@@ -7,7 +7,7 @@ import * as actions from 'loot-core/src/client/actions';
 
 import Loading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
-import { styles, colorsm } from '../style';
+import { styles, colors } from '../style';
 
 import {
   View,
@@ -95,10 +95,10 @@ function Notification({ notification, onRemove }) {
       style={{
         marginTop: 10,
         color: positive
-          ? colorsm.noticeText
+          ? colors.noticeText
           : error
-          ? colorsm.errorText
-          : colorsm.warningText,
+          ? colors.errorText
+          : colors.warningText,
       }}
     >
       <Stack
@@ -108,16 +108,16 @@ function Notification({ notification, onRemove }) {
           padding: '14px 14px',
           fontSize: 14,
           backgroundColor: positive
-            ? colorsm.noticeBackground
+            ? colors.noticeBackground
             : error
-            ? colorsm.errorBackground
-            : colorsm.warningBackground,
+            ? colors.errorBackground
+            : colors.warningBackground,
           borderTop: `3px solid ${
             positive
-              ? colorsm.noticeAccent
+              ? colors.noticeAccent
               : error
-              ? colorsm.errorAccent
-              : colorsm.warningAccent
+              ? colors.errorAccent
+              : colors.warningAccent
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
@@ -161,20 +161,20 @@ function Notification({ notification, onRemove }) {
                 backgroundColor: 'transparent',
                 border: `1px solid ${
                   positive
-                    ? colorsm.noticeAccent
+                    ? colors.noticeAccent
                     : error
-                    ? colorsm.errorAccent
-                    : colorsm.warningAccent
+                    ? colors.errorAccent
+                    : colors.warningAccent
                 }`,
                 color: 'currentColor',
                 fontSize: 14,
                 flexShrink: 0,
                 '&:hover, &:active': {
                   backgroundColor: positive
-                    ? colorsm.noticeBackground
+                    ? colors.noticeBackground
                     : error
-                    ? colorsm.errorBackground
-                    : colorsm.warningBackground,
+                    ? colors.errorBackground
+                    : colors.warningBackground,
                 },
               }}
             >
@@ -200,7 +200,7 @@ function Notification({ notification, onRemove }) {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: colorsm.tableBackground,
+            backgroundColor: colors.tableBackground,
             alignItems: 'center',
             justifyContent: 'center',
           }}

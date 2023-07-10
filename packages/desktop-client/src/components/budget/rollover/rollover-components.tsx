@@ -4,7 +4,7 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import { styles, colorsm } from '../../../style';
+import { styles, colors } from '../../../style';
 import CategoryAutocomplete from '../../autocomplete/CategorySelect';
 import {
   View,
@@ -194,7 +194,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
       style={{
-        color: colorsm.tableHeaderText,
+        color: colors.tableHeaderText,
         flex: 1,
         flexDirection: 'row',
         marginRight: MONTH_RIGHT_PADDING,
@@ -252,7 +252,7 @@ type ExpenseGroupMonthProps = {
 export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   group,
 }: ExpenseGroupMonthProps) {
-  let borderColor = colorsm.tableBorder;
+  let borderColor = colors.tableBorder;
   let { id } = group;
 
   return (
@@ -313,7 +313,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: ExpenseCategoryMonthProps) {
-  let borderColor = colorsm.tableBorder;
+  let borderColor = colors.tableBorder;
   let balanceTooltip = useTooltip();
 
   return (
@@ -335,7 +335,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           },
           {
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + colorsm.formInputShadowSelected,
+              boxShadow: 'inset 0 0 0 1px ' + colors.formInputShadowSelected,
             },
           },
         ]}
@@ -418,7 +418,7 @@ export function IncomeGroupMonth() {
       <SheetCell
         name="received"
         width="flex"
-        borderColor={colorsm.tableBorder}
+        borderColor={colors.tableBorder}
         textAlign="right"
         style={[
           { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
@@ -454,7 +454,7 @@ export function IncomeCategoryMonth({
           {
             paddingRight: MONTH_RIGHT_PADDING,
             textAlign: 'right',
-            borderColor: colorsm.tableBorder,
+            borderColor: colors.tableBorder,
           },
           isLast && { borderBottomWidth: 0 },
         ]}

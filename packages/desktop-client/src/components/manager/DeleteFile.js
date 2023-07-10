@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { View, Text, Modal, ButtonWithLoading } from '../common';
 
 export default function DeleteMenu({ modalProps, actions, file }) {
@@ -44,7 +44,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
             paddingBottom: 25,
             maxWidth: 512,
             lineHeight: '1.5em',
-            color: colorsm.tableText,
+            color: colors.tableText,
           }}
         >
           {isRemote && (
@@ -60,7 +60,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                 primary
                 loading={loadingState === 'cloud'}
                 style={{
-                  backgroundColor: colorsm.tableText,
+                  backgroundColor: colors.tableText,
                   alignSelf: 'center',
                   border: 0,
                   padding: '10px 30px',
@@ -79,7 +79,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                 {
                   alignItems: 'center',
                 },
-                isRemote && { marginTop: 20, color: colorsm.tableText },
+                isRemote && { marginTop: 20, color: colors.tableText },
               ]}
             >
               {isRemote ? (
@@ -113,13 +113,13 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                   marginTop: 10,
                   padding: '10px 30px',
                   fontSize: 14,
-                  borderColor: colorsm.errorAccent,
-                  color: colorsm.errorBackground,
-                  backgroundColor: colorsm.errorText,
+                  borderColor: colors.errorAccent,
+                  color: colors.errorBackground,
+                  backgroundColor: colors.errorText,
                   ':hover': {
-                    borderColor: colorsm.errorAccent,
-                    color: colorsm.buttonNeutralTextHover,
-                    backgroundColor: colorsm.buttonNeutralBackgroundHover,
+                    borderColor: colors.errorAccent,
+                    color: colors.buttonNeutralTextHover,
+                    backgroundColor: colors.buttonNeutralBackgroundHover,
                   },
                 }}
                 onClick={onDeleteLocal}

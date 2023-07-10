@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { View } from '../common';
 
 import Autocomplete from './Autocomplete';
@@ -40,7 +40,7 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
                 key={group}
                 style={{
                   fontWeight: 500,
-                  color: colorsm.menuItemTextHeader,
+                  color: colors.menuItemTextHeader,
                   padding: '4px 9px',
                 }}
                 data-testid="account-item-group"
@@ -54,7 +54,7 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
               style={{
                 backgroundColor:
                   highlightedIndex === idx
-                    ? colorsm.menuItemBackgroundHover
+                    ? colors.menuItemBackgroundHover
                     : 'transparent',
                 padding: 4,
                 paddingLeft: 20,

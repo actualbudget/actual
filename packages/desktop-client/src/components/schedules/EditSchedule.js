@@ -10,7 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import { Stack, View, Text, Button } from '../common';
@@ -502,7 +502,7 @@ export default function ScheduleDetails() {
               }}
               style={{
                 padding: '0 10px',
-                color: colorsm.tableText,
+                color: colors.tableText,
                 fontSize: 12,
               }}
               onChange={(_, op) =>
@@ -562,13 +562,13 @@ export default function ScheduleDetails() {
 
           {state.upcomingDates && (
             <View style={{ fontSize: 13, marginTop: 20 }}>
-              <Text style={{ color: colorsm.tableText, fontWeight: 600 }}>
+              <Text style={{ color: colors.tableText, fontWeight: 600 }}>
                 Upcoming dates
               </Text>
               <Stack
                 direction="column"
                 spacing={1}
-                style={{ marginTop: 10, color: colorsm.tableText }}
+                style={{ marginTop: 10, color: colors.tableText }}
               >
                 {state.upcomingDates.map(date => (
                   <View key={date}>
@@ -614,7 +614,7 @@ export default function ScheduleDetails() {
               alignItems: 'center',
               userSelect: 'none',
               justifyContent: 'flex-end',
-              color: colorsm.pageText,
+              color: colors.pageText,
             }}
           >
             <Checkbox
@@ -627,7 +627,7 @@ export default function ScheduleDetails() {
                   value: e.target.checked,
                 });
               }}
-              style={{ color: colorsm.pageText }}
+              style={{ color: colors.pageText }}
             />
             <label
               htmlFor="form_posts_transaction"
@@ -641,7 +641,7 @@ export default function ScheduleDetails() {
             style={{
               width: 350,
               textAlign: 'right',
-              color: colorsm.pageText,
+              color: colors.pageText,
               marginTop: 10,
               fontSize: 13,
               lineHeight: '1.4em',
@@ -656,7 +656,7 @@ export default function ScheduleDetails() {
               {state.isCustom && (
                 <Text
                   style={{
-                    color: colorsm.tableText,
+                    color: colors.tableText,
                     fontSize: 13,
                     textAlign: 'right',
                     width: 350,
@@ -678,7 +678,7 @@ export default function ScheduleDetails() {
           {adding ? (
             <View
               style={{
-                color: colorsm.tableText,
+                color: colors.tableText,
                 flexDirection: 'row',
                 padding: '5px 0',
               }}
@@ -693,8 +693,8 @@ export default function ScheduleDetails() {
                 style={{
                   color:
                     state.transactionsMode === 'linked'
-                      ? colorsm.tableText
-                      : colorsm.buttonDisabledText,
+                      ? colors.tableText
+                      : colors.buttonDisabledText,
                   marginRight: 10,
                   fontSize: 14,
                 }}
@@ -706,8 +706,8 @@ export default function ScheduleDetails() {
                 style={{
                   color:
                     state.transactionsMode === 'matched'
-                      ? colorsm.tableText
-                      : colorsm.buttonDisabledText,
+                      ? colors.tableText
+                      : colors.buttonDisabledText,
                   fontSize: 14,
                 }}
                 onClick={() => onSwitchTransactions('matched')}
@@ -744,12 +744,12 @@ export default function ScheduleDetails() {
                 <View
                   style={{
                     padding: 20,
-                    color: colorsm.tabletext,
+                    color: colors.tabletext,
                     textAlign: 'center',
                   }}
                 >
                   {state.error ? (
-                    <Text style={{ color: colorsm.errorText }}>
+                    <Text style={{ color: colors.errorText }}>
                       Could not search: {state.error}
                     </Text>
                   ) : (
@@ -761,7 +761,7 @@ export default function ScheduleDetails() {
             transactions={state.transactions}
             fields={['date', 'payee', 'amount']}
             style={{
-              border: '1px solid ' + colorsm.tableBorder,
+              border: '1px solid ' + colors.tableBorder,
               borderRadius: 4,
               overflow: 'hidden',
               marginTop: 5,
@@ -777,7 +777,7 @@ export default function ScheduleDetails() {
         style={{ marginTop: 20 }}
       >
         {state.error && (
-          <Text style={{ color: colorsm.errorText }}>{state.error}</Text>
+          <Text style={{ color: colors.errorText }}>{state.error}</Text>
         )}
         <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
           Cancel

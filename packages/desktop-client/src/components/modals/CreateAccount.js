@@ -5,7 +5,7 @@ import { pushModal } from 'loot-core/src/client/actions/modals';
 
 import useNordigenStatus from '../../hooks/useNordigenStatus';
 import { authorizeBank } from '../../nordigen';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -49,7 +49,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
   return (
     <Modal title="Add Account" {...modalProps}>
       {() => (
-        <View style={{ maxWidth: 500, gap: 30, color: colorsm.pageText }}>
+        <View style={{ maxWidth: 500, gap: 30, color: colors.pageText }}>
           <View style={{ gap: 10 }}>
             <Button
               primary

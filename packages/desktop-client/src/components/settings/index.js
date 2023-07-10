@@ -9,7 +9,7 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { useResponsive } from '../../ResponsiveProvider';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import tokens from '../../tokens';
 import { withThemeColor } from '../../util/withThemeColor';
 import { View, Text, Button, Input, ExternalLink } from '../common';
@@ -59,7 +59,7 @@ function About() {
             New version available: {latestVersion}
           </ExternalLink>
         ) : (
-          <Text style={{ color: colorsm.noticeText, fontWeight: 600 }}>
+          <Text style={{ color: colors.noticeText, fontWeight: 600 }}>
             You’re up to date!
           </Text>
         )}
@@ -89,7 +89,7 @@ function AdvancedAbout({ prefs }) {
       <Text>
         <IDName>Budget ID:</IDName> {prefs.id}
       </Text>
-      <Text style={{ color: colorsm.pageText }}>
+      <Text style={{ color: colors.pageText }}>
         <IDName>Sync ID:</IDName> {prefs.groupId || '(none)'}
       </Text>
       {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
@@ -136,13 +136,13 @@ function Settings({
         titleStyle={
           isNarrowWidth
             ? {
-                backgroundColor: colorsm.sidebarBackground,
-                color: colorsm.sidebarItemText,
+                backgroundColor: colors.sidebarBackground,
+                color: colors.sidebarItemText,
               }
-            : { color: colorsm.tableText }
+            : { color: colors.tableText }
         }
       >
-        <View style={{ flexShrink: 0, gap: 30, color: colorsm.tableText }}>
+        <View style={{ flexShrink: 0, gap: 30, color: colors.tableText }}>
           {isNarrowWidth && (
             <View
               style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
@@ -186,7 +186,7 @@ function Settings({
   );
 }
 
-export default withThemeColor(colorsm.sidebarBackground)(
+export default withThemeColor(colors.sidebarBackground)(
   connect(
     state => ({
       prefs: state.prefs.local,

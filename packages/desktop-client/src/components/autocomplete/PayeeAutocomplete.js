@@ -7,7 +7,7 @@ import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { View } from '../common';
 
 import Autocomplete, {
@@ -83,10 +83,10 @@ function PayeeList({
               padding: '6px 9px',
               backgroundColor:
                 highlightedIndex === 0
-                  ? colorsm.menuItemBackgroundHover
+                  ? colors.menuItemBackgroundHover
                   : 'transparent',
               color:
-                highlightedIndex === 0 ? colorsm.menuItemTextHover : 'inherit',
+                highlightedIndex === 0 ? colors.menuItemTextHover : 'inherit',
               borderRadius: embedded ? 4 : 0,
             }}
           >
@@ -129,7 +129,7 @@ function PayeeList({
                   // Payee headers
                   key={'title-' + idx}
                   style={{
-                    color: colorsm.menuItemTextHeader,
+                    color: colors.menuItemTextHeader,
                     fontWeight: 500,
                     padding: '4px 9px',
                   }}
@@ -145,7 +145,7 @@ function PayeeList({
                 style={{
                   backgroundColor:
                     highlightedIndex === idx + offset
-                      ? colorsm.menuItemBackgroundHover
+                      ? colors.menuItemBackgroundHover
                       : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   padding: 4,
@@ -342,9 +342,9 @@ export default function PayeeAutocomplete({
                   style={[
                     showManagePayees && { marginBottom: 5 },
                     focusTransferPayees && {
-                      backgroundColor: colorsm.buttonPositiveBackground,
-                      color: colorsm.buttonPositiveText,
-                      borderColor: colorsm.buttonPositiveBorder,
+                      backgroundColor: colors.buttonPositiveBackground,
+                      color: colors.buttonPositiveText,
+                      borderColor: colors.buttonPositiveBorder,
                     },
                   ]}
                   onClick={() => {

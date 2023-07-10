@@ -301,7 +301,7 @@ export function ThemeStyle({ theme }: { theme: keyof typeof colorThemes }) {
   return <style>{`:root { ${css} }`}</style>;
 }
 
-export const colorsm = Object.fromEntries(
+export const colors = Object.fromEntries(
   Object.keys(colorsDark).map(key => [key, `var(--${key})`]),
 ) as Record<keyof typeof colorsDark, string>;
 
@@ -411,7 +411,7 @@ function onScrollbarChange() {
         '& ::-webkit-scrollbar-thumb': {
           borderRadius: 30,
           backgroundClip: 'padding-box',
-          background: colorsm.menuItemBackgroundHover,
+          background: colors.menuItemBackgroundHover,
         },
       };
 
@@ -425,7 +425,7 @@ function onScrollbarChange() {
         '& ::-webkit-scrollbar-thumb': {
           borderRadius: 30,
           backgroundClip: 'padding-box',
-          background: colorsm.sidebarItemBackgroundHover,
+          background: colors.sidebarItemBackgroundHover,
         },
       };
 

@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
-import { styles, colorsm } from '../../style';
+import { styles, colors } from '../../style';
 import { View, Block, Modal, ButtonWithLoading, P } from '../common';
 
 function getErrorMessage(error) {
@@ -56,11 +56,11 @@ function Import({ modalProps, availableImports }) {
         <View
           style={[
             styles.smallText,
-            { lineHeight: 1.5, marginTop: 20, color: colorsm.pageText },
+            { lineHeight: 1.5, marginTop: 20, color: colors.pageText },
           ]}
         >
           {error && (
-            <Block style={{ color: colorsm.errorText, marginBottom: 15 }}>
+            <Block style={{ color: colors.errorText, marginBottom: 15 }}>
               {getErrorMessage(error)}
             </Block>
           )}

@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 
 import { css } from 'glamor';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import type { HTMLPropsWithStyle } from '../../types/utils';
 
 type SelectProps = HTMLPropsWithStyle<HTMLSelectElement>;
@@ -18,12 +18,12 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             height: 28,
             fontSize: 14,
             flex: 1,
-            border: '1px solid ' + colorsm.formInputBorder,
+            border: '1px solid ' + colors.formInputBorder,
             borderRadius: 4,
-            color: colorsm.formInputText,
+            color: colors.formInputText,
             ':focus': {
-              border: '1px solid ' + colorsm.formInputBorderSelected,
-              boxShadow: '0 1px 1px ' + colorsm.formInputShadowSelected,
+              border: '1px solid ' + colors.formInputBorderSelected,
+              boxShadow: '0 1px 1px ' + colors.formInputShadowSelected,
               outline: 'none',
             },
           },

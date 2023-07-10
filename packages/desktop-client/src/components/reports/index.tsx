@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colorsm, styles } from '../../style';
+import { colors, styles } from '../../style';
 import { Block, View } from '../common';
 
 import type { ReportRouter } from './ReportRouter';
@@ -36,7 +36,7 @@ export default function Reports() {
           <Block style={{ marginBottom: 20, fontSize: 18 }}>
             Loading reports…
           </Block>
-          <AnimatedLoading width={25} color={colorsm.pageText} />
+          <AnimatedLoading width={25} color={colors.pageText} />
         </View>
       )}
     </View>

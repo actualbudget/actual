@@ -29,7 +29,7 @@ import useSelected, { SelectedProvider } from '../../hooks/useSelected';
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import InformationOutline from '../../icons/v1/InformationOutline';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -80,9 +80,7 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View
-      style={{ color: colorsm.pageTextPositive, fontWeight: 700, ...style }}
-    >
+    <View style={{ color: colors.pageTextPositive, fontWeight: 700, ...style }}>
       <CustomSelect
         options={fields}
         value={value}
@@ -149,7 +147,7 @@ function FieldError({ type }) {
       style={{
         fontSize: 12,
         textAlign: 'center',
-        color: colorsm.errorText,
+        color: colors.errorText,
         marginBottom: 5,
       }}
     >
@@ -277,7 +275,7 @@ function ScheduleDescription({ id }) {
           <DisplayId
             type="payees"
             id={schedule._payee}
-            noneColor={colorsm.pageTextSubdued}
+            noneColor={colors.pageTextSubdued}
           />
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
@@ -338,7 +336,7 @@ function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
           <View
             style={{
               padding: '5px 10px',
-              color: colorsm.formInputTextHighlight,
+              color: colors.formInputTextHighlight,
             }}
           >
             {friendlyOp(op)}
@@ -367,7 +365,7 @@ function StageInfo() {
         onMouseLeave={() => setOpen(false)}
       >
         <InformationOutline
-          style={{ width: 11, height: 11, color: colorsm.tableBorderSelected }}
+          style={{ width: 11, height: 11, color: colors.tableBorderSelected }}
         />
       </View>
       {open && (
@@ -395,18 +393,18 @@ function StageButton({ selected, children, style, onSelect }) {
       style={[
         {
           fontSize: 'inherit',
-          border: '1px solid ' + colorsm.pillBorder,
-          color: colorsm.pillText,
-          backgroundColor: colorsm.pillBackground,
+          border: '1px solid ' + colors.pillBorder,
+          color: colors.pillText,
+          backgroundColor: colors.pillBackground,
           ':hover': {
-            color: colorsm.pillTextSelected,
-            backgroundColor: colorsm.pillBackgroundSelected,
+            color: colors.pillTextSelected,
+            backgroundColor: colors.pillBackgroundSelected,
           },
         },
         selected && {
-          border: '1px solid ' + colorsm.pillBorderSelected,
-          color: colorsm.pillTextSelected,
-          backgroundColor: colorsm.pillBackgroundSelected,
+          border: '1px solid ' + colors.pillBorderSelected,
+          color: colors.pillTextSelected,
+          backgroundColor: colors.pillBackgroundSelected,
         },
         style,
       ]}
@@ -565,7 +563,7 @@ function ConditionsList({
           <View
             key={i}
             style={{
-              color: colorsm.tableText,
+              color: colors.tableText,
             }}
           >
             <ConditionEditor
@@ -755,7 +753,7 @@ export default function EditRule({
   }
 
   let editorStyle = {
-    backgroundColor: colorsm.editorBackground,
+    backgroundColor: colors.editorBackground,
     borderRadius: 4,
   };
 
@@ -786,7 +784,7 @@ export default function EditRule({
               padding: '0 20px',
             }}
           >
-            <Text style={{ color: colorsm.tableText, marginRight: 15 }}>
+            <Text style={{ color: colors.tableText, marginRight: 15 }}>
               Stage of rule:
             </Text>
 
@@ -817,7 +815,7 @@ export default function EditRule({
           <View
             innerRef={scrollableEl}
             style={{
-              borderBottom: '1px solid ' + colorsm.border,
+              borderBottom: '1px solid ' + colors.border,
               padding: 20,
               overflow: 'auto',
               maxHeight: 'calc(100% - 300px)',
@@ -825,7 +823,7 @@ export default function EditRule({
           >
             <View style={{ flexShrink: 0 }}>
               <View style={{ marginBottom: 30 }}>
-                <Text style={{ color: colorsm.pageText, marginBottom: 15 }}>
+                <Text style={{ color: colors.pageText, marginBottom: 15 }}>
                   If
                   <FieldSelect
                     data-testid="conditions-op"
@@ -849,10 +847,10 @@ export default function EditRule({
                 />
               </View>
 
-              <Text style={{ color: colorsm.pageText, marginBottom: 15 }}>
+              <Text style={{ color: colors.pageText, marginBottom: 15 }}>
                 Then apply these actions:
               </Text>
-              <View style={{ flex: 1, color: colorsm.tableText }}>
+              <View style={{ flex: 1, color: colors.tableText }}>
                 {actions.length === 0 ? (
                   <Button
                     style={{ alignSelf: 'flex-start' }}
@@ -891,7 +889,7 @@ export default function EditRule({
                   marginBottom: 12,
                 }}
               >
-                <Text style={{ color: colorsm.pageText, marginBottom: 0 }}>
+                <Text style={{ color: colors.pageText, marginBottom: 0 }}>
                   This rule applies to these transactions:
                 </Text>
 
@@ -907,7 +905,7 @@ export default function EditRule({
               <SimpleTransactionsTable
                 transactions={transactions}
                 fields={getTransactionFields(conditions, actions)}
-                style={{ border: '1px solid ' + colorsm.tableBorder }}
+                style={{ border: '1px solid ' + colors.tableBorder }}
               />
 
               <Stack

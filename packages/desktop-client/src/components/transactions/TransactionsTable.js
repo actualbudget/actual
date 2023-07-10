@@ -51,7 +51,7 @@ import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
 import Hyperlink2 from '../../icons/v2/Hyperlink2';
-import { styles, colorsm } from '../../style';
+import { styles, colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -246,8 +246,8 @@ const TransactionHeader = memo(
         style={{
           fontWeight: 300,
           zIndex: 200,
-          color: colorsm.tableHeaderText,
-          backgroundColor: colorsm.tableHeaderBackground,
+          color: colors.tableHeaderText,
+          backgroundColor: colors.tableHeaderBackground,
         }}
       >
         <SelectCell
@@ -341,8 +341,8 @@ function StatusCell({
             border: '1px solid transparent',
             borderRadius: 50,
             ':focus': {
-              border: '1px solid ' + colorsm.formInputBorderSelected,
-              boxShadow: '0 1px 2px ' + colorsm.formInputBorderSelected,
+              border: '1px solid ' + colors.formInputBorderSelected,
+              boxShadow: '0 1px 2px ' + colors.formInputBorderSelected,
             },
             cursor: isClearedField ? 'pointer' : 'default',
           },
@@ -398,7 +398,7 @@ function PayeeCell({
       value={payeeId}
       valueStyle={[
         valueStyle,
-        inherited && { color: colorsm.tableTextInactive },
+        inherited && { color: colors.tableTextInactive },
       ]}
       exposed={focused}
       onExpose={!isPreview && (name => onEdit(id, name))}
@@ -683,17 +683,17 @@ const Transaction = memo(function Transaction(props) {
       style={[
         {
           backgroundColor: selected
-            ? colorsm.tableRowBackgroundHighlight
+            ? colors.tableRowBackgroundHighlight
             : backgroundFocus
-            ? colorsm.tableRowBackgroundHover
-            : colorsm.tableBackground,
+            ? colors.tableRowBackgroundHover
+            : colors.tableBackground,
         },
         highlighted || selected
-          ? { color: colorsm.tableRowBackgroundHighlightText }
-          : { color: colorsm.tableText },
+          ? { color: colors.tableRowBackgroundHighlightText }
+          : { color: colors.tableText },
         style,
         isPreview && {
-          color: colorsm.tableTextInactive,
+          color: colors.tableTextInactive,
           fontStyle: 'italic',
         },
         _unmatched && { opacity: 0.5 },
@@ -706,7 +706,7 @@ const Transaction = memo(function Transaction(props) {
           width={110}
           style={{
             width: 110,
-            backgroundColor: colorsm.pageBackground,
+            backgroundColor: colors.pageBackground,
             border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
         />
@@ -717,7 +717,7 @@ const Transaction = memo(function Transaction(props) {
         <Field
           style={{
             flex: 1,
-            backgroundColor: colorsm.pageBackground,
+            backgroundColor: colors.pageBackground,
             border: 0,
           }}
         />
@@ -1026,7 +1026,7 @@ const Transaction = memo(function Transaction(props) {
                       // uncategorized transaction
                       fontStyle: 'italic',
                       fontWeight: 500,
-                      color: colorsm.formInputTextHighlight,
+                      color: colors.formInputTextHighlight,
                     }
                   : valueStyle
               }
@@ -1110,7 +1110,7 @@ const Transaction = memo(function Transaction(props) {
               : integerToCurrency(balance)
           }
           valueStyle={{
-            color: balance < 0 ? colorsm.errorText : colorsm.noticeText,
+            color: balance < 0 ? colors.errorText : colors.noticeText,
           }}
           style={[styles.tnum, amountStyle]}
           width={88}
@@ -1236,9 +1236,9 @@ function NewTransaction({
   return (
     <View
       style={{
-        borderBottom: '1px solid ' + colorsm.tableBorderHover,
+        borderBottom: '1px solid ' + colors.tableBorderHover,
         paddingBottom: 6,
-        backgroundColor: colorsm.tableBackground,
+        backgroundColor: colors.tableBackground,
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
@@ -1451,8 +1451,8 @@ function TransactionTableInner({
         {
           flex: 1,
           cursor: 'default',
-          borderLeft: '1px solid ' + colorsm.tableBorder,
-          borderRight: '1px solid ' + colorsm.tableBorder,
+          borderLeft: '1px solid ' + colors.tableBorder,
+          borderRight: '1px solid ' + colors.tableBorder,
         },
         props.style,
       ]}
@@ -1531,7 +1531,7 @@ function TransactionTableInner({
               left: 0,
               right: 0,
               height: 20,
-              backgroundColor: colorsm.errorText,
+              backgroundColor: colors.errorText,
               boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
             }}
           />

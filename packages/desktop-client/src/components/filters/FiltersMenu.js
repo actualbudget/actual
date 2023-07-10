@@ -25,7 +25,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import {
   View,
   Text,
@@ -43,7 +43,7 @@ import { CondOpMenu } from './SavedFilters';
 // todo: merge pill styles across app (e.g. ManageRules)
 let valueStyle = {
   fontWeight: 500,
-  color: colorsm.pageTextPositive,
+  color: colors.pageTextPositive,
 };
 
 let filterFields = [
@@ -107,14 +107,14 @@ function OpButton({ op, selected, style, onClick }) {
         {
           marginBottom: 5,
           fontSize: 'inherit',
-          border: '1px solid ' + colorsm.pillBorder,
-          color: colorsm.pillText,
-          backgroundColor: colorsm.pillBackground,
+          border: '1px solid ' + colors.pillBorder,
+          color: colors.pillText,
+          backgroundColor: colors.pillBackground,
         },
         selected && {
-          border: '1px solid ' + colorsm.pillBorderSelected,
-          color: colorsm.pillTextSelected,
-          backgroundColor: colorsm.pillBackgroundSelected,
+          border: '1px solid ' + colors.pillBorderSelected,
+          color: colors.pillTextSelected,
+          backgroundColor: colors.pillBackgroundSelected,
         },
         style,
       ]}
@@ -478,9 +478,9 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colorsm.pillBackground,
-          color: colorsm.pillText,
-          border: '1px solid ' + colorsm.pillBorder,
+          backgroundColor: colors.pillBackground,
+          color: colors.pillText,
+          border: '1px solid ' + colors.pillBorder,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',

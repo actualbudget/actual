@@ -20,7 +20,7 @@ import {
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { withThemeColor } from '../../util/withThemeColor';
 import SyncRefresh from '../SyncRefresh';
 
@@ -283,4 +283,4 @@ export default connect(
     prefs: state.prefs.local,
   }),
   actions,
-)(withThemeColor(colorsm.pageBackground)(Account));
+)(withThemeColor(colors.pageBackground)(Account));

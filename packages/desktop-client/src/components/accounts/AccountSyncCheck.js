@@ -6,7 +6,7 @@ import * as actions from 'loot-core/src/client/actions';
 
 import ExclamationOutline from '../../icons/v1/ExclamationOutline';
 import { authorizeBank } from '../../nordigen';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { View, Button, Tooltip, ExternalLink } from '../common';
 
 function getErrorMessage(type, code) {
@@ -87,8 +87,8 @@ function AccountSyncCheck({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          color: colorsm.errorText,
-          backgroundColor: colorsm.errorBackground,
+          color: colors.errorText,
+          backgroundColor: colors.errorBackground,
           padding: '4px 8px',
           borderRadius: 4,
         }}
@@ -115,7 +115,7 @@ function AccountSyncCheck({
             The server returned the following error:
           </div>
 
-          <div style={{ marginBottom: '1.25em', color: colorsm.errorText }}>
+          <div style={{ marginBottom: '1.25em', color: colors.errorText }}>
             {getErrorMessage(error.type, error.code)}
           </div>
 

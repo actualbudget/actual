@@ -1,6 +1,6 @@
 import { type ComponentProps, forwardRef } from 'react';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 
 import View from './View';
 
@@ -18,9 +18,9 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
             marginLeft: 5,
             marginRight: 5,
             borderRadius: 6,
-            backgroundColor: colorsm.cardBackground,
-            borderColor: colorsm.cardBorder,
-            boxShadow: '0 1px 2px ' + colorsm.cardShadow,
+            backgroundColor: colors.cardBackground,
+            borderColor: colors.cardBorder,
+            boxShadow: '0 1px 2px ' + colors.cardShadow,
           },
           props.style,
         ]}

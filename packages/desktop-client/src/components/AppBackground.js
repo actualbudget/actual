@@ -3,7 +3,7 @@ import React from 'react';
 import { css } from 'glamor';
 
 import AnimatedLoading from '../icons/AnimatedLoading';
-import { colorsm } from '../style';
+import { colors } from '../style';
 
 import Background from './Background';
 import { View, Block } from './common';
@@ -22,14 +22,14 @@ function AppBackground({ initializing, loadingText }) {
             right: 0,
             padding: 50,
             paddingTop: 200,
-            color: colorsm.pageText,
+            color: colors.pageText,
             alignItems: 'center',
           })}
         >
           <Block style={{ marginBottom: 20, fontSize: 18 }}>
             {loadingText}
           </Block>
-          <AnimatedLoading width={25} color={colorsm.pageText} />
+          <AnimatedLoading width={25} color={colors.pageText} />
         </View>
       )}
     </>

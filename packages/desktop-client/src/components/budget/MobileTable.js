@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { View } from '../common';
 
 export const ROW_HEIGHT = 50;
@@ -12,7 +12,7 @@ export const ListItem = ({ children, style, ...props }) => {
         {
           height: ROW_HEIGHT,
           borderBottomWidth: 1,
-          borderColor: colorsm.tableBorder,
+          borderColor: colors.tableBorder,
           flexDirection: 'row',
           alignItems: 'center',
           paddingLeft: 10,

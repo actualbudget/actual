@@ -26,7 +26,7 @@ import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { authorizeBank } from '../../nordigen';
-import { styles, colorsm } from '../../style';
+import { styles, colors } from '../../style';
 import { useActiveLocation } from '../ActiveLocation';
 import { View, Text, Button } from '../common';
 import TransactionList from '../transactions/TransactionList';
@@ -41,12 +41,12 @@ function EmptyMessage({ onAdd }) {
   return (
     <View
       style={{
-        color: colorsm.tableText,
-        backgroundColor: colorsm.tableBackground,
+        color: colors.tableText,
+        backgroundColor: colors.tableBackground,
         flex: 1,
         alignItems: 'center',
         borderTopWidth: 1,
-        borderColor: colorsm.tableBorderHover,
+        borderColor: colors.tableBorderHover,
       }}
     >
       <View
@@ -67,7 +67,7 @@ function EmptyMessage({ onAdd }) {
           Add account
         </Button>
 
-        <View style={{ marginTop: 20, fontSize: 13, color: colorsm.tableText }}>
+        <View style={{ marginTop: 20, fontSize: 13, color: colors.tableText }}>
           In the future, you can add accounts from the sidebar.
         </View>
       </View>
@@ -1084,7 +1084,7 @@ class AccountInternal extends PureComponent {
                       ) : !loading ? (
                         <View
                           style={{
-                            color: colorsm.pageText,
+                            color: colors.pageText,
                             marginTop: 20,
                             textAlign: 'center',
                             fontStyle: 'italic',

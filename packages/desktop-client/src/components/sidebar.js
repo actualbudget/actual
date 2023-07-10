@@ -16,7 +16,7 @@ import TuningIcon from '../icons/v1/Tuning';
 import Wallet from '../icons/v1/Wallet';
 import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
 import CalendarIcon from '../icons/v2/Calendar';
-import { styles, colorsm } from '../style';
+import { styles, colors } from '../style';
 
 import { View, Block, AlignedText, AnchorLink, Button } from './common';
 import { useSidebar } from './FloatableSidebar';
@@ -78,12 +78,12 @@ function Item({
   forceActive = false,
 }) {
   const hoverStyle = {
-    backgroundColor: colorsm.sidebarItemBackgroundHover,
+    backgroundColor: colors.sidebarItemBackgroundHover,
   };
   const activeStyle = {
-    backgroundColor: colorsm.sidebarItemBackgroundSelected,
-    color: colorsm.sidebarItemTextSelected,
-    borderLeft: '4px solid ' + colorsm.sidebarItemAccentSelected,
+    backgroundColor: colors.sidebarItemBackgroundSelected,
+    color: colors.sidebarItemTextSelected,
+    borderLeft: '4px solid ' + colors.sidebarItemAccentSelected,
     paddingLeft: 19 + indent - 4,
   };
   const linkStyle = [
@@ -94,7 +94,7 @@ function Item({
       paddingLeft: 19 + indent,
       paddingRight: 10,
       textDecoration: 'none',
-      color: colorsm.sidebarItemText,
+      color: colors.sidebarItemText,
     },
     { ':hover': hoverStyle },
   ];
@@ -132,20 +132,20 @@ function Item({
 
 function SecondaryItem({ Icon, title, style, to, onClick, bold, indent = 0 }) {
   const hoverStyle = {
-    backgroundColor: colorsm.sidebarItemBackgroundHover,
+    backgroundColor: colors.sidebarItemBackgroundHover,
   };
   const activeStyle = {
-    color: colorsm.sidebarItemTextSelected,
-    backgroundColor: colorsm.sidebarItemBackgroundSelected,
-    borderLeft: '4px solid ' + colorsm.sidebarItemAccentSelected,
+    color: colors.sidebarItemTextSelected,
+    backgroundColor: colors.sidebarItemBackgroundSelected,
+    borderLeft: '4px solid ' + colors.sidebarItemAccentSelected,
     paddingLeft: 14 - 4 + indent,
     fontWeight: bold ? fontWeight : null,
   };
   const linkStyle = [
     accountNameStyle,
     {
-      color: colorsm.sidebarItemText,
-      backgroundColor: colorsm.sidebarItemBackground,
+      color: colors.sidebarItemText,
+      backgroundColor: colors.sidebarItemBackground,
       paddingLeft: 14 + indent,
       fontWeight: bold ? fontWeight : null,
     },
@@ -190,10 +190,10 @@ let accountNameStyle = [
     paddingRight: 15,
     paddingLeft: 10,
     textDecoration: 'none',
-    color: colorsm.sidebarItemText,
-    backgroundColor: colorsm.sidebarItemBackground,
+    color: colors.sidebarItemText,
+    backgroundColor: colors.sidebarItemBackground,
   },
-  { ':hover': { backgroundColor: colorsm.sidebarItemBackgroundHover } },
+  { ':hover': { backgroundColor: colors.sidebarItemBackgroundHover } },
   styles.smallText,
 ];
 
@@ -246,9 +246,9 @@ function Account({
               updated && { fontWeight: 700 },
             ]}
             activeStyle={{
-              borderLeft: '4px solid ' + colorsm.sidebarItemAccentSelected,
+              borderLeft: '4px solid ' + colors.sidebarItemAccentSelected,
               paddingLeft: 14 - 4 + indent,
-              color: colorsm.sidebarItemTextSelected,
+              color: colors.sidebarItemTextSelected,
               // This is kind of a hack, but we don't ever want the account
               // that the user is looking at to be "bolded" which means it
               // has unread transactions. The system does mark is read and
@@ -256,7 +256,7 @@ function Account({
               // ignores it if it's active
               fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
-                backgroundColor: colorsm.sidebarItemBackgroundSelected,
+                backgroundColor: colors.sidebarItemBackgroundSelected,
                 transform: 'translateX(-4.5px)',
               },
             }}
@@ -279,8 +279,8 @@ function Account({
                   height: 5,
                   borderRadius: 5,
                   backgroundColor: failed
-                    ? colorsm.errorBackground
-                    : colorsm.sidebarItemBackground,
+                    ? colors.errorBackground
+                    : colors.sidebarItemBackground,
                   marginLeft: 2,
                   transition: 'transform .3s',
                   opacity: connected ? 1 : 0,
@@ -456,13 +456,13 @@ function ToggleButton({ style, isFloating, onFloat }) {
               margin: -2,
               width: 15,
               height: 15,
-              color: colorsm.sidebarItemText,
+              color: colors.sidebarItemText,
               transform: 'rotate(45deg)',
             }}
           />
         ) : (
           <ArrowButtonLeft1
-            style={{ width: 13, height: 13, color: colorsm.sidebarItemText }}
+            style={{ width: 13, height: 13, color: colors.sidebarItemText }}
           />
         )}
       </Button>
@@ -546,8 +546,8 @@ export function Sidebar({
       style={[
         {
           width: SIDEBAR_WIDTH,
-          color: colorsm.sidebarItemText,
-          backgroundColor: colorsm.sidebarBackground,
+          color: colors.sidebarItemText,
+          backgroundColor: colors.sidebarBackground,
           '& .float': {
             opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',
@@ -597,7 +597,7 @@ export function Sidebar({
         <View
           style={{
             height: 1,
-            backgroundColor: colorsm.sidebarItemBackgroundHover,
+            backgroundColor: colors.sidebarItemBackgroundHover,
             marginTop: 15,
             flexShrink: 0,
           }}

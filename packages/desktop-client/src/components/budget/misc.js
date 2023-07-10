@@ -19,7 +19,7 @@ import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { styles, colorsm } from '../../style';
+import { styles, colors } from '../../style';
 import {
   View,
   Text,
@@ -224,7 +224,7 @@ class BudgetTable extends Component {
               backgroundColor: 'transparent',
             },
             '& ::-webkit-scrollbar-thumb:vertical': {
-              backgroundColor: colorsm.pageBackground,
+              backgroundColor: colors.pageBackground,
             },
           },
         ]}
@@ -335,7 +335,7 @@ function SidebarCategory({
   dragging,
   editing,
   style,
-  borderColor = colorsm.tableBorder,
+  borderColor = colors.tableBorder,
   isLast,
   onDragChange,
   onEditMonth,
@@ -375,12 +375,12 @@ function SidebarCategory({
             e.stopPropagation();
             setMenuOpen(true);
           }}
-          style={{ color: colorsm.tableText, padding: 3 }}
+          style={{ color: colors.tableText, padding: 3 }}
         >
           <CheveronDown
             width={14}
             height={14}
-            style={{ color: colorsm.tableText }}
+            style={{ color: colors.tableText }}
           />
         </Button>
         {menuOpen && (
@@ -416,7 +416,7 @@ function SidebarCategory({
       <View style={{ flex: 1 }} />
       <NotesButton
         id={category.id}
-        style={dragging && { color: colorsm.tableTextHover }}
+        style={dragging && { color: colors.tableTextHover }}
       />
     </View>
   );
@@ -433,15 +433,15 @@ function SidebarCategory({
           !dragPreview && {
             '&:hover button': {
               display: 'flex',
-              color: colorsm.tableText,
+              color: colors.tableText,
             },
           },
-        dragging && { color: colorsm.tableTextHover },
+        dragging && { color: colors.tableTextHover },
 
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
         dragPreview && {
-          backgroundColor: colorsm.tableRowBackgroundHighlight,
+          backgroundColor: colors.tableRowBackgroundHighlight,
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
@@ -518,7 +518,7 @@ function SidebarGroup({
           width={8}
           height={8}
           style={{
-            color: colorsm.tableText,
+            color: colors.tableText,
             marginRight: 5,
             marginLeft: 5,
             flexShrink: 0,
@@ -552,7 +552,7 @@ function SidebarGroup({
               <CheveronDown
                 width={14}
                 height={14}
-                style={{ color: colorsm.tableText }}
+                style={{ color: colors.tableText }}
               />
             </Button>
             {menuOpen && (
@@ -605,7 +605,7 @@ function SidebarGroup({
           '& button': { display: 'none' },
           '&:hover button': {
             display: 'flex',
-            color: colorsm.tableRowBackgroundHover,
+            color: colors.tableRowBackgroundHover,
           },
         },
         dragPreview && {
@@ -627,7 +627,7 @@ function SidebarGroup({
         formatter={value => displayed}
         width="flex"
         exposed={editing}
-        borderColor={colorsm.tableBorder}
+        borderColor={colors.tableBorder}
         onUpdate={value => {
           if (temporary) {
             if (value === '') {
@@ -664,7 +664,7 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
         <View
           style={[
             { flex: 1 },
-            { borderLeft: '1px solid ' + colorsm.tableBorder },
+            { borderLeft: '1px solid ' + colors.tableBorder },
             style,
           ]}
         >
@@ -686,15 +686,15 @@ const BudgetTotals = memo(function BudgetTotals({
     <View
       data-testid="budget-totals"
       style={{
-        color: colorsm.tableHeaderText,
-        backgroundColor: colorsm.tableBackground,
+        color: colors.tableHeaderText,
+        backgroundColor: colors.tableBackground,
         flexDirection: 'row',
         flexShrink: 0,
         boxShadow: MONTH_BOX_SHADOW,
         marginLeft: 5,
         marginRight: 5 + getScrollbarWidth(),
         borderRadius: '4px 4px 0 0',
-        borderBottom: '1px solid ' + colorsm.tableBorder,
+        borderBottom: '1px solid ' + colors.tableBorder,
       }}
     >
       <View
@@ -721,7 +721,7 @@ const BudgetTotals = memo(function BudgetTotals({
           <DotsHorizontalTriple
             width={15}
             height={15}
-            style={{ color: colorsm.tableText }}
+            style={{ color: colors.tableText }}
           />
           {menuOpen && (
             <Tooltip
@@ -812,8 +812,8 @@ function ExpenseGroup({
     <Row
       collapsed={true}
       style={{
-        backgroundColor: colorsm.tableRowHeaderBackground,
-        color: colorsm.tableRowHeaderText,
+        backgroundColor: colors.tableRowHeaderBackground,
+        color: colors.tableRowHeaderText,
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
       }}
@@ -907,7 +907,7 @@ function ExpenseCategory({
       collapsed={true}
       style={{
         opacity: cat.hidden ? 0.5 : undefined,
-        color: colorsm.tableText,
+        color: colors.tableText,
       }}
     >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
@@ -968,8 +968,8 @@ function IncomeGroup({
       collapsed={true}
       style={{
         fontWeight: 600,
-        color: colorsm.tableHeaderText,
-        backgroundColor: colorsm.tableRowHeaderBackground,
+        color: colors.tableHeaderText,
+        backgroundColor: colors.tableRowHeaderBackground,
       }}
     >
       <SidebarGroup
@@ -1021,7 +1021,7 @@ function IncomeCategory({
     <Row
       innerRef={dropRef}
       collapsed={true}
-      style={{ color: colorsm.tableText }}
+      style={{ color: colors.tableText }}
     >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
@@ -1190,7 +1190,7 @@ const BudgetCategories = memo(
       <View
         style={{
           marginBottom: 10,
-          backgroundColor: colorsm.tableBackground,
+          backgroundColor: colors.tableBackground,
           overflow: 'hidden',
           boxShadow: MONTH_BOX_SHADOW,
           borderRadius: '0 0 4px 4px',
@@ -1339,7 +1339,7 @@ const BudgetCategories = memo(
                 style={
                   !dragState && {
                     ':hover': {
-                      backgroundColor: colorsm.tableRowBackgroundHover,
+                      backgroundColor: colors.tableRowBackgroundHover,
                     },
                   }
                 }
@@ -1360,8 +1360,8 @@ function IncomeHeader({ MonthComponent, onShowNewGroup }) {
       style={{
         flexDirection: 'row',
         flex: 1,
-        backgroundColor: colorsm.tableBackground,
-        ':hover': { backgroundColor: colorsm.tableBackground },
+        backgroundColor: colors.tableBackground,
+        ':hover': { backgroundColor: colors.tableBackground },
       }}
     >
       <View
@@ -1501,15 +1501,15 @@ const MonthPicker = ({
                   cursor: 'default',
                   borderRadius: 2,
                   ':hover': isMonthBudgeted && {
-                    backgroundColor: colorsm.buttonPositiveBackground,
-                    color: colorsm.buttonPositiveText,
+                    backgroundColor: colors.buttonPositiveBackground,
+                    color: colors.buttonPositiveText,
                   },
                 },
-                !isMonthBudgeted && { color: colorsm.pageText },
+                !isMonthBudgeted && { color: colors.pageText },
                 styles.smallText,
                 selected && {
-                  backgroundColor: colorsm.buttonPositiveBackground,
-                  color: colorsm.buttonPositiveText,
+                  backgroundColor: colors.buttonPositiveBackground,
+                  color: colors.buttonPositiveText,
                   borderRadius: 0,
                 },
                 idx === selectedIndex && {
@@ -1524,7 +1524,7 @@ const MonthPicker = ({
                   idx < lastSelectedIndex - 1 && {
                     marginRight: 0,
                     borderRight: 'solid 1px',
-                    borderColor: colorsm.tableBorderHover,
+                    borderColor: colors.tableBorderHover,
                   },
                 current && { textDecoration: 'underline' },
               ]}
@@ -1551,20 +1551,20 @@ const MonthPicker = ({
             width={12}
             height={12}
             style={{
-              color: colorsm.pageText,
+              color: colors.pageText,
             }}
           />
         </Button>
         <Button
           onClick={() => onSelect(monthUtils.addMonths(startMonth, 1))}
           bare
-          style={{ color: colorsm.pageText }}
+          style={{ color: colors.pageText }}
         >
           <ArrowThinRight
             width={12}
             height={12}
             style={{
-              color: colorsm.pageText,
+              color: colors.pageText,
             }}
           />
         </Button>

@@ -4,7 +4,7 @@ import type { CSSProperties } from 'glamor';
 
 import ExclamationOutline from '../icons/v1/ExclamationOutline';
 import InformationOutline from '../icons/v1/InformationOutline';
-import { styles, colorsm } from '../style';
+import { styles, colors } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -64,8 +64,8 @@ export const Information = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={InformationOutline}
-      color={colorsm.noticeText}
-      backgroundColor={colorsm.noticeBackground}
+      color={colors.noticeText}
+      backgroundColor={colors.noticeBackground}
       style={[style, { boxShadow: 'none', padding: 5 }]}
     >
       {children}
@@ -77,8 +77,8 @@ export const Warning = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={ExclamationOutline}
-      color={colorsm.warningText}
-      backgroundColor={colorsm.warningBackground}
+      color={colors.warningText}
+      backgroundColor={colors.warningBackground}
       style={style}
     >
       {children}
@@ -90,8 +90,8 @@ export const Error = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={ExclamationOutline}
-      color={colorsm.errorText}
-      backgroundColor={colorsm.errorBackground}
+      color={colors.errorText}
+      backgroundColor={colors.errorBackground}
       style={style}
     >
       {children}

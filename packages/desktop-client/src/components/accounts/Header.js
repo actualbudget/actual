@@ -9,7 +9,7 @@ import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
 import Pencil1 from '../../icons/v2/Pencil1';
 import SvgRemove from '../../icons/v2/Remove';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
-import { styles, colorsm } from '../../style';
+import { styles, colors } from '../../style';
 import AnimatedRefresh from '../AnimatedRefresh';
 import {
   View,
@@ -255,8 +255,8 @@ export function AccountHeader({
                   height: 13,
                   flexShrink: 0,
                   color: search
-                    ? colorsm.pageTextPositive
-                    : colorsm.formInputText,
+                    ? colors.pageTextPositive
+                    : colors.formInputText,
                   margin: 5,
                   marginRight: 0,
                 }}

@@ -23,7 +23,7 @@ import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { MONTH_BOX_SHADOW } from '../budget/constants';
 import {
   useStableCallback,
@@ -99,8 +99,8 @@ let Payee = memo(
     let { id } = payee;
     let dispatchSelected = useSelectedDispatch();
     let borderColor = selected
-      ? colorsm.tableBorderSelected
-      : colorsm.tableBorder;
+      ? colors.tableBorderSelected
+      : colors.tableBorder;
     let backgroundFocus = hovered || focusedField === 'select';
 
     return (
@@ -111,10 +111,10 @@ let Payee = memo(
             alignItems: 'stretch',
             borderColor: borderColor,
             backgroundColor: selected
-              ? colorsm.tableRowBackgroundHighlight
+              ? colors.tableRowBackgroundHighlight
               : backgroundFocus
-              ? colorsm.tableRowBackgroundHover
-              : colorsm.tableBackground,
+              ? colors.tableRowBackgroundHover
+              : colors.tableBackground,
           },
           style,
           selected && {
@@ -138,10 +138,10 @@ let Payee = memo(
           value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
           style={{
             color: selected
-              ? colorsm.tableRowBackgroundHighlightText
+              ? colors.tableRowBackgroundHighlightText
               : payee.transfer_acct
-              ? colorsm.tableTextInactive
-              : colorsm.tableText,
+              ? colors.tableTextInactive
+              : colors.tableText,
           }}
           exposed={focusedField === 'name'}
           width="flex"
@@ -254,7 +254,7 @@ function EmptyMessage({ text, style }) {
       style={[
         {
           textAlign: 'center',
-          color: colorsm.pageText,
+          color: colors.pageText,
           fontStyle: 'italic',
           fontSize: 13,
           marginTop: 5,
@@ -299,7 +299,7 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
               padding: 3,
               fontSize: 11,
               fontStyle: 'italic',
-              color: colorsm.pageText,
+              color: colors.pageText,
             }}
           >
             {[...selectedPayees]

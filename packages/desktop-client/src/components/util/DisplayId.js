@@ -3,10 +3,10 @@ import React from 'react';
 import { CachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { CachedPayees } from 'loot-core/src/client/data-hooks/payees';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { Text } from '../common';
 
-export default function DisplayId({ type, id, noneColor = colorsm.pageText }) {
+export default function DisplayId({ type, id, noneColor = colors.pageText }) {
   let DataComponent;
 
   switch (type) {

@@ -8,7 +8,7 @@ import {
 import { type CSSProperties, css } from 'glamor';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 
 type CustomSelectProps = {
   options: Array<[string, string]>;
@@ -45,7 +45,7 @@ export default function CustomSelect({
             style={{
               width: arrowSize,
               height: arrowSize,
-              color: colorsm.formInputText,
+              color: colors.formInputText,
             }}
           />
         }
@@ -69,9 +69,9 @@ export default function CustomSelect({
           zIndex: 10000,
           outline: 0,
           borderRadius: 4,
-          backgroundColor: colorsm.menuBackground,
+          backgroundColor: colors.menuBackground,
           boxShadow: '0 2px 6px rgba(0, 0, 0, .25)',
-          border: '1px solid ' + colorsm.tooltipBorder,
+          border: '1px solid ' + colors.tooltipBorder,
         }}
       >
         <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
@@ -82,12 +82,12 @@ export default function CustomSelect({
               disabled={disabledKeys.includes(value)}
               {...css({
                 '[data-reach-listbox-option]': {
-                  background: colorsm.menuItemBackground,
-                  color: colorsm.menuItemText,
+                  background: colors.menuItemBackground,
+                  color: colors.menuItemText,
                 },
                 '[data-reach-listbox-option][data-current-nav]': {
-                  background: colorsm.menuItemBackgroundHover,
-                  color: colorsm.menuItemTextHover,
+                  background: colors.menuItemBackgroundHover,
+                  color: colors.menuItemTextHover,
                 },
               })}
             >

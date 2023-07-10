@@ -4,7 +4,7 @@ import { useLocation } from 'react-router';
 import { css, media } from 'glamor';
 import type { CSSProperties } from 'glamor';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import tokens from '../../tokens';
 import { View, LinkButton } from '../common';
 
@@ -19,12 +19,12 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
     <View
       {...css([
         {
-          backgroundColor: colorsm.tableBackground,
+          backgroundColor: colors.tableBackground,
           alignSelf: 'flex-start',
           alignItems: 'flex-start',
           padding: 15,
           borderRadius: 4,
-          border: '1px solid ' + colorsm.tableBorder,
+          border: '1px solid ' + colors.tableBorder,
           width: '100%',
         },
         style,

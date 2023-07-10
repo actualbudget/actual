@@ -1,4 +1,4 @@
-import { colorsm } from '../style';
+import { colors } from '../style';
 
 import { ExternalLink } from './common';
 import View from './common/View';
@@ -12,9 +12,9 @@ export default function DevelopmentTopBar() {
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
-          color: colorsm.warningText,
-          backgroundColor: colorsm.warningBackground,
-          borderBottom: `1px solid ${colorsm.warningAccent}`,
+          color: colors.warningText,
+          backgroundColor: colors.warningBackground,
+          borderBottom: `1px solid ${colors.warningAccent}`,
           zIndex: 1,
         },
       ]}

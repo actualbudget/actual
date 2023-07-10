@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { useAllFeatureFlags } from '../../hooks/useFeatureFlag';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { LinkButton, Text, View } from '../common';
 import { Checkbox } from '../forms';
 
@@ -20,7 +20,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
             <label
               style={{
                 display: 'flex',
-                color: disabled ? colorsm.pageTextSubdued : 'inherit',
+                color: disabled ? colors.pageTextSubdued : 'inherit',
               }}
             >
               <Checkbox
@@ -36,8 +36,8 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
                 {disabled && (
                   <Text
                     style={{
-                      backgroundColor: colorsm.errorBackground,
-                      color: colorsm.errorText,
+                      backgroundColor: colors.errorBackground,
+                      color: colors.errorText,
                       fontWeight: 500,
                     }}
                   >

@@ -10,7 +10,7 @@ import { NavLink, useMatch, useNavigate } from 'react-router-dom';
 
 import { type CSSProperties, css } from 'glamor';
 
-import { styles, colorsm } from '../style';
+import { styles, colors } from '../style';
 import type { HTMLPropsWithStyle } from '../types/utils';
 
 import Button from './common/Button';
@@ -60,7 +60,7 @@ export function LinkButton({ style, children, ...nativeProps }: LinkProps) {
       style={[
         {
           textDecoration: 'none',
-          color: colorsm.pageTextPositive,
+          color: colors.pageTextPositive,
           backgroundColor: 'transparent',
           display: 'inline',
           border: 0,
@@ -105,7 +105,7 @@ export function AnchorLink({
       to={to}
       {...css([
         styles.smallText,
-        { color: colorsm.pageTextPositive },
+        { color: colors.pageTextPositive },
         style,
         match ? activeStyle : null,
       ])}
@@ -116,8 +116,8 @@ export function AnchorLink({
 }
 
 let externalLinkColors = {
-  purple: colorsm.pageTextPositive,
-  blue: colorsm.pageTextLink,
+  purple: colors.pageTextPositive,
+  blue: colors.pageTextLink,
   muted: 'inherit',
 };
 type ExternalLinkProps = {

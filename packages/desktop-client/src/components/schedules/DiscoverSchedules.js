@@ -11,7 +11,7 @@ import useSelected, {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { getParent } from '../../util/router-tools';
 import { MONTH_BOX_SHADOW } from '../budget/constants';
 import { View, Stack, ButtonWithLoading, P } from '../common';
@@ -41,18 +41,18 @@ function DiscoverSchedulesTable({ schedules, loading }) {
         }}
         style={{
           borderColor: selected
-            ? colorsm.tableBorderSelected
-            : colorsm.tableBorder,
+            ? colors.tableBorderSelected
+            : colors.tableBorder,
           cursor: 'pointer',
           color: selected
-            ? colorsm.tableRowBackgroundHighlightText
-            : colorsm.tableText,
+            ? colors.tableRowBackgroundHighlightText
+            : colors.tableText,
           backgroundColor: selected
-            ? colorsm.tableRowBackgroundHighlight
-            : colorsm.tableBackground,
+            ? colors.tableRowBackgroundHighlight
+            : colors.tableBackground,
           ':hover': {
-            backgroundColor: colorsm.tableRowBackgroundHover,
-            color: colorsm.tableText,
+            backgroundColor: colors.tableRowBackgroundHover,
+            color: colors.tableText,
           },
         }}
       >

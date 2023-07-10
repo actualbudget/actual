@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 
 import Split from '../../icons/v0/Split';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 import { View, Select, Button } from '../common';
 
@@ -88,9 +88,9 @@ function CategoryList({
                 <Button
                   style={{
                     fontWeight: 500,
-                    backgroundColor: colorsm.buttonNeutralBackground,
-                    color: colorsm.buttonNeutralText,
-                    borderColor: colorsm.buttonNeutralBorder,
+                    backgroundColor: colors.buttonNeutralBackground,
+                    color: colors.buttonNeutralText,
+                    borderColor: colors.buttonNeutralBorder,
                   }}
                 >
                   <Split
@@ -116,7 +116,7 @@ function CategoryList({
                 <div
                   style={{
                     fontWeight: 500,
-                    color: colorsm.menuItemTextHeader,
+                    color: colors.menuItemTextHeader,
                     padding: '4px 9px',
                   }}
                   data-testid="category-item-group"
@@ -131,8 +131,8 @@ function CategoryList({
                 style={{
                   backgroundColor:
                     highlightedIndex === idx
-                      ? colorsm.menuItemBackgroundHover
-                      : colorsm.menuItemBackground,
+                      ? colors.menuItemBackgroundHover
+                      : colors.menuItemBackground,
                   padding: 4,
                   paddingLeft: 20,
                   borderRadius: embedded ? 4 : 0,

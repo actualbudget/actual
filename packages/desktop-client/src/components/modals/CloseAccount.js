@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import { P, LinkButton } from '../common';
@@ -155,7 +155,7 @@ function CloseAccount({
                         .forceCloseAccount(account.id)
                         .then(() => modalProps.onClose());
                     }}
-                    style={{ color: colorsm.errorText }}
+                    style={{ color: colors.errorText }}
                   >
                     force close
                   </LinkButton>{' '}

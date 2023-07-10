@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 import { css, type CSSProperties } from 'glamor';
 
 import Loading from '../../icons/AnimatedLoading';
-import { styles, colorsm } from '../../style';
+import { styles, colors } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 import View from './View';
@@ -46,24 +46,24 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ? null
           : '1px solid ' +
             (disabled // always use disabled before primary since we can have a disabled primary button
-              ? colorsm.buttonDisabledBorder
+              ? colors.buttonDisabledBorder
               : primary
-              ? colorsm.buttonPositiveBorder
-              : colorsm.buttonNeutralBorder),
+              ? colors.buttonPositiveBorder
+              : colors.buttonNeutralBorder),
         color: bare
           ? null
           : disabled
-          ? colorsm.buttonDisabledText
+          ? colors.buttonDisabledText
           : primary
-          ? colorsm.buttonPositiveTextHover
-          : colorsm.buttonNeutralTextHover,
+          ? colors.buttonPositiveTextHover
+          : colors.buttonNeutralTextHover,
         backgroundColor: bare
           ? 'rgba(100,100,100,0.15)' // doesn't do anything visible in dark mode, but keep for light
           : disabled
-          ? colorsm.buttonDisabledBackground
+          ? colors.buttonDisabledBackground
           : primary
-          ? colorsm.buttonPositiveBackgroundHover
-          : colorsm.buttonNeutralBackgroundHover,
+          ? colors.buttonPositiveBackgroundHover
+          : colors.buttonNeutralBackgroundHover,
       },
       hoveredStyle,
     ];
@@ -91,25 +91,25 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         backgroundColor: bare
           ? 'transparent'
           : disabled // always use disabled before primary since we can have a disabled primary button
-          ? colorsm.buttonDisabledBackground
+          ? colors.buttonDisabledBackground
           : primary
-          ? colorsm.buttonPositiveBackground
-          : colorsm.buttonNeutralBackground,
+          ? colors.buttonPositiveBackground
+          : colors.buttonNeutralBackground,
         border: bare
           ? 'none'
           : '1px solid ' +
             (disabled
-              ? colorsm.buttonDisabledBorder
+              ? colors.buttonDisabledBorder
               : primary
-              ? colorsm.buttonPositiveBorder
-              : colorsm.buttonNeutralBorder),
+              ? colors.buttonPositiveBorder
+              : colors.buttonNeutralBorder),
         color: bare
           ? 'inherit'
           : disabled
-          ? colorsm.buttonDisabledText
+          ? colors.buttonDisabledText
           : primary
-          ? colorsm.buttonPositiveText
-          : colorsm.buttonNeutralText,
+          ? colors.buttonPositiveText
+          : colors.buttonNeutralText,
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',
         ...styles.smallText,

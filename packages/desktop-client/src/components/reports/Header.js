@@ -1,7 +1,7 @@
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
-import { colorsm, styles } from '../../style';
+import { colors, styles } from '../../style';
 import { View, Button, ButtonLink, CustomSelect } from '../common';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
@@ -96,7 +96,7 @@ function Header({
           }}
         >
           <CustomSelect
-            style={{ backgroundColor: colorsm.formInputBackground }}
+            style={{ backgroundColor: colors.formInputBackground }}
             onChange={newValue =>
               onChangeDates(...validateStart(allMonths, newValue, end))
             }
@@ -105,7 +105,7 @@ function Header({
           />
           <View>to</View>
           <CustomSelect
-            style={{ backgroundColor: colorsm.formInputBackground }}
+            style={{ backgroundColor: colors.formInputBackground }}
             onChange={newValue =>
               onChangeDates(...validateEnd(allMonths, start, newValue))
             }

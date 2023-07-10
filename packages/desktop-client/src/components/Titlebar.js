@@ -20,7 +20,7 @@ import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
-import { colorsm } from '../style';
+import { colors } from '../style';
 import tokens from '../tokens';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
@@ -76,8 +76,8 @@ function UncategorizedButton() {
               bare
               to="/accounts/uncategorized"
               style={{
-                color: colorsm.errorText,
-                backgroundColor: colorsm.errorBackground,
+                color: colors.errorText,
+                backgroundColor: colors.errorBackground,
               }}
             >
               {num} uncategorized {num === 1 ? 'transaction' : 'transactions'}
@@ -135,21 +135,21 @@ export function SyncButton({ localPrefs, style, onSync }) {
           WebkitAppRegion: 'none',
           color:
             syncState === 'error'
-              ? colorsm.errorText
+              ? colors.errorText
               : syncState === 'disabled' ||
                 syncState === 'offline' ||
                 syncState === 'local'
-              ? colorsm.pageTextSubdued
+              ? colors.pageTextSubdued
               : null,
         },
         media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
             syncState === 'error'
-              ? colorsm.errorText
+              ? colors.errorText
               : syncState === 'disabled' ||
                 syncState === 'offline' ||
                 syncState === 'local'
-              ? colorsm.pageTextSubdued
+              ? colors.pageTextSubdued
               : null,
         }),
       )}
@@ -196,7 +196,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        color: colorsm.pageText,
+        color: colors.pageText,
       }}
     >
       <MonthCountSelector
@@ -204,7 +204,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
         onChange={value => saveGlobalPrefs({ maxMonths: value })}
       />
       {reportBudgetEnabled && (
-        <View style={{ marginLeft: -5, color: colorsm.pageTextSubdued }}>
+        <View style={{ marginLeft: -5, color: colors.pageTextSubdued }}>
           <ButtonWithLoading
             bare
             loading={loading}
@@ -303,7 +303,7 @@ function Titlebar({
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
           bare
-          style={{ marginRight: 8, color: colorsm.pageText }}
+          style={{ marginRight: 8, color: colors.pageText }}
           onPointerEnter={e => {
             if (e.pointerType === 'mouse') {
               sidebar.setHidden(false);
@@ -322,7 +322,7 @@ function Titlebar({
         >
           <NavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: colorsm.pageText, left: 0 }}
+            style={{ width: 15, height: 15, color: colors.pageText, left: 0 }}
           />
         </Button>
       )}

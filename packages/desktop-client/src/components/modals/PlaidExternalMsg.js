@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { Error } from '../alerts';
 import { View, Text, Modal, Button, P, ModalButtons } from '../common';
 
@@ -72,10 +72,10 @@ export default function PlaidExternalMsg({
           {waiting ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
-                color={colorsm.pageTextPositive}
+                color={colors.pageTextPositive}
                 style={{ width: 20, height: 20 }}
               />
-              <View style={{ marginTop: 10, color: colorsm.pageText }}>
+              <View style={{ marginTop: 10, color: colors.pageText }}>
                 {waiting === 'browser'
                   ? 'Waiting on browser...'
                   : waiting === 'accounts'
@@ -91,8 +91,8 @@ export default function PlaidExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: colorsm.noticeText,
-                borderColor: colorsm.noticeBackground,
+                backgroundColor: colors.noticeText,
+                borderColor: colors.noticeBackground,
               }}
               onClick={onContinue}
             >
@@ -113,17 +113,17 @@ export default function PlaidExternalMsg({
             </Button>
           )}
           <div style={{ marginTop: waiting ? 30 : 35 }}>
-            <Text style={{ color: colorsm.pageText, fontWeight: 600 }}>
+            <Text style={{ color: colors.pageText, fontWeight: 600 }}>
               Why not link it in the app?
             </Text>
           </div>
           <Text
             style={{
               marginTop: 10,
-              color: colorsm.pageText,
+              color: colors.pageText,
               fontSize: 13,
               '& a, & a:visited': {
-                color: colorsm.pageText,
+                color: colors.pageText,
               },
             }}
           >

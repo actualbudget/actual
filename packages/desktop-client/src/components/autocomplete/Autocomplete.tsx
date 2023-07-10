@@ -14,7 +14,7 @@ import Downshift from 'downshift';
 import { type CSSProperties, css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { View, Input, Tooltip, Button } from '../common';
 
 const inst: { lastChangeType? } = {};
@@ -97,7 +97,7 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
               cursor: 'default',
               backgroundColor:
                 highlightedIndex === index
-                  ? colorsm.menuItemBackgroundHover
+                  ? colors.menuItemBackgroundHover
                   : null,
             })}
           >
@@ -504,9 +504,9 @@ function MultiItem({ name, onRemove }) {
       style={{
         alignItems: 'center',
         flexDirection: 'row',
-        backgroundColor: colorsm.pillBackground,
-        color: colorsm.pillText,
-        border: '1px solid ' + colorsm.pillBorder,
+        backgroundColor: colors.pillBackground,
+        color: colors.pillText,
+        border: '1px solid ' + colors.pillBorder,
         padding: '2px 4px',
         margin: '2px',
         borderRadius: 4,
@@ -583,13 +583,13 @@ function MultiAutocomplete({
               flexWrap: 'wrap',
               flexDirection: 'row',
               alignItems: 'center',
-              backgroundColor: colorsm.formInputBackground,
+              backgroundColor: colors.formInputBackground,
               borderRadius: 4,
-              border: '1px solid ' + colorsm.formInputBorder,
+              border: '1px solid ' + colors.formInputBorder,
             },
             focused && {
-              border: '1px solid ' + colorsm.formInputBorderSelected,
-              boxShadow: '0 1px 1px ' + colorsm.buttonPositiveBorder,
+              border: '1px solid ' + colors.formInputBorderSelected,
+              boxShadow: '0 1px 1px ' + colors.buttonPositiveBorder,
             },
           ]}
         >

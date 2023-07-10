@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { View, Text, Button, Menu, MenuTooltip, Stack } from '../common';
 import { FormField, FormLabel } from '../forms';
 import { FieldSelect } from '../modals/EditRule';
@@ -215,7 +215,7 @@ function SavedFilterMenuButton({
         )}
         {err && (
           <Stack direction="row" align="center" style={{ padding: 10 }}>
-            <Text style={{ color: colorsm.errorText }}>{err}</Text>
+            <Text style={{ color: colors.errorText }}>{err}</Text>
           </Stack>
         )}
       </MenuTooltip>
@@ -264,7 +264,7 @@ function SavedFilterMenuButton({
 export function CondOpMenu({ conditionsOp, onCondOpChange, filters }) {
   return (
     filters.length > 1 && (
-      <Text style={{ color: colorsm.pageText, marginTop: 11, marginRight: 5 }}>
+      <Text style={{ color: colors.pageText, marginTop: 11, marginRight: 5 }}>
         <FieldSelect
           style={{ display: 'inline-flex' }}
           fields={[

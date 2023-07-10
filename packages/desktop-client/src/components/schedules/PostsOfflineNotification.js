@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { Text, P, Button, Stack } from '../common';
 import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';
@@ -32,7 +32,7 @@ export default function PostsOfflineNotification() {
             The {plural ? 'payees ' : 'payee '}
             {payees.map((id, idx) => (
               <Text>
-                <Text style={{ color: colorsm.pageTextPositive }}>
+                <Text style={{ color: colors.pageTextPositive }}>
                   <DisplayId key={id} id={id} type="payees" />
                 </Text>
                 {idx === payees.length - 1

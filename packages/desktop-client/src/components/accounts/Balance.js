@@ -5,7 +5,7 @@ import q from 'loot-core/src/client/query-helpers';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { View, Text, Button } from '../common';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
@@ -19,8 +19,8 @@ function DetailedBalance({ name, balance }) {
         marginLeft: 15,
         borderRadius: 4,
         padding: '4px 6px',
-        color: colorsm.pillText,
-        backgroundColor: colorsm.pillBackground,
+        color: colors.pillText,
+        backgroundColor: colors.pillBackground,
       }}
     >
       {name}{' '}
@@ -134,10 +134,10 @@ export function Balances({
           getStyle={value => ({
             color:
               value < 0
-                ? colorsm.errorText
+                ? colors.errorText
                 : value > 0
-                ? colorsm.noticeText
-                : colorsm.pageTextPositive,
+                ? colors.noticeText
+                : colors.pageTextPositive,
           })}
         />
 

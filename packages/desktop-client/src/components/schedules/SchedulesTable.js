@@ -9,7 +9,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { View, Text, Button, Tooltip, Menu } from '../common';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
 import DisplayId from '../util/DisplayId';
@@ -89,7 +89,7 @@ export function ScheduleAmountCell({ amount, op }) {
         <View
           style={{
             textAlign: 'left',
-            color: colorsm.tableText,
+            color: colors.tableText,
             lineHeight: '1em',
             marginRight: 10,
           }}
@@ -101,7 +101,7 @@ export function ScheduleAmountCell({ amount, op }) {
       <Text
         style={{
           flex: 1,
-          color: colorsm.tableText,
+          color: colors.tableText,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -190,14 +190,14 @@ export function SchedulesTable({
         onClick={() => onSelect(item.id)}
         style={{
           cursor: 'pointer',
-          backgroundColor: colorsm.tableBackground,
-          ':hover': { backgroundColor: colorsm.tableRowBackgroundHover },
+          backgroundColor: colors.tableBackground,
+          ':hover': { backgroundColor: colors.tableRowBackgroundHover },
         }}
       >
         <Field width="flex" name="name">
           <Text
             style={
-              item.name == null ? { color: colorsm.buttonDisabledText } : null
+              item.name == null ? { color: colors.buttonDisabledText } : null
             }
             title={item.name ? item.name : ''}
           >
@@ -248,7 +248,7 @@ export function SchedulesTable({
           style={{
             cursor: 'pointer',
             backgroundColor: 'transparent',
-            ':hover': { backgroundColor: colorsm.tableRowBackgroundHover },
+            ':hover': { backgroundColor: colors.tableRowBackgroundHover },
           }}
           onClick={() => setShowCompleted(true)}
         >
@@ -257,7 +257,7 @@ export function SchedulesTable({
             style={{
               fontStyle: 'italic',
               textAlign: 'center',
-              color: colorsm.tableText,
+              color: colors.tableText,
             }}
           >
             Show completed schedules

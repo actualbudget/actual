@@ -1,4 +1,4 @@
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 
 let colorFades = {
   blueFadeStart: 'rgba(44, 192, 144, 0.3)',
@@ -18,7 +18,7 @@ const baseLabelStyles = {
   fontFamily: sansSerif,
   fontSize,
   letterSpacing,
-  fill: colorsm.pageText,
+  fill: colors.pageText,
   stroke: 'transparent',
 };
 
@@ -44,14 +44,14 @@ const axisBaseStyles = {
 const theme = {
   colors: {
     ...colorFades,
-    red: colorsm.pageTextPositive,
-    blue: colorsm.noticeText,
+    red: colors.pageTextPositive,
+    blue: colors.noticeText,
   },
   area: {
     style: {
       labels: baseLabelStyles,
       data: {
-        stroke: colorsm.noticeText,
+        stroke: colors.noticeText,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',
@@ -82,7 +82,7 @@ const theme = {
   bar: {
     style: {
       labels: baseLabelStyles,
-      data: { fill: colorsm.noticeText, stroke: 'none' },
+      data: { fill: colors.noticeText, stroke: 'none' },
     },
   },
   line: {
@@ -90,7 +90,7 @@ const theme = {
       labels: baseLabelStyles,
       data: {
         fill: 'none',
-        stroke: colorsm.noticeText,
+        stroke: colors.noticeText,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',

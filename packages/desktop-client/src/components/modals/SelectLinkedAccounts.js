@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import Autocomplete from '../autocomplete/Autocomplete';
 import { View, Modal, Button, Text } from '../common';
 import { TableHeader, Table, Row, Field } from '../table';
@@ -88,7 +88,7 @@ export default function SelectLinkedAccounts({
             style={{
               flex: 'unset',
               height: 300,
-              border: '1px solid ' + colorsm.tableBorder,
+              border: '1px solid ' + colors.tableBorder,
             }}
           >
             <TableHeader
@@ -101,7 +101,7 @@ export default function SelectLinkedAccounts({
 
             <Table
               items={externalAccounts}
-              style={{ backgroundColor: colorsm.tableBackground }}
+              style={{ backgroundColor: colors.tableBackground }}
               getItemKey={index => index}
               renderItem={({ key, item }) => (
                 <View key={key}>
@@ -158,7 +158,7 @@ function TableRow({
   ].filter(Boolean);
 
   return (
-    <Row style={{ backgroundColor: colorsm.tableBackground }}>
+    <Row style={{ backgroundColor: colors.tableBackground }}>
       <Field width={200}>{externalAccount.name}</Field>
       <Field
         width="flex"

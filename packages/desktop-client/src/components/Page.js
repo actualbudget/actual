@@ -2,7 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useResponsive } from '../ResponsiveProvider';
-import { colorsm, styles } from '../style';
+import { colors, styles } from '../style';
 
 import { Modal, View, Text } from './common';
 
@@ -29,8 +29,8 @@ export function PageTitle({ name, style }) {
         style={[
           {
             alignItems: 'center',
-            backgroundColor: colorsm.sidebarBackground,
-            color: colorsm.sidebarItemText,
+            backgroundColor: colors.sidebarBackground,
+            color: colors.sidebarItemText,
             flexDirection: 'row',
             flex: '1 0 auto',
             fontSize: 18,
@@ -51,7 +51,7 @@ export function PageTitle({ name, style }) {
     <Text
       style={[
         {
-          color: colorsm.pageText,
+          color: colors.pageText,
           fontSize: 25,
           fontWeight: 500,
           marginBottom: 15,

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import * as actions from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
-import { colorsm, styles } from '../../style';
+import { colors, styles } from '../../style';
 import { withThemeColor } from '../../util/withThemeColor';
 import { Button, Text, TextOneLine, View } from '../common';
 import { Page } from '../Page';
@@ -26,7 +26,7 @@ function AccountHeader({ name, amount }) {
             styles.text,
             {
               textTransform: 'uppercase',
-              color: colorsm.tableText,
+              color: colors.tableText,
               fontSize: 13,
             },
           ]}
@@ -37,7 +37,7 @@ function AccountHeader({ name, amount }) {
       </View>
       <CellValue
         binding={amount}
-        style={[styles.text, { color: colorsm.tableText, fontSize: 13 }]}
+        style={[styles.text, { color: colors.tableText, fontSize: 13 }]}
         type="financial"
       />
     </View>
@@ -50,8 +50,8 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
       style={{
         flex: '1 0 auto',
         flexDirection: 'row',
-        backgroundColor: colorsm.tableBackground,
-        boxShadow: `0 1px 1px ${colorsm.cardShadow}`,
+        backgroundColor: colors.tableBackground,
+        boxShadow: `0 1px 1px ${colors.cardShadow}`,
         borderRadius: 6,
         marginTop: 10,
       }}
@@ -86,9 +86,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
                 {
                   fontSize: 17,
                   fontWeight: 600,
-                  color: updated
-                    ? colorsm.tableTextSelected
-                    : colorsm.tableText,
+                  color: updated ? colors.tableTextSelected : colors.tableText,
                   paddingRight: 30,
                 },
               ]}
@@ -98,7 +96,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             {account.bankId && (
               <View
                 style={{
-                  backgroundColor: colorsm.noticeText,
+                  backgroundColor: colors.noticeText,
                   marginLeft: '-23px',
                   width: 8,
                   height: 8,
@@ -111,8 +109,8 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         <CellValue
           binding={getBalanceQuery(account)}
           type="financial"
-          style={{ fontSize: 16, color: colorsm.tableText }}
-          getStyle={value => value < 0 && { color: colorsm.tableText }}
+          style={{ fontSize: 16, color: colors.tableText }}
+          getStyle={value => value < 0 && { color: colors.tableText }}
         />
       </Button>
     </View>
@@ -121,7 +119,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
 
 function EmptyMessage({ onAdd }) {
   return (
-    <View style={{ flex: 1, padding: 30, color: colorsm.tableText }}>
+    <View style={{ flex: 1, padding: 30, color: colors.tableText }}>
       <Text style={styles.text}>
         For Actual to be useful, you need to add an account. You can link an
         account to automatically download transactions, or manage it locally
@@ -140,7 +138,7 @@ function EmptyMessage({ onAdd }) {
         Add Account
       </Button>
 
-      <Text style={{ marginTop: 20, color: colorsm.tableText }}>
+      <Text style={{ marginTop: 20, color: colors.tableText }}>
         In the future, you can add accounts using the add button in the header.
       </Text>
     </View>
@@ -298,4 +296,4 @@ export default connect(
     prefs: state.prefs.local,
   }),
   actions,
-)(withThemeColor(colorsm.tableText)(Accounts));
+)(withThemeColor(colors.tableText)(Accounts));

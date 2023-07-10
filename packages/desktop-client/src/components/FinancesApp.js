@@ -26,7 +26,7 @@ import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
 import { useResponsive } from '../ResponsiveProvider';
-import { colorsm, styles } from '../style';
+import { colors, styles } from '../style';
 import { ExposeNavigate, StackedRoutes } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
@@ -164,8 +164,8 @@ function NavTab({ icon: TabIcon, name, path }) {
       style={({ isActive }) => ({
         alignItems: 'center',
         color: isActive
-          ? colorsm.sidebarItemAccentSelected
-          : colorsm.sidebarItemText,
+          ? colors.sidebarItemAccentSelected
+          : colors.sidebarItemText,
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
@@ -186,8 +186,8 @@ function MobileNavTabs() {
   return (
     <div
       style={{
-        backgroundColor: colorsm.sidebarBackground,
-        borderTop: `1px solid ${colorsm.menuBorder}`,
+        backgroundColor: colors.sidebarBackground,
+        borderTop: `1px solid ${colors.menuBorder}`,
         bottom: 0,
         ...styles.shadow,
         display: isNarrowWidth ? 'flex' : 'none',
@@ -257,8 +257,8 @@ function FinancesApp(props) {
 
           <View
             style={{
-              color: colorsm.pageText,
-              backgroundColor: colorsm.pageBackground,
+              color: colors.pageText,
+              backgroundColor: colors.pageBackground,
               flex: 1,
               overflow: 'hidden',
               width: '100%',

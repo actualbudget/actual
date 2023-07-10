@@ -2,7 +2,7 @@ import { type ComponentProps, type ReactNode, useState } from 'react';
 
 import { type CSSProperties } from 'glamor';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 
 import Input, { defaultInputStyle } from './Input';
 import View from './View';
@@ -37,9 +37,9 @@ export default function InputWithContent({
           alignItems: 'center',
         },
         focused && {
-          backgroundColor: colorsm.formInputBackground,
-          border: '1px solid ' + colorsm.formInputBorderSelected,
-          boxShadow: '0 1px 1px ' + colorsm.formInputShadowSelected,
+          backgroundColor: colors.formInputBackground,
+          border: '1px solid ' + colors.formInputBorderSelected,
+          boxShadow: '0 1px 1px ' + colors.formInputShadowSelected,
         },
         style,
         getStyle && getStyle(focused),

@@ -18,7 +18,7 @@ import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
 import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colorsm, styles } from '../../style';
+import { colors, styles } from '../../style';
 import { Button, Card, Label, Text, View } from '../common';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
@@ -47,14 +47,14 @@ function ToBudget({ toBudget, onClick }) {
           >
             <Label
               title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
-              style={{ color: colorsm.tableText, flexShrink: 0 }}
+              style={{ color: colors.tableText, flexShrink: 0 }}
             />
             <Text
               style={[
                 styles.smallText,
                 {
                   fontWeight: '500',
-                  color: amount < 0 ? colorsm.errorText : colorsm.tableText,
+                  color: amount < 0 ? colors.errorText : colors.tableText,
                 },
               ]}
             >
@@ -76,11 +76,11 @@ function Saved({ projected }) {
   return (
     <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
       {projected ? (
-        <Label title="PROJECTED SAVINGS" style={{ color: colorsm.tableText }} />
+        <Label title="PROJECTED SAVINGS" style={{ color: colors.tableText }} />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: colorsm.tableText }}
+          style={{ color: colors.tableText }}
         />
       )}
 
@@ -90,10 +90,10 @@ function Saved({ projected }) {
           {
             fontWeight: '500',
             color: projected
-              ? colorsm.warningText
+              ? colors.warningText
               : isNegative
-              ? colorsm.errorText
-              : colorsm.tableText,
+              ? colors.errorText
+              : colors.tableText,
           },
         ]}
       >
@@ -288,7 +288,7 @@ class BudgetCategory extends PureComponent {
         style={[
           {
             backgroundColor: editing
-              ? colorsm.buttonDisabledText
+              ? colors.buttonDisabledText
               : 'transparent',
             borderBottomWidth: 0,
             borderTopWidth: index > 0 ? 1 : 0,
@@ -328,7 +328,7 @@ class BudgetCategory extends PureComponent {
             name="balance"
             binding={balance}
             style={[styles.smallText, { width: 90, textAlign: 'right' }]}
-            getStyle={value => value < 0 && { color: colorsm.errorText }}
+            getStyle={value => value < 0 && { color: colors.errorText }}
             type="financial"
           />
         </View>
@@ -397,7 +397,7 @@ class TotalsRow extends PureComponent {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: colorsm.tableRowHeaderBackground,
+          backgroundColor: colors.tableRowHeaderBackground,
         }}
         data-testid="totals"
       >
@@ -462,7 +462,7 @@ class TotalsRow extends PureComponent {
               onClick={() => onAddCategory(group.id)}
               style={{ padding: 10 }}
             >
-              <Add width={15} height={15} color={colorsm.tableText} />
+              <Add width={15} height={15} color={colors.tableText} />
             </Button>
           </View>
           //   </Animated.View>
@@ -623,7 +623,7 @@ class BudgetGroup extends PureComponent {
         style={{
           marginTop: 7,
           marginBottom: 7,
-          color: colorsm.tableHeaderText,
+          color: colors.tableHeaderText,
         }}
       >
         <TotalsRow
@@ -692,8 +692,8 @@ class IncomeBudgetGroup extends Component {
             nameTextStyle={{ fontWeight: '500' }}
             amountTextStyle={{ fontWeight: '500' }}
             style={{
-              backgroundColor: colorsm.tableRowHeaderBackground,
-              color: colorsm.tableHeaderText,
+              backgroundColor: colors.tableRowHeaderBackground,
+              color: colors.tableHeaderText,
             }}
           />
 
@@ -715,8 +715,8 @@ class IncomeBudgetGroup extends Component {
                 }
                 index={index}
                 style={{
-                  backgroundColor: colorsm.tableBackground,
-                  color: colorsm.tableText,
+                  backgroundColor: colors.tableBackground,
+                  color: colors.tableText,
                 }}
               />
             );
@@ -916,10 +916,10 @@ export class BudgetTable extends Component {
               flex: '1 0 auto',
               padding: 10,
               paddingRight: 14,
-              backgroundColor: colorsm.tableBackground,
+              backgroundColor: colors.tableBackground,
               borderBottomWidth: 1,
-              borderColor: colorsm.tableBorder,
-              color: colorsm.tableText,
+              borderColor: colors.tableBorder,
+              color: colors.tableText,
             }}
           >
             {type === 'report' ? (
@@ -940,7 +940,7 @@ export class BudgetTable extends Component {
                 style={[
                   styles.smallText,
                   {
-                    color: colorsm.tableText,
+                    color: colors.tableText,
                     textAlign: 'right',
                     fontWeight: '500',
                   },
@@ -1065,8 +1065,8 @@ function UnconnectedBudgetHeader({
         flexShrink: 0,
         height: 50,
         justifyContent: 'center',
-        backgroundColor: colorsm.sidebarBackground,
-        color: colorsm.sidebarItemText,
+        backgroundColor: colors.sidebarBackground,
+        color: colors.sidebarItemText,
       }}
     >
       {!editMode && (
@@ -1085,7 +1085,7 @@ function UnconnectedBudgetHeader({
           ]}
         >
           <ArrowThinLeft
-            style={{ color: colorsm.sidebarItemText }}
+            style={{ color: colors.sidebarItemText }}
             width="15"
             height="15"
           />
@@ -1129,7 +1129,7 @@ function UnconnectedBudgetHeader({
             style={[buttonStyle, { opacity: nextEnabled ? 1 : 0.6 }]}
           >
             <ArrowThinRight
-              style={{ color: colorsm.sidebarItemText }}
+              style={{ color: colors.sidebarItemText }}
               width="15"
               height="15"
             />
@@ -1137,7 +1137,7 @@ function UnconnectedBudgetHeader({
 
           <SyncButton
             style={{
-              color: colorsm.sidebarItemText,
+              color: colors.sidebarItemText,
               position: 'absolute',
               top: 0,
               bottom: 0,

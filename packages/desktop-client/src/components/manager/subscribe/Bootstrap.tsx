@@ -5,7 +5,7 @@ import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colorsm } from '../../../style';
+import { colors } from '../../../style';
 import { View, Text, Button, P, ExternalLink } from '../../common';
 
 import { useBootstrapped, Title } from './common';
@@ -50,7 +50,7 @@ export default function Bootstrap() {
   }
 
   return (
-    <View style={{ maxWidth: 450, marginTop: -30, color: colorsm.pageText }}>
+    <View style={{ maxWidth: 450, marginTop: -30, color: colors.pageText }}>
       <Title text="Welcome to Actual!" />
       <P style={{ fontSize: 16 }}>
         Actual is a super fast privacy-focused app for managing your finances.
@@ -70,8 +70,8 @@ export default function Bootstrap() {
         <Text
           style={{
             marginTop: 20,
-            color: colorsm.errorText,
-            backgroundColor: colorsm.errorBackground,
+            color: colors.errorText,
+            backgroundColor: colors.errorBackground,
             borderRadius: 4,
             fontSize: 15,
           }}

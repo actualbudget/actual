@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { NativeCategorySelect } from '../autocomplete/CategorySelect';
 import { View, Text, Block, Modal, Button } from '../common';
 
@@ -38,8 +38,8 @@ export default function ConfirmCategoryDelete({
       <Text
         style={{
           marginTop: 15,
-          color: colorsm.errorText,
-          backgroundColor: colorsm.errorBackground,
+          color: colors.errorText,
+          backgroundColor: colors.errorBackground,
         }}
       >
         {msg}

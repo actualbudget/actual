@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { colorsm } from '../style';
+import { colors } from '../style';
 
-let bgTopLeft = colorsm.pageBackgroundTopLeft; // BG top left
-let bgBottomRight = colorsm.pageBackgroundBottomRight; // BG bottom right
-let linesTop = colorsm.pageBackgroundLineTop; // lines top
-let linesMid = colorsm.pageBackgroundLineMid; // lines mid
-let linesBottom = colorsm.pageBackgroundLineBottom; // lines bottom
+let bgTopLeft = colors.pageBackgroundTopLeft; // BG top left
+let bgBottomRight = colors.pageBackgroundBottomRight; // BG bottom right
+let linesTop = colors.pageBackgroundLineTop; // lines top
+let linesMid = colors.pageBackgroundLineMid; // lines mid
+let linesBottom = colors.pageBackgroundLineBottom; // lines bottom
 
 const Background = props => (
   <div

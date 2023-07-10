@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
-import { colorsm, styles } from '../../style';
+import { colors, styles } from '../../style';
 import { Button, InputWithContent, Label, View } from '../common';
 import Text from '../common/Text';
 import CellValue from '../spreadsheet/CellValue';
@@ -31,7 +31,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
               width: 13,
               height: 13,
               flexShrink: 0,
-              color: text ? colorsm.formInputTextHighlight : 'inherit',
+              color: text ? colors.formInputTextHighlight : 'inherit',
               margin: 5,
               marginRight: 0,
             }}
@@ -44,8 +44,8 @@ function TransactionSearchInput({ accountName, onSearch }) {
         }}
         placeholder={`Search ${accountName}`}
         style={{
-          backgroundColor: colorsm.tableBackground,
-          border: `1px solid ${colorsm.formInputBorder}`,
+          backgroundColor: colors.tableBackground,
+          border: `1px solid ${colors.formInputBorder}`,
           fontSize: 15,
           flex: 1,
           height: 32,
@@ -80,7 +80,7 @@ export default function AccountDetails({
     <View
       style={{
         flex: 1,
-        backgroundColor: colorsm.pageBackground,
+        backgroundColor: colors.pageBackground,
         overflowY: 'hidden',
         width: '100%',
       }}
@@ -114,7 +114,7 @@ export default function AccountDetails({
           >
             <CheveronLeft
               style={{
-                color: colorsm.pageText,
+                color: colors.pageText,
                 width: 32,
                 height: 32,
               }}
@@ -122,7 +122,7 @@ export default function AccountDetails({
             <Text
               style={{
                 ...styles.text,
-                color: colorsm.pageText,
+                color: colors.pageText,
                 fontWeight: 500,
               }}
             >
@@ -133,7 +133,7 @@ export default function AccountDetails({
             style={{
               fontSize: 16,
               fontWeight: 500,
-              color: colorsm.pageText,
+              color: colors.pageText,
             }}
           >
             {account.name}
@@ -161,7 +161,7 @@ export default function AccountDetails({
             fontWeight: '500',
           }}
           getStyle={value => ({
-            color: value < 0 ? colorsm.errorText : colorsm.noticeText,
+            color: value < 0 ? colors.errorText : colors.noticeText,
           })}
         />
         <TransactionSearchInput

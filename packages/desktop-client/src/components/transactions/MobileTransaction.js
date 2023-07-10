@@ -23,7 +23,7 @@ import {
 
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import { styles, colorsm } from '../../style';
+import { styles, colors } from '../../style';
 import { Text, TextOneLine, View } from '../common';
 
 const zIndices = { SECTION_HEADING: 10 };
@@ -56,13 +56,13 @@ function Status({ status }) {
 
   switch (status) {
     case 'missed':
-      color = colorsm.errorText;
+      color = colors.errorText;
       break;
     case 'due':
-      color = colorsm.warningText;
+      color = colors.warningText;
       break;
     case 'upcoming':
-      color = colorsm.tableText;
+      color = colors.tableText;
       break;
     default:
   }
@@ -129,7 +129,7 @@ class Transaction extends PureComponent {
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
-      color: colorsm.tableText,
+      color: colors.tableText,
     };
 
     return (
@@ -145,11 +145,11 @@ class Transaction extends PureComponent {
       <ListItem
         style={[
           { flex: 1, height: 60, padding: '5px 10px' }, // remove padding when Button is back
-          isPreview && { backgroundColor: colorsm.tableBackground },
+          isPreview && { backgroundColor: colors.tableBackground },
           style,
         ]}
       >
-        <View style={[{ flex: 1, color: colorsm.tableText }]}>
+        <View style={[{ flex: 1, color: colors.tableText }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {schedule && (
               <ArrowsSynchronize
@@ -157,7 +157,7 @@ class Transaction extends PureComponent {
                   width: 12,
                   height: 12,
                   marginRight: 5,
-                  color: colorsm.tableText,
+                  color: colors.tableText,
                 }}
               />
             )}
@@ -167,7 +167,7 @@ class Transaction extends PureComponent {
                 textStyle,
                 { fontSize: 14, fontWeight: added ? '600' : '400' },
                 prettyDescription === '' && {
-                  color: colorsm.tableText,
+                  color: colors.tableText,
                   fontStyle: 'italic',
                 },
               ]}
@@ -189,7 +189,7 @@ class Transaction extends PureComponent {
                 style={{
                   width: 11,
                   height: 11,
-                  color: cleared ? colorsm.noticeText : colorsm.tableText,
+                  color: cleared ? colors.noticeText : colors.tableText,
                   marginRight: 5,
                 }}
               />
@@ -200,8 +200,8 @@ class Transaction extends PureComponent {
                     marginTop: 1,
                     fontWeight: '400',
                     color: prettyCategory
-                      ? colorsm.buttonDisabledText
-                      : colorsm.formInputTextHighlight,
+                      ? colors.buttonDisabledText
+                      : colors.formInputTextHighlight,
                     fontStyle: prettyCategory ? null : 'italic',
                     textAlign: 'left',
                   }}
@@ -220,7 +220,7 @@ class Transaction extends PureComponent {
               marginLeft: 25,
               marginRight: 5,
               fontSize: 14,
-              color: colorsm.tableText,
+              color: colors.tableText,
             },
           ]}
         >
@@ -399,10 +399,10 @@ function ListBoxSection({ section, state }) {
           {...headingProps}
           style={{
             ...styles.smallText,
-            backgroundColor: colorsm.tableRowHeaderBackground,
-            borderBottom: `1px solid ${colorsm.tableBorder}`,
-            borderTop: `1px solid ${colorsm.tableBorder}`,
-            color: colorsm.tableRowHeaderBackgroundText,
+            backgroundColor: colors.tableRowHeaderBackground,
+            borderBottom: `1px solid ${colors.tableBorder}`,
+            borderTop: `1px solid ${colors.tableBorder}`,
+            color: colors.tableRowHeaderBackgroundText,
             display: 'flex',
             justifyContent: 'center',
             paddingBottom: 4,
@@ -451,11 +451,11 @@ function Option({ isLast, item, state }) {
       ref={ref}
       style={{
         background: isSelected
-          ? colorsm.tableRowBackgroundHighlight
-          : colorsm.tableBackground,
-        color: isSelected ? colorsm.tableText : null,
+          ? colors.tableRowBackgroundHighlight
+          : colors.tableBackground,
+        color: isSelected ? colors.tableText : null,
         outline: isFocusVisible ? '2px solid orange' : 'none',
-        ...(!isLast && { borderBottom: `1px solid ${colorsm.tableBorder}` }),
+        ...(!isLast && { borderBottom: `1px solid ${colors.tableBorder}` }),
       }}
     >
       {item.rendered}

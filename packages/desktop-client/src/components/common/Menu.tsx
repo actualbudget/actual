@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 
 import Text from './Text';
 import View from './View';
@@ -17,7 +17,7 @@ type KeybindingProps = {
 
 function Keybinding({ keyName }: KeybindingProps) {
   return (
-    <Text style={{ fontSize: 10, color: colorsm.pageTextSubdued }}>
+    <Text style={{ fontSize: 10, color: colors.pageTextSubdued }}>
       {keyName}
     </Text>
   );
@@ -110,7 +110,7 @@ export default function Menu({
         if (item === Menu.line) {
           return (
             <View key={idx} style={{ margin: '3px 0px' }}>
-              <View style={{ borderTop: '1px solid ' + colorsm.menuBorder }} />
+              <View style={{ borderTop: '1px solid ' + colors.menuBorder }} />
             </View>
           );
         } else if (item.type === Menu.label) {
@@ -118,7 +118,7 @@ export default function Menu({
             <Text
               key={item.name}
               style={{
-                color: colorsm.menuItemText,
+                color: colors.menuItemText,
                 fontSize: 11,
                 lineHeight: '1em',
                 textTransform: 'uppercase',
@@ -150,10 +150,10 @@ export default function Menu({
                 flexDirection: 'row',
                 alignItems: 'center',
               },
-              item.disabled && { color: colorsm.pageTextSubdued },
+              item.disabled && { color: colors.pageTextSubdued },
               !item.disabled &&
                 hoveredIndex === idx && {
-                  backgroundColor: colorsm.menuItemBackgroundHover,
+                  backgroundColor: colors.menuItemBackgroundHover,
                 },
             ]}
             onMouseEnter={() => setHoveredIndex(idx)}

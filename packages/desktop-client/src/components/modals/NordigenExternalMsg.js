@@ -7,7 +7,7 @@ import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import useNordigenStatus from '../../hooks/useNordigenStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { colorsm } from '../../style';
+import { colors } from '../../style';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
 import {
@@ -264,10 +264,10 @@ export default function NordigenExternalMsg({
           {waiting || isConfigurationLoading ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
-                color={colorsm.pageTextPositive}
+                color={colors.pageTextPositive}
                 style={{ width: 20, height: 20 }}
               />
-              <View style={{ marginTop: 10, color: colorsm.pageText }}>
+              <View style={{ marginTop: 10, color: colors.pageText }}>
                 {isConfigurationLoading
                   ? 'Checking Nordigen configuration..'
                   : waiting === 'browser'
@@ -291,8 +291,8 @@ export default function NordigenExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: colorsm.noticeBackground,
-                borderColor: colorsm.noticeText,
+                backgroundColor: colors.noticeBackground,
+                borderColor: colors.noticeText,
               }}
               onClick={onContinue}
             >
@@ -302,7 +302,7 @@ export default function NordigenExternalMsg({
             renderLinkButton()
           ) : (
             <>
-              <P style={{ color: colorsm.errorText }}>
+              <P style={{ color: colors.errorText }}>
                 Nordigen integration has not yet been configured.
               </P>
               <Button primary onClick={onNordigenInit}>

@@ -12,7 +12,7 @@ import FileDouble from '../../icons/v1/FileDouble';
 import CloudUnknown from '../../icons/v2/CloudUnknown';
 import Key from '../../icons/v2/Key';
 import RefreshArrow from '../../icons/v2/RefreshArrow';
-import { styles, colorsm } from '../../style';
+import { styles, colors } from '../../style';
 import tokens from '../../tokens';
 import { View, Text, Button, Tooltip, Menu } from '../common';
 import { PageTitle } from '../Page';
@@ -92,7 +92,7 @@ function FileState({ file }) {
     case 'unknown':
       Icon = CloudUnknown;
       status = 'Network unavailable';
-      color = colorsm.buttonDisabledText;
+      color = colors.buttonDisabledText;
       break;
     case 'remote':
       Icon = CloudDownload;
@@ -157,15 +157,15 @@ function File({ file, onSelect, onDelete }) {
           ...styles.shadow,
           margin: 10,
           padding: '12px 15px',
-          backgroundColor: colorsm.buttonNeutralBackground,
-          color: colorsm.buttonNeutralText,
-          border: '1px solid ' + colorsm.buttonNeutralBorder,
+          backgroundColor: colors.buttonNeutralBackground,
+          color: colors.buttonNeutralText,
+          border: '1px solid ' + colors.buttonNeutralBorder,
           borderRadius: 6,
           flexShrink: 0,
           cursor: 'pointer',
           ':hover': {
-            backgroundColor: colorsm.buttonNeutralBackgroundHover,
-            color: colorsm.buttonNeutralTextHover,
+            backgroundColor: colors.buttonNeutralBackgroundHover,
+            color: colors.buttonNeutralTextHover,
           },
         },
       ]}
@@ -185,9 +185,7 @@ function File({ file, onSelect, onDelete }) {
               width: 13,
               height: 13,
               marginRight: 8,
-              color: file.hasKey
-                ? colorsm.tableText
-                : colorsm.buttonDisabledText,
+              color: file.hasKey ? colors.tableText : colors.buttonDisabledText,
             }}
           />
         )}
@@ -196,7 +194,7 @@ function File({ file, onSelect, onDelete }) {
           state={file.state}
           onDelete={() => onDelete(file)}
           style={{
-            color: colorsm.tableText,
+            color: colors.tableText,
           }}
         />
       </View>
@@ -243,8 +241,8 @@ function RefreshButton({ onRefresh }) {
   return (
     <Button bare style={{ padding: 10, marginRight: 5 }} onClick={_onRefresh}>
       <Icon
-        color={colorsm.tableText}
-        style={{ width: 18, height: 18, color: colorsm.tableText }}
+        color={colors.tableText}
+        style={{ width: 18, height: 18, color: colors.tableText }}
       />
     </Button>
   );
@@ -284,7 +282,7 @@ function BudgetList({
     >
       <View
         style={{
-          color: colorsm.pageText,
+          color: colors.pageText,
         }}
       >
         <PageTitle
@@ -335,7 +333,7 @@ function BudgetList({
           bare
           style={{
             marginLeft: 10,
-            color: colorsm.pageText,
+            color: colors.pageText,
           }}
           onClick={e => {
             e.preventDefault();

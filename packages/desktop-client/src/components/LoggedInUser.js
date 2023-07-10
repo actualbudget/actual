@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
 
-import { colorsm, styles } from '../style';
+import { colors, styles } from '../style';
 
 import { View, Text, Button, Tooltip, Menu } from './common';
 import { useServerURL } from './ServerContext';
@@ -72,7 +72,7 @@ function LoggedInUser({
       <Text
         style={[
           {
-            color: colorsm.pageText,
+            color: colors.pageText,
             fontStyle: 'italic',
           },
           styles.delayedFadeIn,
@@ -90,8 +90,8 @@ function LoggedInUser({
         {
           flexDirection: 'row',
           alignItems: 'center',
-          color: colorsm.pageTextSubdued,
-          ':hover': { color: colorsm.pageText },
+          color: colors.pageTextSubdued,
+          ':hover': { color: colors.pageText },
         },
         style,
       ]}

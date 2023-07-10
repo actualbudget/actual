@@ -1,6 +1,6 @@
 import React, { Component, useState } from 'react';
 
-import { colorsm } from '../style';
+import { colors } from '../style';
 
 import {
   View,
@@ -78,8 +78,8 @@ class FatalError extends Component {
           style={{
             paddingBottom: 100,
             maxWidth: 500,
-            color: colorsm.errorText,
-            backgroundColor: colorsm.errorBackground,
+            color: colors.errorText,
+            backgroundColor: colors.errorBackground,
             lineHeight: '1.5em',
             fontSize: 15,
           }}
