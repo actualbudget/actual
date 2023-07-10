@@ -80,13 +80,11 @@ export default function CustomSelect({
               value={value}
               disabled={disabledKeys.includes(value)}
               {...css({
-                background: colorsm.menuItemBackground,
-                color: colorsm.menuItemText,
-                ':hover': {
-                  background: colorsm.menuItemBackgroundHover,
-                  color: colorsm.menuItemTextHover,
+                '[data-reach-listbox-option]': {
+                  background: colorsm.menuItemBackground,
+                  color: colorsm.menuItemText,
                 },
-                ':active': {
+                '[data-reach-listbox-option][data-current-nav]': {
                   background: colorsm.menuItemBackgroundHover,
                   color: colorsm.menuItemTextHover,
                 },
