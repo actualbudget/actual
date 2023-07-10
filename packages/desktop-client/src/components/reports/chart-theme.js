@@ -1,9 +1,9 @@
 import { colorsm } from '../../style';
 
 let colorFades = {
-  blueFadeStart: 'rgba(44, 192, 144, 1)',
+  blueFadeStart: 'rgba(44, 192, 144, 0.3)',
   blueFadeEnd: 'rgba(44, 192, 144, 0)',
-  redFadeStart: 'rgba(172, 115, 235, 1)',
+  redFadeStart: 'rgba(172, 115, 235, 0.3)',
   redFadeEnd: 'rgba(172, 115, 235, 0)',
 };
 
