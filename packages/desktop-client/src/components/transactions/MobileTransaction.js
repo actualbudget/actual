@@ -626,8 +626,10 @@ class TransactionEditInner extends PureComponent {
               <View style={{ marginLeft: 35, marginRight: 35 }}>
                 <FieldLabel title="Cleared" />
                 <BooleanField
-                  value={transaction.cleared}
-                  onUpdate={value => this.onEdit(transaction, 'cleared', value)}
+                  checked={transaction.cleared}
+                  onUpdate={checked =>
+                    this.onEdit(transaction, 'cleared', checked)
+                  }
                   style={{ marginTop: 4 }}
                 />
               </View>

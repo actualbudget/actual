@@ -101,12 +101,12 @@ export function TapField({
   );
 }
 
-export function BooleanField({ value, onUpdate, style }) {
+export function BooleanField({ checked, onUpdate, style }) {
   return (
     <input
       type="checkbox"
-      value={value}
-      onChange={onUpdate}
+      checked={checked}
+      onChange={e => onUpdate(e.target.checked)}
       style={[
         {
           marginHorizontal: EDITING_PADDING,
