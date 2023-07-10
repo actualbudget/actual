@@ -35,7 +35,6 @@ import {
   Menu,
   CustomSelect,
 } from '../common';
-import { Checkbox } from '../forms';
 import { Value } from '../ManageRules';
 import GenericInput from '../util/GenericInput';
 
@@ -118,9 +117,15 @@ function updateFilterReducer(state, action) {
     case 'set-op': {
       let type = FIELD_TYPES.get(state.field);
       let value = state.value;
-      if (type === 'id' && action.op === 'contains') {
-        // Clear out the value if switching between contains for
-        // the id type
+      if (
+        (type === 'id' || type === 'string') &&
+        (action.op === 'contains' ||
+          action.op === 'is' ||
+          action.op === 'doesNotContain' ||
+          action.op === 'isNot')
+      ) {
+        // Clear out the value if switching between contains or
+        // is/oneof for the id or string type
         value = null;
       }
       return { ...state, op: action.op, value };
@@ -145,7 +150,6 @@ function ConfigureField({
   onApply,
 }) {
   let [subfield, setSubfield] = useState(initialSubfield);
-  let [negated, setNegated] = useState(null);
   let inputRef = useRef();
   let prevOp = useRef(null);
 
@@ -157,9 +161,7 @@ function ConfigureField({
   }, [op]);
 
   let type = FIELD_TYPES.get(field);
-  let ops = negated
-    ? TYPE_INFO[type].ops.slice(3, 6)
-    : TYPE_INFO[type].ops.slice(0, 3);
+  let ops = TYPE_INFO[type].ops;
 
   // Month and year fields are quite hacky right now! Figure out how
   // to clean this up later
@@ -171,7 +173,7 @@ function ConfigureField({
     <Tooltip
       position="bottom-left"
       style={{ padding: 15 }}
-      width={300}
+      width={275}
       onClose={() => dispatch({ type: 'close' })}
     >
       <FocusScope>
@@ -217,34 +219,41 @@ function ConfigureField({
           {field === 'saved' && 'Existing filters will be cleared'}
         </View>
 
-        <Stack
-          direction="row"
-          align="flex-start"
-          spacing={1}
-          style={{ flexWrap: 'wrap' }}
-        >
-          {type === 'boolean'
-            ? [
-                <OpButton
-                  key="true"
-                  op="true"
-                  selected={value === true}
-                  onClick={() => {
-                    dispatch({ type: 'set-op', op: 'is' });
-                    dispatch({ type: 'set-value', value: true });
-                  }}
-                />,
-                <OpButton
-                  key="false"
-                  op="false"
-                  selected={value === false}
-                  onClick={() => {
-                    dispatch({ type: 'set-op', op: 'is' });
-                    dispatch({ type: 'set-value', value: false });
-                  }}
-                />,
-              ]
-            : ops.map(currOp => (
+        {type === 'boolean' ? (
+          <Stack
+            direction="row"
+            align="flex-start"
+            spacing={1}
+            style={{ flexWrap: 'wrap' }}
+          >
+            <OpButton
+              key="true"
+              op="true"
+              selected={value === true}
+              onClick={() => {
+                dispatch({ type: 'set-op', op: 'is' });
+                dispatch({ type: 'set-value', value: true });
+              }}
+            />
+            <OpButton
+              key="false"
+              op="false"
+              selected={value === false}
+              onClick={() => {
+                dispatch({ type: 'set-op', op: 'is' });
+                dispatch({ type: 'set-value', value: false });
+              }}
+            />
+          </Stack>
+        ) : (
+          [
+            <Stack
+              direction="row"
+              align="flex-start"
+              spacing={1}
+              style={{ flexWrap: 'wrap' }}
+            >
+              {ops.slice(0, 3).map(currOp => (
                 <OpButton
                   key={currOp}
                   op={currOp}
@@ -252,32 +261,25 @@ function ConfigureField({
                   onClick={() => dispatch({ type: 'set-op', op: currOp })}
                 />
               ))}
-        </Stack>
-
-        {field === 'account' ||
-        field === 'payee' ||
-        field === 'notes' ||
-        field === 'category' ? (
-          <View
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              userSelect: 'none',
-              marginTop: 5,
-            }}
-          >
-            <Checkbox
-              id="add_negate"
-              checked={negated}
-              onChange={() => {
-                setNegated(!negated);
-              }}
-            />
-            <label htmlFor="add_negate">Not</label>
-          </View>
-        ) : (
-          <View style={{ flex: 1 }} />
+            </Stack>,
+            <Stack
+              direction="row"
+              align="flex-start"
+              spacing={1}
+              style={{ flexWrap: 'wrap' }}
+            >
+              {ops.slice(3, 6).map(currOp => (
+                <View>
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
+                </View>
+              ))}
+            </Stack>,
+          ]
         )}
 
         <form action="#">
@@ -528,7 +530,7 @@ function FilterExpression({
                 value={value}
                 field={field}
                 inline={true}
-                valueIsRaw={op === 'contains'}
+                valueIsRaw={op === 'contains' || op === 'doesNotContain'}
               />
             </>
           )}

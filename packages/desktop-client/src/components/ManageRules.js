@@ -697,7 +697,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
           op: 'is',
           value: payeeId || null,
           type: 'id',
-          selectNegate: false,
         },
       ],
       actions: [

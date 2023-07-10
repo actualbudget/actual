@@ -392,8 +392,8 @@ export class Condition {
       op: this.op,
       field: this.field,
       value: this.unparsedValue,
-      ...(this.options ? { options: this.options } : null),
       type: this.type,
+      ...(this.options ? { options: this.options } : null),
     };
   }
 }
