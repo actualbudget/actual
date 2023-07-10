@@ -27,7 +27,6 @@ import { colorsm } from '../../style';
 import {
   useStableCallback,
   View,
-  Text,
   Button,
   Tooltip,
   Menu,
