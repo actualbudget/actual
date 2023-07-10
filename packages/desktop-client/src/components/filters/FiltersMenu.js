@@ -105,6 +105,7 @@ function OpButton({ op, selected, style, onClick }) {
       bare
       style={[
         {
+          marginBottom: 5,
           fontSize: 'inherit',
           border: '1px solid ' + colorsm.pillBorder,
           color: colorsm.pillText,
