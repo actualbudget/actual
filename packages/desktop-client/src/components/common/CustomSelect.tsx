@@ -12,6 +12,7 @@ import ExpandArrow from '../../icons/v0/ExpandArrow';
 type CustomSelectProps = {
   options: Array<[string, string]>;
   value: string;
+  defaultLabel?: string;
   onChange?: (newValue: string) => void;
   style?: CSSProperties;
   wrapperStyle?: CSSProperties;
@@ -21,13 +22,14 @@ type CustomSelectProps = {
 export default function CustomSelect({
   options,
   value,
+  defaultLabel = '',
   onChange,
   style,
   wrapperStyle,
   disabledKeys = [],
 }: CustomSelectProps) {
   const arrowSize = 7;
-  const label = options.filter(option => option[0] === value)[0][1];
+  const targetOption = options.filter(option => option[0] === value);
   return (
     <ListboxInput
       value={value}
@@ -52,7 +54,7 @@ export default function CustomSelect({
             alignItems: 'center',
           }}
         >
-          {label}
+          {targetOption.length !== 0 ? targetOption[0][1] : defaultLabel}
         </span>
       </ListboxButton>
       <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>

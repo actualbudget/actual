@@ -96,6 +96,7 @@ function Header({
               onChangeDates(...validateStart(allMonths, newValue, end))
             }
             value={start}
+            defaultLabel={start}
             options={allMonths.map(({ name, pretty }) => [name, pretty])}
           />
           <View>to</View>
