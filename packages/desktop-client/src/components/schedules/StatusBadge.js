@@ -76,13 +76,14 @@ export function getStatusProps(status) {
 }
 
 export function StatusBadge({ status, style }) {
-  let { color, backgroundColor, Icon } = getStatusProps(status);
+  let { color, backgroundColor, borderColor, Icon } = getStatusProps(status);
   return (
     <View
       style={[
         {
           color,
           backgroundColor,
+          border: '1px solid ' + borderColor,
           padding: '6px 8px',
           borderRadius: 4,
           flexDirection: 'row',
