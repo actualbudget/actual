@@ -18,8 +18,8 @@ You can add an account to your budget at any time, however when you first instal
 
 You can also add an account using the `+ Add account` button in the sidebar.
 
-A box will appear asking you to fill in a few options
-- Create Local Account or Link to Nordigen (See Advanced/Connecting Your Bank)
+Two successive screens will appear with boxes asking you to fill in a few options
+- Create a Local Account or Link to Nordigen (See [Connecting Your Bank](https://actualbudget.org/docs/advanced/bank-sync))
 - Give your account a name
 - Is the account on or off budget
 - The current account balance
