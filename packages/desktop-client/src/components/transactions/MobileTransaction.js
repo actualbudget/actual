@@ -662,7 +662,13 @@ class TransactionEditInner extends PureComponent {
                     height={17}
                     style={{ color: colors.r4 }}
                   />
-                  <Text style={{ color: colors.r4, marginLeft: 5 }}>
+                  <Text
+                    style={{
+                      color: colors.r4,
+                      marginLeft: 5,
+                      userSelect: 'none',
+                    }}
+                  >
                     Delete transaction
                   </Text>
                 </Button>

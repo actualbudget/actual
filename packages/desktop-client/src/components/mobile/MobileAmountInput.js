@@ -419,7 +419,7 @@ class FocusableAmountInput_ extends PureComponent {
               style,
             ]}
           >
-            <Text style={[{ fontSize: 15 }, textStyle]}>
+            <Text style={[{ fontSize: 15, userSelect: 'none' }, textStyle]}>
               {amountToCurrency(this.props.value)}
             </Text>
           </View>

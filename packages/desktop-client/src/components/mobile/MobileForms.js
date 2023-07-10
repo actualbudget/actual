@@ -17,6 +17,7 @@ export function FieldLabel({ title, flush, style }) {
           color: colors.n2,
           paddingLeft: EDITING_PADDING,
           textTransform: 'uppercase',
+          userSelect: 'none',
         },
         style,
       ]}
@@ -91,7 +92,9 @@ export function TapField({
       {children ? (
         children
       ) : (
-        <Text style={[{ flex: 1 }, textStyle]}>{value}</Text>
+        <Text style={[{ flex: 1, userSelect: 'none' }, textStyle]}>
+          {value}
+        </Text>
       )}
       {!disabled && rightContent}
     </Button>

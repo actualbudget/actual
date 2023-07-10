@@ -163,6 +163,7 @@ export const styles = {
       color: colors.n1,
       fontSize: 15,
       fontWeight: 600,
+      userSelect: 'none',
     },
     headerBackTitle: null,
   },
