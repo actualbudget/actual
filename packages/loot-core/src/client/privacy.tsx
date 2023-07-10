@@ -20,6 +20,6 @@ export function PrivacyProvider({ children }) {
 }
 
 export function usePrivacyMode() {
-  let { enabled } = useContext(PrivacyContext);
-  return enabled || false;
+  let context = useContext(PrivacyContext);
+  return context?.enabled || false;
 }

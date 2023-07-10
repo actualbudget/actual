@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { css } from 'glamor';
 
 import * as actions from 'loot-core/src/client/actions';
-import { PrivacyProvider } from 'loot-core/src/client/privacy';
 import {
   init as initConnection,
   send,
@@ -94,49 +93,47 @@ class App extends Component {
 
     return (
       <ResponsiveProvider>
-        <PrivacyProvider>
+        <div
+          style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+        >
+          {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
           <div
-            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+            key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+            {...css([
+              {
+                flexGrow: 1,
+                backgroundColor: '#E8ECF0',
+                overflow: 'hidden',
+              },
+              styles.lightScrollbar,
+            ])}
           >
-            {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
-            <div
-              key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-              {...css([
-                {
-                  flexGrow: 1,
-                  backgroundColor: '#E8ECF0',
-                  overflow: 'hidden',
-                },
-                styles.lightScrollbar,
-              ])}
-            >
-              {fatalError ? (
-                <>
-                  <AppBackground />
-                  <FatalError error={fatalError} buttonText="Restart app" />
-                </>
-              ) : initializing ? (
+            {fatalError ? (
+              <>
+                <AppBackground />
+                <FatalError error={fatalError} buttonText="Restart app" />
+              </>
+            ) : initializing ? (
+              <AppBackground
+                initializing={initializing}
+                loadingText={loadingText}
+              />
+            ) : budgetId ? (
+              <FinancesApp />
+            ) : (
+              <>
                 <AppBackground
                   initializing={initializing}
                   loadingText={loadingText}
                 />
-              ) : budgetId ? (
-                <FinancesApp />
-              ) : (
-                <>
-                  <AppBackground
-                    initializing={initializing}
-                    loadingText={loadingText}
-                  />
-                  <ManagementApp isLoading={loadingText != null} />
-                </>
-              )}
+                <ManagementApp isLoading={loadingText != null} />
+              </>
+            )}
 
-              <UpdateNotification />
-              <MobileWebMessage />
-            </div>
+            <UpdateNotification />
+            <MobileWebMessage />
           </div>
-        </PrivacyProvider>
+        </div>
       </ResponsiveProvider>
     );
   }
