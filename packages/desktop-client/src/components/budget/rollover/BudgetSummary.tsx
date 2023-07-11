@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 
 import { css } from 'glamor';
 
@@ -259,7 +259,7 @@ type BudgetSummaryProps = {
   month: string;
   isGoalTemplatesEnabled: boolean;
 };
-export function BudgetSummary({
+export const BudgetSummary = memo(function BudgetSummary({
   month,
   isGoalTemplatesEnabled,
 }: BudgetSummaryProps) {
@@ -446,4 +446,4 @@ export function BudgetSummary({
       </NamespaceContext.Provider>
     </View>
   );
-}
+});

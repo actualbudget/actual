@@ -7,7 +7,7 @@ import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
 
-import { setBudget, getSheetValue } from './actions';
+import { setBudget, getSheetValue, isReflectBudget } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export function applyTemplate({ month }) {
@@ -324,12 +324,13 @@ async function applyCategoryTemplate(
       }
     });
   }
-
   let sheetName = monthUtils.sheetForMonth(month);
   let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
-  let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+  let budgetAvailable = isReflectBudget()
+    ? await getSheetValue(sheetName, `total-saved`)
+    : await getSheetValue(sheetName, `to-budget`);
   let to_budget = budgeted;
   let limit;
   let hold;
@@ -356,7 +357,7 @@ async function applyCategoryTemplate(
         } else {
           increment = limit;
         }
-        if (to_budget + increment < budgetAvailable || !priority) {
+        if (increment < budgetAvailable || !priority) {
           to_budget += increment;
         } else {
           if (budgetAvailable > 0) to_budget += budgetAvailable;
@@ -366,40 +367,45 @@ async function applyCategoryTemplate(
       }
       case 'by': {
         // by has 'amount' and 'month' params
-        let target = 0;
-        let target_month = `${template_lines[l].month}-01`;
-        let num_months = monthUtils.differenceInCalendarMonths(
-          target_month,
-          current_month,
-        );
-        let repeat =
-          template.type === 'by'
-            ? template.repeat
-            : (template.repeat || 1) * 12;
-        while (num_months < 0 && repeat) {
-          target_month = monthUtils.addMonths(target_month, repeat);
-          num_months = monthUtils.differenceInCalendarMonths(
-            template_lines[l].month,
+        if (!isReflectBudget()) {
+          let target = 0;
+          let target_month = `${template_lines[l].month}-01`;
+          let num_months = monthUtils.differenceInCalendarMonths(
+            target_month,
             current_month,
           );
-        }
-        if (l === 0) remainder = last_month_balance;
-        remainder = amountToInteger(template_lines[l].amount) - remainder;
-        if (remainder >= 0) {
-          target = remainder;
-          remainder = 0;
-        } else {
-          target = 0;
-          remainder = Math.abs(remainder);
-        }
-        let diff = num_months >= 0 ? Math.round(target / (num_months + 1)) : 0;
-        if (diff >= 0) {
-          if (to_budget + diff < budgetAvailable || !priority) {
-            to_budget += diff;
-          } else {
-            if (budgetAvailable > 0) to_budget += budgetAvailable;
-            errors.push(`Insufficient funds.`);
+          let repeat =
+            template.type === 'by'
+              ? template.repeat
+              : (template.repeat || 1) * 12;
+          while (num_months < 0 && repeat) {
+            target_month = monthUtils.addMonths(target_month, repeat);
+            num_months = monthUtils.differenceInCalendarMonths(
+              template_lines[l].month,
+              current_month,
+            );
           }
+          if (l === 0) remainder = last_month_balance;
+          remainder = amountToInteger(template_lines[l].amount) - remainder;
+          if (remainder >= 0) {
+            target = remainder;
+            remainder = 0;
+          } else {
+            target = 0;
+            remainder = Math.abs(remainder);
+          }
+          let diff =
+            num_months >= 0 ? Math.round(target / (num_months + 1)) : 0;
+          if (diff >= 0) {
+            if (to_budget + diff < budgetAvailable || !priority) {
+              to_budget += diff;
+            } else {
+              if (budgetAvailable > 0) to_budget += budgetAvailable;
+              errors.push(`Insufficient funds.`);
+            }
+          }
+        } else {
+          errors.push(`by templates are not supported in Report budgets`);
         }
         break;
       }
@@ -563,9 +569,14 @@ async function applyCategoryTemplate(
           amountCond.value = monthlyTarget;
         }
 
-        if (template.full === true) {
-          if (num_months === 1) {
+        if (template.full === true || isReflectBudget()) {
+          if (num_months === 0) {
             to_budget = -getScheduledAmount(amountCond.value);
+          }
+          if (isReflectBudget() && !template.full) {
+            errors.push(
+              `Report budgets require the full option for Schedules.`,
+            );
           }
           break;
         }
