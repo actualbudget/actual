@@ -940,7 +940,7 @@ type TableProps = {
   animated?: boolean;
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
-  getScrollWidth: (width) => void;
+  getScrollWidth: (parent, child) => void;
 };
 
 export const Table = forwardRef<TableHandleRef, TableProps>(
