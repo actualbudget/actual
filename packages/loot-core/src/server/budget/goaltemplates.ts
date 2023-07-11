@@ -357,7 +357,7 @@ async function applyCategoryTemplate(
         } else {
           increment = limit;
         }
-        if (increment < budgetAvailable || !priority) {
+        if (to_budget + increment < budgetAvailable || !priority) {
           to_budget += increment;
         } else {
           if (budgetAvailable > 0) to_budget += budgetAvailable;
