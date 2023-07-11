@@ -1,7 +1,6 @@
 import React, {
   type ComponentProps,
   type ComponentType,
-  memo,
   type ReactNode,
   useState,
   type SVGProps,
@@ -292,7 +291,7 @@ type BudgetSummaryProps = {
   month?: string;
   isGoalTemplatesEnabled: boolean;
 };
-export const BudgetSummary = memo(function BudgetSummary({
+export function BudgetSummary({
   month,
   isGoalTemplatesEnabled,
 }: BudgetSummaryProps) {
@@ -481,4 +480,4 @@ export const BudgetSummary = memo(function BudgetSummary({
       </NamespaceContext.Provider>
     </View>
   );
-});
+}
