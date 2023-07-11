@@ -1054,7 +1054,8 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       let editing = editingId === item.id;
       let selected = isSelected && isSelected(item.id);
 
-      scrollContainer.current && getScrollWidth &&
+      scrollContainer.current &&
+        getScrollWidth &&
         getScrollWidth(
           scrollContainer.current.offsetParent
             ? scrollContainer.current.offsetParent.clientWidth
