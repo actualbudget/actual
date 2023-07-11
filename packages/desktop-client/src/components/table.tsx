@@ -1055,10 +1055,11 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       let selected = isSelected && isSelected(item.id);
 
       scrollContainer.current &&
-        scrollContainer.current.offsetParent &&
         getScrollWidth(
-          scrollContainer.current.offsetParent.clientWidth -
-            scrollContainer.current.clientWidth,
+          scrollContainer.current.offsetParent
+            ? scrollContainer.current.offsetParent.clientWidth
+            : 0,
+          scrollContainer.current ? scrollContainer.current.clientWidth : 0,
         );
 
       let row = renderItem({

@@ -1419,10 +1419,12 @@ function TransactionTableInner({
 }) {
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
-  let [scrollWidth, setScrollWidth] = useState(null);
+  let [scrollWidth, setScrollWidth] = useState(0);
 
-  function getScrollWidth(width) {
-    setScrollWidth(width);
+  function getScrollWidth(parent, child) {
+    let width = parent > 0 && child > 0 && parent - child;
+
+    setScrollWidth(!width ? 0 : width);
   }
 
   let onNavigateToTransferAccount = useCallback(

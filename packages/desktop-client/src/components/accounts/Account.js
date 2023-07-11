@@ -945,7 +945,7 @@ class AccountInternal extends PureComponent {
       this.setState({ filters: conditions, search: '' });
     }
 
-    if (this.state.sort.field !== null) {
+    if (this.state.sort.length !== 0) {
       this.applySort();
     }
   };
@@ -953,6 +953,7 @@ class AccountInternal extends PureComponent {
   applySort = (field, ascDesc, prevField, prevAscDesc) => {
     let filters = this.state.filters;
     let sortField = getField(!field ? this.state.sort.field : field);
+    let sortAscDesc = !ascDesc ? this.state.sort.ascDesc : ascDesc;
     let sortPrevField = getField(
       !prevField ? this.state.sort.prevField : prevField,
     );
@@ -961,18 +962,27 @@ class AccountInternal extends PureComponent {
       : prevAscDesc;
 
     if (!field) {
+      //no sort was made (called by applyFilters)
       this.currentQuery = this.currentQuery.orderBy({
-        [sortField]: this.state.sort.ascDesc,
+        [sortField]: sortAscDesc,
       });
     } else {
+      //sort called directly
       if (filters.length > 0) {
+        //if filters already exist then apply them
         this.applyFilters([...filters]);
-        this.currentQuery = this.currentQuery.orderBy({ [sortField]: ascDesc });
+        this.currentQuery = this.currentQuery.orderBy({
+          [sortField]: sortAscDesc,
+        });
+      } else {
+        //no filters exist make new rootquery
+        this.currentQuery = this.rootQuery.orderBy({
+          [sortField]: sortAscDesc,
+        });
       }
-
-      this.currentQuery = this.rootQuery.orderBy({ [sortField]: ascDesc });
     }
     if (sortPrevField) {
+      //apply previos sort if it exists
       this.currentQuery = this.currentQuery.orderBy({
         [sortPrevField]: sortPrevAscDesc,
       });
@@ -984,6 +994,8 @@ class AccountInternal extends PureComponent {
   onSort = (headerClicked, ascDesc) => {
     let prevField;
     let prevAscDesc;
+    //if staying on same column but switching asc/desc
+    //then keep prev the same
     if (headerClicked === this.state.sort.field) {
       prevField = this.state.sort.prevField;
       prevAscDesc = this.state.sort.prevAscDesc;
@@ -994,6 +1006,8 @@ class AccountInternal extends PureComponent {
         },
       });
     } else {
+      //if switching to new column then capture state
+      //of current sort column as prev
       prevField = this.state.sort.field;
       prevAscDesc = this.state.sort.ascDesc;
       this.setState({
