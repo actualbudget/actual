@@ -237,6 +237,14 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
+function selectAscDesc(field, ascDesc, clicked, defaultAscDesc) {
+  return field === clicked
+    ? ascDesc === 'asc'
+      ? 'desc'
+      : 'asc'
+    : defaultAscDesc;
+}
+
 const TransactionHeader = memo(
   ({
     hasSelected,
@@ -272,62 +280,47 @@ const TransactionHeader = memo(
           value="Date"
           width={110}
           icon={field === 'date' ? ascDesc : 'clickable'}
-          onClick={() => {
-            let setAscDesc =
-              field === 'date' ? (ascDesc === 'desc' ? 'asc' : 'desc') : 'desc';
-            onSort('date', setAscDesc);
-          }}
+          onClick={() =>
+            onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
+          }
         />
         {showAccount && (
           <Cell
             value="Account"
             width="flex"
             icon={field === 'account' ? ascDesc : 'clickable'}
-            onClick={() => {
-              let setAscDesc =
-                field === 'account'
-                  ? ascDesc === 'asc'
-                    ? 'desc'
-                    : 'asc'
-                  : 'asc';
-              onSort('account', setAscDesc);
-            }}
+            onClick={() =>
+              onSort('account', selectAscDesc(field, ascDesc, 'account', 'asc'))
+            }
           />
         )}
         <Cell
           value="Payee"
           width="flex"
           icon={field === 'payee' ? ascDesc : 'clickable'}
-          onClick={() => {
-            let setAscDesc =
-              field === 'payee' ? (ascDesc === 'asc' ? 'desc' : 'asc') : 'asc';
-            onSort('payee', setAscDesc);
-          }}
+          onClick={() =>
+            onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc'))
+          }
         />
         <Cell
           value="Notes"
           width="flex"
           icon={field === 'notes' ? ascDesc : 'clickable'}
-          onClick={() => {
-            let setAscDesc =
-              field === 'notes' ? (ascDesc === 'asc' ? 'desc' : 'asc') : 'asc';
-            onSort('notes', setAscDesc);
-          }}
+          onClick={() =>
+            onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
+          }
         />
         {showCategory && (
           <Cell
             value="Category"
             width="flex"
             icon={field === 'category' ? ascDesc : 'clickable'}
-            onClick={() => {
-              let setAscDesc =
-                field === 'category'
-                  ? ascDesc === 'asc'
-                    ? 'desc'
-                    : 'asc'
-                  : 'asc';
-              onSort('category', setAscDesc);
-            }}
+            onClick={() =>
+              onSort(
+                'category',
+                selectAscDesc(field, ascDesc, 'category', 'asc'),
+              )
+            }
           />
         )}
         <Cell
@@ -335,30 +328,18 @@ const TransactionHeader = memo(
           width={90}
           textAlign="flex"
           icon={field === 'payment' ? ascDesc : 'clickable'}
-          onClick={() => {
-            let setAscDesc =
-              field === 'payment'
-                ? ascDesc === 'asc'
-                  ? 'desc'
-                  : 'asc'
-                : 'asc';
-            onSort('payment', setAscDesc);
-          }}
+          onClick={() =>
+            onSort('payment', selectAscDesc(field, ascDesc, 'payment', 'asc'))
+          }
         />
         <Cell
           value="Deposit"
           width={85}
           textAlign="flex"
           icon={field === 'deposit' ? ascDesc : 'clickable'}
-          onClick={() => {
-            let setAscDesc =
-              field === 'deposit'
-                ? ascDesc === 'desc'
-                  ? 'asc'
-                  : 'desc'
-                : 'desc';
-            onSort('deposit', setAscDesc);
-          }}
+          onClick={() =>
+            onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
+          }
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
         {showCleared && <Field width={21} truncate={false} />}
@@ -1707,11 +1688,6 @@ export let TransactionTable = forwardRef((props, ref) => {
   let afterSaveFunc = useRef(false);
   let [_, forceRerender] = useState({});
   let selectedItems = useSelectedItems();
-
-  useEffect(() => {
-    //Use UUID as the base sort in case sort and sortPrev are exactly the same
-    //This makes sure the sort is consistent and reacts the same every time
-  }, [transactions]);
 
   useLayoutEffect(() => {
     latestState.current = {
