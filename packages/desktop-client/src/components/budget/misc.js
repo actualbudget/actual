@@ -1156,7 +1156,7 @@ const BudgetCategories = memo(
         });
       } else if (state === 'end') {
         setDragState(null);
-        setCollapsed(savedCollapsed);
+        setCollapsed(savedCollapsed || []);
       }
     }
 

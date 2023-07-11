@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "23.6.0",
+  "version": "23.7.2",
   "license": "MIT",
   "files": [
     "build"
@@ -30,7 +30,6 @@
     "debounce": "^1.2.0",
     "downshift": "7.6.0",
     "focus-visible": "^4.1.1",
-    "formik": "^0.11.10",
     "glamor": "^2.20.40",
     "hotkeys-js": "3.10.3",
     "inter-ui": "^3.19.3",
@@ -42,8 +41,6 @@
     "react-app-rewired": "^2.2.1",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
-    "react-dnd-multi-backend": "^8.0.1",
-    "react-dnd-touch-backend": "^16.0.1",
     "react-dom": "18.2.0",
     "react-merge-refs": "^1.1.0",
     "react-modal": "3.16.1",

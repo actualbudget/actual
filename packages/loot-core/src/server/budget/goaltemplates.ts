@@ -90,13 +90,14 @@ async function processTemplate(month, force) {
   // so the remainders don't get skiped
   if (remainder_found) lowestPriority = remainder_priority;
 
+  let sheetName = monthUtils.sheetForMonth(month);
+  let available_start = await getSheetValue(sheetName, `to-budget`);
   for (let priority = 0; priority <= lowestPriority; priority++) {
     // setup scaling for remainder
     let remainder_scale = 1;
     if (priority === lowestPriority) {
-      let sheetName = monthUtils.sheetForMonth(month);
-      let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
-      remainder_scale = Math.round(budgetAvailable / remainder_weight_total);
+      let available_now = await getSheetValue(sheetName, `to-budget`);
+      remainder_scale = Math.round(available_now / remainder_weight_total);
     }
 
     for (let c = 0; c < categories.length; c++) {
@@ -150,6 +151,7 @@ async function processTemplate(month, force) {
                 month,
                 priority,
                 remainder_scale,
+                available_start,
                 force,
               );
             if (to_budget != null) {
@@ -252,6 +254,7 @@ async function applyCategoryTemplate(
   month,
   priority,
   remainder_scale,
+  available_start,
   force,
 ) {
   let current_month = `${month}-01`;
@@ -493,6 +496,8 @@ async function applyCategoryTemplate(
         let monthlyIncome = 0;
         if (template.category.toLowerCase() === 'all income') {
           monthlyIncome = await getSheetValue(sheetName, `total-income`);
+        } else if (template.category.toLowerCase() === 'available funds') {
+          monthlyIncome = available_start;
         } else {
           let income_category = (await db.getCategories()).find(
             c =>
@@ -533,10 +538,30 @@ async function applyCategoryTemplate(
           dateCond,
           monthUtils._parse(current_month),
         );
+
+        let isRepeating =
+          Object(dateCond.value) === dateCond.value &&
+          'frequency' in dateCond.value;
+
         let num_months = monthUtils.differenceInCalendarMonths(
           next_date_string,
           current_month,
         );
+
+        if (isRepeating) {
+          let monthlyTarget = 0;
+          let next_month = monthUtils.addMonths(current_month, num_months + 1);
+          let next_date = getNextDate(
+            dateCond,
+            monthUtils._parse(current_month),
+          );
+          while (next_date < next_month) {
+            monthlyTarget += amountCond.value;
+            next_date = monthUtils.addDays(next_date, 1);
+            next_date = getNextDate(dateCond, monthUtils._parse(next_date));
+          }
+          amountCond.value = monthlyTarget;
+        }
 
         if (template.full === true) {
           if (num_months === 1) {
@@ -578,9 +603,16 @@ async function applyCategoryTemplate(
         break;
       }
       case 'remainder': {
-        to_budget = Math.round(remainder_scale * template.weight);
-        // can over budget with the rounding, so checking that
-        if (to_budget > budgetAvailable) to_budget = budgetAvailable;
+        if (remainder_scale >= 0) {
+          to_budget +=
+            remainder_scale === 0
+              ? Math.round(template.weight)
+              : Math.round(remainder_scale * template.weight);
+          // can over budget with the rounding, so checking that
+          if (to_budget >= budgetAvailable + budgeted) {
+            to_budget = budgetAvailable + budgeted;
+          }
+        }
         break;
       }
       case 'error':

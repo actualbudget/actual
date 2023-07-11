@@ -7,11 +7,27 @@
 // * Need to check to make sure if account exists when handling
 // * transaction changes in syncing
 
-export function getKeys(trie) {
-  return Object.keys(trie).filter(x => x !== 'hash');
+import { Timestamp } from './timestamp';
+
+/**
+ * Represents a node within a trinary radix trie.
+ */
+export type TrieNode = {
+  '0'?: TrieNode;
+  '1'?: TrieNode;
+  '2'?: TrieNode;
+  hash?: number;
+};
+
+export function emptyTrie(): TrieNode {
+  return { hash: 0 };
 }
 
-export function keyToTimestamp(key) {
+export function getKeys(trie: TrieNode): ('0' | '1' | '2')[] {
+  return Object.keys(trie).filter(x => x !== 'hash') as ('0' | '1' | '2')[];
+}
+
+export function keyToTimestamp(key: string): number {
   // 16 is the length of the base 3 value of the current time in
   // minutes. Ensure it's padded to create the full value
   let fullkey = key + '0'.repeat(16 - key.length);
@@ -20,7 +36,10 @@ export function keyToTimestamp(key) {
   return parseInt(fullkey, 3) * 1000 * 60;
 }
 
-export function insert(trie, timestamp) {
+/**
+ * Mutates `trie` to insert a node at `timestamp`
+ */
+export function insert(trie: TrieNode, timestamp: Timestamp) {
   let hash = timestamp.hash();
   let key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
 
@@ -28,7 +47,7 @@ export function insert(trie, timestamp) {
   return insertKey(trie, key, hash);
 }
 
-function insertKey(trie, key, hash) {
+function insertKey(trie: TrieNode, key: string, hash: number) {
   if (key.length === 0) {
     return trie;
   }
@@ -41,15 +60,15 @@ function insertKey(trie, key, hash) {
   });
 }
 
-export function build(timestamps) {
-  let trie = {};
+export function build(timestamps: Timestamp[]) {
+  let trie = emptyTrie();
   for (let timestamp of timestamps) {
     insert(trie, timestamp);
   }
   return trie;
 }
 
-export function diff(trie1, trie2) {
+export function diff(trie1: TrieNode, trie2: TrieNode): number {
   if (trie1.hash === trie2.hash) {
     return null;
   }
@@ -103,12 +122,12 @@ export function diff(trie1, trie2) {
     }
 
     k += diffkey;
-    node1 = node1[diffkey] || {};
-    node2 = node2[diffkey] || {};
+    node1 = node1[diffkey] || emptyTrie();
+    node2 = node2[diffkey] || emptyTrie();
   }
 }
 
-export function prune(trie, n = 2) {
+export function prune(trie: TrieNode, n = 2): TrieNode {
   // Do nothing if empty
   if (!trie.hash) {
     return trie;
@@ -118,12 +137,16 @@ export function prune(trie, n = 2) {
   keys.sort();
 
   let next = { hash: trie.hash };
-  keys = keys.slice(-n).map(k => (next[k] = prune(trie[k], n)));
+
+  // Prune child nodes.
+  for (let k of keys.slice(-n)) {
+    next[k] = prune(trie[k], n);
+  }
 
   return next;
 }
 
-export function debug(trie, k = '', indent = 0) {
+export function debug(trie: TrieNode, k = '', indent = 0) {
   const str =
     ' '.repeat(indent) +
     (k !== '' ? `k: ${k} ` : '') +

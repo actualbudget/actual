@@ -16,10 +16,10 @@ describe('Timestamp', function () {
 
   describe('comparison', function () {
     it('should be in order', function () {
-      expect(Timestamp.zero()).toBe(Timestamp.zero());
-      expect(Timestamp.max() > Timestamp.zero()).toBeTruthy();
-      expect(Timestamp.send() > Timestamp.zero()).toBeTruthy();
-      expect(Timestamp.send() < Timestamp.max()).toBeTruthy();
+      expect(Timestamp.zero).toBe(Timestamp.zero);
+      expect(Timestamp.max > Timestamp.zero).toBeTruthy();
+      expect(Timestamp.send() > Timestamp.zero).toBeTruthy();
+      expect(Timestamp.send() < Timestamp.max).toBeTruthy();
     });
   });
 
@@ -42,7 +42,7 @@ describe('Timestamp', function () {
         '9999-12-31T23:59:59.999Z-FFFF-10000000000000000',
       ];
       for (let invalidInput of invalidInputs) {
-        expect(Timestamp.parse(invalidInput)).toBe(null);
+        expect(Timestamp.parse(invalidInput as string)).toBe(null);
       }
     });
 

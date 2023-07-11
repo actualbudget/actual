@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { css } from 'glamor';
-
 import * as actions from 'loot-core/src/client/actions';
 
-import { colors } from '../style';
+import { colors, styles } from '../style';
 
 import { View, Text, Button, Tooltip, Menu } from './common';
 import { useServerURL } from './ServerContext';
-
-let fade = css.keyframes({
-  '0%': { opacity: 0 },
-  '100%': { opacity: 1 },
-});
 
 function LoggedInUser({
   hideIfNoServer,
@@ -82,11 +75,8 @@ function LoggedInUser({
           {
             color: colors.n5,
             fontStyle: 'italic',
-            animationName: fade,
-            animationDuration: '0.2s',
-            animationFillMode: 'both',
-            animationDelay: '0.5s',
           },
+          styles.delayedFadeIn,
           style,
         ]}
       >

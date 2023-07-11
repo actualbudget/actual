@@ -1,10 +1,9 @@
-import React from 'react';
-
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
 import { styles } from '../../style';
-import { View, Select, Button, ButtonLink } from '../common';
+import { View, Button, ButtonLink, CustomSelect } from '../common';
+import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
@@ -52,12 +51,17 @@ function Header({
   show1Month,
   allMonths,
   onChangeDates,
-  extraButtons,
+  filters,
+  conditionsOp,
+  onApply,
+  onUpdateFilter,
+  onDeleteFilter,
+  onCondOpChange,
 }) {
   return (
     <View
       style={{
-        padding: 20,
+        padding: 10,
         paddingTop: 0,
         flexShrink: 0,
       }}
@@ -79,37 +83,33 @@ function Header({
           gap: 15,
         }}
       >
-        <div>
-          <Select
-            style={{ flex: 0, backgroundColor: 'white' }}
-            onChange={e =>
-              onChangeDates(...validateStart(allMonths, e.target.value, end))
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 5,
+          }}
+        >
+          <CustomSelect
+            style={{ backgroundColor: 'white' }}
+            onChange={newValue =>
+              onChangeDates(...validateStart(allMonths, newValue, end))
             }
             value={start}
-          >
-            {allMonths.map(month => (
-              <option key={month.name} value={month.name}>
-                {month.pretty}
-              </option>
-            ))}
-          </Select>{' '}
-          to{' '}
-          <Select
-            style={{ flex: 0, backgroundColor: 'white' }}
-            onChange={e =>
-              onChangeDates(...validateEnd(allMonths, start, e.target.value))
+            options={allMonths.map(({ name, pretty }) => [name, pretty])}
+          />
+          <View>to</View>
+          <CustomSelect
+            style={{ backgroundColor: 'white' }}
+            onChange={newValue =>
+              onChangeDates(...validateEnd(allMonths, start, newValue))
             }
             value={end}
-          >
-            {allMonths.map(month => (
-              <option key={month.name} value={month.name}>
-                {month.pretty}
-              </option>
-            ))}
-          </Select>
-        </div>
+            options={allMonths.map(({ name, pretty }) => [name, pretty])}
+          />
+        </View>
 
-        {extraButtons}
+        <FilterButton onApply={onApply} />
 
         {show1Month && (
           <Button bare onClick={() => onChangeDates(...getLatestRange(1))}>
@@ -129,6 +129,23 @@ function Header({
           All Time
         </Button>
       </View>
+      {filters.length > 0 && (
+        <View
+          style={{ marginTop: 5 }}
+          spacing={2}
+          direction="row"
+          justify="flex-start"
+          align="flex-start"
+        >
+          <AppliedFilters
+            filters={filters}
+            onUpdate={onUpdateFilter}
+            onDelete={onDeleteFilter}
+            conditionsOp={conditionsOp}
+            onCondOpChange={onCondOpChange}
+          />
+        </View>
+      )}
     </View>
   );
 }

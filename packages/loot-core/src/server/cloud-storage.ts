@@ -148,7 +148,8 @@ export async function exportBuffer() {
       `,
     );
 
-    let dbContent = sqlite.exportDatabase(memDb);
+    let dbContent = await sqlite.exportDatabase(memDb);
+
     sqlite.closeDatabase(memDb);
 
     // mark it as a file that needs a new clock so when a new client

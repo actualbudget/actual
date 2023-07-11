@@ -98,7 +98,6 @@ __metadata:
     debounce: ^1.2.0
     downshift: 7.6.0
     focus-visible: ^4.1.1
-    formik: ^0.11.10
     glamor: ^2.20.40
     hotkeys-js: 3.10.3
     inter-ui: ^3.19.3
@@ -110,8 +109,6 @@ __metadata:
     react-app-rewired: ^2.2.1
     react-dnd: ^16.0.1
     react-dnd-html5-backend: ^16.0.1
-    react-dnd-multi-backend: ^8.0.1
-    react-dnd-touch-backend: ^16.0.1
     react-dom: 18.2.0
     react-merge-refs: ^1.1.0
     react-modal: 3.16.1
@@ -7779,13 +7776,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dnd-multi-backend@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "dnd-multi-backend@npm:8.0.1"
-  checksum: 674ed8c90a81ac82d0daffe75580f05e06904b5873112f91f8f5d4137a7a6a62d3477b78fb5abd5f36ad8a19e5ff4233a9d7e5f81df08ec468d5ae5ab08defc9
-  languageName: node
-  linkType: hard
-
 "dns-equal@npm:^1.0.0":
   version: 1.0.0
   resolution: "dns-equal@npm:1.0.0"
@@ -9407,21 +9397,6 @@ __metadata:
     combined-stream: ^1.0.8
     mime-types: ^2.1.12
   checksum: 01135bf8675f9d5c61ff18e2e2932f719ca4de964e3be90ef4c36aacfc7b9cb2fceb5eca0b7e0190e3383fe51c5b37f4cb80b62ca06a99aaabfcfd6ac7c9328c
-  languageName: node
-  linkType: hard
-
-"formik@npm:^0.11.10":
-  version: 0.11.11
-  resolution: "formik@npm:0.11.11"
-  dependencies:
-    lodash.clonedeep: ^4.5.0
-    lodash.isequal: 4.5.0
-    lodash.topath: 4.5.2
-    prop-types: ^15.5.10
-    warning: ^3.0.0
-  peerDependencies:
-    react: ">=15"
-  checksum: ce0fde6f1d87fa60afe3a025904e64b6394dccb48dd0739cd1d3aa987b00bad2e15584b03db7ed284b9260748db14fb36459f4768e7b93548e091223c406a0b8
   languageName: node
   linkType: hard
 
@@ -12257,13 +12232,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.clonedeep@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "lodash.clonedeep@npm:4.5.0"
-  checksum: 92c46f094b064e876a23c97f57f81fbffd5d760bf2d8a1c61d85db6d1e488c66b0384c943abee4f6af7debf5ad4e4282e74ff83177c9e63d8ff081a4837c3489
-  languageName: node
-  linkType: hard
-
 "lodash.debounce@npm:^4.0.8":
   version: 4.0.8
   resolution: "lodash.debounce@npm:4.0.8"
@@ -12278,7 +12246,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.isequal@npm:4.5.0, lodash.isequal@npm:^4.5.0":
+"lodash.isequal@npm:^4.5.0":
   version: 4.5.0
   resolution: "lodash.isequal@npm:4.5.0"
   checksum: da27515dc5230eb1140ba65ff8de3613649620e8656b19a6270afe4866b7bd461d9ba2ac8a48dcc57f7adac4ee80e1de9f965d89d4d81a0ad52bb3eec2609644
@@ -12303,13 +12271,6 @@ __metadata:
   version: 4.7.0
   resolution: "lodash.sortby@npm:4.7.0"
   checksum: db170c9396d29d11fe9a9f25668c4993e0c1331bcb941ddbd48fb76f492e732add7f2a47cfdf8e9d740fa59ac41bbfaf931d268bc72aab3ab49e9f89354d718c
-  languageName: node
-  linkType: hard
-
-"lodash.topath@npm:4.5.2":
-  version: 4.5.2
-  resolution: "lodash.topath@npm:4.5.2"
-  checksum: 04583e220f4bb1c4ac0008ff8f46d9cb4ddce0ea1090085790da30a41f4cb1b904d885cb73257fca619fa825cd96f9bb97c67d039635cb76056e18f5e08bfdee
   languageName: node
   linkType: hard
 
@@ -15197,39 +15158,6 @@ __metadata:
   dependencies:
     dnd-core: ^16.0.1
   checksum: e2368bf85d5632a5cd867b743feb54c9052d909ea5331608860fa455edf3c633ac791f5b338e3db29b19ea8670c0ba5fb43c9c1c2510760bea030811d726cdfa
-  languageName: node
-  linkType: hard
-
-"react-dnd-multi-backend@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "react-dnd-multi-backend@npm:8.0.1"
-  dependencies:
-    dnd-multi-backend: ^8.0.1
-    react-dnd-preview: ^8.0.1
-  peerDependencies:
-    react: ^16.14.0 || ^17.0.2 || ^18.0.0
-    react-dom: ^16.14.0 || ^17.0.2 || ^18.0.0
-  checksum: 9ff966e87b383dcdba857592295071cd0177187744d0558ab79a454ac8482f360d835ad7b9c5c78603d1476a93933911bd4746ae7898347b8497cf17bb09730b
-  languageName: node
-  linkType: hard
-
-"react-dnd-preview@npm:^8.0.1":
-  version: 8.0.1
-  resolution: "react-dnd-preview@npm:8.0.1"
-  peerDependencies:
-    react: ^16.14.0 || ^17.0.2 || ^18.0.0
-    react-dnd: ^16.0.1
-  checksum: 9a2138ff283953487fd7142382b3a2a286fdaabf5079588863214f35b6a84d32b62a6f5219592e2e21bca9718c80f22e13a89aef4b196fa35e43334328488404
-  languageName: node
-  linkType: hard
-
-"react-dnd-touch-backend@npm:^16.0.1":
-  version: 16.0.1
-  resolution: "react-dnd-touch-backend@npm:16.0.1"
-  dependencies:
-    "@react-dnd/invariant": ^4.0.1
-    dnd-core: ^16.0.1
-  checksum: 5362c5f4266e3655d02c716f341dc55c61fae53e12eb3b239245bafb7a3f3cdb953e27e187e8dcb9d86c01bc738853d764d7c85b87104a49a8a8f1ecc4d35755
   languageName: node
   linkType: hard
 
@@ -18570,15 +18498,6 @@ __metadata:
   dependencies:
     makeerror: 1.0.12
   checksum: ad7a257ea1e662e57ef2e018f97b3c02a7240ad5093c392186ce0bcf1f1a60bbadd520d073b9beb921ed99f64f065efb63dfc8eec689a80e569f93c1c5d5e16c
-  languageName: node
-  linkType: hard
-
-"warning@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "warning@npm:3.0.0"
-  dependencies:
-    loose-envify: ^1.0.0
-  checksum: c9f99a12803aab81b29858e7dc3415bf98b41baee3a4c3acdeb680d98c47b6e17490f1087dccc54432deed5711a5ce0ebcda2b27e9b5eb054c32ae50acb4419c
   languageName: node
   linkType: hard
 

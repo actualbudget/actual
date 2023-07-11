@@ -1,11 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import {
-  DndProvider,
-  HTML5DragTransition,
-  TouchTransition,
-} from 'react-dnd-multi-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
 import {
   Route,
@@ -14,6 +9,8 @@ import {
   NavLink,
   useNavigate,
   BrowserRouter,
+  useLocation,
+  useHref,
 } from 'react-router-dom';
 
 import hotkeys from 'hotkeys-js';
@@ -23,6 +20,7 @@ import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
+import * as undo from 'loot-core/src/platform/client/undo';
 
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
@@ -204,7 +202,7 @@ function MobileNavTabs() {
   );
 }
 
-function Redirector({ getAccounts }) {
+function RouterBehaviors({ getAccounts }) {
   let navigate = useNavigate();
   useEffect(() => {
     // Get the accounts and check if any exist. If there are no
@@ -216,6 +214,12 @@ function Redirector({ getAccounts }) {
       }
     });
   }, []);
+
+  let location = useLocation();
+  let href = useHref(location);
+  useEffect(() => {
+    undo.setUndoState('url', href);
+  }, [href]);
 }
 
 function FinancesApp(props) {
@@ -240,7 +244,7 @@ function FinancesApp(props) {
 
   return (
     <BrowserRouter>
-      <Redirector getAccounts={props.getAccounts} />
+      <RouterBehaviors getAccounts={props.getAccounts} />
       <ExposeNavigate />
 
       <View style={{ height: '100%', backgroundColor: colors.n10 }}>
@@ -295,23 +299,6 @@ function FinancesApp(props) {
   );
 }
 
-const HTML5toTouch = {
-  backends: [
-    {
-      id: 'touch',
-      backend: TouchBackend,
-      options: { delay: 300 },
-      preview: true,
-      transition: TouchTransition,
-    },
-    {
-      id: 'html5',
-      backend: HTML5Backend,
-      transition: HTML5DragTransition,
-    },
-  ],
-};
-
 function FinancesAppWithContext(props) {
   let app = useMemo(() => <FinancesApp {...props} />, [props]);
 
@@ -322,7 +309,7 @@ function FinancesAppWithContext(props) {
           <BudgetMonthCountProvider>
             <PayeesProvider>
               <AccountsProvider>
-                <DndProvider options={HTML5toTouch}>{app}</DndProvider>
+                <DndProvider backend={Backend}>{app}</DndProvider>
               </AccountsProvider>
             </PayeesProvider>
           </BudgetMonthCountProvider>

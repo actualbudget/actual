@@ -43,6 +43,7 @@ import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
 import { APIError, TransactionError, PostError, RuleError } from './errors';
+import filtersApp from './filters/app';
 import app from './main-app';
 import { mutator, runHandler } from './mutators';
 import notesApp from './notes/app';
@@ -60,7 +61,6 @@ import {
   setSyncingMode,
   makeTestMessage,
   clearFullSyncTimeout,
-  syncAndReceiveMessages,
   resetSync,
   repairSync,
 } from './sync';
@@ -2309,7 +2309,7 @@ injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 
 // A hack for now until we clean up everything
 app.handlers = handlers;
-app.combine(schedulesApp, budgetApp, notesApp, toolsApp);
+app.combine(schedulesApp, budgetApp, notesApp, toolsApp, filtersApp);
 
 function getDefaultDocumentDir() {
   if (Platform.isMobile) {
@@ -2461,12 +2461,6 @@ export const lib = {
     return res;
   },
   on: (name, func) => app.events.on(name, func),
-  syncAndReceiveMessages,
   q,
   db,
-
-  // Expose CRDT mechanisms so server can use them
-  // Backwards compatability
-  ...CRDT,
-  timestamp: CRDT,
 };

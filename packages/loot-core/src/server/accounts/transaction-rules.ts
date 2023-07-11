@@ -62,18 +62,40 @@ function invert(obj) {
 let internalFields = schemaConfig.views.transactions.fields;
 let publicFields = invert(schemaConfig.views.transactions.fields);
 
-function fromInternalField(obj) {
+function fromInternalField<T extends { field: string }>(obj: T): T {
   return {
     ...obj,
     field: publicFields[obj.field] || obj.field,
   };
 }
 
-function toInternalField(obj) {
+function toInternalField<T extends { field: string }>(obj: T): T {
   return {
     ...obj,
     field: internalFields[obj.field] || obj.field,
   };
+}
+
+function parseArray(str) {
+  let value;
+  try {
+    value = typeof str === 'string' ? JSON.parse(str) : str;
+  } catch (e) {
+    throw new RuleError('internal', 'Cannot parse rule json');
+  }
+
+  if (!Array.isArray(value)) {
+    throw new RuleError('internal', 'Rule json must be an array');
+  }
+  return value;
+}
+
+export function parseConditionsOrActions(str) {
+  return str ? parseArray(str).map(item => fromInternalField(item)) : [];
+}
+
+export function serializeConditionsOrActions(arr) {
+  return JSON.stringify(arr.map(item => toInternalField(item)));
 }
 
 export const ruleModel = {
@@ -99,30 +121,12 @@ export const ruleModel = {
   },
 
   toJS(row) {
-    function parseArray(str) {
-      let value;
-      try {
-        value = typeof str === 'string' ? JSON.parse(str) : str;
-      } catch (e) {
-        throw new RuleError('internal', 'Cannot parse rule json');
-      }
-
-      if (!Array.isArray(value)) {
-        throw new RuleError('internal', 'Rule json must be an array');
-      }
-      return value;
-    }
-
     let { conditions, conditions_op, actions, ...fields } = row;
     return {
       ...fields,
       conditionsOp: conditions_op,
-      conditions: conditions
-        ? parseArray(conditions).map(cond => fromInternalField(cond))
-        : [],
-      actions: actions
-        ? parseArray(actions).map(action => fromInternalField(action))
-        : [],
+      conditions: parseConditionsOrActions(conditions),
+      actions: parseConditionsOrActions(actions),
     };
   },
 
@@ -132,12 +136,10 @@ export const ruleModel = {
       row.conditions_op = conditionsOp;
     }
     if (Array.isArray(conditions)) {
-      let value = conditions.map(cond => toInternalField(cond));
-      row.conditions = JSON.stringify(value);
+      row.conditions = serializeConditionsOrActions(conditions);
     }
     if (Array.isArray(actions)) {
-      let value = actions.map(action => toInternalField(action));
-      row.actions = JSON.stringify(value);
+      row.actions = serializeConditionsOrActions(actions);
     }
     return row;
   },

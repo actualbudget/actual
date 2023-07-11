@@ -118,15 +118,19 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
     return { errors };
   }
 
+  // Banks don't always implement the OFX standard properly
+  // If no payee is available try and fallback to memo
+  let useName = data.some(trans => trans.name != null && trans.name !== '');
+
   return {
     errors,
     transactions: data.map(trans => ({
       amount: trans.amount,
       imported_id: trans.fi_id,
       date: trans.date ? dayFromDate(trans.date * 1000) : null,
-      payee_name: trans.name,
-      imported_payee: trans.name,
-      notes: trans.memo || null,
+      payee_name: useName ? trans.name : trans.memo,
+      imported_payee: useName ? trans.name : trans.memo,
+      notes: useName ? trans.memo || null : null, //memo used for payee
     })),
   };
 }

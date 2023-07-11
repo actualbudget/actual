@@ -30,7 +30,6 @@ import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import InformationOutline from '../../icons/v1/InformationOutline';
 import { colors } from '../../style';
-import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import {
   View,
   Text,
@@ -41,6 +40,7 @@ import {
   Tooltip,
 } from '../common';
 import { StatusBadge } from '../schedules/StatusBadge';
+import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
 import DisplayId from '../util/DisplayId';
 import GenericInput from '../util/GenericInput';
@@ -78,7 +78,7 @@ function getTransactionFields(conditions, actions) {
   return fields;
 }
 
-function FieldSelect({ fields, style, value, onChange }) {
+export function FieldSelect({ fields, style, value, onChange }) {
   return (
     <View style={style}>
       <CustomSelect
