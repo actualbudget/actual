@@ -1055,6 +1055,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       let selected = isSelected && isSelected(item.id);
 
       scrollContainer.current &&
+        scrollContainer.current.offsetParent &&
         getScrollWidth(
           scrollContainer.current.offsetParent.clientWidth -
             scrollContainer.current.clientWidth,
