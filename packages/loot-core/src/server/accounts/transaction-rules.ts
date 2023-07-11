@@ -350,8 +350,6 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
 
     switch (op) {
       case 'isapprox':
-      case 'isNot':
-        return apply(field, '$ne', value);
       case 'is':
         if (type === 'date') {
           if (value.type === 'recur') {
@@ -421,7 +419,7 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return apply(field, '$eq', value);
       case 'isNot':
         return apply(field, '$ne', value);
-        
+
       case 'isbetween':
         // This operator is only applicable to the specific `between`
         // number type so we don't use `apply`
