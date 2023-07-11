@@ -274,8 +274,6 @@ export class Condition {
 
     switch (this.op) {
       case 'isapprox':
-      case 'isNot':
-        return fieldValue !== this.value;
       case 'is':
         if (type === 'date') {
           if (fieldValue == null) {
@@ -325,8 +323,10 @@ export class Condition {
           }
           return fieldValue === number;
         }
-
         return fieldValue === this.value;
+
+      case 'isNot':
+        return fieldValue !== this.value;
       case 'isbetween': {
         // The parsing logic already checks that the value is of the
         // right type (only numbers with high and low)
