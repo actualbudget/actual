@@ -570,7 +570,7 @@ export class RuleIndexer {
     let cond = rule.conditions.find(cond => cond.field === this.field);
     let indexes = [];
 
-    if (cond && (cond.op === 'oneOf' || cond.op === 'is' || cond.op === 'isNot')) {
+    if (cond && (cond.op === 'oneOf' || cond.op === 'is' || cond.op === 'isNot' || cond.op === 'notOneOf')) {
       if (cond.op === 'oneOf') {
         cond.value.forEach(val => indexes.push(this.getIndexForValue(val)));
       } else {
