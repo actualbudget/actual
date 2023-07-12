@@ -175,19 +175,17 @@ function BudgetTotal({
           <Text style={{ color: colors.n4 }}>{title}</Text>
         </View>
 
-        <PrivacyFilter>
-          <Text>
-            <CellValue binding={current} type="financial" />
-            <Text style={{ color: colors.n6, fontStyle: 'italic' }}>
-              {' of '}
-              <CellValue
-                binding={target}
-                type="financial"
-                style={styles.notFixed}
-              />
-            </Text>
+        <Text>
+          <CellValue binding={current} type="financial" />
+          <Text style={{ color: colors.n6, fontStyle: 'italic' }}>
+            {' of '}
+            <CellValue
+              binding={target}
+              type="financial"
+              style={styles.notFixed}
+            />
           </Text>
-        </PrivacyFilter>
+        </Text>
       </View>
     </View>
   );

@@ -38,7 +38,6 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           formatter={value => {
             return format(parseFloat(value || '0'), 'financial');
           }}
-          privacyFilter
         />
       </View>
       <View style={headerLabelStyle}>
@@ -47,7 +46,6 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={reportBudget.totalSpent}
           type="financial"
           style={{ color: colors.n4, fontWeight: 600 }}
-          privacyFilter
         />
       </View>
       <View style={headerLabelStyle}>
@@ -56,7 +54,6 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={reportBudget.totalLeftover}
           type="financial"
           style={{ color: colors.n4, fontWeight: 600 }}
-          privacyFilter
         />
       </View>
     </View>
@@ -101,7 +98,6 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           binding: reportBudget.groupBudgeted(id),
           type: 'financial',
         }}
-        privacyFilter
       />
       <SheetCell
         name="spent"
@@ -113,7 +109,6 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           binding: reportBudget.groupSumAmount(id),
           type: 'financial',
         }}
-        privacyFilter
       />
       {!group.is_income && (
         <SheetCell
@@ -128,16 +123,12 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           valueProps={{
             binding: reportBudget.groupBalance(id),
             type: 'financial',
-          }}
-          privacyFilter={(render, defaultProps) =>
-            render({
-              ...defaultProps,
+            privacyFilter: {
               style: {
-                ...defaultProps.style,
                 paddingRight: MONTH_RIGHT_PADDING,
               },
-            })
-          }
+            },
+          }}
         />
       )}
     </View>
@@ -252,7 +243,6 @@ export const CategoryMonth = memo(function CategoryMonth({
             amount,
           });
         }}
-        privacyFilter
       />
 
       <Field
@@ -275,7 +265,6 @@ export const CategoryMonth = memo(function CategoryMonth({
                 textDecoration: 'underline',
               },
             }}
-            privacyFilter
           />
         </span>
       </Field>

@@ -210,7 +210,6 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           formatter={value => {
             return format(-parseFloat(value || '0'), 'financial');
           }}
-          privacyFilter
         />
       </View>
       <View style={headerLabelStyle}>
@@ -219,7 +218,6 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={rolloverBudget.totalSpent}
           type="financial"
           style={{ color: colors.n4, fontWeight: 600 }}
-          privacyFilter
         />
       </View>
       <View style={headerLabelStyle}>
@@ -228,7 +226,6 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           binding={rolloverBudget.totalBalance}
           type="financial"
           style={{ color: colors.n4, fontWeight: 600 }}
-          privacyFilter
         />
       </View>
     </View>
@@ -270,7 +267,6 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           binding: rolloverBudget.groupBudgeted(id),
           type: 'financial',
         }}
-        privacyFilter
       />
       <SheetCell
         name="spent"
@@ -282,7 +278,6 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           binding: rolloverBudget.groupSumAmount(id),
           type: 'financial',
         }}
-        privacyFilter
       />
       <SheetCell
         name="balance"
@@ -296,16 +291,12 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         valueProps={{
           binding: rolloverBudget.groupBalance(id),
           type: 'financial',
-        }}
-        privacyFilter={(render, defaultProps) =>
-          render({
-            ...defaultProps,
+          privacyFilter: {
             style: {
-              ...defaultProps.style,
               paddingRight: MONTH_RIGHT_PADDING,
             },
-          })
-        }
+          },
+        }}
       />
     </View>
   );
@@ -377,7 +368,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             amount,
           });
         }}
-        privacyFilter
       />
 
       <Field
@@ -398,7 +388,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               cursor: 'pointer',
               ':hover': { textDecoration: 'underline' },
             }}
-            privacyFilter
           />
         </span>
       </Field>
@@ -443,16 +432,12 @@ export function IncomeGroupMonth() {
         valueProps={{
           binding: rolloverBudget.groupIncomeReceived,
           type: 'financial',
-        }}
-        privacyFilter={(render, defaultProps) =>
-          render({
-            ...defaultProps,
+          privacyFilter: {
             style: {
-              ...defaultProps.style,
               paddingRight: MONTH_RIGHT_PADDING,
             },
-          })
-        }
+          },
+        }}
       />
     </View>
   );
@@ -491,7 +476,6 @@ export function IncomeCategoryMonth({
               cursor: 'pointer',
               ':hover': { textDecoration: 'underline' },
             }}
-            privacyFilter
           />
         </span>
       </Field>

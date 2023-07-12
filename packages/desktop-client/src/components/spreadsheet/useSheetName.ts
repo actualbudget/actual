@@ -2,6 +2,8 @@ import { useContext } from 'react';
 
 import NamespaceContext from './NamespaceContext';
 
+import { type Binding } from '.';
+
 function unresolveName(name) {
   let idx = name.indexOf('!');
   if (idx !== -1) {
@@ -13,18 +15,18 @@ function unresolveName(name) {
   return { sheet: null, name };
 }
 
-export default function useSheetName(binding) {
+export default function useSheetName(binding: Binding) {
   if (!binding) {
     throw new Error('Sheet binding is required');
   }
 
-  let { name: bindingName, value: bindingValue } = binding;
+  const isStringBinding = typeof binding === 'string';
 
-  if (global.IS_TESTING && typeof binding !== 'string' && !bindingName) {
-    bindingName = bindingValue.toString();
+  let bindingName = isStringBinding ? binding : binding.name;
+
+  if (global.IS_TESTING && !isStringBinding && !bindingName) {
+    bindingName = binding.value.toString();
   }
-
-  bindingName = typeof binding === 'string' ? binding : bindingName;
 
   if (bindingName == null) {
     throw new Error('Binding name is now required');

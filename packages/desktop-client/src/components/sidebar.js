@@ -284,12 +284,7 @@ function Account({
             <AlignedText
               left={name}
               right={
-                <CellValue
-                  debug={true}
-                  binding={query}
-                  type="financial"
-                  privacyFilter
-                />
+                <CellValue debug={true} binding={query} type="financial" />
               }
             />
           </AnchorLink>

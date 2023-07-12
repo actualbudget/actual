@@ -4,44 +4,39 @@ import React, {
   Children,
   type ComponentPropsWithRef,
   type ReactNode,
-  type ReactElement,
 } from 'react';
 
-import { usePrivacyMode } from 'loot-core/src/client/privacy';
+import usePrivacyMode from 'loot-core/src/client/privacy';
 
 import useFeatureFlag from '../hooks/useFeatureFlag';
+import { useResponsive } from '../ResponsiveProvider';
 
 import { View } from './common';
 
 export type ConditionalPrivacyFilterProps = {
   children: ReactNode;
-  privacyFilter?:
-    | boolean
-    | ((
-        render?: (
-          props?: PrivacyFilterProps,
-        ) =>
-          | ReactElement<PrivacyFilterProps, typeof PrivacyFilter>
-          | ReactElement,
-        defaultProps?: PrivacyFilterProps,
-      ) =>
-        | ReactElement<PrivacyFilterProps, typeof PrivacyFilter>
-        | ReactElement);
-  privacyFilterProps?: PrivacyFilterProps;
+  privacyFilter?: boolean | PrivacyFilterProps;
+  defaultPrivacyFilterProps?: PrivacyFilterProps;
 };
 export function ConditionalPrivacyFilter({
   children,
   privacyFilter,
-  privacyFilterProps,
+  defaultPrivacyFilterProps,
 }: ConditionalPrivacyFilterProps) {
-  let renderPrivacyFilter = updatedProps => (
-    <PrivacyFilter {...updatedProps}>{children}</PrivacyFilter>
+  let renderPrivacyFilter = (children, mergedProps) => (
+    <PrivacyFilter {...mergedProps}>{children}</PrivacyFilter>
   );
   return privacyFilter ? (
-    typeof privacyFilter === 'function' ? (
-      privacyFilter(renderPrivacyFilter, privacyFilterProps)
+    typeof privacyFilter === 'boolean' ? (
+      <PrivacyFilter {...defaultPrivacyFilterProps}>{children}</PrivacyFilter>
     ) : (
-      <PrivacyFilter {...privacyFilterProps}>{children}</PrivacyFilter>
+      renderPrivacyFilter(
+        children,
+        mergeConditionalPrivacyFilterProps(
+          defaultPrivacyFilterProps,
+          privacyFilter,
+        ),
+      )
     )
   ) : (
     <>{Children.toArray(children)}</>
@@ -60,8 +55,11 @@ export default function PrivacyFilter({
 }: PrivacyFilterProps) {
   let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let privacyMode = usePrivacyMode();
+  // Limit mobile support for now.
+  let { isNarrowWidth } = useResponsive();
   let activate =
     privacyMode &&
+    !isNarrowWidth &&
     (!activationFilters ||
       activationFilters.every(value =>
         typeof value === 'boolean' ? value : value(),
@@ -106,4 +104,40 @@ function BlurredOverlay({ blurIntensity, children, ...props }) {
       {children}
     </View>
   );
+}
+export function mergeConditionalPrivacyFilterProps(
+  defaultPrivacyFilterProps: PrivacyFilterProps = {},
+  privacyFilter: ConditionalPrivacyFilterProps['privacyFilter'],
+): ConditionalPrivacyFilterProps['privacyFilter'] {
+  if (privacyFilter == null || privacyFilter === false) {
+    return privacyFilter;
+  }
+
+  if (privacyFilter === true) {
+    return defaultPrivacyFilterProps;
+  }
+
+  return merge(defaultPrivacyFilterProps, privacyFilter);
+}
+
+function merge(initialValue, ...objects) {
+  return objects.reduce((prev, current) => {
+    Object.keys(current).forEach(key => {
+      const pValue = prev[key];
+      const cValue = current[key];
+
+      if (Array.isArray(pValue) && Array.isArray(cValue)) {
+        prev[key] = pValue.concat(...cValue);
+      } else if (isObject(pValue) && isObject(cValue)) {
+        prev[key] = merge(pValue, cValue);
+      } else {
+        prev[key] = cValue;
+      }
+    });
+    return prev;
+  }, initialValue);
+}
+
+function isObject(obj) {
+  return obj && typeof obj === 'object';
 }

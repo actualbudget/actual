@@ -33,7 +33,6 @@ export default function BalanceWithCarryover({
             ':hover': { textDecoration: 'underline' },
           },
         ]}
-        privacyFilter
       />
       {carryoverValue === true && (
         <View

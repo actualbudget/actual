@@ -43,10 +43,12 @@ import FixedSizeList from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import {
   ConditionalPrivacyFilter,
+  mergeConditionalPrivacyFilterProps,
   type ConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
+import { type Binding } from './spreadsheet';
 import format from './spreadsheet/format';
-import SheetValue from './spreadsheet/SheetValue';
+import useSheetValue from './spreadsheet/useSheetValue';
 
 export const ROW_HEIGHT = 32;
 const TABLE_BACKGROUND_COLOR = colors.n11;
@@ -243,15 +245,17 @@ export function Cell({
   let conditionalPrivacyFilter = useMemo(
     () => (
       <ConditionalPrivacyFilter
-        privacyFilter={privacyFilter}
-        privacyFilterProps={{
-          activationFilters: [!focused, !exposed],
-          style: {
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
+        privacyFilter={mergeConditionalPrivacyFilterProps(
+          {
+            activationFilters: [!focused, !exposed],
+            style: {
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+            },
           },
-        }}
+          privacyFilter,
+        )}
       >
         {plain ? (
           children
@@ -727,11 +731,12 @@ export function SelectCell({
 }
 
 type SheetCellValueProps = {
-  binding: ComponentProps<typeof SheetValue>['binding'];
+  binding: Binding;
   type: string;
   getValueStyle?: (value: unknown) => CSSProperties;
   formatExpr?: (value) => string;
   unformatExpr?: (value: string) => unknown;
+  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
 };
 
 type SheetCellProps = ComponentProps<typeof Cell> & {
@@ -747,52 +752,55 @@ export function SheetCell({
   onSave,
   ...props
 }: SheetCellProps) {
-  const { binding, type, getValueStyle, formatExpr, unformatExpr } = valueProps;
+  const {
+    binding,
+    type,
+    getValueStyle,
+    formatExpr,
+    unformatExpr,
+    privacyFilter,
+  } = valueProps;
+
+  let sheetValue = useSheetValue(binding, e => {
+    // "close" the cell if it's editing
+    if (props.exposed && inputProps && inputProps.onBlur) {
+      inputProps.onBlur(e);
+    }
+  });
 
   return (
-    <SheetValue
-      binding={binding}
-      onChange={e => {
-        // "close" the cell if it's editing
-        if (props.exposed && inputProps && inputProps.onBlur) {
-          inputProps.onBlur(e);
-        }
-      }}
+    <Cell
+      valueStyle={
+        getValueStyle ? [valueStyle, getValueStyle(sheetValue)] : valueStyle
+      }
+      textAlign={textAlign}
+      {...props}
+      value={sheetValue}
+      formatter={value =>
+        props.formatter ? props.formatter(value, type) : format(value, type)
+      }
+      privacyFilter={
+        privacyFilter != null
+          ? privacyFilter
+          : type === 'financial'
+          ? true
+          : undefined
+      }
+      data-cellname={sheetValue}
     >
-      {node => {
+      {() => {
         return (
-          <Cell
-            valueStyle={
-              getValueStyle
-                ? [valueStyle, getValueStyle(node.value)]
-                : valueStyle
-            }
-            textAlign={textAlign}
-            {...props}
-            value={node.value}
-            formatter={value =>
-              props.formatter
-                ? props.formatter(value, type)
-                : format(value, type)
-            }
-            data-cellname={node.name}
-          >
-            {() => {
-              return (
-                <InputValue
-                  value={formatExpr ? formatExpr(node.value) : node.value}
-                  onUpdate={value => {
-                    onSave(unformatExpr ? unformatExpr(value) : value);
-                  }}
-                  style={{ textAlign }}
-                  {...inputProps}
-                />
-              );
+          <InputValue
+            value={formatExpr ? formatExpr(sheetValue) : sheetValue}
+            onUpdate={value => {
+              onSave(unformatExpr ? unformatExpr(value) : value);
             }}
-          </Cell>
+            style={{ textAlign }}
+            {...inputProps}
+          />
         );
       }}
-    </SheetValue>
+    </Cell>
   );
 }
 

@@ -21,7 +21,6 @@ import thunk from 'redux-thunk';
 
 import * as actions from 'loot-core/src/client/actions';
 import * as constants from 'loot-core/src/client/constants';
-import { PrivacyProvider } from 'loot-core/src/client/privacy';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import reducers from 'loot-core/src/client/reducers';
 import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
@@ -87,9 +86,7 @@ const root = createRoot(container);
 root.render(
   <Provider store={store}>
     <ServerProvider>
-      <PrivacyProvider>
-        <App />
-      </PrivacyProvider>
+      <App />
     </ServerProvider>
   </Provider>,
 );

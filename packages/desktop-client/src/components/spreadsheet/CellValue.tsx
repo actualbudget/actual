@@ -13,7 +13,7 @@ import format from './format';
 import useSheetName from './useSheetName';
 import useSheetValue from './useSheetValue';
 
-type Binding = { name: string; value; query?: unknown };
+import { type Binding } from '.';
 
 type CellValueProps = {
   binding: string | Binding;
@@ -37,7 +37,15 @@ function CellValue({
 
   return useMemo(
     () => (
-      <ConditionalPrivacyFilter privacyFilter={privacyFilter}>
+      <ConditionalPrivacyFilter
+        privacyFilter={
+          privacyFilter != null
+            ? privacyFilter
+            : type === 'financial'
+            ? true
+            : undefined
+        }
+      >
         <Text
           style={[
             type === 'financial' && styles.tnum,

@@ -137,12 +137,9 @@ export function Balances({
           getStyle={value => ({
             color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
           })}
-          privacyFilter={(render, defaultProps) =>
-            render({
-              ...defaultProps,
-              blurIntensity: 5,
-            })
-          }
+          privacyFilter={{
+            blurIntensity: 5,
+          }}
         />
 
         <ArrowButtonRight1

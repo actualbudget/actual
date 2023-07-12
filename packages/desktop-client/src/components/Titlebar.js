@@ -41,7 +41,7 @@ import {
 import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
-import SheetValue from './spreadsheet/SheetValue';
+import useSheetValue from './spreadsheet/useSheetValue';
 
 export let TitlebarContext = createContext();
 
@@ -67,23 +67,17 @@ export function TitlebarProvider({ children }) {
 }
 
 function UncategorizedButton() {
+  let count = useSheetValue(queries.uncategorizedCount());
   return (
-    <SheetValue binding={queries.uncategorizedCount()}>
-      {node => {
-        const num = node.value;
-        return (
-          num !== 0 && (
-            <ButtonLink
-              bare
-              to="/accounts/uncategorized"
-              style={{ color: colors.r5 }}
-            >
-              {num} uncategorized {num === 1 ? 'transaction' : 'transactions'}
-            </ButtonLink>
-          )
-        );
-      }}
-    </SheetValue>
+    count !== 0 && (
+      <ButtonLink
+        bare
+        to="/accounts/uncategorized"
+        style={{ color: colors.r5 }}
+      >
+        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
+      </ButtonLink>
+    )
   );
 }
 

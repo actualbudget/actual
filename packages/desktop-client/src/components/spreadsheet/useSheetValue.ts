@@ -4,18 +4,22 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
 import useSheetName from './useSheetName';
 
-export default function useSheetValue(binding, onChange) {
-  if (!binding) {
-    throw new Error('Binding is required');
-  }
+import { type Binding } from '.';
 
+export default function useSheetValue(
+  binding: Binding,
+  onChange?: (result) => void,
+) {
   let { sheetName, fullSheetName } = useSheetName(binding);
+
+  const bindingObj =
+    typeof binding === 'string' ? { name: binding, value: null } : binding;
 
   let spreadsheet = useSpreadsheet();
   let [result, setResult] = useState({
     name: fullSheetName,
-    value: binding.value === undefined ? null : binding.value,
-    query: binding.query,
+    value: bindingObj.value === undefined ? null : bindingObj.value,
+    query: bindingObj.query,
   });
   let latestOnChange = useRef(onChange);
   let latestValue = useRef(result.value);
@@ -26,8 +30,8 @@ export default function useSheetValue(binding, onChange) {
   });
 
   useLayoutEffect(() => {
-    if (binding.query) {
-      spreadsheet.createQuery(sheetName, binding.name, binding.query);
+    if (bindingObj.query) {
+      spreadsheet.createQuery(sheetName, bindingObj.name, bindingObj.query);
     }
 
     return spreadsheet.bind(sheetName, binding, null, newResult => {
@@ -39,7 +43,7 @@ export default function useSheetValue(binding, onChange) {
         setResult(newResult);
       }
     });
-  }, [sheetName, binding.name]);
+  }, [sheetName, bindingObj.name]);
 
   return result.value;
 }
