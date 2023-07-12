@@ -39,7 +39,7 @@ $ docker-compose up --detach
 
 You can optionally configure the container using environment variables — see the [configuration section](../config/index.md) for more details.
 
-To update your container:
+### Update Docker Compose container
 
 ```bash
 $ docker-compose down
@@ -71,7 +71,7 @@ $ docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH
 
 `actualbudget/actual-server:latest` -- defines which image you want to pull and launch.
 
-To update the container from a new image, use these commands.
+### Update Docker container using docker command
 
 ```bash
 $ docker stop my_actual_budget
