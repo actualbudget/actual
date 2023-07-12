@@ -7,13 +7,12 @@ import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
-import { colors } from '../../style';
-import { View } from '../common';
+import { colors, styles } from '../../style';
+import { Button, View } from '../common';
 
 import Autocomplete, {
   defaultFilterSuggestion,
   AutocompleteFooter,
-  AutocompleteFooterButton,
 } from './Autocomplete';
 
 function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
@@ -70,8 +69,8 @@ function PayeeList({
     <View>
       <View
         style={[
-          { overflow: 'auto', padding: '5px 0' },
-          !embedded && { maxHeight: 175 },
+          { overflow: 'auto', padding: '5px 0', ...styles.altMenuText },
+          !embedded && { maxHeight: styles.altMenuMaxHeight },
         ]}
       >
         {createNew && (
@@ -83,10 +82,12 @@ function PayeeList({
               padding: '6px 9px',
               backgroundColor:
                 highlightedIndex === 0
-                  ? colors.menuItemBackgroundHover
-                  : 'transparent',
+                  ? colors.altMenuItemBackgroundHover
+                  : colors.altMenuBackground,
               color:
-                highlightedIndex === 0 ? colors.menuItemTextHover : 'inherit',
+                highlightedIndex === 0
+                  ? colors.altMenuItemTextHover
+                  : colors.altMenuItemText,
               borderRadius: embedded ? 4 : 0,
             }}
           >
@@ -94,8 +95,6 @@ function PayeeList({
               style={{
                 display: 'block',
                 borderRadius: 4,
-                fontSize: 11,
-                fontWeight: 500,
               }}
             >
               <Add
@@ -104,6 +103,7 @@ function PayeeList({
                 style={{
                   marginRight: 5,
                   display: 'inline-block',
+                  color: 'inherit',
                 }}
               />
               Create Payee “{inputValue}”
@@ -129,8 +129,8 @@ function PayeeList({
                   // Payee headers
                   key={'title-' + idx}
                   style={{
-                    color: colors.menuItemTextHeader,
-                    fontWeight: 500,
+                    ...styles.altMenuHeaderText,
+                    color: colors.altMenuItemTextHeader,
                     padding: '4px 9px',
                   }}
                 >
@@ -143,9 +143,13 @@ function PayeeList({
                 {...(getItemProps ? getItemProps({ item }) : null)}
                 key={item.id}
                 style={{
+                  color:
+                    highlightedIndex === idx
+                      ? colors.altMenuItemTextHover
+                      : colors.altMenuItemText,
                   backgroundColor:
                     highlightedIndex === idx + offset
-                      ? colors.menuItemBackgroundHover
+                      ? colors.altMenuItemBackgroundHover
                       : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   padding: 4,
@@ -158,7 +162,6 @@ function PayeeList({
               {showMoreMessage && (
                 <div
                   style={{
-                    fontSize: 11,
                     padding: 5,
                     textAlign: 'center',
                   }}
@@ -337,8 +340,8 @@ export default function PayeeAutocomplete({
             <AutocompleteFooter embedded={embedded}>
               {showMakeTransfer && (
                 // Buttons at bottom of payee list
-                <AutocompleteFooterButton
-                  title="Make Transfer"
+                <Button
+                  altMenu
                   style={[
                     showManagePayees && { marginBottom: 5 },
                     focusTransferPayees && {
@@ -351,11 +354,14 @@ export default function PayeeAutocomplete({
                     onUpdate && onUpdate(null);
                     setFocusTransferPayees(!focusTransferPayees);
                   }}
-                />
+                >
+                  Make Transfer
+                </Button>
               )}
               {showManagePayees && (
-                <AutocompleteFooterButton
-                  title="Manage Payees"
+                <Button
+                  altMenu
+                  children={'Manage Payees'}
                   onClick={() => onManagePayees()}
                 />
               )}

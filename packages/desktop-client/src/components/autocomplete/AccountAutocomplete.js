@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 
-import { colors } from '../../style';
+import { colors, styles } from '../../style';
 import { View } from '../common';
 
 import Autocomplete from './Autocomplete';
@@ -14,8 +14,13 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
     <View>
       <View
         style={[
-          { overflow: 'auto', padding: '5px 0' },
-          !embedded && { maxHeight: 175 },
+          {
+            overflow: 'auto',
+            padding: '5px 0',
+            color: colors.altMenuItemText,
+            ...styles.altMenuText,
+          },
+          !embedded && { maxHeight: styles.altMenuMaxHeight },
         ]}
       >
         {items.map((item, idx) => {
@@ -39,8 +44,9 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
               <div
                 key={group}
                 style={{
+                  ...styles.altMenuHeaderText,
                   fontWeight: 500,
-                  color: colors.menuItemTextHeader,
+                  color: colors.altMenuItemTextHeader,
                   padding: '4px 9px',
                 }}
                 data-testid="account-item-group"
@@ -49,12 +55,17 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
               </div>
             ) : null,
             <div
+              // List each account up to a max
               {...(getItemProps ? getItemProps({ item }) : null)}
               key={item.id}
               style={{
+                color:
+                  highlightedIndex === idx
+                    ? colors.altMenuItemTextHover
+                    : colors.altMenuItemText,
                 backgroundColor:
                   highlightedIndex === idx
-                    ? colors.menuItemBackgroundHover
+                    ? colors.altMenuItemBackgroundHover
                     : 'transparent',
                 padding: 4,
                 paddingLeft: 20,

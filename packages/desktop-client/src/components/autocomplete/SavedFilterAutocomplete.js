@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 
-import { colors } from '../../style';
+import { colors, styles } from '../../style';
 import { View } from '../common';
 
 import Autocomplete from './Autocomplete';
@@ -12,7 +12,7 @@ function FilterList({ items, getItemProps, highlightedIndex, embedded }) {
     <View>
       <View
         style={[
-          { overflow: 'auto', padding: '5px 0' },
+          { overflow: 'auto', padding: '5px 0', ...styles.altMenuText },
           !embedded && { maxHeight: 175 },
         ]}
       >
@@ -24,12 +24,12 @@ function FilterList({ items, getItemProps, highlightedIndex, embedded }) {
               style={{
                 backgroundColor:
                   highlightedIndex === idx
-                    ? colors.menuItemBackgroundHover
+                    ? colors.altMenuItemBackgroundHover
                     : 'transparent',
                 color:
                   highlightedIndex === idx
-                    ? colors.menuItemTextHover
-                    : colors.menuItemText,
+                    ? colors.altMenuItemTextHover
+                    : colors.altMenuItemText,
                 padding: 4,
                 paddingLeft: 20,
                 borderRadius: embedded ? 4 : 0,

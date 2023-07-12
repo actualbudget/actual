@@ -9,11 +9,13 @@ import { type HTMLPropsWithStyle } from '../../types/utils';
 import View from './View';
 
 type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
-  pressed?: boolean;
-  primary?: boolean;
   hover?: boolean;
+  pressed?: boolean;
+  altMenu?: boolean;
+  primary?: boolean;
   bare?: boolean;
   disabled?: boolean;
+  style?: CSSProperties;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
   textStyle?: CSSProperties;
@@ -25,14 +27,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
-      pressed,
-      primary,
       hover,
+      pressed,
+      altMenu,
+      primary,
       bare,
-      style,
       disabled,
+      style,
       hoveredStyle,
       activeStyle,
+      textStyle,
       bounce = true,
       as = 'button',
       ...nativeProps
@@ -49,6 +53,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
               ? colors.buttonDisabledBorder
               : primary
               ? colors.buttonPositiveBorder
+              : altMenu
+              ? colors.buttonAltMenuBorder
               : colors.buttonNeutralBorder),
         color: bare
           ? null
@@ -56,6 +62,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ? colors.buttonDisabledText
           : primary
           ? colors.buttonPositiveTextHover
+          : altMenu
+          ? colors.buttonAltMenuTextHover
           : colors.buttonNeutralTextHover,
         backgroundColor: bare
           ? 'rgba(100,100,100,0.15)' // doesn't do anything visible in dark mode, but keep for light
@@ -63,6 +71,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ? colors.buttonDisabledBackground
           : primary
           ? colors.buttonPositiveBackgroundHover
+          : altMenu
+          ? colors.buttonAltMenuBackgroundHover
           : colors.buttonNeutralBackgroundHover,
       },
       hoveredStyle,
@@ -94,6 +104,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ? colors.buttonDisabledBackground
           : primary
           ? colors.buttonPositiveBackground
+          : altMenu
+          ? colors.buttonAltMenuBackground
           : colors.buttonNeutralBackground,
         border: bare
           ? 'none'
@@ -102,6 +114,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
               ? colors.buttonDisabledBorder
               : primary
               ? colors.buttonPositiveBorder
+              : altMenu
+              ? colors.buttonAltMenuBorder
               : colors.buttonNeutralBorder),
         color: bare
           ? 'inherit'
@@ -109,6 +123,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ? colors.buttonDisabledText
           : primary
           ? colors.buttonPositiveText
+          : altMenu
+          ? colors.buttonAltMenuText
           : colors.buttonNeutralText,
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',

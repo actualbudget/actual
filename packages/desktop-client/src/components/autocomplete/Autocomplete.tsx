@@ -97,7 +97,7 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
               cursor: 'default',
               backgroundColor:
                 highlightedIndex === index
-                  ? colors.menuItemBackgroundHover
+                  ? colors.altMenuItemBackgroundHover
                   : null,
             })}
           >
@@ -118,6 +118,7 @@ function defaultItemToString(item) {
 }
 
 type SingleAutocompleteProps = {
+  altMenu?: boolean;
   focused?: boolean;
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
@@ -147,6 +148,7 @@ type SingleAutocompleteProps = {
   isMulti?: boolean;
 };
 function SingleAutocomplete({
+  altMenu = false,
   focused,
   embedded = false,
   containerProps,
@@ -474,6 +476,7 @@ function SingleAutocomplete({
               </View>
             ) : (
               <Tooltip
+                altMenu={true}
                 position="bottom-stretch"
                 offset={2}
                 style={{
@@ -498,6 +501,7 @@ function SingleAutocomplete({
   );
 }
 
+// Selected item pills
 function MultiItem({ name, onRemove }) {
   return (
     <View
@@ -583,12 +587,12 @@ function MultiAutocomplete({
               flexWrap: 'wrap',
               flexDirection: 'row',
               alignItems: 'center',
-              backgroundColor: colors.formInputBackground,
+              backgroundColor: colors.altMenuBackground,
               borderRadius: 4,
-              border: '1px solid ' + colors.formInputBorder,
+              border: '1px solid ' + colors.altMenuBorder,
             },
             focused && {
-              border: '1px solid ' + colors.formInputBorderSelected,
+              border: '1px solid ' + colors.altMenuBorderHover,
               boxShadow: '0 1px 1px ' + colors.buttonPositiveBorder,
             },
           ]}
@@ -629,28 +633,6 @@ function MultiAutocomplete({
         </View>
       )}
     />
-  );
-}
-
-export function AutocompleteFooterButton({
-  title,
-  style,
-  hoveredStyle,
-  onClick,
-}) {
-  return (
-    <Button
-      style={[
-        {
-          fontSize: 12,
-        },
-        style,
-      ]}
-      hoveredStyle={[hoveredStyle]}
-      onClick={onClick}
-    >
-      {title}
-    </Button>
   );
 }
 

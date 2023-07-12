@@ -1,7 +1,7 @@
 import React, { Component, createContext, createRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { css, before } from 'glamor';
+import { css } from 'glamor';
 
 import { styles, colors } from '../style';
 
@@ -31,6 +31,7 @@ export class Tooltip extends Component {
     super(props);
     this.position = props.position || 'bottom-right';
     this.contentRef = createRef();
+    this.altMenu = false;
   }
 
   setup() {
@@ -289,20 +290,22 @@ export class Tooltip extends Component {
   }
 
   render() {
-    const { children, width, style } = this.props;
+    const { children, width, style, altMenu } = this.props;
 
     const contentStyle = {
       position: 'absolute',
       zIndex: 3000,
-
       padding: 5,
       width,
       ...styles.shadowLarge,
       borderRadius: 4,
-      backgroundColor: colors.tooltipBackground,
-      color: colors.menuItemText,
+      backgroundColor: altMenu
+        ? colors.altMenuBackground
+        : colors.tooltipBackground,
+      color: altMenu ? colors.altMenuText : colors.menuItemText,
 
-      border: '1px solid ' + colors.tooltipBorder,
+      border:
+        '10px solid ' + altMenu ? colors.altMenuBorder : colors.tooltipBorder,
       // opacity: 0,
       // transition: 'transform .1s, opacity .1s',
       // transitionTimingFunction: 'ease-out'
@@ -340,83 +343,4 @@ export class Tooltip extends Component {
       </div>
     );
   }
-}
-
-export function Pointer({
-  pointerDirection = 'up',
-  pointerPosition = 'left',
-  backgroundColor,
-  borderColor = colors.tooltipBorder,
-  border = true,
-  color,
-  style,
-  innerStyle,
-  pointerStyle,
-  children,
-}) {
-  return (
-    <div {...css({ position: 'relative' }, style)}>
-      <div
-        {...css(
-          {
-            zIndex: 3000,
-            backgroundColor: colors.tooltipBackground,
-            color: colors.tooltipText,
-            padding: 10,
-            boxShadow: '0 2px 6px rgba(0, 0, 0, .25)',
-            border: border && '1px solid ' + borderColor,
-            borderRadius: 2,
-          },
-          before({
-            position: 'absolute',
-            display: 'inline-block',
-            backgroundColor,
-            border: border && '1px solid ' + borderColor,
-            borderLeft: 0,
-            borderBottom: 0,
-            width: 7,
-            height: 7,
-            boxShadow: '1px -1px 1px rgba(0, 0, 0, .05)',
-            ...(pointerDirection === 'up'
-              ? {
-                  transform: 'rotate(-45deg)',
-                  top: border ? -4 : -3,
-                  // eslint-disable-next-line rulesdir/typography
-                  content: '" "',
-                  ...(pointerPosition === 'center'
-                    ? { left: 'calc(50% - 3.5px)' }
-                    : pointerPosition === 'left'
-                    ? { left: 40 }
-                    : { right: 40 }),
-                }
-              : pointerDirection === 'down'
-              ? {
-                  transform: 'rotate(135deg)',
-                  bottom: border ? -4 : -3,
-                  // eslint-disable-next-line rulesdir/typography
-                  content: '" "',
-                  ...(pointerPosition === 'center'
-                    ? { left: 'calc(50% - 3.5px)' }
-                    : pointerPosition === 'left'
-                    ? { left: 40 }
-                    : { right: 40 }),
-                }
-              : pointerDirection === 'right'
-              ? {
-                  transform: 'rotate(45deg)',
-                  // eslint-disable-next-line rulesdir/typography
-                  content: '" "',
-                  top: 'calc(50% - 3.5px)',
-                  right: -3,
-                }
-              : {}),
-            ...pointerStyle,
-          }),
-          innerStyle,
-        )}
-      >
-        {children}
-      </div>
-    </div>
-  );
 }

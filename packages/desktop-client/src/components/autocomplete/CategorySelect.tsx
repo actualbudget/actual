@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 
 import Split from '../../icons/v0/Split';
-import { colors } from '../../style';
+import { colors, styles } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 import { View, Select, Button } from '../common';
 
@@ -71,8 +71,10 @@ function CategoryList({
           {
             overflow: 'auto',
             padding: '5px 0',
+            color: colors.altMenuItemText,
+            ...styles.altMenuText,
           },
-          !embedded && { maxHeight: 175 },
+          !embedded && { maxHeight: styles.altMenuMaxHeight },
         ]}
       >
         {items.map((item, idx) => {
@@ -82,17 +84,13 @@ function CategoryList({
               <View
                 key="split"
                 {...(getItemProps ? getItemProps({ item }) : null)}
-                style={{ flexShrink: 0, margin: 5 }}
+                style={{
+                  flexShrink: 0,
+                  margin: 5,
+                }}
                 data-testid="split-transaction-button"
               >
-                <Button
-                  style={{
-                    fontWeight: 500,
-                    backgroundColor: colors.buttonNeutralBackground,
-                    color: colors.buttonNeutralText,
-                    borderColor: colors.buttonNeutralBorder,
-                  }}
-                >
+                <Button altMenu>
                   <Split
                     width={10}
                     height={10}
@@ -115,8 +113,8 @@ function CategoryList({
                 // Category group headers
                 <div
                   style={{
-                    fontWeight: 500,
-                    color: colors.menuItemTextHeader,
+                    ...styles.altMenuHeaderText,
+                    color: colors.altMenuItemTextHeader,
                     padding: '4px 9px',
                   }}
                   data-testid="category-item-group"
@@ -129,10 +127,14 @@ function CategoryList({
                 // Category item
                 {...(getItemProps ? getItemProps({ item }) : null)}
                 style={{
+                  color:
+                    highlightedIndex === idx
+                      ? colors.altMenuItemTextHover
+                      : colors.altMenuItemText,
                   backgroundColor:
                     highlightedIndex === idx
-                      ? colors.menuItemBackgroundHover
-                      : colors.menuItemBackground,
+                      ? colors.altMenuItemBackgroundHover
+                      : colors.altMenuItemBackground,
                   padding: 4,
                   paddingLeft: 20,
                   borderRadius: embedded ? 4 : 0,
