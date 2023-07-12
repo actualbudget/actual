@@ -1,8 +1,8 @@
-# Filtering In Actual
+# Filtering Transactions
 
 ### Introduction
 
-Filter is a little known tool in Actual but is really quite a powerhouse. Filters go well beyond the simple Search tool and will allow you to create all sorts of useful transaction summaries. This will help you view various aspects of your spending, extract data for tax filing and so on.
+Filtering is a little known tool in Actual but is really quite a powerhouse. Filters go well beyond the simple Search tool and will allow you to create all sorts of useful transaction summaries. This will help you view various aspects of your spending, extract data for tax filing and so on.
 
 ### Caveats
 
@@ -16,10 +16,6 @@ Inevitably, there are some restrictions but these offer a great opportunity for 
 ### How to use the Filter tool
 
 Well, having got that out of the way please don’t let any of this put you off. Filters are a great tool – and there is lots more scope for further development.
-
-:::note
-Payees have been redacted in all images for privacy reasons
-:::
 
 First go to the **Accounts** view. This is to be sure that you are picking up all relevant transactions, rather than those from just one Account or Credit Card.
 
