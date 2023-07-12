@@ -198,6 +198,16 @@ class TransactionEditInner extends PureComponent {
     if (this.props.adding) {
       this.amount.focus();
     }
+
+    document
+      .querySelector('meta[name="theme-color"]')
+      .setAttribute('content', colors.p5);
+  }
+
+  componentWillUnmount() {
+    document
+      .querySelector('meta[name="theme-color"]')
+      .setAttribute('content', '#ffffff');
   }
 
   openChildEdit = child => {
@@ -680,11 +690,14 @@ class TransactionEditInner extends PureComponent {
 
           <View
             style={{
-              paddingHorizontal: EDITING_PADDING,
-              paddingVertical: 15,
+              paddingLeft: EDITING_PADDING,
+              paddingRight: EDITING_PADDING,
+              paddingTop: 15,
+              paddingBottom: 15,
               backgroundColor: colors.n11,
               borderTopWidth: 1,
               borderColor: colors.n10,
+              marginTop: 'auto',
             }}
           >
             {adding ? (

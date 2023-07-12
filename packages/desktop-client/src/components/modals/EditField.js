@@ -187,8 +187,9 @@ function EditField({
       style={[
         {
           flex: 0,
-          height: isNarrowWidth ? '90vh' : 275,
+          height: isNarrowWidth ? '85vh' : 275,
           padding: '15px 10px',
+          borderRadius: '6px',
         },
         minWidth && { minWidth },
         !isNarrowWidth && { backgroundColor: colors.n1, color: 'white' },
