@@ -516,16 +516,6 @@ const RolloverBudgetSummary = memo(props => {
   );
 });
 
-const ReportBudgetSummary = memo(props => {
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  return (
-    <report.BudgetSummary
-      {...props}
-      isGoalTemplatesEnabled={isGoalTemplatesEnabled}
-    />
-  );
-});
-
 function BudgetWrapper(props) {
   let spreadsheet = useSpreadsheet();
   let titlebar = useContext(TitlebarContext);
@@ -535,7 +525,7 @@ function BudgetWrapper(props) {
 
   let reportComponents = useMemo(
     () => ({
-      SummaryComponent: ReportBudgetSummary,
+      SummaryComponent: report.BudgetSummary,
       ExpenseCategoryComponent: report.ExpenseCategoryMonth,
       ExpenseGroupComponent: report.ExpenseGroupMonth,
       IncomeCategoryComponent: report.IncomeCategoryMonth,

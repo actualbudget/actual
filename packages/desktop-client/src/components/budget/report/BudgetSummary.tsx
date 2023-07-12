@@ -11,6 +11,7 @@ import { css, type CSSProperties } from 'glamor';
 import { reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
@@ -301,6 +302,8 @@ export function BudgetSummary({
     onBudgetAction,
     onToggleSummaryCollapse,
   } = useReport();
+
+  isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   let [menuOpen, setMenuOpen] = useState(false);
   function onMenuOpen() {
