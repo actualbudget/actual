@@ -47,6 +47,8 @@ import usePrevious from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import LeftArrow2 from '../../icons/v0/LeftArrow2';
 import RightArrow2 from '../../icons/v0/RightArrow2';
+import ArrowDown from '../../icons/v1/ArrowDown';
+import ArrowUp from '../../icons/v1/ArrowUp';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
@@ -276,44 +278,49 @@ const TransactionHeader = memo(
           width={20}
           onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
-        <Cell
+        <HeaderCell
           value="Date"
           width={110}
+          id="date"
           icon={field === 'date' ? ascDesc : 'clickable'}
           onClick={() =>
             onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
           }
         />
         {showAccount && (
-          <Cell
+          <HeaderCell
             value="Account"
             width="flex"
+            id="account"
             icon={field === 'account' ? ascDesc : 'clickable'}
             onClick={() =>
               onSort('account', selectAscDesc(field, ascDesc, 'account', 'asc'))
             }
           />
         )}
-        <Cell
+        <HeaderCell
           value="Payee"
           width="flex"
+          id="payee"
           icon={field === 'payee' ? ascDesc : 'clickable'}
           onClick={() =>
             onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc'))
           }
         />
-        <Cell
+        <HeaderCell
           value="Notes"
           width="flex"
+          id="notes"
           icon={field === 'notes' ? ascDesc : 'clickable'}
           onClick={() =>
             onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
           }
         />
         {showCategory && (
-          <Cell
+          <HeaderCell
             value="Category"
             width="flex"
+            id="category"
             icon={field === 'category' ? ascDesc : 'clickable'}
             onClick={() =>
               onSort(
@@ -323,19 +330,19 @@ const TransactionHeader = memo(
             }
           />
         )}
-        <Cell
+        <HeaderCell
           value="Payment"
           width={90}
-          textAlign="flex"
+          id="payment"
           icon={field === 'payment' ? ascDesc : 'clickable'}
           onClick={() =>
             onSort('payment', selectAscDesc(field, ascDesc, 'payment', 'asc'))
           }
         />
-        <Cell
+        <HeaderCell
           value="Deposit"
           width={85}
-          textAlign="flex"
+          id="deposit"
           icon={field === 'deposit' ? ascDesc : 'clickable'}
           onClick={() =>
             onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
@@ -452,6 +459,46 @@ function StatusCell({
   );
 }
 
+function HeaderCell({ value, id, width, icon, onClick }) {
+  return (
+    <CustomCell
+      width={width}
+      name={id}
+      textAlign="flex"
+      unexposedContent={
+        <Button
+          bare
+          onClick={onClick}
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            color: colors.n4,
+            fontWeight: 300,
+            marginLeft: -5,
+          }}
+        >
+          <UnexposedCellContent value={value} />
+          {icon === 'asc' && (
+            <ArrowDown
+              width={10}
+              height={10}
+              style={{ marginLeft: 5, color: colors.n4 }}
+            />
+          )}
+          {icon === 'desc' && (
+            <ArrowUp
+              width={10}
+              height={10}
+              style={{ marginLeft: 5, color: colors.n4 }}
+            />
+          )}
+        </Button>
+      }
+    ></CustomCell>
+  );
+}
+
 function PayeeCell({
   id,
   payeeId,
@@ -483,7 +530,6 @@ function PayeeCell({
       width="flex"
       name="payee"
       textAlign="flex"
-      style={{ paddingLeft: 6 }}
       value={payeeId}
       valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
       exposed={focused}
@@ -838,7 +884,6 @@ const Transaction = memo(function Transaction(props) {
           name="date"
           width={110}
           textAlign="flex"
-          style={{ paddingLeft: 5 }}
           exposed={focusedField === 'date'}
           value={date}
           valueStyle={valueStyle}
@@ -876,7 +921,6 @@ const Transaction = memo(function Transaction(props) {
           name="account"
           width="flex"
           textAlign="flex"
-          style={{ paddingLeft: 5 }}
           value={accountId}
           formatter={acctId => {
             let acct = acctId && getAccountsById(accounts)[acctId];
@@ -949,7 +993,6 @@ const Transaction = memo(function Transaction(props) {
           width="flex"
           name="notes"
           textAlign="flex"
-          style={{ paddingLeft: 5 }}
           exposed={focusedField === 'notes'}
           focused={focusedField === 'notes'}
           value={notes || ''}
@@ -997,7 +1040,7 @@ const Transaction = memo(function Transaction(props) {
           name="category"
           width="flex"
           focused={focusedField === 'category'}
-          style={{ padding: 0, paddingLeft: 5 }}
+          style={{ padding: 0 }}
           plain
         >
           <CellButton
@@ -1063,7 +1106,6 @@ const Transaction = memo(function Transaction(props) {
             fontStyle: 'italic',
             color: '#c0c0c0',
             fontWeight: 300,
-            paddingLeft: 5,
           }}
           inputProps={{
             readOnly: true,
@@ -1074,7 +1116,6 @@ const Transaction = memo(function Transaction(props) {
         <CustomCell
           name="category"
           width="flex"
-          style={{ paddingLeft: 5 }}
           textAlign="flex"
           value={categoryId}
           formatter={value =>
@@ -1141,12 +1182,7 @@ const Transaction = memo(function Transaction(props) {
         textAlign="flex"
         title={debit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[
-          isParent && { fontStyle: 'italic' },
-          styles.tnum,
-          amountStyle,
-          { paddingLeft: 5 },
-        ]}
+        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: debit === '' && credit === '' ? '0.00' : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
@@ -1164,12 +1200,7 @@ const Transaction = memo(function Transaction(props) {
         textAlign="flex"
         title={credit}
         onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[
-          isParent && { fontStyle: 'italic' },
-          styles.tnum,
-          amountStyle,
-          { paddingLeft: 4 },
-        ]}
+        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),

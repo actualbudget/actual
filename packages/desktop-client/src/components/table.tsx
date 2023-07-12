@@ -27,8 +27,6 @@ import { useSelectedItems } from '../hooks/useSelected';
 import AnimatedLoading from '../icons/AnimatedLoading';
 import DeleteIcon from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
-import ArrowDown from '../icons/v1/ArrowDown';
-import ArrowUp from '../icons/v1/ArrowUp';
 import Checkmark from '../icons/v1/Checkmark';
 import { styles, colors } from '../style';
 
@@ -167,8 +165,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
 export function UnexposedCellContent({
   value,
   formatter,
-  icon,
-}: Pick<CellProps, 'value' | 'formatter' | 'icon'>) {
+}: Pick<CellProps, 'value' | 'formatter'>) {
   return (
     <Text
       style={{
@@ -178,35 +175,7 @@ export function UnexposedCellContent({
         textOverflow: 'ellipsis',
       }}
     >
-      {icon ? (
-        <Button
-          bare
-          style={{
-            color: colors.n4,
-            fontWeight: 300,
-          }}
-        >
-          {formatter ? formatter(value) : value}
-          {icon === 'asc' && (
-            <ArrowDown
-              width={10}
-              height={10}
-              style={{ marginLeft: 5, color: colors.n4 }}
-            />
-          )}
-          {icon === 'desc' && (
-            <ArrowUp
-              width={10}
-              height={10}
-              style={{ marginLeft: 5, color: colors.n4 }}
-            />
-          )}
-        </Button>
-      ) : formatter ? (
-        formatter(value)
-      ) : (
-        value
-      )}
+      {formatter ? formatter(value) : value}
     </Text>
   );
 }
@@ -221,7 +190,6 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   children?: ReactNode | (() => ReactNode);
   unexposedContent?: ReactNode;
   value?: string;
-  icon?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
 };
@@ -239,7 +207,6 @@ export function Cell({
   plain,
   style,
   valueStyle,
-  icon,
   unexposedContent,
   ...viewProps
 }: CellProps) {
@@ -312,11 +279,7 @@ export function Cell({
           }
         >
           {unexposedContent || (
-            <UnexposedCellContent
-              value={value}
-              formatter={formatter}
-              icon={icon}
-            />
+            <UnexposedCellContent value={value} formatter={formatter} />
           )}
         </View>
       )}
