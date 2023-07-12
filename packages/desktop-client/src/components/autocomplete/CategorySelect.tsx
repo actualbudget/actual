@@ -6,7 +6,10 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import { css } from 'glamor';
+
 import Split from '../../icons/v0/Split';
+import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 import { View, Text, Select } from '../common';
@@ -65,6 +68,10 @@ function CategoryList({
   groupHeaderStyle,
 }: CategoryListProps) {
   let lastGroup = null;
+  const { isNarrowWidth } = useResponsive();
+  const highlightedIndexColor = isNarrowWidth
+    ? 'rgba(100, 100, 100, .15)'
+    : colors.n4;
 
   return (
     <View>
@@ -105,18 +112,25 @@ function CategoryList({
                 // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
                 // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
                 role="button"
-                style={{
-                  backgroundColor:
-                    highlightedIndex === idx ? colors.n4 : 'transparent',
-                  borderRadius: embedded ? 4 : 0,
-                  flexShrink: 0,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: colors.g8,
-                  padding: '6px 8px',
-                }}
+                className={`${css([
+                  {
+                    backgroundColor:
+                      highlightedIndex === idx
+                        ? highlightedIndexColor
+                        : 'transparent',
+                    borderRadius: embedded ? 4 : 0,
+                    flexShrink: 0,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: colors.g8,
+                    padding: '6px 8px',
+                    ':active': {
+                      backgroundColor: 'rgba(100, 100, 100, .25)',
+                    },
+                  },
+                ])}`}
                 data-testid="split-transaction-button"
               >
                 <Text style={{ lineHeight: 0 }}>
@@ -151,13 +165,20 @@ function CategoryList({
                 {...(getItemProps ? getItemProps({ item }) : null)}
                 // See comment above.
                 role="button"
-                style={{
-                  backgroundColor:
-                    highlightedIndex === idx ? colors.n4 : 'transparent',
-                  padding: 4,
-                  paddingLeft: 20,
-                  borderRadius: embedded ? 4 : 0,
-                }}
+                className={`${css([
+                  {
+                    backgroundColor:
+                      highlightedIndex === idx
+                        ? highlightedIndexColor
+                        : 'transparent',
+                    padding: 4,
+                    paddingLeft: 20,
+                    borderRadius: embedded ? 4 : 0,
+                    ':active': {
+                      backgroundColor: 'rgba(100, 100, 100, .25)',
+                    },
+                  },
+                ])}`}
                 data-testid={
                   'category-item' +
                   (highlightedIndex === idx ? '-highlighted' : '')

@@ -1,12 +1,15 @@
 import React, { Fragment, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { css } from 'glamor';
+
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
+import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import { View } from '../common';
 
@@ -51,6 +54,11 @@ function PayeeList({
   groupHeaderStyle,
   footer,
 }) {
+  const { isNarrowWidth } = useResponsive();
+  const highlightedIndexColor = isNarrowWidth
+    ? 'rgba(100, 100, 100, .15)'
+    : colors.n4;
+  const createNewColor = isNarrowWidth ? colors.g5 : colors.g8;
   let isFiltered = items.filtered;
   let createNew = null;
   items = [...items];
@@ -82,16 +90,19 @@ function PayeeList({
               flexShrink: 0,
               padding: '6px 9px',
               backgroundColor:
-                highlightedIndex === 0 ? colors.n4 : 'transparent',
+                highlightedIndex === 0 ? highlightedIndexColor : 'transparent',
               borderRadius: embedded ? 4 : 0,
+              ':active': {
+                backgroundColor: 'rgba(100, 100, 100, .25)',
+              },
             }}
           >
             <View
               style={{
                 display: 'block',
-                color: colors.g8,
+                color: createNewColor,
                 borderRadius: 4,
-                fontSize: 11,
+                fontSize: isNarrowWidth ? 'inherit' : 11,
                 fontWeight: 500,
               }}
             >
@@ -99,7 +110,7 @@ function PayeeList({
                 width={8}
                 height={8}
                 style={{
-                  color: colors.g8,
+                  color: createNewColor,
                   marginRight: 5,
                   display: 'inline-block',
                 }}
@@ -160,15 +171,20 @@ function PayeeList({
                 // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
                 role="button"
                 key={item.id}
-                style={{
-                  backgroundColor:
-                    highlightedIndex === idx + offset
-                      ? colors.n4
-                      : 'transparent',
-                  borderRadius: embedded ? 4 : 0,
-                  padding: 4,
-                  paddingLeft: 20,
-                }}
+                className={`${css([
+                  {
+                    backgroundColor:
+                      highlightedIndex === idx + offset
+                        ? highlightedIndexColor
+                        : 'transparent',
+                    borderRadius: embedded ? 4 : 0,
+                    padding: 4,
+                    paddingLeft: 20,
+                    ':active': {
+                      backgroundColor: 'rgba(100, 100, 100, .25)',
+                    },
+                  },
+                ])}`}
               >
                 {item.name}
               </div>
@@ -176,7 +192,7 @@ function PayeeList({
               {showMoreMessage && (
                 <div
                   style={{
-                    fontSize: 11,
+                    fontSize: isNarrowWidth ? 'inherit' : 11,
                     padding: 5,
                     color: colors.n5,
                     textAlign: 'center',

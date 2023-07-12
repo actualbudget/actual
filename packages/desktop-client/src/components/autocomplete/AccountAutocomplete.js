@@ -1,7 +1,10 @@
 import React from 'react';
 
+import { css } from 'glamor';
+
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 
+import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import { View } from '../common';
 
@@ -15,6 +18,10 @@ function AccountList({
   groupHeaderStyle,
 }) {
   let lastItem = null;
+  const { isNarrowWidth } = useResponsive();
+  const highlightedIndexColor = isNarrowWidth
+    ? 'rgba(100, 100, 100, .15)'
+    : colors.n4;
 
   return (
     <View>
@@ -79,13 +86,20 @@ function AccountList({
               // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
               role="button"
               key={item.id}
-              style={{
-                backgroundColor:
-                  highlightedIndex === idx ? colors.n4 : 'transparent',
-                padding: 4,
-                paddingLeft: 20,
-                borderRadius: embedded ? 4 : 0,
-              }}
+              className={`${css([
+                {
+                  backgroundColor:
+                    highlightedIndex === idx
+                      ? highlightedIndexColor
+                      : 'transparent',
+                  padding: 4,
+                  paddingLeft: 20,
+                  borderRadius: embedded ? 4 : 0,
+                  ':active': {
+                    backgroundColor: 'rgba(100, 100, 100, .25)',
+                  },
+                },
+              ])}`}
               data-testid={
                 'account-item' +
                 (highlightedIndex === idx ? '-highlighted' : '')
