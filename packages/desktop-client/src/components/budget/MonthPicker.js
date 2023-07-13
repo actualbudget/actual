@@ -106,12 +106,12 @@ export const MonthPicker = ({
                 },
                 !isMonthBudgeted && {
                   textDecoration: 'line-through',
-                  color: colors.n7,
+                  color: colors.pageTextSubdued,
                 },
                 styles.smallText,
                 selected && {
-                  backgroundColor: colors.p6,
-                  color: 'white',
+                  backgroundColor: colors.buttonPositiveBackground,
+                  color: colors.buttonPositiveText,
                 },
                 (hovered || selected) && {
                   borderRadius: 0,
@@ -123,7 +123,7 @@ export const MonthPicker = ({
                   },
                 hovered &&
                   selected && {
-                    backgroundColor: colors.p7,
+                    backgroundColor: colors.buttonPositiveBackground,
                   },
                 (idx === firstSelectedIndex ||
                   (idx === hoverId && !selected)) && {
@@ -151,7 +151,9 @@ export const MonthPicker = ({
                       left: 0,
                       fontSize: 10,
                       fontWeight: 'bold',
-                      color: isMonthBudgeted ? '#272630' : colors.n7,
+                      color: isMonthBudgeted
+                        ? colors.pageText
+                        : colors.pageTextSubdued,
                     },
                   ]}
                 >
