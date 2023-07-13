@@ -212,9 +212,12 @@ function MonthlyPatterns({ config, dispatch }) {
               updateRecurrence(recurrence, 'value', parsePatternValue(value))
             }
             disabledKeys={['-']}
-            wrapperStyle={{ flex: 1, marginRight: 10 }}
+            wrapperStyle={{
+              flex: 1,
+              marginRight: 10,
+              border: '1px solid ' + colors.formInputBorder,
+            }}
             style={{
-              borderWidth: 1,
               width: '100%',
             }}
           />
@@ -227,8 +230,12 @@ function MonthlyPatterns({ config, dispatch }) {
             value={recurrence.type}
             onChange={value => updateRecurrence(recurrence, 'type', value)}
             disabledKeys={['-']}
-            wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{ borderWidth: 1, width: '100%' }}
+            wrapperStyle={{
+              flex: 1,
+              marginRight: 10,
+              border: '1px solid ' + colors.formInputBorder,
+            }}
+            style={{ width: '100%' }}
           />
           <Button
             bare
@@ -337,7 +344,10 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          style={{ borderWidth: 1, height: 27.5 }}
+          style={{ height: 23 }}
+          wrapperStyle={{
+            border: '1px solid ' + colors.formInputBorder,
+          }}
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (

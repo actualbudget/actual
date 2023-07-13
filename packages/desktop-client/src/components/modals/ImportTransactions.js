@@ -351,7 +351,10 @@ function SelectField({ width, style, options, value, onChange }) {
         ...options.map(option => [option, option]),
       ]}
       value={value === null ? 'choose-field' : value}
-      style={{ borderWidth: 1, width: '100%' }}
+      style={{ width: '100%' }}
+      wrapperStyle={{
+        border: '1px solid ' + colors.formInputBorder,
+      }}
       wrapperStyle={style}
       onChange={value => onChange(value)}
     />
@@ -385,7 +388,10 @@ function DateFormatSelect({
         ])}
         value={parseDateFormat || ''}
         onChange={value => onChange(value)}
-        style={{ borderWidth: 1, width: '100%' }}
+        style={{ width: '100%' }}
+        wrapperStyle={{
+          border: '1px solid ' + colors.formInputBorder,
+        }}
       />
     </View>
   );
@@ -909,7 +915,10 @@ function ImportTransactions({
                       setCsvDelimiter(value);
                       parse(filename, { delimiter: value });
                     }}
-                    style={{ borderWidth: 1, width: '100%' }}
+                    style={{ width: '100%' }}
+                    wrapperStyle={{
+                      border: '1px solid ' + colors.formInputBorder,
+                    }}
                   />
                 </View>
               )}
