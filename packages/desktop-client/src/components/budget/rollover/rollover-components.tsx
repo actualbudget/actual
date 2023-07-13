@@ -237,6 +237,8 @@ export function IncomeHeaderMonth() {
   return (
     <Row
       style={{
+        color: colors.tableText,
+        backgroundColor: colors.tableBackground,
         alignItems: 'center',
         paddingRight: 10,
       }}

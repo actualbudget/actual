@@ -8,7 +8,7 @@ import {
 import { type CSSProperties, css } from 'glamor';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
-import { colors } from '../../style';
+import { colors, styles } from '../../style';
 
 type CustomSelectProps = {
   options: Array<[string, string]>;
@@ -33,11 +33,19 @@ export default function CustomSelect({
     <ListboxInput
       value={value}
       onChange={onChange}
-      style={{ lineHeight: '1em', ...wrapperStyle }}
+      style={{
+        color: colors.formInputText,
+        backgroundColor: colors.formInputBackground,
+        borderRadius: styles.menuBorderRadius,
+        lineHeight: '1em',
+        ...wrapperStyle,
+      }}
     >
       <ListboxButton
         {...css([
-          { borderWidth: 0, padding: '2px 5px', borderRadius: 4 },
+          {
+            borderWidth: 0,
+          },
           style,
         ])}
         arrow={
@@ -45,7 +53,7 @@ export default function CustomSelect({
             style={{
               width: arrowSize,
               height: arrowSize,
-              color: colors.formInputText,
+              color: 'inherit',
             }}
           />
         }
@@ -68,10 +76,10 @@ export default function CustomSelect({
         style={{
           zIndex: 10000,
           outline: 0,
-          borderRadius: 4,
+          borderRadius: styles.menuBorderRadius,
           backgroundColor: colors.menuBackground,
           boxShadow: '0 2px 6px rgba(0, 0, 0, .25)',
-          border: '1px solid ' + colors.tooltipBorder,
+          border: '1px solid ' + colors.menuBorder,
         }}
       >
         <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>

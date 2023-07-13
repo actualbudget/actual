@@ -191,6 +191,7 @@ export function SchedulesTable({
         style={{
           cursor: 'pointer',
           backgroundColor: colors.tableBackground,
+          color: colors.tableText,
           ':hover': { backgroundColor: colors.tableRowBackgroundHover },
         }}
       >

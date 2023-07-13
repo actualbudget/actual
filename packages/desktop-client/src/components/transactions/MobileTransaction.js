@@ -144,12 +144,12 @@ class Transaction extends PureComponent {
       // >
       <ListItem
         style={[
-          { flex: 1, height: 60, padding: '5px 10px' }, // remove padding when Button is back
+          { flex: 1, height: 60, padding: '5px 10px', color: colors.tableText }, // remove padding when Button is back
           isPreview && { backgroundColor: colors.tableBackground },
           style,
         ]}
       >
-        <View style={[{ flex: 1, color: colors.tableText }]}>
+        <View style={[{ flex: 1 }]}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {schedule && (
               <ArrowsSynchronize
@@ -157,7 +157,7 @@ class Transaction extends PureComponent {
                   width: 12,
                   height: 12,
                   marginRight: 5,
-                  color: colors.tableText,
+                  color: 'inherit',
                 }}
               />
             )}
@@ -200,7 +200,7 @@ class Transaction extends PureComponent {
                     marginTop: 1,
                     fontWeight: '400',
                     color: prettyCategory
-                      ? colors.buttonDisabledText
+                      ? colors.tableTextInactive
                       : colors.formInputTextHighlight,
                     fontStyle: prettyCategory ? null : 'italic',
                     textAlign: 'left',
@@ -220,7 +220,6 @@ class Transaction extends PureComponent {
               marginLeft: 25,
               marginRight: 5,
               fontSize: 14,
-              color: colors.tableText,
             },
           ]}
         >
@@ -285,10 +284,13 @@ export class TransactionList extends Component {
           style={{ flex: '1 auto', height: '100%', overflowY: 'auto' }}
         >
           {sections.length === 0 ? (
+            // Nothing found
             <Section>
               <Item>
                 <div
                   style={{
+                    color: colors.pageText,
+                    backgroundColor: colors.pageBackground,
                     display: 'flex',
                     justifyContent: 'center',
                     width: '100%',
@@ -301,15 +303,21 @@ export class TransactionList extends Component {
           ) : null}
           {sections.map(section => {
             return (
+              // Date header
               <Section
                 title={monthUtils.format(section.date, 'MMMM dd, yyyy')}
                 key={section.id}
+                // Can't style for some reason?
+                // Maybe since inside a Listbox and need to style with that?
+                style={{ backgroundColor: colors.errorText }}
               >
                 {section.data.map((transaction, index, transactions) => {
                   return (
+                    //Transactions within the date
                     <Item
                       key={transaction.id}
                       style={{
+                        backgroundColor: colors.pageBackground,
                         fontSize:
                           index === transactions.length - 1 ? 98 : 'inherit',
                       }}
@@ -321,6 +329,7 @@ export class TransactionList extends Component {
                         accounts={this.props.accounts}
                         payees={this.props.payees}
                         showCategory={this.props.showCategory}
+                        notes={this.props.notes}
                         added={this.props.isNew(transaction.id)}
                         onSelect={() => {}} // onSelect(transaction)}
                       />
@@ -402,7 +411,7 @@ function ListBoxSection({ section, state }) {
             backgroundColor: colors.tableRowHeaderBackground,
             borderBottom: `1px solid ${colors.tableBorder}`,
             borderTop: `1px solid ${colors.tableBorder}`,
-            color: colors.tableRowHeaderBackgroundText,
+            color: colors.tableRowHeaderText,
             display: 'flex',
             justifyContent: 'center',
             paddingBottom: 4,

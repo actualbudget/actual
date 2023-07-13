@@ -2,8 +2,9 @@ import React from 'react';
 
 import { numberFormats } from 'loot-core/src/shared/util';
 
+import { colors } from '../../style';
 import tokens from '../../tokens';
-import { Button, CustomSelect, Text, View } from '../common';
+import { CustomSelect, Text, View } from '../common';
 import { useSidebar } from '../FloatableSidebar';
 import { Checkbox } from '../forms';
 
@@ -86,18 +87,19 @@ export default function FormatSettings({ prefs, savePrefs }) {
           }}
         >
           <Column title="Numbers">
-            <Button bounce={false} style={{ padding: 0 }}>
-              <CustomSelect
-                key={prefs.hideFraction} // needed because label does not update
-                value={numberFormat}
-                onChange={onNumberFormat}
-                options={numberFormats.map(f => [
-                  f.value,
-                  prefs.hideFraction ? f.labelNoFraction : f.label,
-                ])}
-                style={{ padding: '2px 10px', fontSize: 15 }}
-              />
-            </Button>
+            <CustomSelect
+              key={prefs.hideFraction} // needed because label does not update
+              value={numberFormat}
+              onChange={onNumberFormat}
+              options={numberFormats.map(f => [
+                f.value,
+                prefs.hideFraction ? f.labelNoFraction : f.label,
+              ])}
+              style={{ padding: '2px 10px', fontSize: 15 }}
+              wrapperStyle={{
+                border: '1px solid ' + colors.formInputBorder,
+              }}
+            />
 
             <Text style={{ display: 'flex' }}>
               <Checkbox
@@ -110,25 +112,27 @@ export default function FormatSettings({ prefs, savePrefs }) {
           </Column>
 
           <Column title="Dates">
-            <Button bounce={false} style={{ padding: 0 }}>
-              <CustomSelect
-                value={dateFormat}
-                onChange={onDateFormat}
-                options={dateFormats.map(f => [f.value, f.label])}
-                style={{ padding: '2px 10px', fontSize: 15 }}
-              />
-            </Button>
+            <CustomSelect
+              value={dateFormat}
+              onChange={onDateFormat}
+              options={dateFormats.map(f => [f.value, f.label])}
+              style={{ padding: '2px 10px', fontSize: 15 }}
+              wrapperStyle={{
+                border: '1px solid ' + colors.formInputBorder,
+              }}
+            />
           </Column>
 
           <Column title="First day of the week">
-            <Button bounce={false} style={{ padding: 0 }}>
-              <CustomSelect
-                value={firstDayOfWeekIdx}
-                onChange={onFirstDayOfWeek}
-                options={daysOfWeek.map(f => [f.value, f.label])}
-                style={{ padding: '2px 10px', fontSize: 15 }}
-              />
-            </Button>
+            <CustomSelect
+              value={firstDayOfWeekIdx}
+              onChange={onFirstDayOfWeek}
+              options={daysOfWeek.map(f => [f.value, f.label])}
+              style={{ padding: '2px 10px', fontSize: 15 }}
+              wrapperStyle={{
+                border: '1px solid ' + colors.formInputBorder,
+              }}
+            />
           </Column>
         </View>
       }

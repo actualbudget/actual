@@ -1084,7 +1084,7 @@ class AccountInternal extends PureComponent {
                       ) : !loading ? (
                         <View
                           style={{
-                            color: colors.pageText,
+                            color: colors.tableText,
                             marginTop: 20,
                             textAlign: 'center',
                             fontStyle: 'italic',

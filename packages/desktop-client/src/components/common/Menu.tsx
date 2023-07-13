@@ -101,7 +101,13 @@ export default function Menu({
 
   return (
     <View
-      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
+      style={{
+        color: colors.menuItemText,
+        backgroundColor: colors.menuBackground,
+        outline: 'none',
+        borderRadius: 4,
+        overflow: 'hidden',
+      }}
       tabIndex={1}
       innerRef={elRef}
     >

@@ -386,7 +386,7 @@ function StageInfo() {
   );
 }
 
-function StageButton({ selected, children, style, onSelect }) {
+export function StageButton({ selected, children, style, onSelect }) {
   return (
     <Button
       bare
@@ -753,7 +753,8 @@ export default function EditRule({
   }
 
   let editorStyle = {
-    backgroundColor: colors.editorBackground,
+    color: colors.pillText,
+    backgroundColor: colors.pillBackground,
     borderRadius: 4,
   };
 
@@ -774,6 +775,7 @@ export default function EditRule({
             flexShrink: 0,
             flexBasis: 'auto',
             overflow: 'hidden',
+            color: colors.pageText,
           }}
         >
           <View
@@ -784,9 +786,7 @@ export default function EditRule({
               padding: '0 20px',
             }}
           >
-            <Text style={{ color: colors.tableText, marginRight: 15 }}>
-              Stage of rule:
-            </Text>
+            <Text style={{ marginRight: 15 }}>Stage of rule:</Text>
 
             <Stack direction="row" align="center" spacing={1}>
               <StageButton
@@ -823,7 +823,7 @@ export default function EditRule({
           >
             <View style={{ flexShrink: 0 }}>
               <View style={{ marginBottom: 30 }}>
-                <Text style={{ color: colors.pageText, marginBottom: 15 }}>
+                <Text style={{ marginBottom: 15 }}>
                   If
                   <FieldSelect
                     data-testid="conditions-op"
@@ -847,10 +847,10 @@ export default function EditRule({
                 />
               </View>
 
-              <Text style={{ color: colors.pageText, marginBottom: 15 }}>
+              <Text style={{ marginBottom: 15 }}>
                 Then apply these actions:
               </Text>
-              <View style={{ flex: 1, color: colors.tableText }}>
+              <View style={{ flex: 1 }}>
                 {actions.length === 0 ? (
                   <Button
                     style={{ alignSelf: 'flex-start' }}
@@ -905,7 +905,6 @@ export default function EditRule({
               <SimpleTransactionsTable
                 transactions={transactions}
                 fields={getTransactionFields(conditions, actions)}
-                style={{ border: '1px solid ' + colors.tableBorder }}
               />
 
               <Stack

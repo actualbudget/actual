@@ -44,8 +44,6 @@ function TransactionSearchInput({ accountName, onSearch }) {
         }}
         placeholder={`Search ${accountName}`}
         style={{
-          backgroundColor: colors.tableBackground,
-          border: `1px solid ${colors.formInputBorder}`,
           fontSize: 15,
           flex: 1,
           height: 32,

@@ -46,7 +46,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
           padding: '5px 0',
           marginTop: 17,
           backgroundColor: colors.tableRowHeaderBackground,
-          color: colors.pageText,
+          color: colors.tableRowHeaderText,
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor: colors.tableBorder,
@@ -160,7 +160,7 @@ function ToBudget({
         const isNegative = num < 0;
 
         return (
-          <View style={{ alignItems: 'center', color: colors.tableText }}>
+          <View style={{ alignItems: 'center' }}>
             <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
             <View>
               <HoverTarget

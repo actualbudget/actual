@@ -169,9 +169,9 @@ function BudgetTotal({
     >
       <ProgressComponent current={current} target={target} />
 
-      <View style={{ marginLeft: 10 }}>
+      <View style={{ marginLeft: 10, color: colors.tableRowHeaderText }}>
         <View>
-          <Text style={{ color: colors.pageText }}>{title}</Text>
+          <Text>{title}</Text>
         </View>
 
         <Text>
@@ -233,11 +233,9 @@ function Saved({ projected, style }: SavedProps) {
   return (
     <View style={[{ alignItems: 'center', fontSize: 14 }, style]}>
       {projected ? (
-        <Text style={{ color: colors.pageText }}>Projected Savings:</Text>
+        <Text>Projected Savings:</Text>
       ) : (
-        <View style={{ color: colors.pageText }}>
-          {isNegative ? 'Overspent:' : 'Saved:'}
-        </View>
+        <View>{isNegative ? 'Overspent:' : 'Saved:'}</View>
       )}
 
       <HoverTarget
@@ -324,6 +322,7 @@ export const BudgetSummary = memo(function BudgetSummary({
   return (
     <View
       style={{
+        color: colors.tableText,
         backgroundColor: colors.tableBackground,
         boxShadow: MONTH_BOX_SHADOW,
         borderRadius: 6,
@@ -401,7 +400,7 @@ export const BudgetSummary = memo(function BudgetSummary({
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={colors.pageText}
+                defaultColor={colors.pageText} // notes page color
               />
             </View>
             <View style={{ userSelect: 'none' }}>
@@ -444,7 +443,7 @@ export const BudgetSummary = memo(function BudgetSummary({
             spacing={2}
             style={{
               alignSelf: 'center',
-              backgroundColor: colors.tableBackground,
+              backgroundColor: colors.tableRowHeaderBackground,
               borderRadius: 4,
               padding: '10px 15px',
               marginTop: 13,

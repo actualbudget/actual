@@ -18,6 +18,7 @@ function AccountHeader({ name, amount }) {
         flexDirection: 'row',
         marginTop: 28,
         marginBottom: 10,
+        color: colors.pageText,
       }}
     >
       <View style={{ flex: 1 }}>
@@ -26,7 +27,6 @@ function AccountHeader({ name, amount }) {
             styles.text,
             {
               textTransform: 'uppercase',
-              color: colors.tableText,
               fontSize: 13,
             },
           ]}
@@ -37,7 +37,7 @@ function AccountHeader({ name, amount }) {
       </View>
       <CellValue
         binding={amount}
-        style={[styles.text, { color: colors.tableText, fontSize: 13 }]}
+        style={[styles.text, { fontSize: 13 }]}
         type="financial"
       />
     </View>
@@ -86,7 +86,6 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
                 {
                   fontSize: 17,
                   fontWeight: 600,
-                  color: updated ? colors.tableTextSelected : colors.tableText,
                   paddingRight: 30,
                 },
               ]}
@@ -109,8 +108,8 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         <CellValue
           binding={getBalanceQuery(account)}
           type="financial"
-          style={{ fontSize: 16, color: colors.tableText }}
-          getStyle={value => value < 0 && { color: colors.tableText }}
+          style={{ fontSize: 16, color: 'inherit' }}
+          getStyle={value => value < 0 && { color: 'inherit' }}
         />
       </Button>
     </View>

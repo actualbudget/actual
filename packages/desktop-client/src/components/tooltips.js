@@ -298,14 +298,11 @@ export class Tooltip extends Component {
       padding: 5,
       width,
       ...styles.shadowLarge,
-      borderRadius: 4,
+      borderRadius: styles.menuBorderRadius,
       backgroundColor: altMenu
         ? colors.altMenuBackground
         : colors.tooltipBackground,
       color: altMenu ? colors.altMenuText : colors.menuItemText,
-
-      border:
-        '10px solid ' + altMenu ? colors.altMenuBorder : colors.tooltipBorder,
       // opacity: 0,
       // transition: 'transform .1s, opacity .1s',
       // transitionTimingFunction: 'ease-out'

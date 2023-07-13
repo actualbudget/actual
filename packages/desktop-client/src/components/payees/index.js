@@ -299,7 +299,6 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
               padding: 3,
               fontSize: 11,
               fontStyle: 'italic',
-              color: colors.pageText,
             }}
           >
             {[...selectedPayees]

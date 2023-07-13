@@ -131,17 +131,7 @@ function Settings({
           globalPrefs.floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
-      <Page
-        title="Settings"
-        titleStyle={
-          isNarrowWidth
-            ? {
-                backgroundColor: colors.sidebarBackground,
-                color: colors.sidebarItemText,
-              }
-            : { color: colors.tableText }
-        }
-      >
+      <Page title="Settings">
         <View style={{ flexShrink: 0, gap: 30, color: colors.tableText }}>
           {isNarrowWidth && (
             <View

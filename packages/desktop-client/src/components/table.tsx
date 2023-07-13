@@ -702,11 +702,7 @@ export function SelectCell({
           clickBehavior="none"
         >
           {selected && (
-            <Checkmark
-              width={6}
-              height={6}
-              style={{ color: colors.tableBackground }}
-            />
+            <Checkmark width={6} height={6} style={{ color: 'inherit' }} />
           )}
         </CellButton>
       )}
@@ -860,7 +856,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
         <Tooltip
           position="bottom-right"
           width={200}
-          style={{ padding: 0 }}
+          style={{ padding: 0, backgroundColor: 'transparent' }}
           onClose={() => setMenuOpen(false)}
         >
           <Menu

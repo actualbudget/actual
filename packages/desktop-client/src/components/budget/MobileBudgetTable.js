@@ -397,7 +397,8 @@ class TotalsRow extends PureComponent {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: colors.tableRowHeaderBackground,
+          color: colors.tableHeaderText,
+          backgroundColor: colors.tableHeaderBackground,
         }}
         data-testid="totals"
       >
@@ -462,7 +463,7 @@ class TotalsRow extends PureComponent {
               onClick={() => onAddCategory(group.id)}
               style={{ padding: 10 }}
             >
-              <Add width={15} height={15} color={colors.tableText} />
+              <Add width={15} height={15} color="inherit" />
             </Button>
           </View>
           //   </Animated.View>
@@ -623,7 +624,8 @@ class BudgetGroup extends PureComponent {
         style={{
           marginTop: 7,
           marginBottom: 7,
-          color: colors.tableHeaderText,
+          color: colors.tableText,
+          backgroundColor: colors.tableBackground,
         }}
       >
         <TotalsRow
@@ -673,9 +675,15 @@ class IncomeBudgetGroup extends Component {
           }}
         >
           {type === 'report' && (
-            <Label title="BUDGETED" style={{ width: 90 }} />
+            <Label
+              title="BUDGETED"
+              style={{ width: 90, color: colors.pageText }}
+            />
           )}
-          <Label title="RECEIVED" style={{ width: 90 }} />
+          <Label
+            title="RECEIVED"
+            style={{ width: 90, color: colors.pageText }}
+          />
         </View>
 
         <Card style={{ marginTop: 0 }}>
@@ -692,7 +700,7 @@ class IncomeBudgetGroup extends Component {
             nameTextStyle={{ fontWeight: '500' }}
             amountTextStyle={{ fontWeight: '500' }}
             style={{
-              backgroundColor: colors.tableRowHeaderBackground,
+              backgroundColor: colors.tableHeaderBackground,
               color: colors.tableHeaderText,
             }}
           />
@@ -933,14 +941,13 @@ export class BudgetTable extends Component {
             <View style={{ flex: 1 }} />
 
             <View style={{ width: 90 }}>
-              <Label title="BUDGETED" />
+              <Label title="BUDGETED" style={{ color: colors.tableText }} />
               <CellValue
                 binding={reportBudget.totalBudgetedExpense}
                 type="financial"
                 style={[
                   styles.smallText,
                   {
-                    color: colors.tableText,
                     textAlign: 'right',
                     fontWeight: '500',
                   },
@@ -951,7 +958,7 @@ export class BudgetTable extends Component {
               />
             </View>
             <View style={{ width: 90 }}>
-              <Label title="BALANCE" />
+              <Label title="BALANCE" style={{ color: colors.tableText }} />
               <CellValue
                 binding={rolloverBudget.totalBalance}
                 type="financial"
@@ -1084,11 +1091,7 @@ function UnconnectedBudgetHeader({
             },
           ]}
         >
-          <ArrowThinLeft
-            style={{ color: colors.sidebarItemText }}
-            width="15"
-            height="15"
-          />
+          <ArrowThinLeft style={{ color: 'inherit' }} width="15" height="15" />
         </Button>
       )}
       <Text
@@ -1129,7 +1132,7 @@ function UnconnectedBudgetHeader({
             style={[buttonStyle, { opacity: nextEnabled ? 1 : 0.6 }]}
           >
             <ArrowThinRight
-              style={{ color: colors.sidebarItemText }}
+              style={{ color: 'inherit' }}
               width="15"
               height="15"
             />

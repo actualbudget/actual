@@ -140,7 +140,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
                 syncState === 'offline' ||
                 syncState === 'local'
               ? colors.pageTextSubdued
-              : null,
+              : 'inherit',
         },
         media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
@@ -150,7 +150,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
                 syncState === 'offline' ||
                 syncState === 'local'
               ? colors.pageTextSubdued
-              : null,
+              : 'inherit',
         }),
       )}
       onClick={onSync}

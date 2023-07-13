@@ -160,38 +160,40 @@ export default function DiscoverSchedules() {
 
   return (
     <Page title="Found schedules" modalSize={{ width: 850, height: 650 }}>
-      <P>
-        We found some possible schedules in your current transactions. Select
-        the ones you want to create.
-      </P>
-      <P>
-        If you expected a schedule here and don’t see it, it might be because
-        the payees of the transactions don’t match. Make sure you rename payees
-        on all transactions for a schedule to be the same payee.
-      </P>
+      <View style={{ color: colors.pageText }}>
+        <P>
+          We found some possible schedules in your current transactions. Select
+          the ones you want to create.
+        </P>
+        <P>
+          If you expected a schedule here and don’t see it, it might be because
+          the payees of the transactions don’t match. Make sure you rename
+          payees on all transactions for a schedule to be the same payee.
+        </P>
 
-      <SelectedProvider instance={selectedInst}>
-        <DiscoverSchedulesTable loading={isLoading} schedules={schedules} />
-      </SelectedProvider>
+        <SelectedProvider instance={selectedInst}>
+          <DiscoverSchedulesTable loading={isLoading} schedules={schedules} />
+        </SelectedProvider>
 
-      <Stack
-        direction="row"
-        align="center"
-        justify="flex-end"
-        style={{
-          paddingTop: 20,
-          paddingBottom: pageType.type === 'modal' ? 0 : 20,
-        }}
-      >
-        <ButtonWithLoading
-          primary
-          loading={creating}
-          disabled={selectedInst.items.size === 0}
-          onClick={onCreate}
+        <Stack
+          direction="row"
+          align="center"
+          justify="flex-end"
+          style={{
+            paddingTop: 20,
+            paddingBottom: pageType.type === 'modal' ? 0 : 20,
+          }}
         >
-          Create schedules
-        </ButtonWithLoading>
-      </Stack>
+          <ButtonWithLoading
+            primary
+            loading={creating}
+            disabled={selectedInst.items.size === 0}
+            onClick={onCreate}
+          >
+            Create schedules
+          </ButtonWithLoading>
+        </Stack>
+      </View>
     </Page>
   );
 }

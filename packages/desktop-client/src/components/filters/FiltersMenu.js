@@ -36,6 +36,7 @@ import {
   CustomSelect,
 } from '../common';
 import { Value } from '../ManageRules';
+import { StageButton } from '../modals/EditRule';
 import GenericInput from '../util/GenericInput';
 
 import { CondOpMenu } from './SavedFilters';
@@ -97,32 +98,6 @@ function subfieldToOptions(field, subfield) {
     default:
       return null;
   }
-}
-
-function OpButton({ op, selected, style, onClick }) {
-  return (
-    <Button
-      bare
-      style={[
-        {
-          marginBottom: 5,
-          fontSize: 'inherit',
-          border: '1px solid ' + colors.pillBorder,
-          color: colors.pillText,
-          backgroundColor: colors.pillBackground,
-        },
-        selected && {
-          border: '1px solid ' + colors.pillBorderSelected,
-          color: colors.pillTextSelected,
-          backgroundColor: colors.pillBackgroundSelected,
-        },
-        style,
-      ]}
-      onClick={onClick}
-    >
-      {friendlyOp(op)}
-    </Button>
-  );
 }
 
 function updateFilterReducer(state, action) {
@@ -238,31 +213,31 @@ function ConfigureField({
         >
           {type === 'boolean'
             ? [
-                <OpButton
+                <StageButton
+                  children={friendlyOp('true')}
                   key="true"
-                  op="true"
                   selected={value === true}
-                  onClick={() => {
+                  onSelect={() => {
                     dispatch({ type: 'set-op', op: 'is' });
                     dispatch({ type: 'set-value', value: true });
                   }}
                 />,
-                <OpButton
+                <StageButton
+                  children={friendlyOp('false')}
                   key="false"
-                  op="false"
                   selected={value === false}
-                  onClick={() => {
+                  onSelect={() => {
                     dispatch({ type: 'set-op', op: 'is' });
                     dispatch({ type: 'set-value', value: false });
                   }}
                 />,
               ]
             : ops.map(currOp => (
-                <OpButton
+                <StageButton
+                  children={friendlyOp(currOp)}
                   key={currOp}
-                  op={currOp}
                   selected={currOp === op}
-                  onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  onSelect={() => dispatch({ type: 'set-op', op: currOp })}
                 />
               ))}
         </Stack>

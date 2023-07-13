@@ -518,7 +518,7 @@ function SidebarGroup({
           width={8}
           height={8}
           style={{
-            color: colors.tableText,
+            color: 'inherit',
             marginRight: 5,
             marginLeft: 5,
             flexShrink: 0,
@@ -552,7 +552,7 @@ function SidebarGroup({
               <CheveronDown
                 width={14}
                 height={14}
-                style={{ color: colors.tableText }}
+                style={{ color: 'inherit' }}
               />
             </Button>
             {menuOpen && (
@@ -605,7 +605,6 @@ function SidebarGroup({
           '& button': { display: 'none' },
           '&:hover button': {
             display: 'flex',
-            color: colors.tableRowBackgroundHover,
           },
         },
         dragPreview && {
@@ -721,7 +720,7 @@ const BudgetTotals = memo(function BudgetTotals({
           <DotsHorizontalTriple
             width={15}
             height={15}
-            style={{ color: colors.tableText }}
+            style={{ color: 'inherit' }}
           />
           {menuOpen && (
             <Tooltip

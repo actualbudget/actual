@@ -64,7 +64,9 @@ function DetailButton({ style, state, onDelete }) {
           setMenuOpen(true);
         }}
       >
-        <DotsHorizontalTriple style={{ width: 16, height: 16, ...style }} />
+        <DotsHorizontalTriple
+          style={{ width: 16, height: 16, color: 'inherit', ...style }}
+        />
       </Button>
       {menuOpen && (
         <Tooltip
@@ -190,13 +192,7 @@ function File({ file, onSelect, onDelete }) {
           />
         )}
 
-        <DetailButton
-          state={file.state}
-          onDelete={() => onDelete(file)}
-          style={{
-            color: colors.tableText,
-          }}
-        />
+        <DetailButton state={file.state} onDelete={() => onDelete(file)} />
       </View>
     </View>
   );
@@ -240,10 +236,7 @@ function RefreshButton({ onRefresh }) {
 
   return (
     <Button bare style={{ padding: 10, marginRight: 5 }} onClick={_onRefresh}>
-      <Icon
-        color={colors.tableText}
-        style={{ width: 18, height: 18, color: colors.tableText }}
-      />
+      <Icon style={{ width: 18, height: 18, color: 'inherit' }} />
     </Button>
   );
 }
@@ -333,7 +326,6 @@ function BudgetList({
           bare
           style={{
             marginLeft: 10,
-            color: colors.pageText,
           }}
           onClick={e => {
             e.preventDefault();

@@ -73,7 +73,14 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
         }
       }}
     >
-      <View style={{ fontSize: 20, fontWeight: 500, flexShrink: 0 }}>
+      <View
+        style={{
+          color: colors.pageText,
+          fontSize: 20,
+          fontWeight: 500,
+          flexShrink: 0,
+        }}
+      >
         Advanced Settings
       </View>
       {children}
