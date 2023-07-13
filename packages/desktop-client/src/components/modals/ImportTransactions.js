@@ -337,7 +337,7 @@ function Transaction({
 
 function SubLabel({ title }) {
   return (
-    <Text style={{ fontSize: 13, marginBottom: 3, color: colors.errorText }}>
+    <Text style={{ fontSize: 13, marginBottom: 3, color: colors.pageText }}>
       {title}
     </Text>
   );
@@ -351,11 +351,8 @@ function SelectField({ width, style, options, value, onChange }) {
         ...options.map(option => [option, option]),
       ]}
       value={value === null ? 'choose-field' : value}
-      style={{ width: '100%' }}
-      wrapperStyle={{
-        border: '1px solid ' + colors.formInputBorder,
-        ...style,
-      }}
+      style={{ borderWidth: 1, width: '100%' }}
+      wrapperStyle={style}
       onChange={value => onChange(value)}
     />
   );
@@ -388,10 +385,7 @@ function DateFormatSelect({
         ])}
         value={parseDateFormat || ''}
         onChange={value => onChange(value)}
-        style={{ width: '100%' }}
-        wrapperStyle={{
-          border: '1px solid ' + colors.formInputBorder,
-        }}
+        style={{ borderWidth: 1, width: '100%' }}
       />
     </View>
   );
@@ -482,7 +476,7 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
           <SelectField
             options={options}
             value={mappings.date}
-            style={{ marginRight: 5 }}
+            style={{ marginRight: 15 }}
             onChange={name => onChange('date', name)}
           />
         </View>
@@ -491,7 +485,7 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
           <SelectField
             options={options}
             value={mappings.payee}
-            style={{ marginRight: 5 }}
+            style={{ marginRight: 15 }}
             onChange={name => onChange('payee', name)}
           />
         </View>
@@ -500,7 +494,7 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
           <SelectField
             options={options}
             value={mappings.notes}
-            style={{ marginRight: 5 }}
+            style={{ marginRight: 15 }}
             onChange={name => onChange('notes', name)}
           />
         </View>
@@ -796,7 +790,7 @@ function ImportTransactions({
       }
       {...modalProps}
       loading={loadingState === 'parsing'}
-      style={{ width: 800 }}
+      style={{ width: 800, color: colors.pageText }}
     >
       {error && !error.parsed && (
         <View style={{ alignItems: 'center', marginBottom: 15 }}>
@@ -810,7 +804,6 @@ function ImportTransactions({
           style={{
             flex: 'unset',
             height: 300,
-            border: '1px solid ' + colors.tableBorder,
           }}
         >
           <TableHeader headers={headers} />
@@ -915,10 +908,7 @@ function ImportTransactions({
                       setCsvDelimiter(value);
                       parse(filename, { delimiter: value });
                     }}
-                    style={{ width: '100%' }}
-                    wrapperStyle={{
-                      border: '1px solid ' + colors.formInputBorder,
-                    }}
+                    style={{ borderWidth: 1, width: '100%' }}
                   />
                 </View>
               )}

@@ -815,7 +815,7 @@ export default function EditRule({
           <View
             innerRef={scrollableEl}
             style={{
-              borderBottom: '1px solid ' + colors.border,
+              borderBottom: '1px solid ' + colors.tableBorder,
               padding: 20,
               overflow: 'auto',
               maxHeight: 'calc(100% - 300px)',

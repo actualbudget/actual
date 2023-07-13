@@ -9,6 +9,7 @@ import { type CSSProperties, css } from 'glamor';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { colors, styles } from '../../style';
+import { MONTH_BOX_SHADOW } from '../budget/constants';
 
 type CustomSelectProps = {
   options: Array<[string, string]>;
@@ -62,6 +63,8 @@ export default function CustomSelect({
         {...css([
           {
             borderWidth: 0,
+            padding: '2px 5px',
+            borderRadius: 4,
           },
           style,
         ])}
@@ -95,7 +98,7 @@ export default function CustomSelect({
           outline: 0,
           borderRadius: styles.menuBorderRadius,
           backgroundColor: colors.menuBackground,
-          boxShadow: '0 2px 6px rgba(0, 0, 0, .25)',
+          boxShadow: MONTH_BOX_SHADOW,
           border: '1px solid ' + colors.menuBorder,
         }}
       >

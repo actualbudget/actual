@@ -7,6 +7,7 @@ import * as actions from 'loot-core/src/client/actions';
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
+import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -159,6 +160,8 @@ function EditField({
         {
           flex: 0,
           padding: '15px 10px',
+          backgroundColor: colors.altMenuBackground,
+          color: colors.altMenuItemText,
         },
         minWidth && { minWidth },
       ]}

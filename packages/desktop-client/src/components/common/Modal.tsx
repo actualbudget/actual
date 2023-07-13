@@ -125,7 +125,7 @@ const Modal = ({
             minHeight: 0,
             borderRadius: 4,
             border: '1px solid ' + colors.modalBorder,
-            color: colors.tableText,
+            color: colors.pageText,
             backgroundColor: colors.modalBackground,
             opacity: isHidden ? 0 : 1,
             [`@media (min-width: ${tokens.breakpoint_small})`]: {
@@ -148,7 +148,6 @@ const Modal = ({
             {showTitle && (
               <View
                 style={{
-                  color: colors.pageText,
                   flex: 1,
                   alignSelf: 'center',
                   textAlign: 'center',
@@ -195,7 +194,7 @@ const Modal = ({
                     style={{ padding: '10px 10px' }}
                     aria-label="Close"
                   >
-                    <Delete width={10} style={{ color: colors.pageText }} />
+                    <Delete width={10} style={{ color: 'inherit' }} />
                   </Button>
                 )}
               </View>
