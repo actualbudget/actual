@@ -101,6 +101,7 @@ function Header({
               onChangeDates(...validateStart(allMonths, newValue, end))
             }
             value={start}
+            defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
             options={allMonths.map(({ name, pretty }) => [name, pretty])}
           />
           <View>to</View>
