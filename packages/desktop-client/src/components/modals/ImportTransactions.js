@@ -354,8 +354,8 @@ function SelectField({ width, style, options, value, onChange }) {
       style={{ width: '100%' }}
       wrapperStyle={{
         border: '1px solid ' + colors.formInputBorder,
+        ...style,
       }}
-      wrapperStyle={style}
       onChange={value => onChange(value)}
     />
   );
