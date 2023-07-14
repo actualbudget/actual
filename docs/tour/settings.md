@@ -2,7 +2,13 @@
 
 The settings screens in Actual provide you with a number of options for managing the look and feel of your budget along with some more system specific settings.
 
+The Settings screen can be accessed by clicking the down arrow by your budget name or by going, in the sidebar, to More > Settings.
+
+NB: The screenshots below have not yet been updated to show the More dropdown
+
 ![](/img/using-actual/settings-1.png)
+
+
 
 ### Formatting
 
