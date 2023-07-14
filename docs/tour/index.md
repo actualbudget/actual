@@ -6,7 +6,7 @@ This article covers the first steps you’ll likely want to take when you first 
 
 ### Add a bank account
 
-When first opening the app, it will ask you to add a bank account. Fill out the form and click “Create.” You can add accounts later by clicking the "Add Account" button in the sidebar. If you’d like, you can export some recent transactions from your bank and [import them into Actual](../transactions/importing.md) so you have some data to work with right away. But Actual will also work just fine if you don’t import any transactions from the past.
+When first opening your newly created budget file in Actual, it will ask you to add a bank account. Fill out the form and click “Create.” You can add accounts later by clicking the "Add Account" button in the sidebar. If you’d like, you can export some recent transactions from your bank and [import them into Actual](../transactions/importing.md) so you have some data to work with right away. But Actual will also work just fine if you don’t import any transactions from the past.
 
 ### Set a budget
 
