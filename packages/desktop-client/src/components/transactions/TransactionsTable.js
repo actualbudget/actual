@@ -349,7 +349,7 @@ const TransactionHeader = memo(
           }
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
-        {showCleared && <Field width={21} truncate={false} />}
+        {showCleared && <Field width={30} truncate={false} />}
         <Cell value="" width={5 + scrollWidth ?? 0} />
       </Row>
     );
@@ -423,7 +423,7 @@ function StatusCell({
   return (
     <Cell
       name="cleared"
-      width={21}
+      width={30}
       focused={focused}
       style={{ padding: 1 }}
       plain
