@@ -603,9 +603,16 @@ async function applyCategoryTemplate(
         break;
       }
       case 'remainder': {
-        to_budget = Math.round(remainder_scale * template.weight);
-        // can over budget with the rounding, so checking that
-        if (to_budget > budgetAvailable) to_budget = budgetAvailable;
+        if (remainder_scale >= 0) {
+          to_budget +=
+            remainder_scale === 0
+              ? Math.round(template.weight)
+              : Math.round(remainder_scale * template.weight);
+          // can over budget with the rounding, so checking that
+          if (to_budget >= budgetAvailable + budgeted) {
+            to_budget = budgetAvailable + budgeted;
+          }
+        }
         break;
       }
       case 'error':
