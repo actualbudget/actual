@@ -1,6 +1,6 @@
 # Rules
 
-Introduced in 0.0.124, rules determine how a transaction is processed. When importing or syncing transactions, they are run through a list of rules that can apply actions to the transaction. For example, a rule could process a transaction with the payee `AMAZON.COM*5C7QC7MH0 AM 10/26 PURCHASE AMZN.COM/BILL`, and because it contains the word "amazon", sets the payee to "Amazon" and the category to "my fun stuff". Rules allow you to automate any workflow you want.
+Rules determine how a transaction is processed. When importing or syncing transactions, they are run through a list of rules that can apply actions to the transaction. For example, a rule could process a transaction with the payee `AMAZON.COM*5C7QC7MH0 AM 10/26 PURCHASE AMZN.COM/BILL`, and because it contains the word "amazon", sets the payee to "Amazon" and the category to "my fun stuff". Rules allow you to automate any workflow you want.
 
 Cleaning up payees is a common use case of rules since they are ugly much of the time. But rules can do anything: they can set the "notes" field, create a transfer, and more. If you want to be super detailed, you can create all kinds of rules to automate your process away.
 
@@ -12,7 +12,7 @@ The second best part is because you ultimately own the rules, you are free to go
 
 ## How rules work
 
-You can view all the rules by going to File > Manage Rules… (On browser, open the system menu in the top of the sidebar.
+You can view all the rules by going to **More** and then **Rules** in the Sidebar.
 
 When a transaction is imported, it runs against all of the rules **in the order that you see them**. If all of the conditions of a rule matches (the left side), then all of the actions are run (the right side). The transaction is changed, and then it continues running the rest of the rules. Each rule is always only run once. At the end, the transaction will be updated with changes from all matching rules.
 
@@ -57,7 +57,7 @@ Right now, there are two types of rules that Actual will automatically create or
 
 When you change the payee of a transaction and the previous one is no longer used anywhere, Actual will ask you if you want to automatically apply that rename in the future. This creates a nice flow for cleaning up transactions: you can import transactions with ugly payees like `AMAZON.COM*5C7QC7MH0 AM 10/26 PURCHASE AMZN.COM/BILL`, and then change the payee in the transactions list. Actual will ask you if you want to do that in the future, and if you click yes, that payee will automatically be cleaned up in the future.
 
-In the prompt, you can also select the "edit rule" option. Actual will take you to the rule that it created for the rename, and you can change it however you like. For the above payee, you probably want to change the condition to "contains 'amazon'" so all amazon payees are cleaned up.
+You can also select the "edit" option to the right of the rule. Actual will take you to the rule that it created for the rename, and you can change it however you like. For the above payee, you probably want to change the condition to "contains 'amazon'" so all amazon payees are cleaned up.
 
 Payee renaming rules that Actual creates are always in the `pre` stage, so they always run first.
 
@@ -75,7 +75,7 @@ If Actual is doing something that you simply don't like, create a `post` rule to
 
 ### Creating a rule
 
-To create a rule, go to File > Manage Rules… to view all the rules and click "Create new rule" in the bottom-right. You will now be editing a new rule.
+To create a rule, go to More > Rules… to view all the rules and click "Create new rule" in the bottom-right. You will now be editing a new rule.
 
 ### Editing a rule
 
@@ -87,11 +87,11 @@ You can even manually apply all the actions to the transactions. You need to sel
 
 ### Deleting a rule
 
-To delete a rule, go to File > Manage Rules… to view all the rules and select the ones you want to delete. Click the "Delete # rules" button to delete them.
+To delete a rule (or rules), select the ones you want to delete. Then go down to the bottom right of the window and click the "Delete # rules" button.
 
 ### Viewing rules for a payee
 
-To view the list of rules that apply to a specific payee, go to File > Manage Payees… to view the list of payees. This table shows you which payees have rules associated with them, and you can click "# associated rules" to view the rules just for that payee.
+To view the list of rules that apply to a specific payee, go to More > Payees… to view the list of payees. This table shows you which payees have rules associated with them, and you can click "# associated rules" to view the rules just for that payee.
 
 ## Using the rule editor for sophisticated batch editing
 
@@ -99,4 +99,4 @@ This deserves its own section because this turned out to be a surprising use cas
 
 That means if you need to do a lot of work across many transactions at once, you should try the rule editor. While you can select individual transactions in the account screen and quickly change any one field, that is more targeted to changing one field across a small number of transactions. In the rule editor, you can apply any number of actions at once and get a clear view of what transactions are changing.
 
-To do this go to File > Manage Rules… and click "Create new rule". You won't be actually creating a new rule, but you'll have the rule editor at your disposal for quick bulk editing.
+To do this go to More > Rules… and click "Create new rule". You won't be actually creating a new rule, but you'll have the rule editor at your disposal for quick bulk editing.
