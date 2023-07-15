@@ -394,6 +394,8 @@ export function StageButton({ selected, children, style, onSelect }) {
       bare
       style={[
         {
+          marginRight: 5,
+          marginBottom: 5,
           fontSize: 'inherit',
           border: '1px solid ' + colors.pillBorder,
           color: colors.pillText,
