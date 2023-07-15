@@ -32,11 +32,9 @@ export function AmountInput({ id, defaultValue = 0, onChange, style }) {
       leftContent={
         <Button bare style={{ padding: '0 7px' }} onClick={onSwitch}>
           {negative ? (
-            <Subtract
-              style={{ width: 8, height: 8, color: colors.formInputText }}
-            />
+            <Subtract style={{ width: 8, height: 8, color: 'inherit' }} />
           ) : (
-            <Add style={{ width: 8, height: 8, color: colors.formInputText }} />
+            <Add style={{ width: 8, height: 8, color: 'inherit' }} />
           )}
         </Button>
       }
