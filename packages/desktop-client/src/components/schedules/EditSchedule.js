@@ -719,7 +719,7 @@ export default function ScheduleDetails() {
                   <View
                     style={{
                       padding: 20,
-                      color: colors.tabletext,
+                      color: colors.tableText,
                       textAlign: 'center',
                     }}
                   >
