@@ -29,10 +29,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   ungroupTransactions,
-  splitTransaction,
   updateTransaction,
-  addSplitTransaction,
-  deleteTransaction,
   realizeTempTransactions,
 } from 'loot-core/src/shared/transactions';
 import {
@@ -294,48 +291,48 @@ class TransactionEditInner extends PureComponent {
     });
   };
 
-  onSplit = () => {
-    this.props.navigation.navigate('CategorySelect', {
-      title: 'Select the first category',
-      onSelect: categoryId => {
-        let transactions = this.state.transactions;
+  // onSplit = () => {
+  //   this.props.navigation.navigate('CategorySelect', {
+  //     title: 'Select the first category',
+  //     onSelect: categoryId => {
+  //       let transactions = this.state.transactions;
 
-        // Split the transaction
-        let { data } = splitTransaction(transactions, transactions[0].id);
-        data[1].category = categoryId;
+  //       // Split the transaction
+  //       let { data } = splitTransaction(transactions, transactions[0].id);
+  //       data[1].category = categoryId;
 
-        this.setState({ transactions: data }, this.focusSplit);
-      },
-    });
-  };
+  //       this.setState({ transactions: data }, this.focusSplit);
+  //     },
+  //   });
+  // };
 
-  onAddSplit = () => {
-    this.props.navigation.navigate('CategorySelect', {
-      title: 'Select a category',
-      onSelect: categoryId => {
-        let transactions = this.state.transactions;
+  // onAddSplit = () => {
+  //   this.props.navigation.navigate('CategorySelect', {
+  //     title: 'Select a category',
+  //     onSelect: categoryId => {
+  //       let transactions = this.state.transactions;
 
-        // Split the transaction
-        let { data } = addSplitTransaction(transactions, transactions[0].id);
-        // Set the initial category
-        data[data.length - 1].category = categoryId;
+  //       // Split the transaction
+  //       let { data } = addSplitTransaction(transactions, transactions[0].id);
+  //       // Set the initial category
+  //       data[data.length - 1].category = categoryId;
 
-        this.setState({ transactions: data }, this.focusSplit);
-      },
-    });
-  };
+  //       this.setState({ transactions: data }, this.focusSplit);
+  //     },
+  //   });
+  // };
 
-  focusSplit = () => {
-    if (this.lastChildAmount) {
-      this.lastChildAmount.focus();
-    }
-  };
+  // focusSplit = () => {
+  //   if (this.lastChildAmount) {
+  //     this.lastChildAmount.focus();
+  //   }
+  // };
 
-  onDeleteSplit = transaction => {
-    let { transactions } = this.state;
-    let { data } = deleteTransaction(transactions, transaction.id);
-    this.setState({ transactions: data });
-  };
+  // onDeleteSplit = transaction => {
+  //   let { transactions } = this.state;
+  //   let { data } = deleteTransaction(transactions, transaction.id);
+  //   this.setState({ transactions: data });
+  // };
 
   // TODO: `renderActions` was used to render swipe actions on split transaction
   // rows. It enabled you to swipe, revealing a delete action, and if you swiped
@@ -384,7 +381,7 @@ class TransactionEditInner extends PureComponent {
     const transactions = this.serializeTransactions(
       this.state.transactions || [],
     );
-    const [transaction, ...childTransactions] = transactions;
+    const [transaction, ..._childTransactions] = transactions;
     const { payee: payeeId, category, account: accountId } = transaction;
 
     // Child transactions should always default to the signage
@@ -542,75 +539,80 @@ class TransactionEditInner extends PureComponent {
                   onClick={() => this.onClick(transaction.id, 'category')}
                 />
               ) : (
-                <View>
-                  {childTransactions.map((child, idx) => {
-                    const isLast = idx === childTransactions.length - 1;
-                    return (
-                      // <Swipeable
-                      //   key={child.id}
-                      //   renderRightActions={this.renderActions}
-                      //   onSwipeableRightOpen={() => this.onDeleteSplit(child)}
-                      //   rightThreshold={100}
-                      // >
-                      <TapField
-                        value={
-                          child.category
-                            ? lookupName(categories, child.category)
-                            : null
-                        }
-                        rightContent={
-                          <FocusableAmountInput
-                            ref={
-                              isLast ? el => (this.lastChildAmount = el) : null
-                            }
-                            value={child.amount}
-                            sign={forcedSign}
-                            scrollIntoView={true}
-                            buttonProps={{
-                              paddingVertical: 5,
-                              style: {
-                                width: 80,
-                                alignItems: 'flex-end',
-                              },
-                            }}
-                            textStyle={{ fontSize: 14 }}
-                            onBlur={value =>
-                              this.onEdit(child, 'amount', value.toString())
-                            }
-                          />
-                        }
-                        style={{ marginTop: idx === 0 ? 0 : -1 }}
-                        onTap={() => this.openChildEdit(child)}
-                      />
-                      // </Swipeable>
-                    );
-                  })}
+                <Text style={{ paddingLeft: EDITING_PADDING }}>
+                  {
+                    'Split transaction editing is not supported on mobile at this time.'
+                  }
+                </Text>
+                // <View>
+                //   {childTransactions.map((child, idx) => {
+                //     const isLast = idx === childTransactions.length - 1;
+                //     return (
+                //       // <Swipeable
+                //       //   key={child.id}
+                //       //   renderRightActions={this.renderActions}
+                //       //   onSwipeableRightOpen={() => this.onDeleteSplit(child)}
+                //       //   rightThreshold={100}
+                //       // >
+                //       <TapField
+                //         value={
+                //           child.category
+                //             ? lookupName(categories, child.category)
+                //             : null
+                //         }
+                //         rightContent={
+                //           <FocusableAmountInput
+                //             ref={
+                //               isLast ? el => (this.lastChildAmount = el) : null
+                //             }
+                //             value={child.amount}
+                //             sign={forcedSign}
+                //             scrollIntoView={true}
+                //             buttonProps={{
+                //               paddingVertical: 5,
+                //               style: {
+                //                 width: 80,
+                //                 alignItems: 'flex-end',
+                //               },
+                //             }}
+                //             textStyle={{ fontSize: 14 }}
+                //             onBlur={value =>
+                //               this.onEdit(child, 'amount', value.toString())
+                //             }
+                //           />
+                //         }
+                //         style={{ marginTop: idx === 0 ? 0 : -1 }}
+                //         onTap={() => this.openChildEdit(child)}
+                //       />
+                //       // </Swipeable>
+                //     );
+                //   })}
 
-                  <View
-                    style={{
-                      alignItems: 'flex-end',
-                      marginRight: EDITING_PADDING,
-                      paddingTop: 10,
-                    }}
-                  >
-                    {transaction.error && (
-                      <Text style={{ marginBottom: 10 }}>
-                        Remaining:{' '}
-                        {integerToCurrency(transaction.error.difference)}
-                      </Text>
-                    )}
-                    <Button
-                      style={{
-                        paddingVertical: 6,
-                        paddingHorizontal: 15,
-                      }}
-                      onPress={this.onAddSplit}
-                      bare={true}
-                    >
-                      Add split
-                    </Button>
-                  </View>
-                </View>
+                //   <View
+                //     style={{
+                //       alignItems: 'flex-end',
+                //       marginRight: EDITING_PADDING,
+                //       paddingTop: 10,
+                //     }}
+                //   >
+                //     {transaction.error && (
+                //       <Text style={{ marginBottom: 10 }}>
+                //         Remaining:{' '}
+                //         {integerToCurrency(transaction.error.difference)}
+                //       </Text>
+                //     )}
+                //     <Button
+                //       style={{
+                //         paddingVertical: 6,
+                //         paddingHorizontal: 15,
+                //       }}
+                //       onPress={this.onAddSplit}
+                //       bare={true}
+                //     >
+                //       Add split
+                //     </Button>
+                //   </View>
+                // </View>
               )}
             </View>
 
