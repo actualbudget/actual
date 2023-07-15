@@ -7,7 +7,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
-import { colors } from '../../style';
+import { colors, styles } from '../../style';
 import {
   Button,
   CustomSelect,
@@ -215,10 +215,6 @@ function MonthlyPatterns({ config, dispatch }) {
             wrapperStyle={{
               flex: 1,
               marginRight: 10,
-              border: '1px solid ' + colors.formInputBorder,
-            }}
-            style={{
-              width: '100%',
             }}
           />
           <CustomSelect
@@ -233,9 +229,7 @@ function MonthlyPatterns({ config, dispatch }) {
             wrapperStyle={{
               flex: 1,
               marginRight: 10,
-              border: '1px solid ' + colors.formInputBorder,
             }}
-            style={{ width: '100%' }}
           />
           <Button
             bare
@@ -344,9 +338,10 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          style={{ height: 23 }}
           wrapperStyle={{
-            border: '1px solid ' + colors.formInputBorder,
+            height: '28px',
+            marginRight: '10px',
+            ...styles.smallText,
           }}
         />
         {config.frequency === 'monthly' &&

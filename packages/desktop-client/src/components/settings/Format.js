@@ -2,7 +2,6 @@ import React from 'react';
 
 import { numberFormats } from 'loot-core/src/shared/util';
 
-import { colors } from '../../style';
 import tokens from '../../tokens';
 import { CustomSelect, Text, View } from '../common';
 import { useSidebar } from '../FloatableSidebar';
@@ -95,10 +94,6 @@ export default function FormatSettings({ prefs, savePrefs }) {
                 f.value,
                 prefs.hideFraction ? f.labelNoFraction : f.label,
               ])}
-              style={{ padding: '2px 10px', fontSize: 15 }}
-              wrapperStyle={{
-                border: '1px solid ' + colors.formInputBorder,
-              }}
             />
 
             <Text style={{ display: 'flex' }}>
@@ -116,10 +111,6 @@ export default function FormatSettings({ prefs, savePrefs }) {
               value={dateFormat}
               onChange={onDateFormat}
               options={dateFormats.map(f => [f.value, f.label])}
-              style={{ padding: '2px 10px', fontSize: 15 }}
-              wrapperStyle={{
-                border: '1px solid ' + colors.formInputBorder,
-              }}
             />
           </Column>
 
@@ -128,10 +119,6 @@ export default function FormatSettings({ prefs, savePrefs }) {
               value={firstDayOfWeekIdx}
               onChange={onFirstDayOfWeek}
               options={daysOfWeek.map(f => [f.value, f.label])}
-              style={{ padding: '2px 10px', fontSize: 15 }}
-              wrapperStyle={{
-                border: '1px solid ' + colors.formInputBorder,
-              }}
             />
           </Column>
         </View>

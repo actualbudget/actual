@@ -11,6 +11,7 @@ import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { colors, styles } from '../../style';
 
 type CustomSelectProps = {
+  bare?: boolean;
   options: Array<[string, string]>;
   value: string;
   defaultLabel?: string;
@@ -36,6 +37,7 @@ type CustomSelectProps = {
  */
 
 export default function CustomSelect({
+  bare,
   options,
   value,
   defaultLabel = '',
@@ -51,22 +53,23 @@ export default function CustomSelect({
       value={value}
       onChange={onChange}
       style={{
-        color: colors.formInputText,
-        backgroundColor: colors.formInputBackground,
+        color: bare ? 'inherit' : colors.formInputText,
+        backgroundColor: bare ? 'transparent' : colors.formInputBackground,
         borderRadius: styles.menuBorderRadius,
+        border: bare ? 'none' : '1px solid ' + colors.formInputBorder,
         lineHeight: '1em',
+        ...styles.mediumText,
         ...wrapperStyle,
       }}
     >
       <ListboxButton
-        {...css([
-          {
-            borderWidth: 0,
-            padding: '2px 5px',
-            borderRadius: 4,
-          },
-          style,
-        ])}
+        {...css({
+          width: '100%',
+          borderWidth: 0,
+          padding: '2px 10px',
+          borderRadius: styles.menuBorderRadius,
+          ...style,
+        })}
         arrow={
           <ExpandArrow
             style={{
@@ -80,7 +83,6 @@ export default function CustomSelect({
         <span
           style={{
             display: 'flex',
-            overflowX: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             maxWidth: `calc(100% - ${arrowSize + 5}px)`,

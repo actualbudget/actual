@@ -343,7 +343,7 @@ function SubLabel({ title }) {
   );
 }
 
-function SelectField({ width, style, options, value, onChange }) {
+function SelectField({ style, options, value, onChange }) {
   return (
     <CustomSelect
       options={[
@@ -351,7 +351,6 @@ function SelectField({ width, style, options, value, onChange }) {
         ...options.map(option => [option, option]),
       ]}
       value={value === null ? 'choose-field' : value}
-      style={{ borderWidth: 1, width: '100%' }}
       wrapperStyle={style}
       onChange={value => onChange(value)}
     />
@@ -385,7 +384,6 @@ function DateFormatSelect({
         ])}
         value={parseDateFormat || ''}
         onChange={value => onChange(value)}
-        style={{ borderWidth: 1, width: '100%' }}
       />
     </View>
   );
@@ -908,7 +906,6 @@ function ImportTransactions({
                       setCsvDelimiter(value);
                       parse(filename, { delimiter: value });
                     }}
-                    style={{ borderWidth: 1, width: '100%' }}
                   />
                 </View>
               )}

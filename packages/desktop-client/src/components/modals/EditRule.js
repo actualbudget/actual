@@ -82,6 +82,7 @@ export function FieldSelect({ fields, style, value, onChange }) {
   return (
     <View style={{ color: colors.pageTextPositive, fontWeight: 700, ...style }}>
       <CustomSelect
+        bare
         options={fields}
         value={value}
         onChange={value => onChange('field', value)}
@@ -106,6 +107,7 @@ export function OpSelect({
 
   return (
     <CustomSelect
+      bare
       options={ops.map(op => [op, formatOp(op, type)])}
       value={value}
       onChange={value => onChange('op', value)}

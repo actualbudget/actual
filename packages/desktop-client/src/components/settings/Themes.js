@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { colors, GetColorThemes } from '../../style';
+import { GetColorThemes } from '../../style';
 import { View, CustomSelect, Text } from '../common';
 
 import { Setting } from './UI';
@@ -17,10 +17,6 @@ export default function ThemeSettings({ globalPrefs, saveGlobalPrefs }) {
             }}
             value={globalPrefs.theme}
             options={themes.map(x => [x, x])}
-            style={{ padding: '2px 10px', fontSize: 15 }}
-            wrapperStyle={{
-              border: '1px solid ' + colors.formInputBorder,
-            }}
           />
         </View>
       }

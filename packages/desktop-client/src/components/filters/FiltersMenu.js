@@ -190,9 +190,6 @@ function ConfigureField({
                   dispatch({ type: 'set-op', op: 'is' });
                 }
               }}
-              wrapperStyle={{
-                border: '1px solid ' + colors.formInputBorder,
-              }}
             />
           ) : (
             titleFirst(mapField(field))
