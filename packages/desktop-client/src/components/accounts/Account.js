@@ -1090,7 +1090,7 @@ class AccountInternal extends PureComponent {
                             fontStyle: 'italic',
                           }}
                         >
-                          No transactions (Add New or Import using the above
+                          No transactions (Add new transactions using the above
                           buttons)
                         </View>
                       ) : null
