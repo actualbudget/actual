@@ -8,6 +8,7 @@ import { styles, colors } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 export const defaultInputStyle = {
+  minHeight: '1em',
   outline: 0,
   color: colors.formInputText,
   backgroundColor: colors.formInputBackground,
