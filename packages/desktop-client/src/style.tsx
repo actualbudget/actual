@@ -459,7 +459,6 @@ export const styles = {
   altMenuMaxHeight: 250,
   altMenuText: {
     fontSize: 13,
-    fontWeight: 600,
   },
   altMenuHeaderText: {
     fontSize: 13,

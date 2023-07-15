@@ -45,7 +45,6 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
                 key={group}
                 style={{
                   ...styles.altMenuHeaderText,
-                  fontWeight: 500,
                   color: colors.altMenuItemTextHeader,
                   padding: '4px 9px',
                 }}
