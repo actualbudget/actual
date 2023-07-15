@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 
 import { colors } from '../../style';
-import { NativeCategorySelect } from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import { View, Text, Block, Modal, Button } from '../common';
 
 export default function ConfirmCategoryDelete({
@@ -13,15 +13,6 @@ export default function ConfirmCategoryDelete({
 }) {
   const [transferCategory, setTransferCategory] = useState(null);
   const [error, setError] = useState(null);
-
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    // Hack: 200ms is the timing of the modal animation
-    setTimeout(() => {
-      inputRef.current.focus();
-    }, 200);
-  }, []);
 
   const renderError = error => {
     let msg;
@@ -77,25 +68,13 @@ export default function ConfirmCategoryDelete({
             <Text>Transfer to:</Text>
 
             <View style={{ flex: 1, marginLeft: 10, marginRight: 30 }}>
-              <NativeCategorySelect
-                ref={inputRef}
-                categoryGroups={
-                  group
-                    ? categoryGroups.filter(
-                        g => g.id !== group.id && !!g.is_income === isIncome,
-                      )
-                    : categoryGroups
-                        .filter(g => !!g.is_income === isIncome)
-                        .map(g => ({
-                          ...g,
-                          categories: g.categories.filter(
-                            c => c.id !== category.id,
-                          ),
-                        }))
-                }
-                name="category"
+              <CategoryAutocomplete
+                categoryGroups={categoryGroups}
                 value={transferCategory}
-                onChange={e => setTransferCategory(e.target.value)}
+                inputProps={{
+                  placeholder: 'Select category...',
+                }}
+                onSelect={category => setTransferCategory(category)}
               />
             </View>
 
