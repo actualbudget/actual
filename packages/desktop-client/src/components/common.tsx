@@ -19,7 +19,7 @@ export { default as AlignedText } from './common/AlignedText';
 export { default as Block } from './common/Block';
 export { default as Button, ButtonWithLoading } from './common/Button';
 export { default as Card } from './common/Card';
-export { default as CustomSelect } from './common/CustomSelect';
+export { default as Select } from './common/Select';
 export { default as FormError } from './common/FormError';
 export { default as HoverTarget } from './common/HoverTarget';
 export { default as InitialFocus } from './common/InitialFocus';

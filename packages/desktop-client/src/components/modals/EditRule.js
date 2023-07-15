@@ -30,15 +30,7 @@ import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import InformationOutline from '../../icons/v1/InformationOutline';
 import { colors } from '../../style';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  Stack,
-  CustomSelect,
-  Tooltip,
-} from '../common';
+import { View, Text, Modal, Button, Stack, Select, Tooltip } from '../common';
 import { StatusBadge } from '../schedules/StatusBadge';
 import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
@@ -81,7 +73,7 @@ function getTransactionFields(conditions, actions) {
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
     <View style={style}>
-      <CustomSelect
+      <Select
         options={fields}
         value={value}
         onChange={value => onChange('field', value)}
@@ -106,7 +98,7 @@ export function OpSelect({
   }
 
   return (
-    <CustomSelect
+    <Select
       options={ops.map(op => [op, formatOp(op, type)])}
       value={value}
       onChange={value => onChange('op', value)}
