@@ -311,8 +311,12 @@ class FocusableAmountInput_ extends PureComponent {
     this.cleanup();
   }
 
-  onFocus = () => {
+  focus = () => {
     this.setState({ focused: true });
+  };
+
+  onFocus = () => {
+    this.focus();
   };
 
   toggleIsNegative = () => {
