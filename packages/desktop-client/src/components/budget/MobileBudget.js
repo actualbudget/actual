@@ -306,4 +306,4 @@ export default connect(
     initialBudgetMonth: state.app.budgetMonth,
   }),
   actions,
-)(withThemeColor(colors.buttonPositiveBorder)(BudgetWrapper));
+)(withThemeColor(colors.sidebarBackground)(BudgetWrapper));
