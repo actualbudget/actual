@@ -546,6 +546,14 @@ class AccountInternal extends PureComponent {
           this.props.savePrefs({ ['show-balances-' + accountId]: false });
           this.setState({ showBalances: false, balances: [] });
         } else {
+          this.setState({
+            transactions: [],
+            transactionCount: 0,
+            filters: [],
+            search: '',
+            sort: [],
+          });
+          this.fetchTransactions();
           this.props.savePrefs({ ['show-balances-' + accountId]: true });
           this.setState({ showBalances: true });
           this.calculateBalances();
@@ -951,6 +959,7 @@ class AccountInternal extends PureComponent {
   };
 
   applySort = (field, ascDesc, prevField, prevAscDesc) => {
+    this.setState({ showBalances: false });
     let filters = this.state.filters;
     let sortField = getField(!field ? this.state.sort.field : field);
     let sortAscDesc = !ascDesc ? this.state.sort.ascDesc : ascDesc;
