@@ -18,7 +18,7 @@ export const SectionLabel = ({ title, style }: SectionLabelProps) => {
         {
           fontWeight: 500,
           textTransform: 'uppercase',
-          color: 'inherit',
+          color: colors.formLabelText,
           marginBottom: 5,
           lineHeight: '1em',
         },
@@ -39,7 +39,12 @@ type FormLabelProps = {
 
 export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
-    <Text style={[{ fontSize: 13, marginBottom: 3, color: 'inherit' }, style]}>
+    <Text
+      style={[
+        { fontSize: 13, marginBottom: 3, color: colors.formInputText },
+        style,
+      ]}
+    >
       <label htmlFor={htmlFor} id={id}>
         {title}
       </label>

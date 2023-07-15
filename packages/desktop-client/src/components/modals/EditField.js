@@ -171,6 +171,7 @@ function EditField({
           <SectionLabel
             title={label}
             style={{
+              color: colors.altMenuItemText,
               alignSelf: 'center',
               marginBottom: 10,
             }}
