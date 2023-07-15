@@ -491,18 +491,6 @@ export const styles = {
       paddingTop: 36,
     },
   },
-  pageHeader: {
-    fontSize: 25,
-    borderBottomWidth: 5,
-    borderColor: '#ed6704',
-    borderStyle: 'solid',
-    display: 'inline',
-    flex: 0,
-    color: '#ed6704',
-    marginTop: 40,
-    marginBottom: 20,
-    paddingBottom: 5,
-  },
   pageContent: {
     paddingLeft: 2,
     paddingRight: 2,
