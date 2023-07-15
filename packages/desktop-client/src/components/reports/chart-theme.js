@@ -1,9 +1,11 @@
 import { colors } from '../../style';
 
+// Since these are rgba, they have to be hard-coded
+// and must work for both light and dark theme.
 let colorFades = {
-  blueFadeStart: 'rgba(44, 192, 144, 0.3)',
+  blueFadeStart: 'rgba(44, 192, 144, 0.3)', // similar to noticeText but faded
   blueFadeEnd: 'rgba(44, 192, 144, 0)',
-  redFadeStart: 'rgba(172, 115, 235, 0.3)',
+  redFadeStart: 'rgba(172, 115, 235, 0.3)', // similar to pageTextPositive but faded
   redFadeEnd: 'rgba(172, 115, 235, 0)',
 };
 
