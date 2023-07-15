@@ -677,27 +677,24 @@ export function SelectCell({
     >
       {() => (
         <CellButton
-          style={[
-            {
-              width: 12,
-              height: 12,
-              border: '1px solid ' + colors.tableBorder,
-              borderRadius: 3,
-              justifyContent: 'center',
-              alignItems: 'center',
-
-              ':focus': {
-                border: '1px solid ' + colors.tableBorderSelected,
-                boxShadow: '0 1px 2px ' + colors.buttonShadow,
-              },
+          style={{
+            width: 12,
+            height: 12,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 3,
+            border: selected
+              ? '1px solid ' + colors.formInputBorderSelected
+              : '1px solid ' + colors.formInputBorder,
+            color: colors.tableBackground,
+            backgroundColor: selected
+              ? colors.tableTextEditingBackground
+              : colors.tableBackground,
+            ':focus': {
+              border: '1px solid ' + colors.formInputBorderSelected,
+              boxShadow: '0 1px 2px ' + colors.formInputShadowSelected,
             },
-            {
-              backgroundColor: selected
-                ? colors.tableTextEditingBackground
-                : colors.tableBackground,
-              borderColor: colors.tableBorder,
-            },
-          ]}
+          }}
           onEdit={onEdit}
           onSelect={onSelect}
           clickBehavior="none"
