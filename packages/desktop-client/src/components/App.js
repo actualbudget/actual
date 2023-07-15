@@ -147,13 +147,7 @@ export default connect(
     /* render() and init() run in parallel, 
     so no guarantee global prefs are loading
     in time for render() to use the theme */
-    theme: state.prefs
-      ? state.prefs.global
-        ? state.prefs.global.theme
-          ? state.prefs.global.theme
-          : 'light'
-        : 'light'
-      : 'light',
+    theme: state.prefs?.global?.theme ?? 'light',
   }),
   actions,
 )(App);

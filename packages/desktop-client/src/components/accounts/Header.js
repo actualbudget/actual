@@ -246,7 +246,6 @@ export function AccountHeader({
           <InputWithContent
             style={{
               backgroundColor: 'transparent',
-              // border: '1px solid transparent',// makes :focus border style fail
             }}
             leftContent={
               <SearchAlternate
