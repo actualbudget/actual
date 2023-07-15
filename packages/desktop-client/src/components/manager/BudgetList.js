@@ -15,7 +15,6 @@ import RefreshArrow from '../../icons/v2/RefreshArrow';
 import { styles, colors } from '../../style';
 import tokens from '../../tokens';
 import { View, Text, Button, Tooltip, Menu } from '../common';
-import { PageTitle } from '../Page';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {
@@ -278,12 +277,7 @@ function BudgetList({
           color: colors.pageText,
         }}
       >
-        <PageTitle
-          name="Files"
-          style={{
-            margin: 20,
-          }}
-        />
+        <Text style={{ margin: 20, ...styles.veryLargeText }}>Files</Text>
         <View
           style={{
             position: 'absolute',
