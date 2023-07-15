@@ -843,13 +843,13 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
 
       <Button
         bare
-        style={{ color: colors.buttonNeutralText }}
+        style={{ color: colors.pageTextPositive }}
         onClick={() => setMenuOpen(true)}
       >
         <ExpandArrow
           width={8}
           height={8}
-          style={{ marginRight: 5, color: 'inherit' }}
+          style={{ marginRight: 5, color: colors.pageText }}
         />
         {selectedItems.size} {name}
       </Button>
