@@ -57,7 +57,7 @@ type CategoryListProps = {
   highlightedIndex: number;
   embedded: boolean;
   footer?: ReactNode;
-  groupHeaderStyle: object;
+  groupHeaderStyle?: object;
 };
 function CategoryList({
   items,
@@ -198,7 +198,7 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: CategoryGroup[];
   showSplitOption?: boolean;
-  groupHeaderStyle: object;
+  groupHeaderStyle?: object;
 };
 export default function CategoryAutocomplete({
   categoryGroups,
