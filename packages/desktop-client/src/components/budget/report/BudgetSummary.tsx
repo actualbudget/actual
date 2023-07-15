@@ -279,11 +279,6 @@ function Saved({ projected, style }: SavedProps) {
                 : isNegative
                 ? colors.errorText
                 : colors.pageTextPositive,
-              backgroundColor: projected
-                ? colors.warningBackground
-                : isNegative
-                ? colors.errorBackground
-                : colors.pageBackground,
             },
           ])}
         >
