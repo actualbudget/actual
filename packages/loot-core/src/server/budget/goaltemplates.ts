@@ -168,12 +168,10 @@ async function processTemplate(month, force) {
               );
             if (to_budget != null) {
               num_applied++;
-              templateBudget.push(
-                {
-                  category: category.id,
-                  amount: to_budget,
-                }
-              )
+              templateBudget.push({
+                category: category.id,
+                amount: to_budget,
+              });
               available_remaining -= to_budget;
             }
             if (applyErrors != null) {
