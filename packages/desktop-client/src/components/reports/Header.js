@@ -91,16 +91,17 @@ function Header({
           }}
         >
           <CustomSelect
-            style={{ backgroundColor: 'white', width: 130 }}
+            style={{ backgroundColor: 'white' }}
             onChange={newValue =>
               onChangeDates(...validateStart(allMonths, newValue, end))
             }
             value={start}
+            defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
             options={allMonths.map(({ name, pretty }) => [name, pretty])}
           />
           <View>to</View>
           <CustomSelect
-            style={{ backgroundColor: 'white', width: 130 }}
+            style={{ backgroundColor: 'white' }}
             onChange={newValue =>
               onChangeDates(...validateEnd(allMonths, start, newValue))
             }

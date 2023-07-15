@@ -43,6 +43,7 @@ export function sync() {
       if ('error' in result) {
         return { error: result.error };
       }
+      return {};
     }
   };
 }

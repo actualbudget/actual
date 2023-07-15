@@ -87,7 +87,7 @@ function CashFlow() {
     return null;
   }
 
-  const { graphData, totalExpenses, totalIncome } = data;
+  const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
@@ -142,8 +142,18 @@ function CashFlow() {
               </Text>
             }
           />
+
+          <AlignedText
+            style={{ marginBottom: 5, minWidth: 160 }}
+            left={<Block>Transfers:</Block>}
+            right={
+              <Text style={{ fontWeight: 600 }}>
+                {integerToCurrency(totalTransfers)}
+              </Text>
+            }
+          />
           <Text style={{ fontWeight: 600 }}>
-            <Change amount={totalIncome + totalExpenses} />
+            <Change amount={totalIncome + totalExpenses + totalTransfers} />
           </Text>
         </View>
 
