@@ -57,22 +57,20 @@ type LinkProps = ComponentProps<typeof Button>;
 export function LinkButton({ style, children, ...nativeProps }: LinkProps) {
   return (
     <Button
+      bare
       style={[
         {
-          textDecoration: 'none',
           color: colors.pageTextPositive,
-          backgroundColor: 'transparent',
           display: 'inline',
-          border: 0,
           cursor: 'pointer',
           padding: 0,
-          font: 'inherit',
           ':hover': {
             textDecoration: 'underline',
-            boxShadow: 'none',
+            backgroundColor: 'none',
           },
-          ':focus': {
-            boxShadow: 'none',
+          ':active': {
+            textDecoration: 'underline',
+            backgroundColor: 'none',
           },
         },
         styles.smallText,
