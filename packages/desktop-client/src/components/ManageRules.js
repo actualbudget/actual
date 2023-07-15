@@ -767,9 +767,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
         <View
           style={{
             color: colors.pageText,
-            flexDirection: 'row',
             alignItems: 'center',
-            width: '50%',
           }}
         >
           <Text>
@@ -784,9 +782,9 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
         </View>
 
         <View style={{ flex: 1 }} />
+
         <Search
           id="filter-input"
-          width={350}
           placeholder="Filter rules..."
           value={filter}
           onChange={setFilter}

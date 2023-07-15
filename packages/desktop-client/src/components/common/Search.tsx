@@ -26,7 +26,7 @@ export default function Search({
   return (
     <InputWithContent
       id={id}
-      style={{ width: width }}
+      style={{ minWidth: width }}
       leftContent={
         <SearchAlternate
           style={{

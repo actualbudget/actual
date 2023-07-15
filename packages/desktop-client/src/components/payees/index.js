@@ -481,7 +481,7 @@ export const ManagePayees = forwardRef(
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            padding: '0 10px 5px',
+            padding: '0 0 15px',
           }}
         >
           {!buttonsDisabled ? (
@@ -529,10 +529,11 @@ export const ManagePayees = forwardRef(
               {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
             </Button>
           </View>
+
           <View style={{ flex: 1 }} />
+
           <Search
             id="filter-input"
-            width={350}
             placeholder="Filter payees..."
             value={filter}
             onChange={applyFilter}
