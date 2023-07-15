@@ -130,7 +130,12 @@ function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
   return (
     <Text>
       <Text>
-        {date || <Text style={{ fontStyle: 'italic' }}>Empty</Text>} &rarr;{' '}
+        {date || (
+          <Text style={{ color: colors.pageTextSubdued, fontStyle: 'italic' }}>
+            Empty
+          </Text>
+        )}{' '}
+        &rarr;{' '}
       </Text>
       <Text style={{ color: parsed ? colors.noticeText : colors.errorText }}>
         {parsed || 'Invalid'}
