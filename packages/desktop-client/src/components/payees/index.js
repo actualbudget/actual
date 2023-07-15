@@ -25,6 +25,7 @@ import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { colors, styles } from '../../style';
 import {
+  Text,
   useStableCallback,
   View,
   Button,
@@ -59,18 +60,24 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
       plain
     >
       <Button
+        style={{
+          padding: '3px 6px',
+          fontSize: 12,
+        }}
         as={CellButton}
         onEdit={onEdit}
         onSelect={onClick}
         onFocus={onEdit}
       >
-        {ruleCount > 0 ? (
-          <>
-            {ruleCount} associated {plural(ruleCount, 'rule', 'rules')}
-          </>
-        ) : (
-          <>Create rule</>
-        )}
+        <Text style={{ paddingRight: 5 }}>
+          {ruleCount > 0 ? (
+            <>
+              {ruleCount} associated {plural(ruleCount, 'rule', 'rules')}
+            </>
+          ) : (
+            <>Create rule</>
+          )}
+        </Text>
         <ArrowThinRight style={{ width: 8, height: 8, color: 'inherit' }} />
       </Button>
     </Cell>
