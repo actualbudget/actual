@@ -587,13 +587,13 @@ function MultiAutocomplete({
               flexWrap: 'wrap',
               flexDirection: 'row',
               alignItems: 'center',
-              backgroundColor: colors.altMenuBackground,
+              backgroundColor: colors.formInputBackground,
               borderRadius: 4,
-              border: '1px solid ' + colors.altMenuBorder,
+              border: '1px solid ' + colors.formInputBorder,
             },
             focused && {
-              border: '1px solid ' + colors.altMenuBorderHover,
-              boxShadow: '0 1px 1px ' + colors.buttonPositiveBorder,
+              border: '1px solid ' + colors.formInputBorderSelected,
+              boxShadow: '0 1px 1px ' + colors.formInputShadowSelected,
             },
           ]}
         >
