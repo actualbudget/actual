@@ -51,6 +51,12 @@ Now we want to see the total spent on the Mercedes car in 2021. This is shown at
 
 But what if we need to drill down further and calculate just the costs were for servicing this particular car? By deselecting the non-applicable transactions a revised total appears as shown below. Alternatively just remove the non-applicable category filters.
 
+In the above Example we used the **Date is greater than** and **Date is less than** filters to illustrate the fine tuning that is possible. However, in this example of a simple calendar year it would have been quicker simply to click on the down arrow below **Date** and select as follows:
+
+ ![](/img/filtering/Dates1@2x.png)
+
+ ![](/img/filtering/Dates2@2x.png)
+
 ### Saving Filters
 
 Starting with update [27.7.1](https://actualbudget.org/docs/releases/), users now have the ability to save filtered searches. Filtering transactions works exactly the same as in previous updates.
