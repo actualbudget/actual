@@ -247,14 +247,13 @@ function Overview({ accounts }) {
         }}
       >
         <Card
-          style={[
-            {
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: 200,
-            },
-            styles.mediumText,
-          ]}
+          style={{
+            color: colors.pageTextSubdued,
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: 200,
+            ...styles.mediumText,
+          }}
         >
           More reports
           <br /> coming soon!
