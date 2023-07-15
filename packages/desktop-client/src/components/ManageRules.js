@@ -790,7 +790,14 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
           onChange={setFilter}
         />
       </View>
-      <View style={{ flex: 1, boxShadow: styles.cardShadow }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.tableBackground,
+          boxShadow: styles.cardShadow,
+          borderRadius: 4,
+        }}
+      >
         <RulesHeader />
         <SimpleTable
           ref={tableRef}
