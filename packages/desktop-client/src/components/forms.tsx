@@ -41,7 +41,7 @@ export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
     <Text
       style={[
-        { fontSize: 13, marginBottom: 3, color: colors.formInputText },
+        { fontSize: 13, marginBottom: 3, color: colors.formLabelText },
         style,
       ]}
     >
