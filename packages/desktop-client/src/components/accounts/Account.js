@@ -46,7 +46,7 @@ function EmptyMessage({ onAdd }) {
         flex: 1,
         alignItems: 'center',
         borderTopWidth: 1,
-        borderColor: colors.tableBorderHover,
+        borderColor: colors.tableBorder,
       }}
     >
       <View
