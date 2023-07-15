@@ -11,7 +11,6 @@ import format from '../../spreadsheet/format';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell } from '../../table';
 import BalanceWithCarryover from '../BalanceWithCarryover';
-import { MONTH_RIGHT_PADDING } from '../constants';
 import { makeAmountGrey } from '../util';
 
 export { BudgetSummary } from './BudgetSummary';
@@ -29,7 +28,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       style={{
         flex: 1,
         flexDirection: 'row',
-        marginRight: MONTH_RIGHT_PADDING,
+        marginRight: styles.monthRightPadding,
         paddingTop: 10,
         paddingBottom: 10,
       }}
@@ -70,7 +69,7 @@ export function IncomeHeaderMonth() {
     <View
       style={{
         flexDirection: 'row',
-        marginRight: MONTH_RIGHT_PADDING,
+        marginRight: styles.monthRightPadding,
         paddingBottom: 5,
       }}
     >
@@ -122,7 +121,7 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           borderColor={borderColor}
           textAlign="right"
           style={[
-            { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
+            { fontWeight: 600, paddingRight: styles.monthRightPadding },
             styles.tnum,
           ]}
           valueProps={{
@@ -267,7 +266,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           name="balance"
           width="flex"
           style={{
-            paddingRight: MONTH_RIGHT_PADDING,
+            paddingRight: styles.monthRightPadding,
             textAlign: 'right',
             borderColor: borderColor,
           }}

@@ -20,7 +20,6 @@ import format from '../../spreadsheet/format';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell } from '../../table';
 import BalanceWithCarryover from '../BalanceWithCarryover';
-import { MONTH_RIGHT_PADDING } from '../constants';
 import {
   makeAmountGrey,
   addToBeBudgetedGroup,
@@ -197,7 +196,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         color: colors.tableHeaderText,
         flex: 1,
         flexDirection: 'row',
-        marginRight: MONTH_RIGHT_PADDING,
+        marginRight: styles.monthRightPadding,
         paddingTop: 10,
         paddingBottom: 10,
       }}
@@ -287,7 +286,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         borderColor={borderColor}
         textAlign="right"
         style={[
-          { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
+          { fontWeight: 600, paddingRight: styles.monthRightPadding },
           styles.tnum,
         ]}
         valueProps={{
@@ -390,7 +389,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         name="balance"
         width="flex"
         style={{
-          paddingRight: MONTH_RIGHT_PADDING,
+          paddingRight: styles.monthRightPadding,
           textAlign: 'right',
           borderColor: borderColor,
         }}
@@ -423,7 +422,7 @@ export function IncomeGroupMonth() {
         borderColor={colors.tableBorder}
         textAlign="right"
         style={[
-          { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
+          { fontWeight: 600, paddingRight: styles.monthRightPadding },
           styles.tnum,
         ]}
         valueProps={{
@@ -454,7 +453,7 @@ export function IncomeCategoryMonth({
         width="flex"
         style={[
           {
-            paddingRight: MONTH_RIGHT_PADDING,
+            paddingRight: styles.monthRightPadding,
             textAlign: 'right',
             borderColor: colors.tableBorder,
           },

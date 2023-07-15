@@ -31,7 +31,6 @@ import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import useSheetValue from '../../spreadsheet/useSheetValue';
-import { MONTH_BOX_SHADOW } from '../constants';
 import { makeAmountFullStyle } from '../util';
 
 import { useReport } from './ReportContext';
@@ -324,7 +323,7 @@ export const BudgetSummary = memo(function BudgetSummary({
       style={{
         color: colors.tableText,
         backgroundColor: colors.tableBackground,
-        boxShadow: MONTH_BOX_SHADOW,
+        boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,

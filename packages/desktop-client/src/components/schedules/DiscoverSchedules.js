@@ -11,9 +11,8 @@ import useSelected, {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
-import { colors } from '../../style';
+import { colors, styles } from '../../style';
 import { getParent } from '../../util/router-tools';
-import { MONTH_BOX_SHADOW } from '../budget/constants';
 import { View, Stack, ButtonWithLoading, P } from '../common';
 import { Page, usePageType } from '../Page';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
@@ -79,7 +78,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
   }
 
   return (
-    <View style={{ flex: 1, boxShadow: MONTH_BOX_SHADOW }}>
+    <View style={{ flex: 1, boxShadow: styles.cardShadow }}>
       <TableHeader height={ROW_HEIGHT} inset={15}>
         <SelectCell
           exposed={!loading}

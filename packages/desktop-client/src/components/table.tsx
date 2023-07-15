@@ -30,7 +30,6 @@ import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
 import { styles, colors } from '../style';
 
-import { MONTH_BOX_SHADOW } from './budget/constants';
 import {
   View,
   Text,
@@ -794,7 +793,7 @@ export function TableHeader({
         borderRadius: '6px 6px 0 0',
         overflow: 'hidden',
         flexShrink: 0,
-        boxShadow: MONTH_BOX_SHADOW,
+        boxShadow: styles.cardShadow,
       }}
     >
       <Row
@@ -1143,7 +1142,13 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
             {...(Array.isArray(headers) ? { headers } : { children: headers })}
           />
         )}
-        <View style={{ flex: 1, backgroundColor, boxShadow: MONTH_BOX_SHADOW }}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor,
+            boxShadow: styles.cardShadow,
+          }}
+        >
           {isEmpty ? (
             getEmptyContent(renderEmpty)
           ) : (

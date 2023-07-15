@@ -29,9 +29,8 @@ import useSelected, {
   SelectedProvider,
 } from '../hooks/useSelected';
 import ArrowRight from '../icons/v0/RightArrow2';
-import { colors } from '../style';
+import { colors, styles } from '../style';
 
-import { MONTH_BOX_SHADOW } from './budget/constants';
 import {
   View,
   Text,
@@ -793,7 +792,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
           onChange={setFilter}
         />
       </View>
-      <View style={{ flex: 1, boxShadow: MONTH_BOX_SHADOW }}>
+      <View style={{ flex: 1, boxShadow: styles.cardShadow }}>
         <RulesHeader />
         <SimpleTable
           ref={tableRef}

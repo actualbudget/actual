@@ -36,7 +36,6 @@ import NamespaceContext from '../spreadsheet/NamespaceContext';
 import { Row, InputCell, ROW_HEIGHT } from '../table';
 
 import BudgetSummaries from './BudgetSummaries';
-import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
 import { MonthPicker } from './MonthPicker';
 import { MonthsProvider, MonthsContext } from './MonthsContext';
 import { separateGroups, findSortDown, findSortUp } from './util';
@@ -687,7 +686,7 @@ const BudgetTotals = memo(function BudgetTotals({
         backgroundColor: colors.tableBackground,
         flexDirection: 'row',
         flexShrink: 0,
-        boxShadow: MONTH_BOX_SHADOW,
+        boxShadow: styles.cardShadow,
         marginLeft: 5,
         marginRight: 5 + getScrollbarWidth(),
         borderRadius: '4px 4px 0 0',
@@ -1189,7 +1188,7 @@ const BudgetCategories = memo(
           marginBottom: 10,
           backgroundColor: colors.tableBackground,
           overflow: 'hidden',
-          boxShadow: MONTH_BOX_SHADOW,
+          boxShadow: styles.cardShadow,
           borderRadius: '0 0 4px 4px',
           flex: 1,
         }}
@@ -1272,7 +1271,7 @@ const BudgetCategories = memo(
               content = (
                 <View
                   style={{
-                    height: INCOME_HEADER_HEIGHT,
+                    height: styles.incomeHeaderHeight,
                   }}
                 >
                   <IncomeHeader

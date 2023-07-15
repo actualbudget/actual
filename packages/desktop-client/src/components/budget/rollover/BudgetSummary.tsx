@@ -23,7 +23,6 @@ import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import SheetValue from '../../spreadsheet/SheetValue';
-import { MONTH_BOX_SHADOW } from '../constants';
 
 import HoldTooltip from './HoldTooltip';
 import { useRollover } from './RolloverContext';
@@ -289,7 +288,7 @@ export function BudgetSummary({
       style={{
         backgroundColor: colors.tableBackground,
         color: colors.tableText,
-        boxShadow: MONTH_BOX_SHADOW,
+        boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,
