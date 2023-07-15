@@ -105,7 +105,7 @@ Version: 23.7.0
 - [#1219](https://github.com/actualbudget/actual/pull/1219) Auto-close the local/nordigen picker modal after creating an account — thanks @j-f1
 - [#1224](https://github.com/actualbudget/actual/pull/1224) Imports from YNAB4/nYNAB will now link transfer transactions correctly — thanks @j-f1
 - [#1234](https://github.com/actualbudget/actual/pull/1234) Stop page from refreshing when undoing — thanks @j-f1
-- [#1242](https://github.com/actualbudget/actual/pull/1242) Fixed exporting data from Desktop (Electon) app. — thanks @Shazib
+- [#1242](https://github.com/actualbudget/actual/pull/1242) Fixed exporting data from Desktop (Electron) app. — thanks @Shazib
 - [#1247](https://github.com/actualbudget/actual/pull/1247) Mobile: reduce the height of account cards — thanks @MatissJanis
 - [#1250](https://github.com/actualbudget/actual/pull/1250) Fix `link schedule` option in transaction table — thanks @MatissJanis
 - [#1252](https://github.com/actualbudget/actual/pull/1252) Fix toggling of balances in all-accounts view — thanks @MatissJanis
@@ -580,7 +580,7 @@ Version: 23.3.2
 - [#745](https://github.com/actualbudget/actual/pull/745) (nordigen) fallback to array version of remittanceInformationUnstructured if necessary — thanks @Jackenmen
 - [#247](https://github.com/actualbudget/actual/pull/247) Route aggregate queries in transaction grouped mode through the correct layer to remove deleted transactions — thanks @jlongster
 - [#743](https://github.com/actualbudget/actual/pull/743) (nordigen) fallback to bookingDate if valueDate is not set — thanks @MatissJanis
-- [#742](https://github.com/actualbudget/actual/pull/742) (nordigen) check server status before linking accs — thanks @MatissJanis
+- [#742](https://github.com/actualbudget/actual/pull/742) (nordigen) check server status before linking accounts — thanks @MatissJanis
 
 #### Maintenance
 
@@ -625,7 +625,7 @@ Version: 23.3.1
 The release has the following notable features:
 
 - _Experimental_ support for automatically syncing transactions from European bank accounts using Nordigen.
-- Filters in the the transaction list can now be edited.
+- Filters in the transaction list can now be edited.
 - When connecting to a server for the first time, you no longer need to enter the server URL.
 - You’ll now be notified of future updates to Actual.
 - Large imports will no longer break in Safari.
@@ -863,7 +863,7 @@ Version: 23.2.5
 
 The release has notable of improvements of:
 
-- Read-only responsive view, this replaces our mobile apps, it is notable that this is read only only at this stage.
+- Read-only responsive view, this replaces our mobile apps, it is notable that this is read-only at this stage.
 - Improvements to the sidebar design
 
 ### Actual

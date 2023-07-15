@@ -37,7 +37,7 @@ It is possible that you may encounter an error during restoration that says:
 
 This should only happen when you're upgrading from a Docker image with the `edge` tag to a stable release, such as `latest`. This should not happen in other instances. If you find yourself seeing this bug, please submit a bug report.
 
-**IMPORTANT NOTE**: You *MUST* download a backup of each of your budgets using the process outlined above **before** continuing. It's always good practice to backup your data before upgrading to a new verison.
+**IMPORTANT NOTE**: You *MUST* download a backup of each of your budgets using the process outlined above **before** continuing. It's always good practice to backup your data before upgrading to a new version.
 
 The fix for this is to manually migrate the your sqlite database in the steps outlined below:
 

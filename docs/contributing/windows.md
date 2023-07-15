@@ -6,7 +6,7 @@ Many of the build scripts are bash scripts and not natively invokable in Windows
 2. Ensure you have activated [Developer Mode](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development)
 3. Install Node v16.x (latest version 17.x does not work due to issue with crypto package)
 4. Clone this repo
-5. Using Git Bash (run as administrator), change to the the root of this repo
+5. Using Git Bash (run as administrator), change to the root of this repo
 6. From inside the bash shell, run `yarn install`
 7. From still inside the shell, run `yarn start:browser`
 8. Open your browser to [http://localhost:3001](http://localhost:3001)

@@ -188,7 +188,7 @@ export default function Hello() {
           <SmallFeature
             title="Undo & redo"
             icon={icons.rotateBack}
-            learnMore="/docs/getting-started/tipstricks#undoredo"
+            learnMore="/docs/getting-started/tips-tricks#undo-redo"
           >
             A robust undo system allows you to rollback any changes you make,
             and redo them if desired. Never worry about making mistakes.

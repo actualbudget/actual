@@ -272,7 +272,7 @@ Close an account. `transferAccountId` and `transferCategoryId` are optional if t
 
 If the account has a non-zero balance, you need to specify an account with `transferAccountId` to transfer the money into. If you are transferring from an on-budget account to an off-budget account, you can optionally specify a category with `transferCategoryId` to categorize the transfer transaction.
 
-Tranferring money to an off-budget account needs a category because money is taken out of the budget, so it needs to come from somewhere.
+Transferring money to an off-budget account needs a category because money is taken out of the budget, so it needs to come from somewhere.
 
 If you want to simply delete an account, see [`deleteAccount`](#deleteaccount).
 
