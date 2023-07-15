@@ -343,7 +343,7 @@ export function BudgetSummary({
                 fontWeight: 500,
                 textDecorationSkip: 'ink',
               },
-              currentMonth === month && { textDecoration: 'underline' },
+              currentMonth === month && { fontWeight: 'bold' },
             ])}
           >
             {monthUtils.format(month, 'MMMM')}
