@@ -206,14 +206,6 @@ function Account(props) {
         },
       );
     } else {
-      // let trans = [transaction];
-      // if (transaction.parent_id || transaction.is_parent) {
-      //   let index = transactions.findIndex(
-      //     t => t.id === (transaction.parent_id || transaction.id),
-      //   );
-      //   trans = getSplit(transactions, index);
-      // }
-
       navigate(`${transaction.id}`);
     }
   };
