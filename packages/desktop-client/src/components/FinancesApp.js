@@ -66,6 +66,17 @@ function NarrowNotSupported({ children, redirectTo = '/budget' }) {
   return isNarrowWidth ? null : children;
 }
 
+function WideNotSupported({ children, redirectTo = '/budget' }) {
+  const { isNarrowWidth } = useResponsive();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isNarrowWidth) {
+      navigate(redirectTo);
+    }
+  }, [isNarrowWidth, navigate, redirectTo]);
+  return isNarrowWidth ? children : null;
+}
+
 function StackedRoutesInner({ location }) {
   const { isNarrowWidth } = useResponsive();
   return (
@@ -152,12 +163,20 @@ function StackedRoutesInner({ location }) {
 
       <Route
         path="/accounts/:id/:transactionId"
-        element={<TransactionEdit />}
+        element={
+          <WideNotSupported>
+            <TransactionEdit />
+          </WideNotSupported>
+        }
       />
 
       <Route
         path="/accounts/:id/new-transaction"
-        element={<TransactionEdit />}
+        element={
+          <WideNotSupported>
+            <TransactionEdit />
+          </WideNotSupported>
+        }
       />
 
       <Route

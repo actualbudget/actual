@@ -1,5 +1,7 @@
 import { forwardRef } from 'react';
 
+import { css } from 'glamor';
+
 import { colors } from '../../style';
 import { Text, Button, View, Input } from '../common';
 
@@ -107,12 +109,12 @@ export function BooleanField({ checked, onUpdate, style }) {
       type="checkbox"
       checked={checked}
       onChange={e => onUpdate(e.target.checked)}
-      style={[
+      {...css([
         {
-          marginHorizontal: EDITING_PADDING,
+          marginInline: EDITING_PADDING,
         },
         style,
-      ]}
+      ])}
     />
   );
 }

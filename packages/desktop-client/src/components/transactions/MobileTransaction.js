@@ -48,6 +48,7 @@ import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import SvgPencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
 import { styles, colors } from '../../style';
+import { withThemeColor } from '../../util/withThemeColor';
 import { Text, TextOneLine, View, Button } from '../common';
 import { FocusableAmountInput } from '../mobile/MobileAmountInput';
 import {
@@ -195,10 +196,6 @@ class TransactionEditInner extends PureComponent {
     if (this.props.adding) {
       this.amount.focus();
     }
-
-    document
-      .querySelector('meta[name="theme-color"]')
-      .setAttribute('content', colors.p5);
   }
 
   componentWillUnmount() {
@@ -935,7 +932,7 @@ export const TransactionEdit = connect(
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
   }),
   actions,
-)(TransactionEditUnconnected);
+)(withThemeColor(colors.p5)(TransactionEditUnconnected));
 
 class Transaction extends PureComponent {
   render() {
