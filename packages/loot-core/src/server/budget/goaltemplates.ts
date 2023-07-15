@@ -6,6 +6,7 @@ import {
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
+import { batchMessages } from '../sync';
 
 import { setBudget, setZero, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
@@ -34,7 +35,20 @@ function checkScheduleTemplates(template) {
   return { lowPriority, errorNotice };
 }
 
+async function setGoalBudget({ month, templateBudget }) {
+  await batchMessages(async () => {
+    templateBudget.forEach(element => {
+      setBudget({
+        category: element.category,
+        month,
+        amount: element.amount,
+      });
+    });
+  });
+}
+
 async function processTemplate(month, force) {
+  let templateBudget = [];
   let num_applied = 0;
   let errors = [];
   let category_templates = await getCategoryTemplates();
@@ -88,6 +102,7 @@ async function processTemplate(month, force) {
 
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
+  let available_remaining = await getSheetValue(sheetName, `to-budget`);
   for (let priority = 0; priority <= lowestPriority; priority++) {
     // setup scaling for remainder
     let remainder_scale = 1;
@@ -148,15 +163,18 @@ async function processTemplate(month, force) {
                 priority,
                 remainder_scale,
                 available_start,
+                available_remaining,
                 force,
               );
             if (to_budget != null) {
               num_applied++;
-              await setBudget({
-                category: category.id,
-                month,
-                amount: to_budget,
-              });
+              templateBudget.push(
+                {
+                  category: category.id,
+                  amount: to_budget,
+                }
+              )
+              available_remaining -= to_budget;
             }
             if (applyErrors != null) {
               errors = errors.concat(
@@ -167,7 +185,9 @@ async function processTemplate(month, force) {
         }
       }
     }
+    setGoalBudget({ month, templateBudget });
   }
+
   if (!force) {
     //if overwrite is not preferred, set cell to original value
     for (let l = 0; l < originalCategoryBalance.length; l++) {
@@ -251,6 +271,7 @@ async function applyCategoryTemplate(
   priority,
   remainder_scale,
   available_start,
+  budgetAvailable,
   force,
 ) {
   let current_month = `${month}-01`;
@@ -325,7 +346,6 @@ async function applyCategoryTemplate(
   let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
-  let budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   let to_budget = budgeted;
   let limit;
   let hold;
