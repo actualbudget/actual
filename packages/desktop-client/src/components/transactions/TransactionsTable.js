@@ -281,6 +281,8 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Date"
           width={110}
+          alignItems="flex"
+          marginLeft={-5}
           id="date"
           icon={field === 'date' ? ascDesc : 'clickable'}
           onClick={() =>
@@ -291,6 +293,8 @@ const TransactionHeader = memo(
           <HeaderCell
             value="Account"
             width="flex"
+            alignItems="flex"
+            marginLeft={-5}
             id="account"
             icon={field === 'account' ? ascDesc : 'clickable'}
             onClick={() =>
@@ -301,6 +305,8 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Payee"
           width="flex"
+          alignItems="flex"
+          marginLeft={-5}
           id="payee"
           icon={field === 'payee' ? ascDesc : 'clickable'}
           onClick={() =>
@@ -310,6 +316,8 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Notes"
           width="flex"
+          alignItems="flex"
+          marginLeft={-5}
           id="notes"
           icon={field === 'notes' ? ascDesc : 'clickable'}
           onClick={() =>
@@ -320,6 +328,8 @@ const TransactionHeader = memo(
           <HeaderCell
             value="Category"
             width="flex"
+            alignItems="flex"
+            marginLeft={-5}
             id="category"
             icon={field === 'category' ? ascDesc : 'clickable'}
             onClick={() =>
@@ -333,6 +343,8 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Payment"
           width={90}
+          alignItems="flex-end"
+          marginRight={-5}
           id="payment"
           icon={field === 'payment' ? ascDesc : 'clickable'}
           onClick={() =>
@@ -342,13 +354,15 @@ const TransactionHeader = memo(
         <HeaderCell
           value="Deposit"
           width={85}
+          alignItems="flex-end"
+          marginRight={-5}
           id="deposit"
           icon={field === 'deposit' ? ascDesc : 'clickable'}
           onClick={() =>
             onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
           }
         />
-        {showBalance && <Cell value="Balance" width={88} textAlign="flex" />}
+        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
         {showCleared && <Field width={30} truncate={false} />}
         <Cell value="" width={5 + scrollWidth ?? 0} />
       </Row>
@@ -459,12 +473,21 @@ function StatusCell({
   );
 }
 
-function HeaderCell({ value, id, width, icon, onClick }) {
+function HeaderCell({
+  value,
+  id,
+  width,
+  alignItems,
+  marginLeft,
+  marginRight,
+  icon,
+  onClick,
+}) {
   return (
     <CustomCell
       width={width}
       name={id}
-      textAlign="flex"
+      alignItems={alignItems}
       unexposedContent={
         <Button
           bare
@@ -475,7 +498,8 @@ function HeaderCell({ value, id, width, icon, onClick }) {
             textOverflow: 'ellipsis',
             color: colors.n4,
             fontWeight: 300,
-            marginLeft: -5,
+            marginLeft: marginLeft,
+            marginRight: marginRight,
           }}
         >
           <UnexposedCellContent value={value} />
@@ -1179,7 +1203,7 @@ const Transaction = memo(function Transaction(props) {
         focused={focusedField === 'debit'}
         value={debit === '' && credit === '' ? '0.00' : debit}
         valueStyle={valueStyle}
-        textAlign="flex"
+        textAlign="right"
         title={debit}
         onExpose={!isPreview && (name => onEdit(id, name))}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
@@ -1197,7 +1221,7 @@ const Transaction = memo(function Transaction(props) {
         focused={focusedField === 'credit'}
         value={credit}
         valueStyle={valueStyle}
-        textAlign="flex"
+        textAlign="right"
         title={credit}
         onExpose={!isPreview && (name => onEdit(id, name))}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
@@ -1218,7 +1242,7 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
           style={[styles.tnum, amountStyle]}
           width={88}
-          textAlign="flex"
+          textAlign="right"
         />
       )}
 

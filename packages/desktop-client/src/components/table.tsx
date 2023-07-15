@@ -184,6 +184,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   formatter?: (value: string, type?: unknown) => string;
   focused?: boolean;
   textAlign?: string;
+  alignItems?: string;
   borderColor?: string;
   plain?: boolean;
   exposed?: boolean;
@@ -201,6 +202,7 @@ export function Cell({
   value,
   formatter,
   textAlign,
+  alignItems,
   onExpose,
   borderColor: oldBorderColor,
   children,
@@ -232,6 +234,7 @@ export function Cell({
     borderBottomWidth: borderColor ? 1 : 0,
     borderColor,
     backgroundColor,
+    alignItems: alignItems,
   };
 
   return (
