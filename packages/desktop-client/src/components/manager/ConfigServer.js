@@ -116,6 +116,7 @@ export default function ConfigServer() {
         <Text
           style={{
             marginTop: 20,
+            padding: '20px 10px 20px 10px',
             color: colors.errorText,
             backgroundColor: colors.errorBackground,
             borderRadius: 4,
