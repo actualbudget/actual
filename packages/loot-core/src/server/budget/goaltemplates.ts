@@ -7,7 +7,7 @@ import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
 
-import { setBudget, getSheetValue } from './actions';
+import { setBudget, setZero, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export function applyTemplate({ month }) {
@@ -63,13 +63,9 @@ async function processTemplate(month, force) {
             ? template[l].priority
             : lowestPriority;
       }
-      await setBudget({
-        category: category.id,
-        month,
-        amount: 0,
-      });
     }
   }
+  setZero({ month });
   // find all remainder templates, place them after all other templates
   let remainder_found;
   let remainder_priority = lowestPriority + 1;
