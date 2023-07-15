@@ -109,51 +109,19 @@ class AmountInput extends PureComponent {
     const initialState = this.getInitialValue();
     this.setState(initialState);
 
-    this.addEventListeners();
-
     this.props.context.emit('reset');
   }
 
-  addEventListeners() {
-    if (this.removeListeners) {
-      this.removeListeners();
-    }
-
-    this.props.context.on('start-math', this.onStartMath);
-    // This will be called in `onBlur`
-    this.removeListeners = () => {
-      this.props.context.off('start-math', this.onStartMath);
-      this.removeListeners = null;
-    };
-  }
-
-  onStartMath = op => {
-    this.applyText();
-    this.setState({ currentMathOp: op });
-  };
-
   applyText = () => {
-    const { currentMathOp, editing } = this.state;
-    let newValue;
+    const { editing } = this.state;
 
-    switch (currentMathOp) {
-      case '+':
-        newValue = getValue(this.state) + this.parseText();
-        break;
-      case '-':
-        newValue = getValue(this.state) - this.parseText();
-        break;
-      default: {
-        const parsed = this.parseText();
-        newValue = editing ? parsed : getValue(this.state);
-      }
-    }
+    const parsed = this.parseText();
+    const newValue = editing ? parsed : getValue(this.state);
 
     this.setState({
       value: Math.abs(newValue),
       editing: false,
       text: '',
-      currentMathOp: null,
     });
 
     return newValue;
@@ -167,31 +135,11 @@ class AmountInput extends PureComponent {
     }
   };
 
-  renderMathOp = () => {
-    switch (this.state.currentMathOp) {
-      case '+':
-        return '+';
-      case '-':
-        return '-';
-      default:
-        return '';
-    }
-  };
-
   onChangeText = text => {
-    let { currentMathOp } = this.state;
     let { onChange } = this.props;
 
     this.setState({ text });
-
-    // We only want to notify anyone listening if we currently aren't
-    // doing math. Otherwise they'd just the math value that is being
-    // entered. Also, we need to manually apply the negative. This is
-    // important if a user is saving this value instead of getting it
-    // on blur
-    if (currentMathOp == null && onChange) {
-      onChange(text);
-    }
+    onChange(text);
   };
 
   render() {
@@ -207,12 +155,6 @@ class AmountInput extends PureComponent {
         autoCapitalize="none"
         onChange={e => this.onChangeText(e.target.value)}
         onBlur={this.onBlur}
-        // Normally, focus is controlled outside of this component
-        // this is a "hidden" input and the user can't directly tap
-        // it. On blur, it removes event listeners. But let's make
-        // this work in case the input gets focused again by adding
-        // back the listeners (this is necessary for the web target)
-        onFocus={() => this.addEventListeners()}
         onKeyPress={this.onKeyPress}
         data-testid="amount-input"
         style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
@@ -269,7 +211,7 @@ class AmountInput extends PureComponent {
           data-testid="amount-fake-input"
           pointerEvents="none"
         >
-          {editing ? this.renderMathOp() + text : amountToCurrency(value)}
+          {editing ? text : amountToCurrency(value)}
         </Text>
       </View>
     );
