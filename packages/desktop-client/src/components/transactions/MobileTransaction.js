@@ -7,7 +7,7 @@ import React, {
   useRef,
 } from 'react';
 import { connect } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 
 import { useFocusRing } from '@react-aria/focus';
 import { useListBox, useListBoxSection, useOption } from '@react-aria/listbox';
@@ -43,6 +43,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import SvgAdd from '../../icons/v1/Add';
+import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SvgTrash from '../../icons/v1/Trash';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
@@ -176,7 +177,7 @@ function Status({ status }) {
   );
 }
 
-// TOOD: export this
+const LEFT_RIGHT_FLEX_WIDTH = 70;
 class TransactionEditInner extends PureComponent {
   constructor(props) {
     super(props);
@@ -428,23 +429,48 @@ class TransactionEditInner extends PureComponent {
               borderBottomWidth: 1,
               borderColor: colors.n9,
               backgroundColor: 'white',
+              alignItems: 'center',
               flexDirection: 'row',
-              justifyContent: 'center',
-              padding: 15,
+              justifyContent: 'space-between',
+              width: '100%',
+              padding: 10,
             }}
           >
-            <TextOneLine
-              style={[
-                styles.header.headerTitleStyle,
-                { marginLeft: 30, marginRight: 30 },
-              ]}
+            <Link
+              to={`/accounts/${account.id}`}
+              style={{
+                alignItems: 'center',
+                display: 'flex',
+                textDecoration: 'none',
+                width: LEFT_RIGHT_FLEX_WIDTH,
+              }}
             >
+              <CheveronLeft
+                style={{
+                  color: colors.b5,
+                  width: 32,
+                  height: 32,
+                }}
+              />
+              <Text
+                style={{ ...styles.text, color: colors.b5, fontWeight: 500 }}
+              >
+                Back
+              </Text>
+            </Link>
+            <TextOneLine style={styles.header.headerTitleStyle}>
               {payeeId == null
                 ? adding
                   ? 'New Transaction'
                   : 'Transaction'
                 : descriptionPretty}
             </TextOneLine>
+            {/* For centering the transaction title */}
+            <View
+              style={{
+                width: LEFT_RIGHT_FLEX_WIDTH,
+              }}
+            ></View>
           </View>
 
           {/* <ScrollView
