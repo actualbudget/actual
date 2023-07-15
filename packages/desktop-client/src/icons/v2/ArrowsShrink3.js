@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgArrowsShrink3 = props => (
   <svg
     {...props}
@@ -7,7 +6,7 @@ const SvgArrowsShrink3 = props => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     style={{
-      color: '#242134',
+      color: 'inherit',
       ...props.style,
     }}
   >
@@ -17,5 +16,4 @@ const SvgArrowsShrink3 = props => (
     />
   </svg>
 );
-
 export default SvgArrowsShrink3;

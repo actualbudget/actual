@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgSplit = props => (
   <svg
     {...props}
@@ -7,7 +6,7 @@ const SvgSplit = props => (
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 32 32"
     style={{
-      color: '#242134',
+      color: 'inherit',
       ...props.style,
     }}
   >
@@ -21,5 +20,4 @@ const SvgSplit = props => (
     />
   </svg>
 );
-
 export default SvgSplit;

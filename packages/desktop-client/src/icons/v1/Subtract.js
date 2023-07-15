@@ -1,12 +1,11 @@
 import * as React from 'react';
-
 const SvgSubtract = props => (
   <svg
     {...props}
     viewBox="0 0 23 3"
     xmlns="http://www.w3.org/2000/svg"
     style={{
-      color: '#242134',
+      color: 'inherit',
       ...props.style,
     }}
   >
@@ -17,5 +16,4 @@ const SvgSubtract = props => (
     />
   </svg>
 );
-
 export default SvgSubtract;
