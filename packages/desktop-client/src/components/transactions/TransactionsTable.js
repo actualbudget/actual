@@ -934,7 +934,10 @@ const Transaction = memo(function Transaction(props) {
                 style={{
                   alignSelf: 'flex-start',
                   borderRadius: 4,
-                  transition: 'none',
+                  border: '1px solid transparent', // so it doesn't shift on hover
+                  ':hover': {
+                    border: '1px solid ' + colors.buttonNeutralBorder,
+                  },
                 }}
                 disabled={isTemporaryId(transaction.id)}
                 onEdit={() => onEdit(id, 'category')}
