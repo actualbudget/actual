@@ -39,6 +39,7 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
                       backgroundColor: colors.errorBackground,
                       color: colors.errorText,
                       fontWeight: 500,
+                      padding: 5,
                     }}
                   >
                     Switch to a rollover budget before turning off this feature
