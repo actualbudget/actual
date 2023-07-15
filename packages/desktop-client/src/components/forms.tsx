@@ -73,11 +73,13 @@ export const Checkbox = (props: CheckboxProps) => {
       type="checkbox"
       {...props}
       {...css(
-        [
-          {
-            accentColor: colors.formInputBackgroundSelected,
-          },
-        ],
+        {
+          position: 'relative',
+          margin: 0,
+          marginRight: 6,
+          accentColor: colors.formInputBackgroundSelected,
+        },
+
         props.styles,
       )}
     />
