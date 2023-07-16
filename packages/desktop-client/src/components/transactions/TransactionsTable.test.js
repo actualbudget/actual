@@ -26,6 +26,11 @@ import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
 
 jest.mock('loot-core/src/platform/client/fetch');
 jest.mock('../../hooks/useFeatureFlag', () => jest.fn().mockReturnValue(false));
+jest.mock('../../ResponsiveProvider', () => ({
+  useResponsive: () => {
+    return { isNarrowWidth: false };
+  },
+}));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
