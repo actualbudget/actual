@@ -137,7 +137,7 @@ class AmountInput extends PureComponent {
   };
 
   render() {
-    const { style, textStyle, scrollIntoView } = this.props;
+    const { style, textStyle } = this.props;
     const { editing, value, text } = this.state;
 
     let input = (
@@ -169,22 +169,7 @@ class AmountInput extends PureComponent {
           style,
         ]}
       >
-        {scrollIntoView ? (
-          <View
-            style={[styles.inputContainer, styles.inputContent]}
-            pointerEvents="box-none"
-          >
-            {input}
-          </View>
-        ) : (
-          // <ScrollView
-          //   style={styles.inputContainer}
-          //   contentContainerStyle={styles.inputContent}
-          //   pointerEvents="box-none"
-          // >
-          <View style={{ overflowY: 'auto' }}>{input}</View>
-          // </ScrollView>
-        )}
+        <View style={{ overflowY: 'auto' }}>{input}</View>
 
         {/* <Animated.View
           style={{
@@ -330,36 +315,3 @@ class FocusableAmountInputInner extends PureComponent {
 export const FocusableAmountInput = forwardRef((props, ref) => {
   return <FocusableAmountInputInner ref={ref} {...props} />;
 });
-
-const styles = new CSSStyleSheet();
-/* eslint-disable rulesdir/typography */
-styles.replace(`
-inputContainer {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  bottom: 0,
-  right: 0,
-  opacity: 0,
-}
-
-inputContent {
-  flexDirection: 'row',
-  alignItems: 'stretch',
-}
-`);
-
-// let styles = new StyleSheet({
-//   inputContainer: {
-//     position: 'absolute',
-//     top: 0,
-//     left: 0,
-//     bottom: 0,
-//     right: 0,
-//     opacity: 0,
-//   },
-//   inputContent: {
-//     flexDirection: 'row',
-//     alignItems: 'stretch',
-//   },
-// });
