@@ -12,17 +12,17 @@ import { setBudget, setZero, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export async function applyTemplate({ month }) {
-  let category_templates = await getCategoryTemplates();
+  let category_templates = await getCategoryTemplates(null);
   return processTemplate(month, false, category_templates);
 }
 
 export async function overwriteTemplate({ month }) {
-  let category_templates = await getCategoryTemplates();
+  let category_templates = await getCategoryTemplates(null);
   return processTemplate(month, true, category_templates);
 }
 
 export async function applySingleCategoryTemplate({ month, category }) {
-  let category_templates = await getSingleCategoryTemplates(category);
+  let category_templates = await getCategoryTemplates(category);
   await setBudget({
     category: category.id,
     month,
@@ -90,7 +90,7 @@ async function processTemplate(month, force, category_templates) {
       }
     }
   }
-  setZero({ month });
+  await setZero({ month });
   // find all remainder templates, place them after all other templates
   let remainder_found;
   let remainder_priority = lowestPriority + 1;
@@ -108,7 +108,7 @@ async function processTemplate(month, force, category_templates) {
       }
     }
   }
-  // so the remainders don't get skiped
+  // so the remainders don't get skipped
   if (remainder_found) lowestPriority = remainder_priority;
 
   let sheetName = monthUtils.sheetForMonth(month);
@@ -194,7 +194,7 @@ async function processTemplate(month, force, category_templates) {
         }
       }
     }
-    setGoalBudget({ month, templateBudget });
+    await setGoalBudget({ month, templateBudget });
   }
 
   if (!force) {
@@ -245,41 +245,13 @@ async function processTemplate(month, force, category_templates) {
 }
 
 const TEMPLATE_PREFIX = '#template';
-async function getCategoryTemplates() {
+async function getCategoryTemplates(category) {
   let templates = {};
 
   let notes = await db.all(
     `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
   );
-
-  for (let n = 0; n < notes.length; n++) {
-    let lines = notes[n].note.split('\n');
-    let template_lines = [];
-    for (let l = 0; l < lines.length; l++) {
-      let line = lines[l].trim();
-      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
-      let expression = line.slice(TEMPLATE_PREFIX.length);
-      try {
-        let parsed = parse(expression);
-        template_lines.push(parsed);
-      } catch (e) {
-        template_lines.push({ type: 'error', line, error: e });
-      }
-    }
-    if (template_lines.length) {
-      templates[notes[n].id] = template_lines;
-    }
-  }
-  return templates;
-}
-
-async function getSingleCategoryTemplates(category) {
-  let templates = {};
-
-  let notes = await db.all(
-    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
-  );
-  notes = notes.filter(n => n.id === category.id);
+  if (category) notes = notes.filter(n => n.id === category.id);
 
   for (let n = 0; n < notes.length; n++) {
     let lines = notes[n].note.split('\n');
@@ -704,7 +676,7 @@ async function applyCategoryTemplate(
 }
 
 async function checkTemplates() {
-  let category_templates = await getCategoryTemplates();
+  let category_templates = await getCategoryTemplates(null);
   let errors = [];
 
   let categories = await db.all(
