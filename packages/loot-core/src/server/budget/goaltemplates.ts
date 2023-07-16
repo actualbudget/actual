@@ -27,7 +27,7 @@ export async function applySingleCategoryTemplate({ month, category }) {
     category: category.id,
     month,
     amount: 0,
-  })
+  });
   return processTemplate(month, false, category_templates);
 }
 
@@ -279,7 +279,7 @@ async function getSingleCategoryTemplates(category) {
   let notes = await db.all(
     `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
   );
-  notes=notes.filter(n => n.id === category.id);
+  notes = notes.filter(n => n.id === category.id);
 
   for (let n = 0; n < notes.length; n++) {
     let lines = notes[n].note.split('\n');
