@@ -473,15 +473,12 @@ class AccountInternal extends PureComponent {
     let accountId = this.props.accountId;
     let account = this.props.accounts.find(account => account.id === accountId);
     return (
-      account && this.state.search === '' && 
-      this.state.filters.length === 0 && 
-      (
-        this.state.sort.length === 0 ||
-        (
-          this.state.sort.field ==='date' &&
-          this.state.sort.ascDesc ==='desc'
-        )
-      )
+      account &&
+      this.state.search === '' &&
+      this.state.filters.length === 0 &&
+      (this.state.sort.length === 0 ||
+        (this.state.sort.field === 'date' &&
+          this.state.sort.ascDesc === 'desc'))
     );
   };
 
@@ -560,12 +557,16 @@ class AccountInternal extends PureComponent {
             filters: [],
             search: '',
             sort: [],
+            showBalances: true,
           });
           this.fetchTransactions();
           this.props.savePrefs({ ['show-balances-' + accountId]: true });
-          this.setState({ showBalances: true });
           this.calculateBalances();
         }
+        break;
+      case 'remove-sorting':
+        this.setState({ sort: [] });
+        this.fetchTransactions();
         break;
       case 'toggle-cleared':
         if (this.state.showCleared) {
@@ -967,7 +968,6 @@ class AccountInternal extends PureComponent {
   };
 
   applySort = (field, ascDesc, prevField, prevAscDesc) => {
-    
     let filters = this.state.filters;
     let sortField = getField(!field ? this.state.sort.field : field);
     let sortAscDesc = !ascDesc ? this.state.sort.ascDesc : ascDesc;
@@ -1124,6 +1124,7 @@ class AccountInternal extends PureComponent {
                   showEmptyMessage={showEmptyMessage}
                   balanceQuery={balanceQuery}
                   canCalculateBalance={this.canCalculateBalance}
+                  isSorted={this.state.sort.length !== 0}
                   reconcileAmount={reconcileAmount}
                   search={this.state.search}
                   filters={this.state.filters}

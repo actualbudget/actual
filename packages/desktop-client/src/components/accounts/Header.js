@@ -16,7 +16,6 @@ import {
   Button,
   MenuButton,
   MenuTooltip,
-  Tooltip,
   Input,
   InputWithContent,
   InitialFocus,
@@ -52,6 +51,7 @@ export function AccountHeader({
   balanceQuery,
   reconcileAmount,
   canCalculateBalance,
+  isSorted,
   search,
   filters,
   conditionsOp,
@@ -351,6 +351,7 @@ export function AccountHeader({
                   account={account}
                   canSync={canSync}
                   canShowBalances={canCalculateBalance()}
+                  isSorted={isSorted}
                   showBalances={showBalances}
                   showCleared={showCleared}
                   onMenuSelect={item => {
@@ -412,6 +413,7 @@ function AccountMenu({
   canShowBalances,
   showCleared,
   onClose,
+  isSorted,
   onReconcile,
   onMenuSelect,
 }) {
@@ -435,6 +437,10 @@ function AccountMenu({
           }
         }}
         items={[
+          isSorted && {
+            name: 'remove-sorting',
+            text: 'Remove all Sorting',
+          },
           canShowBalances && {
             name: 'toggle-balance',
             text: (showBalances ? 'Hide' : 'Show') + ' Running Balance',
