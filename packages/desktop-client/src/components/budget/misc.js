@@ -416,7 +416,7 @@ function SidebarCategory({
                 { name: 'delete', text: 'Delete' },
                 isGoalTemplatesEnabled && {
                   name: 'apply-single-category-template',
-                  text: 'Apply Goal Template',
+                  text: 'Apply Budget Template',
                 },
               ]}
             />
