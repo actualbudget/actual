@@ -11,12 +11,24 @@ import { batchMessages } from '../sync';
 import { setBudget, setZero, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
 
-export function applyTemplate({ month }) {
-  return processTemplate(month, false);
+export async function applyTemplate({ month }) {
+  let category_templates = await getCategoryTemplates();
+  return processTemplate(month, false, category_templates);
 }
 
-export function overwriteTemplate({ month }) {
-  return processTemplate(month, true);
+export async function overwriteTemplate({ month }) {
+  let category_templates = await getCategoryTemplates();
+  return processTemplate(month, true, category_templates);
+}
+
+export async function applySingleCategoryTemplate({ month, category }) {
+  let category_templates = await getSingleCategoryTemplates(category);
+  await setBudget({
+    category: category.id,
+    month,
+    amount: 0,
+  })
+  return processTemplate(month, false, category_templates);
 }
 
 export function runCheckTemplates() {
@@ -47,11 +59,10 @@ async function setGoalBudget({ month, templateBudget }) {
   });
 }
 
-async function processTemplate(month, force) {
+async function processTemplate(month, force, category_templates) {
   let templateBudget = [];
   let num_applied = 0;
   let errors = [];
-  let category_templates = await getCategoryTemplates();
   let lowestPriority = 0;
   let originalCategoryBalance = [];
 
@@ -168,12 +179,10 @@ async function processTemplate(month, force) {
               );
             if (to_budget != null) {
               num_applied++;
-              templateBudget.push(
-                {
-                  category: category.id,
-                  amount: to_budget,
-                }
-              )
+              templateBudget.push({
+                category: category.id,
+                amount: to_budget,
+              });
               available_remaining -= to_budget;
             }
             if (applyErrors != null) {
@@ -242,6 +251,35 @@ async function getCategoryTemplates() {
   let notes = await db.all(
     `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
   );
+
+  for (let n = 0; n < notes.length; n++) {
+    let lines = notes[n].note.split('\n');
+    let template_lines = [];
+    for (let l = 0; l < lines.length; l++) {
+      let line = lines[l].trim();
+      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
+      let expression = line.slice(TEMPLATE_PREFIX.length);
+      try {
+        let parsed = parse(expression);
+        template_lines.push(parsed);
+      } catch (e) {
+        template_lines.push({ type: 'error', line, error: e });
+      }
+    }
+    if (template_lines.length) {
+      templates[notes[n].id] = template_lines;
+    }
+  }
+  return templates;
+}
+
+async function getSingleCategoryTemplates(category) {
+  let templates = {};
+
+  let notes = await db.all(
+    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
+  );
+  notes=notes.filter(n => n.id === category.id);
 
   for (let n = 0; n < notes.length; n++) {
     let lines = notes[n].note.split('\n');

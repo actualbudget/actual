@@ -29,6 +29,10 @@ app.method(
   mutator(undoable(goalActions.overwriteTemplate)),
 );
 app.method(
+  'budget/apply-single-category-template',
+  mutator(undoable(goalActions.applySingleCategoryTemplate)),
+);
+app.method(
   'budget/cleanup-goal-template',
   mutator(undoable(cleanupActions.cleanupTemplate)),
 );
