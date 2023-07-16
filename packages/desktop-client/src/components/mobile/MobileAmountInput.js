@@ -271,7 +271,7 @@ class FocusableAmountInputInner extends PureComponent {
               }}
               onClick={this.toggleIsNegative}
             >
-              {this.state.isNegative ? '-' : '+'}
+              {this.state.isNegative ? '−' : '+'}
             </Button>
           )}
           <Button
