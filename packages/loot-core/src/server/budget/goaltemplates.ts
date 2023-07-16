@@ -34,7 +34,6 @@ function checkScheduleTemplates(template) {
   }
   return { lowPriority, errorNotice };
 }
-
 async function setGoalBudget({ month, templateBudget }) {
   await batchMessages(async () => {
     templateBudget.forEach(element => {
@@ -79,7 +78,7 @@ async function processTemplate(month, force) {
       }
     }
   }
-  setZero({ month });
+  await setZero({ month });
   // find all remainder templates, place them after all other templates
   let remainder_found;
   let remainder_priority = lowestPriority + 1;
@@ -102,7 +101,7 @@ async function processTemplate(month, force) {
 
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
-  let available_remaining = await getSheetValue(sheetName, `to-budget`);
+  let available_remaining = available_start;
   for (let priority = 0; priority <= lowestPriority; priority++) {
     // setup scaling for remainder
     let remainder_scale = 1;
@@ -183,7 +182,7 @@ async function processTemplate(month, force) {
         }
       }
     }
-    setGoalBudget({ month, templateBudget });
+    await setGoalBudget({ month, templateBudget });
   }
 
   if (!force) {
