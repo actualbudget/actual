@@ -69,7 +69,20 @@ export default function ConfirmCategoryDelete({
 
             <View style={{ flex: 1, marginLeft: 10, marginRight: 30 }}>
               <CategoryAutocomplete
-                categoryGroups={categoryGroups}
+                categoryGroups={
+                  group
+                    ? categoryGroups.filter(
+                        g => g.id !== group.id && !!g.is_income === isIncome,
+                      )
+                    : categoryGroups
+                        .filter(g => !!g.is_income === isIncome)
+                        .map(g => ({
+                          ...g,
+                          categories: g.categories.filter(
+                            c => c.id !== category.id,
+                          ),
+                        }))
+                }
                 value={transferCategory}
                 inputProps={{
                   placeholder: 'Select category...',
