@@ -63,15 +63,14 @@ global.Actual = {
       input.style.position = 'absolute';
       input.style.top = '0px';
       input.style.left = '0px';
-      input.dispatchEvent(
-        new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-        }),
-      );
+      input.style.display = 'none';
 
-      input.addEventListener('change', e => {
+      input.onchange = e => {
+        // Remove the file input from the DOM so we don't keep accumulating them.
+        //
+        // Unfortunately the `change` event does not seem to be fired on cancel
+        // in Safari, so the element may be left in the DOM.
+        document.body.removeChild(input);
         let file = e.target.files[0];
         let filename = file.name.replace(/.*(\.[^.]*)/, 'file$1');
 
@@ -89,7 +88,13 @@ global.Actual = {
             alert('Error reading file');
           };
         }
-      });
+      };
+
+      // In Safari the file input has to be in the DOM for change events to
+      // reliably fire.
+      document.body.appendChild(input);
+
+      input.click();
     });
   },
 
