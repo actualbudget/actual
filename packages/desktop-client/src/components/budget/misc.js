@@ -346,10 +346,7 @@ function SidebarCategory({
 }) {
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
-
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  console.log(isGoalTemplatesEnabled);
-
   const displayed = (
     <View
       style={{
