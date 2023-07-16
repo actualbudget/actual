@@ -1,6 +1,4 @@
-import { PureComponent, createContext, forwardRef } from 'react';
-
-import mitt from 'mitt';
+import { PureComponent, forwardRef } from 'react';
 
 import {
   toRelaxedNumber,
@@ -15,8 +13,6 @@ function getValue(state) {
   const { value } = state;
   return value;
 }
-
-const AmountAccessoryContext = createContext(mitt());
 
 class AmountInput extends PureComponent {
   static getDerivedStateFromProps(props, state) {
@@ -108,8 +104,6 @@ class AmountInput extends PureComponent {
 
     const initialState = this.getInitialValue();
     this.setState(initialState);
-
-    this.props.context.emit('reset');
   }
 
   applyText = () => {
@@ -218,27 +212,10 @@ class AmountInput extends PureComponent {
   }
 }
 
-const AmountInputWithContext = forwardRef((props, ref) => {
-  return (
-    <AmountAccessoryContext.Consumer>
-      {context => <AmountInput {...props} ref={ref} context={context} />}
-    </AmountAccessoryContext.Consumer>
-  );
-});
-
-class FocusableAmountInput_ extends PureComponent {
+class FocusableAmountInputInner extends PureComponent {
   state = { focused: false, isNegative: true };
 
   componentDidMount() {
-    const onDone = () => {
-      this.setState({ focused: false });
-      // Keyboard.dismiss();
-    };
-    this.props.context.on('done', onDone);
-    this.cleanup = () => {
-      this.props.context.off('done', onDone);
-    };
-
     if (this.props.sign) {
       this.setState({ isNegative: this.props.sign === 'negative' });
     } else if (
@@ -247,10 +224,6 @@ class FocusableAmountInput_ extends PureComponent {
     ) {
       this.setState({ isNegative: false });
     }
-  }
-
-  componentWillUnmount() {
-    this.cleanup();
   }
 
   focus = () => {
@@ -281,7 +254,7 @@ class FocusableAmountInput_ extends PureComponent {
 
     return (
       <View>
-        <AmountInputWithContext
+        <AmountInput
           {...this.props}
           ref={el => (this.amount = el)}
           onBlur={this.onBlur}
@@ -355,14 +328,7 @@ class FocusableAmountInput_ extends PureComponent {
 }
 
 export const FocusableAmountInput = forwardRef((props, ref) => {
-  return (
-    <AmountAccessoryContext.Consumer>
-      {context => (
-        // eslint-disable-next-line
-        <FocusableAmountInput_ ref={ref} {...props} context={context} />
-      )}
-    </AmountAccessoryContext.Consumer>
-  );
+  return <FocusableAmountInputInner ref={ref} {...props} />;
 });
 
 const styles = new CSSStyleSheet();
