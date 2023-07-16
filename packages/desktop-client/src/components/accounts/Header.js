@@ -418,34 +418,6 @@ function AccountMenu({
   let [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
 
-  function RunningBalance(showBalances) {
-    let [open, setOpen] = useState();
-
-    return (
-      <View style={{ position: 'relative' }}>
-        <View
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-        >
-          {(showBalances ? 'Hide' : 'Show') + ' Running Balance'}
-        </View>
-        {open && !showBalances && (
-          <Tooltip
-            position="bottom-right"
-            style={{
-              padding: 10,
-              color: colors.n4,
-              maxWidth: 400,
-              lineHeight: 1.5,
-            }}
-          >
-            Showing Balance will clear all filters, sorting and searches.
-          </Tooltip>
-        )}
-      </View>
-    );
-  }
-
   return tooltip === 'reconcile' ? (
     <ReconcileTooltip
       account={account}
@@ -465,7 +437,7 @@ function AccountMenu({
         items={[
           canShowBalances && {
             name: 'toggle-balance',
-            text: RunningBalance(showBalances),
+            text: (showBalances ? 'Hide' : 'Show') + ' Running Balance',
           },
           {
             name: 'toggle-cleared',

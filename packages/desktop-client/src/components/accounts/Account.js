@@ -473,7 +473,15 @@ class AccountInternal extends PureComponent {
     let accountId = this.props.accountId;
     let account = this.props.accounts.find(account => account.id === accountId);
     return (
-      account && this.state.search === '' && this.state.filters.length === 0
+      account && this.state.search === '' && 
+      this.state.filters.length === 0 && 
+      (
+        this.state.sort.length === 0 ||
+        (
+          this.state.sort.field ==='date' &&
+          this.state.sort.ascDesc ==='desc'
+        )
+      )
     );
   };
 
@@ -959,7 +967,7 @@ class AccountInternal extends PureComponent {
   };
 
   applySort = (field, ascDesc, prevField, prevAscDesc) => {
-    this.setState({ showBalances: false });
+    
     let filters = this.state.filters;
     let sortField = getField(!field ? this.state.sort.field : field);
     let sortAscDesc = !ascDesc ? this.state.sort.ascDesc : ascDesc;
