@@ -1,4 +1,4 @@
-import { PureComponent, forwardRef } from 'react';
+import { PureComponent } from 'react';
 
 import {
   toRelaxedNumber,
@@ -197,7 +197,7 @@ class AmountInput extends PureComponent {
   }
 }
 
-class FocusableAmountInputInner extends PureComponent {
+export class FocusableAmountInput extends PureComponent {
   state = { focused: false, isNegative: true };
 
   componentDidMount() {
@@ -311,7 +311,3 @@ class FocusableAmountInputInner extends PureComponent {
     );
   }
 }
-
-export const FocusableAmountInput = forwardRef((props, ref) => {
-  return <FocusableAmountInputInner ref={ref} {...props} />;
-});
