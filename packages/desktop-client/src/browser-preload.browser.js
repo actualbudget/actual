@@ -52,8 +52,19 @@ global.Actual = {
 
   openFileDialog: async ({ filters = [], properties }) => {
     return new Promise(resolve => {
-      let input = document.createElement('input');
+      let createdElement = false;
+      // Attempt to reuse an already-created file input.
+      let input = document.body.querySelector(
+        'input[id="open-file-dialog-input"]',
+      );
+      if (!input) {
+        createdElement = true;
+        input = document.createElement('input');
+      }
+
       input.type = 'file';
+      input.id = 'open-file-dialog-input';
+      input.value = null;
 
       let filter = filters.find(filter => filter.extensions);
       if (filter) {
@@ -66,11 +77,6 @@ global.Actual = {
       input.style.display = 'none';
 
       input.onchange = e => {
-        // Remove the file input from the DOM so we don't keep accumulating them.
-        //
-        // Unfortunately the `change` event does not seem to be fired on cancel
-        // in Safari, so the element may be left in the DOM.
-        document.body.removeChild(input);
         let file = e.target.files[0];
         let filename = file.name.replace(/.*(\.[^.]*)/, 'file$1');
 
@@ -92,7 +98,9 @@ global.Actual = {
 
       // In Safari the file input has to be in the DOM for change events to
       // reliably fire.
-      document.body.appendChild(input);
+      if (createdElement) {
+        document.body.appendChild(input);
+      }
 
       input.click();
     });
