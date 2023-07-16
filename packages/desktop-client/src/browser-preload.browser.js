@@ -52,8 +52,19 @@ global.Actual = {
 
   openFileDialog: async ({ filters = [], properties }) => {
     return new Promise(resolve => {
-      let input = document.createElement('input');
+      let createdElement = false;
+      // Attempt to reuse an already-created file input.
+      let input = document.body.querySelector(
+        'input[id="open-file-dialog-input"]',
+      );
+      if (!input) {
+        createdElement = true;
+        input = document.createElement('input');
+      }
+
       input.type = 'file';
+      input.id = 'open-file-dialog-input';
+      input.value = null;
 
       let filter = filters.find(filter => filter.extensions);
       if (filter) {
@@ -63,15 +74,9 @@ global.Actual = {
       input.style.position = 'absolute';
       input.style.top = '0px';
       input.style.left = '0px';
-      input.dispatchEvent(
-        new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-        }),
-      );
+      input.style.display = 'none';
 
-      input.addEventListener('change', e => {
+      input.onchange = e => {
         let file = e.target.files[0];
         let filename = file.name.replace(/.*(\.[^.]*)/, 'file$1');
 
@@ -89,7 +94,15 @@ global.Actual = {
             alert('Error reading file');
           };
         }
-      });
+      };
+
+      // In Safari the file input has to be in the DOM for change events to
+      // reliably fire.
+      if (createdElement) {
+        document.body.appendChild(input);
+      }
+
+      input.click();
     });
   },
 
