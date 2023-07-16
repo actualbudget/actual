@@ -289,82 +289,6 @@ class TransactionEditInner extends PureComponent {
     });
   };
 
-  // onSplit = () => {
-  //   this.props.navigation.navigate('CategorySelect', {
-  //     title: 'Select the first category',
-  //     onSelect: categoryId => {
-  //       let transactions = this.state.transactions;
-
-  //       // Split the transaction
-  //       let { data } = splitTransaction(transactions, transactions[0].id);
-  //       data[1].category = categoryId;
-
-  //       this.setState({ transactions: data }, this.focusSplit);
-  //     },
-  //   });
-  // };
-
-  // onAddSplit = () => {
-  //   this.props.navigation.navigate('CategorySelect', {
-  //     title: 'Select a category',
-  //     onSelect: categoryId => {
-  //       let transactions = this.state.transactions;
-
-  //       // Split the transaction
-  //       let { data } = addSplitTransaction(transactions, transactions[0].id);
-  //       // Set the initial category
-  //       data[data.length - 1].category = categoryId;
-
-  //       this.setState({ transactions: data }, this.focusSplit);
-  //     },
-  //   });
-  // };
-
-  // focusSplit = () => {
-  //   if (this.lastChildAmount) {
-  //     this.lastChildAmount.focus();
-  //   }
-  // };
-
-  // onDeleteSplit = transaction => {
-  //   let { transactions } = this.state;
-  //   let { data } = deleteTransaction(transactions, transaction.id);
-  //   this.setState({ transactions: data });
-  // };
-
-  // TODO: `renderActions` was used to render swipe actions on split transaction
-  // rows. It enabled you to swipe, revealing a delete action, and if you swiped
-  // all the way it would perform the delete action. The entire swipe was
-  // animated. Swipe actions are a native paradigm and we'll need a web-friendly
-  // replacement.
-  //
-  // renderActions = (progress, dragX) => {
-  //   const trans = dragX.interpolate({
-  //     inputRange: [-101, -100, -50, 0],
-  //     outputRange: [-6, -5, -5, 20],
-  //   });
-  //   return (
-  //     <RectButton
-  //       onPress={this.close}
-  //       style={{
-  //         flex: 1,
-  //         justifyContent: 'center',
-  //         backgroundColor: colors.r4,
-  //       }}
-  //     >
-  //       <Animated.Text
-  //         style={{
-  //           color: 'white',
-  //           textAlign: 'right',
-  //           transform: [{ translateX: trans }],
-  //         }}
-  //       >
-  //         Delete
-  //       </Animated.Text>
-  //     </RectButton>
-  //   );
-  // };
-
   render() {
     const {
       adding,
@@ -563,79 +487,9 @@ class TransactionEditInner extends PureComponent {
                 />
               ) : (
                 <Text style={{ paddingLeft: EDITING_PADDING }}>
-                  {
-                    'Split transaction editing is not supported on mobile at this time.'
-                  }
+                  Split transaction editing is not supported on mobile at this
+                  time.
                 </Text>
-                // <View>
-                //   {childTransactions.map((child, idx) => {
-                //     const isLast = idx === childTransactions.length - 1;
-                //     return (
-                //       // <Swipeable
-                //       //   key={child.id}
-                //       //   renderRightActions={this.renderActions}
-                //       //   onSwipeableRightOpen={() => this.onDeleteSplit(child)}
-                //       //   rightThreshold={100}
-                //       // >
-                //       <TapField
-                //         value={
-                //           child.category
-                //             ? lookupName(categories, child.category)
-                //             : null
-                //         }
-                //         rightContent={
-                //           <FocusableAmountInput
-                //             ref={
-                //               isLast ? el => (this.lastChildAmount = el) : null
-                //             }
-                //             value={child.amount}
-                //             sign={forcedSign}
-                //             scrollIntoView={true}
-                //             buttonProps={{
-                //               paddingVertical: 5,
-                //               style: {
-                //                 width: 80,
-                //                 alignItems: 'flex-end',
-                //               },
-                //             }}
-                //             textStyle={{ fontSize: 14 }}
-                //             onBlur={value =>
-                //               this.onEdit(child, 'amount', value.toString())
-                //             }
-                //           />
-                //         }
-                //         style={{ marginTop: idx === 0 ? 0 : -1 }}
-                //         onTap={() => this.openChildEdit(child)}
-                //       />
-                //       // </Swipeable>
-                //     );
-                //   })}
-
-                //   <View
-                //     style={{
-                //       alignItems: 'flex-end',
-                //       marginRight: EDITING_PADDING,
-                //       paddingTop: 10,
-                //     }}
-                //   >
-                //     {transaction.error && (
-                //       <Text style={{ marginBottom: 10 }}>
-                //         Remaining:{' '}
-                //         {integerToCurrency(transaction.error.difference)}
-                //       </Text>
-                //     )}
-                //     <Button
-                //       style={{
-                //         paddingVertical: 6,
-                //         paddingHorizontal: 15,
-                //       }}
-                //       onPress={this.onAddSplit}
-                //       bare={true}
-                //     >
-                //       Add split
-                //     </Button>
-                //   </View>
-                // </View>
               )}
             </View>
 
@@ -789,11 +643,6 @@ function makeTemporaryTransactions(currentAccountId, lastDate) {
 }
 
 function TransactionEditUnconnected(props) {
-  // componentDidMount() {
-  //   this.props.getCategories();
-  //   this.props.getAccounts();
-  // }
-
   const { categories, accounts, payees, lastTransaction, dateFormat } = props;
   let { id: accountId, transactionId } = useParams();
   let navigate = useNavigate();
