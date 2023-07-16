@@ -112,25 +112,23 @@ function CategoryList({
                 // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
                 // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
                 role="button"
-                className={`${css([
-                  {
-                    backgroundColor:
-                      highlightedIndex === idx
-                        ? highlightedIndexColor
-                        : 'transparent',
-                    borderRadius: embedded ? 4 : 0,
-                    flexShrink: 0,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: colors.g8,
-                    padding: '6px 8px',
-                    ':active': {
-                      backgroundColor: 'rgba(100, 100, 100, .25)',
-                    },
+                style={{
+                  backgroundColor:
+                    highlightedIndex === idx
+                      ? highlightedIndexColor
+                      : 'transparent',
+                  borderRadius: embedded ? 4 : 0,
+                  flexShrink: 0,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: colors.g8,
+                  padding: '6px 8px',
+                  ':active': {
+                    backgroundColor: 'rgba(100, 100, 100, .25)',
                   },
-                ])}`}
+                }}
                 data-testid="split-transaction-button"
               >
                 <Text style={{ lineHeight: 0 }}>
