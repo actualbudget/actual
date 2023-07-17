@@ -115,7 +115,7 @@ export default function NordigenExternalMsg({
   }
 
   function onClose() {
-    originalOnClose && originalOnClose();
+    originalOnClose?.();
     modalProps.onClose();
   }
 
