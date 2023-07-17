@@ -239,7 +239,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
-function selectAscDesc(field, ascDesc, clicked, defaultAscDesc) {
+function selectAscDesc(field, ascDesc, clicked, defaultAscDesc = 'asc') {
   return field === clicked
     ? ascDesc === 'asc'
       ? 'desc'
@@ -1457,7 +1457,7 @@ function TransactionTableInner({
   const isAddingPrev = usePrevious(props.isAdding);
   let [scrollWidth, setScrollWidth] = useState(0);
 
-  function getScrollWidth(parent, child) {
+  function saveScrollWidth(parent, child) {
     let width = parent > 0 && child > 0 && parent - child;
 
     setScrollWidth(!width ? 0 : width);
@@ -1650,7 +1650,7 @@ function TransactionTableInner({
           isSelected={id => props.selectedItems.has(id)}
           onKeyDown={e => props.onCheckEnter(e)}
           onScroll={onScroll}
-          getScrollWidth={getScrollWidth}
+          saveScrollWidth={saveScrollWidth}
         />
 
         {props.isAdding && (

@@ -906,7 +906,7 @@ type TableProps = {
   animated?: boolean;
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
-  getScrollWidth: (parent, child) => void;
+  saveScrollWidth: (parent, child) => void;
 };
 
 export const Table = forwardRef<TableHandleRef, TableProps>(
@@ -931,7 +931,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       animated,
       allowPopupsEscape,
       isSelected,
-      getScrollWidth,
+      saveScrollWidth,
       ...props
     },
     ref,
@@ -1020,14 +1020,14 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       let editing = editingId === item.id;
       let selected = isSelected && isSelected(item.id);
 
-      scrollContainer.current &&
-        getScrollWidth &&
-        getScrollWidth(
+      if (scrollContainer.current && saveScrollWidth) {
+        saveScrollWidth(
           scrollContainer.current.offsetParent
             ? scrollContainer.current.offsetParent.clientWidth
             : 0,
           scrollContainer.current ? scrollContainer.current.clientWidth : 0,
         );
+      }
 
       let row = renderItem({
         item,

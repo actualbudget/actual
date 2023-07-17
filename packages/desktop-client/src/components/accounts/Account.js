@@ -568,7 +568,7 @@ class AccountInternal extends PureComponent {
         let filters = this.state.filters;
         this.setState({ sort: [] });
         if (filters.length > 0) {
-          this.applyFilters([...filters])
+          this.applyFilters([...filters]);
         } else {
           this.fetchTransactions();
         }
