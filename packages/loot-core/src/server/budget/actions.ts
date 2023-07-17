@@ -5,6 +5,8 @@ import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 
+import { applySingleCategoryTemplate } from './goaltemplates';
+
 export async function getSheetValue(sheetName, cell) {
   const node = await sheet.getCell(sheetName, cell);
   return safeNumber(typeof node.value === 'number' ? node.value : 0);
@@ -136,6 +138,29 @@ export async function copyPreviousMonth({ month }) {
   });
 }
 
+export async function copySinglePreviousMonth({ month, category }) {
+  let prevMonth = monthUtils.prevMonth(month);
+  let categories = await db.all(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+
+  let newAmount = await getSheetValue(
+    monthUtils.sheetForMonth(prevMonth),
+    'budget-' + category.id,
+  );
+
+  await batchMessages(async () => {
+    for (let cat of categories) {
+      if (category.id === cat.id) {
+        if (cat.is_income === 1 && !isReflectBudget()) {
+          continue;
+        }
+        setBudget({ category: category.id, month, amount: newAmount });
+      }
+    }
+  });
+}
+
 export async function setZero({ month }) {
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -181,6 +206,34 @@ export async function set3MonthAvg({ month }) {
 
       const avg = Math.round((spent1 + spent2 + spent3) / 3);
       setBudget({ category: cat.id, month, amount: -avg });
+    }
+  });
+}
+
+export async function setNMonthAvg({ month, N, category }) {
+  let categories = await db.all(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+
+  let prevMonth = monthUtils.prevMonth(month);
+  let sumAmount = 0;
+  for (let l = 0; l < N; l++) {
+    sumAmount += await getSheetValue(
+      monthUtils.sheetForMonth(prevMonth),
+      'sum-amount-' + category.id,
+    );
+    prevMonth = monthUtils.prevMonth(prevMonth);
+  }
+
+  await batchMessages(async () => {
+    for (let cat of categories) {
+      if (category.id === cat.id) {
+        if (cat.is_income === 1 && !isReflectBudget()) {
+          continue;
+        }
+        const avg = Math.round(sumAmount / N);
+        setBudget({ category: category.id, month, amount: -avg });
+      }
     }
   });
 }
@@ -271,4 +324,8 @@ export async function setCategoryCarryover({ startMonth, category, flag }) {
       setCarryover(table, category, dbMonth(month), flag);
     }
   });
+}
+
+export async function setSingleCategoryTemplate({ month, category }) {
+  applySingleCategoryTemplate({ month, category });
 }

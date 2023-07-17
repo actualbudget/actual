@@ -1,9 +1,12 @@
 import React, { type ComponentProps, memo, useContext, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
+// import { send } from 'loot-core/src/platform/client/fetch';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
+//import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import CheveronDown from '../../../icons/v1/CheveronDown';
 import { styles, colors } from '../../../style';
 import CategoryAutocomplete from '../../autocomplete/CategorySelect';
 import {
@@ -315,9 +318,60 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 }: ExpenseCategoryMonthProps) {
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
+      <View style={{ flexShrink: 0, marginRight: 5 }}>
+        <Button
+          bare
+          onClick={e => {
+            e.stopPropagation();
+            setMenuOpen(true);
+          }}
+          style={{ color: 'currentColor', padding: 3 }}
+        >
+          <CheveronDown width={14} height={14} style={{ color: colors.b10 }} />
+        </Button>
+        {menuOpen && (
+          <Tooltip
+            position="bottom-left"
+            width={200}
+            style={{ padding: 0 }}
+            onClose={() => setMenuOpen(false)}
+          >
+            <Menu
+              onMenuSelect={type => {
+                // if (type === 'apply-single-category-template') {
+                //   send('budget/apply-single-category-template', {
+                //     monthIndex,
+                //     category,
+                //   });
+                // } else {
+                onBudgetAction(monthIndex, type, { category: category });
+                // }
+                setMenuOpen(false);
+              }}
+              items={[
+                {
+                  name: 'copy-single-last',
+                  text: 'Copy last month’s budget',
+                },
+                {
+                  name: 'set-single-3-avg',
+                  text: 'Set to 3 Month Average',
+                },
+                { name: 'set-single-6-avg', text: 'Set to 6 Month Average' },
+                { name: 'set-single-12-avg', text: 'Set to Yearly Average' },
+                {
+                  name: 'apply-single-category-template',
+                  text: 'Apply Budget Template',
+                },
+              ]}
+            />
+          </Tooltip>
+        )}
+      </View>
       <SheetCell
         name="budget"
         exposed={editing}

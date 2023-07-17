@@ -19,11 +19,38 @@ export function applyBudgetAction(month, type, args) {
       case 'copy-last':
         await send('budget/copy-previous-month', { month });
         break;
+      case 'copy-single-last':
+        await send('budget/copy-single-previous-month', {
+          month,
+          category: args.category,
+        });
+        break;
       case 'set-zero':
         await send('budget/set-zero', { month });
         break;
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });
+        break;
+      case 'set-single-3-avg':
+        await send('budget/set-n-month-avg', {
+          month,
+          N: 3,
+          category: args.category,
+        });
+        break;
+      case 'set-single-6-avg':
+        await send('budget/set-n-month-avg', {
+          month,
+          N: 6,
+          category: args.category,
+        });
+        break;
+      case 'set-single-12-avg':
+        await send('budget/set-n-month-avg', {
+          month,
+          N: 12,
+          category: args.category,
+        });
         break;
       case 'check-templates':
         dispatch(addNotification(await send('budget/check-templates')));
