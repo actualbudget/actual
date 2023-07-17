@@ -53,6 +53,7 @@ module.exports = {
     'react/self-closing-comp': 'error',
 
     'rulesdir/typography': 'error',
+    'rulesdir/prefer-if-statement': 'error',
 
     // https://github.com/eslint/eslint/issues/16954
     // https://github.com/eslint/eslint/issues/16953
