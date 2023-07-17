@@ -60,6 +60,16 @@ export function applyBudgetAction(month, type, args) {
           addNotification(await send('budget/apply-goal-template', { month })),
         );
         break;
+      case 'apply-single-category-template':
+        dispatch(
+          addNotification(
+            await send('budget/apply-single-category-template', {
+              month,
+              category: args.category,
+            }),
+          ),
+        );
+        break;
       case 'overwrite-goal-template':
         dispatch(
           addNotification(

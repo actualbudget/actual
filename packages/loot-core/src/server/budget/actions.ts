@@ -327,5 +327,5 @@ export async function setCategoryCarryover({ startMonth, category, flag }) {
 }
 
 export async function setSingleCategoryTemplate({ month, category }) {
-  applySingleCategoryTemplate({ month, category });
+  await applySingleCategoryTemplate({ month, category });
 }

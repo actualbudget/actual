@@ -331,7 +331,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           }}
           style={{ color: 'currentColor', padding: 3 }}
         >
-          <CheveronDown width={14} height={14} style={{ color: colors.b10 }} />
+          <CheveronDown
+            width={14}
+            height={14}
+            style={{ color: 'currentColor' }}
+          />
         </Button>
         {menuOpen && (
           <Tooltip
@@ -342,14 +346,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           >
             <Menu
               onMenuSelect={type => {
-                // if (type === 'apply-single-category-template') {
-                //   send('budget/apply-single-category-template', {
-                //     monthIndex,
-                //     category,
-                //   });
-                // } else {
                 onBudgetAction(monthIndex, type, { category: category });
-                // }
                 setMenuOpen(false);
               }}
               items={[

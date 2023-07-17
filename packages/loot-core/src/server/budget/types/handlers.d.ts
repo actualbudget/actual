@@ -17,9 +17,10 @@ export interface BudgetHandlers {
 
   'budget/apply-goal-template': (...args: unknown[]) => Promise<unknown>;
 
-  'budget/apply-single-category-template': (
-    ...args: unknown[]
-  ) => Promise<unknown>;
+  'budget/apply-single-category-template': (arg: {
+    category: string /* category id */;
+    month: string;
+  }) => Promise<unknown>;
 
   'budget/overwrite-goal-template': (...args: unknown[]) => Promise<unknown>;
 
