@@ -590,6 +590,7 @@ class AccountInternal extends PureComponent {
             search: '',
             sort: [],
             showBalances: true,
+            balances: await this.calculateBalances(),
           });
           this.fetchTransactions();
           this.props.savePrefs({ ['show-balances-' + accountId]: true });
