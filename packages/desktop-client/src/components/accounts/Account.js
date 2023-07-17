@@ -572,7 +572,9 @@ class AccountInternal extends PureComponent {
         } else {
           this.fetchTransactions();
         }
-        this.state.search !== '' && this.onSearch(this.state.search);
+        if (this.state.search !== '') {
+          this.onSearch(this.state.search);
+        }
         break;
       }
       case 'toggle-cleared':
@@ -862,7 +864,9 @@ class AccountInternal extends PureComponent {
     this.setState({ conditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
     this.applyFilters([...filters]);
-    this.state.search !== '' && this.onSearch(this.state.search);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onReloadSavedFilter = (savedFilter, item) => {
@@ -885,7 +889,9 @@ class AccountInternal extends PureComponent {
     this.setState({ conditionsOp: 'and' });
     this.setState({ filterId: [] });
     this.applyFilters([]);
-    this.state.search !== '' && this.onSearch(this.state.search);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
@@ -898,7 +904,9 @@ class AccountInternal extends PureComponent {
         status: this.state.filterId && 'changed',
       },
     });
-    this.state.search !== '' && this.onSearch(this.state.search);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onDeleteFilter = filter => {
@@ -914,7 +922,9 @@ class AccountInternal extends PureComponent {
         },
       });
     }
-    this.state.search !== '' && this.onSearch(this.state.search);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onApplyFilter = async cond => {
@@ -935,7 +945,9 @@ class AccountInternal extends PureComponent {
       });
       this.applyFilters([...filters, cond]);
     }
-    this.state.search !== '' && this.onSearch(this.state.search);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onScheduleAction = async (name, ids) => {
@@ -1053,7 +1065,9 @@ class AccountInternal extends PureComponent {
     }
 
     this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
-    this.state.search !== '' && this.onSearch(this.state.search);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   render() {

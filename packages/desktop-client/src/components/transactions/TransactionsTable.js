@@ -519,7 +519,7 @@ function HeaderCell({
           )}
         </Button>
       }
-    ></CustomCell>
+    />
   );
 }
 
