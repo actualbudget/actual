@@ -185,7 +185,7 @@ class AccountInternal extends PureComponent {
       transactions: [],
       transactionsCount: 0,
       showBalances: props.showBalances,
-      balances: [],
+      balances: null,
       showCleared: props.showCleared,
       editingName: false,
       isAdding: false,
@@ -373,12 +373,11 @@ class AccountInternal extends PureComponent {
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
+            balances: this.state.showBalances
+              ? await this.calculateBalances()
+              : null,
           },
           () => {
-            if (this.state.showBalances) {
-              this.calculateBalances();
-            }
-
             if (firstLoad) {
               this.table.current?.scrollToTop();
             }
@@ -517,7 +516,7 @@ class AccountInternal extends PureComponent {
 
   async calculateBalances() {
     if (!this.canCalculateBalance()) {
-      return;
+      return null;
     }
 
     let { data } = await runQuery(
@@ -527,7 +526,7 @@ class AccountInternal extends PureComponent {
         .select([{ balance: { $sumOver: '$amount' } }]),
     );
 
-    this.setState({ balances: groupById(data) });
+    return groupById(data);
   }
 
   onAddTransaction = () => {
