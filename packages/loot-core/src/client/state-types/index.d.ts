@@ -36,6 +36,6 @@ export type State = {
 };
 
 declare module 'react-redux' {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions, @typescript-eslint/no-empty-interface, import/no-unused-modules
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions, @typescript-eslint/no-empty-interface
   export interface DefaultRootState extends State {}
 }

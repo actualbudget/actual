@@ -4,8 +4,8 @@ import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Message } from '../server/sync';
-import { AccountEntity } from './models';
 
+import { AccountEntity } from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
