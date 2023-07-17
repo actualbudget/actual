@@ -312,13 +312,13 @@ export default function DateSelect({
           if (!embedded && openOnFocus) {
             setOpen(true);
           }
-          inputProps && inputProps.onFocus && inputProps.onFocus(e);
+          inputProps?.onFocus?.(e);
         }}
         onBlur={e => {
           if (!embedded) {
             setOpen(false);
           }
-          inputProps && inputProps.onBlur && inputProps.onBlur(e);
+          inputProps?.onBlur?.(e);
 
           if (!tableBehavior) {
             // If value is empty, that drives what gets selected.

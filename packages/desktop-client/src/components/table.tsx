@@ -389,7 +389,9 @@ function InputValue({
 
   function onBlur_(e) {
     onUpdate?.(value);
-    onBlur && fireBlur(onBlur, e);
+    if (onBlur) {
+      fireBlur(onBlur, e);
+    }
   }
 
   function onKeyDown(e) {
@@ -1297,7 +1299,7 @@ export function useTableNavigator(data, fields) {
       innerRef: containerRef,
 
       onKeyDown: e => {
-        userProps && userProps.onKeyDown && userProps.onKeyDown(e);
+        userProps?.onKeyDown?.(e);
         if (e.isPropagationStopped()) {
           return;
         }

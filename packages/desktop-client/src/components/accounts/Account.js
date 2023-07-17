@@ -825,9 +825,10 @@ class AccountInternal extends PureComponent {
       this.setState({ conditionsOp: getFilter.conditionsOp });
       this.applyFilters([...getFilter.conditions]);
     } else {
-      savedFilter.status &&
-        this.setState({ conditionsOp: savedFilter.conditionsOp }) &&
+      if (savedFilter.status) {
+        this.setState({ conditionsOp: savedFilter.conditionsOp });
         this.applyFilters([...savedFilter.conditions]);
+      }
     }
     this.setState({ filterId: { ...this.state.filterId, ...savedFilter } });
   };
@@ -852,15 +853,17 @@ class AccountInternal extends PureComponent {
 
   onDeleteFilter = filter => {
     this.applyFilters(this.state.filters.filter(f => f !== filter));
-    this.state.filters.length === 1
-      ? this.setState({ filterId: [] }) &&
-        this.setState({ conditionsOp: 'and' })
-      : this.setState({
-          filterId: {
-            ...this.state.filterId,
-            status: this.state.filterId && 'changed',
-          },
-        });
+    if (this.state.filters.length === 1) {
+      this.setState({ filterId: [] });
+      this.setState({ conditionsOp: 'and' });
+    } else {
+      this.setState({
+        filterId: {
+          ...this.state.filterId,
+          status: this.state.filterId && 'changed',
+        },
+      });
+    }
   };
 
   onApplyFilter = async cond => {
