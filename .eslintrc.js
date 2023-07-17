@@ -50,6 +50,7 @@ module.exports = {
     ),
 
     'react/jsx-no-useless-fragment': 'error',
+    'react/self-closing-comp': 'error',
 
     'rulesdir/typography': 'error',
 
