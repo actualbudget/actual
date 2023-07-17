@@ -251,9 +251,9 @@ class AccountInternal extends PureComponent {
       }, 100);
     }
 
-    //Resest sort on account change
+    //Resest sort/filter/search on account change
     if (this.props.accountId !== prevProps.accountId) {
-      this.setState({ sort: [] });
+      this.setState({ sort: [], search: '', filters: [] });
     }
   }
 
@@ -565,8 +565,12 @@ class AccountInternal extends PureComponent {
         }
         break;
       case 'remove-sorting':
+        let filters = this.state.filters;
         this.setState({ sort: [] });
-        this.fetchTransactions();
+        filters.length > 0
+          ? this.applyFilters([...filters])
+          : this.fetchTransactions();
+        this.state.search !== '' && this.onSearch(this.state.search);
         break;
       case 'toggle-cleared':
         if (this.state.showCleared) {
@@ -855,6 +859,7 @@ class AccountInternal extends PureComponent {
     this.setState({ conditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
     this.applyFilters([...filters]);
+    this.state.search !== '' && this.onSearch(this.state.search);
   };
 
   onReloadSavedFilter = (savedFilter, item) => {
@@ -876,6 +881,7 @@ class AccountInternal extends PureComponent {
     this.setState({ conditionsOp: 'and' });
     this.setState({ filterId: [] });
     this.applyFilters([]);
+    this.state.search !== '' && this.onSearch(this.state.search);
   };
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
@@ -888,6 +894,7 @@ class AccountInternal extends PureComponent {
         status: this.state.filterId && 'changed',
       },
     });
+    this.state.search !== '' && this.onSearch(this.state.search);
   };
 
   onDeleteFilter = filter => {
@@ -901,6 +908,7 @@ class AccountInternal extends PureComponent {
             status: this.state.filterId && 'changed',
           },
         });
+    this.state.search !== '' && this.onSearch(this.state.search);
   };
 
   onApplyFilter = async cond => {
@@ -921,6 +929,7 @@ class AccountInternal extends PureComponent {
       });
       this.applyFilters([...filters, cond]);
     }
+    this.state.search !== '' && this.onSearch(this.state.search);
   };
 
   onScheduleAction = async (name, ids) => {
@@ -955,11 +964,11 @@ class AccountInternal extends PureComponent {
         [conditionsOpKey]: [...filters, ...customFilters],
       });
       this.updateQuery(this.currentQuery, true);
-      this.setState({ filters: conditions, search: '' });
+      this.setState({ filters: conditions });
     } else {
       this.setState({ transactions: [], transactionCount: 0 });
       this.fetchTransactions();
-      this.setState({ filters: conditions, search: '' });
+      this.setState({ filters: conditions });
     }
 
     if (this.state.sort.length !== 0) {
@@ -1038,6 +1047,7 @@ class AccountInternal extends PureComponent {
     }
 
     this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
+    this.state.search !== '' && this.onSearch(this.state.search);
   };
 
   render() {
