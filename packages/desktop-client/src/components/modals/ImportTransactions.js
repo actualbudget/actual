@@ -671,8 +671,8 @@ function ImportTransactions({
     setFieldMappings({ ...fieldMappings, ...newFieldMappings });
   }
 
-  function onNewFile() {
-    const res = window.Actual.openFileDialog({
+  async function onNewFile() {
+    const res = await window.Actual.openFileDialog({
       filters: [
         { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
       ],

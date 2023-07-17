@@ -16,6 +16,7 @@ export default function DevelopmentTopBar() {
           backgroundColor: colors.y8,
           borderBottom: `1px solid ${colors.y6}`,
           zIndex: 1,
+          flexShrink: 0,
         },
       ]}
     >
