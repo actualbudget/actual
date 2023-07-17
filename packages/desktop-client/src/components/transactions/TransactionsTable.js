@@ -1240,11 +1240,7 @@ const Transaction = memo(function Transaction(props) {
       {showBalance && (
         <Cell
           name="balance"
-          value={
-            balance == null || isChild || isPreview
-              ? ''
-              : integerToCurrency(balance)
-          }
+          value={balance == null || isChild ? '' : integerToCurrency(balance)}
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
           style={[styles.tnum, amountStyle]}
           width={88}
