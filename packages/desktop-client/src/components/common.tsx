@@ -32,7 +32,6 @@ export { default as MenuButton } from './common/MenuButton';
 export { default as MenuTooltip } from './common/MenuTooltip';
 export { default as Modal, ModalButtons } from './common/Modal';
 export { default as Search } from './common/Search';
-export { default as Select } from './common/Select';
 export { default as Stack } from './Stack';
 export { default as Text } from './common/Text';
 export { default as TextOneLine } from './common/TextOneLine';
