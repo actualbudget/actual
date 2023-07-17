@@ -284,7 +284,7 @@ export function SchedulesTable({
             Recurring
           </Field>
         )}
-        {!minimal && <Field width={40}></Field>}
+        {!minimal && <Field width={40} />}
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
