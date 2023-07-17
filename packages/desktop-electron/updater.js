@@ -39,7 +39,7 @@ autoUpdater.on('error', message => {
 });
 
 function fireEvent(type, args) {
-  emitEvent && emitEvent(type, args);
+  emitEvent?.(type, args);
   lastEvent = type;
 }
 

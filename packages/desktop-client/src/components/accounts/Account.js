@@ -255,7 +255,7 @@ class AccountInternal extends PureComponent {
   };
 
   refetchTransactions = async () => {
-    this.paged && this.paged.run();
+    this.paged?.run();
   };
 
   fetchTransactions = () => {
@@ -295,7 +295,7 @@ class AccountInternal extends PureComponent {
         const firstLoad = prevData == null;
 
         if (firstLoad) {
-          this.table.current && this.table.current.setRowAnimation(false);
+          this.table.current?.setRowAnimation(false);
 
           if (isFiltered) {
             this.props.splitsExpandedDispatch({
@@ -324,11 +324,11 @@ class AccountInternal extends PureComponent {
             }
 
             if (firstLoad) {
-              this.table.current && this.table.current.scrollToTop();
+              this.table.current?.scrollToTop();
             }
 
             setTimeout(() => {
-              this.table.current && this.table.current.setRowAnimation(true);
+              this.table.current?.setRowAnimation(true);
             }, 0);
           },
         );

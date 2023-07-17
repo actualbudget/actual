@@ -725,7 +725,7 @@ export default function EditRule({
         rule.id = newId;
       }
 
-      originalOnSave && originalOnSave(rule);
+      originalOnSave?.(rule);
       modalProps.onClose();
     }
   }

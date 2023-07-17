@@ -156,7 +156,7 @@ export function ButtonLink({
       }}
       {...props}
       onClick={e => {
-        props.onClick && props.onClick(e);
+        props.onClick?.(e);
         navigate(to);
       }}
     />

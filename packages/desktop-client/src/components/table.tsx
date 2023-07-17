@@ -52,7 +52,7 @@ function fireBlur(onBlur, e) {
     // We only fire the blur event if the app is still focused
     // because the blur event is fired when the app goes into
     // the background and we want to ignore that
-    onBlur && onBlur(e);
+    onBlur?.(e);
   } else {
     // Otherwise, stop React from bubbling this event and swallow it
     e.stopPropagation();
@@ -273,7 +273,7 @@ export function Cell({
                     Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
                     Math.abs(e.clientY - mouseCoords.current[1]) < 5
                   ) {
-                    onExpose && onExpose(name);
+                    onExpose?.(name);
                   }
                 }
           }
@@ -388,7 +388,7 @@ function InputValue({
   let [value, setValue] = useState(defaultValue);
 
   function onBlur_(e) {
-    onUpdate && onUpdate(value);
+    onUpdate?.(value);
     onBlur && fireBlur(onBlur, e);
   }
 
@@ -404,7 +404,7 @@ function InputValue({
         setValue(defaultValue);
       }
     } else if (shouldSaveFromKey(e)) {
-      onUpdate && onUpdate(value);
+      onUpdate?.(value);
     }
   }
 
@@ -509,14 +509,14 @@ export function CustomCell({
     // the app unfocuses, and it's unintuitive to save the value since
     // the input will be focused again when the app regains focus
     if (document.hasFocus()) {
-      onUpdate && onUpdate(value);
+      onUpdate?.(value);
       fireBlur(onBlur, e);
     }
   }
 
   function onKeyDown(e) {
     if (shouldSaveFromKey(e)) {
-      onUpdate && onUpdate(value);
+      onUpdate?.(value);
     }
   }
 
@@ -529,7 +529,7 @@ export function CustomCell({
           onUpdate: val => setValue(val),
           onSave: val => {
             setValue(val);
-            onUpdate && onUpdate(val);
+            onUpdate?.(val);
           },
           shouldSaveFromKey,
           inputStyle: inputCellStyle,
@@ -551,7 +551,7 @@ export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
       style={[{ alignItems: 'center', userSelect: 'none' }, style]}
       onClick={e => {
         e.stopPropagation();
-        onDelete && onDelete();
+        onDelete?.();
       }}
     >
       {() => <DeleteIcon width={7} height={7} />}
@@ -591,7 +591,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
           if (e.key === 'x' || e.key === ' ') {
             e.preventDefault();
             if (!disabled) {
-              onSelect && onSelect(e);
+              onSelect?.(e);
             }
           }
         }}
@@ -615,8 +615,8 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             ? null
             : e => {
                 if (!disabled) {
-                  onSelect && onSelect(e);
-                  onEdit && onEdit();
+                  onSelect?.(e);
+                  onEdit?.();
                 }
               }
         }
@@ -650,8 +650,8 @@ export function SelectCell({
       style={[{ alignItems: 'center', userSelect: 'none' }, style]}
       onClick={e => {
         e.stopPropagation();
-        onSelect && onSelect(e);
-        onEdit && onEdit();
+        onSelect?.(e);
+        onEdit?.();
       }}
     >
       {() => (
@@ -961,7 +961,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       },
 
       scrollToTop: () => {
-        list.current && list.current.scrollTo(0);
+        list.current?.scrollTo(0);
       },
 
       getScrolledItem: () => {
@@ -974,7 +974,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       },
 
       setRowAnimation: flag => {
-        list.current && list.current.setRowAnimation(flag);
+        list.current?.setRowAnimation(flag);
       },
 
       edit(id, field, shouldScroll) {
@@ -987,11 +987,11 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       },
 
       anchor() {
-        list.current && list.current.anchor();
+        list.current?.anchor();
       },
 
       unanchor() {
-        list.current && list.current.unanchor();
+        list.current?.unanchor();
       },
 
       isAnchored() {
@@ -1004,7 +1004,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       // before it's mounted
       if (!listInitialized.current && listContainer.current) {
         // Animation is on by default
-        list.current && list.current.setRowAnimation(true);
+        list.current?.setRowAnimation(true);
         listInitialized.current = true;
       }
     });

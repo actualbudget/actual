@@ -43,7 +43,7 @@ export default function PlaidExternalMsg({
   }
 
   function onClose() {
-    originalOnClose && originalOnClose();
+    originalOnClose?.();
     modalProps.onClose();
   }
 

@@ -378,7 +378,7 @@ export const ManagePayees = forwardRef(
 
     function applyFilter(f) {
       if (filter !== f) {
-        table.current && table.current.setRowAnimation(false);
+        table.current?.setRowAnimation(false);
         setFilter(f);
         resetAnimation.current = true;
       }
@@ -395,7 +395,7 @@ export const ManagePayees = forwardRef(
         // actually update its contents until the next tick or
         // something? The table keeps being animated without this
         setTimeout(() => {
-          table.current && table.current.setRowAnimation(true);
+          table.current?.setRowAnimation(true);
         }, 0);
         resetAnimation.current = false;
       }
