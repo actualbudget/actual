@@ -564,14 +564,17 @@ class AccountInternal extends PureComponent {
           this.calculateBalances();
         }
         break;
-      case 'remove-sorting':
+      case 'remove-sorting': {
         let filters = this.state.filters;
         this.setState({ sort: [] });
-        filters.length > 0
-          ? this.applyFilters([...filters])
-          : this.fetchTransactions();
+        if (filters.length > 0) {
+          this.applyFilters([...filters])
+        } else {
+          this.fetchTransactions();
+        }
         this.state.search !== '' && this.onSearch(this.state.search);
         break;
+      }
       case 'toggle-cleared':
         if (this.state.showCleared) {
           this.props.savePrefs({ ['hide-cleared-' + accountId]: true });
