@@ -1244,6 +1244,7 @@ class AccountInternal extends PureComponent {
                   category={category}
                   categoryGroups={categoryGroups}
                   payees={payees}
+                  showBalances={showBalances}
                   balances={allBalances}
                   showCleared={showCleared}
                   showAccount={

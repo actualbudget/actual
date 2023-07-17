@@ -1499,6 +1499,7 @@ function TransactionTableInner({
       showCleared,
       showAccount,
       showCategory,
+      showBalances,
       balances,
       hideFraction,
       isNew,
@@ -1545,7 +1546,7 @@ function TransactionTableInner({
           transaction={trans}
           showAccount={showAccount}
           showCategory={showCategory}
-          showBalance={!!balances}
+          showBalance={showBalances}
           showCleared={showCleared}
           hovered={hovered}
           selected={selected}
@@ -1591,7 +1592,7 @@ function TransactionTableInner({
           hasSelected={props.selectedItems.size > 0}
           showAccount={props.showAccount}
           showCategory={props.showCategory}
-          showBalance={!!props.balances}
+          showBalance={props.showBalances}
           showCleared={props.showCleared}
           scrollWidth={scrollWidth}
           onSort={props.onSort}
@@ -1615,7 +1616,7 @@ function TransactionTableInner({
               payees={props.payees || []}
               showAccount={props.showAccount}
               showCategory={props.showCategory}
-              showBalance={!!props.balances}
+              showBalance={props.showBalances}
               showCleared={props.showCleared}
               dateFormat={dateFormat}
               hideFraction={props.hideFraction}
