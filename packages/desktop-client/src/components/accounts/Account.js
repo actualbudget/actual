@@ -112,15 +112,19 @@ function AllTransactions({
     }));
   }, [schedules, accountId]);
 
+  let runningBalance = useMemo(() => {
+    if (!showBalances) {
+      return 0;
+    }
+
+    // balances is in descending order so latest order is at the start of the array.
+    return balances ? Object.values(balances)[0]?.balance ?? 0 : 0;
+  }, [showBalances, balances]);
+
   let prependBalances = useMemo(() => {
     if (!showBalances) {
       return null;
     }
-
-    // balances is in descending order so latest order is at the start of the array.
-    let runningBalance = balances
-      ? Object.values(balances)[0]?.balance ?? 0
-      : 0;
 
     // Reverse so we can calculate from earliest upcoming schedule.
     let scheduledBalances = prependTransactions.map((_, index, ptArray) => {
@@ -133,7 +137,7 @@ function AllTransactions({
       };
     });
     return groupById(scheduledBalances);
-  }, [showBalances, prependTransactions, balances]);
+  }, [showBalances, prependTransactions, runningBalance]);
 
   let allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
