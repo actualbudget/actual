@@ -77,6 +77,7 @@ function EmptyMessage({ onAdd }) {
 function AllTransactions({
   account = {},
   transactions,
+  showBalances,
   balances,
   filtered,
   children,
@@ -112,6 +113,10 @@ function AllTransactions({
   }, [schedules, accountId]);
 
   let prependBalances = useMemo(() => {
+    if (!showBalances) {
+      return null;
+    }
+
     // balances is in descending order so latest order is at the start of the array.
     let runningBalance = balances
       ? Object.values(balances)[0]?.balance ?? 0
@@ -128,7 +133,7 @@ function AllTransactions({
       };
     });
     return groupById(scheduledBalances);
-  }, [prependTransactions, balances]);
+  }, [showBalances, prependTransactions, balances]);
 
   let allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
@@ -140,7 +145,7 @@ function AllTransactions({
 
   let allBalances = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
-    if (!filtered && prependBalances) {
+    if (showBalances && !filtered && prependBalances) {
       return { ...prependBalances, ...balances };
     }
     return balances;
@@ -404,7 +409,7 @@ class AccountInternal extends PureComponent {
           loading: true,
           search: '',
           showBalances: nextProps.showBalances,
-          balances: [],
+          balances: null,
           showCleared: nextProps.showCleared,
         },
         () => {
@@ -1157,6 +1162,7 @@ class AccountInternal extends PureComponent {
       <AllTransactions
         account={account}
         transactions={transactions}
+        showBalances={showBalances}
         balances={balances}
         filtered={transactionsFiltered}
       >
@@ -1234,11 +1240,7 @@ class AccountInternal extends PureComponent {
                   category={category}
                   categoryGroups={categoryGroups}
                   payees={payees}
-                  balances={
-                    showBalances && this.canCalculateBalance()
-                      ? allBalances
-                      : null
-                  }
+                  balances={allBalances}
                   showCleared={showCleared}
                   showAccount={
                     !accountId ||
