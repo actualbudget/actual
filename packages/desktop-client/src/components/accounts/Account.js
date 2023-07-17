@@ -148,11 +148,8 @@ function AllTransactions({
   }, [filtered, prependTransactions, transactions]);
 
   let allBalances = useMemo(() => {
-    if (!showBalances) {
-      return null;
-    }
     // Don't prepend scheduled transactions if we are filtering
-    if (!filtered && prependBalances) {
+    if (showBalances && !filtered && prependBalances) {
       return { ...prependBalances, ...balances };
     }
     return balances;
@@ -593,7 +590,7 @@ class AccountInternal extends PureComponent {
       case 'toggle-balance':
         if (this.state.showBalances) {
           this.props.savePrefs({ ['show-balances-' + accountId]: false });
-          this.setState({ showBalances: false, balances: [] });
+          this.setState({ showBalances: false, balances: null });
         } else {
           this.setState({
             transactions: [],
