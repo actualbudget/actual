@@ -52,7 +52,10 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-typescript'],
+            presets: [
+              ['@babel/preset-env', { bugfixes: true }],
+              '@babel/preset-typescript',
+            ],
           },
         },
       },
