@@ -326,7 +326,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           onBlur={e => updateField('interval', e.target.value)}
           onEnter={e => updateField('interval', e.target.value)}
           defaultValue={config.interval || 1}
-        ></Input>
+        />
         <CustomSelect
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}

@@ -12,7 +12,7 @@ function useReport(sheetName, getData) {
       cleanup = c;
     });
     return () => {
-      cleanup && cleanup();
+      cleanup?.();
     };
   }, [getData]);
 

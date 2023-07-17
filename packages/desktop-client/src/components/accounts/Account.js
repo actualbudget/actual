@@ -278,7 +278,7 @@ class AccountInternal extends PureComponent {
   };
 
   refetchTransactions = async () => {
-    this.paged && this.paged.run();
+    this.paged?.run();
   };
 
   fetchTransactions = () => {
@@ -318,7 +318,7 @@ class AccountInternal extends PureComponent {
         const firstLoad = prevData == null;
 
         if (firstLoad) {
-          this.table.current && this.table.current.setRowAnimation(false);
+          this.table.current?.setRowAnimation(false);
 
           if (isFiltered) {
             this.props.splitsExpandedDispatch({
@@ -347,11 +347,11 @@ class AccountInternal extends PureComponent {
             }
 
             if (firstLoad) {
-              this.table.current && this.table.current.scrollToTop();
+              this.table.current?.scrollToTop();
             }
 
             setTimeout(() => {
-              this.table.current && this.table.current.setRowAnimation(true);
+              this.table.current?.setRowAnimation(true);
             }, 0);
           },
         );
@@ -873,9 +873,10 @@ class AccountInternal extends PureComponent {
       this.setState({ conditionsOp: getFilter.conditionsOp });
       this.applyFilters([...getFilter.conditions]);
     } else {
-      savedFilter.status &&
-        this.setState({ conditionsOp: savedFilter.conditionsOp }) &&
+      if (savedFilter.status) {
+        this.setState({ conditionsOp: savedFilter.conditionsOp });
         this.applyFilters([...savedFilter.conditions]);
+      }
     }
     this.setState({ filterId: { ...this.state.filterId, ...savedFilter } });
   };
@@ -902,15 +903,17 @@ class AccountInternal extends PureComponent {
 
   onDeleteFilter = filter => {
     this.applyFilters(this.state.filters.filter(f => f !== filter));
-    this.state.filters.length === 1
-      ? this.setState({ filterId: [] }) &&
-        this.setState({ conditionsOp: 'and' })
-      : this.setState({
-          filterId: {
-            ...this.state.filterId,
-            status: this.state.filterId && 'changed',
-          },
-        });
+    if (this.state.filters.length === 1) {
+      this.setState({ filterId: [] });
+      this.setState({ conditionsOp: 'and' });
+    } else {
+      this.setState({
+        filterId: {
+          ...this.state.filterId,
+          status: this.state.filterId && 'changed',
+        },
+      });
+    }
     this.state.search !== '' && this.onSearch(this.state.search);
   };
 

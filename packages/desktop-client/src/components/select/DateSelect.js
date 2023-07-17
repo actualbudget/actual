@@ -100,7 +100,7 @@ let DatePicker = forwardRef(
           }
           if (newDate) {
             picker.current.setDate(newDate, true);
-            onUpdate && onUpdate(newDate);
+            onUpdate?.(newDate);
           }
         },
       }),
@@ -138,9 +138,7 @@ let DatePicker = forwardRef(
       }
     }, [value, dateFormat]);
 
-    return (
-      <View style={[pickerStyles, { flex: 1 }]} innerRef={mountPoint}></View>
-    );
+    return <View style={[pickerStyles, { flex: 1 }]} innerRef={mountPoint} />;
   },
 );
 
@@ -213,21 +211,21 @@ export default function DateSelect({
       // the right day/month format from it
       let test = d.parse(value, getDayMonthFormat(dateFormat), new Date());
       if (d.isValid(test)) {
-        onUpdate && onUpdate(d.format(test, 'yyyy-MM-dd'));
+        onUpdate?.(d.format(test, 'yyyy-MM-dd'));
         setSelectedValue(d.format(test, dateFormat));
       }
     } else if (getShortYearRegex(dateFormat).test(value)) {
       // Support entering the year as only two digits (4/5/19)
       let test = d.parse(value, getShortYearFormat(dateFormat), new Date());
       if (d.isValid(test)) {
-        onUpdate && onUpdate(d.format(test, 'yyyy-MM-dd'));
+        onUpdate?.(d.format(test, 'yyyy-MM-dd'));
         setSelectedValue(d.format(test, dateFormat));
       }
     } else {
       let test = d.parse(value, dateFormat, new Date());
       if (d.isValid(test)) {
         let date = d.format(test, 'yyyy-MM-dd');
-        onUpdate && onUpdate(date);
+        onUpdate?.(date);
         setSelectedValue(value);
       }
     }
@@ -256,7 +254,7 @@ export default function DateSelect({
         }
       } else {
         setOpen(true);
-        onUpdate && onUpdate(defaultValue);
+        onUpdate?.(defaultValue);
       }
     } else if (shouldSaveFromKey(e)) {
       setValue(selectedValue);
@@ -274,7 +272,7 @@ export default function DateSelect({
       }
 
       let { onKeyDown } = inputProps || {};
-      onKeyDown && onKeyDown(e);
+      onKeyDown?.(e);
     } else if (!open) {
       setOpen(true);
       if (inputRef.current) {
@@ -314,13 +312,13 @@ export default function DateSelect({
           if (!embedded && openOnFocus) {
             setOpen(true);
           }
-          inputProps && inputProps.onFocus && inputProps.onFocus(e);
+          inputProps?.onFocus?.(e);
         }}
         onBlur={e => {
           if (!embedded) {
             setOpen(false);
           }
-          inputProps && inputProps.onBlur && inputProps.onBlur(e);
+          inputProps?.onBlur?.(e);
 
           if (!tableBehavior) {
             // If value is empty, that drives what gets selected.
@@ -349,7 +347,7 @@ export default function DateSelect({
             dateFormat={dateFormat}
             onUpdate={date => {
               setSelectedValue(d.format(date, dateFormat));
-              onUpdate && onUpdate(d.format(date, 'yyyy-MM-dd'));
+              onUpdate?.(d.format(date, 'yyyy-MM-dd'));
             }}
             onSelect={date => {
               setValue(d.format(date, dateFormat));
