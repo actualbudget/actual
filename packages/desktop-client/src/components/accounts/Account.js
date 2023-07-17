@@ -148,8 +148,11 @@ function AllTransactions({
   }, [filtered, prependTransactions, transactions]);
 
   let allBalances = useMemo(() => {
+    if (!showBalances) {
+      return null;
+    }
     // Don't prepend scheduled transactions if we are filtering
-    if (showBalances && !filtered && prependBalances) {
+    if (!filtered && prependBalances) {
       return { ...prependBalances, ...balances };
     }
     return balances;
