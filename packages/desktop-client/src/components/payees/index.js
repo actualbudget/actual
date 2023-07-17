@@ -510,21 +510,27 @@ export const ManagePayees = forwardRef(
             )}
           </View>
           <View>
-            <Button
-              bare
-              style={{
-                marginRight: '10px',
-              }}
-              disabled={!(orphanedPayees?.length > 0) && !orphanedOnly}
-              onClick={() => {
-                setOrphanedOnly(!orphanedOnly);
-                const filterInput = document.getElementById('filter-input');
-                applyFilter(filterInput.value);
-                tableNavigator.onEdit(null);
-              }}
-            >
-              {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
-            </Button>
+            {(orphanedOnly ||
+              (orphanedPayees && orphanedPayees.length > 0)) && (
+              <Button
+                bare
+                style={{ marginRight: 10 }}
+                onClick={() => {
+                  setOrphanedOnly(!orphanedOnly);
+                  const filterInput = document.getElementById('filter-input');
+                  applyFilter(filterInput.value);
+                  tableNavigator.onEdit(null);
+                }}
+              >
+                {orphanedOnly
+                  ? 'Show all payees'
+                  : `Show ${
+                      orphanedPayees.length === 1
+                        ? '1 unused payee'
+                        : `${orphanedPayees.length} unused payees`
+                    }`}
+              </Button>
+            )}
           </View>
           <View style={{ flex: 1 }} />
           <Input
