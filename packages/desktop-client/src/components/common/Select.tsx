@@ -30,11 +30,11 @@ type CustomSelectProps = {
  *
  * @example
  * // Usage:
- * // <CustomSelect options={[['1', 'Option 1'], ['2', 'Option 2']]} value="1" onChange={handleOnChange} />
- * // <CustomSelect options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
+ * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="1" onChange={handleOnChange} />
+ * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
  */
 
-export default function CustomSelect({
+export default function Select({
   options,
   value,
   defaultLabel = '',

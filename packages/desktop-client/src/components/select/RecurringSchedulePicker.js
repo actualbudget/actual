@@ -8,15 +8,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import { colors } from '../../style';
-import {
-  Button,
-  CustomSelect,
-  Input,
-  Tooltip,
-  View,
-  Text,
-  Stack,
-} from '../common';
+import { Button, Select, Input, Tooltip, View, Text, Stack } from '../common';
 import { useTooltip } from '../tooltips';
 
 import DateSelect from './DateSelect';
@@ -199,7 +191,7 @@ function MonthlyPatterns({ config, dispatch }) {
             flexDirection: 'row',
           }}
         >
-          <CustomSelect
+          <Select
             options={[
               [-1, 'Last'],
               ['-', '---'],
@@ -216,7 +208,7 @@ function MonthlyPatterns({ config, dispatch }) {
               width: '100%',
             }}
           />
-          <CustomSelect
+          <Select
             options={[
               ['day', 'Day'],
               ['-', '---'],
@@ -326,8 +318,8 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           onBlur={e => updateField('interval', e.target.value)}
           onEnter={e => updateField('interval', e.target.value)}
           defaultValue={config.interval || 1}
-        ></Input>
-        <CustomSelect
+        />
+        <Select
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}

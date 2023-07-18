@@ -17,7 +17,7 @@ import {
   Text,
   Stack,
   Modal,
-  CustomSelect,
+  Select,
   Input,
   Button,
   ButtonWithLoading,
@@ -339,7 +339,7 @@ function SubLabel({ title }) {
 
 function SelectField({ width, style, options, value, onChange }) {
   return (
-    <CustomSelect
+    <Select
       options={[
         ['choose-field', 'Choose field...'],
         ...options.map(option => [option, option]),
@@ -372,7 +372,7 @@ function DateFormatSelect({
   return (
     <View style={{ width: 120 }}>
       <SectionLabel title="Date format" />
-      <CustomSelect
+      <Select
         options={dateFormats.map(f => [
           f.format,
           f.label.replace(/ /g, delimiter),
@@ -671,8 +671,8 @@ function ImportTransactions({
     setFieldMappings({ ...fieldMappings, ...newFieldMappings });
   }
 
-  function onNewFile() {
-    const res = window.Actual.openFileDialog({
+  async function onNewFile() {
+    const res = await window.Actual.openFileDialog({
       filters: [
         { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
       ],
@@ -890,7 +890,7 @@ function ImportTransactions({
               {filetype === 'csv' && (
                 <View style={{ marginLeft: 25 }}>
                   <SectionLabel title="CSV DELIMITER" />
-                  <CustomSelect
+                  <Select
                     options={[
                       [',', ','],
                       [';', ';'],
