@@ -42,7 +42,7 @@ import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
-import NordigenLink from './nordigen/NordigenLink';
+import GoCardlessLink from './gocardless/GoCardlessLink';
 import Notifications from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
@@ -135,11 +135,21 @@ function StackedRoutesInner({ location }) {
       <Route path="/payees" element={<ManagePayeesPage />} />
       <Route path="/rules" element={<ManageRulesPage />} />
       <Route path="/settings" element={<Settings />} />
+
+      {/* TODO: remove Nordigen route after v23.8.0 */}
       <Route
         path="/nordigen/link"
         element={
           <NarrowNotSupported>
-            <NordigenLink />
+            <GoCardlessLink />
+          </NarrowNotSupported>
+        }
+      />
+      <Route
+        path="/gocardless/link"
+        element={
+          <NarrowNotSupported>
+            <GoCardlessLink />
           </NarrowNotSupported>
         }
       />

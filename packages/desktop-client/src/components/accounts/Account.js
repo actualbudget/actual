@@ -25,7 +25,7 @@ import {
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
-import { authorizeBank } from '../../nordigen';
+import { authorizeBank } from '../../gocardless';
 import { styles, colors } from '../../style';
 import { useActiveLocation } from '../ActiveLocation';
 import { View, Text, Button } from '../common';

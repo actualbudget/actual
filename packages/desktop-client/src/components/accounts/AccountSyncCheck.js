@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import * as actions from 'loot-core/src/client/actions';
 
 import ExclamationOutline from '../../icons/v1/ExclamationOutline';
-import { authorizeBank } from '../../nordigen';
+import { authorizeBank } from '../../gocardless';
 import { colors } from '../../style';
 import { View, Button, Tooltip, ExternalLink } from '../common';
 
