@@ -33,6 +33,7 @@ app.use(bodyParser.raw({ type: 'application/encrypted-file', limit: '50mb' }));
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
 app.use('/nordigen', nordigenApp.handlers);
+app.use('/gocardless', nordigenApp.handlers);
 app.use('/secret', secretApp.handlers);
 
 app.get('/mode', (req, res) => {
