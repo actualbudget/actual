@@ -41,8 +41,14 @@ import {
 } from './common';
 import FixedSizeList from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
+import {
+  ConditionalPrivacyFilter,
+  mergeConditionalPrivacyFilterProps,
+  type ConditionalPrivacyFilterProps,
+} from './PrivacyFilter';
+import { type Binding } from './spreadsheet';
 import format from './spreadsheet/format';
-import SheetValue from './spreadsheet/SheetValue';
+import useSheetValue from './spreadsheet/useSheetValue';
 
 export const ROW_HEIGHT = 32;
 const TABLE_BACKGROUND_COLOR = colors.n11;
@@ -193,6 +199,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
+  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
 };
 export function Cell({
   width,
@@ -210,6 +217,7 @@ export function Cell({
   style,
   valueStyle,
   unexposedContent,
+  privacyFilter,
   ...viewProps
 }: CellProps) {
   let mouseCoords = useRef(null);
@@ -237,6 +245,80 @@ export function Cell({
     alignItems: alignItems,
   };
 
+  let conditionalPrivacyFilter = useMemo(
+    () => (
+      <ConditionalPrivacyFilter
+        privacyFilter={mergeConditionalPrivacyFilterProps(
+          {
+            activationFilters: [!focused, !exposed],
+            style: {
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+            },
+          },
+          privacyFilter,
+        )}
+      >
+        {plain ? (
+          children
+        ) : exposed ? (
+          // @ts-expect-error Missing props refinement
+          children()
+        ) : (
+          <View
+            style={[
+              {
+                flexDirection: 'row',
+                flex: 1,
+                padding: '0 5px',
+                alignItems: 'center',
+              },
+              styles.smallText,
+              valueStyle,
+            ]}
+            // Can't use click because we only want to expose the cell if
+            // the user does a direct click, not if they also drag the
+            // mouse to select something
+            onMouseDown={e => (mouseCoords.current = [e.clientX, e.clientY])}
+            // When testing, allow the click handler to be used instead
+            onClick={
+              global.IS_TESTING
+                ? () => onExpose?.(name)
+                : e => {
+                    if (
+                      mouseCoords.current &&
+                      Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
+                      Math.abs(e.clientY - mouseCoords.current[1]) < 5
+                    ) {
+                      onExpose?.(name);
+                    }
+                  }
+            }
+          >
+            {unexposedContent || (
+              <UnexposedCellContent value={value} formatter={formatter} />
+            )}
+          </View>
+        )}
+      </ConditionalPrivacyFilter>
+    ),
+    [
+      privacyFilter,
+      focused,
+      exposed,
+      children,
+      plain,
+      exposed,
+      valueStyle,
+      onExpose,
+      name,
+      unexposedContent,
+      value,
+      formatter,
+    ],
+  );
+
   return (
     <View
       innerRef={viewRef}
@@ -245,47 +327,7 @@ export function Cell({
       {...viewProps}
       data-testid={name}
     >
-      {plain ? (
-        children
-      ) : exposed ? (
-        // @ts-expect-error Missing props refinement
-        children()
-      ) : (
-        <View
-          style={[
-            {
-              flexDirection: 'row',
-              flex: 1,
-              padding: '0 5px',
-              alignItems: 'center',
-            },
-            styles.smallText,
-            valueStyle,
-          ]}
-          // Can't use click because we only want to expose the cell if
-          // the user does a direct click, not if they also drag the
-          // mouse to select something
-          onMouseDown={e => (mouseCoords.current = [e.clientX, e.clientY])}
-          // When testing, allow the click handler to be used instead
-          onClick={
-            global.IS_TESTING
-              ? () => onExpose && onExpose(name)
-              : e => {
-                  if (
-                    mouseCoords.current &&
-                    Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
-                    Math.abs(e.clientY - mouseCoords.current[1]) < 5
-                  ) {
-                    onExpose?.(name);
-                  }
-                }
-          }
-        >
-          {unexposedContent || (
-            <UnexposedCellContent value={value} formatter={formatter} />
-          )}
-        </View>
-      )}
+      {conditionalPrivacyFilter}
     </View>
   );
 }
@@ -694,11 +736,12 @@ export function SelectCell({
 }
 
 type SheetCellValueProps = {
-  binding: ComponentProps<typeof SheetValue>['binding'];
+  binding: Binding;
   type: string;
   getValueStyle?: (value: unknown) => CSSProperties;
   formatExpr?: (value) => string;
   unformatExpr?: (value: string) => unknown;
+  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
 };
 
 type SheetCellProps = ComponentProps<typeof Cell> & {
@@ -714,52 +757,55 @@ export function SheetCell({
   onSave,
   ...props
 }: SheetCellProps) {
-  const { binding, type, getValueStyle, formatExpr, unformatExpr } = valueProps;
+  const {
+    binding,
+    type,
+    getValueStyle,
+    formatExpr,
+    unformatExpr,
+    privacyFilter,
+  } = valueProps;
+
+  let sheetValue = useSheetValue(binding, e => {
+    // "close" the cell if it's editing
+    if (props.exposed && inputProps && inputProps.onBlur) {
+      inputProps.onBlur(e);
+    }
+  });
 
   return (
-    <SheetValue
-      binding={binding}
-      onChange={e => {
-        // "close" the cell if it's editing
-        if (props.exposed && inputProps && inputProps.onBlur) {
-          inputProps.onBlur(e);
-        }
-      }}
+    <Cell
+      valueStyle={
+        getValueStyle ? [valueStyle, getValueStyle(sheetValue)] : valueStyle
+      }
+      textAlign={textAlign}
+      {...props}
+      value={sheetValue}
+      formatter={value =>
+        props.formatter ? props.formatter(value, type) : format(value, type)
+      }
+      privacyFilter={
+        privacyFilter != null
+          ? privacyFilter
+          : type === 'financial'
+          ? true
+          : undefined
+      }
+      data-cellname={sheetValue}
     >
-      {node => {
+      {() => {
         return (
-          <Cell
-            valueStyle={
-              getValueStyle
-                ? [valueStyle, getValueStyle(node.value)]
-                : valueStyle
-            }
-            textAlign={textAlign}
-            {...props}
-            value={node.value}
-            formatter={value =>
-              props.formatter
-                ? props.formatter(value, type)
-                : format(value, type)
-            }
-            data-cellname={node.name}
-          >
-            {() => {
-              return (
-                <InputValue
-                  value={formatExpr ? formatExpr(node.value) : node.value}
-                  onUpdate={value => {
-                    onSave(unformatExpr ? unformatExpr(value) : value);
-                  }}
-                  style={{ textAlign }}
-                  {...inputProps}
-                />
-              );
+          <InputValue
+            value={formatExpr ? formatExpr(sheetValue) : sheetValue}
+            onUpdate={value => {
+              onSave(unformatExpr ? unformatExpr(value) : value);
             }}
-          </Cell>
+            style={{ textAlign }}
+            {...inputProps}
+          />
         );
       }}
-    </SheetValue>
+    </Cell>
   );
 }
 

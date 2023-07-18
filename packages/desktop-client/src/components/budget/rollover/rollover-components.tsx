@@ -291,6 +291,11 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         valueProps={{
           binding: rolloverBudget.groupBalance(id),
           type: 'financial',
+          privacyFilter: {
+            style: {
+              paddingRight: MONTH_RIGHT_PADDING,
+            },
+          },
         }}
       />
     </View>
@@ -321,6 +326,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       <SheetCell
         name="budget"
         exposed={editing}
+        focused={editing}
         width="flex"
         borderColor={borderColor}
         onExpose={() => onEdit(category.id, monthIndex)}
@@ -426,6 +432,11 @@ export function IncomeGroupMonth() {
         valueProps={{
           binding: rolloverBudget.groupIncomeReceived,
           type: 'financial',
+          privacyFilter: {
+            style: {
+              paddingRight: MONTH_RIGHT_PADDING,
+            },
+          },
         }}
       />
     </View>

@@ -1211,6 +1211,9 @@ const Transaction = memo(function Transaction(props) {
           value: debit === '' && credit === '' ? '0.00' : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
         }}
+        privacyFilter={{
+          activationFilters: [!isTemporaryId(transaction.id)],
+        }}
       />
 
       <InputCell
@@ -1229,6 +1232,9 @@ const Transaction = memo(function Transaction(props) {
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
         }}
+        privacyFilter={{
+          activationFilters: [!isTemporaryId(transaction.id)],
+        }}
       />
 
       {showBalance && (
@@ -1243,6 +1249,7 @@ const Transaction = memo(function Transaction(props) {
           style={[styles.tnum, amountStyle]}
           width={88}
           textAlign="right"
+          privacyFilter
         />
       )}
 

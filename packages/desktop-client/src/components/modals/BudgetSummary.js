@@ -8,10 +8,11 @@ import { View, Text, Modal, Button } from '../common';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
-import SheetValue from '../spreadsheet/SheetValue';
+import useSheetValue from '../spreadsheet/useSheetValue';
 
 function BudgetSummary({ month, modalProps }) {
   const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
+  const budgetAmount = useSheetValue(rolloverBudget.toBudget);
 
   return (
     <Modal title="Budget Details" {...modalProps} animate>
@@ -71,29 +72,21 @@ function BudgetSummary({ month, modalProps }) {
           </View>
 
           <View style={{ alignItems: 'center', marginBottom: 15 }}>
-            <SheetValue binding={rolloverBudget.toBudget}>
-              {({ value: amount }) => {
-                return (
-                  <>
-                    <Text style={styles.text}>
-                      {amount < 0 ? 'Overbudget:' : 'To budget:'}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.text,
-                        {
-                          fontWeight: '600',
-                          fontSize: 22,
-                          color: amount < 0 ? colors.r4 : colors.n1,
-                        },
-                      ]}
-                    >
-                      {format(amount, 'financial')}
-                    </Text>
-                  </>
-                );
-              }}
-            </SheetValue>
+            <Text style={styles.text}>
+              {budgetAmount < 0 ? 'Overbudget:' : 'To budget:'}
+            </Text>
+            <Text
+              style={[
+                styles.text,
+                {
+                  fontWeight: '600',
+                  fontSize: 22,
+                  color: budgetAmount < 0 ? colors.r4 : colors.n1,
+                },
+              ]}
+            >
+              {format(budgetAmount, 'financial')}
+            </Text>
           </View>
 
           <View

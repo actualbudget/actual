@@ -1,7 +1,10 @@
 import { type numberFormats } from '../../shared/util';
 import type * as constants from '../constants';
 
-export type FeatureFlag = 'reportBudget' | 'goalTemplatesEnabled';
+export type FeatureFlag =
+  | 'reportBudget'
+  | 'goalTemplatesEnabled'
+  | 'privacyMode';
 
 type NullableValues<T> = { [K in keyof T]: T[K] | null };
 
@@ -13,6 +16,7 @@ export type LocalPrefs = NullableValues<
     hideFraction: boolean;
     hideClosedAccounts: boolean;
     hideMobileMessage: boolean;
+    isPrivacyEnabled: boolean;
     budgetName: string;
     'ui.showClosedAccounts': boolean;
     'expand-splits': boolean;
