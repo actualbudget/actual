@@ -75,12 +75,12 @@ export async function getAccounts(userId, userKey, id) {
   return accounts;
 }
 
-export async function getNordigenAccounts(userId, userKey, id) {
+export async function getGoCardlessAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
   let res = await post(
-    getServer().NORDIGEN_SERVER + '/accounts',
+    getServer().GOCARDLESS_SERVER + '/accounts',
     {
       userId,
       key: userKey,
@@ -174,7 +174,7 @@ async function downloadTransactions(
   };
 }
 
-async function downloadNordigenTransactions(
+async function downloadGoCardlessTransactions(
   userId,
   userKey,
   acctId,
@@ -187,7 +187,7 @@ async function downloadNordigenTransactions(
   const endDate = new Date().toISOString().split('T')[0];
 
   const res = await post(
-    getServer().NORDIGEN_SERVER + '/transactions',
+    getServer().GOCARDLESS_SERVER + '/transactions',
     {
       userId: userId,
       key: userKey,
@@ -289,7 +289,7 @@ async function normalizeTransactions(
   return { normalized, payeesToCreate };
 }
 
-async function normalizeNordigenTransactions(transactions, acctId) {
+async function normalizeGoCardlessTransactions(transactions, acctId) {
   let payeesToCreate = new Map();
 
   let normalized = [];
@@ -398,12 +398,12 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
   });
 }
 
-export async function reconcileNordigenTransactions(acctId, transactions) {
+export async function reconcileGoCardlessTransactions(acctId, transactions) {
   const hasMatched = new Set();
   const updated = [];
   const added = [];
 
-  let { normalized, payeesToCreate } = await normalizeNordigenTransactions(
+  let { normalized, payeesToCreate } = await normalizeGoCardlessTransactions(
     transactions,
     acctId,
   );
@@ -738,7 +738,13 @@ export async function addTransactions(
   return newTransactions;
 }
 
-export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
+export async function syncGoCardlessAccount(
+  userId,
+  userKey,
+  id,
+  acctId,
+  bankId,
+) {
   // TODO: Handle the case where transactions exist in the future
   // (that will make start date after end date)
   const latestTransaction = await db.first(
@@ -770,7 +776,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
       date = startingDate;
     }
 
-    let { transactions, accountBalance } = await downloadNordigenTransactions(
+    let { transactions, accountBalance } = await downloadGoCardlessTransactions(
       userId,
       userKey,
       acctId,
@@ -785,7 +791,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
     transactions = transactions.map(trans => ({ ...trans, account: id }));
 
     return runMutator(async () => {
-      const result = await reconcileNordigenTransactions(id, transactions);
+      const result = await reconcileGoCardlessTransactions(id, transactions);
       await updateAccountBalance(id, accountBalance);
       return result;
     });
@@ -794,7 +800,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
     const startingDay = monthUtils.subDays(monthUtils.currentDay(), 30);
 
     const { transactions, startingBalance } =
-      await downloadNordigenTransactions(
+      await downloadGoCardlessTransactions(
         userId,
         userKey,
         acctId,
@@ -828,7 +834,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
         starting_balance_flag: true,
       });
 
-      let result = await reconcileNordigenTransactions(id, transactions);
+      let result = await reconcileGoCardlessTransactions(id, transactions);
       return {
         ...result,
         added: [initialId, ...result.added],

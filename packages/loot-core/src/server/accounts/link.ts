@@ -104,7 +104,7 @@ export async function addAccounts(bankId, accountIds, offbudgetIds = []) {
   );
 }
 
-export async function addNordigenAccounts(
+export async function addGoCardlessAccounts(
   bankId,
   accountIds,
   offbudgetIds = [],
@@ -115,7 +115,7 @@ export async function addNordigenAccounts(
   ]);
 
   // Get all the available accounts
-  let accounts = await bankSync.getNordigenAccounts(userId, userKey, bankId);
+  let accounts = await bankSync.getGoCardlessAccounts(userId, userKey, bankId);
 
   // Only add the selected accounts
   accounts = accounts.filter(acct => accountIds.includes(acct.account_id));
@@ -143,7 +143,7 @@ export async function addNordigenAccounts(
       });
 
       // Do an initial sync
-      await bankSync.syncNordigenAccount(
+      await bankSync.syncGoCardlessAccount(
         userId,
         userKey,
         id,

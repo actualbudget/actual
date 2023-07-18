@@ -35,6 +35,7 @@ import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { View } from './common';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
+import GoCardlessLink from './gocardless/GoCardlessLink';
 import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
 import Notifications from './Notifications';
@@ -129,11 +130,21 @@ function StackedRoutesInner({ location }) {
       <Route path="/payees" element={<ManagePayeesPage />} />
       <Route path="/rules" element={<ManageRulesPage />} />
       <Route path="/settings" element={<Settings />} />
+
+      {/* TODO: remove Nordigen route after v23.8.0 */}
       <Route
         path="/nordigen/link"
         element={
           <NarrowNotSupported>
-            <WideComponent name="NordigenLink" />
+            <WideComponent name="GoCardlessLink" />
+          </NarrowNotSupported>
+        }
+      />
+      <Route
+        path="/gocardless/link"
+        element={
+          <NarrowNotSupported>
+            <WideComponent name="GoCardlessLink" />
           </NarrowNotSupported>
         }
       />

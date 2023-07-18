@@ -150,7 +150,7 @@ export interface ServerHandlers {
     upgradingId;
   }) => Promise<'ok'>;
 
-  'nordigen-accounts-link': (arg: {
+  'gocardless-accounts-link': (arg: {
     requisitionId;
     account;
     upgradingId;
@@ -163,7 +163,7 @@ export interface ServerHandlers {
     offbudgetIds;
   }) => Promise<unknown>;
 
-  'nordigen-accounts-connect': (arg: {
+  'gocardless-accounts-connect': (arg: {
     institution;
     publicToken;
     accountIds;
@@ -202,24 +202,24 @@ export interface ServerHandlers {
   'secret-set': (arg: { name: string; value: string }) => Promise<null>;
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
-  'nordigen-poll-web-token': (arg: {
+  'gocardless-poll-web-token': (arg: {
     upgradingAccountId;
     requisitionId;
   }) => Promise<{ error } | { data }>;
 
-  'nordigen-status': () => Promise<{ configured: boolean }>;
+  'gocardless-status': () => Promise<{ configured: boolean }>;
 
-  'nordigen-get-banks': (country) => Promise<unknown>;
+  'gocardless-get-banks': (country) => Promise<unknown>;
 
-  'nordigen-poll-web-token-stop': () => Promise<'ok'>;
+  'gocardless-poll-web-token-stop': () => Promise<'ok'>;
 
-  'nordigen-create-web-token': (arg: {
+  'gocardless-create-web-token': (arg: {
     upgradingAccountId;
     institutionId;
     accessValidForDays;
   }) => Promise<unknown>;
 
-  'nordigen-accounts-sync': (arg: { id }) => Promise<{
+  'gocardless-accounts-sync': (arg: { id }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;

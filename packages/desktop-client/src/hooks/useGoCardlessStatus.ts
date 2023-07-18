@@ -4,7 +4,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import useSyncServerStatus from './useSyncServerStatus';
 
-export default function useNordigenStatus() {
+export default function useGoCardlessStatus() {
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
@@ -13,7 +13,7 @@ export default function useNordigenStatus() {
     async function fetch() {
       setIsLoading(true);
 
-      const results = await send('nordigen-status');
+      const results = await send('gocardless-status');
 
       setConfigured(results.configured || false);
       setIsLoading(false);

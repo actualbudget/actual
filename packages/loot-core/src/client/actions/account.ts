@@ -60,7 +60,7 @@ export function unlinkAccount(id: string): ActionResult {
 
 export function linkAccount(requisitionId, account, upgradingId): ActionResult {
   return async dispatch => {
-    await send('nordigen-accounts-link', {
+    await send('gocardless-accounts-link', {
       requisitionId,
       account,
       upgradingId,
@@ -89,14 +89,14 @@ export function connectAccounts(
   };
 }
 
-export function connectNordigenAccounts(
+export function connectGoCardlessAccounts(
   institution,
   publicToken,
   accountIds,
   offbudgetIds,
 ): ActionResult {
   return async dispatch => {
-    let ids = await send('nordigen-accounts-connect', {
+    let ids = await send('gocardless-accounts-connect', {
       institution,
       publicToken,
       accountIds,
@@ -122,7 +122,7 @@ export function syncAccounts(id): ActionResult {
     }
 
     const { errors, newTransactions, matchedTransactions, updatedAccounts } =
-      await send('nordigen-accounts-sync', { id });
+      await send('gocardless-accounts-sync', { id });
     dispatch(setAccountsSyncing(null));
 
     if (id) {
