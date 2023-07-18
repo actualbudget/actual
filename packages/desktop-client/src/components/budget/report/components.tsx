@@ -1,11 +1,13 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import useFeatureFlag from '../../../hooks/useFeatureFlag';
+import CheveronDown from '../../../icons/v1/CheveronDown';
 import { styles, colors } from '../../../style';
-import { View, Text, Tooltip, Menu, useTooltip } from '../../common';
+import { Button, View, Text, Tooltip, Menu, useTooltip } from '../../common';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import useSheetValue from '../../spreadsheet/useSheetValue';
@@ -190,9 +192,78 @@ export const CategoryMonth = memo(function CategoryMonth({
 }: CategoryMonthProps) {
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        '& .hover-visible': {
+          opacity: 0,
+          transition: 'opacity .25s',
+        },
+        '&:hover .hover-visible': {
+          opacity: 1,
+        },
+      }}
+    >
+      <View
+        style={{
+          flexShrink: 0,
+          marginRight: 0,
+          marginLeft: 3,
+          justifyContent: 'center',
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor,
+        }}
+      >
+        <Button
+          bare
+          onClick={e => {
+            e.stopPropagation();
+            setMenuOpen(true);
+          }}
+          style={{
+            padding: 3,
+          }}
+        >
+          <CheveronDown width={14} height={14} className="hover-visible" />
+        </Button>
+        {menuOpen && (
+          <Tooltip
+            position="bottom-left"
+            width={200}
+            style={{ padding: 0 }}
+            onClose={() => setMenuOpen(false)}
+          >
+            <Menu
+              onMenuSelect={type => {
+                onBudgetAction(monthIndex, type, { category: category });
+                setMenuOpen(false);
+              }}
+              items={[
+                {
+                  name: 'copy-single-last',
+                  text: 'Copy last month’s budget',
+                },
+                {
+                  name: 'set-single-3-avg',
+                  text: 'Set to 3 Month Average',
+                },
+                { name: 'set-single-6-avg', text: 'Set to 6 Month Average' },
+                { name: 'set-single-12-avg', text: 'Set to Yearly Average' },
+                isGoalTemplatesEnabled && {
+                  name: 'apply-single-category-template',
+                  text: 'Apply Budget Template',
+                },
+              ]}
+            />
+          </Tooltip>
+        )}
+      </View>
       <SheetCell
         name="budget"
         exposed={editing}
