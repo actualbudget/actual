@@ -378,7 +378,7 @@ export const ManagePayees = forwardRef(
 
     function applyFilter(f) {
       if (filter !== f) {
-        table.current && table.current.setRowAnimation(false);
+        table.current?.setRowAnimation(false);
         setFilter(f);
         resetAnimation.current = true;
       }
@@ -395,7 +395,7 @@ export const ManagePayees = forwardRef(
         // actually update its contents until the next tick or
         // something? The table keeps being animated without this
         setTimeout(() => {
-          table.current && table.current.setRowAnimation(true);
+          table.current?.setRowAnimation(true);
         }, 0);
         resetAnimation.current = false;
       }
@@ -510,21 +510,27 @@ export const ManagePayees = forwardRef(
             )}
           </View>
           <View>
-            <Button
-              bare
-              style={{
-                marginRight: '10px',
-              }}
-              disabled={!(orphanedPayees?.length > 0) && !orphanedOnly}
-              onClick={() => {
-                setOrphanedOnly(!orphanedOnly);
-                const filterInput = document.getElementById('filter-input');
-                applyFilter(filterInput.value);
-                tableNavigator.onEdit(null);
-              }}
-            >
-              {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
-            </Button>
+            {(orphanedOnly ||
+              (orphanedPayees && orphanedPayees.length > 0)) && (
+              <Button
+                bare
+                style={{ marginRight: 10 }}
+                onClick={() => {
+                  setOrphanedOnly(!orphanedOnly);
+                  const filterInput = document.getElementById('filter-input');
+                  applyFilter(filterInput.value);
+                  tableNavigator.onEdit(null);
+                }}
+              >
+                {orphanedOnly
+                  ? 'Show all payees'
+                  : `Show ${
+                      orphanedPayees.length === 1
+                        ? '1 unused payee'
+                        : `${orphanedPayees.length} unused payees`
+                    }`}
+              </Button>
+            )}
           </View>
           <View style={{ flex: 1 }} />
           <Input
@@ -552,7 +558,8 @@ export const ManagePayees = forwardRef(
             style={{
               flex: 1,
               border: '1px solid ' + colors.border,
-              borderRadius: 4,
+              borderTopLeftRadius: 4,
+              borderTopRightRadius: 4,
               overflow: 'hidden',
             }}
           >

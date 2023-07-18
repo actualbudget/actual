@@ -121,7 +121,7 @@ function Account(props) {
             tables.includes('category_mapping') ||
             tables.includes('payee_mapping')
           ) {
-            paged && paged.run();
+            paged?.run();
           }
 
           if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -260,7 +260,7 @@ function Account(props) {
                   //   />
                   // }
                   onLoadMore={() => {
-                    paged && paged.fetchNext();
+                    paged?.fetchNext();
                   }}
                   onSearch={onSearch}
                   onSelectTransaction={() => {}} // onSelectTransaction}

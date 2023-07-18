@@ -26,15 +26,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
 import { colors } from '../../style';
-import {
-  View,
-  Text,
-  Tooltip,
-  Stack,
-  Button,
-  Menu,
-  CustomSelect,
-} from '../common';
+import { View, Text, Tooltip, Stack, Button, Menu, Select } from '../common';
 import { Value } from '../ManageRules';
 import GenericInput from '../util/GenericInput';
 
@@ -173,7 +165,7 @@ function ConfigureField({
       <FocusScope>
         <View style={{ marginBottom: 10 }}>
           {field === 'amount' || field === 'date' ? (
-            <CustomSelect
+            <Select
               options={
                 field === 'amount'
                   ? [

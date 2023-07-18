@@ -63,13 +63,9 @@ async function processTemplate(month, force) {
             ? template[l].priority
             : lowestPriority;
       }
-      await setBudget({
-        category: category.id,
-        month,
-        amount: 0,
-      });
     }
   }
+  setZero({ month });
   // find all remainder templates, place them after all other templates
   let remainder_found;
   let remainder_priority = lowestPriority + 1;
@@ -357,7 +353,7 @@ async function applyCategoryTemplate(
         } else {
           increment = limit;
         }
-        if (to_budget + increment < budgetAvailable || !priority) {
+        if (increment < budgetAvailable || !priority) {
           to_budget += increment;
         } else {
           if (budgetAvailable > 0) to_budget += budgetAvailable;
@@ -614,9 +610,16 @@ async function applyCategoryTemplate(
         break;
       }
       case 'remainder': {
-        to_budget = Math.round(remainder_scale * template.weight);
-        // can over budget with the rounding, so checking that
-        if (to_budget > budgetAvailable) to_budget = budgetAvailable;
+        if (remainder_scale >= 0) {
+          to_budget +=
+            remainder_scale === 0
+              ? Math.round(template.weight)
+              : Math.round(remainder_scale * template.weight);
+          // can over budget with the rounding, so checking that
+          if (to_budget >= budgetAvailable + budgeted) {
+            to_budget = budgetAvailable + budgeted;
+          }
+        }
         break;
       }
       case 'error':

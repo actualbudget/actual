@@ -2,7 +2,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
 import { styles } from '../../style';
-import { View, Button, ButtonLink, CustomSelect } from '../common';
+import { View, Button, ButtonLink, Select } from '../common';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
 function validateStart(allMonths, start, end) {
@@ -90,16 +90,17 @@ function Header({
             gap: 5,
           }}
         >
-          <CustomSelect
+          <Select
             style={{ backgroundColor: 'white' }}
             onChange={newValue =>
               onChangeDates(...validateStart(allMonths, newValue, end))
             }
             value={start}
+            defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
             options={allMonths.map(({ name, pretty }) => [name, pretty])}
           />
           <View>to</View>
-          <CustomSelect
+          <Select
             style={{ backgroundColor: 'white' }}
             onChange={newValue =>
               onChangeDates(...validateEnd(allMonths, start, newValue))

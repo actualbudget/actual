@@ -59,11 +59,11 @@ export default function InputWithContent({
         ]}
         onFocus={e => {
           setFocused(true);
-          props.onFocus && props.onFocus(e);
+          props.onFocus?.(e);
         }}
         onBlur={e => {
           setFocused(false);
-          props.onBlur && props.onBlur(e);
+          props.onBlur?.(e);
         }}
       />
       {rightContent}
