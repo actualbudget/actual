@@ -557,7 +557,7 @@ function PayeeCell({
       value={payeeId}
       valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
       exposed={focused}
-      onExpose={!isPreview && (name => onEdit(id, name))}
+      onExpose={name => !isPreview && onEdit(id, name)}
       onUpdate={async value => {
         onUpdate('payee', value);
 
@@ -914,7 +914,7 @@ const Transaction = memo(function Transaction(props) {
           formatter={date =>
             date ? formatDate(parseISO(date), dateFormat) : ''
           }
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           onUpdate={value => {
             onUpdate('date', value);
           }}
@@ -955,7 +955,7 @@ const Transaction = memo(function Transaction(props) {
           }}
           valueStyle={valueStyle}
           exposed={focusedField === 'account'}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           onUpdate={async value => {
             // Only ever allow non-null values
             if (value) {
@@ -1021,7 +1021,7 @@ const Transaction = memo(function Transaction(props) {
           focused={focusedField === 'notes'}
           value={notes || ''}
           valueStyle={valueStyle}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           inputProps={{
             value: notes || '',
             onUpdate: onUpdate.bind(null, 'notes'),
@@ -1115,7 +1115,7 @@ const Transaction = memo(function Transaction(props) {
           width="flex"
           exposed={focusedField === 'category'}
           focused={focusedField === 'category'}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           value={
             isParent
               ? 'Split'
@@ -1205,7 +1205,7 @@ const Transaction = memo(function Transaction(props) {
         valueStyle={valueStyle}
         textAlign="right"
         title={debit}
-        onExpose={!isPreview && (name => onEdit(id, name))}
+        onExpose={name => !isPreview && onEdit(id, name)}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: debit === '' && credit === '' ? '0.00' : debit,
@@ -1226,7 +1226,7 @@ const Transaction = memo(function Transaction(props) {
         valueStyle={valueStyle}
         textAlign="right"
         title={credit}
-        onExpose={!isPreview && (name => onEdit(id, name))}
+        onExpose={name => !isPreview && onEdit(id, name)}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: credit,
