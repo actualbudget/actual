@@ -6,6 +6,8 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type CSSProperties } from 'glamor';
+
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { useActions } from '../hooks/useActions';
@@ -22,7 +24,6 @@ import {
   ExternalLink,
   LinkButton,
 } from './common';
-import { CSSProperties } from 'glamor';
 
 function compileMessage(
   message: string,

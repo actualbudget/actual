@@ -227,5 +227,8 @@ export default function Modals() {
     .map((modal, idx) => (
       <React.Fragment key={modalStack[idx].name}>{modal}</React.Fragment>
     ));
+
+  // fragment needed per TS types
+  // eslint-disable-next-line react/jsx-no-useless-fragment
   return <>{modals}</>;
 }
