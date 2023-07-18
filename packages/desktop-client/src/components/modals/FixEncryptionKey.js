@@ -45,7 +45,7 @@ export default function FixEncryptionKey({
       }
 
       actions.popModal();
-      onSuccess && onSuccess();
+      onSuccess?.();
     }
   }
 

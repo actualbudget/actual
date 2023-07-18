@@ -1,17 +1,13 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import { bindActionCreators } from 'redux';
-
-import * as actions from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import useFeatureFlag from '../hooks/useFeatureFlag';
+import { useActions } from '../hooks/useActions';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
 
 import BudgetSummary from './modals/BudgetSummary';
 import CloseAccount from './modals/CloseAccount';
-import ConfigureLinkedAccounts from './modals/ConfigureLinkedAccounts';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
 import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
@@ -28,21 +24,21 @@ import NordigenInitialise from './modals/NordigenInitialise';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 
-function Modals({
-  modalStack,
-  isHidden,
-  accounts,
-  categoryGroups,
-  categories,
-  budgetId,
-  actions,
-}) {
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+export default function Modals() {
+  const modalStack = useSelector(state => state.modals.modalStack);
+  const isHidden = useSelector(state => state.modals.isHidden);
+  const accounts = useSelector(state => state.queries.accounts);
+  const categoryGroups = useSelector(state => state.queries.categories.grouped);
+  const categories = useSelector(state => state.queries.categories.list);
+  const budgetId = useSelector(
+    state => state.prefs.local && state.prefs.local.id,
+  );
+  const actions = useActions();
 
   const syncServerStatus = useSyncServerStatus();
 
   return modalStack
-    .map(({ name, options = {} }, idx) => {
+    .map(({ name, options }, idx) => {
       const modalProps = {
         onClose: actions.popModal,
         onBack: actions.popModal,
@@ -62,7 +58,6 @@ function Modals({
           return (
             <CreateAccount
               modalProps={modalProps}
-              actions={actions}
               syncServerStatus={syncServerStatus}
             />
           );
@@ -92,19 +87,6 @@ function Modals({
               externalAccounts={options.accounts}
               requisitionId={options.requisitionId}
               localAccounts={accounts.filter(acct => acct.closed === 0)}
-              upgradingAccountId={options.upgradingAccountId}
-              actions={actions}
-            />
-          );
-
-        case 'configure-linked-accounts':
-          return (
-            <ConfigureLinkedAccounts
-              modalProps={modalProps}
-              institution={options.institution}
-              publicToken={options.publicToken}
-              accounts={options.accounts}
-              upgradingId={options.upgradingId}
               actions={actions}
             />
           );
@@ -113,9 +95,14 @@ function Modals({
           return (
             <ConfirmCategoryDelete
               modalProps={modalProps}
-              actions={actions}
-              category={categories.find(c => c.id === options.category)}
-              group={categoryGroups.find(g => g.id === options.group)}
+              category={
+                'category' in options &&
+                categories.find(c => c.id === options.category)
+              }
+              group={
+                'group' in options &&
+                categoryGroups.find(g => g.id === options.group)
+              }
               categoryGroups={categoryGroups}
               onDelete={options.onDelete}
             />
@@ -128,6 +115,7 @@ function Modals({
               budgetId={budgetId}
               modalProps={modalProps}
               actions={actions}
+              backupDisabled={false}
             />
           );
 
@@ -161,10 +149,9 @@ function Modals({
           return (
             <PlaidExternalMsg
               modalProps={modalProps}
-              actions={actions}
               onMoveExternal={options.onMoveExternal}
               onClose={() => {
-                options.onClose && options.onClose();
+                options.onClose?.();
                 send('poll-web-token-stop');
               }}
               onSuccess={options.onSuccess}
@@ -183,10 +170,9 @@ function Modals({
           return (
             <NordigenExternalMsg
               modalProps={modalProps}
-              actions={actions}
               onMoveExternal={options.onMoveExternal}
               onClose={() => {
-                options.onClose && options.onClose();
+                options.onClose?.();
                 send('nordigen-poll-web-token-stop');
               }}
               onSuccess={options.onSuccess}
@@ -230,8 +216,6 @@ function Modals({
               key={name}
               modalProps={modalProps}
               month={options.month}
-              actions={actions}
-              isGoalTemplatesEnabled={isGoalTemplatesEnabled}
             />
           );
 
@@ -244,15 +228,3 @@ function Modals({
       <React.Fragment key={modalStack[idx].name}>{modal}</React.Fragment>
     ));
 }
-
-export default connect(
-  state => ({
-    modalStack: state.modals.modalStack,
-    isHidden: state.modals.isHidden,
-    accounts: state.queries.accounts,
-    categoryGroups: state.queries.categories.grouped,
-    categories: state.queries.categories.list,
-    budgetId: state.prefs.local && state.prefs.local.id,
-  }),
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
-)(Modals);

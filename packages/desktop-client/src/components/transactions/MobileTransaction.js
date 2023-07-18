@@ -369,8 +369,7 @@ function ListBox(props) {
     listBoxRef.current.addEventListener('scroll', loadMoreTransactions);
 
     return () => {
-      listBoxRef.current &&
-        listBoxRef.current.removeEventListener('scroll', loadMoreTransactions);
+      listBoxRef.current?.removeEventListener('scroll', loadMoreTransactions);
     };
   }, [state.collection]);
 

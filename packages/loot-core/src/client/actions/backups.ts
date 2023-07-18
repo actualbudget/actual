@@ -1,10 +1,11 @@
 import { send } from '../../platform/client/fetch';
 
 import { closeBudget, loadBudget } from './budgets';
+import type { ActionResult } from './types';
 
 // Take in the budget id so that backups can be loaded when a budget
 // isn't opened
-export function loadBackup(budgetId, backupId) {
+export function loadBackup(budgetId, backupId): ActionResult {
   return async (dispatch, getState) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
@@ -16,7 +17,7 @@ export function loadBackup(budgetId, backupId) {
   };
 }
 
-export function makeBackup() {
+export function makeBackup(): ActionResult {
   return async (dispatch, getState) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {

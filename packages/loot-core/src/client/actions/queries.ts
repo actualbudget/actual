@@ -5,6 +5,7 @@ import * as constants from '../constants';
 
 import { pushModal } from './modals';
 import { addNotification, addGenericErrorNotification } from './notifications';
+import type { ActionResult } from './types';
 
 export function applyBudgetAction(month, type, args) {
   return async function (dispatch) {
@@ -91,7 +92,7 @@ export function applyBudgetAction(month, type, args) {
   };
 }
 
-export function getCategories() {
+export function getCategories(): ActionResult {
   return async function (dispatch) {
     const categories = await send('get-categories');
     dispatch({
@@ -102,7 +103,11 @@ export function getCategories() {
   };
 }
 
-export function createCategory(name, groupId, isIncome) {
+export function createCategory(
+  name: string,
+  groupId: string,
+  isIncome: boolean,
+): ActionResult {
   return async function (dispatch) {
     let id = await send('category-create', {
       name,
@@ -114,7 +119,7 @@ export function createCategory(name, groupId, isIncome) {
   };
 }
 
-export function deleteCategory(id, transferId) {
+export function deleteCategory(id: string, transferId?: string): ActionResult {
   return async function (dispatch, getState) {
     let { error } = await send('category-delete', { id, transferId });
 
@@ -143,28 +148,28 @@ export function deleteCategory(id, transferId) {
   };
 }
 
-export function updateCategory(category) {
+export function updateCategory(category): ActionResult {
   return async dispatch => {
     await send('category-update', category);
     dispatch(getCategories());
   };
 }
 
-export function moveCategory(id, groupId, targetId) {
+export function moveCategory(id, groupId, targetId): ActionResult {
   return async (dispatch, getState) => {
     await send('category-move', { id, groupId, targetId });
     await dispatch(getCategories());
   };
 }
 
-export function moveCategoryGroup(id, targetId) {
+export function moveCategoryGroup(id, targetId): ActionResult {
   return async dispatch => {
     await send('category-group-move', { id, targetId });
     await dispatch(getCategories());
   };
 }
 
-export function createGroup(name) {
+export function createGroup(name): ActionResult {
   return async dispatch => {
     let id = await send('category-group-create', { name });
     dispatch(getCategories());
@@ -172,7 +177,7 @@ export function createGroup(name) {
   };
 }
 
-export function updateGroup(group) {
+export function updateGroup(group): ActionResult {
   // Strip off the categories field if it exist. It's not a real db
   // field but groups have this extra field in the client most of the
   // time
@@ -184,7 +189,7 @@ export function updateGroup(group) {
   };
 }
 
-export function deleteGroup(id, transferId) {
+export function deleteGroup(id, transferId): ActionResult {
   return async function (dispatch, getState) {
     await send('category-group-delete', { id, transferId });
     await dispatch(getCategories());
@@ -193,7 +198,7 @@ export function deleteGroup(id, transferId) {
   };
 }
 
-export function getPayees() {
+export function getPayees(): ActionResult {
   return async function (dispatch) {
     let payees = await send('payees-get');
     dispatch({
@@ -204,7 +209,7 @@ export function getPayees() {
   };
 }
 
-export function initiallyLoadPayees() {
+export function initiallyLoadPayees(): ActionResult {
   return async function (dispatch, getState) {
     if (getState().queries.payees.length === 0) {
       return dispatch(getPayees());
@@ -212,13 +217,13 @@ export function initiallyLoadPayees() {
   };
 }
 
-export function createPayee(name) {
+export function createPayee(name: string): ActionResult {
   return async dispatch => {
     return send('payee-create', { name: name.trim() });
   };
 }
 
-export function getAccounts() {
+export function getAccounts(): ActionResult {
   return async function (dispatch) {
     const accounts = await send('accounts-get');
     dispatch({ type: constants.LOAD_ACCOUNTS, accounts });
@@ -226,14 +231,14 @@ export function getAccounts() {
   };
 }
 
-export function updateAccount(account) {
+export function updateAccount(account): ActionResult {
   return async function (dispatch) {
     dispatch({ type: constants.UPDATE_ACCOUNT, account });
     await send('account-update', account);
   };
 }
 
-export function createAccount(name, balance, offBudget) {
+export function createAccount(name, balance, offBudget): ActionResult {
   return async function (dispatch) {
     let id = await send('account-create', { name, balance, offBudget });
     await dispatch(getAccounts());
@@ -242,7 +247,7 @@ export function createAccount(name, balance, offBudget) {
   };
 }
 
-export function openAccountCloseModal(accountId) {
+export function openAccountCloseModal(accountId): ActionResult {
   return async function (dispatch, getState) {
     const { balance, numTransactions } = await send('account-properties', {
       id: accountId,
@@ -261,7 +266,12 @@ export function openAccountCloseModal(accountId) {
   };
 }
 
-export function closeAccount(accountId, transferAccountId, categoryId, forced) {
+export function closeAccount(
+  accountId,
+  transferAccountId,
+  categoryId,
+  forced,
+): ActionResult {
   return async function (dispatch) {
     await send('account-close', {
       id: accountId,
@@ -273,14 +283,14 @@ export function closeAccount(accountId, transferAccountId, categoryId, forced) {
   };
 }
 
-export function reopenAccount(accountId) {
+export function reopenAccount(accountId): ActionResult {
   return async function (dispatch) {
     await send('account-reopen', { id: accountId });
     dispatch(getAccounts());
   };
 }
 
-export function forceCloseAccount(accountId) {
+export function forceCloseAccount(accountId): ActionResult {
   return closeAccount(accountId, null, null, true);
 }
 
@@ -288,7 +298,7 @@ let _undo = throttle(() => send('undo'), 100);
 let _redo = throttle(() => send('redo'), 100);
 
 let _undoEnabled = true;
-export function setUndoEnabled(flag) {
+export function setUndoEnabled(flag: boolean) {
   _undoEnabled = flag;
 }
 

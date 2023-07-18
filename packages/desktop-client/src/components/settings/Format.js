@@ -3,7 +3,7 @@ import React from 'react';
 import { numberFormats } from 'loot-core/src/shared/util';
 
 import tokens from '../../tokens';
-import { Button, CustomSelect, Text, View } from '../common';
+import { Button, Select, Text, View } from '../common';
 import { useSidebar } from '../FloatableSidebar';
 import { Checkbox } from '../forms';
 
@@ -87,7 +87,7 @@ export default function FormatSettings({ prefs, savePrefs }) {
         >
           <Column title="Numbers">
             <Button bounce={false} style={{ padding: 0 }}>
-              <CustomSelect
+              <Select
                 key={prefs.hideFraction} // needed because label does not update
                 value={numberFormat}
                 onChange={onNumberFormat}
@@ -111,7 +111,7 @@ export default function FormatSettings({ prefs, savePrefs }) {
 
           <Column title="Dates">
             <Button bounce={false} style={{ padding: 0 }}>
-              <CustomSelect
+              <Select
                 value={dateFormat}
                 onChange={onDateFormat}
                 options={dateFormats.map(f => [f.value, f.label])}
@@ -122,7 +122,7 @@ export default function FormatSettings({ prefs, savePrefs }) {
 
           <Column title="First day of the week">
             <Button bounce={false} style={{ padding: 0 }}>
-              <CustomSelect
+              <Select
                 value={firstDayOfWeekIdx}
                 onChange={onFirstDayOfWeek}
                 options={daysOfWeek.map(f => [f.value, f.label])}
