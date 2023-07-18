@@ -723,7 +723,7 @@ const Transaction = memo(function Transaction(props) {
         />
       )}
 
-      {/* Checkmark - for Child transaction 
+      {/* Checkmark - for Child transaction
       between normal Date and Payee or Account and Payee if needed */}
       {isTemporaryId(transaction.id) ? (
         isChild ? (
@@ -1013,13 +1013,7 @@ const Transaction = memo(function Transaction(props) {
                 }
               : valueStyle
           }
-          onUpdate={async value => {
-            if (value === 'split') {
-              onSplit(transaction.id);
-            } else {
-              onUpdate('category', value);
-            }
-          }}
+          onUpdate={value => onUpdate('category', value)}
         >
           {({
             onBlur,
@@ -1039,6 +1033,7 @@ const Transaction = memo(function Transaction(props) {
               inputProps={{ onBlur, onKeyDown, style: inputStyle }}
               onUpdate={onUpdate}
               onSelect={onSave}
+              onSplit={() => onSplit(transaction.id)}
               menuPortalTarget={undefined}
             />
           )}
