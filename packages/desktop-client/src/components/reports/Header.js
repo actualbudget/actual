@@ -2,6 +2,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
 import { styles } from '../../style';
+import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import Button from '../common/Button';
 import ButtonLink from '../common/ButtonLink';
 import Select from '../common/Select';
@@ -60,6 +61,13 @@ function Header({
   onUpdateFilter,
   onDeleteFilter,
   onCondOpChange,
+  category,
+  categoryGroups,
+  onChangeCategory,
+  numberOfMonths,
+  numberOfMonthsOptions,
+  numberOfMonthsLine,
+  onChangeNumberOfMonths,
 }) {
   return (
     <View
@@ -86,6 +94,47 @@ function Header({
           gap: 15,
         }}
       >
+        {categoryGroups && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <CategoryAutocomplete
+              categoryGroups={categoryGroups}
+              value={category}
+              inputProps={{
+                placeholder: 'Select category...',
+              }}
+              onSelect={newValue => onChangeCategory(newValue)}
+            />
+          </View>
+        )}
+
+        {numberOfMonthsOptions && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <View>Average: </View>
+            <Select
+              style={{ backgroundColor: 'white' }}
+              onChange={onChangeNumberOfMonths}
+              value={numberOfMonths}
+              options={numberOfMonthsOptions.map(number => [
+                number.value,
+                number.description,
+              ])}
+              line={numberOfMonthsLine}
+            />
+          </View>
+        )}
+
         <View
           style={{
             flexDirection: 'row',
@@ -113,7 +162,7 @@ function Header({
           />
         </View>
 
-        <FilterButton onApply={onApply} />
+        {filters && <FilterButton onApply={onApply} />}
 
         {show1Month && (
           <Button
@@ -142,7 +191,7 @@ function Header({
           All Time
         </Button>
       </View>
-      {filters.length > 0 && (
+      {filters && filters.length > 0 && (
         <View
           style={{ marginTop: 5 }}
           spacing={2}
