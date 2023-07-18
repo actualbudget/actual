@@ -58,7 +58,6 @@ export default function CustomSelect({
         borderRadius: styles.menuBorderRadius,
         border: bare ? 'none' : '1px solid ' + colors.formInputBorder,
         lineHeight: '1em',
-        ...styles.mediumText,
         ...wrapperStyle,
       }}
     >
@@ -66,7 +65,7 @@ export default function CustomSelect({
         {...css({
           width: '100%',
           borderWidth: 0,
-          padding: '2px 10px',
+          padding: '5px 10px',
           borderRadius: styles.menuBorderRadius,
           ...style,
         })}
