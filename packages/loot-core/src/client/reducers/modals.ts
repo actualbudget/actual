@@ -12,15 +12,12 @@ function update(state = initialState, action: Action): ModalsState {
     case constants.PUSH_MODAL:
       return {
         ...state,
-        modalStack: [
-          ...state.modalStack,
-          { name: action.name, options: action.options },
-        ],
+        modalStack: [...state.modalStack, action.modal],
       };
     case constants.REPLACE_MODAL:
       return {
         ...state,
-        modalStack: [{ name: action.name, options: action.options }],
+        modalStack: [action.modal],
       };
     case constants.POP_MODAL:
       return { ...state, modalStack: state.modalStack.slice(0, -1) };
