@@ -318,19 +318,31 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isHidden, setHidden] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        '& .hover-visible': {
+          opacity: 0,
+          transition: 'opacity .25s',
+        },
+        '&:hover .hover-visible': {
+          opacity: 1,
+        },
+      }}
+    >
       <View
         style={{
           flexShrink: 0,
           marginRight: 0,
           justifyContent: 'center',
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor,
         }}
-        onMouseOver={() => setHidden(true)}
-        onMouseLeave={() => setHidden(false)}
       >
         <Button
           bare
@@ -342,11 +354,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             padding: 3,
           }}
         >
-          <CheveronDown
-            width={14}
-            height={14}
-            style={isHidden ? { color: 'black' } : { color: 'white' }}
-          />
+          <CheveronDown width={14} height={14} className="hover-visible" />
         </Button>
         {menuOpen && (
           <Tooltip
@@ -402,8 +410,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             },
           },
         ]}
-        onMouseOver={() => setHidden(true)}
-        onMouseLeave={() => setHidden(false)}
         valueProps={{
           binding: rolloverBudget.catBudgeted(category.id),
           type: 'financial',
