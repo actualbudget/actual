@@ -16,7 +16,7 @@ import ImportActual from './ImportActual';
 import ImportYNAB4 from './ImportYNAB4';
 import ImportYNAB5 from './ImportYNAB5';
 
-function Modals({ modalStack, isHidden, availableImports, actions }) {
+function Modals({ modalStack, isHidden, actions }) {
   let stack = modalStack.map(({ name, options }, idx) => {
     const modalProps = {
       onClose: actions.popModal,
@@ -38,14 +38,7 @@ function Modals({ modalStack, isHidden, availableImports, actions }) {
           />
         );
       case 'import':
-        return (
-          <Import
-            key={name}
-            modalProps={modalProps}
-            actions={actions}
-            availableImports={availableImports}
-          />
-        );
+        return <Import key={name} modalProps={modalProps} actions={actions} />;
       case 'import-ynab4':
         return (
           <ImportYNAB4 key={name} modalProps={modalProps} actions={actions} />
@@ -102,7 +95,6 @@ export default connect(
     modalStack: state.modals.modalStack,
     isHidden: state.modals.isHidden,
     budgets: state.budgets.budgets,
-    availableImports: state.budgets.availableImports,
   }),
   dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
 )(Modals);

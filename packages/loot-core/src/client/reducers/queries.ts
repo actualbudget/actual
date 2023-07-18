@@ -2,8 +2,10 @@ import memoizeOne from 'memoize-one';
 
 import { groupById } from '../../shared/util';
 import * as constants from '../constants';
+import type { Action } from '../state-types';
+import type { QueriesState } from '../state-types/queries';
 
-const initialState = {
+const initialState: QueriesState = {
   newTransactions: [],
   matchedTransactions: [],
   lastTransaction: null,
@@ -17,7 +19,10 @@ const initialState = {
   earliestTransaction: null,
 };
 
-export default function update(state = initialState, action) {
+export default function update(
+  state = initialState,
+  action: Action,
+): QueriesState {
   switch (action.type) {
     case constants.SET_NEW_TRANSACTIONS:
       return {
@@ -57,7 +62,9 @@ export default function update(state = initialState, action) {
       return {
         ...state,
         accounts: state.accounts.map(account => {
+          // @ts-expect-error Not typed yet
           if (account.id === action.account.id) {
+            // @ts-expect-error Not typed yet
             return { ...account, ...action.account };
           }
           return account;
@@ -74,37 +81,6 @@ export default function update(state = initialState, action) {
         ...state,
         payees: action.payees,
       };
-    case constants.ADD_CATEGORY: {
-      let category = { id: 'temp', name: action.name };
-
-      return {
-        ...state,
-        categories: {
-          grouped: state.categories.grouped.map(group => {
-            if (group.id === action.groupId) {
-              return { ...group, categories: [category, ...group.categories] };
-            }
-            return group;
-          }),
-          list: [category, ...state.categories.list],
-        },
-      };
-    }
-    case constants.DELETE_CATEGORY: {
-      return {
-        ...state,
-        categories: {
-          grouped: state.categories.grouped.map(group => {
-            return {
-              ...group,
-              categories: group.categories.filter(cat => cat.id !== action.id),
-            };
-          }),
-          list: state.categories.list.filter(cat => cat.id !== action.id),
-        },
-      };
-    }
-
     default:
   }
   return state;
