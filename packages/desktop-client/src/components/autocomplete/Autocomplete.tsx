@@ -76,7 +76,7 @@ function fireUpdate(onUpdate, strict, suggestions, index, value) {
     }
   }
 
-  onUpdate && onUpdate(selected, value);
+  onUpdate?.(selected, value);
 }
 
 function defaultRenderInput(props) {
@@ -368,7 +368,7 @@ function SingleAutocomplete({
               focused,
               ...inputProps,
               onFocus: e => {
-                inputProps.onFocus && inputProps.onFocus(e);
+                inputProps.onFocus?.(e);
 
                 if (openOnFocus) {
                   setIsOpen(true);
@@ -377,11 +377,11 @@ function SingleAutocomplete({
               onBlur: e => {
                 // @ts-expect-error Should this be e.nativeEvent
                 e.preventDownshiftDefault = true;
-                inputProps.onBlur && inputProps.onBlur(e);
+                inputProps.onBlur?.(e);
 
                 if (!tableBehavior) {
                   if (e.target.value === '') {
-                    onSelect && onSelect(null, e.target.value);
+                    onSelect?.(null, e.target.value);
                     setSelectedItem(null);
                     setIsOpen(false);
                     return;
@@ -426,11 +426,11 @@ function SingleAutocomplete({
                       // No highlighted item, still allow the table to save the item
                       // as `null`, even though we're allowing the table to move
                       e.preventDefault();
-                      onKeyDown && onKeyDown(e);
+                      onKeyDown?.(e);
                     }
                   } else if (shouldSaveFromKey(e)) {
                     e.preventDefault();
-                    onKeyDown && onKeyDown(e);
+                    onKeyDown?.(e);
                   }
                 }
 
@@ -459,7 +459,7 @@ function SingleAutocomplete({
               onChange: (e: ChangeEvent<HTMLInputElement>) => {
                 const { onChange } = inputProps || {};
                 // @ts-expect-error unsure if onChange needs an event or a string
-                onChange && onChange(e.target.value);
+                onChange?.(e.target.value);
               },
             }),
           )}
@@ -562,7 +562,7 @@ function MultiAutocomplete({
       onRemoveItem(selectedItems[selectedItems.length - 1]);
     }
 
-    prevOnKeyDown && prevOnKeyDown(e);
+    prevOnKeyDown?.(e);
   }
 
   return (

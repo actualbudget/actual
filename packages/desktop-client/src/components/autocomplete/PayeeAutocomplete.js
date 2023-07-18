@@ -225,7 +225,7 @@ export default function PayeeAutocomplete({
 
   async function handleSelect(value, rawInputValue) {
     if (tableBehavior) {
-      onSelect && onSelect(makeNew(value, rawInputValue));
+      onSelect?.(makeNew(value, rawInputValue));
     } else {
       let create = () => dispatch(createPayee(rawInputValue));
 
@@ -236,7 +236,7 @@ export default function PayeeAutocomplete({
           value = await create();
         }
       }
-      onSelect && onSelect(value);
+      onSelect?.(value);
     }
   }
 
@@ -351,7 +351,7 @@ export default function PayeeAutocomplete({
                     },
                   ]}
                   onClick={() => {
-                    onUpdate && onUpdate(null);
+                    onUpdate?.(null);
                     setFocusTransferPayees(!focusTransferPayees);
                   }}
                 >

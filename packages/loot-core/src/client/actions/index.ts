@@ -1,6 +1,5 @@
 export * from './queries';
 export * from './account';
-export * from './debug';
 export * from './modals';
 export * from './notifications';
 export * from './prefs';

@@ -47,6 +47,8 @@ import usePrevious from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import LeftArrow2 from '../../icons/v0/LeftArrow2';
 import RightArrow2 from '../../icons/v0/RightArrow2';
+import ArrowDown from '../../icons/v1/ArrowDown';
+import ArrowUp from '../../icons/v1/ArrowUp';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
@@ -237,8 +239,26 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
+function selectAscDesc(field, ascDesc, clicked, defaultAscDesc = 'asc') {
+  return field === clicked
+    ? ascDesc === 'asc'
+      ? 'desc'
+      : 'asc'
+    : defaultAscDesc;
+}
+
 const TransactionHeader = memo(
-  ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
+  ({
+    hasSelected,
+    showAccount,
+    showCategory,
+    showBalance,
+    showCleared,
+    scrollWidth,
+    onSort,
+    ascDesc,
+    field,
+  }) => {
     let dispatchSelected = useSelectedDispatch();
 
     return (
@@ -257,18 +277,93 @@ const TransactionHeader = memo(
           width={20}
           onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
-        <Field children="Date" width={110} />
-        {showAccount && <Field children="Account" width="flex" />}
-        <Field children="Payee" width="flex" />
-        <Field children="Notes" width="flex" />
-        {showCategory && <Field children="Category" width="flex" />}
-        <Field children="Payment" width={80} style={{ textAlign: 'right' }} />
-        <Field children="Deposit" width={80} style={{ textAlign: 'right' }} />
-        {showBalance && (
-          <Field children="Balance" width={88} style={{ textAlign: 'right' }} />
+        <HeaderCell
+          value="Date"
+          width={110}
+          alignItems="flex"
+          marginLeft={-5}
+          id="date"
+          icon={field === 'date' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
+          }
+        />
+        {showAccount && (
+          <HeaderCell
+            value="Account"
+            width="flex"
+            alignItems="flex"
+            marginLeft={-5}
+            id="account"
+            icon={field === 'account' ? ascDesc : 'clickable'}
+            onClick={() =>
+              onSort('account', selectAscDesc(field, ascDesc, 'account', 'asc'))
+            }
+          />
         )}
-        {showCleared && <Field width={21} truncate={false} />}
-        <Field children="" width={15 + styles.scrollbarWidth} />
+        <HeaderCell
+          value="Payee"
+          width="flex"
+          alignItems="flex"
+          marginLeft={-5}
+          id="payee"
+          icon={field === 'payee' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc'))
+          }
+        />
+        <HeaderCell
+          value="Notes"
+          width="flex"
+          alignItems="flex"
+          marginLeft={-5}
+          id="notes"
+          icon={field === 'notes' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
+          }
+        />
+        {showCategory && (
+          <HeaderCell
+            value="Category"
+            width="flex"
+            alignItems="flex"
+            marginLeft={-5}
+            id="category"
+            icon={field === 'category' ? ascDesc : 'clickable'}
+            onClick={() =>
+              onSort(
+                'category',
+                selectAscDesc(field, ascDesc, 'category', 'asc'),
+              )
+            }
+          />
+        )}
+        <HeaderCell
+          value="Payment"
+          width={90}
+          alignItems="flex-end"
+          marginRight={-5}
+          id="payment"
+          icon={field === 'payment' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('payment', selectAscDesc(field, ascDesc, 'payment', 'asc'))
+          }
+        />
+        <HeaderCell
+          value="Deposit"
+          width={85}
+          alignItems="flex-end"
+          marginRight={-5}
+          id="deposit"
+          icon={field === 'deposit' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
+          }
+        />
+        {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
+        {showCleared && <Field width={30} truncate={false} />}
+        <Cell value="" width={5 + scrollWidth ?? 0} />
       </Row>
     );
   },
@@ -328,7 +423,7 @@ function StatusCell({
   return (
     <Cell
       name="cleared"
-      width="auto"
+      width={30}
       focused={focused}
       style={{ padding: 1 }}
       plain
@@ -365,6 +460,56 @@ function StatusCell({
   );
 }
 
+function HeaderCell({
+  value,
+  id,
+  width,
+  alignItems,
+  marginLeft,
+  marginRight,
+  icon,
+  onClick,
+}) {
+  return (
+    <CustomCell
+      width={width}
+      name={id}
+      alignItems={alignItems}
+      unexposedContent={
+        <Button
+          bare
+          onClick={onClick}
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            color: colors.n4,
+            fontWeight: 300,
+            marginLeft: marginLeft,
+            marginRight: marginRight,
+          }}
+        >
+          <UnexposedCellContent value={value} />
+          {icon === 'asc' && (
+            <ArrowDown
+              width={10}
+              height={10}
+              style={{ marginLeft: 5, color: colors.n4 }}
+            />
+          )}
+          {icon === 'desc' && (
+            <ArrowUp
+              width={10}
+              height={10}
+              style={{ marginLeft: 5, color: colors.n4 }}
+            />
+          )}
+        </Button>
+      }
+    />
+  );
+}
+
 function PayeeCell({
   id,
   payeeId,
@@ -395,6 +540,7 @@ function PayeeCell({
     <CustomCell
       width="flex"
       name="payee"
+      textAlign="flex"
       value={payeeId}
       valueStyle={[
         valueStyle,
@@ -762,6 +908,7 @@ const Transaction = memo(function Transaction(props) {
           /* Date field for non-child transaction */
           name="date"
           width={110}
+          textAlign="flex"
           exposed={focusedField === 'date'}
           value={date}
           valueStyle={valueStyle}
@@ -799,6 +946,7 @@ const Transaction = memo(function Transaction(props) {
           /* Account field for non-child transaction */
           name="account"
           width="flex"
+          textAlign="flex"
           value={accountId}
           formatter={acctId => {
             let acct = acctId && getAccountsById(accounts)[acctId];
@@ -873,6 +1021,7 @@ const Transaction = memo(function Transaction(props) {
         <InputCell
           width="flex"
           name="notes"
+          textAlign="flex"
           exposed={focusedField === 'notes'}
           focused={focusedField === 'notes'}
           value={notes || ''}
@@ -976,10 +1125,7 @@ const Transaction = memo(function Transaction(props) {
               : ''
           }
           valueStyle={valueStyle}
-          style={{
-            fontStyle: 'italic',
-            fontWeight: 300,
-          }}
+          style={{ fontStyle: 'italic', fontWeight: 300 }}
           inputProps={{
             readOnly: true,
             style: { fontStyle: 'italic' },
@@ -990,6 +1136,7 @@ const Transaction = memo(function Transaction(props) {
           /* Category field for normal and child transactions */
           name="category"
           width="flex"
+          textAlign="flex"
           value={categoryId}
           formatter={value =>
             value
@@ -1043,7 +1190,7 @@ const Transaction = memo(function Transaction(props) {
       <InputCell
         /* Debit field for all transactions */
         type="input"
-        width={80}
+        width={90}
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
@@ -1057,12 +1204,15 @@ const Transaction = memo(function Transaction(props) {
           value: debit === '' && credit === '' ? '0.00' : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
         }}
+        privacyFilter={{
+          activationFilters: [!isTemporaryId(transaction.id)],
+        }}
       />
 
       <InputCell
         /* Credit field for all transactions */
         type="input"
-        width={80}
+        width={85}
         name="credit"
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}
@@ -1075,6 +1225,9 @@ const Transaction = memo(function Transaction(props) {
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
+        }}
+        privacyFilter={{
+          activationFilters: [!isTemporaryId(transaction.id)],
         }}
       />
 
@@ -1093,6 +1246,7 @@ const Transaction = memo(function Transaction(props) {
           style={[styles.tnum, amountStyle]}
           width={88}
           textAlign="right"
+          privacyFilter
         />
       )}
 
@@ -1110,7 +1264,7 @@ const Transaction = memo(function Transaction(props) {
         />
       )}
 
-      <Cell width={15} />
+      <Cell width={5} />
     </Row>
   );
 });
@@ -1306,6 +1460,13 @@ function TransactionTableInner({
 }) {
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
+  let [scrollWidth, setScrollWidth] = useState(0);
+
+  function saveScrollWidth(parent, child) {
+    let width = parent > 0 && child > 0 && parent - child;
+
+    setScrollWidth(!width ? 0 : width);
+  }
 
   let onNavigateToTransferAccount = useCallback(
     accountId => {
@@ -1442,6 +1603,10 @@ function TransactionTableInner({
           showCategory={props.showCategory}
           showBalance={!!props.balances}
           showCleared={props.showCleared}
+          scrollWidth={scrollWidth}
+          onSort={props.onSort}
+          ascDesc={props.ascDesc}
+          field={props.sortField}
         />
 
         {props.isAdding && (
@@ -1498,6 +1663,7 @@ function TransactionTableInner({
           isSelected={id => props.selectedItems.has(id)}
           onKeyDown={e => props.onCheckEnter(e)}
           onScroll={onScroll}
+          saveScrollWidth={saveScrollWidth}
         />
 
         {props.isAdding && (
@@ -1589,7 +1755,6 @@ export let TransactionTable = forwardRef((props, ref) => {
   let savePending = useRef(false);
   let afterSaveFunc = useRef(false);
   let [_, forceRerender] = useState({});
-
   let selectedItems = useSelectedItems();
 
   useLayoutEffect(() => {

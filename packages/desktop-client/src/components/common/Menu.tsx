@@ -85,7 +85,7 @@ export default function Menu({
           e.preventDefault();
           const item = items[hoveredIndex];
           if (hoveredIndex !== null && item !== Menu.line) {
-            onMenuSelect && onMenuSelect(item.name);
+            onMenuSelect?.(item.name);
           }
           break;
         default:

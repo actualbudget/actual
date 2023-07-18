@@ -148,6 +148,6 @@ export function SelectedTransactionsButton({
             onEdit(name, [...selectedItems]);
         }
       }}
-    ></SelectedItemsButton>
+    />
   );
 }

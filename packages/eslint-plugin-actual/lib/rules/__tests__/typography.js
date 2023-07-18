@@ -7,7 +7,7 @@
 
 const RuleTester = require('eslint').RuleTester;
 
-const rule = require('../../../lib/rules/typography');
+const rule = require('../typography');
 
 //------------------------------------------------------------------------------
 // Tests

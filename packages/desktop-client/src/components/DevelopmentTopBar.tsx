@@ -16,6 +16,7 @@ export default function DevelopmentTopBar() {
           backgroundColor: colors.warningBackground,
           borderBottom: `1px solid ${colors.warningAccent}`,
           zIndex: 1,
+          flexShrink: 0,
         },
       ]}
     >

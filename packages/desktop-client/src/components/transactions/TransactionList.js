@@ -78,6 +78,9 @@ export default function TransactionList({
   hideFraction,
   addNotification,
   renderEmpty,
+  onSort,
+  sortField,
+  ascDesc,
   onChange,
   onRefetch,
   onCloseAddTransaction,
@@ -197,6 +200,9 @@ export default function TransactionList({
       style={{ backgroundColor: colors.tableBackground }}
       onNavigateToTransferAccount={onNavigateToTransferAccount}
       onNavigateToSchedule={onNavigateToSchedule}
+      onSort={onSort}
+      sortField={sortField}
+      ascDesc={ascDesc}
     />
   );
 }

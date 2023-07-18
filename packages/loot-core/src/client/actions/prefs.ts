@@ -2,8 +2,9 @@ import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
 
 import { closeModal } from './modals';
+import type { ActionResult } from './types';
 
-export function loadPrefs() {
+export function loadPrefs(): ActionResult {
   return async (dispatch, getState) => {
     let prefs = await send('load-prefs');
 
@@ -23,7 +24,7 @@ export function loadPrefs() {
   };
 }
 
-export function savePrefs(prefs) {
+export function savePrefs(prefs): ActionResult {
   return async dispatch => {
     await send('save-prefs', prefs);
     dispatch({
@@ -33,7 +34,7 @@ export function savePrefs(prefs) {
   };
 }
 
-export function loadGlobalPrefs() {
+export function loadGlobalPrefs(): ActionResult {
   return async (dispatch, getState) => {
     let globalPrefs = await send('load-global-prefs');
     dispatch({
@@ -45,7 +46,7 @@ export function loadGlobalPrefs() {
   };
 }
 
-export function saveGlobalPrefs(prefs) {
+export function saveGlobalPrefs(prefs): ActionResult {
   return async dispatch => {
     await send('save-global-prefs', prefs);
     dispatch({

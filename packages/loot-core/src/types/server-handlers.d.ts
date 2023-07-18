@@ -1,9 +1,11 @@
+import { GlobalPrefs, LocalPrefs } from '../client/state-types/prefs';
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Message } from '../server/sync';
 
+import { AccountEntity } from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -40,9 +42,10 @@ export interface ServerHandlers {
 
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
+  // incomplete
   'get-categories': () => Promise<{
-    grouped: unknown[];
-    list: unknown[];
+    grouped: { id: string }[];
+    list: { id: string }[];
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;
@@ -134,7 +137,7 @@ export interface ServerHandlers {
 
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
-  'accounts-get': () => Promise<unknown>;
+  'accounts-get': () => Promise<AccountEntity[]>;
 
   'account-properties': (arg: {
     id;
@@ -147,7 +150,7 @@ export interface ServerHandlers {
     upgradingId;
   }) => Promise<'ok'>;
 
-  'nordigen-accounts-link': (arg: {
+  'gocardless-accounts-link': (arg: {
     requisitionId;
     account;
     upgradingId;
@@ -160,7 +163,7 @@ export interface ServerHandlers {
     offbudgetIds;
   }) => Promise<unknown>;
 
-  'nordigen-accounts-connect': (arg: {
+  'gocardless-accounts-connect': (arg: {
     institution;
     publicToken;
     accountIds;
@@ -168,10 +171,10 @@ export interface ServerHandlers {
   }) => Promise<unknown>;
 
   'account-create': (arg: {
-    name;
-    balance;
-    offBudget;
-    closed?;
+    name: string;
+    balance: number;
+    offBudget?: boolean;
+    closed?: 0 | 1;
   }) => Promise<string>;
 
   'account-close': (arg: {
@@ -199,24 +202,24 @@ export interface ServerHandlers {
   'secret-set': (arg: { name: string; value: string }) => Promise<null>;
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
-  'nordigen-poll-web-token': (arg: {
+  'gocardless-poll-web-token': (arg: {
     upgradingAccountId;
     requisitionId;
   }) => Promise<{ error } | { data }>;
 
-  'nordigen-status': () => Promise<{ configured: boolean }>;
+  'gocardless-status': () => Promise<{ configured: boolean }>;
 
-  'nordigen-get-banks': (country) => Promise<unknown>;
+  'gocardless-get-banks': (country) => Promise<unknown>;
 
-  'nordigen-poll-web-token-stop': () => Promise<'ok'>;
+  'gocardless-poll-web-token-stop': () => Promise<'ok'>;
 
-  'nordigen-create-web-token': (arg: {
+  'gocardless-create-web-token': (arg: {
     upgradingAccountId;
     institutionId;
     accessValidForDays;
   }) => Promise<unknown>;
 
-  'nordigen-accounts-sync': (arg: { id }) => Promise<{
+  'gocardless-accounts-sync': (arg: { id }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;
@@ -240,18 +243,11 @@ export interface ServerHandlers {
 
   'save-global-prefs': (prefs) => Promise<'ok'>;
 
-  'load-global-prefs': () => Promise<{
-    theme: string;
-    floatingSidebar: boolean;
-    maxMonths: number;
-    autoUpdate: boolean;
-    documentDir: string;
-    keyId: string;
-  }>;
+  'load-global-prefs': () => Promise<GlobalPrefs>;
 
   'save-prefs': (prefsToSet) => Promise<'ok'>;
 
-  'load-prefs': () => Promise<Record<string, unknown> | null>;
+  'load-prefs': () => Promise<LocalPrefs | null>;
 
   'sync-reset': () => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
@@ -295,14 +291,7 @@ export interface ServerHandlers {
     | { messages: Message[] }
   >;
 
-  'get-budgets': () => Promise<
-    {
-      id: string;
-      cloudFileId: string;
-      groupId: string;
-      name: string;
-    }[]
-  >;
+  'get-budgets': () => Promise<Budget[]>;
 
   'get-remote-files': () => Promise<RemoteFile[]>;
 

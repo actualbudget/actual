@@ -1,4 +1,4 @@
-import React, { Component, PureComponent } from 'react';
+import React, { Component, memo, PureComponent } from 'react';
 // import {
 //   RectButton,
 //   PanGestureHandler,
@@ -23,7 +23,6 @@ import { Button, Card, Label, Text, View } from '../common';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
-import SheetValue from '../spreadsheet/SheetValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { SyncButton } from '../Titlebar';
 import { AmountInput } from '../util/AmountInput';
@@ -36,34 +35,29 @@ import { AmountInput } from '../util/AmountInput';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
 
 function ToBudget({ toBudget, onClick }) {
+  let amount = useSheetValue(toBudget);
   return (
-    <SheetValue binding={toBudget}>
-      {({ value: amount }) => {
-        return (
-          <Button
-            bare
-            style={{ flexDirection: 'column', alignItems: 'flex-start' }}
-            onClick={onClick}
-          >
-            <Label
-              title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
-              style={{ color: colors.tableText, flexShrink: 0 }}
-            />
-            <Text
-              style={[
-                styles.smallText,
-                {
-                  fontWeight: '500',
-                  color: amount < 0 ? colors.errorText : colors.tableText,
-                },
-              ]}
-            >
-              {format(amount, 'financial')}
-            </Text>
-          </Button>
-        );
-      }}
-    </SheetValue>
+    <Button
+      bare
+      style={{ flexDirection: 'column', alignItems: 'flex-start' }}
+      onClick={onClick}
+    >
+      <Label
+        title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
+        style={{ color: colors.tableText, flexShrink: 0 }}
+      />
+      <Text
+        style={[
+          styles.smallText,
+          {
+            fontWeight: '500',
+            color: amount < 0 ? colors.errorText : colors.tableText,
+          },
+        ]}
+      >
+        {format(amount, 'financial')}
+      </Text>
+    </Button>
   );
 }
 
@@ -103,64 +97,58 @@ function Saved({ projected }) {
   );
 }
 
-class BudgetCell extends PureComponent {
-  render() {
-    const {
-      name,
-      binding,
-      editing,
-      style,
-      textStyle,
-      categoryId,
-      month,
-      onBudgetAction,
-    } = this.props;
+const BudgetCell = memo(function BudgetCell(props) {
+  const {
+    name,
+    binding,
+    editing,
+    style,
+    textStyle,
+    categoryId,
+    month,
+    onBudgetAction,
+  } = props;
 
-    return (
-      <SheetValue binding={binding}>
-        {node => {
-          return (
-            <View style={style}>
-              <AmountInput
-                value={integerToAmount(node.value || 0)}
-                style={{
-                  height: ROW_HEIGHT - 4,
-                  transform: 'translateX(6px)',
-                  ...(!editing && {
-                    opacity: 0,
-                    position: 'absolute',
-                    top: 0,
-                  }),
-                }}
-                focused={editing}
-                textStyle={[styles.smallText, textStyle]}
-                onChange={() => {}} // temporarily disabled for read-only view
-                onBlur={value => {
-                  onBudgetAction(month, 'budget-amount', {
-                    category: categoryId,
-                    amount: amountToInteger(value),
-                  });
-                }}
-              />
+  let sheetValue = useSheetValue(binding);
 
-              <View
-                style={{
-                  justifyContent: 'center',
-                  height: ROW_HEIGHT - 4,
-                  ...(editing && { display: 'none' }),
-                }}
-              >
-                <Text style={[styles.smallText, textStyle]} data-testid={name}>
-                  {format(node.value || 0, 'financial')}
-                </Text>
-              </View>
-            </View>
-          );
+  return (
+    <View style={style}>
+      <AmountInput
+        value={integerToAmount(sheetValue || 0)}
+        style={{
+          height: ROW_HEIGHT - 4,
+          transform: 'translateX(6px)',
+          ...(!editing && {
+            opacity: 0,
+            position: 'absolute',
+            top: 0,
+          }),
         }}
-      </SheetValue>
-    );
-  }
-}
+        focused={editing}
+        textStyle={[styles.smallText, textStyle]}
+        onChange={() => {}} // temporarily disabled for read-only view
+        onBlur={value => {
+          onBudgetAction(month, 'budget-amount', {
+            category: categoryId,
+            amount: amountToInteger(value),
+          });
+        }}
+      />
+
+      <View
+        style={{
+          justifyContent: 'center',
+          height: ROW_HEIGHT - 4,
+          ...(editing && { display: 'none' }),
+        }}
+      >
+        <Text style={[styles.smallText, textStyle]} data-testid={name}>
+          {format(sheetValue || 0, 'financial')}
+        </Text>
+      </View>
+    </View>
+  );
+});
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function BudgetGroupPreview({ group, pending, style }) {

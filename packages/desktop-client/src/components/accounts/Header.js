@@ -51,6 +51,7 @@ export function AccountHeader({
   balanceQuery,
   reconcileAmount,
   canCalculateBalance,
+  isSorted,
   search,
   filters,
   conditionsOp,
@@ -341,6 +342,7 @@ export function AccountHeader({
                   account={account}
                   canSync={canSync}
                   canShowBalances={canCalculateBalance()}
+                  isSorted={isSorted}
                   showBalances={showBalances}
                   showCleared={showCleared}
                   onMenuSelect={item => {
@@ -363,6 +365,7 @@ export function AccountHeader({
                     onMenuSelect(item);
                   }}
                   onClose={() => setMenuOpen(false)}
+                  isSorted={isSorted}
                 />
               )}
             </View>
@@ -402,6 +405,7 @@ function AccountMenu({
   canShowBalances,
   showCleared,
   onClose,
+  isSorted,
   onReconcile,
   onMenuSelect,
 }) {
@@ -425,6 +429,10 @@ function AccountMenu({
           }
         }}
         items={[
+          isSorted && {
+            name: 'remove-sorting',
+            text: 'Remove all Sorting',
+          },
           canShowBalances && {
             name: 'toggle-balance',
             text: (showBalances ? 'Hide' : 'Show') + ' Running Balance',
@@ -455,14 +463,20 @@ function AccountMenu({
   );
 }
 
-function CategoryMenu({ onClose, onMenuSelect }) {
+function CategoryMenu({ onClose, onMenuSelect, isSorted }) {
   return (
     <MenuTooltip width={200} onClose={onClose}>
       <Menu
         onMenuSelect={item => {
           onMenuSelect(item);
         }}
-        items={[{ name: 'export', text: 'Export' }]}
+        items={[
+          isSorted && {
+            name: 'remove-sorting',
+            text: 'Remove all Sorting',
+          },
+          { name: 'export', text: 'Export' },
+        ]}
       />
     </MenuTooltip>
   );

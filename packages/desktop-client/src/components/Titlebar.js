@@ -18,6 +18,8 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
+import SvgEye from '../icons/v2/Eye';
+import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
 import { colors } from '../style';
@@ -39,7 +41,7 @@ import {
 import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
-import SheetValue from './spreadsheet/SheetValue';
+import useSheetValue from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 
 export let TitlebarContext = createContext();
@@ -66,26 +68,46 @@ export function TitlebarProvider({ children }) {
 }
 
 function UncategorizedButton() {
+  let count = useSheetValue(queries.uncategorizedCount());
   return (
-    <SheetValue binding={queries.uncategorizedCount()}>
-      {node => {
-        const num = node.value;
-        return (
-          num !== 0 && (
-            <ButtonLink
-              bare
-              to="/accounts/uncategorized"
-              style={{
-                color: colors.errorText,
-                backgroundColor: colors.errorBackground,
-              }}
-            >
-              {num} uncategorized {num === 1 ? 'transaction' : 'transactions'}
-            </ButtonLink>
-          )
-        );
-      }}
-    </SheetValue>
+    count !== 0 && (
+      <ButtonLink
+        bare
+        to="/accounts/uncategorized"
+        style={{
+          color: colors.errorText,
+          backgroundColor: colors.errorBackground,
+        }}
+      >
+        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
+      </ButtonLink>
+    )
+  );
+}
+
+function PrivacyButton({ localPrefs, onTogglePrivacy }) {
+  let [isPrivacyEnabled, setIsPrivacyEnabled] = useState(
+    localPrefs.isPrivacyEnabled,
+  );
+  let togglePrivacy = () => {
+    setIsPrivacyEnabled(!isPrivacyEnabled);
+    onTogglePrivacy(!isPrivacyEnabled);
+  };
+
+  let privacyIconStyle = {
+    width: 23,
+    height: 23,
+    color: 'inherit',
+  };
+
+  return (
+    <Button bare onClick={togglePrivacy}>
+      {isPrivacyEnabled ? (
+        <SvgEyeSlashed style={privacyIconStyle} />
+      ) : (
+        <SvgEye style={privacyIconStyle} />
+      )}
+    </Button>
   );
 }
 
@@ -267,6 +289,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
 function Titlebar({
   globalPrefs,
   saveGlobalPrefs,
+  savePrefs,
   localPrefs,
   userData,
   floatingSidebar,
@@ -280,6 +303,11 @@ function Titlebar({
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
+
+  let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
+  let onTogglePrivacy = enabled => {
+    savePrefs({ isPrivacyEnabled: enabled });
+  };
 
   return isNarrowWidth ? null : (
     <View
@@ -365,6 +393,12 @@ function Titlebar({
         globalPrefs={globalPrefs}
         saveGlobalPrefs={saveGlobalPrefs}
       />
+      {privacyModeFeatureFlag && (
+        <PrivacyButton
+          localPrefs={localPrefs}
+          onTogglePrivacy={onTogglePrivacy}
+        />
+      )}
       {serverURL ? (
         <SyncButton
           style={{ marginLeft: 10 }}

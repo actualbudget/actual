@@ -60,6 +60,19 @@ export default function ExperimentalFeatures({ prefs, savePrefs }) {
               />{' '}
               <View>Goal templates</View>
             </label>
+
+            <label style={{ display: 'flex' }}>
+              <Checkbox
+                id="privacy-mode-flag"
+                checked={flags.privacyMode}
+                onChange={() => {
+                  savePrefs({
+                    'flags.privacyMode': !flags.privacyMode,
+                  });
+                }}
+              />{' '}
+              <View>Privacy mode</View>
+            </label>
           </View>
         ) : (
           <LinkButton

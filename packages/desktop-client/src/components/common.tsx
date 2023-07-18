@@ -19,7 +19,7 @@ export { default as AlignedText } from './common/AlignedText';
 export { default as Block } from './common/Block';
 export { default as Button, ButtonWithLoading } from './common/Button';
 export { default as Card } from './common/Card';
-export { default as CustomSelect } from './common/CustomSelect';
+export { default as Select } from './common/Select';
 export { default as FormError } from './common/FormError';
 export { default as HoverTarget } from './common/HoverTarget';
 export { default as InitialFocus } from './common/InitialFocus';
@@ -32,7 +32,6 @@ export { default as MenuButton } from './common/MenuButton';
 export { default as MenuTooltip } from './common/MenuTooltip';
 export { default as Modal, ModalButtons } from './common/Modal';
 export { default as Search } from './common/Search';
-export { default as Select } from './common/Select';
 export { default as Stack } from './Stack';
 export { default as Text } from './common/Text';
 export { default as TextOneLine } from './common/TextOneLine';
@@ -160,7 +159,7 @@ export function ButtonLink({
       }}
       {...props}
       onClick={e => {
-        props.onClick && props.onClick(e);
+        props.onClick?.(e);
         navigate(to);
       }}
     />

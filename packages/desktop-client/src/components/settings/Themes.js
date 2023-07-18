@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { GetColorThemes } from '../../style';
-import { View, CustomSelect, Text } from '../common';
+import { View, Select, Text } from '../common';
 
 import { Setting } from './UI';
 
@@ -11,7 +11,7 @@ export default function ThemeSettings({ globalPrefs, saveGlobalPrefs }) {
     <Setting
       primaryAction={
         <View>
-          <CustomSelect
+          <Select
             onChange={value => {
               saveGlobalPrefs({ theme: value });
             }}

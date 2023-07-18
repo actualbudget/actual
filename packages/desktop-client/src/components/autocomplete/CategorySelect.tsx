@@ -1,15 +1,13 @@
 import React, {
   type ComponentProps,
   Fragment,
-  forwardRef,
   useMemo,
   type ReactNode,
 } from 'react';
 
 import Split from '../../icons/v0/Split';
 import { colors, styles } from '../../style';
-import { type HTMLPropsWithStyle } from '../../types/utils';
-import { View, Select, Button } from '../common';
+import { View, Button } from '../common';
 
 import Autocomplete, {
   defaultFilterSuggestion,
@@ -21,30 +19,6 @@ type CategoryGroup = {
   name: string;
   categories: Array<{ id: string; name: string }>;
 };
-
-type NativeCategorySelectProps = HTMLPropsWithStyle<HTMLSelectElement> & {
-  categoryGroups: CategoryGroup[];
-  emptyLabel: string;
-};
-export const NativeCategorySelect = forwardRef<
-  HTMLSelectElement,
-  NativeCategorySelectProps
->(({ categoryGroups, emptyLabel, ...nativeProps }, ref) => {
-  return (
-    <Select {...nativeProps} ref={ref}>
-      <option value="">{emptyLabel || 'Select category...'}</option>
-      {categoryGroups.map(group => (
-        <optgroup key={group.id} label={group.name}>
-          {group.categories.map(category => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </optgroup>
-      ))}
-    </Select>
-  );
-});
 
 type CategoryListProps = {
   items: Array<{

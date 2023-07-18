@@ -19,10 +19,12 @@ import {
   AlignedText,
 } from '../../common';
 import NotesButton from '../../NotesButton';
+import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
-import SheetValue from '../../spreadsheet/SheetValue';
+import useSheetName from '../../spreadsheet/useSheetName';
+import useSheetValue from '../../spreadsheet/useSheetValue';
 
 import HoldTooltip from './HoldTooltip';
 import { useRollover } from './RolloverContext';
@@ -76,6 +78,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
                   <CellValue
                     binding={rolloverBudget.totalIncome}
                     type="financial"
+                    privacyFilter={false}
                   />
                 }
               />
@@ -85,6 +88,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
                   <CellValue
                     binding={rolloverBudget.fromLastMonth}
                     type="financial"
+                    privacyFilter={false}
                   />
                 }
               />
@@ -100,6 +104,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
 
         <CellValue
           binding={rolloverBudget.lastMonthOverspent}
+          type="financial"
           formatter={value => {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
@@ -109,6 +114,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
 
         <CellValue
           binding={rolloverBudget.totalBudgeted}
+          type="financial"
           formatter={value => {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
@@ -118,6 +124,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
 
         <CellValue
           binding={rolloverBudget.forNextMonth}
+          type="financial"
           formatter={value => {
             let n = parseInt(value) || 0;
             let v = format(Math.abs(n), 'financial');
@@ -150,107 +157,104 @@ function ToBudget({
   onBudgetAction,
 }: ToBudgetProps) {
   let [menuOpen, setMenuOpen] = useState(null);
+  let sheetName = useSheetName(rolloverBudget.toBudget);
+  let sheetValue = useSheetValue({
+    name: rolloverBudget.toBudget,
+    value: 0,
+  });
+  let availableValue = parseInt(sheetValue);
+  let num = isNaN(availableValue) ? 0 : availableValue;
+  let isNegative = num < 0;
 
   return (
-    <SheetValue binding={rolloverBudget.toBudget} initialValue={0}>
-      {node => {
-        const availableValue = parseInt(node.value);
-        const num = isNaN(availableValue) ? 0 : availableValue;
-        const isNegative = num < 0;
-
-        return (
-          <View style={{ alignItems: 'center' }}>
-            <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
-            <View>
-              <HoverTarget
-                disabled={!collapsed || menuOpen}
-                renderContent={() => (
-                  <Tooltip position="bottom-center">
-                    <TotalsList
-                      collapsed={true}
-                      prevMonthName={prevMonthName}
-                    />
-                  </Tooltip>
-                )}
-              >
-                <Block
-                  onClick={() => setMenuOpen('actions')}
-                  data-cellname={node.name}
-                  {...css([
-                    styles.veryLargeText,
-                    {
-                      fontWeight: 400,
-                      userSelect: 'none',
-                      cursor: 'pointer',
-                      color: isNegative
-                        ? colors.errorText
-                        : colors.pageTextPositive,
-                      marginBottom: -1,
-                      borderBottom: '1px solid transparent',
-                    },
-                  ])}
-                >
-                  {format(num, 'financial')}
-                </Block>
-              </HoverTarget>
-              {menuOpen === 'actions' && (
-                <Tooltip
-                  position="bottom-center"
-                  width={200}
-                  style={{ padding: 0 }}
-                  onClose={() => setMenuOpen(null)}
-                >
-                  <Menu
-                    onMenuSelect={type => {
-                      if (type === 'reset-buffer') {
-                        onBudgetAction(month, 'reset-hold');
-                        setMenuOpen(null);
-                      } else {
-                        setMenuOpen(type);
-                      }
-                    }}
-                    items={[
-                      {
-                        name: 'transfer',
-                        text: 'Move to a category',
-                      },
-                      {
-                        name: 'buffer',
-                        text: 'Hold for next month',
-                      },
-                      {
-                        name: 'reset-buffer',
-                        text: 'Reset next month’s buffer',
-                      },
-                    ]}
-                  />
-                </Tooltip>
-              )}
-              {menuOpen === 'buffer' && (
-                <HoldTooltip
-                  onClose={() => setMenuOpen(null)}
-                  onSubmit={amount => {
-                    onBudgetAction(month, 'hold', { amount });
-                  }}
-                />
-              )}
-              {menuOpen === 'transfer' && (
-                <TransferTooltip
-                  initialAmount={availableValue}
-                  onClose={() => setMenuOpen(null)}
-                  onSubmit={(amount, category) => {
-                    onBudgetAction(month, 'transfer-available', {
-                      amount,
-                      category,
-                    });
-                  }}
-                />
-              )}
-            </View>
-          </View>
-        );
-      }}
-    </SheetValue>
+    <View style={{ alignItems: 'center' }}>
+      <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
+      <View>
+        <HoverTarget
+          disabled={!collapsed || menuOpen}
+          renderContent={() => (
+            <Tooltip position="bottom-center">
+              <TotalsList collapsed={true} prevMonthName={prevMonthName} />
+            </Tooltip>
+          )}
+        >
+          <PrivacyFilter blurIntensity={7}>
+            <Block
+              onClick={() => setMenuOpen('actions')}
+              data-cellname={sheetName}
+              {...css([
+                styles.veryLargeText,
+                {
+                  fontWeight: 400,
+                  userSelect: 'none',
+                  cursor: 'pointer',
+                  color: isNegative
+                    ? colors.errorText
+                    : colors.pageTextPositive,
+                  marginBottom: -1,
+                  borderBottom: '1px solid transparent',
+                },
+              ])}
+            >
+              {format(num, 'financial')}
+            </Block>
+          </PrivacyFilter>
+        </HoverTarget>
+        {menuOpen === 'actions' && (
+          <Tooltip
+            position="bottom-center"
+            width={200}
+            style={{ padding: 0 }}
+            onClose={() => setMenuOpen(null)}
+          >
+            <Menu
+              onMenuSelect={type => {
+                if (type === 'reset-buffer') {
+                  onBudgetAction(month, 'reset-hold');
+                  setMenuOpen(null);
+                } else {
+                  setMenuOpen(type);
+                }
+              }}
+              items={[
+                {
+                  name: 'transfer',
+                  text: 'Move to a category',
+                },
+                {
+                  name: 'buffer',
+                  text: 'Hold for next month',
+                },
+                {
+                  name: 'reset-buffer',
+                  text: 'Reset next month’s buffer',
+                },
+              ]}
+            />
+          </Tooltip>
+        )}
+        {menuOpen === 'buffer' && (
+          <HoldTooltip
+            onClose={() => setMenuOpen(null)}
+            onSubmit={amount => {
+              onBudgetAction(month, 'hold', { amount });
+            }}
+          />
+        )}
+        {menuOpen === 'transfer' && (
+          <TransferTooltip
+            initialAmount={availableValue}
+            onClose={() => setMenuOpen(null)}
+            onSubmit={(amount, category) => {
+              onBudgetAction(month, 'transfer-available', {
+                amount,
+                category,
+              });
+            }}
+          />
+        )}
+      </View>
+    </View>
   );
 }
 

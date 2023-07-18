@@ -1,9 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { connect } from 'react-redux';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  type SetStateAction,
+} from 'react';
+import { connect, useSelector } from 'react-redux';
 
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
+import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import Loading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
@@ -19,7 +25,12 @@ import {
   LinkButton,
 } from './common';
 
-function compileMessage(message, actions, setLoading, onRemove) {
+function compileMessage(
+  message: string,
+  actions: Record<string, () => void>,
+  setLoading: (arg: SetStateAction<boolean>) => void,
+  onRemove?: () => void,
+) {
   return (
     <Stack spacing={2}>
       {message.split(/\n\n/).map((paragraph, idx) => {
@@ -65,7 +76,13 @@ function compileMessage(message, actions, setLoading, onRemove) {
   );
 }
 
-function Notification({ notification, onRemove }) {
+function Notification({
+  notification,
+  onRemove,
+}: {
+  notification: NotificationWithId;
+  onRemove: () => void;
+}) {
   let { type, title, message, pre, messageActions, sticky, internal, button } =
     notification;
 
@@ -215,7 +232,8 @@ function Notification({ notification, onRemove }) {
   );
 }
 
-function Notifications({ notifications, removeNotification, style }) {
+function Notifications({ removeNotification, style }) {
+  let notifications = useSelector(state => state.notifications.notifications);
   return (
     <View
       style={[
@@ -244,7 +262,6 @@ function Notifications({ notifications, removeNotification, style }) {
   );
 }
 
-export default connect(
-  state => ({ notifications: state.notifications.notifications }),
-  dispatch => bindActionCreators(actions, dispatch),
-)(Notifications);
+export default connect(null, dispatch => bindActionCreators(actions, dispatch))(
+  Notifications,
+);

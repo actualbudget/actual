@@ -30,15 +30,7 @@ import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import InformationOutline from '../../icons/v1/InformationOutline';
 import { colors } from '../../style';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  Stack,
-  CustomSelect,
-  Tooltip,
-} from '../common';
+import { View, Text, Modal, Button, Stack, Select, Tooltip } from '../common';
 import { StatusBadge } from '../schedules/StatusBadge';
 import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
@@ -80,8 +72,8 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={{ color: colors.pageTextPositive, fontWeight: 700, ...style }}>
-      <CustomSelect
+    <View style={[{ color: colors.pageTextPositive, fontWeight: 700 }, style]}>
+      <Select
         bare
         options={fields}
         value={value}
@@ -106,7 +98,7 @@ export function OpSelect({
     ops = ops.filter(op => op !== 'contains');
   }
   return (
-    <CustomSelect
+    <Select
       bare
       options={ops.map(op => [op, formatOp(op, type)])}
       value={value}
@@ -752,7 +744,7 @@ export default function EditRule({
         rule.id = newId;
       }
 
-      originalOnSave && originalOnSave(rule);
+      originalOnSave?.(rule);
       modalProps.onClose();
     }
   }
