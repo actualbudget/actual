@@ -12,15 +12,15 @@ import Text from '../common/Text';
 import View from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
-type NordigenInitialiseProps = {
+type GoCardlessInitialiseProps = {
   modalProps?: Partial<ModalProps>;
   onSuccess: () => void;
 };
 
-const NordigenInitialise = ({
+const GoCardlessInitialise = ({
   modalProps,
   onSuccess,
-}: NordigenInitialiseProps) => {
+}: GoCardlessInitialiseProps) => {
   const [secretId, setSecretId] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [isValid, setIsValid] = useState(true);
@@ -51,13 +51,13 @@ const NordigenInitialise = ({
   };
 
   return (
-    <Modal title="Set-up Nordigen" size={{ width: 300 }} {...modalProps}>
+    <Modal title="Set-up GoCardless" size={{ width: 300 }} {...modalProps}>
       <View style={{ display: 'flex', gap: 10 }}>
         <Text>
-          In order to enable bank-sync via Nordigen (only for EU banks) you will
-          need to create access credentials. This can be done by creating an
-          account with{' '}
-          <ExternalLink to="https://nordigen.com/">Nordigen</ExternalLink>.
+          In order to enable bank-sync via GoCardless (only for EU banks) you
+          will need to create access credentials. This can be done by creating
+          an account with{' '}
+          <ExternalLink to="https://gocardless.com/">GoCardless</ExternalLink>.
         </Text>
 
         <FormField>
@@ -98,4 +98,4 @@ const NordigenInitialise = ({
   );
 };
 
-export default NordigenInitialise;
+export default GoCardlessInitialise;

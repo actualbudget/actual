@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Modal, P, View } from '../common';
 
-export default function NordigenLink() {
+export default function GoCardlessLink() {
   window.close();
 
   return (

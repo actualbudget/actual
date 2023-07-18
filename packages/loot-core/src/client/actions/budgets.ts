@@ -80,6 +80,7 @@ export function loadBudget(
           );
 
           if (showBackups) {
+            // @ts-expect-error manager modals are not yet typed
             dispatch(pushModal('load-backup', { budgetId: id }));
           }
         } else {

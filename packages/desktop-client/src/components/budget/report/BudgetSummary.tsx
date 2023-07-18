@@ -27,6 +27,7 @@ import {
   AlignedText,
 } from '../../common';
 import NotesButton from '../../NotesButton';
+import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
@@ -281,7 +282,9 @@ function Saved({ projected, style }: SavedProps) {
             },
           ])}
         >
-          {format(saved, 'financial')}
+          <PrivacyFilter blurIntensity={7}>
+            {format(saved, 'financial')}
+          </PrivacyFilter>
         </View>
       </HoverTarget>
     </View>

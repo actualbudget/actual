@@ -125,6 +125,11 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           valueProps={{
             binding: reportBudget.groupBalance(id),
             type: 'financial',
+            privacyFilter: {
+              style: {
+                paddingRight: MONTH_RIGHT_PADDING,
+              },
+            },
           }}
         />
       )}
@@ -267,6 +272,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       <SheetCell
         name="budget"
         exposed={editing}
+        focused={editing}
         width="flex"
         borderColor={borderColor}
         onExpose={() => onEdit(category.id, monthIndex)}

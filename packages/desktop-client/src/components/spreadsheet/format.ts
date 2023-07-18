@@ -1,6 +1,6 @@
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-export default function format(value, type = 'string') {
+export default function format(value, type = 'string'): string {
   switch (type) {
     case 'string':
       const val = JSON.stringify(value);
