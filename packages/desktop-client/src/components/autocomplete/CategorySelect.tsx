@@ -11,7 +11,10 @@ import { colors, styles } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 import { View, Select, Button } from '../common';
 
-import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
+import Autocomplete, {
+  defaultFilterSuggestion,
+  AutocompleteFooter,
+} from './Autocomplete';
 
 type CategoryGroup = {
   id: string;
@@ -78,33 +81,6 @@ function CategoryList({
         ]}
       >
         {items.map((item, idx) => {
-          if (item.id === 'split') {
-            return (
-              // Split transaction menu item
-              <View
-                key="split"
-                {...(getItemProps ? getItemProps({ item }) : null)}
-                style={{
-                  flexShrink: 0,
-                  margin: 5,
-                }}
-                data-testid="split-transaction-button"
-              >
-                <Button altMenu>
-                  <Split
-                    width={10}
-                    height={10}
-                    style={{
-                      color: 'inherit',
-                      marginRight: 5,
-                    }}
-                  />
-                  Split Transaction
-                </Button>
-              </View>
-            );
-          }
-
           const showGroup = item.cat_group !== lastGroup;
           lastGroup = item.cat_group;
           return (
@@ -175,6 +151,7 @@ export default function CategoryAutocomplete({
               groupName: group.name,
             })),
           ),
+        // NEEDS REMOVED
         showSplitOption ? [{ id: 'split', name: '' }] : [],
       ),
     [categoryGroups],
@@ -188,15 +165,12 @@ export default function CategoryAutocomplete({
       getHighlightedIndex={suggestions => {
         if (suggestions.length === 0) {
           return null;
-        } else if (suggestions[0].id === 'split') {
-          return suggestions.length > 1 ? 1 : null;
         }
         return 0;
       }}
       filterSuggestions={(suggestions, value) => {
         return suggestions.filter(suggestion => {
           return (
-            suggestion.id === 'split' ||
             defaultFilterSuggestion(suggestion, value) ||
             suggestion.groupName.toLowerCase().includes(value.toLowerCase())
           );
@@ -209,6 +183,25 @@ export default function CategoryAutocomplete({
           embedded={embedded}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
+          footer={
+            <AutocompleteFooter embedded={embedded}>
+              {showSplitOption && (
+                // Buttons at bottom of list
+                // Split transaction menu item
+                <Button altMenu>
+                  <Split
+                    width={10}
+                    height={10}
+                    style={{
+                      color: 'inherit',
+                      marginRight: 5,
+                    }}
+                  />
+                  Split Transaction
+                </Button>
+              )}
+            </AutocompleteFooter>
+          }
         />
       )}
       {...props}
