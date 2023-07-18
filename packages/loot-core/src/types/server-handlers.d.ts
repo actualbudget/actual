@@ -1,9 +1,11 @@
+import { GlobalPrefs, LocalPrefs } from '../client/state-types/prefs';
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Message } from '../server/sync';
 
+import { AccountEntity } from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -40,9 +42,10 @@ export interface ServerHandlers {
 
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
+  // incomplete
   'get-categories': () => Promise<{
-    grouped: unknown[];
-    list: unknown[];
+    grouped: { id: string }[];
+    list: { id: string }[];
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;
@@ -134,7 +137,7 @@ export interface ServerHandlers {
 
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
-  'accounts-get': () => Promise<unknown>;
+  'accounts-get': () => Promise<AccountEntity[]>;
 
   'account-properties': (arg: {
     id;
@@ -168,10 +171,10 @@ export interface ServerHandlers {
   }) => Promise<unknown>;
 
   'account-create': (arg: {
-    name;
-    balance;
-    offBudget;
-    closed?;
+    name: string;
+    balance: number;
+    offBudget?: boolean;
+    closed?: 0 | 1;
   }) => Promise<string>;
 
   'account-close': (arg: {
@@ -240,17 +243,11 @@ export interface ServerHandlers {
 
   'save-global-prefs': (prefs) => Promise<'ok'>;
 
-  'load-global-prefs': () => Promise<{
-    floatingSidebar: boolean;
-    maxMonths: number;
-    autoUpdate: boolean;
-    documentDir: string;
-    keyId: string;
-  }>;
+  'load-global-prefs': () => Promise<GlobalPrefs>;
 
   'save-prefs': (prefsToSet) => Promise<'ok'>;
 
-  'load-prefs': () => Promise<Record<string, unknown> | null>;
+  'load-prefs': () => Promise<LocalPrefs | null>;
 
   'sync-reset': () => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
@@ -294,14 +291,7 @@ export interface ServerHandlers {
     | { messages: Message[] }
   >;
 
-  'get-budgets': () => Promise<
-    {
-      id: string;
-      cloudFileId: string;
-      groupId: string;
-      name: string;
-    }[]
-  >;
+  'get-budgets': () => Promise<Budget[]>;
 
   'get-remote-files': () => Promise<RemoteFile[]>;
 

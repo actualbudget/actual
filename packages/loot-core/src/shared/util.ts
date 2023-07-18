@@ -188,7 +188,7 @@ export let numberFormats = [
   { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
   { value: 'space-comma', label: '1 000,33', labelNoFraction: '1 000' },
   { value: 'space-dot', label: '1 000.33', labelNoFraction: '1 000' },
-];
+] as const;
 
 let numberFormat: {
   value: string | null;
