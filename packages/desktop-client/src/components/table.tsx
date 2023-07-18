@@ -281,14 +281,14 @@ export function Cell({
             // When testing, allow the click handler to be used instead
             onClick={
               global.IS_TESTING
-                ? () => onExpose && onExpose(name)
+                ? () => onExpose?.(name)
                 : e => {
                     if (
                       mouseCoords.current &&
                       Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
                       Math.abs(e.clientY - mouseCoords.current[1]) < 5
                     ) {
-                      onExpose && onExpose(name);
+                      onExpose?.(name);
                     }
                   }
             }
