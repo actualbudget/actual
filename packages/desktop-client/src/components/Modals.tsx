@@ -15,12 +15,12 @@ import CreateLocalAccount from './modals/CreateLocalAccount';
 import EditField from './modals/EditField';
 import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
+import GoCardlessExternalMsg from './modals/GoCardlessExternalMsg';
+import GoCardlessInitialise from './modals/GoCardlessInitialise';
 import ImportTransactions from './modals/ImportTransactions';
 import LoadBackup from './modals/LoadBackup';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
-import NordigenExternalMsg from './modals/NordigenExternalMsg';
-import NordigenInitialise from './modals/NordigenInitialise';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 
@@ -158,22 +158,22 @@ export default function Modals() {
             />
           );
 
-        case 'nordigen-init':
+        case 'gocardless-init':
           return (
-            <NordigenInitialise
+            <GoCardlessInitialise
               modalProps={modalProps}
               onSuccess={options.onSuccess}
             />
           );
 
-        case 'nordigen-external-msg':
+        case 'gocardless-external-msg':
           return (
-            <NordigenExternalMsg
+            <GoCardlessExternalMsg
               modalProps={modalProps}
               onMoveExternal={options.onMoveExternal}
               onClose={() => {
                 options.onClose?.();
-                send('nordigen-poll-web-token-stop');
+                send('gocardless-poll-web-token-stop');
               }}
               onSuccess={options.onSuccess}
             />

@@ -54,10 +54,10 @@ type FinanceModals = {
     onSuccess: (data: unknown) => Promise<void>;
   };
 
-  'nordigen-init': {
+  'gocardless-init': {
     onSuccess: () => void;
   };
-  'nordigen-external-msg': {
+  'gocardless-external-msg': {
     onMoveExternal: (arg: {
       institutionId: string;
     }) => Promise<{ error: string } | { data: unknown }>;
