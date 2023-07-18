@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 
-import useNordigenStatus from '../../hooks/useNordigenStatus';
+import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { colors } from '../../style';
@@ -41,7 +41,7 @@ function useAvailableBanks(country) {
 
       setIsLoading(true);
 
-      const { data, error } = await sendCatch('nordigen-get-banks', country);
+      const { data, error } = await sendCatch('gocardless-get-banks', country);
 
       if (error) {
         setIsError(true);
@@ -73,7 +73,7 @@ function renderError(error) {
   );
 }
 
-export default function NordigenExternalMsg({
+export default function GoCardlessExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,
@@ -86,7 +86,8 @@ export default function NordigenExternalMsg({
   let [institutionId, setInstitutionId] = useState();
   let [country, setCountry] = useState();
   let [error, setError] = useState(null);
-  let [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
+  let [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
+    useState(null);
   let [menuOpen, setMenuOpen] = useState(false);
   let data = useRef(null);
 
@@ -96,7 +97,7 @@ export default function NordigenExternalMsg({
     isError: isBankOptionError,
   } = useAvailableBanks(country);
   const { configured: isConfigured, isLoading: isConfigurationLoading } =
-    useNordigenStatus();
+    useGoCardlessStatus();
 
   async function onJump() {
     setError(null);
@@ -125,10 +126,10 @@ export default function NordigenExternalMsg({
     setWaiting(null);
   }
 
-  const onNordigenInit = () => {
+  const onGoCardlessInit = () => {
     dispatch(
-      pushModal('nordigen-init', {
-        onSuccess: () => setIsNordigenSetupComplete(true),
+      pushModal('gocardless-init', {
+        onSuccess: () => setIsGoCardlessSetupComplete(true),
       }),
     );
   };
@@ -151,10 +152,10 @@ export default function NordigenExternalMsg({
 
         {isBankOptionError ? (
           <Error>
-            Failed loading available banks: Nordigen access credentials might be
-            misconfigured. Please{' '}
+            Failed loading available banks: GoCardless access credentials might
+            be misconfigured. Please{' '}
             <LinkButton
-              onClick={onNordigenInit}
+              onClick={onGoCardlessInit}
               style={{ color: colors.b3, display: 'inline' }}
             >
               set them up
@@ -185,16 +186,12 @@ export default function NordigenExternalMsg({
         )}
 
         <Warning>
-          By enabling bank-sync, you will be granting Nordigen (a third party
+          By enabling bank-sync, you will be granting GoCardless (a third party
           service) read-only access to your entire account’s transaction
           history. This service is not affiliated with Actual in any way. Make
-          sure you’ve read and understand Nordigen’s{' '}
-          <ExternalLink to="https://nordigen.com/en/company/privacy-policy/">
+          sure you’ve read and understand GoCardless’s{' '}
+          <ExternalLink to="https://gocardless.com/privacy/">
             Privacy Policy
-          </ExternalLink>{' '}
-          and{' '}
-          <ExternalLink to="https://nordigen.com/en/company/privacy-policy-end-user/">
-            End User Privacy Policy
           </ExternalLink>{' '}
           before proceeding.
         </Warning>
@@ -229,7 +226,7 @@ export default function NordigenExternalMsg({
                 <Menu
                   onMenuSelect={item => {
                     if (item === 'reconfigure') {
-                      onNordigenInit();
+                      onGoCardlessInit();
                     }
                   }}
                   items={[
@@ -258,8 +255,8 @@ export default function NordigenExternalMsg({
         <View>
           <P style={{ fontSize: 15 }}>
             To link your bank account, you will be redirected to a new page
-            where Nordigen will ask to connect to your bank. Nordigen will not
-            be able to withdraw funds from your accounts.
+            where GoCardless will ask to connect to your bank. GoCardless will
+            not be able to withdraw funds from your accounts.
           </P>
 
           {error && renderError(error)}
@@ -272,9 +269,9 @@ export default function NordigenExternalMsg({
               />
               <View style={{ marginTop: 10, color: colors.n4 }}>
                 {isConfigurationLoading
-                  ? 'Checking Nordigen configuration..'
+                  ? 'Checking GoCardless configuration..'
                   : waiting === 'browser'
-                  ? 'Waiting on Nordigen...'
+                  ? 'Waiting on GoCardless...'
                   : waiting === 'accounts'
                   ? 'Loading accounts...'
                   : null}
@@ -301,15 +298,15 @@ export default function NordigenExternalMsg({
             >
               Success! Click to continue &rarr;
             </Button>
-          ) : isConfigured || isNordigenSetupComplete ? (
+          ) : isConfigured || isGoCardlessSetupComplete ? (
             renderLinkButton()
           ) : (
             <>
               <P style={{ color: colors.r5 }}>
-                Nordigen integration has not yet been configured.
+                GoCardless integration has not yet been configured.
               </P>
-              <Button primary onClick={onNordigenInit}>
-                Configure Nordigen integration
+              <Button primary onClick={onGoCardlessInit}>
+                Configure GoCardless integration
               </Button>
             </>
           )}
