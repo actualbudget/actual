@@ -7,7 +7,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
-import { colors, styles } from '../../style';
+import { colors } from '../../style';
 import {
   Button,
   CustomSelect,
@@ -339,9 +339,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
           wrapperStyle={{
-            height: '28px',
             marginRight: '10px',
-            ...styles.smallText,
           }}
         />
         {config.frequency === 'monthly' &&

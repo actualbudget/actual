@@ -95,6 +95,7 @@ export function OpSelect({
   ops,
   type,
   style,
+  wrapperStyle,
   value,
   formatOp = friendlyOp,
   onChange,
@@ -104,14 +105,14 @@ export function OpSelect({
   if (type === 'id') {
     ops = ops.filter(op => op !== 'contains');
   }
-
   return (
     <CustomSelect
       bare
       options={ops.map(op => [op, formatOp(op, type)])}
       value={value}
       onChange={value => onChange('op', value)}
-      style={style}
+      style={style[2]} // DONT ASK WHY THIS COMES IN AS ARRAY, I DONT KNOW!
+      wrapperStyle={wrapperStyle}
     />
   );
 }

@@ -10,7 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
-import { colors } from '../../style';
+import { colors, styles } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import { Stack, View, Text, Button } from '../common';
@@ -501,9 +501,11 @@ export default function ScheduleDetails() {
                       throw new Error('Invalid op for select: ' + op);
                   }
                 }}
+                wrapperStyle={{
+                  ...styles.verySmallText,
+                }}
                 style={{
-                  padding: '0 10px',
-                  fontSize: 12,
+                  padding: '0 5px',
                 }}
                 onChange={(_, op) =>
                   dispatch({ type: 'set-field', field: 'amountOp', value: op })
