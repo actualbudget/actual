@@ -295,4 +295,4 @@ export default connect(
     prefs: state.prefs.local,
   }),
   actions,
-)(withThemeColor(colors.tableText)(Accounts));
+)(withThemeColor(colors.sidebarBackground)(Accounts));
