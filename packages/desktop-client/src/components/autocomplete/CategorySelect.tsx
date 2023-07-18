@@ -134,10 +134,12 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: CategoryGroup[];
   showSplitOption?: boolean;
+  onSplit: () => void;
 };
 export default function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,
+  onSplit,
   embedded,
   ...props
 }: CategoryAutocompleteProps) {
@@ -151,8 +153,7 @@ export default function CategoryAutocomplete({
               groupName: group.name,
             })),
           ),
-        // NEEDS REMOVED
-        showSplitOption ? [{ id: 'split', name: '' }] : [],
+        [],
       ),
     [categoryGroups],
   );
@@ -188,7 +189,7 @@ export default function CategoryAutocomplete({
               {showSplitOption && (
                 // Buttons at bottom of list
                 // Split transaction menu item
-                <Button altMenu>
+                <Button altMenu onClick={onSplit}>
                   <Split
                     width={10}
                     height={10}
