@@ -83,7 +83,7 @@ function LiveTransactionTable(props) {
 
   useEffect(() => {
     if (transactions === props.transactions) return;
-    props.onTransactionsChange && props.onTransactionsChange(transactions);
+    props.onTransactionsChange?.(transactions);
   }, [transactions]);
 
   const onSplit = id => {
