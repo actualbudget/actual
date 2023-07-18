@@ -1,3 +1,4 @@
+import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import {
   extractScheduleConds,
@@ -675,7 +676,7 @@ async function applyCategoryTemplate(
   }
 }
 
-async function checkTemplates() {
+async function checkTemplates(): Promise<Notification> {
   let category_templates = await getCategoryTemplates(null);
   let errors = [];
 

@@ -1,11 +1,13 @@
 import { useSelector } from 'react-redux';
 
-const DEFAULT_FEATURE_FLAG_STATE: Record<string, boolean> = {
+import { type FeatureFlag } from 'loot-core/src/client/state-types/prefs';
+
+const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   reportBudget: false,
   goalTemplatesEnabled: false,
 };
 
-export default function useFeatureFlag(name: string): boolean {
+export default function useFeatureFlag(name: FeatureFlag): boolean {
   return useSelector(state => {
     const value = state.prefs.local[`flags.${name}`];
 
@@ -15,7 +17,7 @@ export default function useFeatureFlag(name: string): boolean {
   });
 }
 
-export function useAllFeatureFlags(): Record<string, boolean> {
+export function useAllFeatureFlags(): Record<FeatureFlag, boolean> {
   return useSelector(state => {
     return {
       ...DEFAULT_FEATURE_FLAG_STATE,

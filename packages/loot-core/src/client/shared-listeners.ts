@@ -1,5 +1,7 @@
 import { listen, send } from '../platform/client/fetch';
 
+import type { Notification } from './state-types/notifications';
+
 export function listenForSyncEvent(actions, store) {
   let attemptedSyncRepair = false;
 
@@ -43,7 +45,7 @@ export function listenForSyncEvent(actions, store) {
         actions.getAccounts();
       }
     } else if (type === 'error') {
-      let notif = null;
+      let notif: Notification | null = null;
       let learnMore =
         '[Learn more](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)';
       const githubIssueLink =

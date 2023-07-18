@@ -185,9 +185,10 @@ module.exports = {
     },
     {
       files: [
-        '**/icons/**/*.js',
-        '**/mocks/**/*.{js,ts,tsx}',
-        '**/{mocks,__mocks__}/*.{js,ts,tsx}',
+        'packages/loot-core/src/types/**/*',
+        'packages/loot-core/src/client/state-types/**/*',
+        '**/icons/**/*',
+        '**/{mocks,__mocks__}/**/*',
         // can't correctly resolve usages
         '**/*.{testing,electron,browser,web,api}.ts',
       ],

@@ -1,14 +1,15 @@
+import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 
 import { setBudget, getSheetValue } from './actions';
 import { parse } from './cleanup-template.pegjs';
 
-export function cleanupTemplate({ month }) {
+export function cleanupTemplate({ month }: { month: string }) {
   return processCleanup(month);
 }
 
-async function processCleanup(month) {
+async function processCleanup(month: string): Promise<Notification> {
   let num_sources = 0;
   let num_sinks = 0;
   let total_weight = 0;
