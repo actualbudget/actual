@@ -558,7 +558,8 @@ export const ManagePayees = forwardRef(
             style={{
               flex: 1,
               border: '1px solid ' + colors.border,
-              borderRadius: 4,
+              borderTopLeftRadius: 4,
+              borderTopRightRadius: 4,
               overflow: 'hidden',
             }}
           >
