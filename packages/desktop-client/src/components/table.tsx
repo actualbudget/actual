@@ -184,6 +184,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   formatter?: (value: string, type?: unknown) => string;
   focused?: boolean;
   textAlign?: string;
+  alignItems?: string;
   borderColor?: string;
   plain?: boolean;
   exposed?: boolean;
@@ -201,6 +202,7 @@ export function Cell({
   value,
   formatter,
   textAlign,
+  alignItems,
   onExpose,
   borderColor: oldBorderColor,
   children,
@@ -232,6 +234,7 @@ export function Cell({
     borderBottomWidth: borderColor ? 1 : 0,
     borderColor,
     backgroundColor,
+    alignItems: alignItems,
   };
 
   return (
@@ -905,7 +908,9 @@ type TableProps = {
   animated?: boolean;
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
+  saveScrollWidth: (parent, child) => void;
 };
+
 export const Table = forwardRef<TableHandleRef, TableProps>(
   (
     {
@@ -928,6 +933,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       animated,
       allowPopupsEscape,
       isSelected,
+      saveScrollWidth,
       ...props
     },
     ref,
@@ -1015,6 +1021,15 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       let item = items[index];
       let editing = editingId === item.id;
       let selected = isSelected && isSelected(item.id);
+
+      if (scrollContainer.current && saveScrollWidth) {
+        saveScrollWidth(
+          scrollContainer.current.offsetParent
+            ? scrollContainer.current.offsetParent.clientWidth
+            : 0,
+          scrollContainer.current ? scrollContainer.current.clientWidth : 0,
+        );
+      }
 
       let row = renderItem({
         item,
