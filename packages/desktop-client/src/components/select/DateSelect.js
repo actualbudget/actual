@@ -263,12 +263,10 @@ export default function DateSelect({
       let date = d.parse(selectedValue, dateFormat, new Date());
       onSelect(d.format(date, 'yyyy-MM-dd'));
 
-      if (open) {
-        if (userSelectedValue.current !== selectedValue) {
-          // This stops the event from propagating up
-          e.stopPropagation();
-          e.preventDefault();
-        }
+      if (open && e.key === 'Enter') {
+        // This stops the event from propagating up
+        e.stopPropagation();
+        e.preventDefault();
       }
 
       let { onKeyDown } = inputProps || {};
