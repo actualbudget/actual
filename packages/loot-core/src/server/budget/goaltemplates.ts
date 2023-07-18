@@ -7,7 +7,7 @@ import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
 
-import { setBudget, getSheetValue, isReflectBudget } from './actions';
+import { setBudget, setZero, getSheetValue, isReflectBudget } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export function applyTemplate({ month }) {
