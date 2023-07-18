@@ -11,10 +11,8 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import * as actions from 'loot-core/src/client/actions';
-import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useFeatureFlag from '../../hooks/useFeatureFlag';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
@@ -346,7 +344,7 @@ function SidebarCategory({
 }) {
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
   const displayed = (
     <View
       style={{
@@ -398,12 +396,6 @@ function SidebarCategory({
                   onDelete(category.id);
                 } else if (type === 'toggleVisibility') {
                   onSave({ ...category, hidden: !category.hidden });
-                } else if (type === 'apply-single-category-template') {
-                  let month = monthUtils.currentMonth();
-                  send('budget/apply-single-category-template', {
-                    month,
-                    category,
-                  });
                 }
                 setMenuOpen(false);
               }}
@@ -414,10 +406,6 @@ function SidebarCategory({
                 },
                 { name: 'rename', text: 'Rename' },
                 { name: 'delete', text: 'Delete' },
-                isGoalTemplatesEnabled && {
-                  name: 'apply-single-category-template',
-                  text: 'Apply Budget Template',
-                },
               ]}
             />
           </Tooltip>
