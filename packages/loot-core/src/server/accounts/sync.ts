@@ -22,7 +22,7 @@ import { batchUpdateTransactions } from './transactions';
 // Plaid article about API options:
 // https://support.plaid.com/customer/en/portal/articles/2612155-transactions-returned-per-request
 
-function BankSyncError(type, code) {
+function BankSyncError(type: string, code: string) {
   return { type: 'BankSyncError', category: type, code };
 }
 

@@ -1,17 +1,29 @@
 import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
+import type {
+  AccountSyncFailuresAction,
+  AccountSyncStatusAction,
+  SetAccountsSyncingAction,
+} from '../state-types/account';
 
 import { addNotification } from './notifications';
 import { getPayees, getAccounts } from './queries';
+import type { ActionResult } from './types';
 
-export function setAccountsSyncing(name) {
+export function setAccountsSyncing(
+  name: SetAccountsSyncingAction['name'],
+): ActionResult {
   return {
     type: constants.SET_ACCOUNTS_SYNCING,
     name,
   };
 }
 
-export function markAccountFailed(id, errorType, errorCode) {
+export function markAccountFailed(
+  id: AccountSyncStatusAction['id'],
+  errorType?: string,
+  errorCode?: string,
+): ActionResult {
   return {
     type: 'ACCOUNT_SYNC_STATUS',
     id,
@@ -20,21 +32,25 @@ export function markAccountFailed(id, errorType, errorCode) {
     errorCode,
   };
 }
-export function markAccountSuccess(id) {
+export function markAccountSuccess(
+  id: AccountSyncStatusAction['id'],
+): ActionResult {
   return {
     type: 'ACCOUNT_SYNC_STATUS',
     id,
     failed: false,
   };
 }
-export function setFailedAccounts(syncErrors) {
+export function setFailedAccounts(
+  syncErrors: AccountSyncFailuresAction['syncErrors'],
+): ActionResult {
   return {
     type: 'ACCOUNT_SYNC_FAILURES',
     syncErrors,
   };
 }
 
-export function unlinkAccount(id) {
+export function unlinkAccount(id: string): ActionResult {
   return async dispatch => {
     await send('account-unlink', { id });
     dispatch(markAccountSuccess(id));
@@ -42,7 +58,7 @@ export function unlinkAccount(id) {
   };
 }
 
-export function linkAccount(requisitionId, account, upgradingId) {
+export function linkAccount(requisitionId, account, upgradingId): ActionResult {
   return async dispatch => {
     await send('nordigen-accounts-link', {
       requisitionId,
@@ -59,7 +75,7 @@ export function connectAccounts(
   publicToken,
   accountIds,
   offbudgetIds,
-) {
+): ActionResult {
   return async dispatch => {
     let ids = await send('accounts-connect', {
       institution,
@@ -78,7 +94,7 @@ export function connectNordigenAccounts(
   publicToken,
   accountIds,
   offbudgetIds,
-) {
+): ActionResult {
   return async dispatch => {
     let ids = await send('nordigen-accounts-connect', {
       institution,
@@ -92,7 +108,7 @@ export function connectNordigenAccounts(
   };
 }
 
-export function syncAccounts(id) {
+export function syncAccounts(id): ActionResult {
   return async (dispatch, getState) => {
     if (getState().account.accountsSyncing) {
       return false;
@@ -166,14 +182,14 @@ export function syncAccounts(id) {
 }
 
 // Remember the last transaction manually added to the system
-export function setLastTransaction(transaction) {
+export function setLastTransaction(transaction): ActionResult {
   return {
     type: constants.SET_LAST_TRANSACTION,
     transaction,
   };
 }
 
-export function parseTransactions(filepath, options) {
+export function parseTransactions(filepath, options): ActionResult {
   return async dispatch => {
     return await send('transactions-parse-file', {
       filepath,
@@ -182,7 +198,7 @@ export function parseTransactions(filepath, options) {
   };
 }
 
-export function importTransactions(id, transactions) {
+export function importTransactions(id, transactions): ActionResult {
   return async dispatch => {
     let {
       errors = [],
@@ -213,14 +229,14 @@ export function importTransactions(id, transactions) {
   };
 }
 
-export function updateNewTransactions(changedId) {
+export function updateNewTransactions(changedId): ActionResult {
   return {
     type: constants.UPDATE_NEW_TRANSACTIONS,
     changedId,
   };
 }
 
-export function markAccountRead(accountId) {
+export function markAccountRead(accountId): ActionResult {
   return {
     type: constants.MARK_ACCOUNT_READ,
     accountId: accountId,

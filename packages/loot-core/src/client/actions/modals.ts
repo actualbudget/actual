@@ -1,25 +1,19 @@
 import * as constants from '../constants';
 
-export function pushModal(name, options) {
+import type { ActionResult } from './types';
+
+export function pushModal(name: string, options: unknown): ActionResult {
   return { type: constants.PUSH_MODAL, name, options };
 }
 
-export function replaceModal(name, options) {
+export function replaceModal(name: string, options: unknown): ActionResult {
   return { type: constants.REPLACE_MODAL, name, options };
 }
 
-export function hideModals() {
-  return { type: constants.HIDE_MODALS };
-}
-
-export function showModals() {
-  return { type: constants.SHOW_MODALS };
-}
-
-export function popModal() {
+export function popModal(): ActionResult {
   return { type: constants.POP_MODAL };
 }
 
-export function closeModal() {
+export function closeModal(): ActionResult {
   return { type: constants.CLOSE_MODAL };
 }
