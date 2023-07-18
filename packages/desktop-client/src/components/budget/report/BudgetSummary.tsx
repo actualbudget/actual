@@ -290,12 +290,8 @@ function Saved({ projected, style }: SavedProps) {
 
 type BudgetSummaryProps = {
   month?: string;
-  isGoalTemplatesEnabled: boolean;
 };
-export function BudgetSummary({
-  month,
-  isGoalTemplatesEnabled,
-}: BudgetSummaryProps) {
+export function BudgetSummary({ month }: BudgetSummaryProps) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -303,7 +299,7 @@ export function BudgetSummary({
     onToggleSummaryCollapse,
   } = useReport();
 
-  isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   let [menuOpen, setMenuOpen] = useState(false);
   function onMenuOpen() {
