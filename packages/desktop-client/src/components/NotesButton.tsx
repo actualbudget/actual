@@ -46,7 +46,7 @@ function NotesTooltip({
           })}
           value={notes || ''}
           onChange={e => setNotes(e.target.value)}
-        ></textarea>
+        />
       ) : (
         <Text
           {...css({

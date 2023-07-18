@@ -55,13 +55,13 @@ const Input = ({
           onEnter(e);
         }
 
-        nativeProps.onKeyDown && nativeProps.onKeyDown(e);
+        nativeProps.onKeyDown?.(e);
       }}
       onChange={e => {
         if (onUpdate) {
           onUpdate(e.target.value);
         }
-        nativeProps.onChange && nativeProps.onChange(e);
+        nativeProps.onChange?.(e);
       }}
     />
   );
