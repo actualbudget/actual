@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
-import useFeatureFlag from '../hooks/useFeatureFlag';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
 
 import BudgetSummary from './modals/BudgetSummary';
@@ -34,7 +33,6 @@ export default function Modals() {
   const budgetId = useSelector(
     state => state.prefs.local && state.prefs.local.id,
   );
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const actions = useActions();
 
   const syncServerStatus = useSyncServerStatus();
@@ -89,7 +87,6 @@ export default function Modals() {
               externalAccounts={options.accounts}
               requisitionId={options.requisitionId}
               localAccounts={accounts.filter(acct => acct.closed === 0)}
-              // upgradingAccountId={options.upgradingAccountId}
               actions={actions}
             />
           );
