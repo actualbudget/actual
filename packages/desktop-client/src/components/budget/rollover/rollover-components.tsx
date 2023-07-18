@@ -319,26 +319,27 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   let balanceTooltip = useTooltip();
   const [menuOpen, setMenuOpen] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  let menuButtonColor = colors.g11;
 
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
-      <View style={{ flexShrink: 0, marginRight: 5 }}>
+      <View
+        style={{
+          flexShrink: 0,
+          marginRight: 0,
+          justifyContent: 'center',
+        }}
+      >
         <Button
           bare
           onClick={e => {
             e.stopPropagation();
             setMenuOpen(true);
           }}
-          onMouseOver={() => (menuButtonColor = colors.b3)}
-          onMouseLeave={() => (menuButtonColor = colors.g1)}
-          style={{ color: menuButtonColor, padding: 3 }}
+          style={{
+            padding: 3,
+          }}
         >
-          <CheveronDown
-            width={14}
-            height={14}
-            style={{ color: menuButtonColor }}
-          />
+          <CheveronDown width={14} height={14} />
         </Button>
         {menuOpen && (
           <Tooltip
@@ -417,7 +418,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           });
         }}
       />
-
       <Field
         name="spent"
         width="flex"
@@ -439,7 +439,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           />
         </span>
       </Field>
-
       <Field
         name="balance"
         width="flex"
