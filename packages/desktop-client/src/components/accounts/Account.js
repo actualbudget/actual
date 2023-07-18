@@ -77,13 +77,15 @@ function EmptyMessage({ onAdd }) {
 function AllTransactions({
   account = {},
   transactions,
-  showBalances,
   balances,
+  showBalances,
   filtered,
   children,
 }) {
   const { id: accountId } = account;
   let scheduleData = useCachedSchedules();
+
+  transactions ??= [];
 
   let schedules = useMemo(
     () =>
@@ -117,9 +119,10 @@ function AllTransactions({
       return 0;
     }
 
-    // balances is in descending order so latest order is at the start of the array.
-    return balances ? Object.values(balances)[0]?.balance ?? 0 : 0;
-  }, [showBalances, balances]);
+    return balances && transactions?.length > 0
+      ? balances[transactions[0].id]?.balance ?? 0
+      : 0;
+  }, [showBalances, balances, transactions]);
 
   let prependBalances = useMemo(() => {
     if (!showBalances) {
@@ -127,15 +130,17 @@ function AllTransactions({
     }
 
     // Reverse so we can calculate from earliest upcoming schedule.
-    let scheduledBalances = prependTransactions.map((_, index, ptArray) => {
-      let scheduledTransaction = ptArray[ptArray.length - 1 - index];
-      let amount =
-        (scheduledTransaction._inverse ? -1 : 1) * scheduledTransaction.amount;
-      return {
-        balance: (runningBalance += amount),
-        id: scheduledTransaction.id,
-      };
-    });
+    let scheduledBalances = [...prependTransactions]
+      .reverse()
+      .map(scheduledTransaction => {
+        let amount =
+          (scheduledTransaction._inverse ? -1 : 1) *
+          scheduledTransaction.amount;
+        return {
+          balance: (runningBalance += amount),
+          id: scheduledTransaction.id,
+        };
+      });
     return groupById(scheduledBalances);
   }, [showBalances, prependTransactions, runningBalance]);
 
@@ -1166,8 +1171,8 @@ class AccountInternal extends PureComponent {
       <AllTransactions
         account={account}
         transactions={transactions}
-        showBalances={showBalances}
         balances={balances}
+        showBalances={showBalances}
         filtered={transactionsFiltered}
       >
         {(allTransactions, allBalances) => (
@@ -1244,8 +1249,8 @@ class AccountInternal extends PureComponent {
                   category={category}
                   categoryGroups={categoryGroups}
                   payees={payees}
-                  showBalances={showBalances}
                   balances={allBalances}
+                  showBalances={showBalances}
                   showCleared={showCleared}
                   showAccount={
                     !accountId ||

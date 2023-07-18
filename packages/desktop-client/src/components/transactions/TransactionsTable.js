@@ -1551,19 +1551,17 @@ function TransactionTableInner({
           hovered={hovered}
           selected={selected}
           highlighted={false}
-          added={isNew && isNew(trans.id)}
-          expanded={isExpanded && isExpanded(trans.id)}
-          matched={isMatched && isMatched(trans.id)}
+          added={isNew?.(trans.id)}
+          expanded={isExpanded?.(trans.id)}
+          matched={isMatched?.(trans.id)}
           showZeroInDeposit={isChildDeposit}
-          balance={balances && balances[trans.id] && balances[trans.id].balance}
+          balance={balances?.[trans.id]?.balance}
           focusedField={editing && tableNavigator.focusedField}
           accounts={accounts}
           categoryGroups={categoryGroups}
           payees={payees}
           inheritedFields={
-            parent && parent.payee === trans.payee
-              ? new Set(['payee'])
-              : new Set()
+            parent?.payee === trans.payee ? new Set(['payee']) : new Set()
           }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
