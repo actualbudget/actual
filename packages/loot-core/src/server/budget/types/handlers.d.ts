@@ -24,11 +24,10 @@ export interface BudgetHandlers {
   'budget/apply-goal-template': (...args: unknown[]) => Promise<unknown>;
 
   'budget/overwrite-goal-template': (...args: unknown[]) => Promise<unknown>;
-=======
+
   'budget/overwrite-goal-template': (arg: {
     month: string;
   }) => Promise<Notification>;
->>>>>>> master
 
   'budget/cleanup-goal-template': (arg: {
     month: string;
