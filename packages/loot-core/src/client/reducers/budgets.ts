@@ -116,7 +116,7 @@ export default function update(state = initialState, action) {
     case constants.SET_ALL_FILES:
       return {
         ...state,
-        budgets: action.budgetes,
+        budgets: action.budgets,
         remoteFiles: action.remoteFiles,
         allFiles: reconcileFiles(action.budgets, action.remoteFiles),
       };
