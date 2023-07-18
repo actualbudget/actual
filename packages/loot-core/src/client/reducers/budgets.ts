@@ -35,15 +35,13 @@ function reconcileFiles(
   let reconciled = new Set();
 
   let files = localFiles.map((localFile): File & { deleted: boolean } => {
-    if (localFile.cloudFileId) {
+    let { cloudFileId, groupId } = localFile;
+    if (cloudFileId && groupId) {
       // This is the case where for some reason getting the files from
       // the server failed. We don't want to scare the user, just show
       // an unknown state and tell them it'll be OK once they come
       // back online
-
       if (remoteFiles == null) {
-        let cloudFileId = localFile.cloudFileId;
-        let groupId = localFile.groupId;
         return {
           ...localFile,
           cloudFileId,
@@ -61,6 +59,8 @@ function reconcileFiles(
         if (remote.groupId === localFile.groupId) {
           return {
             ...localFile,
+            cloudFileId,
+            groupId,
             name: remote.name,
             deleted: remote.deleted,
             encryptKeyId: remote.encryptKeyId,
@@ -70,6 +70,8 @@ function reconcileFiles(
         } else {
           return {
             ...localFile,
+            cloudFileId,
+            groupId,
             name: remote.name,
             deleted: remote.deleted,
             encryptKeyId: remote.encryptKeyId,
@@ -78,7 +80,13 @@ function reconcileFiles(
           };
         }
       } else {
-        return { ...localFile, deleted: false, state: 'broken' };
+        return {
+          ...localFile,
+          cloudFileId,
+          groupId,
+          deleted: false,
+          state: 'broken',
+        };
       }
     } else {
       return { ...localFile, deleted: false, state: 'local' };

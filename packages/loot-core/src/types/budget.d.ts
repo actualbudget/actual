@@ -1,6 +1,6 @@
 export type Budget = {
   id: string;
-  cloudFileId: string | undefined;
-  groupId: string | undefined;
+  cloudFileId?: string;
+  groupId?: string;
   name: string;
 };

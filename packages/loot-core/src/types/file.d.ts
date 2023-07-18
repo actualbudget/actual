@@ -17,6 +17,8 @@ export type SyncableLocalFile = Budget & {
   state: 'broken' | 'unknown';
 };
 export type SyncedLocalFile = Budget & {
+  cloudFileId: string;
+  groupId: string;
   encryptKeyId?: string;
   hasKey: boolean;
   state: 'synced' | 'detached';
