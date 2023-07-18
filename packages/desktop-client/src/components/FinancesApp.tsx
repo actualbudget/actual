@@ -35,7 +35,6 @@ import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import { View } from './common';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
-import GoCardlessLink from './gocardless/GoCardlessLink';
 import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
 import Notifications from './Notifications';
