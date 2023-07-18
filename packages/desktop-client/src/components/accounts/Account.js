@@ -24,8 +24,8 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
-import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { authorizeBank } from '../../gocardless';
+import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, colors } from '../../style';
 import { useActiveLocation } from '../ActiveLocation';
 import { View, Text, Button } from '../common';

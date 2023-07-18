@@ -15,12 +15,12 @@ import CreateLocalAccount from './modals/CreateLocalAccount';
 import EditField from './modals/EditField';
 import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
+import GoCardlessExternalMsg from './modals/GoCardlessExternalMsg';
+import GoCardlessInitialise from './modals/GoCardlessInitialise';
 import ImportTransactions from './modals/ImportTransactions';
 import LoadBackup from './modals/LoadBackup';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
-import GoCardlessExternalMsg from './modals/GoCardlessExternalMsg';
-import GoCardlessInitialise from './modals/GoCardlessInitialise';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 

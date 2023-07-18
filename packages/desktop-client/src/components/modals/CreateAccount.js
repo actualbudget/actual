@@ -3,8 +3,8 @@ import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 
-import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
 import { authorizeBank } from '../../gocardless';
+import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
 import {
   View,
   Text,
