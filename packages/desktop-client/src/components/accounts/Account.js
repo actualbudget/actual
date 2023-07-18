@@ -597,31 +597,34 @@ class AccountInternal extends PureComponent {
           this.props.savePrefs({ ['show-balances-' + accountId]: false });
           this.setState({ showBalances: false, balances: null });
         } else {
-          this.setState({
-            transactions: [],
-            transactionCount: 0,
-            filters: [],
-            search: '',
-            sort: [],
-            showBalances: true,
-            balances: await this.calculateBalances(),
-          });
-          this.fetchTransactions();
           this.props.savePrefs({ ['show-balances-' + accountId]: true });
-          this.calculateBalances();
+          this.setState(
+            {
+              transactions: [],
+              transactionCount: 0,
+              filters: [],
+              search: '',
+              sort: [],
+              showBalances: true,
+            },
+            () => {
+              this.fetchTransactions();
+            },
+          );
         }
         break;
       case 'remove-sorting': {
-        let filters = this.state.filters;
-        this.setState({ sort: [] });
-        if (filters.length > 0) {
-          this.applyFilters([...filters]);
-        } else {
-          this.fetchTransactions();
-        }
-        if (this.state.search !== '') {
-          this.onSearch(this.state.search);
-        }
+        this.setState({ sort: [] }, () => {
+          let filters = this.state.filters;
+          if (filters.length > 0) {
+            this.applyFilters([...filters]);
+          } else {
+            this.fetchTransactions();
+          }
+          if (this.state.search !== '') {
+            this.onSearch(this.state.search);
+          }
+        });
         break;
       }
       case 'toggle-cleared':
@@ -1028,16 +1031,25 @@ class AccountInternal extends PureComponent {
       this.currentQuery = this.rootQuery.filter({
         [conditionsOpKey]: [...filters, ...customFilters],
       });
-      this.updateQuery(this.currentQuery, true);
-      this.setState({ filters: conditions });
-    } else {
-      this.setState({ transactions: [], transactionCount: 0 });
-      this.fetchTransactions();
-      this.setState({ filters: conditions });
-    }
 
-    if (this.state.sort.length !== 0) {
-      this.applySort();
+      this.setState({ filters: conditions }, () => {
+        this.updateQuery(this.currentQuery, true);
+      });
+    } else {
+      this.setState(
+        {
+          transactions: [],
+          transactionCount: 0,
+          filters: conditions,
+        },
+        () => {
+          this.fetchTransactions();
+
+          if (this.state.sort.length !== 0) {
+            this.applySort();
+          }
+        },
+      );
     }
   };
 
