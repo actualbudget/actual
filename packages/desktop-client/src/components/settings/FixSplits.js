@@ -78,9 +78,9 @@ export default function FixSplitsTool() {
       <Text>
         <strong>Repair split transactions</strong> if you are experiencing bugs
         relating to split transactions and the “Reset budget cache” button above
-        does not help. If you see blank payees on splits or account balances (or
-        any balances) are incorrect, this tool may fix them. This tool does two
-        things:
+        does not help, this tool may fix them. Some examples of bugs include
+        seeing blank payees on splits or incorrect account balances. This tool
+        does two things:
       </Text>
       <ul style={{ margin: 0, paddingLeft: '1.5em' }}>
         <li style={{ marginBottom: '0.5em' }}>

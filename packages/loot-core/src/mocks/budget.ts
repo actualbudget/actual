@@ -10,7 +10,6 @@ import { batchMessages, setSyncingMode } from '../server/sync';
 import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 import type {
-  AccountEntity,
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
@@ -563,7 +562,7 @@ export async function createTestBudget(handlers) {
   await db.runQuery('DELETE FROM categories;');
   await db.runQuery('DELETE FROM category_groups');
 
-  let accounts: AccountEntity[] = [
+  let accounts: { name: string; offBudget?: 1; id?: string }[] = [
     { name: 'Bank of America' },
     { name: 'Ally Savings' },
     { name: 'Capital One Checking' },

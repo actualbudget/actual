@@ -23,7 +23,7 @@ function getErrorMessage(error) {
   }
 }
 
-function Import({ modalProps, availableImports }) {
+function Import({ modalProps }) {
   const dispatch = useDispatch();
   const [error, setError] = useState(false);
   const [importing, setImporting] = useState(false);

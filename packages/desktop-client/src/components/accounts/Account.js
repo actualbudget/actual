@@ -24,8 +24,8 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
+import { authorizeBank } from '../../gocardless';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
-import { authorizeBank } from '../../nordigen';
 import { styles, colors } from '../../style';
 import { useActiveLocation } from '../ActiveLocation';
 import { View, Text, Button } from '../common';
@@ -119,6 +119,23 @@ function AllTransactions({ account = {}, transactions, filtered, children }) {
   return children(allTransactions);
 }
 
+function getField(field) {
+  switch (field) {
+    case 'account':
+      return 'account.name';
+    case 'payee':
+      return 'payee.name';
+    case 'category':
+      return 'category.name';
+    case 'payment':
+      return 'amount';
+    case 'deposit':
+      return 'amount';
+    default:
+      return field;
+  }
+}
+
 class AccountInternal extends PureComponent {
   constructor(props) {
     super(props);
@@ -142,6 +159,7 @@ class AccountInternal extends PureComponent {
       latestDate: null,
       filterId: [],
       conditionsOp: 'and',
+      sort: [],
     };
   }
 
@@ -232,6 +250,11 @@ class AccountInternal extends PureComponent {
         this.refetchTransactions();
       }, 100);
     }
+
+    //Resest sort/filter/search on account change
+    if (this.props.accountId !== prevProps.accountId) {
+      this.setState({ sort: [], search: '', filters: [] });
+    }
   }
 
   componentWillUnmount() {
@@ -255,7 +278,7 @@ class AccountInternal extends PureComponent {
   };
 
   refetchTransactions = async () => {
-    this.paged && this.paged.run();
+    this.paged?.run();
   };
 
   fetchTransactions = () => {
@@ -295,7 +318,7 @@ class AccountInternal extends PureComponent {
         const firstLoad = prevData == null;
 
         if (firstLoad) {
-          this.table.current && this.table.current.setRowAnimation(false);
+          this.table.current?.setRowAnimation(false);
 
           if (isFiltered) {
             this.props.splitsExpandedDispatch({
@@ -324,11 +347,11 @@ class AccountInternal extends PureComponent {
             }
 
             if (firstLoad) {
-              this.table.current && this.table.current.scrollToTop();
+              this.table.current?.scrollToTop();
             }
 
             setTimeout(() => {
-              this.table.current && this.table.current.setRowAnimation(true);
+              this.table.current?.setRowAnimation(true);
             }, 0);
           },
         );
@@ -450,7 +473,12 @@ class AccountInternal extends PureComponent {
     let accountId = this.props.accountId;
     let account = this.props.accounts.find(account => account.id === accountId);
     return (
-      account && this.state.search === '' && this.state.filters.length === 0
+      account &&
+      this.state.search === '' &&
+      this.state.filters.length === 0 &&
+      (this.state.sort.length === 0 ||
+        (this.state.sort.field === 'date' &&
+          this.state.sort.ascDesc === 'desc'))
     );
   };
 
@@ -523,11 +551,32 @@ class AccountInternal extends PureComponent {
           this.props.savePrefs({ ['show-balances-' + accountId]: false });
           this.setState({ showBalances: false, balances: [] });
         } else {
+          this.setState({
+            transactions: [],
+            transactionCount: 0,
+            filters: [],
+            search: '',
+            sort: [],
+            showBalances: true,
+          });
+          this.fetchTransactions();
           this.props.savePrefs({ ['show-balances-' + accountId]: true });
-          this.setState({ showBalances: true });
           this.calculateBalances();
         }
         break;
+      case 'remove-sorting': {
+        let filters = this.state.filters;
+        this.setState({ sort: [] });
+        if (filters.length > 0) {
+          this.applyFilters([...filters]);
+        } else {
+          this.fetchTransactions();
+        }
+        if (this.state.search !== '') {
+          this.onSearch(this.state.search);
+        }
+        break;
+      }
       case 'toggle-cleared':
         if (this.state.showCleared) {
           this.props.savePrefs({ ['hide-cleared-' + accountId]: true });
@@ -815,6 +864,9 @@ class AccountInternal extends PureComponent {
     this.setState({ conditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
     this.applyFilters([...filters]);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onReloadSavedFilter = (savedFilter, item) => {
@@ -825,9 +877,10 @@ class AccountInternal extends PureComponent {
       this.setState({ conditionsOp: getFilter.conditionsOp });
       this.applyFilters([...getFilter.conditions]);
     } else {
-      savedFilter.status &&
-        this.setState({ conditionsOp: savedFilter.conditionsOp }) &&
+      if (savedFilter.status) {
+        this.setState({ conditionsOp: savedFilter.conditionsOp });
         this.applyFilters([...savedFilter.conditions]);
+      }
     }
     this.setState({ filterId: { ...this.state.filterId, ...savedFilter } });
   };
@@ -836,6 +889,9 @@ class AccountInternal extends PureComponent {
     this.setState({ conditionsOp: 'and' });
     this.setState({ filterId: [] });
     this.applyFilters([]);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
@@ -848,19 +904,27 @@ class AccountInternal extends PureComponent {
         status: this.state.filterId && 'changed',
       },
     });
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onDeleteFilter = filter => {
     this.applyFilters(this.state.filters.filter(f => f !== filter));
-    this.state.filters.length === 1
-      ? this.setState({ filterId: [] }) &&
-        this.setState({ conditionsOp: 'and' })
-      : this.setState({
-          filterId: {
-            ...this.state.filterId,
-            status: this.state.filterId && 'changed',
-          },
-        });
+    if (this.state.filters.length === 1) {
+      this.setState({ filterId: [] });
+      this.setState({ conditionsOp: 'and' });
+    } else {
+      this.setState({
+        filterId: {
+          ...this.state.filterId,
+          status: this.state.filterId && 'changed',
+        },
+      });
+    }
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onApplyFilter = async cond => {
@@ -880,6 +944,9 @@ class AccountInternal extends PureComponent {
         },
       });
       this.applyFilters([...filters, cond]);
+    }
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
     }
   };
 
@@ -915,11 +982,91 @@ class AccountInternal extends PureComponent {
         [conditionsOpKey]: [...filters, ...customFilters],
       });
       this.updateQuery(this.currentQuery, true);
-      this.setState({ filters: conditions, search: '' });
+      this.setState({ filters: conditions });
     } else {
       this.setState({ transactions: [], transactionCount: 0 });
       this.fetchTransactions();
-      this.setState({ filters: conditions, search: '' });
+      this.setState({ filters: conditions });
+    }
+
+    if (this.state.sort.length !== 0) {
+      this.applySort();
+    }
+  };
+
+  applySort = (field, ascDesc, prevField, prevAscDesc) => {
+    let filters = this.state.filters;
+    let sortField = getField(!field ? this.state.sort.field : field);
+    let sortAscDesc = !ascDesc ? this.state.sort.ascDesc : ascDesc;
+    let sortPrevField = getField(
+      !prevField ? this.state.sort.prevField : prevField,
+    );
+    let sortPrevAscDesc = !prevField
+      ? this.state.sort.prevAscDesc
+      : prevAscDesc;
+
+    if (!field) {
+      //no sort was made (called by applyFilters)
+      this.currentQuery = this.currentQuery.orderBy({
+        [sortField]: sortAscDesc,
+      });
+    } else {
+      //sort called directly
+      if (filters.length > 0) {
+        //if filters already exist then apply them
+        this.applyFilters([...filters]);
+        this.currentQuery = this.currentQuery.orderBy({
+          [sortField]: sortAscDesc,
+        });
+      } else {
+        //no filters exist make new rootquery
+        this.currentQuery = this.rootQuery.orderBy({
+          [sortField]: sortAscDesc,
+        });
+      }
+    }
+    if (sortPrevField) {
+      //apply previos sort if it exists
+      this.currentQuery = this.currentQuery.orderBy({
+        [sortPrevField]: sortPrevAscDesc,
+      });
+    }
+
+    this.updateQuery(this.currentQuery, this.state.filters.length > 0);
+  };
+
+  onSort = (headerClicked, ascDesc) => {
+    let prevField;
+    let prevAscDesc;
+    //if staying on same column but switching asc/desc
+    //then keep prev the same
+    if (headerClicked === this.state.sort.field) {
+      prevField = this.state.sort.prevField;
+      prevAscDesc = this.state.sort.prevAscDesc;
+      this.setState({
+        sort: {
+          ...this.state.sort,
+          ascDesc: ascDesc,
+        },
+      });
+    } else {
+      //if switching to new column then capture state
+      //of current sort column as prev
+      prevField = this.state.sort.field;
+      prevAscDesc = this.state.sort.ascDesc;
+      this.setState({
+        sort: {
+          field: headerClicked,
+          ascDesc: ascDesc,
+          prevField: this.state.sort.field,
+          prevAscDesc: this.state.sort.ascDesc,
+        },
+      });
+    }
+
+    this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
     }
   };
 
@@ -1007,6 +1154,7 @@ class AccountInternal extends PureComponent {
                   showEmptyMessage={showEmptyMessage}
                   balanceQuery={balanceQuery}
                   canCalculateBalance={this.canCalculateBalance}
+                  isSorted={this.state.sort.length !== 0}
                   reconcileAmount={reconcileAmount}
                   search={this.state.search}
                   filters={this.state.filters}
@@ -1092,6 +1240,9 @@ class AccountInternal extends PureComponent {
                         </View>
                       ) : null
                     }
+                    onSort={this.onSort}
+                    sortField={this.state.sort.field}
+                    ascDesc={this.state.sort.ascDesc}
                     onChange={this.onTransactionsChange}
                     onRefetch={this.refetchTransactions}
                     onRefetchUpToRow={row =>

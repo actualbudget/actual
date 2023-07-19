@@ -14,7 +14,7 @@ export function useTooltip() {
     getOpenEvents: (events = {}) => ({
       onClick: e => {
         e.stopPropagation();
-        events.onClick && events.onClick(e);
+        events.onClick?.(e);
         setIsOpen(true);
       },
     }),
@@ -54,13 +54,13 @@ export class Tooltip extends Component {
       }
 
       if (node === document.documentElement) {
-        this.props.onClose && this.props.onClose();
+        this.props.onClose?.();
       }
     };
 
     let escHandler = e => {
       if (e.key === 'Escape') {
-        this.props.onClose && this.props.onClose();
+        this.props.onClose?.();
       }
     };
 

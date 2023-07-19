@@ -1,8 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import * as constants from '../constants';
+import { type Notification } from '../state-types/notifications';
 
-export function addNotification(notification) {
+import type { ActionResult } from './types';
+
+export function addNotification(
+  notification: Omit<Notification, 'id'> & { id?: string },
+): ActionResult {
   return {
     type: constants.ADD_NOTIFICATION,
     notification: {
@@ -12,7 +17,7 @@ export function addNotification(notification) {
   };
 }
 
-export function addGenericErrorNotification() {
+export function addGenericErrorNotification(): ActionResult {
   return addNotification({
     type: 'error',
     message:
@@ -21,7 +26,7 @@ export function addGenericErrorNotification() {
   });
 }
 
-export function removeNotification(id) {
+export function removeNotification(id: string): ActionResult {
   return {
     type: constants.REMOVE_NOTIFICATION,
     id,

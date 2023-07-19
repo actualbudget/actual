@@ -1,3 +1,4 @@
+import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import {
   extractScheduleConds,
@@ -7,7 +8,7 @@ import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
 
-import { setBudget, getSheetValue } from './actions';
+import { setBudget, setZero, getSheetValue } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export function applyTemplate({ month }) {
@@ -34,7 +35,10 @@ function checkScheduleTemplates(template) {
   return { lowPriority, errorNotice };
 }
 
-async function processTemplate(month, force) {
+async function processTemplate(
+  month: string,
+  force: boolean,
+): Promise<Notification> {
   let num_applied = 0;
   let errors = [];
   let category_templates = await getCategoryTemplates();
@@ -63,13 +67,9 @@ async function processTemplate(month, force) {
             ? template[l].priority
             : lowestPriority;
       }
-      await setBudget({
-        category: category.id,
-        month,
-        amount: 0,
-      });
     }
   }
+  setZero({ month });
   // find all remainder templates, place them after all other templates
   let remainder_found;
   let remainder_priority = lowestPriority + 1;
@@ -356,7 +356,7 @@ async function applyCategoryTemplate(
         } else {
           increment = limit;
         }
-        if (to_budget + increment < budgetAvailable || !priority) {
+        if (increment < budgetAvailable || !priority) {
           to_budget += increment;
         } else {
           if (budgetAvailable > 0) to_budget += budgetAvailable;
@@ -649,7 +649,7 @@ async function applyCategoryTemplate(
   }
 }
 
-async function checkTemplates() {
+async function checkTemplates(): Promise<Notification> {
   let category_templates = await getCategoryTemplates();
   let errors = [];
 
