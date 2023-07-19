@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { type ReactElement, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
 import { connect } from 'react-redux';
@@ -30,31 +30,28 @@ import { colors, styles } from '../style';
 import { ExposeNavigate, StackedRoutes } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
-import Account from './accounts/Account';
-import MobileAccount from './accounts/MobileAccount';
-import MobileAccounts from './accounts/MobileAccounts';
 import BankSyncStatus from './BankSyncStatus';
-import Budget from './budget';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import MobileBudget from './budget/MobileBudget';
 import { View } from './common';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
-import GoCardlessLink from './gocardless/GoCardlessLink';
 import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
 import Notifications from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
-import Schedules from './schedules';
-import DiscoverSchedules from './schedules/DiscoverSchedules';
-import EditSchedule from './schedules/EditSchedule';
-import LinkSchedule from './schedules/LinkSchedule';
+import { NarrowAlternate, WideComponent } from './responsive';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 
-function NarrowNotSupported({ children, redirectTo = '/budget' }) {
+function NarrowNotSupported({
+  redirectTo = '/budget',
+  children,
+}: {
+  redirectTo?: string;
+  children: ReactElement;
+}) {
   const { isNarrowWidth } = useResponsive();
   const navigate = useNavigate();
   useEffect(() => {
@@ -66,7 +63,6 @@ function NarrowNotSupported({ children, redirectTo = '/budget' }) {
 }
 
 function StackedRoutesInner({ location }) {
-  const { isNarrowWidth } = useResponsive();
   return (
     <Routes location={location}>
       <Route path="/" element={<Navigate to="/budget" replace />} />
@@ -75,21 +71,19 @@ function StackedRoutesInner({ location }) {
         path="/reports/*"
         element={
           <NarrowNotSupported>
+            {/* Has its own lazy loading logic */}
             <Reports />
           </NarrowNotSupported>
         }
       />
 
-      <Route
-        path="/budget"
-        element={isNarrowWidth ? <MobileBudget /> : <Budget />}
-      />
+      <Route path="/budget" element={<NarrowAlternate name="Budget" />} />
 
       <Route
         path="/schedules"
         element={
           <NarrowNotSupported>
-            <Schedules />
+            <WideComponent name="Schedules" />
           </NarrowNotSupported>
         }
       />
@@ -98,7 +92,7 @@ function StackedRoutesInner({ location }) {
         path="/schedule/edit"
         element={
           <NarrowNotSupported>
-            <EditSchedule />
+            <WideComponent name="EditSchedule" />
           </NarrowNotSupported>
         }
       />
@@ -106,7 +100,7 @@ function StackedRoutesInner({ location }) {
         path="/schedule/edit/:id"
         element={
           <NarrowNotSupported>
-            <EditSchedule />
+            <WideComponent name="EditSchedule" />
           </NarrowNotSupported>
         }
       />
@@ -114,7 +108,7 @@ function StackedRoutesInner({ location }) {
         path="/schedule/link"
         element={
           <NarrowNotSupported>
-            <LinkSchedule />
+            <WideComponent name="LinkSchedule" />
           </NarrowNotSupported>
         }
       />
@@ -122,7 +116,7 @@ function StackedRoutesInner({ location }) {
         path="/schedule/discover"
         element={
           <NarrowNotSupported>
-            <DiscoverSchedules />
+            <WideComponent name="DiscoverSchedules" />
           </NarrowNotSupported>
         }
       />
@@ -141,7 +135,7 @@ function StackedRoutesInner({ location }) {
         path="/nordigen/link"
         element={
           <NarrowNotSupported>
-            <GoCardlessLink />
+            <WideComponent name="GoCardlessLink" />
           </NarrowNotSupported>
         }
       />
@@ -149,20 +143,17 @@ function StackedRoutesInner({ location }) {
         path="/gocardless/link"
         element={
           <NarrowNotSupported>
-            <GoCardlessLink />
+            <WideComponent name="GoCardlessLink" />
           </NarrowNotSupported>
         }
       />
 
       <Route
         path="/accounts/:id"
-        element={isNarrowWidth ? <MobileAccount /> : <Account />}
+        element={<NarrowAlternate name="Account" />}
       />
 
-      <Route
-        path="/accounts"
-        element={isNarrowWidth ? <MobileAccounts /> : <Account />}
-      />
+      <Route path="/accounts" element={<NarrowAlternate name="Accounts" />} />
     </Routes>
   );
 }
@@ -230,6 +221,8 @@ function RouterBehaviors({ getAccounts }) {
   useEffect(() => {
     undo.setUndoState('url', href);
   }, [href]);
+
+  return null;
 }
 
 function FinancesApp(props) {
