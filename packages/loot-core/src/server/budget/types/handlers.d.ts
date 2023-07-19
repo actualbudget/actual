@@ -44,4 +44,12 @@ export interface BudgetHandlers {
   'budget/transfer-category': (...args: unknown[]) => Promise<unknown>;
 
   'budget/set-carryover': (...args: unknown[]) => Promise<unknown>;
+
+  'budget/apply-single-category-template': (
+    ...args: unknown[]
+  ) => Promise<unknown>;
+
+  'budget/set-n-month-avg': (...args: unknown[]) => Promise<unknown>;
+
+  'budget/copy-single-previous-month': (...args: unknown[]) => Promise<unknown>;
 }
