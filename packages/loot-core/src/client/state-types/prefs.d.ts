@@ -45,9 +45,11 @@ export type LocalPrefs = NullableValues<
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 
+export type Theme = 'light' | 'dark' | 'development';
 export type GlobalPrefs = NullableValues<{
   floatingSidebar: boolean;
   maxMonths: number;
+  theme: Theme;
   documentDir: string; // Electron only
 }>;
 
