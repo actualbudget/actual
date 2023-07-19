@@ -81,7 +81,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
             <>Create rule</>
           )}
         </Text>
-        <ArrowThinRight style={{ width: 8, height: 8, color: colors.g1 }} />
+        <ArrowThinRight style={{ width: 8, height: 8 }} />
       </CellButton>
     </Cell>
   );

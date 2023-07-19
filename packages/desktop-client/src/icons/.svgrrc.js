@@ -4,11 +4,11 @@ module.exports = {
       {
         name: 'preset-default',
         params: {
-          overrides: { removeUnknownsAndDefaults: false }
-        }
+          overrides: { removeUnknownsAndDefaults: false },
+        },
       },
-      'removeDimensions'
-    ]
+      'removeDimensions',
+    ],
   },
   jsx: {
     babelConfig: {
@@ -23,10 +23,10 @@ module.exports = {
                 value: 'currentColor',
                 spread: false,
                 literal: false,
-                position: 'end'
-              }
-            ]
-          }
+                position: 'end',
+              },
+            ],
+          },
         ],
         [
           '@svgr/babel-plugin-add-jsx-attribute',
@@ -35,16 +35,16 @@ module.exports = {
             attributes: [
               {
                 name: 'style',
-                value: '({ color: "#242134", ...props.style })',
+                value: '({ color: "inherit", ...props.style })',
                 spread: false,
                 literal: true,
-                position: 'end'
-              }
-            ]
+                position: 'end',
+              },
+            ],
           },
-          'add-style'
-        ]
-      ]
-    }
-  }
+          'add-style',
+        ],
+      ],
+    },
+  },
 };

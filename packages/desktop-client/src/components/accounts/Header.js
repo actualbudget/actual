@@ -215,7 +215,7 @@ export function AccountHeader({
                       (account && accountsSyncing === account.name) ||
                       accountsSyncing === '__all'
                     }
-                    style={{ color: 'currentColor', marginRight: 4 }}
+                    style={{ marginRight: 4 }}
                   />{' '}
                   Sync
                 </>
@@ -224,7 +224,7 @@ export function AccountHeader({
                   <DownloadThickBottom
                     width={13}
                     height={13}
-                    style={{ color: 'currentColor', marginRight: 4 }}
+                    style={{ marginRight: 4 }}
                   />{' '}
                   Import
                 </>
@@ -233,12 +233,7 @@ export function AccountHeader({
           )}
           {!showEmptyMessage && (
             <Button bare onClick={onAddTransaction}>
-              <Add
-                width={10}
-                height={10}
-                style={{ color: 'inherit', marginRight: 3 }}
-              />{' '}
-              Add New
+              <Add width={10} height={10} style={{ marginRight: 3 }} /> Add New
             </Button>
           )}
           <View>
@@ -265,13 +260,7 @@ export function AccountHeader({
                   onClick={() => onSearch('')}
                   title="Clear search term"
                 >
-                  <SvgRemove
-                    style={{
-                      width: 8,
-                      height: 8,
-                      color: 'inherit',
-                    }}
-                  />
+                  <SvgRemove style={{ width: 8, height: 8 }} />
                 </Button>
               )
             }
@@ -325,21 +314,9 @@ export function AccountHeader({
             }
           >
             {splitsExpanded.state.mode === 'collapse' ? (
-              <ArrowsShrink3
-                style={{
-                  width: 14,
-                  height: 14,
-                  color: 'inherit',
-                }}
-              />
+              <ArrowsShrink3 style={{ width: 14, height: 14 }} />
             ) : (
-              <ArrowsExpand3
-                style={{
-                  width: 14,
-                  height: 14,
-                  color: 'inherit',
-                }}
-              />
+              <ArrowsExpand3 style={{ width: 14, height: 14 }} />
             )}
           </Button>
           {account ? (
