@@ -42,6 +42,7 @@ import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import useSheetValue from './spreadsheet/useSheetValue';
+import { ThemeSelector } from './ThemeSelector';
 
 export let TitlebarContext = createContext();
 
@@ -372,6 +373,10 @@ function Titlebar({
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
+      <ThemeSelector
+        globalPrefs={globalPrefs}
+        saveGlobalPrefs={saveGlobalPrefs}
+      />
       {privacyModeFeatureFlag && (
         <PrivacyButton
           localPrefs={localPrefs}
