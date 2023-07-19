@@ -2,6 +2,10 @@ import React, { Component } from 'react';
 
 export const withThemeColor = color => WrappedComponent => {
   class WithThemeColor extends Component {
+    static displayName = `withThemeColor(${
+      WrappedComponent.displayName || WrappedComponent.name
+    })`;
+
     componentDidMount() {
       setThemeColor(color);
     }
