@@ -8,7 +8,7 @@ import { useResponsive } from '../ResponsiveProvider';
 
 import { Button, View } from './common';
 
-export default function ThemeSelector() {
+export function ThemeSelector() {
   let theme = useSelector(state => state.prefs?.global.theme ?? 'light');
   let { saveGlobalPrefs } = useActions();
 
