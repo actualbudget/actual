@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { themeNames } from '../../theme';
+import { themeNames } from '../../style';
 import { View, Select, Text } from '../common';
 
 import { Setting } from './UI';

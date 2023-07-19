@@ -1,9 +1,9 @@
 import type { Theme } from 'loot-core/src/client/state-types/prefs';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
-import * as darkTheme from './dark';
-import * as developmentTheme from './development';
-import * as lightTheme from './light';
+import * as darkTheme from './themes/dark';
+import * as developmentTheme from './themes/development';
+import * as lightTheme from './themes/light';
 
 const themes = {
   light: lightTheme,
