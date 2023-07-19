@@ -63,6 +63,7 @@
     "watch": "cross-env BROWSER=none yarn start",
     "build": "cross-env INLINE_RUNTIME_CHUNK=false react-app-rewired build",
     "build:browser": "cross-env ./bin/build-browser",
+    "generate:icons": "rm src/icons/*/*.js; cd src/icons && svgr --expand-props start --ext js -d . .",
     "test": "react-app-rewired test",
     "e2e": "npx playwright test --browser=chromium"
   },
