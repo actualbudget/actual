@@ -1,7 +1,6 @@
 import React, {
   type ComponentProps,
   type ComponentType,
-  memo,
   type ReactNode,
   useState,
   type SVGProps,
@@ -12,6 +11,7 @@ import { css, type CSSProperties } from 'glamor';
 import { reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
@@ -294,15 +294,15 @@ function Saved({ projected, style }: SavedProps) {
 type BudgetSummaryProps = {
   month?: string;
 };
-export const BudgetSummary = memo(function BudgetSummary({
-  month,
-}: BudgetSummaryProps) {
+export function BudgetSummary({ month }: BudgetSummaryProps) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
     onBudgetAction,
     onToggleSummaryCollapse,
   } = useReport();
+
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   let [menuOpen, setMenuOpen] = useState(false);
   function onMenuOpen() {
@@ -425,6 +425,18 @@ export const BudgetSummary = memo(function BudgetSummary({
                         name: 'set-3-avg',
                         text: 'Set budgets to 3 month avg',
                       },
+                      isGoalTemplatesEnabled && {
+                        name: 'check-templates',
+                        text: 'Check templates',
+                      },
+                      isGoalTemplatesEnabled && {
+                        name: 'apply-goal-template',
+                        text: 'Apply budget template',
+                      },
+                      isGoalTemplatesEnabled && {
+                        name: 'overwrite-goal-template',
+                        text: 'Overwrite with budget template',
+                      },
                     ]}
                   />
                 </Tooltip>
@@ -470,4 +482,4 @@ export const BudgetSummary = memo(function BudgetSummary({
       </NamespaceContext.Provider>
     </View>
   );
-});
+}
