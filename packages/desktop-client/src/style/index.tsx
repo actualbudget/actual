@@ -2,7 +2,7 @@ import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
-import tokens from './tokens';
+import tokens from '../tokens';
 
 export const colors = {
   y1: '#733309',
