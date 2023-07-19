@@ -176,7 +176,7 @@ export const styles = {
       '0%': { opacity: 0 },
       '100%': { opacity: 1 },
     }),
-    animationDuration: '0.2s',
+    animationDuration: '1s',
     animationFillMode: 'both',
     animationDelay: '0.5s',
   },

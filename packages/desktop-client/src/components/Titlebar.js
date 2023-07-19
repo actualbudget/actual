@@ -277,10 +277,7 @@ function Titlebar({
   saveGlobalPrefs,
   savePrefs,
   localPrefs,
-  userData,
   floatingSidebar,
-  syncError,
-  setAppState,
   style,
   sync,
 }) {
