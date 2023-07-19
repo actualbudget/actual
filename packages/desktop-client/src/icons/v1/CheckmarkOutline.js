@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCheckmarkOutline = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCheckmarkOutline = props => (
     />
   </svg>
 );
-
 export default SvgCheckmarkOutline;

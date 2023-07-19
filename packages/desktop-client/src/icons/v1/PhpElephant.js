@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPhpElephant = props => (
   <svg
     {...props}
@@ -17,5 +16,4 @@ const SvgPhpElephant = props => (
     />
   </svg>
 );
-
 export default SvgPhpElephant;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBookmarkCopy3 = props => (
   <svg
     {...props}
@@ -13,5 +12,4 @@ const SvgBookmarkCopy3 = props => (
     <path d="M3.5 13H12v5l6-6-6-6v5H4V2H2v11z" fill="currentColor" />
   </svg>
 );
-
 export default SvgBookmarkCopy3;

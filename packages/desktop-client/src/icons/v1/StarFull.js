@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgStarFull = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgStarFull = props => (
     />
   </svg>
 );
-
 export default SvgStarFull;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgRefresh = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgRefresh = props => (
     />
   </svg>
 );
-
 export default SvgRefresh;

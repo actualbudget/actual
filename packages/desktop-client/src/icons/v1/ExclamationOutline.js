@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgExclamationOutline = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgExclamationOutline = props => (
     />
   </svg>
 );
-
 export default SvgExclamationOutline;

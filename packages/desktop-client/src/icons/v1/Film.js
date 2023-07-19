@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgFilm = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgFilm = props => (
     />
   </svg>
 );
-
 export default SvgFilm;

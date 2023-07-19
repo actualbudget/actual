@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgScreenFull = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgScreenFull = props => (
     />
   </svg>
 );
-
 export default SvgScreenFull;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgMoodSadOutline = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgMoodSadOutline = props => (
     />
   </svg>
 );
-
 export default SvgMoodSadOutline;

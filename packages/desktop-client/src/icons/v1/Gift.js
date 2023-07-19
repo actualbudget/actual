@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgGift = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgGift = props => (
     />
   </svg>
 );
-
 export default SvgGift;

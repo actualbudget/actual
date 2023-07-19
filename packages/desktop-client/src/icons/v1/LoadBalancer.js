@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgLoadBalancer = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgLoadBalancer = props => (
     />
   </svg>
 );
-
 export default SvgLoadBalancer;

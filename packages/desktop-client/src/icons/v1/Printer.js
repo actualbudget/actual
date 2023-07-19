@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPrinter = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgPrinter = props => (
     />
   </svg>
 );
-
 export default SvgPrinter;

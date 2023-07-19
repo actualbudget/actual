@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgSearchAlternate = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgSearchAlternate = props => (
     />
   </svg>
 );
-
 export default SvgSearchAlternate;

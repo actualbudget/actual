@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgTravelCase = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgTravelCase = props => (
     />
   </svg>
 );
-
 export default SvgTravelCase;

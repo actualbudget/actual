@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgKeyboard = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgKeyboard = props => (
     />
   </svg>
 );
-
 export default SvgKeyboard;

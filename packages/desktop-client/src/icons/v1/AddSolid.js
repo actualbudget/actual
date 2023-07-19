@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgAddSolid = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgAddSolid = props => (
     />
   </svg>
 );
-
 export default SvgAddSolid;

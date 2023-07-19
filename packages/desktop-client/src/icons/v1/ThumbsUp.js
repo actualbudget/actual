@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgThumbsUp = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgThumbsUp = props => (
     />
   </svg>
 );
-
 export default SvgThumbsUp;

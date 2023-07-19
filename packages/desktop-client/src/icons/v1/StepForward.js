@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgStepForward = props => (
   <svg
     {...props}
@@ -13,5 +12,4 @@ const SvgStepForward = props => (
     <path d="M13 5h3v10h-3V5zM4 5l9 5-9 5V5z" fill="currentColor" />
   </svg>
 );
-
 export default SvgStepForward;

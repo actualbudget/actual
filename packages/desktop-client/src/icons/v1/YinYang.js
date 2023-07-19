@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgYinYang = props => (
   <svg
     {...props}
@@ -17,5 +16,4 @@ const SvgYinYang = props => (
     />
   </svg>
 );
-
 export default SvgYinYang;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgRemoveAlternate = props => (
   <svg
     {...props}
@@ -20,5 +19,4 @@ const SvgRemoveAlternate = props => (
     />
   </svg>
 );
-
 export default SvgRemoveAlternate;

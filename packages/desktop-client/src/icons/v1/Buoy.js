@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBuoy = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBuoy = props => (
     />
   </svg>
 );
-
 export default SvgBuoy;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgVolumeUp = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgVolumeUp = props => (
     />
   </svg>
 );
-
 export default SvgVolumeUp;

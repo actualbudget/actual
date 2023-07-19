@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgUsb = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgUsb = props => (
     />
   </svg>
 );
-
 export default SvgUsb;

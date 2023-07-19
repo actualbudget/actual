@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgFolderOutline = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgFolderOutline = props => (
     />
   </svg>
 );
-
 export default SvgFolderOutline;

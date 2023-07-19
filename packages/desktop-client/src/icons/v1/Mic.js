@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgMic = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgMic = props => (
     />
   </svg>
 );
-
 export default SvgMic;

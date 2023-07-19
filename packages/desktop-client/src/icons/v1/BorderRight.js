@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBorderRight = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBorderRight = props => (
     />
   </svg>
 );
-
 export default SvgBorderRight;

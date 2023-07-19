@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgArrowButtonRight1 = props => (
   <svg
     {...props}
@@ -20,5 +19,4 @@ const SvgArrowButtonRight1 = props => (
     />
   </svg>
 );
-
 export default SvgArrowButtonRight1;

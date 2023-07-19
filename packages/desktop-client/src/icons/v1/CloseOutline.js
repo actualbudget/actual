@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCloseOutline = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCloseOutline = props => (
     />
   </svg>
 );
-
 export default SvgCloseOutline;

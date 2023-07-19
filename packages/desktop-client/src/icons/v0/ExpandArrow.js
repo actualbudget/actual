@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgExpandArrow = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgExpandArrow = props => (
     />
   </svg>
 );
-
 export default SvgExpandArrow;

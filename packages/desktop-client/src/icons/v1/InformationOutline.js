@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgInformationOutline = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgInformationOutline = props => (
     />
   </svg>
 );
-
 export default SvgInformationOutline;

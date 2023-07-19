@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgRadar = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgRadar = props => (
     />
   </svg>
 );
-
 export default SvgRadar;

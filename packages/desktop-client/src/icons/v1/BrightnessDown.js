@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBrightnessDown = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBrightnessDown = props => (
     />
   </svg>
 );
-
 export default SvgBrightnessDown;

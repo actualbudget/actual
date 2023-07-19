@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgDateAdd = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgDateAdd = props => (
     />
   </svg>
 );
-
 export default SvgDateAdd;

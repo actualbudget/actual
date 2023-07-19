@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgAtSymbol = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgAtSymbol = props => (
     />
   </svg>
 );
-
 export default SvgAtSymbol;

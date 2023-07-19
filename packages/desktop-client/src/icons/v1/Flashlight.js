@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgFlashlight = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgFlashlight = props => (
     />
   </svg>
 );
-
 export default SvgFlashlight;

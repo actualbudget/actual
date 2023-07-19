@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgRadio = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgRadio = props => (
     />
   </svg>
 );
-
 export default SvgRadio;

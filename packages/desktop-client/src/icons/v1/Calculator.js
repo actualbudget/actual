@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCalculator = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCalculator = props => (
     />
   </svg>
 );
-
 export default SvgCalculator;

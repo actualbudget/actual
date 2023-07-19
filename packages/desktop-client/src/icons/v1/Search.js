@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgSearch = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgSearch = props => (
     />
   </svg>
 );
-
 export default SvgSearch;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgSaveDisk = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgSaveDisk = props => (
     />
   </svg>
 );
-
 export default SvgSaveDisk;

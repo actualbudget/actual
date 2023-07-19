@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgUserSolidSquare = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgUserSolidSquare = props => (
     />
   </svg>
 );
-
 export default SvgUserSolidSquare;

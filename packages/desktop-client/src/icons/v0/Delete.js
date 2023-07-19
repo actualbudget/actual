@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgDelete = props => (
   <svg
     {...props}
@@ -13,12 +12,11 @@ const SvgDelete = props => (
     <path
       fill="none"
       stroke="currentColor"
-      strokeWidth={4}
+      d="m2 2 20 20M22 2 2 22"
       strokeLinecap="round"
       strokeMiterlimit={10}
-      d="m2 2 20 20M22 2 2 22"
+      strokeWidth={4}
     />
   </svg>
 );
-
 export default SvgDelete;

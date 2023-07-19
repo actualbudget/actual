@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBackspace = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBackspace = props => (
     />
   </svg>
 );
-
 export default SvgBackspace;

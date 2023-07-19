@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgLocationCurrent = props => (
   <svg
     {...props}
@@ -13,5 +12,4 @@ const SvgLocationCurrent = props => (
     <path d="m0 0 20 8-8 4-2 8z" fill="currentColor" />
   </svg>
 );
-
 export default SvgLocationCurrent;

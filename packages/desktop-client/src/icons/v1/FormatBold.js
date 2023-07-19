@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgFormatBold = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgFormatBold = props => (
     />
   </svg>
 );
-
 export default SvgFormatBold;

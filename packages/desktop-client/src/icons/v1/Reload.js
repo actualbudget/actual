@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgReload = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgReload = props => (
     />
   </svg>
 );
-
 export default SvgReload;

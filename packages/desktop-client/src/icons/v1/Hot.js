@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgHot = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgHot = props => (
     />
   </svg>
 );
-
 export default SvgHot;

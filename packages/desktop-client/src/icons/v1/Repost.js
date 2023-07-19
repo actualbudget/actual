@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgRepost = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgRepost = props => (
     />
   </svg>
 );
-
 export default SvgRepost;

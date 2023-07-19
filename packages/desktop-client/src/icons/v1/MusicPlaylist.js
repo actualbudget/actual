@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgMusicPlaylist = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgMusicPlaylist = props => (
     />
   </svg>
 );
-
 export default SvgMusicPlaylist;

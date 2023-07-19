@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgInboxDownload = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgInboxDownload = props => (
     />
   </svg>
 );
-
 export default SvgInboxDownload;

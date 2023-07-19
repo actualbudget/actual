@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPauseSolid = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgPauseSolid = props => (
     />
   </svg>
 );
-
 export default SvgPauseSolid;

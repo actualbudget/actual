@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPencilWrite = props => (
   <svg
     {...props}
@@ -20,5 +19,4 @@ const SvgPencilWrite = props => (
     />
   </svg>
 );
-
 export default SvgPencilWrite;

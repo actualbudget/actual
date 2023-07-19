@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgFormatFontSize = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgFormatFontSize = props => (
     />
   </svg>
 );
-
 export default SvgFormatFontSize;

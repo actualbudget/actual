@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgTextDecoration = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgTextDecoration = props => (
     />
   </svg>
 );
-
 export default SvgTextDecoration;

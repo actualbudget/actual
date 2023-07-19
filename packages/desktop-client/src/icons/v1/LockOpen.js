@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgLockOpen = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgLockOpen = props => (
     />
   </svg>
 );
-
 export default SvgLockOpen;

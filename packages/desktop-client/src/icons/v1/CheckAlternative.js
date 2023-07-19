@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCheckAlternative = props => (
   <svg
     {...props}
@@ -20,5 +19,4 @@ const SvgCheckAlternative = props => (
     />
   </svg>
 );
-
 export default SvgCheckAlternative;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgTrophy = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgTrophy = props => (
     />
   </svg>
 );
-
 export default SvgTrophy;

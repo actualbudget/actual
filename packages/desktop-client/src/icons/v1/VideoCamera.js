@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgVideoCamera = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgVideoCamera = props => (
     />
   </svg>
 );
-
 export default SvgVideoCamera;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCalendar = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCalendar = props => (
     />
   </svg>
 );
-
 export default SvgCalendar;

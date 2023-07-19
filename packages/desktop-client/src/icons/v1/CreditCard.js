@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCreditCard = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCreditCard = props => (
     />
   </svg>
 );
-
 export default SvgCreditCard;

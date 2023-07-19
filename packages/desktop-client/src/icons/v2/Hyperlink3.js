@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgHyperlink3 = props => (
   <svg
     {...props}
@@ -20,5 +19,4 @@ const SvgHyperlink3 = props => (
     />
   </svg>
 );
-
 export default SvgHyperlink3;

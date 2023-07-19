@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgShuffle = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgShuffle = props => (
     />
   </svg>
 );
-
 export default SvgShuffle;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBatteryLow = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBatteryLow = props => (
     />
   </svg>
 );
-
 export default SvgBatteryLow;

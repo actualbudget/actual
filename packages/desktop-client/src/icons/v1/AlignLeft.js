@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgAlignLeft = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgAlignLeft = props => (
     />
   </svg>
 );
-
 export default SvgAlignLeft;

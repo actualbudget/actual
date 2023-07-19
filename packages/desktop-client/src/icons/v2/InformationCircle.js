@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgInformationCircle = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgInformationCircle = props => (
     />
   </svg>
 );
-
 export default SvgInformationCircle;

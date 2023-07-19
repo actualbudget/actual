@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgListBullet = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgListBullet = props => (
     />
   </svg>
 );
-
 export default SvgListBullet;

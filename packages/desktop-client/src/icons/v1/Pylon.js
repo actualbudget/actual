@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPylon = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgPylon = props => (
     />
   </svg>
 );
-
 export default SvgPylon;

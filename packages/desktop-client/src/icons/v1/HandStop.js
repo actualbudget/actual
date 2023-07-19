@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgHandStop = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgHandStop = props => (
     />
   </svg>
 );
-
 export default SvgHandStop;

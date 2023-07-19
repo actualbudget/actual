@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgViewTile = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgViewTile = props => (
     />
   </svg>
 );
-
 export default SvgViewTile;

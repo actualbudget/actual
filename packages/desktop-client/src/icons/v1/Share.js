@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgShare = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgShare = props => (
     />
   </svg>
 );
-
 export default SvgShare;

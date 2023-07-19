@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPauseOutline = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgPauseOutline = props => (
     />
   </svg>
 );
-
 export default SvgPauseOutline;

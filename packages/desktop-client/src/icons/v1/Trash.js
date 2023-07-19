@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgTrash = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgTrash = props => (
     />
   </svg>
 );
-
 export default SvgTrash;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBookReference = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBookReference = props => (
     />
   </svg>
 );
-
 export default SvgBookReference;

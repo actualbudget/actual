@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgComputerDesktop = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgComputerDesktop = props => (
     />
   </svg>
 );
-
 export default SvgComputerDesktop;

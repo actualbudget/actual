@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgMoodHappySolid = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgMoodHappySolid = props => (
     />
   </svg>
 );
-
 export default SvgMoodHappySolid;

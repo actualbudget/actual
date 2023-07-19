@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCopy = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCopy = props => (
     />
   </svg>
 );
-
 export default SvgCopy;

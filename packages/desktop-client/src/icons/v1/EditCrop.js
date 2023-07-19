@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgEditCrop = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgEditCrop = props => (
     />
   </svg>
 );
-
 export default SvgEditCrop;

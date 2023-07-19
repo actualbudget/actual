@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgShield = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgShield = props => (
     />
   </svg>
 );
-
 export default SvgShield;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgRefreshArrow = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgRefreshArrow = props => (
     />
   </svg>
 );
-
 export default SvgRefreshArrow;

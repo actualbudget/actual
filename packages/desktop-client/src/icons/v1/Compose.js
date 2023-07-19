@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCompose = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCompose = props => (
     />
   </svg>
 );
-
 export default SvgCompose;

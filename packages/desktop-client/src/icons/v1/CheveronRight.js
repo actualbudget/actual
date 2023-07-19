@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCheveronRight = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCheveronRight = props => (
     />
   </svg>
 );
-
 export default SvgCheveronRight;

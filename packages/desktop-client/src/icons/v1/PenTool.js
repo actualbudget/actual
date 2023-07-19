@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPenTool = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgPenTool = props => (
     />
   </svg>
 );
-
 export default SvgPenTool;

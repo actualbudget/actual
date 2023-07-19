@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgHardDrive = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgHardDrive = props => (
     />
   </svg>
 );
-
 export default SvgHardDrive;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgHourGlass = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgHourGlass = props => (
     />
   </svg>
 );
-
 export default SvgHourGlass;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgDotsHorizontalDouble = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgDotsHorizontalDouble = props => (
     />
   </svg>
 );
-
 export default SvgDotsHorizontalDouble;

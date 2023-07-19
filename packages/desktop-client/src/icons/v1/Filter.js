@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgFilter = props => (
   <svg
     {...props}
@@ -13,5 +12,4 @@ const SvgFilter = props => (
     <path d="m12 12 8-8V0H0v4l8 8v8l4-4v-4z" fill="currentColor" />
   </svg>
 );
-
 export default SvgFilter;

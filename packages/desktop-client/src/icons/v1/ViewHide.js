@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgViewHide = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgViewHide = props => (
     />
   </svg>
 );
-
 export default SvgViewHide;

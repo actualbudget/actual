@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgKey = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgKey = props => (
     />
   </svg>
 );
-
 export default SvgKey;

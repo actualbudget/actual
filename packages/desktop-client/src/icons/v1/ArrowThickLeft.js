@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgArrowThickLeft = props => (
   <svg
     {...props}
@@ -13,5 +12,4 @@ const SvgArrowThickLeft = props => (
     <path d="M10 13h8V7h-8V2l-8 8 8 8v-5z" fill="currentColor" />
   </svg>
 );
-
 export default SvgArrowThickLeft;

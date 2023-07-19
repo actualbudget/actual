@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgChartBar = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgChartBar = props => (
     />
   </svg>
 );
-
 export default SvgChartBar;

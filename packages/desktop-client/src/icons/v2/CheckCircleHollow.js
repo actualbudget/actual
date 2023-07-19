@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCheckCircleHollow = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCheckCircleHollow = props => (
     />
   </svg>
 );
-
 export default SvgCheckCircleHollow;

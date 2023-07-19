@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgNavigationMore = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgNavigationMore = props => (
     />
   </svg>
 );
-
 export default SvgNavigationMore;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgQueue = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgQueue = props => (
     />
   </svg>
 );
-
 export default SvgQueue;

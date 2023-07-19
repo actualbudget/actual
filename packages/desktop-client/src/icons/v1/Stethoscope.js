@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgStethoscope = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgStethoscope = props => (
     />
   </svg>
 );
-
 export default SvgStethoscope;

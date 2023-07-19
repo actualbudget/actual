@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgFormatItalic = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgFormatItalic = props => (
     />
   </svg>
 );
-
 export default SvgFormatItalic;

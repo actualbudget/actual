@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgMouse = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgMouse = props => (
     />
   </svg>
 );
-
 export default SvgMouse;

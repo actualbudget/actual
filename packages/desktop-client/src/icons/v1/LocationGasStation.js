@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgLocationGasStation = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgLocationGasStation = props => (
     />
   </svg>
 );
-
 export default SvgLocationGasStation;

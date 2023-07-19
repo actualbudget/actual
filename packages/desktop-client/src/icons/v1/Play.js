@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPlay = props => (
   <svg
     {...props}
@@ -13,5 +12,4 @@ const SvgPlay = props => (
     <path d="m4 4 12 6-12 6z" fill="currentColor" />
   </svg>
 );
-
 export default SvgPlay;

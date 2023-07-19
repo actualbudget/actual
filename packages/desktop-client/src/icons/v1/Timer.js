@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgTimer = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgTimer = props => (
     />
   </svg>
 );
-
 export default SvgTimer;

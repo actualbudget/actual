@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgTranslate = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgTranslate = props => (
     />
   </svg>
 );
-
 export default SvgTranslate;

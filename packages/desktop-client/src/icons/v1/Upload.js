@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgUpload = props => (
   <svg
     {...props}
@@ -13,5 +12,4 @@ const SvgUpload = props => (
     <path d="M13 10v6H7v-6H2l8-8 8 8h-5zM0 18h20v2H0v-2z" fill="currentColor" />
   </svg>
 );
-
 export default SvgUpload;

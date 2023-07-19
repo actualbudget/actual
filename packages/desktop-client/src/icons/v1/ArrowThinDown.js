@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgArrowThinDown = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgArrowThinDown = props => (
     />
   </svg>
 );
-
 export default SvgArrowThinDown;

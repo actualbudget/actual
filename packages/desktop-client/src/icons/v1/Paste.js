@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPaste = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgPaste = props => (
     />
   </svg>
 );
-
 export default SvgPaste;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgColorPalette = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgColorPalette = props => (
     />
   </svg>
 );
-
 export default SvgColorPalette;

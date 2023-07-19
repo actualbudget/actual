@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgDialPad = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgDialPad = props => (
     />
   </svg>
 );
-
 export default SvgDialPad;

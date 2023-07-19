@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCloudUnknown = props => (
   <svg
     {...props}
@@ -20,5 +19,4 @@ const SvgCloudUnknown = props => (
     />
   </svg>
 );
-
 export default SvgCloudUnknown;

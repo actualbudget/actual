@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgChartPie = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgChartPie = props => (
     />
   </svg>
 );
-
 export default SvgChartPie;

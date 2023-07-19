@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgTicket = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgTicket = props => (
     />
   </svg>
 );
-
 export default SvgTicket;

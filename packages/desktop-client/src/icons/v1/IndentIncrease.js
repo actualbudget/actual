@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgIndentIncrease = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgIndentIncrease = props => (
     />
   </svg>
 );
-
 export default SvgIndentIncrease;

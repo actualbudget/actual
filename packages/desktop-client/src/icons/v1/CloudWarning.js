@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCloudWarning = props => (
   <svg
     {...props}
@@ -20,5 +19,4 @@ const SvgCloudWarning = props => (
     />
   </svg>
 );
-
 export default SvgCloudWarning;

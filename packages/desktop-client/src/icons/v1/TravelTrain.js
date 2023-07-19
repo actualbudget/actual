@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgTravelTrain = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgTravelTrain = props => (
     />
   </svg>
 );
-
 export default SvgTravelTrain;

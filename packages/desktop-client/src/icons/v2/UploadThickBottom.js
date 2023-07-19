@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgUploadThickBottom = props => (
   <svg
     {...props}
@@ -20,5 +19,4 @@ const SvgUploadThickBottom = props => (
     />
   </svg>
 );
-
 export default SvgUploadThickBottom;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgStandBy = props => (
   <svg
     {...props}
@@ -17,5 +16,4 @@ const SvgStandBy = props => (
     />
   </svg>
 );
-
 export default SvgStandBy;

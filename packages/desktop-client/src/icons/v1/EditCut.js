@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgEditCut = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgEditCut = props => (
     />
   </svg>
 );
-
 export default SvgEditCut;

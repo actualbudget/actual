@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgToolsCopy = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgToolsCopy = props => (
     />
   </svg>
 );
-
 export default SvgToolsCopy;

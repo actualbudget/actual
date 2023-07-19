@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBadge = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBadge = props => (
     />
   </svg>
 );
-
 export default SvgBadge;

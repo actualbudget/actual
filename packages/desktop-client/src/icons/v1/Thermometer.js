@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgThermometer = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgThermometer = props => (
     />
   </svg>
 );
-
 export default SvgThermometer;

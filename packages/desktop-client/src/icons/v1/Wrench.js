@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgWrench = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgWrench = props => (
     />
   </svg>
 );
-
 export default SvgWrench;

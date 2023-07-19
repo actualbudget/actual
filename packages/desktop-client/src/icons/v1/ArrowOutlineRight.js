@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgArrowOutlineRight = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgArrowOutlineRight = props => (
     />
   </svg>
 );
-
 export default SvgArrowOutlineRight;

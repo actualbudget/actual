@@ -1,10 +1,9 @@
 import * as React from 'react';
-
 const SvgReports = props => (
   <svg
     {...props}
-    viewBox="0 0 20 20"
     xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 20 20"
     style={{
       color: '#242134',
       ...props.style,
@@ -16,5 +15,4 @@ const SvgReports = props => (
     />
   </svg>
 );
-
 export default SvgReports;

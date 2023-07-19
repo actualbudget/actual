@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgExclamationSolid = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgExclamationSolid = props => (
     />
   </svg>
 );
-
 export default SvgExclamationSolid;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgMoveBack = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgMoveBack = props => (
     />
   </svg>
 );
-
 export default SvgMoveBack;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgStoreFront = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgStoreFront = props => (
     />
   </svg>
 );
-
 export default SvgStoreFront;

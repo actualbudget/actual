@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgRadarCopy2 = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgRadarCopy2 = props => (
     />
   </svg>
 );
-
 export default SvgRadarCopy2;

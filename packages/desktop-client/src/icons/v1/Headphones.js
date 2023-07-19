@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgHeadphones = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgHeadphones = props => (
     />
   </svg>
 );
-
 export default SvgHeadphones;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgStrokeWidth = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgStrokeWidth = props => (
     />
   </svg>
 );
-
 export default SvgStrokeWidth;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgTuning = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgTuning = props => (
     />
   </svg>
 );
-
 export default SvgTuning;

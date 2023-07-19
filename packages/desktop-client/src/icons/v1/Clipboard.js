@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgClipboard = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgClipboard = props => (
     />
   </svg>
 );
-
 export default SvgClipboard;

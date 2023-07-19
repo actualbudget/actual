@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBookmark = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBookmark = props => (
     />
   </svg>
 );
-
 export default SvgBookmark;

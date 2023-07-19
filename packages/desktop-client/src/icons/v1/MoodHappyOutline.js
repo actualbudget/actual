@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgMoodHappyOutline = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgMoodHappyOutline = props => (
     />
   </svg>
 );
-
 export default SvgMoodHappyOutline;

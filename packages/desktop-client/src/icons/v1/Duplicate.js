@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgDuplicate = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgDuplicate = props => (
     />
   </svg>
 );
-
 export default SvgDuplicate;

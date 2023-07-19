@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgPlayOutline = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgPlayOutline = props => (
     />
   </svg>
 );
-
 export default SvgPlayOutline;

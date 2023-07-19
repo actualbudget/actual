@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgZoomIn = props => (
   <svg
     {...props}
@@ -17,5 +16,4 @@ const SvgZoomIn = props => (
     />
   </svg>
 );
-
 export default SvgZoomIn;

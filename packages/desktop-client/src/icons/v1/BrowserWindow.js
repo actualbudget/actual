@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBrowserWindow = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBrowserWindow = props => (
     />
   </svg>
 );
-
 export default SvgBrowserWindow;

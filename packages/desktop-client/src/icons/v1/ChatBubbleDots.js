@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgChatBubbleDots = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgChatBubbleDots = props => (
     />
   </svg>
 );
-
 export default SvgChatBubbleDots;

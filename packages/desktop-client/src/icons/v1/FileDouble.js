@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgFileDouble = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgFileDouble = props => (
     />
   </svg>
 );
-
 export default SvgFileDouble;

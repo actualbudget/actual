@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgCurrencyDollar = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgCurrencyDollar = props => (
     />
   </svg>
 );
-
 export default SvgCurrencyDollar;

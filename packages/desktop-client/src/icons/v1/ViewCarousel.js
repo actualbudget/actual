@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgViewCarousel = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgViewCarousel = props => (
     />
   </svg>
 );
-
 export default SvgViewCarousel;

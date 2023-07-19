@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgInformationSolid = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgInformationSolid = props => (
     />
   </svg>
 );
-
 export default SvgInformationSolid;

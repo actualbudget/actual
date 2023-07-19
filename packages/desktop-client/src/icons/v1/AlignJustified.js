@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgAlignJustified = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgAlignJustified = props => (
     />
   </svg>
 );
-
 export default SvgAlignJustified;

@@ -1,5 +1,4 @@
 import * as React from 'react';
-
 const SvgBox = props => (
   <svg
     {...props}
@@ -16,5 +15,4 @@ const SvgBox = props => (
     />
   </svg>
 );
-
 export default SvgBox;
