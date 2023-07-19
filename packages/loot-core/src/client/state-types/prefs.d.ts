@@ -4,7 +4,8 @@ import type * as constants from '../constants';
 export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'privacyMode';
+  | 'privacyMode'
+  | 'themes';
 
 type NullableValues<T> = { [K in keyof T]: T[K] | null };
 

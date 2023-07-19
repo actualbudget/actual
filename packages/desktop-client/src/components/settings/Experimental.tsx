@@ -14,12 +14,14 @@ import { Setting } from './UI';
 type FeatureToggleProps = {
   flag: FeatureFlag;
   disableToggle?: boolean;
+  error?: ReactNode;
   children: ReactNode;
 };
 
 function FeatureToggle({
   flag,
   disableToggle = false,
+  error,
   children,
 }: FeatureToggleProps) {
   let { savePrefs } = useActions();
@@ -36,7 +38,12 @@ function FeatureToggle({
         }}
         disabled={disableToggle}
       />
-      {children}
+      <View style={{ color: disableToggle ? colors.n5 : 'inherit' }}>
+        {children}
+        {disableToggle && (
+          <Text style={{ color: colors.r3, fontWeight: 500 }}>{error}</Text>
+        )}
+      </View>
     </label>
   );
 }
@@ -46,15 +53,27 @@ function ReportBudgetFeature() {
   let enabled = useFeatureFlag('reportBudget');
   let blockToggleOff = budgetType === 'report' && enabled;
   return (
-    <FeatureToggle flag="reportBudget" disableToggle={blockToggleOff}>
-      <View style={{ color: blockToggleOff ? colors.n5 : 'inherit' }}>
-        Budget mode toggle
-        {blockToggleOff && (
-          <Text style={{ color: colors.r3, fontWeight: 500 }}>
-            Switch to a rollover budget before turning off this feature
-          </Text>
-        )}
-      </View>
+    <FeatureToggle
+      flag="reportBudget"
+      disableToggle={blockToggleOff}
+      error="Switch to a rollover budget before turning off this feature"
+    >
+      Budget mode toggle
+    </FeatureToggle>
+  );
+}
+
+function ThemeFeature() {
+  let theme = useSelector(state => state.prefs.global?.theme);
+  let enabled = useFeatureFlag('themes');
+  let blockToggleOff = theme !== 'light' && enabled;
+  return (
+    <FeatureToggle
+      flag="themes"
+      disableToggle={blockToggleOff}
+      error="Switch to the light theme before turning off this feature"
+    >
+      Dark mode
     </FeatureToggle>
   );
 }
@@ -74,6 +93,8 @@ export default function ExperimentalFeatures() {
             </FeatureToggle>
 
             <FeatureToggle flag="privacyMode">Privacy mode</FeatureToggle>
+
+            <ThemeFeature />
           </View>
         ) : (
           <LinkButton

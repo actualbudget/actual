@@ -289,6 +289,7 @@ function Titlebar({
   const serverURL = useServerURL();
 
   let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
+  let themesFlag = useFeatureFlag('themes');
   let onTogglePrivacy = enabled => {
     savePrefs({ isPrivacyEnabled: enabled });
   };
@@ -373,7 +374,7 @@ function Titlebar({
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <ThemeSelector />
+      {themesFlag && <ThemeSelector />}
       {privacyModeFeatureFlag && (
         <PrivacyButton
           localPrefs={localPrefs}

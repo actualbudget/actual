@@ -6,6 +6,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   reportBudget: false,
   goalTemplatesEnabled: false,
   privacyMode: false,
+  themes: false,
 };
 
 export default function useFeatureFlag(name: FeatureFlag): boolean {
