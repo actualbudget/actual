@@ -1313,6 +1313,7 @@ function TransactionError({
               style={{ marginLeft: 15, padding: '4px 10px' }}
               primary
               onClick={onAddSplit}
+              data-testid="add-split-button"
             >
               Add Split
             </Button>
