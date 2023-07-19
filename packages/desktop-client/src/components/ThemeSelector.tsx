@@ -9,7 +9,7 @@ import { useResponsive } from '../ResponsiveProvider';
 import { Button, View } from './common';
 
 export function ThemeSelector() {
-  let theme = useSelector(state => state.prefs?.global.theme ?? 'light');
+  let theme = useSelector(state => state.prefs?.global?.theme ?? 'light');
   let { saveGlobalPrefs } = useActions();
 
   let { isNarrowWidth } = useResponsive();
