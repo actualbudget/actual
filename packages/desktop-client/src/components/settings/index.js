@@ -183,7 +183,7 @@ function Settings({
             <ResetCache />
             <ResetSync isEnabled={!!prefs.groupId} resetSync={resetSync} />
             <FixSplitsTool />
-            <ExperimentalFeatures prefs={prefs} savePrefs={savePrefs} />
+            <ExperimentalFeatures />
           </AdvancedToggle>
         </View>
       </Page>
