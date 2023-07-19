@@ -5,15 +5,22 @@ import { colors, styles } from '../../style';
 import { Block, View } from '../common';
 
 type ProplessComponent = ComponentType<Record<string, never>>;
-export function LoadComponent<K extends string>({
-  name,
-  message,
-  importer,
-}: {
+type LoadComponentProps<K extends string> = {
   name: K;
   message?: string;
   importer: () => Promise<{ [key in K]: ProplessComponent }>;
-}) {
+};
+export function LoadComponent<K extends string>(props: LoadComponentProps<K>) {
+  // need to set `key` so the component is reloaded when the name changes
+  // otherwise the old component will be rendered while the new one is being loaded
+  return <LoadComponentInner key={props.name} {...props} />;
+}
+
+function LoadComponentInner<K extends string>({
+  name,
+  message,
+  importer,
+}: LoadComponentProps<K>) {
   let [Component, setComponent] = useState<ProplessComponent | null>(null);
   useEffect(() => {
     importer().then(module => setComponent(() => module[name]));
@@ -39,5 +46,9 @@ export function LoadComponent<K extends string>({
       </View>
     );
   }
+
+  // console.log(
+  //   `rendering <${Component.displayName || Component.name} /> as ${name}`,
+  // );
   return <Component />;
 }
