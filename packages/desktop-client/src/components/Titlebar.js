@@ -373,10 +373,7 @@ function Titlebar({
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <ThemeSelector
-        globalPrefs={globalPrefs}
-        saveGlobalPrefs={saveGlobalPrefs}
-      />
+      <ThemeSelector />
       {privacyModeFeatureFlag && (
         <PrivacyButton
           localPrefs={localPrefs}
