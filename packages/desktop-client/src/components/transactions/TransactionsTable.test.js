@@ -832,7 +832,9 @@ describe('Transactions', () => {
 
     // Add another split transaction and make sure everything is
     // updated properly
-    await userEvent.click(toolbar.querySelector('button'));
+    await userEvent.click(
+      toolbar.querySelector('[data-testid="add-split-button"]'),
+    );
     expect(getTransactions().length).toBe(7);
     expect(getTransactions()[2].amount).toBe(0);
     expectErrorToExist(getTransactions().slice(0, 3));
