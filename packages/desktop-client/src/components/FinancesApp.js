@@ -179,11 +179,7 @@ function NavTab({ icon: TabIcon, name, path }) {
         textDecoration: 'none',
       })}
     >
-      <TabIcon
-        width={22}
-        height={22}
-        style={{ color: 'inherit', marginBottom: '5px' }}
-      />
+      <TabIcon width={22} height={22} style={{ marginBottom: '5px' }} />
       {name}
     </NavLink>
   );

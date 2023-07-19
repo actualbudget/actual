@@ -90,11 +90,7 @@ function PrivacyButton({ localPrefs, onTogglePrivacy }) {
     onTogglePrivacy(!isPrivacyEnabled);
   };
 
-  let privacyIconStyle = {
-    width: 23,
-    height: 23,
-    color: 'inherit',
-  };
+  let privacyIconStyle = { width: 23, height: 23 };
 
   return (
     <Button bare onClick={togglePrivacy}>
@@ -174,7 +170,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
       onClick={onSync}
     >
       {syncState === 'error' ? (
-        <AlertTriangle width={13} style={{ color: 'currentColor' }} />
+        <AlertTriangle width={13} />
       ) : (
         <AnimatedRefresh animating={syncing} />
       )}
