@@ -12,6 +12,7 @@ import {
 import installPolyfills from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
 import { styles, hasHiddenScrollbars } from '../style';
+import { ThemeStyle } from '../theme';
 
 import AppBackground from './AppBackground';
 import DevelopmentTopBar from './DevelopmentTopBar';
@@ -134,6 +135,7 @@ class App extends Component {
             <MobileWebMessage />
           </div>
         </div>
+        <ThemeStyle theme={this.props.theme} />
       </ResponsiveProvider>
     );
   }
@@ -144,6 +146,7 @@ export default connect(
     budgetId: state.prefs.local && state.prefs.local.id,
     cloudFileId: state.prefs.local && state.prefs.local.cloudFileId,
     loadingText: state.app.loadingText,
+    theme: state.prefs.global?.theme || 'light',
   }),
   actions,
 )(App);
