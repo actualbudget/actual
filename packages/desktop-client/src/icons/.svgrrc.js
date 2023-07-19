@@ -35,7 +35,7 @@ module.exports = {
             attributes: [
               {
                 name: 'style',
-                value: '({ color: "#242134", ...props.style })',
+                value: '({ color: "inherit", ...props.style })',
                 spread: false,
                 literal: true,
                 position: 'end',

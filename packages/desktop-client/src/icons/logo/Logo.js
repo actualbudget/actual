@@ -6,7 +6,7 @@ const SvgLogo = props => (
     fill="none"
     viewBox="0 0 30 32"
     style={{
-      color: '#242134',
+      color: 'inherit',
       ...props.style,
     }}
   >
