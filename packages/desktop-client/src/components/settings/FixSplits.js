@@ -81,7 +81,6 @@ export default function FixSplitsTool() {
         does not help, this tool may fix them. Some examples of bugs include
         seeing blank payees on splits or incorrect account balances. This tool
         does two things:
-
       </Text>
       <ul style={{ margin: 0, paddingLeft: '1.5em' }}>
         <li style={{ marginBottom: '0.5em' }}>
