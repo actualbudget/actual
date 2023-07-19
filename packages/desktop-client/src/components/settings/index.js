@@ -7,6 +7,7 @@ import * as actions from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
@@ -26,7 +27,6 @@ import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
 import ThemeSettings from './Themes';
 import { AdvancedToggle, Setting } from './UI';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
 
 function About() {
   const version = useServerVersion();

@@ -18,16 +18,3 @@ export default function useFeatureFlag(name: FeatureFlag): boolean {
       : value;
   });
 }
-
-export function useAllFeatureFlags(): Record<FeatureFlag, boolean> {
-  return useSelector(state => {
-    return {
-      ...DEFAULT_FEATURE_FLAG_STATE,
-      ...Object.fromEntries(
-        Object.entries(state.prefs.local)
-          .filter(([key]) => key.startsWith('flags.'))
-          .map(([key, value]) => [key.replace('flags.', ''), value]),
-      ),
-    };
-  });
-}
