@@ -1,12 +1,11 @@
 import * as React from 'react';
-
 const SvgExpandArrow = props => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 25 15"
     style={{
-      color: '#242134',
+      color: 'inherit',
       ...props.style,
     }}
   >
@@ -16,5 +15,4 @@ const SvgExpandArrow = props => (
     />
   </svg>
 );
-
 export default SvgExpandArrow;

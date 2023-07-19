@@ -70,11 +70,7 @@ function CategoryList({
                 data-testid="split-transaction-button"
               >
                 <Text style={{ lineHeight: 0 }}>
-                  <Split
-                    width={10}
-                    height={10}
-                    style={{ marginRight: 5, color: 'inherit' }}
-                  />
+                  <Split width={10} height={10} style={{ marginRight: 5 }} />
                 </Text>
                 Split Transaction
               </View>

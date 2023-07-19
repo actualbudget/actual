@@ -504,18 +504,10 @@ function HeaderCell({
         >
           <UnexposedCellContent value={value} />
           {icon === 'asc' && (
-            <ArrowDown
-              width={10}
-              height={10}
-              style={{ marginLeft: 5, color: colors.n4 }}
-            />
+            <ArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
           )}
           {icon === 'desc' && (
-            <ArrowUp
-              width={10}
-              height={10}
-              style={{ marginLeft: 5, color: colors.n4 }}
-            />
+            <ArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
           )}
         </Button>
       }
@@ -644,17 +636,9 @@ function PayeeIcons({
     color: 'inherit',
   };
 
-  let scheduleIconStyle = {
-    width: 13,
-    height: 13,
-    color: 'inherit',
-  };
+  let scheduleIconStyle = { width: 13, height: 13 };
 
-  let transferIconStyle = {
-    width: 10,
-    height: 10,
-    color: 'inherit',
-  };
+  let transferIconStyle = { width: 10, height: 10 };
 
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
 
@@ -1097,7 +1081,6 @@ const Transaction = memo(function Transaction(props) {
                   style={{
                     width: 14,
                     height: 14,
-                    color: 'currentColor',
                     transition: 'transform .08s',
                     transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
                   }}

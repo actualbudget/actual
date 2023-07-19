@@ -94,14 +94,7 @@ function AccountSyncCheck({
         }}
         onClick={() => setOpen(true)}
       >
-        <ExclamationOutline
-          style={{
-            width: 14,
-            height: 14,
-            marginRight: 5,
-            color: 'currentColor',
-          }}
-        />{' '}
+        <ExclamationOutline style={{ width: 14, height: 14, marginRight: 5 }} />{' '}
         This account is experiencing connection problems. Let’s fix it.
       </Button>
 
