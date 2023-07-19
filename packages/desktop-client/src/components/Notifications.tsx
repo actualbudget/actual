@@ -4,13 +4,13 @@ import React, {
   useMemo,
   type SetStateAction,
 } from 'react';
-import { connect, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import { bindActionCreators } from 'redux';
+import { type CSSProperties } from 'glamor';
 
-import * as actions from 'loot-core/src/client/actions';
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
+import { useActions } from '../hooks/useActions';
 import Loading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
 import { styles, colors } from '../style';
@@ -220,7 +220,8 @@ function Notification({
   );
 }
 
-function Notifications({ removeNotification, style }) {
+export default function Notifications({ style }: { style?: CSSProperties }) {
+  let { removeNotification } = useActions();
   let notifications = useSelector(state => state.notifications.notifications);
   return (
     <View
@@ -249,7 +250,3 @@ function Notifications({ removeNotification, style }) {
     </View>
   );
 }
-
-export default connect(null, dispatch => bindActionCreators(actions, dispatch))(
-  Notifications,
-);
