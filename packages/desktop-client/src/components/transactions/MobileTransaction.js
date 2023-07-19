@@ -11,6 +11,7 @@ import { useListBox, useListBoxSection, useOption } from '@react-aria/listbox';
 import { mergeProps } from '@react-aria/utils';
 import { Item, Section } from '@react-stately/collections';
 import { useListState } from '@react-stately/list';
+import { css } from 'glamor';
 import memoizeOne from 'memoize-one';
 
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -408,8 +409,7 @@ function ListBoxSection({ section, state }) {
       {section.rendered && (
         <div
           {...headingProps}
-          style={{
-            ...styles.smallText,
+          {...css(styles.smallText, {
             backgroundColor: colors.n10,
             borderBottom: `1px solid ${colors.n9}`,
             borderTop: `1px solid ${colors.n9}`,
@@ -422,7 +422,7 @@ function ListBoxSection({ section, state }) {
             top: '0',
             width: '100%',
             zIndex: zIndices.SECTION_HEADING,
-          }}
+          })}
         >
           {section.rendered}
         </div>
