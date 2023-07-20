@@ -23,11 +23,11 @@ export function ThemeStyle() {
   let theme = useTheme();
   let themeColors = themes[theme];
   let css = Object.keys(themeColors)
-    .map(key => `  --${key}: ${themeColors[key]};`)
+    .map(key => `  --color-${key}: ${themeColors[key]};`)
     .join('\n');
   return <style>{`:root {\n${css}}`}</style>;
 }
 
 export const theme = Object.fromEntries(
-  Object.keys(lightTheme).map(key => [key, `var(--${key})`]),
+  Object.keys(lightTheme).map(key => [key, `var(--color-${key})`]),
 ) as Record<keyof typeof lightTheme, string>;
