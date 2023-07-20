@@ -406,7 +406,7 @@ function CheckboxOption({ id, checked, disabled, onChange, children, style }) {
           flexDirection: 'row',
           alignItems: 'center',
           userSelect: 'none',
-          height: 28,
+          minHeight: 28,
         },
         style,
       ]}
@@ -446,7 +446,7 @@ function MultiplierOption({
         type="text"
         style={{ display: multiplierEnabled ? 'inherit' : 'none' }}
         value={multiplierAmount}
-        placeholder="Optional"
+        placeholder="Multiplier"
         onUpdate={onChangeAmount}
       />
     </View>
@@ -901,11 +901,8 @@ export default function ImportTransactions({ modalProps, options }) {
 
             {/* CSV Options */}
             {filetype === 'csv' && (
-              <View style={{ marginLeft: 25, gap: 10 }}>
-                <SectionLabel
-                  title="CSV OPTIONS"
-                  style={{ marginBottom: -5 }}
-                />
+              <View style={{ marginLeft: 25, gap: 5 }}>
+                <SectionLabel title="CSV OPTIONS" />
                 <label
                   style={{
                     display: 'flex',
@@ -946,11 +943,8 @@ export default function ImportTransactions({ modalProps, options }) {
 
             <View style={{ flex: 1 }} />
 
-            <View style={{ marginRight: 25, gap: 10 }}>
-              <SectionLabel
-                title="AMOUNT OPTIONS"
-                style={{ marginBottom: -5 }}
-              />
+            <View style={{ marginRight: 25, gap: 5 }}>
+              <SectionLabel title="AMOUNT OPTIONS" />
               <CheckboxOption
                 id="form_flip"
                 checked={flipAmount}
