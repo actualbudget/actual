@@ -117,7 +117,10 @@ function formatDate(date, format) {
 
 function getFileType(filepath) {
   let m = filepath.match(/\.([^.]*)$/);
-  return m ? m[1].toLowerCase() : 'ofx';
+  if (!m) return 'ofx';
+  let rawType = m[1].toLowerCase();
+  if (rawType === 'tsv') return 'csv';
+  return rawType;
 }
 
 function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
@@ -674,7 +677,10 @@ function ImportTransactions({
   async function onNewFile() {
     const res = await window.Actual.openFileDialog({
       filters: [
-        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
+        {
+          name: 'Financial Files',
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv'],
+        },
       ],
     });
 
@@ -894,6 +900,7 @@ function ImportTransactions({
                     options={[
                       [',', ','],
                       [';', ';'],
+                      ['\t', 'tab'],
                     ]}
                     value={csvDelimiter}
                     onChange={value => {
