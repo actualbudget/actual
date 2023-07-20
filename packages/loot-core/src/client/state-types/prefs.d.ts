@@ -4,7 +4,8 @@ import type * as constants from '../constants';
 export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'privacyMode';
+  | 'privacyMode'
+  | 'themes';
 
 type NullableValues<T> = { [K in keyof T]: T[K] | null };
 
@@ -45,9 +46,11 @@ export type LocalPrefs = NullableValues<
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 
+export type Theme = 'light' | 'dark' | 'development';
 export type GlobalPrefs = NullableValues<{
   floatingSidebar: boolean;
   maxMonths: number;
+  theme: Theme;
   documentDir: string; // Electron only
 }>;
 
