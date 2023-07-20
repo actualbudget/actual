@@ -67,5 +67,5 @@ export const purple600 = oldColors.p4;
 export const purple700 = oldColors.p3;
 export const purple800 = oldColors.p2;
 export const purple900 = oldColors.p1;
-export const white = oldColors.'#fafafa';
-export const black = oldColors.'#0a0a0a';
+export const white = '#fafafa';
+export const black = '#0a0a0a';
