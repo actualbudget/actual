@@ -6,7 +6,7 @@ import Sun from '../icons/v2/Sun';
 import { useResponsive } from '../ResponsiveProvider';
 import { useTheme } from '../style';
 
-import { Button, View } from './common';
+import { Button } from './common';
 
 export function ThemeSelector() {
   let theme = useTheme();
