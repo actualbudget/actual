@@ -504,18 +504,10 @@ function HeaderCell({
         >
           <UnexposedCellContent value={value} />
           {icon === 'asc' && (
-            <ArrowDown
-              width={10}
-              height={10}
-              style={{ marginLeft: 5, color: colors.n4 }}
-            />
+            <ArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
           )}
           {icon === 'desc' && (
-            <ArrowUp
-              width={10}
-              height={10}
-              style={{ marginLeft: 5, color: colors.n4 }}
-            />
+            <ArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
           )}
         </Button>
       }
@@ -557,7 +549,7 @@ function PayeeCell({
       value={payeeId}
       valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
       exposed={focused}
-      onExpose={!isPreview && (name => onEdit(id, name))}
+      onExpose={name => !isPreview && onEdit(id, name)}
       onUpdate={async value => {
         onUpdate('payee', value);
 
@@ -644,17 +636,9 @@ function PayeeIcons({
     color: 'inherit',
   };
 
-  let scheduleIconStyle = {
-    width: 13,
-    height: 13,
-    color: 'inherit',
-  };
+  let scheduleIconStyle = { width: 13, height: 13 };
 
-  let transferIconStyle = {
-    width: 10,
-    height: 10,
-    color: 'inherit',
-  };
+  let transferIconStyle = { width: 10, height: 10 };
 
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
 
@@ -914,7 +898,7 @@ const Transaction = memo(function Transaction(props) {
           formatter={date =>
             date ? formatDate(parseISO(date), dateFormat) : ''
           }
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           onUpdate={value => {
             onUpdate('date', value);
           }}
@@ -955,7 +939,7 @@ const Transaction = memo(function Transaction(props) {
           }}
           valueStyle={valueStyle}
           exposed={focusedField === 'account'}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           onUpdate={async value => {
             // Only ever allow non-null values
             if (value) {
@@ -1021,7 +1005,7 @@ const Transaction = memo(function Transaction(props) {
           focused={focusedField === 'notes'}
           value={notes || ''}
           valueStyle={valueStyle}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           inputProps={{
             value: notes || '',
             onUpdate: onUpdate.bind(null, 'notes'),
@@ -1097,7 +1081,6 @@ const Transaction = memo(function Transaction(props) {
                   style={{
                     width: 14,
                     height: 14,
-                    color: 'currentColor',
                     transition: 'transform .08s',
                     transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
                   }}
@@ -1115,7 +1098,7 @@ const Transaction = memo(function Transaction(props) {
           width="flex"
           exposed={focusedField === 'category'}
           focused={focusedField === 'category'}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           value={
             isParent
               ? 'Split'
@@ -1205,7 +1188,7 @@ const Transaction = memo(function Transaction(props) {
         valueStyle={valueStyle}
         textAlign="right"
         title={debit}
-        onExpose={!isPreview && (name => onEdit(id, name))}
+        onExpose={name => !isPreview && onEdit(id, name)}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: debit === '' && credit === '' ? '0.00' : debit,
@@ -1226,7 +1209,7 @@ const Transaction = memo(function Transaction(props) {
         valueStyle={valueStyle}
         textAlign="right"
         title={credit}
-        onExpose={!isPreview && (name => onEdit(id, name))}
+        onExpose={name => !isPreview && onEdit(id, name)}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: credit,
@@ -1240,11 +1223,7 @@ const Transaction = memo(function Transaction(props) {
       {showBalance && (
         <Cell
           name="balance"
-          value={
-            balance == null || isChild || isPreview
-              ? ''
-              : integerToCurrency(balance)
-          }
+          value={balance == null || isChild ? '' : integerToCurrency(balance)}
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
           style={[styles.tnum, amountStyle]}
           width={88}
@@ -1503,6 +1482,7 @@ function TransactionTableInner({
       showCleared,
       showAccount,
       showCategory,
+      showBalances,
       balances,
       hideFraction,
       isNew,
@@ -1549,24 +1529,22 @@ function TransactionTableInner({
           transaction={trans}
           showAccount={showAccount}
           showCategory={showCategory}
-          showBalance={!!balances}
+          showBalance={showBalances}
           showCleared={showCleared}
           hovered={hovered}
           selected={selected}
           highlighted={false}
-          added={isNew && isNew(trans.id)}
-          expanded={isExpanded && isExpanded(trans.id)}
-          matched={isMatched && isMatched(trans.id)}
+          added={isNew?.(trans.id)}
+          expanded={isExpanded?.(trans.id)}
+          matched={isMatched?.(trans.id)}
           showZeroInDeposit={isChildDeposit}
-          balance={balances && balances[trans.id] && balances[trans.id].balance}
+          balance={balances?.[trans.id]?.balance}
           focusedField={editing && tableNavigator.focusedField}
           accounts={accounts}
           categoryGroups={categoryGroups}
           payees={payees}
           inheritedFields={
-            parent && parent.payee === trans.payee
-              ? new Set(['payee'])
-              : new Set()
+            parent?.payee === trans.payee ? new Set(['payee']) : new Set()
           }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
@@ -1595,7 +1573,7 @@ function TransactionTableInner({
           hasSelected={props.selectedItems.size > 0}
           showAccount={props.showAccount}
           showCategory={props.showCategory}
-          showBalance={!!props.balances}
+          showBalance={props.showBalances}
           showCleared={props.showCleared}
           scrollWidth={scrollWidth}
           onSort={props.onSort}
@@ -1619,7 +1597,7 @@ function TransactionTableInner({
               payees={props.payees || []}
               showAccount={props.showAccount}
               showCategory={props.showCategory}
-              showBalance={!!props.balances}
+              showBalance={props.showBalances}
               showCleared={props.showCleared}
               dateFormat={dateFormat}
               hideFraction={props.hideFraction}

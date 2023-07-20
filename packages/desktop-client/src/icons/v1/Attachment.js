@@ -1,12 +1,11 @@
 import * as React from 'react';
-
 const SvgAttachment = props => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 20 20"
     style={{
-      color: '#242134',
+      color: 'inherit',
       ...props.style,
     }}
   >
@@ -16,5 +15,4 @@ const SvgAttachment = props => (
     />
   </svg>
 );
-
 export default SvgAttachment;

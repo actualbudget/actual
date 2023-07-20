@@ -65,6 +65,7 @@ export default function TransactionList({
   categoryGroups,
   payees,
   balances,
+  showBalances,
   showCleared,
   showAccount,
   headerContent,
@@ -172,6 +173,7 @@ export default function TransactionList({
       accounts={accounts}
       categoryGroups={categoryGroups}
       payees={payees}
+      showBalances={showBalances}
       balances={balances}
       showCleared={showCleared}
       showAccount={showAccount}

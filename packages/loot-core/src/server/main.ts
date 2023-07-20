@@ -1472,6 +1472,9 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('floatingSidebar' in prefs) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
+  if ('theme' in prefs) {
+    await asyncStorage.setItem('theme', prefs.theme);
+  }
   return 'ok';
 };
 
@@ -1482,12 +1485,14 @@ handlers['load-global-prefs'] = async function () {
     [, autoUpdate],
     [, documentDir],
     [, encryptKey],
+    [, theme],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
     'auto-update',
     'document-dir',
     'encrypt-key',
+    'theme',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1495,6 +1500,10 @@ handlers['load-global-prefs'] = async function () {
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
+    theme:
+      theme === 'light' || theme === 'dark' || theme === 'development'
+        ? theme
+        : 'light',
   };
 };
 

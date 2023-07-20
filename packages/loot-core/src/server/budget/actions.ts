@@ -26,7 +26,7 @@ function getBudgetTable() {
   return budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
 }
 
-function isReflectBudget() {
+export function isReflectBudget() {
   let { budgetType } = prefs.getPrefs();
   return budgetType === 'report';
 }

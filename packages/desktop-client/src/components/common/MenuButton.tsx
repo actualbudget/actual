@@ -10,7 +10,7 @@ export default function MenuButton({ onClick }) {
       <DotsHorizontalTriple
         width={15}
         height={15}
-        style={{ color: 'inherit', transform: 'rotateZ(90deg)' }}
+        style={{ transform: 'rotateZ(90deg)' }}
       />
     </Button>
   );

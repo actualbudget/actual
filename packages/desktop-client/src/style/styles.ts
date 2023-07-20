@@ -2,84 +2,9 @@ import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
-import tokens from './tokens';
+import tokens from '../tokens';
 
-export const colors = {
-  y1: '#733309',
-  y2: '#87540d',
-  y3: '#B88115',
-  y4: '#D4A31C',
-  y5: '#E6BB20',
-  y6: '#F2D047',
-  y7: '#F5E35D',
-  y8: '#FCF088',
-  y9: '#FFF7C4',
-  y10: '#FFFBEA',
-  y11: '#FFFEFA',
-  r1: '#610316',
-  r2: '#8A041A',
-  r3: '#AB091E',
-  r4: '#CF1124',
-  r5: '#E12D39',
-  r6: '#EF4E4E',
-  r7: '#F86A6A',
-  r8: '#FF9B9B',
-  r9: '#FFBDBD',
-  r10: '#FFE3E3',
-  r11: '#FFF1F1',
-  b1: '#034388',
-  b2: '#0B5FA3',
-  b3: '#1271BF',
-  b4: '#1980D4',
-  b5: '#2B8FED',
-  b6: '#40A5F7',
-  b7: '#66B5FA',
-  b8: '#8BCAFD',
-  b9: '#B3D9FF',
-  b10: '#E3F0FF',
-  b11: '#F5FCFF',
-  n1: '#102A43',
-  n2: '#243B53',
-  n3: '#334E68',
-  n4: '#486581',
-  n5: '#627D98',
-  n6: '#829AB1',
-  n7: '#9FB3C8',
-  n8: '#BCCCDC',
-  n9: '#D9E2EC',
-  n10: '#E8ECF0',
-  n11: '#F7FAFC',
-  g1: '#014D40',
-  g2: '#0C6B58',
-  g3: '#147D64',
-  g4: '#199473',
-  g5: '#27AB83',
-  g6: '#3EBD93',
-  g7: '#65D6AD',
-  g8: '#8EEDC7',
-  g9: '#C6F7E2',
-  g10: '#EFFCF6',
-  g11: '#FAFFFD',
-  p1: '#44056E',
-  p2: '#580A94',
-  p3: '#690CB0',
-  p4: '#7A0ECC',
-  p5: '#8719E0',
-  p6: '#9446ED',
-  p7: '#A368FC',
-  p8: '#B990FF',
-  p9: '#DAC4FF',
-  p10: '#F2EBFE',
-  p11: '#F9F6FE',
-
-  get border() {
-    return this.n10;
-  },
-  hover: '#fafafa',
-  get selected() {
-    return this.b9;
-  },
-};
+import * as colors from './colors';
 
 export const styles = {
   veryLargeText: {
@@ -176,7 +101,7 @@ export const styles = {
       '0%': { opacity: 0 },
       '100%': { opacity: 1 },
     }),
-    animationDuration: '0.2s',
+    animationDuration: '1s',
     animationFillMode: 'both',
     animationDelay: '0.5s',
   },

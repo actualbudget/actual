@@ -49,9 +49,7 @@ export default function BalanceWithCarryover({
           <ArrowThinRight
             width={7}
             height={7}
-            style={{
-              ...makeAmountStyle(balanceValue),
-            }}
+            style={makeAmountStyle(balanceValue)}
           />
         </View>
       )}

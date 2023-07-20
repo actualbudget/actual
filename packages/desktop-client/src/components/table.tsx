@@ -720,15 +720,14 @@ export function SelectCell({
             selected && {
               backgroundColor: partial ? colors.b9 : colors.b5,
               borderColor: partial ? colors.b9 : colors.b5,
+              color: 'white',
             },
           ]}
           onEdit={onEdit}
           onSelect={onSelect}
           clickBehavior="none"
         >
-          {selected && (
-            <Checkmark width={6} height={6} style={{ color: 'white' }} />
-          )}
+          {selected && <Checkmark width={6} height={6} />}
         </CellButton>
       )}
     </Cell>

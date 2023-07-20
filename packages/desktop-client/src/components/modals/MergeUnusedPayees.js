@@ -122,8 +122,14 @@ export default function MergeUnusedPayees({
 
             <Information>
               Merging will remove the payee and transfer any existing rules to
-              the new payee. If checked below, a rule will be created to do this
-              rename while importing transactions.
+              the new payee.
+              {!isEditingRule && (
+                <>
+                  {' '}
+                  If checked below, a rule will be created to do this rename
+                  while importing transactions.
+                </>
+              )}
             </Information>
 
             {!isEditingRule && (

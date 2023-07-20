@@ -26,6 +26,7 @@ export async function parseFile(
       case '.qif':
         return parseQIF(filepath);
       case '.csv':
+      case '.tsv':
         return parseCSV(filepath, options);
       case '.ofx':
       case '.qfx':

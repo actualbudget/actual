@@ -8,6 +8,7 @@ import {
 import { type CSSProperties, css } from 'glamor';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
+import { colors } from '../../style';
 
 type CustomSelectProps = {
   options: Array<[string, string]>;
@@ -16,6 +17,7 @@ type CustomSelectProps = {
   onChange?: (newValue: string) => void;
   style?: CSSProperties;
   wrapperStyle?: CSSProperties;
+  line: number;
   disabledKeys?: string[];
 };
 
@@ -41,6 +43,7 @@ export default function Select({
   onChange,
   style,
   wrapperStyle,
+  line,
   disabledKeys = [],
 }: CustomSelectProps) {
   const arrowSize = 7;
@@ -73,17 +76,47 @@ export default function Select({
         </span>
       </ListboxButton>
       <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
-        <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
-          {options.map(([value, label]) => (
-            <ListboxOption
-              key={value}
-              value={value}
-              disabled={disabledKeys.includes(value)}
-            >
-              {label}
-            </ListboxOption>
-          ))}
-        </ListboxList>
+        {!line ? (
+          <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
+            {options.map(([value, label]) => (
+              <ListboxOption
+                key={value}
+                value={value}
+                disabled={disabledKeys.includes(value)}
+              >
+                {label}
+              </ListboxOption>
+            ))}
+          </ListboxList>
+        ) : (
+          <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
+            {options.slice(0, line).map(([value, label]) => (
+              <ListboxOption
+                key={value}
+                value={value}
+                disabled={disabledKeys.includes(value)}
+              >
+                {label}
+              </ListboxOption>
+            ))}
+            <div
+              style={{
+                padding: '2px',
+                marginTop: 5,
+                borderTop: '1px solid ' + colors.n10,
+              }}
+            />
+            {options.slice(line, options.length).map(([value, label]) => (
+              <ListboxOption
+                key={value}
+                value={value}
+                disabled={disabledKeys.includes(value)}
+              >
+                {label}
+              </ListboxOption>
+            ))}
+          </ListboxList>
+        )}
       </ListboxPopover>
     </ListboxInput>
   );
