@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
-import * as actions from 'loot-core/src/client/actions';
 import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
@@ -11,6 +10,7 @@ import {
   looselyParseAmount,
 } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../hooks/useActions';
 import { colors, styles } from '../../style';
 import {
   View,
@@ -537,16 +537,14 @@ function MultipliersField({ multiplierCB, value, onChange }) {
   );
 }
 
-function ImportTransactions({
-  modalProps,
-  options,
-  dateFormat = 'MM/dd/yyyy',
-  prefs,
-  parseTransactions,
-  importTransactions,
-  getPayees,
-  savePrefs,
-}) {
+export default function ImportTransactions({ modalProps, options }) {
+  let dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
+  let prefs = useSelector(state => state.prefs.local);
+  let { parseTransactions, importTransactions, getPayees, savePrefs } =
+    useActions();
+
   let [multiplierAmount, setMultiplierAmount] = useState('');
   let [loadingState, setLoadingState] = useState('parsing');
   let [error, setError] = useState(null);
@@ -969,11 +967,3 @@ function ImportTransactions({
     </Modal>
   );
 }
-
-export default connect(
-  state => ({
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    prefs: state.prefs.local,
-  }),
-  actions,
-)(ImportTransactions);
