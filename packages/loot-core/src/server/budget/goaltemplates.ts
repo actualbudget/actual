@@ -79,7 +79,11 @@ async function processTemplate(month, force, category_templates) {
       `budget-${category.id}`,
     );
     if (budgeted) {
-      originalCategoryBalance.push({ cat: category, amount: budgeted });
+      originalCategoryBalance.push({
+        cat: category,
+        amount: budgeted,
+        isIncome: category.is_income,
+      });
     }
     let template = category_templates[category.id];
     if (template) {
@@ -91,7 +95,22 @@ async function processTemplate(month, force, category_templates) {
       }
     }
   }
+
   await setZero({ month });
+
+  //setZero() sets budgeted Income to 0. Reset income categories before continuing.
+  if (isReflectBudget()) {
+    for (let l = 0; l < originalCategoryBalance.length; l++) {
+      if (originalCategoryBalance[l].isIncome) {
+        await setBudget({
+          category: originalCategoryBalance[l].cat.id,
+          month,
+          amount: originalCategoryBalance[l].amount,
+        });
+      }
+    }
+  }
+
   // find all remainder templates, place them after all other templates
   let remainder_found;
   let remainder_priority = lowestPriority + 1;
