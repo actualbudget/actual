@@ -19,8 +19,6 @@ export function ThemeSelector() {
     <View>
       <Button
         bare
-        // Switch theme value then update the global pref
-        // which triggers a theme update in <App> <ThemeStyle>
         onClick={() => {
           saveGlobalPrefs({
             theme: theme === 'dark' ? 'light' : 'dark',
