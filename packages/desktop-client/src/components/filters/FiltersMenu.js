@@ -211,68 +211,68 @@ function ConfigureField({
           {field === 'saved' && 'Existing filters will be cleared'}
         </View>
 
-        {type === 'boolean' ? (
-          <Stack
-            direction="row"
-            align="flex-start"
-            spacing={1}
-            style={{ flexWrap: 'wrap' }}
-          >
-            <OpButton
-              key="true"
-              op="true"
-              selected={value === true}
-              onClick={() => {
-                dispatch({ type: 'set-op', op: 'is' });
-                dispatch({ type: 'set-value', value: true });
-              }}
-            />
-            <OpButton
-              key="false"
-              op="false"
-              selected={value === false}
-              onClick={() => {
-                dispatch({ type: 'set-op', op: 'is' });
-                dispatch({ type: 'set-value', value: false });
-              }}
-            />
-          </Stack>
-        ) : (
-          [
-            <Stack
-              direction="row"
-              align="flex-start"
-              spacing={1}
-              style={{ flexWrap: 'wrap' }}
-            >
-              {ops.slice(0, 3).map(currOp => (
+        <Stack
+          direction="row"
+          align="flex-start"
+          spacing={1}
+          style={{ flexWrap: 'wrap' }}
+        >
+          {type === 'boolean'
+            ? [
                 <OpButton
-                  key={currOp}
-                  op={currOp}
-                  selected={currOp === op}
-                  onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                />
-              ))}
-            </Stack>,
-            <Stack
-              direction="row"
-              align="flex-start"
-              spacing={1}
-              style={{ flexWrap: 'wrap' }}
-            >
-              {ops.slice(3, 6).map(currOp => (
-                <View>
-                  <OpButton
-                    key={currOp}
-                    op={currOp}
-                    selected={currOp === op}
-                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                  />
-                </View>
-              ))}
-            </Stack>,
-          ]
-        )}
+                  key="true"
+                  op="true"
+                  selected={value === true}
+                  onClick={() => {
+                    dispatch({ type: 'set-op', op: 'is' });
+                    dispatch({ type: 'set-value', value: true });
+                  }}
+                />,
+                <OpButton
+                  key="false"
+                  op="false"
+                  selected={value === false}
+                  onClick={() => {
+                    dispatch({ type: 'set-op', op: 'is' });
+                    dispatch({ type: 'set-value', value: false });
+                  }}
+                />,
+              ]
+            : [
+                <Stack
+                  direction="row"
+                  align="flex-start"
+                  spacing={1}
+                  style={{ flexWrap: 'wrap' }}
+                >
+                  {ops.slice(0, 3).map(currOp => (
+                    <OpButton
+                      key={currOp}
+                      op={currOp}
+                      selected={currOp === op}
+                      onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                    />
+                  ))}
+                </Stack>,
+                <Stack
+                  direction="row"
+                  align="flex-start"
+                  spacing={1}
+                  style={{ flexWrap: 'wrap' }}
+                >
+                  {ops.slice(3, ops.length).map(currOp => (
+                    <View>
+                      <OpButton
+                        key={currOp}
+                        op={currOp}
+                        selected={currOp === op}
+                        onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                      />
+                    </View>
+                  ))}
+                </Stack>,
+              ]}
+        </Stack>
 
         <form action="#">
           {type !== 'boolean' && (
