@@ -14,23 +14,20 @@ export function ThemeSelector() {
 
   let { isNarrowWidth } = useResponsive();
 
-  // Don't display on mobile
   return isNarrowWidth ? null : (
-    <View>
-      <Button
-        bare
-        onClick={() => {
-          saveGlobalPrefs({
-            theme: theme === 'dark' ? 'light' : 'dark',
-          });
-        }}
-      >
-        {theme === 'light' ? (
-          <MoonStars style={{ width: 13, height: 13, color: 'inherit' }} />
-        ) : (
-          <Sun style={{ width: 13, height: 13, color: 'inherit' }} />
-        )}
-      </Button>
-    </View>
+    <Button
+      bare
+      onClick={() => {
+        saveGlobalPrefs({
+          theme: theme === 'dark' ? 'light' : 'dark',
+        });
+      }}
+    >
+      {theme === 'light' ? (
+        <MoonStars style={{ width: 13, height: 13, color: 'inherit' }} />
+      ) : (
+        <Sun style={{ width: 13, height: 13, color: 'inherit' }} />
+      )}
+    </Button>
   );
 }
