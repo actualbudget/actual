@@ -1474,7 +1474,7 @@ handlers['save-global-prefs'] = async function (prefs) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
   if ('theme' in prefs) {
-    await asyncStorage.setItem('theme', '' + prefs.theme);
+    await asyncStorage.setItem('theme', prefs.theme);
   }
   return 'ok';
 };
