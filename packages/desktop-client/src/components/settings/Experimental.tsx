@@ -5,7 +5,7 @@ import type { FeatureFlag } from 'loot-core/src/client/state-types/prefs';
 
 import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
-import { colors } from '../../style';
+import { colors, useTheme } from '../../style';
 import { LinkButton, Text, View } from '../common';
 import { Checkbox } from '../forms';
 
@@ -64,7 +64,7 @@ function ReportBudgetFeature() {
 }
 
 function ThemeFeature() {
-  let theme = useSelector(state => state.prefs.global?.theme);
+  let theme = useTheme();
   let enabled = useFeatureFlag('themes');
   let blockToggleOff = theme !== 'light' && enabled;
   return (

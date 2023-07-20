@@ -172,12 +172,7 @@ function Settings({
             />
           )}
 
-          {themesFlag && (
-            <ThemeSettings
-              saveGlobalPrefs={saveGlobalPrefs}
-              globalPrefs={globalPrefs}
-            />
-          )}
+          {themesFlag && <ThemeSettings saveGlobalPrefs={saveGlobalPrefs} />}
           <FormatSettings prefs={prefs} savePrefs={savePrefs} />
           <EncryptionSettings prefs={prefs} pushModal={pushModal} />
           <ExportBudget prefs={prefs} />

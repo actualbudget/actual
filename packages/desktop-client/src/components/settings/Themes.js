@@ -1,11 +1,12 @@
 import React from 'react';
 
-import { themeNames } from '../../style';
+import { themeNames, useTheme } from '../../style';
 import { View, Select, Text } from '../common';
 
 import { Setting } from './UI';
 
-export default function ThemeSettings({ globalPrefs, saveGlobalPrefs }) {
+export default function ThemeSettings({ saveGlobalPrefs }) {
+  let theme = useTheme();
   return (
     <Setting
       primaryAction={
@@ -14,7 +15,7 @@ export default function ThemeSettings({ globalPrefs, saveGlobalPrefs }) {
             onChange={value => {
               saveGlobalPrefs({ theme: value });
             }}
-            value={globalPrefs.theme}
+            value={theme}
             options={themeNames.map(name => [name, name])}
           />
         </View>

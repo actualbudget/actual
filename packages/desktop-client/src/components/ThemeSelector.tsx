@@ -5,11 +5,12 @@ import { useActions } from '../hooks/useActions';
 import MoonStars from '../icons/v2/MoonStars';
 import Sun from '../icons/v2/Sun';
 import { useResponsive } from '../ResponsiveProvider';
+import { useTheme } from '../style';
 
 import { Button, View } from './common';
 
 export function ThemeSelector() {
-  let theme = useSelector(state => state.prefs?.global?.theme ?? 'light');
+  let theme = useTheme();
   let { saveGlobalPrefs } = useActions();
 
   let { isNarrowWidth } = useResponsive();
