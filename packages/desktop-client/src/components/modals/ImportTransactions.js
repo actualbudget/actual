@@ -385,18 +385,35 @@ function DateFormatSelect({
   );
 }
 
-function MultipliersOption({ value, onChange }) {
+function MultiplierOption({
+  multiplierEnabled,
+  multiplierAmount,
+  onToggle,
+  onChangeAmount,
+}) {
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        userSelect: 'none',
-      }}
-    >
-      <Checkbox id="add_multiplier" checked={value} onChange={onChange} />
-      <label htmlFor="add_multiplier">Add Multiplier</label>
+    <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          userSelect: 'none',
+        }}
+      >
+        <Checkbox
+          id="add_multiplier"
+          checked={multiplierEnabled}
+          onChange={onToggle}
+        />
+        <label htmlFor="add_multiplier">Add multiplier</label>
+      </View>
+      <Input
+        type="text"
+        style={{ display: multiplierEnabled ? 'inherit' : 'none' }}
+        value={multiplierAmount}
+        placeholder="Optional"
+        onUpdate={onChangeAmount}
+      />
     </View>
   );
 }
@@ -435,6 +452,7 @@ function SplitOption({ value, onChange }) {
         flexDirection: 'row',
         alignItems: 'center',
         userSelect: 'none',
+        height: 28,
       }}
     >
       <Checkbox id="form_split" checked={value} onChange={onChange} />
@@ -520,20 +538,6 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
         )}
       </Stack>
     </View>
-  );
-}
-
-function MultipliersField({ multiplierCB, value, onChange }) {
-  const styl = multiplierCB ? 'inherit' : 'none';
-
-  return (
-    <Input
-      type="text"
-      style={{ display: styl }}
-      value={value}
-      placeholder="Optional"
-      onUpdate={onChange}
-    />
   );
 }
 
@@ -884,10 +888,18 @@ export default function ImportTransactions({ modalProps, options }) {
             </View>
 
             {/*csv Delimiter */}
-            <View>
-              {filetype === 'csv' && (
-                <View style={{ marginLeft: 25 }}>
-                  <SectionLabel title="CSV DELIMITER" />
+            {filetype === 'csv' && (
+              <View style={{ marginLeft: 25 }}>
+                <SectionLabel title="CSV OPTIONS" />
+                <label
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: 5,
+                    alignItems: 'baseline',
+                  }}
+                >
+                  Delimiter:
                   <Select
                     options={[
                       [',', ','],
@@ -898,17 +910,17 @@ export default function ImportTransactions({ modalProps, options }) {
                       setCsvDelimiter(value);
                       parse(filename, { delimiter: value });
                     }}
-                    style={{ borderWidth: 1, width: '100%' }}
+                    style={{ borderWidth: 1, width: 50 }}
                   />
-                </View>
-              )}
-            </View>
+                </label>
+              </View>
+            )}
 
             <View style={{ flex: 1 }} />
 
-            <View style={{ marginRight: 25 }}>
-              <SectionLabel title="IMPORT OPTIONS" />
-              <View style={{ marginTop: 5 }}>
+            <View style={{ marginRight: 25, gap: 10 }}>
+              <SectionLabel title="AMOUNT OPTIONS" />
+              <View style={{ marginTop: -10, height: 28 }}>
                 <FlipAmountOption
                   value={flipAmount}
                   disabled={splitMode}
@@ -918,28 +930,17 @@ export default function ImportTransactions({ modalProps, options }) {
                 />
               </View>
               {filetype === 'csv' && (
-                <View style={{ marginTop: 10 }}>
-                  <SplitOption value={splitMode} onChange={onSplitMode} />
-                </View>
+                <SplitOption value={splitMode} onChange={onSplitMode} />
               )}
-              <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                <View style={{ marginRight: 30 }}>
-                  <MultipliersOption
-                    value={multiplierEnabled}
-                    onChange={() => {
-                      setMultiplierEnabled(!multiplierEnabled);
-                      setMultiplierAmount('');
-                    }}
-                  />
-                </View>
-                <View style={{ width: 75 }}>
-                  <MultipliersField
-                    multiplierCB={multiplierEnabled}
-                    value={multiplierAmount}
-                    onChange={onMultiplierChange}
-                  />
-                </View>
-              </View>
+              <MultiplierOption
+                multiplierEnabled={multiplierEnabled}
+                multiplierAmount={multiplierAmount}
+                onToggle={() => {
+                  setMultiplierEnabled(!multiplierEnabled);
+                  setMultiplierAmount('');
+                }}
+                onChangeAmount={onMultiplierChange}
+              />
             </View>
           </Stack>
         </View>
