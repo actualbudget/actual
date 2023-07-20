@@ -24,6 +24,6 @@ export function ThemeStyle({ theme }: { theme: Theme }) {
 }
 
 // eslint-disable-next-line import/no-unused-modules
-export const colors = Object.fromEntries(
+export const theme = Object.fromEntries(
   Object.keys(lightTheme).map(key => [key, `var(--${key})`]),
 ) as Record<keyof typeof lightTheme, string>;
