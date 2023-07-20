@@ -337,12 +337,24 @@ function SubLabel({ title }) {
   );
 }
 
-function SelectField({ width, style, options, value, onChange }) {
+function SelectField({
+  style,
+  options,
+  value,
+  onChange,
+  hasHeaderRow,
+  firstTransaction,
+}) {
   return (
     <Select
       options={[
         ['choose-field', 'Choose field...'],
-        ...options.map(option => [option, option]),
+        ...options.map(option => [
+          option,
+          hasHeaderRow
+            ? option
+            : `Column ${parseInt(option) + 1} (${firstTransaction[option]})`,
+        ]),
       ]}
       value={value === null ? 'choose-field' : value}
       style={{ borderWidth: 1, width: '100%' }}
@@ -441,7 +453,13 @@ function MultiplierOption({
   );
 }
 
-function FieldMappings({ transactions, mappings, onChange, splitMode }) {
+function FieldMappings({
+  transactions,
+  mappings,
+  onChange,
+  splitMode,
+  hasHeaderRow,
+}) {
   if (transactions.length === 0) {
     return null;
   }
@@ -465,6 +483,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
             value={mappings.date}
             style={{ marginRight: 5 }}
             onChange={name => onChange('date', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
           />
         </View>
         <View style={{ flex: 1 }}>
@@ -474,6 +494,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
             value={mappings.payee}
             style={{ marginRight: 5 }}
             onChange={name => onChange('payee', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
           />
         </View>
         <View style={{ flex: 1 }}>
@@ -483,6 +505,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
             value={mappings.notes}
             style={{ marginRight: 5 }}
             onChange={name => onChange('notes', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
           />
         </View>
         {splitMode ? (
@@ -493,6 +517,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
                 options={options}
                 value={mappings.outflow}
                 onChange={name => onChange('outflow', name)}
+                hasHeaderRow={hasHeaderRow}
+                firstTransaction={transactions[0]}
               />
             </View>
             <View style={{ flex: 0.5 }}>
@@ -501,6 +527,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
                 options={options}
                 value={mappings.inflow}
                 onChange={name => onChange('inflow', name)}
+                hasHeaderRow={hasHeaderRow}
+                firstTransaction={transactions[0]}
               />
             </View>
           </>
@@ -511,6 +539,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
               options={options}
               value={mappings.amount}
               onChange={name => onChange('amount', name)}
+              hasHeaderRow={hasHeaderRow}
+              firstTransaction={transactions[0]}
             />
           </View>
         )}
@@ -546,6 +576,9 @@ export default function ImportTransactions({ modalProps, options }) {
   // re-read this.
   let [csvDelimiter, setCsvDelimiter] = useState(
     prefs[`csv-delimiter-${accountId}`] || ',',
+  );
+  let [hasHeaderRow, setHasHeaderRow] = useState(
+    prefs[`csv-has-header-${accountId}`] ?? true,
   );
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
@@ -616,7 +649,7 @@ export default function ImportTransactions({ modalProps, options }) {
     parse(
       options.filename,
       getFileType(options.filename) === 'csv'
-        ? { delimiter: csvDelimiter }
+        ? { delimiter: csvDelimiter, hasHeaderRow }
         : null,
     );
   }, [parseTransactions, options.filename]);
@@ -840,6 +873,7 @@ export default function ImportTransactions({ modalProps, options }) {
             onChange={onUpdateFields}
             mappings={fieldMappings}
             splitMode={splitMode}
+            hasHeaderRow={hasHeaderRow}
           />
         </View>
       )}
@@ -865,10 +899,13 @@ export default function ImportTransactions({ modalProps, options }) {
               )}
             </View>
 
-            {/*csv Delimiter */}
+            {/* CSV Options */}
             {filetype === 'csv' && (
-              <View style={{ marginLeft: 25 }}>
-                <SectionLabel title="CSV OPTIONS" />
+              <View style={{ marginLeft: 25, gap: 10 }}>
+                <SectionLabel
+                  title="CSV OPTIONS"
+                  style={{ marginBottom: -5 }}
+                />
                 <label
                   style={{
                     display: 'flex',
@@ -886,11 +923,24 @@ export default function ImportTransactions({ modalProps, options }) {
                     value={csvDelimiter}
                     onChange={value => {
                       setCsvDelimiter(value);
-                      parse(filename, { delimiter: value });
+                      parse(filename, { delimiter: value, hasHeaderRow });
                     }}
                     style={{ borderWidth: 1, width: 50 }}
                   />
                 </label>
+                <CheckboxOption
+                  id="form_has_header"
+                  checked={hasHeaderRow}
+                  onChange={() => {
+                    setHasHeaderRow(!hasHeaderRow);
+                    parse(filename, {
+                      delimiter: csvDelimiter,
+                      hasHeaderRow: !hasHeaderRow,
+                    });
+                  }}
+                >
+                  File has header row
+                </CheckboxOption>
               </View>
             )}
 
