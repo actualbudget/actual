@@ -229,7 +229,6 @@ export default function Modals() {
               key={name}
               modalProps={modalProps}
               id={options.id || null}
-              initialFields={options.initialFields}
               actions={actions}
             />
           );
@@ -255,7 +254,11 @@ export default function Modals() {
 
         case 'schedule-posts-offline-notification':
           return (
-            <PostsOfflineNotification key={name} modalProps={modalProps} />
+            <PostsOfflineNotification
+              key={name}
+              modalProps={modalProps}
+              actions={actions}
+            />
           );
 
         default:

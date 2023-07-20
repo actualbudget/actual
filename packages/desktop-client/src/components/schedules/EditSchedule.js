@@ -22,19 +22,6 @@ import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import GenericInput from '../util/GenericInput';
 
-function mergeFields(defaults, initial) {
-  let res = { ...defaults };
-  if (initial) {
-    // Only merge in fields from `initial` that exist in `defaults`
-    Object.keys(initial).forEach(key => {
-      if (key in defaults) {
-        res[key] = initial[key];
-      }
-    });
-  }
-  return res;
-}
-
 function updateScheduleConditions(schedule, fields) {
   let conds = extractScheduleConds(schedule._conditions);
 
@@ -75,12 +62,7 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export default function ScheduleDetails({
-  modalProps,
-  actions,
-  id,
-  initialFields,
-}) {
+export default function ScheduleDetails({ modalProps, actions, id }) {
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
   let globalDispatch = useDispatch();
@@ -191,18 +173,15 @@ export default function ScheduleDetails({
       schedule: null,
       upcomingDates: null,
       error: null,
-      fields: mergeFields(
-        {
-          payee: null,
-          account: null,
-          amount: null,
-          amountOp: null,
-          date: null,
-          posts_transaction: false,
-          name: null,
-        },
-        initialFields,
-      ),
+      fields: {
+        payee: null,
+        account: null,
+        amount: null,
+        amountOp: null,
+        date: null,
+        posts_transaction: false,
+        name: null,
+      },
       transactions: [],
       transactionsMode: adding ? 'matched' : 'linked',
     },

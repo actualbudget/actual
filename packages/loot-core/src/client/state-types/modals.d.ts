@@ -83,7 +83,6 @@ type FinanceModals = {
 
   'schedule-edit': {
     id?: string;
-    initialFields?: unknown;
   };
 
   'schedule-link': {
