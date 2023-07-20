@@ -114,7 +114,9 @@ async function processTemplate(month, force, category_templates) {
 
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
-  let available_remaining = await getSheetValue(sheetName, `to-budget`);
+  let available_remaining = isReflectBudget()
+    ? await getSheetValue(sheetName, `total-saved`)
+    : await getSheetValue(sheetName, `to-budget`);
   for (let priority = 0; priority <= lowestPriority; priority++) {
     // setup scaling for remainder
     let remainder_scale = 1;
@@ -356,9 +358,6 @@ async function applyCategoryTemplate(
   let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
-  let budgetAvailable = isReflectBudget()
-    ? await getSheetValue(sheetName, `total-saved`)
-    : await getSheetValue(sheetName, `to-budget`);
   let to_budget = budgeted;
   let limit;
   let hold;
