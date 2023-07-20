@@ -144,8 +144,6 @@ function FinancesApp(props) {
     }, 100);
   }, []);
 
-  const { isNarrowWidth } = useResponsive();
-
   return (
     <BrowserRouter>
       <RouterBehaviors getAccounts={props.getAccounts} />
