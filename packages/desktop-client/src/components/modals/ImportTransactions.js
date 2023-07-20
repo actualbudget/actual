@@ -568,7 +568,7 @@ function ImportTransactions({
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
   let [csvDelimiter, setCsvDelimiter] = useState(
-    prefs[`csv-delimiter-${accountId}`] || ',',
+    prefs[`csv-delimiter-${accountId}`] || (filename.endsWith('.tsv') ? '\t' : ',')),
   );
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
