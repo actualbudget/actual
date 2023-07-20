@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 
 import { useActions } from '../hooks/useActions';
 import MoonStars from '../icons/v2/MoonStars';

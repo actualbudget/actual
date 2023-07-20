@@ -5,7 +5,6 @@ import * as YNAB4 from '@actual-app/import-ynab4/importer';
 import * as YNAB5 from '@actual-app/import-ynab5/importer';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Theme } from '../client/state-types/prefs';
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import * as asyncStorage from '../platform/server/asyncStorage';
