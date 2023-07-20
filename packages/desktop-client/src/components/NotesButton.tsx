@@ -126,7 +126,7 @@ export default function NotesButton({
         ]}
         {...tooltip.getOpenEvents()}
       >
-        <CustomNotesPaper style={{ width, height, color: 'currentColor' }} />
+        <CustomNotesPaper style={{ width, height }} />
       </Button>
       {tooltipOpen && (
         <NotesTooltip

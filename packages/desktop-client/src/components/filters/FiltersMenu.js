@@ -405,12 +405,7 @@ export function FilterButton({ onApply }) {
     <View>
       <Button bare onClick={() => dispatch({ type: 'select-field' })}>
         <SettingsSliderAlternate
-          style={{
-            width: 16,
-            height: 16,
-            color: 'inherit',
-            marginRight: 5,
-          }}
+          style={{ width: 16, height: 16, marginRight: 5 }}
         />{' '}
         Filter
       </Button>
@@ -533,7 +528,6 @@ function FilterExpression({
           style={{
             width: 8,
             height: 8,
-            color: colors.n4,
             margin: 5,
             marginLeft: 3,
           }}
