@@ -23,11 +23,9 @@ export function ThemeStyle() {
   let theme = useTheme();
   let themeColors = themes[theme];
   let css = Object.keys(themeColors)
-    .map(key => {
-      return `--${key}: ${themeColors[key]};`;
-    })
+    .map(key => `  --${key}: ${themeColors[key]};`)
     .join('\n');
-  return <style>{`:root { ${css} }`}</style>;
+  return <style>{`:root {\n${css}}`}</style>;
 }
 
 export const theme = Object.fromEntries(
