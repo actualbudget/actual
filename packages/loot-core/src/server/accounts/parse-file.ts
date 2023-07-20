@@ -14,7 +14,7 @@ export type ParseFileResult = {
 
 export async function parseFile(
   filepath,
-  options?: unknown,
+  options?: { delimiter?: string; hasHeaderRow: boolean },
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let m = filepath.match(/\.[^.]*$/);
