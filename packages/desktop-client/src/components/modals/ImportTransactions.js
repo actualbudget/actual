@@ -385,6 +385,36 @@ function DateFormatSelect({
   );
 }
 
+function CheckboxOption({ id, checked, disabled, onChange, children, style }) {
+  return (
+    <View
+      style={[
+        {
+          flex: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          userSelect: 'none',
+          height: 28,
+        },
+        style,
+      ]}
+    >
+      <Checkbox
+        id={id}
+        checked={checked}
+        disabled={disabled}
+        onChange={onChange}
+      />
+      <label
+        htmlFor={id}
+        style={{ userSelect: 'none', color: disabled ? colors.n6 : null }}
+      >
+        {children}
+      </label>
+    </View>
+  );
+}
+
 function MultiplierOption({
   multiplierEnabled,
   multiplierAmount,
@@ -393,20 +423,13 @@ function MultiplierOption({
 }) {
   return (
     <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          userSelect: 'none',
-        }}
+      <CheckboxOption
+        id="add_multiplier"
+        checked={multiplierEnabled}
+        onChange={onToggle}
       >
-        <Checkbox
-          id="add_multiplier"
-          checked={multiplierEnabled}
-          onChange={onToggle}
-        />
-        <label htmlFor="add_multiplier">Add multiplier</label>
-      </View>
+        Add multiplier
+      </CheckboxOption>
       <Input
         type="text"
         style={{ display: multiplierEnabled ? 'inherit' : 'none' }}
@@ -414,51 +437,6 @@ function MultiplierOption({
         placeholder="Optional"
         onUpdate={onChangeAmount}
       />
-    </View>
-  );
-}
-
-function FlipAmountOption({ value, disabled, onChange }) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        userSelect: 'none',
-      }}
-    >
-      <Checkbox
-        id="form_flip"
-        checked={value}
-        disabled={disabled}
-        onChange={onChange}
-      />
-      <label
-        htmlFor="form_flip"
-        style={{ userSelect: 'none', color: disabled ? colors.n6 : null }}
-      >
-        Flip amount
-      </label>
-    </View>
-  );
-}
-
-function SplitOption({ value, onChange }) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        userSelect: 'none',
-        height: 28,
-      }}
-    >
-      <Checkbox id="form_split" checked={value} onChange={onChange} />
-      <label htmlFor="form_split" style={{ userSelect: 'none' }}>
-        Split amount into separate inflow/outflow columns
-      </label>
     </View>
   );
 }
@@ -919,18 +897,26 @@ export default function ImportTransactions({ modalProps, options }) {
             <View style={{ flex: 1 }} />
 
             <View style={{ marginRight: 25, gap: 10 }}>
-              <SectionLabel title="AMOUNT OPTIONS" />
-              <View style={{ marginTop: -10, height: 28 }}>
-                <FlipAmountOption
-                  value={flipAmount}
-                  disabled={splitMode}
-                  onChange={() => {
-                    setFlipAmount(!flipAmount);
-                  }}
-                />
-              </View>
+              <SectionLabel
+                title="AMOUNT OPTIONS"
+                style={{ marginBottom: -5 }}
+              />
+              <CheckboxOption
+                id="form_flip"
+                checked={flipAmount}
+                disabled={splitMode}
+                onChange={() => setFlipAmount(!flipAmount)}
+              >
+                Flip amount
+              </CheckboxOption>
               {filetype === 'csv' && (
-                <SplitOption value={splitMode} onChange={onSplitMode} />
+                <CheckboxOption
+                  id="form_split"
+                  checked={splitMode}
+                  onChange={onSplitMode}
+                >
+                  Split amount into separate inflow/outflow columns
+                </CheckboxOption>
               )}
               <MultiplierOption
                 multiplierEnabled={multiplierEnabled}
