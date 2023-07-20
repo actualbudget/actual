@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { themeNames, useTheme } from '../../style';
-import { View, Select, Text } from '../common';
+import { Button, Select, Text } from '../common';
 
 import { Setting } from './UI';
 
@@ -10,7 +10,7 @@ export default function ThemeSettings({ saveGlobalPrefs }) {
   return (
     <Setting
       primaryAction={
-        <View>
+        <Button bounce={false} style={{ padding: 0 }}>
           <Select
             onChange={value => {
               saveGlobalPrefs({ theme: value });
@@ -18,7 +18,7 @@ export default function ThemeSettings({ saveGlobalPrefs }) {
             value={theme}
             options={themeNames.map(name => [name, name])}
           />
-        </View>
+        </Button>
       }
     >
       <Text>
