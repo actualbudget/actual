@@ -1,4 +1,4 @@
-import * as oldColors from './colors-old';
+import * as oldColors from './colors';
 
 // Only for use in contextual color definitions
 export const gray50 = oldColors.n11;

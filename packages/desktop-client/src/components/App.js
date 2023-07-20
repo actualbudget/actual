@@ -11,8 +11,7 @@ import {
 
 import installPolyfills from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
-import { styles, hasHiddenScrollbars } from '../style';
-import { ThemeStyle } from '../theme';
+import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 
 import AppBackground from './AppBackground';
 import DevelopmentTopBar from './DevelopmentTopBar';
