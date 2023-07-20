@@ -1,3 +1,5 @@
+import { useSelector } from 'react-redux';
+
 import type { Theme } from 'loot-core/src/client/state-types/prefs';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
@@ -13,7 +15,8 @@ const themes = {
 
 export const themeNames = Object.keys(themes) as Theme[];
 
-export function ThemeStyle({ theme }: { theme: Theme }) {
+export function ThemeStyle() {
+  let theme = useSelector(state => state.prefs.global?.theme) || 'light';
   let themeColors = themes[theme];
   let css = Object.keys(themeColors)
     .map(key => {

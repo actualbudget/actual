@@ -134,7 +134,7 @@ class App extends Component {
             <MobileWebMessage />
           </div>
         </div>
-        <ThemeStyle theme={this.props.theme} />
+        <ThemeStyle />
       </ResponsiveProvider>
     );
   }
@@ -145,7 +145,6 @@ export default connect(
     budgetId: state.prefs.local && state.prefs.local.id,
     cloudFileId: state.prefs.local && state.prefs.local.cloudFileId,
     loadingText: state.app.loadingText,
-    theme: state.prefs.global?.theme || 'light',
   }),
   actions,
 )(App);
