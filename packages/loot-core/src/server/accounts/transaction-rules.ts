@@ -416,8 +416,9 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           }
           return apply(field, '$eq', number);
         }
-
         return apply(field, '$eq', value);
+      case 'isNot':
+        return apply(field, '$ne', value);
 
       case 'isbetween':
         // This operator is only applicable to the specific `between`
@@ -434,6 +435,14 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           '$like',
           '%' + value + '%',
         );
+      case 'doesNotContain':
+        // Running contains with id will automatically reach into
+        // the `name` of the referenced table and do a string match
+        return apply(
+          type === 'id' ? field + '.name' : field,
+          '$notlike',
+          '%' + value + '%',
+        );
       case 'oneOf':
         let values = value;
         if (values.length === 0) {
@@ -441,6 +450,13 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           return { id: null };
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
+      case 'notOneOf':
+        let notValues = value;
+        if (notValues.length === 0) {
+          // This forces it to match nothing
+          return { id: null };
+        }
+        return { $and: notValues.map(v => apply(field, '$ne', v)) };
       case 'gt':
         return apply(field, '$gt', getValue(value));
       case 'gte':
@@ -527,7 +543,7 @@ function* getIsSetterRules(
       rule.actions[0].field === actionField &&
       (actionValue === undefined || rule.actions[0].value === actionValue) &&
       rule.conditions.length === 1 &&
-      rule.conditions[0].op === 'is' &&
+      (rule.conditions[0].op === 'is' || rule.conditions[0].op === 'isNot') &&
       rule.conditions[0].field === condField &&
       (condValue === undefined || rule.conditions[0].value === condValue)
     ) {
@@ -555,7 +571,8 @@ function* getOneOfSetterRules(
       rule.actions[0].field === actionField &&
       (actionValue == null || rule.actions[0].value === actionValue) &&
       rule.conditions.length === 1 &&
-      rule.conditions[0].op === 'oneOf' &&
+      (rule.conditions[0].op === 'oneOf' ||
+        rule.conditions[0].op === 'oneOf') &&
       rule.conditions[0].field === condField &&
       (condValue == null || rule.conditions[0].value.indexOf(condValue) !== -1)
     ) {
