@@ -28,7 +28,7 @@ export type LocalPrefs = NullableValues<
     // TODO: pull from src/components/modals/ImportTransactions.js
     [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
     [key: `csv-mappings-${string}`]: string;
-    [key: `csv-delimiter-${string}`]: ',' | ';';
+    [key: `csv-delimiter-${string}`]: ',' | ';' | '\t';
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
     'flags.updateNotificationShownForVersion': string;
     id: string;
