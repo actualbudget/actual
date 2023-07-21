@@ -7,7 +7,7 @@ const SvgMoonStars = props => (
     className="bi bi-moon-stars"
     viewBox="0 0 16 16"
     style={{
-      color: '#242134',
+      color: 'inherit',
       ...props.style,
     }}
   >

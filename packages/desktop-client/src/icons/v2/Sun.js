@@ -7,7 +7,7 @@ const SvgSun = props => (
     className="bi bi-sun"
     viewBox="0 0 16 16"
     style={{
-      color: '#242134',
+      color: 'inherit',
       ...props.style,
     }}
   >
