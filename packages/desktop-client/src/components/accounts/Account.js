@@ -74,9 +74,18 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-function AllTransactions({ account = {}, transactions, filtered, children }) {
+function AllTransactions({
+  account = {},
+  transactions,
+  balances,
+  showBalances,
+  filtered,
+  children,
+}) {
   const { id: accountId } = account;
   let scheduleData = useCachedSchedules();
+
+  transactions ??= [];
 
   let schedules = useMemo(
     () =>
@@ -94,7 +103,7 @@ function AllTransactions({ account = {}, transactions, filtered, children }) {
 
   let prependTransactions = useMemo(() => {
     return schedules.map(schedule => ({
-      id: 'preview/' + schedule.id,
+      id: `preview/${schedule.id}`,
       payee: schedule._payee,
       account: schedule._account,
       amount: schedule._amount,
@@ -105,6 +114,36 @@ function AllTransactions({ account = {}, transactions, filtered, children }) {
     }));
   }, [schedules, accountId]);
 
+  let runningBalance = useMemo(() => {
+    if (!showBalances) {
+      return 0;
+    }
+
+    return balances && transactions?.length > 0
+      ? balances[transactions[0].id]?.balance ?? 0
+      : 0;
+  }, [showBalances, balances, transactions]);
+
+  let prependBalances = useMemo(() => {
+    if (!showBalances) {
+      return null;
+    }
+
+    // Reverse so we can calculate from earliest upcoming schedule.
+    let scheduledBalances = [...prependTransactions]
+      .reverse()
+      .map(scheduledTransaction => {
+        let amount =
+          (scheduledTransaction._inverse ? -1 : 1) *
+          scheduledTransaction.amount;
+        return {
+          balance: (runningBalance += amount),
+          id: scheduledTransaction.id,
+        };
+      });
+    return groupById(scheduledBalances);
+  }, [showBalances, prependTransactions, runningBalance]);
+
   let allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
     if (!filtered && prependTransactions.length > 0) {
@@ -113,10 +152,18 @@ function AllTransactions({ account = {}, transactions, filtered, children }) {
     return transactions;
   }, [filtered, prependTransactions, transactions]);
 
+  let allBalances = useMemo(() => {
+    // Don't prepend scheduled transactions if we are filtering
+    if (!filtered && prependBalances && balances) {
+      return { ...prependBalances, ...balances };
+    }
+    return balances;
+  }, [filtered, prependBalances, balances]);
+
   if (scheduleData == null) {
-    return children(null);
+    return children(transactions, balances);
   }
-  return children(allTransactions);
+  return children(allTransactions, allBalances);
 }
 
 function getField(field) {
@@ -152,7 +199,7 @@ class AccountInternal extends PureComponent {
       transactions: [],
       transactionsCount: 0,
       showBalances: props.showBalances,
-      balances: [],
+      balances: null,
       showCleared: props.showCleared,
       editingName: false,
       isAdding: false,
@@ -340,12 +387,11 @@ class AccountInternal extends PureComponent {
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
+            balances: this.state.showBalances
+              ? await this.calculateBalances()
+              : null,
           },
           () => {
-            if (this.state.showBalances) {
-              this.calculateBalances();
-            }
-
             if (firstLoad) {
               this.table.current?.scrollToTop();
             }
@@ -372,7 +418,7 @@ class AccountInternal extends PureComponent {
           loading: true,
           search: '',
           showBalances: nextProps.showBalances,
-          balances: [],
+          balances: null,
           showCleared: nextProps.showCleared,
         },
         () => {
@@ -416,7 +462,10 @@ class AccountInternal extends PureComponent {
     if (account) {
       const res = await window.Actual.openFileDialog({
         filters: [
-          { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
+          {
+            name: 'Financial Files',
+            extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv'],
+          },
         ],
       });
 
@@ -484,7 +533,7 @@ class AccountInternal extends PureComponent {
 
   async calculateBalances() {
     if (!this.canCalculateBalance()) {
-      return;
+      return null;
     }
 
     let { data } = await runQuery(
@@ -494,7 +543,7 @@ class AccountInternal extends PureComponent {
         .select([{ balance: { $sumOver: '$amount' } }]),
     );
 
-    this.setState({ balances: groupById(data) });
+    return groupById(data);
   }
 
   onAddTransaction = () => {
@@ -549,32 +598,36 @@ class AccountInternal extends PureComponent {
       case 'toggle-balance':
         if (this.state.showBalances) {
           this.props.savePrefs({ ['show-balances-' + accountId]: false });
-          this.setState({ showBalances: false, balances: [] });
+          this.setState({ showBalances: false, balances: null });
         } else {
-          this.setState({
-            transactions: [],
-            transactionCount: 0,
-            filters: [],
-            search: '',
-            sort: [],
-            showBalances: true,
-          });
-          this.fetchTransactions();
           this.props.savePrefs({ ['show-balances-' + accountId]: true });
-          this.calculateBalances();
+          this.setState(
+            {
+              transactions: [],
+              transactionCount: 0,
+              filters: [],
+              search: '',
+              sort: [],
+              showBalances: true,
+            },
+            () => {
+              this.fetchTransactions();
+            },
+          );
         }
         break;
       case 'remove-sorting': {
-        let filters = this.state.filters;
-        this.setState({ sort: [] });
-        if (filters.length > 0) {
-          this.applyFilters([...filters]);
-        } else {
-          this.fetchTransactions();
-        }
-        if (this.state.search !== '') {
-          this.onSearch(this.state.search);
-        }
+        this.setState({ sort: [] }, () => {
+          let filters = this.state.filters;
+          if (filters.length > 0) {
+            this.applyFilters([...filters]);
+          } else {
+            this.fetchTransactions();
+          }
+          if (this.state.search !== '') {
+            this.onSearch(this.state.search);
+          }
+        });
         break;
       }
       case 'toggle-cleared':
@@ -981,16 +1034,25 @@ class AccountInternal extends PureComponent {
       this.currentQuery = this.rootQuery.filter({
         [conditionsOpKey]: [...filters, ...customFilters],
       });
-      this.updateQuery(this.currentQuery, true);
-      this.setState({ filters: conditions });
-    } else {
-      this.setState({ transactions: [], transactionCount: 0 });
-      this.fetchTransactions();
-      this.setState({ filters: conditions });
-    }
 
-    if (this.state.sort.length !== 0) {
-      this.applySort();
+      this.setState({ filters: conditions }, () => {
+        this.updateQuery(this.currentQuery, true);
+      });
+    } else {
+      this.setState(
+        {
+          transactions: [],
+          transactionCount: 0,
+          filters: conditions,
+        },
+        () => {
+          this.fetchTransactions();
+
+          if (this.state.sort.length !== 0) {
+            this.applySort();
+          }
+        },
+      );
     }
   };
 
@@ -1124,143 +1186,134 @@ class AccountInternal extends PureComponent {
       <AllTransactions
         account={account}
         transactions={transactions}
+        balances={balances}
+        showBalances={showBalances}
         filtered={transactionsFiltered}
       >
-        {allTransactions =>
-          allTransactions == null ? null : (
-            <SelectedProviderWithItems
-              name="transactions"
-              items={allTransactions}
-              fetchAllIds={this.fetchAllIds}
-              registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
-            >
-              <View style={[styles.page]}>
-                <AccountHeader
-                  tableRef={this.table}
-                  editingName={editingName}
-                  isNameEditable={isNameEditable}
-                  workingHard={workingHard}
-                  account={account}
-                  filterId={filterId}
-                  filtersList={this.props.filtersList}
-                  location={this.props.location}
-                  accountName={accountName}
-                  accountsSyncing={accountsSyncing}
-                  accounts={accounts}
-                  transactions={transactions}
-                  showBalances={showBalances}
-                  showExtraBalances={showExtraBalances}
-                  showCleared={showCleared}
-                  showEmptyMessage={showEmptyMessage}
-                  balanceQuery={balanceQuery}
-                  canCalculateBalance={this.canCalculateBalance}
-                  isSorted={this.state.sort.length !== 0}
-                  reconcileAmount={reconcileAmount}
-                  search={this.state.search}
-                  filters={this.state.filters}
-                  conditionsOp={this.state.conditionsOp}
-                  savePrefs={this.props.savePrefs}
-                  onSearch={this.onSearch}
-                  onShowTransactions={this.onShowTransactions}
-                  onMenuSelect={this.onMenuSelect}
-                  onAddTransaction={this.onAddTransaction}
-                  onToggleExtraBalances={this.onToggleExtraBalances}
-                  onSaveName={this.onSaveName}
-                  onExposeName={this.onExposeName}
-                  onReconcile={this.onReconcile}
-                  onDoneReconciling={this.onDoneReconciling}
-                  onCreateReconciliationTransaction={
-                    this.onCreateReconciliationTransaction
-                  }
-                  onSync={this.onSync}
-                  onImport={this.onImport}
-                  onBatchDelete={this.onBatchDelete}
-                  onBatchDuplicate={this.onBatchDuplicate}
-                  onBatchEdit={this.onBatchEdit}
-                  onBatchUnlink={this.onBatchUnlink}
-                  onCreateRule={this.onCreateRule}
-                  onUpdateFilter={this.onUpdateFilter}
-                  onClearFilters={this.onClearFilters}
-                  onReloadSavedFilter={this.onReloadSavedFilter}
-                  onCondOpChange={this.onCondOpChange}
-                  onDeleteFilter={this.onDeleteFilter}
-                  onApplyFilter={this.onApplyFilter}
-                  onScheduleAction={this.onScheduleAction}
-                />
+        {(allTransactions, allBalances) => (
+          <SelectedProviderWithItems
+            name="transactions"
+            items={allTransactions}
+            fetchAllIds={this.fetchAllIds}
+            registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
+          >
+            <View style={[styles.page]}>
+              <AccountHeader
+                tableRef={this.table}
+                editingName={editingName}
+                isNameEditable={isNameEditable}
+                workingHard={workingHard}
+                account={account}
+                filterId={filterId}
+                filtersList={this.props.filtersList}
+                location={this.props.location}
+                accountName={accountName}
+                accountsSyncing={accountsSyncing}
+                accounts={accounts}
+                transactions={transactions}
+                showBalances={showBalances}
+                showExtraBalances={showExtraBalances}
+                showCleared={showCleared}
+                showEmptyMessage={showEmptyMessage}
+                balanceQuery={balanceQuery}
+                canCalculateBalance={this.canCalculateBalance}
+                reconcileAmount={reconcileAmount}
+                search={this.state.search}
+                filters={this.state.filters}
+                conditionsOp={this.state.conditionsOp}
+                savePrefs={this.props.savePrefs}
+                onSearch={this.onSearch}
+                onShowTransactions={this.onShowTransactions}
+                onMenuSelect={this.onMenuSelect}
+                onAddTransaction={this.onAddTransaction}
+                onToggleExtraBalances={this.onToggleExtraBalances}
+                onSaveName={this.onSaveName}
+                onExposeName={this.onExposeName}
+                onReconcile={this.onReconcile}
+                onDoneReconciling={this.onDoneReconciling}
+                onCreateReconciliationTransaction={
+                  this.onCreateReconciliationTransaction
+                }
+                onSync={this.onSync}
+                onImport={this.onImport}
+                onBatchDelete={this.onBatchDelete}
+                onBatchDuplicate={this.onBatchDuplicate}
+                onBatchEdit={this.onBatchEdit}
+                onBatchUnlink={this.onBatchUnlink}
+                onCreateRule={this.onCreateRule}
+                onUpdateFilter={this.onUpdateFilter}
+                onClearFilters={this.onClearFilters}
+                onReloadSavedFilter={this.onReloadSavedFilter}
+                onCondOpChange={this.onCondOpChange}
+                onDeleteFilter={this.onDeleteFilter}
+                onApplyFilter={this.onApplyFilter}
+                onScheduleAction={this.onScheduleAction}
+              />
 
-                <View style={{ flex: 1 }}>
-                  <TransactionList
-                    tableRef={this.table}
-                    account={account}
-                    transactions={transactions}
-                    allTransactions={allTransactions}
-                    animated={this.animated}
-                    loadMoreTransactions={() =>
-                      this.paged && this.paged.fetchNext()
-                    }
-                    accounts={accounts}
-                    category={category}
-                    categoryGroups={categoryGroups}
-                    payees={payees}
-                    balances={
-                      showBalances && this.canCalculateBalance()
-                        ? balances
-                        : null
-                    }
-                    showCleared={showCleared}
-                    showAccount={
-                      !accountId ||
-                      accountId === 'offbudget' ||
-                      accountId === 'budgeted' ||
-                      accountId === 'uncategorized'
-                    }
-                    isAdding={this.state.isAdding}
-                    isNew={this.isNew}
-                    isMatched={this.isMatched}
-                    isFiltered={
-                      this.state.search !== '' || this.state.filters.length > 0
-                    }
-                    dateFormat={dateFormat}
-                    hideFraction={hideFraction}
-                    addNotification={addNotification}
-                    renderEmpty={() =>
-                      showEmptyMessage ? (
-                        <EmptyMessage
-                          onAdd={() => replaceModal('add-account')}
-                        />
-                      ) : !loading ? (
-                        <View
-                          style={{
-                            marginTop: 20,
-                            textAlign: 'center',
-                            fontStyle: 'italic',
-                          }}
-                        >
-                          No transactions
-                        </View>
-                      ) : null
-                    }
-                    onSort={this.onSort}
-                    sortField={this.state.sort.field}
-                    ascDesc={this.state.sort.ascDesc}
-                    onChange={this.onTransactionsChange}
-                    onRefetch={this.refetchTransactions}
-                    onRefetchUpToRow={row =>
-                      this.paged.refetchUpToRow(row, {
-                        field: 'date',
-                        order: 'desc',
-                      })
-                    }
-                    onCloseAddTransaction={() =>
-                      this.setState({ isAdding: false })
-                    }
-                    onCreatePayee={this.onCreatePayee}
-                  />
-                </View>
+              <View style={{ flex: 1 }}>
+                <TransactionList
+                  tableRef={this.table}
+                  account={account}
+                  transactions={transactions}
+                  allTransactions={allTransactions}
+                  animated={this.animated}
+                  loadMoreTransactions={() =>
+                    this.paged && this.paged.fetchNext()
+                  }
+                  accounts={accounts}
+                  category={category}
+                  categoryGroups={categoryGroups}
+                  payees={payees}
+                  balances={allBalances}
+                  showBalances={showBalances}
+                  showCleared={showCleared}
+                  showAccount={
+                    !accountId ||
+                    accountId === 'offbudget' ||
+                    accountId === 'budgeted' ||
+                    accountId === 'uncategorized'
+                  }
+                  isAdding={this.state.isAdding}
+                  isNew={this.isNew}
+                  isMatched={this.isMatched}
+                  isFiltered={
+                    this.state.search !== '' || this.state.filters.length > 0
+                  }
+                  dateFormat={dateFormat}
+                  hideFraction={hideFraction}
+                  addNotification={addNotification}
+                  renderEmpty={() =>
+                    showEmptyMessage ? (
+                      <EmptyMessage onAdd={() => replaceModal('add-account')} />
+                    ) : !loading ? (
+                      <View
+                        style={{
+                          marginTop: 20,
+                          textAlign: 'center',
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        No transactions
+                      </View>
+                    ) : null
+                  }
+                  onChange={this.onTransactionsChange}
+                  onRefetch={this.refetchTransactions}
+                  onRefetchUpToRow={row =>
+                    this.paged.refetchUpToRow(row, {
+                      field: 'date',
+                      order: 'desc',
+                    })
+                  }
+                  onCloseAddTransaction={() =>
+                    this.setState({ isAdding: false })
+                  }
+                  onCreatePayee={this.onCreatePayee}
+                />
               </View>
-            </SelectedProviderWithItems>
-          )
-        }
+            </View>
+          </SelectedProviderWithItems>
+        )}
       </AllTransactions>
     );
   }

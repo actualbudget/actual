@@ -548,7 +548,7 @@ function ruleToString(rule, data) {
   let conditions = rule.conditions.flatMap(cond => [
     mapField(cond.field),
     friendlyOp(cond.op),
-    cond.op === 'oneOf'
+    cond.op === 'oneOf' || cond.op === 'notOneOf'
       ? cond.value.map(v => mapValue(cond.field, v, data)).join(', ')
       : mapValue(cond.field, cond.value, data),
   ]);

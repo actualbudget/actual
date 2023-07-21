@@ -117,7 +117,10 @@ function formatDate(date, format) {
 
 function getFileType(filepath) {
   let m = filepath.match(/\.([^.]*)$/);
-  return m ? m[1].toLowerCase() : 'ofx';
+  if (!m) return 'ofx';
+  let rawType = m[1].toLowerCase();
+  if (rawType === 'tsv') return 'csv';
+  return rawType;
 }
 
 function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
@@ -575,7 +578,8 @@ export default function ImportTransactions({ modalProps, options }) {
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
   let [csvDelimiter, setCsvDelimiter] = useState(
-    prefs[`csv-delimiter-${accountId}`] || ',',
+    prefs[`csv-delimiter-${accountId}`] ||
+      (filename.endsWith('.tsv') ? '\t' : ','),
   );
   let [hasHeaderRow, setHasHeaderRow] = useState(
     prefs[`csv-has-header-${accountId}`] ?? true,
@@ -687,7 +691,10 @@ export default function ImportTransactions({ modalProps, options }) {
   async function onNewFile() {
     const res = await window.Actual.openFileDialog({
       filters: [
-        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
+        {
+          name: 'Financial Files',
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv'],
+        },
       ],
     });
 
@@ -916,6 +923,7 @@ export default function ImportTransactions({ modalProps, options }) {
                     options={[
                       [',', ','],
                       [';', ';'],
+                      ['\t', 'tab'],
                     ]}
                     value={csvDelimiter}
                     onChange={value => {

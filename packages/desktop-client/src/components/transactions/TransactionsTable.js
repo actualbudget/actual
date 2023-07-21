@@ -1223,11 +1223,7 @@ const Transaction = memo(function Transaction(props) {
       {showBalance && (
         <Cell
           name="balance"
-          value={
-            balance == null || isChild || isPreview
-              ? ''
-              : integerToCurrency(balance)
-          }
+          value={balance == null || isChild ? '' : integerToCurrency(balance)}
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
           style={[styles.tnum, amountStyle]}
           width={88}
@@ -1486,6 +1482,7 @@ function TransactionTableInner({
       showCleared,
       showAccount,
       showCategory,
+      showBalances,
       balances,
       hideFraction,
       isNew,
@@ -1532,24 +1529,22 @@ function TransactionTableInner({
           transaction={trans}
           showAccount={showAccount}
           showCategory={showCategory}
-          showBalance={!!balances}
+          showBalance={showBalances}
           showCleared={showCleared}
           hovered={hovered}
           selected={selected}
           highlighted={false}
-          added={isNew && isNew(trans.id)}
-          expanded={isExpanded && isExpanded(trans.id)}
-          matched={isMatched && isMatched(trans.id)}
+          added={isNew?.(trans.id)}
+          expanded={isExpanded?.(trans.id)}
+          matched={isMatched?.(trans.id)}
           showZeroInDeposit={isChildDeposit}
-          balance={balances && balances[trans.id] && balances[trans.id].balance}
+          balance={balances?.[trans.id]?.balance}
           focusedField={editing && tableNavigator.focusedField}
           accounts={accounts}
           categoryGroups={categoryGroups}
           payees={payees}
           inheritedFields={
-            parent && parent.payee === trans.payee
-              ? new Set(['payee'])
-              : new Set()
+            parent?.payee === trans.payee ? new Set(['payee']) : new Set()
           }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
@@ -1578,7 +1573,7 @@ function TransactionTableInner({
           hasSelected={props.selectedItems.size > 0}
           showAccount={props.showAccount}
           showCategory={props.showCategory}
-          showBalance={!!props.balances}
+          showBalance={props.showBalances}
           showCleared={props.showCleared}
           scrollWidth={scrollWidth}
           onSort={props.onSort}
@@ -1602,7 +1597,7 @@ function TransactionTableInner({
               payees={props.payees || []}
               showAccount={props.showAccount}
               showCategory={props.showCategory}
-              showBalance={!!props.balances}
+              showBalance={props.showBalances}
               showCleared={props.showCleared}
               dateFormat={dateFormat}
               hideFraction={props.hideFraction}
