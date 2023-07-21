@@ -1,7 +1,7 @@
 import { type ComponentType, useEffect, useState } from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Block, View } from '../common';
 
 type ProplessComponent = ComponentType<Record<string, never>>;
@@ -42,7 +42,7 @@ function LoadComponentInner<K extends string>({
         {message && (
           <Block style={{ marginBottom: 20, fontSize: 18 }}>{message}</Block>
         )}
-        <AnimatedLoading width={25} color={colors.pageText} />
+        <AnimatedLoading width={25} color={theme.pageText} />
       </View>
     );
   }

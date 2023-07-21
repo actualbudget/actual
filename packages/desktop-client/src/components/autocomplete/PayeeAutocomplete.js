@@ -7,7 +7,7 @@ import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Button, View } from '../common';
 
 import Autocomplete, {
@@ -82,12 +82,12 @@ function PayeeList({
               padding: '6px 9px',
               backgroundColor:
                 highlightedIndex === 0
-                  ? colors.altMenuItemBackgroundHover
-                  : colors.altMenuBackground,
+                  ? theme.altMenuItemBackgroundHover
+                  : theme.altMenuBackground,
               color:
                 highlightedIndex === 0
-                  ? colors.altMenuItemTextHover
-                  : colors.altMenuItemText,
+                  ? theme.altMenuItemTextHover
+                  : theme.altMenuItemText,
               borderRadius: embedded ? 4 : 0,
             }}
           >
@@ -126,7 +126,7 @@ function PayeeList({
                   key={'title-' + idx}
                   style={{
                     ...styles.altMenuHeaderText,
-                    color: colors.altMenuItemTextHeader,
+                    color: theme.altMenuItemTextHeader,
                     padding: '4px 9px',
                   }}
                 >
@@ -141,11 +141,11 @@ function PayeeList({
                 style={{
                   color:
                     highlightedIndex === idx
-                      ? colors.altMenuItemTextHover
-                      : colors.altMenuItemText,
+                      ? theme.altMenuItemTextHover
+                      : theme.altMenuItemText,
                   backgroundColor:
                     highlightedIndex === idx + offset
-                      ? colors.altMenuItemBackgroundHover
+                      ? theme.altMenuItemBackgroundHover
                       : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   padding: 4,
@@ -341,9 +341,9 @@ export default function PayeeAutocomplete({
                   style={[
                     showManagePayees && { marginBottom: 5 },
                     focusTransferPayees && {
-                      backgroundColor: colors.buttonPositiveBackground,
-                      color: colors.buttonPositiveText,
-                      borderColor: colors.buttonPositiveBorder,
+                      backgroundColor: theme.buttonPositiveBackground,
+                      color: theme.buttonPositiveText,
+                      borderColor: theme.buttonPositiveBorder,
                     },
                   ]}
                   onClick={() => {

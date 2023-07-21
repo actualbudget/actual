@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors, styles } from '../../../style';
+import { theme, styles } from '../../../style';
 import { Input as BaseInput } from '../../common';
 import { useSetServerURL } from '../../ServerContext';
 
@@ -84,7 +84,7 @@ export function Title({ text }: TitleProps) {
       style={{
         fontSize: 40,
         fontWeight: 700,
-        color: colors.pageTextPositive,
+        color: theme.pageTextPositive,
         marginBottom: 20,
       }}
     >
@@ -104,7 +104,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
           fontSize: 15,
           ...styles.shadow,
           ':focus': {
-            border: '1px solid ' + colors.buttonPositiveBorder,
+            border: '1px solid ' + theme.buttonPositiveBorder,
             ...styles.shadow,
           },
         },

@@ -5,7 +5,7 @@ import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../../style';
+import { theme } from '../../../style';
 import { View, Text, Button, ButtonWithLoading } from '../../common';
 
 import { useBootstrapped, Title, Input } from './common';
@@ -56,7 +56,7 @@ export default function Login() {
   }
 
   return (
-    <View style={{ maxWidth: 450, marginTop: -30, color: colors.pageText }}>
+    <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
       <Title text="Sign in to this Actual instance" />
       <Text
         style={{
@@ -72,7 +72,7 @@ export default function Login() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.errorText,
+            color: theme.errorText,
             borderRadius: 4,
             fontSize: 15,
           }}

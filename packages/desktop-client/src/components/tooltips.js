@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import { css } from 'glamor';
 
-import { styles, colors } from '../style';
+import { styles, theme } from '../style';
 
 export const IntersectionBoundary = createContext();
 
@@ -300,9 +300,9 @@ export class Tooltip extends Component {
       ...styles.shadowLarge,
       borderRadius: styles.menuBorderRadius,
       backgroundColor: altMenu
-        ? colors.altMenuBackground
-        : colors.tooltipBackground,
-      color: altMenu ? colors.altMenuText : colors.menuItemText,
+        ? theme.altMenuBackground
+        : theme.tooltipBackground,
+      color: altMenu ? theme.altMenuText : theme.menuItemText,
       // opacity: 0,
       // transition: 'transform .1s, opacity .1s',
       // transitionTimingFunction: 'ease-out'

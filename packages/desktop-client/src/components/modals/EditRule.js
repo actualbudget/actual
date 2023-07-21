@@ -29,7 +29,7 @@ import useSelected, { SelectedProvider } from '../../hooks/useSelected';
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import InformationOutline from '../../icons/v1/InformationOutline';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { View, Text, Modal, Button, Stack, Select, Tooltip } from '../common';
 import { StatusBadge } from '../schedules/StatusBadge';
 import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
@@ -72,7 +72,7 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={[{ color: colors.pageTextPositive, fontWeight: 700 }, style]}>
+    <View style={[{ color: theme.pageTextPositive, fontWeight: 700 }, style]}>
       <Select
         bare
         options={fields}
@@ -148,7 +148,7 @@ function FieldError({ type }) {
       style={{
         fontSize: 12,
         textAlign: 'center',
-        color: colors.errorText,
+        color: theme.errorText,
         marginBottom: 5,
       }}
     >
@@ -276,7 +276,7 @@ function ScheduleDescription({ id }) {
           <DisplayId
             type="payees"
             id={schedule._payee}
-            noneColor={colors.pageTextSubdued}
+            noneColor={theme.pageTextSubdued}
           />
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
@@ -337,7 +337,7 @@ function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
           <View
             style={{
               padding: '5px 10px',
-              color: colors.formInputTextHighlight,
+              color: theme.formInputTextHighlight,
             }}
           >
             {friendlyOp(op)}
@@ -366,7 +366,7 @@ function StageInfo() {
         onMouseLeave={() => setOpen(false)}
       >
         <InformationOutline
-          style={{ width: 11, height: 11, color: colors.tableBorderSelected }}
+          style={{ width: 11, height: 11, color: theme.tableBorderSelected }}
         />
       </View>
       {open && (
@@ -396,18 +396,18 @@ export function StageButton({ selected, children, style, onSelect }) {
           marginRight: 5,
           marginBottom: 5,
           fontSize: 'inherit',
-          border: '1px solid ' + colors.pillBorder,
-          color: colors.pillText,
-          backgroundColor: colors.pillBackground,
+          border: '1px solid ' + theme.pillBorder,
+          color: theme.pillText,
+          backgroundColor: theme.pillBackground,
           ':hover': {
-            color: colors.pillTextSelected,
-            backgroundColor: colors.pillBackgroundSelected,
+            color: theme.pillTextSelected,
+            backgroundColor: theme.pillBackgroundSelected,
           },
         },
         selected && {
-          border: '1px solid ' + colors.pillBorderSelected,
-          color: colors.pillTextSelected,
-          backgroundColor: colors.pillBackgroundSelected,
+          border: '1px solid ' + theme.pillBorderSelected,
+          color: theme.pillTextSelected,
+          backgroundColor: theme.pillBackgroundSelected,
         },
         style,
       ]}
@@ -574,7 +574,7 @@ function ConditionsList({
           <View
             key={i}
             style={{
-              color: colors.tableText,
+              color: theme.tableText,
             }}
           >
             <ConditionEditor
@@ -764,8 +764,8 @@ export default function EditRule({
   }
 
   let editorStyle = {
-    color: colors.pillText,
-    backgroundColor: colors.pillBackground,
+    color: theme.pillText,
+    backgroundColor: theme.pillBackground,
     borderRadius: 4,
   };
 
@@ -786,7 +786,7 @@ export default function EditRule({
             flexShrink: 0,
             flexBasis: 'auto',
             overflow: 'hidden',
-            color: colors.pageText,
+            color: theme.pageText,
           }}
         >
           <View
@@ -826,7 +826,7 @@ export default function EditRule({
           <View
             innerRef={scrollableEl}
             style={{
-              borderBottom: '1px solid ' + colors.tableBorder,
+              borderBottom: '1px solid ' + theme.tableBorder,
               padding: 20,
               overflow: 'auto',
               maxHeight: 'calc(100% - 300px)',
@@ -900,7 +900,7 @@ export default function EditRule({
                   marginBottom: 12,
                 }}
               >
-                <Text style={{ color: colors.pageText, marginBottom: 0 }}>
+                <Text style={{ color: theme.pageText, marginBottom: 0 }}>
                   This rule applies to these transactions:
                 </Text>
 

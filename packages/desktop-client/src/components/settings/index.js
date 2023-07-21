@@ -10,7 +10,7 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { useResponsive } from '../../ResponsiveProvider';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import tokens from '../../tokens';
 import { withThemeColor } from '../../util/withThemeColor';
 import { View, Text, Button, Input, ExternalLink } from '../common';
@@ -60,7 +60,7 @@ function About() {
             New version available: {latestVersion}
           </ExternalLink>
         ) : (
-          <Text style={{ color: colors.noticeText, fontWeight: 600 }}>
+          <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
             You’re up to date!
           </Text>
         )}
@@ -90,7 +90,7 @@ function AdvancedAbout({ prefs }) {
       <Text>
         <IDName>Budget ID:</IDName> {prefs.id}
       </Text>
-      <Text style={{ color: colors.pageText }}>
+      <Text style={{ color: theme.pageText }}>
         <IDName>Sync ID:</IDName> {prefs.groupId || '(none)'}
       </Text>
       {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
@@ -134,7 +134,7 @@ function Settings({
       }}
     >
       <Page title="Settings">
-        <View style={{ flexShrink: 0, gap: 30, color: colors.tableText }}>
+        <View style={{ flexShrink: 0, gap: 30, color: theme.tableText }}>
           {isNarrowWidth && (
             <View
               style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
@@ -175,7 +175,7 @@ function Settings({
   );
 }
 
-export default withThemeColor(colors.sidebarBackground)(
+export default withThemeColor(theme.sidebarBackground)(
   connect(
     state => ({
       prefs: state.prefs.local,

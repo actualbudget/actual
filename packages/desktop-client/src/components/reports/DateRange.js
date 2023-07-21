@@ -2,7 +2,7 @@ import React from 'react';
 
 import * as d from 'date-fns';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { Block } from '../common';
 
 function DateRange({ start, end }) {
@@ -26,7 +26,7 @@ function DateRange({ start, end }) {
     content = d.format(end, 'MMMM yyyy');
   }
 
-  return <Block style={{ color: colors.pageTextSubdued }}>{content}</Block>;
+  return <Block style={{ color: theme.pageTextSubdued }}>{content}</Block>;
 }
 
 export default DateRange;

@@ -28,7 +28,7 @@ import AnimatedLoading from '../icons/AnimatedLoading';
 import DeleteIcon from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
-import { styles, colors } from '../style';
+import { styles, theme } from '../style';
 
 import {
   View,
@@ -65,8 +65,8 @@ function fireBlur(onBlur, e) {
 }
 
 const CellContext = createContext({
-  backgroundColor: colors.formInputBackground,
-  borderColor: colors.formInputBorder,
+  backgroundColor: theme.formInputBackground,
+  borderColor: theme.formInputBorder,
 });
 
 type CellProviderProps = {
@@ -101,7 +101,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   { width, name, truncate = true, children, style, contentStyle, ...props },
   ref,
 ) {
-  let borderColor = colors.tableBorder;
+  let borderColor = theme.tableBorder;
   return (
     <View
       innerRef={ref}
@@ -214,7 +214,7 @@ export function Cell({
   if (oldBorderColor) {
     borderColor = oldBorderColor;
   } else {
-    borderColor = colors.tableBorder;
+    borderColor = theme.tableBorder;
   }
 
   const widthStyle = width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
@@ -364,9 +364,9 @@ export function Row({
   return (
     <CellProvider
       backgroundColor={
-        shouldHighlight ? colors.tableRowBackgroundHighlight : null
+        shouldHighlight ? theme.tableRowBackgroundHighlight : null
       }
-      borderColor={shouldHighlight ? colors.tableBorderSelected : null}
+      borderColor={shouldHighlight ? theme.tableBorderSelected : null}
     >
       <View
         innerRef={rowRef}
@@ -401,7 +401,7 @@ const inputCellStyle = {
 
 const readonlyInputStyle = {
   backgroundColor: 'transparent',
-  '::selection': { backgroundColor: colors.formInputTextReadOnlySelection },
+  '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
 type InputValueProps = ComponentProps<typeof Input> & {
@@ -648,30 +648,30 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             backgroundColor: bare
               ? 'transparent'
               : disabled // always use disabled before primary since we can have a disabled primary button
-              ? colors.buttonDisabledBackground
+              ? theme.buttonDisabledBackground
               : primary
-              ? colors.buttonPositiveBackground
-              : colors.buttonNeutralBackground,
+              ? theme.buttonPositiveBackground
+              : theme.buttonNeutralBackground,
             border: bare
               ? 'none'
               : '1px solid ' +
                 (disabled
-                  ? colors.buttonDisabledBorder
+                  ? theme.buttonDisabledBorder
                   : primary
-                  ? colors.buttonPositiveBorder
-                  : colors.buttonNeutralBorder),
+                  ? theme.buttonPositiveBorder
+                  : theme.buttonNeutralBorder),
             color: bare
               ? 'inherit'
               : disabled
-              ? colors.buttonDisabledText
+              ? theme.buttonDisabledText
               : primary
-              ? colors.buttonPositiveText
-              : colors.buttonNeutralText,
+              ? theme.buttonPositiveText
+              : theme.buttonNeutralText,
             ':focus': bare
               ? null
               : {
                   outline: 0,
-                  boxShadow: `1px 1px 2px ${colors.buttonShadow}`,
+                  boxShadow: `1px 1px 2px ${theme.buttonShadow}`,
                 },
           },
           style,
@@ -730,15 +730,15 @@ export function SelectCell({
             alignItems: 'center',
             borderRadius: 3,
             border: selected
-              ? '1px solid ' + colors.formInputBorderSelected
-              : '1px solid ' + colors.formInputBorder,
-            color: colors.tableBackground,
+              ? '1px solid ' + theme.formInputBorderSelected
+              : '1px solid ' + theme.formInputBorder,
+            color: theme.tableBackground,
             backgroundColor: selected
-              ? colors.tableTextEditingBackground
-              : colors.tableBackground,
+              ? theme.tableTextEditingBackground
+              : theme.tableBackground,
             ':focus': {
-              border: '1px solid ' + colors.formInputBorderSelected,
-              boxShadow: '0 1px 2px ' + colors.formInputShadowSelected,
+              border: '1px solid ' + theme.formInputBorderSelected,
+              boxShadow: '0 1px 2px ' + theme.formInputShadowSelected,
             },
           }}
           onEdit={onEdit}
@@ -849,8 +849,8 @@ export function TableHeader({
         collapsed={true}
         {...rowProps}
         style={{
-          color: colors.tableHeaderText,
-          backgroundColor: colors.tableHeaderBackground,
+          color: theme.tableHeaderText,
+          backgroundColor: theme.tableHeaderBackground,
           zIndex: 200,
           fontWeight: 500,
           ...rowProps.style,
@@ -888,13 +888,13 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
 
       <Button
         bare
-        style={{ color: colors.pageTextPositive }}
+        style={{ color: theme.pageTextPositive }}
         onClick={() => setMenuOpen(true)}
       >
         <ExpandArrow
           width={8}
           height={8}
-          style={{ marginRight: 5, color: colors.pageText }}
+          style={{ marginRight: 5, color: theme.pageText }}
         />
         {selectedItems.size} {name}
       </Button>
@@ -984,7 +984,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
-      backgroundColor = colors.tableBackground,
+      backgroundColor = theme.tableBackground,
       renderItem,
       renderEmpty,
       getItemKey,
@@ -1155,7 +1155,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
             justifyContent: 'center',
             alignItems: 'center',
             fontStyle: 'italic',
-            color: colors.tableText,
+            color: theme.tableText,
             flex: 1,
           }}
         >
@@ -1176,7 +1176,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
             },
           ]}
         >
-          <AnimatedLoading width={25} color={colors.tableText} />
+          <AnimatedLoading width={25} color={theme.tableText} />
         </View>
       );
     }

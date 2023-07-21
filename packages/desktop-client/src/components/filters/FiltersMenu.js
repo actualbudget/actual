@@ -25,7 +25,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { View, Text, Tooltip, Stack, Button, Menu, Select } from '../common';
 import { Value } from '../ManageRules';
 import { StageButton } from '../modals/EditRule';
@@ -36,7 +36,7 @@ import { CondOpMenu } from './SavedFilters';
 // todo: merge pill styles across app (e.g. ManageRules)
 let valueStyle = {
   fontWeight: 500,
-  color: colors.pageTextPositive,
+  color: theme.pageTextPositive,
 };
 
 let filterFields = [
@@ -481,9 +481,9 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colors.pillBackground,
-          color: colors.pillText,
-          border: '1px solid ' + colors.pillBorder,
+          backgroundColor: theme.pillBackground,
+          color: theme.pillText,
+          border: '1px solid ' + theme.pillBorder,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import { View, Block, Modal, Button, Text } from '../common';
 
 function getErrorMessage(error) {
@@ -42,7 +42,7 @@ function Import({ modalProps, actions }) {
       {() => (
         <View style={[styles.smallText, { lineHeight: 1.5 }]}>
           {error && (
-            <Block style={{ color: colors.errorText, marginBottom: 15 }}>
+            <Block style={{ color: theme.errorText, marginBottom: 15 }}>
               {getErrorMessage(error)}
             </Block>
           )}

@@ -10,7 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import { Stack, View, Text, Button } from '../common';
@@ -433,7 +433,7 @@ export default function ScheduleDetails() {
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
       modalSize="medium"
     >
-      <View style={{ color: colors.pageText }}>
+      <View style={{ color: theme.pageText }}>
         <Stack direction="row" style={{ marginTop: 10 }}>
           <FormField style={{ flex: 1 }}>
             <FormLabel title="Schedule Name" htmlFor="name-field" />
@@ -721,12 +721,12 @@ export default function ScheduleDetails() {
                   <View
                     style={{
                       padding: 20,
-                      color: colors.tableText,
+                      color: theme.tableText,
                       textAlign: 'center',
                     }}
                   >
                     {state.error ? (
-                      <Text style={{ color: colors.errorText }}>
+                      <Text style={{ color: theme.errorText }}>
                         Could not search: {state.error}
                       </Text>
                     ) : (
@@ -753,7 +753,7 @@ export default function ScheduleDetails() {
           style={{ marginTop: 20 }}
         >
           {state.error && (
-            <Text style={{ color: colors.errorText }}>{state.error}</Text>
+            <Text style={{ color: theme.errorText }}>{state.error}</Text>
           )}
           <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
             Cancel

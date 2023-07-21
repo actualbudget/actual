@@ -53,7 +53,7 @@ import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
 import Hyperlink2 from '../../icons/v2/Hyperlink2';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -266,8 +266,8 @@ const TransactionHeader = memo(
         style={{
           fontWeight: 300,
           zIndex: 200,
-          color: colors.tableHeaderText,
-          backgroundColor: colors.tableHeaderBackground,
+          color: theme.tableHeaderText,
+          backgroundColor: theme.tableHeaderBackground,
         }}
       >
         <SelectCell
@@ -436,8 +436,8 @@ function StatusCell({
             border: '1px solid transparent',
             borderRadius: 50,
             ':focus': {
-              border: '1px solid ' + colors.formInputBorderSelected,
-              boxShadow: '0 1px 2px ' + colors.formInputBorderSelected,
+              border: '1px solid ' + theme.formInputBorderSelected,
+              boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
             },
             cursor: isClearedField ? 'pointer' : 'default',
           },
@@ -483,7 +483,7 @@ function HeaderCell({
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            color: colors.tableHeaderText,
+            color: theme.tableHeaderText,
             fontWeight: 300,
             marginLeft: marginLeft,
             marginRight: marginRight,
@@ -534,10 +534,7 @@ function PayeeCell({
       name="payee"
       textAlign="flex"
       value={payeeId}
-      valueStyle={[
-        valueStyle,
-        inherited && { color: colors.tableTextInactive },
-      ]}
+      valueStyle={[valueStyle, inherited && { color: theme.tableTextInactive }]}
       exposed={focused}
       onExpose={name => !isPreview && onEdit(id, name)}
       onUpdate={async value => {
@@ -813,17 +810,17 @@ const Transaction = memo(function Transaction(props) {
       style={[
         {
           backgroundColor: selected
-            ? colors.tableRowBackgroundHighlight
+            ? theme.tableRowBackgroundHighlight
             : backgroundFocus
-            ? colors.tableRowBackgroundHover
-            : colors.tableBackground,
+            ? theme.tableRowBackgroundHover
+            : theme.tableBackground,
         },
         highlighted || selected
-          ? { color: colors.tableRowBackgroundHighlightText }
-          : { color: colors.tableText },
+          ? { color: theme.tableRowBackgroundHighlightText }
+          : { color: theme.tableText },
         style,
         isPreview && {
-          color: colors.tableTextInactive,
+          color: theme.tableTextInactive,
           fontStyle: 'italic',
         },
         _unmatched && { opacity: 0.5 },
@@ -836,7 +833,7 @@ const Transaction = memo(function Transaction(props) {
           width={110}
           style={{
             width: 110,
-            backgroundColor: colors.pageBackground,
+            backgroundColor: theme.pageBackground,
             border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
         />
@@ -847,7 +844,7 @@ const Transaction = memo(function Transaction(props) {
           /* Account blank placeholder for Child transaction */
           style={{
             flex: 1,
-            backgroundColor: colors.pageBackground,
+            backgroundColor: theme.pageBackground,
             border: 0,
           }}
         />
@@ -1056,7 +1053,7 @@ const Transaction = memo(function Transaction(props) {
               borderRadius: 4,
               border: '1px solid transparent', // so it doesn't shift on hover
               ':hover': {
-                border: '1px solid ' + colors.buttonNeutralBorder,
+                border: '1px solid ' + theme.buttonNeutralBorder,
               },
             }}
             disabled={isTemporaryId(transaction.id)}
@@ -1140,7 +1137,7 @@ const Transaction = memo(function Transaction(props) {
                   // uncategorized transaction
                   fontStyle: 'italic',
                   fontWeight: 500,
-                  color: colors.formInputTextHighlight,
+                  color: theme.formInputTextHighlight,
                 }
               : valueStyle
           }
@@ -1221,7 +1218,7 @@ const Transaction = memo(function Transaction(props) {
           name="balance"
           value={balance == null || isChild ? '' : integerToCurrency(balance)}
           valueStyle={{
-            color: balance < 0 ? colors.errorText : colors.noticeText,
+            color: balance < 0 ? theme.errorText : theme.noticeText,
           }}
           style={[styles.tnum, amountStyle]}
           width={88}
@@ -1348,9 +1345,9 @@ function NewTransaction({
   return (
     <View
       style={{
-        borderBottom: '1px solid ' + colors.tableBorderHover,
+        borderBottom: '1px solid ' + theme.tableBorderHover,
         paddingBottom: 6,
-        backgroundColor: colors.tableBackground,
+        backgroundColor: theme.tableBackground,
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
@@ -1569,8 +1566,8 @@ function TransactionTableInner({
         {
           flex: 1,
           cursor: 'default',
-          borderLeft: '1px solid ' + colors.tableBorder,
-          borderRight: '1px solid ' + colors.tableBorder,
+          borderLeft: '1px solid ' + theme.tableBorder,
+          borderRight: '1px solid ' + theme.tableBorder,
         },
         props.style,
       ]}
@@ -1654,7 +1651,7 @@ function TransactionTableInner({
               left: 0,
               right: 0,
               height: 20,
-              backgroundColor: colors.errorText,
+              backgroundColor: theme.errorText,
               boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
             }}
           />

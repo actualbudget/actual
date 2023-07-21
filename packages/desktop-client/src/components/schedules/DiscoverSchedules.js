@@ -11,7 +11,7 @@ import useSelected, {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { getParent } from '../../util/router-tools';
 import { View, Stack, ButtonWithLoading, P } from '../common';
 import { Page, usePageType } from '../Page';
@@ -39,19 +39,17 @@ function DiscoverSchedulesTable({ schedules, loading }) {
           dispatchSelected({ type: 'select', id: item.id, event: e });
         }}
         style={{
-          borderColor: selected
-            ? colors.tableBorderSelected
-            : colors.tableBorder,
+          borderColor: selected ? theme.tableBorderSelected : theme.tableBorder,
           cursor: 'pointer',
           color: selected
-            ? colors.tableRowBackgroundHighlightText
-            : colors.tableText,
+            ? theme.tableRowBackgroundHighlightText
+            : theme.tableText,
           backgroundColor: selected
-            ? colors.tableRowBackgroundHighlight
-            : colors.tableBackground,
+            ? theme.tableRowBackgroundHighlight
+            : theme.tableBackground,
           ':hover': {
-            backgroundColor: colors.tableRowBackgroundHover,
-            color: colors.tableText,
+            backgroundColor: theme.tableRowBackgroundHover,
+            color: theme.tableText,
           },
         }}
       >
@@ -159,7 +157,7 @@ export default function DiscoverSchedules() {
 
   return (
     <Page title="Found schedules" modalSize={{ width: 850, height: 650 }}>
-      <View style={{ color: colors.pageText }}>
+      <View style={{ color: theme.pageText }}>
         <P>
           We found some possible schedules in your current transactions. Select
           the ones you want to create.

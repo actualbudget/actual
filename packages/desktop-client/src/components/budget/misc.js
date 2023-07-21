@@ -16,7 +16,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import {
   View,
   Text,
@@ -221,7 +221,7 @@ class BudgetTable extends Component {
               backgroundColor: 'transparent',
             },
             '& ::-webkit-scrollbar-thumb:vertical': {
-              backgroundColor: colors.pageBackground,
+              backgroundColor: theme.pageBackground,
             },
           },
         ]}
@@ -332,7 +332,7 @@ function SidebarCategory({
   dragging,
   editing,
   style,
-  borderColor = colors.tableBorder,
+  borderColor = theme.tableBorder,
   isLast,
   onDragChange,
   onEditMonth,
@@ -372,12 +372,12 @@ function SidebarCategory({
             e.stopPropagation();
             setMenuOpen(true);
           }}
-          style={{ color: colors.tableText, padding: 3 }}
+          style={{ color: theme.tableText, padding: 3 }}
         >
           <CheveronDown
             width={14}
             height={14}
-            style={{ color: colors.tableText }}
+            style={{ color: theme.tableText }}
           />
         </Button>
         {menuOpen && (
@@ -413,7 +413,7 @@ function SidebarCategory({
       <View style={{ flex: 1 }} />
       <NotesButton
         id={category.id}
-        style={dragging && { color: colors.tableTextHover }}
+        style={dragging && { color: theme.tableTextHover }}
       />
     </View>
   );
@@ -430,15 +430,15 @@ function SidebarCategory({
           !dragPreview && {
             '&:hover button': {
               display: 'flex',
-              color: colors.tableText,
+              color: theme.tableText,
             },
           },
-        dragging && { color: colors.tableTextHover },
+        dragging && { color: theme.tableTextHover },
 
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
         dragPreview && {
-          backgroundColor: colors.tableRowBackgroundHighlight,
+          backgroundColor: theme.tableRowBackgroundHighlight,
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
@@ -623,7 +623,7 @@ function SidebarGroup({
         formatter={value => displayed}
         width="flex"
         exposed={editing}
-        borderColor={colors.tableBorder}
+        borderColor={theme.tableBorder}
         onUpdate={value => {
           if (temporary) {
             if (value === '') {
@@ -660,7 +660,7 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
         <View
           style={[
             { flex: 1 },
-            { borderLeft: '1px solid ' + colors.tableBorder },
+            { borderLeft: '1px solid ' + theme.tableBorder },
             style,
           ]}
         >
@@ -682,15 +682,15 @@ const BudgetTotals = memo(function BudgetTotals({
     <View
       data-testid="budget-totals"
       style={{
-        color: colors.tableHeaderText,
-        backgroundColor: colors.tableBackground,
+        color: theme.tableHeaderText,
+        backgroundColor: theme.tableBackground,
         flexDirection: 'row',
         flexShrink: 0,
         boxShadow: styles.cardShadow,
         marginLeft: 5,
         marginRight: 5 + getScrollbarWidth(),
         borderRadius: '4px 4px 0 0',
-        borderBottom: '1px solid ' + colors.tableBorder,
+        borderBottom: '1px solid ' + theme.tableBorder,
       }}
     >
       <View
@@ -808,8 +808,8 @@ function ExpenseGroup({
     <Row
       collapsed={true}
       style={{
-        backgroundColor: colors.tableRowHeaderBackground,
-        color: colors.tableRowHeaderText,
+        backgroundColor: theme.tableRowHeaderBackground,
+        color: theme.tableRowHeaderText,
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
       }}
@@ -903,7 +903,7 @@ function ExpenseCategory({
       collapsed={true}
       style={{
         opacity: cat.hidden ? 0.5 : undefined,
-        color: colors.tableText,
+        color: theme.tableText,
       }}
     >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
@@ -964,8 +964,8 @@ function IncomeGroup({
       collapsed={true}
       style={{
         fontWeight: 600,
-        color: colors.tableHeaderText,
-        backgroundColor: colors.tableRowHeaderBackground,
+        color: theme.tableHeaderText,
+        backgroundColor: theme.tableRowHeaderBackground,
       }}
     >
       <SidebarGroup
@@ -1014,11 +1014,7 @@ function IncomeCategory({
   });
 
   return (
-    <Row
-      innerRef={dropRef}
-      collapsed={true}
-      style={{ color: colors.tableText }}
-    >
+    <Row innerRef={dropRef} collapsed={true} style={{ color: theme.tableText }}>
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
       <SidebarCategory
@@ -1186,7 +1182,7 @@ const BudgetCategories = memo(
       <View
         style={{
           marginBottom: 10,
-          backgroundColor: colors.tableBackground,
+          backgroundColor: theme.tableBackground,
           overflow: 'hidden',
           boxShadow: styles.cardShadow,
           borderRadius: '0 0 4px 4px',
@@ -1335,7 +1331,7 @@ const BudgetCategories = memo(
                 style={
                   !dragState && {
                     ':hover': {
-                      backgroundColor: colors.tableRowBackgroundHover,
+                      backgroundColor: theme.tableRowBackgroundHover,
                     },
                   }
                 }
@@ -1356,8 +1352,8 @@ function IncomeHeader({ MonthComponent, onShowNewGroup }) {
       style={{
         flexDirection: 'row',
         flex: 1,
-        backgroundColor: colors.tableBackground,
-        ':hover': { backgroundColor: colors.tableBackground },
+        backgroundColor: theme.tableBackground,
+        ':hover': { backgroundColor: theme.tableBackground },
       }}
     >
       <View

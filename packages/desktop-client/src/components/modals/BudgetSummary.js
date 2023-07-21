@@ -82,7 +82,8 @@ function BudgetSummary({ month, modalProps }) {
                 {
                   fontWeight: '600',
                   fontSize: 22,
-                  color: amount < 0 ? colors.errorText : colors.tableTextHover,
+                  color:
+                    budgetAmount < 0 ? colors.errorText : colors.tableTextHover,
                 },
               ]}
             >

@@ -18,7 +18,7 @@ import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
 import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Button, Card, Label, Text, View } from '../common';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
@@ -44,14 +44,14 @@ function ToBudget({ toBudget, onClick }) {
     >
       <Label
         title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
-        style={{ color: colors.tableText, flexShrink: 0 }}
+        style={{ color: theme.tableText, flexShrink: 0 }}
       />
       <Text
         style={[
           styles.smallText,
           {
             fontWeight: '500',
-            color: amount < 0 ? colors.errorText : colors.tableText,
+            color: amount < 0 ? theme.errorText : theme.tableText,
           },
         ]}
       >
@@ -70,11 +70,11 @@ function Saved({ projected }) {
   return (
     <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
       {projected ? (
-        <Label title="PROJECTED SAVINGS" style={{ color: colors.tableText }} />
+        <Label title="PROJECTED SAVINGS" style={{ color: theme.tableText }} />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: colors.tableText }}
+          style={{ color: theme.tableText }}
         />
       )}
 
@@ -84,10 +84,10 @@ function Saved({ projected }) {
           {
             fontWeight: '500',
             color: projected
-              ? colors.warningText
+              ? theme.warningText
               : isNegative
-              ? colors.errorText
-              : colors.tableText,
+              ? theme.errorText
+              : theme.tableText,
           },
         ]}
       >
@@ -275,9 +275,7 @@ class BudgetCategory extends PureComponent {
         // ref={el => (this.container = el)}
         style={[
           {
-            backgroundColor: editing
-              ? colors.buttonDisabledText
-              : 'transparent',
+            backgroundColor: editing ? theme.buttonDisabledText : 'transparent',
             borderBottomWidth: 0,
             borderTopWidth: index > 0 ? 1 : 0,
           },
@@ -316,7 +314,7 @@ class BudgetCategory extends PureComponent {
             name="balance"
             binding={balance}
             style={[styles.smallText, { width: 90, textAlign: 'right' }]}
-            getStyle={value => value < 0 && { color: colors.errorText }}
+            getStyle={value => value < 0 && { color: theme.errorText }}
             type="financial"
           />
         </View>
@@ -385,8 +383,8 @@ class TotalsRow extends PureComponent {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          color: colors.tableHeaderText,
-          backgroundColor: colors.tableHeaderBackground,
+          color: theme.tableHeaderText,
+          backgroundColor: theme.tableHeaderBackground,
         }}
         data-testid="totals"
       >
@@ -612,8 +610,8 @@ class BudgetGroup extends PureComponent {
         style={{
           marginTop: 7,
           marginBottom: 7,
-          color: colors.tableText,
-          backgroundColor: colors.tableBackground,
+          color: theme.tableText,
+          backgroundColor: theme.tableBackground,
         }}
       >
         <TotalsRow
@@ -665,12 +663,12 @@ class IncomeBudgetGroup extends Component {
           {type === 'report' && (
             <Label
               title="BUDGETED"
-              style={{ width: 90, color: colors.pageText }}
+              style={{ width: 90, color: theme.pageText }}
             />
           )}
           <Label
             title="RECEIVED"
-            style={{ width: 90, color: colors.pageText }}
+            style={{ width: 90, color: theme.pageText }}
           />
         </View>
 
@@ -688,8 +686,8 @@ class IncomeBudgetGroup extends Component {
             nameTextStyle={{ fontWeight: '500' }}
             amountTextStyle={{ fontWeight: '500' }}
             style={{
-              backgroundColor: colors.tableHeaderBackground,
-              color: colors.tableHeaderText,
+              backgroundColor: theme.tableHeaderBackground,
+              color: theme.tableHeaderText,
             }}
           />
 
@@ -711,8 +709,8 @@ class IncomeBudgetGroup extends Component {
                 }
                 index={index}
                 style={{
-                  backgroundColor: colors.tableBackground,
-                  color: colors.tableText,
+                  backgroundColor: theme.tableBackground,
+                  color: theme.tableText,
                 }}
               />
             );
@@ -912,10 +910,10 @@ export class BudgetTable extends Component {
               flex: '1 0 auto',
               padding: 10,
               paddingRight: 14,
-              backgroundColor: colors.tableBackground,
+              backgroundColor: theme.tableBackground,
               borderBottomWidth: 1,
-              borderColor: colors.tableBorder,
-              color: colors.tableText,
+              borderColor: theme.tableBorder,
+              color: theme.tableText,
             }}
           >
             {type === 'report' ? (
@@ -929,7 +927,7 @@ export class BudgetTable extends Component {
             <View style={{ flex: 1 }} />
 
             <View style={{ width: 90 }}>
-              <Label title="BUDGETED" style={{ color: colors.tableText }} />
+              <Label title="BUDGETED" style={{ color: theme.tableText }} />
               <CellValue
                 binding={reportBudget.totalBudgetedExpense}
                 type="financial"
@@ -946,7 +944,7 @@ export class BudgetTable extends Component {
               />
             </View>
             <View style={{ width: 90 }}>
-              <Label title="BALANCE" style={{ color: colors.tableText }} />
+              <Label title="BALANCE" style={{ color: theme.tableText }} />
               <CellValue
                 binding={rolloverBudget.totalBalance}
                 type="financial"
@@ -1060,8 +1058,8 @@ function UnconnectedBudgetHeader({
         flexShrink: 0,
         height: 50,
         justifyContent: 'center',
-        backgroundColor: colors.sidebarBackground,
-        color: colors.sidebarItemText,
+        backgroundColor: theme.sidebarBackground,
+        color: theme.sidebarItemText,
       }}
     >
       {!editMode && (
@@ -1128,7 +1126,7 @@ function UnconnectedBudgetHeader({
 
           <SyncButton
             style={{
-              color: colors.sidebarItemText,
+              color: theme.sidebarItemText,
               position: 'absolute',
               top: 0,
               bottom: 0,

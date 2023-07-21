@@ -15,7 +15,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Table, Row, Field, Cell, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
@@ -47,7 +47,7 @@ const TransactionRow = memo(function TransactionRow({
   let dispatchSelected = useSelectedDispatch();
 
   return (
-    <Row style={{ color: colors.tableText }}>
+    <Row style={{ color: theme.tableText }}>
       <SelectCell
         exposed={true}
         focused={false}

@@ -23,7 +23,7 @@ import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colors, styles } from '../../style';
+import { colors, styles, theme } from '../../style';
 import {
   Text,
   useStableCallback,
@@ -104,9 +104,7 @@ let Payee = memo(
   }) => {
     let { id } = payee;
     let dispatchSelected = useSelectedDispatch();
-    let borderColor = selected
-      ? colors.tableBorderSelected
-      : colors.tableBorder;
+    let borderColor = selected ? theme.tableBorderSelected : theme.tableBorder;
     let backgroundFocus = hovered || focusedField === 'select';
 
     return (
@@ -117,10 +115,10 @@ let Payee = memo(
             alignItems: 'stretch',
             borderColor: borderColor,
             backgroundColor: selected
-              ? colors.tableRowBackgroundHighlight
+              ? theme.tableRowBackgroundHighlight
               : backgroundFocus
-              ? colors.tableRowBackgroundHover
-              : colors.tableBackground,
+              ? theme.tableRowBackgroundHover
+              : theme.tableBackground,
           },
           style,
           selected && {
@@ -144,10 +142,10 @@ let Payee = memo(
           value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
           style={{
             color: selected
-              ? colors.tableRowBackgroundHighlightText
+              ? theme.tableRowBackgroundHighlightText
               : payee.transfer_acct
-              ? colors.tableTextInactive
-              : colors.tableText,
+              ? theme.tableTextInactive
+              : theme.tableText,
           }}
           exposed={focusedField === 'name'}
           width="flex"
@@ -260,7 +258,7 @@ function EmptyMessage({ text, style }) {
       style={[
         {
           textAlign: 'center',
-          color: colors.pageText,
+          color: theme.pageText,
           fontStyle: 'italic',
           fontSize: 13,
           marginTop: 5,

@@ -5,7 +5,7 @@ import type { FeatureFlag } from 'loot-core/src/client/state-types/prefs';
 
 import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
-import { colors, useTheme } from '../../style';
+import { theme, useTheme } from '../../style';
 import { LinkButton, Text, View } from '../common';
 import { Checkbox } from '../forms';
 
@@ -39,14 +39,14 @@ function FeatureToggle({
         disabled={disableToggle}
       />
       <View
-        style={{ color: disableToggle ? colors.pageTextSubdued : 'inherit' }}
+        style={{ color: disableToggle ? theme.pageTextSubdued : 'inherit' }}
       >
         {children}
         {disableToggle && (
           <Text
             style={{
-              backgroundColor: colors.errorBackground,
-              color: colors.errorText,
+              backgroundColor: theme.errorBackground,
+              color: theme.errorText,
               fontWeight: 500,
             }}
           >

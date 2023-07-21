@@ -15,7 +15,7 @@ import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
-import { colors, styles } from '../../../style';
+import { theme, styles } from '../../../style';
 import {
   View,
   Text,
@@ -101,8 +101,8 @@ function IncomeProgress({ current, target }: IncomeProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? colors.errorText : colors.noticeText}
-      backgroundColor={over ? colors.errorBackground : colors.noticeBackground}
+      color={over ? theme.errorText : theme.noticeText}
+      backgroundColor={over ? theme.errorBackground : theme.noticeBackground}
       style={{ width: 20, height: 20 }}
     />
   );
@@ -134,8 +134,8 @@ function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? colors.errorText : colors.noticeText}
-      backgroundColor={over ? colors.errorBackground : colors.noticeBackground}
+      color={over ? theme.errorText : theme.noticeText}
+      backgroundColor={over ? theme.errorBackground : theme.noticeBackground}
       style={{ width: 20, height: 20 }}
     />
   );
@@ -169,14 +169,14 @@ function BudgetTotal({
     >
       <ProgressComponent current={current} target={target} />
 
-      <View style={{ marginLeft: 10, color: colors.tableRowHeaderText }}>
+      <View style={{ marginLeft: 10, color: theme.tableRowHeaderText }}>
         <View>
           <Text>{title}</Text>
         </View>
 
         <Text>
           <CellValue binding={current} type="financial" />
-          <Text style={{ color: colors.pageTextSubdued, fontStyle: 'italic' }}>
+          <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
             {' of '}
             <CellValue
               binding={target}
@@ -276,10 +276,10 @@ function Saved({ projected, style }: SavedProps) {
             {
               fontSize: 25,
               color: projected
-                ? colors.warningText
+                ? theme.warningText
                 : isNegative
-                ? colors.errorText
-                : colors.pageTextPositive,
+                ? theme.errorText
+                : theme.pageTextPositive,
             },
           ])}
         >
@@ -319,8 +319,8 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   return (
     <View
       style={{
-        color: colors.tableText,
-        backgroundColor: colors.tableBackground,
+        color: theme.tableText,
+        backgroundColor: theme.tableBackground,
         boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
@@ -397,7 +397,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={colors.pageText} // notes page color
+                defaultColor={theme.pageText} // notes page color
               />
             </View>
             <View style={{ userSelect: 'none' }}>
@@ -452,7 +452,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             spacing={2}
             style={{
               alignSelf: 'center',
-              backgroundColor: colors.tableRowHeaderBackground,
+              backgroundColor: theme.tableRowHeaderBackground,
               borderRadius: 4,
               padding: '10px 15px',
               marginTop: 13,
@@ -469,8 +469,8 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: colors.tableBackground,
-              borderTop: '1px solid ' + colors.tableBorder,
+              backgroundColor: theme.tableBackground,
+              borderTop: '1px solid ' + theme.tableBorder,
             }}
           >
             <Saved projected={month >= currentMonth} />

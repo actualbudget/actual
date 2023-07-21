@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 import { css, type CSSProperties } from 'glamor';
 
 import Loading from '../../icons/AnimatedLoading';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 import View from './View';
@@ -50,30 +50,30 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ? null
           : '1px solid ' +
             (disabled // always use disabled before primary since we can have a disabled primary button
-              ? colors.buttonDisabledBorder
+              ? theme.buttonDisabledBorder
               : primary
-              ? colors.buttonPositiveBorder
+              ? theme.buttonPositiveBorder
               : altMenu
-              ? colors.buttonAltMenuBorder
-              : colors.buttonNeutralBorder),
+              ? theme.buttonAltMenuBorder
+              : theme.buttonNeutralBorder),
         color: bare
           ? null
           : disabled
-          ? colors.buttonDisabledText
+          ? theme.buttonDisabledText
           : primary
-          ? colors.buttonPositiveTextHover
+          ? theme.buttonPositiveTextHover
           : altMenu
-          ? colors.buttonAltMenuTextHover
-          : colors.buttonNeutralTextHover,
+          ? theme.buttonAltMenuTextHover
+          : theme.buttonNeutralTextHover,
         backgroundColor: bare
           ? 'rgba(100,100,100,0.15)' // doesn't do anything visible in dark mode, but keep for light
           : disabled
-          ? colors.buttonDisabledBackground
+          ? theme.buttonDisabledBackground
           : primary
-          ? colors.buttonPositiveBackgroundHover
+          ? theme.buttonPositiveBackgroundHover
           : altMenu
-          ? colors.buttonAltMenuBackgroundHover
-          : colors.buttonNeutralBackgroundHover,
+          ? theme.buttonAltMenuBackgroundHover
+          : theme.buttonNeutralBackgroundHover,
       },
       hoveredStyle,
     ];
@@ -101,31 +101,31 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         backgroundColor: bare
           ? 'transparent'
           : disabled // always use disabled before primary since we can have a disabled primary button
-          ? colors.buttonDisabledBackground
+          ? theme.buttonDisabledBackground
           : primary
-          ? colors.buttonPositiveBackground
+          ? theme.buttonPositiveBackground
           : altMenu
-          ? colors.buttonAltMenuBackground
-          : colors.buttonNeutralBackground,
+          ? theme.buttonAltMenuBackground
+          : theme.buttonNeutralBackground,
         border: bare
           ? 'none'
           : '1px solid ' +
             (disabled
-              ? colors.buttonDisabledBorder
+              ? theme.buttonDisabledBorder
               : primary
-              ? colors.buttonPositiveBorder
+              ? theme.buttonPositiveBorder
               : altMenu
-              ? colors.buttonAltMenuBorder
-              : colors.buttonNeutralBorder),
+              ? theme.buttonAltMenuBorder
+              : theme.buttonNeutralBorder),
         color: bare
           ? 'inherit'
           : disabled
-          ? colors.buttonDisabledText
+          ? theme.buttonDisabledText
           : primary
-          ? colors.buttonPositiveText
+          ? theme.buttonPositiveText
           : altMenu
-          ? colors.buttonAltMenuText
-          : colors.buttonNeutralText,
+          ? theme.buttonAltMenuText
+          : theme.buttonNeutralText,
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',
         ...styles.smallText,

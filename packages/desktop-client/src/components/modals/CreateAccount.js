@@ -5,7 +5,7 @@ import { pushModal } from 'loot-core/src/client/actions/modals';
 
 import { authorizeBank } from '../../gocardless';
 import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import {
   View,
   Text,
@@ -50,7 +50,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
   return (
     <Modal title="Add Account" {...modalProps}>
       {() => (
-        <View style={{ maxWidth: 500, gap: 30, color: colors.pageText }}>
+        <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
           <View style={{ gap: 10 }}>
             <Button
               primary

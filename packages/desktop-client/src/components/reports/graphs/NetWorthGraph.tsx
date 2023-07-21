@@ -40,7 +40,7 @@ function Area({ start, end, scale, range }: AreaProps) {
             y={range.y[1]}
             width={endX - startX}
             height={zero - range.y[1] + 1}
-            fill={theme.colors.blueFadeStart}
+            fill={theme.theme.blueFadeStart}
           />
         </clipPath>
         <clipPath id="negative">
@@ -49,7 +49,7 @@ function Area({ start, end, scale, range }: AreaProps) {
             y={zero + 1}
             width={endX - startX}
             height={Math.max(range.y[0] - zero - 1, 0)}
-            fill={theme.colors.redFadeStart}
+            fill={theme.theme.redFadeStart}
           />
         </clipPath>
         <linearGradient
@@ -60,8 +60,8 @@ function Area({ start, end, scale, range }: AreaProps) {
           x2={0}
           y2={zero}
         >
-          <stop offset="0%" stopColor={theme.colors.blueFadeStart} />
-          <stop offset="100%" stopColor={theme.colors.blueFadeEnd} />
+          <stop offset="0%" stopColor={theme.theme.blueFadeStart} />
+          <stop offset="100%" stopColor={theme.theme.blueFadeEnd} />
         </linearGradient>
         <linearGradient
           id="negative-gradient"
@@ -71,8 +71,8 @@ function Area({ start, end, scale, range }: AreaProps) {
           x2={0}
           y2={range.y[0]}
         >
-          <stop offset="0%" stopColor={theme.colors.redFadeEnd} />
-          <stop offset="100%" stopColor={theme.colors.redFadeStart} />
+          <stop offset="0%" stopColor={theme.theme.redFadeEnd} />
+          <stop offset="100%" stopColor={theme.theme.redFadeStart} />
         </linearGradient>
       </defs>
     </svg>

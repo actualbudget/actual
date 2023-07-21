@@ -4,7 +4,7 @@ import { useLocation } from 'react-router';
 import { css, media } from 'glamor';
 import type { CSSProperties } from 'glamor';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import tokens from '../../tokens';
 import { View, LinkButton } from '../common';
 
@@ -19,12 +19,12 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
     <View
       {...css([
         {
-          backgroundColor: colors.tableBackground,
+          backgroundColor: theme.tableBackground,
           alignSelf: 'flex-start',
           alignItems: 'flex-start',
           padding: 15,
           borderRadius: 4,
-          border: '1px solid ' + colors.tableBorder,
+          border: '1px solid ' + theme.tableBorder,
           width: '100%',
         },
         style,
@@ -75,7 +75,7 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
     >
       <View
         style={{
-          color: colors.pageText,
+          color: theme.pageText,
           fontSize: 20,
           fontWeight: 500,
           flexShrink: 0,

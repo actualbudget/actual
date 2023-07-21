@@ -2,7 +2,7 @@ import React from 'react';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Block } from '../common';
 
 function Change({ amount }) {
@@ -10,7 +10,7 @@ function Change({ amount }) {
     <Block
       style={[
         styles.smallText,
-        { color: amount < 0 ? colors.errorText : colors.noticeText },
+        { color: amount < 0 ? theme.errorText : theme.noticeText },
       ]}
     >
       {amount >= 0 ? '+' : ''}

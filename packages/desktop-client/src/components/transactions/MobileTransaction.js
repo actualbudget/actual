@@ -24,7 +24,7 @@ import {
 
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import { Text, TextOneLine, View } from '../common';
 
 const zIndices = { SECTION_HEADING: 10 };
@@ -57,13 +57,13 @@ function Status({ status }) {
 
   switch (status) {
     case 'missed':
-      color = colors.errorText;
+      color = theme.errorText;
       break;
     case 'due':
-      color = colors.warningText;
+      color = theme.warningText;
       break;
     case 'upcoming':
-      color = colors.tableText;
+      color = theme.tableText;
       break;
     default:
   }
@@ -130,7 +130,7 @@ class Transaction extends PureComponent {
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
-      color: colors.tableText,
+      color: theme.tableText,
     };
 
     return (
@@ -145,8 +145,8 @@ class Transaction extends PureComponent {
       // >
       <ListItem
         style={[
-          { flex: 1, height: 60, padding: '5px 10px', color: colors.tableText }, // remove padding when Button is back
-          isPreview && { backgroundColor: colors.tableBackground },
+          { flex: 1, height: 60, padding: '5px 10px', color: theme.tableText }, // remove padding when Button is back
+          isPreview && { backgroundColor: theme.tableBackground },
           style,
         ]}
       >
@@ -168,7 +168,7 @@ class Transaction extends PureComponent {
                 textStyle,
                 { fontSize: 14, fontWeight: added ? '600' : '400' },
                 prettyDescription === '' && {
-                  color: colors.tableText,
+                  color: theme.tableText,
                   fontStyle: 'italic',
                 },
               ]}
@@ -190,7 +190,7 @@ class Transaction extends PureComponent {
                 style={{
                   width: 11,
                   height: 11,
-                  color: cleared ? colors.noticeText : colors.tableText,
+                  color: cleared ? theme.noticeText : theme.tableText,
                   marginRight: 5,
                 }}
               />
@@ -201,8 +201,8 @@ class Transaction extends PureComponent {
                     marginTop: 1,
                     fontWeight: '400',
                     color: prettyCategory
-                      ? colors.tableTextInactive
-                      : colors.formInputTextHighlight,
+                      ? theme.tableTextInactive
+                      : theme.formInputTextHighlight,
                     fontStyle: prettyCategory ? null : 'italic',
                     textAlign: 'left',
                   }}
@@ -290,8 +290,8 @@ export class TransactionList extends Component {
               <Item>
                 <div
                   style={{
-                    color: colors.pageText,
-                    backgroundColor: colors.pageBackground,
+                    color: theme.pageText,
+                    backgroundColor: theme.pageBackground,
                     display: 'flex',
                     justifyContent: 'center',
                     width: '100%',
@@ -310,7 +310,7 @@ export class TransactionList extends Component {
                 key={section.id}
                 // Can't style for some reason?
                 // Maybe since inside a Listbox and need to style with that?
-                style={{ backgroundColor: colors.errorText }}
+                style={{ backgroundColor: theme.errorText }}
               >
                 {section.data.map((transaction, index, transactions) => {
                   return (
@@ -318,7 +318,7 @@ export class TransactionList extends Component {
                     <Item
                       key={transaction.id}
                       style={{
-                        backgroundColor: colors.pageBackground,
+                        backgroundColor: theme.pageBackground,
                         fontSize:
                           index === transactions.length - 1 ? 98 : 'inherit',
                       }}
@@ -407,10 +407,10 @@ function ListBoxSection({ section, state }) {
         <div
           {...headingProps}
           {...css(styles.smallText, {
-            backgroundColor: colors.tableRowHeaderBackground,
-            borderBottom: `1px solid ${colors.tableBorder}`,
-            borderTop: `1px solid ${colors.tableBorder}`,
-            color: colors.tableRowHeaderText,
+            backgroundColor: theme.tableRowHeaderBackground,
+            borderBottom: `1px solid ${theme.tableBorder}`,
+            borderTop: `1px solid ${theme.tableBorder}`,
+            color: theme.tableRowHeaderText,
             display: 'flex',
             justifyContent: 'center',
             paddingBottom: 4,
@@ -459,11 +459,11 @@ function Option({ isLast, item, state }) {
       ref={ref}
       style={{
         background: isSelected
-          ? colors.tableRowBackgroundHighlight
-          : colors.tableBackground,
-        color: isSelected ? colors.tableText : null,
+          ? theme.tableRowBackgroundHighlight
+          : theme.tableBackground,
+        color: isSelected ? theme.tableText : null,
         outline: isFocusVisible ? '2px solid orange' : 'none',
-        ...(!isLast && { borderBottom: `1px solid ${colors.tableBorder}` }),
+        ...(!isLast && { borderBottom: `1px solid ${theme.tableBorder}` }),
       }}
     >
       {item.rendered}

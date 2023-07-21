@@ -29,7 +29,7 @@ import useSelected, {
   SelectedProvider,
 } from '../hooks/useSelected';
 import ArrowRight from '../icons/v0/RightArrow2';
-import { colors, styles } from '../style';
+import { theme, styles } from '../style';
 
 import {
   View,
@@ -52,7 +52,7 @@ import {
 
 let valueStyle = {
   fontWeight: 500,
-  color: colors.pageTextPositive,
+  color: theme.pageTextPositive,
 };
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
@@ -162,7 +162,7 @@ export function Value({
     }
     let numHidden = value.length - displayed.length;
     return (
-      <Text style={{ color: colors.pageText }}>
+      <Text style={{ color: theme.pageText }}>
         [
         {displayed.map((v, i) => {
           let text = <Text style={valueStyle}>{formatValue(v)}</Text>;
@@ -227,8 +227,8 @@ function ConditionExpression({
         {
           display: 'block',
           maxWidth: '100%',
-          color: colors.pillText,
-          backgroundColor: colors.pillBackground,
+          color: theme.pillText,
+          backgroundColor: theme.pillBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',
@@ -277,8 +277,8 @@ function ActionExpression({ field, op, value, options, style }) {
         {
           display: 'block',
           maxWidth: '100%',
-          color: colors.pillText,
-          backgroundColor: colors.pillBackground,
+          color: theme.pillText,
+          backgroundColor: theme.pillBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',
@@ -317,7 +317,7 @@ let Rule = memo(
     onEditRule,
   }) => {
     let dispatchSelected = useSelectedDispatch();
-    let borderColor = selected ? colors.tableBorderSelected : 'none';
+    let borderColor = selected ? theme.tableBorderSelected : 'none';
     let backgroundFocus = hovered || focusedField === 'select';
 
     return (
@@ -328,10 +328,10 @@ let Rule = memo(
           zIndex: editing || selected ? 101 : 'auto',
           borderColor: borderColor,
           backgroundColor: selected
-            ? colors.tableRowBackgroundHighlight
+            ? theme.tableRowBackgroundHighlight
             : backgroundFocus
-            ? colors.tableRowBackgroundHover
-            : colors.tableBackground,
+            ? theme.tableRowBackgroundHover
+            : theme.tableBackground,
         }}
         collapsed="true"
         onMouseEnter={() => onHover && onHover(rule.id)}
@@ -347,7 +347,7 @@ let Rule = memo(
           selected={selected}
         />
 
-        <Cell name="stage" width={50} plain style={{ color: colors.tableText }}>
+        <Cell name="stage" width={50} plain style={{ color: theme.tableText }}>
           {rule.stage && (
             <View
               style={{
@@ -390,7 +390,7 @@ let Rule = memo(
 
             <Text>
               <ArrowRight
-                style={{ width: 12, height: 12, color: colors.tableText }}
+                style={{ width: 12, height: 12, color: theme.tableText }}
               />
             </Text>
 
@@ -766,7 +766,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
       >
         <View
           style={{
-            color: colors.pageText,
+            color: theme.pageText,
             alignItems: 'center',
           }}
         >
@@ -793,7 +793,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
       <View
         style={{
           flex: 1,
-          backgroundColor: colors.tableBackground,
+          backgroundColor: theme.tableBackground,
           boxShadow: styles.cardShadow,
           borderRadius: 4,
         }}
@@ -821,7 +821,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
         style={{
           paddingBlock: 15,
           paddingInline: isModal ? 13 : 0,
-          borderTop: isModal && '1px solid ' + colors.tableBorder,
+          borderTop: isModal && '1px solid ' + theme.tableBorder,
           flexShrink: 0,
         }}
       >

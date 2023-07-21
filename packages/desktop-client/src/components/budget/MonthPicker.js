@@ -3,7 +3,7 @@ import { useState } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import { View } from '../common';
 
 export const MonthPicker = ({
@@ -106,12 +106,12 @@ export const MonthPicker = ({
                 },
                 !isMonthBudgeted && {
                   textDecoration: 'line-through',
-                  color: colors.pageTextSubdued,
+                  color: theme.pageTextSubdued,
                 },
                 styles.smallText,
                 selected && {
-                  backgroundColor: colors.buttonPositiveBackground,
-                  color: colors.buttonPositiveText,
+                  backgroundColor: theme.buttonPositiveBackground,
+                  color: theme.buttonPositiveText,
                 },
                 (hovered || selected) && {
                   borderRadius: 0,
@@ -123,7 +123,7 @@ export const MonthPicker = ({
                   },
                 hovered &&
                   selected && {
-                    backgroundColor: colors.buttonPositiveBackground,
+                    backgroundColor: theme.buttonPositiveBackground,
                   },
                 (idx === firstSelectedIndex ||
                   (idx === hoverId && !selected)) && {
@@ -152,8 +152,8 @@ export const MonthPicker = ({
                       fontSize: 10,
                       fontWeight: 'bold',
                       color: isMonthBudgeted
-                        ? colors.pageText
-                        : colors.pageTextSubdued,
+                        ? theme.pageText
+                        : theme.pageTextSubdued,
                     },
                   ]}
                 >

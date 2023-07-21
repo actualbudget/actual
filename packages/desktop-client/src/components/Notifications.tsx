@@ -13,7 +13,7 @@ import type { NotificationWithId } from 'loot-core/src/client/state-types/notifi
 import { useActions } from '../hooks/useActions';
 import Loading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
-import { styles, colors } from '../style';
+import { styles, theme } from '../style';
 
 import {
   View,
@@ -112,10 +112,10 @@ function Notification({
       style={{
         marginTop: 10,
         color: positive
-          ? colors.noticeText
+          ? theme.noticeText
           : error
-          ? colors.errorText
-          : colors.warningText,
+          ? theme.errorText
+          : theme.warningText,
       }}
     >
       <Stack
@@ -125,16 +125,16 @@ function Notification({
           padding: '14px 14px',
           fontSize: 14,
           backgroundColor: positive
-            ? colors.noticeBackground
+            ? theme.noticeBackground
             : error
-            ? colors.errorBackground
-            : colors.warningBackground,
+            ? theme.errorBackground
+            : theme.warningBackground,
           borderTop: `3px solid ${
             positive
-              ? colors.noticeAccent
+              ? theme.noticeAccent
               : error
-              ? colors.errorAccent
-              : colors.warningAccent
+              ? theme.errorAccent
+              : theme.warningAccent
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
@@ -178,20 +178,20 @@ function Notification({
                 backgroundColor: 'transparent',
                 border: `1px solid ${
                   positive
-                    ? colors.noticeAccent
+                    ? theme.noticeAccent
                     : error
-                    ? colors.errorAccent
-                    : colors.warningAccent
+                    ? theme.errorAccent
+                    : theme.warningAccent
                 }`,
                 color: 'currentColor',
                 fontSize: 14,
                 flexShrink: 0,
                 '&:hover, &:active': {
                   backgroundColor: positive
-                    ? colors.noticeBackground
+                    ? theme.noticeBackground
                     : error
-                    ? colors.errorBackground
-                    : colors.warningBackground,
+                    ? theme.errorBackground
+                    : theme.warningBackground,
                 },
               }}
             >
@@ -217,7 +217,7 @@ function Notification({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: colors.tableBackground,
+            backgroundColor: theme.tableBackground,
             alignItems: 'center',
             justifyContent: 'center',
           }}

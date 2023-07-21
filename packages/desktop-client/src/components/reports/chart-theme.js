@@ -1,4 +1,4 @@
-import { colors } from '../../style';
+import { theme } from '../../style';
 
 // Since these are rgba, they have to be hard-coded
 // and must work for both light and dark theme.
@@ -20,7 +20,7 @@ const baseLabelStyles = {
   fontFamily: sansSerif,
   fontSize,
   letterSpacing,
-  fill: colors.pageText,
+  fill: theme.pageText,
   stroke: 'transparent',
 };
 
@@ -43,17 +43,17 @@ const axisBaseStyles = {
   tickLabels: baseLabelStyles,
 };
 
-const theme = {
+const chartTheme = {
   colors: {
     ...colorFades,
-    red: colors.pageTextPositive,
-    blue: colors.noticeText,
+    red: theme.pageTextPositive,
+    blue: theme.noticeText,
   },
   area: {
     style: {
       labels: baseLabelStyles,
       data: {
-        stroke: colors.noticeText,
+        stroke: theme.noticeText,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',
@@ -84,7 +84,7 @@ const theme = {
   bar: {
     style: {
       labels: baseLabelStyles,
-      data: { fill: colors.noticeText, stroke: 'none' },
+      data: { fill: theme.noticeText, stroke: 'none' },
     },
   },
   line: {
@@ -92,7 +92,7 @@ const theme = {
       labels: baseLabelStyles,
       data: {
         fill: 'none',
-        stroke: colors.noticeText,
+        stroke: theme.noticeText,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',
@@ -113,4 +113,4 @@ const theme = {
     },
   },
 };
-export default theme;
+export default chartTheme;

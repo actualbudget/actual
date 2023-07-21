@@ -2,11 +2,8 @@ import type { CSSProperties } from 'glamor';
 import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import tokens from '../tokens';
-
-import * as colors from './colors';
 
 export const styles = {
   incomeHeaderHeight: 70,
@@ -114,7 +111,7 @@ function onScrollbarChange() {
         '& ::-webkit-scrollbar-thumb': {
           borderRadius: 30,
           backgroundClip: 'padding-box',
-          background: colors.menuItemBackgroundHover,
+          background: theme.menuItemBackgroundHover,
         },
       };
 
@@ -128,7 +125,7 @@ function onScrollbarChange() {
         '& ::-webkit-scrollbar-thumb': {
           borderRadius: 30,
           backgroundClip: 'padding-box',
-          background: colors.sidebarItemBackgroundHover,
+          background: theme.sidebarItemBackgroundHover,
         },
       };
 

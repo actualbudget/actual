@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import { View, Text, Block, Modal, Button } from '../common';
 
@@ -29,8 +29,8 @@ export default function ConfirmCategoryDelete({
       <Text
         style={{
           marginTop: 15,
-          color: colors.errorText,
-          backgroundColor: colors.errorBackground,
+          color: theme.errorText,
+          backgroundColor: theme.errorBackground,
         }}
       >
         {msg}

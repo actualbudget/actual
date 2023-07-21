@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import * as actions from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { withThemeColor } from '../../util/withThemeColor';
 import { Button, Text, TextOneLine, View } from '../common';
 import { Page } from '../Page';
@@ -18,7 +18,7 @@ function AccountHeader({ name, amount }) {
         flexDirection: 'row',
         marginTop: 28,
         marginBottom: 10,
-        color: colors.pageText,
+        color: theme.pageText,
       }}
     >
       <View style={{ flex: 1 }}>
@@ -50,8 +50,8 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
       style={{
         flex: '1 0 auto',
         flexDirection: 'row',
-        backgroundColor: colors.tableBackground,
-        boxShadow: `0 1px 1px ${colors.cardShadow}`,
+        backgroundColor: theme.tableBackground,
+        boxShadow: `0 1px 1px ${theme.cardShadow}`,
         borderRadius: 6,
         marginTop: 10,
       }}
@@ -95,7 +95,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             {account.bankId && (
               <View
                 style={{
-                  backgroundColor: colors.noticeText,
+                  backgroundColor: theme.noticeText,
                   marginLeft: '-23px',
                   width: 8,
                   height: 8,
@@ -118,7 +118,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
 
 function EmptyMessage({ onAdd }) {
   return (
-    <View style={{ flex: 1, padding: 30, color: colors.tableText }}>
+    <View style={{ flex: 1, padding: 30, color: theme.tableText }}>
       <Text style={styles.text}>
         For Actual to be useful, you need to add an account. You can link an
         account to automatically download transactions, or manage it locally
@@ -137,7 +137,7 @@ function EmptyMessage({ onAdd }) {
         Add Account
       </Button>
 
-      <Text style={{ marginTop: 20, color: colors.tableText }}>
+      <Text style={{ marginTop: 20, color: theme.tableText }}>
         In the future, you can add accounts using the add button in the header.
       </Text>
     </View>
@@ -295,4 +295,4 @@ export default connect(
     prefs: state.prefs.local,
   }),
   actions,
-)(withThemeColor(colors.sidebarBackground)(Accounts));
+)(withThemeColor(theme.sidebarBackground)(Accounts));

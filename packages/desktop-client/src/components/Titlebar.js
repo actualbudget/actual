@@ -22,7 +22,7 @@ import SvgEye from '../icons/v2/Eye';
 import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
-import { colors } from '../style';
+import { theme } from '../style';
 import tokens from '../tokens';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
@@ -75,8 +75,8 @@ function UncategorizedButton() {
         bare
         to="/accounts/uncategorized"
         style={{
-          color: colors.errorText,
-          backgroundColor: colors.errorBackground,
+          color: theme.errorText,
+          backgroundColor: theme.errorBackground,
         }}
       >
         {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
@@ -153,21 +153,21 @@ export function SyncButton({ localPrefs, style, onSync }) {
           WebkitAppRegion: 'none',
           color:
             syncState === 'error'
-              ? colors.errorText
+              ? theme.errorText
               : syncState === 'disabled' ||
                 syncState === 'offline' ||
                 syncState === 'local'
-              ? colors.pageTextSubdued
+              ? theme.pageTextSubdued
               : 'inherit',
         },
         media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
             syncState === 'error'
-              ? colors.errorText
+              ? theme.errorText
               : syncState === 'disabled' ||
                 syncState === 'offline' ||
                 syncState === 'local'
-              ? colors.pageTextSubdued
+              ? theme.pageTextSubdued
               : 'inherit',
         }),
       )}
@@ -214,7 +214,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        color: colors.pageText,
+        color: theme.pageText,
       }}
     >
       <MonthCountSelector
@@ -222,7 +222,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
         onChange={value => saveGlobalPrefs({ maxMonths: value })}
       />
       {reportBudgetEnabled && (
-        <View style={{ marginLeft: -5, color: colors.pageTextSubdued }}>
+        <View style={{ marginLeft: -5, color: theme.pageTextSubdued }}>
           <ButtonWithLoading
             bare
             loading={loading}
@@ -325,7 +325,7 @@ function Titlebar({
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
           bare
-          style={{ marginRight: 8, color: colors.pageText }}
+          style={{ marginRight: 8, color: theme.pageText }}
           onPointerEnter={e => {
             if (e.pointerType === 'mouse') {
               sidebar.setHidden(false);
@@ -344,7 +344,7 @@ function Titlebar({
         >
           <NavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: colors.pageText, left: 0 }}
+            style={{ width: 15, height: 15, color: theme.pageText, left: 0 }}
           />
         </Button>
       )}

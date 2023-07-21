@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { View } from '../common';
 
 import Autocomplete from './Autocomplete';
@@ -17,7 +17,7 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
           {
             overflow: 'auto',
             padding: '5px 0',
-            color: colors.altMenuItemText,
+            color: theme.altMenuItemText,
             ...styles.altMenuText,
           },
           !embedded && { maxHeight: styles.altMenuMaxHeight },
@@ -45,7 +45,7 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
                 key={group}
                 style={{
                   ...styles.altMenuHeaderText,
-                  color: colors.altMenuItemTextHeader,
+                  color: theme.altMenuItemTextHeader,
                   padding: '4px 9px',
                 }}
                 data-testid="account-item-group"
@@ -60,11 +60,11 @@ function AccountList({ items, getItemProps, highlightedIndex, embedded }) {
               style={{
                 color:
                   highlightedIndex === idx
-                    ? colors.altMenuItemTextHover
-                    : colors.altMenuItemText,
+                    ? theme.altMenuItemTextHover
+                    : theme.altMenuItemText,
                 backgroundColor:
                   highlightedIndex === idx
-                    ? colors.altMenuItemBackgroundHover
+                    ? theme.altMenuItemBackgroundHover
                     : 'transparent',
                 padding: 4,
                 paddingLeft: 20,

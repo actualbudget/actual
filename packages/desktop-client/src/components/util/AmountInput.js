@@ -7,7 +7,7 @@ import {
 
 import Add from '../../icons/v1/Add';
 import Subtract from '../../icons/v1/Subtract';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { View, Button, InputWithContent } from '../common';
 
 export function AmountInput({ id, defaultValue = 0, onChange, style }) {
@@ -59,7 +59,7 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
           setNum1(value);
           onChange({ num1: value, num2 });
         }}
-        style={{ color: colors.formInputText }}
+        style={{ color: theme.formInputText }}
       />
       <View style={{ margin: '0 5px' }}>and</View>
       <AmountInput
@@ -68,7 +68,7 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
           setNum2(value);
           onChange({ num1, num2: value });
         }}
-        style={{ color: colors.formInputText }}
+        style={{ color: theme.formInputText }}
       />
     </View>
   );

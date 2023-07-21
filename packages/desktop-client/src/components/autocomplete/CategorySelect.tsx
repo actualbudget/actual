@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 
 import Split from '../../icons/v0/Split';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { View, Button } from '../common';
 
 import Autocomplete, {
@@ -48,7 +48,7 @@ function CategoryList({
           {
             overflow: 'auto',
             padding: '5px 0',
-            color: colors.altMenuItemText,
+            color: theme.altMenuItemText,
             ...styles.altMenuText,
           },
           !embedded && { maxHeight: styles.altMenuMaxHeight },
@@ -64,7 +64,7 @@ function CategoryList({
                 <div
                   style={{
                     ...styles.altMenuHeaderText,
-                    color: colors.altMenuItemTextHeader,
+                    color: theme.altMenuItemTextHeader,
                     padding: '4px 9px',
                   }}
                   data-testid="category-item-group"
@@ -79,12 +79,12 @@ function CategoryList({
                 style={{
                   color:
                     highlightedIndex === idx
-                      ? colors.altMenuItemTextHover
-                      : colors.altMenuItemText,
+                      ? theme.altMenuItemTextHover
+                      : theme.altMenuItemText,
                   backgroundColor:
                     highlightedIndex === idx
-                      ? colors.altMenuItemBackgroundHover
-                      : colors.altMenuItemBackground,
+                      ? theme.altMenuItemBackgroundHover
+                      : theme.altMenuItemBackground,
                   padding: 4,
                   paddingLeft: 20,
                   borderRadius: embedded ? 4 : 0,

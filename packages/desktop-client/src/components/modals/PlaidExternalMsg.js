@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { Error } from '../alerts';
 import { View, Text, Modal, Button, P, ModalButtons } from '../common';
 
@@ -72,10 +72,10 @@ export default function PlaidExternalMsg({
           {waiting ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
-                color={colors.pageTextPositive}
+                color={theme.pageTextPositive}
                 style={{ width: 20, height: 20 }}
               />
-              <View style={{ marginTop: 10, color: colors.pageText }}>
+              <View style={{ marginTop: 10, color: theme.pageText }}>
                 {waiting === 'browser'
                   ? 'Waiting on browser...'
                   : waiting === 'accounts'
@@ -91,8 +91,8 @@ export default function PlaidExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: colors.noticeText,
-                borderColor: colors.noticeBackground,
+                backgroundColor: theme.noticeText,
+                borderColor: theme.noticeBackground,
               }}
               onClick={onContinue}
             >
@@ -113,17 +113,17 @@ export default function PlaidExternalMsg({
             </Button>
           )}
           <div style={{ marginTop: waiting ? 30 : 35 }}>
-            <Text style={{ color: colors.pageText, fontWeight: 600 }}>
+            <Text style={{ color: theme.pageText, fontWeight: 600 }}>
               Why not link it in the app?
             </Text>
           </div>
           <Text
             style={{
               marginTop: 10,
-              color: colors.pageText,
+              color: theme.pageText,
               fontSize: 13,
               '& a, & a:visited': {
-                color: colors.pageText,
+                color: theme.pageText,
               },
             }}
           >

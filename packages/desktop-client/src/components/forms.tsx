@@ -2,7 +2,7 @@ import React, { type ReactNode, type HTMLProps } from 'react';
 
 import { css, type CSSProperties } from 'glamor';
 
-import { colors } from '../style';
+import { theme } from '../style';
 
 import { View, Text } from './common';
 
@@ -18,7 +18,7 @@ export const SectionLabel = ({ title, style }: SectionLabelProps) => {
         {
           fontWeight: 500,
           textTransform: 'uppercase',
-          color: colors.formLabelText,
+          color: theme.formLabelText,
           marginBottom: 5,
           lineHeight: '1em',
         },
@@ -41,7 +41,7 @@ export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
     <Text
       style={[
-        { fontSize: 13, marginBottom: 3, color: colors.formLabelText },
+        { fontSize: 13, marginBottom: 3, color: theme.formLabelText },
         style,
       ]}
     >
@@ -77,7 +77,7 @@ export const Checkbox = (props: CheckboxProps) => {
           position: 'relative',
           margin: 0,
           marginRight: 6,
-          accentColor: colors.formInputBackgroundSelected,
+          accentColor: theme.formInputBackgroundSelected,
         },
 
         props.styles,

@@ -5,7 +5,7 @@ import q from 'loot-core/src/client/query-helpers';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { View, Text, Button } from '../common';
 import PrivacyFilter from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
@@ -20,8 +20,8 @@ function DetailedBalance({ name, balance }) {
         marginLeft: 15,
         borderRadius: 4,
         padding: '4px 6px',
-        color: colors.pillText,
-        backgroundColor: colors.pillBackground,
+        color: theme.pillText,
+        backgroundColor: theme.pillBackground,
       }}
     >
       {name}{' '}
@@ -137,10 +137,10 @@ export function Balances({
           getStyle={value => ({
             color:
               value < 0
-                ? colors.errorText
+                ? theme.errorText
                 : value > 0
-                ? colors.noticeText
-                : colors.pageTextPositive,
+                ? theme.noticeText
+                : theme.pageTextPositive,
           })}
           privacyFilter={{
             blurIntensity: 5,

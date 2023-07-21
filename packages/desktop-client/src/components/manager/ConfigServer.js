@@ -10,14 +10,14 @@ import {
 } from 'loot-core/src/shared/environment';
 
 import { useSetThemeColor } from '../../hooks';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { View, Text, Button, ButtonWithLoading } from '../common';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title, Input } from './subscribe/common';
 
 export default function ConfigServer() {
-  useSetThemeColor(colors.buttonPositiveBackground);
+  useSetThemeColor(theme.buttonPositiveBackground);
   let dispatch = useDispatch();
   let navigate = useNavigate();
   let [url, setUrl] = useState('');
@@ -94,7 +94,7 @@ export default function ConfigServer() {
       <Text
         style={{
           fontSize: 16,
-          color: colors.pageText,
+          color: theme.pageText,
           lineHeight: 1.5,
         }}
       >
@@ -117,8 +117,8 @@ export default function ConfigServer() {
           style={{
             marginTop: 20,
             padding: '20px 10px 20px 10px',
-            color: colors.errorText,
-            backgroundColor: colors.errorBackground,
+            color: theme.errorText,
+            backgroundColor: theme.errorBackground,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -165,7 +165,7 @@ export default function ConfigServer() {
         }}
       >
         {currentUrl ? (
-          <Button bare style={{ color: colors.pageText }} onClick={onSkip}>
+          <Button bare style={{ color: theme.pageText }} onClick={onSkip}>
             Stop using a server
           </Button>
         ) : (
@@ -174,7 +174,7 @@ export default function ConfigServer() {
               <Button
                 bare
                 style={{
-                  color: colors.pageText,
+                  color: theme.pageText,
                   margin: 5,
                   marginRight: 15,
                 }}
@@ -185,7 +185,7 @@ export default function ConfigServer() {
             )}
             <Button
               bare
-              style={{ color: colors.pageText, margin: 5 }}
+              style={{ color: theme.pageText, margin: 5 }}
               onClick={onSkip}
             >
               Don’t use a server

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Button, InputWithContent, Label, View } from '../common';
 import Text from '../common/Text';
 import CellValue from '../spreadsheet/CellValue';
@@ -31,7 +31,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
               width: 13,
               height: 13,
               flexShrink: 0,
-              color: text ? colors.formInputTextHighlight : 'inherit',
+              color: text ? theme.formInputTextHighlight : 'inherit',
               margin: 5,
               marginRight: 0,
             }}
@@ -78,7 +78,7 @@ export default function AccountDetails({
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.pageBackground,
+        backgroundColor: theme.pageBackground,
         overflowY: 'hidden',
         width: '100%',
       }}
@@ -104,7 +104,7 @@ export default function AccountDetails({
           <Link
             to="/accounts"
             style={{
-              color: colors.pageText,
+              color: theme.pageText,
               alignItems: 'center',
               display: 'flex',
               textDecoration: 'none',
@@ -118,7 +118,7 @@ export default function AccountDetails({
             style={{
               fontSize: 16,
               fontWeight: 500,
-              color: colors.pageText,
+              color: theme.pageText,
             }}
           >
             {account.name}
@@ -146,7 +146,7 @@ export default function AccountDetails({
             fontWeight: '500',
           }}
           getStyle={value => ({
-            color: value < 0 ? colors.errorText : colors.noticeText,
+            color: value < 0 ? theme.errorText : theme.noticeText,
           })}
         />
         <TransactionSearchInput

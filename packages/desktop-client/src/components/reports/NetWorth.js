@@ -10,7 +10,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { View, P } from '../common';
 
 import Change from './Change';
@@ -85,7 +85,7 @@ function NetWorth({ accounts }) {
     <View
       style={[
         styles.page,
-        { minWidth: 650, overflow: 'hidden', color: colors.pageText },
+        { minWidth: 650, overflow: 'hidden', color: theme.pageText },
       ]}
     >
       <Header
@@ -105,7 +105,7 @@ function NetWorth({ accounts }) {
 
       <View
         style={{
-          backgroundColor: colors.tableBackground,
+          backgroundColor: theme.tableBackground,
           padding: 30,
           paddingTop: 0,
           overflow: 'auto',

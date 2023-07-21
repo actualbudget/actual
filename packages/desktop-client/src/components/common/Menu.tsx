@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 
 import Text from './Text';
 import View from './View';
@@ -17,7 +17,7 @@ type KeybindingProps = {
 
 function Keybinding({ keyName }: KeybindingProps) {
   return (
-    <Text style={{ fontSize: 10, color: colors.pageTextSubdued }}>
+    <Text style={{ fontSize: 10, color: theme.pageTextSubdued }}>
       {keyName}
     </Text>
   );
@@ -102,8 +102,8 @@ export default function Menu({
   return (
     <View
       style={{
-        color: colors.menuItemText,
-        backgroundColor: colors.menuBackground,
+        color: theme.menuItemText,
+        backgroundColor: theme.menuBackground,
         outline: 'none',
         borderRadius: 4,
         overflow: 'hidden',
@@ -116,7 +116,7 @@ export default function Menu({
         if (item === Menu.line) {
           return (
             <View key={idx} style={{ margin: '3px 0px' }}>
-              <View style={{ borderTop: '1px solid ' + colors.menuBorder }} />
+              <View style={{ borderTop: '1px solid ' + theme.menuBorder }} />
             </View>
           );
         } else if (item.type === Menu.label) {
@@ -124,7 +124,7 @@ export default function Menu({
             <Text
               key={item.name}
               style={{
-                color: colors.menuItemText,
+                color: theme.menuItemText,
                 fontSize: 11,
                 lineHeight: '1em',
                 textTransform: 'uppercase',
@@ -156,10 +156,10 @@ export default function Menu({
                 flexDirection: 'row',
                 alignItems: 'center',
               },
-              item.disabled && { color: colors.pageTextSubdued },
+              item.disabled && { color: theme.pageTextSubdued },
               !item.disabled &&
                 hoveredIndex === idx && {
-                  backgroundColor: colors.menuItemBackgroundHover,
+                  backgroundColor: theme.menuItemBackgroundHover,
                 },
             ]}
             onMouseEnter={() => setHoveredIndex(idx)}

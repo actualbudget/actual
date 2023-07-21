@@ -7,7 +7,7 @@ import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
 import {
@@ -264,10 +264,10 @@ export default function GoCardlessExternalMsg({
           {waiting || isConfigurationLoading ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
-                color={colors.pageTextPositive}
+                color={theme.pageTextPositive}
                 style={{ width: 20, height: 20 }}
               />
-              <View style={{ marginTop: 10, color: colors.pageText }}>
+              <View style={{ marginTop: 10, color: theme.pageText }}>
                 {isConfigurationLoading
                   ? 'Checking GoCardless configuration..'
                   : waiting === 'browser'
@@ -291,8 +291,8 @@ export default function GoCardlessExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: colors.noticeBackground,
-                borderColor: colors.noticeText,
+                backgroundColor: theme.noticeBackground,
+                borderColor: theme.noticeText,
               }}
               onClick={onContinue}
             >
@@ -302,7 +302,7 @@ export default function GoCardlessExternalMsg({
             renderLinkButton()
           ) : (
             <>
-              <P style={{ color: colors.errorText }}>
+              <P style={{ color: theme.errorText }}>
                 GoCardless integration has not yet been configured.
               </P>
               <Button primary onClick={onGoCardlessInit}>

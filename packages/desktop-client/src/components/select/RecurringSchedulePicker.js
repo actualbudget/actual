@@ -7,7 +7,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { Button, Select, Input, Tooltip, View, Text, Stack } from '../common';
 import { useTooltip } from '../tooltips';
 
@@ -148,7 +148,7 @@ function SchedulePreview({ previewDates }) {
   } else {
     content = (
       <View>
-        <Text style={{ color: colors.tableText, fontWeight: 600 }}>
+        <Text style={{ color: theme.tableText, fontWeight: 600 }}>
           Upcoming dates
         </Text>
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
@@ -167,7 +167,7 @@ function SchedulePreview({ previewDates }) {
     <Stack
       direction="column"
       spacing={1}
-      style={{ marginTop: 15, color: colors.tableText }}
+      style={{ marginTop: 15, color: theme.tableText }}
     >
       {content}
     </Stack>
@@ -289,7 +289,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
   return (
     <Tooltip
       style={{
-        backgroundColor: colors.tooltipBackground,
+        backgroundColor: theme.tooltipBackground,
         padding: 10,
         width: 380,
       }}

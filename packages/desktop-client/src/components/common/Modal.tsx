@@ -11,7 +11,7 @@ import hotkeys from 'hotkeys-js';
 
 import Loading from '../../icons/AnimatedLoading';
 import Delete from '../../icons/v0/Delete';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import tokens from '../../tokens';
 
 import Button from './Button';
@@ -124,9 +124,9 @@ const Modal = ({
             minWidth: '100%',
             minHeight: 0,
             borderRadius: 4,
-            border: '1px solid ' + colors.modalBorder,
-            color: colors.pageText,
-            backgroundColor: colors.modalBackground,
+            border: '1px solid ' + theme.modalBorder,
+            color: theme.pageText,
+            backgroundColor: theme.modalBackground,
             opacity: isHidden ? 0 : 1,
             [`@media (min-width: ${tokens.breakpoint_small})`]: {
               minWidth: tokens.breakpoint_small,
@@ -212,16 +212,13 @@ const Modal = ({
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: colors.pageBackground,
+              backgroundColor: theme.pageBackground,
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000,
             }}
           >
-            <Loading
-              style={{ width: 20, height: 20 }}
-              color={colors.pageText}
-            />
+            <Loading style={{ width: 20, height: 20 }} color={theme.pageText} />
           </View>
         )}
       </ModalContent>

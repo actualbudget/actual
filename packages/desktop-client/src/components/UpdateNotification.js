@@ -6,7 +6,7 @@ import { bindActionCreators } from 'redux';
 import * as actions from 'loot-core/src/client/actions';
 
 import Close from '../icons/v1/Close';
-import { colors } from '../style';
+import { theme } from '../style';
 
 import { View, Text, LinkButton, Button } from './common';
 
@@ -34,8 +34,8 @@ function UpdateNotification({
           bottom: 0,
           right: 0,
           margin: '15px 17px',
-          backgroundColor: colors.pageTextPositive,
-          color: colors.tableBackground,
+          backgroundColor: theme.pageTextPositive,
+          color: theme.tableBackground,
           padding: '7px 10px',
           borderRadius: 4,
           zIndex: 10000,
@@ -65,7 +65,7 @@ function UpdateNotification({
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onClick={() => closeNotification(setAppState)}
               >
-                <Close width={9} style={{ color: colors.pageText }} />
+                <Close width={9} style={{ color: theme.pageText }} />
               </Button>
             </Text>
           </View>

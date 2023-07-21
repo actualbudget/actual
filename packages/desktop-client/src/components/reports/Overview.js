@@ -8,11 +8,11 @@ import * as actions from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import { View, Block, AnchorLink } from '../common';
 
 import Change from './Change';
-import theme from './chart-theme';
+import chartTheme from './chart-theme';
 import Container from './Container';
 import DateRange from './DateRange';
 import { simpleCashFlow } from './graphs/cash-flow-spreadsheet';
@@ -28,8 +28,8 @@ function Card({ flex, to, style, children }) {
     <View
       style={[
         {
-          color: colors.pageText,
-          backgroundColor: colors.cardBackground,
+          color: theme.pageText,
+          backgroundColor: theme.cardBackground,
           borderRadius: 2,
           height: 200,
           boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
@@ -94,7 +94,7 @@ function NetWorthCard({ accounts }) {
             </Block>
             <Change
               amount={data.totalChange}
-              style={{ color: colors.tableText, fontWeight: 300 }}
+              style={{ color: theme.tableText, fontWeight: 300 }}
             />
           </View>
         </View>
@@ -141,7 +141,7 @@ function CashFlowCard() {
           <View style={{ textAlign: 'right' }}>
             <Change
               amount={income - expense}
-              style={{ color: colors.tableText, fontWeight: 300 }}
+              style={{ color: theme.tableText, fontWeight: 300 }}
             />
           </View>
         </View>
@@ -149,10 +149,10 @@ function CashFlowCard() {
         <Container style={{ height: 'auto', flex: 1 }}>
           {(width, height, portalHost) => (
             <VictoryGroup
-              colorScale={[theme.colors.blue, theme.colors.red]}
+              colorScale={[chartTheme.colors.blue, chartTheme.colors.red]}
               width={100}
               height={height}
-              theme={theme}
+              theme={chartTheme}
               domain={{
                 x: [0, 100],
                 y: [0, Math.max(income, expense, 100)],
@@ -209,7 +209,7 @@ function CashFlowCard() {
                       </div>
                     ),
                     labelPosition: 'right',
-                    fill: theme.colors.red,
+                    fill: chartTheme.colors.red,
                   },
                 ]}
                 labels={d => d.premadeLabel}
@@ -248,7 +248,7 @@ function Overview({ accounts }) {
       >
         <Card
           style={{
-            color: colors.pageTextSubdued,
+            color: theme.pageTextSubdued,
             justifyContent: 'center',
             alignItems: 'center',
             width: 200,

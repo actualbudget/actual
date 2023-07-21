@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 
 export let CategoryGroupsContext = createContext([]);
 
@@ -24,7 +24,7 @@ export function separateGroups(categoryGroups) {
 
 export function makeAmountGrey(value) {
   return value === 0 || value === '0' || value === ''
-    ? { color: colors.tableTextInactive }
+    ? { color: theme.tableTextInactive }
     : null;
 }
 
@@ -35,7 +35,7 @@ export function makeAmountStyle(value) {
   }
 
   if (value < 0) {
-    return { color: colors.errorText };
+    return { color: theme.errorText };
   }
 }
 
@@ -43,10 +43,10 @@ export function makeAmountFullStyle(value) {
   return {
     color:
       value < 0
-        ? colors.errorText
+        ? theme.errorText
         : value === 0
-        ? colors.pageTextSubdued
-        : colors.noticeText,
+        ? theme.pageTextSubdued
+        : theme.noticeText,
   };
 }
 

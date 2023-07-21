@@ -8,7 +8,7 @@ import {
 import { type CSSProperties, css } from 'glamor';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 
 type SelectProps = {
   bare?: boolean;
@@ -55,10 +55,10 @@ export default function Select({
       value={value}
       onChange={onChange}
       style={{
-        color: bare ? 'inherit' : colors.formInputText,
-        backgroundColor: bare ? 'transparent' : colors.formInputBackground,
+        color: bare ? 'inherit' : theme.formInputText,
+        backgroundColor: bare ? 'transparent' : theme.formInputBackground,
         borderRadius: styles.menuBorderRadius,
-        border: bare ? 'none' : '1px solid ' + colors.formInputBorder,
+        border: bare ? 'none' : '1px solid ' + theme.formInputBorder,
         lineHeight: '1em',
         ...wrapperStyle,
       }}
@@ -99,18 +99,18 @@ export default function Select({
           zIndex: 10000,
           outline: 0,
           borderRadius: styles.menuBorderRadius,
-          backgroundColor: colors.menuBackground,
+          backgroundColor: theme.menuBackground,
           boxShadow: styles.cardShadow,
-          border: '1px solid ' + colors.menuBorder,
+          border: '1px solid ' + theme.menuBorder,
         }}
         {...css({
           '[data-reach-listbox-option]': {
-            background: colors.menuItemBackground,
-            color: colors.menuItemText,
+            background: theme.menuItemBackground,
+            color: theme.menuItemText,
           },
           '[data-reach-listbox-option][data-current-nav]': {
-            background: colors.menuItemBackgroundHover,
-            color: colors.menuItemTextHover,
+            background: theme.menuItemBackgroundHover,
+            color: theme.menuItemTextHover,
           },
         })}
       >
@@ -141,7 +141,7 @@ export default function Select({
               style={{
                 padding: '2px',
                 marginTop: 5,
-                borderTop: '1px solid ' + colors.menuBorder,
+                borderTop: '1px solid ' + theme.menuBorder,
               }}
             />
             {options.slice(line, options.length).map(([value, label]) => (

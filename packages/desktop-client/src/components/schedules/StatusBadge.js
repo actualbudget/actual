@@ -9,7 +9,7 @@ import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
 import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { View, Text } from '../common';
 
 export function getStatusProps(status) {
@@ -17,57 +17,57 @@ export function getStatusProps(status) {
 
   switch (status) {
     case 'missed':
-      color = colors.errorText;
-      backgroundColor = colors.errorBackground;
-      borderColor = colors.errorAccent;
+      color = theme.errorText;
+      backgroundColor = theme.errorBackground;
+      borderColor = theme.errorAccent;
       Icon = EditSkull1;
       break;
     case 'due':
-      color = colors.warningText;
-      backgroundColor = colors.warningBackground;
-      borderColor = colors.warningAccent;
+      color = theme.warningText;
+      backgroundColor = theme.warningBackground;
+      borderColor = theme.warningAccent;
       Icon = AlertTriangle;
       break;
     case 'upcoming':
-      color = colors.tableTextInactive;
-      backgroundColor = colors.tableBackground;
-      borderColor = colors.tableBorder;
+      color = theme.tableTextInactive;
+      backgroundColor = theme.tableBackground;
+      borderColor = theme.tableBorder;
       Icon = CalendarIcon;
       break;
     case 'paid':
-      color = colors.noticeText;
-      backgroundColor = colors.noticeBackground;
-      borderColor = colors.noticeAccent;
+      color = theme.noticeText;
+      backgroundColor = theme.noticeBackground;
+      borderColor = theme.noticeAccent;
       Icon = ValidationCheck;
       break;
     case 'completed':
-      color = colors.tableText;
-      backgroundColor = colors.tableBackground;
-      borderColor = colors.tableBorder;
+      color = theme.tableText;
+      backgroundColor = theme.tableBackground;
+      borderColor = theme.tableBorder;
       Icon = FavoriteStar;
       break;
     case 'pending':
-      color = colors.noticeText;
-      backgroundColor = colors.noticeBackground;
-      borderColor = colors.noticeAccent;
+      color = theme.noticeText;
+      backgroundColor = theme.noticeBackground;
+      borderColor = theme.noticeAccent;
       Icon = CalendarIcon;
       break;
     case 'scheduled':
-      color = colors.tableText;
-      backgroundColor = colors.tableBackground;
-      borderColor = colors.tableBorder;
+      color = theme.tableText;
+      backgroundColor = theme.tableBackground;
+      borderColor = theme.tableBorder;
       Icon = CalendarIcon;
       break;
     case 'cleared':
-      color = colors.noticeText;
-      backgroundColor = colors.noticeBackground;
-      borderColor = colors.noticeAccent;
+      color = theme.noticeText;
+      backgroundColor = theme.noticeBackground;
+      borderColor = theme.noticeAccent;
       Icon = CheckCircle1;
       break;
     default:
-      color = colors.buttonDisabledText;
-      backgroundColor = colors.buttonDisabledBackground;
-      borderColor = colors.buttonDisabledBorder;
+      color = theme.buttonDisabledText;
+      backgroundColor = theme.buttonDisabledBackground;
+      borderColor = theme.buttonDisabledBorder;
       Icon = CheckCircleHollow;
       break;
   }

@@ -4,29 +4,29 @@ import mergeRefs from 'react-merge-refs';
 import { css } from 'glamor';
 
 import { useProperFocus } from '../../hooks/useProperFocus';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 export const defaultInputStyle = {
   minHeight: '1.5em',
   outline: 0,
-  color: colors.formInputText,
-  backgroundColor: colors.formInputBackground,
+  color: theme.formInputText,
+  backgroundColor: theme.formInputBackground,
   margin: 0,
   padding: 5,
   borderRadius: 4,
-  border: '1px solid ' + colors.formInputBorder,
+  border: '1px solid ' + theme.formInputBorder,
   '::placeholder': {
-    color: colors.formInputTextPlaceholder,
+    color: theme.formInputTextPlaceholder,
   },
   ':hover': {
-    backgroundColor: colors.formInputBackground,
+    backgroundColor: theme.formInputBackground,
   },
   ':focus': {
-    color: colors.formInputText,
-    backgroundColor: colors.formInputBackground,
-    border: '1px solid ' + colors.formInputBorderSelected,
-    boxShadow: '0 1px 1px ' + colors.formInputShadowSelected,
+    color: theme.formInputText,
+    backgroundColor: theme.formInputBackground,
+    border: '1px solid ' + theme.formInputBorderSelected,
+    boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
   },
 };
 

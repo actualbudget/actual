@@ -4,7 +4,7 @@ import * as queries from 'loot-core/src/client/queries';
 import { currencyToInteger } from 'loot-core/src/shared/util';
 
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import { View, Text, Button, Input, InitialFocus, Tooltip } from '../common';
 import format from '../spreadsheet/format';
 import useSheetValue from '../spreadsheet/useSheetValue';
@@ -27,7 +27,7 @@ export function ReconcilingMessage({
       style={{
         flexDirection: 'row',
         alignSelf: 'center',
-        backgroundColor: colors.tooltipBackground,
+        backgroundColor: theme.tooltipBackground,
         ...styles.shadow,
         borderRadius: 4,
         marginTop: 5,
@@ -39,7 +39,7 @@ export function ReconcilingMessage({
         {targetDiff === 0 ? (
           <View
             style={{
-              color: colors.noticeText,
+              color: theme.noticeText,
               flex: 1,
               flexDirection: 'row',
               alignItems: 'center',
@@ -57,7 +57,7 @@ export function ReconcilingMessage({
             All reconciled!
           </View>
         ) : (
-          <View style={{ color: colors.pageText }}>
+          <View style={{ color: theme.pageText }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
               Your cleared balance{' '}
               <strong>{format(cleared, 'financial')}</strong> needs{' '}

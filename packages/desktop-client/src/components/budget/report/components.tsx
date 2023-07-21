@@ -4,7 +4,7 @@ import { reportBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import { styles, colors } from '../../../style';
+import { styles, theme } from '../../../style';
 import { View, Text, Tooltip, Menu, useTooltip } from '../../common';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
@@ -16,7 +16,7 @@ import { makeAmountGrey } from '../util';
 export { BudgetSummary } from './BudgetSummary';
 
 let headerLabelStyle = {
-  color: colors.tableHeaderText,
+  color: theme.tableHeaderText,
   flex: 1,
   padding: '0 5px',
   textAlign: 'right',
@@ -87,7 +87,7 @@ type GroupMonthProps = {
   group: { id: string; is_income: boolean };
 };
 export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
-  let borderColor = colors.tableBorder;
+  let borderColor = theme.tableBorder;
   let { id } = group;
 
   return (
@@ -197,7 +197,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
-  let borderColor = colors.tableBorder;
+  let borderColor = theme.tableBorder;
   let balanceTooltip = useTooltip();
 
   return (
@@ -217,7 +217,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           padding: '0 4px',
           borderRadius: 4,
           ':hover': {
-            boxShadow: 'inset 0 0 0 1px ' + colors.formInputShadowSelected,
+            boxShadow: 'inset 0 0 0 1px ' + theme.formInputShadowSelected,
           },
         }}
         valueProps={{

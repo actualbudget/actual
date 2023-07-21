@@ -4,7 +4,7 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import { styles, colors } from '../../../style';
+import { styles, theme } from '../../../style';
 import CategoryAutocomplete from '../../autocomplete/CategorySelect';
 import {
   View,
@@ -193,7 +193,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
       style={{
-        color: colors.tableHeaderText,
+        color: theme.tableHeaderText,
         flex: 1,
         flexDirection: 'row',
         marginRight: styles.monthRightPadding,
@@ -236,8 +236,8 @@ export function IncomeHeaderMonth() {
   return (
     <Row
       style={{
-        color: colors.tableText,
-        backgroundColor: colors.tableBackground,
+        color: theme.tableText,
+        backgroundColor: theme.tableBackground,
         alignItems: 'center',
         paddingRight: 10,
       }}
@@ -253,7 +253,7 @@ type ExpenseGroupMonthProps = {
 export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   group,
 }: ExpenseGroupMonthProps) {
-  let borderColor = colors.tableBorder;
+  let borderColor = theme.tableBorder;
   let { id } = group;
 
   return (
@@ -319,7 +319,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: ExpenseCategoryMonthProps) {
-  let borderColor = colors.tableBorder;
+  let borderColor = theme.tableBorder;
   let balanceTooltip = useTooltip();
 
   return (
@@ -342,7 +342,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           },
           {
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + colors.formInputShadowSelected,
+              boxShadow: 'inset 0 0 0 1px ' + theme.formInputShadowSelected,
             },
           },
         ]}
@@ -425,7 +425,7 @@ export function IncomeGroupMonth() {
       <SheetCell
         name="received"
         width="flex"
-        borderColor={colors.tableBorder}
+        borderColor={theme.tableBorder}
         textAlign="right"
         style={[
           { fontWeight: 600, paddingRight: styles.monthRightPadding },
@@ -466,7 +466,7 @@ export function IncomeCategoryMonth({
           {
             paddingRight: styles.monthRightPadding,
             textAlign: 'right',
-            borderColor: colors.tableBorder,
+            borderColor: theme.tableBorder,
           },
           isLast && { borderBottomWidth: 0 },
         ]}

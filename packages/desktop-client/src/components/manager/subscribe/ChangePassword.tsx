@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../../style';
+import { theme } from '../../../style';
 import { View, Text, Button } from '../../common';
 
 import { Title } from './common';
@@ -41,7 +41,7 @@ export default function ChangePassword() {
   }
 
   return (
-    <View style={{ maxWidth: 500, marginTop: -30, color: colors.pageText }}>
+    <View style={{ maxWidth: 500, marginTop: -30, color: theme.pageText }}>
       <Title text="Change server password" />
       <Text
         style={{
@@ -57,8 +57,8 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.errorText,
-            backgroundColor: colors.errorBackground,
+            color: theme.errorText,
+            backgroundColor: theme.errorBackground,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -71,8 +71,8 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.noticeText,
-            backgroundColor: colors.noticeBackground,
+            color: theme.noticeText,
+            backgroundColor: theme.noticeBackground,
             borderRadius: 4,
             fontSize: 15,
           }}
