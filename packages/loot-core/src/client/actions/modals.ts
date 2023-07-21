@@ -5,7 +5,7 @@ import type { ActionResult } from './types';
 
 export function pushModal<M extends Modal>(
   name: M['name'],
-  options: M['options'],
+  options: M['options'] = {},
 ): ActionResult {
   // @ts-expect-error TS is unable to determine that `name` and `options` match
   let modal: M = { name, options };
