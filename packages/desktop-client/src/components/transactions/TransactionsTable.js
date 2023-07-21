@@ -437,7 +437,7 @@ function StatusCell({
   return (
     <Cell
       name="cleared"
-      width={30}
+      width={23}
       focused={focused}
       style={{ padding: 1 }}
       plain
