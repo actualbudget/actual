@@ -14,7 +14,7 @@ export type ParseFileResult = {
 
 export async function parseFile(
   filepath,
-  options?: unknown,
+  options?: { delimiter?: string; hasHeaderRow: boolean },
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let m = filepath.match(/\.[^.]*$/);
@@ -44,7 +44,9 @@ export async function parseFile(
 
 async function parseCSV(
   filepath,
-  options: { delimiter?: string } = {},
+  options: { delimiter?: string; hasHeaderRow: boolean } = {
+    hasHeaderRow: true,
+  },
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
@@ -52,7 +54,7 @@ async function parseCSV(
   let data;
   try {
     data = csv2json(contents, {
-      columns: true,
+      columns: options.hasHeaderRow,
       bom: true,
       delimiter: options.delimiter || ',',
       // eslint-disable-next-line rulesdir/typography
