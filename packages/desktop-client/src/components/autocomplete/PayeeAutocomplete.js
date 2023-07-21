@@ -100,11 +100,7 @@ function PayeeList({
               <Add
                 width={8}
                 height={8}
-                style={{
-                  marginRight: 5,
-                  display: 'inline-block',
-                  color: 'inherit',
-                }}
+                style={{ marginRight: 5, display: 'inline-block' }}
               />
               Create Payee “{inputValue}”
             </View>

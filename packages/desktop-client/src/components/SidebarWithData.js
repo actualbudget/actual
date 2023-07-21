@@ -88,11 +88,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           {prefs.budgetName || 'A budget has no name'}
         </Text>
-        <ExpandArrow
-          width={7}
-          height={7}
-          style={{ color: 'inherit', marginLeft: 5 }}
-        />
+        <ExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
         {menuOpen && (
           <Tooltip
             position="bottom-left"

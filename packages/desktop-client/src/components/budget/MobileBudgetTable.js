@@ -451,7 +451,7 @@ class TotalsRow extends PureComponent {
               onClick={() => onAddCategory(group.id)}
               style={{ padding: 10 }}
             >
-              <Add width={15} height={15} color="inherit" />
+              <Add width={15} height={15} />
             </Button>
           </View>
           //   </Animated.View>

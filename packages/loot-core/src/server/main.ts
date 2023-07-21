@@ -1473,7 +1473,7 @@ handlers['save-global-prefs'] = async function (prefs) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
   if ('theme' in prefs) {
-    await asyncStorage.setItem('theme', '' + prefs.theme);
+    await asyncStorage.setItem('theme', prefs.theme);
   }
   return 'ok';
 };
@@ -1500,7 +1500,10 @@ handlers['load-global-prefs'] = async function () {
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
-    theme: theme || 'light',
+    theme:
+      theme === 'light' || theme === 'dark' || theme === 'development'
+        ? theme
+        : 'light',
   };
 };
 

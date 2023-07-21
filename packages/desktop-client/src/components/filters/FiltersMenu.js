@@ -97,9 +97,15 @@ function updateFilterReducer(state, action) {
     case 'set-op': {
       let type = FIELD_TYPES.get(state.field);
       let value = state.value;
-      if (type === 'id' && action.op === 'contains') {
-        // Clear out the value if switching between contains for
-        // the id type
+      if (
+        (type === 'id' || type === 'string') &&
+        (action.op === 'contains' ||
+          action.op === 'is' ||
+          action.op === 'doesNotContain' ||
+          action.op === 'isNot')
+      ) {
+        // Clear out the value if switching between contains or
+        // is/oneof for the id or string type
         value = null;
       }
       return { ...state, op: action.op, value };
@@ -147,7 +153,7 @@ function ConfigureField({
     <Tooltip
       position="bottom-left"
       style={{ padding: 15 }}
-      width={250}
+      width={275}
       onClose={() => dispatch({ type: 'close' })}
     >
       <FocusScope>
@@ -223,14 +229,42 @@ function ConfigureField({
                   }}
                 />,
               ]
-            : ops.map(currOp => (
-                <StageButton
-                  children={friendlyOp(currOp)}
-                  key={currOp}
-                  selected={currOp === op}
-                  onSelect={() => dispatch({ type: 'set-op', op: currOp })}
-                />
-              ))}
+            : [
+                <Stack
+                  direction="row"
+                  align="flex-start"
+                  spacing={1}
+                  style={{ flexWrap: 'wrap' }}
+                >
+                  {ops.slice(0, 3).map(currOp => (
+                    <StageButton
+                      key={currOp}
+                      op={currOp}
+                      selected={currOp === op}
+                      children={friendlyOp(currOp)}
+                      onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                    />
+                  ))}
+                </Stack>,
+                <Stack
+                  direction="row"
+                  align="flex-start"
+                  spacing={1}
+                  style={{ flexWrap: 'wrap' }}
+                >
+                  {ops.slice(3, ops.length).map(currOp => (
+                    <View>
+                      <StageButton
+                        key={currOp}
+                        op={currOp}
+                        children={friendlyOp(currOp)}
+                        selected={currOp === op}
+                        onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                      />
+                    </View>
+                  ))}
+                </Stack>,
+              ]}
         </Stack>
 
         <form action="#">
@@ -239,19 +273,27 @@ function ConfigureField({
               inputRef={inputRef}
               field={field}
               subfield={subfield}
-              type={type === 'id' && op === 'contains' ? 'string' : type}
+              type={
+                type === 'id' && (op === 'contains' || op === 'doesNotContain')
+                  ? 'string'
+                  : type
+              }
               value={value}
-              multi={op === 'oneOf'}
+              multi={op === 'oneOf' || op === 'notOneOf'}
               style={{ marginTop: 10 }}
               onChange={v => dispatch({ type: 'set-value', value: v })}
             />
           )}
 
-          <Stack direction="row" justify="flex-end" align="center">
+          <Stack
+            direction="row"
+            justify="flex-end"
+            align="center"
+            style={{ marginTop: 15 }}
+          >
             <View style={{ flex: 1 }} />
             <Button
               primary
-              style={{ marginTop: 15 }}
               onClick={e => {
                 e.preventDefault();
                 onApply({
@@ -356,12 +398,7 @@ export function FilterButton({ onApply }) {
     <View>
       <Button bare onClick={() => dispatch({ type: 'select-field' })}>
         <SettingsSliderAlternate
-          style={{
-            width: 16,
-            height: 16,
-            color: 'inherit',
-            marginRight: 5,
-          }}
+          style={{ width: 16, height: 16, marginRight: 5 }}
         />{' '}
         Filter
       </Button>
@@ -479,7 +516,7 @@ function FilterExpression({
                 value={value}
                 field={field}
                 inline={true}
-                valueIsRaw={op === 'contains'}
+                valueIsRaw={op === 'contains' || op === 'doesNotContain'}
               />
             </>
           )}
@@ -490,7 +527,6 @@ function FilterExpression({
           style={{
             width: 8,
             height: 8,
-            color: 'inherit',
             margin: 5,
             marginLeft: 3,
           }}

@@ -132,7 +132,7 @@ class App extends Component {
             <MobileWebMessage />
           </div>
         </div>
-        <ThemeStyle theme={this.props.theme} />
+        <ThemeStyle />
       </ResponsiveProvider>
     );
   }
@@ -144,7 +144,7 @@ export default connect(
     cloudFileId: state.prefs.local && state.prefs.local.cloudFileId,
     loadingText: state.app.loadingText,
     prefs: state.prefs,
-    /* render() and init() run in parallel, 
+    /* render() and init() run in parallel,
     so no guarantee global prefs are loading
     in time for render() to use the theme */
     theme: state.prefs?.global?.theme ?? 'light',

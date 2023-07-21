@@ -1,24 +1,24 @@
 import React from 'react';
 
-import { GetColorThemes } from '../../style';
-import { View, Select, Text } from '../common';
+import { themeNames, useTheme } from '../../style';
+import { Button, Select, Text } from '../common';
 
 import { Setting } from './UI';
 
-export default function ThemeSettings({ globalPrefs, saveGlobalPrefs }) {
-  let themes = GetColorThemes();
+export default function ThemeSettings({ saveGlobalPrefs }) {
+  let theme = useTheme();
   return (
     <Setting
       primaryAction={
-        <View>
+        <Button bounce={false} style={{ padding: 0 }}>
           <Select
             onChange={value => {
               saveGlobalPrefs({ theme: value });
             }}
-            value={globalPrefs.theme}
-            options={themes.map(x => [x, x])}
+            value={theme}
+            options={themeNames.map(name => [name, name])}
           />
-        </View>
+        </Button>
       }
     >
       <Text>

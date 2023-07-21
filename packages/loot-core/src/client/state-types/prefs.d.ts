@@ -4,7 +4,8 @@ import type * as constants from '../constants';
 export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'privacyMode';
+  | 'privacyMode'
+  | 'themes';
 
 type NullableValues<T> = { [K in keyof T]: T[K] | null };
 
@@ -28,7 +29,7 @@ export type LocalPrefs = NullableValues<
     // TODO: pull from src/components/modals/ImportTransactions.js
     [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
     [key: `csv-mappings-${string}`]: string;
-    [key: `csv-delimiter-${string}`]: ',' | ';';
+    [key: `csv-delimiter-${string}`]: ',' | ';' | '\t';
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
     'flags.updateNotificationShownForVersion': string;
     id: string;
@@ -45,9 +46,11 @@ export type LocalPrefs = NullableValues<
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 
+export type Theme = 'light' | 'dark' | 'development';
 export type GlobalPrefs = NullableValues<{
   floatingSidebar: boolean;
   maxMonths: number;
+  theme: Theme;
   documentDir: string; // Electron only
   theme: string;
 }>;

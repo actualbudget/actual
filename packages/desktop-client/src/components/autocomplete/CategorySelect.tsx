@@ -164,14 +164,7 @@ export default function CategoryAutocomplete({
                 // Buttons at bottom of list
                 // Split transaction menu item
                 <Button altMenu onClick={onSplit}>
-                  <Split
-                    width={10}
-                    height={10}
-                    style={{
-                      color: 'inherit',
-                      marginRight: 5,
-                    }}
-                  />
+                  <Split width={10} height={10} style={{ marginRight: 5 }} />
                   Split Transaction
                 </Button>
               )}

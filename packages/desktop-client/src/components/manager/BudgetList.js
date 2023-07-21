@@ -120,7 +120,6 @@ function FileState({ file }) {
       }}
     >
       <Icon
-        color={color}
         style={{
           width: 18,
           height: 18,
@@ -235,7 +234,7 @@ function RefreshButton({ onRefresh }) {
 
   return (
     <Button bare style={{ padding: 10, marginRight: 5 }} onClick={_onRefresh}>
-      <Icon style={{ width: 18, height: 18, color: 'inherit' }} />
+      <Icon style={{ width: 18, height: 18 }} />
     </Button>
   );
 }

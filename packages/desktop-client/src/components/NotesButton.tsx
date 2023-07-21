@@ -127,7 +127,7 @@ export default function NotesButton({
         ]}
         {...tooltip.getOpenEvents()}
       >
-        <CustomNotesPaper style={{ width, height, color: 'inherit' }} />
+        <CustomNotesPaper style={{ width, height }} />
       </Button>
       {tooltipOpen && (
         <NotesTooltip

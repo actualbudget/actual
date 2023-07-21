@@ -92,10 +92,15 @@ export function OpSelect({
   formatOp = friendlyOp,
   onChange,
 }) {
+  let line;
   // We don't support the `contains` operator for the id type for
   // rules yet
   if (type === 'id') {
-    ops = ops.filter(op => op !== 'contains');
+    ops = ops.filter(op => op !== 'contains' && op !== 'doesNotContain');
+    line = ops.length / 2;
+  }
+  if (type === 'string') {
+    line = ops.length / 2;
   }
   return (
     <Select
@@ -103,6 +108,7 @@ export function OpSelect({
       options={ops.map(op => [op, formatOp(op, type)])}
       value={value}
       onChange={value => onChange('op', value)}
+      line={line}
       style={style[2]} // DONT ASK WHY THIS COMES IN AS ARRAY, I DONT KNOW!
       wrapperStyle={wrapperStyle}
     />
@@ -202,7 +208,7 @@ function ConditionEditor({
         field={field}
         type={type}
         value={value}
-        multi={op === 'oneOf'}
+        multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
       />
     );
@@ -493,14 +499,22 @@ function ConditionsList({
           // Switching between oneOf and other operators is a
           // special-case. It changes the input type, so we need to
           // clear the value
-          if (cond.op !== 'oneOf' && op === 'oneOf') {
+          if (
+            cond.op !== 'oneOf' &&
+            cond.op !== 'notOneOf' &&
+            (op === 'oneOf' || op === 'notOneOf')
+          ) {
             return newInput(
               makeValue(cond.value != null ? [cond.value] : [], {
                 ...cond,
                 op: value,
               }),
             );
-          } else if (cond.op === 'oneOf' && op !== 'oneOf') {
+          } else if (
+            (cond.op === 'oneOf' || cond.op === 'notOneOf') &&
+            op !== 'oneOf' &&
+            op !== 'notOneOf'
+          ) {
             return newInput(
               makeValue(cond.value.length > 0 ? cond.value[0] : null, {
                 ...cond,

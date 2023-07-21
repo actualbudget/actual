@@ -18,6 +18,7 @@ type SelectProps = {
   onChange?: (newValue: string) => void;
   style?: CSSProperties;
   wrapperStyle?: CSSProperties;
+  line: number;
   disabledKeys?: string[];
 };
 
@@ -44,6 +45,7 @@ export default function Select({
   onChange,
   style,
   wrapperStyle,
+  line,
   disabledKeys = [],
 }: SelectProps) {
   const arrowSize = 7;
@@ -101,28 +103,58 @@ export default function Select({
           boxShadow: styles.cardShadow,
           border: '1px solid ' + colors.menuBorder,
         }}
+        {...css({
+          '[data-reach-listbox-option]': {
+            background: colors.menuItemBackground,
+            color: colors.menuItemText,
+          },
+          '[data-reach-listbox-option][data-current-nav]': {
+            background: colors.menuItemBackgroundHover,
+            color: colors.menuItemTextHover,
+          },
+        })}
       >
-        <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
-          {options.map(([value, label]) => (
-            <ListboxOption
-              key={value}
-              value={value}
-              disabled={disabledKeys.includes(value)}
-              {...css({
-                '[data-reach-listbox-option]': {
-                  background: colors.menuItemBackground,
-                  color: colors.menuItemText,
-                },
-                '[data-reach-listbox-option][data-current-nav]': {
-                  background: colors.menuItemBackgroundHover,
-                  color: colors.menuItemTextHover,
-                },
-              })}
-            >
-              {label}
-            </ListboxOption>
-          ))}
-        </ListboxList>
+        {!line ? (
+          <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
+            {options.map(([value, label]) => (
+              <ListboxOption
+                key={value}
+                value={value}
+                disabled={disabledKeys.includes(value)}
+              >
+                {label}
+              </ListboxOption>
+            ))}
+          </ListboxList>
+        ) : (
+          <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
+            {options.slice(0, line).map(([value, label]) => (
+              <ListboxOption
+                key={value}
+                value={value}
+                disabled={disabledKeys.includes(value)}
+              >
+                {label}
+              </ListboxOption>
+            ))}
+            <div
+              style={{
+                padding: '2px',
+                marginTop: 5,
+                borderTop: '1px solid ' + colors.menuBorder,
+              }}
+            />
+            {options.slice(line, options.length).map(([value, label]) => (
+              <ListboxOption
+                key={value}
+                value={value}
+                disabled={disabledKeys.includes(value)}
+              >
+                {label}
+              </ListboxOption>
+            ))}
+          </ListboxList>
+        )}
       </ListboxPopover>
     </ListboxInput>
   );

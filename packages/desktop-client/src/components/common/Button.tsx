@@ -180,10 +180,7 @@ export const ButtonWithLoading = forwardRef<
             justifyContent: 'center',
           }}
         >
-          <Loading
-            color="currentColor"
-            style={{ width: 20, height: 20, color: 'currentColor' }}
-          />
+          <Loading color="inherit" style={{ width: 20, height: 20 }} />
         </View>
       )}
       <View

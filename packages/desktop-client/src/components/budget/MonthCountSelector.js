@@ -9,7 +9,7 @@ import { useBudgetMonthCount } from './BudgetMonthCountContext';
 function Calendar({ color, onClick }) {
   return (
     <CalendarIcon
-      style={{ width: 13, height: 13, color: color, marginRight: 5 }}
+      style={{ width: 13, height: 13, color, marginRight: 5 }}
       onClick={onClick}
     />
   );

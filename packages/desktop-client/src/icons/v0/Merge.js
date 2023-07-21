@@ -2,8 +2,8 @@ import * as React from 'react';
 const SvgMerge = props => (
   <svg
     {...props}
-    fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    fill="none"
     viewBox="0 0 32 32"
     style={{
       color: 'inherit',
@@ -11,12 +11,12 @@ const SvgMerge = props => (
     }}
   >
     <path
-      d="M24 29h5.333M8 29H2.667M16 21l-8 8M16 21l8 8M16 2.667v18.666M16 2.667 8 9.333M16 2.667l8 6.666"
       fill="none"
       stroke="currentColor"
-      strokeWidth={3.5}
-      strokeMiterlimit={10}
       strokeLinecap="round"
+      strokeMiterlimit={10}
+      strokeWidth={3.5}
+      d="M24 29h5.333M8 29H2.667M16 21l-8 8M16 21l8 8M16 2.667v18.666M16 2.667 8 9.333M16 2.667l8 6.666"
     />
   </svg>
 );

@@ -7,6 +7,7 @@ import * as actions from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
@@ -123,6 +124,7 @@ function Settings({
   }, [loadPrefs]);
 
   const { isNarrowWidth } = useResponsive();
+  const themesFlag = useFeatureFlag('themes');
 
   return (
     <View
@@ -155,10 +157,7 @@ function Settings({
             />
           )}
 
-          <ThemeSettings
-            saveGlobalPrefs={saveGlobalPrefs}
-            globalPrefs={globalPrefs}
-          />
+          {themesFlag && <ThemeSettings saveGlobalPrefs={saveGlobalPrefs} />}
           <FormatSettings prefs={prefs} savePrefs={savePrefs} />
           <EncryptionSettings prefs={prefs} pushModal={pushModal} />
           <ExportBudget prefs={prefs} />
@@ -168,7 +167,7 @@ function Settings({
             <ResetCache />
             <ResetSync isEnabled={!!prefs.groupId} resetSync={resetSync} />
             <FixSplitsTool />
-            <ExperimentalFeatures prefs={prefs} savePrefs={savePrefs} />
+            <ExperimentalFeatures />
           </AdvancedToggle>
         </View>
       </Page>

@@ -94,11 +94,7 @@ function PrivacyButton({ localPrefs, onTogglePrivacy }) {
     onTogglePrivacy(!isPrivacyEnabled);
   };
 
-  let privacyIconStyle = {
-    width: 23,
-    height: 23,
-    color: 'inherit',
-  };
+  let privacyIconStyle = { width: 23, height: 23 };
 
   return (
     <Button bare onClick={togglePrivacy}>
@@ -178,7 +174,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
       onClick={onSync}
     >
       {syncState === 'error' ? (
-        <AlertTriangle width={13} style={{ color: 'currentColor' }} />
+        <AlertTriangle width={13} />
       ) : (
         <AnimatedRefresh animating={syncing} />
       )}
@@ -291,10 +287,7 @@ function Titlebar({
   saveGlobalPrefs,
   savePrefs,
   localPrefs,
-  userData,
   floatingSidebar,
-  syncError,
-  setAppState,
   style,
   sync,
 }) {
@@ -305,6 +298,7 @@ function Titlebar({
   const serverURL = useServerURL();
 
   let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
+  let themesFlag = useFeatureFlag('themes');
   let onTogglePrivacy = enabled => {
     savePrefs({ isPrivacyEnabled: enabled });
   };
@@ -389,10 +383,7 @@ function Titlebar({
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <ThemeSelector
-        globalPrefs={globalPrefs}
-        saveGlobalPrefs={saveGlobalPrefs}
-      />
+      {themesFlag && <ThemeSelector />}
       {privacyModeFeatureFlag && (
         <PrivacyButton
           localPrefs={localPrefs}

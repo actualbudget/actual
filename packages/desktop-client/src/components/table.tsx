@@ -745,9 +745,7 @@ export function SelectCell({
           onSelect={onSelect}
           clickBehavior="none"
         >
-          {selected && (
-            <Checkmark width={6} height={6} style={{ color: 'inherit' }} />
-          )}
+          {selected && <Checkmark width={6} height={6} />}
         </CellButton>
       )}
     </Cell>
