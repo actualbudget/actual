@@ -11,7 +11,7 @@ import { type CSSProperties } from 'glamor';
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { useActions } from '../hooks/useActions';
-import Loading from '../icons/AnimatedLoading';
+import AnimatedLoading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
 import { styles, colors } from '../style';
 
@@ -210,7 +210,7 @@ function Notification({
             justifyContent: 'center',
           }}
         >
-          <Loading
+          <AnimatedLoading
             color="currentColor"
             style={{ width: 20, height: 20, color: 'currentColor' }}
           />
