@@ -3,7 +3,7 @@ import * as colorPalette from '../palette';
 export const pageBackground = colorPalette.navy100;
 export const pageBackgroundModalActive = colorPalette.navy200;
 export const pageBackgroundTopLeft = colorPalette.navy100;
-export const pageBackgroundBottomRight = colorPalette.blue100;
+export const pageBackgroundBottomRight = colorPalette.blue150;
 export const pageBackgroundLineTop = colorPalette.white;
 export const pageBackgroundLineMid = colorPalette.navy100;
 export const pageBackgroundLineBottom = colorPalette.blue150;
