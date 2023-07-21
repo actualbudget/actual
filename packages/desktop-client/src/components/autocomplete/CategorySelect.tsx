@@ -108,7 +108,7 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: CategoryGroup[];
   showSplitOption?: boolean;
-  onSplit: () => void;
+  onSplit?: () => void;
 };
 export default function CategoryAutocomplete({
   categoryGroups,
