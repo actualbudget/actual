@@ -349,6 +349,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           borderColor,
           backgroundColor: 'white',
         }}
+        onMouseOverCapture={() => setHover(true)}
+        onMouseLeave={() => {
+          setHover(false);
+          setMenuOpen(false);
+        }}
       >
         {hover ? (
           <View
@@ -419,8 +424,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onExpose={() => onEdit(category.id, monthIndex)}
           style={[editing && { zIndex: 100 }, styles.tnum]}
           textAlign="right"
-          onMouseOver={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
           valueStyle={[
             {
               cursor: 'default',

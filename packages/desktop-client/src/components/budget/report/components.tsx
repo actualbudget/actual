@@ -224,6 +224,11 @@ export const CategoryMonth = memo(function CategoryMonth({
           borderColor,
           backgroundColor: 'white',
         }}
+        onMouseOverCapture={() => setHover(true)}
+        onMouseLeave={() => {
+          setHover(false);
+          setMenuOpen(false);
+        }}
       >
         {hover ? (
           <View
@@ -294,8 +299,6 @@ export const CategoryMonth = memo(function CategoryMonth({
           onExpose={() => onEdit(category.id, monthIndex)}
           style={[editing && { zIndex: 100 }, styles.tnum]}
           textAlign="right"
-          onMouseOver={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
           valueStyle={[
             {
               cursor: 'default',
