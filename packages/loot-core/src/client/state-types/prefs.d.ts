@@ -52,7 +52,6 @@ export type GlobalPrefs = NullableValues<{
   maxMonths: number;
   theme: Theme;
   documentDir: string; // Electron only
-  theme: string;
 }>;
 
 export type PrefsState = {
