@@ -13,13 +13,13 @@ export interface BudgetHandlers {
 
   'budget/set-3month-avg': (...args: unknown[]) => Promise<unknown>;
 
-  'budget/set-n-month-avg': (...args: unknown[]) => Promise<unknown>;
-
   'budget/check-templates': () => Promise<Notification>;
 
-  'budget/apply-goal-template': (...args: unknown[]) => Promise<unknown>;
+  'budget/apply-goal-template': (arg: { month: string }) => Promise<unknown>;
 
-  'budget/overwrite-goal-template': (...args: unknown[]) => Promise<unknown>;
+  'budget/overwrite-goal-template': (arg: {
+    month: string;
+  }) => Promise<unknown>;
 
   'budget/cleanup-goal-template': (arg: {
     month: string;
@@ -37,11 +37,19 @@ export interface BudgetHandlers {
 
   'budget/set-carryover': (...args: unknown[]) => Promise<unknown>;
 
-  'budget/apply-single-category-template': (
-    ...args: unknown[]
-  ) => Promise<unknown>;
+  'budget/apply-single-category-template': (arg: {
+    month: string;
+    category: string;
+  }) => Promise<unknown>;
 
-  'budget/set-n-month-avg': (...args: unknown[]) => Promise<unknown>;
+  'budget/set-n-month-avg': (arg: {
+    month: string;
+    N: number;
+    category: string;
+  }) => Promise<unknown>;
 
-  'budget/copy-single-previous-month': (...args: unknown[]) => Promise<unknown>;
+  'budget/copy-single-previous-month': (arg: {
+    month: string;
+    category: string;
+  }) => Promise<unknown>;
 }
