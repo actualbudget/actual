@@ -5,6 +5,8 @@ import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from '../tokens';
 
+import { theme } from './theme';
+
 export const styles = {
   incomeHeaderHeight: 70,
   cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
