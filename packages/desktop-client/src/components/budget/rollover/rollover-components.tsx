@@ -323,6 +323,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   return (
@@ -349,58 +350,66 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           backgroundColor: 'white',
         }}
       >
-        <View
-          style={{
-            flexShrink: 1,
-            marginRight: 0,
-            marginLeft: 3,
-            justifyContent: 'center',
-          }}
-        >
-          <Button
-            bare
-            onClick={e => {
-              e.stopPropagation();
-              setMenuOpen(true);
-            }}
+        {hover ? (
+          <View
             style={{
-              padding: 3,
+              flexShrink: 1,
+              marginRight: 0,
+              marginLeft: 3,
+              justifyContent: 'center',
             }}
           >
-            <CheveronDown width={14} height={14} className="hover-visible" />
-          </Button>
-          {menuOpen && (
-            <Tooltip
-              position="bottom-left"
-              width={200}
-              style={{ padding: 0 }}
-              onClose={() => setMenuOpen(false)}
+            <Button
+              bare
+              onClick={e => {
+                e.stopPropagation();
+                setMenuOpen(true);
+              }}
+              style={{
+                padding: 3,
+              }}
             >
-              <Menu
-                onMenuSelect={type => {
-                  onBudgetAction(monthIndex, type, { category: category });
-                  setMenuOpen(false);
-                }}
-                items={[
-                  {
-                    name: 'copy-single-last',
-                    text: 'Copy last month’s budget',
-                  },
-                  {
-                    name: 'set-single-3-avg',
-                    text: 'Set to 3 month average',
-                  },
-                  { name: 'set-single-6-avg', text: 'Set to 6 month average' },
-                  { name: 'set-single-12-avg', text: 'Set to yearly average' },
-                  isGoalTemplatesEnabled && {
-                    name: 'apply-single-category-template',
-                    text: 'Apply budget template',
-                  },
-                ]}
-              />
-            </Tooltip>
-          )}
-        </View>
+              <CheveronDown width={14} height={14} className="hover-visible" />
+            </Button>
+            {menuOpen && (
+              <Tooltip
+                position="bottom-left"
+                width={200}
+                style={{ padding: 0 }}
+                onClose={() => setMenuOpen(false)}
+              >
+                <Menu
+                  onMenuSelect={type => {
+                    onBudgetAction(monthIndex, type, { category: category });
+                    setMenuOpen(false);
+                  }}
+                  items={[
+                    {
+                      name: 'copy-single-last',
+                      text: 'Copy last month’s budget',
+                    },
+                    {
+                      name: 'set-single-3-avg',
+                      text: 'Set to 3 month average',
+                    },
+                    {
+                      name: 'set-single-6-avg',
+                      text: 'Set to 6 month average',
+                    },
+                    {
+                      name: 'set-single-12-avg',
+                      text: 'Set to yearly average',
+                    },
+                    isGoalTemplatesEnabled && {
+                      name: 'apply-single-category-template',
+                      text: 'Apply budget template',
+                    },
+                  ]}
+                />
+              </Tooltip>
+            )}
+          </View>
+        ) : null}
         <SheetCell
           name="budget"
           exposed={editing}
@@ -410,6 +419,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onExpose={() => onEdit(category.id, monthIndex)}
           style={[editing && { zIndex: 100 }, styles.tnum]}
           textAlign="right"
+          onMouseOver={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
           valueStyle={[
             {
               cursor: 'default',
