@@ -405,7 +405,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           exposed={editing}
           focused={editing}
           width="flex"
-          borderColor={borderColor}
+          borderColor="white"
           onExpose={() => onEdit(category.id, monthIndex)}
           style={[editing && { zIndex: 100 }, styles.tnum]}
           textAlign="right"
