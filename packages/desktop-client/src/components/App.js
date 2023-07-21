@@ -102,7 +102,6 @@ class App extends Component {
             {...css([
               {
                 flexGrow: 1,
-                backgroundColor: '#E8ECF0',
                 overflow: 'hidden',
               },
               styles.lightScrollbar,
