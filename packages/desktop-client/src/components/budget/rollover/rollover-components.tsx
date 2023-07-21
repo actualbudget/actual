@@ -343,6 +343,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         style={{
           flex: 1,
           flexDirection: 'row',
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor,
         }}
       >
         <View
@@ -351,9 +354,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             marginRight: 0,
             marginLeft: 3,
             justifyContent: 'center',
-            borderTopWidth: 1,
-            borderBottomWidth: 1,
-            borderColor,
           }}
         >
           <Button

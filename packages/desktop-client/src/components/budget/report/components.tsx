@@ -218,6 +218,9 @@ export const CategoryMonth = memo(function CategoryMonth({
         style={{
           flex: 1,
           flexDirection: 'row',
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor,
         }}
       >
         <View
@@ -226,9 +229,6 @@ export const CategoryMonth = memo(function CategoryMonth({
             marginRight: 0,
             marginLeft: 3,
             justifyContent: 'center',
-            borderTopWidth: 1,
-            borderBottomWidth: 1,
-            borderColor,
           }}
         >
           <Button
