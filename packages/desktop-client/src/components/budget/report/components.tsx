@@ -221,6 +221,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor,
+          backgroundColor: 'white',
         }}
       >
         <View
