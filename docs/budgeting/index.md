@@ -96,7 +96,7 @@ You need to create a new budget each time a new month begins. It wouldn't make s
 Sometimes you want to keep a negative balance in a category across months. The most common reason is to keep track of reimbursable expenses.
 
 1. Click an amount in the **Balance** column for a category.
-2. Select **Keep negative spending in category**
+2. Select **Rollover overspending**
 3. For all future months, a negative balance will stay in the category
 
 ## Recommended workflow for new users
