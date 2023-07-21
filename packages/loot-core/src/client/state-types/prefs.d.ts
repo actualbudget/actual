@@ -30,7 +30,7 @@ export type LocalPrefs = NullableValues<
     [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
     [key: `csv-mappings-${string}`]: string;
     [key: `csv-delimiter-${string}`]: ',' | ';' | '\t';
-    [key: `csv-has-header-${string}`]: ',' | ';';
+    [key: `csv-has-header-${string}`]: boolean;
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
     'flags.updateNotificationShownForVersion': string;
     id: string;
