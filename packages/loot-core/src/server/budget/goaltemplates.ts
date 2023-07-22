@@ -22,7 +22,7 @@ export async function overwriteTemplate({ month }) {
   return processTemplate(month, true, category_templates);
 }
 
-export async function applySingleCategoryTemplate(month, category) {
+export async function applySingleCategoryTemplate({ month, category }) {
   let categories = await db.all(`SELECT * FROM v_categories WHERE id = ?`, [
     category,
   ]);

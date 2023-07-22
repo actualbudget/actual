@@ -35,7 +35,7 @@ app.method(
 );
 app.method(
   'budget/apply-single-template',
-  mutator(undoable(actions.setSingleCategoryTemplate)),
+  mutator(undoable(goalActions.applySingleCategoryTemplate)),
 );
 app.method(
   'budget/cleanup-goal-template',

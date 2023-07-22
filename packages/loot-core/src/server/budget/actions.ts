@@ -5,8 +5,6 @@ import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 
-import { applySingleCategoryTemplate } from './goaltemplates';
-
 export async function getSheetValue(sheetName, cell) {
   const node = await sheet.getCell(sheetName, cell);
   return safeNumber(typeof node.value === 'number' ? node.value : 0);
@@ -140,21 +138,12 @@ export async function copyPreviousMonth({ month }) {
 
 export async function copySinglePreviousMonth({ month, category }) {
   let prevMonth = monthUtils.prevMonth(month);
-  let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0 AND id = ?',
-    [category],
-  );
   let newAmount = await getSheetValue(
     monthUtils.sheetForMonth(prevMonth),
     'budget-' + category,
   );
   await batchMessages(async () => {
-    for (let cat of categories) {
-      if (cat.is_income === 1 && !isReflectBudget()) {
-        continue;
-      }
-      setBudget({ category: cat.id, month, amount: newAmount });
-    }
+    setBudget({ category: category, month, amount: newAmount });
   });
 }
 
@@ -208,10 +197,6 @@ export async function set3MonthAvg({ month }) {
 }
 
 export async function setNMonthAvg({ month, N, category }) {
-  let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0 AND id = ?',
-    [category],
-  );
   let prevMonth = monthUtils.prevMonth(month);
   let sumAmount = 0;
   for (let l = 0; l < N; l++) {
@@ -222,13 +207,8 @@ export async function setNMonthAvg({ month, N, category }) {
     prevMonth = monthUtils.prevMonth(prevMonth);
   }
   await batchMessages(async () => {
-    for (let cat of categories) {
-      if (cat.is_income === 1 && !isReflectBudget()) {
-        continue;
-      }
-      const avg = Math.round(sumAmount / N);
-      setBudget({ category: cat.id, month, amount: -avg });
-    }
+    const avg = Math.round(sumAmount / N);
+    setBudget({ category: category, month, amount: -avg });
   });
 }
 
@@ -317,11 +297,5 @@ export async function setCategoryCarryover({ startMonth, category, flag }) {
     for (let month of months) {
       setCarryover(table, category, dbMonth(month), flag);
     }
-  });
-}
-
-export async function setSingleCategoryTemplate({ month, category }) {
-  await batchMessages(async () => {
-    applySingleCategoryTemplate(month, category);
   });
 }
