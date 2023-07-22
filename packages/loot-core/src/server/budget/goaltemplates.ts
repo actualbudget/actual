@@ -22,10 +22,13 @@ export async function overwriteTemplate({ month }) {
   return processTemplate(month, true, category_templates);
 }
 
-export async function applySingleCategoryTemplate({ month, category }) {
-  let category_templates = await getCategoryTemplates(category);
+export async function applySingleCategoryTemplate(month, category) {
+  let categories = await db.all(`SELECT * FROM v_categories WHERE id = ?`, [
+    category,
+  ]);
+  let category_templates = await getCategoryTemplates(categories[0]);
   await setBudget({
-    category: category.id,
+    category: category,
     month,
     amount: 0,
   });

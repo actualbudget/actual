@@ -141,22 +141,19 @@ export async function copyPreviousMonth({ month }) {
 export async function copySinglePreviousMonth({ month, category }) {
   let prevMonth = monthUtils.prevMonth(month);
   let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0',
+    'SELECT * FROM v_categories WHERE tombstone = 0 AND id = ?',
+    [category],
   );
-
   let newAmount = await getSheetValue(
     monthUtils.sheetForMonth(prevMonth),
-    'budget-' + category.id,
+    'budget-' + category,
   );
-
   await batchMessages(async () => {
     for (let cat of categories) {
-      if (category.id === cat.id) {
-        if (cat.is_income === 1 && !isReflectBudget()) {
-          continue;
-        }
-        setBudget({ category: category.id, month, amount: newAmount });
+      if (cat.is_income === 1 && !isReflectBudget()) {
+        continue;
       }
+      setBudget({ category: cat.id, month, amount: newAmount });
     }
   });
 }
@@ -212,28 +209,25 @@ export async function set3MonthAvg({ month }) {
 
 export async function setNMonthAvg({ month, N, category }) {
   let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0',
+    'SELECT * FROM v_categories WHERE tombstone = 0 AND id = ?',
+    [category],
   );
-
   let prevMonth = monthUtils.prevMonth(month);
   let sumAmount = 0;
   for (let l = 0; l < N; l++) {
     sumAmount += await getSheetValue(
       monthUtils.sheetForMonth(prevMonth),
-      'sum-amount-' + category.id,
+      'sum-amount-' + category,
     );
     prevMonth = monthUtils.prevMonth(prevMonth);
   }
-
   await batchMessages(async () => {
     for (let cat of categories) {
-      if (category.id === cat.id) {
-        if (cat.is_income === 1 && !isReflectBudget()) {
-          continue;
-        }
-        const avg = Math.round(sumAmount / N);
-        setBudget({ category: category.id, month, amount: -avg });
+      if (cat.is_income === 1 && !isReflectBudget()) {
+        continue;
       }
+      const avg = Math.round(sumAmount / N);
+      setBudget({ category: cat.id, month, amount: -avg });
     }
   });
 }
@@ -327,5 +321,7 @@ export async function setCategoryCarryover({ startMonth, category, flag }) {
 }
 
 export async function setSingleCategoryTemplate({ month, category }) {
-  await applySingleCategoryTemplate({ month, category });
+  await batchMessages(async () => {
+    applySingleCategoryTemplate(month, category);
+  });
 }

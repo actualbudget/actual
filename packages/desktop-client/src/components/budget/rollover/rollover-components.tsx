@@ -385,7 +385,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               >
                 <Menu
                   onMenuSelect={type => {
-                    onBudgetAction(monthIndex, type, { category: category });
+                    onBudgetAction(monthIndex, type, { category: category.id });
                     setMenuOpen(false);
                   }}
                   items={[

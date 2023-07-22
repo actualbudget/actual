@@ -82,7 +82,7 @@ export function applyBudgetAction(month, type, args) {
         break;
       }
       case 'apply-single-category-template':
-        await send('budget/apply-single-category-template', {
+        await send('budget/apply-single-template', {
           month,
           category: args.category,
         });
@@ -109,7 +109,7 @@ export function applyBudgetAction(month, type, args) {
         });
         break;
       case 'copy-single-last':
-        await send('budget/copy-single-previous-month', {
+        await send('budget/copy-single-month', {
           month,
           category: args.category,
         });

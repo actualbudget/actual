@@ -15,7 +15,7 @@ app.method(
   mutator(undoable(actions.copyPreviousMonth)),
 );
 app.method(
-  'budget/copy-single-previous-month',
+  'budget/copy-single-month',
   mutator(undoable(actions.copySinglePreviousMonth)),
 );
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
@@ -34,7 +34,7 @@ app.method(
   mutator(undoable(goalActions.overwriteTemplate)),
 );
 app.method(
-  'budget/apply-single-category-template',
+  'budget/apply-single-template',
   mutator(undoable(actions.setSingleCategoryTemplate)),
 );
 app.method(

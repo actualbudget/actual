@@ -37,19 +37,19 @@ export interface BudgetHandlers {
 
   'budget/set-carryover': (...args: unknown[]) => Promise<unknown>;
 
-  'budget/apply-single-category-template': (arg: {
+  'budget/apply-single-template': (arg: {
     month: string;
-    category: string;
+    category: string; //category id
   }) => Promise<unknown>;
 
   'budget/set-n-month-avg': (arg: {
     month: string;
     N: number;
-    category: string;
+    category: string; //category id
   }) => Promise<unknown>;
 
-  'budget/copy-single-previous-month': (arg: {
+  'budget/copy-single-month': (arg: {
     month: string;
-    category: string;
+    category: string; //category id
   }) => Promise<unknown>;
 }
