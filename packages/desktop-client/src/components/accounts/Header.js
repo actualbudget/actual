@@ -26,6 +26,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/SavedFilters';
 import { KeyHandlers } from '../KeyHandlers';
 import NotesButton from '../NotesButton';
+import { SchedulePreviewButton } from '../schedules/SchedulePreviewPicker';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
 import { useSplitsExpanded } from '../transactions/TransactionsTable';
 
@@ -238,6 +239,9 @@ export function AccountHeader({
           )}
           <View>
             <FilterButton onApply={onApplyFilter} />
+          </View>
+          <View>
+            <SchedulePreviewButton onScheduleAction={null} />
           </View>
           <InputWithContent
             leftContent={
