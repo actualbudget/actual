@@ -160,6 +160,7 @@ export default function MergeUnusedPayees({
             <ModalButtons style={{ marginTop: 20 }} focusButton>
               <Button
                 type="primary"
+                isSubmit={false}
                 style={{ marginRight: 10 }}
                 onClick={onMerge}
               >

@@ -12,6 +12,7 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   pressed?: boolean;
   hover?: boolean;
   type?: ButtonType;
+  isSubmit?: boolean;
   disabled?: boolean;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
@@ -49,6 +50,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       pressed,
       hover,
       type = 'normal',
+      isSubmit = type === 'primary',
       style,
       disabled,
       hoveredStyle,
@@ -114,7 +116,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...(typeof as === 'string'
           ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (css(buttonStyle) as any)
-          : { style: buttonStyle })}
+          : { style: buttonStyle, type: isSubmit ? 'submit' : 'button' })}
         disabled={disabled}
         {...nativeProps}
       >

@@ -331,6 +331,7 @@ function BudgetList({
         {isNonProductionEnvironment() && (
           <Button
             type="primary"
+            isSubmit={false}
             onClick={() => onCreate({ testMode: true })}
             style={{ marginLeft: 15 }}
           >
