@@ -64,27 +64,43 @@ export const altMenuItemTextSelected = colorPalette.purple300;
 export const altMenuItemTextHeader = colorPalette.purple300;
 export const altMenuBorder = colorPalette.blue700;
 export const altMenuBorderHover = colorPalette.purple300;
+
+// Button
 export const buttonAltMenuText = colorPalette.navy100;
 export const buttonAltMenuTextHover = colorPalette.navy50;
 export const buttonAltMenuTextSelected = colorPalette.navy50;
 export const buttonAltMenuBackground = colorPalette.blue800;
 export const buttonAltMenuBackgroundHover = colorPalette.blue700;
 export const buttonAltMenuBorder = colorPalette.navy200;
-export const buttonPositiveText = colorPalette.navy50;
-export const buttonPositiveTextHover = colorPalette.purple600;
-export const buttonPositiveTextSelected = colorPalette.navy50;
-export const buttonPositiveBackground = colorPalette.purple600;
-export const buttonPositiveBackgroundHover = colorPalette.navy50;
-export const buttonPositiveBorder = colorPalette.purple600;
-export const buttonNeutralText = colorPalette.navy700;
-export const buttonNeutralTextHover = colorPalette.navy800;
-export const buttonNeutralBackground = colorPalette.navy50;
-export const buttonNeutralBackgroundHover = colorPalette.navy100;
-export const buttonNeutralBorder = colorPalette.navy200;
+
+export const buttonPrimaryText = colorPalette.white;
+export const buttonPrimaryTextHover = buttonPrimaryText;
+export const buttonPrimaryBackground = colorPalette.purple500;
+export const buttonPrimaryBackgroundHover = buttonPrimaryBackground;
+export const buttonPrimaryBorder = buttonPrimaryBackground;
+export const buttonPrimaryShadow = 'rgba(0, 0, 0, 0.3)';
+
+export const buttonPrimaryDisabledText = colorPalette.navy400;
+export const buttonPrimaryDisabledBackground = colorPalette.navy300;
+export const buttonPrimaryDisabledBorder = buttonPrimaryDisabledBackground;
+
+export const buttonNormalText = colorPalette.navy900;
+export const buttonNormalTextHover = buttonNormalText;
+export const buttonNormalBackground = colorPalette.white;
+export const buttonNormalBackgroundHover = buttonNormalBackground;
+export const buttonNormalBorder = colorPalette.navy150;
+export const buttonNormalShadow = 'rgba(0, 0, 0, 0.2)';
+
 export const buttonDisabledText = colorPalette.navy300;
 export const buttonDisabledBackground = colorPalette.navy50;
 export const buttonDisabledBorder = colorPalette.navy300;
-export const buttonShadow = colorPalette.purple500;
+
+export const buttonBareText = buttonNormalText;
+export const buttonBareTextHover = buttonNormalText;
+export const buttonBareBackground = 'transparent';
+export const buttonBareBackgroundHover = 'rgba(100, 100, 100, .15)';
+export const buttonBareBackgroundActive = 'rgba(100, 100, 100, .25)';
+
 export const noticeBackground = colorPalette.green50;
 export const noticeText = colorPalette.green500;
 export const noticeAccent = colorPalette.green200;

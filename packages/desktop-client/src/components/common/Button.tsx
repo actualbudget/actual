@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 import { css, type CSSProperties } from 'glamor';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { styles, colors } from '../../style';
+import { styles, colors, theme } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 import View from './View';
@@ -24,23 +24,37 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
 type ButtonType = 'normal' | 'primary' | 'bare';
 
 const backgroundColor = {
-  normal: 'white',
-  primary: colors.p5,
-  primaryDisabled: colors.n7,
-  bare: 'transparent',
+  normal: theme.buttonNormalBackground,
+  primary: theme.buttonPrimaryBackground,
+  primaryDisabled: theme.buttonPrimaryDisabledBackground,
+  bare: theme.buttonBareBackground,
+};
+
+const backgroundColorHover = {
+  normal: theme.buttonNormalBackgroundHover,
+  primary: theme.buttonPrimaryBackgroundHover,
+  primaryDisabled: theme.buttonPrimaryDisabledBackground,
+  bare: theme.buttonBareBackgroundHover,
 };
 
 const borderColor = {
-  normal: colors.n9,
-  primary: colors.p5,
-  primaryDisabled: colors.n7,
+  normal: theme.buttonNormalBorder,
+  primary: theme.buttonPrimaryBorder,
+  primaryDisabled: theme.buttonPrimaryDisabledBorder,
 };
 
-const color = {
-  normal: colors.n1,
-  primary: 'white',
-  primaryDisabled: colors.n6,
-  bare: colors.n1,
+const textColor = {
+  normal: theme.buttonNormalText,
+  primary: theme.buttonPrimaryText,
+  primaryDisabled: theme.buttonPrimaryDisabledText,
+  bare: theme.buttonBareText,
+};
+
+const textColorHover = {
+  normal: theme.buttonNormalTextHover,
+  primary: theme.buttonPrimaryTextHover,
+  primaryDisabled: theme.buttonPrimaryDisabledText,
+  bare: theme.buttonBareTextHover,
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -61,28 +75,31 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
+    let resolvedType =
+      type === 'primary' && disabled ? 'primaryDisabled' : type;
+
     hoveredStyle = [
-      type === 'bare'
-        ? { backgroundColor: 'rgba(100, 100, 100, .15)' }
-        : styles.shadow,
+      type !== 'bare' && styles.shadow,
       hoveredStyle,
+      {
+        backgroundColor: backgroundColorHover[resolvedType],
+        color: textColorHover[resolvedType],
+      },
     ];
     activeStyle = [
       type === 'bare'
-        ? { backgroundColor: 'rgba(100, 100, 100, .25)' }
+        ? { backgroundColor: theme.buttonBareBackgroundActive }
         : {
             transform: bounce && 'translateY(1px)',
             boxShadow:
-              type === 'primary'
-                ? '0 1px 4px 0 rgba(0,0,0,0.3)'
-                : '0 1px 4px 0 rgba(0,0,0,0.2)',
+              '0 1px 4px 0 ' +
+              (type === 'primary'
+                ? theme.buttonPrimaryShadow
+                : theme.buttonNormalShadow),
             transition: 'none',
           },
       activeStyle,
     ];
-
-    let resolvedType =
-      type === 'primary' && disabled ? 'primaryDisabled' : type;
 
     let Component = as;
     let buttonStyle = [
@@ -98,7 +115,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         backgroundColor: backgroundColor[resolvedType],
         border:
           type === 'bare' ? 'none' : '1px solid ' + borderColor[resolvedType],
-        color: color[resolvedType],
+        color: textColor[resolvedType],
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',
         ...styles.smallText,
