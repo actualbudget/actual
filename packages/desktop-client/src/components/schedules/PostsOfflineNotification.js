@@ -71,7 +71,7 @@ export default function PostsOfflineNotification() {
         spacing={2}
       >
         <Button onClick={onClose}>Decide later</Button>
-        <Button primary onClick={onPost}>
+        <Button type="primary" onClick={onPost}>
           Post transactions
         </Button>
       </Stack>

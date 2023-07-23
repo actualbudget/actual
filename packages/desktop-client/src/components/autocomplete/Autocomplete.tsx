@@ -510,7 +510,7 @@ function MultiItem({ name, onRemove }) {
       }}
     >
       {name}
-      <Button type="button" bare style={{ marginLeft: 1 }} onClick={onRemove}>
+      <Button type="bare" style={{ marginLeft: 1 }} onClick={onRemove}>
         <Remove style={{ width: 8, height: 8 }} />
       </Button>
     </View>

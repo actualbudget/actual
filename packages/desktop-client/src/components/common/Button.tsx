@@ -10,9 +10,8 @@ import View from './View';
 
 type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   pressed?: boolean;
-  primary?: boolean;
   hover?: boolean;
-  bare?: boolean;
+  type?: ButtonType;
   disabled?: boolean;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
@@ -21,14 +20,35 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   as?: 'button';
 };
 
+type ButtonType = 'normal' | 'primary' | 'bare';
+
+const backgroundColor = {
+  normal: 'white',
+  primary: colors.p5,
+  primaryDisabled: colors.n7,
+  bare: 'transparent',
+};
+
+const borderColor = {
+  normal: colors.n9,
+  primary: colors.p5,
+  primaryDisabled: colors.n7,
+};
+
+const color = {
+  normal: colors.n1,
+  primary: 'white',
+  primaryDisabled: colors.n6,
+  bare: colors.n1,
+};
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
       pressed,
-      primary,
       hover,
-      bare,
+      type = 'normal',
       style,
       disabled,
       hoveredStyle,
@@ -40,25 +60,27 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     hoveredStyle = [
-      bare
+      type === 'bare'
         ? { backgroundColor: 'rgba(100, 100, 100, .15)' }
-        : { ...styles.shadow },
+        : styles.shadow,
       hoveredStyle,
     ];
     activeStyle = [
-      bare
+      type === 'bare'
         ? { backgroundColor: 'rgba(100, 100, 100, .25)' }
         : {
             transform: bounce && 'translateY(1px)',
             boxShadow:
-              !bare &&
-              (primary
+              type === 'primary'
                 ? '0 1px 4px 0 rgba(0,0,0,0.3)'
-                : '0 1px 4px 0 rgba(0,0,0,0.2)'),
+                : '0 1px 4px 0 rgba(0,0,0,0.2)',
             transition: 'none',
           },
       activeStyle,
     ];
+
+    let resolvedType =
+      type === 'primary' && disabled ? 'primaryDisabled' : type;
 
     let Component = as;
     let buttonStyle = [
@@ -66,23 +88,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
-        padding: bare ? '5px' : '5px 10px',
+        padding: type === 'bare' ? '5px' : '5px 10px',
         margin: 0,
         overflow: 'hidden',
         display: 'flex',
         borderRadius: 4,
-        backgroundColor: bare
-          ? 'transparent'
-          : primary
-          ? disabled
-            ? colors.n7
-            : colors.p5
-          : 'white',
-        border: bare
-          ? 'none'
-          : '1px solid ' +
-            (primary ? (disabled ? colors.n7 : colors.p5) : colors.n9),
-        color: primary ? 'white' : disabled ? colors.n6 : colors.n1,
+        backgroundColor: backgroundColor[resolvedType],
+        border:
+          type === 'bare' ? 'none' : '1px solid ' + borderColor[resolvedType],
+        color: color[resolvedType],
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',
         ...styles.smallText,

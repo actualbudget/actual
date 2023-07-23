@@ -994,7 +994,7 @@ export default function ImportTransactions({ modalProps, options }) {
           }}
         >
           <ButtonWithLoading
-            primary
+            type="primary"
             disabled={transactions.length === 0}
             loading={loadingState === 'importing'}
             onClick={onImport}

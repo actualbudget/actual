@@ -155,7 +155,7 @@ export default function CreateEncryptionKey({
             </View>
 
             <ModalButtons style={{ marginTop: 20 }}>
-              <ButtonWithLoading loading={loading} primary>
+              <ButtonWithLoading loading={loading} type="primary">
                 Enable
               </ButtonWithLoading>
             </ModalButtons>

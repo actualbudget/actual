@@ -83,7 +83,7 @@ function AccountSyncCheck({
   return (
     <View>
       <Button
-        bare
+        type="bare"
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -116,7 +116,11 @@ function AccountSyncCheck({
             {showAuth ? (
               <>
                 <Button onClick={unlink}>Unlink</Button>
-                <Button primary onClick={reauth} style={{ marginLeft: 5 }}>
+                <Button
+                  type="primary"
+                  onClick={reauth}
+                  style={{ marginLeft: 5 }}
+                >
                   Reauthorize
                 </Button>
               </>

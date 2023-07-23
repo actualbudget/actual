@@ -57,7 +57,7 @@ function DetailButton({ state, onDelete }) {
   return (
     <View>
       <Button
-        bare
+        type="bare"
         onClick={e => {
           e.stopPropagation();
           setMenuOpen(true);
@@ -228,7 +228,11 @@ function RefreshButton({ onRefresh }) {
   let Icon = loading ? Loading : RefreshArrow;
 
   return (
-    <Button bare style={{ padding: 10, marginRight: 5 }} onClick={_onRefresh}>
+    <Button
+      type="bare"
+      style={{ padding: 10, marginRight: 5 }}
+      onClick={_onRefresh}
+    >
       <Icon style={{ width: 18, height: 18 }} />
     </Button>
   );
@@ -307,7 +311,7 @@ function BudgetList({
         }}
       >
         <Button
-          bare
+          type="bare"
           style={{
             marginLeft: 10,
             color: colors.n4,
@@ -320,13 +324,13 @@ function BudgetList({
           Import file
         </Button>
 
-        <Button primary onClick={onCreate} style={{ marginLeft: 15 }}>
+        <Button type="primary" onClick={onCreate} style={{ marginLeft: 15 }}>
           Create new file
         </Button>
 
         {isNonProductionEnvironment() && (
           <Button
-            primary
+            type="primary"
             onClick={() => onCreate({ testMode: true })}
             style={{ marginLeft: 15 }}
           >

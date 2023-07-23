@@ -487,7 +487,7 @@ export const ManagePayees = forwardRef(
         >
           <View>
             <Button
-              bare
+              type="bare"
               style={{ marginRight: 10 }}
               disabled={buttonsDisabled}
               onClick={() => setMenuOpen(true)}
@@ -513,7 +513,7 @@ export const ManagePayees = forwardRef(
             {(orphanedOnly ||
               (orphanedPayees && orphanedPayees.length > 0)) && (
               <Button
-                bare
+                type="bare"
                 style={{ marginRight: 10 }}
                 onClick={() => {
                   setOrphanedOnly(!orphanedOnly);
