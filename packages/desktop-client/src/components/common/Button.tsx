@@ -137,7 +137,7 @@ export const ButtonWithLoading = forwardRef<
             justifyContent: 'center',
           }}
         >
-          <AnimatedLoading color="inherit" style={{ width: 20, height: 20 }} />
+          <AnimatedLoading style={{ width: 20, height: 20 }} />
         </View>
       )}
       <View

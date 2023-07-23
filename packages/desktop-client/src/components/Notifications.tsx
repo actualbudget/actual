@@ -211,7 +211,6 @@ function Notification({
           }}
         >
           <AnimatedLoading
-            color="currentColor"
             style={{ width: 20, height: 20, color: 'currentColor' }}
           />
         </View>
