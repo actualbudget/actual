@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 
 import { css, type CSSProperties } from 'glamor';
 
-import Loading from '../../icons/AnimatedLoading';
+import AnimatedLoading from '../../icons/AnimatedLoading';
 import { styles, colors } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
@@ -137,7 +137,7 @@ export const ButtonWithLoading = forwardRef<
             justifyContent: 'center',
           }}
         >
-          <Loading color="inherit" style={{ width: 20, height: 20 }} />
+          <AnimatedLoading style={{ width: 20, height: 20 }} />
         </View>
       )}
       <View
