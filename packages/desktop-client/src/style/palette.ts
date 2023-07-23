@@ -1,6 +1,17 @@
 import * as oldColors from './colors';
 
 // Only for use in contextual color definitions
+export const gray50 = '#f6f8fa';
+export const gray100 = '#e8ecf0';
+export const gray150 = '#d4dae0';
+export const gray200 = '#bdc5cf';
+export const gray300 = '#98a1ae';
+export const gray400 = '#747c8b';
+export const gray500 = '#4d5768';
+export const gray600 = '#373b4a';
+export const gray700 = '#242733';
+export const gray800 = '#141520';
+export const gray900 = '#080811';
 export const navy50 = oldColors.n11;
 export const navy100 = oldColors.n10;
 export const navy150 = oldColors.n9;
