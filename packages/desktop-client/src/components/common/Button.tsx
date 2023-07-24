@@ -14,6 +14,7 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   type?: ButtonType;
   isSubmit?: boolean;
   disabled?: boolean;
+  color?: string;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
   textStyle?: CSSProperties;
@@ -78,6 +79,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       hover,
       type = 'normal',
       isSubmit = type === 'primary',
+      color,
       style,
       disabled,
       hoveredStyle,
@@ -95,7 +97,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       hoveredStyle,
       {
         backgroundColor: backgroundColorHover[type],
-        color: textColorHover[type],
+        color: color || textColorHover[type],
       },
     ];
     activeStyle = [
@@ -129,7 +131,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           type === 'bare'
             ? 'none'
             : '1px solid ' + borderColor[typeWithDisabled],
-        color: textColor[typeWithDisabled],
+        color: color || textColor[typeWithDisabled],
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',
         ...styles.smallText,
