@@ -30,12 +30,16 @@ const backgroundColor = {
   primaryDisabled: theme.buttonPrimaryDisabledBackground,
   bare: theme.buttonBareBackground,
   bareDisabled: theme.buttonBareDisabledBackground,
+  menu: theme.buttonMenuBackground,
+  menuSelected: theme.buttonMenuSelectedBackground,
 };
 
 const backgroundColorHover = {
   normal: theme.buttonNormalBackgroundHover,
   primary: theme.buttonPrimaryBackgroundHover,
   bare: theme.buttonBareBackgroundHover,
+  menu: theme.buttonMenuBackgroundHover,
+  menuSelected: theme.buttonMenuSelectedBackgroundHover,
 };
 
 const borderColor = {
@@ -43,6 +47,8 @@ const borderColor = {
   normalDisabled: theme.buttonNormalDisabledBorder,
   primary: theme.buttonPrimaryBorder,
   primaryDisabled: theme.buttonPrimaryDisabledBorder,
+  menu: theme.buttonMenuBorder,
+  menuSelected: theme.buttonMenuSelectedBorder,
 };
 
 const textColor = {
@@ -52,12 +58,16 @@ const textColor = {
   primaryDisabled: theme.buttonPrimaryDisabledText,
   bare: theme.buttonBareText,
   bareDisabled: theme.buttonBareDisabledText,
+  menu: theme.buttonMenuText,
+  menuSelected: theme.buttonMenuSelectedText,
 };
 
 const textColorHover = {
   normal: theme.buttonNormalTextHover,
   primary: theme.buttonPrimaryTextHover,
   bare: theme.buttonBareTextHover,
+  menu: theme.buttonMenuTextHover,
+  menuSelected: theme.buttonMenuSelectedTextHover,
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

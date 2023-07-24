@@ -66,12 +66,17 @@ export const altMenuBorder = colorPalette.blue700;
 export const altMenuBorderHover = colorPalette.purple300;
 
 // Button
-export const buttonAltMenuText = colorPalette.navy100;
-export const buttonAltMenuTextHover = colorPalette.navy50;
-export const buttonAltMenuTextSelected = colorPalette.navy50;
-export const buttonAltMenuBackground = colorPalette.blue800;
-export const buttonAltMenuBackgroundHover = colorPalette.blue700;
-export const buttonAltMenuBorder = colorPalette.navy200;
+export const buttonMenuText = colorPalette.navy100;
+export const buttonMenuTextHover = colorPalette.navy50;
+export const buttonMenuBackground = 'transparent';
+export const buttonMenuBackgroundHover = 'rgba(200, 200, 200, .25)';
+export const buttonMenuBorder = colorPalette.navy500;
+
+export const buttonMenuSelectedText = colorPalette.green800;
+export const buttonMenuSelectedTextHover = colorPalette.orange800;
+export const buttonMenuSelectedBackground = colorPalette.orange200;
+export const buttonMenuSelectedBackgroundHover = buttonMenuSelectedBackground;
+export const buttonMenuSelectedBorder = buttonMenuSelectedBackground;
 
 export const buttonPrimaryText = colorPalette.white;
 export const buttonPrimaryTextHover = buttonPrimaryText;

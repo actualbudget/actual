@@ -629,34 +629,6 @@ function MultiAutocomplete({
   );
 }
 
-export function AutocompleteFooterButton({
-  title,
-  style,
-  hoveredStyle,
-  onClick,
-}) {
-  return (
-    <Button
-      style={[
-        {
-          fontSize: 12,
-          color: colors.n10,
-          backgroundColor: 'transparent',
-          borderColor: colors.n5,
-        },
-        style,
-      ]}
-      hoveredStyle={[
-        { backgroundColor: 'rgba(200, 200, 200, .25)' },
-        hoveredStyle,
-      ]}
-      onClick={onClick}
-    >
-      {title}
-    </Button>
-  );
-}
-
 type AutocompleteFooterProps = {
   show?: boolean;
   embedded: boolean;
