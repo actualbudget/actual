@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 import { css, type CSSProperties } from 'glamor';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { styles, colors, theme } from '../../style';
+import { styles, theme } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 import View from './View';
@@ -25,15 +25,16 @@ type ButtonType = 'normal' | 'primary' | 'bare';
 
 const backgroundColor = {
   normal: theme.buttonNormalBackground,
+  normalDisabled: theme.buttonNormalDisabledBackground,
   primary: theme.buttonPrimaryBackground,
   primaryDisabled: theme.buttonPrimaryDisabledBackground,
   bare: theme.buttonBareBackground,
+  bareDisabled: theme.buttonBareDisabledBackground,
 };
 
 const backgroundColorHover = {
   normal: theme.buttonNormalBackgroundHover,
   primary: theme.buttonPrimaryBackgroundHover,
-  primaryDisabled: theme.buttonPrimaryDisabledBackground,
   bare: theme.buttonBareBackgroundHover,
 };
 
@@ -45,15 +46,16 @@ const borderColor = {
 
 const textColor = {
   normal: theme.buttonNormalText,
+  normalDisabled: theme.buttonNormalDisabledText,
   primary: theme.buttonPrimaryText,
   primaryDisabled: theme.buttonPrimaryDisabledText,
   bare: theme.buttonBareText,
+  bareDisabled: theme.buttonBareDisabledText,
 };
 
 const textColorHover = {
   normal: theme.buttonNormalTextHover,
   primary: theme.buttonPrimaryTextHover,
-  primaryDisabled: theme.buttonPrimaryDisabledText,
   bare: theme.buttonBareTextHover,
 };
 
@@ -75,15 +77,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    let resolvedType =
-      type === 'primary' && disabled ? 'primaryDisabled' : type;
+    let typeWithDisabled = disabled ? type + 'Disabled' : type;
 
     hoveredStyle = [
       type !== 'bare' && styles.shadow,
       hoveredStyle,
       {
-        backgroundColor: backgroundColorHover[resolvedType],
-        color: textColorHover[resolvedType],
+        backgroundColor: backgroundColorHover[type],
+        color: textColorHover[type],
       },
     ];
     activeStyle = [
@@ -112,10 +113,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         overflow: 'hidden',
         display: 'flex',
         borderRadius: 4,
-        backgroundColor: backgroundColor[resolvedType],
+        backgroundColor: backgroundColor[typeWithDisabled],
         border:
-          type === 'bare' ? 'none' : '1px solid ' + borderColor[resolvedType],
-        color: textColor[resolvedType],
+          type === 'bare'
+            ? 'none'
+            : '1px solid ' + borderColor[typeWithDisabled],
+        color: textColor[typeWithDisabled],
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',
         ...styles.smallText,

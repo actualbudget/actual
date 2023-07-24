@@ -91,15 +91,17 @@ export const buttonNormalBackgroundHover = colorPalette.navy600;
 export const buttonNormalBorder = colorPalette.navy300;
 export const buttonNormalShadow = 'rgba(0, 0, 0, 0.4)';
 
-export const buttonDisabledText = colorPalette.navy500;
-export const buttonDisabledBackground = colorPalette.navy800;
-export const buttonDisabledBorder = colorPalette.navy500;
+export const buttonNormalDisabledText = colorPalette.navy500;
+export const buttonNormalDisabledBackground = colorPalette.navy800;
+export const buttonNormalDisabledBorder = colorPalette.navy500;
 
 export const buttonBareText = buttonNormalText;
 export const buttonBareTextHover = buttonNormalText;
 export const buttonBareBackground = 'transparent';
 export const buttonBareBackgroundHover = 'rgba(200, 200, 200, .3)';
 export const buttonBareBackgroundActive = 'rgba(200, 200, 200, .5)';
+export const buttonBareDisabledText = buttonNormalDisabledText;
+export const buttonBareDisabledBackground = buttonBareBackground;
 
 export const noticeBackground = colorPalette.green800;
 export const noticeText = colorPalette.green300;
