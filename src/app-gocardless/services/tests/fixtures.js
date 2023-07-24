@@ -1,4 +1,4 @@
-/** @type {{balances: import('../../nordigen-node.types.js').Balance[]}} */
+/** @type {{balances: import('../../gocardless-node.types.js').Balance[]}} */
 export const mockedBalances = {
   balances: [
     {
@@ -20,7 +20,7 @@ export const mockedBalances = {
   ],
 };
 
-/** @type {{transactions: import('../../nordigen-node.types.js').Transactions}} */
+/** @type {{transactions: import('../../gocardless-node.types.js').Transactions}} */
 export const mockTransactions = {
   transactions: {
     booked: [
@@ -68,7 +68,7 @@ export const mockUnknownError = {
   status_code: 500,
 };
 
-/** @type {{account: import('../../nordigen-node.types.js').NordigenAccountDetails}} */
+/** @type {{account: import('../../gocardless-node.types.js').GoCardlessAccountDetails}} */
 export const mockAccountDetails = {
   account: {
     resourceId: 'PL00000000000000000987654321',
@@ -81,7 +81,7 @@ export const mockAccountDetails = {
   },
 };
 
-/** @type {import('../../nordigen-node.types.js').NordigenAccountMetadata} */
+/** @type {import('../../gocardless-node.types.js').GoCardlessAccountMetadata} */
 export const mockAccountMetaData = {
   id: 'f0e49aa6-f6db-48fc-94ca-4a62372fadf4',
   created: '2022-07-24T20:45:47.847062Z',
@@ -92,13 +92,13 @@ export const mockAccountMetaData = {
   owner_name: 'JOHN EXAMPLE',
 };
 
-/** @type {import('../../nordigen.types.js').DetailedAccount} */
+/** @type {import('../../gocardless.types.js').DetailedAccount} */
 export const mockDetailedAccount = {
   ...mockAccountDetails.account,
   ...mockAccountMetaData,
 };
 
-/** @type {import('../../nordigen-node.types.js').Institution} */
+/** @type {import('../../gocardless-node.types.js').Institution} */
 export const mockInstitution = {
   id: 'N26_NTSBDEB1',
   name: 'N26 Bank',
@@ -108,7 +108,7 @@ export const mockInstitution = {
   logo: 'https://cdn.nordigen.com/ais/N26_SANDBOX_NTSBDEB1.png',
 };
 
-/** @type {import('../../nordigen-node.types.js').Requisition} */
+/** @type {import('../../gocardless-node.types.js').Requisition} */
 export const mockRequisition = {
   id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   created: '2023-01-31T18:15:50.172Z',
@@ -147,19 +147,19 @@ export const mockCreateRequisition = {
   redirect_immediate: false,
 };
 
-/** @type {import('../../nordigen.types.js').DetailedAccount} */
+/** @type {import('../../gocardless.types.js').DetailedAccount} */
 export const mockDetailedAccountExample1 = {
   ...mockDetailedAccount,
   name: 'account-example-one',
 };
 
-/** @type {import('../../nordigen.types.js').DetailedAccount} */
+/** @type {import('../../gocardless.types.js').DetailedAccount} */
 export const mockDetailedAccountExample2 = {
   ...mockDetailedAccount,
   name: 'account-example-two',
 };
 
-/** @type {import('../../nordigen.types.js').DetailedAccountWithInstitution[]} */
+/** @type {import('../../gocardless.types.js').DetailedAccountWithInstitution[]} */
 export const mockExtendAccountsAboutInstitutions = [
   {
     ...mockDetailedAccountExample1,

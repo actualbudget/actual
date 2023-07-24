@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import {
   InvalidInputDataError,
-  InvalidNordigenTokenError,
+  InvalidGoCardlessTokenError,
   AccessDeniedError,
   NotFoundError,
   ResourceSuspended,
@@ -30,12 +30,12 @@ import {
 } from './fixtures.js';
 
 import {
-  nordigenService,
-  handleNordigenError,
+  goCardlessService,
+  handleGoCardlessError,
   client,
-} from '../nordigen-service.js';
+} from '../gocardless-service.js';
 
-describe('nordigenService', () => {
+describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;
   const requisitionId = mockRequisition.id;
 
@@ -60,7 +60,7 @@ describe('nordigenService', () => {
     getTransactionsSpy = jest.spyOn(client, 'getTransactions');
     getDetailsSpy = jest.spyOn(client, 'getDetails');
     getMetadataSpy = jest.spyOn(client, 'getMetadata');
-    setTokenSpy = jest.spyOn(nordigenService, 'setToken');
+    setTokenSpy = jest.spyOn(goCardlessService, 'setToken');
   });
 
   afterEach(() => {
@@ -72,23 +72,23 @@ describe('nordigenService', () => {
       setTokenSpy.mockResolvedValue();
 
       jest
-        .spyOn(nordigenService, 'getRequisition')
+        .spyOn(goCardlessService, 'getRequisition')
         .mockResolvedValue(mockRequisition);
 
-      expect(await nordigenService.getLinkedRequisition(requisitionId)).toEqual(
-        mockRequisition,
-      );
+      expect(
+        await goCardlessService.getLinkedRequisition(requisitionId),
+      ).toEqual(mockRequisition);
     });
 
     it('throws RequisitionNotLinked error if requisition status is different than LN', async () => {
       setTokenSpy.mockResolvedValue();
 
       jest
-        .spyOn(nordigenService, 'getRequisition')
+        .spyOn(goCardlessService, 'getRequisition')
         .mockResolvedValue({ ...mockRequisition, status: 'ER' });
 
       await expect(() =>
-        nordigenService.getLinkedRequisition(requisitionId),
+        goCardlessService.getLinkedRequisition(requisitionId),
       ).rejects.toThrow(RequisitionNotLinked);
     });
   });
@@ -96,19 +96,19 @@ describe('nordigenService', () => {
   describe('#getRequisitionWithAccounts', () => {
     it('returns combined data', async () => {
       jest
-        .spyOn(nordigenService, 'getRequisition')
+        .spyOn(goCardlessService, 'getRequisition')
         .mockResolvedValue(mockRequisitionWithExampleAccounts);
       jest
-        .spyOn(nordigenService, 'getDetailedAccount')
+        .spyOn(goCardlessService, 'getDetailedAccount')
         .mockResolvedValueOnce(mockDetailedAccountExample1);
       jest
-        .spyOn(nordigenService, 'getDetailedAccount')
+        .spyOn(goCardlessService, 'getDetailedAccount')
         .mockResolvedValueOnce(mockDetailedAccountExample2);
       jest
-        .spyOn(nordigenService, 'getInstitution')
+        .spyOn(goCardlessService, 'getInstitution')
         .mockResolvedValue(mockInstitution);
       jest
-        .spyOn(nordigenService, 'extendAccountsAboutInstitutions')
+        .spyOn(goCardlessService, 'extendAccountsAboutInstitutions')
         .mockResolvedValue([
           {
             ...mockExtendAccountsAboutInstitutions[0],
@@ -120,7 +120,7 @@ describe('nordigenService', () => {
           },
         ]);
 
-      const response = await nordigenService.getRequisitionWithAccounts(
+      const response = await goCardlessService.getRequisitionWithAccounts(
         mockRequisitionWithExampleAccounts.id,
       );
 
@@ -147,20 +147,20 @@ describe('nordigenService', () => {
     const requisitionId = mockRequisition.id;
     it('returns transaction with starting balance', async () => {
       jest
-        .spyOn(nordigenService, 'getLinkedRequisition')
+        .spyOn(goCardlessService, 'getLinkedRequisition')
         .mockResolvedValue(mockRequisition);
       jest
-        .spyOn(nordigenService, 'getAccountMetadata')
+        .spyOn(goCardlessService, 'getAccountMetadata')
         .mockResolvedValue(mockAccountMetaData);
       jest
-        .spyOn(nordigenService, 'getTransactions')
+        .spyOn(goCardlessService, 'getTransactions')
         .mockResolvedValue(mockTransactions);
       jest
-        .spyOn(nordigenService, 'getBalances')
+        .spyOn(goCardlessService, 'getBalances')
         .mockResolvedValue(mockedBalances);
 
       expect(
-        await nordigenService.getTransactionsWithBalance(
+        await goCardlessService.getTransactionsWithBalance(
           requisitionId,
           accountId,
           undefined,
@@ -218,11 +218,11 @@ describe('nordigenService', () => {
 
     it('throws AccountNotLinedToRequisition error if requisition accounts not includes requested account', async () => {
       jest
-        .spyOn(nordigenService, 'getLinkedRequisition')
+        .spyOn(goCardlessService, 'getLinkedRequisition')
         .mockResolvedValue(mockRequisition);
 
       await expect(() =>
-        nordigenService.getTransactionsWithBalance({
+        goCardlessService.getTransactionsWithBalance({
           requisitionId,
           accountId: 'some-unknown-account-id',
           startDate: undefined,
@@ -240,12 +240,12 @@ describe('nordigenService', () => {
       accessValidForDays: 90,
     };
 
-    it('calls nordigenClient and delete requisition', async () => {
+    it('calls goCardlessClient and delete requisition', async () => {
       setTokenSpy.mockResolvedValue();
 
       createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
 
-      expect(await nordigenService.createRequisition(params)).toEqual({
+      expect(await goCardlessService.createRequisition(params)).toEqual({
         link: expect.any(String),
         requisitionId: expect.any(String),
       });
@@ -259,7 +259,7 @@ describe('nordigenService', () => {
       createRequisitionSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.createRequisition(params),
+        goCardlessService.createRequisition(params),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -267,13 +267,13 @@ describe('nordigenService', () => {
   describe('#deleteRequisition', () => {
     const requisitionId = 'some-requisition-id';
 
-    it('calls nordigenClient and delete requisition', async () => {
+    it('calls goCardlessClient and delete requisition', async () => {
       setTokenSpy.mockResolvedValue();
 
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
       deleteRequisitionsSpy.mockResolvedValue(mockDeleteRequisition);
 
-      expect(await nordigenService.deleteRequisition(requisitionId)).toEqual(
+      expect(await goCardlessService.deleteRequisition(requisitionId)).toEqual(
         mockDeleteRequisition,
       );
 
@@ -288,7 +288,7 @@ describe('nordigenService', () => {
       deleteRequisitionsSpy.mockReturnValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.deleteRequisition(requisitionId),
+        goCardlessService.deleteRequisition(requisitionId),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -296,11 +296,11 @@ describe('nordigenService', () => {
   describe('#getRequisition', () => {
     const requisitionId = 'some-requisition-id';
 
-    it('calls nordigenClient and fetch requisition', async () => {
+    it('calls goCardlessClient and fetch requisition', async () => {
       setTokenSpy.mockResolvedValue();
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
 
-      expect(await nordigenService.getRequisition(requisitionId)).toEqual(
+      expect(await goCardlessService.getRequisition(requisitionId)).toEqual(
         mockRequisition,
       );
 
@@ -314,7 +314,7 @@ describe('nordigenService', () => {
       getRequisitionsSpy.mockReturnValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getRequisition(requisitionId),
+        goCardlessService.getRequisition(requisitionId),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -324,7 +324,7 @@ describe('nordigenService', () => {
       getDetailsSpy.mockResolvedValue(mockAccountDetails);
       getMetadataSpy.mockResolvedValue(mockAccountMetaData);
 
-      expect(await nordigenService.getDetailedAccount(accountId)).toEqual({
+      expect(await goCardlessService.getDetailedAccount(accountId)).toEqual({
         ...mockAccountMetaData,
         ...mockAccountDetails.account,
       });
@@ -337,7 +337,7 @@ describe('nordigenService', () => {
       getMetadataSpy.mockResolvedValue(mockAccountMetaData);
 
       await expect(() =>
-        nordigenService.getDetailedAccount(accountId),
+        goCardlessService.getDetailedAccount(accountId),
       ).rejects.toThrow(UnknownError);
 
       expect(getDetailsSpy).toBeCalledTimes(1);
@@ -349,7 +349,7 @@ describe('nordigenService', () => {
       getMetadataSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getDetailedAccount(accountId),
+        goCardlessService.getDetailedAccount(accountId),
       ).rejects.toThrow(UnknownError);
 
       expect(getDetailsSpy).toBeCalledTimes(1);
@@ -359,10 +359,10 @@ describe('nordigenService', () => {
 
   describe('#getInstitutions', () => {
     const country = 'IE';
-    it('calls nordigenClient and fetch institution details', async () => {
+    it('calls goCardlessClient and fetch institution details', async () => {
       getInstitutionsSpy.mockResolvedValue([mockInstitution]);
 
-      expect(await nordigenService.getInstitutions({ country })).toEqual([
+      expect(await goCardlessService.getInstitutions({ country })).toEqual([
         mockInstitution,
       ]);
       expect(getInstitutionsSpy).toBeCalledTimes(1);
@@ -372,17 +372,17 @@ describe('nordigenService', () => {
       getInstitutionsSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getInstitutions({ country }),
+        goCardlessService.getInstitutions({ country }),
       ).rejects.toThrow(UnknownError);
     });
   });
 
   describe('#getInstitution', () => {
     const institutionId = 'fake-institution-id';
-    it('calls nordigenClient and fetch institution details', async () => {
+    it('calls goCardlessClient and fetch institution details', async () => {
       getInstitutionSpy.mockResolvedValue(mockInstitution);
 
-      expect(await nordigenService.getInstitution(institutionId)).toEqual(
+      expect(await goCardlessService.getInstitution(institutionId)).toEqual(
         mockInstitution,
       );
       expect(getInstitutionSpy).toBeCalledTimes(1);
@@ -392,7 +392,7 @@ describe('nordigenService', () => {
       getInstitutionSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getInstitution(institutionId),
+        goCardlessService.getInstitution(institutionId),
       ).rejects.toThrow(UnknownError);
     });
   });
@@ -426,7 +426,7 @@ describe('nordigenService', () => {
         },
       ];
 
-      const result = await nordigenService.extendAccountsAboutInstitutions({
+      const result = await goCardlessService.extendAccountsAboutInstitutions({
         accounts,
         institutions,
       });
@@ -462,7 +462,7 @@ describe('nordigenService', () => {
         },
       ];
 
-      const result = await nordigenService.extendAccountsAboutInstitutions({
+      const result = await goCardlessService.extendAccountsAboutInstitutions({
         accounts,
         institutions,
       });
@@ -472,11 +472,11 @@ describe('nordigenService', () => {
   });
 
   describe('#getTransactions', () => {
-    it('calls nordigenClient and fetch transactions for provided accountId', async () => {
+    it('calls goCardlessClient and fetch transactions for provided accountId', async () => {
       getTransactionsSpy.mockResolvedValue(mockTransactions);
 
       expect(
-        await nordigenService.getTransactions({
+        await goCardlessService.getTransactions({
           accountId,
           startDate: '',
           endDate: '',
@@ -529,7 +529,7 @@ describe('nordigenService', () => {
       getTransactionsSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getTransactions({
+        goCardlessService.getTransactions({
           accountId,
           startDate: '',
           endDate: '',
@@ -539,10 +539,10 @@ describe('nordigenService', () => {
   });
 
   describe('#getBalances', () => {
-    it('calls nordigenClient and fetch balances for provided accountId', async () => {
+    it('calls goCardlessClient and fetch balances for provided accountId', async () => {
       getBalancesSpy.mockResolvedValue(mockedBalances);
 
-      expect(await nordigenService.getBalances(accountId)).toEqual(
+      expect(await goCardlessService.getBalances(accountId)).toEqual(
         mockedBalances,
       );
       expect(getBalancesSpy).toBeCalledTimes(1);
@@ -552,62 +552,64 @@ describe('nordigenService', () => {
       getBalancesSpy.mockResolvedValue(mockUnknownError);
 
       await expect(() =>
-        nordigenService.getBalances(accountId),
+        goCardlessService.getBalances(accountId),
       ).rejects.toThrow(UnknownError);
     });
   });
 });
 
-describe('#handleNordigenError', () => {
+describe('#handleGoCardlessError', () => {
   it('throws InvalidInputDataError for status code 400', () => {
     const response = { status_code: 400 };
-    expect(() => handleNordigenError(response)).toThrow(InvalidInputDataError);
+    expect(() => handleGoCardlessError(response)).toThrow(
+      InvalidInputDataError,
+    );
   });
 
-  it('throws InvalidNordigenTokenError for status code 401', () => {
+  it('throws InvalidGoCardlessTokenError for status code 401', () => {
     const response = { status_code: 401 };
-    expect(() => handleNordigenError(response)).toThrow(
-      InvalidNordigenTokenError,
+    expect(() => handleGoCardlessError(response)).toThrow(
+      InvalidGoCardlessTokenError,
     );
   });
 
   it('throws AccessDeniedError for status code 403', () => {
     const response = { status_code: 403 };
-    expect(() => handleNordigenError(response)).toThrow(AccessDeniedError);
+    expect(() => handleGoCardlessError(response)).toThrow(AccessDeniedError);
   });
 
   it('throws NotFoundError for status code 404', () => {
     const response = { status_code: 404 };
-    expect(() => handleNordigenError(response)).toThrow(NotFoundError);
+    expect(() => handleGoCardlessError(response)).toThrow(NotFoundError);
   });
 
   it('throws ResourceSuspended for status code 409', () => {
     const response = { status_code: 409 };
-    expect(() => handleNordigenError(response)).toThrow(ResourceSuspended);
+    expect(() => handleGoCardlessError(response)).toThrow(ResourceSuspended);
   });
 
   it('throws RateLimitError for status code 429', () => {
     const response = { status_code: 429 };
-    expect(() => handleNordigenError(response)).toThrow(RateLimitError);
+    expect(() => handleGoCardlessError(response)).toThrow(RateLimitError);
   });
 
   it('throws UnknownError for status code 500', () => {
     const response = { status_code: 500 };
-    expect(() => handleNordigenError(response)).toThrow(UnknownError);
+    expect(() => handleGoCardlessError(response)).toThrow(UnknownError);
   });
 
   it('throws ServiceError for status code 503', () => {
     const response = { status_code: 503 };
-    expect(() => handleNordigenError(response)).toThrow(ServiceError);
+    expect(() => handleGoCardlessError(response)).toThrow(ServiceError);
   });
 
   it('does not throw an error for status code 200', () => {
     const response = { status_code: 200 };
-    expect(() => handleNordigenError(response)).not.toThrow();
+    expect(() => handleGoCardlessError(response)).not.toThrow();
   });
 
   it('does not throw an error when status code is not present', () => {
     const response = { foo: 'bar' };
-    expect(() => handleNordigenError(response)).not.toThrow();
+    expect(() => handleGoCardlessError(response)).not.toThrow();
   });
 });

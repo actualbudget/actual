@@ -15,45 +15,45 @@ export class AccountNotLinedToRequisition extends Error {
   }
 }
 
-export class GenericNordigenError extends Error {
+export class GenericGoCardlessError extends Error {
   constructor(data = {}) {
-    super('Nordigen returned error');
+    super('GoCardless returned error');
     this.details = data;
   }
 }
 
-export class NordigenClientError extends Error {
+export class GoCardlessClientError extends Error {
   constructor(message, details) {
     super(message);
     this.details = details;
   }
 }
 
-export class InvalidInputDataError extends NordigenClientError {
+export class InvalidInputDataError extends GoCardlessClientError {
   constructor(response) {
     super('Invalid provided parameters', response);
   }
 }
 
-export class InvalidNordigenTokenError extends NordigenClientError {
+export class InvalidGoCardlessTokenError extends GoCardlessClientError {
   constructor(response) {
     super('Token is invalid or expired', response);
   }
 }
 
-export class AccessDeniedError extends NordigenClientError {
+export class AccessDeniedError extends GoCardlessClientError {
   constructor(response) {
     super('IP address access denied', response);
   }
 }
 
-export class NotFoundError extends NordigenClientError {
+export class NotFoundError extends GoCardlessClientError {
   constructor(response) {
     super('Resource not found', response);
   }
 }
 
-export class ResourceSuspended extends NordigenClientError {
+export class ResourceSuspended extends GoCardlessClientError {
   constructor(response) {
     super(
       'Resource was suspended due to numerous errors that occurred while accessing it',
@@ -62,7 +62,7 @@ export class ResourceSuspended extends NordigenClientError {
   }
 }
 
-export class RateLimitError extends NordigenClientError {
+export class RateLimitError extends GoCardlessClientError {
   constructor(response) {
     super(
       'Daily request limit set by the Institution has been exceeded',
@@ -71,13 +71,13 @@ export class RateLimitError extends NordigenClientError {
   }
 }
 
-export class UnknownError extends NordigenClientError {
+export class UnknownError extends GoCardlessClientError {
   constructor(response) {
     super('Request to Institution returned an error', response);
   }
 }
 
-export class ServiceError extends NordigenClientError {
+export class ServiceError extends GoCardlessClientError {
   constructor(response) {
     super('Institution service unavailable', response);
   }

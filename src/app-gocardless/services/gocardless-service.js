@@ -3,7 +3,7 @@ import {
   RequisitionNotLinked,
   AccountNotLinedToRequisition,
   InvalidInputDataError,
-  InvalidNordigenTokenError,
+  InvalidGoCardlessTokenError,
   AccessDeniedError,
   NotFoundError,
   ResourceSuspended,
@@ -16,25 +16,25 @@ import * as uuid from 'uuid';
 import jwt from 'jws';
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 
-const NordigenClient = nordigenNode.default;
-const nordigenClient = new NordigenClient({
+const GoCardlessClient = nordigenNode.default;
+const goCardlessClient = new GoCardlessClient({
   secretId: secretsService.get(SecretName.nordigen_secretId),
   secretKey: secretsService.get(SecretName.nordigen_secretKey),
 });
 
 secretsService.onUpdate(SecretName.nordigen_secretId, (newSecret) => {
-  nordigenClient.secretId = newSecret;
+  goCardlessClient.secretId = newSecret;
 });
 secretsService.onUpdate(SecretName.nordigen_secretKey, (newSecret) => {
-  nordigenClient.secretKey = newSecret;
+  goCardlessClient.secretKey = newSecret;
 });
 
-export const handleNordigenError = (response) => {
+export const handleGoCardlessError = (response) => {
   switch (response.status_code) {
     case 400:
       throw new InvalidInputDataError(response);
     case 401:
-      throw new InvalidNordigenTokenError(response);
+      throw new InvalidGoCardlessTokenError(response);
     case 403:
       throw new AccessDeniedError(response);
     case 404:
@@ -52,13 +52,13 @@ export const handleNordigenError = (response) => {
   }
 };
 
-export const nordigenService = {
+export const goCardlessService = {
   /**
-   * Check if the Nordigen service is configured to be used.
+   * Check if the GoCardless service is configured to be used.
    * @returns {boolean}
    */
   isConfigured: () => {
-    return !!(nordigenClient.secretId && nordigenClient.secretKey);
+    return !!(goCardlessClient.secretId && goCardlessClient.secretKey);
   },
 
   /**
@@ -76,11 +76,11 @@ export const nordigenService = {
       return clockTimestamp >= payload.exp;
     };
 
-    if (isExpiredJwtToken(nordigenClient.token)) {
+    if (isExpiredJwtToken(goCardlessClient.token)) {
       // Generate new access token. Token is valid for 24 hours
       // Note: access_token is automatically injected to other requests after you successfully obtain it
       const tokenData = await client.generateToken();
-      handleNordigenError(tokenData);
+      handleGoCardlessError(tokenData);
     }
   },
 
@@ -89,17 +89,17 @@ export const nordigenService = {
    * @param requisitionId
    * @throws {RequisitionNotLinked} Will throw an error if requisition is not in Linked
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<import('../nordigen-node.types.js').Requisition>}
+   * @returns {Promise<import('../gocardless-node.types.js').Requisition>}
    */
   getLinkedRequisition: async (requisitionId) => {
-    const requisition = await nordigenService.getRequisition(requisitionId);
+    const requisition = await goCardlessService.getRequisition(requisitionId);
 
     const { status } = requisition;
 
@@ -118,24 +118,24 @@ export const nordigenService = {
    * @param requisitionId
    * @throws {RequisitionNotLinked} Will throw an error if requisition is not in Linked
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{requisition: import('../nordigen-node.types.js').Requisition, accounts: Array<import('../nordigen.types.js').NormalizedAccountDetails>}>}
+   * @returns {Promise<{requisition: import('../gocardless-node.types.js').Requisition, accounts: Array<import('../gocardless.types.js').NormalizedAccountDetails>}>}
    */
   getRequisitionWithAccounts: async (requisitionId) => {
-    const requisition = await nordigenService.getLinkedRequisition(
+    const requisition = await goCardlessService.getLinkedRequisition(
       requisitionId,
     );
 
     let institutionIdSet = new Set();
     const detailedAccounts = await Promise.all(
       requisition.accounts.map(async (accountId) => {
-        const account = await nordigenService.getDetailedAccount(accountId);
+        const account = await goCardlessService.getDetailedAccount(accountId);
         institutionIdSet.add(account.institution_id);
         return account;
       }),
@@ -143,12 +143,12 @@ export const nordigenService = {
 
     const institutions = await Promise.all(
       Array.from(institutionIdSet).map(async (institutionId) => {
-        return await nordigenService.getInstitution(institutionId);
+        return await goCardlessService.getInstitution(institutionId);
       }),
     );
 
     const extendedAccounts =
-      await nordigenService.extendAccountsAboutInstitutions({
+      await goCardlessService.extendAccountsAboutInstitutions({
         accounts: detailedAccounts,
         institutions,
       });
@@ -170,14 +170,14 @@ export const nordigenService = {
    * @throws {AccountNotLinedToRequisition} Will throw an error if requisition not includes provided account id
    * @throws {RequisitionNotLinked} Will throw an error if requisition is not in Linked
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<{iban: string, balances: Array<import('../nordigen-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../nordigen-node.types.js').Transaction>, pending: Array<import('../nordigen-node.types.js').Transaction>, all: Array<import('../nordigen.types.js').TransactionWithBookedStatus>}, startingBalance: number}>}
+   * @returns {Promise<{iban: string, balances: Array<import('../gocardless-node.types.js').Balance>, institutionId: string, transactions: {booked: Array<import('../gocardless-node.types.js').Transaction>, pending: Array<import('../gocardless-node.types.js').Transaction>, all: Array<import('../gocardless.types.js').TransactionWithBookedStatus>}, startingBalance: number}>}
    */
   getTransactionsWithBalance: async (
     requisitionId,
@@ -186,20 +186,20 @@ export const nordigenService = {
     endDate,
   ) => {
     const { institution_id, accounts: accountIds } =
-      await nordigenService.getLinkedRequisition(requisitionId);
+      await goCardlessService.getLinkedRequisition(requisitionId);
 
     if (!accountIds.includes(accountId)) {
       throw new AccountNotLinedToRequisition(accountId, requisitionId);
     }
 
     const [accountMetadata, transactions, accountBalance] = await Promise.all([
-      nordigenService.getAccountMetadata(accountId),
-      nordigenService.getTransactions({
+      goCardlessService.getAccountMetadata(accountId),
+      goCardlessService.getTransactions({
         accountId,
         startDate,
         endDate,
       }),
-      nordigenService.getBalances(accountId),
+      goCardlessService.getBalances(accountId),
     ]);
 
     const bank = BankFactory(institution_id);
@@ -237,9 +237,9 @@ export const nordigenService = {
 
   /**
    *
-   * @param {import('../nordigen.types.js').CreateRequisitionParams} params
+   * @param {import('../gocardless.types.js').CreateRequisitionParams} params
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
@@ -249,7 +249,7 @@ export const nordigenService = {
    * @returns {Promise<{requisitionId, link}>}
    */
   createRequisition: async ({ institutionId, accessValidForDays, host }) => {
-    await nordigenService.setToken();
+    await goCardlessService.setToken();
 
     const response = await client.initSession({
       redirectUrl: host + '/nordigen/link',
@@ -263,7 +263,7 @@ export const nordigenService = {
       accountSelection: false,
     });
 
-    handleNordigenError(response);
+    handleGoCardlessError(response);
 
     const { link, id: requisitionId } = response;
 
@@ -277,7 +277,7 @@ export const nordigenService = {
    * Deletes requisition by provided ID
    * @param requisitionId
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
@@ -287,10 +287,10 @@ export const nordigenService = {
    * @returns {Promise<{summary: string, detail: string}>}
    */
   deleteRequisition: async (requisitionId) => {
-    await nordigenService.getRequisition(requisitionId);
+    await goCardlessService.getRequisition(requisitionId);
     const response = client.deleteRequisition(requisitionId);
 
-    handleNordigenError(response);
+    handleGoCardlessError(response);
     return response;
   },
 
@@ -299,21 +299,21 @@ export const nordigenService = {
    * https://nordigen.com/en/docs/account-information/integration/parameters-and-responses/#/requisitions/requisition%20by%20id
    * @param { string } requisitionId
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns { Promise<import('../nordigen-node.types.js').Requisition> }
+   * @returns { Promise<import('../gocardless-node.types.js').Requisition> }
    */
   getRequisition: async (requisitionId) => {
-    await nordigenService.setToken();
+    await goCardlessService.setToken();
 
     const response = client.getRequisitionById(requisitionId);
 
-    handleNordigenError(response);
+    handleGoCardlessError(response);
 
     return response;
   },
@@ -321,7 +321,7 @@ export const nordigenService = {
   /**
    * Retrieve an detailed account by account id
    * @param accountId
-   * @returns {Promise<import('../nordigen.types.js').DetailedAccount>}
+   * @returns {Promise<import('../gocardless.types.js').DetailedAccount>}
    */
   getDetailedAccount: async (accountId) => {
     const [detailedAccount, metadataAccount] = await Promise.all([
@@ -329,8 +329,8 @@ export const nordigenService = {
       client.getMetadata(accountId),
     ]);
 
-    handleNordigenError(detailedAccount);
-    handleNordigenError(metadataAccount);
+    handleGoCardlessError(detailedAccount);
+    handleGoCardlessError(metadataAccount);
 
     return {
       ...detailedAccount.account,
@@ -344,12 +344,12 @@ export const nordigenService = {
    * Unlike getDetailedAccount, this method is not affected by institution rate-limits.
    *
    * @param accountId
-   * @returns {Promise<import('../nordigen-node.types.js').NordigenAccountMetadata>}
+   * @returns {Promise<import('../gocardless-node.types.js').GoCardlessAccountMetadata>}
    */
   getAccountMetadata: async (accountId) => {
     const response = await client.getMetadata(accountId);
 
-    handleNordigenError(response);
+    handleGoCardlessError(response);
 
     return response;
   },
@@ -358,19 +358,19 @@ export const nordigenService = {
    * Retrieve details about all Institutions in a specific country
    * @param country
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<Array<import('../nordigen-node.types.js').Institution>>}
+   * @returns {Promise<Array<import('../gocardless-node.types.js').Institution>>}
    */
   getInstitutions: async (country) => {
     const response = await client.getInstitutions(country);
 
-    handleNordigenError(response);
+    handleGoCardlessError(response);
 
     return response;
   },
@@ -379,27 +379,27 @@ export const nordigenService = {
    * Retrieve details about a specific Institution
    * @param institutionId
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<import('../nordigen-node.types.js').Institution>}
+   * @returns {Promise<import('../gocardless-node.types.js').Institution>}
    */
   getInstitution: async (institutionId) => {
     const response = await client.getInstitutionById(institutionId);
 
-    handleNordigenError(response);
+    handleGoCardlessError(response);
 
     return response;
   },
 
   /**
    * Extends provided accounts about details of their institution
-   * @param {{accounts: Array<import('../nordigen.types.js').DetailedAccount>, institutions: Array<import('../nordigen-node.types.js').Institution>}} params
-   * @returns {Promise<Array<import('../nordigen.types.js').DetailedAccount&{institution: import('../nordigen-node.types.js').Institution}>>}
+   * @param {{accounts: Array<import('../gocardless.types.js').DetailedAccount>, institutions: Array<import('../gocardless-node.types.js').Institution>}} params
+   * @returns {Promise<Array<import('../gocardless.types.js').DetailedAccount&{institution: import('../gocardless-node.types.js').Institution}>>}
    */
   extendAccountsAboutInstitutions: async ({ accounts, institutions }) => {
     const institutionsById = institutions.reduce((acc, institution) => {
@@ -418,16 +418,16 @@ export const nordigenService = {
 
   /**
    * Returns account transaction in provided dates
-   * @param {import('../nordigen.types.js').GetTransactionsParams} params
+   * @param {import('../gocardless.types.js').GetTransactionsParams} params
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<import('../nordigen.types.js').GetTransactionsResponse>}
+   * @returns {Promise<import('../gocardless.types.js').GetTransactionsResponse>}
    */
   getTransactions: async ({ accountId, startDate, endDate }) => {
     const response = await client.getTransactions({
@@ -436,7 +436,7 @@ export const nordigenService = {
       dateTo: endDate,
     });
 
-    handleNordigenError(response);
+    handleGoCardlessError(response);
 
     return response;
   },
@@ -445,50 +445,50 @@ export const nordigenService = {
    * Returns account available balances
    * @param accountId
    * @throws {InvalidInputDataError}
-   * @throws {InvalidNordigenTokenError}
+   * @throws {InvalidGoCardlessTokenError}
    * @throws {AccessDeniedError}
    * @throws {NotFoundError}
    * @throws {ResourceSuspended}
    * @throws {RateLimitError}
    * @throws {UnknownError}
    * @throws {ServiceError}
-   * @returns {Promise<import('../nordigen.types.js').GetBalances>}
+   * @returns {Promise<import('../gocardless.types.js').GetBalances>}
    */
   getBalances: async (accountId) => {
     const response = await client.getBalances(accountId);
 
-    handleNordigenError(response);
+    handleGoCardlessError(response);
 
     return response;
   },
 };
 
 /**
- * All executions of nordigenClient should be here for testing purposes,
+ * All executions of goCardlessClient should be here for testing purposes,
  * as the nordigen-node library is not written in a way that is conducive to testing.
  * In that way we can mock the `client` const instead of nordigen library
  */
 export const client = {
   getBalances: async (accountId) =>
-    await nordigenClient.account(accountId).getBalances(),
+    await goCardlessClient.account(accountId).getBalances(),
   getTransactions: async ({ accountId, dateFrom, dateTo }) =>
-    await nordigenClient.account(accountId).getTransactions({
+    await goCardlessClient.account(accountId).getTransactions({
       dateFrom,
       dateTo,
       country: undefined,
     }),
   getInstitutions: async (country) =>
-    await nordigenClient.institution.getInstitutions({ country }),
+    await goCardlessClient.institution.getInstitutions({ country }),
   getInstitutionById: async (institutionId) =>
-    await nordigenClient.institution.getInstitutionById(institutionId),
+    await goCardlessClient.institution.getInstitutionById(institutionId),
   getDetails: async (accountId) =>
-    await nordigenClient.account(accountId).getDetails(),
+    await goCardlessClient.account(accountId).getDetails(),
   getMetadata: async (accountId) =>
-    await nordigenClient.account(accountId).getMetadata(),
+    await goCardlessClient.account(accountId).getMetadata(),
   getRequisitionById: async (requisitionId) =>
-    await nordigenClient.requisition.getRequisitionById(requisitionId),
+    await goCardlessClient.requisition.getRequisitionById(requisitionId),
   deleteRequisition: async (requisitionId) =>
-    await nordigenClient.requisition.deleteRequisition(requisitionId),
+    await goCardlessClient.requisition.deleteRequisition(requisitionId),
   initSession: async ({
     redirectUrl,
     institutionId,
@@ -500,7 +500,7 @@ export const client = {
     redirectImmediate,
     accountSelection,
   }) =>
-    await nordigenClient.initSession({
+    await goCardlessClient.initSession({
       redirectUrl,
       institutionId,
       referenceId,
@@ -511,7 +511,7 @@ export const client = {
       redirectImmediate,
       accountSelection,
     }),
-  generateToken: async () => await nordigenClient.generateToken(),
+  generateToken: async () => await goCardlessClient.generateToken(),
   exchangeToken: async ({ refreshToken }) =>
-    await nordigenClient.exchangeToken({ refreshToken }),
+    await goCardlessClient.exchangeToken({ refreshToken }),
 };

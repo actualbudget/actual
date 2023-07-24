@@ -79,10 +79,10 @@ export type Requisition = {
 };
 
 /**
- * Object representing Nordigen account details
+ * Object representing GoCardless account details
  * Account details will be returned in Berlin Group PSD2 format.
  */
-export type NordigenAccountDetails = {
+export type GoCardlessAccountDetails = {
   /**
    * Resource id of the account
    */
@@ -174,31 +174,31 @@ export type NordigenAccountDetails = {
 };
 
 /**
- * Representation of the Nordigen account metadata
+ * Representation of the GoCardless account metadata
  */
-export type NordigenAccountMetadata = {
+export type GoCardlessAccountMetadata = {
   /**
-   * ID of the Nordigen account metadata
+   * ID of the GoCardless account metadata
    */
   id: string;
   /**
-   * Date when the Nordigen account metadata was created
+   * Date when the GoCardless account metadata was created
    */
   created: string;
   /**
-   * Date of the last access to the Nordigen account metadata
+   * Date of the last access to the GoCardless account metadata
    */
   last_accessed: string;
   /**
-   * IBAN of the Nordigen account metadata
+   * IBAN of the GoCardless account metadata
    */
   iban: string;
   /**
-   * ID of the institution associated with the Nordigen account metadata
+   * ID of the institution associated with the GoCardless account metadata
    */
   institution_id: string;
   /**
-   * Status of the Nordigen account
+   * Status of the GoCardless account
    * DISCOVERED: User has successfully authenticated and account is discovered
    * PROCESSING: Account is being processed by the Institution
    * ERROR: An error was encountered when processing account
@@ -214,7 +214,7 @@ export type NordigenAccountMetadata = {
     | 'READY'
     | 'SUSPENDED';
   /**
-   * Name of the owner of the Nordigen account metadata
+   * Name of the owner of the GoCardless account metadata
    */
   owner_name: string;
 };
@@ -406,7 +406,7 @@ export type Transaction = {
   entryReference?: string;
 
   /**
-   * Transaction identifier given by Nordigen
+   * Transaction identifier given by GoCardless
    */
   internalTransactionId?: string;
 

@@ -1,8 +1,8 @@
 import {
   DetailedAccountWithInstitution,
   NormalizedAccountDetails,
-} from '../nordigen.types.js';
-import { Transaction, Balance } from '../nordigen-node.types.js';
+} from '../gocardless.types.js';
+import { Transaction, Balance } from '../gocardless-node.types.js';
 
 export interface IBank {
   institutionId: string;

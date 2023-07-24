@@ -19,11 +19,11 @@ class SecretsDb {
     this.debug = createDebug('actual:secrets-db');
     this.db = null;
     this.initialize();
-    this.migrateNordigen();
+    this.migrateGoCardless();
   }
 
-  /// Migrates nordigen from config.json or process.env to app secret
-  migrateNordigen() {
+  /// Migrates GoCardless from config.json or process.env to app secret
+  migrateGoCardless() {
     if (
       config.nordigen &&
       (!this.get(SecretName.nordigen_secretId) ||

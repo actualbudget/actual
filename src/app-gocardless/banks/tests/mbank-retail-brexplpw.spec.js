@@ -2,7 +2,7 @@ import MbankRetailBrexplpw from '../mbank-retail-brexplpw.js';
 
 describe('MbankRetailBrexplpw', () => {
   describe('#normalizeAccount', () => {
-    /** @type {import('../../nordigen.types.js').DetailedAccountWithInstitution} */
+    /** @type {import('../../gocardless.types.js').DetailedAccountWithInstitution} */
     const accountRaw = {
       iban: 'PL00000000000000000987654321',
       currency: 'PLN',
@@ -135,7 +135,7 @@ describe('MbankRetailBrexplpw', () => {
   });
 
   describe('#countStartingBalance', () => {
-    /** @type {import('../../nordigen-node.types.js').Balance[]} */
+    /** @type {import('../../gocardless-node.types.js').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'PLN' },

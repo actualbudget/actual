@@ -106,7 +106,7 @@ describe('IntegrationBank', () => {
   });
 
   describe('calculateStartingBalance', () => {
-    /** @type {import('../../nordigen-node.types.js').Transaction[]} */
+    /** @type {import('../../gocardless-node.types.js').Transaction[]} */
     const transactions = [
       {
         bookingDate: '2022-01-01',
@@ -122,7 +122,7 @@ describe('IntegrationBank', () => {
       },
     ];
 
-    /** @type {import('../../nordigen-node.types.js').Balance[]} */
+    /** @type {import('../../gocardless-node.types.js').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'EUR' },

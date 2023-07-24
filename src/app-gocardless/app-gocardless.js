@@ -3,11 +3,11 @@ import express from 'express';
 import path from 'path';
 import { inspect } from 'util';
 
-import { nordigenService } from './services/nordigen-service.js';
+import { goCardlessService } from './services/gocardless-service.js';
 import {
   RequisitionNotLinked,
   AccountNotLinedToRequisition,
-  GenericNordigenError,
+  GenericGoCardlessError,
 } from './errors.js';
 import { handleError } from './util/handle-error.js';
 import { sha256String } from '../util/hash.js';
@@ -15,7 +15,7 @@ import validateUser from '../util/validate-user.js';
 
 const app = express();
 app.get('/link', function (req, res) {
-  res.sendFile('link.html', { root: path.resolve('./src/app-nordigen') });
+  res.sendFile('link.html', { root: path.resolve('./src/app-gocardless') });
 });
 
 export { app as handlers };
@@ -32,7 +32,7 @@ app.post('/status', async (req, res) => {
   res.send({
     status: 'ok',
     data: {
-      configured: nordigenService.isConfigured(),
+      configured: goCardlessService.isConfigured(),
     },
   });
 });
@@ -43,7 +43,7 @@ app.post(
     const { accessValidForDays, institutionId } = req.body;
     const { origin } = req.headers;
 
-    const { link, requisitionId } = await nordigenService.createRequisition({
+    const { link, requisitionId } = await goCardlessService.createRequisition({
       accessValidForDays,
       institutionId,
       host: origin,
@@ -66,7 +66,7 @@ app.post(
 
     try {
       const { requisition, accounts } =
-        await nordigenService.getRequisitionWithAccounts(requisitionId);
+        await goCardlessService.getRequisitionWithAccounts(requisitionId);
 
       res.send({
         status: 'ok',
@@ -99,8 +99,8 @@ app.post(
   handleError(async (req, res) => {
     let { country, showDemo = false } = req.body;
 
-    await nordigenService.setToken();
-    const data = await nordigenService.getInstitutions(country);
+    await goCardlessService.setToken();
+    const data = await goCardlessService.getInstitutions(country);
 
     res.send({
       status: 'ok',
@@ -122,7 +122,7 @@ app.post(
   handleError(async (req, res) => {
     let { requisitionId } = req.body;
 
-    const data = await nordigenService.deleteRequisition(requisitionId);
+    const data = await goCardlessService.deleteRequisition(requisitionId);
     if (data.summary === 'Requisition deleted') {
       res.send({
         status: 'ok',
@@ -152,7 +152,7 @@ app.post(
         institutionId,
         startingBalance,
         transactions: { booked, pending, all },
-      } = await nordigenService.getTransactionsWithBalance(
+      } = await goCardlessService.getTransactionsWithBalance(
         requisitionId,
         accountId,
         startDate,
@@ -195,7 +195,7 @@ app.post(
             reason: 'Account not linked with this requisition',
           });
           break;
-        case error instanceof GenericNordigenError:
+        case error instanceof GenericGoCardlessError:
           console.log('Something went wrong', inspect(error, { depth: null }));
           sendErrorResponse({
             error_type: 'SYNC_ERROR',

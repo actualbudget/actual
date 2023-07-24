@@ -3,7 +3,7 @@ import { mockTransactionAmount } from '../../services/tests/fixtures.js';
 
 describe('IngPlIngbplpw', () => {
   describe('#normalizeAccount', () => {
-    /** @type {import('../../nordigen.types.js').DetailedAccountWithInstitution} */
+    /** @type {import('../../gocardless.types.js').DetailedAccountWithInstitution} */
     const accountRaw = {
       resourceId: 'PL00000000000000000987654321',
       iban: 'PL00000000000000000987654321',
@@ -137,7 +137,7 @@ describe('IngPlIngbplpw', () => {
 
   describe('#countStartingBalance', () => {
     it('should calculate the starting balance correctly', () => {
-      /** @type {import('../../nordigen-node.types.js').Transaction[]} */
+      /** @type {import('../../gocardless-node.types.js').Transaction[]} */
       const sortedTransactions = [
         {
           transactionAmount: { amount: '-100.00', currency: 'USD' },
@@ -162,7 +162,7 @@ describe('IngPlIngbplpw', () => {
         },
       ];
 
-      /** @type {import('../../nordigen-node.types.js').Balance[]} */
+      /** @type {import('../../gocardless-node.types.js').Balance[]} */
       const balances = [
         {
           balanceType: 'interimBooked',
@@ -185,7 +185,7 @@ describe('IngPlIngbplpw', () => {
     it('returns the same balance amount when no transactions', () => {
       const transactions = [];
 
-      /** @type {import('../../nordigen-node.types.js').Balance[]} */
+      /** @type {import('../../gocardless-node.types.js').Balance[]} */
       const balances = [
         {
           balanceType: 'interimBooked',

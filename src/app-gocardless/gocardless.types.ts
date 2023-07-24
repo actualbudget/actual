@@ -1,14 +1,14 @@
 import {
-  NordigenAccountMetadata,
-  NordigenAccountDetails,
+  GoCardlessAccountMetadata,
+  GoCardlessAccountDetails,
   Institution,
   Transactions,
   Balance,
   Transaction,
-} from './nordigen-node.types.js';
+} from './gocardless-node.types.js';
 
-export type DetailedAccount = Omit<NordigenAccountDetails, 'status'> &
-  NordigenAccountMetadata;
+export type DetailedAccount = Omit<GoCardlessAccountDetails, 'status'> &
+  GoCardlessAccountMetadata;
 export type DetailedAccountWithInstitution = DetailedAccount & {
   institution: Institution;
 };
@@ -53,7 +53,7 @@ export type NormalizedAccountDetails = {
 
 export type GetTransactionsParams = {
   /**
-   * Id of account from the nordigen app
+   * Id of account from the GoCardless app
    */
   accountId: string;
 

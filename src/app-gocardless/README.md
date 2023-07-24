@@ -3,7 +3,7 @@
 Find in [doc](https://docs.google.com/spreadsheets/d/1ogpzydzotOltbssrc3IQ8rhBLlIZbQgm5QCiiNJrkyA/edit#gid=489769432) what is id of bank which you want to integrate
 
 Add the `institution_id` and your name to list of possible options in the frontend
-project `actual/packages/loot-design/src/components/modals/NordigenExternalMsg.js`
+project `actual` in file `GoCardlessExternalMsg.js`
 
 ```jsx
 <Strong>Choose your banks:</Strong>
@@ -23,7 +23,7 @@ Create new linked account selecting the institution which you added recently.
 In the server logs you can find all required information to create class for
 your bank.
 
-Create new a bank class based on `app-nordigen/banks/sandboxfinance-sfin0000.js`. Name of the file and class should be
+Create new a bank class based on `app-gocardless/banks/sandboxfinance-sfin0000.js`. Name of the file and class should be
 created based on the ID of the integrated institution.
 
 Fill the logic of `normalizeAccount`, `sortTransactions`, and `calculateStartingBalance` functions.
@@ -56,6 +56,6 @@ Available (first 10) transactions properties for new integration of institution 
 }
 ```
 
-Add new bank integration to `BankFactory` class in file `actual-server/app-nordigen/bank-factory.js`
+Add new bank integration to `BankFactory` class in file `actual-server/app-gocardless/bank-factory.js`
 
 Remember to add tests for new bank integration in
