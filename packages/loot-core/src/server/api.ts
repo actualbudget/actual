@@ -204,6 +204,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 
     let result = await handlers['download-budget']({ fileId: file.fileId });
     if (result.error) {
+      console.log('Full error details', result.error);
       throw new Error(getDownloadError(result.error));
     }
     await handlers['load-budget']({ id: result.id });
