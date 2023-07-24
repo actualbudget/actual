@@ -1,7 +1,6 @@
 import { useSelector } from 'react-redux';
 
 import type { Theme } from 'loot-core/src/client/state-types/prefs';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import * as darkTheme from './themes/dark';
 import * as lightTheme from './themes/light';
