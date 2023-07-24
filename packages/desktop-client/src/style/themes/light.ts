@@ -75,7 +75,7 @@ export const buttonMenuBorder = colorPalette.navy500;
 export const buttonMenuSelectedText = colorPalette.green800;
 export const buttonMenuSelectedTextHover = colorPalette.orange800;
 export const buttonMenuSelectedBackground = colorPalette.orange200;
-export const buttonMenuSelectedBackgroundHover = buttonMenuSelectedBackground;
+export const buttonMenuSelectedBackgroundHover = colorPalette.orange300;
 export const buttonMenuSelectedBorder = buttonMenuSelectedBackground;
 
 export const buttonPrimaryText = colorPalette.white;
