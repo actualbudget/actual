@@ -40,6 +40,7 @@ const backgroundColorHover = {
 
 const borderColor = {
   normal: theme.buttonNormalBorder,
+  normalDisabled: theme.buttonNormalDisabledBorder,
   primary: theme.buttonPrimaryBorder,
   primaryDisabled: theme.buttonPrimaryDisabledBorder,
 };
