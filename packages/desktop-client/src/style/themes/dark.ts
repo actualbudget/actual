@@ -74,15 +74,15 @@ export const buttonAltMenuBackgroundHover = colorPalette.navy600;
 export const buttonAltMenuBorder = colorPalette.navy600;
 
 export const buttonPrimaryText = colorPalette.white;
-export const buttonPrimaryTextHover = colorPalette.navy150;
+export const buttonPrimaryTextHover = buttonPrimaryText;
 export const buttonPrimaryBackground = colorPalette.purple400;
-export const buttonPrimaryBackgroundHover = colorPalette.navy800;
-export const buttonPrimaryBorder = colorPalette.purple400;
+export const buttonPrimaryBackgroundHover = buttonPrimaryBackground;
+export const buttonPrimaryBorder = buttonPrimaryBackground;
 export const buttonPrimaryShadow = 'rgba(0, 0, 0, 0.6)';
 
-export const buttonPrimaryDisabledText = colorPalette.navy400;
-export const buttonPrimaryDisabledBackground = colorPalette.navy300;
-export const buttonPrimaryDisabledBorder = colorPalette.navy300;
+export const buttonPrimaryDisabledText = colorPalette.navy700;
+export const buttonPrimaryDisabledBackground = colorPalette.navy400;
+export const buttonPrimaryDisabledBorder = buttonPrimaryDisabledBackground;
 
 export const buttonNormalText = colorPalette.navy150;
 export const buttonNormalTextHover = colorPalette.navy150;
