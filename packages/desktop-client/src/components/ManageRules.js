@@ -40,15 +40,7 @@ import {
   Search,
   LinkButton,
 } from './common';
-import {
-  SelectCell,
-  Row,
-  Field,
-  Cell,
-  CellButton,
-  TableHeader,
-  useTableNavigator,
-} from './table';
+import { SelectCell, Row, Field, Cell, CellButton, TableHeader } from './table';
 
 let valueStyle = {
   fontWeight: 500,
@@ -318,7 +310,7 @@ let Rule = memo(
   }) => {
     let dispatchSelected = useSelectedDispatch();
     let borderColor = selected ? theme.tableBorderSelected : 'none';
-    let backgroundFocus = hovered || focusedField === 'select';
+    let backgroundFocus = hovered;
 
     return (
       <Row
@@ -326,7 +318,7 @@ let Rule = memo(
         style={{
           fontSize: 13,
           zIndex: editing || selected ? 101 : 'auto',
-          borderColor: borderColor,
+          borderColor,
           backgroundColor: selected
             ? theme.tableRowBackgroundHighlight
             : backgroundFocus
@@ -338,8 +330,8 @@ let Rule = memo(
         onMouseLeave={() => onHover && onHover(null)}
       >
         <SelectCell
-          exposed={hovered || selected || editing}
-          focused={focusedField === 'select'}
+          exposed={hovered || selected}
+          focused={true}
           onSelect={e => {
             dispatchSelected({ type: 'select', id: rule.id, event: e });
           }}
@@ -362,13 +354,7 @@ let Rule = memo(
           )}
         </Cell>
 
-        <Field
-          width="flex"
-          style={{
-            padding: '15px 0',
-          }}
-          truncate={false}
-        >
+        <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
           <Stack direction="row" align="center">
             <View
               style={{ flex: 1, alignItems: 'flex-start' }}
@@ -412,17 +398,8 @@ let Rule = memo(
           </Stack>
         </Field>
 
-        <Cell
-          name="edit"
-          focused={focusedField === 'edit'}
-          plain
-          style={{ padding: '0 15px', paddingLeft: 5 }}
-        >
-          <Button
-            as={CellButton}
-            onSelect={() => onEditRule(rule)}
-            onEdit={() => onEdit(rule.id, 'edit')}
-          >
+        <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
+          <Button as={CellButton} onSelect={() => onEditRule(rule)}>
             Edit
           </Button>
         </Cell>
@@ -432,14 +409,10 @@ let Rule = memo(
 );
 
 let SimpleTable = forwardRef(
-  (
-    { data, navigator, loadMore, style, onHoverLeave, children, ...props },
-    ref,
-  ) => {
+  ({ data, loadMore, style, onHoverLeave, children, ...props }, ref) => {
     let contentRef = useRef();
     let contentHeight = useRef();
     let scrollRef = useRef();
-    let { getNavigatorProps } = navigator;
 
     function onScroll(e) {
       if (contentHeight.current != null) {
@@ -470,7 +443,6 @@ let SimpleTable = forwardRef(
         ]}
         tabIndex="1"
         data-testid="table"
-        {...getNavigatorProps(props)}
       >
         <View
           innerRef={scrollRef}
@@ -507,7 +479,6 @@ function RulesHeader() {
 function RulesList({
   rules,
   selectedItems,
-  navigator,
   hoveredRule,
   collapsed: borderCollapsed,
   onHover,
@@ -523,7 +494,6 @@ function RulesList({
       {rules.map(rule => {
         let hovered = hoveredRule === rule.id;
         let selected = selectedItems.has(rule.id);
-        let editing = navigator.editingId === rule.id;
 
         return (
           <Rule
@@ -531,10 +501,7 @@ function RulesList({
             rule={rule}
             hovered={hovered}
             selected={selected}
-            editing={editing}
-            focusedField={editing && navigator.focusedField}
             onHover={onHover}
-            onEdit={navigator.onEdit}
             onEditRule={onEditRule}
           />
         );
@@ -601,7 +568,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
   let [rules, setRules] = useState(null);
   let [filter, setFilter] = useState('');
   let dispatch = useDispatch();
-  let navigator = useTableNavigator(rules, ['select', 'edit']);
 
   let { data: schedules } = SchedulesQuery.useQuery();
   let filterData = useSelector(state => ({
@@ -733,8 +699,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
         onSave: async newRule => {
           let newRules = await loadRules();
 
-          navigator.onEdit(newRule.id, 'edit');
-
           setRules(rules => {
             let newIdx = newRules.findIndex(rule => rule.id === newRule.id);
             return newRules.slice(0, newIdx + 75);
@@ -756,85 +720,78 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: isModal ? '0 13px 15px' : '0 0 15px',
-          flexShrink: 0,
-        }}
-      >
+      <View style={{ overflow: 'hidden' }}>
         <View
           style={{
-            color: theme.pageText,
+            flexDirection: 'row',
             alignItems: 'center',
+            padding: isModal ? '0 13px 15px' : '0 0 15px',
+            flexShrink: 0,
           }}
         >
-          <Text>
-            Rules are always run in the order that you see them.{' '}
-            <ExternalLink
-              to="https://actualbudget.org/docs/budgeting/rules/"
-              linkColor="muted"
-            >
-              Learn more
-            </ExternalLink>
-          </Text>
-        </View>
-
-        <View style={{ flex: 1 }} />
-
-        <Search
-          id="filter-input"
-          placeholder="Filter rules..."
-          value={filter}
-          onChange={setFilter}
-        />
-      </View>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: theme.tableBackground,
-          boxShadow: styles.cardShadow,
-          borderRadius: 4,
-        }}
-      >
-        <RulesHeader />
-        <SimpleTable
-          ref={tableRef}
-          data={filteredRules}
-          navigator={navigator}
-          loadMore={loadMore}
-          // Hide the last border of the item in the table
-          style={{ marginBottom: -1 }}
-        >
-          <RulesList
-            rules={filteredRules}
-            selectedItems={selectedInst.items}
-            navigator={navigator}
-            hoveredRule={hoveredRule}
-            onHover={onHover}
-            onEditRule={onEditRule}
+          <View
+            style={{
+              color: theme.pageText,
+              alignItems: 'center',
+            }}
+          >
+            <Text>
+              Rules are always run in the order that you see them.{' '}
+              <ExternalLink
+                to="https://actualbudget.org/docs/budgeting/rules/"
+                linkColor="muted"
+              >
+                Learn more
+              </ExternalLink>
+            </Text>
+          </View>
+          <View style={{ flex: 1 }} />
+          <Search
+            id="filter-input"
+            placeholder="Filter rules..."
+            value={filter}
+            onChange={setFilter}
           />
-        </SimpleTable>
-      </View>
-      <View
-        style={{
-          paddingBlock: 15,
-          paddingInline: isModal ? 13 : 0,
-          borderTop: isModal && '1px solid ' + theme.tableBorder,
-          flexShrink: 0,
-        }}
-      >
-        <Stack direction="row" align="center" justify="flex-end" spacing={2}>
-          {selectedInst.items.size > 0 && (
-            <Button onClick={onDeleteSelected}>
-              Delete {selectedInst.items.size} rules
+        </View>
+        <View style={{ flex: 1 }}>
+          <RulesHeader />
+          <SimpleTable
+            ref={tableRef}
+            data={filteredRules}
+            navigator={navigator}
+            loadMore={loadMore}
+            // Hide the last border of the item in the table
+            style={{ marginBottom: -1 }}
+          >
+            <RulesList
+              rules={filteredRules}
+              selectedItems={selectedInst.items}
+              navigator={navigator}
+              hoveredRule={hoveredRule}
+              onHover={onHover}
+              onEditRule={onEditRule}
+            />
+          </SimpleTable>
+        </View>
+        <View
+          style={{
+            paddingBlock: 15,
+            paddingInline: isModal ? 13 : 0,
+            borderTop: isModal && '1px solid ' + colors.border,
+            flexShrink: 0,
+          }}
+        >
+          <Stack direction="row" align="center" justify="flex-end" spacing={2}>
+            {selectedInst.items.size > 0 && (
+              <Button onClick={onDeleteSelected}>
+                Delete {selectedInst.items.size} rules
+              </Button>
+            )}
+            <Button primary onClick={onCreateRule}>
+              Create new rule
             </Button>
-          )}
-          <Button primary onClick={onCreateRule}>
-            Create new rule
-          </Button>
-        </Stack>
+          </Stack>
+        </View>
       </View>
     </SelectedProvider>
   );

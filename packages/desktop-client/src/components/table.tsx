@@ -1079,12 +1079,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
         list.current?.setRowAnimation(true);
         listInitialized.current = true;
       }
-    });
-
-    function renderRow({ index, style, key }) {
-      let item = items[index];
-      let editing = editingId === item.id;
-      let selected = isSelected && isSelected(item.id);
 
       if (scrollContainer.current && saveScrollWidth) {
         saveScrollWidth(
@@ -1094,6 +1088,12 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
           scrollContainer.current ? scrollContainer.current.clientWidth : 0,
         );
       }
+    });
+
+    function renderRow({ index, style, key }) {
+      let item = items[index];
+      let editing = editingId === item.id;
+      let selected = isSelected && isSelected(item.id);
 
       let row = renderItem({
         item,

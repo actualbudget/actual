@@ -141,7 +141,7 @@ function ConfigureField({
   }, [op]);
 
   let type = FIELD_TYPES.get(field);
-  let ops = TYPE_INFO[type].ops;
+  let ops = TYPE_INFO[type].ops.filter(op => op !== 'isbetween');
 
   // Month and year fields are quite hacky right now! Figure out how
   // to clean this up later

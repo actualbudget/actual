@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 import useSyncServerStatus from '../../hooks/useSyncServerStatus';
-import Loading from '../../icons/AnimatedLoading';
+import AnimatedLoading from '../../icons/AnimatedLoading';
 import Add from '../../icons/v1/Add';
 import ArrowsExpand3 from '../../icons/v2/ArrowsExpand3';
 import ArrowsShrink3 from '../../icons/v2/ArrowsShrink3';
@@ -277,7 +277,7 @@ export function AccountHeader({
           />
           {workingHard ? (
             <View>
-              <Loading color="inherit" style={{ width: 16, height: 16 }} />
+              <AnimatedLoading style={{ width: 16, height: 16 }} />
             </View>
           ) : (
             <SelectedTransactionsButton

@@ -9,7 +9,7 @@ import ReactModal from 'react-modal';
 import type { CSSProperties } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
-import Loading from '../../icons/AnimatedLoading';
+import AnimatedLoading from '../../icons/AnimatedLoading';
 import Delete from '../../icons/v0/Delete';
 import { styles, theme } from '../../style';
 import tokens from '../../tokens';
@@ -218,7 +218,10 @@ const Modal = ({
               zIndex: 1000,
             }}
           >
-            <Loading style={{ width: 20, height: 20 }} color={theme.pageText} />
+            <AnimatedLoading
+              style={{ width: 20, height: 20 }}
+              color={theme.pageText}
+            />
           </View>
         )}
       </ModalContent>
