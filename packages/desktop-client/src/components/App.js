@@ -11,7 +11,7 @@ import {
 
 import installPolyfills from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
-import { styles, hasHiddenScrollbars } from '../style';
+import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 
 import AppBackground from './AppBackground';
 import DevelopmentTopBar from './DevelopmentTopBar';
@@ -102,7 +102,6 @@ class App extends Component {
             {...css([
               {
                 flexGrow: 1,
-                backgroundColor: '#E8ECF0',
                 overflow: 'hidden',
               },
               styles.lightScrollbar,
@@ -134,6 +133,7 @@ class App extends Component {
             <MobileWebMessage />
           </div>
         </div>
+        <ThemeStyle />
       </ResponsiveProvider>
     );
   }

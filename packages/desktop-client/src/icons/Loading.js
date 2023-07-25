@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const SvgLoading = props => {
-  let { color = '#fff' } = props;
+  let { color = 'currentColor' } = props;
   let [gradientId] = useState('gradient-' + Math.random());
 
   return (

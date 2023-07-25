@@ -81,7 +81,7 @@ export class RulesPage {
 
       if (op) {
         await row.getByRole('button', { name: 'is' }).click();
-        await this.page.getByRole('option', { name: op }).click();
+        await this.page.getByRole('option', { name: op, exact: true }).click();
       }
 
       if (value) {
