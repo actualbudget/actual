@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 // eslint-disable-next-line import/extensions
 import * as bundle from './app/bundle.api.js';
 import * as injected from './injected';
@@ -18,7 +16,8 @@ export async function init(config = {}) {
     return;
   }
 
-  global.fetch = fetch;
+  global.fetch = (...args) =>
+    import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
   await bundle.init(config);
   actualApp = bundle.lib;
