@@ -147,7 +147,8 @@ function AllTransactions({
   }, [showBalances, prependTransactions, runningBalance]);
 
   let allTransactions = useMemo(() => {
-    // Don't prepend scheduled transactions if we are filtering
+    // Don't prepend setting "transaction" or
+    // scheduled transactions if we are filtering
     if (!filtered && prependTransactions.length > 0) {
       return prependPreviewSetting.concat(prependTransactions, transactions);
     }
