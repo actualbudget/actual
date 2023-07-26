@@ -116,7 +116,7 @@ export default function NotesButton({
       onMouseLeave={handleMouseLeave}
     >
       <Button
-        bare
+        type="bare"
         className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
         style={[
           { color: defaultColor },

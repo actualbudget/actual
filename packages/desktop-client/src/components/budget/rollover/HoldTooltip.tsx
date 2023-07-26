@@ -68,7 +68,7 @@ export default function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
         }}
       >
         <Button
-          primary
+          type="primary"
           style={{
             fontSize: 12,
             paddingTop: 3,

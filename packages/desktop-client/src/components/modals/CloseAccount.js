@@ -172,16 +172,10 @@ function CloseAccount({
                 justifyContent: 'flex-end',
               }}
             >
-              <Button
-                type="submit"
-                style={{ marginRight: 10 }}
-                onClick={modalProps.onClose}
-              >
+              <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>
                 Cancel
               </Button>
-              <Button type="submit" primary>
-                Close Account
-              </Button>
+              <Button type="primary">Close Account</Button>
             </View>
           </form>
         </View>

@@ -59,7 +59,7 @@ function WelcomeScreen({ createBudget, pushModal }) {
         }}
       >
         <Button onClick={() => pushModal('import')}>Import my budget</Button>
-        <Button primary onClick={createBudget}>
+        <Button type="primary" onClick={createBudget}>
           Start fresh
         </Button>
       </View>

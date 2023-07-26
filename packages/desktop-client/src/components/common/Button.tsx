@@ -3,17 +3,18 @@ import React, { forwardRef } from 'react';
 import { css, type CSSProperties } from 'glamor';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 import View from './View';
 
 type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   pressed?: boolean;
-  primary?: boolean;
   hover?: boolean;
-  bare?: boolean;
+  type?: ButtonType;
+  isSubmit?: boolean;
   disabled?: boolean;
+  color?: string;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
   textStyle?: CSSProperties;
@@ -21,14 +22,64 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   as?: 'button';
 };
 
+type ButtonType = 'normal' | 'primary' | 'bare';
+
+const backgroundColor = {
+  normal: theme.buttonNormalBackground,
+  normalDisabled: theme.buttonNormalDisabledBackground,
+  primary: theme.buttonPrimaryBackground,
+  primaryDisabled: theme.buttonPrimaryDisabledBackground,
+  bare: theme.buttonBareBackground,
+  bareDisabled: theme.buttonBareDisabledBackground,
+  menu: theme.buttonMenuBackground,
+  menuSelected: theme.buttonMenuSelectedBackground,
+};
+
+const backgroundColorHover = {
+  normal: theme.buttonNormalBackgroundHover,
+  primary: theme.buttonPrimaryBackgroundHover,
+  bare: theme.buttonBareBackgroundHover,
+  menu: theme.buttonMenuBackgroundHover,
+  menuSelected: theme.buttonMenuSelectedBackgroundHover,
+};
+
+const borderColor = {
+  normal: theme.buttonNormalBorder,
+  normalDisabled: theme.buttonNormalDisabledBorder,
+  primary: theme.buttonPrimaryBorder,
+  primaryDisabled: theme.buttonPrimaryDisabledBorder,
+  menu: theme.buttonMenuBorder,
+  menuSelected: theme.buttonMenuSelectedBorder,
+};
+
+const textColor = {
+  normal: theme.buttonNormalText,
+  normalDisabled: theme.buttonNormalDisabledText,
+  primary: theme.buttonPrimaryText,
+  primaryDisabled: theme.buttonPrimaryDisabledText,
+  bare: theme.buttonBareText,
+  bareDisabled: theme.buttonBareDisabledText,
+  menu: theme.buttonMenuText,
+  menuSelected: theme.buttonMenuSelectedText,
+};
+
+const textColorHover = {
+  normal: theme.buttonNormalTextHover,
+  primary: theme.buttonPrimaryTextHover,
+  bare: theme.buttonBareTextHover,
+  menu: theme.buttonMenuTextHover,
+  menuSelected: theme.buttonMenuSelectedTextHover,
+};
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
       pressed,
-      primary,
       hover,
-      bare,
+      type = 'normal',
+      isSubmit = type === 'primary',
+      color,
       style,
       disabled,
       hoveredStyle,
@@ -39,22 +90,26 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
+    let typeWithDisabled = disabled ? type + 'Disabled' : type;
+
     hoveredStyle = [
-      bare
-        ? { backgroundColor: 'rgba(100, 100, 100, .15)' }
-        : { ...styles.shadow },
+      type !== 'bare' && styles.shadow,
       hoveredStyle,
+      {
+        backgroundColor: backgroundColorHover[type],
+        color: color || textColorHover[type],
+      },
     ];
     activeStyle = [
-      bare
-        ? { backgroundColor: 'rgba(100, 100, 100, .25)' }
+      type === 'bare'
+        ? { backgroundColor: theme.buttonBareBackgroundActive }
         : {
             transform: bounce && 'translateY(1px)',
             boxShadow:
-              !bare &&
-              (primary
-                ? '0 1px 4px 0 rgba(0,0,0,0.3)'
-                : '0 1px 4px 0 rgba(0,0,0,0.2)'),
+              '0 1px 4px 0 ' +
+              (type === 'primary'
+                ? theme.buttonPrimaryShadow
+                : theme.buttonNormalShadow),
             transition: 'none',
           },
       activeStyle,
@@ -66,23 +121,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
-        padding: bare ? '5px' : '5px 10px',
+        padding: type === 'bare' ? '5px' : '5px 10px',
         margin: 0,
         overflow: 'hidden',
         display: 'flex',
         borderRadius: 4,
-        backgroundColor: bare
-          ? 'transparent'
-          : primary
-          ? disabled
-            ? colors.n7
-            : colors.p5
-          : 'white',
-        border: bare
-          ? 'none'
-          : '1px solid ' +
-            (primary ? (disabled ? colors.n7 : colors.p5) : colors.n9),
-        color: primary ? 'white' : disabled ? colors.n6 : colors.n1,
+        backgroundColor: backgroundColor[typeWithDisabled],
+        border:
+          type === 'bare'
+            ? 'none'
+            : '1px solid ' + borderColor[typeWithDisabled],
+        color: color || textColor[typeWithDisabled],
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',
         ...styles.smallText,
@@ -100,7 +149,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...(typeof as === 'string'
           ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (css(buttonStyle) as any)
-          : { style: buttonStyle })}
+          : { style: buttonStyle, type: isSubmit ? 'submit' : 'button' })}
         disabled={disabled}
         {...nativeProps}
       >

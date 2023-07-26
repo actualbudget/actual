@@ -38,7 +38,7 @@ function ToBudget({ toBudget, onClick }) {
   let amount = useSheetValue(toBudget);
   return (
     <Button
-      bare
+      type="bare"
       style={{ flexDirection: 'column', alignItems: 'flex-start' }}
       onClick={onClick}
     >
@@ -1039,7 +1039,7 @@ function UnconnectedBudgetHeader({
     >
       {!editMode && (
         <Button
-          bare
+          type="bare"
           // hitSlop={{ top: 5, bottom: 5, left: 0, right: 30 }}
 
           onClick={prevEnabled && onPrevMonth}
@@ -1072,7 +1072,7 @@ function UnconnectedBudgetHeader({
       </Text>
       {editMode ? (
         <Button
-          bare
+          type="bare"
           onClick={onDone}
           style={[
             buttonStyle,
@@ -1089,7 +1089,7 @@ function UnconnectedBudgetHeader({
       ) : (
         <>
           <Button
-            bare
+            type="bare"
             onClick={nextEnabled && onNextMonth}
             // hitSlop={{ top: 5, bottom: 5, left: 30, right: 5 }}
             style={[buttonStyle, { opacity: nextEnabled ? 1 : 0.6 }]}
@@ -1116,7 +1116,7 @@ function UnconnectedBudgetHeader({
             onSync={sync}
           />
           {/* <Button
-            bare
+            type="bare"
             onClick={() => setMenuOpen(true)}
             style={{
               position: 'absolute',

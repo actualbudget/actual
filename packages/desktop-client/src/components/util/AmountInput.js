@@ -29,7 +29,7 @@ export function AmountInput({ id, defaultValue = 0, onChange, style }) {
     <InputWithContent
       id={id}
       leftContent={
-        <Button bare style={{ padding: '0 7px' }} onClick={onSwitch}>
+        <Button type="bare" style={{ padding: '0 7px' }} onClick={onSwitch}>
           {negative ? (
             <Subtract style={{ width: 8, height: 8 }} />
           ) : (

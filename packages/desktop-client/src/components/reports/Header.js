@@ -67,8 +67,8 @@ function Header({
       }}
     >
       <ButtonLink
+        type="bare"
         to="/reports"
-        bare
         style={{ marginBottom: '15', alignSelf: 'flex-start' }}
       >
         <ArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
@@ -113,20 +113,29 @@ function Header({
         <FilterButton onApply={onApply} />
 
         {show1Month && (
-          <Button bare onClick={() => onChangeDates(...getLatestRange(1))}>
+          <Button
+            type="bare"
+            onClick={() => onChangeDates(...getLatestRange(1))}
+          >
             1 month
           </Button>
         )}
-        <Button bare onClick={() => onChangeDates(...getLatestRange(2))}>
+        <Button type="bare" onClick={() => onChangeDates(...getLatestRange(2))}>
           3 months
         </Button>
-        <Button bare onClick={() => onChangeDates(...getLatestRange(5))}>
+        <Button type="bare" onClick={() => onChangeDates(...getLatestRange(5))}>
           6 months
         </Button>
-        <Button bare onClick={() => onChangeDates(...getLatestRange(11))}>
+        <Button
+          type="bare"
+          onClick={() => onChangeDates(...getLatestRange(11))}
+        >
           1 Year
         </Button>
-        <Button bare onClick={() => onChangeDates(...getFullRange(allMonths))}>
+        <Button
+          type="bare"
+          onClick={() => onChangeDates(...getFullRange(allMonths))}
+        >
           All Time
         </Button>
       </View>

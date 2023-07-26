@@ -188,7 +188,7 @@ const Modal = ({
               >
                 {showClose && (
                   <Button
-                    bare
+                    type="bare"
                     onClick={onClose}
                     style={{ padding: '10px 10px' }}
                     aria-label="Close"

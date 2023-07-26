@@ -62,7 +62,11 @@ function Import({ modalProps }) {
               folder”. Upload the zipped folder for importing.
             </P>
             <View>
-              <ButtonWithLoading loading={importing} primary onClick={onImport}>
+              <ButtonWithLoading
+                type="primary"
+                loading={importing}
+                onClick={onImport}
+              >
                 Select zip file...
               </ButtonWithLoading>
             </View>
