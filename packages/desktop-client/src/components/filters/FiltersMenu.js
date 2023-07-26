@@ -88,7 +88,7 @@ function subfieldToOptions(field, subfield) {
 function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
-      bare
+      type="bare"
       style={[
         { backgroundColor: colors.n10, marginBottom: 5 },
         style,
@@ -300,7 +300,7 @@ function ConfigureField({
           >
             <View style={{ flex: 1 }} />
             <Button
-              primary
+              type="primary"
               onClick={e => {
                 e.preventDefault();
                 onApply({
@@ -403,7 +403,7 @@ export function FilterButton({ onApply }) {
 
   return (
     <View>
-      <Button bare onClick={() => dispatch({ type: 'select-field' })}>
+      <Button type="bare" onClick={() => dispatch({ type: 'select-field' })}>
         <SettingsSliderAlternate
           style={{ width: 16, height: 16, marginRight: 5 }}
         />{' '}
@@ -499,7 +499,7 @@ function FilterExpression({
       ]}
     >
       <Button
-        bare
+        type="bare"
         disabled={customName != null}
         onClick={() => setEditing(true)}
         style={{ marginRight: -7 }}
@@ -523,7 +523,7 @@ function FilterExpression({
           )}
         </div>
       </Button>
-      <Button bare onClick={onDelete}>
+      <Button type="bare" onClick={onDelete}>
         <DeleteIcon
           style={{
             width: 8,

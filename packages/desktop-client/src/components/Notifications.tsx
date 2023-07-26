@@ -158,7 +158,7 @@ function Notification({
             : null}
           {button && (
             <ButtonWithLoading
-              bare
+              type="bare"
               loading={loading}
               onClick={async () => {
                 setLoading(true);
@@ -189,7 +189,7 @@ function Notification({
         </Stack>
         {sticky && (
           <Button
-            bare
+            type="bare"
             style={{ flexShrink: 0, color: 'currentColor' }}
             onClick={onRemove}
           >

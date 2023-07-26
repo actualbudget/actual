@@ -88,7 +88,7 @@ function LoadBackup({
                   version below.
                 </Block>
                 <Button
-                  primary
+                  type="primary"
                   onClick={() => actions.loadBackup(budgetId, latestBackup.id)}
                 >
                   Revert to original version
@@ -105,7 +105,7 @@ function LoadBackup({
                   </Text>
                 </Block>
                 <Button
-                  primary
+                  type="primary"
                   disabled={backupDisabled}
                   onClick={() => actions.makeBackup()}
                 >

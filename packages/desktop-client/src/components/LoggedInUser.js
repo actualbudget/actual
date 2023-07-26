@@ -87,7 +87,7 @@ function LoggedInUser({
 
   return (
     <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
-      <Button bare onClick={() => setMenuOpen(true)} style={{ color }}>
+      <Button type="bare" onClick={() => setMenuOpen(true)} style={{ color }}>
         {serverMessage()}
       </Button>
 

@@ -16,7 +16,7 @@ export function ThemeSelector() {
 
   return isNarrowWidth ? null : (
     <Button
-      bare
+      type="bare"
       onClick={() => {
         saveGlobalPrefs({
           theme: theme === 'dark' ? 'light' : 'dark',

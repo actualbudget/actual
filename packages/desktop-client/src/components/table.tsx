@@ -872,7 +872,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
       <KeyHandlers keys={keyHandlers || {}} />
 
       <Button
-        bare
+        type="bare"
         style={{ color: colors.b3 }}
         onClick={() => setMenuOpen(true)}
       >

@@ -85,7 +85,7 @@ export default function PlaidExternalMsg({
             </View>
           ) : success ? (
             <Button
-              primary
+              type="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,
@@ -100,7 +100,7 @@ export default function PlaidExternalMsg({
             </Button>
           ) : (
             <Button
-              primary
+              type="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,
