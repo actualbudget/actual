@@ -48,8 +48,7 @@ async function processTemplate(
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
-
-  //clears templated categories
+  //sort priority and find lowest
   for (let c = 0; c < categories.length; c++) {
     let category = categories[c];
     let budgeted = await getSheetValue(
@@ -69,6 +68,7 @@ async function processTemplate(
       }
     }
   }
+  //clears templated categories
   setZero({ month });
   // find all remainder templates, place them after all other templates
   let remainder_found;
@@ -91,7 +91,9 @@ async function processTemplate(
   if (remainder_found) lowestPriority = remainder_priority;
 
   let sheetName = monthUtils.sheetForMonth(month);
-  let available_start = await getSheetValue(sheetName, `to-budget`);
+  let available_start = await getSheetValue(sheetName, `available-funds`);
+  let held_funds = await getSheetValue(sheetName, `buffered`);
+  available_start = available_start - held_funds;
   for (let priority = 0; priority <= lowestPriority; priority++) {
     // setup scaling for remainder
     let remainder_scale = 1;
