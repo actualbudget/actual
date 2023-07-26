@@ -101,6 +101,8 @@ function AllTransactions({
     [scheduleData],
   );
 
+  let prependPreviewSetting = [{ id: `previewSetting/${accountId}` }];
+
   let prependTransactions = useMemo(() => {
     return schedules.map(schedule => ({
       id: `preview/${schedule.id}`,
@@ -147,7 +149,7 @@ function AllTransactions({
   let allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
     if (!filtered && prependTransactions.length > 0) {
-      return prependTransactions.concat(transactions);
+      return prependPreviewSetting.concat(prependTransactions, transactions);
     }
     return transactions;
   }, [filtered, prependTransactions, transactions]);

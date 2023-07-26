@@ -78,6 +78,21 @@ function ThemeFeature() {
   );
 }
 
+function TransactionPreviewFeature() {
+  let theme = useTheme();
+  let enabled = useFeatureFlag('transactionPreview');
+  let blockToggleOff = theme !== 'light' && enabled;
+  return (
+    <FeatureToggle
+      flag="transactionPreview"
+      disableToggle={blockToggleOff}
+      error="Switch transaction preview to 7 days before turning off this feature"
+    >
+      Transaction preview
+    </FeatureToggle>
+  );
+}
+
 export default function ExperimentalFeatures() {
   let [expanded, setExpanded] = useState(false);
 
@@ -95,6 +110,8 @@ export default function ExperimentalFeatures() {
             <FeatureToggle flag="privacyMode">Privacy mode</FeatureToggle>
 
             <ThemeFeature />
+
+            <TransactionPreviewFeature />
           </View>
         ) : (
           <LinkButton

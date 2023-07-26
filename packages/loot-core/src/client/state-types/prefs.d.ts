@@ -5,7 +5,8 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'privacyMode'
-  | 'themes';
+  | 'themes'
+  | 'transactionPreview';
 
 type NullableValues<T> = { [K in keyof T]: T[K] | null };
 

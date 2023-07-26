@@ -59,6 +59,7 @@ import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import { View, Text, Tooltip, Button } from '../common';
 import { getStatusProps } from '../schedules/StatusBadge';
+import { TransactionPreviewPicker } from '../schedules/TransactionPreviewPicker';
 import DateSelect from '../select/DateSelect';
 import {
   Cell,
@@ -722,6 +723,8 @@ const Transaction = memo(function Transaction(props) {
   );
   let isPreview = isPreviewId(transaction.id);
 
+  let isPreviewSetting = isPreviewSettingId(transaction.id);
+
   if (
     originalTransaction !== prevTransaction ||
     showZeroInDeposit !== prevShowZero
@@ -817,7 +820,13 @@ const Transaction = memo(function Transaction(props) {
   let backgroundFocus = hovered || focusedField === 'select';
   let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
-  return (
+  return isPreviewSetting ? (
+    <TransactionPreviewPicker
+      transaction={transaction}
+      onHover={onHover}
+      selected={selected}
+    />
+  ) : (
     <Row
       borderColor={borderColor}
       backgroundColor={
@@ -1310,6 +1319,10 @@ function makeTemporaryTransactions(
 
 function isTemporaryId(id) {
   return id.indexOf('temp') !== -1;
+}
+
+function isPreviewSettingId(id) {
+  return id.indexOf('previewSetting/') !== -1;
 }
 
 export function isPreviewId(id) {
