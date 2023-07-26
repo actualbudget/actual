@@ -622,9 +622,9 @@ async function applyCategoryTemplate(
           // can over budget with the rounding, so checking that
           if (to_budget >= budgetAvailable + budgeted) {
             to_budget = budgetAvailable + budgeted;
-          // check if there is 1 cent leftover from rounding
-          } else if (budgetAvailable-to_budget==1) {
-            to_budget=to_budget+1;
+            // check if there is 1 cent leftover from rounding
+          } else if (budgetAvailable - to_budget === 1) {
+            to_budget = to_budget + 1;
           }
         }
         break;
