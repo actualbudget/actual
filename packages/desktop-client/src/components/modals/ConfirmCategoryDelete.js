@@ -92,7 +92,7 @@ export default function ConfirmCategoryDelete({
             </View>
 
             <Button
-              primary
+              type="primary"
               onClick={() => {
                 if (!transferCategory) {
                   setError('required-transfer');

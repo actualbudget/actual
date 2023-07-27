@@ -132,7 +132,7 @@ export default function AccountDetails({
           */}
           <Link to="transaction/new" style={{ visibility: 'hidden' }}>
             <Button
-              bare
+              type="bare"
               style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
             >
               <Add width={20} height={20} />

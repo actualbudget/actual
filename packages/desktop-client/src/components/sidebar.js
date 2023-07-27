@@ -445,7 +445,7 @@ function ToggleButton({ style, isFloating, onFloat }) {
       className="float"
       style={[style, { flexShrink: 0, color: colors.n5 }]}
     >
-      <Button bare onClick={onFloat}>
+      <Button type="bare" onClick={onFloat}>
         {isFloating ? (
           <Pin
             style={{

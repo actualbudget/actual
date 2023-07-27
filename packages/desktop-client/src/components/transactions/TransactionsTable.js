@@ -491,7 +491,7 @@ function HeaderCell({
       alignItems={alignItems}
       unexposedContent={
         <Button
-          bare
+          type="bare"
           onClick={onClick}
           style={{
             whiteSpace: 'nowrap',
@@ -645,7 +645,7 @@ function PayeeIcons({
 
   return schedule ? (
     <Button
-      bare
+      type="bare"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();
@@ -660,7 +660,7 @@ function PayeeIcons({
     </Button>
   ) : transferAccount ? (
     <Button
-      bare
+      type="bare"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();
@@ -680,6 +680,7 @@ function PayeeIcons({
 
 const Transaction = memo(function Transaction(props) {
   let {
+    isNew = false,
     transaction: originalTransaction,
     editing,
     backgroundColor = 'white',
@@ -688,7 +689,6 @@ const Transaction = memo(function Transaction(props) {
     showCleared,
     showZeroInDeposit,
     style,
-    hovered,
     selected,
     highlighted,
     added,
@@ -704,7 +704,6 @@ const Transaction = memo(function Transaction(props) {
     hideFraction,
     onSave,
     onEdit,
-    onHover,
     onDelete,
     onSplit,
     onManagePayees,
@@ -716,6 +715,7 @@ const Transaction = memo(function Transaction(props) {
 
   let dispatchSelected = useSelectedDispatch();
 
+  let [hovered, setHovered] = useState(showZeroInDeposit);
   let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   let [prevTransaction, setPrevTransaction] = useState(originalTransaction);
   let [transaction, setTransaction] = useState(() =>
@@ -844,7 +844,8 @@ const Transaction = memo(function Transaction(props) {
         isPreview && { color: colors.n5, fontStyle: 'italic' },
         _unmatched && { opacity: 0.5 },
       ]}
-      onMouseEnter={() => onHover && onHover(transaction.id)}
+      onMouseEnter={() => !isNew && setHovered(true)}
+      onMouseLeave={() => !isNew && setHovered(false)}
     >
       {isChild && (
         <Field
@@ -1285,8 +1286,8 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
             </Text>
             <View style={{ flex: 1 }} />
             <Button
+              type="primary"
               style={{ marginLeft: 15, padding: '4px 10px' }}
-              primary
               onClick={onAddSplit}
             >
               Add Split
@@ -1335,7 +1336,6 @@ function NewTransaction({
   categoryGroups,
   payees,
   editingTransaction,
-  hoveredTransaction,
   focusedField,
   showAccount,
   showCategory,
@@ -1343,7 +1343,6 @@ function NewTransaction({
   showCleared,
   dateFormat,
   hideFraction,
-  onHover,
   onClose,
   onSplit,
   onEdit,
@@ -1372,13 +1371,12 @@ function NewTransaction({
           onClose();
         }
       }}
-      onMouseLeave={() => onHover(null)}
     >
       {transactions.map((transaction, idx) => (
         <Transaction
+          isNew
           key={transaction.id}
           editing={editingTransaction === transaction.id}
-          hovered={hoveredTransaction === transaction.id}
           transaction={transaction}
           showAccount={showAccount}
           showCategory={showCategory}
@@ -1392,7 +1390,6 @@ function NewTransaction({
           dateFormat={dateFormat}
           hideFraction={hideFraction}
           expanded={true}
-          onHover={onHover}
           onEdit={onEdit}
           onSave={onSave}
           onSplit={onSplit}
@@ -1429,8 +1426,8 @@ function NewTransaction({
           />
         ) : (
           <Button
+            type="primary"
             style={{ padding: '4px 10px' }}
-            primary
             onClick={onAdd}
             data-testid="add-button"
           >
@@ -1448,7 +1445,6 @@ function TransactionTableInner({
   dateFormat = 'MM/dd/yyyy',
   newNavigator,
   renderEmpty,
-  onHover,
   onScroll,
   ...props
 }) {
@@ -1488,7 +1484,6 @@ function TransactionTableInner({
     const {
       transactions,
       selectedItems,
-      hoveredTransaction,
       accounts,
       categoryGroups,
       payees,
@@ -1504,7 +1499,6 @@ function TransactionTableInner({
     } = props;
 
     let trans = item;
-    let hovered = hoveredTransaction === trans.id;
     let selected = selectedItems.has(trans.id);
 
     let parent = props.transactionMap.get(trans.parent_id);
@@ -1544,7 +1538,6 @@ function TransactionTableInner({
           showCategory={showCategory}
           showBalance={showBalances}
           showCleared={showCleared}
-          hovered={hovered}
           selected={selected}
           highlighted={false}
           added={isNew?.(trans.id)}
@@ -1561,7 +1554,6 @@ function TransactionTableInner({
           }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
-          onHover={onHover}
           onEdit={tableNavigator.onEdit}
           onSave={props.onSave}
           onDelete={props.onDelete}
@@ -1603,7 +1595,6 @@ function TransactionTableInner({
             <NewTransaction
               transactions={props.newTransactions}
               editingTransaction={newNavigator.editingId}
-              hoveredTransaction={props.hoveredTransaction}
               focusedField={newNavigator.focusedField}
               accounts={props.accounts}
               categoryGroups={props.categoryGroups}
@@ -1621,7 +1612,6 @@ function TransactionTableInner({
               onEdit={newNavigator.onEdit}
               onSave={props.onSave}
               onDelete={props.onDelete}
-              onHover={onHover}
               onManagePayees={props.onManagePayees}
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
@@ -1636,7 +1626,6 @@ function TransactionTableInner({
       <View
         style={[{ flex: 1, overflow: 'hidden' }]}
         data-testid="transaction-table"
-        onMouseLeave={() => onHover(null)}
       >
         <Table
           navigator={tableNavigator}
@@ -1672,9 +1661,6 @@ function TransactionTableInner({
 
 export let TransactionTable = forwardRef((props, ref) => {
   let [newTransactions, setNewTransactions] = useState(null);
-  let [hoveredTransaction, setHoveredTransaction] = useState(
-    props.hoveredTransaction,
-  );
   let [prevIsAdding, setPrevIsAdding] = useState(false);
   let splitsExpanded = useSplitsExpanded();
   let prevSplitsExpanded = useRef(null);
@@ -1928,10 +1914,6 @@ export let TransactionTable = forwardRef((props, ref) => {
     [props.onSave],
   );
 
-  let onHover = useCallback(id => {
-    setHoveredTransaction(id);
-  }, []);
-
   let onDelete = useCallback(id => {
     let temporary = isTemporaryId(id);
 
@@ -2025,9 +2007,7 @@ export let TransactionTable = forwardRef((props, ref) => {
       transactions={transactions}
       transactionMap={transactionMap}
       selectedItems={selectedItems}
-      hoveredTransaction={hoveredTransaction}
       isExpanded={splitsExpanded.expanded}
-      onHover={onHover}
       onSave={onSave}
       onDelete={onDelete}
       onSplit={onSplit}

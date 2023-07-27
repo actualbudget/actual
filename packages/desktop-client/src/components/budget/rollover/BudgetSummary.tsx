@@ -325,8 +325,8 @@ export function BudgetSummary({
             }}
           >
             <Button
+              type="bare"
               className="hover-visible"
-              bare
               onClick={onToggleSummaryCollapse}
             >
               <ExpandOrCollapseIcon
@@ -372,7 +372,7 @@ export function BudgetSummary({
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
-              <Button bare onClick={onMenuOpen}>
+              <Button type="bare" onClick={onMenuOpen}>
                 <DotsHorizontalTriple
                   width={15}
                   height={15}

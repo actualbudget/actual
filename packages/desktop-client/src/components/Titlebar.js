@@ -72,7 +72,7 @@ function UncategorizedButton() {
   return (
     count !== 0 && (
       <ButtonLink
-        bare
+        type="bare"
         to="/accounts/uncategorized"
         style={{ color: colors.r5 }}
       >
@@ -94,7 +94,7 @@ function PrivacyButton({ localPrefs, onTogglePrivacy }) {
   let privacyIconStyle = { width: 23, height: 23 };
 
   return (
-    <Button bare onClick={togglePrivacy}>
+    <Button type="bare" onClick={togglePrivacy}>
       {isPrivacyEnabled ? (
         <SvgEyeSlashed style={privacyIconStyle} />
       ) : (
@@ -143,7 +143,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
 
   return (
     <Button
-      bare
+      type="bare"
       style={css(
         style,
         {
@@ -215,7 +215,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
       {reportBudgetEnabled && (
         <View style={{ marginLeft: -5 }}>
           <ButtonWithLoading
-            bare
+            type="bare"
             loading={loading}
             style={{
               alignSelf: 'flex-start',
@@ -247,7 +247,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
               </P>
               <P>
                 <ButtonWithLoading
-                  primary
+                  type="primary"
                   loading={loading}
                   onClick={onSwitchType}
                 >
@@ -315,7 +315,7 @@ function Titlebar({
     >
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
-          bare
+          type="bare"
           style={{ marginRight: 8 }}
           onPointerEnter={e => {
             if (e.pointerType === 'mouse') {
@@ -345,7 +345,7 @@ function Titlebar({
           path="/accounts"
           element={
             location.state?.goBack ? (
-              <Button onClick={() => navigate(-1)} bare>
+              <Button type="bare" onClick={() => navigate(-1)}>
                 <ArrowLeft
                   width={10}
                   height={10}

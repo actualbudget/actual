@@ -71,7 +71,11 @@ function Import({ modalProps }) {
             <P>Select one of these compressed files and import it here.</P>
 
             <View style={{ alignSelf: 'center' }}>
-              <ButtonWithLoading loading={importing} primary onClick={onImport}>
+              <ButtonWithLoading
+                type="primary"
+                loading={importing}
+                onClick={onImport}
+              >
                 Select file...
               </ButtonWithLoading>
             </View>

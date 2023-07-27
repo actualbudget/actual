@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 
 import useSyncServerStatus from '../../hooks/useSyncServerStatus';
-import Loading from '../../icons/AnimatedLoading';
+import AnimatedLoading from '../../icons/AnimatedLoading';
 import Add from '../../icons/v1/Add';
 import ArrowsExpand3 from '../../icons/v2/ArrowsExpand3';
 import ArrowsShrink3 from '../../icons/v2/ArrowsShrink3';
@@ -165,7 +165,7 @@ export function AccountHeader({
 
                 {account && <NotesButton id={`account-${account.id}`} />}
                 <Button
-                  bare
+                  type="bare"
                   className="hover-visible"
                   onClick={() => onExposeName(true)}
                 >
@@ -205,7 +205,7 @@ export function AccountHeader({
           style={{ marginTop: 12 }}
         >
           {((account && !account.closed) || canSync) && (
-            <Button bare onClick={canSync ? onSync : onImport}>
+            <Button type="bare" onClick={canSync ? onSync : onImport}>
               {canSync ? (
                 <>
                   <AnimatedRefresh
@@ -232,7 +232,7 @@ export function AccountHeader({
             </Button>
           )}
           {!showEmptyMessage && (
-            <Button bare onClick={onAddTransaction}>
+            <Button type="bare" onClick={onAddTransaction}>
               <Add width={10} height={10} style={{ marginRight: 3 }} /> Add New
             </Button>
           )}
@@ -255,7 +255,7 @@ export function AccountHeader({
             rightContent={
               search && (
                 <Button
-                  bare
+                  type="bare"
                   style={{ padding: 8 }}
                   onClick={() => onSearch('')}
                   title="Clear search term"
@@ -288,7 +288,10 @@ export function AccountHeader({
           />
           {workingHard ? (
             <View>
-              <Loading color={colors.n1} style={{ width: 16, height: 16 }} />
+              <AnimatedLoading
+                color={colors.n1}
+                style={{ width: 16, height: 16 }}
+              />
             </View>
           ) : (
             <SelectedTransactionsButton
@@ -303,7 +306,7 @@ export function AccountHeader({
             />
           )}
           <Button
-            bare
+            type="bare"
             disabled={search !== '' || filters.length > 0}
             style={{ padding: 6 }}
             onClick={onToggleSplits}

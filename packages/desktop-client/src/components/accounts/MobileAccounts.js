@@ -123,7 +123,7 @@ function EmptyMessage({ onAdd }) {
       </Text>
 
       <Button
-        primary
+        type="primary"
         style={{ marginTop: 20, alignSelf: 'center' }}
         onClick={() =>
           alert(

@@ -200,8 +200,7 @@ function SavedFilterMenuButton({
                 />
               </FormField>
               <Button
-                primary
-                type="submit"
+                type="primary"
                 style={{ marginTop: 18 }}
                 onClick={e => {
                   e.preventDefault();
@@ -226,7 +225,7 @@ function SavedFilterMenuButton({
     <View>
       {filters.length > 0 && (
         <Button
-          bare
+          type="bare"
           style={{ marginTop: 10 }}
           onClick={() => {
             setMenuOpen(true);

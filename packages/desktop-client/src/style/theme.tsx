@@ -1,16 +1,13 @@
 import { useSelector } from 'react-redux';
 
 import type { Theme } from 'loot-core/src/client/state-types/prefs';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import * as darkTheme from './themes/dark';
-import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
 
 const themes = {
   light: lightTheme,
   dark: darkTheme,
-  ...(isNonProductionEnvironment() && { development: developmentTheme }),
 };
 
 export const themeNames = Object.keys(themes) as Theme[];
