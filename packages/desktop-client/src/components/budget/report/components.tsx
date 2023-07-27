@@ -229,15 +229,15 @@ export const CategoryMonth = memo(function CategoryMonth({
           setHover(false);
         }}
       >
-        <View
-          style={{
-            flexShrink: 0,
-            marginRight: 0,
-            marginLeft: 3,
-            justifyContent: 'center',
-          }}
-        >
-          {hover && !editing ? (
+        {!editing && (hover || menuOpen) && (
+          <View
+            style={{
+              flexShrink: 0,
+              marginRight: 0,
+              marginLeft: 3,
+              justifyContent: 'center',
+            }}
+          >
             <Button
               type="bare"
               onClick={e => {
@@ -248,47 +248,52 @@ export const CategoryMonth = memo(function CategoryMonth({
                 padding: 3,
               }}
             >
-              <CheveronDown width={14} height={14} className="hover-visible" />
-            </Button>
-          ) : null}
-          {menuOpen && (
-            <Tooltip
-              position="bottom-left"
-              width={200}
-              style={{ padding: 0 }}
-              onClose={() => setMenuOpen(false)}
-            >
-              <Menu
-                onMenuSelect={type => {
-                  onBudgetAction(monthIndex, type, { category: category.id });
-                  setMenuOpen(false);
-                }}
-                items={[
-                  {
-                    name: 'copy-single-last',
-                    text: 'Copy last month’s budget',
-                  },
-                  {
-                    name: 'set-single-3-avg',
-                    text: 'Set to 3 month average',
-                  },
-                  {
-                    name: 'set-single-6-avg',
-                    text: 'Set to 6 month average',
-                  },
-                  {
-                    name: 'set-single-12-avg',
-                    text: 'Set to yearly average',
-                  },
-                  isGoalTemplatesEnabled && {
-                    name: 'apply-single-category-template',
-                    text: 'Apply budget template',
-                  },
-                ]}
+              <CheveronDown
+                width={14}
+                height={14}
+                className="hover-visible"
+                style={menuOpen && { opacity: 1 }}
               />
-            </Tooltip>
-          )}
-        </View>
+            </Button>
+            {menuOpen && (
+              <Tooltip
+                position="bottom-left"
+                width={200}
+                style={{ padding: 0 }}
+                onClose={() => setMenuOpen(false)}
+              >
+                <Menu
+                  onMenuSelect={type => {
+                    onBudgetAction(monthIndex, type, { category: category.id });
+                    setMenuOpen(false);
+                  }}
+                  items={[
+                    {
+                      name: 'copy-single-last',
+                      text: 'Copy last month’s budget',
+                    },
+                    {
+                      name: 'set-single-3-avg',
+                      text: 'Set to 3 month average',
+                    },
+                    {
+                      name: 'set-single-6-avg',
+                      text: 'Set to 6 month average',
+                    },
+                    {
+                      name: 'set-single-12-avg',
+                      text: 'Set to yearly average',
+                    },
+                    isGoalTemplatesEnabled && {
+                      name: 'apply-single-category-template',
+                      text: 'Apply budget template',
+                    },
+                  ]}
+                />
+              </Tooltip>
+            )}
+          </View>
+        )}
         <SheetCell
           name="budget"
           exposed={editing}
