@@ -2,12 +2,15 @@ import type { AccountEntity } from '../../types/models';
 import type { RuleEntity } from '../../types/models/rule';
 import type * as constants from '../constants';
 
-type Modal = {
+export type Modal = {
   [K in keyof FinanceModals]: {
     name: K;
     options: FinanceModals[K];
   };
 }[keyof FinanceModals];
+
+export type OptionlessModal = keyof (FinanceModals &
+  Record<keyof FinanceModals, null>);
 
 // There is a separate (overlapping!) set of modals for the management app. Fun!
 type FinanceModals = {
