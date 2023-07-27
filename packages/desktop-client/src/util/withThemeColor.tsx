@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
-export const withThemeColor = color => WrappedComponent => {
+/** @deprecated use `useSetThemeColor` instead */
+export const withThemeColor = (color: string) => WrappedComponent => {
   class WithThemeColor extends Component {
     static displayName = `withThemeColor(${
       WrappedComponent.displayName || WrappedComponent.name
@@ -21,7 +22,7 @@ export const withThemeColor = color => WrappedComponent => {
   return WithThemeColor;
 };
 
-export function setThemeColor(color) {
+export function setThemeColor(color: string) {
   const metaTags = document.getElementsByTagName('meta');
   const themeTag = [...metaTags].find(tag => tag.name === 'theme-color');
   themeTag.setAttribute('content', color);
