@@ -552,10 +552,18 @@ async function applyCategoryTemplate(
 
         if (template.category.toLowerCase() === 'all income') {
           if (template.previous) {
-            let sheetname_lastmonth = monthUtils.sheetForMonth(monthUtils.addMonths(month, -1));
-            monthlyIncome = await getSheetValue(sheetname_lastmonth, 'total-income');
+            let sheetName_lastmonth = monthUtils.sheetForMonth(
+              monthUtils.addMonths(month, -1),
+            );
+            monthlyIncome = await getSheetValue(
+              sheetName_lastmonth,
+              'total-income',
+            );
           } else {
-            monthlyIncome = await getSheetValue(sheetName, `total-income`);
+            monthlyIncome = await getSheetValue(
+              sheetName, 
+              `total-income`
+              );
           }
         } else if (template.category.toLowerCase() === 'available funds') {
           monthlyIncome = available_start;
@@ -570,8 +578,13 @@ async function applyCategoryTemplate(
             return { errors };
           }
           if (template.previous) {
-            let sheetname_lastmonth = monthUtils.sheetForMonth(monthUtils.addMonths(month, -1));
-            monthlyIncome = await getSheetValue(sheetname_lastmonth, 'total-income');
+            let sheetName_lastmonth = monthUtils.sheetForMonth(
+              monthUtils.addMonths(month, -1),
+            );
+            monthlyIncome = await getSheetValue(
+              sheetName_lastmonth,
+              `sum-amount-${income_category.id}`,
+            );
           } else {
             monthlyIncome = await getSheetValue(
               sheetName,
