@@ -1,7 +1,7 @@
 // https://peggyjs.org
 
 expr
- = priority: priority? _? percentOf:percentOf category: name
+  = priority: priority? _? percentOf:percentOf category: name
     { return { type: 'percentage', percent: +percentOf.percent, previous: percentOf.prev, category, priority: +priority }}
   / priority: priority? _? amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
     { return { type: 'week', amount, weeks, starting, limit, priority: +priority }}
