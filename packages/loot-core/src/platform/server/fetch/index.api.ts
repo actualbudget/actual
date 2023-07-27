@@ -1,1 +1,1 @@
-export const fetch = self.fetch;
+export const fetch = globalThis.fetch;
