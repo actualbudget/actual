@@ -30,16 +30,10 @@ export function applyBudgetAction(month, type, args) {
         dispatch(addNotification(await send('budget/check-templates')));
         break;
       case 'apply-goal-template':
-        dispatch(
-          addNotification(await send('budget/apply-goal-template', { month })),
-        );
+        await send('budget/apply-goal-template', { month });
         break;
       case 'overwrite-goal-template':
-        dispatch(
-          addNotification(
-            await send('budget/overwrite-goal-template', { month }),
-          ),
-        );
+        await send('budget/overwrite-goal-template', { month });
         break;
       case 'cleanup-goal-template':
         dispatch(
@@ -87,6 +81,39 @@ export function applyBudgetAction(month, type, args) {
         });
         break;
       }
+      case 'apply-single-category-template':
+        await send('budget/apply-single-template', {
+          month,
+          category: args.category,
+        });
+        break;
+      case 'set-single-3-avg':
+        await send('budget/set-n-month-avg', {
+          month,
+          N: 3,
+          category: args.category,
+        });
+        break;
+      case 'set-single-6-avg':
+        await send('budget/set-n-month-avg', {
+          month,
+          N: 6,
+          category: args.category,
+        });
+        break;
+      case 'set-single-12-avg':
+        await send('budget/set-n-month-avg', {
+          month,
+          N: 12,
+          category: args.category,
+        });
+        break;
+      case 'copy-single-last':
+        await send('budget/copy-single-month', {
+          month,
+          category: args.category,
+        });
+        break;
       default:
     }
   };
