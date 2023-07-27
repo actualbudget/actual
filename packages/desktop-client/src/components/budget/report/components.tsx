@@ -240,7 +240,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             }}
           >
             <Button
-              bare
+              type="bare"
               onClick={e => {
                 e.stopPropagation();
                 setMenuOpen(true);

@@ -365,7 +365,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             }}
           >
             <Button
-              bare
+              type="bare"
               onClick={e => {
                 e.stopPropagation();
                 setMenuOpen(true);
