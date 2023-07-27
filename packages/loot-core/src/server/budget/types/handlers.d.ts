@@ -15,13 +15,11 @@ export interface BudgetHandlers {
 
   'budget/check-templates': () => Promise<Notification>;
 
-  'budget/apply-goal-template': (arg: {
-    month: string;
-  }) => Promise<Notification>;
+  'budget/apply-goal-template': (arg: { month: string }) => Promise<unknown>;
 
   'budget/overwrite-goal-template': (arg: {
     month: string;
-  }) => Promise<Notification>;
+  }) => Promise<unknown>;
 
   'budget/cleanup-goal-template': (arg: {
     month: string;
@@ -38,4 +36,20 @@ export interface BudgetHandlers {
   'budget/transfer-category': (...args: unknown[]) => Promise<unknown>;
 
   'budget/set-carryover': (...args: unknown[]) => Promise<unknown>;
+
+  'budget/apply-single-template': (arg: {
+    month: string;
+    category: string; //category id
+  }) => Promise<unknown>;
+
+  'budget/set-n-month-avg': (arg: {
+    month: string;
+    N: number;
+    category: string; //category id
+  }) => Promise<unknown>;
+
+  'budget/copy-single-month': (arg: {
+    month: string;
+    category: string; //category id
+  }) => Promise<unknown>;
 }
