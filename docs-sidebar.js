@@ -175,7 +175,16 @@ const sidebars = {
             },
             'budgeting/schedules',
             'budgeting/returns-and-reimbursements',
-            'budgeting/credit-cards',
+            {
+              type: 'category',
+              label: 'Managing Credit Cards',
+              collapsed: true,
+              link: {
+                type: 'doc',
+                id: 'budgeting/credit-cards/index',
+              },
+              items: ['budgeting/credit-cards/carrying-debt'],
+            },
             'budgeting/joint-accounts',
             //unavailable('Returns and Reimbursements'),
           ],
