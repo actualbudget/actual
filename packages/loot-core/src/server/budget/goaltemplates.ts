@@ -560,10 +560,7 @@ async function applyCategoryTemplate(
               'total-income',
             );
           } else {
-            monthlyIncome = await getSheetValue(
-              sheetName, 
-              `total-income`
-              );
+            monthlyIncome = await getSheetValue(sheetName, `total-income`);
           }
         } else if (template.category.toLowerCase() === 'available funds') {
           monthlyIncome = available_start;
