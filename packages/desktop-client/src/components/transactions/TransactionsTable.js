@@ -437,7 +437,7 @@ function StatusCell({
   return (
     <Cell
       name="cleared"
-      width={30}
+      width={23}
       focused={focused}
       style={{ padding: 1 }}
       plain
@@ -490,7 +490,7 @@ function HeaderCell({
       alignItems={alignItems}
       unexposedContent={
         <Button
-          bare
+          type="bare"
           onClick={onClick}
           style={{
             whiteSpace: 'nowrap',
@@ -644,7 +644,7 @@ function PayeeIcons({
 
   return schedule ? (
     <Button
-      bare
+      type="bare"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();
@@ -659,7 +659,7 @@ function PayeeIcons({
     </Button>
   ) : transferAccount ? (
     <Button
-      bare
+      type="bare"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();
@@ -1276,8 +1276,8 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
             </Text>
             <View style={{ flex: 1 }} />
             <Button
+              type="primary"
               style={{ marginLeft: 15, padding: '4px 10px' }}
-              primary
               onClick={onAddSplit}
             >
               Add Split
@@ -1416,8 +1416,8 @@ function NewTransaction({
           />
         ) : (
           <Button
+            type="primary"
             style={{ padding: '4px 10px' }}
-            primary
             onClick={onAdd}
             data-testid="add-button"
           >

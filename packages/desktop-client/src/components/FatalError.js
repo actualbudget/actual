@@ -1,6 +1,6 @@
 import React, { Component, useState } from 'react';
 
-import { colors } from '../style';
+import { theme } from '../style';
 
 import {
   View,
@@ -78,7 +78,8 @@ class FatalError extends Component {
           style={{
             paddingBottom: 100,
             maxWidth: 500,
-            color: colors.r4,
+            color: theme.errorText,
+            backgroundColor: theme.errorBackground,
             lineHeight: '1.5em',
             fontSize: 15,
           }}
@@ -125,10 +126,7 @@ class FatalError extends Component {
               </Button>
             </P>
             <P isLast={true} style={{ fontSize: 11 }}>
-              <LinkButton
-                onClick={() => this.setState({ showError: true })}
-                style={{ color: colors.p4 }}
-              >
+              <LinkButton onClick={() => this.setState({ showError: true })}>
                 Show Error
               </LinkButton>
               {showError && (
@@ -181,20 +179,7 @@ function SharedArrayBufferOverride() {
       </Button>
     </>
   ) : (
-    <LinkButton
-      onClick={() => setExpanded(true)}
-      style={{
-        color: `inherit !important`,
-        marginLeft: 5,
-        border: 'none !important',
-        background: 'none !important',
-        padding: '0 !important',
-        textDecoration: 'underline !important',
-        boxShadow: 'none !important',
-        display: 'inline !important',
-        font: 'inherit !important',
-      }}
-    >
+    <LinkButton onClick={() => setExpanded(true)} style={{ marginLeft: 5 }}>
       Advanced options
     </LinkButton>
   );

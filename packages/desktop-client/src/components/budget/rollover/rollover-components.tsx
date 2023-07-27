@@ -89,7 +89,7 @@ function CoverTooltip({ tooltipProps, onSubmit, onClose }: CoverTooltipProps) {
         }}
       >
         <Button
-          primary
+          type="primary"
           style={{
             fontSize: 12,
             paddingTop: 3,

@@ -24,7 +24,7 @@ function OverflowMenu({ schedule, status, onAction }) {
   return (
     <View>
       <Button
-        bare
+        type="bare"
         onClick={e => {
           e.stopPropagation();
           setOpen(true);

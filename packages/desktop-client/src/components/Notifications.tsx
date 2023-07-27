@@ -11,7 +11,7 @@ import { type CSSProperties } from 'glamor';
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { useActions } from '../hooks/useActions';
-import Loading from '../icons/AnimatedLoading';
+import AnimatedLoading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
 import { styles, colors } from '../style';
 
@@ -158,7 +158,7 @@ function Notification({
             : null}
           {button && (
             <ButtonWithLoading
-              bare
+              type="bare"
               loading={loading}
               onClick={async () => {
                 setLoading(true);
@@ -189,7 +189,7 @@ function Notification({
         </Stack>
         {sticky && (
           <Button
-            bare
+            type="bare"
             style={{ flexShrink: 0, color: 'currentColor' }}
             onClick={onRemove}
           >
@@ -210,8 +210,7 @@ function Notification({
             justifyContent: 'center',
           }}
         >
-          <Loading
-            color="currentColor"
+          <AnimatedLoading
             style={{ width: 20, height: 20, color: 'currentColor' }}
           />
         </View>

@@ -9,7 +9,7 @@ import ReactModal from 'react-modal';
 import type { CSSProperties } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
-import Loading from '../../icons/AnimatedLoading';
+import AnimatedLoading from '../../icons/AnimatedLoading';
 import Delete from '../../icons/v0/Delete';
 import { styles, colors } from '../../style';
 import tokens from '../../tokens';
@@ -188,7 +188,7 @@ const Modal = ({
               >
                 {showClose && (
                   <Button
-                    bare
+                    type="bare"
                     onClick={onClose}
                     style={{ padding: '10px 10px' }}
                     aria-label="Close"
@@ -217,7 +217,10 @@ const Modal = ({
               zIndex: 1000,
             }}
           >
-            <Loading style={{ width: 20, height: 20 }} color={colors.n1} />
+            <AnimatedLoading
+              style={{ width: 20, height: 20 }}
+              color={colors.n1}
+            />
           </View>
         )}
       </ModalContent>

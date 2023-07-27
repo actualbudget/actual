@@ -206,7 +206,7 @@ export default class FixedSizeList extends PureComponent {
             style={{
               height,
               width,
-              overflow: 'auto',
+              overflow: 'hidden auto',
               ...style,
             }}
           >

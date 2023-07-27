@@ -147,10 +147,8 @@ function CreateLocalAccount({ modalProps, actions }) {
             )}
 
             <ModalButtons>
-              <Button onClick={() => modalProps.onBack()} type="button">
-                Back
-              </Button>
-              <Button primary style={{ marginLeft: 10 }}>
+              <Button onClick={() => modalProps.onBack()}>Back</Button>
+              <Button type="primary" style={{ marginLeft: 10 }}>
                 Create
               </Button>
             </ModalButtons>

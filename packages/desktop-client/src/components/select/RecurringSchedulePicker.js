@@ -221,7 +221,7 @@ function MonthlyPatterns({ config, dispatch }) {
             style={{ borderWidth: 1, width: '100%' }}
           />
           <Button
-            bare
+            type="bare"
             style={{ padding: 7 }}
             onClick={() =>
               dispatch({
@@ -233,7 +233,7 @@ function MonthlyPatterns({ config, dispatch }) {
             <SubtractIcon style={{ width: 8, height: 8 }} />
           </Button>
           <Button
-            bare
+            type="bare"
             style={{ padding: 7, marginLeft: 5 }}
             onClick={() => dispatch({ type: 'add-recurrence' })}
           >
@@ -343,8 +343,8 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
       >
         <Button onClick={onClose}>Cancel</Button>
         <Button
+          type="primary"
           onClick={() => onSave(unparseConfig(config))}
-          primary
           style={{ marginLeft: 10 }}
         >
           Apply

@@ -368,7 +368,7 @@ function SidebarCategory({
       </div>
       <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
-          bare
+          type="bare"
           onClick={e => {
             e.stopPropagation();
             setMenuOpen(true);
@@ -537,7 +537,7 @@ function SidebarGroup({
         <>
           <View style={{ marginLeft: 5, flexShrink: 0 }}>
             <Button
-              bare
+              type="bare"
               onClick={e => {
                 e.stopPropagation();
                 setMenuOpen(true);
@@ -701,7 +701,7 @@ const BudgetTotals = memo(function BudgetTotals({
       >
         <View style={{ flexGrow: '1' }}>Category</View>
         <Button
-          bare
+          type="bare"
           onClick={() => {
             setMenuOpen(true);
           }}

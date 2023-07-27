@@ -181,7 +181,7 @@ export default function DiscoverSchedules() {
         }}
       >
         <ButtonWithLoading
-          primary
+          type="primary"
           loading={creating}
           disabled={selectedInst.items.size === 0}
           onClick={onCreate}

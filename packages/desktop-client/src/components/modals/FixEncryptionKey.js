@@ -136,8 +136,8 @@ export default function FixEncryptionKey({
                 Back
               </Button>
               <ButtonWithLoading
+                type="primary"
                 loading={loading}
-                primary
                 onClick={onUpdateKey}
               >
                 {hasExistingKey ? 'Update key' : 'Create key'}
