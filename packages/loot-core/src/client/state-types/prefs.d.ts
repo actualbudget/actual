@@ -1,6 +1,8 @@
 import { type numberFormats } from '../../shared/util';
 import type * as constants from '../constants';
 
+import { SchedulePreviewOpts } from '../../../../desktop-client/src/components/schedules/TransactionPreviewPicker';
+
 export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
@@ -12,6 +14,7 @@ type NullableValues<T> = { [K in keyof T]: T[K] | null };
 
 export type LocalPrefs = NullableValues<
   {
+    [key: `schedulePreview-${string}`]: SchedulePreviewOpts;
     firstDayOfWeekIdx: `${0 | 1 | 2 | 3 | 4 | 5 | 6}`;
     dateFormat: string;
     numberFormat: (typeof numberFormats)[number]['value'];

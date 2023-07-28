@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, type ChangeEvent } from 'react';
 import { useSelector } from 'react-redux';
 
 //import * as d from 'date-fns';
@@ -9,189 +9,109 @@ import { colors } from '../../style';
 import { Text, Button, Input, Select } from '../common';
 import { Row } from '../table';
 
-const schedMenuTypes = ['for', 'at the end of'] as const;
-type SchedMenuType = (typeof schedMenuTypes)[number];
+const lengthTypes = ['for', 'at the end of'] as const;
+type MenuLength = (typeof lengthTypes)[number];
 
-const schedMenuIntervals = ['days', 'weeks', 'months'] as const;
-type SchedMenuInterval = (typeof schedMenuIntervals)[number];
+const menuIntervals = ['days', 'weeks', 'months'] as const;
+type MenuInterval = (typeof menuIntervals)[number];
 
-type SchedMenu = {
-  type: SchedMenuType;
+export type SchedulePreviewOpts = {
+  length: MenuLength;
   value: number;
-  interval: SchedMenuInterval;
+  interval: MenuInterval;
 };
 
-const schedCondNames = [
-  // 'for' options
-  'days',
-  'weeks',
-  'months',
-  // 'at the end of' options
-  'endOfWeek',
-  'endOfMonth',
-] as const;
-type SchedCondName = (typeof schedCondNames)[number];
-
-type SchedCond = {
-  name: SchedCondName;
-  value: number;
+const defaultOpts: SchedulePreviewOpts = {
+  length: 'for',
+  value: 7,
+  interval: 'days',
 };
 
-function schedCondToMenu(cond: SchedCond) {
-  let menu: SchedMenu = { type: 'for', value: 7, interval: 'days' };
-  switch (cond.name) {
-    case 'days':
-      menu.type = 'for';
-      menu.value = cond.value;
-      menu.interval = 'days';
-      break;
-    case 'weeks':
-      menu.type = 'for';
-      menu.value = cond.value;
-      menu.interval = 'weeks';
-      break;
-    case 'months':
-      menu.type = 'for';
-      menu.value = cond.value;
-      menu.interval = 'months';
-      break;
-    case 'endOfWeek':
-      menu.type = 'at the end of';
-      menu.value = cond.value;
-      menu.interval = 'weeks';
-      break;
-    case 'endOfMonth':
-      menu.type = 'at the end of';
-      menu.value = cond.value;
-      menu.interval = 'months';
-      break;
-    default:
-      throw new Error('Unknown Schedule Condition name: ' + cond.name);
-  }
-
-  return menu;
-}
-
-function menuToSchedCond(
-  menuType: SchedMenuType,
-  menuInterval: SchedMenuInterval,
-) {
-  let schedCondName: SchedCondName;
-  switch (menuType) {
-    case 'for':
-      // Set value on pref
-      switch (menuInterval) {
-        case 'days':
-          schedCondName = 'days';
-          break;
-        case 'weeks':
-          schedCondName = 'weeks';
-          break;
-        case 'months':
-          schedCondName = 'months';
-          break;
-        default:
-          throw new Error('Unknown interval');
-      }
-      break;
-    case 'at the end of':
-      switch (menuInterval) {
-        case 'days':
-          // 'for' and 'at the end of' are same when using 'days'
-          schedCondName = 'days';
-          break;
-        case 'weeks':
-          schedCondName = 'endOfWeek';
-          break;
-        case 'months':
-          schedCondName = 'endOfMonth';
-          break;
-        default:
-          throw new Error('Unknown interval');
-      }
-      break;
-    default:
-      throw new Error('Unrecognized schedule menu type' + menuType);
-  }
-  return schedCondName;
-}
-
-let defaultSchedCond: SchedCond = { name: 'days', value: 7 };
-
-function schedCondToNextDate(cond: SchedCond) {
+function schedOptsToNextDate(opts: SchedulePreviewOpts) {
   let today = monthUtils.currentDay();
 
   let nextDate = null;
-  switch (cond.name) {
-    case 'days':
-      nextDate = monthUtils.addDays(today, cond.value);
+  switch (opts.length) {
+    case 'for':
+      switch (opts.interval) {
+        case 'days':
+          nextDate = monthUtils.addDays(today, opts.value);
+          break;
+        case 'weeks':
+          nextDate = monthUtils.addDays(today, opts.value * 7);
+          break;
+        case 'months':
+          throw new Error(`Schedule options not implemented: ${opts}`);
+        default:
+          throw new Error(`Unrecognized schedule options: ${opts}`);
+      }
       break;
-    case 'weeks':
-      throw new Error(`Schedule condition not implemented: ${cond}`);
-    case 'endOfWeek':
-      throw new Error(`Schedule condition not implemented: ${cond}`);
-    case 'months':
-      throw new Error(`Schedule condition not implemented: ${cond}`);
-    case 'endOfMonth':
-      throw new Error(`Schedule condition not implemented: ${cond}`);
+    case 'at the end of':
+      switch (opts.interval) {
+        case 'days':
+          nextDate = monthUtils.addDays(today, opts.value);
+          break;
+        case 'weeks':
+          throw new Error(`Schedule options not implemented: ${opts}`);
+          break;
+        case 'months':
+          throw new Error(`Schedule options not implemented: ${opts}`);
+        default:
+          throw new Error(`Unrecognized schedule options: ${opts}`);
+      }
+      break;
     default:
-      throw new Error(`Unrecognized schedule condition: ${cond}`);
+      throw new Error(`Unrecognized schedule options: ${opts}`);
   }
   return nextDate;
 }
 
-export function TransactionPreviewPicker(transaction: unknown) {
+export function TransactionPreviewPicker(accountId) {
+  console.log('TransactionPreviewPicker =============');
+  console.log(accountId);
   const [showSettings, setShowSettings] = useState(false);
   const [hover, setHover] = useState(false);
 
-  let { dateFormat } = useSelector(state => {
-    return {
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    };
+  const dateFormat = useSelector(state => {
+    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
 
-  let { schedCondPref } = useSelector(state => {
-    return {
-      schedCondPref:
-        state.prefs.local[`schedCondPref-${transaction.id}`] ||
-        defaultSchedCond,
-    };
+  const schedulePreviewPref: SchedulePreviewOpts = useSelector(state => {
+    return state.prefs.local[`schedulePreview-${accountId}`] || defaultOpts;
   });
+  console.log('stat.prefs.local' + `schedulePreview-${accountId}`);
+  console.log(schedulePreviewPref);
+  let nextDate = schedOptsToNextDate(schedulePreviewPref);
 
-  console.log(schedCondPref);
-  let nextDate = schedCondToNextDate(schedCondPref);
-  let currentMenu = schedCondToMenu(schedCondPref);
+  function onChange(changeType: string, changeValue) {
+    console.log('handleChange ==========');
+    console.log('handleChange:changeType', changeType);
+    console.log('handleChange:changeValue', changeValue);
 
-  function setSchedCondPref(cond: SchedCond) {}
+    let newPreviewOpts: SchedulePreviewOpts = { ...schedulePreviewPref };
 
-  function handleChange(changeType: string, changeValue) {
-    currentMenu = schedCondToMenu(schedCondPref);
-    console.log(changeType, changeValue);
-    console.log(currentMenu);
+    // Validate inputs
     switch (changeType) {
+      case 'schedMenuType':
+        newPreviewOpts.length = changeValue;
+        break;
       case 'value':
         // Standard positive integer error checking
         // Make sure is a number and >= 0 otherwise set to 1
-        changeValue = Number.isInteger(changeValue)
-          ? changeValue >= 0
-            ? changeValue
-            : 1
-          : 1;
+        changeValue = changeValue >= 0 ? Math.round(changeValue) : 1;
 
         // Set value on pref
-        schedCondPref.value = changeValue;
-        break;
-      case 'schedMenuType':
-        schedCondPref.name = menuToSchedCond(changeValue, currentMenu.interval);
+        newPreviewOpts.value = changeValue;
         break;
       case 'schedMenuInterval':
-        schedCondPref.name = menuToSchedCond(currentMenu.type, changeValue);
+        newPreviewOpts.interval = changeValue;
         break;
       default:
         throw new Error('Unknown menu change type');
     }
-    setSchedCondPref(schedCondPref);
-    currentMenu = schedCondToMenu(schedCondPref);
+
+    // Save to preferences to trigger component updates
+    // ???
   }
 
   function previewRow() {
@@ -206,23 +126,18 @@ export function TransactionPreviewPicker(transaction: unknown) {
           justifyContent: 'center',
         }}
       >
-        {showSettings ? (
-          settingRow()
-        ) : (
-          <>
-            <Text
-              style={{
-                color: colors.n5,
-                fontStyle: 'italic',
-              }}
-            >
-              7 days of scheduled transactions shown (through{' '}
-              {monthUtils.format(nextDate, dateFormat)}{' '}
-              {monthUtils.format(nextDate, 'EEEE')})
-            </Text>{' '}
-            {hover && <Button>Edit</Button>}
-          </>
-        )}
+        <Text
+          style={{
+            color: colors.n5,
+            fontStyle: 'italic',
+          }}
+        >
+          Showing scheduled transactions {schedulePreviewPref.length}{' '}
+          {schedulePreviewPref.value} {schedulePreviewPref.interval}.
+          Transactions shown through {monthUtils.format(nextDate, dateFormat)}{' '}
+          {monthUtils.format(nextDate, 'EEEE')}
+        </Text>{' '}
+        {hover && <Button>Edit</Button>}
       </Row>
     );
   }
@@ -242,14 +157,16 @@ export function TransactionPreviewPicker(transaction: unknown) {
         <Text>Show scheduled transactions</Text>
         <Select
           line={0}
-          value={currentMenu.type}
-          options={schedMenuTypes.map(x => [x, x])}
-          onChange={value => handleChange('schedMenuType', value)}
+          value={schedulePreviewPref.length}
+          options={lengthTypes.map(x => [x, x])}
+          onChange={value => onChange('schedMenuType', value)}
           style={{ padding: 5 }}
         />
         <Input
-          defaultValue={currentMenu.value}
-          onChange={value => handleChange('value', value)}
+          defaultValue={schedulePreviewPref.value}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            onChange('value', e.target.value)
+          }
           style={{
             width: '5em',
             marginLeft: 5,
@@ -258,19 +175,19 @@ export function TransactionPreviewPicker(transaction: unknown) {
         />
         <Select
           line={0}
-          value={currentMenu.interval}
-          options={schedMenuIntervals.map(x => [x, x])}
-          onChange={value => handleChange('schedMenuInterval', value)}
+          value={schedulePreviewPref.interval}
+          options={menuIntervals.map(x => [x, x])}
+          onChange={value => onChange('schedMenuInterval', value)}
           style={{ padding: 5 }}
         />
         <Button
-          primary
+          type="primary"
           onClick={e => {
             e.preventDefault();
             setShowSettings(false);
           }}
         >
-          Apply
+          Done
         </Button>
       </Row>
     );

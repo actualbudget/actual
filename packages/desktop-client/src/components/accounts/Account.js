@@ -101,7 +101,9 @@ function AllTransactions({
     [scheduleData],
   );
 
-  let prependPreviewSetting = [{ id: `previewSetting/${accountId}` }];
+  const fakePreviewSettingTransaction = [
+    { id: `previewSetting`, accountId: accountId },
+  ];
 
   let prependTransactions = useMemo(() => {
     return schedules.map(schedule => ({
@@ -147,10 +149,13 @@ function AllTransactions({
   }, [showBalances, prependTransactions, runningBalance]);
 
   let allTransactions = useMemo(() => {
-    // Don't prepend setting "transaction" or
+    // Don't prepend fake setting "transaction" or
     // scheduled transactions if we are filtering
     if (!filtered && prependTransactions.length > 0) {
-      return prependPreviewSetting.concat(prependTransactions, transactions);
+      return fakePreviewSettingTransaction.concat(
+        prependTransactions,
+        transactions,
+      );
     }
     return transactions;
   }, [filtered, prependTransactions, transactions]);
