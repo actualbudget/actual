@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import * as actions from 'loot-core/src/client/actions';
-
+import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import tokens from '../../tokens';
 import { ExposeNavigate } from '../../util/router-tools';
@@ -47,15 +46,15 @@ function Version() {
   );
 }
 
-function ManagementApp({
-  isLoading,
-  files,
-  userData,
-  managerHasInitialized,
-  setAppState,
-  getUserData,
-  loadAllFiles,
-}) {
+export default function ManagementApp({ isLoading }) {
+  let files = useSelector(state => state.budgets.allFiles);
+  let userData = useSelector(state => state.user.data);
+  let managerHasInitialized = useSelector(
+    state => state.app.managerHasInitialized,
+  );
+
+  let { setAppState, getUserData, loadAllFiles } = useActions();
+
   // runs on mount only
   useEffect(() => {
     // An action may have been triggered from outside, and we don't
@@ -208,14 +207,3 @@ function ManagementApp({
     </BrowserRouter>
   );
 }
-
-export default connect(state => {
-  let { modalStack } = state.modals;
-
-  return {
-    files: state.budgets.allFiles,
-    userData: state.user.data,
-    managerHasInitialized: state.app.managerHasInitialized,
-    currentModals: modalStack.map(modal => modal.name),
-  };
-}, actions)(ManagementApp);

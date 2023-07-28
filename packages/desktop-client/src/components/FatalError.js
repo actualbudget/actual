@@ -179,20 +179,7 @@ function SharedArrayBufferOverride() {
       </Button>
     </>
   ) : (
-    <LinkButton
-      onClick={() => setExpanded(true)}
-      style={{
-        color: `inherit !important`,
-        marginLeft: 5,
-        border: 'none !important',
-        background: 'none !important',
-        padding: '0 !important',
-        textDecoration: 'underline !important',
-        boxShadow: 'none !important',
-        display: 'inline !important',
-        font: 'inherit !important',
-      }}
-    >
+    <LinkButton onClick={() => setExpanded(true)} style={{ marginLeft: 5 }}>
       Advanced options
     </LinkButton>
   );

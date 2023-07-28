@@ -1,12 +1,12 @@
 import React from 'react';
-import { connect } from 'react-redux';
 
-import * as actions from 'loot-core/src/client/actions';
-
+import { useActions } from '../../hooks/useActions';
 import { colors, styles } from '../../style';
 import { View, Button, Text, P, ExternalLink } from '../common';
 
-function WelcomeScreen({ createBudget, pushModal }) {
+export default function WelcomeScreen() {
+  let { createBudget, pushModal } = useActions();
+
   return (
     <View
       style={{
@@ -59,12 +59,10 @@ function WelcomeScreen({ createBudget, pushModal }) {
         }}
       >
         <Button onClick={() => pushModal('import')}>Import my budget</Button>
-        <Button primary onClick={createBudget}>
+        <Button type="primary" onClick={createBudget}>
           Start fresh
         </Button>
       </View>
     </View>
   );
 }
-
-export default connect(null, actions)(WelcomeScreen);

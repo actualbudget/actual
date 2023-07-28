@@ -6,11 +6,9 @@ import React, { Component, memo, PureComponent } from 'react';
 // } from 'react-native-gesture-handler';
 // import Animated, { Easing } from 'react-native-reanimated';
 // import AndroidKeyboardAvoidingView from './AndroidKeyboardAvoidingView';
-import { connect } from 'react-redux';
 
 import memoizeOne from 'memoize-one';
 
-import * as actions from 'loot-core/src/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
@@ -38,7 +36,7 @@ function ToBudget({ toBudget, onClick }) {
   let amount = useSheetValue(toBudget);
   return (
     <Button
-      bare
+      type="bare"
       style={{ flexDirection: 'column', alignItems: 'flex-start' }}
       onClick={onClick}
     >
@@ -994,15 +992,13 @@ export class BudgetTable extends Component {
   }
 }
 
-function UnconnectedBudgetHeader({
+function BudgetHeader({
   currentMonth,
   monthBounds,
   editMode,
   onDone,
   onPrevMonth,
   onNextMonth,
-  sync,
-  localPrefs,
 }) {
   // let [menuOpen, setMenuOpen] = useState(false);
 
@@ -1039,7 +1035,7 @@ function UnconnectedBudgetHeader({
     >
       {!editMode && (
         <Button
-          bare
+          type="bare"
           // hitSlop={{ top: 5, bottom: 5, left: 0, right: 30 }}
 
           onClick={prevEnabled && onPrevMonth}
@@ -1072,7 +1068,7 @@ function UnconnectedBudgetHeader({
       </Text>
       {editMode ? (
         <Button
-          bare
+          type="bare"
           onClick={onDone}
           style={[
             buttonStyle,
@@ -1089,7 +1085,7 @@ function UnconnectedBudgetHeader({
       ) : (
         <>
           <Button
-            bare
+            type="bare"
             onClick={nextEnabled && onNextMonth}
             // hitSlop={{ top: 5, bottom: 5, left: 30, right: 5 }}
             style={[buttonStyle, { opacity: nextEnabled ? 1 : 0.6 }]}
@@ -1112,11 +1108,9 @@ function UnconnectedBudgetHeader({
               paddingLeft: 12,
               paddingRight: 12,
             }}
-            localPrefs={localPrefs}
-            onSync={sync}
           />
           {/* <Button
-            bare
+            type="bare"
             onClick={() => setMenuOpen(true)}
             style={{
               position: 'absolute',
@@ -1155,10 +1149,3 @@ function UnconnectedBudgetHeader({
     </View>
   );
 }
-
-const BudgetHeader = connect(
-  state => ({
-    localPrefs: state.prefs.local,
-  }),
-  actions,
-)(UnconnectedBudgetHeader);

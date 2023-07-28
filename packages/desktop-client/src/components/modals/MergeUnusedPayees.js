@@ -159,10 +159,10 @@ export default function MergeUnusedPayees({
 
             <ModalButtons style={{ marginTop: 20 }} focusButton>
               <Button
-                primary
+                type="primary"
+                isSubmit={false}
                 style={{ marginRight: 10 }}
                 onClick={onMerge}
-                type="button"
               >
                 Merge
               </Button>
@@ -170,7 +170,6 @@ export default function MergeUnusedPayees({
                 <Button
                   style={{ marginRight: 10 }}
                   onClick={onMergeAndCreateRule}
-                  type="button"
                 >
                   Merge and edit rule
                 </Button>
@@ -178,7 +177,6 @@ export default function MergeUnusedPayees({
               <Button
                 style={{ marginRight: 10 }}
                 onClick={() => modalProps.onBack()}
-                type="button"
               >
                 Do nothing
               </Button>

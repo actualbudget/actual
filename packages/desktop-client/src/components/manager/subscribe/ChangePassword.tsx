@@ -83,8 +83,7 @@ export default function ChangePassword() {
       <ConfirmPasswordForm
         buttons={
           <Button
-            bare
-            type="button"
+            type="bare"
             style={{ fontSize: 15, marginRight: 10 }}
             onClick={() => navigate('/')}
           >

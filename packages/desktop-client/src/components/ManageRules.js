@@ -775,7 +775,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
                 Delete {selectedInst.items.size} rules
               </Button>
             )}
-            <Button primary onClick={onCreateRule}>
+            <Button type="primary" onClick={onCreateRule}>
               Create new rule
             </Button>
           </Stack>

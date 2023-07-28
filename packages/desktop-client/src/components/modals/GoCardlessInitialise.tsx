@@ -90,7 +90,11 @@ const GoCardlessInitialise = ({
       </View>
 
       <ModalButtons>
-        <ButtonWithLoading loading={isLoading} primary onClick={onSubmit}>
+        <ButtonWithLoading
+          type="primary"
+          loading={isLoading}
+          onClick={onSubmit}
+        >
           Save and continue
         </ButtonWithLoading>
       </ModalButtons>

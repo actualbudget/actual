@@ -363,7 +363,7 @@ const TransactionHeader = memo(
           }
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
-        {showCleared && <Field width={30} truncate={false} />}
+        {showCleared && <Field width={23} truncate={false} />}
         <Cell value="" width={5 + scrollWidth ?? 0} />
       </Row>
     );
@@ -490,7 +490,7 @@ function HeaderCell({
       alignItems={alignItems}
       unexposedContent={
         <Button
-          bare
+          type="bare"
           onClick={onClick}
           style={{
             whiteSpace: 'nowrap',
@@ -644,7 +644,7 @@ function PayeeIcons({
 
   return schedule ? (
     <Button
-      bare
+      type="bare"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();
@@ -659,7 +659,7 @@ function PayeeIcons({
     </Button>
   ) : transferAccount ? (
     <Button
-      bare
+      type="bare"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();
@@ -1276,8 +1276,8 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
             </Text>
             <View style={{ flex: 1 }} />
             <Button
+              type="primary"
               style={{ marginLeft: 15, padding: '4px 10px' }}
-              primary
               onClick={onAddSplit}
             >
               Add Split
@@ -1416,8 +1416,8 @@ function NewTransaction({
           />
         ) : (
           <Button
+            type="primary"
             style={{ padding: '4px 10px' }}
-            primary
             onClick={onAdd}
             data-testid="add-button"
           >

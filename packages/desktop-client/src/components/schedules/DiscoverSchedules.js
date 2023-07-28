@@ -173,7 +173,7 @@ export default function DiscoverSchedules({ modalProps, actions }) {
         }}
       >
         <ButtonWithLoading
-          primary
+          type="primary"
           loading={creating}
           disabled={selectedInst.items.size === 0}
           onClick={onCreate}

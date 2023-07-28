@@ -667,7 +667,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Button
-                bare
+                type="bare"
                 style={{
                   color:
                     state.transactionsMode === 'linked' ? colors.b4 : colors.n7,
@@ -679,7 +679,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
                 Linked transactions
               </Button>{' '}
               <Button
-                bare
+                type="bare"
                 style={{
                   color:
                     state.transactionsMode === 'matched'
@@ -753,7 +753,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         <Button style={{ marginRight: 10 }} onClick={actions.popModal}>
           Cancel
         </Button>
-        <Button primary onClick={onSave}>
+        <Button type="primary" onClick={onSave}>
           {adding ? 'Add' : 'Save'}
         </Button>
       </Stack>

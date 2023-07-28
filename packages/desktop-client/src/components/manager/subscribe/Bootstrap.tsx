@@ -82,7 +82,7 @@ export default function Bootstrap() {
       <ConfirmPasswordForm
         buttons={
           <Button
-            bare
+            type="bare"
             style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
             onClick={onDemo}
           >

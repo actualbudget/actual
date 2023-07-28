@@ -118,7 +118,7 @@ function EditorButtons({ onAdd, onDelete, style }) {
     <>
       {onDelete && (
         <Button
-          bare
+          type="bare"
           onClick={onDelete}
           style={{ padding: 7 }}
           aria-label="Delete entry"
@@ -128,7 +128,7 @@ function EditorButtons({ onAdd, onDelete, style }) {
       )}
       {onAdd && (
         <Button
-          bare
+          type="bare"
           onClick={onAdd}
           style={{ padding: 7 }}
           aria-label="Add entry"
@@ -380,7 +380,7 @@ function StageInfo() {
 function StageButton({ selected, children, style, onSelect }) {
   return (
     <Button
-      bare
+      type="bare"
       style={[
         { fontSize: 'inherit' },
         selected && {
@@ -898,7 +898,7 @@ export default function EditRule({
                 style={{ marginTop: 20 }}
               >
                 <Button onClick={() => modalProps.onClose()}>Cancel</Button>
-                <Button primary onClick={() => onSave()}>
+                <Button type="primary" onClick={() => onSave()}>
                   Save
                 </Button>
               </Stack>

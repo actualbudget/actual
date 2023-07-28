@@ -52,7 +52,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
         <View style={{ maxWidth: 500, gap: 30 }}>
           <View style={{ gap: 10 }}>
             <Button
-              primary
+              type="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,

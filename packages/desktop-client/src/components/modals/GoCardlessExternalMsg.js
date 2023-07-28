@@ -198,7 +198,7 @@ export default function GoCardlessExternalMsg({
 
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Button
-            primary
+            type="primary"
             style={{
               padding: '10px 0',
               fontSize: 15,
@@ -210,7 +210,11 @@ export default function GoCardlessExternalMsg({
           >
             Link bank in browser &rarr;
           </Button>
-          <Button bare onClick={() => setMenuOpen(true)} aria-label="Menu">
+          <Button
+            type="bare"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Menu"
+          >
             <DotsHorizontalTriple
               width={15}
               height={15}
@@ -285,7 +289,7 @@ export default function GoCardlessExternalMsg({
             </View>
           ) : success ? (
             <Button
-              primary
+              type="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,
@@ -305,7 +309,7 @@ export default function GoCardlessExternalMsg({
               <P style={{ color: colors.r5 }}>
                 GoCardless integration has not yet been configured.
               </P>
-              <Button primary onClick={onGoCardlessInit}>
+              <Button type="primary" onClick={onGoCardlessInit}>
                 Configure GoCardless integration
               </Button>
             </>

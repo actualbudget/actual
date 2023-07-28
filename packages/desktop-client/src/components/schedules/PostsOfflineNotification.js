@@ -65,7 +65,7 @@ export default function PostsOfflineNotification({ modalProps, actions }) {
         spacing={2}
       >
         <Button onClick={actions.popModal}>Decide later</Button>
-        <Button primary onClick={onPost}>
+        <Button type="primary" onClick={onPost}>
           Post transactions
         </Button>
       </Stack>
