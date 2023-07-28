@@ -33,7 +33,7 @@ repeat 'repeat interval'
 limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
         / _? upTo _ amount: amount { return {amount: amount, hold: false } }
 
-percentOf = percent:percent _ of _ 'prev'i _ { return { percent: percent, prev: true} }
+percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true} }
 		/ percent:percent _ of _ { return { percent: percent, prev: false} }
 
 weekCount
