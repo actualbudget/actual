@@ -1297,6 +1297,9 @@ class AccountInternal extends PureComponent {
                       </View>
                     ) : null
                   }
+                  onSort={this.onSort}
+                  sortField={this.state.sort.field}
+                  ascDesc={this.state.sort.ascDesc}
                   onChange={this.onTransactionsChange}
                   onRefetch={this.refetchTransactions}
                   onRefetchUpToRow={row =>
