@@ -45,7 +45,7 @@ function getScrollbarWidth() {
   return Math.max(styles.scrollbarWidth - 2, 0);
 }
 
-class BudgetTable extends Component {
+export class BudgetTable extends Component {
   constructor(props) {
     super(props);
     this.budgetCategoriesRef = createRef();
@@ -314,15 +314,6 @@ class BudgetTable extends Component {
     );
   }
 }
-
-const connected = connect(
-  state => ({
-    prefs: state.prefs.local,
-  }),
-  dispatch => bindActionCreators(actions, dispatch),
-  null,
-  { forwardRef: true },
-)(BudgetTable);
 
 export { connected as BudgetTable };
 

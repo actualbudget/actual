@@ -1,5 +1,7 @@
 import React, { forwardRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import { useActions } from '../../hooks/useActions';
 
 import { View } from '../common';
 
@@ -41,7 +43,9 @@ const DynamicBudgetTableInner = forwardRef(
     },
     ref,
   ) => {
+    let prefs = useSelector(state => state.prefs.local);
     let { setDisplayMax } = useBudgetMonthCount();
+    let actions = useActions();
 
     let numPossible = getNumPossibleMonths(width);
     let numMonths = Math.min(numPossible, maxMonths);
@@ -79,6 +83,8 @@ const DynamicBudgetTableInner = forwardRef(
               startMonth={startMonth}
               numMonths={numMonths}
               monthBounds={monthBounds}
+              prefs={prefs}
+              {...actions}
               {...props}
             />
           </View>
