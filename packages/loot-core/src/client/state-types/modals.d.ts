@@ -72,8 +72,8 @@ type FinanceModals = {
 
   'create-encryption-key': { recreate?: boolean };
   'fix-encryption-key': {
-    hasExistingKey: boolean;
-    cloudFileId: string;
+    hasExistingKey?: boolean;
+    cloudFileId?: string;
     onSuccess?: () => void;
   };
 
