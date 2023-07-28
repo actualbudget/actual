@@ -1,16 +1,19 @@
 import type { AccountEntity } from '../../types/models';
 import type { RuleEntity } from '../../types/models/rule';
+import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
 
-export type Modal = {
-  [K in keyof FinanceModals]: {
-    name: K;
-    options: FinanceModals[K];
-  };
-}[keyof FinanceModals];
+export type ModalType = keyof FinanceModals;
 
-export type OptionlessModal = keyof (FinanceModals &
-  Record<keyof FinanceModals, null>);
+export type OptionlessModal = {
+  [K in ModalType]: EmptyObject extends FinanceModals[K] ? K : never;
+}[ModalType];
+
+export type ModalWithOptions = StripNever<{
+  [K in ModalType]: keyof FinanceModals[K] extends never
+    ? never
+    : FinanceModals[K];
+}>;
 
 // There is a separate (overlapping!) set of modals for the management app. Fun!
 type FinanceModals = {
@@ -20,8 +23,8 @@ type FinanceModals = {
     onImported: (didChange: boolean) => void;
   };
 
-  'add-account': null;
-  'add-local-account': null;
+  'add-account': EmptyObject;
+  'add-local-account': EmptyObject;
   'close-account': {
     account: AccountEntity;
     balance: number;
@@ -32,16 +35,15 @@ type FinanceModals = {
     requisitionId: string;
     upgradingAccountId: string;
   };
-  'configure-linked-accounts': never;
 
   'confirm-category-delete': { onDelete: () => void } & (
     | { category: string }
     | { group: string }
   );
 
-  'load-backup': null;
+  'load-backup': EmptyObject;
 
-  'manage-rules': { payeeId: string } | null;
+  'manage-rules': { payeeId?: string };
   'edit-rule': {
     rule: RuleEntity;
     onSave: (rule: RuleEntity) => void;
@@ -68,7 +70,7 @@ type FinanceModals = {
     onSuccess: (data: unknown) => Promise<void>;
   };
 
-  'create-encryption-key': { recreate: boolean } | null;
+  'create-encryption-key': { recreate?: boolean };
   'fix-encryption-key': {
     hasExistingKey: boolean;
     cloudFileId: string;

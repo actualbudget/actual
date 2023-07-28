@@ -1,35 +1,37 @@
 import * as constants from '../constants';
 import type {
-  Modal,
   OptionlessModal,
   CloseModalAction,
   PopModalAction,
   PushModalAction,
   ReplaceModalAction,
+  ModalWithOptions,
+  ModalType,
+  FinanceModals,
 } from '../state-types/modals';
 
-export function pushModal(name: OptionlessModal): PushModalAction;
-export function pushModal<M extends Modal>(
-  name: M['name'],
-  options: M['options'],
+export function pushModal<M extends keyof ModalWithOptions>(
+  name: M,
+  options: ModalWithOptions[M],
 ): PushModalAction;
-export function pushModal<M extends Modal>(
-  name: M['name'],
-  options?: M['options'],
+export function pushModal(name: OptionlessModal): PushModalAction;
+export function pushModal<M extends ModalType>(
+  name: M,
+  options?: FinanceModals[M],
 ): PushModalAction {
   // @ts-expect-error TS is unable to determine that `name` and `options` match
   let modal: M = { name, options };
   return { type: constants.PUSH_MODAL, modal };
 }
 
-export function pushModal(name: OptionlessModal): ReplaceModalAction;
-export function replaceModal<M extends Modal>(
-  name: M['name'],
-  options: M['options'],
+export function replaceModal<M extends keyof ModalWithOptions>(
+  name: M,
+  options: ModalWithOptions[M],
 ): ReplaceModalAction;
-export function replaceModal<M extends Modal>(
-  name: M['name'],
-  options?: M['options'],
+export function replaceModal(name: OptionlessModal): ReplaceModalAction;
+export function replaceModal<M extends ModalType>(
+  name: M,
+  options?: FinanceModals[M],
 ): ReplaceModalAction {
   // @ts-expect-error TS is unable to determine that `name` and `options` match
   let modal: M = { name, options };
