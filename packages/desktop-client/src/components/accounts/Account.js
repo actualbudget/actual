@@ -1047,12 +1047,12 @@ class AccountInternal extends PureComponent {
         },
         () => {
           this.fetchTransactions();
-
-          if (this.state.sort.length !== 0) {
-            this.applySort();
-          }
         },
       );
+    }
+
+    if (this.state.sort.length !== 0) {
+      this.applySort();
     }
   };
 
@@ -1217,6 +1217,7 @@ class AccountInternal extends PureComponent {
                 showEmptyMessage={showEmptyMessage}
                 balanceQuery={balanceQuery}
                 canCalculateBalance={this.canCalculateBalance}
+                isSorted={this.state.sort.length !== 0}
                 reconcileAmount={reconcileAmount}
                 search={this.state.search}
                 filters={this.state.filters}
@@ -1265,7 +1266,7 @@ class AccountInternal extends PureComponent {
                   categoryGroups={categoryGroups}
                   payees={payees}
                   balances={allBalances}
-                  showBalances={showBalances}
+                  showBalances={!!allBalances}
                   showCleared={showCleared}
                   showAccount={
                     !accountId ||
@@ -1297,6 +1298,9 @@ class AccountInternal extends PureComponent {
                       </View>
                     ) : null
                   }
+                  onSort={this.onSort}
+                  sortField={this.state.sort.field}
+                  ascDesc={this.state.sort.ascDesc}
                   onChange={this.onTransactionsChange}
                   onRefetch={this.refetchTransactions}
                   onRefetchUpToRow={row =>
