@@ -246,7 +246,6 @@ export default function Accounts() {
   useEffect(() => {
     (async () => {
       if (categories.length === 0) {
-        debugger;
         await getCategories();
       }
 
