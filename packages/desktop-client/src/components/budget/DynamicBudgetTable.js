@@ -1,8 +1,8 @@
 import React, { forwardRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { useActions } from '../../hooks/useActions';
 
+import { useActions } from '../../hooks/useActions';
 import { View } from '../common';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';

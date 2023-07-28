@@ -5,7 +5,7 @@ import * as constants from '../constants';
 
 import { pushModal } from './modals';
 import { addNotification, addGenericErrorNotification } from './notifications';
-import { Dispatch, GetState } from './types';
+import type { Dispatch, GetState } from './types';
 
 export function applyBudgetAction(month, type, args) {
   return async (dispatch: Dispatch) => {

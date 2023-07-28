@@ -6,11 +6,7 @@ import React, {
   useState,
   useMemo,
 } from 'react';
-import { connect } from 'react-redux';
 
-import { bindActionCreators } from 'redux';
-
-import * as actions from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
@@ -314,8 +310,6 @@ export class BudgetTable extends Component {
     );
   }
 }
-
-export { connected as BudgetTable };
 
 function SidebarCategory({
   innerRef,
