@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 
+import { useActions } from '../../hooks/useActions';
 import { colors } from '../../style';
 import { Information } from '../alerts';
 import { View, Text, Button } from '../common';
 
 import { Setting } from './UI';
 
-export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
+export default function GlobalSettings() {
+  let documentDir = useSelector(state => state.prefs.global.documentDir);
+  let { saveGlobalPrefs } = useActions();
+
   let [documentDirChanged, setDirChanged] = useState(false);
   let dirScrolled = useRef(null);
 
@@ -57,7 +62,7 @@ export default function GlobalSettings({ globalPrefs, saveGlobalPrefs }) {
           '::-webkit-scrollbar': { display: 'none' },
         }}
       >
-        {globalPrefs.documentDir}
+        {documentDir}
       </Text>
     </Setting>
   );

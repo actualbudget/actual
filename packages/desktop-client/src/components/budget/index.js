@@ -1,8 +1,7 @@
 import React, { memo, PureComponent, useContext, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
-import * as actions from 'loot-core/src/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
@@ -17,6 +16,7 @@ import {
 } from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { styles } from '../../style';
 import { View } from '../common';
@@ -523,7 +523,21 @@ const RolloverBudgetSummary = memo(props => {
   );
 });
 
-function BudgetWrapper(props) {
+export default function BudgetWrapper(props) {
+  let startMonth = useSelector(state => state.prefs.local['budget.startMonth']);
+  let collapsedPrefs = useSelector(
+    state => state.prefs.local['budget.collapsed'],
+  );
+  let summaryCollapsed = useSelector(
+    state => state.prefs.local['budget.summaryCollapsed'],
+  );
+  let budgetType = useSelector(
+    state => state.prefs.local.budgetType || 'rollover',
+  );
+  let maxMonths = useSelector(state => state.prefs.global.maxMonths);
+  let categoryGroups = useSelector(state => state.queries.categories.grouped);
+
+  let actions = useActions();
   let spreadsheet = useSpreadsheet();
   let titlebar = useContext(TitlebarContext);
   let location = useLocation();
@@ -568,7 +582,13 @@ function BudgetWrapper(props) {
       ]}
     >
       <Budget
-        {...props}
+        startMonth={startMonth}
+        collapsedPrefs={collapsedPrefs}
+        summaryCollapsed={summaryCollapsed}
+        budgetType={budgetType}
+        maxMonths={maxMonths}
+        categoryGroups={categoryGroups}
+        {...actions}
         reportComponents={reportComponents}
         rolloverComponents={rolloverComponents}
         spreadsheet={spreadsheet}
@@ -579,15 +599,3 @@ function BudgetWrapper(props) {
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    startMonth: state.prefs.local['budget.startMonth'],
-    collapsedPrefs: state.prefs.local['budget.collapsed'],
-    summaryCollapsed: state.prefs.local['budget.summaryCollapsed'],
-    budgetType: state.prefs.local.budgetType || 'rollover',
-    maxMonths: state.prefs.global.maxMonths,
-    categoryGroups: state.queries.categories.grouped,
-  }),
-  actions,
-)(BudgetWrapper);
