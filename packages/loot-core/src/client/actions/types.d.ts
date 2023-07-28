@@ -1,7 +1,6 @@
 import type { ThunkDispatch } from 'redux-thunk';
 
-import type { Action, State } from '../state-types';
+import type { State, Action } from '../state-types';
 
-export type ActionResult = Parameters<
-  ThunkDispatch<State, Record<string, never>, Action>
->[0];
+export type Dispatch = ThunkDispatch<State, never, Action>;
+export type GetState = () => State;

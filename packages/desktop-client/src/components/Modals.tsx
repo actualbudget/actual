@@ -204,7 +204,6 @@ export default function Modals() {
             <EditField
               key={name}
               modalProps={modalProps}
-              actions={actions}
               name={options.name}
               onSubmit={options.onSubmit}
             />
