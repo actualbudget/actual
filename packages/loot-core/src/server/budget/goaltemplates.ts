@@ -191,7 +191,10 @@ async function processTemplate(month, force, category_templates) {
                   ].join('\n'),
                 ),
             );
-            let prev_budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
+            let prev_budgeted = await getSheetValue(
+              sheetName,
+              `budget-${category.id}`,
+            );
             let { amount: to_budget, errors: applyErrors } =
               await applyCategoryTemplate(
                 category,
@@ -208,7 +211,7 @@ async function processTemplate(month, force, category_templates) {
               num_applied++;
               templateBudget.push({
                 category: category.id,
-                amount: to_budget+prev_budgeted,
+                amount: to_budget + prev_budgeted,
               });
               available_remaining -= to_budget;
             }
@@ -380,7 +383,6 @@ async function applyCategoryTemplate(
     });
   }
   let sheetName = monthUtils.sheetForMonth(month);
-  //let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
   let to_budget = 0;
