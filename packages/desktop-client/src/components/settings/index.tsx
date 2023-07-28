@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { media } from 'glamor';
@@ -75,7 +75,7 @@ function About() {
   );
 }
 
-function IDName({ children }) {
+function IDName({ children }: { children: ReactNode }) {
   return <Text style={{ fontWeight: 500 }}>{children}</Text>;
 }
 
