@@ -9,7 +9,7 @@ import {
   isElectron,
 } from 'loot-core/src/shared/environment';
 
-import { useSetThemeColor } from '../../hooks';
+import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors } from '../../style';
 import { View, Text, Button, ButtonWithLoading } from '../common';
 import { useServerURL, useSetServerURL } from '../ServerContext';

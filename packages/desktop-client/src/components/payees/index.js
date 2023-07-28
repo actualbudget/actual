@@ -338,7 +338,6 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
 export const ManagePayees = forwardRef(
   (
     {
-      modalProps,
       payees,
       ruleCounts,
       orphanedPayees,

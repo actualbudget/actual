@@ -1,12 +1,15 @@
 import React from 'react';
 
+import { useActions } from '../../hooks/useActions';
 import { themeNames, useTheme } from '../../style';
 import { Button, Select, Text } from '../common';
 
 import { Setting } from './UI';
 
-export default function ThemeSettings({ saveGlobalPrefs }) {
+export default function ThemeSettings() {
   let theme = useTheme();
+  let { saveGlobalPrefs } = useActions();
+
   return (
     <Setting
       primaryAction={

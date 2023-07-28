@@ -1,20 +1,25 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
+import { useActions } from '../../hooks/useActions';
 import { colors } from '../../style';
 import { Text, Button, ExternalLink } from '../common';
 import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
 
-export default function EncryptionSettings({ prefs, pushModal }) {
+export default function EncryptionSettings() {
+  const { pushModal } = useActions();
   const serverURL = useServerURL();
+  const encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);
+
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
 
   function onChangeKey() {
     pushModal('create-encryption-key', { recreate: true });
   }
 
-  return prefs.encryptKeyId ? (
+  return encryptKeyId ? (
     <Setting
       primaryAction={<Button onClick={onChangeKey}>Generate new key</Button>}
     >

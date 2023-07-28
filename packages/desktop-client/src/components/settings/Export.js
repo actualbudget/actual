@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 import { format } from 'date-fns';
 
@@ -8,12 +9,15 @@ import { Text, Button } from '../common';
 
 import { Setting } from './UI';
 
-export default function ExportBudget({ prefs }) {
+export default function ExportBudget() {
+  let budgetId = useSelector(state => state.prefs.local.budgetId);
+  let encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);
+
   async function onExport() {
     let data = await send('export-budget');
     window.Actual.saveFile(
       data,
-      `${format(new Date(), 'yyyy-MM-dd')}-${prefs.id}.zip`,
+      `${format(new Date(), 'yyyy-MM-dd')}-${budgetId}.zip`,
       'Export budget',
     );
   }
@@ -26,7 +30,7 @@ export default function ExportBudget({ prefs }) {
         imported into another Actual instance by closing an open file (if any),
         then clicking the “Import file” button, then choosing “Actual.”
       </Text>
-      {prefs.encryptKeyId ? (
+      {encryptKeyId ? (
         <Text>
           Even though encryption is enabled, the exported zip file will not have
           any encryption.

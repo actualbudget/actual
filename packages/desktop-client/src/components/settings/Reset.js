@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useActions } from '../../hooks/useActions';
 import { Text, ButtonWithLoading } from '../common';
 
 import { Setting } from './UI';
@@ -34,7 +36,10 @@ export function ResetCache() {
   );
 }
 
-export function ResetSync({ isEnabled, resetSync }) {
+export function ResetSync() {
+  let isEnabled = useSelector(state => !!state.prefs.local.groupId);
+  let { resetSync } = useActions();
+
   let [resetting, setResetting] = useState(false);
 
   async function onResetSync() {
