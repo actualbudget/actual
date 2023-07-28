@@ -1,7 +1,9 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 import { numberFormats } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../hooks/useActions';
 import tokens from '../../tokens';
 import { Button, Select, Text, View } from '../common';
 import { useSidebar } from '../FloatableSidebar';
@@ -45,7 +47,9 @@ function Column({ title, children }) {
   );
 }
 
-export default function FormatSettings({ prefs, savePrefs }) {
+export default function FormatSettings() {
+  let { savePrefs } = useActions();
+
   function onFirstDayOfWeek(idx) {
     savePrefs({ firstDayOfWeekIdx: idx });
   }
@@ -64,9 +68,16 @@ export default function FormatSettings({ prefs, savePrefs }) {
   }
 
   let sidebar = useSidebar();
-  let firstDayOfWeekIdx = prefs.firstDayOfWeekIdx || '0'; // Sunday
-  let dateFormat = prefs.dateFormat || 'MM/dd/yyyy';
-  let numberFormat = prefs.numberFormat || 'comma-dot';
+  let firstDayOfWeekIdx = useSelector(
+    state => state.prefs.local.firstDayOfWeekIdx || '0', // Sunday
+  );
+  let dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
+  let numberFormat = useSelector(
+    state => state.prefs.local.numberFormat || 'comma-dot',
+  );
+  let hideFraction = useSelector(state => state.prefs.local.hideFraction);
 
   return (
     <Setting
@@ -88,12 +99,12 @@ export default function FormatSettings({ prefs, savePrefs }) {
           <Column title="Numbers">
             <Button bounce={false} style={{ padding: 0 }}>
               <Select
-                key={prefs.hideFraction} // needed because label does not update
+                key={hideFraction} // needed because label does not update
                 value={numberFormat}
                 onChange={onNumberFormat}
                 options={numberFormats.map(f => [
                   f.value,
-                  prefs.hideFraction ? f.labelNoFraction : f.label,
+                  hideFraction ? f.labelNoFraction : f.label,
                 ])}
                 style={{ padding: '2px 10px', fontSize: 15 }}
               />
@@ -102,7 +113,7 @@ export default function FormatSettings({ prefs, savePrefs }) {
             <Text style={{ display: 'flex' }}>
               <Checkbox
                 id="settings-textDecimal"
-                checked={!!prefs.hideFraction}
+                checked={!!hideFraction}
                 onChange={onHideFraction}
               />
               <label htmlFor="settings-textDecimal">Hide decimal places</label>

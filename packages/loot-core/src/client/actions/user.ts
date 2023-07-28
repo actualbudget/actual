@@ -3,9 +3,10 @@ import * as constants from '../constants';
 
 import { loadAllFiles, closeBudget } from './budgets';
 import { loadGlobalPrefs } from './prefs';
+import type { Dispatch } from './types';
 
 export function getUserData() {
-  return async dispatch => {
+  return async (dispatch: Dispatch) => {
     const data = await send('subscribe-get-user');
 
     dispatch({
@@ -17,7 +18,7 @@ export function getUserData() {
 }
 
 export function loggedIn() {
-  return async dispatch => {
+  return async (dispatch: Dispatch) => {
     await dispatch(getUserData());
 
     // We want to be careful about how we call loadAllFiles. It will
@@ -39,7 +40,7 @@ export function loggedIn() {
 }
 
 export function signOut() {
-  return async dispatch => {
+  return async (dispatch: Dispatch) => {
     await send('subscribe-sign-out');
 
     dispatch(getUserData());

@@ -144,7 +144,7 @@ async function processTemplate(month, force, category_templates) {
     let remainder_scale = 1;
     if (priority === lowestPriority) {
       let available_now = await getSheetValue(sheetName, `to-budget`);
-      remainder_scale = Math.round(available_now / remainder_weight_total);
+      remainder_scale = available_now / remainder_weight_total;
     }
 
     for (let c = 0; c < categories.length; c++) {
@@ -693,6 +693,9 @@ async function applyCategoryTemplate(
           // can over budget with the rounding, so checking that
           if (to_budget >= budgetAvailable + budgeted) {
             to_budget = budgetAvailable + budgeted;
+            // check if there is 1 cent leftover from rounding
+          } else if (budgetAvailable - to_budget === 1) {
+            to_budget = to_budget + 1;
           }
         }
         break;
