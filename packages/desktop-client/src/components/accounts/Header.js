@@ -241,7 +241,7 @@ export function AccountHeader({
           </View>
           <View style={{ flex: 1 }} />
           <InputWithContent
-            style={{  width: 250, flex: '' }}
+            style={{ width: 250, flex: '' }}
             leftContent={
               <SearchAlternate
                 style={{
@@ -267,6 +267,12 @@ export function AccountHeader({
               )
             }
             inputRef={searchInput}
+            inputStyle={{
+              '::placeholder': {
+                color: theme.formInputTextPlaceholder,
+                transition: 'color .25s',
+              },
+            }}
             value={search}
             placeholder="Search"
             onKeyDown={e => {
@@ -278,13 +284,12 @@ export function AccountHeader({
                 borderWidth: 0,
                 boxShadow: 'none',
                 transition: 'color .15s',
-                '& input::placeholder': {
-                  color: theme.formInputTextPlaceholder,
-                  transition: 'color .25s',
-                },
               },
-              focused && { boxShadow: '0 0 0 2px ' + theme.formInputBorderSelected },
-              !focused && search !== '' && { color: theme.formInputTextHighlight },
+              focused && {
+                boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
+              },
+              !focused &&
+                search !== '' && { color: theme.formInputTextHighlight },
             ]}
             onChange={e => onSearch(e.target.value)}
           />

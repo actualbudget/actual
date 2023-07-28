@@ -23,7 +23,7 @@ import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colors } from '../../style';
+import { colors, theme } from '../../style';
 import {
   useStableCallback,
   View,
@@ -544,11 +544,8 @@ export const ManagePayees = forwardRef(
             style={{
               width: 350,
               borderColor: 'transparent',
-              backgroundColor: colors.n11,
-              ':focus': {
-                backgroundColor: 'white',
-                '::placeholder': { color: colors.n8 },
-              },
+              color: 'inherit',
+              backgroundColor: theme.formInputBackground,
             }}
           />
         </View>

@@ -1,6 +1,6 @@
 import { type ChangeEvent, type Ref } from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 
 import Input from './Input';
 
@@ -30,13 +30,8 @@ export default function Search({
       style={{
         width,
         borderColor: isInModal ? null : 'transparent',
-        backgroundColor: isInModal ? null : colors.n11,
-        ':focus': isInModal
-          ? null
-          : {
-              backgroundColor: 'white',
-              '::placeholder': { color: colors.n8 },
-            },
+        backgroundColor: isInModal ? null : theme.formInputBackground,
+        color: 'inherit',
       }}
     />
   );
