@@ -9,7 +9,7 @@ import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
 import Pencil1 from '../../icons/v2/Pencil1';
 import SvgRemove from '../../icons/v2/Remove';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
-import { styles, colors } from '../../style';
+import { styles, colors, theme } from '../../style';
 import AnimatedRefresh from '../AnimatedRefresh';
 import {
   View,
@@ -239,7 +239,9 @@ export function AccountHeader({
           <View>
             <FilterButton onApply={onApplyFilter} />
           </View>
+          <View style={{ flex: 1 }} />
           <InputWithContent
+            style={{  width: 250, flex: '' }}
             leftContent={
               <SearchAlternate
                 style={{
@@ -272,17 +274,17 @@ export function AccountHeader({
             }}
             getStyle={focused => [
               {
-                backgroundColor: 'transparent',
+                backgroundColor: theme.formInputBackground,
                 borderWidth: 0,
                 boxShadow: 'none',
                 transition: 'color .15s',
                 '& input::placeholder': {
-                  color: colors.n1,
+                  color: theme.formInputTextPlaceholder,
                   transition: 'color .25s',
                 },
               },
-              focused && { boxShadow: '0 0 0 2px ' + colors.b5 },
-              !focused && search !== '' && { color: colors.p4 },
+              focused && { boxShadow: '0 0 0 2px ' + theme.formInputBorderSelected },
+              !focused && search !== '' && { color: theme.formInputTextHighlight },
             ]}
             onChange={e => onSearch(e.target.value)}
           />
