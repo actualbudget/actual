@@ -74,6 +74,6 @@ export function syncAndDownload(accountId) {
       // updates
       return true;
     }
-    return { hasUpdated: hasDownloaded || syncState.updated };
+    return { hasUpdated: hasDownloaded };
   };
 }
