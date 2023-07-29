@@ -16,7 +16,7 @@ You are welcome to have other lines in your note, but the #template line must ma
 ## How to use the templates
 
 <!-- prettier-ignore -->
-|Syntax|Description|Application|
+|Syntax|Description|Example Application|
 |---|---|---|
 |#template $50|Budget $50 each month|Regular monthly bills, such as internet|
 |#template up to $150|Budget up to $150 each month, and remove extra funds over $150|Variable expenses, such as petrol and groceries|
@@ -35,7 +35,9 @@ You are welcome to have other lines in your note, but the #template line must ma
 |#template $10 repeat every 9 weeks starting 2022-01-04 up to 30|Budget $10 every 9 weeks, up to a maximum of $30|
 |#template 15% of all income|Budget 15% of all income categories| Using a "pay yourself first" strategy|
 |#template 10% of Paycheck|Budget 10% of the "Paycheck" income category| Using a "pay yourself first" strategy, but have income categories you want to ignore|
-|#template 12% of available funds|Budget 12% of funds available for that month|Using a "pay yourself first" strategy in conjunction with a "month ahead" strategy |
+|#template 15% of previous all income|Budget 15% of all income categories using last month's income|Using a "pay yourself first" strategy in conjunction with a "month ahead" strategy |
+|#template 10% of previous Paycheck|Budget 10% of last month's "Paycheck" income category| Using a "pay yourself first" strategy in conjunction with a "month ahead" strategy, but have income categories you want to ignore|
+|#template 12% of available funds|Budget 12% of your "To Budget" funds| |
 |#template schedule {SCHEDULE NAME}|Fund upcoming scheduled transactions over time|Monthly schedules, or larger non-monthly scheduled transactions|
 |#template schedule full {SCHEDULE NAME}|Fund upcoming scheduled transaction only on needed month| Small schedules that are non-monthly|
 |#template remainder | Add all remaining funds to this category| See the [Remainder Template](#remainder-template) Section for info |
@@ -50,7 +52,7 @@ You are welcome to have other lines in your note, but the #template line must ma
 - By default templates do not consider available funds when being applied. Use template priorities to not budget more than is available.
 - The `hold` flag can be added to any goal that uses the `up to` key word.
 - A single category with two templates that use `up to` is not supported.
-- If multiple templates with the same priority and are in the same category and one template uses the `up to` key word, both templates will be limited to the maximum amount specified by `up to`.
+- If in a category there are multiple templates within the same priority level and one template uses the `up to` key word, all templates in that priority level will be limited to the maximum amount specified by `up to`.
 
 ### Multiple Template Lines
 
