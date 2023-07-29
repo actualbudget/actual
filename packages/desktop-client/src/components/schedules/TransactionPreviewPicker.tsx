@@ -42,6 +42,7 @@ function schedOptsToNextDate(opts: SchedulePreviewOpts) {
           nextDate = monthUtils.addDays(today, opts.value * 7);
           break;
         case 'months':
+          // See find-schedules.ts for examples
           nextDate = monthUtils.addDays(today, defaultOpts.value);
           console.log(`Schedule options not implemented: ${opts}`);
           break;
@@ -55,10 +56,12 @@ function schedOptsToNextDate(opts: SchedulePreviewOpts) {
           nextDate = monthUtils.addDays(today, opts.value);
           break;
         case 'weeks':
+          // See find-schedules.ts for examples
           nextDate = monthUtils.addDays(today, defaultOpts.value);
           console.log(`Schedule options not implemented: ${opts}`);
           break;
         case 'months':
+          // See find-schedules.ts for examples
           nextDate = monthUtils.addDays(today, defaultOpts.value);
           console.log(`Schedule options not implemented: ${opts}`);
           break;
@@ -161,7 +164,11 @@ export function TransactionPreviewPicker(transaction) {
           value={schedulePreviewPref.length}
           options={lengthTypes.map(x => [x, x])}
           onChange={value => onChange('schedMenuType', value)}
-          style={{ padding: 5, backgroundColor: theme.pillBackground }}
+          style={{
+            padding: 5,
+            backgroundColor: theme.pillBackground,
+            color: theme.pillText,
+          }}
         />
         <Input
           defaultValue={schedulePreviewPref.value}
@@ -179,7 +186,11 @@ export function TransactionPreviewPicker(transaction) {
           value={schedulePreviewPref.interval}
           options={menuIntervals.map(x => [x, x])}
           onChange={value => onChange('schedMenuInterval', value)}
-          style={{ padding: 5, backgroundColor: theme.pillBackground }}
+          style={{
+            padding: 5,
+            backgroundColor: theme.pillBackground,
+            color: theme.pillText,
+          }}
         />
       </Row>
     );
