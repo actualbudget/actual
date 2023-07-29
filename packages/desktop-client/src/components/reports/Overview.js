@@ -1,10 +1,8 @@
 import React, { useMemo } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import { bindActionCreators } from 'redux';
 import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
 
-import * as actions from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
@@ -221,7 +219,8 @@ function CashFlowCard() {
   );
 }
 
-function Overview({ accounts }) {
+export default function Overview() {
+  let accounts = useSelector(state => state.queries.accounts);
   return (
     <View
       style={[
@@ -263,8 +262,3 @@ function Overview({ accounts }) {
     </View>
   );
 }
-
-export default connect(
-  state => ({ accounts: state.queries.accounts }),
-  dispatch => bindActionCreators(actions, dispatch),
-)(Overview);

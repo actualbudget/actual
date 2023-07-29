@@ -1,7 +1,6 @@
 import React, { type ReactElement, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
-import { connect } from 'react-redux';
 import {
   Route,
   Routes,
@@ -15,13 +14,13 @@ import {
 
 import hotkeys from 'hotkeys-js';
 
-import * as actions from 'loot-core/src/client/actions';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
+import { useActions } from '../hooks/useActions';
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
@@ -223,7 +222,8 @@ function RouterBehaviors({ getAccounts }) {
   return null;
 }
 
-function FinancesApp(props) {
+function FinancesApp() {
+  let actions = useActions();
   useEffect(() => {
     // The default key handler scope
     hotkeys.setScope('app');
@@ -231,21 +231,21 @@ function FinancesApp(props) {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {
-      await props.sync();
+      await actions.sync();
 
       await checkForUpdateNotification(
-        props.addNotification,
+        actions.addNotification,
         getIsOutdated,
         getLatestVersion,
-        props.loadPrefs,
-        props.savePrefs,
+        actions.loadPrefs,
+        actions.savePrefs,
       );
     }, 100);
   }, []);
 
   return (
     <BrowserRouter>
-      <RouterBehaviors getAccounts={props.getAccounts} />
+      <RouterBehaviors getAccounts={actions.getAccounts} />
       <ExposeNavigate />
 
       <View style={{ height: '100%' }}>
@@ -302,8 +302,8 @@ function FinancesApp(props) {
   );
 }
 
-function FinancesAppWithContext(props) {
-  let app = useMemo(() => <FinancesApp {...props} />, [props]);
+export default function FinancesAppWithContext() {
+  let app = useMemo(() => <FinancesApp />, []);
 
   return (
     <SpreadsheetProvider>
@@ -321,5 +321,3 @@ function FinancesAppWithContext(props) {
     </SpreadsheetProvider>
   );
 }
-
-export default connect(null, actions)(FinancesAppWithContext);
