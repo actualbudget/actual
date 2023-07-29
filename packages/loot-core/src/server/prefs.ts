@@ -1,36 +1,19 @@
 import { Timestamp } from '@actual-app/crdt';
 
 import * as fs from '../platform/server/fs';
+import type { LocalPrefs } from '../types/prefs';
 
 import { Message, sendMessages } from './sync';
 
 export const BUDGET_TYPES = ['report', 'rollover'] as const;
 export type BudgetType = (typeof BUDGET_TYPES)[number];
 
-type Preferences = {
-  id: string;
-  budgetName: string;
-  budgetType?: BudgetType;
-  clientId?: string;
-  groupId?: string;
-  userId?: string;
-  lastSyncedTimestamp?: string;
-  lastScheduleRun?: string;
-  resetClock?: boolean;
-  cloudFileId?: string;
-  lastUploaded?: string;
-  encryptKeyId?: string;
-  'notifications.schedules'?: boolean;
-  'notifications.repair-splits'?: boolean;
-  isCached?: boolean;
-};
+let prefs: LocalPrefs = null;
 
-let prefs: Preferences = null;
-
-export async function loadPrefs(id?: string): Promise<Preferences> {
+export async function loadPrefs(id?: string): Promise<LocalPrefs> {
   if (process.env.NODE_ENV === 'test' && !id) {
-    // Needed so that we can make preferences object non-null for testing.
-    prefs = getDefaultPrefs('test', 'test_preferences');
+    // Needed so that we can make LocalPrefs object non-null for testing.
+    prefs = getDefaultPrefs('test', 'test_LocalPrefs');
     return prefs;
   }
 
@@ -65,7 +48,7 @@ export async function loadPrefs(id?: string): Promise<Preferences> {
 }
 
 export async function savePrefs(
-  prefsToSet: Partial<Preferences>,
+  prefsToSet: Partial<LocalPrefs>,
   { avoidSync = false } = {},
 ): Promise<void> {
   Object.assign(prefs, prefsToSet);
@@ -102,15 +85,15 @@ export function unloadPrefs(): void {
   prefs = null;
 }
 
-export function getPrefs(): Preferences {
+export function getPrefs(): LocalPrefs {
   return prefs;
 }
 
-export function getDefaultPrefs(id: string, budgetName: string): Preferences {
+export function getDefaultPrefs(id: string, budgetName: string): LocalPrefs {
   return { id, budgetName };
 }
 
-export async function readPrefs(id: string): Promise<Preferences> {
+export async function readPrefs(id: string): Promise<LocalPrefs> {
   const fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
 
   try {
