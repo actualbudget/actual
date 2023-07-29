@@ -32,13 +32,12 @@ export default function Search({
         flex: '',
         borderColor: isInModal ? null : 'transparent',
         backgroundColor: isInModal ? null : theme.formInputBackground,
-        color: 'inherit',
       }}
       focusStyle={
         isInModal
           ? null
           : {
-              boxShadow: '0 0 0 1px ' + theme.altformInputShadowSelected,
+              boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
               backgroundColor: theme.formInputBackgroundSelected,
             }
       }
