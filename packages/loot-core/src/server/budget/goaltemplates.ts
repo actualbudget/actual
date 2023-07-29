@@ -7,16 +7,32 @@ import {
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
+import { batchMessages } from '../sync';
 
 import { setBudget, setZero, getSheetValue, isReflectBudget } from './actions';
 import { parse } from './goal-template.pegjs';
 
-export function applyTemplate({ month }) {
-  return processTemplate(month, false);
+export async function applyTemplate({ month }) {
+  let category_templates = await getCategoryTemplates(null);
+  return processTemplate(month, false, category_templates);
 }
 
-export function overwriteTemplate({ month }) {
-  return processTemplate(month, true);
+export async function overwriteTemplate({ month }) {
+  let category_templates = await getCategoryTemplates(null);
+  return processTemplate(month, true, category_templates);
+}
+
+export async function applySingleCategoryTemplate({ month, category }) {
+  let categories = await db.all(`SELECT * FROM v_categories WHERE id = ?`, [
+    category,
+  ]);
+  let category_templates = await getCategoryTemplates(categories[0]);
+  await setBudget({
+    category: category,
+    month,
+    amount: 0,
+  });
+  return processTemplate(month, false, category_templates);
 }
 
 export function runCheckTemplates() {
@@ -35,13 +51,22 @@ function checkScheduleTemplates(template) {
   return { lowPriority, errorNotice };
 }
 
-async function processTemplate(
-  month: string,
-  force: boolean,
-): Promise<Notification> {
+async function setGoalBudget({ month, templateBudget }) {
+  await batchMessages(async () => {
+    templateBudget.forEach(element => {
+      setBudget({
+        category: element.category,
+        month,
+        amount: element.amount,
+      });
+    });
+  });
+}
+
+async function processTemplate(month, force, category_templates) {
+  let templateBudget = [];
   let num_applied = 0;
   let errors = [];
-  let category_templates = await getCategoryTemplates();
   let lowestPriority = 0;
   let originalCategoryBalance = [];
 
@@ -57,7 +82,11 @@ async function processTemplate(
       `budget-${category.id}`,
     );
     if (budgeted) {
-      originalCategoryBalance.push({ cat: category, amount: budgeted });
+      originalCategoryBalance.push({
+        cat: category,
+        amount: budgeted,
+        isIncome: category.is_income,
+      });
     }
     let template = category_templates[category.id];
     if (template) {
@@ -69,7 +98,22 @@ async function processTemplate(
       }
     }
   }
-  setZero({ month });
+
+  await setZero({ month });
+
+  //setZero() sets budgeted Income to 0. Reset income categories before continuing.
+  if (isReflectBudget()) {
+    for (let l = 0; l < originalCategoryBalance.length; l++) {
+      if (originalCategoryBalance[l].isIncome) {
+        await setBudget({
+          category: originalCategoryBalance[l].cat.id,
+          month,
+          amount: originalCategoryBalance[l].amount,
+        });
+      }
+    }
+  }
+
   // find all remainder templates, place them after all other templates
   let remainder_found;
   let remainder_priority = lowestPriority + 1;
@@ -87,17 +131,20 @@ async function processTemplate(
       }
     }
   }
-  // so the remainders don't get skiped
+  // so the remainders don't get skipped
   if (remainder_found) lowestPriority = remainder_priority;
 
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
+  let available_remaining = isReflectBudget()
+    ? await getSheetValue(sheetName, `total-saved`)
+    : await getSheetValue(sheetName, `to-budget`);
   for (let priority = 0; priority <= lowestPriority; priority++) {
     // setup scaling for remainder
     let remainder_scale = 1;
     if (priority === lowestPriority) {
       let available_now = await getSheetValue(sheetName, `to-budget`);
-      remainder_scale = Math.round(available_now / remainder_weight_total);
+      remainder_scale = available_now / remainder_weight_total;
     }
 
     for (let c = 0; c < categories.length; c++) {
@@ -144,6 +191,10 @@ async function processTemplate(
                   ].join('\n'),
                 ),
             );
+            let prev_budgeted = await getSheetValue(
+              sheetName,
+              `budget-${category.id}`,
+            );
             let { amount: to_budget, errors: applyErrors } =
               await applyCategoryTemplate(
                 category,
@@ -152,15 +203,17 @@ async function processTemplate(
                 priority,
                 remainder_scale,
                 available_start,
+                available_remaining,
+                prev_budgeted,
                 force,
               );
             if (to_budget != null) {
               num_applied++;
-              await setBudget({
+              templateBudget.push({
                 category: category.id,
-                month,
-                amount: to_budget,
+                amount: to_budget + prev_budgeted,
               });
+              available_remaining -= to_budget;
             }
             if (applyErrors != null) {
               errors = errors.concat(
@@ -171,7 +224,9 @@ async function processTemplate(
         }
       }
     }
+    await setGoalBudget({ month, templateBudget });
   }
+
   if (!force) {
     //if overwrite is not preferred, set cell to original value
     for (let l = 0; l < originalCategoryBalance.length; l++) {
@@ -220,12 +275,13 @@ async function processTemplate(
 }
 
 const TEMPLATE_PREFIX = '#template';
-async function getCategoryTemplates() {
+async function getCategoryTemplates(category) {
   let templates = {};
 
   let notes = await db.all(
     `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
   );
+  if (category) notes = notes.filter(n => n.id === category.id);
 
   for (let n = 0; n < notes.length; n++) {
     let lines = notes[n].note.split('\n');
@@ -255,6 +311,8 @@ async function applyCategoryTemplate(
   priority,
   remainder_scale,
   available_start,
+  budgetAvailable,
+  budgeted,
   force,
 ) {
   let current_month = `${month}-01`;
@@ -325,13 +383,9 @@ async function applyCategoryTemplate(
     });
   }
   let sheetName = monthUtils.sheetForMonth(month);
-  let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
-  let budgetAvailable = isReflectBudget()
-    ? await getSheetValue(sheetName, `total-saved`)
-    : await getSheetValue(sheetName, `to-budget`);
-  let to_budget = budgeted;
+  let to_budget = 0;
   let limit;
   let hold;
   let last_month_balance = balance - spent - budgeted;
@@ -500,8 +554,19 @@ async function applyCategoryTemplate(
       case 'percentage': {
         let percent = template.percent;
         let monthlyIncome = 0;
+
         if (template.category.toLowerCase() === 'all income') {
-          monthlyIncome = await getSheetValue(sheetName, `total-income`);
+          if (template.previous) {
+            let sheetName_lastmonth = monthUtils.sheetForMonth(
+              monthUtils.addMonths(month, -1),
+            );
+            monthlyIncome = await getSheetValue(
+              sheetName_lastmonth,
+              'total-income',
+            );
+          } else {
+            monthlyIncome = await getSheetValue(sheetName, `total-income`);
+          }
         } else if (template.category.toLowerCase() === 'available funds') {
           monthlyIncome = available_start;
         } else {
@@ -514,11 +579,22 @@ async function applyCategoryTemplate(
             errors.push(`Could not find category “${template.category}”`);
             return { errors };
           }
-          monthlyIncome = await getSheetValue(
-            sheetName,
-            `sum-amount-${income_category.id}`,
-          );
+          if (template.previous) {
+            let sheetName_lastmonth = monthUtils.sheetForMonth(
+              monthUtils.addMonths(month, -1),
+            );
+            monthlyIncome = await getSheetValue(
+              sheetName_lastmonth,
+              `sum-amount-${income_category.id}`,
+            );
+          } else {
+            monthlyIncome = await getSheetValue(
+              sheetName,
+              `sum-amount-${income_category.id}`,
+            );
+          }
         }
+
         let increment = Math.max(
           0,
           Math.round(monthlyIncome * (percent / 100)),
@@ -620,8 +696,11 @@ async function applyCategoryTemplate(
               ? Math.round(template.weight)
               : Math.round(remainder_scale * template.weight);
           // can over budget with the rounding, so checking that
-          if (to_budget >= budgetAvailable + budgeted) {
-            to_budget = budgetAvailable + budgeted;
+          if (to_budget >= budgetAvailable) {
+            to_budget = budgetAvailable;
+            // check if there is 1 cent leftover from rounding
+          } else if (budgetAvailable - to_budget === 1) {
+            to_budget = to_budget + 1;
           }
         }
         break;
@@ -661,7 +740,7 @@ async function applyCategoryTemplate(
 }
 
 async function checkTemplates(): Promise<Notification> {
-  let category_templates = await getCategoryTemplates();
+  let category_templates = await getCategoryTemplates(null);
   let errors = [];
 
   let categories = await db.all(

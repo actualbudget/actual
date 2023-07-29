@@ -1,12 +1,13 @@
 import React from 'react';
-import { connect } from 'react-redux';
 
-import * as actions from 'loot-core/src/client/actions';
-
+import { useActions } from '../../hooks/useActions';
 import { colors, styles } from '../../style';
-import { View, Button, Text, P, ExternalLink } from '../common';
+import { View, Button, Text, ExternalLink } from '../common';
+import Paragraph from '../common/Paragraph';
 
-function WelcomeScreen({ createBudget, pushModal }) {
+export default function WelcomeScreen() {
+  let { createBudget, pushModal } = useActions();
+
   return (
     <View
       style={{
@@ -19,14 +20,14 @@ function WelcomeScreen({ createBudget, pushModal }) {
     >
       <Text style={styles.veryLargeText}>Let’s get started!</Text>
       <View style={{ overflowY: 'auto' }}>
-        <P>
+        <Paragraph>
           Actual is a personal finance tool that focuses on beautiful design and
           a slick user experience.{' '}
           <strong>Editing your data should be as fast as possible.</strong> On
           top of that, we want to provide powerful tools to allow you to do
           whatever you want with your data.
-        </P>
-        <P>
+        </Paragraph>
+        <Paragraph>
           Currently, Actual implements budgeting based on a{' '}
           <ExternalLink
             to="https://actualbudget.org/docs/budgeting/"
@@ -43,12 +44,12 @@ function WelcomeScreen({ createBudget, pushModal }) {
           </ExternalLink>{' '}
           to help you get your bearings, and check out the rest of the
           documentation while you’re there to learn more about advanced topics.
-        </P>
-        <P style={{ color: colors.n5 }}>
+        </Paragraph>
+        <Paragraph style={{ color: colors.n5 }}>
           Get started by importing an existing budget file from Actual or
           another budgeting app, or start fresh with an empty budget. You can
           always create or import another budget later.
-        </P>
+        </Paragraph>
       </View>
       <View
         style={{
@@ -66,5 +67,3 @@ function WelcomeScreen({ createBudget, pushModal }) {
     </View>
   );
 }
-
-export default connect(null, actions)(WelcomeScreen);

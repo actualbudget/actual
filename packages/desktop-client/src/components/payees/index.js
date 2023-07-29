@@ -19,20 +19,13 @@ import useSelected, {
   useSelectedItems,
   useSelectedDispatch,
 } from '../../hooks/useSelected';
+import useStableCallback from '../../hooks/useStableCallback';
 import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { colors } from '../../style';
-import {
-  useStableCallback,
-  View,
-  Text,
-  Input,
-  Button,
-  Tooltip,
-  Menu,
-} from '../common';
+import { View, Text, Input, Button, Tooltip, Menu } from '../common';
 import {
   Table,
   TableHeader,
@@ -338,7 +331,6 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
 export const ManagePayees = forwardRef(
   (
     {
-      modalProps,
       payees,
       ruleCounts,
       orphanedPayees,

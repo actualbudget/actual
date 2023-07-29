@@ -5,10 +5,10 @@ import * as constants from '../constants';
 
 import { pushModal } from './modals';
 import { addNotification, addGenericErrorNotification } from './notifications';
-import type { ActionResult } from './types';
+import type { Dispatch, GetState } from './types';
 
 export function applyBudgetAction(month, type, args) {
-  return async function (dispatch) {
+  return async (dispatch: Dispatch) => {
     switch (type) {
       case 'budget-amount':
         await send('budget/budget-amount', {
@@ -30,16 +30,10 @@ export function applyBudgetAction(month, type, args) {
         dispatch(addNotification(await send('budget/check-templates')));
         break;
       case 'apply-goal-template':
-        dispatch(
-          addNotification(await send('budget/apply-goal-template', { month })),
-        );
+        await send('budget/apply-goal-template', { month });
         break;
       case 'overwrite-goal-template':
-        dispatch(
-          addNotification(
-            await send('budget/overwrite-goal-template', { month }),
-          ),
-        );
+        await send('budget/overwrite-goal-template', { month });
         break;
       case 'cleanup-goal-template':
         dispatch(
@@ -87,13 +81,46 @@ export function applyBudgetAction(month, type, args) {
         });
         break;
       }
+      case 'apply-single-category-template':
+        await send('budget/apply-single-template', {
+          month,
+          category: args.category,
+        });
+        break;
+      case 'set-single-3-avg':
+        await send('budget/set-n-month-avg', {
+          month,
+          N: 3,
+          category: args.category,
+        });
+        break;
+      case 'set-single-6-avg':
+        await send('budget/set-n-month-avg', {
+          month,
+          N: 6,
+          category: args.category,
+        });
+        break;
+      case 'set-single-12-avg':
+        await send('budget/set-n-month-avg', {
+          month,
+          N: 12,
+          category: args.category,
+        });
+        break;
+      case 'copy-single-last':
+        await send('budget/copy-single-month', {
+          month,
+          category: args.category,
+        });
+        break;
       default:
     }
   };
 }
 
-export function getCategories(): ActionResult {
-  return async function (dispatch) {
+export function getCategories() {
+  return async (dispatch: Dispatch) => {
     const categories = await send('get-categories');
     dispatch({
       type: constants.LOAD_CATEGORIES,
@@ -107,8 +134,8 @@ export function createCategory(
   name: string,
   groupId: string,
   isIncome: boolean,
-): ActionResult {
-  return async function (dispatch) {
+) {
+  return async (dispatch: Dispatch) => {
     let id = await send('category-create', {
       name,
       groupId,
@@ -119,8 +146,8 @@ export function createCategory(
   };
 }
 
-export function deleteCategory(id: string, transferId?: string): ActionResult {
-  return async function (dispatch, getState) {
+export function deleteCategory(id: string, transferId?: string) {
+  return async (dispatch: Dispatch) => {
     let { error } = await send('category-delete', { id, transferId });
 
     if (error) {
@@ -148,36 +175,36 @@ export function deleteCategory(id: string, transferId?: string): ActionResult {
   };
 }
 
-export function updateCategory(category): ActionResult {
-  return async dispatch => {
+export function updateCategory(category) {
+  return async (dispatch: Dispatch) => {
     await send('category-update', category);
     dispatch(getCategories());
   };
 }
 
-export function moveCategory(id, groupId, targetId): ActionResult {
-  return async (dispatch, getState) => {
+export function moveCategory(id, groupId, targetId) {
+  return async (dispatch: Dispatch) => {
     await send('category-move', { id, groupId, targetId });
     await dispatch(getCategories());
   };
 }
 
-export function moveCategoryGroup(id, targetId): ActionResult {
-  return async dispatch => {
+export function moveCategoryGroup(id, targetId) {
+  return async (dispatch: Dispatch) => {
     await send('category-group-move', { id, targetId });
     await dispatch(getCategories());
   };
 }
 
-export function createGroup(name): ActionResult {
-  return async dispatch => {
+export function createGroup(name) {
+  return async (dispatch: Dispatch) => {
     let id = await send('category-group-create', { name });
     dispatch(getCategories());
     return id;
   };
 }
 
-export function updateGroup(group): ActionResult {
+export function updateGroup(group) {
   // Strip off the categories field if it exist. It's not a real db
   // field but groups have this extra field in the client most of the
   // time
@@ -189,7 +216,7 @@ export function updateGroup(group): ActionResult {
   };
 }
 
-export function deleteGroup(id, transferId): ActionResult {
+export function deleteGroup(id, transferId) {
   return async function (dispatch, getState) {
     await send('category-group-delete', { id, transferId });
     await dispatch(getCategories());
@@ -198,8 +225,8 @@ export function deleteGroup(id, transferId): ActionResult {
   };
 }
 
-export function getPayees(): ActionResult {
-  return async function (dispatch) {
+export function getPayees() {
+  return async (dispatch: Dispatch) => {
     let payees = await send('payees-get');
     dispatch({
       type: constants.LOAD_PAYEES,
@@ -209,37 +236,37 @@ export function getPayees(): ActionResult {
   };
 }
 
-export function initiallyLoadPayees(): ActionResult {
-  return async function (dispatch, getState) {
+export function initiallyLoadPayees() {
+  return async (dispatch: Dispatch, getState: GetState) => {
     if (getState().queries.payees.length === 0) {
       return dispatch(getPayees());
     }
   };
 }
 
-export function createPayee(name: string): ActionResult {
-  return async dispatch => {
+export function createPayee(name: string) {
+  return async () => {
     return send('payee-create', { name: name.trim() });
   };
 }
 
-export function getAccounts(): ActionResult {
-  return async function (dispatch) {
+export function getAccounts() {
+  return async (dispatch: Dispatch) => {
     const accounts = await send('accounts-get');
     dispatch({ type: constants.LOAD_ACCOUNTS, accounts });
     return accounts;
   };
 }
 
-export function updateAccount(account): ActionResult {
-  return async function (dispatch) {
+export function updateAccount(account) {
+  return async (dispatch: Dispatch) => {
     dispatch({ type: constants.UPDATE_ACCOUNT, account });
     await send('account-update', account);
   };
 }
 
-export function createAccount(name, balance, offBudget): ActionResult {
-  return async function (dispatch) {
+export function createAccount(name, balance, offBudget) {
+  return async (dispatch: Dispatch) => {
     let id = await send('account-create', { name, balance, offBudget });
     await dispatch(getAccounts());
     await dispatch(getPayees());
@@ -247,8 +274,8 @@ export function createAccount(name, balance, offBudget): ActionResult {
   };
 }
 
-export function openAccountCloseModal(accountId): ActionResult {
-  return async function (dispatch, getState) {
+export function openAccountCloseModal(accountId) {
+  return async (dispatch: Dispatch, getState: GetState) => {
     const { balance, numTransactions } = await send('account-properties', {
       id: accountId,
     });
@@ -266,13 +293,8 @@ export function openAccountCloseModal(accountId): ActionResult {
   };
 }
 
-export function closeAccount(
-  accountId,
-  transferAccountId,
-  categoryId,
-  forced,
-): ActionResult {
-  return async function (dispatch) {
+export function closeAccount(accountId, transferAccountId, categoryId, forced) {
+  return async (dispatch: Dispatch) => {
     await send('account-close', {
       id: accountId,
       transferAccountId,
@@ -283,14 +305,14 @@ export function closeAccount(
   };
 }
 
-export function reopenAccount(accountId): ActionResult {
-  return async function (dispatch) {
+export function reopenAccount(accountId) {
+  return async (dispatch: Dispatch) => {
     await send('account-reopen', { id: accountId });
     dispatch(getAccounts());
   };
 }
 
-export function forceCloseAccount(accountId): ActionResult {
+export function forceCloseAccount(accountId) {
   return closeAccount(accountId, null, null, true);
 }
 
