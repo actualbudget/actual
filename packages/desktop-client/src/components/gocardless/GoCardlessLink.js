@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { Modal, P, View } from '../common';
+import { Modal, View } from '../common';
+import Paragraph from '../common/Paragraph';
 
 export default function GoCardlessLink() {
   window.close();
@@ -9,11 +10,11 @@ export default function GoCardlessLink() {
     <Modal isCurrent={true} showClose={false} title="Account sync">
       {() => (
         <View style={{ maxWidth: 500 }}>
-          <P>Please wait...</P>
-          <P>
+          <Paragraph>Please wait...</Paragraph>
+          <Paragraph>
             The window should close automatically. If nothing happend you can
             close this window or tab.
-          </P>
+          </Paragraph>
         </View>
       )}
     </Modal>

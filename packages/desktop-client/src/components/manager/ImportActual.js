@@ -4,7 +4,8 @@ import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, colors } from '../../style';
-import { View, Block, Modal, ButtonWithLoading, P } from '../common';
+import { View, Block, Modal, ButtonWithLoading } from '../common';
+import Paragraph from '../common/Paragraph';
 
 function getErrorMessage(error) {
   switch (error) {
@@ -61,14 +62,16 @@ function Import({ modalProps }) {
           )}
 
           <View style={{ '& > div': { lineHeight: '1.7em' } }}>
-            <P>
+            <Paragraph>
               You can import data from another Actual account or instance. First
               export your data from a different account, and it will give you a
               compressed file. This file is a simple zip file that contains the{' '}
               <code>db.sqlite</code> and <code>metadata.json</code> files.
-            </P>
+            </Paragraph>
 
-            <P>Select one of these compressed files and import it here.</P>
+            <Paragraph>
+              Select one of these compressed files and import it here.
+            </Paragraph>
 
             <View style={{ alignSelf: 'center' }}>
               <ButtonWithLoading

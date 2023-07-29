@@ -4,14 +4,8 @@ import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, colors } from '../../style';
-import {
-  View,
-  Block,
-  Modal,
-  ButtonWithLoading,
-  P,
-  ExternalLink,
-} from '../common';
+import { View, Block, Modal, ButtonWithLoading, ExternalLink } from '../common';
+import Paragraph from '../common/Paragraph';
 
 function getErrorMessage(error) {
   switch (error) {
@@ -60,20 +54,20 @@ function Import({ modalProps }) {
           <View
             style={{ alignItems: 'center', '& > div': { lineHeight: '1.7em' } }}
           >
-            <P>
+            <Paragraph>
               <ExternalLink to="https://actualbudget.org/docs/migration/nynab">
                 Read here
               </ExternalLink>{' '}
               for instructions on how to migrate your data from YNAB. You need
               to export your data as JSON, and that page explains how to do
               that.
-            </P>
-            <P>
+            </Paragraph>
+            <Paragraph>
               Once you have exported your data, select the file and Actual will
               import it. Budgets may not match up exactly because things work
               slightly differently, but you should be able to fix up any
               problems.
-            </P>
+            </Paragraph>
             <View>
               <ButtonWithLoading
                 type="primary"

@@ -4,7 +4,9 @@ import { useLocation } from 'react-router-dom';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../style';
-import { Modal, Text, P, Button, Stack } from '../common';
+import { Modal, Text, Button, Stack } from '../common';
+import Paragraph from '../common/Paragraph';
+import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';
 
 export default function PostsOfflineNotification({ modalProps, actions }) {
@@ -20,7 +22,7 @@ export default function PostsOfflineNotification({ modalProps, actions }) {
 
   return (
     <Modal title="Post transactions?" size="small" {...modalProps}>
-      <P>
+      <Paragraph>
         {payees.length > 0 ? (
           <Text>
             The {plural ? 'payees ' : 'payee '}
@@ -47,17 +49,17 @@ export default function PostsOfflineNotification({ modalProps, actions }) {
           syncing failed. In order to avoid duplicate transactions, we let you
           choose whether or not to create transactions for these schedules.
         </Text>
-      </P>
-      <P>
+      </Paragraph>
+      <Paragraph>
         Be aware that other devices may have already created these transactions.
         If you have multiple devices, make sure you only do this on one device
         or you will have duplicate transactions.
-      </P>
-      <P>
+      </Paragraph>
+      <Paragraph>
         You can always manually post a transaction later for a due schedule by
         selecting the schedule and clicking “Post transaction” in the action
         menu.
-      </P>
+      </Paragraph>
       <Stack
         direction="row"
         justify="flex-end"

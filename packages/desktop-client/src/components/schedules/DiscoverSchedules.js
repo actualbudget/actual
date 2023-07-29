@@ -11,7 +11,8 @@ import useSelected, {
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
 import { colors } from '../../style';
-import { Modal, View, Stack, ButtonWithLoading, P } from '../common';
+import { Modal, View, Stack, ButtonWithLoading } from '../common';
+import Paragraph from '../common/Paragraph';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
@@ -149,15 +150,15 @@ export default function DiscoverSchedules({ modalProps, actions }) {
       size={{ width: 850, height: 650 }}
       {...modalProps}
     >
-      <P>
+      <Paragraph>
         We found some possible schedules in your current transactions. Select
         the ones you want to create.
-      </P>
-      <P>
+      </Paragraph>
+      <Paragraph>
         If you expected a schedule here and don’t see it, it might be because
         the payees of the transactions don’t match. Make sure you rename payees
         on all transactions for a schedule to be the same payee.
-      </P>
+      </Paragraph>
 
       <SelectedProvider instance={selectedInst}>
         <DiscoverSchedulesTable loading={isLoading} schedules={schedules} />

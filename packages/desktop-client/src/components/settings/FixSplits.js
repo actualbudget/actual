@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../style';
-import { View, Text, P, ButtonWithLoading } from '../common';
+import { View, Text, ButtonWithLoading } from '../common';
+import Paragraph from '../common/Paragraph';
 
 import { Setting } from './UI';
 
@@ -31,7 +32,7 @@ function renderResults(results) {
   }
 
   return (
-    <P
+    <Paragraph
       style={{
         color: colors.g3,
         marginBottom: 0,
@@ -41,7 +42,7 @@ function renderResults(results) {
       }}
     >
       {result}
-    </P>
+    </Paragraph>
   );
 }
 

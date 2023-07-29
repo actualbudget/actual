@@ -399,10 +399,15 @@ export async function download(fileId) {
       },
     });
   } catch (err) {
+    console.log('Error fetching file info', err);
     throw FileDownloadError('internal', { fileId });
   }
 
   if (res.status !== 'ok') {
+    console.log(
+      'Could not download file from the server. Are you sure you have the right file ID?',
+      res,
+    );
     throw FileDownloadError('internal', { fileId });
   }
   let fileData = res.data;
