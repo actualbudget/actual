@@ -14,12 +14,12 @@ import {
   View,
   Modal,
   Button,
-  P,
   LinkButton,
   Menu,
   Tooltip,
   ExternalLink,
 } from '../common';
+import Paragraph from '../common/Paragraph';
 import { FormField, FormLabel } from '../forms';
 
 import { COUNTRY_OPTIONS } from './countries';
@@ -257,11 +257,11 @@ export default function GoCardlessExternalMsg({
     >
       {() => (
         <View>
-          <P style={{ fontSize: 15 }}>
+          <Paragraph style={{ fontSize: 15 }}>
             To link your bank account, you will be redirected to a new page
             where GoCardless will ask to connect to your bank. GoCardless will
             not be able to withdraw funds from your accounts.
-          </P>
+          </Paragraph>
 
           {error && renderError(error)}
 
@@ -306,9 +306,9 @@ export default function GoCardlessExternalMsg({
             renderLinkButton()
           ) : (
             <>
-              <P style={{ color: colors.r5 }}>
+              <Paragraph style={{ color: colors.r5 }}>
                 GoCardless integration has not yet been configured.
-              </P>
+              </Paragraph>
               <Button type="primary" onClick={onGoCardlessInit}>
                 Configure GoCardless integration
               </Button>

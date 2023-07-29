@@ -44,6 +44,16 @@ describe('utility functions', () => {
     expect(formatter.format(Number('1234.56'))).toBe('1,235');
   });
 
+  test('number formatting works with comma-dot-in format', () => {
+    setNumberFormat({ format: 'comma-dot-in', hideFraction: false });
+    let formatter = getNumberFormat().formatter;
+    expect(formatter.format(Number('1234567.89'))).toBe('12,34,567.89');
+
+    setNumberFormat({ format: 'comma-dot-in', hideFraction: true });
+    formatter = getNumberFormat().formatter;
+    expect(formatter.format(Number('1234567.89'))).toBe('12,34,568');
+  });
+
   test('number formatting works with dot-comma format', () => {
     setNumberFormat({ format: 'dot-comma', hideFraction: false });
     let formatter = getNumberFormat().formatter;
