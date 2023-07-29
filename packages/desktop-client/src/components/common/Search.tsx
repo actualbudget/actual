@@ -1,8 +1,11 @@
 import { type ChangeEvent, type Ref } from 'react';
 
+import SvgRemove from '../../icons/v2/Remove';
+import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { theme } from '../../style';
 
-import Input from './Input';
+import Button from './Button';
+import InputWithContent from './InputWithContent';
 
 type SearchProps = {
   inputRef: Ref<HTMLInputElement>;
@@ -22,17 +25,66 @@ export default function Search({
   width = 350,
 }: SearchProps) {
   return (
-    <Input
+    <InputWithContent
       inputRef={inputRef}
-      placeholder={placeholder}
-      value={value}
-      onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
       style={{
         width,
+        flex: '',
         borderColor: isInModal ? null : 'transparent',
         backgroundColor: isInModal ? null : theme.formInputBackground,
         color: 'inherit',
       }}
+      focusStyle={
+        isInModal
+          ? null
+          : {
+              boxShadow: '0 0 0 1px ' + theme.altformInputShadowSelected,
+              backgroundColor: theme.formInputBackgroundSelected,
+            }
+      }
+      leftContent={
+        <SearchAlternate
+          style={{
+            width: 13,
+            height: 13,
+            flexShrink: 0,
+            color: value ? theme.altMenuItemTextSelected : 'inherit',
+            margin: 5,
+            marginRight: 0,
+          }}
+        />
+      }
+      rightContent={
+        value && (
+          <Button
+            type="bare"
+            style={{ padding: 8 }}
+            onClick={() => onChange('')}
+            title="Clear search term"
+          >
+            <SvgRemove style={{ width: 8, height: 8 }} />
+          </Button>
+        )
+      }
+      inputStyle={{
+        '::placeholder': {
+          color: theme.formInputTextPlaceholder,
+          transition: 'color .25s',
+        },
+        ':focus': isInModal
+          ? null
+          : {
+              '::placeholder': {
+                color: theme.formInputTextPlaceholderSelected,
+              },
+            },
+      }}
+      value={value}
+      placeholder={placeholder}
+      onKeyDown={e => {
+        if (e.key === 'Escape') onChange('');
+      }}
+      onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
     />
   );
 }

@@ -23,12 +23,12 @@ import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colors, theme } from '../../style';
+import { colors } from '../../style';
 import {
   useStableCallback,
   View,
   Text,
-  Input,
+  Search,
   Button,
   Tooltip,
   Menu,
@@ -533,20 +533,10 @@ export const ManagePayees = forwardRef(
             )}
           </View>
           <View style={{ flex: 1 }} />
-          <Input
-            id="filter-input"
+          <Search
             placeholder="Filter payees..."
             value={filter}
-            onChange={e => {
-              applyFilter(e.target.value);
-              tableNavigator.onEdit(null);
-            }}
-            style={{
-              width: 350,
-              borderColor: 'transparent',
-              color: 'inherit',
-              backgroundColor: theme.formInputBackground,
-            }}
+            onChange={applyFilter}
           />
         </View>
 

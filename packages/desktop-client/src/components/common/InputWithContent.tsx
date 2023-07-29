@@ -2,7 +2,7 @@ import { type ComponentProps, type ReactNode, useState } from 'react';
 
 import { type CSSProperties } from 'glamor';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 
 import Input, { defaultInputStyle } from './Input';
 import View from './View';
@@ -11,6 +11,7 @@ type InputWithContentProps = ComponentProps<typeof Input> & {
   leftContent: ReactNode;
   rightContent: ReactNode;
   inputStyle?: CSSProperties;
+  focusStyle?: CSSProperties;
   style?: CSSProperties;
   getStyle?: (focused: boolean) => CSSProperties;
 };
@@ -18,6 +19,7 @@ export default function InputWithContent({
   leftContent,
   rightContent,
   inputStyle,
+  focusStyle,
   style,
   getStyle,
   ...props
@@ -30,15 +32,14 @@ export default function InputWithContent({
         defaultInputStyle,
         {
           padding: 0,
-          flex: 1,
           flexDirection: 'row',
           alignItems: 'center',
         },
-        focused && {
-          border: '1px solid ' + colors.b5,
-          boxShadow: '0 1px 1px ' + colors.b7,
-        },
         style,
+        focused &&
+          (focusStyle ?? {
+            boxShadow: '0 0 0 1px ' + theme.altformInputShadowSelected,
+          }),
         getStyle && getStyle(focused),
       ]}
     >

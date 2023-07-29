@@ -40,6 +40,9 @@ const Input = ({
       {...css(
         defaultInputStyle,
         {
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          flexShrink: 0,
           ':focus': {
             border: '1px solid ' + theme.altformInputBorderSelected,
             boxShadow: '0 1px 1px ' + theme.altformInputShadowSelected,

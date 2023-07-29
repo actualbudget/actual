@@ -37,7 +37,7 @@ import {
   Button,
   Stack,
   ExternalLink,
-  Input,
+  Search,
   LinkButton,
 } from './common';
 import { SelectCell, Row, Field, Cell, CellButton, TableHeader } from './table';
@@ -696,7 +696,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View style={{ overflow: 'hidden' }}>
+      <View>
         <View
           style={{
             flexDirection: 'row',
@@ -724,23 +724,10 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             </Text>
           </View>
           <View style={{ flex: 1 }} />
-          <Input
+          <Search
             placeholder="Filter rules..."
             value={filter}
-            onChange={e => {
-              setFilter(e.target.value);
-            }}
-            style={{
-              width: 350,
-              borderColor: isModal ? null : 'transparent',
-              backgroundColor: isModal ? null : colors.n11,
-              ':focus': isModal
-                ? null
-                : {
-                    backgroundColor: 'white',
-                    '::placeholder': { color: colors.n8 },
-                  },
-            }}
+            onChange={setFilter}
           />
         </View>
         <View style={{ flex: 1 }}>
