@@ -554,8 +554,19 @@ async function applyCategoryTemplate(
       case 'percentage': {
         let percent = template.percent;
         let monthlyIncome = 0;
+
         if (template.category.toLowerCase() === 'all income') {
-          monthlyIncome = await getSheetValue(sheetName, `total-income`);
+          if (template.previous) {
+            let sheetName_lastmonth = monthUtils.sheetForMonth(
+              monthUtils.addMonths(month, -1),
+            );
+            monthlyIncome = await getSheetValue(
+              sheetName_lastmonth,
+              'total-income',
+            );
+          } else {
+            monthlyIncome = await getSheetValue(sheetName, `total-income`);
+          }
         } else if (template.category.toLowerCase() === 'available funds') {
           monthlyIncome = available_start;
         } else {
@@ -568,11 +579,22 @@ async function applyCategoryTemplate(
             errors.push(`Could not find category “${template.category}”`);
             return { errors };
           }
-          monthlyIncome = await getSheetValue(
-            sheetName,
-            `sum-amount-${income_category.id}`,
-          );
+          if (template.previous) {
+            let sheetName_lastmonth = monthUtils.sheetForMonth(
+              monthUtils.addMonths(month, -1),
+            );
+            monthlyIncome = await getSheetValue(
+              sheetName_lastmonth,
+              `sum-amount-${income_category.id}`,
+            );
+          } else {
+            monthlyIncome = await getSheetValue(
+              sheetName,
+              `sum-amount-${income_category.id}`,
+            );
+          }
         }
+
         let increment = Math.max(
           0,
           Math.round(monthlyIncome * (percent / 100)),
