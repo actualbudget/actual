@@ -6,8 +6,8 @@ import * as monthUtils from 'loot-core/src/shared/months';
 //import * as d from 'date-fns';
 
 import { useActions } from '../../hooks/useActions';
-import { colors } from '../../style';
-import { Text, Button, Input, Select } from '../common';
+import { colors, theme } from '../../style';
+import { Text, Input, Select } from '../common';
 import { Row } from '../table';
 
 const lengthTypes = ['for', 'until the end of'] as const;
@@ -74,7 +74,6 @@ function schedOptsToNextDate(opts: SchedulePreviewOpts) {
 
 export function TransactionPreviewPicker(transaction) {
   console.log(transaction);
-  const [showSettings, setShowSettings] = useState(false);
   const [hover, setHover] = useState(false);
 
   let { savePrefs } = useActions();
@@ -122,7 +121,6 @@ export function TransactionPreviewPicker(transaction) {
   function previewRow() {
     return (
       <Row
-        onClick={() => setShowSettings(!showSettings)}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         style={{
@@ -138,11 +136,9 @@ export function TransactionPreviewPicker(transaction) {
           }}
         >
           Showing scheduled transactions {schedulePreviewPref.length}{' '}
-          {schedulePreviewPref.value} {schedulePreviewPref.interval}.
-          Transactions shown through {monthUtils.format(nextDate, dateFormat)}{' '}
-          {monthUtils.format(nextDate, 'EEEE')}
-        </Text>{' '}
-        {hover && <Button>Edit</Button>}
+          {schedulePreviewPref.value} {schedulePreviewPref.interval} (
+          {monthUtils.format(nextDate, dateFormat)})
+        </Text>
       </Row>
     );
   }
@@ -165,7 +161,7 @@ export function TransactionPreviewPicker(transaction) {
           value={schedulePreviewPref.length}
           options={lengthTypes.map(x => [x, x])}
           onChange={value => onChange('schedMenuType', value)}
-          style={{ padding: 5 }}
+          style={{ padding: 5, backgroundColor: theme.pillBackground }}
         />
         <Input
           defaultValue={schedulePreviewPref.value}
@@ -183,20 +179,11 @@ export function TransactionPreviewPicker(transaction) {
           value={schedulePreviewPref.interval}
           options={menuIntervals.map(x => [x, x])}
           onChange={value => onChange('schedMenuInterval', value)}
-          style={{ padding: 5 }}
+          style={{ padding: 5, backgroundColor: theme.pillBackground }}
         />
-        <Button
-          type="primary"
-          onClick={e => {
-            e.preventDefault();
-            setShowSettings(false);
-          }}
-        >
-          Done
-        </Button>
       </Row>
     );
   }
 
-  return showSettings ? settingRow() : previewRow();
+  return hover ? settingRow() : previewRow();
 }
