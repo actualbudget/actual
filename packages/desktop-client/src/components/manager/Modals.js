@@ -18,7 +18,7 @@ export default function Modals() {
   let isHidden = useSelector(state => state.modals.isHidden);
   let actions = useActions();
 
-  let stack = modalStack.map(({ name, options }, idx) => {
+  let stack = modalStack.map(({ name, options = {} }, idx) => {
     const modalProps = {
       onClose: actions.popModal,
       onPush: actions.pushModal,

@@ -42,7 +42,7 @@ export default function Modals() {
   const syncServerStatus = useSyncServerStatus();
 
   let modals = modalStack
-    .map(({ name, options }, idx) => {
+    .map(({ name, options = {} }, idx) => {
       const modalProps = {
         onClose: actions.popModal,
         onBack: actions.popModal,
