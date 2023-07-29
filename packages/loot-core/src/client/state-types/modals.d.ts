@@ -81,13 +81,9 @@ type FinanceModals = {
     month: string;
   };
 
-  'schedule-edit': {
-    id?: string;
-  };
+  'schedule-edit': { id: string } | null;
 
-  'schedule-link': {
-    transactionIds?: string[];
-  };
+  'schedule-link': { transactionIds: string[] } | null;
 
   'schedules-discover': null;
 

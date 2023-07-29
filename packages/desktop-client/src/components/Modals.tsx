@@ -42,7 +42,7 @@ export default function Modals() {
   const syncServerStatus = useSyncServerStatus();
 
   let modals = modalStack
-    .map(({ name, options = {} }, idx) => {
+    .map(({ name, options }, idx) => {
       const modalProps = {
         onClose: actions.popModal,
         onBack: actions.popModal,
@@ -227,7 +227,7 @@ export default function Modals() {
             <ScheduleDetails
               key={name}
               modalProps={modalProps}
-              id={options.id || null}
+              id={options?.id || null}
               actions={actions}
             />
           );
@@ -238,7 +238,7 @@ export default function Modals() {
               key={name}
               modalProps={modalProps}
               actions={actions}
-              transactionIds={options.transactionIds}
+              transactionIds={options?.transactionIds}
             />
           );
 
