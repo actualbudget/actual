@@ -6,7 +6,6 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { colors } from '../../style';
 import { Modal, Text, Button, Stack } from '../common';
 import Paragraph from '../common/Paragraph';
-import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';
 
 export default function PostsOfflineNotification({ modalProps, actions }) {
