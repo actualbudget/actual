@@ -11,8 +11,4 @@ export interface Config {
     key: string;
     cert: string;
   } & ServerOptions;
-  nordigen?: {
-    secretId: string;
-    secretKey: string;
-  };
 }

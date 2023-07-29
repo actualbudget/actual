@@ -85,15 +85,6 @@ const finalConfig = {
           ...(config.https || {}),
         }
       : config.https,
-  nordigen:
-    process.env.ACTUAL_NORDIGEN_SECRET_ID &&
-    process.env.ACTUAL_NORDIGEN_SECRET_KEY
-      ? {
-          secretId: process.env.ACTUAL_NORDIGEN_SECRET_ID,
-          secretKey: process.env.ACTUAL_NORDIGEN_SECRET_KEY,
-          ...(config.nordigen || {}),
-        }
-      : config.nordigen,
 };
 
 debug(`using port ${finalConfig.port}`);
@@ -107,21 +98,6 @@ if (finalConfig.https) {
   debugSensitive(`using https key ${finalConfig.https.key}`);
   debug(`using https cert: ${'*'.repeat(finalConfig.https.cert.length)}`);
   debugSensitive(`using https cert ${finalConfig.https.cert}`);
-}
-
-if (finalConfig.nordigen) {
-  debug(
-    `using nordigen secret id: ${'*'.repeat(
-      finalConfig.nordigen.secretId.length,
-    )}`,
-  );
-  debugSensitive(`using nordigen secret id ${finalConfig.nordigen.secretId}`);
-  debug(
-    `using nordigen secret key: ${'*'.repeat(
-      finalConfig.nordigen.secretKey.length,
-    )}`,
-  );
-  debugSensitive(`using nordigen secret key ${finalConfig.nordigen.secretKey}`);
 }
 
 export default finalConfig;

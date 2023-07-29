@@ -10,8 +10,6 @@ services:
       # Uncomment any of the lines below to set configuration options.
       # - ACTUAL_HTTPS_KEY=/data/selfhost.key
       # - ACTUAL_HTTPS_CERT=/data/selfhost.crt
-      # - ACTUAL_NORDIGEN_SECRET_ID=xxxx
-      # - ACTUAL_NORDIGEN_SECRET_KEY=xxxx
       # See all options and more details at https://actualbudget.github.io/docs/Installing/Configuration
       # !! If you are not using any of these options, remove the 'environment:' tag entirely.
     volumes:
