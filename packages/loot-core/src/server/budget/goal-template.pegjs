@@ -1,8 +1,8 @@
 // https://peggyjs.org
 
 expr
-  = priority: priority? _? percent: percent _ of _ category: name
-    { return { type: 'percentage', percent: +percent, category, priority: +priority }}
+  = priority: priority? _? percentOf:percentOf category: name
+    { return { type: 'percentage', percent: +percentOf.percent, previous: percentOf.prev, category, priority: +priority }}
   / priority: priority? _? amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
     { return { type: 'week', amount, weeks, starting, limit, priority: +priority }}
   / priority: priority? _? amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
@@ -33,6 +33,8 @@ repeat 'repeat interval'
 limit =  _? upTo _ amount: amount _ 'hold'i { return {amount: amount, hold: true } }
         / _? upTo _ amount: amount { return {amount: amount, hold: false } }
 
+percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true} }
+		/ percent:percent _ of _ { return { percent: percent, prev: false} }
 
 weekCount
   = week { return null }
