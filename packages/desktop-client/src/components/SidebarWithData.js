@@ -11,8 +11,13 @@ import { useActions } from '../hooks/useActions';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import { styles, colors } from '../style';
 
-import { Button, Input, InitialFocus, Text, Tooltip, Menu } from './common';
+import Button from './common/Button';
+import InitialFocus from './common/InitialFocus';
+import Input from './common/Input';
+import Menu from './common/Menu';
+import Text from './common/Text';
 import { Sidebar } from './sidebar';
+import { Tooltip } from './tooltips';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();

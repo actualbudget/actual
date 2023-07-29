@@ -30,15 +30,11 @@ import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
 import { styles, colors } from '../style';
 
-import {
-  View,
-  Text,
-  Button,
-  Input,
-  Tooltip,
-  IntersectionBoundary,
-  Menu,
-} from './common';
+import Button from './common/Button';
+import Input from './common/Input';
+import Menu from './common/Menu';
+import Text from './common/Text';
+import View from './common/View';
 import FixedSizeList from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import {
@@ -49,6 +45,7 @@ import {
 import { type Binding } from './spreadsheet';
 import format from './spreadsheet/format';
 import useSheetValue from './spreadsheet/useSheetValue';
+import { Tooltip, IntersectionBoundary } from './tooltips';
 
 export const ROW_HEIGHT = 32;
 const TABLE_BACKGROUND_COLOR = colors.n11;

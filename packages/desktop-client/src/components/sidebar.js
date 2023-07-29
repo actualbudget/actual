@@ -18,7 +18,11 @@ import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
 import CalendarIcon from '../icons/v2/Calendar';
 import { styles, colors } from '../style';
 
-import { View, Block, AlignedText, AnchorLink, Button } from './common';
+import AlignedText from './common/AlignedText';
+import AnchorLink from './common/AnchorLink';
+import Block from './common/Block';
+import Button from './common/Button';
+import View from './common/View';
 import { useSidebar } from './FloatableSidebar';
 import { useDraggable, useDroppable, DropHighlight } from './sort';
 import CellValue from './spreadsheet/CellValue';

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Tooltip } from '../common';
+import { Tooltip } from '../tooltips';
 
 export default function MenuTooltip({ width, onClose, children }) {
   return (

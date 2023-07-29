@@ -4,8 +4,12 @@ import { useSelector } from 'react-redux';
 import { useActions } from '../hooks/useActions';
 import { colors, styles } from '../style';
 
-import { View, Text, Button, Tooltip, Menu } from './common';
+import Button from './common/Button';
+import Menu from './common/Menu';
+import Text from './common/Text';
+import View from './common/View';
 import { useServerURL } from './ServerContext';
+import { Tooltip } from './tooltips';
 
 export default function LoggedInUser({ hideIfNoServer, style, color }) {
   let userData = useSelector(state => state.userData);
