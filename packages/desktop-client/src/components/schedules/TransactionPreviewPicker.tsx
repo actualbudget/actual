@@ -1,16 +1,16 @@
 import React, { useState, type ChangeEvent } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+
+import * as monthUtils from 'loot-core/src/shared/months';
 
 //import * as d from 'date-fns';
 
-import { savePrefs } from 'loot-core/src/server/prefs';
-import * as monthUtils from 'loot-core/src/shared/months';
-
+import { useActions } from '../../hooks/useActions';
 import { colors } from '../../style';
 import { Text, Button, Input, Select } from '../common';
 import { Row } from '../table';
 
-const lengthTypes = ['for', 'at the end of'] as const;
+const lengthTypes = ['for', 'until the end of'] as const;
 type MenuLength = (typeof lengthTypes)[number];
 
 const menuIntervals = ['days', 'weeks', 'months'] as const;
@@ -42,21 +42,26 @@ function schedOptsToNextDate(opts: SchedulePreviewOpts) {
           nextDate = monthUtils.addDays(today, opts.value * 7);
           break;
         case 'months':
-          throw new Error(`Schedule options not implemented: ${opts}`);
+          nextDate = monthUtils.addDays(today, defaultOpts.value);
+          console.log(`Schedule options not implemented: ${opts}`);
+          break;
         default:
           throw new Error(`Unrecognized schedule options: ${opts}`);
       }
       break;
-    case 'at the end of':
+    case 'until the end of':
       switch (opts.interval) {
         case 'days':
           nextDate = monthUtils.addDays(today, opts.value);
           break;
         case 'weeks':
-          throw new Error(`Schedule options not implemented: ${opts}`);
+          nextDate = monthUtils.addDays(today, defaultOpts.value);
+          console.log(`Schedule options not implemented: ${opts}`);
           break;
         case 'months':
-          throw new Error(`Schedule options not implemented: ${opts}`);
+          nextDate = monthUtils.addDays(today, defaultOpts.value);
+          console.log(`Schedule options not implemented: ${opts}`);
+          break;
         default:
           throw new Error(`Unrecognized schedule options: ${opts}`);
       }
@@ -67,14 +72,17 @@ function schedOptsToNextDate(opts: SchedulePreviewOpts) {
   return nextDate;
 }
 
-export function TransactionPreviewPicker(accountId) {
+export function TransactionPreviewPicker(transaction) {
+  console.log(transaction);
   const [showSettings, setShowSettings] = useState(false);
   const [hover, setHover] = useState(false);
 
-  let dispatch = useDispatch();
+  let { savePrefs } = useActions();
   const dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
+
+  let accountId = transaction.accountId;
 
   const schedulePreviewPref: SchedulePreviewOpts = useSelector(state => {
     return state.prefs.local[`schedulePreview-${accountId}`] || defaultOpts;
@@ -108,7 +116,7 @@ export function TransactionPreviewPicker(accountId) {
     }
 
     // Save to preferences to trigger component updates
-    dispatch(savePrefs({ [`schedulePreview-${accountId}`]: newPreviewOpts }));
+    savePrefs({ [`schedulePreview-${accountId}`]: newPreviewOpts });
   }
 
   function previewRow() {

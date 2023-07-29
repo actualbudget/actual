@@ -713,7 +713,6 @@ const Transaction = memo(function Transaction(props) {
     onNavigateToSchedule,
   } = props;
 
-  console.log('Transaction');
   let dispatchSelected = useSelectedDispatch();
 
   let [hovered, setHovered] = useState(showZeroInDeposit);
@@ -822,7 +821,7 @@ const Transaction = memo(function Transaction(props) {
   let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
   return isPreviewSetting ? (
-    <TransactionPreviewPicker accountId={accountId} />
+    <TransactionPreviewPicker transaction={transaction} />
   ) : (
     <Row
       borderColor={borderColor}
@@ -1320,7 +1319,7 @@ function isTemporaryId(id) {
 }
 
 function isPreviewSettingId(id) {
-  return id === 'previewSetting';
+  return id.indexOf('previewSetting/') !== -1;
 }
 
 export function isPreviewId(id) {
