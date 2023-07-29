@@ -107,7 +107,7 @@ function Item({
         height: 20,
       }}
     >
-      <Icon width={15} height={15} style={{ color: 'inherit' }} />
+      <Icon width={15} height={15} />
       <Block style={{ marginLeft: 8 }}>{title}</Block>
       <View style={{ flex: 1 }} />
       {button}
@@ -158,7 +158,7 @@ function SecondaryItem({ Icon, title, style, to, onClick, bold, indent = 0 }) {
         height: 16,
       }}
     >
-      {Icon && <Icon width={12} height={12} style={{ color: 'inherit' }} />}
+      {Icon && <Icon width={12} height={12} />}
       <Block style={{ marginLeft: Icon ? 8 : 0, color: 'inherit' }}>
         {title}
       </Block>
@@ -441,22 +441,22 @@ function Accounts({
 
 function ToggleButton({ style, isFloating, onFloat }) {
   return (
-    <View className="float" style={[style, { flexShrink: 0 }]}>
-      <Button bare onClick={onFloat}>
+    <View
+      className="float"
+      style={[style, { flexShrink: 0, color: colors.n5 }]}
+    >
+      <Button type="bare" onClick={onFloat}>
         {isFloating ? (
           <Pin
             style={{
               margin: -2,
               width: 15,
               height: 15,
-              color: colors.n5,
               transform: 'rotate(45deg)',
             }}
           />
         ) : (
-          <ArrowButtonLeft1
-            style={{ width: 13, height: 13, color: colors.n5 }}
-          />
+          <ArrowButtonLeft1 style={{ width: 13, height: 13 }} />
         )}
       </Button>
     </View>

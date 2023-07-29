@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import * as actions from 'loot-core/src/client/actions';
-
 import { authorizeBank } from '../../gocardless';
+import { useActions } from '../../hooks/useActions';
 import ExclamationOutline from '../../icons/v1/ExclamationOutline';
 import { colors } from '../../style';
 import { View, Button, Tooltip, ExternalLink } from '../common';
@@ -46,12 +45,11 @@ function getErrorMessage(type, code) {
   );
 }
 
-function AccountSyncCheck({
-  accounts,
-  failedAccounts,
-  unlinkAccount,
-  pushModal,
-}) {
+export default function AccountSyncCheck() {
+  let accounts = useSelector(state => state.queries.accounts);
+  let failedAccounts = useSelector(state => state.account.failedAccounts);
+  let { unlinkAccount, pushModal } = useActions();
+
   let { id } = useParams();
   let [open, setOpen] = useState(false);
   if (!failedAccounts) {
@@ -83,7 +81,7 @@ function AccountSyncCheck({
   return (
     <View>
       <Button
-        bare
+        type="bare"
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -94,14 +92,7 @@ function AccountSyncCheck({
         }}
         onClick={() => setOpen(true)}
       >
-        <ExclamationOutline
-          style={{
-            width: 14,
-            height: 14,
-            marginRight: 5,
-            color: 'currentColor',
-          }}
-        />{' '}
+        <ExclamationOutline style={{ width: 14, height: 14, marginRight: 5 }} />{' '}
         This account is experiencing connection problems. Let’s fix it.
       </Button>
 
@@ -123,7 +114,11 @@ function AccountSyncCheck({
             {showAuth ? (
               <>
                 <Button onClick={unlink}>Unlink</Button>
-                <Button primary onClick={reauth} style={{ marginLeft: 5 }}>
+                <Button
+                  type="primary"
+                  onClick={reauth}
+                  style={{ marginLeft: 5 }}
+                >
                   Reauthorize
                 </Button>
               </>
@@ -136,11 +131,3 @@ function AccountSyncCheck({
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    accounts: state.queries.accounts,
-    failedAccounts: state.account.failedAccounts,
-  }),
-  actions,
-)(AccountSyncCheck);

@@ -87,7 +87,6 @@ export function StatusBadge({ status, style }) {
         style={{
           width: 13,
           height: 13,
-          color: 'inherit',
           marginRight: 7,
         }}
       />

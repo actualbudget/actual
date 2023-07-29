@@ -686,7 +686,7 @@ export default function ScheduleDetails() {
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Button
-                bare
+                type="bare"
                 style={{
                   color:
                     state.transactionsMode === 'linked' ? colors.b4 : colors.n7,
@@ -698,7 +698,7 @@ export default function ScheduleDetails() {
                 Linked transactions
               </Button>{' '}
               <Button
-                bare
+                type="bare"
                 style={{
                   color:
                     state.transactionsMode === 'matched'
@@ -772,7 +772,7 @@ export default function ScheduleDetails() {
         <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
           Cancel
         </Button>
-        <Button primary onClick={onSave}>
+        <Button type="primary" onClick={onSave}>
           {adding ? 'Add' : 'Save'}
         </Button>
       </Stack>

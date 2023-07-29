@@ -4,7 +4,8 @@ import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, colors } from '../../style';
-import { View, Block, Modal, ButtonWithLoading, P } from '../common';
+import { View, Block, Modal, ButtonWithLoading } from '../common';
+import Paragraph from '../common/Paragraph';
 
 function getErrorMessage(error) {
   switch (error) {
@@ -49,20 +50,24 @@ function Import({ modalProps }) {
           )}
 
           <View style={{ alignItems: 'center' }}>
-            <P>
+            <Paragraph>
               To import data from YNAB4, locate where your YNAB4 data is stored.
               It is usually in your Documents folder under YNAB. Your data is a
               directory inside that with the <code>.ynab4</code> suffix.
-            </P>
-            <P>
+            </Paragraph>
+            <Paragraph>
               When you’ve located your data,{' '}
               <strong>compress it into a zip file</strong>. On macOS,
               right-click the folder and select “Compress”. On Windows,
               right-click and select “Send to &rarr; Compressed (zipped)
               folder”. Upload the zipped folder for importing.
-            </P>
+            </Paragraph>
             <View>
-              <ButtonWithLoading loading={importing} primary onClick={onImport}>
+              <ButtonWithLoading
+                type="primary"
+                loading={importing}
+                onClick={onImport}
+              >
                 Select zip file...
               </ButtonWithLoading>
             </View>

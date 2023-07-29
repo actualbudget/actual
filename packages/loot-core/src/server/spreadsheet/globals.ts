@@ -1,4 +1,4 @@
-export function number(v) {
+export function number(v: unknown): number {
   if (typeof v === 'number') {
     return v;
   } else if (typeof v === 'string') {

@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
-import * as actions from 'loot-core/src/client/actions';
 import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
@@ -11,6 +10,7 @@ import {
   looselyParseAmount,
 } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../hooks/useActions';
 import { colors, styles } from '../../style';
 import {
   View,
@@ -117,7 +117,10 @@ function formatDate(date, format) {
 
 function getFileType(filepath) {
   let m = filepath.match(/\.([^.]*)$/);
-  return m ? m[1].toLowerCase() : 'ofx';
+  if (!m) return 'ofx';
+  let rawType = m[1].toLowerCase();
+  if (rawType === 'tsv') return 'csv';
+  return rawType;
 }
 
 function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
@@ -337,12 +340,24 @@ function SubLabel({ title }) {
   );
 }
 
-function SelectField({ width, style, options, value, onChange }) {
+function SelectField({
+  style,
+  options,
+  value,
+  onChange,
+  hasHeaderRow,
+  firstTransaction,
+}) {
   return (
     <Select
       options={[
         ['choose-field', 'Choose field...'],
-        ...options.map(option => [option, option]),
+        ...options.map(option => [
+          option,
+          hasHeaderRow
+            ? option
+            : `Column ${parseInt(option) + 1} (${firstTransaction[option]})`,
+        ]),
       ]}
       value={value === null ? 'choose-field' : value}
       style={{ borderWidth: 1, width: '100%' }}
@@ -385,67 +400,69 @@ function DateFormatSelect({
   );
 }
 
-function MultipliersOption({ value, onChange }) {
+function CheckboxOption({ id, checked, disabled, onChange, children, style }) {
   return (
     <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        userSelect: 'none',
-      }}
-    >
-      <Checkbox id="add_multiplier" checked={value} onChange={onChange} />
-      <label htmlFor="add_multiplier">Add Multiplier</label>
-    </View>
-  );
-}
-
-function FlipAmountOption({ value, disabled, onChange }) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        userSelect: 'none',
-      }}
+      style={[
+        {
+          flex: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          userSelect: 'none',
+          minHeight: 28,
+        },
+        style,
+      ]}
     >
       <Checkbox
-        id="form_flip"
-        checked={value}
+        id={id}
+        checked={checked}
         disabled={disabled}
         onChange={onChange}
       />
       <label
-        htmlFor="form_flip"
+        htmlFor={id}
         style={{ userSelect: 'none', color: disabled ? colors.n6 : null }}
       >
-        Flip amount
+        {children}
       </label>
     </View>
   );
 }
 
-function SplitOption({ value, onChange }) {
+function MultiplierOption({
+  multiplierEnabled,
+  multiplierAmount,
+  onToggle,
+  onChangeAmount,
+}) {
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        userSelect: 'none',
-      }}
-    >
-      <Checkbox id="form_split" checked={value} onChange={onChange} />
-      <label htmlFor="form_split" style={{ userSelect: 'none' }}>
-        Split amount into separate inflow/outflow columns
-      </label>
+    <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
+      <CheckboxOption
+        id="add_multiplier"
+        checked={multiplierEnabled}
+        onChange={onToggle}
+      >
+        Add multiplier
+      </CheckboxOption>
+      <Input
+        type="text"
+        style={{ display: multiplierEnabled ? 'inherit' : 'none' }}
+        value={multiplierAmount}
+        placeholder="Multiplier"
+        onUpdate={onChangeAmount}
+      />
     </View>
   );
 }
 
-function FieldMappings({ transactions, mappings, onChange, splitMode }) {
+function FieldMappings({
+  transactions,
+  mappings,
+  onChange,
+  splitMode,
+  hasHeaderRow,
+}) {
   if (transactions.length === 0) {
     return null;
   }
@@ -469,6 +486,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
             value={mappings.date}
             style={{ marginRight: 5 }}
             onChange={name => onChange('date', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
           />
         </View>
         <View style={{ flex: 1 }}>
@@ -478,6 +497,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
             value={mappings.payee}
             style={{ marginRight: 5 }}
             onChange={name => onChange('payee', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
           />
         </View>
         <View style={{ flex: 1 }}>
@@ -487,6 +508,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
             value={mappings.notes}
             style={{ marginRight: 5 }}
             onChange={name => onChange('notes', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
           />
         </View>
         {splitMode ? (
@@ -497,6 +520,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
                 options={options}
                 value={mappings.outflow}
                 onChange={name => onChange('outflow', name)}
+                hasHeaderRow={hasHeaderRow}
+                firstTransaction={transactions[0]}
               />
             </View>
             <View style={{ flex: 0.5 }}>
@@ -505,6 +530,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
                 options={options}
                 value={mappings.inflow}
                 onChange={name => onChange('inflow', name)}
+                hasHeaderRow={hasHeaderRow}
+                firstTransaction={transactions[0]}
               />
             </View>
           </>
@@ -515,6 +542,8 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
               options={options}
               value={mappings.amount}
               onChange={name => onChange('amount', name)}
+              hasHeaderRow={hasHeaderRow}
+              firstTransaction={transactions[0]}
             />
           </View>
         )}
@@ -523,30 +552,14 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
   );
 }
 
-function MultipliersField({ multiplierCB, value, onChange }) {
-  const styl = multiplierCB ? 'inherit' : 'none';
-
-  return (
-    <Input
-      type="text"
-      style={{ display: styl }}
-      value={value}
-      placeholder="Optional"
-      onUpdate={onChange}
-    />
+export default function ImportTransactions({ modalProps, options }) {
+  let dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-}
+  let prefs = useSelector(state => state.prefs.local);
+  let { parseTransactions, importTransactions, getPayees, savePrefs } =
+    useActions();
 
-function ImportTransactions({
-  modalProps,
-  options,
-  dateFormat = 'MM/dd/yyyy',
-  prefs,
-  parseTransactions,
-  importTransactions,
-  getPayees,
-  savePrefs,
-}) {
   let [multiplierAmount, setMultiplierAmount] = useState('');
   let [loadingState, setLoadingState] = useState('parsing');
   let [error, setError] = useState(null);
@@ -565,7 +578,11 @@ function ImportTransactions({
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
   let [csvDelimiter, setCsvDelimiter] = useState(
-    prefs[`csv-delimiter-${accountId}`] || ',',
+    prefs[`csv-delimiter-${accountId}`] ||
+      (filename.endsWith('.tsv') ? '\t' : ','),
+  );
+  let [hasHeaderRow, setHasHeaderRow] = useState(
+    prefs[`csv-has-header-${accountId}`] ?? true,
   );
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
@@ -636,7 +653,7 @@ function ImportTransactions({
     parse(
       options.filename,
       getFileType(options.filename) === 'csv'
-        ? { delimiter: csvDelimiter }
+        ? { delimiter: csvDelimiter, hasHeaderRow }
         : null,
     );
   }, [parseTransactions, options.filename]);
@@ -674,7 +691,10 @@ function ImportTransactions({
   async function onNewFile() {
     const res = await window.Actual.openFileDialog({
       filters: [
-        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
+        {
+          name: 'Financial Files',
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv'],
+        },
       ],
     });
 
@@ -860,6 +880,7 @@ function ImportTransactions({
             onChange={onUpdateFields}
             mappings={fieldMappings}
             splitMode={splitMode}
+            hasHeaderRow={hasHeaderRow}
           />
         </View>
       )}
@@ -885,63 +906,79 @@ function ImportTransactions({
               )}
             </View>
 
-            {/*csv Delimiter */}
-            <View>
-              {filetype === 'csv' && (
-                <View style={{ marginLeft: 25 }}>
-                  <SectionLabel title="CSV DELIMITER" />
+            {/* CSV Options */}
+            {filetype === 'csv' && (
+              <View style={{ marginLeft: 25, gap: 5 }}>
+                <SectionLabel title="CSV OPTIONS" />
+                <label
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: 5,
+                    alignItems: 'baseline',
+                  }}
+                >
+                  Delimiter:
                   <Select
                     options={[
                       [',', ','],
                       [';', ';'],
+                      ['\t', 'tab'],
                     ]}
                     value={csvDelimiter}
                     onChange={value => {
                       setCsvDelimiter(value);
-                      parse(filename, { delimiter: value });
+                      parse(filename, { delimiter: value, hasHeaderRow });
                     }}
-                    style={{ borderWidth: 1, width: '100%' }}
+                    style={{ borderWidth: 1, width: 50 }}
                   />
-                </View>
-              )}
-            </View>
+                </label>
+                <CheckboxOption
+                  id="form_has_header"
+                  checked={hasHeaderRow}
+                  onChange={() => {
+                    setHasHeaderRow(!hasHeaderRow);
+                    parse(filename, {
+                      delimiter: csvDelimiter,
+                      hasHeaderRow: !hasHeaderRow,
+                    });
+                  }}
+                >
+                  File has header row
+                </CheckboxOption>
+              </View>
+            )}
 
             <View style={{ flex: 1 }} />
 
-            <View style={{ marginRight: 25 }}>
-              <SectionLabel title="IMPORT OPTIONS" />
-              <View style={{ marginTop: 5 }}>
-                <FlipAmountOption
-                  value={flipAmount}
-                  disabled={splitMode}
-                  onChange={() => {
-                    setFlipAmount(!flipAmount);
-                  }}
-                />
-              </View>
+            <View style={{ marginRight: 25, gap: 5 }}>
+              <SectionLabel title="AMOUNT OPTIONS" />
+              <CheckboxOption
+                id="form_flip"
+                checked={flipAmount}
+                disabled={splitMode}
+                onChange={() => setFlipAmount(!flipAmount)}
+              >
+                Flip amount
+              </CheckboxOption>
               {filetype === 'csv' && (
-                <View style={{ marginTop: 10 }}>
-                  <SplitOption value={splitMode} onChange={onSplitMode} />
-                </View>
+                <CheckboxOption
+                  id="form_split"
+                  checked={splitMode}
+                  onChange={onSplitMode}
+                >
+                  Split amount into separate inflow/outflow columns
+                </CheckboxOption>
               )}
-              <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                <View style={{ marginRight: 30 }}>
-                  <MultipliersOption
-                    value={multiplierEnabled}
-                    onChange={() => {
-                      setMultiplierEnabled(!multiplierEnabled);
-                      setMultiplierAmount('');
-                    }}
-                  />
-                </View>
-                <View style={{ width: 75 }}>
-                  <MultipliersField
-                    multiplierCB={multiplierEnabled}
-                    value={multiplierAmount}
-                    onChange={onMultiplierChange}
-                  />
-                </View>
-              </View>
+              <MultiplierOption
+                multiplierEnabled={multiplierEnabled}
+                multiplierAmount={multiplierAmount}
+                onToggle={() => {
+                  setMultiplierEnabled(!multiplierEnabled);
+                  setMultiplierAmount('');
+                }}
+                onChangeAmount={onMultiplierChange}
+              />
             </View>
           </Stack>
         </View>
@@ -957,7 +994,7 @@ function ImportTransactions({
           }}
         >
           <ButtonWithLoading
-            primary
+            type="primary"
             disabled={transactions.length === 0}
             loading={loadingState === 'importing'}
             onClick={onImport}
@@ -969,11 +1006,3 @@ function ImportTransactions({
     </Modal>
   );
 }
-
-export default connect(
-  state => ({
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    prefs: state.prefs.local,
-  }),
-  actions,
-)(ImportTransactions);

@@ -88,7 +88,7 @@ function subfieldToOptions(field, subfield) {
 function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
-      bare
+      type="bare"
       style={[
         { backgroundColor: colors.n10, marginBottom: 5 },
         style,
@@ -109,9 +109,15 @@ function updateFilterReducer(state, action) {
     case 'set-op': {
       let type = FIELD_TYPES.get(state.field);
       let value = state.value;
-      if (type === 'id' && action.op === 'contains') {
-        // Clear out the value if switching between contains for
-        // the id type
+      if (
+        (type === 'id' || type === 'string') &&
+        (action.op === 'contains' ||
+          action.op === 'is' ||
+          action.op === 'doesNotContain' ||
+          action.op === 'isNot')
+      ) {
+        // Clear out the value if switching between contains or
+        // is/oneof for the id or string type
         value = null;
       }
       return { ...state, op: action.op, value };
@@ -147,7 +153,7 @@ function ConfigureField({
   }, [op]);
 
   let type = FIELD_TYPES.get(field);
-  let ops = TYPE_INFO[type].ops;
+  let ops = TYPE_INFO[type].ops.filter(op => op !== 'isbetween');
 
   // Month and year fields are quite hacky right now! Figure out how
   // to clean this up later
@@ -159,7 +165,7 @@ function ConfigureField({
     <Tooltip
       position="bottom-left"
       style={{ padding: 15 }}
-      width={250}
+      width={275}
       onClose={() => dispatch({ type: 'close' })}
     >
       <FocusScope>
@@ -232,14 +238,40 @@ function ConfigureField({
                   }}
                 />,
               ]
-            : ops.map(currOp => (
-                <OpButton
-                  key={currOp}
-                  op={currOp}
-                  selected={currOp === op}
-                  onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                />
-              ))}
+            : [
+                <Stack
+                  direction="row"
+                  align="flex-start"
+                  spacing={1}
+                  style={{ flexWrap: 'wrap' }}
+                >
+                  {ops.slice(0, 3).map(currOp => (
+                    <OpButton
+                      key={currOp}
+                      op={currOp}
+                      selected={currOp === op}
+                      onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                    />
+                  ))}
+                </Stack>,
+                <Stack
+                  direction="row"
+                  align="flex-start"
+                  spacing={1}
+                  style={{ flexWrap: 'wrap' }}
+                >
+                  {ops.slice(3, ops.length).map(currOp => (
+                    <View>
+                      <OpButton
+                        key={currOp}
+                        op={currOp}
+                        selected={currOp === op}
+                        onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                      />
+                    </View>
+                  ))}
+                </Stack>,
+              ]}
         </Stack>
 
         <form action="#">
@@ -248,19 +280,27 @@ function ConfigureField({
               inputRef={inputRef}
               field={field}
               subfield={subfield}
-              type={type === 'id' && op === 'contains' ? 'string' : type}
+              type={
+                type === 'id' && (op === 'contains' || op === 'doesNotContain')
+                  ? 'string'
+                  : type
+              }
               value={value}
-              multi={op === 'oneOf'}
+              multi={op === 'oneOf' || op === 'notOneOf'}
               style={{ marginTop: 10 }}
               onChange={v => dispatch({ type: 'set-value', value: v })}
             />
           )}
 
-          <Stack direction="row" justify="flex-end" align="center">
+          <Stack
+            direction="row"
+            justify="flex-end"
+            align="center"
+            style={{ marginTop: 15 }}
+          >
             <View style={{ flex: 1 }} />
             <Button
-              primary
-              style={{ marginTop: 15 }}
+              type="primary"
               onClick={e => {
                 e.preventDefault();
                 onApply({
@@ -363,14 +403,9 @@ export function FilterButton({ onApply }) {
 
   return (
     <View>
-      <Button bare onClick={() => dispatch({ type: 'select-field' })}>
+      <Button type="bare" onClick={() => dispatch({ type: 'select-field' })}>
         <SettingsSliderAlternate
-          style={{
-            width: 16,
-            height: 16,
-            color: 'inherit',
-            marginRight: 5,
-          }}
+          style={{ width: 16, height: 16, marginRight: 5 }}
         />{' '}
         Filter
       </Button>
@@ -464,7 +499,7 @@ function FilterExpression({
       ]}
     >
       <Button
-        bare
+        type="bare"
         disabled={customName != null}
         onClick={() => setEditing(true)}
         style={{ marginRight: -7 }}
@@ -477,23 +512,22 @@ function FilterExpression({
               <Text style={{ color: colors.p4 }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+              <Text style={{ color: colors.n3 }}>{friendlyOp(op, null)}</Text>{' '}
               <Value
                 value={value}
                 field={field}
                 inline={true}
-                valueIsRaw={op === 'contains'}
+                valueIsRaw={op === 'contains' || op === 'doesNotContain'}
               />
             </>
           )}
         </div>
       </Button>
-      <Button bare onClick={onDelete}>
+      <Button type="bare" onClick={onDelete}>
         <DeleteIcon
           style={{
             width: 8,
             height: 8,
-            color: colors.n4,
             margin: 5,
             marginLeft: 3,
           }}

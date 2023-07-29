@@ -10,12 +10,12 @@ import {
   Modal,
   Button,
   ButtonWithLoading,
-  P,
   ModalButtons,
   Input,
   InitialFocus,
   ExternalLink,
 } from '../common';
+import Paragraph from '../common/Paragraph';
 
 export default function FixEncryptionKey({
   modalProps,
@@ -66,22 +66,22 @@ export default function FixEncryptionKey({
               : 'This file is encrypted'}
           </Text>
           {hasExistingKey ? (
-            <P>
+            <Paragraph>
               This file was encrypted with a different key than you are
               currently using. This probably means you changed your password.
               Enter your current password to update your key.{' '}
               <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                 Learn more
               </ExternalLink>
-            </P>
+            </Paragraph>
           ) : (
-            <P>
+            <Paragraph>
               We don’t have a key that encrypts or decrypts this file. Enter the
               password for this file to create the key for encryption.{' '}
               <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                 Learn more
               </ExternalLink>
-            </P>
+            </Paragraph>
           )}
           <form
             onSubmit={e => {
@@ -136,8 +136,8 @@ export default function FixEncryptionKey({
                 Back
               </Button>
               <ButtonWithLoading
+                type="primary"
                 loading={loading}
-                primary
                 onClick={onUpdateKey}
               >
                 {hasExistingKey ? 'Update key' : 'Create key'}

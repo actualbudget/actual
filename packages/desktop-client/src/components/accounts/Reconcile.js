@@ -73,7 +73,7 @@ export function ReconcilingMessage({
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
-          <Button primary onClick={onDone}>
+          <Button type="primary" onClick={onDone}>
             Done Reconciling
           </Button>
         </View>
@@ -120,7 +120,7 @@ export function ReconcileTooltip({ account, onReconcile, onClose }) {
               />
             </InitialFocus>
           )}
-          <Button primary>Reconcile</Button>
+          <Button type="primary">Reconcile</Button>
         </form>
       </View>
     </Tooltip>

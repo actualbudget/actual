@@ -51,7 +51,7 @@ const Alert = ({
           marginRight: 5,
         }}
       >
-        <Icon width={13} style={{ color, marginTop: 2 }} />
+        <Icon width={13} style={{ marginTop: 2 }} />
       </View>
       <Text style={{ zIndex: 1, lineHeight: 1.5 }}>{children}</Text>
     </View>

@@ -95,7 +95,11 @@ export default function Login() {
           }
           style={{ flex: 1, marginRight: 10 }}
         />
-        <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
+        <ButtonWithLoading
+          type="primary"
+          loading={loading}
+          style={{ fontSize: 15 }}
+        >
           Sign in
         </ButtonWithLoading>
       </form>
@@ -107,7 +111,7 @@ export default function Login() {
         }}
       >
         <Button
-          bare
+          type="bare"
           style={{ fontSize: 15, color: colors.b4, marginLeft: 10 }}
           onClick={onDemo}
         >

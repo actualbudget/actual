@@ -9,7 +9,7 @@ import {
   isElectron,
 } from 'loot-core/src/shared/environment';
 
-import { useSetThemeColor } from '../../hooks';
+import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors } from '../../style';
 import { View, Text, Button, ButtonWithLoading } from '../common';
 import { useServerURL, useSetServerURL } from '../ServerContext';
@@ -139,13 +139,16 @@ export default function ConfigServer() {
           onChange={e => setUrl(e.target.value)}
           style={{ flex: 1, marginRight: 10 }}
         />
-        <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
+        <ButtonWithLoading
+          type="primary"
+          loading={loading}
+          style={{ fontSize: 15 }}
+        >
           OK
         </ButtonWithLoading>
         {currentUrl && (
           <Button
-            bare
-            type="button"
+            type="bare"
             style={{ fontSize: 15, marginLeft: 10 }}
             onClick={() => navigate(-1)}
           >
@@ -163,14 +166,14 @@ export default function ConfigServer() {
         }}
       >
         {currentUrl ? (
-          <Button bare style={{ color: colors.n4 }} onClick={onSkip}>
+          <Button type="bare" style={{ color: colors.n4 }} onClick={onSkip}>
             Stop using a server
           </Button>
         ) : (
           <>
             {!isElectron() && (
               <Button
-                bare
+                type="bare"
                 style={{
                   color: colors.n4,
                   margin: 5,
@@ -182,7 +185,7 @@ export default function ConfigServer() {
               </Button>
             )}
             <Button
-              bare
+              type="bare"
               style={{ color: colors.n4, margin: 5 }}
               onClick={onSkip}
             >
@@ -191,7 +194,7 @@ export default function ConfigServer() {
 
             {isNonProductionEnvironment() && (
               <Button
-                primary
+                type="primary"
                 style={{ marginLeft: 15 }}
                 onClick={onCreateTestFile}
               >

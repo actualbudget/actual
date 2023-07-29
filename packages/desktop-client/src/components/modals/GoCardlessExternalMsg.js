@@ -14,12 +14,12 @@ import {
   View,
   Modal,
   Button,
-  P,
   LinkButton,
   Menu,
   Tooltip,
   ExternalLink,
 } from '../common';
+import Paragraph from '../common/Paragraph';
 import { FormField, FormLabel } from '../forms';
 
 import { COUNTRY_OPTIONS } from './countries';
@@ -198,7 +198,7 @@ export default function GoCardlessExternalMsg({
 
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Button
-            primary
+            type="primary"
             style={{
               padding: '10px 0',
               fontSize: 15,
@@ -210,11 +210,15 @@ export default function GoCardlessExternalMsg({
           >
             Link bank in browser &rarr;
           </Button>
-          <Button bare onClick={() => setMenuOpen(true)} aria-label="Menu">
+          <Button
+            type="bare"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Menu"
+          >
             <DotsHorizontalTriple
               width={15}
               height={15}
-              style={{ color: 'inherit', transform: 'rotateZ(90deg)' }}
+              style={{ transform: 'rotateZ(90deg)' }}
             />
             {menuOpen && (
               <Tooltip
@@ -253,11 +257,11 @@ export default function GoCardlessExternalMsg({
     >
       {() => (
         <View>
-          <P style={{ fontSize: 15 }}>
+          <Paragraph style={{ fontSize: 15 }}>
             To link your bank account, you will be redirected to a new page
             where GoCardless will ask to connect to your bank. GoCardless will
             not be able to withdraw funds from your accounts.
-          </P>
+          </Paragraph>
 
           {error && renderError(error)}
 
@@ -285,7 +289,7 @@ export default function GoCardlessExternalMsg({
             </View>
           ) : success ? (
             <Button
-              primary
+              type="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,
@@ -302,10 +306,10 @@ export default function GoCardlessExternalMsg({
             renderLinkButton()
           ) : (
             <>
-              <P style={{ color: colors.r5 }}>
+              <Paragraph style={{ color: colors.r5 }}>
                 GoCardless integration has not yet been configured.
-              </P>
-              <Button primary onClick={onGoCardlessInit}>
+              </Paragraph>
+              <Button type="primary" onClick={onGoCardlessInit}>
                 Configure GoCardless integration
               </Button>
             </>

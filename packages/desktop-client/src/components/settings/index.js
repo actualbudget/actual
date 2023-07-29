@@ -1,17 +1,18 @@
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { media } from 'glamor';
 
-import * as actions from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
+import { useActions } from '../../hooks/useActions';
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
+import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import tokens from '../../tokens';
-import { withThemeColor } from '../../util/withThemeColor';
 import { View, Text, Button, Input, ExternalLink } from '../common';
 import { FormField, FormLabel } from '../forms';
 import { Page } from '../Page';
@@ -24,6 +25,7 @@ import FixSplitsTool from './FixSplits';
 import FormatSettings from './Format';
 import GlobalSettings from './Global';
 import { ResetCache, ResetSync } from './Reset';
+import ThemeSettings from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
@@ -77,7 +79,10 @@ function IDName({ children }) {
   return <Text style={{ fontWeight: 500 }}>{children}</Text>;
 }
 
-function AdvancedAbout({ prefs }) {
+function AdvancedAbout() {
+  let budgetId = useSelector(state => state.prefs.local.id);
+  let groupId = useSelector(state => state.prefs.local.groupId);
+
   return (
     <Setting>
       <Text>
@@ -87,10 +92,10 @@ function AdvancedAbout({ prefs }) {
         to access the budget on the server.
       </Text>
       <Text>
-        <IDName>Budget ID:</IDName> {prefs.id}
+        <IDName>Budget ID:</IDName> {budgetId}
       </Text>
       <Text style={{ color: colors.n5 }}>
-        <IDName>Sync ID:</IDName> {prefs.groupId || '(none)'}
+        <IDName>Sync ID:</IDName> {groupId || '(none)'}
       </Text>
       {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
       {/* <Text>
@@ -103,16 +108,14 @@ function AdvancedAbout({ prefs }) {
   );
 }
 
-function Settings({
-  loadPrefs,
-  savePrefs,
-  saveGlobalPrefs,
-  prefs,
-  globalPrefs,
-  pushModal,
-  resetSync,
-  closeBudget,
-}) {
+export default function Settings() {
+  let floatingSidebar = useSelector(
+    state => state.prefs.global.floatingSidebar,
+  );
+  let budgetName = useSelector(state => state.prefs.local.budgetName);
+
+  let { loadPrefs, closeBudget } = useActions();
+
   useEffect(() => {
     let unlisten = listen('prefs-updated', () => {
       loadPrefs();
@@ -123,12 +126,13 @@ function Settings({
   }, [loadPrefs]);
 
   const { isNarrowWidth } = useResponsive();
+  const themesFlag = useFeatureFlag('themes');
 
+  useSetThemeColor(colors.n11);
   return (
     <View
       style={{
-        marginInline:
-          globalPrefs.floatingSidebar && !isNarrowWidth ? 'auto' : 0,
+        marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
       <Page
@@ -150,11 +154,7 @@ function Settings({
               {/* The only spot to close a budget on mobile */}
               <FormField>
                 <FormLabel title="Budget Name" />
-                <Input
-                  value={prefs.budgetName}
-                  disabled
-                  style={{ color: '#999' }}
-                />
+                <Input value={budgetName} disabled style={{ color: '#999' }} />
               </FormField>
               <Button onClick={closeBudget}>Close Budget</Button>
             </View>
@@ -162,36 +162,22 @@ function Settings({
 
           <About />
 
-          {!Platform.isBrowser && (
-            <GlobalSettings
-              globalPrefs={globalPrefs}
-              saveGlobalPrefs={saveGlobalPrefs}
-            />
-          )}
+          {!Platform.isBrowser && <GlobalSettings />}
 
-          <FormatSettings prefs={prefs} savePrefs={savePrefs} />
-          <EncryptionSettings prefs={prefs} pushModal={pushModal} />
-          <ExportBudget prefs={prefs} />
+          {themesFlag && <ThemeSettings />}
+          <FormatSettings />
+          <EncryptionSettings />
+          <ExportBudget />
 
           <AdvancedToggle>
-            <AdvancedAbout prefs={prefs} />
+            <AdvancedAbout />
             <ResetCache />
-            <ResetSync isEnabled={!!prefs.groupId} resetSync={resetSync} />
+            <ResetSync />
             <FixSplitsTool />
-            <ExperimentalFeatures prefs={prefs} savePrefs={savePrefs} />
+            <ExperimentalFeatures />
           </AdvancedToggle>
         </View>
       </Page>
     </View>
   );
 }
-
-export default withThemeColor(colors.n11)(
-  connect(
-    state => ({
-      prefs: state.prefs.local,
-      globalPrefs: state.prefs.global,
-    }),
-    actions,
-  )(Settings),
-);

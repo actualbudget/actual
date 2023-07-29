@@ -19,20 +19,13 @@ import useSelected, {
   useSelectedItems,
   useSelectedDispatch,
 } from '../../hooks/useSelected';
+import useStableCallback from '../../hooks/useStableCallback';
 import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { colors } from '../../style';
-import {
-  useStableCallback,
-  View,
-  Text,
-  Input,
-  Button,
-  Tooltip,
-  Menu,
-} from '../common';
+import { View, Text, Input, Button, Tooltip, Menu } from '../common';
 import {
   Table,
   TableHeader,
@@ -81,7 +74,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
             <>Create rule</>
           )}
         </Text>
-        <ArrowThinRight style={{ width: 8, height: 8, color: colors.g1 }} />
+        <ArrowThinRight style={{ width: 8, height: 8 }} />
       </CellButton>
     </Cell>
   );
@@ -338,7 +331,6 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
 export const ManagePayees = forwardRef(
   (
     {
-      modalProps,
       payees,
       ruleCounts,
       orphanedPayees,
@@ -487,7 +479,7 @@ export const ManagePayees = forwardRef(
         >
           <View>
             <Button
-              bare
+              type="bare"
               style={{ marginRight: 10 }}
               disabled={buttonsDisabled}
               onClick={() => setMenuOpen(true)}
@@ -513,7 +505,7 @@ export const ManagePayees = forwardRef(
             {(orphanedOnly ||
               (orphanedPayees && orphanedPayees.length > 0)) && (
               <Button
-                bare
+                type="bare"
                 style={{ marginRight: 10 }}
                 onClick={() => {
                   setOrphanedOnly(!orphanedOnly);

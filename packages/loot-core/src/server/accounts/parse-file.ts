@@ -14,7 +14,7 @@ export type ParseFileResult = {
 
 export async function parseFile(
   filepath,
-  options?: unknown,
+  options?: { delimiter?: string; hasHeaderRow: boolean },
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let m = filepath.match(/\.[^.]*$/);
@@ -26,6 +26,7 @@ export async function parseFile(
       case '.qif':
         return parseQIF(filepath);
       case '.csv':
+      case '.tsv':
         return parseCSV(filepath, options);
       case '.ofx':
       case '.qfx':
@@ -43,7 +44,9 @@ export async function parseFile(
 
 async function parseCSV(
   filepath,
-  options: { delimiter?: string } = {},
+  options: { delimiter?: string; hasHeaderRow: boolean } = {
+    hasHeaderRow: true,
+  },
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
@@ -51,7 +54,7 @@ async function parseCSV(
   let data;
   try {
     data = csv2json(contents, {
-      columns: true,
+      columns: options.hasHeaderRow,
       bom: true,
       delimiter: options.delimiter || ',',
       // eslint-disable-next-line rulesdir/typography
@@ -127,7 +130,7 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
     transactions: data.map(trans => ({
       amount: trans.amount,
       imported_id: trans.fi_id,
-      date: trans.date ? dayFromDate(trans.date * 1000) : null,
+      date: trans.date ? dayFromDate(new Date(trans.date * 1000)) : null,
       payee_name: useName ? trans.name : trans.memo,
       imported_payee: useName ? trans.name : trans.memo,
       notes: useName ? trans.memo || null : null, //memo used for payee

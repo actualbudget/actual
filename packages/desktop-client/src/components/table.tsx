@@ -720,15 +720,14 @@ export function SelectCell({
             selected && {
               backgroundColor: partial ? colors.b9 : colors.b5,
               borderColor: partial ? colors.b9 : colors.b5,
+              color: 'white',
             },
           ]}
           onEdit={onEdit}
           onSelect={onSelect}
           clickBehavior="none"
         >
-          {selected && (
-            <Checkmark width={6} height={6} style={{ color: 'white' }} />
-          )}
+          {selected && <Checkmark width={6} height={6} />}
         </CellButton>
       )}
     </Cell>
@@ -873,7 +872,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
       <KeyHandlers keys={keyHandlers || {}} />
 
       <Button
-        bare
+        type="bare"
         style={{ color: colors.b3 }}
         onClick={() => setMenuOpen(true)}
       >
@@ -1061,12 +1060,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
         list.current?.setRowAnimation(true);
         listInitialized.current = true;
       }
-    });
-
-    function renderRow({ index, style, key }) {
-      let item = items[index];
-      let editing = editingId === item.id;
-      let selected = isSelected && isSelected(item.id);
 
       if (scrollContainer.current && saveScrollWidth) {
         saveScrollWidth(
@@ -1076,6 +1069,12 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
           scrollContainer.current ? scrollContainer.current.clientWidth : 0,
         );
       }
+    });
+
+    function renderRow({ index, style, key }) {
+      let item = items[index];
+      let editing = editingId === item.id;
+      let selected = isSelected && isSelected(item.id);
 
       let row = renderItem({
         item,

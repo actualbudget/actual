@@ -1,7 +1,5 @@
 import React, { createContext, useState, useContext, useMemo } from 'react';
-import { connect, useSelector } from 'react-redux';
-
-import * as actions from 'loot-core/src/client/actions';
+import { useSelector } from 'react-redux';
 
 import { useResponsive } from '../ResponsiveProvider';
 
@@ -39,7 +37,11 @@ export function useSidebar() {
   );
 }
 
-function Sidebar({ floatingSidebar }) {
+export default function Sidebar() {
+  let floatingSidebar = useSelector(
+    state => state.prefs.global.floatingSidebar,
+  );
+
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
 
@@ -82,8 +84,3 @@ function Sidebar({ floatingSidebar }) {
     </View>
   );
 }
-
-export default connect(
-  state => ({ floatingSidebar: state.prefs.global.floatingSidebar }),
-  actions,
-)(Sidebar);

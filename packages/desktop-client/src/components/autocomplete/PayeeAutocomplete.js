@@ -8,12 +8,11 @@ import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
 import { colors } from '../../style';
-import { View } from '../common';
+import { View, Button } from '../common';
 
 import Autocomplete, {
   defaultFilterSuggestion,
   AutocompleteFooter,
-  AutocompleteFooterButton,
 } from './Autocomplete';
 
 function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
@@ -97,11 +96,7 @@ function PayeeList({
               <Add
                 width={8}
                 height={8}
-                style={{
-                  color: colors.g8,
-                  marginRight: 5,
-                  display: 'inline-block',
-                }}
+                style={{ marginRight: 5, display: 'inline-block' }}
               />
               Create Payee “{inputValue}”
             </View>
@@ -331,33 +326,21 @@ export default function PayeeAutocomplete({
           footer={
             <AutocompleteFooter embedded={embedded}>
               {showMakeTransfer && (
-                <AutocompleteFooterButton
-                  title="Make Transfer"
-                  style={[
-                    showManagePayees && { marginBottom: 5 },
-                    focusTransferPayees && {
-                      backgroundColor: colors.y8,
-                      color: colors.g2,
-                      borderColor: colors.y8,
-                    },
-                  ]}
-                  hoveredStyle={
-                    focusTransferPayees && {
-                      backgroundColor: colors.y8,
-                      colors: colors.y2,
-                    }
-                  }
+                <Button
+                  type={focusTransferPayees ? 'menuSelected' : 'menu'}
+                  style={showManagePayees && { marginBottom: 5 }}
                   onClick={() => {
                     onUpdate?.(null);
                     setFocusTransferPayees(!focusTransferPayees);
                   }}
-                />
+                >
+                  Make Transfer
+                </Button>
               )}
               {showManagePayees && (
-                <AutocompleteFooterButton
-                  title="Manage Payees"
-                  onClick={() => onManagePayees()}
-                />
+                <Button type="menu" onClick={() => onManagePayees()}>
+                  Manage Payees
+                </Button>
               )}
             </AutocompleteFooter>
           }

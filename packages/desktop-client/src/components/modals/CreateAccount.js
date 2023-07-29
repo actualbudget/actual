@@ -9,11 +9,11 @@ import {
   View,
   Text,
   Modal,
-  P,
   Button,
   ButtonWithLoading,
   ExternalLink,
 } from '../common';
+import Paragraph from '../common/Paragraph';
 
 export default function CreateAccount({ modalProps, syncServerStatus }) {
   const dispatch = useDispatch();
@@ -52,7 +52,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
         <View style={{ maxWidth: 500, gap: 30 }}>
           <View style={{ gap: 10 }}>
             <Button
-              primary
+              type="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,
@@ -111,7 +111,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                 >
                   Set up GoCardless for bank sync
                 </Button>
-                <P style={{ fontSize: 15 }}>
+                <Paragraph style={{ fontSize: 15 }}>
                   Connect to an Actual server to set up{' '}
                   <ExternalLink
                     to="https://actualbudget.org/docs/advanced/bank-sync"
@@ -120,7 +120,7 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                     automatic syncing with GoCardless
                   </ExternalLink>
                   .
-                </P>
+                </Paragraph>
               </>
             )}
           </View>

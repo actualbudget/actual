@@ -121,7 +121,7 @@ export function Balances({
     >
       <Button
         data-testid="account-balance"
-        bare
+        type="bare"
         onClick={onToggleExtraBalances}
         style={{
           '& svg': {
