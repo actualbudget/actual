@@ -191,6 +191,10 @@ async function processTemplate(month, force, category_templates) {
                   ].join('\n'),
                 ),
             );
+            let prev_budgeted = await getSheetValue(
+              sheetName,
+              `budget-${category.id}`,
+            );
             let { amount: to_budget, errors: applyErrors } =
               await applyCategoryTemplate(
                 category,
@@ -200,13 +204,14 @@ async function processTemplate(month, force, category_templates) {
                 remainder_scale,
                 available_start,
                 available_remaining,
+                prev_budgeted,
                 force,
               );
             if (to_budget != null) {
               num_applied++;
               templateBudget.push({
                 category: category.id,
-                amount: to_budget,
+                amount: to_budget + prev_budgeted,
               });
               available_remaining -= to_budget;
             }
@@ -307,6 +312,7 @@ async function applyCategoryTemplate(
   remainder_scale,
   available_start,
   budgetAvailable,
+  budgeted,
   force,
 ) {
   let current_month = `${month}-01`;
@@ -377,10 +383,9 @@ async function applyCategoryTemplate(
     });
   }
   let sheetName = monthUtils.sheetForMonth(month);
-  let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
-  let to_budget = budgeted;
+  let to_budget = 0;
   let limit;
   let hold;
   let last_month_balance = balance - spent - budgeted;
@@ -549,8 +554,19 @@ async function applyCategoryTemplate(
       case 'percentage': {
         let percent = template.percent;
         let monthlyIncome = 0;
+
         if (template.category.toLowerCase() === 'all income') {
-          monthlyIncome = await getSheetValue(sheetName, `total-income`);
+          if (template.previous) {
+            let sheetName_lastmonth = monthUtils.sheetForMonth(
+              monthUtils.addMonths(month, -1),
+            );
+            monthlyIncome = await getSheetValue(
+              sheetName_lastmonth,
+              'total-income',
+            );
+          } else {
+            monthlyIncome = await getSheetValue(sheetName, `total-income`);
+          }
         } else if (template.category.toLowerCase() === 'available funds') {
           monthlyIncome = available_start;
         } else {
@@ -563,11 +579,22 @@ async function applyCategoryTemplate(
             errors.push(`Could not find category “${template.category}”`);
             return { errors };
           }
-          monthlyIncome = await getSheetValue(
-            sheetName,
-            `sum-amount-${income_category.id}`,
-          );
+          if (template.previous) {
+            let sheetName_lastmonth = monthUtils.sheetForMonth(
+              monthUtils.addMonths(month, -1),
+            );
+            monthlyIncome = await getSheetValue(
+              sheetName_lastmonth,
+              `sum-amount-${income_category.id}`,
+            );
+          } else {
+            monthlyIncome = await getSheetValue(
+              sheetName,
+              `sum-amount-${income_category.id}`,
+            );
+          }
         }
+
         let increment = Math.max(
           0,
           Math.round(monthlyIncome * (percent / 100)),
@@ -669,8 +696,8 @@ async function applyCategoryTemplate(
               ? Math.round(template.weight)
               : Math.round(remainder_scale * template.weight);
           // can over budget with the rounding, so checking that
-          if (to_budget >= budgetAvailable + budgeted) {
-            to_budget = budgetAvailable + budgeted;
+          if (to_budget >= budgetAvailable) {
+            to_budget = budgetAvailable;
             // check if there is 1 cent leftover from rounding
           } else if (budgetAvailable - to_budget === 1) {
             to_budget = to_budget + 1;
