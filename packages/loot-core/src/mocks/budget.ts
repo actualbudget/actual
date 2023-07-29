@@ -456,7 +456,7 @@ async function createBudget(accounts, payees, groups) {
     let spent: number = sheet.getCellValue(
       monthUtils.sheetForMonth(month),
       `sum-amount-${cat.id}`,
-    ) as number;
+    );
 
     if (spent < 0) {
       setBudget(month, cat, -spent);
@@ -514,10 +514,7 @@ async function createBudget(accounts, payees, groups) {
           month <= monthUtils.currentMonth()
         ) {
           let sheetName = monthUtils.sheetForMonth(month);
-          let toBudget: number = sheet.getCellValue(
-            sheetName,
-            'to-budget',
-          ) as number;
+          let toBudget: number = sheet.getCellValue(sheetName, 'to-budget');
           let available = toBudget - prevSaved;
 
           if (available - 403000 > 0) {
@@ -536,7 +533,7 @@ async function createBudget(accounts, payees, groups) {
   await sheet.waitOnSpreadsheet();
 
   let sheetName = monthUtils.sheetForMonth(monthUtils.currentMonth());
-  let toBudget: number = sheet.getCellValue(sheetName, 'to-budget') as number;
+  let toBudget: number = sheet.getCellValue(sheetName, 'to-budget');
   if (toBudget < 0) {
     await addTransactions(primaryAccount.id, [
       {
