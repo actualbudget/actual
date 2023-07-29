@@ -1,14 +1,18 @@
 import { Timestamp } from '@actual-app/crdt';
 
 import * as fs from '../platform/server/fs';
+import type { LocalPrefs } from '../types/prefs';
 
-import { sendMessages } from './sync';
+import { Message, sendMessages } from './sync';
 
-let prefs = null;
+export const BUDGET_TYPES = ['report', 'rollover'] as const;
+export type BudgetType = (typeof BUDGET_TYPES)[number];
 
-export async function loadPrefs(id?) {
+let prefs: LocalPrefs = null;
+
+export async function loadPrefs(id?: string): Promise<LocalPrefs> {
   if (process.env.NODE_ENV === 'test' && !id) {
-    prefs = { dummyTestPrefs: true };
+    prefs = getDefaultPrefs('test', 'test_LocalPrefs');
     return prefs;
   }
 
@@ -42,12 +46,15 @@ export async function loadPrefs(id?) {
   return prefs;
 }
 
-export async function savePrefs(prefsToSet, { avoidSync = false } = {}) {
+export async function savePrefs(
+  prefsToSet: LocalPrefs,
+  { avoidSync = false } = {},
+): Promise<void> {
   Object.assign(prefs, prefsToSet);
 
   if (!avoidSync) {
     // Sync whitelisted prefs
-    let messages = Object.keys(prefsToSet)
+    const messages: Message[] = Object.keys(prefsToSet)
       .map(key => {
         if (key === 'budgetType' || key === 'budgetName') {
           return {
@@ -67,30 +74,20 @@ export async function savePrefs(prefsToSet, { avoidSync = false } = {}) {
     }
   }
 
-  if (!prefs.dummyTestPrefs) {
+  if (process.env.NODE_ENV !== 'test') {
     let prefsPath = fs.join(fs.getBudgetDir(prefs.id), 'metadata.json');
     await fs.writeFile(prefsPath, JSON.stringify(prefs));
   }
 }
 
-export function unloadPrefs() {
+export function unloadPrefs(): void {
   prefs = null;
 }
 
-export function getPrefs() {
+export function getPrefs(): LocalPrefs {
   return prefs;
 }
 
-export function getDefaultPrefs(id, budgetName) {
+export function getDefaultPrefs(id: string, budgetName: string): LocalPrefs {
   return { id, budgetName };
-}
-
-export async function readPrefs(id) {
-  const fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
-
-  try {
-    return JSON.parse(await fs.readFile(fullpath));
-  } catch (e) {
-    return null;
-  }
 }

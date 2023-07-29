@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 
-import type { Theme } from 'loot-core/src/client/state-types/prefs';
+import type { Theme } from 'loot-core/src/types/prefs';
 
 import * as darkTheme from './themes/dark';
 import * as lightTheme from './themes/light';

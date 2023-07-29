@@ -5,6 +5,18 @@ import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
 import Graph from './graph-data-structure';
 import { unresolveName, resolveName } from './util';
 
+type Node = {
+  name: string;
+  expr: string | number | boolean;
+  value: string | number | boolean;
+  sheet: unknown;
+  query?: string;
+  sql?: { sqlPieces: unknown; state: { dependencies: unknown[] } };
+  dynamic?: boolean;
+  _run?: unknown;
+  _dependencies?: string[];
+};
+
 export default class Spreadsheet {
   _meta;
   cacheBarrier;
@@ -12,7 +24,7 @@ export default class Spreadsheet {
   dirtyCells;
   events;
   graph;
-  nodes;
+  nodes: Map<string, Node>;
   running;
   saveCache;
   setCacheStatus;
@@ -21,7 +33,7 @@ export default class Spreadsheet {
   constructor(saveCache?: unknown, setCacheStatus?: unknown) {
     // @ts-expect-error Graph should be converted to class
     this.graph = new Graph();
-    this.nodes = new Map();
+    this.nodes = new Map<string, Node>();
     this.transactionDepth = 0;
     this.saveCache = saveCache;
     this.setCacheStatus = setCacheStatus;
@@ -43,7 +55,7 @@ export default class Spreadsheet {
 
   // Spreadsheet interface
 
-  _getNode(name) {
+  _getNode(name: string): Node {
     const { sheet } = unresolveName(name);
 
     if (!this.nodes.has(name)) {
@@ -293,13 +305,13 @@ export default class Spreadsheet {
     });
   }
 
-  load(name, value) {
+  load(name: string, value: string | number | boolean): void {
     const node = this._getNode(name);
     node.expr = value;
     node.value = value;
   }
 
-  create(name, value) {
+  create(name: string, value: string | number | boolean) {
     return this.transaction(() => {
       const node = this._getNode(name);
       node.expr = value;
@@ -308,24 +320,24 @@ export default class Spreadsheet {
     });
   }
 
-  set(name, value) {
+  set(name: string, value: string | number | boolean): void {
     this.create(name, value);
   }
 
-  recompute(name) {
+  recompute(name: string): void {
     this.transaction(() => {
       this.dirtyCells.push(name);
     });
   }
 
-  recomputeAll() {
+  recomputeAll(): void {
     // Recompute everything!
     this.transaction(() => {
       this.dirtyCells = [...this.nodes.keys()];
     });
   }
 
-  createQuery(sheetName, cellName, query) {
+  createQuery(sheetName: string, cellName: string, query: string): void {
     let name = resolveName(sheetName, cellName);
     let node = this._getNode(name);
 
@@ -340,7 +352,11 @@ export default class Spreadsheet {
     }
   }
 
-  createStatic(sheetName, cellName, initialValue) {
+  createStatic(
+    sheetName: string,
+    cellName: string,
+    initialValue: number | boolean,
+  ): void {
     let name = resolveName(sheetName, cellName);
     let exists = this.nodes.has(name);
     if (!exists) {
@@ -349,10 +365,20 @@ export default class Spreadsheet {
   }
 
   createDynamic(
-    sheetName,
-    cellName,
-    { dependencies = [], run, initialValue, refresh = false },
-  ) {
+    sheetName: string,
+    cellName: string,
+    {
+      dependencies = [],
+      run,
+      initialValue,
+      refresh = false,
+    }: {
+      dependencies?: string[];
+      run?: unknown;
+      initialValue: number | boolean;
+      refresh?: boolean;
+    },
+  ): void {
     let name = resolveName(sheetName, cellName);
     let node = this._getNode(name);
 
@@ -391,7 +417,7 @@ export default class Spreadsheet {
     }
   }
 
-  clearSheet(sheetName) {
+  clearSheet(sheetName: string): void {
     for (let [name, node] of this.nodes.entries()) {
       if (node.sheet === sheetName) {
         this.nodes.delete(name);
@@ -399,19 +425,19 @@ export default class Spreadsheet {
     }
   }
 
-  voidCell(sheetName, name, voidValue = null) {
+  voidCell(sheetName: string, name: string, voidValue = null): void {
     let node = this.getNode(resolveName(sheetName, name));
     node._run = null;
     node.dynamic = false;
     node.value = voidValue;
   }
 
-  deleteCell(sheetName, name) {
+  deleteCell(sheetName: string, name: string): void {
     this.voidCell(sheetName, name);
     this.nodes.delete(resolveName(sheetName, name));
   }
 
-  addDependencies(sheetName, cellName, deps) {
+  addDependencies(sheetName: string, cellName: string, deps: string[]): void {
     let name = resolveName(sheetName, cellName);
 
     deps = deps.map(dep => {
@@ -435,7 +461,11 @@ export default class Spreadsheet {
     }
   }
 
-  removeDependencies(sheetName, cellName, deps) {
+  removeDependencies(
+    sheetName: string,
+    cellName: string,
+    deps: string[],
+  ): void {
     let name = resolveName(sheetName, cellName);
 
     deps = deps.map(dep => {

@@ -262,7 +262,7 @@ setNumberFormat({ format: 'comma-dot', hideFraction: false });
 const MAX_SAFE_NUMBER = 2 ** 51 - 1;
 const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 
-export function safeNumber(value) {
+export function safeNumber(value: number) {
   if (!Number.isInteger(value)) {
     throw new Error(
       'safeNumber: number is not an integer: ' + JSON.stringify(value),
