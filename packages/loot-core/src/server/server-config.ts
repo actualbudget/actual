@@ -5,7 +5,7 @@ type ServerConfig = {
   SYNC_SERVER: string;
   SIGNUP_SERVER: string;
   PLAID_SERVER: string;
-  NORDIGEN_SERVER: string;
+  GOCARDLESS_SERVER: string;
 };
 
 let config: ServerConfig = null;
