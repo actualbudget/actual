@@ -263,7 +263,7 @@ handlers['report-budget-month'] = async function ({ month }) {
 };
 
 handlers['budget-set-type'] = async function ({ type }) {
-  if (type !== 'rollover' && type !== 'report') {
+  if (!prefs.BUDGET_TYPES.includes(type)) {
     throw new Error('Invalid budget type: ' + type);
   }
 
