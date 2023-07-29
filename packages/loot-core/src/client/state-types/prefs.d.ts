@@ -14,12 +14,12 @@ export type SetPrefsAction = {
 
 export type MergeLocalPrefsAction = {
   type: typeof constants.MERGE_LOCAL_PREFS;
-  prefs: Partial<LocalPrefs>;
+  prefs: LocalPrefs;
 };
 
 export type MergeGlobalPrefsAction = {
   type: typeof constants.MERGE_GLOBAL_PREFS;
-  globalPrefs: Partial<GlobalPrefs>;
+  globalPrefs: GlobalPrefs;
 };
 
 export type PrefsActions =

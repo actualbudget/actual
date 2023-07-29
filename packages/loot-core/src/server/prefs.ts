@@ -48,7 +48,7 @@ export async function loadPrefs(id?: string): Promise<LocalPrefs> {
 }
 
 export async function savePrefs(
-  prefsToSet: Partial<LocalPrefs>,
+  prefsToSet: LocalPrefs,
   { avoidSync = false } = {},
 ): Promise<void> {
   Object.assign(prefs, prefsToSet);
