@@ -110,7 +110,6 @@ async function createWindow() {
     width: windowState.width,
     height: windowState.height,
     title: 'Actual',
-    titleBarStyle: 'hiddenInset',
     webPreferences: {
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
