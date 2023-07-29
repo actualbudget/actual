@@ -102,7 +102,7 @@ function AllTransactions({
   );
 
   const fakePreviewSettingTransaction = [
-    { id: `previewSetting`, accountId: accountId },
+    { id: `previewSetting`, account: account.id },
   ];
 
   let prependTransactions = useMemo(() => {

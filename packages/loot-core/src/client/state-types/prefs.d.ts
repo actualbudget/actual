@@ -1,7 +1,6 @@
+import { SchedulePreviewOpts } from '../../../../desktop-client/src/components/schedules/TransactionPreviewPicker';
 import { type numberFormats } from '../../shared/util';
 import type * as constants from '../constants';
-
-import { SchedulePreviewOpts } from '../../../../desktop-client/src/components/schedules/TransactionPreviewPicker';
 
 export type FeatureFlag =
   | 'reportBudget'

@@ -68,8 +68,6 @@ function schedOptsToNextDate(opts: SchedulePreviewOpts) {
 }
 
 export function TransactionPreviewPicker(accountId) {
-  console.log('TransactionPreviewPicker =============');
-  console.log(accountId);
   const [showSettings, setShowSettings] = useState(false);
   const [hover, setHover] = useState(false);
 
@@ -81,15 +79,12 @@ export function TransactionPreviewPicker(accountId) {
   const schedulePreviewPref: SchedulePreviewOpts = useSelector(state => {
     return state.prefs.local[`schedulePreview-${accountId}`] || defaultOpts;
   });
-  console.log('stat.prefs.local' + `schedulePreview-${accountId}`);
-  console.log(schedulePreviewPref);
   let nextDate = schedOptsToNextDate(schedulePreviewPref);
 
-  function onChange(changeType: string, changeValue) {
-    console.log('handleChange ==========');
-    console.log('handleChange:changeType', changeType);
-    console.log('handleChange:changeValue', changeValue);
-
+  function onChange(
+    changeType: string,
+    changeValue: MenuLength | number | MenuInterval,
+  ) {
     let newPreviewOpts: SchedulePreviewOpts = { ...schedulePreviewPref };
 
     // Validate inputs
