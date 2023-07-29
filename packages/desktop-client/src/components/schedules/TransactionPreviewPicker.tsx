@@ -1,8 +1,9 @@
 import React, { useState, type ChangeEvent } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 //import * as d from 'date-fns';
 
+import { savePrefs } from 'loot-core/src/server/prefs';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { colors } from '../../style';
@@ -72,6 +73,7 @@ export function TransactionPreviewPicker(accountId) {
   const [showSettings, setShowSettings] = useState(false);
   const [hover, setHover] = useState(false);
 
+  let dispatch = useDispatch();
   const dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
@@ -111,7 +113,7 @@ export function TransactionPreviewPicker(accountId) {
     }
 
     // Save to preferences to trigger component updates
-    // ???
+    dispatch(savePrefs({ [`schedulePreview-${accountId}`]: newPreviewOpts }));
   }
 
   function previewRow() {
