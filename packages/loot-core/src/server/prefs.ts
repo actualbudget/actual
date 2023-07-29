@@ -92,13 +92,3 @@ export function getPrefs(): LocalPrefs {
 export function getDefaultPrefs(id: string, budgetName: string): LocalPrefs {
   return { id, budgetName };
 }
-
-export async function readPrefs(id: string): Promise<LocalPrefs> {
-  const fullpath = fs.join(fs.getBudgetDir(id), 'metadata.json');
-
-  try {
-    return JSON.parse(await fs.readFile(fullpath));
-  } catch (e) {
-    return null;
-  }
-}
