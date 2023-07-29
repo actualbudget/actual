@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-type DateLike = string | number | Date;
+type DateLike = string | Date;
 
 export function _parse(value: DateLike): Date {
   if (typeof value === 'string') {
