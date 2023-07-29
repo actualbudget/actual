@@ -1,15 +1,13 @@
 import React, {
   type ComponentProps,
   Fragment,
-  forwardRef,
   useMemo,
   type ReactNode,
 } from 'react';
 
 import Split from '../../icons/v0/Split';
 import { colors } from '../../style';
-import { type HTMLPropsWithStyle } from '../../types/utils';
-import { View, Text, Select } from '../common';
+import { View, Text } from '../common';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
@@ -18,30 +16,6 @@ type CategoryGroup = {
   name: string;
   categories: Array<{ id: string; name: string }>;
 };
-
-type NativeCategorySelectProps = HTMLPropsWithStyle<HTMLSelectElement> & {
-  categoryGroups: CategoryGroup[];
-  emptyLabel: string;
-};
-export const NativeCategorySelect = forwardRef<
-  HTMLSelectElement,
-  NativeCategorySelectProps
->(({ categoryGroups, emptyLabel, ...nativeProps }, ref) => {
-  return (
-    <Select {...nativeProps} ref={ref}>
-      <option value="">{emptyLabel || 'Select category...'}</option>
-      {categoryGroups.map(group => (
-        <optgroup key={group.id} label={group.name}>
-          {group.categories.map(category => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </optgroup>
-      ))}
-    </Select>
-  );
-});
 
 type CategoryListProps = {
   items: Array<{
@@ -96,11 +70,7 @@ function CategoryList({
                 data-testid="split-transaction-button"
               >
                 <Text style={{ lineHeight: 0 }}>
-                  <Split
-                    width={10}
-                    height={10}
-                    style={{ marginRight: 5, color: 'inherit' }}
-                  />
+                  <Split width={10} height={10} style={{ marginRight: 5 }} />
                 </Text>
                 Split Transaction
               </View>

@@ -1,9 +1,8 @@
 {
   "name": "desktop-electron",
   "productName": "Actual",
-  "author": "Shift Reset LLC",
   "description": "A simple and powerful personal finance system",
-  "version": "23.6.0",
+  "version": "23.7.2",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",

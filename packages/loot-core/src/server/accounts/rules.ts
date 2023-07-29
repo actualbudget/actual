@@ -109,10 +109,10 @@ let CONDITION_TYPES = {
     },
   },
   id: {
-    ops: ['is', 'contains', 'oneOf'],
+    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: true,
     parse(op, value, fieldName) {
-      if (op === 'oneOf') {
+      if (op === 'oneOf' || op === 'notOneOf') {
         assert(
           Array.isArray(value),
           'no-empty-array',
@@ -124,10 +124,10 @@ let CONDITION_TYPES = {
     },
   },
   string: {
-    ops: ['is', 'contains', 'oneOf'],
+    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: false,
     parse(op, value, fieldName) {
-      if (op === 'oneOf') {
+      if (op === 'oneOf' || op === 'notOneOf') {
         assert(
           Array.isArray(value),
           'no-empty-array',
@@ -138,7 +138,7 @@ let CONDITION_TYPES = {
         return value.filter(Boolean).map(val => val.toLowerCase());
       }
 
-      if (op === 'contains') {
+      if (op === 'contains' || op === 'doesNotContain') {
         assert(
           typeof value === 'string' && value.length > 0,
           'no-empty-string',
@@ -323,8 +323,10 @@ export class Condition {
           }
           return fieldValue === number;
         }
-
         return fieldValue === this.value;
+
+      case 'isNot':
+        return fieldValue !== this.value;
       case 'isbetween': {
         // The parsing logic already checks that the value is of the
         // right type (only numbers with high and low)
@@ -336,11 +338,21 @@ export class Condition {
           return false;
         }
         return fieldValue.indexOf(this.value) !== -1;
+      case 'doesNotContain':
+        if (fieldValue === null) {
+          return false;
+        }
+        return fieldValue.indexOf(this.value) === -1;
       case 'oneOf':
         if (fieldValue === null) {
           return false;
         }
         return this.value.indexOf(fieldValue) !== -1;
+      case 'notOneOf':
+        if (fieldValue === null) {
+          return false;
+        }
+        return this.value.indexOf(fieldValue) === -1;
       case 'gt':
         if (fieldValue === null) {
           return false;
@@ -568,8 +580,14 @@ export class RuleIndexer {
     let cond = rule.conditions.find(cond => cond.field === this.field);
     let indexes = [];
 
-    if (cond && (cond.op === 'oneOf' || cond.op === 'is')) {
-      if (cond.op === 'oneOf') {
+    if (
+      cond &&
+      (cond.op === 'oneOf' ||
+        cond.op === 'is' ||
+        cond.op === 'isNot' ||
+        cond.op === 'notOneOf')
+    ) {
+      if (cond.op === 'oneOf' || cond.op === 'notOneOf') {
         cond.value.forEach(val => indexes.push(this.getIndexForValue(val)));
       } else {
         indexes.push(this.getIndexForValue(cond.value));
@@ -635,7 +653,12 @@ function computeScore(rule) {
 
   if (
     rule.conditions.every(
-      cond => cond.op === 'is' || cond.op === 'isapprox' || cond.op === 'oneOf',
+      cond =>
+        cond.op === 'is' ||
+        cond.op === 'isNot' ||
+        cond.op === 'isapprox' ||
+        cond.op === 'oneOf' ||
+        cond.op === 'notOneOf',
     )
   ) {
     return initialScore * 2;
@@ -716,7 +739,15 @@ export function migrateIds(rule, mappings) {
           cond.value = mappings.get(cond.rawValue) || cond.rawValue;
           cond.unparsedValue = cond.value;
           break;
+        case 'isNot':
+          cond.value = mappings.get(cond.rawValue) || cond.rawValue;
+          cond.unparsedValue = cond.value;
+          break;
         case 'oneOf':
+          cond.value = cond.rawValue.map(v => mappings.get(v) || v);
+          cond.unparsedValue = [...cond.value];
+          break;
+        case 'notOneOf':
           cond.value = cond.rawValue.map(v => mappings.get(v) || v);
           cond.unparsedValue = [...cond.value];
           break;
@@ -750,7 +781,19 @@ export function iterateIds(rules, fieldName, func) {
               continue ruleiter;
             }
             break;
+          case 'isNot':
+            if (func(rule, cond.value)) {
+              continue ruleiter;
+            }
+            break;
           case 'oneOf':
+            for (let vi = 0; vi < cond.value.length; vi++) {
+              if (func(rule, cond.value[vi])) {
+                continue ruleiter;
+              }
+            }
+            break;
+          case 'notOneOf':
             for (let vi = 0; vi < cond.value.length; vi++) {
               if (func(rule, cond.value[vi])) {
                 continue ruleiter;

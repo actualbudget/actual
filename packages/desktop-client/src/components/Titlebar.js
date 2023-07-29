@@ -5,19 +5,21 @@ import React, {
   useRef,
   useContext,
 } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 import { css, media } from 'glamor';
 
-import * as actions from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
+import { useActions } from '../hooks/useActions';
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
+import SvgEye from '../icons/v2/Eye';
+import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
 import { colors } from '../style';
@@ -33,13 +35,14 @@ import {
   Button,
   ButtonWithLoading,
   Tooltip,
-  P,
   ExternalLink,
 } from './common';
+import Paragraph from './common/Paragraph';
 import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
-import SheetValue from './spreadsheet/SheetValue';
+import useSheetValue from './spreadsheet/useSheetValue';
+import { ThemeSelector } from './ThemeSelector';
 
 export let TitlebarContext = createContext();
 
@@ -65,27 +68,46 @@ export function TitlebarProvider({ children }) {
 }
 
 function UncategorizedButton() {
+  let count = useSheetValue(queries.uncategorizedCount());
   return (
-    <SheetValue binding={queries.uncategorizedCount()}>
-      {node => {
-        const num = node.value;
-        return (
-          num !== 0 && (
-            <ButtonLink
-              bare
-              to="/accounts/uncategorized"
-              style={{ color: colors.r5 }}
-            >
-              {num} uncategorized {num === 1 ? 'transaction' : 'transactions'}
-            </ButtonLink>
-          )
-        );
-      }}
-    </SheetValue>
+    count !== 0 && (
+      <ButtonLink
+        type="bare"
+        to="/accounts/uncategorized"
+        style={{ color: colors.r5 }}
+      >
+        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
+      </ButtonLink>
+    )
   );
 }
 
-export function SyncButton({ localPrefs, style, onSync }) {
+function PrivacyButton() {
+  let isPrivacyEnabled = useSelector(
+    state => state.prefs.local.isPrivacyEnabled,
+  );
+  let { savePrefs } = useActions();
+
+  let privacyIconStyle = { width: 23, height: 23 };
+
+  return (
+    <Button
+      type="bare"
+      onClick={() => savePrefs({ isPrivacyEnabled: !isPrivacyEnabled })}
+    >
+      {isPrivacyEnabled ? (
+        <SvgEyeSlashed style={privacyIconStyle} />
+      ) : (
+        <SvgEye style={privacyIconStyle} />
+      )}
+    </Button>
+  );
+}
+
+export function SyncButton({ style }) {
+  let cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
+  let { sync } = useActions();
+
   let [syncing, setSyncing] = useState(false);
   let [syncState, setSyncState] = useState(null);
 
@@ -109,7 +131,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
         // file.
         if (subtype === 'network') {
           setSyncState('offline');
-        } else if (!localPrefs.cloudFileId) {
+        } else if (!cloudFileId) {
           setSyncState('local');
         } else {
           setSyncState('error');
@@ -124,7 +146,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
 
   return (
     <Button
-      bare
+      type="bare"
       style={css(
         style,
         {
@@ -149,10 +171,10 @@ export function SyncButton({ localPrefs, style, onSync }) {
               : null,
         }),
       )}
-      onClick={onSync}
+      onClick={sync}
     >
       {syncState === 'error' ? (
-        <AlertTriangle width={13} style={{ color: 'currentColor' }} />
+        <AlertTriangle width={13} />
       ) : (
         <AnimatedRefresh animating={syncing} />
       )}
@@ -167,8 +189,12 @@ export function SyncButton({ localPrefs, style, onSync }) {
   );
 }
 
-function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
+function BudgetTitlebar() {
+  let maxMonths = useSelector(state => state.prefs.global.maxMonths);
+  let budgetType = useSelector(state => state.prefs.local.budgetType);
+  let { saveGlobalPrefs } = useActions();
   let { sendEvent } = useContext(TitlebarContext);
+
   let [loading, setLoading] = useState(false);
   let [showTooltip, setShowTooltip] = useState(false);
 
@@ -183,20 +209,18 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
 
   useEffect(() => {
     setLoading(false);
-  }, [localPrefs.budgetType]);
-
-  let { budgetType } = localPrefs;
+  }, [budgetType]);
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <MonthCountSelector
-        maxMonths={globalPrefs.maxMonths || 1}
+        maxMonths={maxMonths || 1}
         onChange={value => saveGlobalPrefs({ maxMonths: value })}
       />
       {reportBudgetEnabled && (
         <View style={{ marginLeft: -5 }}>
           <ButtonWithLoading
-            bare
+            type="bare"
             loading={loading}
             style={{
               alignSelf: 'flex-start',
@@ -216,7 +240,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                 maxWidth: 400,
               }}
             >
-              <P>
+              <Paragraph>
                 You are currently using a{' '}
                 <Text style={{ fontWeight: 600 }}>
                   {budgetType === 'report'
@@ -225,10 +249,10 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                   .
                 </Text>{' '}
                 Switching will not lose any data and you can always switch back.
-              </P>
-              <P>
+              </Paragraph>
+              <Paragraph>
                 <ButtonWithLoading
-                  primary
+                  type="primary"
                   loading={loading}
                   onClick={onSwitchType}
                 >
@@ -237,15 +261,15 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                     ? 'Rollover budget'
                     : 'Report budget'}
                 </ButtonWithLoading>
-              </P>
-              <P isLast={true}>
+              </Paragraph>
+              <Paragraph isLast={true}>
                 <ExternalLink
                   to="https://actualbudget.org/docs/experimental/report-budget"
                   linkColor="muted"
                 >
                   How do these types of budgeting work?
                 </ExternalLink>
-              </P>
+              </Paragraph>
             </Tooltip>
           )}
         </View>
@@ -254,22 +278,18 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
   );
 }
 
-function Titlebar({
-  globalPrefs,
-  saveGlobalPrefs,
-  localPrefs,
-  userData,
-  floatingSidebar,
-  syncError,
-  setAppState,
-  style,
-  sync,
-}) {
+export default function Titlebar({ style }) {
   let navigate = useNavigate();
   let location = useLocation();
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
-  const serverURL = useServerURL();
+  let serverURL = useServerURL();
+  let floatingSidebar = useSelector(
+    state => state.prefs.global.floatingSidebar,
+  );
+
+  let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
+  let themesFlag = useFeatureFlag('themes');
 
   return isNarrowWidth ? null : (
     <View
@@ -292,7 +312,7 @@ function Titlebar({
     >
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button
-          bare
+          type="bare"
           style={{ marginRight: 8 }}
           onPointerEnter={e => {
             if (e.pointerType === 'mouse') {
@@ -322,7 +342,7 @@ function Titlebar({
           path="/accounts"
           element={
             location.state?.goBack ? (
-              <Button onClick={() => navigate(-1)} bare>
+              <Button type="bare" onClick={() => navigate(-1)}>
                 <ArrowLeft
                   width={10}
                   height={10}
@@ -336,39 +356,16 @@ function Titlebar({
 
         <Route path="/accounts/:id" element={<AccountSyncCheck />} />
 
-        <Route
-          path="/budget"
-          element={
-            <BudgetTitlebar
-              globalPrefs={globalPrefs}
-              saveGlobalPrefs={saveGlobalPrefs}
-              localPrefs={localPrefs}
-            />
-          }
-        />
+        <Route path="/budget" element={<BudgetTitlebar />} />
 
         <Route path="*" element={null} />
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      {serverURL ? (
-        <SyncButton
-          style={{ marginLeft: 10 }}
-          localPrefs={localPrefs}
-          onSync={sync}
-        />
-      ) : null}
+      {themesFlag && <ThemeSelector />}
+      {privacyModeFeatureFlag && <PrivacyButton />}
+      {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    globalPrefs: state.prefs.global,
-    localPrefs: state.prefs.local,
-    userData: state.user.data,
-    floatingSidebar: state.prefs.global.floatingSidebar,
-  }),
-  actions,
-)(Titlebar);

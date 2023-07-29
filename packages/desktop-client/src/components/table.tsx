@@ -41,8 +41,14 @@ import {
 } from './common';
 import FixedSizeList from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
+import {
+  ConditionalPrivacyFilter,
+  mergeConditionalPrivacyFilterProps,
+  type ConditionalPrivacyFilterProps,
+} from './PrivacyFilter';
+import { type Binding } from './spreadsheet';
 import format from './spreadsheet/format';
-import SheetValue from './spreadsheet/SheetValue';
+import useSheetValue from './spreadsheet/useSheetValue';
 
 export const ROW_HEIGHT = 32;
 const TABLE_BACKGROUND_COLOR = colors.n11;
@@ -52,7 +58,7 @@ function fireBlur(onBlur, e) {
     // We only fire the blur event if the app is still focused
     // because the blur event is fired when the app goes into
     // the background and we want to ignore that
-    onBlur && onBlur(e);
+    onBlur?.(e);
   } else {
     // Otherwise, stop React from bubbling this event and swallow it
     e.stopPropagation();
@@ -184,6 +190,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   formatter?: (value: string, type?: unknown) => string;
   focused?: boolean;
   textAlign?: string;
+  alignItems?: string;
   borderColor?: string;
   plain?: boolean;
   exposed?: boolean;
@@ -192,6 +199,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
+  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
 };
 export function Cell({
   width,
@@ -201,6 +209,7 @@ export function Cell({
   value,
   formatter,
   textAlign,
+  alignItems,
   onExpose,
   borderColor: oldBorderColor,
   children,
@@ -208,6 +217,7 @@ export function Cell({
   style,
   valueStyle,
   unexposedContent,
+  privacyFilter,
   ...viewProps
 }: CellProps) {
   let mouseCoords = useRef(null);
@@ -232,7 +242,82 @@ export function Cell({
     borderBottomWidth: borderColor ? 1 : 0,
     borderColor,
     backgroundColor,
+    alignItems: alignItems,
   };
+
+  let conditionalPrivacyFilter = useMemo(
+    () => (
+      <ConditionalPrivacyFilter
+        privacyFilter={mergeConditionalPrivacyFilterProps(
+          {
+            activationFilters: [!focused, !exposed],
+            style: {
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+            },
+          },
+          privacyFilter,
+        )}
+      >
+        {plain ? (
+          children
+        ) : exposed ? (
+          // @ts-expect-error Missing props refinement
+          children()
+        ) : (
+          <View
+            style={[
+              {
+                flexDirection: 'row',
+                flex: 1,
+                padding: '0 5px',
+                alignItems: 'center',
+              },
+              styles.smallText,
+              valueStyle,
+            ]}
+            // Can't use click because we only want to expose the cell if
+            // the user does a direct click, not if they also drag the
+            // mouse to select something
+            onMouseDown={e => (mouseCoords.current = [e.clientX, e.clientY])}
+            // When testing, allow the click handler to be used instead
+            onClick={
+              global.IS_TESTING
+                ? () => onExpose?.(name)
+                : e => {
+                    if (
+                      mouseCoords.current &&
+                      Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
+                      Math.abs(e.clientY - mouseCoords.current[1]) < 5
+                    ) {
+                      onExpose?.(name);
+                    }
+                  }
+            }
+          >
+            {unexposedContent || (
+              <UnexposedCellContent value={value} formatter={formatter} />
+            )}
+          </View>
+        )}
+      </ConditionalPrivacyFilter>
+    ),
+    [
+      privacyFilter,
+      focused,
+      exposed,
+      children,
+      plain,
+      exposed,
+      valueStyle,
+      onExpose,
+      name,
+      unexposedContent,
+      value,
+      formatter,
+    ],
+  );
 
   return (
     <View
@@ -242,47 +327,7 @@ export function Cell({
       {...viewProps}
       data-testid={name}
     >
-      {plain ? (
-        children
-      ) : exposed ? (
-        // @ts-expect-error Missing props refinement
-        children()
-      ) : (
-        <View
-          style={[
-            {
-              flexDirection: 'row',
-              flex: 1,
-              padding: '0 5px',
-              alignItems: 'center',
-            },
-            styles.smallText,
-            valueStyle,
-          ]}
-          // Can't use click because we only want to expose the cell if
-          // the user does a direct click, not if they also drag the
-          // mouse to select something
-          onMouseDown={e => (mouseCoords.current = [e.clientX, e.clientY])}
-          // When testing, allow the click handler to be used instead
-          onClick={
-            global.IS_TESTING
-              ? () => onExpose && onExpose(name)
-              : e => {
-                  if (
-                    mouseCoords.current &&
-                    Math.abs(e.clientX - mouseCoords.current[0]) < 5 &&
-                    Math.abs(e.clientY - mouseCoords.current[1]) < 5
-                  ) {
-                    onExpose && onExpose(name);
-                  }
-                }
-          }
-        >
-          {unexposedContent || (
-            <UnexposedCellContent value={value} formatter={formatter} />
-          )}
-        </View>
-      )}
+      {conditionalPrivacyFilter}
     </View>
   );
 }
@@ -388,8 +433,10 @@ function InputValue({
   let [value, setValue] = useState(defaultValue);
 
   function onBlur_(e) {
-    onUpdate && onUpdate(value);
-    onBlur && fireBlur(onBlur, e);
+    onUpdate?.(value);
+    if (onBlur) {
+      fireBlur(onBlur, e);
+    }
   }
 
   function onKeyDown(e) {
@@ -404,7 +451,7 @@ function InputValue({
         setValue(defaultValue);
       }
     } else if (shouldSaveFromKey(e)) {
-      onUpdate && onUpdate(value);
+      onUpdate?.(value);
     }
   }
 
@@ -509,14 +556,14 @@ export function CustomCell({
     // the app unfocuses, and it's unintuitive to save the value since
     // the input will be focused again when the app regains focus
     if (document.hasFocus()) {
-      onUpdate && onUpdate(value);
+      onUpdate?.(value);
       fireBlur(onBlur, e);
     }
   }
 
   function onKeyDown(e) {
     if (shouldSaveFromKey(e)) {
-      onUpdate && onUpdate(value);
+      onUpdate?.(value);
     }
   }
 
@@ -529,7 +576,7 @@ export function CustomCell({
           onUpdate: val => setValue(val),
           onSave: val => {
             setValue(val);
-            onUpdate && onUpdate(val);
+            onUpdate?.(val);
           },
           shouldSaveFromKey,
           inputStyle: inputCellStyle,
@@ -551,7 +598,7 @@ export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
       style={[{ alignItems: 'center', userSelect: 'none' }, style]}
       onClick={e => {
         e.stopPropagation();
-        onDelete && onDelete();
+        onDelete?.();
       }}
     >
       {() => <DeleteIcon width={7} height={7} />}
@@ -591,7 +638,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
           if (e.key === 'x' || e.key === ' ') {
             e.preventDefault();
             if (!disabled) {
-              onSelect && onSelect(e);
+              onSelect?.(e);
             }
           }
         }}
@@ -615,8 +662,8 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             ? null
             : e => {
                 if (!disabled) {
-                  onSelect && onSelect(e);
-                  onEdit && onEdit();
+                  onSelect?.(e);
+                  onEdit?.();
                 }
               }
         }
@@ -650,8 +697,8 @@ export function SelectCell({
       style={[{ alignItems: 'center', userSelect: 'none' }, style]}
       onClick={e => {
         e.stopPropagation();
-        onSelect && onSelect(e);
-        onEdit && onEdit();
+        onSelect?.(e);
+        onEdit?.();
       }}
     >
       {() => (
@@ -673,15 +720,14 @@ export function SelectCell({
             selected && {
               backgroundColor: partial ? colors.b9 : colors.b5,
               borderColor: partial ? colors.b9 : colors.b5,
+              color: 'white',
             },
           ]}
           onEdit={onEdit}
           onSelect={onSelect}
           clickBehavior="none"
         >
-          {selected && (
-            <Checkmark width={6} height={6} style={{ color: 'white' }} />
-          )}
+          {selected && <Checkmark width={6} height={6} />}
         </CellButton>
       )}
     </Cell>
@@ -689,11 +735,12 @@ export function SelectCell({
 }
 
 type SheetCellValueProps = {
-  binding: ComponentProps<typeof SheetValue>['binding'];
+  binding: Binding;
   type: string;
   getValueStyle?: (value: unknown) => CSSProperties;
   formatExpr?: (value) => string;
   unformatExpr?: (value: string) => unknown;
+  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
 };
 
 type SheetCellProps = ComponentProps<typeof Cell> & {
@@ -709,52 +756,55 @@ export function SheetCell({
   onSave,
   ...props
 }: SheetCellProps) {
-  const { binding, type, getValueStyle, formatExpr, unformatExpr } = valueProps;
+  const {
+    binding,
+    type,
+    getValueStyle,
+    formatExpr,
+    unformatExpr,
+    privacyFilter,
+  } = valueProps;
+
+  let sheetValue = useSheetValue(binding, e => {
+    // "close" the cell if it's editing
+    if (props.exposed && inputProps && inputProps.onBlur) {
+      inputProps.onBlur(e);
+    }
+  });
 
   return (
-    <SheetValue
-      binding={binding}
-      onChange={e => {
-        // "close" the cell if it's editing
-        if (props.exposed && inputProps && inputProps.onBlur) {
-          inputProps.onBlur(e);
-        }
-      }}
+    <Cell
+      valueStyle={
+        getValueStyle ? [valueStyle, getValueStyle(sheetValue)] : valueStyle
+      }
+      textAlign={textAlign}
+      {...props}
+      value={sheetValue}
+      formatter={value =>
+        props.formatter ? props.formatter(value, type) : format(value, type)
+      }
+      privacyFilter={
+        privacyFilter != null
+          ? privacyFilter
+          : type === 'financial'
+          ? true
+          : undefined
+      }
+      data-cellname={sheetValue}
     >
-      {node => {
+      {() => {
         return (
-          <Cell
-            valueStyle={
-              getValueStyle
-                ? [valueStyle, getValueStyle(node.value)]
-                : valueStyle
-            }
-            textAlign={textAlign}
-            {...props}
-            value={node.value}
-            formatter={value =>
-              props.formatter
-                ? props.formatter(value, type)
-                : format(value, type)
-            }
-            data-cellname={node.name}
-          >
-            {() => {
-              return (
-                <InputValue
-                  value={formatExpr ? formatExpr(node.value) : node.value}
-                  onUpdate={value => {
-                    onSave(unformatExpr ? unformatExpr(value) : value);
-                  }}
-                  style={{ textAlign }}
-                  {...inputProps}
-                />
-              );
+          <InputValue
+            value={formatExpr ? formatExpr(sheetValue) : sheetValue}
+            onUpdate={value => {
+              onSave(unformatExpr ? unformatExpr(value) : value);
             }}
-          </Cell>
+            style={{ textAlign }}
+            {...inputProps}
+          />
         );
       }}
-    </SheetValue>
+    </Cell>
   );
 }
 
@@ -822,7 +872,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
       <KeyHandlers keys={keyHandlers || {}} />
 
       <Button
-        bare
+        type="bare"
         style={{ color: colors.b3 }}
         onClick={() => setMenuOpen(true)}
       >
@@ -903,7 +953,9 @@ type TableProps = {
   animated?: boolean;
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
+  saveScrollWidth: (parent, child) => void;
 };
+
 export const Table = forwardRef<TableHandleRef, TableProps>(
   (
     {
@@ -926,6 +978,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       animated,
       allowPopupsEscape,
       isSelected,
+      saveScrollWidth,
       ...props
     },
     ref,
@@ -961,7 +1014,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       },
 
       scrollToTop: () => {
-        list.current && list.current.scrollTo(0);
+        list.current?.scrollTo(0);
       },
 
       getScrolledItem: () => {
@@ -974,7 +1027,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       },
 
       setRowAnimation: flag => {
-        list.current && list.current.setRowAnimation(flag);
+        list.current?.setRowAnimation(flag);
       },
 
       edit(id, field, shouldScroll) {
@@ -987,11 +1040,11 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       },
 
       anchor() {
-        list.current && list.current.anchor();
+        list.current?.anchor();
       },
 
       unanchor() {
-        list.current && list.current.unanchor();
+        list.current?.unanchor();
       },
 
       isAnchored() {
@@ -1004,8 +1057,17 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       // before it's mounted
       if (!listInitialized.current && listContainer.current) {
         // Animation is on by default
-        list.current && list.current.setRowAnimation(true);
+        list.current?.setRowAnimation(true);
         listInitialized.current = true;
+      }
+
+      if (scrollContainer.current && saveScrollWidth) {
+        saveScrollWidth(
+          scrollContainer.current.offsetParent
+            ? scrollContainer.current.offsetParent.clientWidth
+            : 0,
+          scrollContainer.current ? scrollContainer.current.clientWidth : 0,
+        );
       }
     });
 
@@ -1297,7 +1359,7 @@ export function useTableNavigator(data, fields) {
       innerRef: containerRef,
 
       onKeyDown: e => {
-        userProps && userProps.onKeyDown && userProps.onKeyDown(e);
+        userProps?.onKeyDown?.(e);
         if (e.isPropagationStopped()) {
           return;
         }

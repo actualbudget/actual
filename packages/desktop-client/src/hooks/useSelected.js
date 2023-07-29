@@ -270,7 +270,7 @@ export function SelectedProviderWithItems({
   let selected = useSelected(name, items, initialSelectedIds);
 
   useEffect(() => {
-    registerDispatch && registerDispatch(selected.dispatch);
+    registerDispatch?.(selected.dispatch);
   }, [registerDispatch]);
 
   return (

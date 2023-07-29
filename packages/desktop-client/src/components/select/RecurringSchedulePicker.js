@@ -192,39 +192,36 @@ function MonthlyPatterns({ config, dispatch }) {
           }}
         >
           <Select
-            style={{ marginRight: 10 }}
+            options={[
+              [-1, 'Last'],
+              ['-', '---'],
+              ...DAY_OF_MONTH_OPTIONS.map(opt => [opt, opt]),
+            ]}
             value={recurrence.value}
-            onChange={e =>
-              updateRecurrence(
-                recurrence,
-                'value',
-                parsePatternValue(e.target.value),
-              )
+            onChange={value =>
+              updateRecurrence(recurrence, 'value', parsePatternValue(value))
             }
-          >
-            <option value={-1}>Last</option>
-            <option disabled>---</option>
-            {DAY_OF_MONTH_OPTIONS.map(opt => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </Select>
+            disabledKeys={['-']}
+            wrapperStyle={{ flex: 1, marginRight: 10 }}
+            style={{
+              borderWidth: 1,
+              width: '100%',
+            }}
+          />
           <Select
-            style={{ marginRight: 10 }}
+            options={[
+              ['day', 'Day'],
+              ['-', '---'],
+              ...DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name]),
+            ]}
             value={recurrence.type}
-            onChange={e => updateRecurrence(recurrence, 'type', e.target.value)}
-          >
-            <option value="day">Day</option>
-            <option disabled>---</option>
-            {DAY_OF_WEEK_OPTIONS.map(opt => (
-              <option key={opt.id} value={opt.id}>
-                {opt.name}
-              </option>
-            ))}
-          </Select>
+            onChange={value => updateRecurrence(recurrence, 'type', value)}
+            disabledKeys={['-']}
+            wrapperStyle={{ flex: 1, marginRight: 10 }}
+            style={{ borderWidth: 1, width: '100%' }}
+          />
           <Button
-            bare
+            type="bare"
             style={{ padding: 7 }}
             onClick={() =>
               dispatch({
@@ -236,7 +233,7 @@ function MonthlyPatterns({ config, dispatch }) {
             <SubtractIcon style={{ width: 8, height: 8 }} />
           </Button>
           <Button
-            bare
+            type="bare"
             style={{ padding: 7, marginLeft: 5 }}
             onClick={() => dispatch({ type: 'add-recurrence' })}
           >
@@ -321,18 +318,13 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           onBlur={e => updateField('interval', e.target.value)}
           onEnter={e => updateField('interval', e.target.value)}
           defaultValue={config.interval || 1}
-        ></Input>
+        />
         <Select
-          onChange={e => updateField('frequency', e.target.value)}
+          options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
-          style={{ flex: 0 }}
-        >
-          {FREQUENCY_OPTIONS.map(opt => (
-            <option key={opt.id} value={opt.id}>
-              {opt.name}
-            </option>
-          ))}
-        </Select>
+          onChange={value => updateField('frequency', value)}
+          style={{ borderWidth: 1, height: 27.5 }}
+        />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
           <Button onClick={() => dispatch({ type: 'add-recurrence' })}>
@@ -351,8 +343,8 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
       >
         <Button onClick={onClose}>Cancel</Button>
         <Button
+          type="primary"
           onClick={() => onSave(unparseConfig(config))}
-          primary
           style={{ marginLeft: 10 }}
         >
           Apply

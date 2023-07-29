@@ -56,7 +56,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
               </Text>
 
               <ButtonWithLoading
-                primary
+                type="primary"
                 loading={loadingState === 'cloud'}
                 style={{
                   backgroundColor: colors.r4,
@@ -98,7 +98,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
               )}
 
               <ButtonWithLoading
-                primary={!isRemote}
+                type={isRemote ? 'normal' : 'primary'}
                 loading={loadingState === 'local'}
                 style={[
                   {

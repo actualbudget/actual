@@ -1,4 +1,4 @@
-import React, { Component, PureComponent } from 'react';
+import React, { Component, memo, PureComponent } from 'react';
 // import {
 //   RectButton,
 //   PanGestureHandler,
@@ -6,11 +6,9 @@ import React, { Component, PureComponent } from 'react';
 // } from 'react-native-gesture-handler';
 // import Animated, { Easing } from 'react-native-reanimated';
 // import AndroidKeyboardAvoidingView from './AndroidKeyboardAvoidingView';
-import { connect } from 'react-redux';
 
 import memoizeOne from 'memoize-one';
 
-import * as actions from 'loot-core/src/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
@@ -23,7 +21,6 @@ import { Button, Card, Label, Text, View } from '../common';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
-import SheetValue from '../spreadsheet/SheetValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { SyncButton } from '../Titlebar';
 import { AmountInput } from '../util/AmountInput';
@@ -36,34 +33,29 @@ import { AmountInput } from '../util/AmountInput';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
 
 function ToBudget({ toBudget, onClick }) {
+  let amount = useSheetValue(toBudget);
   return (
-    <SheetValue binding={toBudget}>
-      {({ value: amount }) => {
-        return (
-          <Button
-            bare
-            style={{ flexDirection: 'column', alignItems: 'flex-start' }}
-            onClick={onClick}
-          >
-            <Label
-              title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
-              style={{ color: colors.n1, flexShrink: 0 }}
-            />
-            <Text
-              style={[
-                styles.smallText,
-                {
-                  fontWeight: '500',
-                  color: amount < 0 ? colors.r4 : colors.n1,
-                },
-              ]}
-            >
-              {format(amount, 'financial')}
-            </Text>
-          </Button>
-        );
-      }}
-    </SheetValue>
+    <Button
+      type="bare"
+      style={{ flexDirection: 'column', alignItems: 'flex-start' }}
+      onClick={onClick}
+    >
+      <Label
+        title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
+        style={{ color: colors.n1, flexShrink: 0 }}
+      />
+      <Text
+        style={[
+          styles.smallText,
+          {
+            fontWeight: '500',
+            color: amount < 0 ? colors.r4 : colors.n1,
+          },
+        ]}
+      >
+        {format(amount, 'financial')}
+      </Text>
+    </Button>
   );
 }
 
@@ -99,64 +91,58 @@ function Saved({ projected }) {
   );
 }
 
-class BudgetCell extends PureComponent {
-  render() {
-    const {
-      name,
-      binding,
-      editing,
-      style,
-      textStyle,
-      categoryId,
-      month,
-      onBudgetAction,
-    } = this.props;
+const BudgetCell = memo(function BudgetCell(props) {
+  const {
+    name,
+    binding,
+    editing,
+    style,
+    textStyle,
+    categoryId,
+    month,
+    onBudgetAction,
+  } = props;
 
-    return (
-      <SheetValue binding={binding}>
-        {node => {
-          return (
-            <View style={style}>
-              <AmountInput
-                value={integerToAmount(node.value || 0)}
-                style={{
-                  height: ROW_HEIGHT - 4,
-                  transform: 'translateX(6px)',
-                  ...(!editing && {
-                    opacity: 0,
-                    position: 'absolute',
-                    top: 0,
-                  }),
-                }}
-                focused={editing}
-                textStyle={[styles.smallText, textStyle]}
-                onChange={() => {}} // temporarily disabled for read-only view
-                onBlur={value => {
-                  onBudgetAction(month, 'budget-amount', {
-                    category: categoryId,
-                    amount: amountToInteger(value),
-                  });
-                }}
-              />
+  let sheetValue = useSheetValue(binding);
 
-              <View
-                style={{
-                  justifyContent: 'center',
-                  height: ROW_HEIGHT - 4,
-                  ...(editing && { display: 'none' }),
-                }}
-              >
-                <Text style={[styles.smallText, textStyle]} data-testid={name}>
-                  {format(node.value || 0, 'financial')}
-                </Text>
-              </View>
-            </View>
-          );
+  return (
+    <View style={style}>
+      <AmountInput
+        value={integerToAmount(sheetValue || 0)}
+        style={{
+          height: ROW_HEIGHT - 4,
+          transform: 'translateX(6px)',
+          ...(!editing && {
+            opacity: 0,
+            position: 'absolute',
+            top: 0,
+          }),
         }}
-      </SheetValue>
-    );
-  }
-}
+        focused={editing}
+        textStyle={[styles.smallText, textStyle]}
+        onChange={() => {}} // temporarily disabled for read-only view
+        onBlur={value => {
+          onBudgetAction(month, 'budget-amount', {
+            category: categoryId,
+            amount: amountToInteger(value),
+          });
+        }}
+      />
+
+      <View
+        style={{
+          justifyContent: 'center',
+          height: ROW_HEIGHT - 4,
+          ...(editing && { display: 'none' }),
+        }}
+      >
+        <Text style={[styles.smallText, textStyle]} data-testid={name}>
+          {format(sheetValue || 0, 'financial')}
+        </Text>
+      </View>
+    </View>
+  );
+});
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function BudgetGroupPreview({ group, pending, style }) {
@@ -456,7 +442,7 @@ class TotalsRow extends PureComponent {
               onClick={() => onAddCategory(group.id)}
               style={{ padding: 10 }}
             >
-              <Add width={15} height={15} color={colors.n1} />
+              <Add width={15} height={15} />
             </Button>
           </View>
           //   </Animated.View>
@@ -1006,15 +992,13 @@ export class BudgetTable extends Component {
   }
 }
 
-function UnconnectedBudgetHeader({
+function BudgetHeader({
   currentMonth,
   monthBounds,
   editMode,
   onDone,
   onPrevMonth,
   onNextMonth,
-  sync,
-  localPrefs,
 }) {
   // let [menuOpen, setMenuOpen] = useState(false);
 
@@ -1051,7 +1035,7 @@ function UnconnectedBudgetHeader({
     >
       {!editMode && (
         <Button
-          bare
+          type="bare"
           // hitSlop={{ top: 5, bottom: 5, left: 0, right: 30 }}
 
           onClick={prevEnabled && onPrevMonth}
@@ -1084,7 +1068,7 @@ function UnconnectedBudgetHeader({
       </Text>
       {editMode ? (
         <Button
-          bare
+          type="bare"
           onClick={onDone}
           style={[
             buttonStyle,
@@ -1101,7 +1085,7 @@ function UnconnectedBudgetHeader({
       ) : (
         <>
           <Button
-            bare
+            type="bare"
             onClick={nextEnabled && onNextMonth}
             // hitSlop={{ top: 5, bottom: 5, left: 30, right: 5 }}
             style={[buttonStyle, { opacity: nextEnabled ? 1 : 0.6 }]}
@@ -1124,11 +1108,9 @@ function UnconnectedBudgetHeader({
               paddingLeft: 12,
               paddingRight: 12,
             }}
-            localPrefs={localPrefs}
-            onSync={sync}
           />
           {/* <Button
-            bare
+            type="bare"
             onClick={() => setMenuOpen(true)}
             style={{
               position: 'absolute',
@@ -1167,10 +1149,3 @@ function UnconnectedBudgetHeader({
     </View>
   );
 }
-
-const BudgetHeader = connect(
-  state => ({
-    localPrefs: state.prefs.local,
-  }),
-  actions,
-)(UnconnectedBudgetHeader);

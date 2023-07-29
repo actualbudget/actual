@@ -11,7 +11,6 @@ import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
 import { colors } from '../../style';
-import SimpleTransactionsTable from '../accounts/SimpleTransactionsTable';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import { Stack, View, Text, Button } from '../common';
@@ -21,6 +20,7 @@ import { Page } from '../Page';
 import DateSelect from '../select/DateSelect';
 import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '../table';
+import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import GenericInput from '../util/GenericInput';
 
@@ -686,7 +686,7 @@ export default function ScheduleDetails() {
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Button
-                bare
+                type="bare"
                 style={{
                   color:
                     state.transactionsMode === 'linked' ? colors.b4 : colors.n7,
@@ -698,7 +698,7 @@ export default function ScheduleDetails() {
                 Linked transactions
               </Button>{' '}
               <Button
-                bare
+                type="bare"
                 style={{
                   color:
                     state.transactionsMode === 'matched'
@@ -772,7 +772,7 @@ export default function ScheduleDetails() {
         <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
           Cancel
         </Button>
-        <Button primary onClick={onSave}>
+        <Button type="primary" onClick={onSave}>
           {adding ? 'Add' : 'Save'}
         </Button>
       </Stack>

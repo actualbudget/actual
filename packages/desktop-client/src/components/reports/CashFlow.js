@@ -8,7 +8,8 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
 import { colors, styles } from '../../style';
-import { View, Text, Block, P, AlignedText } from '../common';
+import { View, Text, Block, AlignedText } from '../common';
+import Paragraph from '../common/Paragraph';
 
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
@@ -87,7 +88,7 @@ function CashFlow() {
     return null;
   }
 
-  const { graphData, totalExpenses, totalIncome } = data;
+  const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
 
   return (
     <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
@@ -142,8 +143,18 @@ function CashFlow() {
               </Text>
             }
           />
+
+          <AlignedText
+            style={{ marginBottom: 5, minWidth: 160 }}
+            left={<Block>Transfers:</Block>}
+            right={
+              <Text style={{ fontWeight: 600 }}>
+                {integerToCurrency(totalTransfers)}
+              </Text>
+            }
+          />
           <Text style={{ fontWeight: 600 }}>
-            <Change amount={totalIncome + totalExpenses} />
+            <Change amount={totalIncome + totalExpenses + totalTransfers} />
           </Text>
         </View>
 
@@ -155,15 +166,15 @@ function CashFlow() {
         />
 
         <View style={{ marginTop: 30 }}>
-          <P>
+          <Paragraph>
             <strong>How is cash flow calculated?</strong>
-          </P>
-          <P>
+          </Paragraph>
+          <Paragraph>
             Cash flow shows the balance of your budgeted accounts over time, and
             the amount of expenses/income each day or month. Your budgeted
             accounts are considered to be “cash on hand,” so this gives you a
             picture of how available money fluctuates.
-          </P>
+          </Paragraph>
         </View>
       </View>
     </View>

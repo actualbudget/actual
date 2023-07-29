@@ -740,7 +740,7 @@ handlers['accounts-link'] = async function ({
   ]);
 
   // Get all the available accounts and find the selected one
-  let accounts = await bankSync.getNordigenAccounts(userId, userKey, bankId);
+  let accounts = await bankSync.getGoCardlessAccounts(userId, userKey, bankId);
   let account = accounts.find(acct => acct.account_id === accountId);
 
   await db.update('accounts', {
@@ -770,7 +770,7 @@ handlers['accounts-link'] = async function ({
   return 'ok';
 };
 
-handlers['nordigen-accounts-link'] = async function ({
+handlers['gocardless-accounts-link'] = async function ({
   requisitionId,
   account,
   upgradingId,
@@ -804,7 +804,7 @@ handlers['nordigen-accounts-link'] = async function ({
     });
   }
 
-  await bankSync.syncNordigenAccount(
+  await bankSync.syncGoCardlessAccount(
     undefined,
     undefined,
     id,
@@ -831,14 +831,14 @@ handlers['accounts-connect'] = async function ({
   return ids;
 };
 
-handlers['nordigen-accounts-connect'] = async function ({
+handlers['gocardless-accounts-connect'] = async function ({
   institution,
   publicToken,
   accountIds,
   offbudgetIds,
 }) {
   let bankId = await link.handoffPublicToken(institution, publicToken);
-  let ids = await link.addNordigenAccounts(bankId, accountIds, offbudgetIds);
+  let ids = await link.addGoCardlessAccounts(bankId, accountIds, offbudgetIds);
   return ids;
 };
 
@@ -1162,7 +1162,7 @@ handlers['secret-check'] = async function (name) {
   }
 };
 
-handlers['nordigen-poll-web-token'] = async function ({
+handlers['gocardless-poll-web-token'] = async function ({
   upgradingAccountId,
   requisitionId,
 }) {
@@ -1183,7 +1183,7 @@ handlers['nordigen-poll-web-token'] = async function ({
     }
 
     let data = await post(
-      getServer().NORDIGEN_SERVER + '/get-accounts',
+      getServer().GOCARDLESS_SERVER + '/get-accounts',
       {
         upgradingAccountId,
         requisitionId,
@@ -1215,7 +1215,7 @@ handlers['nordigen-poll-web-token'] = async function ({
   });
 };
 
-handlers['nordigen-status'] = async function () {
+handlers['gocardless-status'] = async function () {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1223,7 +1223,7 @@ handlers['nordigen-status'] = async function () {
   }
 
   return post(
-    getServer().NORDIGEN_SERVER + '/status',
+    getServer().GOCARDLESS_SERVER + '/status',
     {},
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1231,7 +1231,7 @@ handlers['nordigen-status'] = async function () {
   );
 };
 
-handlers['nordigen-get-banks'] = async function (country) {
+handlers['gocardless-get-banks'] = async function (country) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1239,7 +1239,7 @@ handlers['nordigen-get-banks'] = async function (country) {
   }
 
   return post(
-    getServer().NORDIGEN_SERVER + '/get-banks',
+    getServer().GOCARDLESS_SERVER + '/get-banks',
     { country, showDemo: isNonProductionEnvironment() },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1247,12 +1247,12 @@ handlers['nordigen-get-banks'] = async function (country) {
   );
 };
 
-handlers['nordigen-poll-web-token-stop'] = async function () {
+handlers['gocardless-poll-web-token-stop'] = async function () {
   stopPolling = true;
   return 'ok';
 };
 
-handlers['nordigen-create-web-token'] = async function ({
+handlers['gocardless-create-web-token'] = async function ({
   upgradingAccountId,
   institutionId,
   accessValidForDays,
@@ -1265,7 +1265,7 @@ handlers['nordigen-create-web-token'] = async function ({
 
   try {
     return await post(
-      getServer().NORDIGEN_SERVER + '/create-web-token',
+      getServer().GOCARDLESS_SERVER + '/create-web-token',
       {
         upgradingAccountId,
         institutionId,
@@ -1281,7 +1281,7 @@ handlers['nordigen-create-web-token'] = async function ({
   }
 };
 
-handlers['nordigen-accounts-sync'] = async function ({ id }) {
+handlers['gocardless-accounts-sync'] = async function ({ id }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
@@ -1307,7 +1307,7 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
-        const res = await bankSync.syncNordigenAccount(
+        const res = await bankSync.syncGoCardlessAccount(
           userId,
           userKey,
           acct.id,
@@ -1408,7 +1408,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   );
 
   // No more accounts are associated with this bank. We can remove
-  // it from Nordigen.
+  // it from GoCardless.
   let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return 'ok';
@@ -1421,7 +1421,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     );
     try {
       await post(
-        getServer().NORDIGEN_SERVER + '/remove-account',
+        getServer().GOCARDLESS_SERVER + '/remove-account',
         {
           requisitionId: requisitionId,
         },
@@ -1472,6 +1472,9 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('floatingSidebar' in prefs) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
+  if ('theme' in prefs) {
+    await asyncStorage.setItem('theme', prefs.theme);
+  }
   return 'ok';
 };
 
@@ -1482,12 +1485,14 @@ handlers['load-global-prefs'] = async function () {
     [, autoUpdate],
     [, documentDir],
     [, encryptKey],
+    [, theme],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
     'auto-update',
     'document-dir',
     'encrypt-key',
+    'theme',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1495,6 +1500,7 @@ handlers['load-global-prefs'] = async function () {
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
+    theme: theme === 'light' || theme === 'dark' ? theme : 'light',
   };
 };
 
@@ -2463,9 +2469,4 @@ export const lib = {
   on: (name, func) => app.events.on(name, func),
   q,
   db,
-
-  // Expose CRDT mechanisms so server can use them
-  // Backwards compatability
-  ...CRDT,
-  timestamp: CRDT,
 };

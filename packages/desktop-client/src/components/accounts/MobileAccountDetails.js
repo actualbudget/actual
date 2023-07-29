@@ -8,8 +8,7 @@ import { colors, styles } from '../../style';
 import { Button, InputWithContent, Label, View } from '../common';
 import Text from '../common/Text';
 import CellValue from '../spreadsheet/CellValue';
-
-import { TransactionList } from './MobileTransaction';
+import { TransactionList } from '../transactions/MobileTransaction';
 
 function TransactionSearchInput({ accountName, onSearch }) {
   const [text, setText] = useState('');
@@ -109,22 +108,15 @@ export default function AccountDetails({
           <Link
             to="/accounts"
             style={{
+              color: colors.b5,
               alignItems: 'center',
               display: 'flex',
               textDecoration: 'none',
               width: LEFT_RIGHT_FLEX_WIDTH,
             }}
           >
-            <CheveronLeft
-              style={{
-                color: colors.b5,
-                width: 32,
-                height: 32,
-              }}
-            />
-            <Text style={{ ...styles.text, color: colors.b5, fontWeight: 500 }}>
-              Back
-            </Text>
+            <CheveronLeft style={{ width: 32, height: 32 }} />
+            <Text style={{ ...styles.text, fontWeight: 500 }}>Back</Text>
           </Link>
           <View
             style={{
@@ -140,7 +132,7 @@ export default function AccountDetails({
           */}
           <Link to="transaction/new" style={{ visibility: 'hidden' }}>
             <Button
-              bare
+              type="bare"
               style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
             >
               <Add width={20} height={20} />

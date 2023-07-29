@@ -50,6 +50,7 @@
     "@types/jest": "^27.5.0",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/pegjs": "^0.10.3",
+    "@types/react-redux": "^7.1.25",
     "@types/uuid": "^9.0.2",
     "@types/webpack": "^5.28.0",
     "@types/webpack-bundle-analyzer": "^4.6.0",

@@ -24,7 +24,7 @@ function OverflowMenu({ schedule, status, onAction }) {
   return (
     <View>
       <Button
-        bare
+        type="bare"
         onClick={e => {
           e.stopPropagation();
           setOpen(true);
@@ -33,7 +33,7 @@ function OverflowMenu({ schedule, status, onAction }) {
         <DotsHorizontalTriple
           width={15}
           height={15}
-          style={{ color: 'inherit', transform: 'rotateZ(90deg)' }}
+          style={{ transform: 'rotateZ(90deg)' }}
         />
       </Button>
       {open && (
@@ -284,7 +284,7 @@ export function SchedulesTable({
             Recurring
           </Field>
         )}
-        {!minimal && <Field width={40}></Field>}
+        {!minimal && <Field width={40} />}
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}

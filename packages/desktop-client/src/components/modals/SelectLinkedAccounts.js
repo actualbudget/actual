@@ -130,7 +130,7 @@ export default function SelectLinkedAccounts({
             }}
           >
             <Button
-              primary
+              type="primary"
               onClick={onNext}
               disabled={!Object.keys(chosenAccounts).length}
             >
@@ -195,7 +195,7 @@ function TableRow({
           </Button>
         ) : (
           <Button
-            primary
+            type="primary"
             onClick={() => {
               setFocusedField('account');
             }}

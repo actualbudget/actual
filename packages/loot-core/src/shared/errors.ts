@@ -51,10 +51,11 @@ export function getDownloadError({ reason, meta, fileName }) {
       );
 
     default:
-      let info = meta && meta.fileId ? `(fileId: ${meta.fileId})` : '';
+      let info = meta && meta.fileId ? `, fileId: ${meta.fileId}` : '';
       return (
-        'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. ' +
-        info
+        'Something went wrong trying to download that file, sorry! ' +
+        'Visit https://actualbudget.org/contact/ for support. ' +
+        `(reason: ${reason}${info})`
       );
   }
 }

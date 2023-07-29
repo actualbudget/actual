@@ -46,7 +46,7 @@ function NotesTooltip({
           })}
           value={notes || ''}
           onChange={e => setNotes(e.target.value)}
-        ></textarea>
+        />
       ) : (
         <Text
           {...css({
@@ -116,7 +116,7 @@ export default function NotesButton({
       onMouseLeave={handleMouseLeave}
     >
       <Button
-        bare
+        type="bare"
         className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
         style={[
           { color: defaultColor },
@@ -126,7 +126,7 @@ export default function NotesButton({
         ]}
         {...tooltip.getOpenEvents()}
       >
-        <CustomNotesPaper style={{ width, height, color: 'currentColor' }} />
+        <CustomNotesPaper style={{ width, height }} />
       </Button>
       {tooltipOpen && (
         <NotesTooltip

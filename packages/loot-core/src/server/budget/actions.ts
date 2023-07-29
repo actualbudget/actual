@@ -31,7 +31,7 @@ function getBudgetTable(): string {
   return budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
 }
 
-function isReflectBudget(): boolean {
+export function isReflectBudget(): boolean {
   let { budgetType } = prefs.getPrefs();
   return budgetType === 'report';
 }
@@ -173,6 +173,23 @@ export async function copyPreviousMonth({
   });
 }
 
+export async function copySinglePreviousMonth({
+  month,
+  category,
+}: {
+  month: string;
+  category: string;
+}): Promise<void> {
+  let prevMonth = monthUtils.prevMonth(month);
+  let newAmount = await getSheetValue(
+    monthUtils.sheetForMonth(prevMonth),
+    'budget-' + category,
+  );
+  await batchMessages(async () => {
+    setBudget({ category: category, month, amount: newAmount });
+  });
+}
+
 export async function setZero({ month }: { month: string }): Promise<void> {
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -223,6 +240,30 @@ export async function set3MonthAvg({
       const avg = Math.round((spent1 + spent2 + spent3) / 3);
       setBudget({ category: cat.id, month, amount: -avg });
     }
+  });
+}
+
+export async function setNMonthAvg({
+  month,
+  N,
+  category,
+}: {
+  month: string;
+  N: number;
+  category: string;
+}): Promise<void> {
+  let prevMonth = monthUtils.prevMonth(month);
+  let sumAmount = 0;
+  for (let l = 0; l < N; l++) {
+    sumAmount += await getSheetValue(
+      monthUtils.sheetForMonth(prevMonth),
+      'sum-amount-' + category,
+    );
+    prevMonth = monthUtils.prevMonth(prevMonth);
+  }
+  await batchMessages(async () => {
+    const avg = Math.round(sumAmount / N);
+    setBudget({ category: category, month, amount: -avg });
   });
 }
 

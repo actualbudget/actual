@@ -4,9 +4,10 @@ import { getUploadError } from '../../shared/errors';
 import { syncAccounts } from './account';
 import { pushModal } from './modals';
 import { loadPrefs } from './prefs';
+import type { Dispatch, GetState } from './types';
 
 export function resetSync() {
-  return async (dispatch, getState) => {
+  return async (dispatch: Dispatch) => {
     let { error } = await send('sync-reset');
 
     if (error) {
@@ -36,19 +37,20 @@ export function resetSync() {
 }
 
 export function sync() {
-  return async (dispatch, getState) => {
+  return async (dispatch: Dispatch, getState: GetState) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       let result = await send('sync');
       if ('error' in result) {
         return { error: result.error };
       }
+      return {};
     }
   };
 }
 
 export function syncAndDownload(accountId) {
-  return async (dispatch, getState) => {
+  return async (dispatch: Dispatch) => {
     // It is *critical* that we sync first because of transaction
     // reconciliation. We want to get all transactions that other
     // clients have already made, so that imported transactions can be
@@ -72,6 +74,6 @@ export function syncAndDownload(accountId) {
       // updates
       return true;
     }
-    return { hasUpdated: hasDownloaded || syncState.updated };
+    return { hasUpdated: hasDownloaded };
   };
 }

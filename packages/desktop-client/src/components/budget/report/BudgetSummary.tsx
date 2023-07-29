@@ -1,7 +1,6 @@
 import React, {
   type ComponentProps,
   type ComponentType,
-  memo,
   type ReactNode,
   useState,
   type SVGProps,
@@ -12,6 +11,7 @@ import { css, type CSSProperties } from 'glamor';
 import { reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
@@ -27,6 +27,7 @@ import {
   AlignedText,
 } from '../../common';
 import NotesButton from '../../NotesButton';
+import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
@@ -281,7 +282,9 @@ function Saved({ projected, style }: SavedProps) {
             },
           ])}
         >
-          {format(saved, 'financial')}
+          <PrivacyFilter blurIntensity={7}>
+            {format(saved, 'financial')}
+          </PrivacyFilter>
         </View>
       </HoverTarget>
     </View>
@@ -291,15 +294,15 @@ function Saved({ projected, style }: SavedProps) {
 type BudgetSummaryProps = {
   month?: string;
 };
-export const BudgetSummary = memo(function BudgetSummary({
-  month,
-}: BudgetSummaryProps) {
+export function BudgetSummary({ month }: BudgetSummaryProps) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
     onBudgetAction,
     onToggleSummaryCollapse,
   } = useReport();
+
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   let [menuOpen, setMenuOpen] = useState(false);
   function onMenuOpen() {
@@ -349,8 +352,8 @@ export const BudgetSummary = memo(function BudgetSummary({
             }}
           >
             <Button
+              type="bare"
               className="hover-visible"
-              bare
               onClick={onToggleSummaryCollapse}
             >
               <ExpandOrCollapseIcon
@@ -396,7 +399,7 @@ export const BudgetSummary = memo(function BudgetSummary({
               />
             </View>
             <View style={{ userSelect: 'none' }}>
-              <Button bare onClick={onMenuOpen}>
+              <Button type="bare" onClick={onMenuOpen}>
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
@@ -421,6 +424,18 @@ export const BudgetSummary = memo(function BudgetSummary({
                       {
                         name: 'set-3-avg',
                         text: 'Set budgets to 3 month avg',
+                      },
+                      isGoalTemplatesEnabled && {
+                        name: 'check-templates',
+                        text: 'Check templates',
+                      },
+                      isGoalTemplatesEnabled && {
+                        name: 'apply-goal-template',
+                        text: 'Apply budget template',
+                      },
+                      isGoalTemplatesEnabled && {
+                        name: 'overwrite-goal-template',
+                        text: 'Overwrite with budget template',
                       },
                     ]}
                   />
@@ -467,4 +482,4 @@ export const BudgetSummary = memo(function BudgetSummary({
       </NamespaceContext.Provider>
     </View>
   );
-});
+}
