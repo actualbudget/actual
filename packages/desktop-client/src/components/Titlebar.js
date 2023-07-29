@@ -35,9 +35,9 @@ import {
   Button,
   ButtonWithLoading,
   Tooltip,
-  P,
   ExternalLink,
 } from './common';
+import Paragraph from './common/Paragraph';
 import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
@@ -240,7 +240,7 @@ function BudgetTitlebar() {
                 maxWidth: 400,
               }}
             >
-              <P>
+              <Paragraph>
                 You are currently using a{' '}
                 <Text style={{ fontWeight: 600 }}>
                   {budgetType === 'report'
@@ -249,8 +249,8 @@ function BudgetTitlebar() {
                   .
                 </Text>{' '}
                 Switching will not lose any data and you can always switch back.
-              </P>
-              <P>
+              </Paragraph>
+              <Paragraph>
                 <ButtonWithLoading
                   type="primary"
                   loading={loading}
@@ -261,15 +261,15 @@ function BudgetTitlebar() {
                     ? 'Rollover budget'
                     : 'Report budget'}
                 </ButtonWithLoading>
-              </P>
-              <P isLast={true}>
+              </Paragraph>
+              <Paragraph isLast={true}>
                 <ExternalLink
                   to="https://actualbudget.org/docs/experimental/report-budget"
                   linkColor="muted"
                 >
                   How do these types of budgeting work?
                 </ExternalLink>
-              </P>
+              </Paragraph>
             </Tooltip>
           )}
         </View>

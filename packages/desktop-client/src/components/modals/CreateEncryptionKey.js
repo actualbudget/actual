@@ -12,11 +12,11 @@ import {
   Modal,
   ButtonWithLoading,
   ExternalLink,
-  P,
   ModalButtons,
   Input,
   InitialFocus,
 } from '../common';
+import Paragraph from '../common/Paragraph';
 
 export default function CreateEncryptionKey({
   modalProps,
@@ -62,7 +62,7 @@ export default function CreateEncryptionKey({
         <>
           {!isRecreating ? (
             <>
-              <P style={{ marginTop: 5 }}>
+              <Paragraph style={{ marginTop: 5 }}>
                 To enable end-to-end encryption, you need to create a key. We
                 will generate a key based on a password and use it to encrypt
                 from now on. <strong>This requires a sync reset</strong> and all
@@ -70,8 +70,8 @@ export default function CreateEncryptionKey({
                 <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                   Learn more
                 </ExternalLink>
-              </P>
-              <P>
+              </Paragraph>
+              <Paragraph>
                 <ul {...css({ marginTop: 0, '& li': { marginBottom: 8 } })}>
                   <li>
                     <strong>Important:</strong> if you forget this password{' '}
@@ -94,11 +94,11 @@ export default function CreateEncryptionKey({
                     protect your data.
                   </li>
                 </ul>
-              </P>
+              </Paragraph>
             </>
           ) : (
             <>
-              <P style={{ marginTop: 5 }}>
+              <Paragraph style={{ marginTop: 5 }}>
                 This will generate a new key for encrypting your data.{' '}
                 <strong>This requires a sync reset</strong> and all other
                 devices will have to revert to this version of your data. Actual
@@ -106,12 +106,12 @@ export default function CreateEncryptionKey({
                 <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                   Learn more
                 </ExternalLink>
-              </P>
-              <P>
+              </Paragraph>
+              <Paragraph>
                 Key generation is randomized. The same password will create
                 different keys, so this will change your key regardless of the
                 password being different.
-              </P>
+              </Paragraph>
             </>
           )}
           <form

@@ -9,7 +9,8 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
 import { styles } from '../../style';
-import { View, P } from '../common';
+import Paragraph from '../common/Paragraph';
+import View from '../common/View';
 
 import Change from './Change';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
@@ -124,16 +125,16 @@ export default function NetWorth() {
         <NetWorthGraph start={start} end={end} graphData={data.graphData} />
 
         <View style={{ marginTop: 30 }}>
-          <P>
+          <Paragraph>
             <strong>How is net worth calculated?</strong>
-          </P>
-          <P>
+          </Paragraph>
+          <Paragraph>
             Net worth shows the balance of all accounts over time, including all
             of your investments. Your “net worth” is considered to be the amount
             you’d have if you sold all your assets and paid off as much debt as
             possible. If you hover over the graph, you can also see the amount
             of assets and debt individually.
-          </P>
+          </Paragraph>
         </View>
       </View>
     </View>
