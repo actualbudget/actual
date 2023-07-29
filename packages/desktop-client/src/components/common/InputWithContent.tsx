@@ -38,7 +38,7 @@ export default function InputWithContent({
         style,
         focused &&
           (focusStyle ?? {
-            boxShadow: '0 0 0 1px ' + theme.altformInputShadowSelected,
+            boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
           }),
         getStyle && getStyle(focused),
       ]}

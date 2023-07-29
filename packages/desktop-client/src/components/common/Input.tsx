@@ -44,8 +44,8 @@ const Input = ({
           overflow: 'hidden',
           flexShrink: 0,
           ':focus': {
-            border: '1px solid ' + theme.altformInputBorderSelected,
-            boxShadow: '0 1px 1px ' + theme.altformInputShadowSelected,
+            border: '1px solid ' + theme.formInputBorderSelected,
+            boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
           },
           '::placeholder': { color: theme.formInputTextPlaceholder },
         },

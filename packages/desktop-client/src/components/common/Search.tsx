@@ -22,7 +22,7 @@ export default function Search({
   onChange,
   placeholder,
   isInModal,
-  width = 350,
+  width = 250,
 }: SearchProps) {
   return (
     <InputWithContent

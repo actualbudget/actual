@@ -477,7 +477,11 @@ export const ManagePayees = forwardRef(
             padding: '0 10px 5px',
           }}
         >
-          <View>
+          <View
+            style={{
+              flexShrink: 0,
+            }}
+          >
             <Button
               type="bare"
               style={{ marginRight: 10 }}
@@ -501,7 +505,11 @@ export const ManagePayees = forwardRef(
               />
             )}
           </View>
-          <View>
+          <View
+            style={{
+              flexShrink: 0,
+            }}
+          >
             {(orphanedOnly ||
               (orphanedPayees && orphanedPayees.length > 0)) && (
               <Button

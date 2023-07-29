@@ -234,7 +234,7 @@ export function AccountHeader({
               <Add width={10} height={10} style={{ marginRight: 3 }} /> Add New
             </Button>
           )}
-          <View>
+          <View style={{ flexShrink: 0 }}>
             <FilterButton onApply={onApplyFilter} />
           </View>
           <View style={{ flex: 1 }} />
