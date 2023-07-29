@@ -51,7 +51,7 @@ describe('utility functions', () => {
 
     setNumberFormat({ format: 'comma-dot-in', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234567.89'))).toBe('12,34,567');
+    expect(formatter.format(Number('1234567.89'))).toBe('12,34,568');
   });
 
   test('number formatting works with dot-comma format', () => {
