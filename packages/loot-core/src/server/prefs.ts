@@ -12,7 +12,6 @@ let prefs: LocalPrefs = null;
 
 export async function loadPrefs(id?: string): Promise<LocalPrefs> {
   if (process.env.NODE_ENV === 'test' && !id) {
-    // Needed so that we can make LocalPrefs object non-null for testing.
     prefs = getDefaultPrefs('test', 'test_LocalPrefs');
     return prefs;
   }
@@ -68,7 +67,7 @@ export async function savePrefs(
         }
         return null;
       })
-      .filter(x => x !== null);
+      .filter(x => x);
 
     if (messages.length > 0) {
       await sendMessages(messages);

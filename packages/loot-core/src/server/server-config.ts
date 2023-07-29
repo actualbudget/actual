@@ -8,7 +8,7 @@ type ServerConfig = {
   GOCARDLESS_SERVER: string;
 };
 
-let config: ServerConfig = null;
+let config: ServerConfig | null = null;
 
 function joinURL(base: string | URL, ...paths: string[]): string {
   let url = new URL(base);
@@ -25,7 +25,7 @@ export function setServer(url: string): void {
 }
 
 // `url` is optional; if not given it will provide the global config
-export function getServer(url?: string): ServerConfig {
+export function getServer(url?: string): ServerConfig | null {
   if (url) {
     return {
       BASE_SERVER: url,
