@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { replaceModal } from 'loot-core/src/client/actions/modals';
+import { selectPayeeQueries } from 'loot-core/src/client/selectors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../style';
@@ -19,10 +20,8 @@ export default function MergeUnusedPayees({
   payeeIds,
   targetPayeeId,
 }) {
-  let { payees: allPayees, modalStack } = useSelector(state => ({
-    payees: state.queries.payees,
-    modalStack: state.modals.modalStack,
-  }));
+  let allPayees = useSelector(selectPayeeQueries);
+  let modalStack = useSelector(state => state.modals.modalStack);
   let isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
   let dispatch = useDispatch();
   let [shouldCreateRule, setShouldCreateRule] = useState(true);

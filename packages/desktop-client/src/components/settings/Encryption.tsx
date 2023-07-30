@@ -1,6 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { selectLocalPrefEncryptKeyId } from 'loot-core/src/client/selectors';
+
 import { useActions } from '../../hooks/useActions';
 import { colors } from '../../style';
 import Button from '../common/Button';
@@ -13,7 +15,7 @@ import { Setting } from './UI';
 export default function EncryptionSettings() {
   const { pushModal } = useActions();
   const serverURL = useServerURL();
-  const encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);
+  const encryptKeyId = useSelector(selectLocalPrefEncryptKeyId);
 
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
 

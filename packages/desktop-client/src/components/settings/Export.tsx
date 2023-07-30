@@ -3,6 +3,10 @@ import { useSelector } from 'react-redux';
 
 import { format } from 'date-fns';
 
+import {
+  selectLocalPrefEncryptKeyId,
+  selectLocalPrefId,
+} from 'loot-core/src/client/selectors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import Button from '../common/Button';
@@ -11,8 +15,8 @@ import Text from '../common/Text';
 import { Setting } from './UI';
 
 export default function ExportBudget() {
-  let budgetId = useSelector(state => state.prefs.local.id);
-  let encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);
+  let budgetId = useSelector(selectLocalPrefId);
+  let encryptKeyId = useSelector(selectLocalPrefEncryptKeyId);
 
   async function onExport() {
     let data = await send('export-budget');

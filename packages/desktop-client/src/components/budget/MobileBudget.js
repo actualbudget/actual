@@ -1,6 +1,13 @@
 import React, { Component } from 'react';
 import { useSelector } from 'react-redux';
 
+import {
+  selectAppBudgetMonth,
+  selectCategoryListQueries,
+  selectGroupedCategoryQueries,
+  selectLocalPrefBudgetType,
+  selectLocalPrefsState,
+} from 'loot-core/src/client/selectors';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
@@ -293,13 +300,11 @@ class Budget extends Component {
 }
 
 export default function BudgetWrapper() {
-  let categoryGroups = useSelector(state => state.queries.categories.grouped);
-  let categories = useSelector(state => state.queries.categories.list);
-  let budgetType = useSelector(
-    state => state.prefs.local.budgetType || 'rollover',
-  );
-  let prefs = useSelector(state => state.prefs.local);
-  let initialBudgetMonth = useSelector(state => state.app.budgetMonth);
+  let categoryGroups = useSelector(selectGroupedCategoryQueries);
+  let categories = useSelector(selectCategoryListQueries);
+  let budgetType = useSelector(selectLocalPrefBudgetType) || 'rollover';
+  let prefs = useSelector(selectLocalPrefsState);
+  let initialBudgetMonth = useSelector(selectAppBudgetMonth);
 
   let actions = useActions();
   let spreadsheet = useSpreadsheet();

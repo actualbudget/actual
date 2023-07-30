@@ -1,5 +1,7 @@
 import { useSelector } from 'react-redux';
 
+import { selectLocalPerfIsPrivacyEnabled } from './selectors';
+
 export default function usePrivacyMode() {
-  return useSelector(state => state.prefs?.local?.isPrivacyEnabled ?? false);
+  return useSelector(selectLocalPerfIsPrivacyEnabled);
 }

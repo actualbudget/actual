@@ -3,6 +3,14 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import * as queries from 'loot-core/src/client/queries';
+import {
+  selectAccountQueries,
+  selectCategoryListQueries,
+  selectLocalHideFraction,
+  selectLocalNumberFormat,
+  selectNewTransactionQueries,
+  selectUpdatedAccountQueries,
+} from 'loot-core/src/client/selectors';
 
 import { useActions } from '../../hooks/useActions';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
@@ -230,16 +238,12 @@ class AccountList extends Component {
 }
 
 export default function Accounts() {
-  let accounts = useSelector(state => state.queries.accounts);
-  let newTransactions = useSelector(state => state.queries.newTransactions);
-  let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  let categories = useSelector(state => state.queries.categories.list);
-  let numberFormat = useSelector(
-    state => state.prefs.local.numberFormat || 'comma-dot',
-  );
-  let hideFraction = useSelector(
-    state => state.prefs.local.hideFraction || false,
-  );
+  let accounts = useSelector(selectAccountQueries);
+  let newTransactions = useSelector(selectNewTransactionQueries);
+  let updatedAccounts = useSelector(selectUpdatedAccountQueries);
+  let categories = useSelector(selectCategoryListQueries);
+  let numberFormat = useSelector(selectLocalNumberFormat);
+  let hideFraction = useSelector(selectLocalHideFraction);
 
   let { getCategories, getAccounts } = useActions();
 

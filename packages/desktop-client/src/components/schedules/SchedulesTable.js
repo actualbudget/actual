@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
+import { selectLocalPerfDateFormat } from 'loot-core/src/client/selectors';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -129,9 +130,7 @@ export function SchedulesTable({
   onAction,
   tableStyle,
 }) {
-  let dateFormat = useSelector(state => {
-    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-  });
+  let dateFormat = useSelector(selectLocalPerfDateFormat);
 
   let [showCompleted, setShowCompleted] = useState(false);
 

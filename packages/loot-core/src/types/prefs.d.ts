@@ -23,17 +23,17 @@ export type LocalPrefs = Partial<
     budgetName: string;
     'ui.showClosedAccounts': boolean;
     'expand-splits': boolean;
-    [key: `show-extra-balances-${string}`]: boolean;
-    [key: `hide-cleared-${string}`]: boolean;
+    [`show-extra-balances-${string}`]: boolean;
+    [`hide-cleared-${string}`]: boolean;
     'budget.collapsed': boolean;
     'budget.summaryCollapsed': boolean;
     'budget.showHiddenCategories': boolean;
     // TODO: pull from src/components/modals/ImportTransactions.js
-    [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
-    [key: `csv-mappings-${string}`]: string;
-    [key: `csv-delimiter-${string}`]: ',' | ';' | '\t';
-    [key: `csv-has-header-${string}`]: boolean;
-    [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
+    [`parse-date-${string}-${'csv' | 'qif'}`]: string;
+    [`csv-mappings-${string}`]: string;
+    [`csv-delimiter-${string}`]: ',' | ';' | '\t';
+    [`csv-has-header-${string}`]: boolean;
+    [`flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
     'flags.updateNotificationShownForVersion': string;
     id: string;
     isCached: boolean;

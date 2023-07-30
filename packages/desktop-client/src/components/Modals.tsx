@@ -1,6 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import {
+  selectAccountQueries,
+  selectCategoryListQueries,
+  selectGroupedCategoryQueries,
+  selectLocalPrefId,
+} from 'loot-core/src/client/selectors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
@@ -27,12 +33,10 @@ import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 export default function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);
   const isHidden = useSelector(state => state.modals.isHidden);
-  const accounts = useSelector(state => state.queries.accounts);
-  const categoryGroups = useSelector(state => state.queries.categories.grouped);
-  const categories = useSelector(state => state.queries.categories.list);
-  const budgetId = useSelector(
-    state => state.prefs.local && state.prefs.local.id,
-  );
+  const accounts = useSelector(selectAccountQueries);
+  const categoryGroups = useSelector(selectGroupedCategoryQueries);
+  const categories = useSelector(selectCategoryListQueries);
+  const budgetId = useSelector(selectLocalPrefId);
   const actions = useActions();
 
   const syncServerStatus = useSyncServerStatus();

@@ -2,6 +2,7 @@ import type { Handlers } from '../../types/handlers';
 import type * as constants from '../constants';
 
 export type QueriesState = {
+  saved?: unknown;
   newTransactions: unknown[];
   matchedTransactions: unknown[];
   lastTransaction: unknown | null;

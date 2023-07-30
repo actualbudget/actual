@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
+import { selectUserData } from 'loot-core/src/client/selectors';
+
 import { useActions } from '../hooks/useActions';
 import { colors, styles } from '../style';
 
@@ -12,7 +14,7 @@ import { useServerURL } from './ServerContext';
 import { Tooltip } from './tooltips';
 
 export default function LoggedInUser({ hideIfNoServer, style, color }) {
-  let userData = useSelector(state => state.userData);
+  let userData = useSelector(selectUserData);
   let { getUserData, signOut, closeBudget } = useActions();
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);

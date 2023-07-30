@@ -13,6 +13,7 @@ import {
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
+import { selectAccountQueries } from 'loot-core/src/client/selectors';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   getSplit,
@@ -70,7 +71,7 @@ function PreviewTransactions({ accountId, children }) {
 let paged;
 
 export default function Account(props) {
-  const accounts = useSelector(state => state.queries.accounts);
+  const accounts = useSelector(selectAccountQueries);
   const { syncAndDownload } = useActions();
 
   const navigate = useNavigate();

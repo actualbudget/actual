@@ -2,6 +2,11 @@ import React, { memo, PureComponent, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
+import {
+  selectGlobalPrefMaxMonths,
+  selectGroupedCategoryQueries,
+  selectLocalPrefBudgetType,
+} from 'loot-core/src/client/selectors';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
@@ -531,11 +536,9 @@ export default function BudgetWrapper(props) {
   let summaryCollapsed = useSelector(
     state => state.prefs.local['budget.summaryCollapsed'],
   );
-  let budgetType = useSelector(
-    state => state.prefs.local.budgetType || 'rollover',
-  );
-  let maxMonths = useSelector(state => state.prefs.global.maxMonths);
-  let categoryGroups = useSelector(state => state.queries.categories.grouped);
+  let budgetType = useSelector(selectLocalPrefBudgetType) || 'rollover';
+  let maxMonths = useSelector(selectGlobalPrefMaxMonths);
+  let categoryGroups = useSelector(selectGroupedCategoryQueries);
 
   let actions = useActions();
   let spreadsheet = useSpreadsheet();

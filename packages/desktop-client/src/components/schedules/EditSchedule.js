@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
+import { selectLocalPerfDateFormat } from 'loot-core/src/client/selectors';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
@@ -86,9 +87,7 @@ export default function ScheduleDetails() {
   let payees = useCachedPayees({ idKey: true });
   let navigate = useNavigate();
   let globalDispatch = useDispatch();
-  let dateFormat = useSelector(state => {
-    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-  });
+  let dateFormat = useSelector(selectLocalPerfDateFormat);
 
   let [state, dispatch] = useReducer(
     (state, action) => {

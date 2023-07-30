@@ -27,6 +27,7 @@ import {
   getPayeesById,
   getCategoriesById,
 } from 'loot-core/src/client/reducers/queries';
+import { selectAppLastSplitState } from 'loot-core/src/client/selectors';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
@@ -165,7 +166,7 @@ export function useSplitsExpanded() {
 }
 
 export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
-  let cachedState = useSelector(state => state.app.lastSplitState);
+  let cachedState = useSelector(selectAppLastSplitState);
   let reduxDispatch = useDispatch();
 
   let [state, dispatch] = useReducer((state, action) => {

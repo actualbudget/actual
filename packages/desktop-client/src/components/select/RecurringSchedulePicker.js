@@ -1,6 +1,7 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { selectLocalPerfDateFormat } from 'loot-core/src/client/selectors';
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
@@ -137,11 +138,9 @@ function reducer(state, action) {
 }
 
 function SchedulePreview({ previewDates }) {
-  const dateFormat = useSelector(state =>
-    (state.prefs.local.dateFormat || 'MM/dd/yyyy')
-      .replace('MM', 'M')
-      .replace('dd', 'd'),
-  );
+  const dateFormat = useSelector(selectLocalPerfDateFormat)
+    .replace('MM', 'M')
+    .replace('dd', 'd');
 
   if (!previewDates) {
     return null;

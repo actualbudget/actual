@@ -12,6 +12,12 @@ import { css, media } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
+import {
+  selectGlobalPrefFloatingSidebar,
+  selectGlobalPrefMaxMonths,
+  selectLocalPrefBudgetType,
+  selectLocalPrefCloudFileId,
+} from 'loot-core/src/client/selectors';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
@@ -102,7 +108,7 @@ function PrivacyButton() {
 }
 
 export function SyncButton({ style }) {
-  let cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
+  let cloudFileId = useSelector(selectLocalPrefCloudFileId);
   let { sync } = useActions();
 
   let [syncing, setSyncing] = useState(false);
@@ -187,8 +193,8 @@ export function SyncButton({ style }) {
 }
 
 function BudgetTitlebar() {
-  let maxMonths = useSelector(state => state.prefs.global.maxMonths);
-  let budgetType = useSelector(state => state.prefs.local.budgetType);
+  let maxMonths = useSelector(selectGlobalPrefMaxMonths);
+  let budgetType = useSelector(selectLocalPrefBudgetType);
   let { saveGlobalPrefs } = useActions();
   let { sendEvent } = useContext(TitlebarContext);
 
@@ -281,9 +287,7 @@ export default function Titlebar({ style }) {
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
   let serverURL = useServerURL();
-  let floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
-  );
+  let floatingSidebar = useSelector(selectGlobalPrefFloatingSidebar);
 
   let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let themesFlag = useFeatureFlag('themes');

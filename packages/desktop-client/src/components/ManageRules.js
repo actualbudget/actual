@@ -16,6 +16,11 @@ import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import q from 'loot-core/src/client/query-helpers';
 import { liveQueryContext } from 'loot-core/src/client/query-hooks';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
+import {
+  selectAccountQueries,
+  selectCategoryListQueries,
+  selectPayeeQueries,
+} from 'loot-core/src/client/selectors';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
@@ -240,7 +245,7 @@ function describeSchedule(schedule, payee) {
 }
 
 function ScheduleValue({ value }) {
-  let payees = useSelector(state => state.queries.payees);
+  let payees = useSelector(selectPayeeQueries);
   let byId = getPayeesById(payees);
   let { data: schedules } = SchedulesQuery.useQuery();
 
@@ -545,9 +550,9 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 
   let { data: schedules } = SchedulesQuery.useQuery();
   let filterData = useSelector(state => ({
-    payees: state.queries.payees,
-    categories: state.queries.categories.list,
-    accounts: state.queries.accounts,
+    payees: selectPayeeQueries(state),
+    categories: selectCategoryListQueries(state),
+    accounts: selectAccountQueries(state),
     schedules,
   }));
 

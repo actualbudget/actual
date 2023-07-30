@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
+import { selectAccountQueries } from 'loot-core/src/client/selectors';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -20,7 +21,7 @@ import useReport from './useReport';
 import { fromDateRepr } from './util';
 
 export default function NetWorth() {
-  let accounts = useSelector(state => state.queries.accounts);
+  let accounts = useSelector(selectAccountQueries);
   const {
     filters,
     saved,

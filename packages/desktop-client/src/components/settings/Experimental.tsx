@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { selectLocalPrefBudgetType } from 'loot-core/src/client/selectors';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
@@ -34,7 +35,6 @@ function FeatureToggle({
       <Checkbox
         checked={enabled}
         onChange={() => {
-          // @ts-expect-error key type is not correctly inferred
           savePrefs({
             [`flags.${flag}`]: !enabled,
           });
@@ -52,7 +52,7 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  let budgetType = useSelector(state => state.prefs.local?.budgetType);
+  let budgetType = useSelector(selectLocalPrefBudgetType);
   let enabled = useFeatureFlag('reportBudget');
   let blockToggleOff = budgetType === 'report' && enabled;
   return (

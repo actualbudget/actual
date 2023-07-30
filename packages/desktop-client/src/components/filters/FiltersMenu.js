@@ -9,6 +9,7 @@ import {
 } from 'date-fns';
 
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
+import { selectLocalPerfDateFormat } from 'loot-core/src/client/selectors';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import {
@@ -329,11 +330,7 @@ function ConfigureField({
 export function FilterButton({ onApply }) {
   let filters = useFilters();
 
-  let { dateFormat } = useSelector(state => {
-    return {
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    };
-  });
+  let dateFormat = useSelector(selectLocalPerfDateFormat);
 
   let [state, dispatch] = useReducer(
     (state, action) => {

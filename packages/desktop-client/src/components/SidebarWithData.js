@@ -5,6 +5,13 @@ import { useNavigate } from 'react-router';
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
+import {
+  selectAccountQueries,
+  selectFailedAccounts,
+  selectGlobalPrefFloatingSidebar,
+  selectLocalPrefsState,
+  selectUpdatedAccountQueries,
+} from 'loot-core/src/client/selectors';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
@@ -107,13 +114,11 @@ function EditableBudgetName({ prefs, savePrefs }) {
 }
 
 export default function SidebarWithData() {
-  let accounts = useSelector(state => state.queries.accounts);
-  let failedAccounts = useSelector(state => state.account.failedAccounts);
-  let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  let prefs = useSelector(state => state.prefs.local);
-  let floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
-  );
+  let accounts = useSelector(selectAccountQueries);
+  let failedAccounts = useSelector(selectFailedAccounts);
+  let updatedAccounts = useSelector(selectUpdatedAccountQueries);
+  let prefs = useSelector(selectLocalPrefsState);
+  let floatingSidebar = useSelector(selectGlobalPrefFloatingSidebar);
 
   let { getAccounts, replaceModal, savePrefs, saveGlobalPrefs } = useActions();
 

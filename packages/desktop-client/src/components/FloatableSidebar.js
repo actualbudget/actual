@@ -1,6 +1,8 @@
 import React, { createContext, useState, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
+import { selectGlobalPrefFloatingSidebar } from 'loot-core/src/client/selectors';
+
 import { useResponsive } from '../ResponsiveProvider';
 
 import View from './common/View';
@@ -10,9 +12,7 @@ import SidebarWithData from './SidebarWithData';
 const SidebarContext = createContext(null);
 
 export function SidebarProvider({ children }) {
-  let floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
-  );
+  let floatingSidebar = useSelector(selectGlobalPrefFloatingSidebar);
   let [hidden, setHidden] = useState(true);
   let { width } = useResponsive();
   let alwaysFloats = width < 668;
@@ -38,9 +38,7 @@ export function useSidebar() {
 }
 
 export default function Sidebar() {
-  let floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
-  );
+  let floatingSidebar = useSelector(selectGlobalPrefFloatingSidebar);
 
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();

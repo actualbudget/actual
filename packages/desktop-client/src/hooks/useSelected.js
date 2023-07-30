@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
+import { selectAppLastUndoState } from 'loot-core/src/client/selectors';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
@@ -162,7 +163,7 @@ export default function useSelected(name, items, initialSelectedIds) {
     return () => undo.setUndoState('selectedItems', prevState);
   }, [state.selectedItems]);
 
-  let lastUndoState = useSelector(state => state.app.lastUndoState);
+  let lastUndoState = useSelector(selectAppLastUndoState);
 
   useEffect(() => {
     function onUndo({ messages, undoTag }) {

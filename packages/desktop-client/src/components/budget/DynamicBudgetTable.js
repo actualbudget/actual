@@ -2,6 +2,8 @@ import React, { forwardRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { selectLocalPrefsState } from 'loot-core/src/client/selectors';
+
 import { useActions } from '../../hooks/useActions';
 import View from '../common/View';
 
@@ -43,7 +45,7 @@ const DynamicBudgetTableInner = forwardRef(
     },
     ref,
   ) => {
-    let prefs = useSelector(state => state.prefs.local);
+    let prefs = useSelector(selectLocalPrefsState);
     let { setDisplayMax } = useBudgetMonthCount();
     let actions = useActions();
 

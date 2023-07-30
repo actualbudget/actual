@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
 
+import { selectAccountQueries } from 'loot-core/src/client/selectors';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
@@ -222,7 +223,7 @@ function CashFlowCard() {
 }
 
 export default function Overview() {
-  let accounts = useSelector(state => state.queries.accounts);
+  let accounts = useSelector(selectAccountQueries);
   return (
     <View
       style={[

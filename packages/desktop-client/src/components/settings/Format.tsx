@@ -1,6 +1,11 @@
 import React, { type ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 
+import {
+  selectLocalHideFraction,
+  selectLocalNumberFormat,
+  selectLocalPerfDateFormat,
+} from 'loot-core/src/client/selectors';
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
@@ -58,13 +63,9 @@ export default function FormatSettings() {
   let firstDayOfWeekIdx = useSelector(
     state => state.prefs.local.firstDayOfWeekIdx || '0', // Sunday
   );
-  let dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
-  let numberFormat = useSelector(
-    state => state.prefs.local.numberFormat || 'comma-dot',
-  );
-  let hideFraction = useSelector(state => state.prefs.local.hideFraction);
+  let dateFormat = useSelector(selectLocalPerfDateFormat);
+  let numberFormat = useSelector(selectLocalNumberFormat);
+  let hideFraction = useSelector(selectLocalHideFraction);
 
   return (
     <Setting

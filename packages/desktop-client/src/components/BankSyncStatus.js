@@ -2,6 +2,8 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
+import { selectAccountSyncing } from 'loot-core/src/client/selectors';
+
 import { colors, styles } from '../style';
 
 import AnimatedRefresh from './AnimatedRefresh';
@@ -9,7 +11,7 @@ import Text from './common/Text';
 import View from './common/View';
 
 export default function BankSyncStatus() {
-  let accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  let accountsSyncing = useSelector(selectAccountSyncing);
 
   let name = accountsSyncing
     ? accountsSyncing === '__all'

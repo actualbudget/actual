@@ -7,6 +7,7 @@ import {
 } from 'loot-core/src/client/actions/queries';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { selectLocalPerfDateFormat } from 'loot-core/src/client/selectors';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
@@ -248,9 +249,7 @@ function formatAmount(amount) {
 }
 
 function ScheduleDescription({ id }) {
-  let dateFormat = useSelector(state => {
-    return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-  });
+  let dateFormat = useSelector(selectLocalPerfDateFormat);
   let scheduleData = useSchedules({
     transform: useCallback(q => q.filter({ id }), []),
   });

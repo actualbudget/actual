@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 
+import { selectGlobalPrefTheme } from 'loot-core/src/client/selectors';
 import type { Theme } from 'loot-core/src/types/prefs';
 
 import * as darkTheme from './themes/dark';
@@ -13,7 +14,7 @@ const themes = {
 export const themeNames = Object.keys(themes) as Theme[];
 
 export function useTheme() {
-  return useSelector(state => state.prefs.global?.theme) || 'light';
+  return useSelector(selectGlobalPrefTheme) || 'light';
 }
 
 export function ThemeStyle() {

@@ -11,6 +11,12 @@ import {
   getAccountsById,
   getCategoriesById,
 } from 'loot-core/src/client/reducers/queries';
+import {
+  selectAccountQueries,
+  selectGroupedCategoryQueries,
+  selectLocalPerfDateFormat,
+  selectPayeeQueries,
+} from 'loot-core/src/client/selectors';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
@@ -141,14 +147,10 @@ export default function SimpleTransactionsTable({
   fields = ['date', 'payee', 'amount'],
   style,
 }) {
-  let { payees, categories, accounts, dateFormat } = useSelector(state => {
-    return {
-      payees: state.queries.payees,
-      accounts: state.queries.accounts,
-      categories: state.queries.categories.grouped,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    };
-  });
+  let dateFormat = useSelector(selectLocalPerfDateFormat);
+  let payees = useSelector(selectPayeeQueries);
+  let accounts = useSelector(selectAccountQueries);
+  let categories = useSelector(selectGroupedCategoryQueries);
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
   let memoFields = useMemo(() => fields, [JSON.stringify(fields)]);

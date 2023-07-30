@@ -14,6 +14,7 @@ export type AppState = {
   managerHasInitialized: boolean;
   lastUndoState: { current: UndoState | null };
   lastSplitState: { current: SplitState | null };
+  budgetMonth?: unknown;
 };
 
 export type SetAppStateAction = {

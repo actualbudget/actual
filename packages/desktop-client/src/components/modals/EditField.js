@@ -3,6 +3,12 @@ import { useSelector } from 'react-redux';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
+import {
+  selectAccountQueries,
+  selectGroupedCategoryQueries,
+  selectLocalPerfDateFormat,
+  selectPayeeQueries,
+} from 'loot-core/src/client/selectors';
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
@@ -18,12 +24,10 @@ import { SectionLabel } from '../forms';
 import DateSelect from '../select/DateSelect';
 
 export default function EditField({ modalProps, name, onSubmit }) {
-  let dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
-  let categoryGroups = useSelector(state => state.queries.categories.grouped);
-  let accounts = useSelector(state => state.queries.accounts);
-  let payees = useSelector(state => state.queries.payees);
+  let dateFormat = useSelector(selectLocalPerfDateFormat);
+  let categoryGroups = useSelector(selectGroupedCategoryQueries);
+  let accounts = useSelector(selectAccountQueries);
+  let payees = useSelector(selectPayeeQueries);
 
   let { createPayee } = useActions();
 

@@ -4,6 +4,11 @@ import { useSelector } from 'react-redux';
 import { css } from 'glamor';
 
 import {
+  selectAppLoadingText,
+  selectLocalPrefId,
+  selectLocalPrefCloudFileId,
+} from 'loot-core/src/client/selectors';
+import {
   init as initConnection,
   send,
 } from 'loot-core/src/platform/client/fetch';
@@ -140,13 +145,9 @@ class App extends Component {
 }
 
 export default function AppWrapper() {
-  let budgetId = useSelector(
-    state => state.prefs.local && state.prefs.local.id,
-  );
-  let cloudFileId = useSelector(
-    state => state.prefs.local && state.prefs.local.cloudFileId,
-  );
-  let loadingText = useSelector(state => state.app.loadingText);
+  let budgetId = useSelector(selectLocalPrefId);
+  let cloudFileId = useSelector(selectLocalPrefCloudFileId);
+  let loadingText = useSelector(selectAppLoadingText);
   let { loadBudget, closeBudget, loadGlobalPrefs } = useActions();
 
   return (

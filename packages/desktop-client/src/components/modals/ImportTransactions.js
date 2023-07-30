@@ -3,6 +3,10 @@ import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
+import {
+  selectLocalPerfDateFormat,
+  selectLocalPrefsState,
+} from 'loot-core/src/client/selectors';
 import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
@@ -550,10 +554,8 @@ function FieldMappings({
 }
 
 export default function ImportTransactions({ modalProps, options }) {
-  let dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
-  let prefs = useSelector(state => state.prefs.local);
+  let dateFormat = useSelector(selectLocalPerfDateFormat);
+  let prefs = useSelector(selectLocalPrefsState);
   let { parseTransactions, importTransactions, getPayees, savePrefs } =
     useActions();
 

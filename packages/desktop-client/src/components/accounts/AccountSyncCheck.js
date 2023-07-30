@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
+import {
+  selectAccountQueries,
+  selectFailedAccounts,
+} from 'loot-core/src/client/selectors';
+
 import { authorizeBank } from '../../gocardless';
 import { useActions } from '../../hooks/useActions';
 import ExclamationOutline from '../../icons/v1/ExclamationOutline';
@@ -49,8 +54,8 @@ function getErrorMessage(type, code) {
 }
 
 export default function AccountSyncCheck() {
-  let accounts = useSelector(state => state.queries.accounts);
-  let failedAccounts = useSelector(state => state.account.failedAccounts);
+  let accounts = useSelector(selectAccountQueries);
+  let failedAccounts = useSelector(selectFailedAccounts);
   let { unlinkAccount, pushModal } = useActions();
 
   let { id } = useParams();

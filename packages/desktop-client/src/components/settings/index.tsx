@@ -4,6 +4,12 @@ import { useSelector } from 'react-redux';
 import { media } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
+import {
+  selectGlobalPrefFloatingSidebar,
+  selectLocalPrefBudgetName,
+  selectLocalPrefGroupId,
+  selectLocalPrefId,
+} from 'loot-core/src/client/selectors';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
@@ -84,8 +90,8 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
-  let budgetId = useSelector(state => state.prefs.local.id);
-  let groupId = useSelector(state => state.prefs.local.groupId);
+  let budgetId = useSelector(selectLocalPrefId);
+  let groupId = useSelector(selectLocalPrefGroupId);
 
   return (
     <Setting>
@@ -113,10 +119,8 @@ function AdvancedAbout() {
 }
 
 export default function Settings() {
-  let floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
-  );
-  let budgetName = useSelector(state => state.prefs.local.budgetName);
+  let floatingSidebar = useSelector(selectGlobalPrefFloatingSidebar);
+  let budgetName = useSelector(selectLocalPrefBudgetName);
 
   let { loadPrefs, closeBudget } = useActions();
 

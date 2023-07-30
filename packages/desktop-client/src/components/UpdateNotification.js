@@ -1,6 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import {
+  selectAppShowUpdateNotification,
+  selectAppUpdateInfo,
+} from 'loot-core/src/client/selectors';
+
 import { useActions } from '../hooks/useActions';
 import Close from '../icons/v1/Close';
 import { colors } from '../style';
@@ -19,10 +24,8 @@ function closeNotification(setAppState) {
 }
 
 export default function UpdateNotification() {
-  let updateInfo = useSelector(state => state.app.updateInfo);
-  let showUpdateNotification = useSelector(
-    state => state.app.showUpdateNotification,
-  );
+  let updateInfo = useSelector(selectAppUpdateInfo);
+  let showUpdateNotification = useSelector(selectAppShowUpdateNotification);
 
   let { updateApp, setAppState } = useActions();
 

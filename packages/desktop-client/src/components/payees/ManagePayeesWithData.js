@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
+import {
+  selectAppLastUndoState,
+  selectGroupedCategoryQueries,
+  selectPayeeQueries,
+} from 'loot-core/src/client/selectors';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { applyChanges } from 'loot-core/src/shared/util';
 
@@ -9,9 +14,9 @@ import { useActions } from '../../hooks/useActions';
 import { ManagePayees } from '.';
 
 export default function ManagePayeesWithData({ initialSelectedIds }) {
-  let initialPayees = useSelector(state => state.queries.payees);
-  let lastUndoState = useSelector(state => state.app.lastUndoState);
-  let categoryGroups = useSelector(state => state.queries.categories.grouped);
+  let initialPayees = useSelector(selectPayeeQueries);
+  let lastUndoState = useSelector(selectAppLastUndoState);
+  let categoryGroups = useSelector(selectGroupedCategoryQueries);
 
   let { initiallyLoadPayees, getPayees, setLastUndoState, pushModal } =
     useActions();

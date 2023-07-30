@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
+import { selectUserData } from 'loot-core/src/client/selectors';
+
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import tokens from '../../tokens';
@@ -49,7 +51,7 @@ function Version() {
 
 export default function ManagementApp({ isLoading }) {
   let files = useSelector(state => state.budgets.allFiles);
-  let userData = useSelector(state => state.user.data);
+  let userData = useSelector(selectUserData);
   let managerHasInitialized = useSelector(
     state => state.app.managerHasInitialized,
   );
