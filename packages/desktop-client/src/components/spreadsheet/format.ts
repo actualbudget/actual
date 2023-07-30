@@ -23,7 +23,7 @@ export default function format(
       return '' + value;
     case 'financial-with-sign':
       let formatted = format(value, 'financial', formatter);
-      if (value >= 0) {
+      if (typeof value === 'number' && value >= 0) {
         return '+' + formatted;
       }
       return formatted;
