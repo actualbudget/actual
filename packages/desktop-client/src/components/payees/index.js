@@ -479,7 +479,7 @@ export const ManagePayees = forwardRef(
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            padding: '0 0 10px',
+            padding: '0 0 15px',
           }}
         >
           <View style={{ flexShrink: 0 }}>
