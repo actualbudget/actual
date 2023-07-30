@@ -1,6 +1,17 @@
+import { useCallback } from 'react';
+import { useSelector } from 'react-redux';
+
+import { selectNumberFormat } from 'loot-core/src/client/selectors';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-export default function format(value, type = 'string'): string {
+/**
+ * @deprecated Please do not use this directly. Use `useFormat` hook
+ */
+export default function format(
+  value: unknown,
+  type = 'string',
+  formatter?: Intl.NumberFormat,
+): string {
   switch (type) {
     case 'string':
       const val = JSON.stringify(value);
@@ -12,14 +23,14 @@ export default function format(value, type = 'string'): string {
     case 'number':
       return '' + value;
     case 'financial-with-sign':
-      let formatted = format(value, 'financial');
-      if (value >= 0) {
+      let formatted = format(value, 'financial', formatter);
+      if (typeof value === 'number' && value >= 0) {
         return '+' + formatted;
       }
       return formatted;
     case 'financial':
       if (value == null || value === '' || value === 0) {
-        return integerToCurrency(0);
+        return integerToCurrency(0, formatter);
       } else if (typeof value === 'string') {
         const parsed = parseFloat(value);
         value = isNaN(parsed) ? 0 : parsed;
@@ -31,8 +42,18 @@ export default function format(value, type = 'string'): string {
         );
       }
 
-      return integerToCurrency(value);
+      return integerToCurrency(value, formatter);
     default:
       throw new Error('Unknown format type: ' + type);
   }
+}
+
+export function useFormat() {
+  const numberFormat = useSelector(selectNumberFormat);
+
+  return useCallback(
+    (value: unknown, type = 'string') =>
+      format(value, type, numberFormat.formatter),
+    [numberFormat],
+  );
 }
