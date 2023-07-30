@@ -3,7 +3,7 @@ import React from 'react';
 import * as d from 'date-fns';
 
 import { colors } from '../../style';
-import { Block } from '../common';
+import Block from '../common/Block';
 
 function DateRange({ start, end }) {
   start = d.parseISO(start);
