@@ -6,7 +6,9 @@ import type { FeatureFlag } from 'loot-core/src/types/prefs';
 import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { colors, useTheme } from '../../style';
-import { LinkButton, Text, View } from '../common';
+import LinkButton from '../common/LinkButton';
+import Text from '../common/Text';
+import View from '../common/View';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
@@ -32,6 +34,7 @@ function FeatureToggle({
       <Checkbox
         checked={enabled}
         onChange={() => {
+          // @ts-expect-error key type is not correctly inferred
           savePrefs({
             [`flags.${flag}`]: !enabled,
           });

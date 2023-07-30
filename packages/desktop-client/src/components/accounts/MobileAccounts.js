@@ -7,7 +7,10 @@ import * as queries from 'loot-core/src/client/queries';
 import { useActions } from '../../hooks/useActions';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors, styles } from '../../style';
-import { Button, Text, TextOneLine, View } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import TextOneLine from '../common/TextOneLine';
+import View from '../common/View';
 import { Page } from '../Page';
 import CellValue from '../spreadsheet/CellValue';
 

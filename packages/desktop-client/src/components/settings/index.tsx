@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { type ReactNode, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { media } from 'glamor';
@@ -13,7 +13,11 @@ import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import tokens from '../../tokens';
-import { View, Text, Button, Input, ExternalLink } from '../common';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import Input from '../common/Input';
+import Text from '../common/Text';
+import View from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
@@ -75,7 +79,7 @@ function About() {
   );
 }
 
-function IDName({ children }) {
+function IDName({ children }: { children: ReactNode }) {
   return <Text style={{ fontWeight: 500 }}>{children}</Text>;
 }
 

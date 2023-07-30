@@ -4,8 +4,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../style';
-import { Text, Button, Stack } from '../common';
+import Button from '../common/Button';
 import Paragraph from '../common/Paragraph';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
 import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';
 

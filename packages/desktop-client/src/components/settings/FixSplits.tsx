@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type Handlers } from 'loot-core/src/types/handlers';
 
 import { colors } from '../../style';
-import { View, Text, ButtonWithLoading } from '../common';
+import { ButtonWithLoading } from '../common/Button';
 import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 import { Setting } from './UI';
 
-function renderResults(results) {
+type Results = Awaited<ReturnType<Handlers['tools/fix-split-transactions']>>;
+
+function renderResults(results: Results) {
   let { numBlankPayees, numCleared, numDeleted } = results;
   let result = '';
   if (numBlankPayees === 0 && numCleared === 0 && numDeleted === 0) {
@@ -48,7 +53,7 @@ function renderResults(results) {
 
 export default function FixSplitsTool() {
   let [loading, setLoading] = useState(false);
-  let [results, setResults] = useState(null);
+  let [results, setResults] = useState<Results>(null);
 
   async function onFix() {
     setLoading(true);

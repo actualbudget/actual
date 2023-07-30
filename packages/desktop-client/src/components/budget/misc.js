@@ -13,14 +13,10 @@ import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { styles, colors } from '../../style';
-import {
-  View,
-  Text,
-  Button,
-  Tooltip,
-  Menu,
-  IntersectionBoundary,
-} from '../common';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Text from '../common/Text';
+import View from '../common/View';
 import NotesButton from '../NotesButton';
 import {
   useDraggable,
@@ -30,6 +26,7 @@ import {
 } from '../sort';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 import { Row, InputCell, ROW_HEIGHT } from '../table';
+import { Tooltip, IntersectionBoundary } from '../tooltips';
 
 import BudgetSummaries from './BudgetSummaries';
 import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';

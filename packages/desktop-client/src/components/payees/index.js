@@ -25,7 +25,11 @@ import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { colors } from '../../style';
-import { View, Text, Search, Button, Tooltip, Menu } from '../common';
+import Button from '../common/Button';
+import Search from '../common/Search';
+import Menu from '../common/Menu';
+import Text from '../common/Text';
+import View from '../common/View';
 import {
   Table,
   TableHeader,
@@ -36,6 +40,7 @@ import {
   CellButton,
   useTableNavigator,
 } from '../table';
+import { Tooltip } from '../tooltips';
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 

@@ -10,8 +10,12 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
 import { colors } from '../../style';
-import { View, Text, Button, Tooltip, Menu } from '../common';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Text from '../common/Text';
+import View from '../common/View';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
+import { Tooltip } from '../tooltips';
 import DisplayId from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';

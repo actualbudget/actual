@@ -31,15 +31,13 @@ import useSelected, {
 import ArrowRight from '../icons/v0/RightArrow2';
 import { colors } from '../style';
 
-import {
-  View,
-  Text,
-  Button,
-  Stack,
-  ExternalLink,
-  Search,
-  LinkButton,
-} from './common';
+import Button from './common/Button';
+import ExternalLink from './common/ExternalLink';
+import LinkButton from './common/LinkButton';
+import Search from './common/Search';
+import Stack from './common/Stack';
+import Text from './common/Text';
+import View from './common/View';
 import { SelectCell, Row, Field, Cell, CellButton, TableHeader } from './table';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));

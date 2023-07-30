@@ -6,10 +6,11 @@ import type { CSSProperties } from 'glamor';
 
 import { colors } from '../../style';
 import tokens from '../../tokens';
-import { View, LinkButton } from '../common';
+import LinkButton from '../common/LinkButton';
+import View from '../common/View';
 
 type SettingProps = {
-  primaryAction: ReactNode;
+  primaryAction?: ReactNode;
   style?: CSSProperties;
   children: ReactNode;
 };

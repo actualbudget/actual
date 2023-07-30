@@ -40,36 +40,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/import-ynab4@*, @actual-app/import-ynab4@workspace:packages/import-ynab4":
-  version: 0.0.0-use.local
-  resolution: "@actual-app/import-ynab4@workspace:packages/import-ynab4"
-  dependencies:
-    "@actual-app/api": "*"
-    "@types/uuid": ^9.0.2
-    adm-zip: ^0.5.9
-    date-fns: ^2.29.3
-    slash: 3.0.0
-    ts-node: ^10.9.1
-    uuid: ^9.0.0
-  bin:
-    import-ynab4: ./index.js
-  languageName: unknown
-  linkType: soft
-
-"@actual-app/import-ynab5@workspace:packages/import-ynab5":
-  version: 0.0.0-use.local
-  resolution: "@actual-app/import-ynab5@workspace:packages/import-ynab5"
-  dependencies:
-    "@actual-app/api": "*"
-    "@types/uuid": ^9.0.2
-    date-fns: ^2.29.3
-    ts-node: ^10.9.1
-    uuid: ^9.0.0
-  bin:
-    import-ynab5: ./index.js
-  languageName: unknown
-  linkType: soft
-
 "@actual-app/web@workspace:packages/desktop-client":
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
@@ -3984,6 +3954,15 @@ __metadata:
   version: 1.0.3
   resolution: "@tsconfig/node16@npm:1.0.3"
   checksum: 3a8b657dd047495b7ad23437d6afd20297ce90380ff0bdee93fc7d39a900dbd8d9e26e53ff6b465e7967ce2adf0b218782590ce9013285121e6a5928fbd6819f
+  languageName: node
+  linkType: hard
+
+"@types/adm-zip@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "@types/adm-zip@npm:0.5.0"
+  dependencies:
+    "@types/node": "*"
+  checksum: 11dd013584e47d431bdf7c115b73cd3162c1a1eca0fbb911f691c9734e904cfe4a01ac1d2d3cbf76d0a952e01fcce8a01fd6fb1c150675a29d740a7fb15325b2
   languageName: node
   linkType: hard
 
@@ -12569,7 +12548,6 @@ __metadata:
   dependencies:
     "@actual-app/api": "*"
     "@actual-app/crdt": "*"
-    "@actual-app/import-ynab4": "*"
     "@babel/core": ~7.22.5
     "@babel/preset-env": ^7.22.5
     "@babel/preset-typescript": ^7.22.5
@@ -12579,6 +12557,7 @@ __metadata:
     "@rschedule/ical-tools": ^1.2.0
     "@rschedule/json-tools": ^1.2.0
     "@rschedule/standard-date-adapter": ^1.2.0
+    "@types/adm-zip": ^0.5.0
     "@types/better-sqlite3": ^7.6.4
     "@types/jest": ^27.5.0
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
@@ -12616,6 +12595,7 @@ __metadata:
     path-browserify: ^1.0.1
     peggy: 3.0.2
     process: ^0.11.10
+    slash: 3.0.0
     snapshot-diff: ^0.10.0
     source-map: ^0.7.3
     stream-browserify: ^3.0.0
@@ -17821,7 +17801,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.7.0, ts-node@npm:^10.9.1":
+"ts-node@npm:^10.7.0":
   version: 10.9.1
   resolution: "ts-node@npm:10.9.1"
   dependencies:

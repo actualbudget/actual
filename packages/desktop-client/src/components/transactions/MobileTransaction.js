@@ -25,7 +25,9 @@ import {
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import { styles, colors } from '../../style';
-import { Text, TextOneLine, View } from '../common';
+import Text from '../common/Text';
+import TextOneLine from '../common/TextOneLine';
+import View from '../common/View';
 
 const zIndices = { SECTION_HEADING: 10 };
 

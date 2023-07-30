@@ -26,8 +26,14 @@ import { titleFirst } from 'loot-core/src/shared/util';
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
 import { colors } from '../../style';
-import { View, Text, Tooltip, Stack, Button, Menu, Select } from '../common';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Select from '../common/Select';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
 import { Value } from '../ManageRules';
+import { Tooltip } from '../tooltips';
 import GenericInput from '../util/GenericInput';
 
 import { CondOpMenu } from './SavedFilters';

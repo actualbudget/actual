@@ -4,7 +4,10 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { colors, styles } from '../../style';
-import { View, Text, Modal, Button } from '../common';
+import Button from '../common/Button';
+import Modal from '../common/Modal';
+import Text from '../common/Text';
+import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
