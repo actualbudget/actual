@@ -15,7 +15,10 @@ import { type CSSProperties, css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
 import { colors } from '../../style';
-import { View, Input, Tooltip, Button } from '../common';
+import Button from '../common/Button';
+import Input from '../common/Input';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 const inst: { lastChangeType? } = {};
 

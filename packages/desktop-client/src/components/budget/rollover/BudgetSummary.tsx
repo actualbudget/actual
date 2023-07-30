@@ -9,15 +9,12 @@ import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
 import { colors, styles } from '../../../style';
-import {
-  View,
-  Block,
-  Button,
-  Tooltip,
-  Menu,
-  HoverTarget,
-  AlignedText,
-} from '../../common';
+import AlignedText from '../../common/AlignedText';
+import Block from '../../common/Block';
+import Button from '../../common/Button';
+import HoverTarget from '../../common/HoverTarget';
+import Menu from '../../common/Menu';
+import View from '../../common/View';
 import NotesButton from '../../NotesButton';
 import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
@@ -25,6 +22,7 @@ import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import useSheetName from '../../spreadsheet/useSheetName';
 import useSheetValue from '../../spreadsheet/useSheetValue';
+import { Tooltip } from '../../tooltips';
 import { MONTH_BOX_SHADOW } from '../constants';
 
 import HoldTooltip from './HoldTooltip';

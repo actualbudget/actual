@@ -7,7 +7,9 @@ import {
 
 import Add from '../../icons/v1/Add';
 import Subtract from '../../icons/v1/Subtract';
-import { View, Button, InputWithContent } from '../common';
+import Button from '../common/Button';
+import InputWithContent from '../common/InputWithContent';
+import View from '../common/View';
 
 export function AmountInput({ id, defaultValue = 0, onChange, style }) {
   let [negative, setNegative] = useState(defaultValue <= 0);

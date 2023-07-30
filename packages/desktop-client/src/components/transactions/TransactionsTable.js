@@ -57,7 +57,9 @@ import { styles, colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { View, Text, Tooltip, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
 import DateSelect from '../select/DateSelect';
 import {
@@ -73,6 +75,7 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
+import { Tooltip } from '../tooltips';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
