@@ -71,8 +71,5 @@
     "setupFilesAfterEnv": [
       "<rootDir>/src/setupTests.js"
     ]
-  },
-  "dependencies": {
-    "reselect": "^4.1.8"
   }
 }

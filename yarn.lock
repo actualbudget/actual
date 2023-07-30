@@ -90,7 +90,6 @@ __metadata:
     react-virtualized-auto-sizer: ^1.0.2
     redux: ^4.0.5
     redux-thunk: ^2.3.0
-    reselect: ^4.1.8
     sass: ^1.63.6
     uuid: ^9.0.0
     victory: ^36.6.8
@@ -12596,6 +12595,7 @@ __metadata:
     path-browserify: ^1.0.1
     peggy: 3.0.2
     process: ^0.11.10
+    reselect: ^4.1.8
     slash: 3.0.0
     snapshot-diff: ^0.10.0
     source-map: ^0.7.3

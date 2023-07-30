@@ -1,10 +1,8 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 
-import { createSelector } from 'reselect';
-
-import type { State } from 'loot-core/src/client/state-types';
-import { integerToCurrency, getNumberFormat } from 'loot-core/src/shared/util';
+import { selectNumberFormat } from 'loot-core/src/client/selectors';
+import { integerToCurrency } from 'loot-core/src/shared/util';
 
 /**
  * @deprecated Please do not use this directly. Use `useFormat` hook
@@ -49,15 +47,6 @@ export default function format(
       throw new Error('Unknown format type: ' + type);
   }
 }
-
-const selectNumberFormat = createSelector(
-  (state: State) => state.prefs.local,
-  prefs =>
-    getNumberFormat({
-      format: prefs.numberFormat,
-      hideFraction: prefs.hideFraction,
-    }),
-);
 
 export function useFormat() {
   const numberFormat = useSelector(selectNumberFormat);
