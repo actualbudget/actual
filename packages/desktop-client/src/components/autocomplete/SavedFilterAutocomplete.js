@@ -3,7 +3,7 @@ import React from 'react';
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 
 import { colors } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 
 import Autocomplete from './Autocomplete';
 

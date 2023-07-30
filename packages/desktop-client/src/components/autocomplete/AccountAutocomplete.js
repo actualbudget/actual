@@ -3,7 +3,7 @@ import React from 'react';
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 
 import { colors } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 
 import Autocomplete from './Autocomplete';
 

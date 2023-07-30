@@ -5,7 +5,8 @@ import { useTransition, animated } from 'react-spring';
 import { colors, styles } from '../style';
 
 import AnimatedRefresh from './AnimatedRefresh';
-import { View, Text } from './common';
+import Text from './common/Text';
+import View from './common/View';
 
 export default function BankSyncStatus() {
   let accountsSyncing = useSelector(state => state.account.accountsSyncing);

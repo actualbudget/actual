@@ -4,7 +4,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
 import { styles, colors } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 
 export const MonthPicker = ({
   startMonth,

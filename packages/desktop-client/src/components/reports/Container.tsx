@@ -3,7 +3,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { type CSSProperties } from 'glamor';
 
-import { View } from '../common';
+import View from '../common/View';
 
 type ContainerProps = {
   style?: CSSProperties;

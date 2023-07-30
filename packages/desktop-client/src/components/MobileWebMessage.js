@@ -6,7 +6,9 @@ import { savePrefs } from 'loot-core/src/client/actions';
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
 
-import { View, Text, Button } from './common';
+import Button from './common/Button';
+import Text from './common/Text';
+import View from './common/View';
 import { Checkbox } from './forms';
 
 let buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
