@@ -445,10 +445,7 @@ function Accounts({
 
 function ToggleButton({ style, isFloating, onFloat }) {
   return (
-    <View
-      className="float"
-      style={[style, { flexShrink: 0, color: colors.n5 }]}
-    >
+    <View className="float" style={[style, { flexShrink: 0 }]}>
       <Button type="bare" onClick={onFloat}>
         {isFloating ? (
           <Pin
@@ -457,10 +454,13 @@ function ToggleButton({ style, isFloating, onFloat }) {
               width: 15,
               height: 15,
               transform: 'rotate(45deg)',
+              color: colors.n5,
             }}
           />
         ) : (
-          <ArrowButtonLeft1 style={{ width: 13, height: 13 }} />
+          <ArrowButtonLeft1
+            style={{ width: 13, height: 13, color: colors.n5 }}
+          />
         )}
       </Button>
     </View>
