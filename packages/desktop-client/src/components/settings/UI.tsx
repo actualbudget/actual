@@ -10,7 +10,7 @@ import LinkButton from '../common/LinkButton';
 import View from '../common/View';
 
 type SettingProps = {
-  primaryAction: ReactNode;
+  primaryAction?: ReactNode;
   style?: CSSProperties;
   children: ReactNode;
 };

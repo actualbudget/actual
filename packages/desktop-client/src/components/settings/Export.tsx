@@ -10,7 +10,7 @@ import { Text, Button } from '../common';
 import { Setting } from './UI';
 
 export default function ExportBudget() {
-  let budgetId = useSelector(state => state.prefs.local.budgetId);
+  let budgetId = useSelector(state => state.prefs.local.id);
   let encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);
 
   async function onExport() {

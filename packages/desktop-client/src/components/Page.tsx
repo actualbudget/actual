@@ -1,5 +1,7 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, type ReactNode, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { type CSSProperties } from 'glamor';
 
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
@@ -8,7 +10,7 @@ import Modal from './common/Modal';
 import Text from './common/Text';
 import View from './common/View';
 
-let PageTypeContext = createContext({ type: 'page' });
+let PageTypeContext = createContext({ type: 'page', current: undefined });
 
 export function PageTypeProvider({ type, current, children }) {
   return (
@@ -65,18 +67,29 @@ function PageTitle({ name, style }) {
   );
 }
 
-export function Page({ title, modalSize, children, titleStyle }) {
+export function Page({
+  title,
+  modalSize,
+  children,
+  titleStyle,
+}: {
+  title: string;
+  modalSize?: string | { width: number; height?: number };
+  children: ReactNode;
+  titleStyle?: CSSProperties;
+}) {
   let { type, current } = usePageType();
   let navigate = useNavigate();
   let { isNarrowWidth } = useResponsive();
   let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
 
   if (type === 'modal') {
-    let size = modalSize;
-    if (typeof modalSize === 'string') {
-      size =
-        modalSize === 'medium' ? { width: 750, height: 600 } : { width: 600 };
-    }
+    let size =
+      typeof modalSize === 'string'
+        ? modalSize === 'medium'
+          ? { width: 750, height: 600 }
+          : { width: 600 }
+        : modalSize;
 
     return (
       <Modal
