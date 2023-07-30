@@ -13,7 +13,7 @@ export default function GlobalSettings() {
   let { saveGlobalPrefs } = useActions();
 
   let [documentDirChanged, setDirChanged] = useState(false);
-  let dirScrolled = useRef(null);
+  let dirScrolled = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (dirScrolled.current) {
