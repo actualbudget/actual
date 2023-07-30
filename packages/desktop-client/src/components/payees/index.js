@@ -26,8 +26,8 @@ import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { colors } from '../../style';
 import Button from '../common/Button';
-import Search from '../common/Search';
 import Menu from '../common/Menu';
+import Search from '../common/Search';
 import Text from '../common/Text';
 import View from '../common/View';
 import {
