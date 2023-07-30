@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type Handlers } from 'loot-core/src/types/handlers';
 
 import { colors } from '../../style';
 import { View, Text, ButtonWithLoading } from '../common';
 import Paragraph from '../common/Paragraph';
 
 import { Setting } from './UI';
-import { Handlers } from 'loot-core/src/types/handlers';
 
 type Results = Awaited<ReturnType<Handlers['tools/fix-split-transactions']>>;
 

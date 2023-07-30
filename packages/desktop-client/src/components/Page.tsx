@@ -1,6 +1,7 @@
-import { CSSProperties } from 'glamor';
-import React, { createContext, ReactNode, useContext } from 'react';
+import React, { createContext, type ReactNode, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { type CSSProperties } from 'glamor';
 
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';

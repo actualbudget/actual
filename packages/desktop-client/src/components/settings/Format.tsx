@@ -1,7 +1,8 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 
 import { numberFormats } from 'loot-core/src/shared/util';
+import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
 import tokens from '../../tokens';
@@ -10,7 +11,6 @@ import { useSidebar } from '../FloatableSidebar';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
-import { LocalPrefs } from 'loot-core/src/types/prefs';
 
 // Follows Pikaday 'firstDay' numbering
 // https://github.com/Pikaday/Pikaday

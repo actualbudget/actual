@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect } from 'react';
+import React, { type ReactNode, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { media } from 'glamor';
