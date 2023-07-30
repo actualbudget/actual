@@ -81,11 +81,12 @@ export function Page({
   let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
 
   if (type === 'modal') {
-    let size = modalSize;
-    if (typeof modalSize === 'string') {
-      size =
-        modalSize === 'medium' ? { width: 750, height: 600 } : { width: 600 };
-    }
+    let size =
+      typeof modalSize === 'string'
+        ? modalSize === 'medium'
+          ? { width: 750, height: 600 }
+          : { width: 600 }
+        : modalSize;
 
     return (
       <Modal

@@ -1,6 +1,6 @@
 import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
-import type { GlobalPrefs, LocalPrefs } from '../state-types/prefs';
+import type { GlobalPrefs, LocalPrefs } from '../../types/prefs';
 
 import { closeModal } from './modals';
 import type { Dispatch, GetState } from './types';

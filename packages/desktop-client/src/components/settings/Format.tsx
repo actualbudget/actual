@@ -10,7 +10,7 @@ import { useSidebar } from '../FloatableSidebar';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
-import { LocalPrefs } from 'loot-core/src/client/state-types/prefs';
+import { LocalPrefs } from 'loot-core/src/types/prefs';
 
 // Follows Pikaday 'firstDay' numbering
 // https://github.com/Pikaday/Pikaday
