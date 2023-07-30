@@ -397,12 +397,12 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               />
             </View>
             <View style={{ userSelect: 'none' }}>
-              <Button type="bare" onClick={onMenuOpen}>
-                <DotsHorizontalTriple
-                  width={15}
-                  height={15}
-                  style={{ color: colors.n5 }}
-                />
+              <Button
+                type="bare"
+                style={{ color: colors.n5 }}
+                onClick={onMenuOpen}
+              >
+                <DotsHorizontalTriple width={15} height={15} />
               </Button>
               {menuOpen && (
                 <Tooltip

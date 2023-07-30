@@ -340,11 +340,7 @@ export default function Titlebar({ style }) {
           element={
             location.state?.goBack ? (
               <Button type="bare" onClick={() => navigate(-1)}>
-                <ArrowLeft
-                  width={10}
-                  height={10}
-                  style={{ marginRight: 5, color: 'currentColor' }}
-                />{' '}
+                <ArrowLeft width={10} height={10} style={{ marginRight: 5 }} />{' '}
                 Back
               </Button>
             ) : null

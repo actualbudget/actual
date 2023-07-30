@@ -190,7 +190,7 @@ function Notification({
             style={{ flexShrink: 0, color: 'currentColor' }}
             onClick={onRemove}
           >
-            <Delete style={{ width: 9, height: 9, color: 'currentColor' }} />
+            <Delete style={{ width: 9, height: 9 }} />
           </Button>
         )}
       </Stack>
@@ -207,9 +207,7 @@ function Notification({
             justifyContent: 'center',
           }}
         >
-          <AnimatedLoading
-            style={{ width: 20, height: 20, color: 'currentColor' }}
-          />
+          <AnimatedLoading style={{ width: 20, height: 20 }} />
         </View>
       )}
     </View>

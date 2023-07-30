@@ -357,11 +357,7 @@ function SidebarCategory({
           }}
           style={{ color: 'currentColor', padding: 3 }}
         >
-          <CheveronDown
-            width={14}
-            height={14}
-            style={{ color: 'currentColor' }}
-          />
+          <CheveronDown width={14} height={14} />
         </Button>
         {menuOpen && (
           <Tooltip

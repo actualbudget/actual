@@ -122,13 +122,7 @@ function FileState({ file }) {
         marginTop: 8,
       }}
     >
-      <Icon
-        style={{
-          width: 18,
-          height: 18,
-          color: 'currentColor',
-        }}
-      />
+      <Icon style={{ width: 18, height: 18 }} />
 
       <Text style={{ marginLeft: 5 }}>{status}</Text>
     </View>
