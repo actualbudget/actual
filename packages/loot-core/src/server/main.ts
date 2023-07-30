@@ -1904,9 +1904,9 @@ handlers['download-budget'] = async function ({ fileId }) {
 // open and sync, but don’t close
 handlers['sync-budget'] = async function () {
   setSyncingMode('enabled');
-  await initialFullSync();
+  let result = await initialFullSync();
 
-  return {};
+  return result;
 };
 
 handlers['load-budget'] = async function ({ id }) {
