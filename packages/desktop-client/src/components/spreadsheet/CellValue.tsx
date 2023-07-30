@@ -9,7 +9,7 @@ import {
   type ConditionalPrivacyFilterProps,
 } from '../PrivacyFilter';
 
-import format from './format';
+import { useFormat } from './format';
 import useSheetName from './useSheetName';
 import useSheetValue from './useSheetValue';
 
@@ -34,6 +34,7 @@ function CellValue({
 }: CellValueProps) {
   let { fullSheetName } = useSheetName(binding);
   let sheetValue = useSheetValue(binding);
+  let format = useFormat();
 
   return useMemo(
     () => (
@@ -66,6 +67,7 @@ function CellValue({
       getStyle,
       fullSheetName,
       formatter,
+      format,
       sheetValue,
     ],
   );
