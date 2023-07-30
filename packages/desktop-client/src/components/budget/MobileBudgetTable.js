@@ -1077,12 +1077,12 @@ function BudgetHeader({
           style={[
             buttonStyle,
             { position: 'absolute', top: 0, bottom: 0, right: 0 },
+            {
+              color: colors.n11,
+              fontSize: 15,
+              fontWeight: 500,
+            },
           ]}
-          textStyle={{
-            color: colors.n11,
-            fontSize: 15,
-            fontWeight: '500',
-          }}
         >
           Done
         </Button>
