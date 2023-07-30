@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 
 import { colors } from '../../style';
-import { View, Text, Modal, ButtonWithLoading } from '../common';
+import { ButtonWithLoading } from '../common/Button';
+import Modal from '../common/Modal';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function DeleteMenu({ modalProps, actions, file }) {
   let [loadingState, setLoadingState] = useState(null);
