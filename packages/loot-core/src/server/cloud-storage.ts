@@ -161,7 +161,7 @@ export async function exportBuffer() {
     meta.resetClock = true;
     let metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
 
-    zipped.addFile('db.sqlite', dbContent);
+    zipped.addFile('db.sqlite', Buffer.from(dbContent));
     zipped.addFile('metadata.json', metaContent);
   });
 
