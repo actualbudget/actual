@@ -11,8 +11,6 @@ export { default as AnchorLink } from './common/AnchorLink';
 export { default as Button, ButtonWithLoading } from './common/Button';
 export { default as Select } from './common/Select';
 export { default as Input } from './common/Input';
-export { default as Menu } from './common/Menu';
-export { default as Stack } from './common/Stack';
 export { default as Text } from './common/Text';
 export { default as View } from './common/View';
 

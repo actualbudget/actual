@@ -13,8 +13,10 @@ import useSelected, {
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
 import { colors } from '../../style';
 import { getParent } from '../../util/router-tools';
-import { View, Stack, ButtonWithLoading } from '../common';
+import { ButtonWithLoading } from '../common/Button';
 import Paragraph from '../common/Paragraph';
+import Stack from '../common/Stack';
+import View from '../common/View';
 import { Page, usePageType } from '../Page';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';

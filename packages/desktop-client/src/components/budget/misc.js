@@ -13,7 +13,10 @@ import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { styles, colors } from '../../style';
-import { View, Text, Button, Menu } from '../common';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Text from '../common/Text';
+import View from '../common/View';
 import NotesButton from '../NotesButton';
 import {
   useDraggable,
