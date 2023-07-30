@@ -5,15 +5,12 @@ import { pushModal } from 'loot-core/src/client/actions/modals';
 
 import { authorizeBank } from '../../gocardless';
 import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  ButtonWithLoading,
-  ExternalLink,
-} from '../common';
+import { ExternalLink } from '../common';
+import Button, { ButtonWithLoading } from '../common/Button';
+import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function CreateAccount({ modalProps, syncServerStatus }) {
   const dispatch = useDispatch();

@@ -11,7 +11,9 @@ import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { View, Modal, Input } from '../common';
+import Input from '../common/Input';
+import Modal from '../common/Modal';
+import View from '../common/View';
 import { SectionLabel } from '../forms';
 import DateSelect from '../select/DateSelect';
 

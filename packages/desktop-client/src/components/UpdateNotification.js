@@ -5,7 +5,10 @@ import { useActions } from '../hooks/useActions';
 import Close from '../icons/v1/Close';
 import { colors } from '../style';
 
-import { View, Text, LinkButton, Button } from './common';
+import Button from './common/Button';
+import LinkButton from './common/LinkButton';
+import Text from './common/Text';
+import View from './common/View';
 
 function closeNotification(setAppState) {
   // Set a flag to never show an update notification again for this session

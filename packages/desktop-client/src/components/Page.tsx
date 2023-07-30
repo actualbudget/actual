@@ -6,7 +6,9 @@ import { type CSSProperties } from 'glamor';
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
 
-import { Modal, View, Text } from './common';
+import Modal from './common/Modal';
+import Text from './common/Text';
+import View from './common/View';
 
 let PageTypeContext = createContext({ type: 'page', current: undefined });
 

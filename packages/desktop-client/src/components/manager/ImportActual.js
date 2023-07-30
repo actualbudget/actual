@@ -4,8 +4,11 @@ import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, colors } from '../../style';
-import { View, Block, Modal, ButtonWithLoading } from '../common';
+import Block from '../common/Block';
+import { ButtonWithLoading } from '../common/Button';
+import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
+import View from '../common/View';
 
 function getErrorMessage(error) {
   switch (error) {

@@ -2,17 +2,15 @@ import React, { Component, useState } from 'react';
 
 import { theme } from '../style';
 
-import {
-  View,
-  Stack,
-  Text,
-  Block,
-  Modal,
-  LinkButton,
-  Button,
-  ExternalLink,
-} from './common';
+import { ExternalLink } from './common';
+import Block from './common/Block';
+import Button from './common/Button';
+import LinkButton from './common/LinkButton';
+import Modal from './common/Modal';
 import Paragraph from './common/Paragraph';
+import Stack from './common/Stack';
+import Text from './common/Text';
+import View from './common/View';
 import { Checkbox } from './forms';
 
 class FatalError extends Component {

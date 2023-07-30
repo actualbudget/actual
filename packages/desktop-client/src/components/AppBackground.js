@@ -6,7 +6,8 @@ import AnimatedLoading from '../icons/AnimatedLoading';
 import { theme } from '../style';
 
 import Background from './Background';
-import { View, Block } from './common';
+import Block from './common/Block';
+import View from './common/View';
 
 function AppBackground({ initializing, loadingText }) {
   return (
