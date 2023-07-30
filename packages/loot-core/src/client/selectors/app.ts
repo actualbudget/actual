@@ -4,11 +4,6 @@ import { selectState } from './root';
 
 const selectAppState = createSelector(selectState, state => state.app);
 
-export const selectAppBudgetMonth = createSelector(
-  selectAppState,
-  app => app.budgetMonth,
-);
-
 export const selectAppLoadingText = createSelector(
   selectAppState,
   app => app.loadingText,

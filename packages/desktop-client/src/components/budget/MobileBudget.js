@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { useSelector } from 'react-redux';
 
 import {
-  selectAppBudgetMonth,
   selectCategoryListQueries,
   selectGroupedCategoryQueries,
   selectLocalPrefBudgetType,
@@ -304,7 +303,6 @@ export default function BudgetWrapper() {
   let categories = useSelector(selectCategoryListQueries);
   let budgetType = useSelector(selectLocalPrefBudgetType) || 'rollover';
   let prefs = useSelector(selectLocalPrefsState);
-  let initialBudgetMonth = useSelector(selectAppBudgetMonth);
 
   let actions = useActions();
   let spreadsheet = useSpreadsheet();
@@ -316,7 +314,6 @@ export default function BudgetWrapper() {
       categories={categories}
       budgetType={budgetType}
       prefs={prefs}
-      initialBudgetMonth={initialBudgetMonth}
       {...actions}
       spreadsheet={spreadsheet}
     />
