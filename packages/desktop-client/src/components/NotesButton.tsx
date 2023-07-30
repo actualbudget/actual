@@ -9,7 +9,10 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
 import { colors } from '../style';
 
-import { View, Button, Tooltip, useTooltip, Text } from './common';
+import Button from './common/Button';
+import Text from './common/Text';
+import View from './common/View';
+import { Tooltip, useTooltip } from './tooltips';
 
 type NotesTooltipProps = {
   editable?: boolean;

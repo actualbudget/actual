@@ -4,7 +4,9 @@ import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
-import { View, Button, Search } from '../common';
+import Button from '../common/Button';
+import Search from '../common/Search';
+import View from '../common/View';
 import { Page } from '../Page';
 
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';

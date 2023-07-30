@@ -5,7 +5,10 @@ import * as prefs from '../prefs';
 import * as sheet from '../sheet';
 import { batchMessages } from '../sync';
 
-export async function getSheetValue(sheetName, cell) {
+export async function getSheetValue(
+  sheetName: string,
+  cell: string,
+): Promise<number> {
   const node = await sheet.getCell(sheetName, cell);
   return safeNumber(typeof node.value === 'number' ? node.value : 0);
 }
@@ -14,26 +17,37 @@ export async function getSheetValue(sheetName, cell) {
 // forth. buffered should never be allowed to go into the negative,
 // and you shouldn't be allowed to pull non-existant money from
 // leftover.
-function calcBufferedAmount(toBudget, buffered, amount) {
+function calcBufferedAmount(
+  toBudget: number,
+  buffered: number,
+  amount: number,
+): number {
   amount = Math.min(Math.max(amount, -buffered), Math.max(toBudget, 0));
   return buffered + amount;
 }
 
-function getBudgetTable() {
+function getBudgetTable(): string {
   let { budgetType } = prefs.getPrefs() || {};
   return budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
 }
 
-export function isReflectBudget() {
+export function isReflectBudget(): boolean {
   let { budgetType } = prefs.getPrefs();
   return budgetType === 'report';
 }
 
-function dbMonth(month) {
+function dbMonth(month: string): number {
   return parseInt(month.replace('-', ''));
 }
 
-function getBudgetData(table, month) {
+// TODO: complete list of fields.
+type BudgetData = {
+  is_income: 1 | 0;
+  category: string;
+  amount: number;
+};
+
+function getBudgetData(table: string, month: string): Promise<BudgetData[]> {
   return db.all(
     `
     SELECT b.*, c.is_income FROM v_categories c
@@ -44,7 +58,7 @@ function getBudgetData(table, month) {
   );
 }
 
-function getAllMonths(startMonth) {
+function getAllMonths(startMonth: string): string[] {
   let { createdMonths } = sheet.get().meta();
   let latest = null;
   for (let month of createdMonths) {
@@ -57,7 +71,13 @@ function getAllMonths(startMonth) {
 
 // TODO: Valid month format in all the functions below
 
-export function getBudget({ category, month }) {
+export function getBudget({
+  category,
+  month,
+}: {
+  category: string;
+  month: string;
+}): number {
   let table = getBudgetTable();
   let existing = db.firstSync(
     `SELECT * FROM ${table} WHERE month = ? AND category = ?`,
@@ -66,7 +86,15 @@ export function getBudget({ category, month }) {
   return existing ? existing.amount || 0 : 0;
 }
 
-export function setBudget({ category, month, amount }) {
+export function setBudget({
+  category,
+  month,
+  amount,
+}: {
+  category: string;
+  month: string;
+  amount: unknown;
+}): Promise<void> {
   amount = safeNumber(typeof amount === 'number' ? amount : 0);
   const table = getBudgetTable();
 
@@ -85,7 +113,7 @@ export function setBudget({ category, month, amount }) {
   });
 }
 
-export function setBuffer(month, amount) {
+export function setBuffer(month: string, amount: unknown): Promise<void> {
   let existing = db.firstSync(
     `SELECT id FROM zero_budget_months WHERE id = ?`,
     [month],
@@ -99,7 +127,12 @@ export function setBuffer(month, amount) {
   return db.insert('zero_budget_months', { id: month, buffered: amount });
 }
 
-function setCarryover(table, category, month, flag) {
+function setCarryover(
+  table: string,
+  category: string,
+  month: string,
+  flag: boolean,
+): Promise<void> {
   let existing = db.firstSync(
     `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
     [month, category],
@@ -117,10 +150,14 @@ function setCarryover(table, category, month, flag) {
 
 // Actions
 
-export async function copyPreviousMonth({ month }) {
+export async function copyPreviousMonth({
+  month,
+}: {
+  month: string;
+}): Promise<void> {
   let prevMonth = dbMonth(monthUtils.prevMonth(month));
   let table = getBudgetTable();
-  let budgetData = await getBudgetData(table, prevMonth);
+  let budgetData = await getBudgetData(table, prevMonth.toString());
 
   await batchMessages(async () => {
     budgetData.forEach(prevBudget => {
@@ -136,7 +173,13 @@ export async function copyPreviousMonth({ month }) {
   });
 }
 
-export async function copySinglePreviousMonth({ month, category }) {
+export async function copySinglePreviousMonth({
+  month,
+  category,
+}: {
+  month: string;
+  category: string;
+}): Promise<void> {
   let prevMonth = monthUtils.prevMonth(month);
   let newAmount = await getSheetValue(
     monthUtils.sheetForMonth(prevMonth),
@@ -147,7 +190,7 @@ export async function copySinglePreviousMonth({ month, category }) {
   });
 }
 
-export async function setZero({ month }) {
+export async function setZero({ month }: { month: string }): Promise<void> {
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
@@ -162,7 +205,11 @@ export async function setZero({ month }) {
   });
 }
 
-export async function set3MonthAvg({ month }) {
+export async function set3MonthAvg({
+  month,
+}: {
+  month: string;
+}): Promise<void> {
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
@@ -196,7 +243,15 @@ export async function set3MonthAvg({ month }) {
   });
 }
 
-export async function setNMonthAvg({ month, N, category }) {
+export async function setNMonthAvg({
+  month,
+  N,
+  category,
+}: {
+  month: string;
+  N: number;
+  category: string;
+}): Promise<void> {
   let prevMonth = monthUtils.prevMonth(month);
   let sumAmount = 0;
   for (let l = 0; l < N; l++) {
@@ -212,7 +267,13 @@ export async function setNMonthAvg({ month, N, category }) {
   });
 }
 
-export async function holdForNextMonth({ month, amount }) {
+export async function holdForNextMonth({
+  month,
+  amount,
+}: {
+  month: string;
+  amount: number;
+}): Promise<boolean> {
   let row = await db.first(
     'SELECT buffered FROM zero_budget_months WHERE id = ?',
     [month],
@@ -234,11 +295,19 @@ export async function holdForNextMonth({ month, amount }) {
   return false;
 }
 
-export async function resetHold({ month }) {
+export async function resetHold({ month }: { month: string }): Promise<void> {
   await setBuffer(month, 0);
 }
 
-export async function coverOverspending({ month, to, from }) {
+export async function coverOverspending({
+  month,
+  to,
+  from,
+}: {
+  month: string;
+  to: string;
+  from: string;
+}): Promise<void> {
   let sheetName = monthUtils.sheetForMonth(month);
   let toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
   let leftover = await getSheetValue(sheetName, 'leftover-' + to);
@@ -266,7 +335,15 @@ export async function coverOverspending({ month, to, from }) {
   await setBudget({ category: to, month, amount: toBudgeted + amountCovered });
 }
 
-export async function transferAvailable({ month, amount, category }) {
+export async function transferAvailable({
+  month,
+  amount,
+  category,
+}: {
+  month: string;
+  amount: number;
+  category: string;
+}): Promise<void> {
   let sheetName = monthUtils.sheetForMonth(month);
   let leftover = await getSheetValue(sheetName, 'to-budget');
   amount = Math.max(Math.min(amount, leftover), 0);
@@ -275,7 +352,17 @@ export async function transferAvailable({ month, amount, category }) {
   await setBudget({ category, month, amount: budgeted + amount });
 }
 
-export async function transferCategory({ month, amount, from, to }) {
+export async function transferCategory({
+  month,
+  amount,
+  from,
+  to,
+}: {
+  month: string;
+  amount: number;
+  to: string;
+  from: string;
+}): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
 
@@ -289,13 +376,21 @@ export async function transferCategory({ month, amount, from, to }) {
   }
 }
 
-export async function setCategoryCarryover({ startMonth, category, flag }) {
+export async function setCategoryCarryover({
+  startMonth,
+  category,
+  flag,
+}: {
+  startMonth: string;
+  category: string;
+  flag: boolean;
+}): Promise<void> {
   let table = getBudgetTable();
   let months = getAllMonths(startMonth);
 
   await batchMessages(async () => {
     for (let month of months) {
-      setCarryover(table, category, dbMonth(month), flag);
+      setCarryover(table, category, dbMonth(month).toString(), flag);
     }
   });
 }

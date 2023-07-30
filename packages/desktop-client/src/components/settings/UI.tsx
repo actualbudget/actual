@@ -9,7 +9,7 @@ import tokens from '../../tokens';
 import { View, LinkButton } from '../common';
 
 type SettingProps = {
-  primaryAction: ReactNode;
+  primaryAction?: ReactNode;
   style?: CSSProperties;
   children: ReactNode;
 };

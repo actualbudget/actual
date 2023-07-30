@@ -34,7 +34,6 @@ import {
   ButtonLink,
   Button,
   ButtonWithLoading,
-  Tooltip,
   ExternalLink,
 } from './common';
 import Paragraph from './common/Paragraph';
@@ -43,6 +42,7 @@ import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import useSheetValue from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
+import { Tooltip } from './tooltips';
 
 export let TitlebarContext = createContext();
 

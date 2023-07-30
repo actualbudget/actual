@@ -78,13 +78,13 @@ export function partitionByField(data, field) {
   return res;
 }
 
-export function groupBy(data, field, mapper?: (v: unknown) => unknown) {
-  let res = new Map();
+export function groupBy<T, K extends keyof T>(data: T[], field: K) {
+  let res = new Map<T[K], T[]>();
   for (let i = 0; i < data.length; i++) {
     let item = data[i];
     let key = item[field];
     let existing = res.get(key) || [];
-    res.set(key, existing.concat([mapper ? mapper(item) : data[i]]));
+    res.set(key, existing.concat([item]));
   }
   return res;
 }
@@ -262,7 +262,7 @@ setNumberFormat({ format: 'comma-dot', hideFraction: false });
 const MAX_SAFE_NUMBER = 2 ** 51 - 1;
 const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 
-export function safeNumber(value) {
+export function safeNumber(value: number) {
   if (!Number.isInteger(value)) {
     throw new Error(
       'safeNumber: number is not an integer: ' + JSON.stringify(value),
@@ -342,4 +342,15 @@ export function looselyParseAmount(amount) {
   let right = extractNumbers(amount.slice(m.index + 1));
 
   return safeNumber(parseFloat(left + '.' + right));
+}
+
+export function sortByKey<T>(arr: T[], key: keyof T): T[] {
+  return [...arr].sort((item1, item2) => {
+    if (item1[key] < item2[key]) {
+      return -1;
+    } else if (item1[key] > item2[key]) {
+      return 1;
+    }
+    return 0;
+  });
 }

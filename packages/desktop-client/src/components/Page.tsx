@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
+
+import { type CSSProperties } from 'glamor';
 
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
 
 import { View, Text } from './common';
 
-function PageTitle({ name, style }) {
+function PageTitle({
+  name,
+  style,
+}: {
+  name: ReactNode;
+  style?: CSSProperties;
+}) {
   const { isNarrowWidth } = useResponsive();
 
   if (isNarrowWidth) {
@@ -48,7 +56,15 @@ function PageTitle({ name, style }) {
   );
 }
 
-export function Page({ title, children, titleStyle }) {
+export function Page({
+  title,
+  children,
+  titleStyle,
+}: {
+  title: ReactNode;
+  children: ReactNode;
+  titleStyle?: CSSProperties;
+}) {
   let { isNarrowWidth } = useResponsive();
   let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
 

@@ -3,7 +3,10 @@ import React, { useCallback, useState } from 'react';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { Modal, Search, Text, View } from '../common';
+import { Modal } from '../common';
+import Search from '../common/Search';
+import Text from '../common/Text';
+import View from '../common/View';
 
 import { SchedulesTable } from './SchedulesTable';
 

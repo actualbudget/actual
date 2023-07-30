@@ -8,8 +8,11 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
 import { colors, styles } from '../../style';
-import { View, Text, Block, AlignedText } from '../common';
+import AlignedText from '../common/AlignedText';
+import Block from '../common/Block';
 import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
