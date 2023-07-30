@@ -55,6 +55,7 @@ export namespace YNAB5 {
   }
 
   interface Subtransaction {
+    id: string;
     transaction_id: string;
     category_id: string;
     memo: string;

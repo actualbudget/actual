@@ -35,8 +35,8 @@ async function updateSpreadsheetCache(rawDb, names: string[]) {
 }
 
 function setCacheStatus(
-  mainDb: unknown,
-  cacheDb: unknown,
+  mainDb: Database,
+  cacheDb: Database,
   { clean }: { clean: boolean },
 ) {
   if (clean) {

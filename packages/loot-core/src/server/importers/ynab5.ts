@@ -162,18 +162,7 @@ async function importTransactions(
             return null;
           }
 
-          // Handle subtransactions
           let subtransactions = subtransactionsGrouped.get(transaction.id);
-          if (subtransactions) {
-            subtransactions = subtransactions.map(subtrans => {
-              return {
-                id: entityIdMap.get(subtrans.id),
-                amount: amountFromYnab(subtrans.amount),
-                category: entityIdMap.get(subtrans.category_id) || null,
-                notes: subtrans.memo,
-              };
-            });
-          }
 
           // Add transaction
           let newTransaction = {
@@ -190,6 +179,7 @@ async function importTransactions(
             subtransactions: subtransactions
               ? subtransactions.map(subtrans => {
                   return {
+                    id: entityIdMap.get(subtrans.id),
                     amount: amountFromYnab(subtrans.amount),
                     category: entityIdMap.get(subtrans.category_id) || null,
                     notes: subtrans.memo,
