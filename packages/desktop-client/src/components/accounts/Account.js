@@ -104,7 +104,6 @@ function AllTransactions({
   let fakePreviewSettingTransaction = [
     { id: 'previewSetting/', account: accountId },
   ];
-  console.log(fakePreviewSettingTransaction);
 
   let prependTransactions = useMemo(() => {
     return schedules.map(schedule => ({

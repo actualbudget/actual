@@ -10,44 +10,46 @@ import { colors, theme } from '../../style';
 import { Text, Input, Select } from '../common';
 import { Row } from '../table';
 
-const lengthTypes = ['for', 'until the end of'] as const;
-type MenuLength = (typeof lengthTypes)[number];
+const descTypes = ['for', 'until the end of'] as const;
+type MenuDesc = (typeof descTypes)[number];
 
 const menuIntervals = ['days', 'weeks', 'months'] as const;
 type MenuInterval = (typeof menuIntervals)[number];
 
-export type SchedulePreviewOpts = {
-  length: MenuLength;
+type SchedulePreviewOpts = {
+  desc: MenuDesc;
   value: number;
   interval: MenuInterval;
 };
 
 const defaultOpts: SchedulePreviewOpts = {
-  length: 'for',
+  desc: 'for',
   value: 7,
   interval: 'days',
 };
 
-function schedOptsToNextDate(opts: SchedulePreviewOpts) {
+function getErrorMessage(opts) {
+  return `Schedule options not implemented: desc:“${opts.desc}”, value:“${opts.value}”, interval:“${opts.interval}”`;
+}
+
+function schedOptsToNextDate(opts: SchedulePreviewOpts = defaultOpts) {
   let today = monthUtils.currentDay();
 
-  let nextDate = null;
-  switch (opts.length) {
+  let nextDate: string;
+  switch (opts.desc) {
     case 'for':
       switch (opts.interval) {
         case 'days':
           nextDate = monthUtils.addDays(today, opts.value);
           break;
         case 'weeks':
-          nextDate = monthUtils.addDays(today, opts.value * 7);
+          nextDate = monthUtils.addWeeks(today, opts.value);
           break;
         case 'months':
-          // See find-schedules.ts for examples
-          nextDate = monthUtils.addDays(today, defaultOpts.value);
-          console.log(`Schedule options not implemented: ${opts}`);
+          nextDate = monthUtils.addMonths(today, opts.value);
           break;
         default:
-          throw new Error(`Unrecognized schedule options: ${opts}`);
+          console.log(getErrorMessage(opts));
       }
       break;
     case 'until the end of':
@@ -58,25 +60,25 @@ function schedOptsToNextDate(opts: SchedulePreviewOpts) {
         case 'weeks':
           // See find-schedules.ts for examples
           nextDate = monthUtils.addDays(today, defaultOpts.value);
-          console.log(`Schedule options not implemented: ${opts}`);
+          console.log(getErrorMessage(opts));
           break;
         case 'months':
           // See find-schedules.ts for examples
           nextDate = monthUtils.addDays(today, defaultOpts.value);
-          console.log(`Schedule options not implemented: ${opts}`);
+          console.log(getErrorMessage(opts));
           break;
         default:
-          throw new Error(`Unrecognized schedule options: ${opts}`);
+          console.log(getErrorMessage(opts));
       }
       break;
     default:
-      throw new Error(`Unrecognized schedule options: ${opts}`);
+      console.log(getErrorMessage(opts));
+      return schedOptsToNextDate(); // to get default
   }
   return nextDate;
 }
 
 export function TransactionPreviewPicker(transaction) {
-  console.log(transaction);
   const [hover, setHover] = useState(false);
 
   let { savePrefs } = useActions();
@@ -93,22 +95,19 @@ export function TransactionPreviewPicker(transaction) {
 
   function onChange(
     changeType: string,
-    changeValue: MenuLength | number | MenuInterval,
+    changeValue: MenuDesc | number | MenuInterval,
   ) {
     let newPreviewOpts: SchedulePreviewOpts = { ...schedulePreviewPref };
 
     // Validate inputs
     switch (changeType) {
-      case 'schedMenuType':
-        newPreviewOpts.length = changeValue;
+      case 'schedMenuDesc':
+        newPreviewOpts.desc = changeValue;
         break;
       case 'value':
         // Standard positive integer error checking
         // Make sure is a number and >= 0 otherwise set to 1
-        changeValue = changeValue >= 0 ? Math.round(changeValue) : 1;
-
-        // Set value on pref
-        newPreviewOpts.value = changeValue;
+        newPreviewOpts.value = changeValue >= 0 ? Math.round(changeValue) : 1;
         break;
       case 'schedMenuInterval':
         newPreviewOpts.interval = changeValue;
@@ -138,7 +137,7 @@ export function TransactionPreviewPicker(transaction) {
             fontStyle: 'italic',
           }}
         >
-          Showing scheduled transactions {schedulePreviewPref.length}{' '}
+          Showing scheduled transactions {schedulePreviewPref.desc}{' '}
           {schedulePreviewPref.value} {schedulePreviewPref.interval} (
           {monthUtils.format(nextDate, dateFormat)})
         </Text>
@@ -161,9 +160,9 @@ export function TransactionPreviewPicker(transaction) {
         <Text>Show scheduled transactions</Text>
         <Select
           line={0}
-          value={schedulePreviewPref.length}
-          options={lengthTypes.map(x => [x, x])}
-          onChange={value => onChange('schedMenuType', value)}
+          value={schedulePreviewPref.desc}
+          options={descTypes.map(x => [x, x])}
+          onChange={value => onChange('schedMenuDesc', value)}
           style={{
             padding: 5,
             backgroundColor: theme.pillBackground,
