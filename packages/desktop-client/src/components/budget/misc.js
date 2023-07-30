@@ -355,13 +355,10 @@ function SidebarCategory({
             e.stopPropagation();
             setMenuOpen(true);
           }}
-          style={{ color: 'currentColor', padding: 3 }}
+          color="currentColor"
+          style={{ padding: 3 }}
         >
-          <CheveronDown
-            width={14}
-            height={14}
-            style={{ color: 'currentColor' }}
-          />
+          <CheveronDown width={14} height={14} />
         </Button>
         {menuOpen && (
           <Tooltip
@@ -687,13 +684,10 @@ const BudgetTotals = memo(function BudgetTotals({
           onClick={() => {
             setMenuOpen(true);
           }}
-          style={{ color: 'currentColor', padding: 3 }}
+          color={colors.n5}
+          style={{ padding: 3 }}
         >
-          <DotsHorizontalTriple
-            width={15}
-            height={15}
-            style={{ color: colors.n5 }}
-          />
+          <DotsHorizontalTriple width={15} height={15} />
           {menuOpen && (
             <Tooltip
               position="bottom-right"

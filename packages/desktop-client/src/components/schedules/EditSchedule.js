@@ -702,13 +702,10 @@ export default function ScheduleDetails() {
               </Button>{' '}
               <Button
                 type="bare"
-                style={{
-                  color:
-                    state.transactionsMode === 'matched'
-                      ? colors.b4
-                      : colors.n7,
-                  fontSize: 14,
-                }}
+                color={
+                  state.transactionsMode === 'matched' ? colors.b4 : colors.n7
+                }
+                style={{ fontSize: 14 }}
                 onClick={() => onSwitchTransactions('matched')}
               >
                 Find matching transactions

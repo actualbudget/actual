@@ -163,12 +163,12 @@ function Notification({
                 onRemove();
                 setLoading(false);
               }}
+              color="currentColor"
               style={{
                 backgroundColor: 'transparent',
                 border: `1px solid ${
                   positive ? colors.g5 : error ? colors.r4 : colors.y3
                 }`,
-                color: 'currentColor',
                 fontSize: 14,
                 flexShrink: 0,
                 '&:hover, &:active': {
@@ -187,7 +187,8 @@ function Notification({
         {sticky && (
           <Button
             type="bare"
-            style={{ flexShrink: 0, color: 'currentColor' }}
+            color="currentColor"
+            style={{ flexShrink: 0 }}
             onClick={onRemove}
           >
             <Delete style={{ width: 9, height: 9, color: 'currentColor' }} />

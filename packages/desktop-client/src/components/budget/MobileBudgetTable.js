@@ -1077,12 +1077,9 @@ function BudgetHeader({
           style={[
             buttonStyle,
             { position: 'absolute', top: 0, bottom: 0, right: 0 },
+            { fontSize: 15, fontWeight: '500' },
           ]}
-          textStyle={{
-            color: colors.n11,
-            fontSize: 15,
-            fontWeight: '500',
-          }}
+          color={colors.n11}
         >
           Done
         </Button>
@@ -1092,13 +1089,10 @@ function BudgetHeader({
             type="bare"
             onClick={nextEnabled && onNextMonth}
             // hitSlop={{ top: 5, bottom: 5, left: 30, right: 5 }}
+            color={colors.n11}
             style={[buttonStyle, { opacity: nextEnabled ? 1 : 0.6 }]}
           >
-            <ArrowThinRight
-              style={{ color: colors.n11 }}
-              width="15"
-              height="15"
-            />
+            <ArrowThinRight width="15" height="15" />
           </Button>
 
           <SyncButton

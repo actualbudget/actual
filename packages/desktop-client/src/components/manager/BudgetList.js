@@ -320,10 +320,8 @@ export default function BudgetList() {
       >
         <Button
           type="bare"
-          style={{
-            marginLeft: 10,
-            color: colors.n4,
-          }}
+          color={colors.n4}
+          style={{ marginLeft: 10 }}
           onClick={e => {
             e.preventDefault();
             pushModal('import');

@@ -868,11 +868,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
     <View>
       <KeyHandlers keys={keyHandlers || {}} />
 
-      <Button
-        type="bare"
-        style={{ color: colors.b3 }}
-        onClick={() => setMenuOpen(true)}
-      >
+      <Button type="bare" color={colors.b3} onClick={() => setMenuOpen(true)}>
         <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
         {selectedItems.size} {name}
       </Button>

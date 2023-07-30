@@ -495,11 +495,11 @@ function HeaderCell({
         <Button
           type="bare"
           onClick={onClick}
+          color={colors.n4}
           style={{
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            color: colors.n4,
             fontWeight: 300,
             marginLeft: marginLeft,
             marginRight: marginRight,
@@ -636,7 +636,6 @@ function PayeeIcons({
     marginRight: 2,
     width: 23,
     height: 23,
-    color: 'inherit',
   };
 
   let scheduleIconStyle = { width: 13, height: 13 };
@@ -648,6 +647,7 @@ function PayeeIcons({
   return schedule ? (
     <Button
       type="bare"
+      color="inherit"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();
@@ -663,6 +663,7 @@ function PayeeIcons({
   ) : transferAccount ? (
     <Button
       type="bare"
+      color="inherit"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();

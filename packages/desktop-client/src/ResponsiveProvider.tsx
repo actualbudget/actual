@@ -5,6 +5,7 @@ import { useViewportSize } from '@react-aria/utils';
 import { breakpoints } from './tokens';
 
 type TResponsiveContext = {
+  atLeastSmallWidth: boolean;
   atLeastMediumWidth: boolean;
   isNarrowWidth: boolean;
   isSmallWidth: boolean;
@@ -33,6 +34,7 @@ export function ResponsiveProvider(props: { children: ReactNode }) {
   // To check if we're at least small width, check !isNarrowWidth
   const viewportInfo = {
     // atLeastMediumWidth is provided to avoid checking (isMediumWidth || isWideWidth)
+    atLeastSmallWidth: width >= breakpoints.small,
     atLeastMediumWidth: width >= breakpoints.medium,
     isNarrowWidth: width < breakpoints.small,
     isSmallWidth: width >= breakpoints.small && width < breakpoints.medium,

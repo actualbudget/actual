@@ -95,11 +95,11 @@ function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
       type="bare"
+      color={selected ? 'white' : null}
       style={[
         { backgroundColor: colors.n10, marginBottom: 5 },
         style,
         selected && {
-          color: 'white',
           '&,:hover,:active': { backgroundColor: colors.b4 },
         },
       ]}

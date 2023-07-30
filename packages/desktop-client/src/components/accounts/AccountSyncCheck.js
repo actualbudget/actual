@@ -85,13 +85,12 @@ export default function AccountSyncCheck() {
     <View>
       <Button
         type="bare"
+        color={colors.r5}
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          color: colors.r5,
           backgroundColor: colors.r10,
           padding: '4px 8px',
-          borderRadius: 4,
         }}
         onClick={() => setOpen(true)}
       >

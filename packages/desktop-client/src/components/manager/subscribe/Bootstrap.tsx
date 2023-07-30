@@ -87,7 +87,8 @@ export default function Bootstrap() {
         buttons={
           <Button
             type="bare"
-            style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
+            color={colors.b4}
+            style={{ fontSize: 15, marginRight: 15 }}
             onClick={onDemo}
           >
             Try Demo

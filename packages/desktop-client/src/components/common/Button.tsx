@@ -17,7 +17,6 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   color?: string;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
-  textStyle?: CSSProperties;
   bounce?: boolean;
   as?: 'button';
 };

@@ -114,7 +114,8 @@ export default function Login() {
       >
         <Button
           type="bare"
-          style={{ fontSize: 15, color: colors.b4, marginLeft: 10 }}
+          color={colors.b4}
+          style={{ fontSize: 15, marginLeft: 10 }}
           onClick={onDemo}
         >
           Try Demo &rarr;

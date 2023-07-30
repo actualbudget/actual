@@ -168,7 +168,7 @@ export default function ConfigServer() {
         }}
       >
         {currentUrl ? (
-          <Button type="bare" style={{ color: colors.n4 }} onClick={onSkip}>
+          <Button type="bare" color={colors.n4} onClick={onSkip}>
             Stop using a server
           </Button>
         ) : (
@@ -176,8 +176,8 @@ export default function ConfigServer() {
             {!isElectron() && (
               <Button
                 type="bare"
+                color={colors.n4}
                 style={{
-                  color: colors.n4,
                   margin: 5,
                   marginRight: 15,
                 }}
@@ -188,7 +188,8 @@ export default function ConfigServer() {
             )}
             <Button
               type="bare"
-              style={{ color: colors.n4, margin: 5 }}
+              color={colors.n4}
+              style={{ margin: 5 }}
               onClick={onSkip}
             >
               Don’t use a server

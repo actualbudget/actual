@@ -353,12 +353,13 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               type="bare"
               className="hover-visible"
               onClick={onToggleSummaryCollapse}
+              color={colors.n6}
             >
               <ExpandOrCollapseIcon
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: colors.n6, margin: 1 }}
+                style={{ margin: 1 }}
               />
             </Button>
           </View>
@@ -397,12 +398,8 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               />
             </View>
             <View style={{ userSelect: 'none' }}>
-              <Button type="bare" onClick={onMenuOpen}>
-                <DotsHorizontalTriple
-                  width={15}
-                  height={15}
-                  style={{ color: colors.n5 }}
-                />
+              <Button type="bare" onClick={onMenuOpen} color={colors.n5}>
+                <DotsHorizontalTriple width={15} height={15} />
               </Button>
               {menuOpen && (
                 <Tooltip

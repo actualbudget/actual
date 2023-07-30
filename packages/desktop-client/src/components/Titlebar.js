@@ -68,11 +68,7 @@ function UncategorizedButton() {
   let count = useSheetValue(queries.uncategorizedCount());
   return (
     count !== 0 && (
-      <ButtonLink
-        type="bare"
-        to="/accounts/uncategorized"
-        style={{ color: colors.r5 }}
-      >
+      <ButtonLink type="bare" to="/accounts/uncategorized" color={colors.r5}>
         {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
       </ButtonLink>
     )
@@ -104,6 +100,8 @@ function PrivacyButton() {
 export function SyncButton({ style }) {
   let cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
   let { sync } = useActions();
+
+  let { atLeastSmallWidth } = useResponsive();
 
   let [syncing, setSyncing] = useState(false);
   let [syncState, setSyncState] = useState(null);
@@ -144,30 +142,20 @@ export function SyncButton({ style }) {
   return (
     <Button
       type="bare"
-      style={css(
-        style,
-        {
-          WebkitAppRegion: 'none',
-          color:
-            syncState === 'error'
-              ? colors.r7
-              : syncState === 'disabled' ||
-                syncState === 'offline' ||
-                syncState === 'local'
-              ? colors.n9
-              : null,
-        },
-        media(`(min-width: ${tokens.breakpoint_small})`, {
-          color:
-            syncState === 'error'
-              ? colors.r4
-              : syncState === 'disabled' ||
-                syncState === 'offline' ||
-                syncState === 'local'
-              ? colors.n6
-              : null,
-        }),
-      )}
+      color={
+        syncState === 'error'
+          ? atLeastSmallWidth
+            ? colors.r4
+            : colors.r7
+          : syncState === 'disabled' ||
+            syncState === 'offline' ||
+            syncState === 'local'
+          ? atLeastSmallWidth
+            ? colors.n6
+            : colors.n9
+          : null
+      }
+      style={[style, { WebkitAppRegion: 'none' }]}
       onClick={sync}
     >
       {syncState === 'error' ? (
@@ -311,6 +299,7 @@ export default function Titlebar({ style }) {
         <Button
           type="bare"
           style={{ marginRight: 8 }}
+          color={colors.n5}
           onPointerEnter={e => {
             if (e.pointerType === 'mouse') {
               sidebar.setHidden(false);
@@ -329,7 +318,7 @@ export default function Titlebar({ style }) {
         >
           <NavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: colors.n5, left: 0 }}
+            style={{ width: 15, height: 15, left: 0 }}
           />
         </Button>
       )}
@@ -340,11 +329,7 @@ export default function Titlebar({ style }) {
           element={
             location.state?.goBack ? (
               <Button type="bare" onClick={() => navigate(-1)}>
-                <ArrowLeft
-                  width={10}
-                  height={10}
-                  style={{ marginRight: 5, color: 'currentColor' }}
-                />{' '}
+                <ArrowLeft width={10} height={10} style={{ marginRight: 5 }} />{' '}
                 Back
               </Button>
             ) : null

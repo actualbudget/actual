@@ -121,12 +121,8 @@ export default function NotesButton({
       <Button
         type="bare"
         className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
-        style={[
-          { color: defaultColor },
-          style,
-          hasNotes && { display: 'flex !important' },
-          tooltipOpen && { color: colors.n1 },
-        ]}
+        color={tooltipOpen ? colors.n1 : defaultColor}
+        style={[style, hasNotes && { display: 'flex !important' }]}
         {...tooltip.getOpenEvents()}
       >
         <CustomNotesPaper style={{ width, height }} />

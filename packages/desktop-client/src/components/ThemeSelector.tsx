@@ -24,9 +24,9 @@ export function ThemeSelector() {
       }}
     >
       {theme === 'light' ? (
-        <MoonStars style={{ width: 13, height: 13, color: 'inherit' }} />
+        <MoonStars style={{ width: 13, height: 13 }} />
       ) : (
-        <Sun style={{ width: 13, height: 13, color: 'inherit' }} />
+        <Sun style={{ width: 13, height: 13 }} />
       )}
     </Button>
   );

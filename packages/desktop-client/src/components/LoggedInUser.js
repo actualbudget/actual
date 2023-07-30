@@ -84,7 +84,7 @@ export default function LoggedInUser({ hideIfNoServer, style, color }) {
 
   return (
     <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
-      <Button type="bare" onClick={() => setMenuOpen(true)} style={{ color }}>
+      <Button type="bare" onClick={() => setMenuOpen(true)} color={color}>
         {serverMessage()}
       </Button>
 
