@@ -2,8 +2,8 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
 import { styles } from '../../style';
-import { ButtonLink } from '../common';
 import Button from '../common/Button';
+import ButtonLink from '../common/ButtonLink';
 import Select from '../common/Select';
 import View from '../common/View';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';

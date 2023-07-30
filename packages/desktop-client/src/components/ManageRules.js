@@ -31,8 +31,8 @@ import useSelected, {
 import ArrowRight from '../icons/v0/RightArrow2';
 import { colors } from '../style';
 
-import { ExternalLink } from './common';
 import Button from './common/Button';
+import ExternalLink from './common/ExternalLink';
 import Input from './common/Input';
 import LinkButton from './common/LinkButton';
 import Stack from './common/Stack';

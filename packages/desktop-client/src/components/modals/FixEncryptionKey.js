@@ -4,8 +4,8 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
 import { colors } from '../../style';
-import { ExternalLink } from '../common';
 import Button, { ButtonWithLoading } from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
 import InitialFocus from '../common/InitialFocus';
 import Input from '../common/Input';
 import Modal, { ModalButtons } from '../common/Modal';

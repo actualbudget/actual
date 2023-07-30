@@ -2,9 +2,9 @@ import React, { Component, useState } from 'react';
 
 import { theme } from '../style';
 
-import { ExternalLink } from './common';
 import Block from './common/Block';
 import Button from './common/Button';
+import ExternalLink from './common/ExternalLink';
 import LinkButton from './common/LinkButton';
 import Modal from './common/Modal';
 import Paragraph from './common/Paragraph';
