@@ -11,17 +11,15 @@ import SvgRemove from '../../icons/v2/Remove';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { styles, colors } from '../../style';
 import AnimatedRefresh from '../AnimatedRefresh';
-import {
-  View,
-  Button,
-  MenuButton,
-  MenuTooltip,
-  Input,
-  InputWithContent,
-  InitialFocus,
-  Menu,
-  Stack,
-} from '../common';
+import Button from '../common/Button';
+import InitialFocus from '../common/InitialFocus';
+import Input from '../common/Input';
+import InputWithContent from '../common/InputWithContent';
+import Menu from '../common/Menu';
+import MenuButton from '../common/MenuButton';
+import MenuTooltip from '../common/MenuTooltip';
+import Stack from '../common/Stack';
+import View from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/SavedFilters';
 import { KeyHandlers } from '../KeyHandlers';

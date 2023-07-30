@@ -7,8 +7,8 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import Text from './common/Text';
-import View from './common/View';
+import Text from './Text';
+import View from './View';
 
 function getChildren(key, children) {
   return Children.toArray(children).reduce((list, child) => {

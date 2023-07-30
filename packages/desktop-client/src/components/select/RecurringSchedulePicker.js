@@ -8,8 +8,13 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import { colors } from '../../style';
-import { Button, Select, Input, Tooltip, View, Text, Stack } from '../common';
-import { useTooltip } from '../tooltips';
+import Button from '../common/Button';
+import Input from '../common/Input';
+import Select from '../common/Select';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
+import { useTooltip, Tooltip } from '../tooltips';
 
 import DateSelect from './DateSelect';
 
