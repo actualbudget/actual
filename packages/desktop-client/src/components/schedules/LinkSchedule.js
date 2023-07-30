@@ -26,7 +26,7 @@ export default function ScheduleLink({
 
   async function onSelect(scheduleId) {
     if (ids && ids.length > 0) {
-      await send('tran;sactions-batch-update', {
+      await send('transactions-batch-update', {
         updated: ids.map(id => ({ id, schedule: scheduleId })),
       });
     }
