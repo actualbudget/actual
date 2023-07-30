@@ -482,11 +482,7 @@ export const ManagePayees = forwardRef(
             padding: '0 10px 5px',
           }}
         >
-          <View
-            style={{
-              flexShrink: 0,
-            }}
-          >
+          <View style={{ flexShrink: 0 }}>
             <Button
               type="bare"
               style={{ marginRight: 10 }}
