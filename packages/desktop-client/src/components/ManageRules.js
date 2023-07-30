@@ -33,8 +33,8 @@ import { colors } from '../style';
 
 import Button from './common/Button';
 import ExternalLink from './common/ExternalLink';
-import Input from './common/Input';
 import LinkButton from './common/LinkButton';
+import Search from './common/Search';
 import Stack from './common/Stack';
 import Text from './common/Text';
 import View from './common/View';
@@ -694,7 +694,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View style={{ overflow: 'hidden' }}>
+      <View>
         <View
           style={{
             flexDirection: 'row',
@@ -722,23 +722,10 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             </Text>
           </View>
           <View style={{ flex: 1 }} />
-          <Input
+          <Search
             placeholder="Filter rules..."
             value={filter}
-            onChange={e => {
-              setFilter(e.target.value);
-            }}
-            style={{
-              width: 350,
-              borderColor: isModal ? null : 'transparent',
-              backgroundColor: isModal ? null : colors.n11,
-              ':focus': isModal
-                ? null
-                : {
-                    backgroundColor: 'white',
-                    '::placeholder': { color: colors.n8 },
-                  },
-            }}
+            onChange={setFilter}
           />
         </View>
         <View style={{ flex: 1 }}>
