@@ -22,6 +22,7 @@
     "@types/react-modal": "^3.16.0",
     "@types/react-redux": "^7.1.25",
     "@types/react-router-dom": "^5.3.3",
+    "@types/reselect": "^2.2.0",
     "@types/uuid": "^9.0.2",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "chokidar": "^3.5.3",
@@ -71,5 +72,8 @@
     "setupFilesAfterEnv": [
       "<rootDir>/src/setupTests.js"
     ]
+  },
+  "dependencies": {
+    "reselect": "^4.1.8"
   }
 }
