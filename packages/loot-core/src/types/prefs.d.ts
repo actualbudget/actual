@@ -9,7 +9,12 @@ export type FeatureFlag =
 export type LocalPrefs = Partial<
   {
     firstDayOfWeekIdx: `${0 | 1 | 2 | 3 | 4 | 5 | 6}`;
-    dateFormat: string;
+    dateFormat:
+      | 'MM/dd/yyyy'
+      | 'dd/MM/yyyy'
+      | 'yyyy-MM-dd'
+      | 'MM.dd.yyyy'
+      | 'dd.MM.yyyy';
     numberFormat: (typeof numberFormats)[number]['value'];
     hideFraction: boolean;
     hideClosedAccounts: boolean;

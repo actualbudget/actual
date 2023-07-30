@@ -10,15 +10,15 @@ import { type CSSProperties, css } from 'glamor';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { colors } from '../../style';
 
-type CustomSelectProps = {
-  options: Array<[string, string]>;
-  value: string;
+type SelectProps<Value extends string> = {
+  options: Array<[Value, string]>;
+  value: Value;
   defaultLabel?: string;
-  onChange?: (newValue: string) => void;
+  onChange?: (newValue: Value) => void;
   style?: CSSProperties;
   wrapperStyle?: CSSProperties;
-  line: number;
-  disabledKeys?: string[];
+  line?: number;
+  disabledKeys?: Value[];
 };
 
 /**
@@ -36,7 +36,7 @@ type CustomSelectProps = {
  * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
  */
 
-export default function Select({
+export default function Select<Value extends string>({
   options,
   value,
   defaultLabel = '',
@@ -45,7 +45,7 @@ export default function Select({
   wrapperStyle,
   line,
   disabledKeys = [],
-}: CustomSelectProps) {
+}: SelectProps<Value>) {
   const arrowSize = 7;
   const targetOption = options.filter(option => option[0] === value);
   return (

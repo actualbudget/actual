@@ -301,7 +301,9 @@ export interface ServerHandlers {
 
   'download-budget': (arg: { fileId; replace? }) => Promise<{ error; id }>;
 
-  'sync-budget': () => Promise<EmptyObject>;
+  'sync-budget': () => Promise<{
+    error?: { message: string; reason: string; meta: unknown };
+  }>;
 
   'load-budget': (arg: { id }) => Promise<{ error }>;
 

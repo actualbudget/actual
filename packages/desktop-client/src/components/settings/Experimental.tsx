@@ -32,6 +32,7 @@ function FeatureToggle({
       <Checkbox
         checked={enabled}
         onChange={() => {
+          // @ts-expect-error key type is not correctly inferred
           savePrefs({
             [`flags.${flag}`]: !enabled,
           });

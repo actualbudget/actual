@@ -538,12 +538,16 @@ function getTablesFromMessages(messages: Message[]): string[] {
 // spreadsheet to finish any processing. This is useful if we want to
 // perform a full sync and wait for everything to finish, usually if
 // you're doing an initial sync before working with a file.
-export async function initialFullSync(): Promise<void> {
+export async function initialFullSync(): Promise<{
+  error?: { message: string; reason: string; meta: unknown };
+}> {
   let result = await fullSync();
   if (isError(result)) {
     // Make sure to wait for anything in the spreadsheet to process
     await sheet.waitOnSpreadsheet();
+    return result;
   }
+  return {};
 }
 
 export const fullSync = once(async function (): Promise<
