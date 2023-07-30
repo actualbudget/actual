@@ -2,7 +2,9 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import { colors } from '../../../style';
-import { View, Text, Button } from '../../common';
+import Button from '../../common/Button';
+import Text from '../../common/Text';
+import View from '../../common/View';
 
 function getErrorMessage(reason) {
   switch (reason) {
