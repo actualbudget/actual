@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
 
-import * as actions from 'loot-core/src/client/actions';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useActions } from '../../hooks/useActions';
 import { View, Button, Search } from '../common';
 import { Page } from '../Page';
 
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
-function Schedules({ pushModal }) {
+export default function Schedules() {
+  let { pushModal } = useActions();
   let [filter, setFilter] = useState('');
 
   let scheduleData = useSchedules();
@@ -101,5 +101,3 @@ function Schedules({ pushModal }) {
     </Page>
   );
 }
-
-export default connect(null, actions)(Schedules);
