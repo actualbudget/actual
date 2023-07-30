@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
-import { ExternalLink } from '../common';
 import { ButtonWithLoading } from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
 import Input from '../common/Input';
 import Modal, { ModalButtons } from '../common/Modal';
 import type { ModalProps } from '../common/Modal';

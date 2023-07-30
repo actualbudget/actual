@@ -5,8 +5,8 @@ import { pushModal } from 'loot-core/src/client/actions/modals';
 
 import { authorizeBank } from '../../gocardless';
 import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
-import { ExternalLink } from '../common';
 import Button, { ButtonWithLoading } from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
 import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';

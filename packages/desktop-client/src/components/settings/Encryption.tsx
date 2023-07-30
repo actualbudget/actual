@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
 import { colors } from '../../style';
-import { ExternalLink } from '../common';
 import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
 import Text from '../common/Text';
 import { useServerURL } from '../ServerContext';
 
