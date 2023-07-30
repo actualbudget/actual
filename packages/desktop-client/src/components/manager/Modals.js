@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
-import { View } from '../common';
+import View from '../common/View';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
 import LoadBackup from '../modals/LoadBackup';

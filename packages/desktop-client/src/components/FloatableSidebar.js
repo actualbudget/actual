@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { useResponsive } from '../ResponsiveProvider';
 
-import { View } from './common';
+import View from './common/View';
 import { SIDEBAR_WIDTH } from './sidebar';
 import SidebarWithData from './SidebarWithData';
 

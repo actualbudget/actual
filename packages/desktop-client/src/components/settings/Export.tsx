@@ -5,7 +5,8 @@ import { format } from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { Text, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
 
 import { Setting } from './UI';
 

@@ -7,13 +7,6 @@ import { colors } from '../style';
 
 import Button from './common/Button';
 
-export { default as AnchorLink } from './common/AnchorLink';
-export { default as Button, ButtonWithLoading } from './common/Button';
-export { default as Select } from './common/Select';
-export { default as Input } from './common/Input';
-export { default as Text } from './common/Text';
-export { default as View } from './common/View';
-
 let externalLinkColors = {
   purple: colors.p4,
   blue: colors.b4,

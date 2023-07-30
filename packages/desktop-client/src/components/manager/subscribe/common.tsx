@@ -9,7 +9,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors, styles } from '../../../style';
-import { Input as BaseInput } from '../../common';
+import BaseInput from '../../common/Input';
 import { useSetServerURL } from '../../ServerContext';
 
 // There are two URLs that dance with each other: `/login` and

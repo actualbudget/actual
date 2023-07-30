@@ -31,7 +31,7 @@ import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import BankSyncStatus from './BankSyncStatus';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import { View } from './common';
+import View from './common/View';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';

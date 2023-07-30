@@ -28,7 +28,9 @@ import { authorizeBank } from '../../gocardless';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, colors } from '../../style';
 import { useActiveLocation } from '../ActiveLocation';
-import { View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import TransactionList from '../transactions/TransactionList';
 import {
   SplitsExpandedProvider,

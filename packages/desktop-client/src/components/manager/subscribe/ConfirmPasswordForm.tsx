@@ -1,6 +1,7 @@
 import React, { type ChangeEvent, useState } from 'react';
 
-import { View, ButtonWithLoading } from '../../common';
+import { ButtonWithLoading } from '../../common/Button';
+import View from '../../common/View';
 
 import { Input } from './common';
 
