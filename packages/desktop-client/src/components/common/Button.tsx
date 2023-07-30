@@ -94,6 +94,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     hoveredStyle = [
       type !== 'bare' && styles.shadow,
+      style,
       hoveredStyle,
       {
         backgroundColor: backgroundColorHover[type],
@@ -112,6 +113,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 : theme.buttonNormalShadow),
             transition: 'none',
           },
+      style,
       activeStyle,
     ];
 
@@ -138,9 +140,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       },
       { ':hover': !disabled && hoveredStyle },
       { ':active': !disabled && activeStyle },
+      style,
       hover && hoveredStyle,
       pressed && activeStyle,
-      style,
     ];
 
     return (
