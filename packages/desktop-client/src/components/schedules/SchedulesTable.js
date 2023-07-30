@@ -163,6 +163,7 @@ export function SchedulesTable({
         : null;
 
       return (
+        filterIncludes(schedule.name) ||
         filterIncludes(payee && payee.name) ||
         filterIncludes(account && account.name) ||
         filterIncludes(amountStr) ||
