@@ -120,6 +120,24 @@ export function TransactionPreviewPicker(transaction) {
     savePrefs({ [`schedulePreview-${accountId}`]: newPreviewOpts });
   }
 
+  function plural(value: number, interval: MenuInterval) {
+    if (value > 1) {
+      return interval;
+    } else {
+      switch (interval) {
+        case 'days':
+          return 'day';
+        case 'weeks':
+          return 'week';
+        case 'months':
+          return 'month';
+        default:
+          console.log('Unknown schedule interval: ' + interval);
+          return 'ERROR';
+      }
+    }
+  }
+
   function previewRow() {
     return (
       <Row
@@ -138,7 +156,8 @@ export function TransactionPreviewPicker(transaction) {
           }}
         >
           Showing scheduled transactions {schedulePreviewPref.desc}{' '}
-          {schedulePreviewPref.value} {schedulePreviewPref.interval} (
+          {schedulePreviewPref.value}{' '}
+          {plural(schedulePreviewPref.value, schedulePreviewPref.interval)} (
           {monthUtils.format(nextDate, dateFormat)})
         </Text>
       </Row>
