@@ -14,7 +14,6 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   type?: ButtonType;
   isSubmit?: boolean;
   disabled?: boolean;
-  color?: string;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
   textStyle?: CSSProperties;
@@ -79,7 +78,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       hover,
       type = 'normal',
       isSubmit = type === 'primary',
-      color,
       style,
       disabled,
       hoveredStyle,
@@ -98,7 +96,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       hoveredStyle,
       {
         backgroundColor: backgroundColorHover[type],
-        color: color || textColorHover[type],
+        color: textColorHover[type],
       },
     ];
     activeStyle = [

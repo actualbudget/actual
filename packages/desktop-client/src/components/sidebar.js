@@ -446,7 +446,7 @@ function Accounts({
 function ToggleButton({ style, isFloating, onFloat }) {
   return (
     <View className="float" style={[style, { flexShrink: 0 }]}>
-      <Button type="bare" onClick={onFloat} color={colors.n5}>
+      <Button type="bare" onClick={onFloat} style={{ color: colors.n5 }}>
         {isFloating ? (
           <Pin
             style={{

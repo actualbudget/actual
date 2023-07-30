@@ -79,8 +79,8 @@ function EditableBudgetName({ prefs, savePrefs }) {
     return (
       <Button
         type="bare"
-        color={colors.n9}
         style={{
+          color: colors.n9,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,
