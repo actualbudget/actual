@@ -2,8 +2,8 @@ import React from 'react';
 
 import { useActions } from '../../hooks/useActions';
 import { colors, styles } from '../../style';
-import { ExternalLink } from '../common';
 import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
 import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';

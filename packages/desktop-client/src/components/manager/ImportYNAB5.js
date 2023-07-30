@@ -4,9 +4,9 @@ import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, colors } from '../../style';
-import { ExternalLink } from '../common';
 import Block from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
 import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import View from '../common/View';
