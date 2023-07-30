@@ -2,7 +2,9 @@ import React from 'react';
 
 import { useActions } from '../../hooks/useActions';
 import { themeNames, useTheme } from '../../style';
-import { Button, Select, Text } from '../common';
+import Button from '../common/Button';
+import Select from '../common/Select';
+import Text from '../common/Text';
 
 import { Setting } from './UI';
 

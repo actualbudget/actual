@@ -3,8 +3,11 @@ import React, { useState, useRef } from 'react';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors } from '../../style';
 import { Error } from '../alerts';
-import { View, Text, Modal, Button, ModalButtons } from '../common';
+import Button from '../common/Button';
+import Modal, { ModalButtons } from '../common/Modal';
 import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 function renderError(error) {
   return (

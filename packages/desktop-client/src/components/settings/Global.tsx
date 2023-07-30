@@ -4,7 +4,9 @@ import { useSelector } from 'react-redux';
 import { useActions } from '../../hooks/useActions';
 import { colors } from '../../style';
 import { Information } from '../alerts';
-import { View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 
 import { Setting } from './UI';
 

@@ -27,7 +27,9 @@ import { applyChanges, groupById } from 'loot-core/src/shared/util';
 import { authorizeBank } from '../../gocardless';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, colors } from '../../style';
-import { View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import TransactionList from '../transactions/TransactionList';
 import {
   SplitsExpandedProvider,

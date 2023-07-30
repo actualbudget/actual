@@ -14,7 +14,7 @@ import { useActions } from '../../hooks/useActions';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 import SyncRefresh from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';

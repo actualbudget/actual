@@ -1,6 +1,8 @@
 import React from 'react';
 
-import { View, Text, AnchorLink } from '../common';
+import AnchorLink from '../common/AnchorLink';
+import Text from '../common/Text';
+import View from '../common/View';
 import { useServerURL } from '../ServerContext';
 
 export default function ServerURL() {

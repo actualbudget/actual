@@ -5,7 +5,8 @@ import { type CSSProperties } from 'glamor';
 import { useResponsive } from '../ResponsiveProvider';
 import { colors, styles } from '../style';
 
-import { View, Text } from './common';
+import Text from './common/Text';
+import View from './common/View';
 
 function PageTitle({
   name,

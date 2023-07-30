@@ -71,7 +71,7 @@ export default function Schedules() {
 
       <View
         style={{
-          marginTop: 20,
+          marginTop: 15,
           flexBasis: (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1),
           overflow: 'hidden',
         }}

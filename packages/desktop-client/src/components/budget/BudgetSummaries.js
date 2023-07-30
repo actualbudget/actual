@@ -12,7 +12,7 @@ import { css } from 'glamor';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
-import { View } from '../common';
+import View from '../common/View';
 
 import { MonthsContext } from './MonthsContext';
 

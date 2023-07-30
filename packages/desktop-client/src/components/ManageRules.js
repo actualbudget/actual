@@ -31,15 +31,13 @@ import useSelected, {
 import ArrowRight from '../icons/v0/RightArrow2';
 import { colors } from '../style';
 
-import {
-  View,
-  Text,
-  Button,
-  Stack,
-  ExternalLink,
-  Input,
-  LinkButton,
-} from './common';
+import Button from './common/Button';
+import ExternalLink from './common/ExternalLink';
+import LinkButton from './common/LinkButton';
+import Search from './common/Search';
+import Stack from './common/Stack';
+import Text from './common/Text';
+import View from './common/View';
 import { SelectCell, Row, Field, Cell, CellButton, TableHeader } from './table';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
@@ -696,7 +694,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View style={{ overflow: 'hidden' }}>
+      <View>
         <View
           style={{
             flexDirection: 'row',
@@ -724,23 +722,10 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             </Text>
           </View>
           <View style={{ flex: 1 }} />
-          <Input
+          <Search
             placeholder="Filter rules..."
             value={filter}
-            onChange={e => {
-              setFilter(e.target.value);
-            }}
-            style={{
-              width: 350,
-              borderColor: isModal ? null : 'transparent',
-              backgroundColor: isModal ? null : colors.n11,
-              ':focus': isModal
-                ? null
-                : {
-                    backgroundColor: 'white',
-                    '::placeholder': { color: colors.n8 },
-                  },
-            }}
+            onChange={setFilter}
           />
         </View>
         <View style={{ flex: 1 }}>

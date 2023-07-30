@@ -26,8 +26,8 @@ import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { colors } from '../../style';
 import Button from '../common/Button';
-import Input from '../common/Input';
 import Menu from '../common/Menu';
+import Search from '../common/Search';
 import Text from '../common/Text';
 import View from '../common/View';
 import {
@@ -479,10 +479,10 @@ export const ManagePayees = forwardRef(
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            padding: '0 10px 5px',
+            padding: '0 0 15px',
           }}
         >
-          <View>
+          <View style={{ flexShrink: 0 }}>
             <Button
               type="bare"
               style={{ marginRight: 10 }}
@@ -506,7 +506,11 @@ export const ManagePayees = forwardRef(
               />
             )}
           </View>
-          <View>
+          <View
+            style={{
+              flexShrink: 0,
+            }}
+          >
             {(orphanedOnly ||
               (orphanedPayees && orphanedPayees.length > 0)) && (
               <Button
@@ -530,23 +534,10 @@ export const ManagePayees = forwardRef(
             )}
           </View>
           <View style={{ flex: 1 }} />
-          <Input
-            id="filter-input"
+          <Search
             placeholder="Filter payees..."
             value={filter}
-            onChange={e => {
-              applyFilter(e.target.value);
-              tableNavigator.onEdit(null);
-            }}
-            style={{
-              width: 350,
-              borderColor: 'transparent',
-              backgroundColor: colors.n11,
-              ':focus': {
-                backgroundColor: 'white',
-                '::placeholder': { color: colors.n8 },
-              },
-            }}
+            onChange={applyFilter}
           />
         </View>
 
