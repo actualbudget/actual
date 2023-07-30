@@ -4,7 +4,7 @@ import mergeRefs from 'react-merge-refs';
 import { css } from 'glamor';
 
 import { useProperFocus } from '../../hooks/useProperFocus';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import { type HTMLPropsWithStyle } from '../../types/utils';
 
 export const defaultInputStyle = {
@@ -40,11 +40,14 @@ const Input = ({
       {...css(
         defaultInputStyle,
         {
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          flexShrink: 0,
           ':focus': {
-            border: '1px solid ' + colors.b5,
-            boxShadow: '0 1px 1px ' + colors.b7,
+            border: '1px solid ' + theme.formInputBorderSelected,
+            boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
           },
-          '::placeholder': { color: colors.n7 },
+          '::placeholder': { color: theme.formInputTextPlaceholder },
         },
         styles.smallText,
         style,

@@ -865,7 +865,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
   }
 
   return (
-    <View>
+    <View style={{ marginLeft: 10, flexShrink: 0 }}>
       <KeyHandlers keys={keyHandlers || {}} />
 
       <Button
