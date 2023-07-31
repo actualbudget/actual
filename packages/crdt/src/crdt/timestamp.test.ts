@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Timestamp } from './timestamp';
 
 describe('Timestamp', function () {
@@ -16,12 +17,12 @@ describe('Timestamp', function () {
 
   describe('comparison', function () {
     it('should be in order', function () {
-      const sendTimestamp = Timestamp.send()!;
+      const sendTimestamp = Timestamp.send();
 
       expect(Timestamp.zero).toBe(Timestamp.zero);
       expect(Timestamp.max > Timestamp.zero).toBeTruthy();
-      expect(sendTimestamp > Timestamp.zero).toBeTruthy();
-      expect(sendTimestamp < Timestamp.max).toBeTruthy();
+      expect(sendTimestamp && sendTimestamp > Timestamp.zero).toBeTruthy();
+      expect(sendTimestamp && sendTimestamp < Timestamp.max).toBeTruthy();
     });
   });
 

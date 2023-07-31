@@ -141,7 +141,7 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
 
   // Prune child nodes.
   for (let k of keys.slice(-n)) {
-    next[k] = prune(trie[k]!, n);
+    next[k] = prune(trie[k], n);
   }
 
   return next;
@@ -156,7 +156,7 @@ export function debug(trie: TrieNode, k = '', indent = 0): string {
     str +
     getKeys(trie)
       .map(key => {
-        return debug(trie[key]!, key, indent + 2);
+        return debug(trie[key], key, indent + 2);
       })
       .join('')
   );
