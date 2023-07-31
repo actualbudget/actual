@@ -64,14 +64,8 @@ export function deserializeClock(clock: string): Clock {
     };
   }
 
-  const ts = Timestamp.parse(data.timestamp);
-
-  if (!ts) {
-    throw new Timestamp.InvalidError(data.timestamp);
-  }
-
   return {
-    timestamp: MutableTimestamp.from(ts),
+    timestamp: MutableTimestamp.from(Timestamp.parse(data.timestamp)),
     merkle: data.merkle,
   };
 }
@@ -322,13 +316,6 @@ export class Timestamp {
     constructor() {
       super('timestamp counter overflow');
       this.name = 'OverflowError';
-    }
-  };
-
-  static InvalidError = class InvalidError extends Error {
-    constructor(...args: unknown[]) {
-      super(['timestamp is not valid'].concat(args.map(String)).join(' '));
-      this.name = 'InvalidError';
     }
   };
 }

@@ -43,7 +43,7 @@ export function insert(trie: TrieNode, timestamp: Timestamp) {
   let hash = timestamp.hash();
   let key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
 
-  trie = Object.assign({}, trie, { hash: (trie.hash || 0) ^ hash });
+  trie = Object.assign({}, trie, { hash: trie.hash ^ hash });
   return insertKey(trie, key, hash);
 }
 
@@ -70,7 +70,7 @@ export function build(timestamps: Timestamp[]) {
 
 export function diff(trie1: TrieNode, trie2: TrieNode): number {
   if (trie1.hash === trie2.hash) {
-    return 0;
+    return null;
   }
 
   let node1 = trie1;
@@ -126,8 +126,6 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number {
     node1 = node1[diffkey] || emptyTrie();
     node2 = node2[diffkey] || emptyTrie();
   }
-
-  return 0;
 }
 
 export function prune(trie: TrieNode, n = 2): TrieNode {
