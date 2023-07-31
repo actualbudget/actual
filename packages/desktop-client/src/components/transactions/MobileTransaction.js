@@ -217,12 +217,11 @@ class TransactionEditInner extends PureComponent {
     this.onSave();
   };
 
-  onCancel = () => {
-    this.props.navigation('..', { relative: 'path' });
-  };
-
   onSave = async () => {
     let { transactions } = this.state;
+    const [transaction, ..._childTransactions] = transactions;
+    const { account: accountId } = transaction;
+    let account = getAccountsById(this.props.accounts)[accountId];
 
     if (transactions.find(t => t.account == null)) {
       // Ignore transactions if any of them don't have an account
@@ -243,7 +242,7 @@ class TransactionEditInner extends PureComponent {
     }
 
     this.props.onSave(transactions);
-    this.props.navigation('..', { relative: 'path' });
+    this.props.navigation(`/accounts/${account.id}`);
   };
 
   onSaveChild = childTransaction => {
@@ -771,7 +770,7 @@ function TransactionEditUnconnected(props) {
 
   const onDelete = async () => {
     // Eagerly go back
-    navigate('..', { relative: 'path' });
+    navigate(`/accounts/${accountId}`);
 
     if (adding) {
       // Adding a new transactions, this disables saving when the component unmounts
