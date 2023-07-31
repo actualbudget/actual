@@ -12,7 +12,7 @@ import { useServerURL } from './ServerContext';
 import { Tooltip } from './tooltips';
 
 export default function LoggedInUser({ hideIfNoServer, style, color }) {
-  let userData = useSelector(state => state.userData);
+  let userData = useSelector(state => state.user.data);
   let { getUserData, signOut, closeBudget } = useActions();
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);
