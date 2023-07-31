@@ -19,12 +19,18 @@ export type TrieNode = {
   hash?: number;
 };
 
+type NumberTrieNodeKey = keyof Omit<TrieNode, 'hash'>;
+
 export function emptyTrie(): TrieNode {
   return { hash: 0 };
 }
 
-export function getKeys(trie: TrieNode): ('0' | '1' | '2')[] {
-  return Object.keys(trie).filter(x => x !== 'hash') as ('0' | '1' | '2')[];
+function isNumberTrieNodeKey(input: string): input is NumberTrieNodeKey {
+  return ['0', '1', '2'].includes(input);
+}
+
+export function getKeys(trie: TrieNode): NumberTrieNodeKey[] {
+  return Object.keys(trie).filter(isNumberTrieNodeKey);
 }
 
 export function keyToTimestamp(key: string): number {
@@ -43,7 +49,7 @@ export function insert(trie: TrieNode, timestamp: Timestamp) {
   let hash = timestamp.hash();
   let key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
 
-  trie = Object.assign({}, trie, { hash: trie.hash ^ hash });
+  trie = Object.assign({}, trie, { hash: (trie.hash || 0) ^ hash });
   return insertKey(trie, key, hash);
 }
 
@@ -52,10 +58,11 @@ function insertKey(trie: TrieNode, key: string, hash: number): TrieNode {
     return trie;
   }
   const c = key[0];
-  const n = trie[c] || {};
+  const t = isNumberTrieNodeKey(c) ? trie[c] : undefined;
+  const n = t || {};
   return Object.assign({}, trie, {
     [c]: Object.assign({}, n, insertKey(n, key.slice(1), hash), {
-      hash: n.hash ^ hash,
+      hash: (n.hash || 0) ^ hash,
     }),
   });
 }
@@ -70,7 +77,7 @@ export function build(timestamps: Timestamp[]) {
 
 export function diff(trie1: TrieNode, trie2: TrieNode): number {
   if (trie1.hash === trie2.hash) {
-    return null;
+    return 0;
   }
 
   let node1 = trie1;
@@ -126,6 +133,8 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number {
     node1 = node1[diffkey] || emptyTrie();
     node2 = node2[diffkey] || emptyTrie();
   }
+
+  return 0;
 }
 
 export function prune(trie: TrieNode, n = 2): TrieNode {
@@ -141,7 +150,13 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
 
   // Prune child nodes.
   for (let k of keys.slice(-n)) {
-    next[k] = prune(trie[k], n);
+    const node = trie[k];
+
+    if (!node) {
+      throw new Error(`TrieNode for key ${k} could not be found`);
+    }
+
+    next[k] = prune(node, n);
   }
 
   return next;
@@ -156,7 +171,9 @@ export function debug(trie: TrieNode, k = '', indent = 0): string {
     str +
     getKeys(trie)
       .map(key => {
-        return debug(trie[key], key, indent + 2);
+        const node = trie[key];
+        if (!node) return;
+        return debug(node, key, indent + 2);
       })
       .join('')
   );
