@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Eye from '../../icons/v2/Eye';
 import EyeSlashed from '../../icons/v2/EyeSlashed';
 import {
+  type Category,
   type CategoryGroup,
   type CategoryListProps,
 } from '../autocomplete/CategorySelect';
@@ -12,7 +13,7 @@ import { Checkbox } from '../forms';
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroup>;
   selectedCategories: CategoryListProps['items'];
-  setSelectedCategories: ([]) => null;
+  setSelectedCategories: (selectedCategories: Category[]) => null;
 };
 
 export default function CategorySelector({
@@ -138,7 +139,7 @@ export default function CategorySelector({
                                 setSelectedCategories(
                                   selectedCategories.filter(
                                     selectedCategory =>
-                                      selectedCategory.id != category.id,
+                                      selectedCategory.id !== category.id,
                                   ),
                                 );
                               } else {

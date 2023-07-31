@@ -12,7 +12,7 @@ import View from '../common/View';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
-type Category = {
+export type Category = {
   id: string;
   cat_group: unknown;
   groupName: string;
