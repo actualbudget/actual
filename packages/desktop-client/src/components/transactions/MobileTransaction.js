@@ -559,7 +559,7 @@ class TransactionEditInner extends PureComponent {
                     marginBottom: 15,
                     backgroundColor: 'transparent',
                   }}
-                  bare={true}
+                  type="bare"
                 >
                   <SvgTrash
                     width={17}

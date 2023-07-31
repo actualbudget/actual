@@ -290,7 +290,7 @@ export class FocusableAmountInput extends PureComponent {
                 },
               },
             ]}
-            bare={true}
+            type="bare"
           >
             <View
               style={[
