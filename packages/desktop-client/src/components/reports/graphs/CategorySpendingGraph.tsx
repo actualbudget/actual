@@ -1,13 +1,24 @@
 import * as d from 'date-fns';
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryStack } from 'victory';
 
-import { categoryColorScale } from '../CategorySpending';
 import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
 import { type CategorySpendingGraphData } from './category-spending-spreadsheet';
 import { Area } from './common';
+
+const categoryColorScale = [
+  '#ea5545',
+  '#f46a9b',
+  '#ef9b20',
+  '#edbf33',
+  '#ede15b',
+  '#bdcf32',
+  '#87bc45',
+  '#27aeef',
+  '#b33dc6',
+];
 
 type CategorySpendingGraphProps = {
   start: string;
