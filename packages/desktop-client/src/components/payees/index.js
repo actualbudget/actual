@@ -518,8 +518,7 @@ export const ManagePayees = forwardRef(
                 style={{ marginRight: 10 }}
                 onClick={() => {
                   setOrphanedOnly(!orphanedOnly);
-                  const filterInput = document.getElementById('filter-input');
-                  applyFilter(filterInput.value);
+                  applyFilter(filter);
                   tableNavigator.onEdit(null);
                 }}
               >
