@@ -111,6 +111,8 @@ function CategoryAverage() {
         start={start}
         end={end}
         onChangeDates={onChangeDates}
+        numberOfMonths={numberOfMonthsAverage}
+        numberOfMonthsOptions={numberOfMonthsOptions}
         numberOfMonthsLine={numberOfMonthsLine}
         onChangeNumberOfMonths={setNumberOfMonthsAverage}
         categorySelectorVisible={categorySelectorVisible}
