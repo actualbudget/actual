@@ -131,7 +131,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           type === 'bare'
             ? 'none'
             : '1px solid ' + borderColor[typeWithDisabled],
-        color: color || textColor[typeWithDisabled],
+        color: textColor[typeWithDisabled],
         transition: 'box-shadow .25s',
         WebkitAppRegion: 'no-drag',
         ...styles.smallText,
