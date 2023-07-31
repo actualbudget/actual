@@ -1,32 +1,33 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
-import * as actions from 'loot-core/src/client/actions';
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../hooks/useActions';
 import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { View, Modal, Input } from '../common';
+import Input from '../common/Input';
+import Modal from '../common/Modal';
+import View from '../common/View';
 import { SectionLabel } from '../forms';
 import DateSelect from '../select/DateSelect';
 
-function EditField({
-  actions,
-  modalProps,
-  name,
-  accounts,
-  categoryGroups,
-  payees,
-  onSubmit,
-  dateFormat,
-  createPayee,
-}) {
+export default function EditField({ modalProps, name, onSubmit }) {
+  let dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
+  let categoryGroups = useSelector(state => state.queries.categories.grouped);
+  let accounts = useSelector(state => state.queries.accounts);
+  let payees = useSelector(state => state.queries.payees);
+
+  let { createPayee } = useActions();
+
   function onSelect(value) {
     if (value != null) {
       // Process the value if needed
@@ -213,13 +214,3 @@ function EditField({
     </Modal>
   );
 }
-
-export default connect(
-  state => ({
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    categoryGroups: state.queries.categories.grouped,
-    accounts: state.queries.accounts,
-    payees: state.queries.payees,
-  }),
-  actions,
-)(EditField);

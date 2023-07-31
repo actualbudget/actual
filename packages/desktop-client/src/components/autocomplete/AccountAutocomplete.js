@@ -6,7 +6,7 @@ import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 
 import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 
 import Autocomplete from './Autocomplete';
 

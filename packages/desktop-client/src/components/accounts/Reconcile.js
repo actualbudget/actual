@@ -5,9 +5,14 @@ import { currencyToInteger } from 'loot-core/src/shared/util';
 
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import { styles, colors } from '../../style';
-import { View, Text, Button, Input, InitialFocus, Tooltip } from '../common';
+import Button from '../common/Button';
+import InitialFocus from '../common/InitialFocus';
+import Input from '../common/Input';
+import Text from '../common/Text';
+import View from '../common/View';
 import format from '../spreadsheet/format';
 import useSheetValue from '../spreadsheet/useSheetValue';
+import { Tooltip } from '../tooltips';
 
 export function ReconcilingMessage({
   balanceQuery,
@@ -73,7 +78,7 @@ export function ReconcilingMessage({
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
-          <Button primary onClick={onDone}>
+          <Button type="primary" onClick={onDone}>
             Done Reconciling
           </Button>
         </View>
@@ -120,7 +125,7 @@ export function ReconcileTooltip({ account, onReconcile, onClose }) {
               />
             </InitialFocus>
           )}
-          <Button primary>Reconcile</Button>
+          <Button type="primary">Reconcile</Button>
         </form>
       </View>
     </Tooltip>

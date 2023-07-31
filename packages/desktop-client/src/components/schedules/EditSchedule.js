@@ -13,7 +13,10 @@ import useSelected, { SelectedProvider } from '../../hooks/useSelected';
 import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { Stack, View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
 import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRule';
 import { Page } from '../Page';
@@ -686,7 +689,7 @@ export default function ScheduleDetails() {
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Button
-                bare
+                type="bare"
                 style={{
                   color:
                     state.transactionsMode === 'linked' ? colors.b4 : colors.n7,
@@ -698,7 +701,7 @@ export default function ScheduleDetails() {
                 Linked transactions
               </Button>{' '}
               <Button
-                bare
+                type="bare"
                 style={{
                   color:
                     state.transactionsMode === 'matched'
@@ -772,7 +775,7 @@ export default function ScheduleDetails() {
         <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
           Cancel
         </Button>
-        <Button primary onClick={onSave}>
+        <Button type="primary" onClick={onSave}>
           {adding ? 'Add' : 'Save'}
         </Button>
       </Stack>

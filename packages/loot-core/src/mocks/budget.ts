@@ -10,7 +10,6 @@ import { batchMessages, setSyncingMode } from '../server/sync';
 import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 import type {
-  AccountEntity,
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
@@ -454,10 +453,10 @@ async function createBudget(accounts, payees, groups) {
   }
 
   function setBudgetIfSpent(month, cat) {
-    let spent = sheet.getCellValue(
+    let spent: number = sheet.getCellValue(
       monthUtils.sheetForMonth(month),
       `sum-amount-${cat.id}`,
-    );
+    ) as number;
 
     if (spent < 0) {
       setBudget(month, cat, -spent);
@@ -515,7 +514,10 @@ async function createBudget(accounts, payees, groups) {
           month <= monthUtils.currentMonth()
         ) {
           let sheetName = monthUtils.sheetForMonth(month);
-          let toBudget = sheet.getCellValue(sheetName, 'to-budget');
+          let toBudget: number = sheet.getCellValue(
+            sheetName,
+            'to-budget',
+          ) as number;
           let available = toBudget - prevSaved;
 
           if (available - 403000 > 0) {
@@ -534,7 +536,7 @@ async function createBudget(accounts, payees, groups) {
   await sheet.waitOnSpreadsheet();
 
   let sheetName = monthUtils.sheetForMonth(monthUtils.currentMonth());
-  let toBudget = sheet.getCellValue(sheetName, 'to-budget');
+  let toBudget: number = sheet.getCellValue(sheetName, 'to-budget') as number;
   if (toBudget < 0) {
     await addTransactions(primaryAccount.id, [
       {
@@ -563,7 +565,7 @@ export async function createTestBudget(handlers) {
   await db.runQuery('DELETE FROM categories;');
   await db.runQuery('DELETE FROM category_groups');
 
-  let accounts: AccountEntity[] = [
+  let accounts: { name: string; offBudget?: 1; id?: string }[] = [
     { name: 'Bank of America' },
     { name: 'Ally Savings' },
     { name: 'Capital One Checking' },

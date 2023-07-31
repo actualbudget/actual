@@ -7,7 +7,9 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
-import { Button, Text, View } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 
 function getValue(state) {
   const { value } = state;
@@ -123,7 +125,7 @@ class AmountInput extends PureComponent {
 
   onBlur = () => {
     const value = this.applyText();
-    this.props.onBlur && this.props.onBlur(value);
+    this.props.onBlur?.(value);
     if (this.removeListeners) {
       this.removeListeners();
     }

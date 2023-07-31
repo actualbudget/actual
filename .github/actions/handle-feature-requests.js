@@ -76,7 +76,7 @@ async function main() {
           label =>
             label.name === 'help wanted' ||
             label.name === 'needs votes' ||
-            lahel.name === 'good first issue',
+            label.name === 'good first issue',
         )
         .map(label => label.id);
       const res = await makeAPIRequest(

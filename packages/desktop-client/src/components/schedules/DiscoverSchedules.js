@@ -13,7 +13,10 @@ import useSelected, {
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
 import { colors } from '../../style';
 import { getParent } from '../../util/router-tools';
-import { View, Stack, ButtonWithLoading, P } from '../common';
+import { ButtonWithLoading } from '../common/Button';
+import Paragraph from '../common/Paragraph';
+import Stack from '../common/Stack';
+import View from '../common/View';
 import { Page, usePageType } from '../Page';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
@@ -157,15 +160,15 @@ export default function DiscoverSchedules() {
 
   return (
     <Page title="Found schedules" modalSize={{ width: 850, height: 650 }}>
-      <P>
+      <Paragraph>
         We found some possible schedules in your current transactions. Select
         the ones you want to create.
-      </P>
-      <P>
+      </Paragraph>
+      <Paragraph>
         If you expected a schedule here and don’t see it, it might be because
         the payees of the transactions don’t match. Make sure you rename payees
         on all transactions for a schedule to be the same payee.
-      </P>
+      </Paragraph>
 
       <SelectedProvider instance={selectedInst}>
         <DiscoverSchedulesTable loading={isLoading} schedules={schedules} />
@@ -181,7 +184,7 @@ export default function DiscoverSchedules() {
         }}
       >
         <ButtonWithLoading
-          primary
+          type="primary"
           loading={creating}
           disabled={selectedInst.items.size === 0}
           onClick={onCreate}

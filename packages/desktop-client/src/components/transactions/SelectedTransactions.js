@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import { usePushModal } from '../../util/router-tools';
-import { Menu } from '../common';
+import Menu from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
 import { isPreviewId } from './TransactionsTable';
@@ -148,6 +148,6 @@ export function SelectedTransactionsButton({
             onEdit(name, [...selectedItems]);
         }
       }}
-    ></SelectedItemsButton>
+    />
   );
 }

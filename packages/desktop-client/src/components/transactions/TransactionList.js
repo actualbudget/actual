@@ -65,6 +65,7 @@ export default function TransactionList({
   categoryGroups,
   payees,
   balances,
+  showBalances,
   showCleared,
   showAccount,
   headerContent,
@@ -77,6 +78,9 @@ export default function TransactionList({
   hideFraction,
   addNotification,
   renderEmpty,
+  onSort,
+  sortField,
+  ascDesc,
   onChange,
   onRefetch,
   onCloseAddTransaction,
@@ -169,6 +173,7 @@ export default function TransactionList({
       accounts={accounts}
       categoryGroups={categoryGroups}
       payees={payees}
+      showBalances={showBalances}
       balances={balances}
       showCleared={showCleared}
       showAccount={showAccount}
@@ -196,6 +201,9 @@ export default function TransactionList({
       style={{ backgroundColor: 'white' }}
       onNavigateToTransferAccount={onNavigateToTransferAccount}
       onNavigateToSchedule={onNavigateToSchedule}
+      onSort={onSort}
+      sortField={sortField}
+      ascDesc={ascDesc}
     />
   );
 }

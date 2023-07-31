@@ -2,14 +2,14 @@ import React from 'react';
 
 import CalendarIcon from '../../icons/v2/Calendar';
 import { colors } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 
 function Calendar({ color, onClick }) {
   return (
     <CalendarIcon
-      style={{ width: 13, height: 13, color: color, marginRight: 5 }}
+      style={{ width: 13, height: 13, color, marginRight: 5 }}
       onClick={onClick}
     />
   );

@@ -20,6 +20,7 @@ import {
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
+import { css } from 'glamor';
 import memoizeOne from 'memoize-one';
 
 import * as actions from 'loot-core/src/client/actions';
@@ -42,6 +43,7 @@ import {
   groupById,
 } from 'loot-core/src/shared/util';
 
+import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import SvgAdd from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SvgTrash from '../../icons/v1/Trash';
@@ -49,8 +51,10 @@ import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import SvgPencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
 import { styles, colors } from '../../style';
-import { withThemeColor } from '../../util/withThemeColor';
-import { Text, TextOneLine, View, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import TextOneLine from '../common/TextOneLine';
+import View from '../common/View';
 import { FocusableAmountInput } from '../mobile/MobileAmountInput';
 import {
   FieldLabel,
@@ -396,7 +400,7 @@ class TransactionEditInner extends PureComponent {
               style={{
                 width: LEFT_RIGHT_FLEX_WIDTH,
               }}
-            ></View>
+            />
           </View>
 
           {/* <ScrollView
@@ -661,6 +665,8 @@ function TransactionEditUnconnected(props) {
   let adding = false;
   let deleted = false;
 
+  useSetThemeColor(colors.p5);
+
   useEffect(() => {
     // May as well update categories / accounts when transaction ID changes
     props.getCategories();
@@ -817,7 +823,7 @@ export const TransactionEdit = connect(
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
   }),
   actions,
-)(withThemeColor(colors.p5)(TransactionEditUnconnected));
+)(TransactionEditUnconnected);
 
 class Transaction extends PureComponent {
   render() {
@@ -1089,8 +1095,7 @@ function ListBox(props) {
     listBoxRef.current.addEventListener('scroll', loadMoreTransactions);
 
     return () => {
-      listBoxRef.current &&
-        listBoxRef.current.removeEventListener('scroll', loadMoreTransactions);
+      listBoxRef.current?.removeEventListener('scroll', loadMoreTransactions);
     };
   }, [state.collection]);
 
@@ -1129,8 +1134,7 @@ function ListBoxSection({ section, state }) {
       {section.rendered && (
         <div
           {...headingProps}
-          style={{
-            ...styles.smallText,
+          {...css(styles.smallText, {
             backgroundColor: colors.n10,
             borderBottom: `1px solid ${colors.n9}`,
             borderTop: `1px solid ${colors.n9}`,
@@ -1143,7 +1147,7 @@ function ListBoxSection({ section, state }) {
             top: '0',
             width: '100%',
             zIndex: zIndices.SECTION_HEADING,
-          }}
+          })}
         >
           {section.rendered}
         </div>

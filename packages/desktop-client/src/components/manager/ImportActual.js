@@ -4,7 +4,11 @@ import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, colors } from '../../style';
-import { View, Block, Modal, ButtonWithLoading, P } from '../common';
+import Block from '../common/Block';
+import { ButtonWithLoading } from '../common/Button';
+import Modal from '../common/Modal';
+import Paragraph from '../common/Paragraph';
+import View from '../common/View';
 
 function getErrorMessage(error) {
   switch (error) {
@@ -23,7 +27,7 @@ function getErrorMessage(error) {
   }
 }
 
-function Import({ modalProps, availableImports }) {
+function Import({ modalProps }) {
   const dispatch = useDispatch();
   const [error, setError] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -61,17 +65,23 @@ function Import({ modalProps, availableImports }) {
           )}
 
           <View style={{ '& > div': { lineHeight: '1.7em' } }}>
-            <P>
+            <Paragraph>
               You can import data from another Actual account or instance. First
               export your data from a different account, and it will give you a
               compressed file. This file is a simple zip file that contains the{' '}
               <code>db.sqlite</code> and <code>metadata.json</code> files.
-            </P>
+            </Paragraph>
 
-            <P>Select one of these compressed files and import it here.</P>
+            <Paragraph>
+              Select one of these compressed files and import it here.
+            </Paragraph>
 
             <View style={{ alignSelf: 'center' }}>
-              <ButtonWithLoading loading={importing} primary onClick={onImport}>
+              <ButtonWithLoading
+                type="primary"
+                loading={importing}
+                onClick={onImport}
+              >
                 Select file...
               </ButtonWithLoading>
             </View>

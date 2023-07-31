@@ -1,8 +1,6 @@
 import './polyfills';
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
-import * as YNAB4 from '@actual-app/import-ynab4/importer';
-import * as YNAB5 from '@actual-app/import-ynab5/importer';
 import { v4 as uuidv4 } from 'uuid';
 
 import { createTestBudget } from '../mocks/budget';
@@ -44,6 +42,7 @@ import * as mappings from './db/mappings';
 import * as encryption from './encryption';
 import { APIError, TransactionError, PostError, RuleError } from './errors';
 import filtersApp from './filters/app';
+import { handleBudgetImport } from './importers';
 import app from './main-app';
 import { mutator, runHandler } from './mutators';
 import notesApp from './notes/app';
@@ -263,7 +262,7 @@ handlers['report-budget-month'] = async function ({ month }) {
 };
 
 handlers['budget-set-type'] = async function ({ type }) {
-  if (type !== 'rollover' && type !== 'report') {
+  if (!prefs.BUDGET_TYPES.includes(type)) {
     throw new Error('Invalid budget type: ' + type);
   }
 
@@ -740,7 +739,7 @@ handlers['accounts-link'] = async function ({
   ]);
 
   // Get all the available accounts and find the selected one
-  let accounts = await bankSync.getNordigenAccounts(userId, userKey, bankId);
+  let accounts = await bankSync.getGoCardlessAccounts(userId, userKey, bankId);
   let account = accounts.find(acct => acct.account_id === accountId);
 
   await db.update('accounts', {
@@ -770,7 +769,7 @@ handlers['accounts-link'] = async function ({
   return 'ok';
 };
 
-handlers['nordigen-accounts-link'] = async function ({
+handlers['gocardless-accounts-link'] = async function ({
   requisitionId,
   account,
   upgradingId,
@@ -804,7 +803,7 @@ handlers['nordigen-accounts-link'] = async function ({
     });
   }
 
-  await bankSync.syncNordigenAccount(
+  await bankSync.syncGoCardlessAccount(
     undefined,
     undefined,
     id,
@@ -831,14 +830,14 @@ handlers['accounts-connect'] = async function ({
   return ids;
 };
 
-handlers['nordigen-accounts-connect'] = async function ({
+handlers['gocardless-accounts-connect'] = async function ({
   institution,
   publicToken,
   accountIds,
   offbudgetIds,
 }) {
   let bankId = await link.handoffPublicToken(institution, publicToken);
-  let ids = await link.addNordigenAccounts(bankId, accountIds, offbudgetIds);
+  let ids = await link.addGoCardlessAccounts(bankId, accountIds, offbudgetIds);
   return ids;
 };
 
@@ -1162,7 +1161,7 @@ handlers['secret-check'] = async function (name) {
   }
 };
 
-handlers['nordigen-poll-web-token'] = async function ({
+handlers['gocardless-poll-web-token'] = async function ({
   upgradingAccountId,
   requisitionId,
 }) {
@@ -1183,7 +1182,7 @@ handlers['nordigen-poll-web-token'] = async function ({
     }
 
     let data = await post(
-      getServer().NORDIGEN_SERVER + '/get-accounts',
+      getServer().GOCARDLESS_SERVER + '/get-accounts',
       {
         upgradingAccountId,
         requisitionId,
@@ -1215,7 +1214,7 @@ handlers['nordigen-poll-web-token'] = async function ({
   });
 };
 
-handlers['nordigen-status'] = async function () {
+handlers['gocardless-status'] = async function () {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1223,7 +1222,7 @@ handlers['nordigen-status'] = async function () {
   }
 
   return post(
-    getServer().NORDIGEN_SERVER + '/status',
+    getServer().GOCARDLESS_SERVER + '/status',
     {},
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1231,7 +1230,7 @@ handlers['nordigen-status'] = async function () {
   );
 };
 
-handlers['nordigen-get-banks'] = async function (country) {
+handlers['gocardless-get-banks'] = async function (country) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1239,7 +1238,7 @@ handlers['nordigen-get-banks'] = async function (country) {
   }
 
   return post(
-    getServer().NORDIGEN_SERVER + '/get-banks',
+    getServer().GOCARDLESS_SERVER + '/get-banks',
     { country, showDemo: isNonProductionEnvironment() },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1247,12 +1246,12 @@ handlers['nordigen-get-banks'] = async function (country) {
   );
 };
 
-handlers['nordigen-poll-web-token-stop'] = async function () {
+handlers['gocardless-poll-web-token-stop'] = async function () {
   stopPolling = true;
   return 'ok';
 };
 
-handlers['nordigen-create-web-token'] = async function ({
+handlers['gocardless-create-web-token'] = async function ({
   upgradingAccountId,
   institutionId,
   accessValidForDays,
@@ -1265,7 +1264,7 @@ handlers['nordigen-create-web-token'] = async function ({
 
   try {
     return await post(
-      getServer().NORDIGEN_SERVER + '/create-web-token',
+      getServer().GOCARDLESS_SERVER + '/create-web-token',
       {
         upgradingAccountId,
         institutionId,
@@ -1281,7 +1280,7 @@ handlers['nordigen-create-web-token'] = async function ({
   }
 };
 
-handlers['nordigen-accounts-sync'] = async function ({ id }) {
+handlers['gocardless-accounts-sync'] = async function ({ id }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
@@ -1307,7 +1306,7 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
-        const res = await bankSync.syncNordigenAccount(
+        const res = await bankSync.syncGoCardlessAccount(
           userId,
           userKey,
           acct.id,
@@ -1408,7 +1407,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   );
 
   // No more accounts are associated with this bank. We can remove
-  // it from Nordigen.
+  // it from GoCardless.
   let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return 'ok';
@@ -1421,7 +1420,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     );
     try {
       await post(
-        getServer().NORDIGEN_SERVER + '/remove-account',
+        getServer().GOCARDLESS_SERVER + '/remove-account',
         {
           requisitionId: requisitionId,
         },
@@ -1472,6 +1471,9 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('floatingSidebar' in prefs) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
+  if ('theme' in prefs) {
+    await asyncStorage.setItem('theme', prefs.theme);
+  }
   return 'ok';
 };
 
@@ -1482,12 +1484,14 @@ handlers['load-global-prefs'] = async function () {
     [, autoUpdate],
     [, documentDir],
     [, encryptKey],
+    [, theme],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
     'auto-update',
     'document-dir',
     'encrypt-key',
+    'theme',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1495,6 +1499,7 @@ handlers['load-global-prefs'] = async function () {
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
+    theme: theme === 'light' || theme === 'dark' ? theme : 'light',
   };
 };
 
@@ -1898,9 +1903,9 @@ handlers['download-budget'] = async function ({ fileId }) {
 // open and sync, but don’t close
 handlers['sync-budget'] = async function () {
   setSyncingMode('enabled');
-  await initialFullSync();
+  let result = await initialFullSync();
 
-  return {};
+  return result;
 };
 
 handlers['load-budget'] = async function ({ id }) {
@@ -2048,80 +2053,7 @@ handlers['import-budget'] = async function ({ filepath, type }) {
     }
 
     let buffer = Buffer.from(await fs.readFile(filepath, 'binary'));
-
-    switch (type) {
-      case 'ynab4':
-        try {
-          await YNAB4.importBuffer(filepath, buffer);
-        } catch (e) {
-          let msg = e.message.toLowerCase();
-          if (
-            msg.includes('not a ynab4') ||
-            msg.includes('could not find file')
-          ) {
-            return { error: 'not-ynab4' };
-          }
-        }
-        break;
-      case 'ynab5':
-        let data;
-        try {
-          data = JSON.parse(buffer.toString());
-        } catch (e) {
-          return { error: 'parse-error' };
-        }
-
-        try {
-          await YNAB5.importYNAB5(data);
-        } catch (e) {
-          return { error: 'not-ynab5' };
-        }
-        break;
-      case 'actual':
-        // We should pull out import/export into its own app so this
-        // can be abstracted out better. Importing Actual files is a
-        // special case because we can directly write down the files,
-        // but because it doesn't go through the API layer we need to
-        // duplicate some of the workflow
-        await handlers['close-budget']();
-
-        let id;
-        try {
-          ({ id } = await cloudStorage.importBuffer(
-            { cloudFileId: null, groupId: null },
-            buffer,
-          ));
-        } catch (e) {
-          if (e.type === 'FileDownloadError') {
-            return { error: e.reason };
-          }
-          throw e;
-        }
-
-        // We never want to load cached data from imported files, so
-        // delete the cache
-        let sqliteDb = await sqlite.openDatabase(
-          fs.join(fs.getBudgetDir(id), 'db.sqlite'),
-        );
-        sqlite.execQuery(
-          sqliteDb,
-          `
-          DELETE FROM kvcache;
-          DELETE FROM kvcache_key;
-        `,
-        );
-        sqlite.closeDatabase(sqliteDb);
-
-        // Load the budget, force everything to be computed, and try
-        // to upload it as a cloud file
-        await handlers['load-budget']({ id });
-        await handlers['get-budget-bounds']();
-        await sheet.waitOnSpreadsheet();
-        await cloudStorage.upload().catch(err => {});
-
-        break;
-      default:
-    }
+    await handleBudgetImport(type, filepath, buffer);
   } catch (err) {
     err.message = 'Error importing budget: ' + err.message;
     captureException(err);

@@ -3,7 +3,11 @@ import React, { useState, useRef } from 'react';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors } from '../../style';
 import { Error } from '../alerts';
-import { View, Text, Modal, Button, P, ModalButtons } from '../common';
+import Button from '../common/Button';
+import Modal, { ModalButtons } from '../common/Modal';
+import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 function renderError(error) {
   return (
@@ -43,7 +47,7 @@ export default function PlaidExternalMsg({
   }
 
   function onClose() {
-    originalOnClose && originalOnClose();
+    originalOnClose?.();
     modalProps.onClose();
   }
 
@@ -62,11 +66,11 @@ export default function PlaidExternalMsg({
     >
       {() => (
         <View>
-          <P style={{ fontSize: 15 }}>
+          <Paragraph style={{ fontSize: 15 }}>
             To link your bank account, you will be moved to your browser for
             enhanced security. Click below and Actual will automatically resume
             when you have given your bank’s credentials.
-          </P>
+          </Paragraph>
           {error && renderError(error)}
 
           {waiting ? (
@@ -85,7 +89,7 @@ export default function PlaidExternalMsg({
             </View>
           ) : success ? (
             <Button
-              primary
+              type="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,
@@ -100,7 +104,7 @@ export default function PlaidExternalMsg({
             </Button>
           ) : (
             <Button
-              primary
+              type="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,

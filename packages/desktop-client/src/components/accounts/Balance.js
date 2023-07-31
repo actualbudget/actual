@@ -6,7 +6,10 @@ import q from 'loot-core/src/client/query-helpers';
 import { useSelectedItems } from '../../hooks/useSelected';
 import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
 import { colors } from '../../style';
-import { View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
+import PrivacyFilter from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import useSheetValue from '../spreadsheet/useSheetValue';
@@ -24,7 +27,9 @@ function DetailedBalance({ name, balance }) {
       }}
     >
       {name}{' '}
-      <Text style={{ fontWeight: 600 }}>{format(balance, 'financial')}</Text>
+      <PrivacyFilter>
+        <Text style={{ fontWeight: 600 }}>{format(balance, 'financial')}</Text>
+      </PrivacyFilter>
     </Text>
   );
 }
@@ -118,7 +123,7 @@ export function Balances({
     >
       <Button
         data-testid="account-balance"
-        bare
+        type="bare"
         onClick={onToggleExtraBalances}
         style={{
           '& svg': {
@@ -134,6 +139,9 @@ export function Balances({
           getStyle={value => ({
             color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
           })}
+          privacyFilter={{
+            blurIntensity: 5,
+          }}
         />
 
         <ArrowButtonRight1

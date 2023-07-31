@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import * as actions from 'loot-core/src/client/actions';
-
+import { useActions } from '../hooks/useActions';
 import { colors, styles } from '../style';
 
-import { View, Text, Button, Tooltip, Menu } from './common';
+import Button from './common/Button';
+import Menu from './common/Menu';
+import Text from './common/Text';
+import View from './common/View';
 import { useServerURL } from './ServerContext';
+import { Tooltip } from './tooltips';
 
-function LoggedInUser({
-  hideIfNoServer,
-  userData,
-  getUserData,
-  signOut,
-  closeBudget,
-  style,
-  color,
-}) {
+export default function LoggedInUser({ hideIfNoServer, style, color }) {
+  let userData = useSelector(state => state.userData);
+  let { getUserData, signOut, closeBudget } = useActions();
   let [loading, setLoading] = useState(true);
   let [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
@@ -87,7 +84,7 @@ function LoggedInUser({
 
   return (
     <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
-      <Button bare onClick={() => setMenuOpen(true)} style={{ color }}>
+      <Button type="bare" onClick={() => setMenuOpen(true)} style={{ color }}>
         {serverMessage()}
       </Button>
 
@@ -117,8 +114,3 @@ function LoggedInUser({
     </View>
   );
 }
-
-export default connect(
-  state => ({ userData: state.user.data }),
-  actions,
-)(LoggedInUser);

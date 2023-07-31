@@ -3,7 +3,10 @@ import { forwardRef } from 'react';
 import { css } from 'glamor';
 
 import { colors } from '../../style';
-import { Text, Button, View, Input } from '../common';
+import Button from '../common/Button';
+import Input from '../common/Input';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export const EDITING_PADDING = 12;
 const FIELD_HEIGHT = 40;
@@ -49,7 +52,7 @@ export const InputField = forwardRef(function InputField(
       autoCapitalize="none"
       disabled={disabled}
       onBlur={e => {
-        onUpdate && onUpdate(e.target.value);
+        onUpdate?.(e.target.value);
       }}
       style={[
         valueStyle,

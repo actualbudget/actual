@@ -21,6 +21,7 @@ import {
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
+import { ResponsiveProvider } from '../../ResponsiveProvider';
 
 import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
 
@@ -87,7 +88,7 @@ function LiveTransactionTable(props) {
 
   useEffect(() => {
     if (transactions === props.transactions) return;
-    props.onTransactionsChange && props.onTransactionsChange(transactions);
+    props.onTransactionsChange?.(transactions);
   }, [transactions]);
 
   const onSplit = id => {
@@ -120,26 +121,28 @@ function LiveTransactionTable(props) {
   // hook dependencies haven't changed
   return (
     <TestProvider>
-      <SelectedProviderWithItems
-        name="transactions"
-        items={transactions}
-        fetchAllIds={() => transactions.map(t => t.id)}
-      >
-        <SplitsExpandedProvider>
-          <TransactionTable
-            {...props}
-            transactions={transactions}
-            loadMoreTransactions={() => {}}
-            payees={payees}
-            addNotification={n => console.log(n)}
-            onSave={onSave}
-            onSplit={onSplit}
-            onAdd={onAdd}
-            onAddSplit={onAddSplit}
-            onCreatePayee={onCreatePayee}
-          />
-        </SplitsExpandedProvider>
-      </SelectedProviderWithItems>
+      <ResponsiveProvider>
+        <SelectedProviderWithItems
+          name="transactions"
+          items={transactions}
+          fetchAllIds={() => transactions.map(t => t.id)}
+        >
+          <SplitsExpandedProvider>
+            <TransactionTable
+              {...props}
+              transactions={transactions}
+              loadMoreTransactions={() => {}}
+              payees={payees}
+              addNotification={n => console.log(n)}
+              onSave={onSave}
+              onSplit={onSplit}
+              onAdd={onAdd}
+              onAddSplit={onAddSplit}
+              onCreatePayee={onCreatePayee}
+            />
+          </SplitsExpandedProvider>
+        </SelectedProviderWithItems>
+      </ResponsiveProvider>
     </TestProvider>
   );
 }

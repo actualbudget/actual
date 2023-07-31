@@ -4,7 +4,7 @@ import { CachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { CachedPayees } from 'loot-core/src/client/data-hooks/payees';
 
 import { colors } from '../../style';
-import { Text } from '../common';
+import Text from '../common/Text';
 
 export default function DisplayId({ type, id, noneColor = colors.n8 }) {
   let DataComponent;

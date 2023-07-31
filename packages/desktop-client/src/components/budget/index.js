@@ -1,8 +1,7 @@
 import React, { memo, PureComponent, useContext, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
-import * as actions from 'loot-core/src/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
@@ -17,9 +16,10 @@ import {
 } from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { styles } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 import { TitlebarContext } from '../Titlebar';
 
 import DynamicBudgetTable from './DynamicBudgetTable';
@@ -38,8 +38,7 @@ class Budget extends PureComponent {
     const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
     this.state = {
       initialized: false,
-      prewarmStartMonth: currentMonth,
-      startMonth: currentMonth,
+      prewarmStartMonth: props.startMonth || currentMonth,
       newCategoryForGroup: null,
       isAddingGroup: false,
       collapsed: props.collapsedPrefs || [],
@@ -105,10 +104,13 @@ class Budget extends PureComponent {
       this.props.savePrefs({ 'budget.collapsed': this.state.collapsed });
     }
 
-    if (prevState.startMonth !== this.state.startMonth) {
+    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
+    const startMonth = this.props.startMonth || currentMonth;
+
+    if (prevState.startMonth !== startMonth) {
       // Save it off into a global state so if the component re-mounts
       // we keep this state (but don't need to subscribe to it)
-      _initialBudgetMonth = this.state.startMonth;
+      _initialBudgetMonth = startMonth;
     }
 
     if (this.props.accountId !== prevProps.accountId) {
@@ -143,8 +145,10 @@ class Budget extends PureComponent {
   };
 
   async prewarmAllMonths(bounds, type = null) {
-    let { startMonth } = this.state;
     let numMonths = 3;
+
+    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
+    const startMonth = this.props.startMonth || currentMonth;
 
     bounds = getValidMonthBounds(
       bounds,
@@ -159,11 +163,12 @@ class Budget extends PureComponent {
   }
 
   onMonthSelect = async (month, numDisplayed) => {
-    let { startMonth } = this.state;
-
     this.setState({ prewarmStartMonth: month });
 
     this.warmingMonth = month;
+
+    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
+    const startMonth = this.props.startMonth || currentMonth;
 
     // We could be smarter about this, but this is a good start. We
     // optimize for the case where users press the left/right button
@@ -180,7 +185,7 @@ class Budget extends PureComponent {
     }
 
     if (this.warmingMonth === month) {
-      this.setState({ startMonth: month });
+      this.props.savePrefs({ 'budget.startMonth': month });
     }
   };
 
@@ -408,7 +413,6 @@ class Budget extends PureComponent {
       initialized,
       categoryGroups,
       prewarmStartMonth,
-      startMonth,
       newCategoryForGroup,
       isAddingGroup,
       collapsed,
@@ -421,6 +425,9 @@ class Budget extends PureComponent {
     if (!initialized || !categoryGroups) {
       return null;
     }
+
+    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
+    const startMonth = this.props.startMonth || currentMonth;
 
     let table;
     if (type === 'report') {
@@ -516,7 +523,21 @@ const RolloverBudgetSummary = memo(props => {
   );
 });
 
-function BudgetWrapper(props) {
+export default function BudgetWrapper(props) {
+  let startMonth = useSelector(state => state.prefs.local['budget.startMonth']);
+  let collapsedPrefs = useSelector(
+    state => state.prefs.local['budget.collapsed'],
+  );
+  let summaryCollapsed = useSelector(
+    state => state.prefs.local['budget.summaryCollapsed'],
+  );
+  let budgetType = useSelector(
+    state => state.prefs.local.budgetType || 'rollover',
+  );
+  let maxMonths = useSelector(state => state.prefs.global.maxMonths);
+  let categoryGroups = useSelector(state => state.queries.categories.grouped);
+
+  let actions = useActions();
   let spreadsheet = useSpreadsheet();
   let titlebar = useContext(TitlebarContext);
   let location = useLocation();
@@ -561,7 +582,13 @@ function BudgetWrapper(props) {
       ]}
     >
       <Budget
-        {...props}
+        startMonth={startMonth}
+        collapsedPrefs={collapsedPrefs}
+        summaryCollapsed={summaryCollapsed}
+        budgetType={budgetType}
+        maxMonths={maxMonths}
+        categoryGroups={categoryGroups}
+        {...actions}
         reportComponents={reportComponents}
         rolloverComponents={rolloverComponents}
         spreadsheet={spreadsheet}
@@ -572,14 +599,3 @@ function BudgetWrapper(props) {
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    collapsedPrefs: state.prefs.local['budget.collapsed'],
-    summaryCollapsed: state.prefs.local['budget.summaryCollapsed'],
-    budgetType: state.prefs.local.budgetType || 'rollover',
-    maxMonths: state.prefs.global.maxMonths,
-    categoryGroups: state.queries.categories.grouped,
-  }),
-  actions,
-)(BudgetWrapper);

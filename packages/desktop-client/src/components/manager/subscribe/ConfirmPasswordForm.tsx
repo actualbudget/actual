@@ -1,6 +1,7 @@
 import React, { type ChangeEvent, useState } from 'react';
 
-import { View, ButtonWithLoading } from '../../common';
+import { ButtonWithLoading } from '../../common/Button';
+import View from '../../common/View';
 
 import { Input } from './common';
 
@@ -73,7 +74,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         </label>
         <View style={{ flex: 1 }} />
         {buttons}
-        <ButtonWithLoading primary loading={loading}>
+        <ButtonWithLoading type="primary" loading={loading}>
           OK
         </ButtonWithLoading>
       </View>

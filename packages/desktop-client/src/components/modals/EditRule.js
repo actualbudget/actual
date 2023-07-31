@@ -30,16 +30,14 @@ import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import InformationOutline from '../../icons/v1/InformationOutline';
 import { colors } from '../../style';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  Stack,
-  CustomSelect,
-  Tooltip,
-} from '../common';
+import Button from '../common/Button';
+import Modal from '../common/Modal';
+import Select from '../common/Select';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
 import { StatusBadge } from '../schedules/StatusBadge';
+import { Tooltip } from '../tooltips';
 import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
 import DisplayId from '../util/DisplayId';
@@ -81,7 +79,7 @@ function getTransactionFields(conditions, actions) {
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
     <View style={style}>
-      <CustomSelect
+      <Select
         options={fields}
         value={value}
         onChange={value => onChange('field', value)}
@@ -99,17 +97,23 @@ export function OpSelect({
   formatOp = friendlyOp,
   onChange,
 }) {
+  let line;
   // We don't support the `contains` operator for the id type for
   // rules yet
   if (type === 'id') {
-    ops = ops.filter(op => op !== 'contains');
+    ops = ops.filter(op => op !== 'contains' && op !== 'doesNotContain');
+    line = ops.length / 2;
+  }
+  if (type === 'string') {
+    line = ops.length / 2;
   }
 
   return (
-    <CustomSelect
+    <Select
       options={ops.map(op => [op, formatOp(op, type)])}
       value={value}
       onChange={value => onChange('op', value)}
+      line={line}
       style={style}
     />
   );
@@ -120,7 +124,7 @@ function EditorButtons({ onAdd, onDelete, style }) {
     <>
       {onDelete && (
         <Button
-          bare
+          type="bare"
           onClick={onDelete}
           style={{ padding: 7 }}
           aria-label="Delete entry"
@@ -130,7 +134,7 @@ function EditorButtons({ onAdd, onDelete, style }) {
       )}
       {onAdd && (
         <Button
-          bare
+          type="bare"
           onClick={onAdd}
           style={{ padding: 7 }}
           aria-label="Add entry"
@@ -208,7 +212,7 @@ function ConditionEditor({
         field={field}
         type={type}
         value={value}
-        multi={op === 'oneOf'}
+        multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
       />
     );
@@ -382,7 +386,7 @@ function StageInfo() {
 function StageButton({ selected, children, style, onSelect }) {
   return (
     <Button
-      bare
+      type="bare"
       style={[
         { fontSize: 'inherit' },
         selected && {
@@ -479,14 +483,22 @@ function ConditionsList({
           // Switching between oneOf and other operators is a
           // special-case. It changes the input type, so we need to
           // clear the value
-          if (cond.op !== 'oneOf' && op === 'oneOf') {
+          if (
+            cond.op !== 'oneOf' &&
+            cond.op !== 'notOneOf' &&
+            (op === 'oneOf' || op === 'notOneOf')
+          ) {
             return newInput(
               makeValue(cond.value != null ? [cond.value] : [], {
                 ...cond,
                 op: value,
               }),
             );
-          } else if (cond.op === 'oneOf' && op !== 'oneOf') {
+          } else if (
+            (cond.op === 'oneOf' || cond.op === 'notOneOf') &&
+            op !== 'oneOf' &&
+            op !== 'notOneOf'
+          ) {
             return newInput(
               makeValue(cond.value.length > 0 ? cond.value[0] : null, {
                 ...cond,
@@ -725,7 +737,7 @@ export default function EditRule({
         rule.id = newId;
       }
 
-      originalOnSave && originalOnSave(rule);
+      originalOnSave?.(rule);
       modalProps.onClose();
     }
   }
@@ -892,7 +904,7 @@ export default function EditRule({
                 style={{ marginTop: 20 }}
               >
                 <Button onClick={() => modalProps.onClose()}>Cancel</Button>
-                <Button primary onClick={() => onSave()}>
+                <Button type="primary" onClick={() => onSave()}>
                   Save
                 </Button>
               </Stack>

@@ -6,17 +6,14 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
 import { colors } from '../../style';
-import {
-  View,
-  Text,
-  Modal,
-  ButtonWithLoading,
-  ExternalLink,
-  P,
-  ModalButtons,
-  Input,
-  InitialFocus,
-} from '../common';
+import { ButtonWithLoading } from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import InitialFocus from '../common/InitialFocus';
+import Input from '../common/Input';
+import Modal, { ModalButtons } from '../common/Modal';
+import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function CreateEncryptionKey({
   modalProps,
@@ -62,7 +59,7 @@ export default function CreateEncryptionKey({
         <>
           {!isRecreating ? (
             <>
-              <P style={{ marginTop: 5 }}>
+              <Paragraph style={{ marginTop: 5 }}>
                 To enable end-to-end encryption, you need to create a key. We
                 will generate a key based on a password and use it to encrypt
                 from now on. <strong>This requires a sync reset</strong> and all
@@ -70,8 +67,8 @@ export default function CreateEncryptionKey({
                 <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                   Learn more
                 </ExternalLink>
-              </P>
-              <P>
+              </Paragraph>
+              <Paragraph>
                 <ul {...css({ marginTop: 0, '& li': { marginBottom: 8 } })}>
                   <li>
                     <strong>Important:</strong> if you forget this password{' '}
@@ -94,11 +91,11 @@ export default function CreateEncryptionKey({
                     protect your data.
                   </li>
                 </ul>
-              </P>
+              </Paragraph>
             </>
           ) : (
             <>
-              <P style={{ marginTop: 5 }}>
+              <Paragraph style={{ marginTop: 5 }}>
                 This will generate a new key for encrypting your data.{' '}
                 <strong>This requires a sync reset</strong> and all other
                 devices will have to revert to this version of your data. Actual
@@ -106,12 +103,12 @@ export default function CreateEncryptionKey({
                 <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                   Learn more
                 </ExternalLink>
-              </P>
-              <P>
+              </Paragraph>
+              <Paragraph>
                 Key generation is randomized. The same password will create
                 different keys, so this will change your key regardless of the
                 password being different.
-              </P>
+              </Paragraph>
             </>
           )}
           <form
@@ -155,7 +152,7 @@ export default function CreateEncryptionKey({
             </View>
 
             <ModalButtons style={{ marginTop: 20 }}>
-              <ButtonWithLoading loading={loading} primary>
+              <ButtonWithLoading loading={loading} type="primary">
                 Enable
               </ButtonWithLoading>
             </ModalButtons>

@@ -9,6 +9,6 @@ export function unresolveName(name) {
   return { sheet: null, name };
 }
 
-export function resolveName(sheet, name) {
+export function resolveName(sheet: string, name: string): string {
   return sheet + '!' + name;
 }

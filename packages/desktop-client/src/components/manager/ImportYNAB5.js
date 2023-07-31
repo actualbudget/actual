@@ -4,14 +4,12 @@ import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, colors } from '../../style';
-import {
-  View,
-  Block,
-  Modal,
-  ButtonWithLoading,
-  P,
-  ExternalLink,
-} from '../common';
+import Block from '../common/Block';
+import { ButtonWithLoading } from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import Modal from '../common/Modal';
+import Paragraph from '../common/Paragraph';
+import View from '../common/View';
 
 function getErrorMessage(error) {
   switch (error) {
@@ -24,7 +22,7 @@ function getErrorMessage(error) {
   }
 }
 
-function Import({ modalProps, availableImports }) {
+function Import({ modalProps }) {
   const dispatch = useDispatch();
   const [error, setError] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -60,22 +58,26 @@ function Import({ modalProps, availableImports }) {
           <View
             style={{ alignItems: 'center', '& > div': { lineHeight: '1.7em' } }}
           >
-            <P>
+            <Paragraph>
               <ExternalLink to="https://actualbudget.org/docs/migration/nynab">
                 Read here
               </ExternalLink>{' '}
               for instructions on how to migrate your data from YNAB. You need
               to export your data as JSON, and that page explains how to do
               that.
-            </P>
-            <P>
+            </Paragraph>
+            <Paragraph>
               Once you have exported your data, select the file and Actual will
               import it. Budgets may not match up exactly because things work
               slightly differently, but you should be able to fix up any
               problems.
-            </P>
+            </Paragraph>
             <View>
-              <ButtonWithLoading loading={importing} primary onClick={onImport}>
+              <ButtonWithLoading
+                type="primary"
+                loading={importing}
+                onClick={onImport}
+              >
                 Select file...
               </ButtonWithLoading>
             </View>

@@ -4,21 +4,20 @@ import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import useFeatureFlag from '../../../hooks/useFeatureFlag';
+import CheveronDown from '../../../icons/v1/CheveronDown';
 import { styles, colors } from '../../../style';
 import CategoryAutocomplete from '../../autocomplete/CategorySelect';
-import {
-  View,
-  Text,
-  useTooltip,
-  InitialFocus,
-  Tooltip,
-  Button,
-  Menu,
-} from '../../common';
+import Button from '../../common/Button';
+import InitialFocus from '../../common/InitialFocus';
+import Menu from '../../common/Menu';
+import Text from '../../common/Text';
+import View from '../../common/View';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell } from '../../table';
+import { Tooltip, useTooltip } from '../../tooltips';
 import BalanceWithCarryover from '../BalanceWithCarryover';
 import { MONTH_RIGHT_PADDING } from '../constants';
 import {
@@ -87,7 +86,7 @@ function CoverTooltip({ tooltipProps, onSubmit, onClose }: CoverTooltipProps) {
         }}
       >
         <Button
-          primary
+          type="primary"
           style={{
             fontSize: 12,
             paddingTop: 3,
@@ -291,6 +290,11 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         valueProps={{
           binding: rolloverBudget.groupBalance(id),
           type: 'financial',
+          privacyFilter: {
+            style: {
+              paddingRight: MONTH_RIGHT_PADDING,
+            },
+          },
         }}
       />
     </View>
@@ -315,55 +319,150 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 }: ExpenseCategoryMonthProps) {
   let borderColor = colors.border;
   let balanceTooltip = useTooltip();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [hover, setHover] = useState(false);
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row' }}>
-      <SheetCell
-        name="budget"
-        exposed={editing}
-        width="flex"
-        borderColor={borderColor}
-        onExpose={() => onEdit(category.id, monthIndex)}
-        style={[editing && { zIndex: 100 }, styles.tnum]}
-        textAlign="right"
-        valueStyle={[
-          {
-            cursor: 'default',
-            margin: 1,
-            padding: '0 4px',
-            borderRadius: 4,
-          },
-          {
-            ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-              backgroundColor: 'white',
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        '& .hover-visible': {
+          opacity: 0,
+          transition: 'opacity .25s',
+        },
+        '&:hover .hover-visible': {
+          opacity: 1,
+        },
+      }}
+    >
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor,
+          backgroundColor: 'white',
+        }}
+        onMouseOverCapture={() => setHover(true)}
+        onMouseLeave={() => {
+          setHover(false);
+        }}
+      >
+        {!editing && (hover || menuOpen) ? (
+          <View
+            style={{
+              flexShrink: 1,
+              marginRight: 0,
+              marginLeft: 3,
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              type="bare"
+              onClick={e => {
+                e.stopPropagation();
+                setMenuOpen(true);
+              }}
+              style={{
+                padding: 3,
+              }}
+            >
+              <CheveronDown
+                width={14}
+                height={14}
+                className="hover-visible"
+                style={menuOpen && { opacity: 1 }}
+              />
+            </Button>
+            {menuOpen && (
+              <Tooltip
+                position="bottom-left"
+                width={200}
+                style={{ padding: 0 }}
+                onClose={() => setMenuOpen(false)}
+              >
+                <Menu
+                  onMenuSelect={type => {
+                    onBudgetAction(monthIndex, type, { category: category.id });
+                    setMenuOpen(false);
+                  }}
+                  items={[
+                    {
+                      name: 'copy-single-last',
+                      text: 'Copy last month’s budget',
+                    },
+                    {
+                      name: 'set-single-3-avg',
+                      text: 'Set to 3 month average',
+                    },
+                    {
+                      name: 'set-single-6-avg',
+                      text: 'Set to 6 month average',
+                    },
+                    {
+                      name: 'set-single-12-avg',
+                      text: 'Set to yearly average',
+                    },
+                    isGoalTemplatesEnabled && {
+                      name: 'apply-single-category-template',
+                      text: 'Apply budget template',
+                    },
+                  ]}
+                />
+              </Tooltip>
+            )}
+          </View>
+        ) : null}
+        <SheetCell
+          name="budget"
+          exposed={editing}
+          focused={editing}
+          width="flex"
+          borderColor="white"
+          onExpose={() => onEdit(category.id, monthIndex)}
+          style={[editing && { zIndex: 100 }, styles.tnum]}
+          textAlign="right"
+          valueStyle={[
+            {
+              cursor: 'default',
+              margin: 1,
+              padding: '0 4px',
+              borderRadius: 4,
             },
-          },
-        ]}
-        valueProps={{
-          binding: rolloverBudget.catBudgeted(category.id),
-          type: 'financial',
-          getValueStyle: makeAmountGrey,
-          formatExpr: expr => {
-            return integerToCurrency(expr);
-          },
-          unformatExpr: expr => {
-            return amountToInteger(evalArithmetic(expr, 0));
-          },
-        }}
-        inputProps={{
-          onBlur: () => {
-            onEdit(null);
-          },
-        }}
-        onSave={amount => {
-          onBudgetAction(monthIndex, 'budget-amount', {
-            category: category.id,
-            amount,
-          });
-        }}
-      />
-
+            {
+              ':hover': {
+                boxShadow: 'inset 0 0 0 1px ' + colors.n7,
+                backgroundColor: 'white',
+              },
+            },
+          ]}
+          valueProps={{
+            binding: rolloverBudget.catBudgeted(category.id),
+            type: 'financial',
+            getValueStyle: makeAmountGrey,
+            formatExpr: expr => {
+              return integerToCurrency(expr);
+            },
+            unformatExpr: expr => {
+              return amountToInteger(evalArithmetic(expr, 0));
+            },
+          }}
+          inputProps={{
+            onBlur: () => {
+              onEdit(null);
+            },
+          }}
+          onSave={amount => {
+            onBudgetAction(monthIndex, 'budget-amount', {
+              category: category.id,
+              amount,
+            });
+          }}
+        />
+      </View>
       <Field
         name="spent"
         width="flex"
@@ -385,7 +484,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           />
         </span>
       </Field>
-
       <Field
         name="balance"
         width="flex"
@@ -426,6 +524,11 @@ export function IncomeGroupMonth() {
         valueProps={{
           binding: rolloverBudget.groupIncomeReceived,
           type: 'financial',
+          privacyFilter: {
+            style: {
+              paddingRight: MONTH_RIGHT_PADDING,
+            },
+          },
         }}
       />
     </View>

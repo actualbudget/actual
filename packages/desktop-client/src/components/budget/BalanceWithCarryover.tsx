@@ -1,7 +1,7 @@
 import React, { type ComponentProps } from 'react';
 
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { View } from '../common';
+import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 
@@ -49,9 +49,7 @@ export default function BalanceWithCarryover({
           <ArrowThinRight
             width={7}
             height={7}
-            style={{
-              ...makeAmountStyle(balanceValue),
-            }}
+            style={makeAmountStyle(balanceValue)}
           />
         </View>
       )}

@@ -1,14 +1,14 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import { bindActionCreators } from 'redux';
-
-import * as actions from 'loot-core/src/client/actions';
-
+import { useActions } from '../hooks/useActions';
 import Close from '../icons/v1/Close';
 import { colors } from '../style';
 
-import { View, Text, LinkButton, Button } from './common';
+import Button from './common/Button';
+import LinkButton from './common/LinkButton';
+import Text from './common/Text';
+import View from './common/View';
 
 function closeNotification(setAppState) {
   // Set a flag to never show an update notification again for this session
@@ -18,12 +18,14 @@ function closeNotification(setAppState) {
   });
 }
 
-function UpdateNotification({
-  updateInfo,
-  showUpdateNotification,
-  updateApp,
-  setAppState,
-}) {
+export default function UpdateNotification() {
+  let updateInfo = useSelector(state => state.app.updateInfo);
+  let showUpdateNotification = useSelector(
+    state => state.app.showUpdateNotification,
+  );
+
+  let { updateApp, setAppState } = useActions();
+
   if (updateInfo && showUpdateNotification) {
     let notes = updateInfo.releaseNotes;
 
@@ -68,7 +70,7 @@ function UpdateNotification({
               </LinkButton>
               )
               <Button
-                bare
+                type="bare"
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onClick={() => closeNotification(setAppState)}
               >
@@ -86,11 +88,3 @@ function UpdateNotification({
 
   return null;
 }
-
-export default connect(
-  state => ({
-    updateInfo: state.app.updateInfo,
-    showUpdateNotification: state.app.showUpdateNotification,
-  }),
-  dispatch => bindActionCreators(actions, dispatch),
-)(UpdateNotification);

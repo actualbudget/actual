@@ -15,7 +15,10 @@ import { type CSSProperties, css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
 import { colors } from '../../style';
-import { View, Input, Tooltip, Button } from '../common';
+import Button from '../common/Button';
+import Input from '../common/Input';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 const inst: { lastChangeType? } = {};
 
@@ -76,7 +79,7 @@ function fireUpdate(onUpdate, strict, suggestions, index, value) {
     }
   }
 
-  onUpdate && onUpdate(selected, value);
+  onUpdate?.(selected, value);
 }
 
 function defaultRenderInput(props) {
@@ -387,7 +390,7 @@ function SingleAutocomplete({
               focused,
               ...inputProps,
               onFocus: e => {
-                inputProps.onFocus && inputProps.onFocus(e);
+                inputProps.onFocus?.(e);
 
                 if (openOnFocus) {
                   setIsOpen(true);
@@ -396,13 +399,13 @@ function SingleAutocomplete({
               onBlur: e => {
                 // @ts-expect-error Should this be e.nativeEvent
                 e.preventDownshiftDefault = true;
-                inputProps.onBlur && inputProps.onBlur(e);
+                inputProps.onBlur?.(e);
 
                 if (!closeOnBlur) return;
 
                 if (!tableBehavior) {
                   if (e.target.value === '') {
-                    onSelect && onSelect(null, e.target.value);
+                    onSelect?.(null, e.target.value);
                     setSelectedItem(null);
                     setIsOpen(false);
                     return;
@@ -447,11 +450,11 @@ function SingleAutocomplete({
                       // No highlighted item, still allow the table to save the item
                       // as `null`, even though we're allowing the table to move
                       e.preventDefault();
-                      onKeyDown && onKeyDown(e);
+                      onKeyDown?.(e);
                     }
                   } else if (shouldSaveFromKey(e)) {
                     e.preventDefault();
-                    onKeyDown && onKeyDown(e);
+                    onKeyDown?.(e);
                   }
                 }
 
@@ -480,7 +483,7 @@ function SingleAutocomplete({
               onChange: (e: ChangeEvent<HTMLInputElement>) => {
                 const { onChange } = inputProps || {};
                 // @ts-expect-error unsure if onChange needs an event or a string
-                onChange && onChange(e.target.value);
+                onChange?.(e.target.value);
               },
             }),
           )}
@@ -536,7 +539,7 @@ function MultiItem({ name, onRemove }) {
       }}
     >
       {name}
-      <Button type="button" bare style={{ marginLeft: 1 }} onClick={onRemove}>
+      <Button type="bare" style={{ marginLeft: 1 }} onClick={onRemove}>
         <Remove style={{ width: 8, height: 8 }} />
       </Button>
     </View>
@@ -581,7 +584,7 @@ function MultiAutocomplete({
       onRemoveItem(selectedItems[selectedItems.length - 1]);
     }
 
-    prevOnKeyDown && prevOnKeyDown(e);
+    prevOnKeyDown?.(e);
   }
 
   return (
@@ -652,34 +655,6 @@ function MultiAutocomplete({
         </View>
       )}
     />
-  );
-}
-
-export function AutocompleteFooterButton({
-  title,
-  style,
-  hoveredStyle,
-  onClick,
-}) {
-  return (
-    <Button
-      style={[
-        {
-          fontSize: 12,
-          color: colors.n10,
-          backgroundColor: 'transparent',
-          borderColor: colors.n5,
-        },
-        style,
-      ]}
-      hoveredStyle={[
-        { backgroundColor: 'rgba(200, 200, 200, .25)' },
-        hoveredStyle,
-      ]}
-      onClick={onClick}
-    >
-      {title}
-    </Button>
   );
 }
 

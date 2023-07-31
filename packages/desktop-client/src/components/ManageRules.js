@@ -31,24 +31,14 @@ import useSelected, {
 import ArrowRight from '../icons/v0/RightArrow2';
 import { colors } from '../style';
 
-import {
-  View,
-  Text,
-  Button,
-  Stack,
-  ExternalLink,
-  Input,
-  LinkButton,
-} from './common';
-import {
-  SelectCell,
-  Row,
-  Field,
-  Cell,
-  CellButton,
-  TableHeader,
-  useTableNavigator,
-} from './table';
+import Button from './common/Button';
+import ExternalLink from './common/ExternalLink';
+import LinkButton from './common/LinkButton';
+import Search from './common/Search';
+import Stack from './common/Stack';
+import Text from './common/Text';
+import View from './common/View';
+import { SelectCell, Row, Field, Cell, CellButton, TableHeader } from './table';
 
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
@@ -298,130 +288,105 @@ function ActionExpression({ field, op, value, options, style }) {
   );
 }
 
-let Rule = memo(
-  ({
-    rule,
-    hovered,
-    selected,
-    editing,
-    focusedField,
-    onHover,
-    onEdit,
-    onEditRule,
-  }) => {
-    let dispatchSelected = useSelectedDispatch();
-    let borderColor = selected ? colors.b8 : colors.border;
-    let backgroundFocus = hovered || focusedField === 'select';
+let Rule = memo(({ rule, hovered, selected, onHover, onEditRule }) => {
+  let dispatchSelected = useSelectedDispatch();
+  let borderColor = selected ? colors.b8 : colors.border;
+  let backgroundFocus = hovered;
 
-    return (
-      <Row
-        height="auto"
-        borderColor={borderColor}
-        backgroundColor={
-          selected ? colors.selected : backgroundFocus ? colors.hover : 'white'
-        }
-        style={{ fontSize: 13, zIndex: editing || selected ? 101 : 'auto' }}
-        collapsed="true"
-        onMouseEnter={() => onHover && onHover(rule.id)}
-        onMouseLeave={() => onHover && onHover(null)}
-      >
-        <SelectCell
-          exposed={hovered || selected || editing}
-          focused={focusedField === 'select'}
-          onSelect={e => {
-            dispatchSelected({ type: 'select', id: rule.id, event: e });
-          }}
-          onEdit={() => onEdit(rule.id, 'select')}
-          selected={selected}
-        />
+  return (
+    <Row
+      height="auto"
+      borderColor={borderColor}
+      backgroundColor={
+        selected ? colors.selected : backgroundFocus ? colors.hover : 'white'
+      }
+      style={{ fontSize: 13, zIndex: selected ? 101 : 'auto' }}
+      collapsed="true"
+      onMouseEnter={() => onHover && onHover(rule.id)}
+      onMouseLeave={() => onHover && onHover(null)}
+    >
+      <SelectCell
+        exposed={hovered || selected}
+        focused={true}
+        onSelect={e => {
+          dispatchSelected({ type: 'select', id: rule.id, event: e });
+        }}
+        selected={selected}
+      />
 
-        <Cell name="stage" width={50} plain style={{ color: colors.n5 }}>
-          {rule.stage && (
-            <View
-              style={{
-                alignSelf: 'flex-start',
-                margin: 5,
-                backgroundColor: colors.b10,
-                color: colors.b1,
-                borderRadius: 4,
-                padding: '3px 5px',
-              }}
-            >
-              {rule.stage}
-            </View>
-          )}
-        </Cell>
-
-        <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
-          <Stack direction="row" align="center">
-            <View
-              style={{ flex: 1, alignItems: 'flex-start' }}
-              data-testid="conditions"
-            >
-              {rule.conditions.map((cond, i) => (
-                <ConditionExpression
-                  key={i}
-                  field={cond.field}
-                  op={cond.op}
-                  inline={true}
-                  value={cond.value}
-                  options={cond.options}
-                  prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
-                  style={i !== 0 && { marginTop: 3 }}
-                />
-              ))}
-            </View>
-
-            <Text>
-              <ArrowRight color={colors.n4} style={{ width: 12, height: 12 }} />
-            </Text>
-
-            <View
-              style={{ flex: 1, alignItems: 'flex-start' }}
-              data-testid="actions"
-            >
-              {rule.actions.map((action, i) => (
-                <ActionExpression
-                  key={i}
-                  field={action.field}
-                  op={action.op}
-                  value={action.value}
-                  options={action.options}
-                  style={i !== 0 && { marginTop: 3 }}
-                />
-              ))}
-            </View>
-          </Stack>
-        </Field>
-
-        <Cell
-          name="edit"
-          focused={focusedField === 'edit'}
-          plain
-          style={{ padding: '0 15px', paddingLeft: 5 }}
-        >
-          <Button
-            as={CellButton}
-            onSelect={() => onEditRule(rule)}
-            onEdit={() => onEdit(rule.id, 'edit')}
+      <Cell name="stage" width={50} plain style={{ color: colors.n5 }}>
+        {rule.stage && (
+          <View
+            style={{
+              alignSelf: 'flex-start',
+              margin: 5,
+              backgroundColor: colors.b10,
+              color: colors.b1,
+              borderRadius: 4,
+              padding: '3px 5px',
+            }}
           >
-            Edit
-          </Button>
-        </Cell>
-      </Row>
-    );
-  },
-);
+            {rule.stage}
+          </View>
+        )}
+      </Cell>
+
+      <Field width="flex" style={{ padding: '15px 0' }} truncate={false}>
+        <Stack direction="row" align="center">
+          <View
+            style={{ flex: 1, alignItems: 'flex-start' }}
+            data-testid="conditions"
+          >
+            {rule.conditions.map((cond, i) => (
+              <ConditionExpression
+                key={i}
+                field={cond.field}
+                op={cond.op}
+                inline={true}
+                value={cond.value}
+                options={cond.options}
+                prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
+                style={i !== 0 && { marginTop: 3 }}
+              />
+            ))}
+          </View>
+
+          <Text>
+            <ArrowRight color={colors.n4} style={{ width: 12, height: 12 }} />
+          </Text>
+
+          <View
+            style={{ flex: 1, alignItems: 'flex-start' }}
+            data-testid="actions"
+          >
+            {rule.actions.map((action, i) => (
+              <ActionExpression
+                key={i}
+                field={action.field}
+                op={action.op}
+                value={action.value}
+                options={action.options}
+                style={i !== 0 && { marginTop: 3 }}
+              />
+            ))}
+          </View>
+        </Stack>
+      </Field>
+
+      <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
+        <Button as={CellButton} onSelect={() => onEditRule(rule)}>
+          Edit
+        </Button>
+      </Cell>
+    </Row>
+  );
+});
 
 let SimpleTable = forwardRef(
-  (
-    { data, navigator, loadMore, style, onHoverLeave, children, ...props },
-    ref,
-  ) => {
+  ({ data, loadMore, style, onHoverLeave, children, ...props }, ref) => {
     let contentRef = useRef();
     let contentHeight = useRef();
     let scrollRef = useRef();
-    let { getNavigatorProps } = navigator;
 
     function onScroll(e) {
       if (contentHeight.current != null) {
@@ -452,7 +417,6 @@ let SimpleTable = forwardRef(
         ]}
         tabIndex="1"
         data-testid="table"
-        {...getNavigatorProps(props)}
       >
         <View
           innerRef={scrollRef}
@@ -489,7 +453,6 @@ function RulesHeader() {
 function RulesList({
   rules,
   selectedItems,
-  navigator,
   hoveredRule,
   collapsed: borderCollapsed,
   onHover,
@@ -505,7 +468,6 @@ function RulesList({
       {rules.map(rule => {
         let hovered = hoveredRule === rule.id;
         let selected = selectedItems.has(rule.id);
-        let editing = navigator.editingId === rule.id;
 
         return (
           <Rule
@@ -513,10 +475,7 @@ function RulesList({
             rule={rule}
             hovered={hovered}
             selected={selected}
-            editing={editing}
-            focusedField={editing && navigator.focusedField}
             onHover={onHover}
-            onEdit={navigator.onEdit}
             onEditRule={onEditRule}
           />
         );
@@ -548,7 +507,7 @@ function ruleToString(rule, data) {
   let conditions = rule.conditions.flatMap(cond => [
     mapField(cond.field),
     friendlyOp(cond.op),
-    cond.op === 'oneOf'
+    cond.op === 'oneOf' || cond.op === 'notOneOf'
       ? cond.value.map(v => mapValue(cond.field, v, data)).join(', ')
       : mapValue(cond.field, cond.value, data),
   ]);
@@ -583,7 +542,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
   let [rules, setRules] = useState(null);
   let [filter, setFilter] = useState('');
   let dispatch = useDispatch();
-  let navigator = useTableNavigator(rules, ['select', 'edit']);
 
   let { data: schedules } = SchedulesQuery.useQuery();
   let filterData = useSelector(state => ({
@@ -715,8 +673,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
         onSave: async newRule => {
           let newRules = await loadRules();
 
-          navigator.onEdit(newRule.id, 'edit');
-
           setRules(rules => {
             let newIdx = newRules.findIndex(rule => rule.id === newRule.id);
             return newRules.slice(0, newIdx + 75);
@@ -738,7 +694,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View style={{ overflow: 'hidden' }}>
+      <View>
         <View
           style={{
             flexDirection: 'row',
@@ -766,24 +722,10 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             </Text>
           </View>
           <View style={{ flex: 1 }} />
-          <Input
+          <Search
             placeholder="Filter rules..."
             value={filter}
-            onChange={e => {
-              setFilter(e.target.value);
-              navigator.onEdit(null);
-            }}
-            style={{
-              width: 350,
-              borderColor: isModal ? null : 'transparent',
-              backgroundColor: isModal ? null : colors.n11,
-              ':focus': isModal
-                ? null
-                : {
-                    backgroundColor: 'white',
-                    '::placeholder': { color: colors.n8 },
-                  },
-            }}
+            onChange={setFilter}
           />
         </View>
         <View style={{ flex: 1 }}>
@@ -791,7 +733,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
           <SimpleTable
             ref={tableRef}
             data={filteredRules}
-            navigator={navigator}
             loadMore={loadMore}
             // Hide the last border of the item in the table
             style={{ marginBottom: -1 }}
@@ -799,7 +740,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
             <RulesList
               rules={filteredRules}
               selectedItems={selectedInst.items}
-              navigator={navigator}
               hoveredRule={hoveredRule}
               onHover={onHover}
               onEditRule={onEditRule}
@@ -820,7 +760,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
                 Delete {selectedInst.items.size} rules
               </Button>
             )}
-            <Button primary onClick={onCreateRule}>
+            <Button type="primary" onClick={onCreateRule}>
               Create new rule
             </Button>
           </Stack>

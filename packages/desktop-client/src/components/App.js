@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { css } from 'glamor';
 
-import * as actions from 'loot-core/src/client/actions';
 import {
   init as initConnection,
   send,
 } from 'loot-core/src/platform/client/fetch';
 
+import { useActions } from '../hooks/useActions';
 import installPolyfills from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
-import { styles, hasHiddenScrollbars } from '../style';
+import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 
 import AppBackground from './AppBackground';
 import DevelopmentTopBar from './DevelopmentTopBar';
@@ -102,7 +102,6 @@ class App extends Component {
             {...css([
               {
                 flexGrow: 1,
-                backgroundColor: '#E8ECF0',
                 overflow: 'hidden',
               },
               styles.lightScrollbar,
@@ -134,16 +133,30 @@ class App extends Component {
             <MobileWebMessage />
           </div>
         </div>
+        <ThemeStyle />
       </ResponsiveProvider>
     );
   }
 }
 
-export default connect(
-  state => ({
-    budgetId: state.prefs.local && state.prefs.local.id,
-    cloudFileId: state.prefs.local && state.prefs.local.cloudFileId,
-    loadingText: state.app.loadingText,
-  }),
-  actions,
-)(App);
+export default function AppWrapper() {
+  let budgetId = useSelector(
+    state => state.prefs.local && state.prefs.local.id,
+  );
+  let cloudFileId = useSelector(
+    state => state.prefs.local && state.prefs.local.cloudFileId,
+  );
+  let loadingText = useSelector(state => state.app.loadingText);
+  let { loadBudget, closeBudget, loadGlobalPrefs } = useActions();
+
+  return (
+    <App
+      budgetId={budgetId}
+      cloudFileId={cloudFileId}
+      loadingText={loadingText}
+      loadBudget={loadBudget}
+      closeBudget={closeBudget}
+      loadGlobalPrefs={loadGlobalPrefs}
+    />
+  );
+}

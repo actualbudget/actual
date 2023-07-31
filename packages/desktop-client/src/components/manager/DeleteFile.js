@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 
 import { colors } from '../../style';
-import { View, Text, Modal, ButtonWithLoading } from '../common';
+import { ButtonWithLoading } from '../common/Button';
+import Modal from '../common/Modal';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function DeleteMenu({ modalProps, actions, file }) {
   let [loadingState, setLoadingState] = useState(null);
@@ -56,7 +59,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
               </Text>
 
               <ButtonWithLoading
-                primary
+                type="primary"
                 loading={loadingState === 'cloud'}
                 style={{
                   backgroundColor: colors.r4,
@@ -98,7 +101,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
               )}
 
               <ButtonWithLoading
-                primary={!isRemote}
+                type={isRemote ? 'normal' : 'primary'}
                 loading={loadingState === 'local'}
                 style={[
                   {

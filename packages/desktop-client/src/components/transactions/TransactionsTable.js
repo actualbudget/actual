@@ -47,6 +47,8 @@ import usePrevious from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import LeftArrow2 from '../../icons/v0/LeftArrow2';
 import RightArrow2 from '../../icons/v0/RightArrow2';
+import ArrowDown from '../../icons/v1/ArrowDown';
+import ArrowUp from '../../icons/v1/ArrowUp';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
@@ -55,7 +57,9 @@ import { styles, colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { View, Text, Tooltip, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
 import DateSelect from '../select/DateSelect';
 import {
@@ -71,6 +75,7 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
+import { Tooltip } from '../tooltips';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -237,8 +242,26 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
+function selectAscDesc(field, ascDesc, clicked, defaultAscDesc = 'asc') {
+  return field === clicked
+    ? ascDesc === 'asc'
+      ? 'desc'
+      : 'asc'
+    : defaultAscDesc;
+}
+
 const TransactionHeader = memo(
-  ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
+  ({
+    hasSelected,
+    showAccount,
+    showCategory,
+    showBalance,
+    showCleared,
+    scrollWidth,
+    onSort,
+    ascDesc,
+    field,
+  }) => {
     let dispatchSelected = useSelectedDispatch();
 
     return (
@@ -258,16 +281,93 @@ const TransactionHeader = memo(
           width={20}
           onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
-        <Cell value="Date" width={110} />
-        {showAccount && <Cell value="Account" width="flex" />}
-        <Cell value="Payee" width="flex" />
-        <Cell value="Notes" width="flex" />
-        {showCategory && <Cell value="Category" width="flex" />}
-        <Cell value="Payment" width={80} textAlign="right" />
-        <Cell value="Deposit" width={80} textAlign="right" />
+        <HeaderCell
+          value="Date"
+          width={110}
+          alignItems="flex"
+          marginLeft={-5}
+          id="date"
+          icon={field === 'date' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
+          }
+        />
+        {showAccount && (
+          <HeaderCell
+            value="Account"
+            width="flex"
+            alignItems="flex"
+            marginLeft={-5}
+            id="account"
+            icon={field === 'account' ? ascDesc : 'clickable'}
+            onClick={() =>
+              onSort('account', selectAscDesc(field, ascDesc, 'account', 'asc'))
+            }
+          />
+        )}
+        <HeaderCell
+          value="Payee"
+          width="flex"
+          alignItems="flex"
+          marginLeft={-5}
+          id="payee"
+          icon={field === 'payee' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc'))
+          }
+        />
+        <HeaderCell
+          value="Notes"
+          width="flex"
+          alignItems="flex"
+          marginLeft={-5}
+          id="notes"
+          icon={field === 'notes' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
+          }
+        />
+        {showCategory && (
+          <HeaderCell
+            value="Category"
+            width="flex"
+            alignItems="flex"
+            marginLeft={-5}
+            id="category"
+            icon={field === 'category' ? ascDesc : 'clickable'}
+            onClick={() =>
+              onSort(
+                'category',
+                selectAscDesc(field, ascDesc, 'category', 'asc'),
+              )
+            }
+          />
+        )}
+        <HeaderCell
+          value="Payment"
+          width={90}
+          alignItems="flex-end"
+          marginRight={-5}
+          id="payment"
+          icon={field === 'payment' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('payment', selectAscDesc(field, ascDesc, 'payment', 'asc'))
+          }
+        />
+        <HeaderCell
+          value="Deposit"
+          width={85}
+          alignItems="flex-end"
+          marginRight={-5}
+          id="deposit"
+          icon={field === 'deposit' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
+          }
+        />
         {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
-        {showCleared && <Field width={21} truncate={false} />}
-        <Cell value="" width={15 + styles.scrollbarWidth} />
+        {showCleared && <Field width={23} truncate={false} />}
+        <Cell value="" width={5 + scrollWidth ?? 0} />
       </Row>
     );
   },
@@ -340,7 +440,7 @@ function StatusCell({
   return (
     <Cell
       name="cleared"
-      width="auto"
+      width={23}
       focused={focused}
       style={{ padding: 1 }}
       plain
@@ -376,6 +476,48 @@ function StatusCell({
   );
 }
 
+function HeaderCell({
+  value,
+  id,
+  width,
+  alignItems,
+  marginLeft,
+  marginRight,
+  icon,
+  onClick,
+}) {
+  return (
+    <CustomCell
+      width={width}
+      name={id}
+      alignItems={alignItems}
+      unexposedContent={
+        <Button
+          type="bare"
+          onClick={onClick}
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            color: colors.n4,
+            fontWeight: 300,
+            marginLeft: marginLeft,
+            marginRight: marginRight,
+          }}
+        >
+          <UnexposedCellContent value={value} />
+          {icon === 'asc' && (
+            <ArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
+          )}
+          {icon === 'desc' && (
+            <ArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
+          )}
+        </Button>
+      }
+    />
+  );
+}
+
 function PayeeCell({
   id,
   payeeId,
@@ -406,10 +548,11 @@ function PayeeCell({
     <CustomCell
       width="flex"
       name="payee"
+      textAlign="flex"
       value={payeeId}
       valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
       exposed={focused}
-      onExpose={!isPreview && (name => onEdit(id, name))}
+      onExpose={name => !isPreview && onEdit(id, name)}
       onUpdate={async value => {
         onUpdate('payee', value);
 
@@ -496,23 +639,15 @@ function PayeeIcons({
     color: 'inherit',
   };
 
-  let scheduleIconStyle = {
-    width: 13,
-    height: 13,
-    color: 'inherit',
-  };
+  let scheduleIconStyle = { width: 13, height: 13 };
 
-  let transferIconStyle = {
-    width: 10,
-    height: 10,
-    color: 'inherit',
-  };
+  let transferIconStyle = { width: 10, height: 10 };
 
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
 
   return schedule ? (
     <Button
-      bare
+      type="bare"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();
@@ -527,7 +662,7 @@ function PayeeIcons({
     </Button>
   ) : transferAccount ? (
     <Button
-      bare
+      type="bare"
       style={buttonStyle}
       onClick={e => {
         e.stopPropagation();
@@ -759,13 +894,14 @@ const Transaction = memo(function Transaction(props) {
         <CustomCell
           name="date"
           width={110}
+          textAlign="flex"
           exposed={focusedField === 'date'}
           value={date}
           valueStyle={valueStyle}
           formatter={date =>
             date ? formatDate(parseISO(date), dateFormat) : ''
           }
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           onUpdate={value => {
             onUpdate('date', value);
           }}
@@ -795,6 +931,7 @@ const Transaction = memo(function Transaction(props) {
         <CustomCell
           name="account"
           width="flex"
+          textAlign="flex"
           value={accountId}
           formatter={acctId => {
             let acct = acctId && getAccountsById(accounts)[acctId];
@@ -805,7 +942,7 @@ const Transaction = memo(function Transaction(props) {
           }}
           valueStyle={valueStyle}
           exposed={focusedField === 'account'}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           onUpdate={async value => {
             // Only ever allow non-null values
             if (value) {
@@ -866,11 +1003,12 @@ const Transaction = memo(function Transaction(props) {
         <InputCell
           width="flex"
           name="notes"
+          textAlign="flex"
           exposed={focusedField === 'notes'}
           focused={focusedField === 'notes'}
           value={notes || ''}
           valueStyle={valueStyle}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           inputProps={{
             value: notes || '',
             onUpdate: onUpdate.bind(null, 'notes'),
@@ -946,7 +1084,6 @@ const Transaction = memo(function Transaction(props) {
                   style={{
                     width: 14,
                     height: 14,
-                    color: 'currentColor',
                     transition: 'transform .08s',
                     transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
                   }}
@@ -964,7 +1101,7 @@ const Transaction = memo(function Transaction(props) {
           width="flex"
           exposed={focusedField === 'category'}
           focused={focusedField === 'category'}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           value={
             isParent
               ? 'Split'
@@ -975,7 +1112,11 @@ const Transaction = memo(function Transaction(props) {
               : ''
           }
           valueStyle={valueStyle}
-          style={{ fontStyle: 'italic', color: '#c0c0c0', fontWeight: 300 }}
+          style={{
+            fontStyle: 'italic',
+            color: '#c0c0c0',
+            fontWeight: 300,
+          }}
           inputProps={{
             readOnly: true,
             style: { fontStyle: 'italic' },
@@ -985,6 +1126,7 @@ const Transaction = memo(function Transaction(props) {
         <CustomCell
           name="category"
           width="flex"
+          textAlign="flex"
           value={categoryId}
           formatter={value =>
             value
@@ -1041,7 +1183,7 @@ const Transaction = memo(function Transaction(props) {
 
       <InputCell
         type="input"
-        width={80}
+        width={90}
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
@@ -1049,17 +1191,20 @@ const Transaction = memo(function Transaction(props) {
         valueStyle={valueStyle}
         textAlign="right"
         title={debit}
-        onExpose={!isPreview && (name => onEdit(id, name))}
+        onExpose={name => !isPreview && onEdit(id, name)}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: debit === '' && credit === '' ? '0.00' : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
         }}
+        privacyFilter={{
+          activationFilters: [!isTemporaryId(transaction.id)],
+        }}
       />
 
       <InputCell
         type="input"
-        width={80}
+        width={85}
         name="credit"
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}
@@ -1067,26 +1212,26 @@ const Transaction = memo(function Transaction(props) {
         valueStyle={valueStyle}
         textAlign="right"
         title={credit}
-        onExpose={!isPreview && (name => onEdit(id, name))}
+        onExpose={name => !isPreview && onEdit(id, name)}
         style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
+        }}
+        privacyFilter={{
+          activationFilters: [!isTemporaryId(transaction.id)],
         }}
       />
 
       {showBalance && (
         <Cell
           name="balance"
-          value={
-            balance == null || isChild || isPreview
-              ? ''
-              : integerToCurrency(balance)
-          }
+          value={balance == null || isChild ? '' : integerToCurrency(balance)}
           valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
           style={[styles.tnum, amountStyle]}
           width={88}
           textAlign="right"
+          privacyFilter
         />
       )}
 
@@ -1103,7 +1248,7 @@ const Transaction = memo(function Transaction(props) {
         />
       )}
 
-      <Cell width={15} />
+      <Cell width={5} />
     </Row>
   );
 });
@@ -1134,8 +1279,8 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
             </Text>
             <View style={{ flex: 1 }} />
             <Button
+              type="primary"
               style={{ marginLeft: 15, padding: '4px 10px' }}
-              primary
               onClick={onAddSplit}
             >
               Add Split
@@ -1274,8 +1419,8 @@ function NewTransaction({
           />
         ) : (
           <Button
+            type="primary"
             style={{ padding: '4px 10px' }}
-            primary
             onClick={onAdd}
             data-testid="add-button"
           >
@@ -1299,6 +1444,13 @@ function TransactionTableInner({
 }) {
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
+  let [scrollWidth, setScrollWidth] = useState(0);
+
+  function saveScrollWidth(parent, child) {
+    let width = parent > 0 && child > 0 && parent - child;
+
+    setScrollWidth(!width ? 0 : width);
+  }
 
   let onNavigateToTransferAccount = useCallback(
     accountId => {
@@ -1333,6 +1485,7 @@ function TransactionTableInner({
       showCleared,
       showAccount,
       showCategory,
+      showBalances,
       balances,
       hideFraction,
       isNew,
@@ -1379,24 +1532,22 @@ function TransactionTableInner({
           transaction={trans}
           showAccount={showAccount}
           showCategory={showCategory}
-          showBalance={!!balances}
+          showBalance={showBalances}
           showCleared={showCleared}
           hovered={hovered}
           selected={selected}
           highlighted={false}
-          added={isNew && isNew(trans.id)}
-          expanded={isExpanded && isExpanded(trans.id)}
-          matched={isMatched && isMatched(trans.id)}
+          added={isNew?.(trans.id)}
+          expanded={isExpanded?.(trans.id)}
+          matched={isMatched?.(trans.id)}
           showZeroInDeposit={isChildDeposit}
-          balance={balances && balances[trans.id] && balances[trans.id].balance}
+          balance={balances?.[trans.id]?.balance}
           focusedField={editing && tableNavigator.focusedField}
           accounts={accounts}
           categoryGroups={categoryGroups}
           payees={payees}
           inheritedFields={
-            parent && parent.payee === trans.payee
-              ? new Set(['payee'])
-              : new Set()
+            parent?.payee === trans.payee ? new Set(['payee']) : new Set()
           }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
@@ -1425,8 +1576,12 @@ function TransactionTableInner({
           hasSelected={props.selectedItems.size > 0}
           showAccount={props.showAccount}
           showCategory={props.showCategory}
-          showBalance={!!props.balances}
+          showBalance={props.showBalances}
           showCleared={props.showCleared}
+          scrollWidth={scrollWidth}
+          onSort={props.onSort}
+          ascDesc={props.ascDesc}
+          field={props.sortField}
         />
 
         {props.isAdding && (
@@ -1445,7 +1600,7 @@ function TransactionTableInner({
               payees={props.payees || []}
               showAccount={props.showAccount}
               showCategory={props.showCategory}
-              showBalance={!!props.balances}
+              showBalance={props.showBalances}
               showCleared={props.showCleared}
               dateFormat={dateFormat}
               hideFraction={props.hideFraction}
@@ -1483,6 +1638,7 @@ function TransactionTableInner({
           isSelected={id => props.selectedItems.has(id)}
           onKeyDown={e => props.onCheckEnter(e)}
           onScroll={onScroll}
+          saveScrollWidth={saveScrollWidth}
         />
 
         {props.isAdding && (
@@ -1574,7 +1730,6 @@ export let TransactionTable = forwardRef((props, ref) => {
   let savePending = useRef(false);
   let afterSaveFunc = useRef(false);
   let [_, forceRerender] = useState({});
-
   let selectedItems = useSelectedItems();
 
   useLayoutEffect(() => {

@@ -4,18 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
-import {
-  View,
-  Modal,
-  ModalButtons,
-  Button,
-  Input,
-  InlineField,
-  FormError,
-  InitialFocus,
-  Text,
-  ExternalLink,
-} from '../common';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import FormError from '../common/FormError';
+import InitialFocus from '../common/InitialFocus';
+import InlineField from '../common/InlineField';
+import Input from '../common/Input';
+import Modal, { ModalButtons } from '../common/Modal';
+import Text from '../common/Text';
+import View from '../common/View';
 
 function CreateLocalAccount({ modalProps, actions }) {
   let navigate = useNavigate();
@@ -147,10 +144,8 @@ function CreateLocalAccount({ modalProps, actions }) {
             )}
 
             <ModalButtons>
-              <Button onClick={() => modalProps.onBack()} type="button">
-                Back
-              </Button>
-              <Button primary style={{ marginLeft: 10 }}>
+              <Button onClick={() => modalProps.onBack()}>Back</Button>
+              <Button type="primary" style={{ marginLeft: 10 }}>
                 Create
               </Button>
             </ModalButtons>

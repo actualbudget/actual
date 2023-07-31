@@ -6,25 +6,17 @@ import React, {
   useState,
   useMemo,
 } from 'react';
-import { connect } from 'react-redux';
 
-import { bindActionCreators } from 'redux';
-
-import * as actions from 'loot-core/src/client/actions';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { styles, colors } from '../../style';
-import {
-  View,
-  Text,
-  Button,
-  Tooltip,
-  Menu,
-  IntersectionBoundary,
-} from '../common';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Text from '../common/Text';
+import View from '../common/View';
 import NotesButton from '../NotesButton';
 import {
   useDraggable,
@@ -34,6 +26,7 @@ import {
 } from '../sort';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 import { Row, InputCell, ROW_HEIGHT } from '../table';
+import { Tooltip, IntersectionBoundary } from '../tooltips';
 
 import BudgetSummaries from './BudgetSummaries';
 import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
@@ -45,7 +38,7 @@ function getScrollbarWidth() {
   return Math.max(styles.scrollbarWidth - 2, 0);
 }
 
-class BudgetTable extends Component {
+export class BudgetTable extends Component {
   constructor(props) {
     super(props);
     this.budgetCategoriesRef = createRef();
@@ -315,17 +308,6 @@ class BudgetTable extends Component {
   }
 }
 
-const connected = connect(
-  state => ({
-    prefs: state.prefs.local,
-  }),
-  dispatch => bindActionCreators(actions, dispatch),
-  null,
-  { forwardRef: true },
-)(BudgetTable);
-
-export { connected as BudgetTable };
-
 function SidebarCategory({
   innerRef,
   category,
@@ -368,7 +350,7 @@ function SidebarCategory({
       </div>
       <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
-          bare
+          type="bare"
           onClick={e => {
             e.stopPropagation();
             setMenuOpen(true);
@@ -537,7 +519,7 @@ function SidebarGroup({
         <>
           <View style={{ marginLeft: 5, flexShrink: 0 }}>
             <Button
-              bare
+              type="bare"
               onClick={e => {
                 e.stopPropagation();
                 setMenuOpen(true);
@@ -701,7 +683,7 @@ const BudgetTotals = memo(function BudgetTotals({
       >
         <View style={{ flexGrow: '1' }}>Category</View>
         <Button
-          bare
+          type="bare"
           onClick={() => {
             setMenuOpen(true);
           }}

@@ -3,10 +3,11 @@ import React from 'react';
 import { css } from 'glamor';
 
 import AnimatedLoading from '../icons/AnimatedLoading';
-import { colors } from '../style';
+import { theme } from '../style';
 
 import Background from './Background';
-import { View, Block } from './common';
+import Block from './common/Block';
+import View from './common/View';
 
 function AppBackground({ initializing, loadingText }) {
   return (
@@ -22,14 +23,14 @@ function AppBackground({ initializing, loadingText }) {
             right: 0,
             padding: 50,
             paddingTop: 200,
-            color: colors.n1,
+            color: theme.pageText,
             alignItems: 'center',
           })}
         >
           <Block style={{ marginBottom: 20, fontSize: 18 }}>
             {loadingText}
           </Block>
-          <AnimatedLoading width={25} color={colors.n1} />
+          <AnimatedLoading width={25} color={theme.pageText} />
         </View>
       )}
     </>

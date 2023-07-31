@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../../style';
-import { View, Text, Button } from '../../common';
+import Button from '../../common/Button';
+import Text from '../../common/Text';
+import View from '../../common/View';
 
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -83,8 +85,7 @@ export default function ChangePassword() {
       <ConfirmPasswordForm
         buttons={
           <Button
-            bare
-            type="button"
+            type="bare"
             style={{ fontSize: 15, marginRight: 10 }}
             onClick={() => navigate('/')}
           >

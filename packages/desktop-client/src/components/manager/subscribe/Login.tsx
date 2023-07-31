@@ -6,7 +6,9 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../../style';
-import { View, Text, Button, ButtonWithLoading } from '../../common';
+import Button, { ButtonWithLoading } from '../../common/Button';
+import Text from '../../common/Text';
+import View from '../../common/View';
 
 import { useBootstrapped, Title, Input } from './common';
 
@@ -95,7 +97,11 @@ export default function Login() {
           }
           style={{ flex: 1, marginRight: 10 }}
         />
-        <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
+        <ButtonWithLoading
+          type="primary"
+          loading={loading}
+          style={{ fontSize: 15 }}
+        >
           Sign in
         </ButtonWithLoading>
       </form>
@@ -107,7 +113,7 @@ export default function Login() {
         }}
       >
         <Button
-          bare
+          type="bare"
           style={{ fontSize: 15, color: colors.b4, marginLeft: 10 }}
           onClick={onDemo}
         >

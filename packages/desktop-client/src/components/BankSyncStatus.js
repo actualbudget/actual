@@ -1,15 +1,16 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
-
-import * as actions from 'loot-core/src/client/actions';
 
 import { colors, styles } from '../style';
 
 import AnimatedRefresh from './AnimatedRefresh';
-import { View, Text } from './common';
+import Text from './common/Text';
+import View from './common/View';
 
-function BankSyncStatus({ accountsSyncing }) {
+export default function BankSyncStatus() {
+  let accountsSyncing = useSelector(state => state.account.accountsSyncing);
+
   let name = accountsSyncing
     ? accountsSyncing === '__all'
       ? 'accounts'
@@ -62,10 +63,3 @@ function BankSyncStatus({ accountsSyncing }) {
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    accountsSyncing: state.account.accountsSyncing,
-  }),
-  actions,
-)(BankSyncStatus);

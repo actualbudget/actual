@@ -8,16 +8,13 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import { colors } from '../../style';
-import {
-  Button,
-  CustomSelect,
-  Input,
-  Tooltip,
-  View,
-  Text,
-  Stack,
-} from '../common';
-import { useTooltip } from '../tooltips';
+import Button from '../common/Button';
+import Input from '../common/Input';
+import Select from '../common/Select';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
+import { useTooltip, Tooltip } from '../tooltips';
 
 import DateSelect from './DateSelect';
 
@@ -199,7 +196,7 @@ function MonthlyPatterns({ config, dispatch }) {
             flexDirection: 'row',
           }}
         >
-          <CustomSelect
+          <Select
             options={[
               [-1, 'Last'],
               ['-', '---'],
@@ -216,7 +213,7 @@ function MonthlyPatterns({ config, dispatch }) {
               width: '100%',
             }}
           />
-          <CustomSelect
+          <Select
             options={[
               ['day', 'Day'],
               ['-', '---'],
@@ -229,7 +226,7 @@ function MonthlyPatterns({ config, dispatch }) {
             style={{ borderWidth: 1, width: '100%' }}
           />
           <Button
-            bare
+            type="bare"
             style={{ padding: 7 }}
             onClick={() =>
               dispatch({
@@ -241,7 +238,7 @@ function MonthlyPatterns({ config, dispatch }) {
             <SubtractIcon style={{ width: 8, height: 8 }} />
           </Button>
           <Button
-            bare
+            type="bare"
             style={{ padding: 7, marginLeft: 5 }}
             onClick={() => dispatch({ type: 'add-recurrence' })}
           >
@@ -326,8 +323,8 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           onBlur={e => updateField('interval', e.target.value)}
           onEnter={e => updateField('interval', e.target.value)}
           defaultValue={config.interval || 1}
-        ></Input>
-        <CustomSelect
+        />
+        <Select
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
@@ -351,8 +348,8 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
       >
         <Button onClick={onClose}>Cancel</Button>
         <Button
+          type="primary"
           onClick={() => onSave(unparseConfig(config))}
-          primary
           style={{ marginLeft: 10 }}
         >
           Apply

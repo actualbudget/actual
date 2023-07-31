@@ -5,10 +5,11 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
-import { P, LinkButton } from '../common';
 import Button from '../common/Button';
 import FormError from '../common/FormError';
+import LinkButton from '../common/LinkButton';
 import Modal from '../common/Modal';
+import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
 
@@ -46,7 +47,7 @@ function CloseAccount({
     >
       {() => (
         <View>
-          <P>
+          <Paragraph>
             Are you sure you want to close <strong>{account.name}</strong>?{' '}
             {canDelete ? (
               <span>
@@ -58,7 +59,7 @@ function CloseAccount({
                 This account has transactions so we can’t permanently delete it.
               </span>
             )}
-          </P>
+          </Paragraph>
           <form
             onSubmit={event => {
               event.preventDefault();
@@ -83,12 +84,12 @@ function CloseAccount({
           >
             {balance !== 0 && (
               <View>
-                <P>
+                <Paragraph>
                   This account has a balance of{' '}
                   <strong>{integerToCurrency(balance)}</strong>. To close this
                   account, select a different account to transfer this balance
                   to:
-                </P>
+                </Paragraph>
 
                 <View style={{ marginBottom: 15 }}>
                   <AccountAutocomplete
@@ -115,11 +116,11 @@ function CloseAccount({
 
                 {needsCategory(account, transfer, accounts) && (
                   <View style={{ marginBottom: 15 }}>
-                    <P>
+                    <Paragraph>
                       Since you are transferring the balance from a budgeted
                       account to an off-budget account, this transaction must be
                       categorized. Select a category:
-                    </P>
+                    </Paragraph>
 
                     <CategoryAutocomplete
                       categoryGroups={categoryGroups}
@@ -172,16 +173,10 @@ function CloseAccount({
                 justifyContent: 'flex-end',
               }}
             >
-              <Button
-                type="submit"
-                style={{ marginRight: 10 }}
-                onClick={modalProps.onClose}
-              >
+              <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>
                 Cancel
               </Button>
-              <Button type="submit" primary>
-                Close Account
-              </Button>
+              <Button type="primary">Close Account</Button>
             </View>
           </form>
         </View>

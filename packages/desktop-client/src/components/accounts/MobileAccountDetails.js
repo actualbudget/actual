@@ -5,8 +5,11 @@ import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { colors, styles } from '../../style';
-import { Button, InputWithContent, Label, View } from '../common';
+import Button from '../common/Button';
+import InputWithContent from '../common/InputWithContent';
+import Label from '../common/Label';
 import Text from '../common/Text';
+import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import { TransactionList } from '../transactions/MobileTransaction';
 
@@ -108,22 +111,15 @@ export default function AccountDetails({
           <Link
             to="/accounts"
             style={{
+              color: colors.b5,
               alignItems: 'center',
               display: 'flex',
               textDecoration: 'none',
               width: LEFT_RIGHT_FLEX_WIDTH,
             }}
           >
-            <CheveronLeft
-              style={{
-                color: colors.b5,
-                width: 32,
-                height: 32,
-              }}
-            />
-            <Text style={{ ...styles.text, color: colors.b5, fontWeight: 500 }}>
-              Back
-            </Text>
+            <CheveronLeft style={{ width: 32, height: 32 }} />
+            <Text style={{ ...styles.text, fontWeight: 500 }}>Back</Text>
           </Link>
           <View
             style={{
@@ -139,7 +135,7 @@ export default function AccountDetails({
           */}
           <Link to="transactions/new">
             <Button
-              bare
+              type="bare"
               style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
             >
               <Add width={20} height={20} />

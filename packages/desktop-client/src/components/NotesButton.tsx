@@ -9,7 +9,10 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
 import { colors } from '../style';
 
-import { View, Button, Tooltip, useTooltip, Text } from './common';
+import Button from './common/Button';
+import Text from './common/Text';
+import View from './common/View';
+import { Tooltip, useTooltip } from './tooltips';
 
 type NotesTooltipProps = {
   editable?: boolean;
@@ -46,7 +49,7 @@ function NotesTooltip({
           })}
           value={notes || ''}
           onChange={e => setNotes(e.target.value)}
-        ></textarea>
+        />
       ) : (
         <Text
           {...css({
@@ -116,7 +119,7 @@ export default function NotesButton({
       onMouseLeave={handleMouseLeave}
     >
       <Button
-        bare
+        type="bare"
         className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
         style={[
           { color: defaultColor },
@@ -126,7 +129,7 @@ export default function NotesButton({
         ]}
         {...tooltip.getOpenEvents()}
       >
-        <CustomNotesPaper style={{ width, height, color: 'currentColor' }} />
+        <CustomNotesPaper style={{ width, height }} />
       </Button>
       {tooltipOpen && (
         <NotesTooltip

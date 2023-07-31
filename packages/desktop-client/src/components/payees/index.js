@@ -19,20 +19,17 @@ import useSelected, {
   useSelectedItems,
   useSelectedDispatch,
 } from '../../hooks/useSelected';
+import useStableCallback from '../../hooks/useStableCallback';
 import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { colors } from '../../style';
-import {
-  useStableCallback,
-  View,
-  Text,
-  Input,
-  Button,
-  Tooltip,
-  Menu,
-} from '../common';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Search from '../common/Search';
+import Text from '../common/Text';
+import View from '../common/View';
 import {
   Table,
   TableHeader,
@@ -43,6 +40,7 @@ import {
   CellButton,
   useTableNavigator,
 } from '../table';
+import { Tooltip } from '../tooltips';
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 
@@ -81,7 +79,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
             <>Create rule</>
           )}
         </Text>
-        <ArrowThinRight style={{ width: 8, height: 8, color: colors.g1 }} />
+        <ArrowThinRight style={{ width: 8, height: 8 }} />
       </CellButton>
     </Cell>
   );
@@ -338,7 +336,6 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
 export const ManagePayees = forwardRef(
   (
     {
-      modalProps,
       payees,
       ruleCounts,
       orphanedPayees,
@@ -378,7 +375,7 @@ export const ManagePayees = forwardRef(
 
     function applyFilter(f) {
       if (filter !== f) {
-        table.current && table.current.setRowAnimation(false);
+        table.current?.setRowAnimation(false);
         setFilter(f);
         resetAnimation.current = true;
       }
@@ -395,7 +392,7 @@ export const ManagePayees = forwardRef(
         // actually update its contents until the next tick or
         // something? The table keeps being animated without this
         setTimeout(() => {
-          table.current && table.current.setRowAnimation(true);
+          table.current?.setRowAnimation(true);
         }, 0);
         resetAnimation.current = false;
       }
@@ -482,12 +479,12 @@ export const ManagePayees = forwardRef(
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            padding: '0 10px 5px',
+            padding: '0 0 15px',
           }}
         >
-          <View>
+          <View style={{ flexShrink: 0 }}>
             <Button
-              bare
+              type="bare"
               style={{ marginRight: 10 }}
               disabled={buttonsDisabled}
               onClick={() => setMenuOpen(true)}
@@ -509,41 +506,38 @@ export const ManagePayees = forwardRef(
               />
             )}
           </View>
-          <View>
-            <Button
-              bare
-              style={{
-                marginRight: '10px',
-              }}
-              disabled={!(orphanedPayees?.length > 0) && !orphanedOnly}
-              onClick={() => {
-                setOrphanedOnly(!orphanedOnly);
-                const filterInput = document.getElementById('filter-input');
-                applyFilter(filterInput.value);
-                tableNavigator.onEdit(null);
-              }}
-            >
-              {orphanedOnly ? 'Show all payees' : 'Show unused payees'}
-            </Button>
+          <View
+            style={{
+              flexShrink: 0,
+            }}
+          >
+            {(orphanedOnly ||
+              (orphanedPayees && orphanedPayees.length > 0)) && (
+              <Button
+                type="bare"
+                style={{ marginRight: 10 }}
+                onClick={() => {
+                  setOrphanedOnly(!orphanedOnly);
+                  const filterInput = document.getElementById('filter-input');
+                  applyFilter(filterInput.value);
+                  tableNavigator.onEdit(null);
+                }}
+              >
+                {orphanedOnly
+                  ? 'Show all payees'
+                  : `Show ${
+                      orphanedPayees.length === 1
+                        ? '1 unused payee'
+                        : `${orphanedPayees.length} unused payees`
+                    }`}
+              </Button>
+            )}
           </View>
           <View style={{ flex: 1 }} />
-          <Input
-            id="filter-input"
+          <Search
             placeholder="Filter payees..."
             value={filter}
-            onChange={e => {
-              applyFilter(e.target.value);
-              tableNavigator.onEdit(null);
-            }}
-            style={{
-              width: 350,
-              borderColor: 'transparent',
-              backgroundColor: colors.n11,
-              ':focus': {
-                backgroundColor: 'white',
-                '::placeholder': { color: colors.n8 },
-              },
-            }}
+            onChange={applyFilter}
           />
         </View>
 
@@ -552,7 +546,8 @@ export const ManagePayees = forwardRef(
             style={{
               flex: 1,
               border: '1px solid ' + colors.border,
-              borderRadius: 4,
+              borderTopLeftRadius: 4,
+              borderTopRightRadius: 4,
               overflow: 'hidden',
             }}
           >
