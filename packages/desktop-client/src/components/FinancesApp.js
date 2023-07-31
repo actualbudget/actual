@@ -162,7 +162,7 @@ function StackedRoutesInner({ location }) {
       />
 
       <Route
-        path="/accounts/:id/:transactionId"
+        path="/accounts/:id/transactions/:transactionId"
         element={
           <WideNotSupported>
             <TransactionEdit />
@@ -171,7 +171,7 @@ function StackedRoutesInner({ location }) {
       />
 
       <Route
-        path="/accounts/:id/new-transaction"
+        path="/accounts/:id/transactions/new"
         element={
           <WideNotSupported>
             <TransactionEdit />

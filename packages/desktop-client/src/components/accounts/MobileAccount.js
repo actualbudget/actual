@@ -206,7 +206,7 @@ function Account(props) {
         },
       );
     } else {
-      navigate(`${transaction.id}`);
+      navigate(`transactions/${transaction.id}`);
     }
   };
 
