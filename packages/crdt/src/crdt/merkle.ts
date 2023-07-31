@@ -43,11 +43,11 @@ export function insert(trie: TrieNode, timestamp: Timestamp) {
   let hash = timestamp.hash();
   let key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
 
-  trie = Object.assign({}, trie, { hash: trie.hash ^ hash });
+  trie = Object.assign({}, trie, { hash: (trie.hash || 0) ^ hash });
   return insertKey(trie, key, hash);
 }
 
-function insertKey(trie: TrieNode, key: string, hash: number) {
+function insertKey(trie: TrieNode, key: string, hash: number): TrieNode {
   if (key.length === 0) {
     return trie;
   }
@@ -70,7 +70,7 @@ export function build(timestamps: Timestamp[]) {
 
 export function diff(trie1: TrieNode, trie2: TrieNode): number {
   if (trie1.hash === trie2.hash) {
-    return null;
+    return 0;
   }
 
   let node1 = trie1;
@@ -105,12 +105,13 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number {
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
 
-      if (!node1[key] || !node2[key]) {
+      let next1 = node1[key];
+      let next2 = node2[key];
+
+      if (!next1 || !next2) {
         break;
       }
 
-      let next1 = node1[key];
-      let next2 = node2[key];
       if (next1.hash !== next2.hash) {
         diffkey = key;
         break;
@@ -125,6 +126,8 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number {
     node1 = node1[diffkey] || emptyTrie();
     node2 = node2[diffkey] || emptyTrie();
   }
+
+  return 0;
 }
 
 export function prune(trie: TrieNode, n = 2): TrieNode {
@@ -136,17 +139,17 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
   let keys = getKeys(trie);
   keys.sort();
 
-  let next = { hash: trie.hash };
+  let next: TrieNode = { hash: trie.hash };
 
   // Prune child nodes.
   for (let k of keys.slice(-n)) {
-    next[k] = prune(trie[k], n);
+    next[k] = prune(trie[k]!, n);
   }
 
   return next;
 }
 
-export function debug(trie: TrieNode, k = '', indent = 0) {
+export function debug(trie: TrieNode, k = '', indent = 0): string {
   const str =
     ' '.repeat(indent) +
     (k !== '' ? `k: ${k} ` : '') +
@@ -155,7 +158,7 @@ export function debug(trie: TrieNode, k = '', indent = 0) {
     str +
     getKeys(trie)
       .map(key => {
-        return debug(trie[key], key, indent + 2);
+        return debug(trie[key]!, key, indent + 2);
       })
       .join('')
   );

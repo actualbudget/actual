@@ -2,7 +2,7 @@ import { Timestamp } from './timestamp';
 
 describe('Timestamp', function () {
   let now = 0;
-  let prevNow;
+  let prevNow: typeof Date.now;
 
   beforeEach(function () {
     prevNow = Date.now;
@@ -16,10 +16,12 @@ describe('Timestamp', function () {
 
   describe('comparison', function () {
     it('should be in order', function () {
+      const sendTimestamp = Timestamp.send()!;
+
       expect(Timestamp.zero).toBe(Timestamp.zero);
       expect(Timestamp.max > Timestamp.zero).toBeTruthy();
-      expect(Timestamp.send() > Timestamp.zero).toBeTruthy();
-      expect(Timestamp.send() < Timestamp.max).toBeTruthy();
+      expect(sendTimestamp > Timestamp.zero).toBeTruthy();
+      expect(sendTimestamp < Timestamp.max).toBeTruthy();
     });
   });
 
@@ -53,7 +55,7 @@ describe('Timestamp', function () {
         '9999-12-31T23:59:59.999Z-FFFF-FFFFFFFFFFFFFFFF',
       ];
       for (let validInput of validInputs) {
-        let parsed = Timestamp.parse(validInput);
+        let parsed = Timestamp.parse(validInput)!;
         expect(typeof parsed).toBe('object');
         expect(parsed.millis() >= 0).toBeTruthy();
         expect(parsed.millis() < 253402300800000).toBeTruthy();
@@ -133,7 +135,7 @@ describe('Timestamp', function () {
       now = 52;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.051Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.051Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.052Z-0000-0000000000000001'),
@@ -141,7 +143,7 @@ describe('Timestamp', function () {
       now = 54;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.053Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.053Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.054Z-0000-0000000000000001'),
@@ -149,7 +151,7 @@ describe('Timestamp', function () {
       now = 56;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.055Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.055Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.056Z-0000-0000000000000001'),
@@ -160,7 +162,7 @@ describe('Timestamp', function () {
       now = 61;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.062Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.062Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.062Z-0001-0000000000000001'),
@@ -168,7 +170,7 @@ describe('Timestamp', function () {
       now = 62;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.062Z-0001-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.062Z-0001-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.062Z-0002-0000000000000001'),
@@ -176,7 +178,7 @@ describe('Timestamp', function () {
       now = 62;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.062Z-0002-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.062Z-0002-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.062Z-0003-0000000000000001'),
@@ -184,7 +186,7 @@ describe('Timestamp', function () {
       now = 63;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.062Z-0004-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.062Z-0004-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.063Z-0000-0000000000000001'),
@@ -195,7 +197,7 @@ describe('Timestamp', function () {
       now = 73;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.071Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.071Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.073Z-0000-0000000000000001'),
@@ -203,7 +205,7 @@ describe('Timestamp', function () {
       now = 73;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.072Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.072Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.073Z-0001-0000000000000001'),
@@ -211,7 +213,7 @@ describe('Timestamp', function () {
       now = 74;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.073Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.073Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.074Z-0000-0000000000000001'),
@@ -222,7 +224,7 @@ describe('Timestamp', function () {
       now = 81;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.083Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.083Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.083Z-0001-0000000000000001'),
@@ -230,7 +232,7 @@ describe('Timestamp', function () {
       now = 82;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.083Z-0001-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.083Z-0001-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.083Z-0002-0000000000000001'),
@@ -238,7 +240,7 @@ describe('Timestamp', function () {
       now = 83;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.083Z-0002-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.083Z-0002-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.083Z-0003-0000000000000001'),
@@ -246,7 +248,7 @@ describe('Timestamp', function () {
       now = 84;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.083Z-0003-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.083Z-0003-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.084Z-0000-0000000000000001'),
@@ -256,7 +258,7 @@ describe('Timestamp', function () {
       now = 93;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.091Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.091Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.093Z-0000-0000000000000001'),
@@ -264,7 +266,7 @@ describe('Timestamp', function () {
       now = 92;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.092Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.092Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.093Z-0001-0000000000000001'),
@@ -272,7 +274,7 @@ describe('Timestamp', function () {
       now = 91;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.093Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.093Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.093Z-0002-0000000000000001'),
@@ -282,7 +284,7 @@ describe('Timestamp', function () {
       now = 101;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.103Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.103Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.103Z-0001-0000000000000001'),
@@ -290,7 +292,7 @@ describe('Timestamp', function () {
       now = 102;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.102Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.102Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.103Z-0002-0000000000000001'),
@@ -298,7 +300,7 @@ describe('Timestamp', function () {
       now = 103;
       expect(
         Timestamp.recv(
-          Timestamp.parse('1970-01-01T00:00:00.101Z-0000-0000000000000002'),
+          Timestamp.parse('1970-01-01T00:00:00.101Z-0000-0000000000000002')!,
         ),
       ).toEqual(
         Timestamp.parse('1970-01-01T00:00:00.103Z-0003-0000000000000001'),
@@ -316,7 +318,7 @@ describe('Timestamp', function () {
     it('should fail with clock drift', function () {
       expect(function () {
         Timestamp.recv(
-          Timestamp.parse('1980-01-01T00:00:00.101Z-0000-0000000000000002'),
+          Timestamp.parse('1980-01-01T00:00:00.101Z-0000-0000000000000002')!,
         );
       }).toThrow(Timestamp.ClockDriftError);
     });
