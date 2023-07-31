@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { createBudget } from 'loot-core/src/client/actions/budgets';
-import { signOut, loggedIn } from 'loot-core/src/client/actions/user';
 import {
   isNonProductionEnvironment,
   isElectron,
@@ -18,10 +15,11 @@ import View from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
+import { useActions } from '../../hooks/useActions';
 
 export default function ConfigServer() {
   useSetThemeColor(colors.p5);
-  let dispatch = useDispatch();
+  let { createBudget, signOut, loggedIn } = useActions();
   let navigate = useNavigate();
   let [url, setUrl] = useState('');
   let currentUrl = useServerURL();
@@ -30,9 +28,9 @@ export default function ConfigServer() {
     setUrl(currentUrl);
   }, [currentUrl]);
   let [loading, setLoading] = useState(false);
-  let [error, setError] = useState(null);
+  let [error, setError] = useState<string | null>(null);
 
-  function getErrorMessage(error) {
+  function getErrorMessage(error: string) {
     switch (error) {
       case 'network-failure':
         return 'Server is not running at this URL. Make sure you have HTTPS set up properly.';
@@ -60,7 +58,7 @@ export default function ConfigServer() {
         setUrl('https://' + url);
         setError(error);
       } else {
-        await dispatch(signOut());
+        await signOut();
         navigate('/');
       }
       setLoading(false);
@@ -69,7 +67,7 @@ export default function ConfigServer() {
       setError(error);
     } else {
       setLoading(false);
-      await dispatch(signOut());
+      await signOut();
       navigate('/');
     }
   }
@@ -80,13 +78,13 @@ export default function ConfigServer() {
 
   async function onSkip() {
     await setServerUrl(null);
-    await dispatch(loggedIn());
+    await loggedIn();
     navigate('/');
   }
 
   async function onCreateTestFile() {
     await setServerUrl(null);
-    await dispatch(createBudget({ testMode: true }));
+    await createBudget({ testMode: true });
     window.__navigate('/');
   }
 
@@ -137,9 +135,9 @@ export default function ConfigServer() {
       >
         <BigInput
           autoFocus={true}
-          placeholder={'https://example.com'}
+          placeholder="https://example.com"
           value={url || ''}
-          onChange={e => setUrl(e.target.value)}
+          onUpdate={setUrl}
           style={{ flex: 1, marginRight: 10 }}
         />
         <ButtonWithLoading
