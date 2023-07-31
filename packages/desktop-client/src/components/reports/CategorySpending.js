@@ -139,7 +139,9 @@ function CategoryAverage() {
           }}
         >
           <CategorySelector
-            categoryGroups={categories.grouped}
+            categoryGroups={categories.grouped.filter(
+              categoryGroup => !categoryGroup.is_income,
+            )}
             selectedCategories={selectedCategories}
             setSelectedCategories={setSelectedCategories}
           />
