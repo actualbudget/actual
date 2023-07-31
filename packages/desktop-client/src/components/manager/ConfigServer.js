@@ -12,11 +12,12 @@ import {
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
+import { BigInput } from '../common/Input';
 import Text from '../common/Text';
 import View from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
-import { Title, Input } from './subscribe/common';
+import { Title } from './subscribe/common';
 
 export default function ConfigServer() {
   useSetThemeColor(colors.p5);
@@ -134,7 +135,7 @@ export default function ConfigServer() {
           onSubmit();
         }}
       >
-        <Input
+        <BigInput
           autoFocus={true}
           placeholder={'https://example.com'}
           value={url || ''}

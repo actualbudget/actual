@@ -2,8 +2,7 @@ import React, { type ChangeEvent, useState } from 'react';
 
 import { ButtonWithLoading } from '../../common/Button';
 import View from '../../common/View';
-
-import { Input } from './common';
+import { BigInput } from '../../common/Input';
 
 export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
   let [password1, setPassword1] = useState('');
@@ -40,7 +39,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
       }}
       onSubmit={onSubmit}
     >
-      <Input
+      <BigInput
         autoFocus={true}
         placeholder="Password"
         type={showPassword ? 'text' : 'password'}
@@ -50,7 +49,7 @@ export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
         }
         onEnter={onSubmit}
       />
-      <Input
+      <BigInput
         placeholder="Confirm password"
         type={showPassword ? 'text' : 'password'}
         value={password2}
