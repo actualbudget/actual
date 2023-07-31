@@ -1,8 +1,8 @@
 import React, { type ChangeEvent, useState } from 'react';
 
 import { ButtonWithLoading } from '../../common/Button';
-import View from '../../common/View';
 import { BigInput } from '../../common/Input';
+import View from '../../common/View';
 
 export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
   let [password1, setPassword1] = useState('');

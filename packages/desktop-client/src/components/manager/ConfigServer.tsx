@@ -6,6 +6,7 @@ import {
   isElectron,
 } from 'loot-core/src/shared/environment';
 
+import { useActions } from '../../hooks/useActions';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
@@ -15,7 +16,6 @@ import View from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
-import { useActions } from '../../hooks/useActions';
 
 export default function ConfigServer() {
   useSetThemeColor(colors.p5);
