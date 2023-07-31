@@ -8,6 +8,7 @@ export const pageBackgroundLineTop = colorPalette.purple400;
 export const pageBackgroundLineMid = colorPalette.navy900;
 export const pageBackgroundLineBottom = colorPalette.navy150;
 export const pageText = colorPalette.navy150;
+export const pageTextLight = pageText;
 export const pageTextSubdued = colorPalette.navy500;
 export const pageTextPositive = colorPalette.purple400;
 export const pageTextLink = colorPalette.purple400;
@@ -55,6 +56,7 @@ export const menuItemTextSelected = colorPalette.navy200;
 export const menuItemTextHeader = colorPalette.purple400;
 export const menuBorder = colorPalette.navy800;
 export const menuBorderHover = colorPalette.purple400;
+export const menuKeybindingText = colorPalette.navy500;
 export const altMenuBackground = colorPalette.navy700;
 export const altMenuItemBackground = colorPalette.navy700;
 export const altMenuItemBackgroundHover = colorPalette.navy600;
@@ -96,6 +98,10 @@ export const buttonNormalBackgroundHover = colorPalette.navy600;
 export const buttonNormalBorder = colorPalette.navy300;
 export const buttonNormalShadow = 'rgba(0, 0, 0, 0.4)';
 
+export const altbuttonMenuBackground = buttonNormalBackground;
+export const buttonNormalSelectedText = colorPalette.white;
+export const buttonNormalSelectedBackground = colorPalette.purple600;
+
 export const buttonNormalDisabledText = colorPalette.navy500;
 export const buttonNormalDisabledBackground = colorPalette.navy800;
 export const buttonNormalDisabledBorder = colorPalette.navy500;
@@ -131,8 +137,10 @@ export const formInputTextPlaceholderSelected = colorPalette.navy100;
 export const formInputTextSelection = colorPalette.navy800;
 export const formInputShadowSelected = colorPalette.purple200;
 export const formInputTextHighlight = colorPalette.purple400;
+
 export const pillBackground = colorPalette.navy600;
 export const pillText = colorPalette.navy200;
+export const pillTextHighlighted = colorPalette.purple500;
 export const pillBorder = colorPalette.navy700;
 export const pillBackgroundSelected = colorPalette.purple600;
 export const pillTextSelected = colorPalette.navy150;

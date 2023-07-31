@@ -29,7 +29,7 @@ import useSelected, {
   SelectedProvider,
 } from '../hooks/useSelected';
 import ArrowRight from '../icons/v0/RightArrow2';
-import { colors } from '../style';
+import { theme } from '../style';
 
 import Button from './common/Button';
 import ExternalLink from './common/ExternalLink';
@@ -40,6 +40,10 @@ import Text from './common/Text';
 import View from './common/View';
 import { SelectCell, Row, Field, Cell, CellButton, TableHeader } from './table';
 
+let valueStyle = {
+  fontWeight: 500,
+  color: theme.pageTextPositive,
+};
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
 
 export function Value({
@@ -133,11 +137,11 @@ export function Value({
 
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <Text style={{ color: colors.p4 }}>(empty)</Text>;
+      return <Text style={valueStyle}>(empty)</Text>;
     } else if (value.length === 1) {
       return (
         <Text>
-          [<Text style={{ color: colors.p4 }}>{formatValue(value[0])}</Text>]
+          [<Text style={valueStyle}>{formatValue(value[0])}</Text>]
         </Text>
       );
     }
@@ -148,10 +152,10 @@ export function Value({
     }
     let numHidden = value.length - displayed.length;
     return (
-      <Text style={{ color: colors.n3 }}>
+      <Text style={{ color: theme.pageText }}>
         [
         {displayed.map((v, i) => {
-          let text = <Text style={{ color: colors.p4 }}>{formatValue(v)}</Text>;
+          let text = <Text style={valueStyle}>{formatValue(v)}</Text>;
           let spacing;
           if (inline) {
             spacing = i !== 0 ? ' ' : '';
@@ -174,9 +178,9 @@ export function Value({
           );
         })}
         {numHidden > 0 && (
-          <Text style={{ color: colors.p4 }}>
+          <Text style={valueStyle}>
             &nbsp;&nbsp;
-            <LinkButton onClick={onExpand} style={{ color: colors.p4 }}>
+            <LinkButton onClick={onExpand} style={valueStyle}>
               {numHidden} more items...
             </LinkButton>
             {!inline && <br />}
@@ -189,12 +193,12 @@ export function Value({
     // An "in between" type
     return (
       <Text>
-        <Text style={{ color: colors.p4 }}>{formatValue(value.num1)}</Text> and{' '}
-        <Text style={{ color: colors.p4 }}>{formatValue(value.num2)}</Text>
+        <Text style={valueStyle}>{formatValue(value.num1)}</Text> and{' '}
+        <Text style={valueStyle}>{formatValue(value.num2)}</Text>
       </Text>
     );
   } else {
-    return <Text style={{ color: colors.p4 }}>{formatValue(value)}</Text>;
+    return <Text style={valueStyle}>{formatValue(value)}</Text>;
   }
 }
 
@@ -213,7 +217,8 @@ function ConditionExpression({
         {
           display: 'block',
           maxWidth: '100%',
-          backgroundColor: colors.n10,
+          color: theme.pillText,
+          backgroundColor: theme.pillBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',
@@ -223,9 +228,9 @@ function ConditionExpression({
         style,
       ]}
     >
-      {prefix && <Text style={{ color: colors.n3 }}>{prefix} </Text>}
-      <Text style={{ color: colors.p4 }}>{mapField(field, options)}</Text>{' '}
-      <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+      {prefix && <Text>{prefix} </Text>}
+      <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
+      <Text>{friendlyOp(op)}</Text>{' '}
       <Value value={value} field={field} inline={inline} />
     </View>
   );
@@ -261,7 +266,8 @@ function ActionExpression({ field, op, value, options, style }) {
         {
           display: 'block',
           maxWidth: '100%',
-          backgroundColor: colors.n10,
+          color: theme.pillText,
+          backgroundColor: theme.pillBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',
@@ -273,15 +279,14 @@ function ActionExpression({ field, op, value, options, style }) {
     >
       {op === 'set' ? (
         <>
-          <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
-          <Text style={{ color: colors.p4 }}>{mapField(field, options)}</Text>{' '}
-          <Text style={{ color: colors.n3 }}>to </Text>
+          <Text>{friendlyOp(op)}</Text>{' '}
+          <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
+          <Text>to </Text>
           <Value value={value} field={field} />
         </>
       ) : op === 'link-schedule' ? (
         <>
-          <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
-          <ScheduleValue value={value} />
+          <Text>{friendlyOp(op)}</Text> <ScheduleValue value={value} />
         </>
       ) : null}
     </View>
@@ -290,17 +295,22 @@ function ActionExpression({ field, op, value, options, style }) {
 
 let Rule = memo(({ rule, hovered, selected, onHover, onEditRule }) => {
   let dispatchSelected = useSelectedDispatch();
-  let borderColor = selected ? colors.b8 : colors.border;
+  let borderColor = selected ? theme.tableBorderSelected : 'none';
   let backgroundFocus = hovered;
 
   return (
     <Row
       height="auto"
-      borderColor={borderColor}
-      backgroundColor={
-        selected ? colors.selected : backgroundFocus ? colors.hover : 'white'
-      }
-      style={{ fontSize: 13, zIndex: selected ? 101 : 'auto' }}
+      style={{
+        fontSize: 13,
+        zIndex: selected ? 101 : 'auto',
+        borderColor,
+        backgroundColor: selected
+          ? theme.tableRowBackgroundHighlight
+          : backgroundFocus
+          ? theme.tableRowBackgroundHover
+          : theme.tableBackground,
+      }}
       collapsed="true"
       onMouseEnter={() => onHover && onHover(rule.id)}
       onMouseLeave={() => onHover && onHover(null)}
@@ -314,14 +324,14 @@ let Rule = memo(({ rule, hovered, selected, onHover, onEditRule }) => {
         selected={selected}
       />
 
-      <Cell name="stage" width={50} plain style={{ color: colors.n5 }}>
+      <Cell name="stage" width={50} plain style={{ color: theme.tableText }}>
         {rule.stage && (
           <View
             style={{
               alignSelf: 'flex-start',
               margin: 5,
-              backgroundColor: colors.b10,
-              color: colors.b1,
+              backgroundColor: theme.pillBackgroundSelected,
+              color: theme.pillTextSelected,
               borderRadius: 4,
               padding: '3px 5px',
             }}
@@ -352,7 +362,9 @@ let Rule = memo(({ rule, hovered, selected, onHover, onEditRule }) => {
           </View>
 
           <Text>
-            <ArrowRight color={colors.n4} style={{ width: 12, height: 12 }} />
+            <ArrowRight
+              style={{ width: 12, height: 12, color: theme.tableText }}
+            />
           </Text>
 
           <View
@@ -705,7 +717,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
         >
           <View
             style={{
-              color: colors.n4,
+              color: theme.pageTextLight,
               flexDirection: 'row',
               alignItems: 'center',
               width: '50%',
@@ -750,7 +762,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
           style={{
             paddingBlock: 15,
             paddingInline: isModal ? 13 : 0,
-            borderTop: isModal && '1px solid ' + colors.border,
+            borderTop: isModal && '1px solid ' + theme.pillBorder,
             flexShrink: 0,
           }}
         >

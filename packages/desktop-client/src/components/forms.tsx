@@ -2,7 +2,7 @@ import React, { type ReactNode, type HTMLProps } from 'react';
 
 import { css, type CSSProperties } from 'glamor';
 
-import { colors } from '../style';
+import { theme } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -19,7 +19,7 @@ export const SectionLabel = ({ title, style }: SectionLabelProps) => {
         {
           fontWeight: 500,
           textTransform: 'uppercase',
-          color: colors.b3,
+          color: theme.formLabelText,
           marginBottom: 5,
           lineHeight: '1em',
         },
@@ -40,7 +40,12 @@ type FormLabelProps = {
 
 export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
-    <Text style={[{ fontSize: 13, marginBottom: 3, color: colors.n3 }, style]}>
+    <Text
+      style={[
+        { fontSize: 13, marginBottom: 3, color: theme.formLabelText },
+        style,
+      ]}
+    >
       <label htmlFor={htmlFor} id={id}>
         {title}
       </label>
@@ -69,51 +74,14 @@ export const Checkbox = (props: CheckboxProps) => {
       type="checkbox"
       {...props}
       {...css(
-        [
-          {
-            position: 'relative',
-            margin: 0,
-            marginRight: 6,
-            width: 15,
-            height: 15,
-            appearance: 'none',
-            outline: 0,
-            border: '1px solid #d0d0d0',
-            borderRadius: 4,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            backgroundColor: 'white',
-            ':checked': {
-              border: '1px solid ' + colors.b6,
-              backgroundColor: colors.b6,
-              '::after': {
-                display: 'block',
-                background:
-                  colors.b6 +
-                  // eslint-disable-next-line rulesdir/typography
-                  ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
-                width: 9,
-                height: 9,
-                content: ' ',
-              },
-            },
-            '&.focus-visible:focus': {
-              '::before': {
-                position: 'absolute',
-                top: -5,
-                bottom: -5,
-                left: -5,
-                right: -5,
-                border: '2px solid ' + colors.b5,
-                borderRadius: 6,
-                content: ' ',
-              },
-            },
-          },
-        ],
-        props.style,
+        {
+          position: 'relative',
+          margin: 0,
+          marginRight: 6,
+          accentColor: theme.formInputBackgroundSelected,
+        },
+
+        props.styles,
       )}
     />
   );

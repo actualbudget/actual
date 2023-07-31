@@ -25,7 +25,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
 import Select from '../common/Select';
@@ -96,11 +96,14 @@ function OpButton({ op, selected, style, onClick }) {
     <Button
       type="bare"
       style={[
-        { backgroundColor: colors.n10, marginBottom: 5 },
+        { backgroundColor: theme.altbuttonMenuBackground, marginBottom: 5 },
         style,
         selected && {
-          color: 'white',
-          '&,:hover,:active': { backgroundColor: colors.b4 },
+          color: theme.buttonNormalSelectedText,
+          '&,:hover,:active': {
+            backgroundColor: theme.buttonNormalSelectedBackground,
+            color: theme.buttonNormalSelectedText,
+          },
         },
       ]}
       onClick={onClick}
@@ -170,7 +173,7 @@ function ConfigureField({
   return (
     <Tooltip
       position="bottom-left"
-      style={{ padding: 15 }}
+      style={{ padding: 15, color: theme.altMenuItemTextHeader }}
       width={275}
       onClose={() => dispatch({ type: 'close' })}
     >
@@ -210,7 +213,7 @@ function ConfigureField({
 
         <View
           style={{
-            color: colors.n4,
+            color: theme.menuItemText,
             marginBottom: 10,
           }}
         >
@@ -494,7 +497,7 @@ function FilterExpression({
     <View
       style={[
         {
-          backgroundColor: colors.n9,
+          backgroundColor: theme.pillBackground,
           borderRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
@@ -512,13 +515,15 @@ function FilterExpression({
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
-            <Text style={{ color: colors.p4 }}>{customName}</Text>
+            <Text style={{ color: theme.pillTextHighlighted }}>
+              {customName}
+            </Text>
           ) : (
             <>
-              <Text style={{ color: colors.p4 }}>
+              <Text style={{ color: theme.pillTextHighlighted }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colors.n3 }}>{friendlyOp(op, null)}</Text>{' '}
+              <Text>{friendlyOp(op, null)}</Text>{' '}
               <Value
                 value={value}
                 field={field}
