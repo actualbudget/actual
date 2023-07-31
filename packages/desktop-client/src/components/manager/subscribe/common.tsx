@@ -93,8 +93,7 @@ export function Title({ text }: TitleProps) {
   );
 }
 
-type InputProps = ComponentProps<typeof BaseInput>;
-export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+export function Input(props: ComponentProps<typeof BaseInput>) {
   return (
     <BaseInput
       {...props}
@@ -110,4 +109,4 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
       ]}
     />
   );
-});
+}
