@@ -1,6 +1,7 @@
 import * as d from 'date-fns';
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryStack } from 'victory';
 
+import { categoryColorScale } from '../CategorySpending';
 import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
@@ -23,7 +24,7 @@ function CategorySpendingGraph({
   }
 
   return (
-    <Container style={{ height: 600 }}>
+    <Container>
       {(width, height, portalHost) => (
         <VictoryChart
           scale={{ x: 'time', y: 'linear' }}
@@ -33,7 +34,7 @@ function CategorySpendingGraph({
           height={height}
         >
           <Area start={start} end={end} />
-          <VictoryStack colorScale="warm">
+          <VictoryStack colorScale={categoryColorScale}>
             {graphData.categories.map(category => (
               <VictoryBar
                 key={category.id}

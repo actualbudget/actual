@@ -9,16 +9,31 @@ import { useActions } from '../../hooks/useActions';
 import { styles } from '../../style';
 import View from '../common/View';
 
+import CategorySelector from './CategorySelector';
 import categorySpendingSpreadsheet from './graphs/category-spending-spreadsheet';
 import CategorySpendingGraph from './graphs/CategorySpendingGraph';
 import Header from './Header';
 import useReport from './useReport';
 import { fromDateRepr } from './util';
 
+export const categoryColorScale = [
+  '#ea5545',
+  '#f46a9b',
+  '#ef9b20',
+  '#edbf33',
+  '#ede15b',
+  '#bdcf32',
+  '#87bc45',
+  '#27aeef',
+  '#b33dc6',
+];
+
 function CategoryAverage() {
   const { getCategories } = useActions();
 
   const [categories, setCategories] = useState({});
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [categorySelectorVisible, setCategorySelectorVisible] = useState(false);
 
   const [allMonths, setAllMonths] = useState(null);
 
@@ -29,22 +44,28 @@ function CategoryAverage() {
 
   const [numberOfMonthsAverage, setNumberOfMonthsAverage] = useState(3);
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState([]);
-
   const getGraphData = useMemo(() => {
     return categorySpendingSpreadsheet(
       start,
       end,
       numberOfMonthsAverage,
       (categories.list || []).filter(
-        category => !category.is_income && !category.hidden,
+        category =>
+          !category.is_income &&
+          !category.hidden &&
+          selectedCategories.some(
+            selectedCategory => selectedCategory.id === category.id,
+          ),
       ),
     );
-  }, [start, end, numberOfMonthsAverage, categories]);
+  }, [start, end, numberOfMonthsAverage, categories, selectedCategories]);
   const perCategorySpending = useReport('category_spending', getGraphData);
 
   useEffect(() => {
-    getCategories().then(categories => setCategories(categories));
+    getCategories().then(categories => {
+      setCategories(categories);
+      setSelectedCategories(categories.list);
+    });
   }, []);
 
   useEffect(() => {
@@ -95,35 +116,50 @@ function CategoryAverage() {
   const numberOfMonthsLine = numberOfMonthsOptions.length - 1;
 
   return (
-    <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
+    <View style={[styles.page, { overflow: 'hidden' }]}>
       <Header
         title="Category Spending"
         allMonths={allMonths}
         start={start}
         end={end}
         onChangeDates={onChangeDates}
-        category={selectedCategoryId}
-        categoryGroups={categories.grouped}
-        onChangeCategory={setSelectedCategoryId}
-        numberOfMonths={numberOfMonthsAverage}
-        numberOfMonthsOptions={numberOfMonthsOptions}
         numberOfMonthsLine={numberOfMonthsLine}
         onChangeNumberOfMonths={setNumberOfMonthsAverage}
+        categorySelectorVisible={categorySelectorVisible}
+        onChangeCategoryVisible={setCategorySelectorVisible}
       />
-
       <View
-        style={{
-          backgroundColor: 'white',
-          padding: 30,
-          paddingTop: 50,
-          overflow: 'auto',
-        }}
+        style={{ display: 'flex', flexDirection: 'row', padding: 15, gap: 15 }}
       >
-        <CategorySpendingGraph
-          start={start}
-          end={end}
-          graphData={perCategorySpending}
-        />
+        <View
+          style={{
+            height: '360',
+            overflowY: 'scroll',
+            width: !categorySelectorVisible ? 0 : 'auto',
+          }}
+        >
+          <CategorySelector
+            categoryGroups={categories.grouped}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+          />
+        </View>
+
+        <View
+          style={{
+            flexGrow: 1,
+            backgroundColor: 'white',
+            padding: 30,
+            overflow: 'auto',
+            transition: 'flex-grow .3s linear',
+          }}
+        >
+          <CategorySpendingGraph
+            start={start}
+            end={end}
+            graphData={perCategorySpending}
+          />
+        </View>
       </View>
     </View>
   );

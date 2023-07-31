@@ -1,8 +1,8 @@
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
+import Filter from '../../icons/v2/Filter2';
 import { styles } from '../../style';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import Button from '../common/Button';
 import ButtonLink from '../common/ButtonLink';
 import Select from '../common/Select';
@@ -61,13 +61,12 @@ function Header({
   onUpdateFilter,
   onDeleteFilter,
   onCondOpChange,
-  category,
-  categoryGroups,
-  onChangeCategory,
   numberOfMonths,
   numberOfMonthsOptions,
   numberOfMonthsLine,
   onChangeNumberOfMonths,
+  categorySelectorVisible,
+  onChangeCategoryVisible,
 }) {
   return (
     <View
@@ -94,23 +93,17 @@ function Header({
           gap: 15,
         }}
       >
-        {categoryGroups && (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 5,
-            }}
+        {title === 'Category Spending' && (
+          <Button
+            type="bare"
+            onClick={() => onChangeCategoryVisible(!categorySelectorVisible)}
           >
-            <CategoryAutocomplete
-              categoryGroups={categoryGroups}
-              value={category}
-              inputProps={{
-                placeholder: 'Select category...',
-              }}
-              onSelect={newValue => onChangeCategory(newValue)}
+            <Filter
+              width={14}
+              height={14}
+              style={{ opacity: categorySelectorVisible ? 0.6 : 1 }}
             />
-          </View>
+          </Button>
         )}
 
         {numberOfMonthsOptions && (

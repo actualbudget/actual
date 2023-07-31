@@ -12,19 +12,21 @@ import View from '../common/View';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
-type CategoryGroup = {
+type Category = {
   id: string;
+  cat_group: unknown;
+  groupName: string;
   name: string;
-  categories: Array<{ id: string; name: string }>;
 };
 
-type CategoryListProps = {
-  items: Array<{
-    id: string;
-    cat_group: unknown;
-    groupName: string;
-    name: string;
-  }>;
+export type CategoryGroup = {
+  id: string;
+  name: string;
+  categories: Array<Category>;
+};
+
+export type CategoryListProps = {
+  items: Array<Category>;
   getItemProps?: (arg: { item }) => Partial<ComponentProps<typeof View>>;
   highlightedIndex: number;
   embedded: boolean;
