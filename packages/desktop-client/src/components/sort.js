@@ -9,9 +9,9 @@ import React, {
 } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
-import { colors } from '../style';
+import { theme } from '../style';
 
-import View from './common/View';
+import { View } from './common';
 
 function useMergedRefs(ref1, ref2) {
   return useMemo(() => {
@@ -123,7 +123,7 @@ export function DropHighlight({ pos, offset = {} }) {
           right: 2,
           borderRadius: 3,
           height: 3,
-          background: `linear-gradient(90deg, ${colors.b4} 0%, ${colors.b5} 100%)`,
+          background: theme.sidebarItemAccentSelected,
           zIndex: 10000,
           pointerEvents: 'none',
         },

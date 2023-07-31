@@ -173,42 +173,45 @@ function ConfigureField({
   return (
     <Tooltip
       position="bottom-left"
-      style={{ padding: 15, color: theme.altMenuItemTextHeader }}
+      style={{ padding: 15, color: theme.menuItemTextHeader }}
       width={275}
       onClose={() => dispatch({ type: 'close' })}
     >
       <FocusScope>
         <View style={{ marginBottom: 10 }}>
-          {field === 'amount' || field === 'date' ? (
-            <Select
-              options={
-                field === 'amount'
-                  ? [
-                      ['amount', 'Amount'],
-                      ['amount-inflow', 'Amount (inflow)'],
-                      ['amount-outflow', 'Amount (outflow)'],
-                    ]
-                  : field === 'date'
-                  ? [
-                      ['date', 'Date'],
-                      ['month', 'Month'],
-                      ['year', 'Year'],
-                    ]
-                  : null
-              }
-              value={subfield}
-              onChange={sub => {
-                setSubfield(sub);
-
-                if (sub === 'month' || sub === 'year') {
-                  dispatch({ type: 'set-op', op: 'is' });
+          <Stack direction="row" align="flex-start">
+            {field === 'amount' || field === 'date' ? (
+              <Select
+                options={
+                  field === 'amount'
+                    ? [
+                        ['amount', 'Amount'],
+                        ['amount-inflow', 'Amount (inflow)'],
+                        ['amount-outflow', 'Amount (outflow)'],
+                      ]
+                    : field === 'date'
+                    ? [
+                        ['date', 'Date'],
+                        ['month', 'Month'],
+                        ['year', 'Year'],
+                      ]
+                    : null
                 }
-              }}
-              style={{ borderWidth: 1 }}
-            />
-          ) : (
-            titleFirst(mapField(field))
-          )}
+                value={subfield}
+                onChange={sub => {
+                  setSubfield(sub);
+
+                  if (sub === 'month' || sub === 'year') {
+                    dispatch({ type: 'set-op', op: 'is' });
+                  }
+                }}
+                style={{ borderWidth: 1 }}
+              />
+            ) : (
+              titleFirst(mapField(field))
+            )}
+            <View style={{ flex: 1 }} />
+          </Stack>
         </View>
 
         <View
@@ -515,12 +518,10 @@ function FilterExpression({
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
-            <Text style={{ color: theme.pillTextHighlighted }}>
-              {customName}
-            </Text>
+            <Text style={{ color: theme.pageTextPositive }}>{customName}</Text>
           ) : (
             <>
-              <Text style={{ color: theme.pillTextHighlighted }}>
+              <Text style={{ color: theme.pageTextPositive }}>
                 {mapField(field, options)}
               </Text>{' '}
               <Text>{friendlyOp(op, null)}</Text>{' '}

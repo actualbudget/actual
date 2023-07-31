@@ -65,9 +65,8 @@ export default function Select<Value extends string>({
     >
       <ListboxButton
         {...css({
-          width: '100%',
           borderWidth: 0,
-          padding: '2px 10px',
+          padding: '2px 5px',
           borderRadius: styles.menuBorderRadius,
           ...style,
         })}

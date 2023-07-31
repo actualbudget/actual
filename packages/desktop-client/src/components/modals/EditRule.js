@@ -78,7 +78,7 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={[{ color: theme.pillTextHighlighted }, style]}>
+    <View style={[{ color: theme.pageTextPositive }, style]}>
       <Select
         bare
         options={fields}

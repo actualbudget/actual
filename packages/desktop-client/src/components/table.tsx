@@ -900,7 +900,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
         <Tooltip
           position="bottom-right"
           width={200}
-          style={{ padding: 0, backgroundColor: 'transparent' }}
+          style={{ padding: 0, backgroundColor: theme.menuBackground }}
           onClose={() => setMenuOpen(false)}
         >
           <Menu
