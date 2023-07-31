@@ -345,7 +345,8 @@ class TransactionEditInner extends PureComponent {
           style={{
             borderRadius: 4,
             overflow: 'hidden',
-            flex: 1,
+            display: 'flex',
+            flex: 'auto',
           }}
         >
           <View
@@ -355,6 +356,7 @@ class TransactionEditInner extends PureComponent {
               backgroundColor: 'white',
               alignItems: 'center',
               flexDirection: 'row',
+              flexShrink: 0,
               justifyContent: 'space-between',
               width: '100%',
               padding: 10,
@@ -412,6 +414,7 @@ class TransactionEditInner extends PureComponent {
             style={{
               overflowY: 'auto',
               overflowX: 'hidden',
+              display: 'block',
             }}
           >
             <View
@@ -448,11 +451,13 @@ class TransactionEditInner extends PureComponent {
               />
             </View>
 
-            <FieldLabel title="Payee" flush />
-            <TapField
-              value={descriptionPretty}
-              onClick={() => this.onClick(transaction.id, 'payee')}
-            />
+            <View>
+              <FieldLabel title="Payee" />
+              <TapField
+                value={descriptionPretty}
+                onClick={() => this.onClick(transaction.id, 'payee')}
+              />
+            </View>
 
             <View>
               <FieldLabel
@@ -493,12 +498,14 @@ class TransactionEditInner extends PureComponent {
               )}
             </View>
 
-            <FieldLabel title="Account" />
-            <TapField
-              disabled={!adding}
-              value={account ? account.name : null}
-              onClick={() => this.onClick(transaction.id, 'account')}
-            />
+            <View>
+              <FieldLabel title="Account" />
+              <TapField
+                disabled={!adding}
+                value={account ? account.name : null}
+                onClick={() => this.onClick(transaction.id, 'account')}
+              />
+            </View>
 
             <View style={{ flexDirection: 'row' }}>
               <View style={{ flex: 1 }}>
@@ -524,14 +531,16 @@ class TransactionEditInner extends PureComponent {
               </View>
             </View>
 
-            <FieldLabel title="Notes" />
-            <InputField
-              defaultValue={transaction.notes}
-              onUpdate={value => this.onEdit(transaction, 'notes', value)}
-              onChange={e =>
-                this.onQueueChange(transaction, 'notes', e.target.value)
-              }
-            />
+            <View>
+              <FieldLabel title="Notes" />
+              <InputField
+                defaultValue={transaction.notes}
+                onUpdate={value => this.onEdit(transaction, 'notes', value)}
+                onChange={e =>
+                  this.onQueueChange(transaction, 'notes', e.target.value)
+                }
+              />
+            </View>
 
             {!adding && (
               <View style={{ alignItems: 'center' }}>
@@ -577,6 +586,7 @@ class TransactionEditInner extends PureComponent {
               borderTopWidth: 1,
               borderColor: colors.n10,
               marginTop: 'auto',
+              flexShrink: 0,
             }}
           >
             {adding ? (
