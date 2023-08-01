@@ -1,6 +1,7 @@
 import React, { type ComponentProps, memo, useContext, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
+import { getGoal } from 'loot-core/src/server/budget/actions';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
@@ -326,6 +327,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
+  getGoal({ category, monthIndex });
+
+  //const percentProgress = Math.round((amount * 100) / goal);
+  const percentProgress = 50;
   return (
     <View
       style={{
@@ -525,7 +530,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           flexDirection: 'row',
         }}
       >
-        <progress max="100" value="70">
+        <progress max="100" value={percentProgress}>
           {' '}
         </progress>
       </View>

@@ -66,6 +66,15 @@ export function getBudget({ category, month }) {
   return existing ? existing.amount || 0 : 0;
 }
 
+export function getGoal({ category, month }) {
+  let table = getBudgetTable();
+  let existing = db.firstSync(
+    `SELECT * FROM ${table} WHERE month = ? AND category = ?`,
+    [dbMonth(month), category],
+  );
+  return { goal: existing.goal, amount: existing.amount };
+}
+
 export function setBudget({ category, month, amount }) {
   amount = safeNumber(typeof amount === 'number' ? amount : 0);
   const table = getBudgetTable();
