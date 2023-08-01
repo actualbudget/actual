@@ -19,7 +19,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { styles } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 import { TitlebarContext } from '../Titlebar';
 
 import DynamicBudgetTable from './DynamicBudgetTable';

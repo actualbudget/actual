@@ -4,7 +4,9 @@ import { useSelector } from 'react-redux';
 import { useActions } from '../../hooks/useActions';
 import { colors } from '../../style';
 import { Information } from '../alerts';
-import { View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 
 import { Setting } from './UI';
 
@@ -13,7 +15,7 @@ export default function GlobalSettings() {
   let { saveGlobalPrefs } = useActions();
 
   let [documentDirChanged, setDirChanged] = useState(false);
-  let dirScrolled = useRef(null);
+  let dirScrolled = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (dirScrolled.current) {

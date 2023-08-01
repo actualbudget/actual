@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 
 import { numberFormats } from 'loot-core/src/shared/util';
+import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
 import tokens from '../../tokens';
-import { Button, Select, Text, View } from '../common';
+import Button from '../common/Button';
+import Select from '../common/Select';
+import Text from '../common/Text';
+import View from '../common/View';
 import { useSidebar } from '../FloatableSidebar';
 import { Checkbox } from '../forms';
 
@@ -13,7 +17,7 @@ import { Setting } from './UI';
 
 // Follows Pikaday 'firstDay' numbering
 // https://github.com/Pikaday/Pikaday
-let daysOfWeek = [
+let daysOfWeek: { value: LocalPrefs['firstDayOfWeekIdx']; label: string }[] = [
   { value: '0', label: 'Sunday' },
   { value: '1', label: 'Monday' },
   { value: '2', label: 'Tuesday' },
@@ -23,7 +27,7 @@ let daysOfWeek = [
   { value: '6', label: 'Saturday' },
 ];
 
-let dateFormats = [
+let dateFormats: { value: LocalPrefs['dateFormat']; label: string }[] = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
   { value: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
   { value: 'yyyy-MM-dd', label: 'YYYY-MM-DD' },
@@ -31,7 +35,7 @@ let dateFormats = [
   { value: 'dd.MM.yyyy', label: 'DD.MM.YYYY' },
 ];
 
-function Column({ title, children }) {
+function Column({ title, children }: { title: string; children: ReactNode }) {
   return (
     <View
       style={{
@@ -49,23 +53,6 @@ function Column({ title, children }) {
 
 export default function FormatSettings() {
   let { savePrefs } = useActions();
-
-  function onFirstDayOfWeek(idx) {
-    savePrefs({ firstDayOfWeekIdx: idx });
-  }
-
-  function onDateFormat(format) {
-    savePrefs({ dateFormat: format });
-  }
-
-  function onNumberFormat(format) {
-    savePrefs({ numberFormat: format });
-  }
-
-  function onHideFraction(e) {
-    let hideFraction = e.target.checked;
-    savePrefs({ hideFraction });
-  }
 
   let sidebar = useSidebar();
   let firstDayOfWeekIdx = useSelector(
@@ -99,9 +86,9 @@ export default function FormatSettings() {
           <Column title="Numbers">
             <Button bounce={false} style={{ padding: 0 }}>
               <Select
-                key={hideFraction} // needed because label does not update
+                key={String(hideFraction)} // needed because label does not update
                 value={numberFormat}
-                onChange={onNumberFormat}
+                onChange={format => savePrefs({ numberFormat: format })}
                 options={numberFormats.map(f => [
                   f.value,
                   hideFraction ? f.labelNoFraction : f.label,
@@ -114,7 +101,9 @@ export default function FormatSettings() {
               <Checkbox
                 id="settings-textDecimal"
                 checked={!!hideFraction}
-                onChange={onHideFraction}
+                onChange={e =>
+                  savePrefs({ hideFraction: e.currentTarget.checked })
+                }
               />
               <label htmlFor="settings-textDecimal">Hide decimal places</label>
             </Text>
@@ -124,7 +113,7 @@ export default function FormatSettings() {
             <Button bounce={false} style={{ padding: 0 }}>
               <Select
                 value={dateFormat}
-                onChange={onDateFormat}
+                onChange={format => savePrefs({ dateFormat: format })}
                 options={dateFormats.map(f => [f.value, f.label])}
                 style={{ padding: '2px 10px', fontSize: 15 }}
               />
@@ -135,7 +124,7 @@ export default function FormatSettings() {
             <Button bounce={false} style={{ padding: 0 }}>
               <Select
                 value={firstDayOfWeekIdx}
-                onChange={onFirstDayOfWeek}
+                onChange={idx => savePrefs({ firstDayOfWeekIdx: idx })}
                 options={daysOfWeek.map(f => [f.value, f.label])}
                 style={{ padding: '2px 10px', fontSize: 15 }}
               />

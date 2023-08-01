@@ -8,19 +8,16 @@ import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
 import { styles, colors } from '../../../style';
 import CategoryAutocomplete from '../../autocomplete/CategorySelect';
-import {
-  View,
-  Text,
-  useTooltip,
-  InitialFocus,
-  Tooltip,
-  Button,
-  Menu,
-} from '../../common';
+import Button from '../../common/Button';
+import InitialFocus from '../../common/InitialFocus';
+import Menu from '../../common/Menu';
+import Text from '../../common/Text';
+import View from '../../common/View';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell } from '../../table';
+import { Tooltip, useTooltip } from '../../tooltips';
 import BalanceWithCarryover from '../BalanceWithCarryover';
 import { MONTH_RIGHT_PADDING } from '../constants';
 import {

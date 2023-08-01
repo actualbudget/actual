@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { colors } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 
 export const ROW_HEIGHT = 50;
 

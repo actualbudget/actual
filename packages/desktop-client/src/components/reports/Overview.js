@@ -7,7 +7,9 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { colors, styles } from '../../style';
-import { View, Block, AnchorLink } from '../common';
+import AnchorLink from '../common/AnchorLink';
+import Block from '../common/Block';
+import View from '../common/View';
 
 import Change from './Change';
 import theme from './chart-theme';

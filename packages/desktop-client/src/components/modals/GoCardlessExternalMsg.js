@@ -10,17 +10,15 @@ import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { colors } from '../../style';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
-import {
-  View,
-  Modal,
-  Button,
-  LinkButton,
-  Menu,
-  Tooltip,
-  ExternalLink,
-} from '../common';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import LinkButton from '../common/LinkButton';
+import Menu from '../common/Menu';
+import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
+import View from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { Tooltip } from '../tooltips';
 
 import { COUNTRY_OPTIONS } from './countries';
 

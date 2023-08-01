@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 
 import { colors } from '../../style';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
-import { View, Text, Block, Modal, Button } from '../common';
+import Block from '../common/Block';
+import Button from '../common/Button';
+import Modal from '../common/Modal';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function ConfirmCategoryDelete({
   modalProps,

@@ -23,7 +23,9 @@ import {
 import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { colors } from '../../style';
-import { View, Input, Tooltip } from '../common';
+import Input from '../common/Input';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';

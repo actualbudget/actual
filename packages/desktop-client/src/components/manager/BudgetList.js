@@ -15,7 +15,11 @@ import Key from '../../icons/v2/Key';
 import RefreshArrow from '../../icons/v2/RefreshArrow';
 import { styles, colors } from '../../style';
 import tokens from '../../tokens';
-import { View, Text, Button, Tooltip, Menu } from '../common';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Text from '../common/Text';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {

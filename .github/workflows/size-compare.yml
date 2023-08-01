@@ -66,14 +66,14 @@ jobs:
         run: |
           sed -i -E 's/\.[0-9a-f]{8,}\././g' ./head/*.json
           sed -i -E 's/\.[0-9a-f]{8,}\././g' ./base/*.json
-      - uses: github/webpack-bundlesize-compare-action@v1.8.1
+      - uses: github/webpack-bundlesize-compare-action@v1.8.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           current-stats-json-path: ./head/desktop-client-stats.json
           base-stats-json-path: ./base/desktop-client-stats.json
           title: desktop-client
 
-      - uses: github/webpack-bundlesize-compare-action@v1.8.1
+      - uses: github/webpack-bundlesize-compare-action@v1.8.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           current-stats-json-path: ./head/loot-core-stats.json

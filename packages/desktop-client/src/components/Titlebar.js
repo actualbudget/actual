@@ -28,21 +28,18 @@ import tokens from '../tokens';
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
-import {
-  View,
-  Text,
-  ButtonLink,
-  Button,
-  ButtonWithLoading,
-  Tooltip,
-  ExternalLink,
-} from './common';
+import Button, { ButtonWithLoading } from './common/Button';
+import ButtonLink from './common/ButtonLink';
+import ExternalLink from './common/ExternalLink';
 import Paragraph from './common/Paragraph';
+import Text from './common/Text';
+import View from './common/View';
 import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import useSheetValue from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
+import { Tooltip } from './tooltips';
 
 export let TitlebarContext = createContext();
 

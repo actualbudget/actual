@@ -11,7 +11,9 @@ import {
 
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors } from '../../style';
-import { View, Text, Button, ButtonWithLoading } from '../common';
+import Button, { ButtonWithLoading } from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title, Input } from './subscribe/common';

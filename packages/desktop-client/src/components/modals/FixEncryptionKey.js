@@ -4,18 +4,14 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
 import { colors } from '../../style';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  ButtonWithLoading,
-  ModalButtons,
-  Input,
-  InitialFocus,
-  ExternalLink,
-} from '../common';
+import Button, { ButtonWithLoading } from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import InitialFocus from '../common/InitialFocus';
+import Input from '../common/Input';
+import Modal, { ModalButtons } from '../common/Modal';
 import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function FixEncryptionKey({
   modalProps,

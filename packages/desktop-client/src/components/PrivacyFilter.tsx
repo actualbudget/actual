@@ -11,7 +11,7 @@ import usePrivacyMode from 'loot-core/src/client/privacy';
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import { useResponsive } from '../ResponsiveProvider';
 
-import { View } from './common';
+import View from './common/View';
 
 export type ConditionalPrivacyFilterProps = {
   children: ReactNode;

@@ -6,7 +6,10 @@ import { authorizeBank } from '../../gocardless';
 import { useActions } from '../../hooks/useActions';
 import ExclamationOutline from '../../icons/v1/ExclamationOutline';
 import { colors } from '../../style';
-import { View, Button, Tooltip, ExternalLink } from '../common';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {

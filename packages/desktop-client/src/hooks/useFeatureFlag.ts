@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 
-import { type FeatureFlag } from 'loot-core/src/client/state-types/prefs';
+import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   reportBudget: false,

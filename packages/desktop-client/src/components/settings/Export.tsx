@@ -5,12 +5,13 @@ import { format } from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { Text, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
 
 import { Setting } from './UI';
 
 export default function ExportBudget() {
-  let budgetId = useSelector(state => state.prefs.local.budgetId);
+  let budgetId = useSelector(state => state.prefs.local.id);
   let encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);
 
   async function onExport() {

@@ -3,7 +3,9 @@ import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
 import { colors } from '../../style';
-import { Text, Button, ExternalLink } from '../common';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import Text from '../common/Text';
 import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
@@ -16,6 +18,7 @@ export default function EncryptionSettings() {
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
 
   function onChangeKey() {
+    // @ts-expect-error useActions() type does not properly handle overloads
     pushModal('create-encryption-key', { recreate: true });
   }
 

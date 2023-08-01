@@ -14,7 +14,7 @@ import { useActions } from '../../hooks/useActions';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors } from '../../style';
-import { View } from '../common';
+import View from '../common/View';
 import SyncRefresh from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';
@@ -299,7 +299,6 @@ export default function BudgetWrapper() {
     state => state.prefs.local.budgetType || 'rollover',
   );
   let prefs = useSelector(state => state.prefs.local);
-  let initialBudgetMonth = useSelector(state => state.app.budgetMonth);
 
   let actions = useActions();
   let spreadsheet = useSpreadsheet();
@@ -311,7 +310,6 @@ export default function BudgetWrapper() {
       categories={categories}
       budgetType={budgetType}
       prefs={prefs}
-      initialBudgetMonth={initialBudgetMonth}
       {...actions}
       spreadsheet={spreadsheet}
     />
