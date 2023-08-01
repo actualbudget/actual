@@ -657,6 +657,9 @@ async function applyCategoryTemplate(
           break;
         }
 
+        while (last_month_balance >= -getScheduledAmount(amountCond.value)) {
+          last_month_balance += getScheduledAmount(amountCond.value);
+        }
         if (l === 0) remainder = last_month_balance;
         remainder = -getScheduledAmount(amountCond.value) - remainder;
         let target = 0;
