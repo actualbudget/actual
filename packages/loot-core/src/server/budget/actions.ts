@@ -113,7 +113,7 @@ export function setBudget({
   });
 }
 
-export function setGoal({ month, category, goal }) {
+export function setGoal({ month, category, goal }): Promise<void> {
   let existing = db.firstSync(
     `SELECT id FROM zero_budgets WHERE month = ? AND category = ?`,
     [dbMonth(month), category],
