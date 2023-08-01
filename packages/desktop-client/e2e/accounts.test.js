@@ -38,12 +38,12 @@ test.describe('Accounts', () => {
   });
 
   test('closes an account', async () => {
-    const accountPage = await navigation.goToAccountPage('Roth IRA');
+    const accountPage = await navigation.goToAccountPage('💵Roth IRA');
 
-    await expect(accountPage.accountName).toHaveText('Roth IRA');
+    await expect(accountPage.accountName).toHaveText('💵Roth IRA');
 
     const modal = await accountPage.clickCloseAccount();
-    await modal.selectTransferAccount('Vanguard 401k');
+    await modal.selectTransferAccount('📈Vanguard 401k');
     await modal.closeAccount();
 
     await expect(accountPage.accountName).toHaveText('Closed: Roth IRA');

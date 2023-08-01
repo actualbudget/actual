@@ -48,7 +48,7 @@ test.describe('Rules', () => {
       actions: ['set category to General'],
     });
 
-    const accountPage = await navigation.goToAccountPage('Bank of America');
+    const accountPage = await navigation.goToAccountPage('🏦Bank of America');
 
     await accountPage.createSingleTransaction({
       payee: 'Fast Internet',

@@ -29,13 +29,13 @@ test.describe('Schedules', () => {
   test('creates a new schedule, posts the transaction and later completes it', async () => {
     await schedulesPage.addNewSchedule({
       payee: 'Home Depot',
-      account: 'HSBC',
+      account: '🏦HSBC',
       amount: 25,
     });
 
     expect(await schedulesPage.getNthSchedule(0)).toMatchObject({
       payee: 'Home Depot',
-      account: 'HSBC',
+      account: '🏦HSBC',
       amount: '~25.00',
       status: 'Due',
     });
@@ -46,7 +46,7 @@ test.describe('Schedules', () => {
     });
 
     // Go to transactions page
-    const accountPage = await navigation.goToAccountPage('HSBC');
+    const accountPage = await navigation.goToAccountPage('🏦HSBC');
     expect(await accountPage.getNthTransaction(0)).toMatchObject({
       payee: 'Home Depot',
       category: 'Categorize',

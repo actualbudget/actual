@@ -394,7 +394,7 @@ describe('Account sync', () => {
       name: 'group2',
     });
     let catId = await db.insertCategory({
-      name: 'Food',
+      name: '🍞Food',
       cat_group: 'group2',
     });
 
