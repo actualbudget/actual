@@ -1,7 +1,6 @@
 import React, { type ComponentProps, memo, useContext, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
-import { getGoal } from 'loot-core/src/server/budget/actions';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
@@ -326,214 +325,190 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-
-  getGoal({ category, monthIndex });
-
-  //const percentProgress = Math.round((amount * 100) / goal);
-  const percentProgress = 50;
   return (
     <View
       style={{
         flex: 1,
-        flexDirection: 'column',
+        flexDirection: 'row',
+        '& .hover-visible': {
+          opacity: 0,
+          transition: 'opacity .25s',
+        },
+        '&:hover .hover-visible': {
+          opacity: 1,
+        },
       }}
     >
       <View
         style={{
           flex: 1,
           flexDirection: 'row',
-          '& .hover-visible': {
-            opacity: 0,
-            transition: 'opacity .25s',
-          },
-          '&:hover .hover-visible': {
-            opacity: 1,
-          },
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor,
+          backgroundColor: 'white',
+        }}
+        onMouseOverCapture={() => setHover(true)}
+        onMouseLeave={() => {
+          setHover(false);
         }}
       >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            borderTopWidth: 1,
-            borderBottomWidth: 1,
-            borderColor,
-            backgroundColor: 'white',
-          }}
-          onMouseOverCapture={() => setHover(true)}
-          onMouseLeave={() => {
-            setHover(false);
-          }}
-        >
-          {!editing && (hover || menuOpen) ? (
-            <View
+        {!editing && (hover || menuOpen) ? (
+          <View
+            style={{
+              flexShrink: 1,
+              marginRight: 0,
+              marginLeft: 3,
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              type="bare"
+              onClick={e => {
+                e.stopPropagation();
+                setMenuOpen(true);
+              }}
               style={{
-                flexShrink: 1,
-                marginRight: 0,
-                marginLeft: 3,
-                justifyContent: 'center',
+                padding: 3,
               }}
             >
-              <Button
-                type="bare"
-                onClick={e => {
-                  e.stopPropagation();
-                  setMenuOpen(true);
-                }}
-                style={{
-                  padding: 3,
-                }}
+              <CheveronDown
+                width={14}
+                height={14}
+                className="hover-visible"
+                style={menuOpen && { opacity: 1 }}
+              />
+            </Button>
+            {menuOpen && (
+              <Tooltip
+                position="bottom-left"
+                width={200}
+                style={{ padding: 0 }}
+                onClose={() => setMenuOpen(false)}
               >
-                <CheveronDown
-                  width={14}
-                  height={14}
-                  className="hover-visible"
-                  style={menuOpen && { opacity: 1 }}
+                <Menu
+                  onMenuSelect={type => {
+                    onBudgetAction(monthIndex, type, {
+                      category: category.id,
+                    });
+                    setMenuOpen(false);
+                  }}
+                  items={[
+                    {
+                      name: 'copy-single-last',
+                      text: 'Copy last month’s budget',
+                    },
+                    {
+                      name: 'set-single-3-avg',
+                      text: 'Set to 3 month average',
+                    },
+                    {
+                      name: 'set-single-6-avg',
+                      text: 'Set to 6 month average',
+                    },
+                    {
+                      name: 'set-single-12-avg',
+                      text: 'Set to yearly average',
+                    },
+                    isGoalTemplatesEnabled && {
+                      name: 'apply-single-category-template',
+                      text: 'Apply budget template',
+                    },
+                  ]}
                 />
-              </Button>
-              {menuOpen && (
-                <Tooltip
-                  position="bottom-left"
-                  width={200}
-                  style={{ padding: 0 }}
-                  onClose={() => setMenuOpen(false)}
-                >
-                  <Menu
-                    onMenuSelect={type => {
-                      onBudgetAction(monthIndex, type, {
-                        category: category.id,
-                      });
-                      setMenuOpen(false);
-                    }}
-                    items={[
-                      {
-                        name: 'copy-single-last',
-                        text: 'Copy last month’s budget',
-                      },
-                      {
-                        name: 'set-single-3-avg',
-                        text: 'Set to 3 month average',
-                      },
-                      {
-                        name: 'set-single-6-avg',
-                        text: 'Set to 6 month average',
-                      },
-                      {
-                        name: 'set-single-12-avg',
-                        text: 'Set to yearly average',
-                      },
-                      isGoalTemplatesEnabled && {
-                        name: 'apply-single-category-template',
-                        text: 'Apply budget template',
-                      },
-                    ]}
-                  />
-                </Tooltip>
-              )}
-            </View>
-          ) : null}
-          <SheetCell
-            name="budget"
-            exposed={editing}
-            focused={editing}
-            width="flex"
-            borderColor="white"
-            onExpose={() => onEdit(category.id, monthIndex)}
-            style={[editing && { zIndex: 100 }, styles.tnum]}
-            textAlign="right"
-            valueStyle={[
-              {
-                cursor: 'default',
-                margin: 1,
-                padding: '0 4px',
-                borderRadius: 4,
+              </Tooltip>
+            )}
+          </View>
+        ) : null}
+        <SheetCell
+          name="budget"
+          exposed={editing}
+          focused={editing}
+          width="flex"
+          borderColor="white"
+          onExpose={() => onEdit(category.id, monthIndex)}
+          style={[editing && { zIndex: 100 }, styles.tnum]}
+          textAlign="right"
+          valueStyle={[
+            {
+              cursor: 'default',
+              margin: 1,
+              padding: '0 4px',
+              borderRadius: 4,
+            },
+            {
+              ':hover': {
+                boxShadow: 'inset 0 0 0 1px ' + colors.n7,
+                backgroundColor: 'white',
               },
-              {
-                ':hover': {
-                  boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-                  backgroundColor: 'white',
-                },
-              },
-            ]}
-            valueProps={{
-              binding: rolloverBudget.catBudgeted(category.id),
-              type: 'financial',
-              getValueStyle: makeAmountGrey,
-              formatExpr: expr => {
-                return integerToCurrency(expr);
-              },
-              unformatExpr: expr => {
-                return amountToInteger(evalArithmetic(expr, 0));
-              },
-            }}
-            inputProps={{
-              onBlur: () => {
-                onEdit(null);
-              },
-            }}
-            onSave={amount => {
-              onBudgetAction(monthIndex, 'budget-amount', {
-                category: category.id,
-                amount,
-              });
+            },
+          ]}
+          valueProps={{
+            binding: rolloverBudget.catBudgeted(category.id),
+            type: 'financial',
+            getValueStyle: makeAmountGrey,
+            formatExpr: expr => {
+              return integerToCurrency(expr);
+            },
+            unformatExpr: expr => {
+              return amountToInteger(evalArithmetic(expr, 0));
+            },
+          }}
+          inputProps={{
+            onBlur: () => {
+              onEdit(null);
+            },
+          }}
+          onSave={amount => {
+            onBudgetAction(monthIndex, 'budget-amount', {
+              category: category.id,
+              amount,
+            });
+          }}
+        />
+      </View>
+      <Field
+        name="spent"
+        width="flex"
+        borderColor={borderColor}
+        style={{ textAlign: 'right' }}
+      >
+        <span
+          data-testid="category-month-spent"
+          onClick={() => onShowActivity(category.name, category.id, monthIndex)}
+        >
+          <CellValue
+            binding={rolloverBudget.catSumAmount(category.id)}
+            type="financial"
+            getStyle={makeAmountGrey}
+            style={{
+              cursor: 'pointer',
+              ':hover': { textDecoration: 'underline' },
             }}
           />
-        </View>
-        <Field
-          name="spent"
-          width="flex"
-          borderColor={borderColor}
-          style={{ textAlign: 'right' }}
-        >
-          <span
-            data-testid="category-month-spent"
-            onClick={() =>
-              onShowActivity(category.name, category.id, monthIndex)
-            }
-          >
-            <CellValue
-              binding={rolloverBudget.catSumAmount(category.id)}
-              type="financial"
-              getStyle={makeAmountGrey}
-              style={{
-                cursor: 'pointer',
-                ':hover': { textDecoration: 'underline' },
-              }}
-            />
-          </span>
-        </Field>
-        <Field
-          name="balance"
-          width="flex"
-          borderColor={borderColor}
-          style={{ paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' }}
-        >
-          <span {...balanceTooltip.getOpenEvents()}>
-            <BalanceWithCarryover
-              carryover={rolloverBudget.catCarryover(category.id)}
-              balance={rolloverBudget.catBalance(category.id)}
-            />
-          </span>
-          {balanceTooltip.isOpen && (
-            <BalanceTooltip
-              categoryId={category.id}
-              tooltip={balanceTooltip}
-              monthIndex={monthIndex}
-              onBudgetAction={onBudgetAction}
-            />
-          )}
-        </Field>
-      </View>
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-        }}
+        </span>
+      </Field>
+      <Field
+        name="balance"
+        width="flex"
+        borderColor={borderColor}
+        style={{ paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' }}
       >
-        <progress max="100" value={percentProgress}>
-          {' '}
-        </progress>
-      </View>
+        <span {...balanceTooltip.getOpenEvents()}>
+          <BalanceWithCarryover
+            carryover={rolloverBudget.catCarryover(category.id)}
+            balance={rolloverBudget.catBalance(category.id)}
+          />
+        </span>
+        {balanceTooltip.isOpen && (
+          <BalanceTooltip
+            categoryId={category.id}
+            tooltip={balanceTooltip}
+            monthIndex={monthIndex}
+            onBudgetAction={onBudgetAction}
+          />
+        )}
+      </Field>
     </View>
   );
 });
