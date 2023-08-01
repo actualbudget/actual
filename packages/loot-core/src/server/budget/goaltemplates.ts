@@ -70,6 +70,18 @@ async function setGoalBudget({ month, templateBudget }) {
 }
 
 async function setCategoryTargets({ month, idealTemplate }) {
+  let categories = await db.all('SELECT * FROM zero_budgets WHERE month = ?', [
+    parseInt(month.replace('-', '')),
+  ]);
+
+  //clear set values
+  for (let cat of categories) {
+    await setGoal({
+      category: cat.category,
+      goal: 0,
+      month: month,
+    });
+  }
   await batchMessages(async () => {
     idealTemplate.forEach(element => {
       setGoal({
