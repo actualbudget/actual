@@ -53,10 +53,10 @@ test.describe('Onboarding', () => {
 
     await expect(budgetPage.budgetTable).toBeVisible();
 
-    const accountPage = await navigation.goToAccountPage('💰Ally Savings');
+    const accountPage = await navigation.goToAccountPage('💰 Ally Savings');
     await expect(accountPage.accountBalance).toHaveText('1,772.80');
 
-    await navigation.goToAccountPage('💵Roth IRA');
+    await navigation.goToAccountPage('💵 Roth IRA');
     await expect(accountPage.accountBalance).toHaveText('2,745.81');
   });
 

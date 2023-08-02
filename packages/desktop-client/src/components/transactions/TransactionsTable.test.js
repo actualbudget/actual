@@ -28,7 +28,7 @@ import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
 jest.mock('loot-core/src/platform/client/fetch');
 jest.mock('../../hooks/useFeatureFlag', () => jest.fn().mockReturnValue(false));
 
-const accounts = [generateAccount('🏦Bank of America')];
+const accounts = [generateAccount('🏦 Bank of America')];
 const payees = [
   { id: 'payed-to', name: 'Payed To' },
   { id: 'guy', name: 'This guy on the side of the road' },
@@ -40,7 +40,7 @@ const categoryGroups = generateCategoryGroups([
   },
   {
     name: 'Usual Expenses',
-    categories: [{ name: '🍞Food' }, { name: 'General' }, { name: 'Home' }],
+    categories: [{ name: '🍞 Food' }, { name: 'General' }, { name: 'Home' }],
   },
   {
     name: 'Projects',
@@ -455,7 +455,7 @@ describe('Transactions', () => {
     items = tooltip.querySelectorAll('[data-testid*="category-item"]');
     expect(items.length).toBe(4);
     expect(items[0].textContent).toBe('Usual Expenses');
-    expect(items[1].textContent).toBe('🍞Food');
+    expect(items[1].textContent).toBe('🍞 Food');
     expect(items[2].textContent).toBe('General');
     expect(items[3].textContent).toBe('Home');
     expect(items[1].dataset['testid']).toBe('category-item-highlighted');
@@ -483,7 +483,7 @@ describe('Transactions', () => {
     expect(highlighted.textContent).toBe('General');
 
     expect(getTransactions()[2].category).toBe(
-      categories.find(category => category.name === '🍞Food').id,
+      categories.find(category => category.name === '🍞 Food').id,
     );
 
     await userEvent.type(input, '[Enter]');
@@ -530,7 +530,7 @@ describe('Transactions', () => {
 
     // Click the item and check the before/after values
     expect(getTransactions()[2].category).toBe(
-      categories.find(c => c.name === '🍞Food').id,
+      categories.find(c => c.name === '🍞 Food').id,
     );
     await userEvent.click(items[2]);
     await waitForAutocomplete();

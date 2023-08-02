@@ -23,21 +23,21 @@ test.describe('Transactions', () => {
   });
 
   test.beforeEach(async () => {
-    accountPage = await navigation.goToAccountPage('💰Ally Savings');
+    accountPage = await navigation.goToAccountPage('💰 Ally Savings');
   });
 
   test('creates a test transaction', async () => {
     await accountPage.createSingleTransaction({
       payee: 'Home Depot',
       notes: 'Notes field',
-      category: '🍞Food',
+      category: '🍞 Food',
       debit: '12.34',
     });
 
     expect(await accountPage.getNthTransaction(0)).toMatchObject({
       payee: 'Home Depot',
       notes: 'Notes field',
-      category: '🍞Food',
+      category: '🍞 Food',
       debit: '12.34',
       credit: '',
     });

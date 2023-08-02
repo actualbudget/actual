@@ -106,7 +106,7 @@ describe('Transaction rules', () => {
       conditions: [{ op: 'is', field: 'date', value: '2019-05' }],
       actions: [
         { op: 'set', field: 'notes', value: 'Sarah' },
-        { op: 'set', field: 'category', value: '🍞Food' },
+        { op: 'set', field: 'category', value: '🍞 Food' },
       ],
     });
     expect((await db.all('SELECT * FROM rules')).length).toBe(2);
@@ -132,7 +132,7 @@ describe('Transaction rules', () => {
     });
     expect(transaction.date).toBe('2019-05-10');
     expect(transaction.notes).toBe('Sarah');
-    expect(transaction.category).toBe('🍞Food');
+    expect(transaction.category).toBe('🍞 Food');
   });
 
   test('update a rule in the database', async () => {
@@ -143,7 +143,7 @@ describe('Transaction rules', () => {
       conditions: [{ op: 'is', field: 'imported_payee', value: 'kroger' }],
       actions: [
         { op: 'set', field: 'notes', value: 'Sarah' },
-        { op: 'set', field: 'category', value: '🍞Food' },
+        { op: 'set', field: 'category', value: '🍞 Food' },
       ],
     });
     expect(getRules().length).toBe(1);
@@ -155,7 +155,7 @@ describe('Transaction rules', () => {
     });
     expect(transaction.imported_payee).toBe('Kroger');
     expect(transaction.notes).toBe('Sarah');
-    expect(transaction.category).toBe('🍞Food');
+    expect(transaction.category).toBe('🍞 Food');
 
     // Change the action
     await updateRule({
@@ -195,7 +195,7 @@ describe('Transaction rules', () => {
       conditions: [{ op: 'is', field: 'payee', value: 'kroger' }],
       actions: [
         { op: 'set', field: 'notes', value: 'Sarah' },
-        { op: 'set', field: 'category', value: '🍞Food' },
+        { op: 'set', field: 'category', value: '🍞 Food' },
       ],
     });
     expect(getRules().length).toBe(1);
@@ -206,7 +206,7 @@ describe('Transaction rules', () => {
       category: null,
     });
     expect(transaction.payee).toBe('Kroger');
-    expect(transaction.category).toBe('🍞Food');
+    expect(transaction.category).toBe('🍞 Food');
 
     await deleteRule({ id });
     expect(getRules().length).toBe(0);
@@ -263,7 +263,7 @@ describe('Transaction rules', () => {
     await db.insertCategoryGroup({ name: 'group' });
     await db.insertCategory({
       id: 'food_id',
-      name: '🍞Food',
+      name: '🍞 Food',
       cat_group: 'group',
     });
     await db.insertCategory({
@@ -372,7 +372,7 @@ describe('Transaction rules', () => {
     let account = await db.insertAccount({ name: 'bank' });
     let categoryGroupId = await db.insertCategoryGroup({ name: 'general' });
     let categoryId = await db.insertCategory({
-      name: '🍞Food',
+      name: '🍞 Food',
       cat_group: categoryGroupId,
     });
     let krogerId = await db.insertPayee({ name: 'kroger' });
@@ -507,8 +507,8 @@ describe('Learning categories', () => {
     await db.insertAccount({ id: 'acct', name: 'acct' });
     await db.insertCategoryGroup({ id: 'catg', name: 'catg' });
     await db.insertCategory({
-      id: '🍞Food',
-      name: '🍞Food',
+      id: '🍞 Food',
+      name: '🍞 Food',
       cat_group: 'catg',
     });
     await db.insertCategory({ id: 'beer', name: 'beer', cat_group: 'catg' });
@@ -557,7 +557,7 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: '🍞Food',
+        category: '🍞 Food',
       },
       null,
       0,
@@ -569,7 +569,7 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: '🍞Food',
+        category: '🍞 Food',
       },
       null,
       0,
@@ -581,9 +581,9 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: '🍞Food',
+        category: '🍞 Food',
       },
-      '🍞Food',
+      '🍞 Food',
     );
   });
 
@@ -596,7 +596,7 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: '🍞Food',
+        category: '🍞 Food',
       },
       null,
       0,
@@ -664,7 +664,7 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: '🍞Food',
+        category: '🍞 Food',
       },
       'beer',
       1,
@@ -675,7 +675,7 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: '🍞Food',
+        category: '🍞 Food',
       },
       'beer',
       1,
@@ -686,9 +686,9 @@ describe('Learning categories', () => {
         date: '2016-12-01',
         account: 'acct',
         payee: 'foo',
-        category: '🍞Food',
+        category: '🍞 Food',
       },
-      '🍞Food',
+      '🍞 Food',
       1,
     );
   });
@@ -766,7 +766,7 @@ describe('Learning categories', () => {
       date: '2016-12-01',
       account: 'acct',
       payee: 'foo',
-      category: '🍞Food',
+      category: '🍞 Food',
     };
     await db.insertTransaction({ ...trans, id: 'one' });
     await db.insertTransaction({ ...trans, id: 'two' });
@@ -798,7 +798,7 @@ describe('Learning categories', () => {
     // the correct one
     expect(getPayees('unknown1')).toEqual([]);
     expect(getPayees('unknown2')).toEqual([]);
-    expect(getPayees('🍞Food')).toEqual([]);
+    expect(getPayees('🍞 Food')).toEqual([]);
     expect(getPayees('beer')).toEqual(['foo', 'foo', null]);
   });
 
@@ -810,7 +810,7 @@ describe('Learning categories', () => {
       date: '2016-12-01',
       account: 'acct',
       payee: null,
-      category: '🍞Food',
+      category: '🍞 Food',
     };
     await db.insertTransaction({ ...trans, id: 'one' });
     await db.insertTransaction({ ...trans, id: 'two' });
@@ -840,7 +840,7 @@ describe('Learning categories', () => {
       date: '2016-12-01',
       account: 'acct',
       payee: null,
-      category: '🍞Food',
+      category: '🍞 Food',
     };
     await db.insertTransaction({ ...trans, id: 'one' });
     await db.insertTransaction({ ...trans, id: 'two' });
