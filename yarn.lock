@@ -5,21 +5,21 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@actual-app/crdt@npm:2.0.1":
-  version: 2.0.1
-  resolution: "@actual-app/crdt@npm:2.0.1"
+"@actual-app/crdt@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@actual-app/crdt@npm:2.0.2"
   dependencies:
     google-protobuf: ^3.12.0-rc.1
     murmurhash: ^0.0.2
     uuid: ^9.0.0
-  checksum: f01a38a2bc3b9030b3b99e4acda43f3501230baaf98d4f550f6ad35e9f02bc57047127c5c90c372c6decba837eddffb73c2200a6e38a911d2092ab5c6af53f49
+  checksum: ca3c41872d730e03b4495be937bc0310095468c57520f65715cd48fc4689b5d349d3ef877c09b55e51a0141c139f965ae1fc45301dc7776281749d685b2e0b06
   languageName: node
   linkType: hard
 
-"@actual-app/web@npm:23.7.2":
-  version: 23.7.2
-  resolution: "@actual-app/web@npm:23.7.2"
-  checksum: 9350a9de304b08061a23a38dbad91e1766190907f3cd7f158341f7a4e7e1ff005ec565e04c81a930c64559a426546fda3f71e98c9de61c7b2d5ca7f0526c4061
+"@actual-app/web@npm:23.8.0":
+  version: 23.8.0
+  resolution: "@actual-app/web@npm:23.8.0"
+  checksum: 3841082b02dcdc1ea930d3459bccb400b5d51ca0a4bc16fffc07ef0dcf752a47a0398df2f25c697b2a848a4bbce90ad9b74314b557994608e70615eb0c4b122f
   languageName: node
   linkType: hard
 
@@ -1555,8 +1555,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual-sync@workspace:."
   dependencies:
-    "@actual-app/crdt": 2.0.1
-    "@actual-app/web": 23.7.2
+    "@actual-app/crdt": 2.0.2
+    "@actual-app/web": 23.8.0
     "@babel/preset-typescript": ^7.20.2
     "@types/bcrypt": ^5.0.0
     "@types/better-sqlite3": ^7.6.3
