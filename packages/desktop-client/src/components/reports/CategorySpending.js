@@ -30,7 +30,7 @@ function CategoryAverage() {
   );
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
-  const [numberOfMonthsAverage, setNumberOfMonthsAverage] = useState(3);
+  const [numberOfMonthsAverage, setNumberOfMonthsAverage] = useState(1);
 
   const getGraphData = useMemo(() => {
     return categorySpendingSpreadsheet(
