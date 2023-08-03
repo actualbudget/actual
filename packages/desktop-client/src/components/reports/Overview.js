@@ -7,6 +7,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { colors, styles } from '../../style';
 import AnchorLink from '../common/AnchorLink';
 import Block from '../common/Block';
@@ -309,6 +310,10 @@ function CategorySpendingCard() {
 }
 
 export default function Overview() {
+  let categorySpendingReportFeatureFlag = useFeatureFlag(
+    'categorySpendingReport',
+  );
+
   let accounts = useSelector(state => state.queries.accounts);
   return (
     <View
@@ -327,16 +332,18 @@ export default function Overview() {
         <CashFlowCard />
       </View>
 
-      <View
-        style={{
-          flex: '0 0 auto',
-          flexDirection: 'row',
-        }}
-      >
-        <CategorySpendingCard />
-        <div style={{ flex: 1 }} />
-        <div style={{ flex: 1 }} />
-      </View>
+      {categorySpendingReportFeatureFlag && (
+        <View
+          style={{
+            flex: '0 0 auto',
+            flexDirection: 'row',
+          }}
+        >
+          <CategorySpendingCard />
+          <div style={{ flex: 1 }} />
+          <div style={{ flex: 1 }} />
+        </View>
+      )}
     </View>
   );
 }
