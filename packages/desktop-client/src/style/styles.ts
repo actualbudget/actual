@@ -5,8 +5,6 @@ import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from '../tokens';
 
-import { theme } from './theme';
-
 export const styles = {
   incomeHeaderHeight: 70,
   cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
@@ -121,21 +119,17 @@ function onScrollbarChange() {
     },
   };
 
-  styles.darkScrollbar = hiddenScrollbars
-    ? null
-    : {
-        // webkit
-        '& ::-webkit-scrollbar': {
-          width: 9,
-        },
-        '& ::-webkit-scrollbar-thumb': {
-          borderRadius: 30,
-          backgroundClip: 'padding-box',
-          background: theme.sidebarItemBackgroundHover,
-        },
-      };
+  styles.darkScrollbar = !hiddenScrollbars && {
+    '& ::-webkit-scrollbar': {
+      width: 7,
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+    },
+    '& ::-webkit-scrollbar-thumb:vertical': {
+      backgroundColor: 'rgba(200, 200, 200, .5)',
+    },
+  };
 
-  styles.scrollbarWidth = hiddenScrollbars ? 0 : 11;
+  styles.scrollbarWidth = hiddenScrollbars ? 0 : 13;
 }
 
 if (Platform.env === 'web') {
