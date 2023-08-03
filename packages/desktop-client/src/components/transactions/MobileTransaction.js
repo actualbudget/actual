@@ -326,6 +326,13 @@ class TransactionEditInner extends PureComponent {
       transferAcct,
     );
 
+    const transactionDate = parseDate(
+      transaction.date,
+      this.props.dateFormat,
+      new Date(),
+    );
+    const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
+
     return (
       // <KeyboardAvoidingView>
       <View
@@ -514,10 +521,26 @@ class TransactionEditInner extends PureComponent {
               <View style={{ flex: 1 }}>
                 <FieldLabel title="Date" />
                 <InputField
-                  defaultValue={transaction.date}
-                  onUpdate={value => this.onEdit(transaction, 'date', value)}
+                  type="date"
+                  required
+                  style={{ color: 'canvastext', minWidth: '150px' }}
+                  defaultValue={dateDefaultValue}
+                  onUpdate={value =>
+                    this.onEdit(
+                      transaction,
+                      'date',
+                      formatDate(parseISO(value), this.props.dateFormat),
+                    )
+                  }
                   onChange={e =>
-                    this.onQueueChange(transaction, 'date', e.target.value)
+                    this.onQueueChange(
+                      transaction,
+                      'date',
+                      formatDate(
+                        parseISO(e.target.value),
+                        this.props.dateFormat,
+                      ),
+                    )
                   }
                 />
               </View>
