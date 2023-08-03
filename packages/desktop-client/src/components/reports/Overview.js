@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
@@ -10,6 +10,7 @@ import { colors, styles } from '../../style';
 import AnchorLink from '../common/AnchorLink';
 import Block from '../common/Block';
 import View from '../common/View';
+import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
 import theme from './chart-theme';
@@ -61,6 +62,9 @@ function Card({ flex, to, style, children }) {
 function NetWorthCard({ accounts }) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
+  const [isCardHovered, setIsCardHovered] = useState(false);
+  const onCardHover = useCallback(() => setIsCardHovered(true));
+  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
 
   const params = useMemo(
     () => netWorthSpreadsheet(start, end, accounts),
@@ -74,7 +78,11 @@ function NetWorthCard({ accounts }) {
 
   return (
     <Card flex={2} to="/reports/net-worth">
-      <View style={{ flex: 1 }}>
+      <View
+        style={{ flex: 1 }}
+        onPointerEnter={onCardHover}
+        onPointerLeave={onCardHoverEnd}
+      >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <Block
@@ -89,12 +97,16 @@ function NetWorthCard({ accounts }) {
             <Block
               style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
             >
-              {integerToCurrency(data.netWorth)}
+              <PrivacyFilter activationFilters={[!isCardHovered]}>
+                {integerToCurrency(data.netWorth)}
+              </PrivacyFilter>
             </Block>
-            <Change
-              amount={data.totalChange}
-              style={{ color: colors.n6, fontWeight: 300 }}
-            />
+            <PrivacyFilter activationFilters={[!isCardHovered]}>
+              <Change
+                amount={data.totalChange}
+                style={{ color: colors.n6, fontWeight: 300 }}
+              />
+            </PrivacyFilter>
           </View>
         </View>
 
@@ -116,6 +128,10 @@ function CashFlowCard() {
 
   const params = useMemo(() => simpleCashFlow(start, end), [start, end]);
   const data = useReport('cash_flow_simple', params);
+  const [isCardHovered, setIsCardHovered] = useState(false);
+  const onCardHover = useCallback(() => setIsCardHovered(true));
+  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
+
   if (!data) {
     return null;
   }
@@ -126,7 +142,11 @@ function CashFlowCard() {
 
   return (
     <Card flex={1} to="/reports/cash-flow">
-      <View style={{ flex: 1 }}>
+      <View
+        style={{ flex: 1 }}
+        onPointerEnter={onCardHover}
+        onPointerLeave={onCardHoverEnd}
+      >
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <Block
@@ -138,10 +158,12 @@ function CashFlowCard() {
             <DateRange start={start} end={end} />
           </View>
           <View style={{ textAlign: 'right' }}>
-            <Change
-              amount={income - expense}
-              style={{ color: colors.n6, fontWeight: 300 }}
-            />
+            <PrivacyFilter activationFilters={[!isCardHovered]}>
+              <Change
+                amount={income - expense}
+                style={{ color: colors.n6, fontWeight: 300 }}
+              />
+            </PrivacyFilter>
           </View>
         </View>
 
@@ -185,10 +207,14 @@ function CashFlowCard() {
                     x: 30,
                     y: Math.max(income, 5),
                     premadeLabel: (
-                      <div style={{ textAlign: 'right' }}>
-                        <div>Income</div>
-                        <div>{integerToCurrency(income)}</div>
-                      </div>
+                      <View style={{ textAlign: 'right' }}>
+                        Income
+                        <View>
+                          <PrivacyFilter activationFilters={[!isCardHovered]}>
+                            {integerToCurrency(income)}
+                          </PrivacyFilter>
+                        </View>
+                      </View>
                     ),
                     labelPosition: 'left',
                   },
@@ -202,10 +228,14 @@ function CashFlowCard() {
                     x: 60,
                     y: Math.max(expense, 5),
                     premadeLabel: (
-                      <div>
-                        <div>Expenses</div>
-                        <div>{integerToCurrency(expense)}</div>
-                      </div>
+                      <View>
+                        Expenses
+                        <View>
+                          <PrivacyFilter activationFilters={[!isCardHovered]}>
+                            {integerToCurrency(expense)}
+                          </PrivacyFilter>
+                        </View>
+                      </View>
                     ),
                     labelPosition: 'right',
                     fill: theme.colors.red,
