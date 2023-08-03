@@ -41,10 +41,7 @@ type FormLabelProps = {
 export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
     <Text
-      style={[
-        { fontSize: 13, marginBottom: 3, color: theme.pillTextSelected },
-        style,
-      ]}
+      style={[{ fontSize: 13, marginBottom: 3, color: theme.tableText }, style]}
     >
       <label htmlFor={htmlFor} id={id}>
         {title}
@@ -74,13 +71,38 @@ export const Checkbox = (props: CheckboxProps) => {
       type="checkbox"
       {...props}
       {...css(
-        {
-          position: 'relative',
-          margin: 0,
-          marginRight: 6,
-          accentColor: theme.formInputBackgroundSelected,
-        },
-
+        [
+          {
+            position: 'relative',
+            margin: 0,
+            marginRight: 6,
+            width: 15,
+            height: 15,
+            appearance: 'none',
+            outline: 0,
+            border: '1px solid ' + theme.formInputBorder,
+            borderRadius: 4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: theme.tableBackground,
+            backgroundColor: theme.tableBackground,
+            ':checked': {
+              border: '1px solid ' + theme.formInputBorderSelected,
+              backgroundColor: theme.tableTextEditingBackground,
+              '::after': {
+                display: 'block',
+                background:
+                  theme.tableTextEditingBackground +
+                  // eslint-disable-next-line rulesdir/typography
+                  ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
+                width: 9,
+                height: 9,
+                content: ' ',
+              },
+            },
+          },
+        ],
         props.styles,
       )}
     />

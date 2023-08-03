@@ -64,12 +64,7 @@ export default function Select<Value extends string>({
       }}
     >
       <ListboxButton
-        {...css({
-          borderWidth: 0,
-          padding: '2px 5px',
-          borderRadius: styles.menuBorderRadius,
-          ...style,
-        })}
+        {...css([{ borderWidth: 0, padding: 5, borderRadius: 4 }, style])}
         arrow={
           <ExpandArrow
             style={{
@@ -86,7 +81,6 @@ export default function Select<Value extends string>({
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             maxWidth: `calc(100% - ${arrowSize + 5}px)`,
-            minHeight: '18px',
             alignItems: 'center',
           }}
         >

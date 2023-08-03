@@ -97,8 +97,8 @@ type FieldProps = ComponentProps<typeof View> & {
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   { width, name, truncate = true, children, style, contentStyle, ...props },
   ref,
-  ) {
-    let { backgroundColor, borderColor } = useContext(CellContext);
+) {
+  let { backgroundColor, borderColor } = useContext(CellContext);
   return (
     <View
       innerRef={ref}
@@ -365,9 +365,13 @@ export function Row({
   return (
     <CellProvider
       backgroundColor={
-        shouldHighlight ? theme.tableRowBackgroundHighlight : theme.tableBackground
+        shouldHighlight
+          ? theme.tableRowBackgroundHighlight
+          : theme.tableBackground
       }
-      borderColor={shouldHighlight ? theme.tableBorderSelected : theme.tableBorder}
+      borderColor={
+        shouldHighlight ? theme.tableBorderSelected : theme.tableBorder
+      }
     >
       <View
         innerRef={rowRef}

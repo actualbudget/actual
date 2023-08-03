@@ -7,7 +7,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
-import { colors } from '../../style';
+import { colors, theme } from '../../style';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Select from '../common/Select';
@@ -325,14 +325,21 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           defaultValue={config.interval || 1}
         />
         <Select
+          bare
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          style={{ borderWidth: 1, height: 27.5 }}
+          style={{ border: '1px solid ' + theme.formInputBorder, height: 27.5 }}
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
-          <Button onClick={() => dispatch({ type: 'add-recurrence' })}>
+          <Button
+            style={{
+              backgroundColor: theme.tooltipBackground,
+              ':hover': { backgroundColor: theme.tooltipBackground },
+            }}
+            onClick={() => dispatch({ type: 'add-recurrence' })}
+          >
             Add specific days
           </Button>
         ) : null}
