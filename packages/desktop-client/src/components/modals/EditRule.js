@@ -283,7 +283,7 @@ function ScheduleDescription({ id }) {
           <DisplayId
             type="payees"
             id={schedule._payee}
-            noneColor={theme.pageTextSubdued}
+            noneColor={theme.altpageTextSubdued}
           />
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
@@ -344,7 +344,7 @@ function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
           <View
             style={{
               padding: '5px 10px',
-              color: theme.formInputTextHighlight,
+              color: theme.pageTextPositive,
             }}
           >
             {friendlyOp(op)}
@@ -373,7 +373,7 @@ function StageInfo() {
         onMouseLeave={() => setOpen(false)}
       >
         <InformationOutline
-          style={{ width: 11, height: 11, color: theme.tableBorderSelected }}
+          style={{ width: 11, height: 11, color: theme.pageTextLight }}
         />
       </View>
       {open && (
@@ -381,6 +381,7 @@ function StageInfo() {
           position="bottom-left"
           style={{
             padding: 10,
+            color: theme.pageTextLight,
             maxWidth: 450,
             lineHeight: 1.5,
           }}
@@ -566,12 +567,7 @@ function ConditionsList({
         }
 
         return (
-          <View
-            key={i}
-            style={{
-              color: theme.tableText,
-            }}
-          >
+          <View key={i}>
             <ConditionEditor
               editorStyle={editorStyle}
               ops={ops}
@@ -759,8 +755,8 @@ export default function EditRule({
   }
 
   let editorStyle = {
-    color: theme.pillText,
-    backgroundColor: theme.pillBackground,
+    color: theme.altPillText,
+    backgroundColor: theme.altPillBackground,
     borderRadius: 4,
   };
 

@@ -62,7 +62,7 @@ function fireBlur(onBlur, e) {
 }
 
 const CellContext = createContext({
-  backgroundColor: theme.formInputBackground,
+  backgroundColor: theme.pageBackground,
   borderColor: theme.formInputBorder,
 });
 
@@ -839,7 +839,6 @@ export function TableHeader({
         borderRadius: '6px 6px 0 0',
         overflow: 'hidden',
         flexShrink: 0,
-        boxShadow: styles.cardShadow,
       }}
     >
       <Row
@@ -847,7 +846,7 @@ export function TableHeader({
         {...rowProps}
         style={{
           color: theme.tableHeaderText,
-          backgroundColor: theme.tableHeaderBackground,
+          backgroundColor: theme.tableBackground,
           zIndex: 200,
           fontWeight: 500,
           ...rowProps.style,
@@ -885,7 +884,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
 
       <Button
         type="bare"
-        style={{ color: theme.pageTextPositive }}
+        style={{ color: theme.altFormLabelText }}
         onClick={() => setMenuOpen(true)}
       >
         <ExpandArrow
@@ -900,7 +899,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
         <Tooltip
           position="bottom-right"
           width={200}
-          style={{ padding: 0, backgroundColor: theme.menuBackground }}
+          style={{ padding: 0 }}
           onClose={() => setMenuOpen(false)}
         >
           <Menu
@@ -981,7 +980,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
-      backgroundColor = theme.tableBackground,
+      backgroundColor = theme.tableHeaderBackground,
       renderItem,
       renderEmpty,
       getItemKey,
@@ -1204,7 +1203,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
           style={{
             flex: 1,
             backgroundColor,
-            boxShadow: styles.cardShadow,
           }}
         >
           {isEmpty ? (

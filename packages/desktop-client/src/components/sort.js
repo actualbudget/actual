@@ -123,7 +123,7 @@ export function DropHighlight({ pos, offset = {} }) {
           right: 2,
           borderRadius: 3,
           height: 3,
-          background: theme.sidebarItemAccentSelected,
+          background: theme.pageTextLink,
           zIndex: 10000,
           pointerEvents: 'none',
         },

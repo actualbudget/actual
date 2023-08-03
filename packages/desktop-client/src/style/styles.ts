@@ -37,7 +37,7 @@ export const styles = {
     fontSize: 13,
   },
   verySmallText: {
-    fontSize: 12,
+    fontSize: 13,
   },
   page: {
     flex: 1,
@@ -105,19 +105,21 @@ let hiddenScrollbars = false;
 // lightScrollbar => primary
 // darkScrollbar => secondary
 function onScrollbarChange() {
-  styles.lightScrollbar = hiddenScrollbars
-    ? null
-    : {
-        // webkit
-        '& ::-webkit-scrollbar': {
-          width: 9,
-        },
-        '& ::-webkit-scrollbar-thumb': {
-          borderRadius: 30,
-          backgroundClip: 'padding-box',
-          background: theme.menuItemBackgroundHover,
-        },
-      };
+  styles.lightScrollbar = !hiddenScrollbars && {
+    '& ::-webkit-scrollbar': {
+      width: 11,
+      backgroundColor: 'rgba(200, 200, 200, .2)',
+    },
+    '& ::-webkit-scrollbar-thumb': {
+      width: 7,
+      borderRadius: 30,
+      backgroundClip: 'padding-box',
+      border: '2px solid rgba(0, 0, 0, 0)',
+    },
+    '& ::-webkit-scrollbar-thumb:vertical': {
+      backgroundColor: '#d0d0d0',
+    },
+  };
 
   styles.darkScrollbar = hiddenScrollbars
     ? null

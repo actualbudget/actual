@@ -173,7 +173,7 @@ function ConfigureField({
   return (
     <Tooltip
       position="bottom-left"
-      style={{ padding: 15, color: theme.menuItemTextHeader }}
+      style={{ padding: 15, color: theme.altmenuItemTextHeader }}
       width={275}
       onClose={() => dispatch({ type: 'close' })}
     >
@@ -216,7 +216,7 @@ function ConfigureField({
 
         <View
           style={{
-            color: theme.menuItemText,
+            color: theme.pageTextLight,
             marginBottom: 10,
           }}
         >

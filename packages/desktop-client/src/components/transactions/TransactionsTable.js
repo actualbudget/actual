@@ -270,7 +270,7 @@ const TransactionHeader = memo(
           fontWeight: 300,
           zIndex: 200,
           color: theme.tableHeaderText,
-          backgroundColor: theme.tableHeaderBackground,
+          backgroundColor: theme.tableBackground,
         }}
       >
         <SelectCell
@@ -836,7 +836,7 @@ const Transaction = memo(function Transaction(props) {
           width={110}
           style={{
             width: 110,
-            backgroundColor: theme.pageBackground,
+            backgroundColor: theme.tableRowBackgroundHover,
             border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
         />
@@ -847,7 +847,7 @@ const Transaction = memo(function Transaction(props) {
           /* Account blank placeholder for Child transaction */
           style={{
             flex: 1,
-            backgroundColor: theme.pageBackground,
+            backgroundColor: theme.tableRowBackgroundHover,
             border: 0,
           }}
         />
@@ -1019,7 +1019,6 @@ const Transaction = memo(function Transaction(props) {
           {() => (
             <View
               style={{
-                border: '1px solid ' + statusProps.borderColor,
                 color: statusProps.color,
                 backgroundColor: statusProps.backgroundColor,
                 margin: '0 5px',
@@ -1130,7 +1129,7 @@ const Transaction = memo(function Transaction(props) {
               ? {
                   // uncategorized transaction
                   fontStyle: 'italic',
-                  fontWeight: 500,
+                  fontWeight: 300,
                   color: theme.formInputTextHighlight,
                 }
               : valueStyle
@@ -1565,8 +1564,6 @@ function TransactionTableInner({
         {
           flex: 1,
           cursor: 'default',
-          borderLeft: '1px solid ' + theme.tableBorder,
-          borderRight: '1px solid ' + theme.tableBorder,
         },
         props.style,
       ]}

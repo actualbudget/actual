@@ -124,7 +124,7 @@ const Modal = ({
             minWidth: '100%',
             minHeight: 0,
             borderRadius: 4,
-            border: '1px solid ' + theme.modalBorder,
+            //border: '1px solid ' + theme.modalBorder,
             color: theme.pageText,
             backgroundColor: theme.modalBackground,
             opacity: isHidden ? 0 : 1,

@@ -41,7 +41,6 @@ import View from './common/View';
 import { SelectCell, Row, Field, Cell, CellButton, TableHeader } from './table';
 
 let valueStyle = {
-  fontWeight: 500,
   color: theme.pageTextPositive,
 };
 let SchedulesQuery = liveQueryContext(q('schedules').select('*'));
@@ -152,7 +151,7 @@ export function Value({
     }
     let numHidden = value.length - displayed.length;
     return (
-      <Text style={{ color: theme.pageText }}>
+      <Text style={{ color: theme.tableText }}>
         [
         {displayed.map((v, i) => {
           let text = <Text style={valueStyle}>{formatValue(v)}</Text>;
@@ -217,8 +216,8 @@ function ConditionExpression({
         {
           display: 'block',
           maxWidth: '100%',
-          color: theme.pillText,
-          backgroundColor: theme.pillBackground,
+          color: theme.altPillText,
+          backgroundColor: theme.altPillBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',
@@ -266,8 +265,8 @@ function ActionExpression({ field, op, value, options, style }) {
         {
           display: 'block',
           maxWidth: '100%',
-          color: theme.pillText,
-          backgroundColor: theme.pillBackground,
+          color: theme.altPillText,
+          backgroundColor: theme.altPillBackground,
           borderRadius: 4,
           padding: '3px 5px',
           whiteSpace: 'nowrap',

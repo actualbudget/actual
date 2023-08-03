@@ -56,7 +56,7 @@ export default function Select<Value extends string>({
       onChange={onChange}
       style={{
         color: bare ? 'inherit' : theme.formInputText,
-        backgroundColor: bare ? 'transparent' : theme.formInputBackground,
+        backgroundColor: bare ? 'transparent' : theme.cardBackground,
         borderRadius: styles.menuBorderRadius,
         border: bare ? 'none' : '1px solid ' + theme.formInputBorder,
         lineHeight: '1em',

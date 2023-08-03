@@ -19,7 +19,7 @@ export const SectionLabel = ({ title, style }: SectionLabelProps) => {
         {
           fontWeight: 500,
           textTransform: 'uppercase',
-          color: theme.formLabelText,
+          color: theme.altFormLabelText,
           marginBottom: 5,
           lineHeight: '1em',
         },
@@ -42,7 +42,7 @@ export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
     <Text
       style={[
-        { fontSize: 13, marginBottom: 3, color: theme.formLabelText },
+        { fontSize: 13, marginBottom: 3, color: theme.pillTextSelected },
         style,
       ]}
     >
