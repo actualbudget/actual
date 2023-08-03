@@ -44,7 +44,7 @@ export function ConditionalPrivacyFilter({
 }
 
 type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
-  activationFilters?: boolean[] | (() => boolean)[];
+  activationFilters?: (boolean | (() => boolean))[];
   blurIntensity?: number;
 };
 export default function PrivacyFilter({
