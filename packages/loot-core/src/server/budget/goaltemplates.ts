@@ -625,6 +625,7 @@ async function applyCategoryTemplate(
           let next_date_string = [];
           let target = [];
           let target_interval = [];
+          let target_frequency = [];
           let num_months = [];
           let isRepeating = [];
           let totalScheduledGoal = 0;
@@ -645,6 +646,7 @@ async function applyCategoryTemplate(
               getNextDate(dateCond[ll], monthUtils._parse(current_month)),
             );
             target_interval.push(dateCond[ll].value.interval);
+            target_frequency.push(dateCond[ll].value.frequency);
             totalScheduledGoal += target[ll];
             isRepeating.push(
               Object(dateCond[ll].value) === dateCond[ll].value &&
@@ -674,7 +676,7 @@ async function applyCategoryTemplate(
                   monthUtils._parse(next_date),
                 );
               }
-              amountCond[ll].value = monthlyTarget;
+              target[ll] = -monthlyTarget;
             }
           }
           let diff = 0;
@@ -686,7 +688,11 @@ async function applyCategoryTemplate(
                 );
                 break;
               }
-              if (template[ll].full && num_months[ll] === 0) {
+              if (
+                (template[ll].full && num_months[ll] === 0) ||
+                target_frequency[ll] === 'weekly' ||
+                target_frequency[ll] === 'daily'
+              ) {
                 diff += target[ll];
               } else if (template[ll].full && num_months[ll] > 0) {
                 diff += 0;
@@ -721,7 +727,11 @@ async function applyCategoryTemplate(
                 tg = 0;
                 remainder = Math.abs(remainder);
               }
-              if (template[ll].full && num_months[ll] === 0) {
+              if (
+                (template[ll].full && num_months[ll] === 0) ||
+                target_frequency[ll] === 'weekly' ||
+                target_frequency[ll] === 'daily'
+              ) {
                 diff += tg;
               } else {
                 diff += tg / (num_months[ll] + 1);
