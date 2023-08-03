@@ -616,7 +616,7 @@ async function applyCategoryTemplate(
               ? template[l].priority
               : lowestPriority;
         }
-        if (l === lowestPriority) {
+        if (l === 0) {
           let schedule_id = [];
           let rule = [];
           let conditions = [];
@@ -702,39 +702,48 @@ async function applyCategoryTemplate(
             }
           } else if (balance < totalScheduledGoal) {
             for (let ll = 0; ll < template.length; ll++) {
-              if (isReflectBudget() && !template[ll].full) {
-                errors.push(
-                  `Report budgets require the full option for Schedules.`,
-                );
-                break;
+              if (isReflectBudget()) {
+                if (!template[ll].full) {
+                  errors.push(
+                    `Report budgets require the full option for Schedules.`,
+                  );
+                  break;
+                }
+                if (template[ll].full && num_months[ll] === 0) {
+                  to_budget += target[ll];
+                }
               }
-              if (num_months[ll] < 0) {
-                errors.push(
-                  `Non-repeating schedule ${template[ll].name} was due on ${next_date_string[ll]}, which is in the past.`,
-                );
-                break;
-              }
-              if (ll === 0) {
-                remainder = target[ll] - last_month_balance;
-              } else {
-                remainder = target[ll] - remainder;
-              }
-              let tg = 0;
-              if (remainder >= 0) {
-                tg = remainder;
-                remainder = 0;
-              } else {
-                tg = 0;
-                remainder = Math.abs(remainder);
-              }
-              if (
-                (template[ll].full && num_months[ll] === 0) ||
-                target_frequency[ll] === 'weekly' ||
-                target_frequency[ll] === 'daily'
-              ) {
-                diff += tg;
-              } else {
-                diff += tg / (num_months[ll] + 1);
+              if (!isReflectBudget()) {
+                if (num_months[ll] < 0) {
+                  errors.push(
+                    `Non-repeating schedule ${template[ll].name} was due on ${next_date_string[ll]}, which is in the past.`,
+                  );
+                  break;
+                }
+                if (ll === 0) {
+                  remainder = target[ll] - last_month_balance;
+                } else {
+                  remainder = target[ll] - remainder;
+                }
+                let tg = 0;
+                if (remainder >= 0) {
+                  tg = remainder;
+                  remainder = 0;
+                } else {
+                  tg = 0;
+                  remainder = Math.abs(remainder);
+                }
+                if (
+                  (template[ll].full && num_months[ll] === 0) ||
+                  target_frequency[ll] === 'weekly' ||
+                  target_frequency[ll] === 'daily'
+                ) {
+                  diff += tg;
+                } else if (template[ll].full && num_months[ll] > 0) {
+                  diff += target[ll];
+                } else {
+                  diff += tg / (num_months[ll] + 1);
+                }
               }
             }
           }
@@ -743,11 +752,15 @@ async function applyCategoryTemplate(
             !lowestPriority
           ) {
             to_budget += diff;
-          } else if (budgetAvailable > to_budget + diff) {
+          } else if (
+            to_budget + diff > budgetAvailable &&
+            budgetAvailable >= 0
+          ) {
             to_budget = budgetAvailable;
             errors.push(`Insufficient funds.`);
           }
         }
+
         break;
       }
       case 'remainder': {
