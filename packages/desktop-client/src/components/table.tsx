@@ -62,8 +62,8 @@ function fireBlur(onBlur, e) {
 }
 
 const CellContext = createContext({
-  backgroundColor: theme.pageBackground,
-  borderColor: theme.formInputBorder,
+  backgroundColor: theme.tableBackground,
+  borderColor: theme.tableBorder,
 });
 
 type CellProviderProps = {
@@ -97,8 +97,8 @@ type FieldProps = ComponentProps<typeof View> & {
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   { width, name, truncate = true, children, style, contentStyle, ...props },
   ref,
-) {
-  let borderColor = theme.tableBorder;
+  ) {
+    let { backgroundColor, borderColor } = useContext(CellContext);
   return (
     <View
       innerRef={ref}
@@ -110,6 +110,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
           borderTopWidth: borderColor ? 1 : 0,
           borderBottomWidth: borderColor ? 1 : 0,
           borderColor,
+          backgroundColor,
         },
         styles.smallText,
         style,
@@ -322,6 +323,9 @@ type RowProps = ComponentProps<typeof View> & {
   highlighted?: boolean;
 };
 export function Row({
+  backgroundColor = theme.tableBackground,
+  borderColor = theme.tableBorder,
+  color = theme.tableTextHover,
   inset = 0,
   collapsed,
   focused,
@@ -361,9 +365,9 @@ export function Row({
   return (
     <CellProvider
       backgroundColor={
-        shouldHighlight ? theme.tableRowBackgroundHighlight : null
+        shouldHighlight ? theme.tableRowBackgroundHighlight : theme.tableBackground
       }
-      borderColor={shouldHighlight ? theme.tableBorderSelected : null}
+      borderColor={shouldHighlight ? theme.tableBorderSelected : theme.tableBorder}
     >
       <View
         innerRef={rowRef}
@@ -392,6 +396,7 @@ export function Row({
 }
 
 const inputCellStyle = {
+  backgroundColor: theme.tableBackground,
   padding: '5px 3px',
   margin: '0 1px',
 };

@@ -907,6 +907,7 @@ export default function EditRule({
               <SimpleTransactionsTable
                 transactions={transactions}
                 fields={getTransactionFields(conditions, actions)}
+                style={{ border: '1px solid ' + theme.tableBorder }}
               />
 
               <Stack
