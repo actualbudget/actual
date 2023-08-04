@@ -153,9 +153,19 @@ async function processTemplate(month, force, category_templates) {
         let isScheduleOrBy = false;
         let priorityCheck = 0;
         if (
-          template.filter(t => t.type === 'schedule' || t.type === 'by')
-            .length > 0
+          template.filter(
+            t =>
+              (t.type === 'schedule' || t.type === 'by') &&
+              t.priority === priority,
+          ).length > 0
         ) {
+          template = template.filter(
+            t =>
+              (t.priority === priority &&
+                (t.type !== 'schedule' || t.type !== 'by')) ||
+              t.type === 'schedule' ||
+              t.type === 'by',
+          );
           let { lowPriority, errorNotice } = await checkScheduleTemplates(
             template,
           );
@@ -415,7 +425,7 @@ async function applyCategoryTemplate(
         if (to_budget + increment < budgetAvailable || !priority) {
           to_budget += increment;
         } else {
-          to_budget = budgetAvailable;
+          if (budgetAvailable > 0) to_budget += budgetAvailable;
           errors.push(`Insufficient funds.`);
         }
         break;
@@ -613,13 +623,6 @@ async function applyCategoryTemplate(
           scheduleFlag = true;
           let template = template_lines.filter(t => t.type === 'schedule');
           //in the case of multiple templates per category, schedules may have wrong priority level
-          let lowestPriority = 0;
-          for (let l = 0; l < template.length; l++) {
-            lowestPriority =
-              template[l].priority > lowestPriority
-                ? template[l].priority
-                : lowestPriority;
-          }
           let t = [];
           let totalScheduledGoal = 0;
 
@@ -752,10 +755,7 @@ async function applyCategoryTemplate(
             }
           }
           diff = Math.round(diff);
-          if (
-            (diff > 0 && to_budget + diff <= budgetAvailable) ||
-            !lowestPriority
-          ) {
+          if ((diff > 0 && to_budget + diff <= budgetAvailable) || !priority) {
             to_budget += diff;
           } else if (
             to_budget + diff > budgetAvailable &&
