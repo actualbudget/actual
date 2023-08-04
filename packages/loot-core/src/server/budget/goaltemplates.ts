@@ -319,6 +319,8 @@ async function applyCategoryTemplate(
   );
   all_schedule_names = all_schedule_names.map(v => v.name);
 
+  let scheduleFlag = false; //only run schedules portion once
+
   // remove lines for past dates, calculate repeating dates
   template_lines = template_lines.filter(template => {
     switch (template.type) {
@@ -607,27 +609,18 @@ async function applyCategoryTemplate(
         break;
       }
       case 'schedule': {
-        let template = template_lines.filter(t => t.type === 'schedule');
-        //in the case of multiple templates per category, schedules may have wrong priority level
-        let lowestPriority = 0;
-        for (let l = 0; l < template.length; l++) {
-          lowestPriority =
-            template[l].priority > lowestPriority
-              ? template[l].priority
-              : lowestPriority;
-        }
-        if (l === 0) {
-          let schedule_id = [];
-          let rule = [];
-          let conditions = [];
-          let dateCond = [];
-          let amountCond = [];
-          let next_date_string = [];
-          let target = [];
-          let target_interval = [];
-          let target_frequency = [];
-          let num_months = [];
-          let isRepeating = [];
+        if (!scheduleFlag) {
+          scheduleFlag = true;
+          let template = template_lines.filter(t => t.type === 'schedule');
+          //in the case of multiple templates per category, schedules may have wrong priority level
+          let lowestPriority = 0;
+          for (let l = 0; l < template.length; l++) {
+            lowestPriority =
+              template[l].priority > lowestPriority
+                ? template[l].priority
+                : lowestPriority;
+          }
+          let t = [];
           let totalScheduledGoal = 0;
 
           for (let ll = 0; ll < template.length; ll++) {
@@ -635,95 +628,105 @@ async function applyCategoryTemplate(
               'SELECT id FROM schedules WHERE name = ?',
               [template[ll].name],
             );
-            schedule_id.push(sid);
-            rule.push(await getRuleForSchedule(schedule_id[ll]));
-            conditions.push(rule[ll].serialize().conditions);
-            let { date: dc, amount: ac } = extractScheduleConds(conditions[ll]);
-            dateCond.push(dc);
-            amountCond.push(ac);
-            target.push(-amountCond[ll].value);
-            next_date_string.push(
-              getNextDate(dateCond[ll], monthUtils._parse(current_month)),
+            let rule = await getRuleForSchedule(sid);
+            let conditions = rule.serialize().conditions;
+            let { date: dc, amount: ac } = extractScheduleConds(conditions);
+            let target = -ac.value;
+            let next_date_string = getNextDate(
+              dc,
+              monthUtils._parse(current_month),
             );
-            target_interval.push(dateCond[ll].value.interval);
-            target_frequency.push(dateCond[ll].value.frequency);
-            totalScheduledGoal += target[ll];
-            isRepeating.push(
-              Object(dateCond[ll].value) === dateCond[ll].value &&
-                'frequency' in dateCond[ll].value,
+            let target_interval = dc.value.interval;
+            let target_frequency = dc.value.frequency;
+            totalScheduledGoal += target;
+            let isRepeating =
+              Object(dc.value) === dc.value && 'frequency' in dc.value;
+            let num_months = monthUtils.differenceInCalendarMonths(
+              next_date_string,
+              current_month,
             );
-            num_months.push(
-              monthUtils.differenceInCalendarMonths(
-                next_date_string[ll],
-                current_month,
-              ),
-            );
-            if (isRepeating[ll]) {
+            t.push({
+              template: template[ll],
+              schedule_id: sid,
+              rule: rule,
+              conditions: conditions,
+              dateCond: dc,
+              amountCond: ac,
+              target: target,
+              next_date_string: next_date_string,
+              target_interval: target_interval,
+              target_frequency: target_frequency,
+              isRepeating: isRepeating,
+              num_months: num_months,
+            });
+            if (t[ll].isRepeating) {
               let monthlyTarget = 0;
               let next_month = monthUtils.addMonths(
                 current_month,
-                num_months[ll] + 1,
+                t[ll].num_months + 1,
               );
               let next_date = getNextDate(
-                dateCond[ll],
+                t[ll].dateCond,
                 monthUtils._parse(current_month),
               );
               while (next_date < next_month) {
-                monthlyTarget += amountCond[ll].value;
+                monthlyTarget += t[ll].amountCond.value;
                 next_date = monthUtils.addDays(next_date, 1);
                 next_date = getNextDate(
-                  dateCond[ll],
+                  t[ll].dateCond,
                   monthUtils._parse(next_date),
                 );
               }
-              target[ll] = -monthlyTarget;
+              t[ll].target = -monthlyTarget;
             }
           }
+          t = t.sort((a, b) => b.target - a.target);
+
           let diff = 0;
           if (balance >= totalScheduledGoal) {
             for (let ll = 0; ll < template.length; ll++) {
-              if (num_months[ll] < 0) {
+              if (t[ll].num_months < 0) {
                 errors.push(
-                  `Non-repeating schedule ${template[ll].name} was due on ${next_date_string[ll]}, which is in the past.`,
+                  `Non-repeating schedule ${t[ll].template.name} was due on ${t[ll].next_date_string}, which is in the past.`,
                 );
                 break;
               }
               if (
-                (template[ll].full && num_months[ll] === 0) ||
-                target_frequency[ll] === 'weekly' ||
-                target_frequency[ll] === 'daily'
+                (t[ll].template.full && t[ll].num_months === 0) ||
+                t[ll].target_frequency === 'weekly' ||
+                t[ll].target_frequency === 'daily'
               ) {
-                diff += target[ll];
-              } else if (template[ll].full && num_months[ll] > 0) {
+                diff += t[ll].target;
+              } else if (t[ll].template.full && t[ll].num_months > 0) {
                 diff += 0;
               } else {
-                diff += target[ll] / target_interval[ll];
+                diff += t[ll].target / t[ll].target_interval;
               }
             }
           } else if (balance < totalScheduledGoal) {
-            for (let ll = 0; ll < template.length; ll++) {
+            for (let ll = 0; ll < t.length; ll++) {
               if (isReflectBudget()) {
-                if (!template[ll].full) {
+                if (!t[ll].template.full) {
                   errors.push(
                     `Report budgets require the full option for Schedules.`,
                   );
                   break;
                 }
-                if (template[ll].full && num_months[ll] === 0) {
-                  to_budget += target[ll];
+                if (t[ll].template.full && t[ll].num_months === 0) {
+                  to_budget += t[ll].target;
                 }
               }
               if (!isReflectBudget()) {
-                if (num_months[ll] < 0) {
+                if (t[ll].num_months < 0) {
                   errors.push(
-                    `Non-repeating schedule ${template[ll].name} was due on ${next_date_string[ll]}, which is in the past.`,
+                    `Non-repeating schedule ${t[ll].template.name} was due on ${t[ll].next_date_string}, which is in the past.`,
                   );
                   break;
                 }
                 if (ll === 0) {
-                  remainder = target[ll] - last_month_balance;
+                  remainder = t[ll].target - last_month_balance;
                 } else {
-                  remainder = target[ll] - remainder;
+                  remainder = t[ll].target - remainder;
                 }
                 let tg = 0;
                 if (remainder >= 0) {
@@ -734,19 +737,21 @@ async function applyCategoryTemplate(
                   remainder = Math.abs(remainder);
                 }
                 if (
-                  (template[ll].full && num_months[ll] === 0) ||
-                  target_frequency[ll] === 'weekly' ||
-                  target_frequency[ll] === 'daily'
+                  t[ll].template.full ||
+                  t[ll].num_months === 0 ||
+                  t[ll].target_frequency === 'weekly' ||
+                  t[ll].target_frequency === 'daily'
                 ) {
                   diff += tg;
-                } else if (template[ll].full && num_months[ll] > 0) {
-                  diff += target[ll];
+                } else if (t[ll].template.full && t[ll].num_months > 0) {
+                  diff += 0;
                 } else {
-                  diff += tg / (num_months[ll] + 1);
+                  diff += tg / (t[ll].num_months + 1);
                 }
               }
             }
           }
+          diff = Math.round(diff);
           if (
             (diff > 0 && to_budget + diff <= budgetAvailable) ||
             !lowestPriority
@@ -760,7 +765,6 @@ async function applyCategoryTemplate(
             errors.push(`Insufficient funds.`);
           }
         }
-
         break;
       }
       case 'remainder': {
