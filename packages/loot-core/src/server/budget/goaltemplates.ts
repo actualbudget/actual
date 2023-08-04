@@ -627,10 +627,11 @@ async function applyCategoryTemplate(
           let totalScheduledGoal = 0;
 
           for (let ll = 0; ll < template.length; ll++) {
-            let { id: sid } = await db.first(
-              'SELECT id FROM schedules WHERE name = ?',
+            let { id: sid, completed: complete } = await db.first(
+              'SELECT * FROM schedules WHERE name = ?',
               [template[ll].name],
             );
+            console.log(complete);
             let rule = await getRuleForSchedule(sid);
             let conditions = rule.serialize().conditions;
             let { date: dc, amount: ac } = extractScheduleConds(conditions);
@@ -641,7 +642,6 @@ async function applyCategoryTemplate(
             );
             let target_interval = dc.value.interval;
             let target_frequency = dc.value.frequency;
-            totalScheduledGoal += target;
             let isRepeating =
               Object(dc.value) === dc.value && 'frequency' in dc.value;
             let num_months = monthUtils.differenceInCalendarMonths(
@@ -661,33 +661,43 @@ async function applyCategoryTemplate(
               target_frequency: target_frequency,
               isRepeating: isRepeating,
               num_months: num_months,
+              completed: complete,
             });
-            if (t[ll].isRepeating) {
-              let monthlyTarget = 0;
-              let next_month = monthUtils.addMonths(
-                current_month,
-                t[ll].num_months + 1,
-              );
-              let next_date = getNextDate(
-                t[ll].dateCond,
-                monthUtils._parse(current_month),
-              );
-              while (next_date < next_month) {
-                monthlyTarget += t[ll].amountCond.value;
-                next_date = monthUtils.addDays(next_date, 1);
-                next_date = getNextDate(
-                  t[ll].dateCond,
-                  monthUtils._parse(next_date),
+            if (!complete) {
+              if (t[ll].isRepeating) {
+                let monthlyTarget = 0;
+                let next_month = monthUtils.addMonths(
+                  current_month,
+                  t[ll].num_months + 1,
                 );
+                let next_date = getNextDate(
+                  t[ll].dateCond,
+                  monthUtils._parse(current_month),
+                );
+                while (next_date < next_month) {
+                  monthlyTarget += t[ll].amountCond.value;
+                  next_date = monthUtils.addDays(next_date, 1);
+                  next_date = getNextDate(
+                    t[ll].dateCond,
+                    monthUtils._parse(next_date),
+                  );
+                }
+                t[ll].target = -monthlyTarget;
+                totalScheduledGoal += target;
               }
-              t[ll].target = -monthlyTarget;
+            } else {
+              errors.push(
+                `Schedule ${t[ll].template.name} is a completed schedule.`,
+              );
             }
           }
+
+          t = t.filter(t => t.completed === 0);
           t = t.sort((a, b) => b.target - a.target);
 
           let diff = 0;
           if (balance >= totalScheduledGoal) {
-            for (let ll = 0; ll < template.length; ll++) {
+            for (let ll = 0; ll < t.length; ll++) {
               if (t[ll].num_months < 0) {
                 errors.push(
                   `Non-repeating schedule ${t[ll].template.name} was due on ${t[ll].next_date_string}, which is in the past.`,
