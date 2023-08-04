@@ -644,10 +644,34 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             alignItems: 'center',
             cursor: 'default',
             transition: 'box-shadow .15s',
-            ':focus': {
-              outline: 0,
-              boxShadow: `0 0 0 3px white, 0 0 0 5px ${colors.b5}`,
-            },
+            backgroundColor: bare
+              ? 'transparent'
+              : disabled // always use disabled before primary since we can have a disabled primary button
+              ? theme.buttonNormalDisabledBackground
+              : primary
+              ? theme.buttonPrimaryBackground
+              : theme.buttonNormalBackground,
+            border: bare
+              ? 'none'
+              : '1px solid ' +
+                (disabled
+                  ? theme.buttonNormalDisabledBorder
+                  : primary
+                  ? theme.buttonPrimaryBorder
+                  : theme.buttonNormalBorder),
+            color: bare
+              ? 'inherit'
+              : disabled
+              ? theme.buttonNormalDisabledText
+              : primary
+              ? theme.buttonPrimaryText
+              : theme.buttonNormalText,
+            ':focus': bare
+              ? null
+              : {
+                  outline: 0,
+                  boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
+                },
           },
           style,
         ]}
@@ -862,7 +886,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
 
       <Button
         type="bare"
-        style={{ color: theme.altFormLabelText }}
+        style={{ color: theme.pageTextPositive }}
         onClick={() => setMenuOpen(true)}
       >
         <ExpandArrow
