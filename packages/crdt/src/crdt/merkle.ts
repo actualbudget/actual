@@ -75,9 +75,9 @@ export function build(timestamps: Timestamp[]) {
   return trie;
 }
 
-export function diff(trie1: TrieNode, trie2: TrieNode): number {
+export function diff(trie1: TrieNode, trie2: TrieNode): number | null {
   if (trie1.hash === trie2.hash) {
-    return 0;
+    return null;
   }
 
   let node1 = trie1;
@@ -134,7 +134,7 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number {
     node2 = node2[diffkey] || emptyTrie();
   }
 
-  return 0;
+  return null;
 }
 
 export function prune(trie: TrieNode, n = 2): TrieNode {
