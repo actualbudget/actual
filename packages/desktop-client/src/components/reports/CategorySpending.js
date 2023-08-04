@@ -6,7 +6,10 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useCategories from '../../hooks/useCategories';
+import Filter from '../../icons/v2/Filter2';
 import { styles } from '../../style';
+import Button from '../common/Button';
+import Select from '../common/Select';
 import View from '../common/View';
 
 import CategorySelector from './CategorySelector';
@@ -102,6 +105,41 @@ function CategoryAverage() {
   ];
   const numberOfMonthsLine = numberOfMonthsOptions.length - 1;
 
+  const headerPrefixItems = (
+    <>
+      <Button
+        type="bare"
+        onClick={() => setCategorySelectorVisible(!categorySelectorVisible)}
+      >
+        <Filter
+          width={14}
+          height={14}
+          style={{ opacity: categorySelectorVisible ? 0.6 : 1 }}
+        />
+      </Button>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 5,
+        }}
+      >
+        <View>Average: </View>
+        <Select
+          style={{ backgroundColor: 'white' }}
+          onChange={setNumberOfMonthsAverage}
+          value={numberOfMonthsAverage}
+          options={numberOfMonthsOptions.map(number => [
+            number.value,
+            number.description,
+          ])}
+          line={numberOfMonthsLine}
+        />
+      </View>
+    </>
+  );
+
   return (
     <View style={[styles.page, { overflow: 'hidden' }]}>
       <Header
@@ -110,12 +148,7 @@ function CategoryAverage() {
         start={start}
         end={end}
         onChangeDates={onChangeDates}
-        numberOfMonths={numberOfMonthsAverage}
-        numberOfMonthsOptions={numberOfMonthsOptions}
-        numberOfMonthsLine={numberOfMonthsLine}
-        onChangeNumberOfMonths={setNumberOfMonthsAverage}
-        categorySelectorVisible={categorySelectorVisible}
-        onChangeCategoryVisible={setCategorySelectorVisible}
+        headerPrefixItems={headerPrefixItems}
       />
       <View
         style={{ display: 'flex', flexDirection: 'row', padding: 15, gap: 15 }}

@@ -1,7 +1,6 @@
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
-import Filter from '../../icons/v2/Filter2';
 import { styles } from '../../style';
 import Button from '../common/Button';
 import ButtonLink from '../common/ButtonLink';
@@ -61,12 +60,7 @@ function Header({
   onUpdateFilter,
   onDeleteFilter,
   onCondOpChange,
-  numberOfMonths,
-  numberOfMonthsOptions,
-  numberOfMonthsLine,
-  onChangeNumberOfMonths,
-  categorySelectorVisible,
-  onChangeCategoryVisible,
+  headerPrefixItems,
 }) {
   return (
     <View
@@ -93,40 +87,7 @@ function Header({
           gap: 15,
         }}
       >
-        {title === 'Category Spending' && (
-          <Button
-            type="bare"
-            onClick={() => onChangeCategoryVisible(!categorySelectorVisible)}
-          >
-            <Filter
-              width={14}
-              height={14}
-              style={{ opacity: categorySelectorVisible ? 0.6 : 1 }}
-            />
-          </Button>
-        )}
-
-        {numberOfMonthsOptions && (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 5,
-            }}
-          >
-            <View>Average: </View>
-            <Select
-              style={{ backgroundColor: 'white' }}
-              onChange={onChangeNumberOfMonths}
-              value={numberOfMonths}
-              options={numberOfMonthsOptions.map(number => [
-                number.value,
-                number.description,
-              ])}
-              line={numberOfMonthsLine}
-            />
-          </View>
-        )}
+        {headerPrefixItems}
 
         <View
           style={{
