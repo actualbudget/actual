@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "google-protobuf": "^3.12.0-rc.1",
-    "murmurhash": "^0.0.2",
+    "murmurhash": "^2.0.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
