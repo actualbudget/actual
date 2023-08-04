@@ -7,11 +7,11 @@ import { styles, colors } from '../../style';
 import Block from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
-import Modal from '../common/Modal';
+import Modal, { type ModalProps } from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import View from '../common/View';
 
-function getErrorMessage(error) {
+function getErrorMessage(error: string): string {
   switch (error) {
     case 'parse-error':
       return 'Unable to parse file. Please select a JSON file exported from nYNAB.';
@@ -22,9 +22,13 @@ function getErrorMessage(error) {
   }
 }
 
-function Import({ modalProps }) {
+type ImportProps = {
+  modalProps?: ModalProps;
+};
+
+function Import({ modalProps }: ImportProps) {
   const dispatch = useDispatch();
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
 
   async function onImport() {
@@ -34,7 +38,7 @@ function Import({ modalProps }) {
     });
     if (res) {
       setImporting(true);
-      setError(false);
+      setError(null);
       try {
         await dispatch(importBudget(res[0], 'ynab5'));
       } catch (err) {

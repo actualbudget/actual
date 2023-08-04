@@ -2059,8 +2059,6 @@ handlers['import-budget'] = async function ({ filepath, type }) {
     captureException(err);
     return { error: 'internal-error' };
   }
-
-  return {};
 };
 
 handlers['export-budget'] = async function () {
