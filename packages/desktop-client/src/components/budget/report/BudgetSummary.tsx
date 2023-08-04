@@ -421,7 +421,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                       { name: 'set-zero', text: 'Set budgets to zero' },
                       {
                         name: 'set-3-avg',
-                        text: 'Set budgets to 3 month avg',
+                        text: 'Set budgets to 3 month average',
                       },
                       isGoalTemplatesEnabled && {
                         name: 'check-templates',
