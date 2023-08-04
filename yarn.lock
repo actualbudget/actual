@@ -32,7 +32,7 @@ __metadata:
     "@types/uuid": ^9.0.2
     google-protobuf: ^3.12.0-rc.1
     jest: ^27.0.0
-    murmurhash: ^0.0.2
+    murmurhash: ^2.0.1
     ts-jest: ^27.0.0
     ts-protoc-gen: ^0.15.0
     typescript: ^5.0.2
@@ -13154,10 +13154,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"murmurhash@npm:^0.0.2":
-  version: 0.0.2
-  resolution: "murmurhash@npm:0.0.2"
-  checksum: e06d1e7cfdc39d742584d96af30e9b26bd44c995b9ced192b62c36b52898347ac28d32a9a94f5e0b286339d45657490ae32ed42ead75ef2a15aef9cfe386e5fa
+"murmurhash@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "murmurhash@npm:2.0.1"
+  checksum: 8bb90f43b1c41b1d046efe662a02dcc3cdbda4b42fbbadf7488046772d9eecf2b37ffb6cb73d0d96f2ff489d9f4a8252c674bbae588a6179f60854fe0bfe3325
   languageName: node
   linkType: hard
 
