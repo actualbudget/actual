@@ -172,7 +172,7 @@ export function debug(trie: TrieNode, k = '', indent = 0): string {
     getKeys(trie)
       .map(key => {
         const node = trie[key];
-        if (!node) return;
+        if (!node) return '';
         return debug(node, key, indent + 2);
       })
       .join('')
