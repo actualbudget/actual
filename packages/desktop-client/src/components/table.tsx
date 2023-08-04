@@ -28,7 +28,7 @@ import AnimatedLoading from '../icons/AnimatedLoading';
 import DeleteIcon from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
-import { styles, theme, colors } from '../style';
+import { styles, theme } from '../style';
 
 import Button from './common/Button';
 import Input from './common/Input';
