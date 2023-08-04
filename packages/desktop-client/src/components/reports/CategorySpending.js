@@ -5,7 +5,7 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import { styles } from '../../style';
 import View from '../common/View';
 
@@ -17,10 +17,9 @@ import useReport from './useReport';
 import { fromDateRepr } from './util';
 
 function CategoryAverage() {
-  const { getCategories } = useActions();
+  const categories = useCategories();
 
-  const [categories, setCategories] = useState({});
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState(null);
   const [categorySelectorVisible, setCategorySelectorVisible] = useState(false);
 
   const [allMonths, setAllMonths] = useState(null);
@@ -32,6 +31,12 @@ function CategoryAverage() {
 
   const [numberOfMonthsAverage, setNumberOfMonthsAverage] = useState(1);
 
+  useEffect(() => {
+    if (selectedCategories === null && categories.list.length !== 0) {
+      setSelectedCategories(categories.list);
+    }
+  }, [categories, selectedCategories]);
+
   const getGraphData = useMemo(() => {
     return categorySpendingSpreadsheet(
       start,
@@ -41,6 +46,7 @@ function CategoryAverage() {
         category =>
           !category.is_income &&
           !category.hidden &&
+          selectedCategories &&
           selectedCategories.some(
             selectedCategory => selectedCategory.id === category.id,
           ),
@@ -48,13 +54,6 @@ function CategoryAverage() {
     );
   }, [start, end, numberOfMonthsAverage, categories, selectedCategories]);
   const perCategorySpending = useReport('category_spending', getGraphData);
-
-  useEffect(() => {
-    getCategories().then(categories => {
-      setCategories(categories);
-      setSelectedCategories(categories.list);
-    });
-  }, []);
 
   useEffect(() => {
     async function run() {

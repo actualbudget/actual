@@ -22,6 +22,7 @@ export default function CategorySelector({
   setSelectedCategories,
 }: CategorySelectorProps) {
   const [uncheckedHidden, setUncheckedHidden] = useState(false);
+
   return (
     <>
       <div>
