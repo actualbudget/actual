@@ -736,7 +736,9 @@ async function applyCategoryTemplate(
                   );
                   break;
                 }
-                if (ll === 0) {
+                if (t[ll].template.full && t[ll].num_months > 0) {
+                  remainder = 0;
+                } else if (ll === 0 && !t[ll].template.full) {
                   remainder = t[ll].target - last_month_balance;
                 } else {
                   remainder = t[ll].target - remainder;
