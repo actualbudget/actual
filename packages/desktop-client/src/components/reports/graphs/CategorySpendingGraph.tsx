@@ -53,7 +53,10 @@ function CategorySpendingGraph({
               // eslint-disable-next-line rulesdir/typography
               tickFormat={x => d.format(x, "MMM ''yy")}
               tickValues={graphData.tickValues}
-              tickCount={Math.max(1, Math.min(5, graphData.tickValues.length))}
+              tickCount={Math.max(
+                1,
+                Math.min(width > 760 ? 12 : 5, graphData.tickValues.length),
+              )}
               offsetY={50}
               orientation="bottom"
             />
