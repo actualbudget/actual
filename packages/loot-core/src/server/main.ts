@@ -2053,7 +2053,7 @@ handlers['import-budget'] = async function ({ filepath, type }) {
     }
 
     let buffer = Buffer.from(await fs.readFile(filepath, 'binary'));
-    await handleBudgetImport(type, filepath, buffer);
+    return await handleBudgetImport(type, filepath, buffer);
   } catch (err) {
     err.message = 'Error importing budget: ' + err.message;
     captureException(err);
