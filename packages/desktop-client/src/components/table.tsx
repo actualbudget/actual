@@ -28,7 +28,7 @@ import AnimatedLoading from '../icons/AnimatedLoading';
 import DeleteIcon from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
-import { styles, theme } from '../style';
+import { styles, theme, colors } from '../style';
 
 import Button from './common/Button';
 import Input from './common/Input';
@@ -98,7 +98,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   { width, name, truncate = true, children, style, contentStyle, ...props },
   ref,
 ) {
-  let { backgroundColor, borderColor } = useContext(CellContext);
+  let borderColor = theme.tableBorder;
   return (
     <View
       innerRef={ref}
@@ -110,7 +110,6 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
           borderTopWidth: borderColor ? 1 : 0,
           borderBottomWidth: borderColor ? 1 : 0,
           borderColor,
-          backgroundColor,
         },
         styles.smallText,
         style,
@@ -325,7 +324,6 @@ type RowProps = ComponentProps<typeof View> & {
 export function Row({
   backgroundColor = theme.tableBackground,
   borderColor = theme.tableBorder,
-  color = theme.tableTextHover,
   inset = 0,
   collapsed,
   focused,
@@ -365,13 +363,9 @@ export function Row({
   return (
     <CellProvider
       backgroundColor={
-        shouldHighlight
-          ? theme.tableRowBackgroundHighlight
-          : theme.tableBackground
+        shouldHighlight ? theme.tableRowBackgroundHighlight : backgroundColor
       }
-      borderColor={
-        shouldHighlight ? theme.tableBorderSelected : theme.tableBorder
-      }
+      borderColor={shouldHighlight ? theme.tableBorderSelected : borderColor}
     >
       <View
         innerRef={rowRef}
@@ -400,7 +394,6 @@ export function Row({
 }
 
 const inputCellStyle = {
-  backgroundColor: theme.tableBackground,
   padding: '5px 3px',
   margin: '0 1px',
 };
@@ -651,34 +644,10 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             alignItems: 'center',
             cursor: 'default',
             transition: 'box-shadow .15s',
-            backgroundColor: bare
-              ? 'transparent'
-              : disabled // always use disabled before primary since we can have a disabled primary button
-              ? theme.buttonNormalDisabledBackground
-              : primary
-              ? theme.buttonPrimaryBackground
-              : theme.buttonNormalBackground,
-            border: bare
-              ? 'none'
-              : '1px solid ' +
-                (disabled
-                  ? theme.buttonNormalDisabledBorder
-                  : primary
-                  ? theme.buttonPrimaryBorder
-                  : theme.buttonNormalBorder),
-            color: bare
-              ? 'inherit'
-              : disabled
-              ? theme.buttonNormalDisabledText
-              : primary
-              ? theme.buttonPrimaryText
-              : theme.buttonNormalText,
-            ':focus': bare
-              ? null
-              : {
-                  outline: 0,
-                  boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
-                },
+            ':focus': {
+              outline: 0,
+              boxShadow: `0 0 0 3px white, 0 0 0 5px ${colors.b5}`,
+            },
           },
           style,
         ]}
@@ -855,7 +824,7 @@ export function TableHeader({
         {...rowProps}
         style={{
           color: theme.tableHeaderText,
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.tableHeaderBackground,
           zIndex: 200,
           fontWeight: 500,
           ...rowProps.style,
@@ -908,7 +877,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
         <Tooltip
           position="bottom-right"
           width={200}
-          style={{ padding: 0 }}
+          style={{ padding: 0, backgroundColor: 'transparent' }}
           onClose={() => setMenuOpen(false)}
         >
           <Menu
@@ -989,7 +958,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
-      backgroundColor = theme.tableHeaderBackground,
+      backgroundColor = theme.tableBackground,
       renderItem,
       renderEmpty,
       getItemKey,
@@ -1208,12 +1177,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
             {...(Array.isArray(headers) ? { headers } : { children: headers })}
           />
         )}
-        <View
-          style={{
-            flex: 1,
-            backgroundColor,
-          }}
-        >
+        <View style={{ flex: 1, backgroundColor }}>
           {isEmpty ? (
             getEmptyContent(renderEmpty)
           ) : (
