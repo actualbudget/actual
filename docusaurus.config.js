@@ -15,8 +15,8 @@ const defaultOptions = {
 /** @type {import('@docusaurus/types').Config} */
 module.exports = {
   title: 'Actual Budget Documentation',
-  tagline: 'Dinosaurs are cool',
-  url: 'https://docs.actualbudget.org',
+  tagline: 'Your finances - made simple',
+  url: 'https://actualbudget.org/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
