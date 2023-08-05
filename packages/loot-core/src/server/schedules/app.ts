@@ -188,9 +188,10 @@ export async function setNextDate({
 // Methods
 
 async function checkIfScheduleExists(name, scheduleId) {
-  let idForName = await db.first('SELECT id from schedules WHERE name = ?', [
-    name,
-  ]);
+  let idForName = await db.first(
+    'SELECT id from schedules WHERE tombstone = 0 AND name = ?',
+    [name],
+  );
 
   if (idForName == null) {
     return false;
