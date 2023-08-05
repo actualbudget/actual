@@ -9,7 +9,7 @@ import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
 import { batchMessages } from '../sync';
 
-import { setBudget, setZero, getSheetValue, isReflectBudget } from './actions';
+import { setBudget, getSheetValue, isReflectBudget } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export async function applyTemplate({ month }) {
@@ -69,6 +69,7 @@ async function processTemplate(month, force, category_templates) {
   let errors = [];
   let lowestPriority = 0;
   let originalCategoryBalance = [];
+  let setToZero = [];
 
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -97,28 +98,20 @@ async function processTemplate(month, force, category_templates) {
         isIncome: category.is_income,
         isTemplate: template ? true : false,
       });
+      setToZero.push({
+        category: category.id,
+        amount: 0,
+        isIncome: category.is_income,
+        isTemplate: template ? true : false,
+      });
     }
   }
-  await setZero({ month });
-
-  //set all non-templated cells to original value
   await setGoalBudget({
     month,
-    templateBudget: originalCategoryBalance.filter(f => f.isTemplate === false),
+    templateBudget: setToZero.filter(
+      f => f.isTemplate === true || f.isIncome === true,
+    ),
   });
-
-  //setZero() sets budgeted Income to 0. Reset income categories before continuing.
-  if (isReflectBudget()) {
-    for (let l = 0; l < originalCategoryBalance.length; l++) {
-      if (originalCategoryBalance[l].isIncome) {
-        await setBudget({
-          category: originalCategoryBalance[l].category,
-          month,
-          amount: originalCategoryBalance[l].amount,
-        });
-      }
-    }
-  }
 
   // find all remainder templates, place them after all other templates
   let remainder_found;
