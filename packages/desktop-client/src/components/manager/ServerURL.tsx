@@ -30,7 +30,7 @@ export default function ServerURL() {
           <strong>No server configured</strong>
         )}
       </Text>
-      <AnchorLink bare to="/config-server" style={{ marginLeft: 15 }}>
+      <AnchorLink to="/config-server" style={{ marginLeft: 15 }}>
         Change
       </AnchorLink>
     </View>
