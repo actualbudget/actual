@@ -64,7 +64,7 @@ export default function Select<Value extends string>({
         <span
           style={{
             display: 'flex',
-            overflowX: 'hidden',
+            overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             maxWidth: `calc(100% - ${arrowSize + 5}px)`,

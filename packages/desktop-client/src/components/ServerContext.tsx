@@ -4,25 +4,39 @@ import React, {
   useCallback,
   useEffect,
   useContext,
+  type ReactNode,
 } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-const ServerContext = createContext({});
+type ServerContextValue = {
+  url: string | null;
+  version: string;
+  setURL: (
+    url: string,
+    opts?: { validate?: boolean },
+  ) => Promise<{ error?: string }>;
+};
+
+const ServerContext = createContext<ServerContextValue>({
+  url: null,
+  version: '',
+  setURL: () => Promise.reject(new Error('ServerContext not initialized')),
+});
 
 export const useServerURL = () => useContext(ServerContext).url;
 export const useServerVersion = () => useContext(ServerContext).version;
 export const useSetServerURL = () => useContext(ServerContext).setURL;
 
 async function getServerVersion() {
-  let { error, version } = await send('get-server-version');
-  if (error) {
-    return '';
+  let result = await send('get-server-version');
+  if ('version' in result) {
+    return result.version;
   }
-  return version;
+  return '';
 }
 
-export function ServerProvider({ children }) {
+export function ServerProvider({ children }: { children: ReactNode }) {
   let [serverURL, setServerURL] = useState('');
   let [version, setVersion] = useState('');
 
@@ -35,7 +49,7 @@ export function ServerProvider({ children }) {
   }, []);
 
   let setURL = useCallback(
-    async (url, opts = {}) => {
+    async (url: string, opts: { validate?: boolean } = {}) => {
       let { error } = await send('set-server-url', { ...opts, url });
       if (!error) {
         setServerURL(await send('get-server-url'));
