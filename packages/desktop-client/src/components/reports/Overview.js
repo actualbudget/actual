@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
@@ -6,7 +6,7 @@ import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { colors, styles } from '../../style';
 import AnchorLink from '../common/AnchorLink';
@@ -256,9 +256,7 @@ function CashFlowCard() {
 }
 
 function CategorySpendingCard() {
-  const { getCategories } = useActions();
-
-  const [categories, setCategories] = useState({});
+  const categories = useCategories();
 
   const end = monthUtils.currentDay();
   const start = monthUtils.subMonths(end, 3);
@@ -275,12 +273,6 @@ function CategorySpendingCard() {
   }, [start, end, categories]);
 
   const perCategorySpending = useReport('category_spending', params);
-
-  useEffect(() => {
-    getCategories().then(categories => {
-      setCategories(categories);
-    });
-  }, []);
 
   return (
     <Card flex={1} to="/reports/category-spending">
