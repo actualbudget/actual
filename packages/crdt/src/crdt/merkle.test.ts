@@ -1,13 +1,17 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as merkle from './merkle';
 import { Timestamp } from './timestamp';
 
-function message(timestamp, hash) {
-  timestamp = Timestamp.parse(timestamp);
+function message(timestampStr: string, hash: number) {
+  const timestamp = Timestamp.parse(timestampStr)!;
   timestamp.hash = () => hash;
   return { timestamp };
 }
 
-function insertMessages(trie, messages) {
+function insertMessages(
+  trie: merkle.TrieNode,
+  messages: ReturnType<typeof message>[],
+) {
   messages.forEach(msg => {
     trie = merkle.insert(trie, msg.timestamp);
   });
@@ -18,11 +22,11 @@ describe('merkle trie', () => {
   test('adding an item works', () => {
     let trie = merkle.insert(
       merkle.emptyTrie(),
-      Timestamp.parse('2018-11-12T13:21:40.122Z-0000-0123456789ABCDEF'),
+      Timestamp.parse('2018-11-12T13:21:40.122Z-0000-0123456789ABCDEF')!,
     );
     trie = merkle.insert(
       trie,
-      Timestamp.parse('2018-11-13T13:21:40.122Z-0000-0123456789ABCDEF'),
+      Timestamp.parse('2018-11-13T13:21:40.122Z-0000-0123456789ABCDEF')!,
     );
     expect(trie).toMatchSnapshot();
   });
@@ -68,7 +72,7 @@ describe('merkle trie', () => {
     let trie1 = merkle.emptyTrie();
     let trie2 = merkle.insert(
       merkle.emptyTrie(),
-      Timestamp.parse('2009-01-02T10:17:37.789Z-0000-0000testinguuid1'),
+      Timestamp.parse('2009-01-02T10:17:37.789Z-0000-0000testinguuid1')!,
     );
 
     expect(merkle.diff(trie1, trie2)).toBe(0);

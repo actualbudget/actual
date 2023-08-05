@@ -1,15 +1,9 @@
-import React, {
-  type ComponentProps,
-  forwardRef,
-  useEffect,
-  useState,
-} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors, styles } from '../../../style';
-import BaseInput from '../../common/Input';
+import { colors } from '../../../style';
 import { useSetServerURL } from '../../ServerContext';
 
 // There are two URLs that dance with each other: `/login` and
@@ -92,22 +86,3 @@ export function Title({ text }: TitleProps) {
     </h1>
   );
 }
-
-type InputProps = ComponentProps<typeof BaseInput>;
-export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
-  return (
-    <BaseInput
-      {...props}
-      style={[
-        {
-          padding: 10,
-          fontSize: 15,
-          border: 'none',
-          ...styles.shadow,
-          ':focus': { border: 'none', ...styles.shadow },
-        },
-        props.style,
-      ]}
-    />
-  );
-});
