@@ -68,6 +68,9 @@ export const altMenuItemTextSelected = colorPalette.purple300;
 export const altMenuItemTextHeader = colorPalette.navy400;
 export const altMenuBorder = colorPalette.blue700;
 export const altMenuBorderHover = colorPalette.purple300;
+export const mobileNavBackground = colorPalette.white;
+export const mobileNavItem = 'rgb(142, 142, 143)';
+export const mobileNavItemSelected = colorPalette.purple500;
 
 // Button
 export const buttonMenuText = colorPalette.navy100;

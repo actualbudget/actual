@@ -1,0 +1,5 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE schedules_next_date ADD COLUMN tombstone INTEGER DEFAULT 0;
+
+COMMIT;
