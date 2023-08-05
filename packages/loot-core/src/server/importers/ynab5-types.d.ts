@@ -2,7 +2,8 @@
 
 export namespace YNAB5 {
   export interface Budget {
-    budget_name: string;
+    name?: string;
+    budget_name?: string;
     accounts: Account[];
     payees: Payee[];
     category_groups: CategoryGroup[];
