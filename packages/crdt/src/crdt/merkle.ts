@@ -47,7 +47,7 @@ export function insert(trie: TrieNode, timestamp: Timestamp) {
   return insertKey(trie, key, hash);
 }
 
-function insertKey(trie: TrieNode, key: string, hash: number) {
+function insertKey(trie: TrieNode, key: string, hash: number): TrieNode {
   if (key.length === 0) {
     return trie;
   }
@@ -105,12 +105,13 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number {
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
 
-      if (!node1[key] || !node2[key]) {
+      let next1 = node1[key];
+      let next2 = node2[key];
+
+      if (!next1 || !next2) {
         break;
       }
 
-      let next1 = node1[key];
-      let next2 = node2[key];
       if (next1.hash !== next2.hash) {
         diffkey = key;
         break;
@@ -136,7 +137,7 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
   let keys = getKeys(trie);
   keys.sort();
 
-  let next = { hash: trie.hash };
+  let next: TrieNode = { hash: trie.hash };
 
   // Prune child nodes.
   for (let k of keys.slice(-n)) {
@@ -146,7 +147,7 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
   return next;
 }
 
-export function debug(trie: TrieNode, k = '', indent = 0) {
+export function debug(trie: TrieNode, k = '', indent = 0): string {
   const str =
     ' '.repeat(indent) +
     (k !== '' ? `k: ${k} ` : '') +
