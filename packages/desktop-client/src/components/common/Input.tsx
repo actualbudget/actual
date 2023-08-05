@@ -9,7 +9,7 @@ import { type HTMLPropsWithStyle } from '../../types/utils';
 
 export const defaultInputStyle = {
   outline: 0,
-  backgroundColor: theme.formInputBackground,
+  backgroundColor: theme.tableBackground,
   color: theme.formInputText,
   margin: 0,
   padding: 5,

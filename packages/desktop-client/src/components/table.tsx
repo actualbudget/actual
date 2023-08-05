@@ -98,7 +98,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   { width, name, truncate = true, children, style, contentStyle, ...props },
   ref,
 ) {
-  let borderColor = theme.tableBorder;
+  let { backgroundColor, borderColor } = useContext(CellContext);
   return (
     <View
       innerRef={ref}
@@ -110,6 +110,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
           borderTopWidth: borderColor ? 1 : 0,
           borderBottomWidth: borderColor ? 1 : 0,
           borderColor,
+          backgroundColor,
         },
         styles.smallText,
         style,

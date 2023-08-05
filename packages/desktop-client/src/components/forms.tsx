@@ -101,6 +101,18 @@ export const Checkbox = (props: CheckboxProps) => {
                 content: ' ',
               },
             },
+            '&.focus-visible:focus': {
+              '::before': {
+                position: 'absolute',
+                top: -5,
+                bottom: -5,
+                left: -5,
+                right: -5,
+                border: '2px solid ' + theme.formInputBorderSelected,
+                borderRadius: 6,
+                content: ' ',
+              },
+            },
           },
         ],
         props.styles,
