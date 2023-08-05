@@ -3,11 +3,13 @@ import { useSelector } from 'react-redux';
 import type { Theme } from 'loot-core/src/types/prefs';
 
 import * as darkTheme from './themes/dark';
+import * as devTheme from './themes/development';
 import * as lightTheme from './themes/light';
 
 const themes = {
   light: lightTheme,
   dark: darkTheme,
+  dev: devTheme,
 };
 
 export const themeNames = Object.keys(themes) as Theme[];
