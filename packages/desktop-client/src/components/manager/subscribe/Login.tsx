@@ -7,10 +7,11 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../../style';
 import Button, { ButtonWithLoading } from '../../common/Button';
+import { BigInput } from '../../common/Input';
 import Text from '../../common/Text';
 import View from '../../common/View';
 
-import { useBootstrapped, Title, Input } from './common';
+import { useBootstrapped, Title } from './common';
 
 export default function Login() {
   let dispatch = useDispatch();
@@ -88,7 +89,7 @@ export default function Login() {
         style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
         onSubmit={onSubmit}
       >
-        <Input
+        <BigInput
           autoFocus={true}
           placeholder="Password"
           type="password"
