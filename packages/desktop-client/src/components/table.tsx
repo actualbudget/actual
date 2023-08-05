@@ -983,7 +983,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
-      backgroundColor = theme.tableBackground,
+      backgroundColor = theme.tableHeaderBackground,
       renderItem,
       renderEmpty,
       getItemKey,
