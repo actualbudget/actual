@@ -208,10 +208,7 @@ function MonthlyPatterns({ config, dispatch }) {
             }
             disabledKeys={['-']}
             wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{
-              borderWidth: 1,
-              width: '100%',
-            }}
+            style={{ minHeight: '1px', width: '100%' }}
           />
           <Select
             options={[
@@ -223,7 +220,7 @@ function MonthlyPatterns({ config, dispatch }) {
             onChange={value => updateRecurrence(recurrence, 'type', value)}
             disabledKeys={['-']}
             wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{ borderWidth: 1, width: '100%' }}
+            style={{ minHeight: '1px', width: '100%' }}
           />
           <Button
             type="bare"
@@ -335,8 +332,8 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
         (config.patterns == null || config.patterns.length === 0) ? (
           <Button
             style={{
-              backgroundColor: theme.tooltipBackground,
-              ':hover': { backgroundColor: theme.tooltipBackground },
+              backgroundColor: theme.tableBackground,
+              ':hover': { backgroundColor: theme.tableBackground },
             }}
             onClick={() => dispatch({ type: 'add-recurrence' })}
           >

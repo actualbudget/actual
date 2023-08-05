@@ -88,7 +88,7 @@ export const Checkbox = (props: CheckboxProps) => {
             color: theme.tableBackground,
             backgroundColor: theme.tableBackground,
             ':checked': {
-              border: '1px solid ' + theme.formInputBorderSelected,
+              border: '1px solid ' + theme.altformInputBorderSelected,
               backgroundColor: theme.tableTextEditingBackground,
               '::after': {
                 display: 'block',
@@ -108,7 +108,7 @@ export const Checkbox = (props: CheckboxProps) => {
                 bottom: -5,
                 left: -5,
                 right: -5,
-                border: '2px solid ' + theme.formInputBorderSelected,
+                border: '2px solid ' + theme.altformInputBorderSelected,
                 borderRadius: 6,
                 content: ' ',
               },

@@ -730,15 +730,15 @@ export function SelectCell({
             alignItems: 'center',
             borderRadius: 3,
             border: selected
-              ? '1px solid ' + theme.formInputBorderSelected
+              ? '1px solid ' + theme.altformInputBorderSelected
               : '1px solid ' + theme.formInputBorder,
             color: theme.tableBackground,
             backgroundColor: selected
               ? theme.tableTextEditingBackground
               : theme.tableBackground,
             ':focus': {
-              border: '1px solid ' + theme.formInputBorderSelected,
-              boxShadow: '0 1px 2px ' + theme.formInputShadowSelected,
+              border: '1px solid ' + theme.altformInputBorderSelected,
+              boxShadow: '0 1px 2px ' + theme.altformInputShadowSelected,
             },
           }}
           onEdit={onEdit}

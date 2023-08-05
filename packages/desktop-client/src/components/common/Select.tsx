@@ -51,6 +51,8 @@ export default function Select<Value extends string>({
   const arrowSize = 7;
   const checkHeight = !style
     ? '18px'
+    : style.minHeight
+    ? style.minHeight
     : !style[0]
     ? '18px'
     : style[0].minHeight ?? '18px';

@@ -136,12 +136,14 @@ export const formInputBackgroundSelection = colorPalette.purple500;
 export const formInputBorder = colorPalette.navy150;
 export const formInputTextReadOnlySelection = colorPalette.navy50;
 export const formInputBorderSelected = colorPalette.purple500;
+export const altformInputBorderSelected = colorPalette.blue500;
 export const formInputText = colorPalette.navy900;
 export const formInputTextSelected = colorPalette.navy50;
 export const formInputTextPlaceholder = colorPalette.navy300;
 export const formInputTextPlaceholderSelected = colorPalette.navy200;
 export const formInputTextSelection = colorPalette.navy100;
 export const formInputShadowSelected = colorPalette.purple300;
+export const altformInputShadowSelected = colorPalette.blue300;
 export const formInputTextHighlight = colorPalette.purple200;
 
 export const pillBackground = colorPalette.navy150;
