@@ -634,51 +634,47 @@ async function applyCategoryTemplate(
             console.log(complete);
             let rule = await getRuleForSchedule(sid);
             let conditions = rule.serialize().conditions;
-            let { date: dc, amount: ac } = extractScheduleConds(conditions);
-            let target = -ac.value;
+            let { date: dateConditions, amount: amountCondition } =
+              extractScheduleConds(conditions);
+            let target = -amountCondition.value;
             let next_date_string = getNextDate(
-              dc,
+              dateConditions,
               monthUtils._parse(current_month),
             );
-            let target_interval = dc.value.interval;
-            let target_frequency = dc.value.frequency;
+            let target_interval = dateConditions.value.interval;
+            let target_frequency = dateConditions.value.frequency;
             let isRepeating =
-              Object(dc.value) === dc.value && 'frequency' in dc.value;
+              Object(dateConditions.value) === dateConditions.value &&
+              'frequency' in dateConditions.value;
             let num_months = monthUtils.differenceInCalendarMonths(
               next_date_string,
               current_month,
             );
             t.push({
               template: template[ll],
-              schedule_id: sid,
-              rule: rule,
-              conditions: conditions,
-              dateCond: dc,
-              amountCond: ac,
               target: target,
               next_date_string: next_date_string,
               target_interval: target_interval,
               target_frequency: target_frequency,
-              isRepeating: isRepeating,
               num_months: num_months,
               completed: complete,
             });
             if (!complete) {
-              if (t[ll].isRepeating) {
+              if (isRepeating) {
                 let monthlyTarget = 0;
                 let next_month = monthUtils.addMonths(
                   current_month,
                   t[ll].num_months + 1,
                 );
                 let next_date = getNextDate(
-                  t[ll].dateCond,
+                  dateConditions,
                   monthUtils._parse(current_month),
                 );
                 while (next_date < next_month) {
-                  monthlyTarget += t[ll].amountCond.value;
+                  monthlyTarget += amountCondition.value;
                   next_date = monthUtils.addDays(next_date, 1);
                   next_date = getNextDate(
-                    t[ll].dateCond,
+                    dateConditions,
                     monthUtils._parse(next_date),
                   );
                 }
