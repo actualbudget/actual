@@ -22,7 +22,7 @@ import SvgEye from '../icons/v2/Eye';
 import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
-import { colors, theme } from '../style';
+import { colors } from '../style';
 import tokens from '../tokens';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
@@ -292,7 +292,6 @@ export default function Titlebar({ style }) {
     <View
       style={[
         {
-          background: theme.pageBackground,
           flexDirection: 'row',
           alignItems: 'center',
           padding: '0 15px',
