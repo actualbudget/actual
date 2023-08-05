@@ -31,14 +31,13 @@ export async function exportToCSV(
   }, {});
 
   const transactionsForExport = transactions.map(
-    ({ account, date, payee, notes, category, amount, cleared }) => ({
+    ({ account, date, payee, notes, category, amount }) => ({
       Account: accountNamesById[account],
       Date: date,
       Payee: payeeNamesById[payee],
       Notes: notes,
       Category: categoryNamesById[category],
       Amount: amount == null ? 0 : integerToAmount(amount),
-      Cleared: cleared,
     }),
   );
 
@@ -58,7 +57,6 @@ export async function exportQueryToCSV(query) {
         { Notes: 'notes' },
         { Category: 'category.name' },
         { Amount: 'amount' },
-        { Cleared: 'cleared' },
       ])
       .options({ splits: 'all' }),
   );
@@ -82,7 +80,6 @@ export async function exportQueryToCSV(query) {
       Notes: trans.Notes,
       Category: trans.Category,
       Amount: trans.Amount == null ? 0 : integerToAmount(trans.Amount),
-      Cleared: trans.Cleared === true ? 'Cleared' : 'Not cleared',
     };
   });
 
