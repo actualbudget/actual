@@ -109,7 +109,7 @@ async function processTemplate(month, force, category_templates) {
   await setGoalBudget({
     month,
     templateBudget: setToZero.filter(
-      f => f.isTemplate === true || f.isIncome === true,
+      f => f.isTemplate === true && f.isIncome === 0,
     ),
   });
 
@@ -227,7 +227,10 @@ async function processTemplate(month, force, category_templates) {
   }
 
   if (!force) {
-    //if overwrite is not preferred, set cell to original value
+    //if overwrite is not preferred, set cell to original value;
+    originalCategoryBalance = originalCategoryBalance.filter(
+      c => c.isIncome === 0 && c.isTemplate,
+    );
     for (let l = 0; l < originalCategoryBalance.length; l++) {
       await setBudget({
         category: originalCategoryBalance[l].category,
