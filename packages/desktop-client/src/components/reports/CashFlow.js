@@ -13,6 +13,7 @@ import Block from '../common/Block';
 import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
+import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
@@ -132,7 +133,7 @@ function CashFlow() {
             left={<Block>Income:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalIncome)}
+                <PrivacyFilter>{integerToCurrency(totalIncome)}</PrivacyFilter>
               </Text>
             }
           />
@@ -142,7 +143,9 @@ function CashFlow() {
             left={<Block>Expenses:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalExpenses)}
+                <PrivacyFilter>
+                  {integerToCurrency(totalExpenses)}
+                </PrivacyFilter>
               </Text>
             }
           />
@@ -152,12 +155,16 @@ function CashFlow() {
             left={<Block>Transfers:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalTransfers)}
+                <PrivacyFilter>
+                  {integerToCurrency(totalTransfers)}
+                </PrivacyFilter>
               </Text>
             }
           />
           <Text style={{ fontWeight: 600 }}>
-            <Change amount={totalIncome + totalExpenses + totalTransfers} />
+            <PrivacyFilter>
+              <Change amount={totalIncome + totalExpenses + totalTransfers} />
+            </PrivacyFilter>
           </Text>
         </View>
 

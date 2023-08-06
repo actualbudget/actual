@@ -6,37 +6,46 @@ import { importBudget } from 'loot-core/src/client/actions/budgets';
 import { styles, colors } from '../../style';
 import Block from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import Modal from '../common/Modal';
+import Modal, { type ModalProps } from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import View from '../common/View';
 
-function getErrorMessage(error) {
+function getErrorMessage(error: string): string {
   switch (error) {
     case 'parse-error':
       return 'Unable to parse file. Please select a JSON file exported from nYNAB.';
     case 'not-ynab5':
       return 'This file is not valid. Please select a JSON file exported from nYNAB.';
+    case 'not-zip-file':
+      return 'This file is not valid. Please select an unencrypted archive of Actual data.';
+    case 'invalid-zip-file':
+      return 'This archive is not a valid Actual export file.';
+    case 'invalid-metadata-file':
+      return 'The metadata file in the given archive is corrupted.';
     default:
       return 'An unknown error occurred while importing. Please report this as a new issue on Github.';
   }
 }
 
-function Import({ modalProps }) {
+type ImportProps = {
+  modalProps?: ModalProps;
+};
+
+function Import({ modalProps }: ImportProps) {
   const dispatch = useDispatch();
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
 
   async function onImport() {
     const res = await window.Actual.openFileDialog({
       properties: ['openFile'],
-      filters: [{ name: 'ynab', extensions: ['json'] }],
+      filters: [{ name: 'actual', extensions: ['zip', 'blob'] }],
     });
     if (res) {
       setImporting(true);
-      setError(false);
+      setError(null);
       try {
-        await dispatch(importBudget(res[0], 'ynab5'));
+        await dispatch(importBudget(res[0], 'actual'));
       } catch (err) {
         setError(err.message);
       } finally {
@@ -46,7 +55,11 @@ function Import({ modalProps }) {
   }
 
   return (
-    <Modal {...modalProps} title="Import from nYNAB" style={{ width: 400 }}>
+    <Modal
+      {...modalProps}
+      title="Import from Actual export"
+      style={{ width: 400 }}
+    >
       {() => (
         <View style={[styles.smallText, { lineHeight: 1.5, marginTop: 20 }]}>
           {error && (
@@ -55,24 +68,19 @@ function Import({ modalProps }) {
             </Block>
           )}
 
-          <View
-            style={{ alignItems: 'center', '& > div': { lineHeight: '1.7em' } }}
-          >
+          <View style={{ '& > div': { lineHeight: '1.7em' } }}>
             <Paragraph>
-              <ExternalLink to="https://actualbudget.org/docs/migration/nynab">
-                Read here
-              </ExternalLink>{' '}
-              for instructions on how to migrate your data from YNAB. You need
-              to export your data as JSON, and that page explains how to do
-              that.
+              You can import data from another Actual account or instance. First
+              export your data from a different account, and it will give you a
+              compressed file. This file is a simple zip file that contains the{' '}
+              <code>db.sqlite</code> and <code>metadata.json</code> files.
             </Paragraph>
+
             <Paragraph>
-              Once you have exported your data, select the file and Actual will
-              import it. Budgets may not match up exactly because things work
-              slightly differently, but you should be able to fix up any
-              problems.
+              Select one of these compressed files and import it here.
             </Paragraph>
-            <View>
+
+            <View style={{ alignSelf: 'center' }}>
               <ButtonWithLoading
                 type="primary"
                 loading={importing}
