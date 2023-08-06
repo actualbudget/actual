@@ -273,12 +273,10 @@ function Saved({ projected, style }: SavedProps) {
         }}
       >
         <View
-          {...css([
-            {
-              fontSize: 25,
-              color: projected ? colors.y3 : isNegative ? colors.r4 : colors.p5,
-            },
-          ])}
+          className={css({
+            fontSize: 25,
+            color: projected ? colors.y3 : isNegative ? colors.r4 : colors.p5,
+          }).toString()}
         >
           <PrivacyFilter blurIntensity={7}>
             {format(saved, 'financial')}
@@ -364,7 +362,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
           </View>
 
           <div
-            {...css([
+            className={css([
               {
                 textAlign: 'center',
                 marginTop: 3,

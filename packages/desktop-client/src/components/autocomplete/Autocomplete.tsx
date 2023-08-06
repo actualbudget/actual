@@ -95,11 +95,11 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
           <div
             {...getItemProps({ item })}
             key={name}
-            {...css({
+            className={css({
               padding: 5,
               cursor: 'default',
               backgroundColor: highlightedIndex === index ? colors.n4 : null,
-            })}
+            }).toString()}
           >
             {name}
           </div>

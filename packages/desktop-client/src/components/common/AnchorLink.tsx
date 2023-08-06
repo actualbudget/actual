@@ -23,7 +23,11 @@ export default function AnchorLink({
   return (
     <NavLink
       to={to}
-      {...css([styles.smallText, style, match ? activeStyle : null])}
+      className={css([
+        styles.smallText,
+        style,
+        match ? activeStyle : null,
+      ]).toString()}
     >
       {children}
     </NavLink>

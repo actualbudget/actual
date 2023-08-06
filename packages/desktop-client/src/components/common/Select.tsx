@@ -55,10 +55,10 @@ export default function Select<Value extends string>({
       style={{ lineHeight: '1em', ...wrapperStyle }}
     >
       <ListboxButton
-        {...css([
+        className={css([
           { borderWidth: 0, padding: '2px 5px', borderRadius: 4 },
           style,
-        ])}
+        ]).toString()}
         arrow={<ExpandArrow style={{ width: arrowSize, height: arrowSize }} />}
       >
         <span

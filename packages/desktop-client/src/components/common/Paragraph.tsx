@@ -15,7 +15,9 @@ export default function Paragraph({
   return (
     <div
       {...props}
-      {...css(!isLast && { marginBottom: 15 }, style, { lineHeight: '1.5em' })}
+      className={css(!isLast && { marginBottom: 15 }, style, {
+        lineHeight: '1.5em',
+      }).toString()}
     >
       {children}
     </div>

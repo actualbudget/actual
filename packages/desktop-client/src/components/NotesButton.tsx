@@ -40,25 +40,25 @@ function NotesTooltip({
       {editable ? (
         <textarea
           ref={inputRef}
-          {...css({
+          className={css({
             border: '1px solid ' + colors.border,
             padding: 7,
             minWidth: 300,
             minHeight: 120,
             outline: 'none',
-          })}
+          }).toString()}
           value={notes || ''}
           onChange={e => setNotes(e.target.value)}
         />
       ) : (
         <Text
-          {...css({
+          className={css({
             display: 'block',
             maxWidth: 225,
             padding: 8,
             whiteSpace: 'pre-wrap',
             overflowWrap: 'break-word',
-          })}
+          }).toString()}
         >
           {notes}
         </Text>

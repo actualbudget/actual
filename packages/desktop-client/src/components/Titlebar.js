@@ -144,7 +144,7 @@ export function SyncButton({ style }) {
   return (
     <Button
       type="bare"
-      style={css(
+      className={css(
         style,
         {
           WebkitAppRegion: 'none',
@@ -167,7 +167,7 @@ export function SyncButton({ style }) {
               ? colors.n6
               : null,
         }),
-      )}
+      ).toString()}
       onClick={sync}
     >
       {syncState === 'error' ? (

@@ -12,13 +12,13 @@ const rotation = css.keyframes({
 function AnimatedLoading(props) {
   return (
     <span
-      {...css({
+      className={css({
         animationName: rotation,
         animationDuration: '1.6s',
         animationTimingFunction: 'cubic-bezier(0.17, 0.67, 0.83, 0.67)',
         animationIterationCount: 'infinite',
         lineHeight: 0,
-      })}
+      }).toString()}
     >
       <Loading {...props} />
     </span>

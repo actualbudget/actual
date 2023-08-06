@@ -68,7 +68,7 @@ export const Checkbox = (props: CheckboxProps) => {
     <input
       type="checkbox"
       {...props}
-      {...css(
+      className={css(
         [
           {
             position: 'relative',
@@ -114,7 +114,7 @@ export const Checkbox = (props: CheckboxProps) => {
           },
         ],
         props.style,
-      )}
+      ).toString()}
     />
   );
 };

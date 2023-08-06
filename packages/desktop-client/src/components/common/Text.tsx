@@ -16,7 +16,7 @@ const Text = (props: TextProps) => {
     <span
       {...restProps}
       ref={innerRef}
-      className={String(css([props.className, props.style]))}
+      className={css([props.className, props.style]).toString()}
     />
   );
 };

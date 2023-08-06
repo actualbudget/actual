@@ -99,13 +99,13 @@ class App extends Component {
           {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
           <div
             key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-            {...css([
+            className={css([
               {
                 flexGrow: 1,
                 overflow: 'hidden',
               },
               styles.lightScrollbar,
-            ])}
+            ]).toString()}
           >
             {fatalError ? (
               <>
