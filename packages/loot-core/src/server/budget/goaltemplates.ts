@@ -6,7 +6,7 @@ import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
 import { batchMessages } from '../sync';
 
-import { setBudget, setZero, getSheetValue, isReflectBudget } from './actions';
+import { setBudget, getSheetValue, isReflectBudget } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export async function applyTemplate({ month }) {
@@ -66,6 +66,7 @@ async function processTemplate(month, force, category_templates) {
   let errors = [];
   let lowestPriority = 0;
   let originalCategoryBalance = [];
+  let setToZero = [];
 
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -78,13 +79,6 @@ async function processTemplate(month, force, category_templates) {
       monthUtils.sheetForMonth(month),
       `budget-${category.id}`,
     );
-    if (budgeted) {
-      originalCategoryBalance.push({
-        cat: category,
-        amount: budgeted,
-        isIncome: category.is_income,
-      });
-    }
     let template = category_templates[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
@@ -94,22 +88,27 @@ async function processTemplate(month, force, category_templates) {
             : lowestPriority;
       }
     }
-  }
-
-  await setZero({ month });
-
-  //setZero() sets budgeted Income to 0. Reset income categories before continuing.
-  if (isReflectBudget()) {
-    for (let l = 0; l < originalCategoryBalance.length; l++) {
-      if (originalCategoryBalance[l].isIncome) {
-        await setBudget({
-          category: originalCategoryBalance[l].cat.id,
-          month,
-          amount: originalCategoryBalance[l].amount,
-        });
-      }
+    if (budgeted) {
+      originalCategoryBalance.push({
+        category: category.id,
+        amount: budgeted,
+        isIncome: category.is_income,
+        isTemplate: template ? true : false,
+      });
+      setToZero.push({
+        category: category.id,
+        amount: 0,
+        isIncome: category.is_income,
+        isTemplate: template ? true : false,
+      });
     }
   }
+  await setGoalBudget({
+    month,
+    templateBudget: setToZero.filter(
+      f => f.isTemplate === true && f.isIncome === 0,
+    ),
+  });
 
   // find all remainder templates, place them after all other templates
   let remainder_found;
@@ -235,17 +234,26 @@ async function processTemplate(month, force, category_templates) {
   }
 
   if (!force) {
-    //if overwrite is not preferred, set cell to original value
+    //if overwrite is not preferred, set cell to original value;
+    originalCategoryBalance = originalCategoryBalance.filter(
+      c => c.isIncome === 0 && c.isTemplate,
+    );
     for (let l = 0; l < originalCategoryBalance.length; l++) {
       await setBudget({
-        category: originalCategoryBalance[l].cat.id,
+        category: originalCategoryBalance[l].category,
         month,
         amount: originalCategoryBalance[l].amount,
       });
       //if overwrite is not preferred, remove template errors for category
       let j = errors.length;
       for (let k = 0; k < j; k++) {
-        if (errors[k].includes(originalCategoryBalance[l].cat.name)) {
+        if (
+          errors[k].includes(
+            categories.filter(
+              c => c.id === originalCategoryBalance[l].category,
+            )[0].name,
+          )
+        ) {
           errors.splice(k, 1);
           j--;
         }
