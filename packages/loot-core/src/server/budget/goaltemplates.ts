@@ -649,7 +649,9 @@ async function applyCategoryTemplate(
               dateConditions,
               monthUtils._parse(current_month),
             );
-            let target_interval = dateConditions.value.interval;
+            let target_interval = dateConditions.value.interval
+              ? dateConditions.value.interval
+              : 1;
             let target_frequency = dateConditions.value.frequency;
             let isRepeating =
               Object(dateConditions.value) === dateConditions.value &&
