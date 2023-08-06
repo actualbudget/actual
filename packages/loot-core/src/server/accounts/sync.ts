@@ -545,11 +545,11 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
     WHERE t.is_child = 1 AND t.cleared != p.cleared
   `);
 
-  let updatedClearRows = clearedRows.map(row => ({
+  let updatedClearedRows = clearedRows.map(row => ({
     id: row.id,
     cleared: row.cleared === 1,
   }));
-  await batchUpdateTransactions({ updated: updatedClearRows });
+  await batchUpdateTransactions({ updated: updatedClearedRows });
 
   return {
     added: added.map(trans => trans.id),
@@ -704,11 +704,11 @@ export async function reconcileTransactions(acctId, transactions) {
     WHERE t.is_child = 1 AND t.cleared != p.cleared
   `);
 
-  let updatedClearRows = clearedRows.map(row => ({
+  let updatedClearedRows = clearedRows.map(row => ({
     id: row.id,
     cleared: row.cleared === 1,
   }));
-  await batchUpdateTransactions({ updated: updatedClearRows });
+  await batchUpdateTransactions({ updated: updatedClearedRows });
 
   return {
     added: added.map(trans => trans.id),
