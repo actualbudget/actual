@@ -371,7 +371,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 textDecorationSkip: 'ink',
               },
               currentMonth === month && { textDecoration: 'underline' },
-            ])}
+            ]).toString()}
           >
             {monthUtils.format(month, 'MMMM')}
           </div>
