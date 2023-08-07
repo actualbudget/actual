@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 
 import { css } from 'glamor';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Text from '../common/Text';
@@ -19,7 +19,7 @@ export function FieldLabel({ title, flush, style }) {
           marginBottom: 5,
           marginTop: flush ? 0 : 25,
           fontSize: 13,
-          color: colors.n2,
+          color: theme.tableRowHeaderText,
           paddingLeft: EDITING_PADDING,
           textTransform: 'uppercase',
           userSelect: 'none',
@@ -34,7 +34,7 @@ export function FieldLabel({ title, flush, style }) {
 
 const valueStyle = {
   borderWidth: 1,
-  borderColor: colors.n9,
+  borderColor: theme.formInputBorder,
   marginLeft: -1,
   marginRight: -1,
   height: FIELD_HEIGHT,
@@ -57,7 +57,11 @@ export const InputField = forwardRef(function InputField(
       style={[
         valueStyle,
         style,
-        { backgroundColor: disabled ? colors.n11 : 'white' },
+        {
+          backgroundColor: disabled
+            ? theme.formInputTextReadOnlySelection
+            : 'white',
+        },
       ]}
       {...props}
     />
@@ -82,7 +86,7 @@ export function TapField({
         style,
         valueStyle,
         { backgroundColor: 'white' },
-        disabled && { backgroundColor: colors.n11 },
+        disabled && { backgroundColor: theme.formInputTextReadOnlySelection },
       ]}
       bounce={false}
       activeStyle={{

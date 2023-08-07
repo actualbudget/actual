@@ -6,7 +6,7 @@ import {
   getNumberFormat,
 } from 'loot-core/src/shared/util';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -163,7 +163,7 @@ class AmountInput extends PureComponent {
           {
             justifyContent: 'center',
             borderWidth: 1,
-            borderColor: colors.p3,
+            borderColor: theme.pillBorderSelected,
             borderRadius: 4,
             padding: 5,
             backgroundColor: 'white',

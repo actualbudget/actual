@@ -50,7 +50,7 @@ import SvgTrash from '../../icons/v1/Trash';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import SvgPencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
-import { styles, colors } from '../../style';
+import { styles, colors, theme } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import TextOneLine from '../common/TextOneLine';
@@ -394,7 +394,14 @@ class TransactionEditInner extends PureComponent {
                 Back
               </Text>
             </Link>
-            <TextOneLine style={styles.header.headerTitleStyle}>
+            <TextOneLine
+              style={{
+                color: theme.formInputText,
+                fontSize: 15,
+                fontWeight: 600,
+                userSelect: 'none',
+              }}
+            >
               {payeeId == null
                 ? adding
                   ? 'New Transaction'
