@@ -1,5 +1,47 @@
 # Release Notes
 
+## 23.8.1
+
+**Docker tag: 23.8.1**
+
+### Actual
+
+Version: 23.8.1
+
+#### Enhancements
+
+- [#1446](https://github.com/actualbudget/actual/pull/1446) Sentence case in menus — thanks @joel-jeremy
+- [#1447](https://github.com/actualbudget/actual/pull/1447) Reports privacy filter — thanks @joel-jeremy
+- [#1451](https://github.com/actualbudget/actual/pull/1451) Add option on import transactions screen to mark the transactions as cleared/uncleared — thanks @kstockk
+
+#### Bugfix
+
+- [#1448](https://github.com/actualbudget/actual/pull/1448) Goals: Fix 'up to' calculation to include current month spending — thanks @shall0pass
+- [#1450](https://github.com/actualbudget/actual/pull/1450) fix Eye.js to change color dynamically based on style element passed to it. — thanks @carkom
+- [#1452](https://github.com/actualbudget/actual/pull/1452) Goals: Schedules allow filling for future months — thanks @shall0pass
+- [#1456](https://github.com/actualbudget/actual/pull/1456) Fix the mobile footer color back to the previous version — thanks @aleetsaiya
+- [#1458](https://github.com/actualbudget/actual/pull/1458) In some situations the text in the Select component will be too big, which will make the inner vertical scrollbar appear. This PR is to hide the vertical scrollbar. — thanks @aleetsaiya
+- [#1460](https://github.com/actualbudget/actual/pull/1460) Fix transparent background on titlebar. — thanks @carkom
+- [#1461](https://github.com/actualbudget/actual/pull/1461) crdt: making the package fully TypeScript strict — thanks @MatissJanis
+- [#1462](https://github.com/actualbudget/actual/pull/1462) Fix import from nYNAB and error-handling of other importers — thanks @MatissJanis
+- [#1463](https://github.com/actualbudget/actual/pull/1463) Fix creating a new schedule with the same name as a deleted schedule — thanks @MatissJanis
+- [#1464](https://github.com/actualbudget/actual/pull/1464) Goals: Applying templates would zero non-templated categories — thanks @shall0pass
+- [#1473](https://github.com/actualbudget/actual/pull/1473) Fix approximate schedule values showing in balance pill when selected — thanks @MatissJanis
+- [#1473](https://github.com/actualbudget/actual/pull/1473) Fix approximate schedule values showing in balance pill when selected — thanks @MatissJanis
+
+#### Maintenance
+
+- [#1431](https://github.com/actualbudget/actual/pull/1431) Move big input component into Input.js, port some of the manager app to TS — thanks @j-f1
+- [#1437](https://github.com/actualbudget/actual/pull/1437) `crdt`: make typings more strict — thanks @MatissJanis
+- [#1438](https://github.com/actualbudget/actual/pull/1438) crdt: upgrade murmurhash dependency — thanks @MatissJanis
+- [#1449](https://github.com/actualbudget/actual/pull/1449) Update link in README for release notes — thanks @shall0pass
+
+### Actual Server
+
+Version: 23.8.1
+
+No changes from the previous version.
+
 ## 23.8.0
 
 **Docker tag: 23.8.0**

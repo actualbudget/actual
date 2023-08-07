@@ -1,5 +1,7 @@
 Cardless
 cashflow
 Darkmode
+murmurhash
 prefs
 SVGR
+titlebar
