@@ -2,12 +2,15 @@ export type UndoState = {
   id?: string;
   url: unknown;
   openModal: unknown;
-  selectedItems: unknown;
+  selectedItems: {
+    name: string;
+    items: Set<string>;
+  } | null;
 };
 
-export function setUndoState(
-  name: keyof Omit<UndoState, 'id'>,
-  value: unknown,
+export function setUndoState<K extends keyof Omit<UndoState, 'id'>>(
+  name: K,
+  value: State[K],
 ): void;
 export type SetUndoState = typeof setUndoState;
 
