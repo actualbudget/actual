@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 
 import Split from '../../icons/v0/Split';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
@@ -58,14 +58,16 @@ function CategoryList({
                 {...(getItemProps ? getItemProps({ item }) : null)}
                 style={{
                   backgroundColor:
-                    highlightedIndex === idx ? colors.n4 : 'transparent',
+                    highlightedIndex === idx
+                      ? theme.alt2MenuItemBackgroundHover
+                      : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   flexShrink: 0,
                   flexDirection: 'row',
                   alignItems: 'center',
                   fontSize: 11,
                   fontWeight: 500,
-                  color: colors.g8,
+                  color: theme.noticeAccent,
                   padding: '6px 8px',
                 }}
                 data-testid="split-transaction-button"
@@ -85,7 +87,7 @@ function CategoryList({
               {showGroup && (
                 <div
                   style={{
-                    color: colors.y9,
+                    color: theme.alt2MenuItemTextHeader,
                     padding: '4px 9px',
                   }}
                   data-testid="category-item-group"
@@ -97,7 +99,9 @@ function CategoryList({
                 {...(getItemProps ? getItemProps({ item }) : null)}
                 style={{
                   backgroundColor:
-                    highlightedIndex === idx ? colors.n4 : 'transparent',
+                    highlightedIndex === idx
+                      ? theme.alt2MenuItemBackgroundHover
+                      : 'transparent',
                   padding: 4,
                   paddingLeft: 20,
                   borderRadius: embedded ? 4 : 0,

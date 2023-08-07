@@ -7,7 +7,7 @@ import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import View from '../common/View';
 
@@ -81,14 +81,16 @@ function PayeeList({
               flexShrink: 0,
               padding: '6px 9px',
               backgroundColor:
-                highlightedIndex === 0 ? colors.n4 : 'transparent',
+                highlightedIndex === 0
+                  ? theme.alt2MenuItemBackgroundHover
+                  : 'transparent',
               borderRadius: embedded ? 4 : 0,
             }}
           >
             <View
               style={{
                 display: 'block',
-                color: colors.g8,
+                color: theme.noticeAccent,
                 borderRadius: 4,
                 fontSize: 11,
                 fontWeight: 500,
@@ -121,7 +123,7 @@ function PayeeList({
                 <div
                   key={'title-' + idx}
                   style={{
-                    color: colors.y9,
+                    color: theme.alt2MenuItemTextHeader,
                     padding: '4px 9px',
                   }}
                 >
@@ -135,7 +137,7 @@ function PayeeList({
                 style={{
                   backgroundColor:
                     highlightedIndex === idx + offset
-                      ? colors.n4
+                      ? theme.alt2MenuItemBackgroundHover
                       : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   padding: 4,
@@ -150,7 +152,7 @@ function PayeeList({
                   style={{
                     fontSize: 11,
                     padding: 5,
-                    color: colors.n5,
+                    color: theme.altpageTextSubdued,
                     textAlign: 'center',
                   }}
                 >

@@ -22,7 +22,7 @@ import {
 
 import { useActions } from '../../hooks/useActions';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import SyncRefresh from '../SyncRefresh';
 
 import AccountDetails from './MobileAccountDetails';
@@ -168,7 +168,7 @@ export default function Account(props) {
 
   useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
 
-  useSetThemeColor(colors.n11);
+  useSetThemeColor(theme.altMenuItemTextHover);
 
   if (!accounts || !accounts.length) {
     return null;

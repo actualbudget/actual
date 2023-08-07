@@ -7,7 +7,7 @@ import ArrowsExpand3 from '../../icons/v2/ArrowsExpand3';
 import ArrowsShrink3 from '../../icons/v2/ArrowsShrink3';
 import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
 import Pencil1 from '../../icons/v2/Pencil1';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import AnimatedRefresh from '../AnimatedRefresh';
 import Button from '../common/Button';
 import InitialFocus from '../common/InitialFocus';
@@ -169,7 +169,7 @@ export function AccountHeader({
                     style={{
                       width: 11,
                       height: 11,
-                      color: colors.n8,
+                      color: 'inherit',
                     }}
                   />
                 </Button>
@@ -245,7 +245,7 @@ export function AccountHeader({
           {workingHard ? (
             <View>
               <AnimatedLoading
-                color={colors.n1}
+                color={theme.menuItemText}
                 style={{ width: 16, height: 16 }}
               />
             </View>

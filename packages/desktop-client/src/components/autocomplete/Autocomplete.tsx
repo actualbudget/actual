@@ -14,7 +14,7 @@ import Downshift from 'downshift';
 import { type CSSProperties, css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import View from '../common/View';
@@ -98,7 +98,10 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
             {...css({
               padding: 5,
               cursor: 'default',
-              backgroundColor: highlightedIndex === index ? colors.n4 : null,
+              backgroundColor:
+                highlightedIndex === index
+                  ? theme.alt2MenuItemBackgroundHover
+                  : null,
             })}
           >
             {name}
@@ -478,8 +481,8 @@ function SingleAutocomplete({
                 offset={2}
                 style={{
                   padding: 0,
-                  backgroundColor: colors.n1,
-                  color: 'white',
+                  backgroundColor: theme.menuItemText,
+                  color: theme.tableBackground,
                   minWidth: 200,
                   ...tooltipStyle,
                 }}
@@ -506,7 +509,7 @@ function MultiItem({ name, onRemove }) {
       style={{
         alignItems: 'center',
         flexDirection: 'row',
-        backgroundColor: colors.b9,
+        backgroundColor: theme.pillBackgroundSelected,
         padding: '2px 4px',
         margin: '2px',
         borderRadius: 4,
@@ -583,13 +586,13 @@ function MultiAutocomplete({
               flexWrap: 'wrap',
               flexDirection: 'row',
               alignItems: 'center',
-              backgroundColor: 'white',
+              backgroundColor: theme.tableBackground,
               borderRadius: 4,
-              border: '1px solid #d0d0d0',
+              border: '1px solid ' + theme.formInputBorder,
             },
             focused && {
-              border: '1px solid ' + colors.b5,
-              boxShadow: '0 1px 1px ' + colors.b7,
+              border: '1px solid ' + theme.formInputBorderSelected,
+              boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
             },
           ]}
         >
