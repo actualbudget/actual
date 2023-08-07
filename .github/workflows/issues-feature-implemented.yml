@@ -25,7 +25,7 @@ jobs:
     steps:
       # This is not a security concern because we have approved & merged the PR
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '19'
       - name: Handle feature requests

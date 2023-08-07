@@ -1,12 +1,23 @@
+import type { CSSProperties } from 'glamor';
 import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from '../tokens';
 
-import * as colors from './colors';
-
 export const styles = {
+  incomeHeaderHeight: 70,
+  cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+  monthRightPadding: 5,
+  menuBorderRadius: 4,
+  altMenuMaxHeight: 250,
+  altMenuText: {
+    fontSize: 13,
+  },
+  altMenuHeaderText: {
+    fontSize: 13,
+    fontWeight: 700,
+  },
   veryLargeText: {
     fontSize: 30,
     fontWeight: 600,
@@ -22,9 +33,6 @@ export const styles = {
   },
   smallText: {
     fontSize: 13,
-    [`@media (min-width: ${tokens.breakpoint_small})`]: {
-      // lineHeight: 21 // TODO: This seems like trouble, but what's the right value?
-    },
   },
   verySmallText: {
     fontSize: 13,
@@ -38,16 +46,6 @@ export const styles = {
     [`@media (min-width: ${tokens.breakpoint_small})`]: {
       paddingTop: 36,
     },
-  },
-  pageHeader: {
-    fontSize: 25,
-    borderBottomWidth: 5,
-    borderStyle: 'solid',
-    display: 'inline',
-    flex: 0,
-    marginTop: 40,
-    marginBottom: 20,
-    paddingBottom: 5,
   },
   pageContent: {
     paddingLeft: 2,
@@ -78,27 +76,11 @@ export const styles = {
     fontFeatureSettings: '"tnum"',
   },
   notFixed: { fontFeatureSettings: '' },
-  header: {
-    headerStyle: {
-      backgroundColor: 'white',
-      borderBottomWidth: 1,
-      borderBottomColor: colors.n9,
-      elevation: 0,
-    },
-    headerTintColor: colors.n1,
-    headerTitleStyle: {
-      color: colors.n1,
-      fontSize: 15,
-      fontWeight: 600,
-      userSelect: 'none',
-    },
-    headerBackTitle: null,
-  },
   text: {
     fontSize: 16,
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
   },
-  textColor: colors.n1,
+
   delayedFadeIn: {
     animationName: keyframes({
       '0%': { opacity: 0 },
@@ -109,13 +91,17 @@ export const styles = {
     animationDelay: '0.5s',
   },
   // Dynamically set
-  lightScrollbar: undefined,
-  darkScrollbar: undefined,
-  scrollbarWidth: undefined,
+  lightScrollbar: null as CSSProperties | null,
+  darkScrollbar: null as CSSProperties | null,
+  scrollbarWidth: null as number | null,
 };
 
 let hiddenScrollbars = false;
 
+// need both styles defined for primary and secondary colors
+// e.g. transaction table and sidebar
+// lightScrollbar => primary
+// darkScrollbar => secondary
 function onScrollbarChange() {
   styles.lightScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {

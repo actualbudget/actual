@@ -9,11 +9,12 @@ import { type HTMLPropsWithStyle } from '../../types/utils';
 
 export const defaultInputStyle = {
   outline: 0,
-  backgroundColor: 'white',
+  backgroundColor: theme.tableBackground,
+  color: theme.formInputText,
   margin: 0,
   padding: 5,
   borderRadius: 4,
-  border: '1px solid #d0d0d0',
+  border: '1px solid ' + theme.formInputBorder,
 };
 
 type InputProps = HTMLPropsWithStyle<HTMLInputElement> & {
@@ -23,14 +24,14 @@ type InputProps = HTMLPropsWithStyle<HTMLInputElement> & {
   focused?: boolean;
 };
 
-const Input = ({
+export default function Input({
   style,
   inputRef,
   onEnter,
   onUpdate,
   focused,
   ...nativeProps
-}: InputProps) => {
+}: InputProps) {
   let ref = useRef();
   useProperFocus(ref, focused);
 
@@ -68,6 +69,22 @@ const Input = ({
       }}
     />
   );
-};
+}
 
-export default Input;
+export function BigInput(props: InputProps) {
+  return (
+    <Input
+      {...props}
+      style={[
+        {
+          padding: 10,
+          fontSize: 15,
+          border: 'none',
+          ...styles.shadow,
+          ':focus': { border: 'none', ...styles.shadow },
+        },
+        props.style,
+      ]}
+    />
+  );
+}

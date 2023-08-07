@@ -193,9 +193,7 @@ function NavTab({ icon: TabIcon, name, path }) {
       to={path}
       style={({ isActive }) => ({
         alignItems: 'center',
-        color: isActive
-          ? theme.sidebarItemAccentSelected
-          : theme.sidebarItemText,
+        color: isActive ? theme.mobileNavItemSelected : theme.mobileNavItem,
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
@@ -212,7 +210,7 @@ function MobileNavTabs() {
   return (
     <div
       style={{
-        backgroundColor: theme.sidebarBackground,
+        backgroundColor: theme.mobileNavBackground,
         borderTop: `1px solid ${theme.menuBorder}`,
         bottom: 0,
         ...styles.shadow,
@@ -293,16 +291,6 @@ function FinancesApp() {
               width: '100%',
             }}
           >
-            <Titlebar
-              style={{
-                WebkitAppRegion: 'drag',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-              }}
-            />
             <div
               style={{
                 flex: 1,
@@ -311,6 +299,16 @@ function FinancesApp() {
                 position: 'relative',
               }}
             >
+              <Titlebar
+                style={{
+                  WebkitAppRegion: 'drag',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                }}
+              />
               <Notifications />
               <BankSyncStatus />
               <StackedRoutes
