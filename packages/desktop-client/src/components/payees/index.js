@@ -19,17 +19,20 @@ import useSelected, {
   useSelectedItems,
   useSelectedDispatch,
 } from '../../hooks/useSelected';
-import useStableCallback from '../../hooks/useStableCallback';
 import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colors } from '../../style';
-import Button from '../common/Button';
-import Menu from '../common/Menu';
-import Search from '../common/Search';
-import Text from '../common/Text';
-import View from '../common/View';
+import { colors, styles, theme } from '../../style';
+import {
+  Text,
+  useStableCallback,
+  View,
+  Button,
+  Tooltip,
+  Menu,
+  Search,
+} from '../common';
 import {
   Table,
   TableHeader,
@@ -40,7 +43,6 @@ import {
   CellButton,
   useTableNavigator,
 } from '../table';
-import { Tooltip } from '../tooltips';
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 
@@ -57,15 +59,12 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
       style={{ padding: '0 10px' }}
       plain
     >
-      <CellButton
+      <Button
         style={{
-          borderRadius: 4,
           padding: '3px 6px',
-          backgroundColor: colors.g9,
-          border: '1px solid ' + colors.g9,
-          color: colors.g1,
           fontSize: 12,
         }}
+        as={CellButton}
         onEdit={onEdit}
         onSelect={onClick}
         onFocus={onEdit}
@@ -80,7 +79,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
           )}
         </Text>
         <ArrowThinRight style={{ width: 8, height: 8 }} />
-      </CellButton>
+      </Button>
     </Cell>
   );
 }
@@ -105,24 +104,24 @@ let Payee = memo(
   }) => {
     let { id } = payee;
     let dispatchSelected = useSelectedDispatch();
-    let borderColor = selected ? colors.b8 : colors.border;
+    let borderColor = selected ? theme.tableBorderSelected : theme.tableBorder;
     let backgroundFocus = hovered || focusedField === 'select';
 
     return (
       <Row
-        borderColor={borderColor}
-        backgroundColor={
-          selected ? colors.b9 : backgroundFocus ? colors.hover : 'white'
-        }
         highlighted={highlighted}
         style={[
-          { alignItems: 'stretch' },
-          style,
           {
-            backgroundColor: hovered ? colors.hover : null,
+            alignItems: 'stretch',
+            borderColor: borderColor,
+            backgroundColor: selected
+              ? theme.tableRowBackgroundHighlight
+              : backgroundFocus
+              ? theme.tableRowBackgroundHover
+              : theme.tableBackground,
           },
+          style,
           selected && {
-            backgroundColor: colors.b9,
             zIndex: 100,
           },
         ]}
@@ -141,7 +140,13 @@ let Payee = memo(
         />
         <InputCell
           value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
-          valueStyle={!selected && payee.transfer_acct && { color: colors.n7 }}
+          style={{
+            color: selected
+              ? theme.tableRowBackgroundHighlightText
+              : payee.transfer_acct
+              ? theme.tableTextInactive
+              : theme.tableText,
+          }}
           exposed={focusedField === 'name'}
           width="flex"
           onUpdate={value =>
@@ -223,22 +228,17 @@ const PayeeTable = forwardRef(
 );
 
 function PayeeTableHeader() {
-  let borderColor = colors.border;
   let dispatchSelected = useSelectedDispatch();
   let selectedItems = useSelectedItems();
 
   return (
     <View>
       <TableHeader
-        borderColor={borderColor}
         style={{
-          backgroundColor: 'white',
-          color: colors.n4,
           zIndex: 200,
           userSelect: 'none',
         }}
         collapsed={true}
-        version="v2"
       >
         <SelectCell
           exposed={true}
@@ -258,7 +258,7 @@ function EmptyMessage({ text, style }) {
       style={[
         {
           textAlign: 'center',
-          color: colors.n7,
+          color: theme.pageText,
           fontStyle: 'italic',
           fontSize: 13,
           marginTop: 5,
@@ -303,7 +303,6 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
               padding: 3,
               fontSize: 11,
               fontStyle: 'italic',
-              color: colors.n7,
             }}
           >
             {[...selectedPayees]
@@ -336,6 +335,7 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
 export const ManagePayees = forwardRef(
   (
     {
+      modalProps,
       payees,
       ruleCounts,
       orphanedPayees,
@@ -482,43 +482,44 @@ export const ManagePayees = forwardRef(
             padding: '0 0 15px',
           }}
         >
-          <View style={{ flexShrink: 0 }}>
-            <Button
-              type="bare"
-              style={{ marginRight: 10 }}
-              disabled={buttonsDisabled}
-              onClick={() => setMenuOpen(true)}
-            >
-              {buttonsDisabled
-                ? 'No payees selected'
-                : selected.items.size +
-                  ' ' +
-                  plural(selected.items.size, 'payee', 'payees')}
-              <ExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
-            </Button>
-            {menuOpen && (
-              <PayeeMenu
-                payeesById={payeesById}
-                selectedPayees={selected.items}
-                onClose={() => setMenuOpen(false)}
-                onDelete={onDelete}
-                onMerge={onMerge}
-              />
-            )}
-          </View>
-          <View
-            style={{
-              flexShrink: 0,
-            }}
-          >
+          {!buttonsDisabled ? (
+            <View>
+              <Button
+                bare
+                style={{ marginRight: 10 }}
+                disabled={buttonsDisabled}
+                onClick={() => setMenuOpen(true)}
+              >
+                {buttonsDisabled
+                  ? 'No payees selected'
+                  : selected.items.size +
+                    ' ' +
+                    plural(selected.items.size, 'payee', 'payees')}
+                <ExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
+              </Button>
+              {menuOpen && (
+                <PayeeMenu
+                  payeesById={payeesById}
+                  selectedPayees={selected.items}
+                  onClose={() => setMenuOpen(false)}
+                  onDelete={onDelete}
+                  onMerge={onMerge}
+                />
+              )}
+            </View>
+          ) : (
+            <View />
+          )}
+          <View>
             {(orphanedOnly ||
               (orphanedPayees && orphanedPayees.length > 0)) && (
               <Button
-                type="bare"
+                bare
                 style={{ marginRight: 10 }}
                 onClick={() => {
                   setOrphanedOnly(!orphanedOnly);
-                  applyFilter(filter);
+                  const filterInput = document.getElementById('filter-input');
+                  applyFilter(filterInput.value);
                   tableNavigator.onEdit(null);
                 }}
               >
@@ -532,8 +533,11 @@ export const ManagePayees = forwardRef(
               </Button>
             )}
           </View>
+
           <View style={{ flex: 1 }} />
+
           <Search
+            id="filter-input"
             placeholder="Filter payees..."
             value={filter}
             onChange={applyFilter}
@@ -548,6 +552,7 @@ export const ManagePayees = forwardRef(
               borderTopLeftRadius: 4,
               borderTopRightRadius: 4,
               overflow: 'hidden',
+              boxShadow: styles.cardShadow,
             }}
           >
             <PayeeTableHeader />

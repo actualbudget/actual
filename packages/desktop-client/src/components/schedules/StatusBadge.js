@@ -9,72 +9,81 @@ import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
 import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
-import { colors } from '../../style';
-import Text from '../common/Text';
-import View from '../common/View';
+import { theme } from '../../style';
+import { View, Text } from '../common';
 
 export function getStatusProps(status) {
-  let color, backgroundColor, Icon;
+  let color, backgroundColor, borderColor, Icon;
 
   switch (status) {
     case 'missed':
-      color = colors.r1;
-      backgroundColor = colors.r10;
+      color = theme.errorText;
+      backgroundColor = theme.errorBackground;
+      borderColor = theme.errorAccent;
       Icon = EditSkull1;
       break;
     case 'due':
-      color = colors.y1;
-      backgroundColor = colors.y9;
+      color = theme.warningText;
+      backgroundColor = theme.warningBackground;
+      borderColor = theme.warningAccent;
       Icon = AlertTriangle;
       break;
     case 'upcoming':
-      color = colors.p1;
-      backgroundColor = colors.p10;
+      color = theme.tableTextInactive;
+      backgroundColor = theme.tableBackground;
+      borderColor = theme.tableBorder;
       Icon = CalendarIcon;
       break;
     case 'paid':
-      color = colors.g2;
-      backgroundColor = colors.g10;
+      color = theme.noticeText;
+      backgroundColor = theme.noticeBackground;
+      borderColor = theme.noticeAccent;
       Icon = ValidationCheck;
       break;
     case 'completed':
-      color = colors.n4;
-      backgroundColor = colors.n11;
+      color = theme.tableText;
+      backgroundColor = theme.tableBackground;
+      borderColor = theme.tableBorder;
       Icon = FavoriteStar;
       break;
     case 'pending':
-      color = colors.g4;
-      backgroundColor = colors.g11;
+      color = theme.noticeText;
+      backgroundColor = theme.noticeBackground;
+      borderColor = theme.noticeAccent;
       Icon = CalendarIcon;
       break;
     case 'scheduled':
-      color = colors.n1;
-      backgroundColor = colors.n11;
+      color = theme.tableText;
+      backgroundColor = theme.tableBackground;
+      borderColor = theme.tableBorder;
       Icon = CalendarIcon;
       break;
     case 'cleared':
-      color = colors.g5;
-      backgroundColor = colors.n11;
+      color = theme.noticeText;
+      backgroundColor = theme.noticeBackground;
+      borderColor = theme.noticeAccent;
       Icon = CheckCircle1;
       break;
     default:
-      color = colors.n1;
-      backgroundColor = colors.n11;
+      color = theme.buttonDisabledText;
+      backgroundColor = theme.buttonDisabledBackground;
+      borderColor = theme.buttonDisabledBorder;
       Icon = CheckCircleHollow;
       break;
   }
 
-  return { color, backgroundColor, Icon };
+  return { color, backgroundColor, borderColor, Icon };
 }
 
 export function StatusBadge({ status, style }) {
-  let { color, backgroundColor, Icon } = getStatusProps(status);
+  let { color, backgroundColor, borderColor, Icon } = getStatusProps(status);
   return (
     <View
       style={[
         {
           color,
           backgroundColor,
+          border: '1px solid ' + borderColor,
           padding: '6px 8px',
           borderRadius: 4,
           flexDirection: 'row',

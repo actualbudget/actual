@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, {
+  type ComponentProps,
+  forwardRef,
+  useEffect,
+  useState,
+} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../../style';
+import { theme, styles } from '../../../style';
+import { Input as BaseInput } from '../../common';
 import { useSetServerURL } from '../../ServerContext';
 
 // There are two URLs that dance with each other: `/login` and
@@ -78,7 +84,7 @@ export function Title({ text }: TitleProps) {
       style={{
         fontSize: 40,
         fontWeight: 700,
-        color: colors.p3,
+        color: theme.pageTextPositive,
         marginBottom: 20,
       }}
     >
@@ -86,3 +92,24 @@ export function Title({ text }: TitleProps) {
     </h1>
   );
 }
+
+type InputProps = ComponentProps<typeof BaseInput>;
+export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+  return (
+    <BaseInput
+      {...props}
+      style={[
+        {
+          padding: 10,
+          fontSize: 15,
+          ...styles.shadow,
+          ':focus': {
+            border: '1px solid ' + theme.buttonPositiveBorder,
+            ...styles.shadow,
+          },
+        },
+        props.style,
+      ]}
+    />
+  );
+});

@@ -3,11 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../style';
-import Button from '../common/Button';
-import Paragraph from '../common/Paragraph';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
+import { theme } from '../../style';
+import { Text, P, Button, Stack } from '../common';
 import { Page } from '../Page';
 import DisplayId from '../util/DisplayId';
 
@@ -29,13 +26,13 @@ export default function PostsOfflineNotification() {
 
   return (
     <Page title="Post transactions?" modalSize="small">
-      <Paragraph>
+      <P>
         {payees.length > 0 ? (
           <Text>
             The {plural ? 'payees ' : 'payee '}
             {payees.map((id, idx) => (
               <Text>
-                <Text style={{ color: colors.p4 }}>
+                <Text style={{ color: theme.pageTextPositive }}>
                   <DisplayId key={id} id={id} type="payees" />
                 </Text>
                 {idx === payees.length - 1
@@ -56,17 +53,17 @@ export default function PostsOfflineNotification() {
           syncing failed. In order to avoid duplicate transactions, we let you
           choose whether or not to create transactions for these schedules.
         </Text>
-      </Paragraph>
-      <Paragraph>
+      </P>
+      <P>
         Be aware that other devices may have already created these transactions.
         If you have multiple devices, make sure you only do this on one device
         or you will have duplicate transactions.
-      </Paragraph>
-      <Paragraph>
+      </P>
+      <P>
         You can always manually post a transaction later for a due schedule by
         selecting the schedule and clicking “Post transaction” in the action
         menu.
-      </Paragraph>
+      </P>
       <Stack
         direction="row"
         justify="flex-end"
@@ -74,7 +71,7 @@ export default function PostsOfflineNotification() {
         spacing={2}
       >
         <Button onClick={onClose}>Decide later</Button>
-        <Button type="primary" onClick={onPost}>
+        <Button primary onClick={onPost}>
           Post transactions
         </Button>
       </Stack>

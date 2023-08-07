@@ -7,14 +7,9 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
-import { colors, theme } from '../../style';
-import Button from '../common/Button';
-import Input from '../common/Input';
-import Select from '../common/Select';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
-import View from '../common/View';
-import { useTooltip, Tooltip } from '../tooltips';
+import { theme } from '../../style';
+import { Button, Select, Input, Tooltip, View, Text, Stack } from '../common';
+import { useTooltip } from '../tooltips';
 
 import DateSelect from './DateSelect';
 
@@ -153,7 +148,9 @@ function SchedulePreview({ previewDates }) {
   } else {
     content = (
       <View>
-        <Text style={{ fontWeight: 600 }}>Upcoming dates</Text>
+        <Text style={{ color: theme.tableText, fontWeight: 600 }}>
+          Upcoming dates
+        </Text>
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
           {previewDates.map(d => (
             <View>
@@ -170,7 +167,7 @@ function SchedulePreview({ previewDates }) {
     <Stack
       direction="column"
       spacing={1}
-      style={{ marginTop: 15, color: colors.n4 }}
+      style={{ marginTop: 15, color: theme.tableText }}
     >
       {content}
     </Stack>
@@ -207,8 +204,10 @@ function MonthlyPatterns({ config, dispatch }) {
               updateRecurrence(recurrence, 'value', parsePatternValue(value))
             }
             disabledKeys={['-']}
-            wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{ minHeight: '1px', width: '100%' }}
+            wrapperStyle={{
+              flex: 1,
+              marginRight: 10,
+            }}
           />
           <Select
             options={[
@@ -219,11 +218,13 @@ function MonthlyPatterns({ config, dispatch }) {
             value={recurrence.type}
             onChange={value => updateRecurrence(recurrence, 'type', value)}
             disabledKeys={['-']}
-            wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{ minHeight: '1px', width: '100%' }}
+            wrapperStyle={{
+              flex: 1,
+              marginRight: 10,
+            }}
           />
           <Button
-            type="bare"
+            bare
             style={{ padding: 7 }}
             onClick={() =>
               dispatch({
@@ -235,7 +236,7 @@ function MonthlyPatterns({ config, dispatch }) {
             <SubtractIcon style={{ width: 8, height: 8 }} />
           </Button>
           <Button
-            type="bare"
+            bare
             style={{ padding: 7, marginLeft: 5 }}
             onClick={() => dispatch({ type: 'add-recurrence' })}
           >
@@ -287,7 +288,11 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
 
   return (
     <Tooltip
-      style={{ padding: 10, width: 380 }}
+      style={{
+        backgroundColor: theme.tooltipBackground,
+        padding: 10,
+        width: 380,
+      }}
       offset={1}
       position="bottom-left"
       onClose={onClose}
@@ -322,21 +327,16 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           defaultValue={config.interval || 1}
         />
         <Select
-          bare
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          style={{ border: '1px solid ' + theme.formInputBorder, height: 27.5 }}
+          wrapperStyle={{
+            marginRight: '10px',
+          }}
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
-          <Button
-            style={{
-              backgroundColor: theme.tableBackground,
-              ':hover': { backgroundColor: theme.tableBackground },
-            }}
-            onClick={() => dispatch({ type: 'add-recurrence' })}
-          >
+          <Button onClick={() => dispatch({ type: 'add-recurrence' })}>
             Add specific days
           </Button>
         ) : null}
@@ -352,8 +352,8 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
       >
         <Button onClick={onClose}>Cancel</Button>
         <Button
-          type="primary"
           onClick={() => onSave(unparseConfig(config))}
+          primary
           style={{ marginLeft: 10 }}
         >
           Apply

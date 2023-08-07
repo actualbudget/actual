@@ -3,10 +3,9 @@ import React, { useState } from 'react';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { styles } from '../../style';
 import { usePushModal } from '../../util/router-tools';
-import Button from '../common/Button';
-import Search from '../common/Search';
-import View from '../common/View';
+import { View, Button, Search } from '../common';
 import { Page } from '../Page';
 
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
@@ -72,9 +71,10 @@ export default function Schedules() {
 
       <View
         style={{
-          marginTop: 15,
+          marginTop: 20,
           flexBasis: (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1),
           overflow: 'hidden',
+          boxShadow: styles.cardShadow,
         }}
       >
         <SchedulesTable
@@ -84,7 +84,6 @@ export default function Schedules() {
           allowCompleted={true}
           onSelect={onEdit}
           onAction={onAction}
-          style={{ backgroundColor: 'white' }}
         />
       </View>
 
@@ -97,7 +96,7 @@ export default function Schedules() {
         }}
       >
         <Button onClick={onDiscover}>Find schedules</Button>
-        <Button type="primary" onClick={onAdd}>
+        <Button primary onClick={onAdd}>
           Add new schedule
         </Button>
       </View>

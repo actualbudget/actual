@@ -5,12 +5,8 @@ import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../../style';
-import Button from '../../common/Button';
-import ExternalLink from '../../common/ExternalLink';
-import Paragraph from '../../common/Paragraph';
-import Text from '../../common/Text';
-import View from '../../common/View';
+import { theme } from '../../../style';
+import { View, Text, Button, P, ExternalLink } from '../../common';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -54,27 +50,28 @@ export default function Bootstrap() {
   }
 
   return (
-    <View style={{ maxWidth: 450, marginTop: -30 }}>
+    <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
       <Title text="Welcome to Actual!" />
-      <Paragraph style={{ fontSize: 16, color: colors.n2 }}>
+      <P style={{ fontSize: 16 }}>
         Actual is a super fast privacy-focused app for managing your finances.
         To secure your data, you’ll need to set a password for your server.
-      </Paragraph>
+      </P>
 
-      <Paragraph isLast style={{ fontSize: 16, color: colors.n2 }}>
+      <P isLast style={{ fontSize: 16 }}>
         Consider opening{' '}
         <ExternalLink to="https://actualbudget.org/docs/tour/">
           our tour
         </ExternalLink>{' '}
         in a new tab for some guidance on what to do when you’ve set your
         password.
-      </Paragraph>
+      </P>
 
       {error && (
         <Text
           style={{
             marginTop: 20,
-            color: colors.r4,
+            color: theme.errorText,
+            backgroundColor: theme.errorBackground,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -86,8 +83,8 @@ export default function Bootstrap() {
       <ConfirmPasswordForm
         buttons={
           <Button
-            type="bare"
-            style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
+            bare
+            style={{ fontSize: 15, marginRight: 15 }}
             onClick={onDemo}
           >
             Try Demo
