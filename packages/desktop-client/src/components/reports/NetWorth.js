@@ -11,6 +11,7 @@ import useFilters from '../../hooks/useFilters';
 import { styles } from '../../style';
 import Paragraph from '../common/Paragraph';
 import View from '../common/View';
+import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
@@ -117,9 +118,13 @@ export default function NetWorth() {
           <View
             style={[styles.largeText, { fontWeight: 400, marginBottom: 5 }]}
           >
-            {integerToCurrency(data.netWorth)}
+            <PrivacyFilter blurIntensity={5}>
+              {integerToCurrency(data.netWorth)}
+            </PrivacyFilter>
           </View>
-          <Change amount={data.totalChange} />
+          <PrivacyFilter>
+            <Change amount={data.totalChange} />
+          </PrivacyFilter>
         </View>
 
         <NetWorthGraph start={start} end={end} graphData={data.graphData} />

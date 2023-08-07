@@ -60,6 +60,7 @@ function Header({
   onUpdateFilter,
   onDeleteFilter,
   onCondOpChange,
+  headerPrefixItems,
 }) {
   return (
     <View
@@ -86,6 +87,8 @@ function Header({
           gap: 15,
         }}
       >
+        {headerPrefixItems}
+
         <View
           style={{
             flexDirection: 'row',
@@ -113,7 +116,7 @@ function Header({
           />
         </View>
 
-        <FilterButton onApply={onApply} />
+        {filters && <FilterButton onApply={onApply} />}
 
         {show1Month && (
           <Button
@@ -142,7 +145,7 @@ function Header({
           All Time
         </Button>
       </View>
-      {filters.length > 0 && (
+      {filters && filters.length > 0 && (
         <View
           style={{ marginTop: 5 }}
           spacing={2}
