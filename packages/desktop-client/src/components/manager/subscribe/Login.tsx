@@ -5,10 +5,13 @@ import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { theme } from '../../../style';
-import { View, Text, Button, ButtonWithLoading } from '../../common';
+import { colors } from '../../../style';
+import Button, { ButtonWithLoading } from '../../common/Button';
+import { BigInput } from '../../common/Input';
+import Text from '../../common/Text';
+import View from '../../common/View';
 
-import { useBootstrapped, Title, Input } from './common';
+import { useBootstrapped, Title } from './common';
 
 export default function Login() {
   let dispatch = useDispatch();
@@ -56,11 +59,12 @@ export default function Login() {
   }
 
   return (
-    <View style={{ maxWidth: 450, marginTop: -30, color: theme.pageText }}>
+    <View style={{ maxWidth: 450, marginTop: -30 }}>
       <Title text="Sign in to this Actual instance" />
       <Text
         style={{
           fontSize: 16,
+          color: colors.n2,
           lineHeight: 1.4,
         }}
       >
@@ -72,7 +76,7 @@ export default function Login() {
         <Text
           style={{
             marginTop: 20,
-            color: theme.errorText,
+            color: colors.r4,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -85,7 +89,7 @@ export default function Login() {
         style={{ display: 'flex', flexDirection: 'row', marginTop: 30 }}
         onSubmit={onSubmit}
       >
-        <Input
+        <BigInput
           autoFocus={true}
           placeholder="Password"
           type="password"
@@ -94,7 +98,11 @@ export default function Login() {
           }
           style={{ flex: 1, marginRight: 10 }}
         />
-        <ButtonWithLoading primary loading={loading} style={{ fontSize: 15 }}>
+        <ButtonWithLoading
+          type="primary"
+          loading={loading}
+          style={{ fontSize: 15 }}
+        >
           Sign in
         </ButtonWithLoading>
       </form>
@@ -105,7 +113,11 @@ export default function Login() {
           marginTop: 15,
         }}
       >
-        <Button bare style={{ fontSize: 15, marginLeft: 10 }} onClick={onDemo}>
+        <Button
+          type="bare"
+          style={{ fontSize: 15, color: colors.b4, marginLeft: 10 }}
+          onClick={onDemo}
+        >
           Try Demo &rarr;
         </Button>
       </View>

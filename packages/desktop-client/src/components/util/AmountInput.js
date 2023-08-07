@@ -7,8 +7,9 @@ import {
 
 import Add from '../../icons/v1/Add';
 import Subtract from '../../icons/v1/Subtract';
-import { theme } from '../../style';
-import { View, Button, InputWithContent } from '../common';
+import Button from '../common/Button';
+import InputWithContent from '../common/InputWithContent';
+import View from '../common/View';
 
 export function AmountInput({ id, defaultValue = 0, onChange, style }) {
   let [negative, setNegative] = useState(defaultValue <= 0);
@@ -30,11 +31,11 @@ export function AmountInput({ id, defaultValue = 0, onChange, style }) {
     <InputWithContent
       id={id}
       leftContent={
-        <Button bare style={{ padding: '0 7px' }} onClick={onSwitch}>
+        <Button type="bare" style={{ padding: '0 7px' }} onClick={onSwitch}>
           {negative ? (
-            <Subtract style={{ width: 8, height: 8, color: 'inherit' }} />
+            <Subtract style={{ width: 8, height: 8 }} />
           ) : (
-            <Add style={{ width: 8, height: 8, color: 'inherit' }} />
+            <Add style={{ width: 8, height: 8 }} />
           )}
         </Button>
       }
@@ -59,7 +60,6 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
           setNum1(value);
           onChange({ num1: value, num2 });
         }}
-        style={{ color: theme.formInputText }}
       />
       <View style={{ margin: '0 5px' }}>and</View>
       <AmountInput
@@ -68,7 +68,6 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
           setNum2(value);
           onChange({ num1, num2: value });
         }}
-        style={{ color: theme.formInputText }}
       />
     </View>
   );

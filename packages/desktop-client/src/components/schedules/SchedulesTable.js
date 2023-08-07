@@ -9,9 +9,13 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
-import { theme } from '../../style';
-import { View, Text, Button, Tooltip, Menu } from '../common';
+import { colors } from '../../style';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Text from '../common/Text';
+import View from '../common/View';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
+import { Tooltip } from '../tooltips';
 import DisplayId from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
@@ -24,7 +28,7 @@ function OverflowMenu({ schedule, status, onAction }) {
   return (
     <View>
       <Button
-        bare
+        type="bare"
         onClick={e => {
           e.stopPropagation();
           setOpen(true);
@@ -89,7 +93,7 @@ export function ScheduleAmountCell({ amount, op }) {
         <View
           style={{
             textAlign: 'left',
-            color: num > 0 ? theme.noticeText : theme.tableText,
+            color: colors.n7,
             lineHeight: '1em',
             marginRight: 10,
           }}
@@ -101,7 +105,7 @@ export function ScheduleAmountCell({ amount, op }) {
       <Text
         style={{
           flex: 1,
-          color: theme.tableText,
+          color: num > 0 ? colors.g5 : null,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -159,6 +163,7 @@ export function SchedulesTable({
         : null;
 
       return (
+        filterIncludes(schedule.name) ||
         filterIncludes(payee && payee.name) ||
         filterIncludes(account && account.name) ||
         filterIncludes(amountStr) ||
@@ -187,19 +192,17 @@ export function SchedulesTable({
       <Row
         height={ROW_HEIGHT}
         inset={15}
+        backgroundColor="transparent"
         onClick={() => onSelect(item.id)}
         style={{
           cursor: 'pointer',
-          backgroundColor: theme.tableBackground,
-          color: theme.tableText,
-          ':hover': { backgroundColor: theme.tableRowBackgroundHover },
+          backgroundColor: 'white',
+          ':hover': { backgroundColor: colors.hover },
         }}
       >
         <Field width="flex" name="name">
           <Text
-            style={
-              item.name == null ? { color: theme.buttonDisabledText } : null
-            }
+            style={item.name == null ? { color: colors.n8 } : null}
             title={item.name ? item.name : ''}
           >
             {item.name ? item.name : 'None'}
@@ -223,7 +226,7 @@ export function SchedulesTable({
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
             {item._date && item._date.frequency && (
-              <Check style={{ width: 13, height: 13, color: 'inherit' }} />
+              <Check style={{ width: 13, height: 13 }} />
             )}
           </Field>
         )}
@@ -246,10 +249,11 @@ export function SchedulesTable({
         <Row
           height={ROW_HEIGHT}
           inset={15}
+          backgroundColor="transparent"
           style={{
             cursor: 'pointer',
-            backgroundColor: 'transparent',
-            ':hover': { backgroundColor: theme.tableRowBackgroundHover },
+            backgroundColor: 'white',
+            ':hover': { backgroundColor: colors.hover },
           }}
           onClick={() => setShowCompleted(true)}
         >
@@ -258,7 +262,7 @@ export function SchedulesTable({
             style={{
               fontStyle: 'italic',
               textAlign: 'center',
-              color: theme.tableText,
+              color: colors.n6,
             }}
           >
             Show completed schedules
@@ -271,7 +275,7 @@ export function SchedulesTable({
 
   return (
     <View style={[{ flex: 1 }, tableStyle]}>
-      <TableHeader height={ROW_HEIGHT} inset={15}>
+      <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
         <Field width="flex">Name</Field>
         <Field width="flex">Payee</Field>
         <Field width="flex">Account</Field>
@@ -289,6 +293,8 @@ export function SchedulesTable({
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
+        backgroundColor="transparent"
+        version="v2"
         style={[{ flex: 1, backgroundColor: 'transparent' }, style]}
         items={items}
         renderItem={renderItem}

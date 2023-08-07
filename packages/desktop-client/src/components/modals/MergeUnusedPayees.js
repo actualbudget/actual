@@ -4,11 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { theme } from '../../style';
+import { colors } from '../../style';
 import { Information } from '../alerts';
-import { View, Text, Modal, ModalButtons, Button, P } from '../common';
+import Button from '../common/Button';
+import Modal, { ModalButtons } from '../common/Modal';
+import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
-let highlightStyle = { color: theme.pageTextPositive };
+let highlightStyle = { color: colors.p5 };
 
 export default function MergeUnusedPayees({
   modalProps,
@@ -89,7 +93,7 @@ export default function MergeUnusedPayees({
       {() => (
         <View style={{ padding: 20, maxWidth: 500 }}>
           <View>
-            <P style={{ marginBottom: 10, fontWeight: 500 }}>
+            <Paragraph style={{ marginBottom: 10, fontWeight: 500 }}>
               {payees.length === 1 ? (
                 <>
                   The payee <Text style={highlightStyle}>{payees[0].name}</Text>{' '}
@@ -118,7 +122,7 @@ export default function MergeUnusedPayees({
                   </ul>
                 </>
               )}
-            </P>
+            </Paragraph>
 
             <Information>
               Merging will remove the payee and transfer any existing rules to
@@ -137,6 +141,7 @@ export default function MergeUnusedPayees({
                 style={{
                   fontSize: 13,
                   marginTop: 10,
+                  color: colors.n4,
                   userSelect: 'none',
                   display: 'flex',
                   alignItems: 'center',
@@ -158,10 +163,10 @@ export default function MergeUnusedPayees({
 
             <ModalButtons style={{ marginTop: 20 }} focusButton>
               <Button
-                primary
+                type="primary"
+                isSubmit={false}
                 style={{ marginRight: 10 }}
                 onClick={onMerge}
-                type="button"
               >
                 Merge
               </Button>
@@ -169,7 +174,6 @@ export default function MergeUnusedPayees({
                 <Button
                   style={{ marginRight: 10 }}
                   onClick={onMergeAndCreateRule}
-                  type="button"
                 >
                   Merge and edit rule
                 </Button>
@@ -177,7 +181,6 @@ export default function MergeUnusedPayees({
               <Button
                 style={{ marginRight: 10 }}
                 onClick={() => modalProps.onBack()}
-                type="button"
               >
                 Do nothing
               </Button>

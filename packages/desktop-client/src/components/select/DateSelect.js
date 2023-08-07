@@ -22,17 +22,18 @@ import {
 } from 'loot-core/src/shared/months';
 import { stringToInteger } from 'loot-core/src/shared/util';
 
-import { theme } from '../../style';
-import { View, Input, Tooltip } from '../common';
+import { colors } from '../../style';
+import Input from '../common/Input';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
 let pickerStyles = {
-  // main
   '& .pika-single.actual-date-picker': {
-    color: theme.sidebarItemText,
-    background: theme.sidebarItemBackground,
+    color: colors.n11,
+    background: colors.n1,
     border: 'none',
     boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
     borderRadius: 4,
@@ -43,33 +44,28 @@ let pickerStyles = {
       float: 'none',
       width: 'auto',
     },
-    // month/year
     '& .pika-label': {
-      backgroundColor: theme.sidebarItemBackground,
+      backgroundColor: colors.n1,
     },
-    // Back/forward buttons
     '& .pika-prev': {
       backgroundImage: `url(${DateSelectLeft})`,
     },
     '& .pika-next': {
       backgroundImage: `url(${DateSelectRight})`,
     },
-    // Day of week
     '& .pika-table th': {
-      color: theme.sidebarItemText,
+      color: colors.n11,
       '& abbr': { textDecoration: 'none' },
     },
-    // Numbered days
     '& .pika-button': {
-      backgroundColor: theme.sidebarItemBackgroundHover,
-      color: theme.sidebarItemText,
+      backgroundColor: colors.n2,
+      color: colors.n11,
     },
     '& .is-today .pika-button': {
       textDecoration: 'underline',
     },
     '& .is-selected .pika-button': {
-      backgroundColor: theme.buttonPositiveBackground,
-      color: theme.buttonPositiveText,
+      backgroundColor: colors.n5,
       boxShadow: 'none',
     },
   },

@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { theme } from '../../../style';
-import { View, Text, Button } from '../../common';
+import { colors } from '../../../style';
+import Button from '../../common/Button';
+import Text from '../../common/Text';
+import View from '../../common/View';
 
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -41,11 +43,12 @@ export default function ChangePassword() {
   }
 
   return (
-    <View style={{ maxWidth: 500, marginTop: -30, color: theme.pageText }}>
+    <View style={{ maxWidth: 500, marginTop: -30 }}>
       <Title text="Change server password" />
       <Text
         style={{
           fontSize: 16,
+          color: colors.n2,
           lineHeight: 1.4,
         }}
       >
@@ -57,8 +60,7 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: theme.errorText,
-            backgroundColor: theme.errorBackground,
+            color: colors.r4,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -71,8 +73,7 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: theme.noticeText,
-            backgroundColor: theme.noticeBackground,
+            color: colors.g4,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -84,8 +85,7 @@ export default function ChangePassword() {
       <ConfirmPasswordForm
         buttons={
           <Button
-            bare
-            type="button"
+            type="bare"
             style={{ fontSize: 15, marginRight: 10 }}
             onClick={() => navigate('/')}
           >
