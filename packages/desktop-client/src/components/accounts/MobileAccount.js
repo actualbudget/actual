@@ -150,7 +150,7 @@ export default function Account(props) {
   }, []);
 
   // Load categories if necessary.
-  useCategories();
+  const categories = useCategories();
 
   const updateSearchQuery = debounce(() => {
     if (searchText === '' && currentQuery) {
@@ -253,7 +253,7 @@ export default function Account(props) {
                   key={numberFormat + hideFraction}
                   account={account}
                   accounts={accounts}
-                  categories={state.categories}
+                  categories={categories.list}
                   payees={state.payees}
                   transactions={transactions}
                   prependTransactions={prependTransactions || []}
