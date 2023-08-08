@@ -584,6 +584,8 @@ export default function ImportTransactions({ modalProps, options }) {
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
 
+  let [clearOnImport, setClearOnImport] = useState(true);
+
   async function parse(filename, options) {
     setLoadingState('parsing');
 
@@ -741,6 +743,7 @@ export default function ImportTransactions({ modalProps, options }) {
         ...finalTransaction,
         date,
         amount: amountToInteger(amount),
+        cleared: clearOnImport,
       });
     }
 
@@ -942,6 +945,15 @@ export default function ImportTransactions({ modalProps, options }) {
                   }}
                 >
                   File has header row
+                </CheckboxOption>
+                <CheckboxOption
+                  id="clear_on_import"
+                  checked={clearOnImport}
+                  onChange={() => {
+                    setClearOnImport(!clearOnImport);
+                  }}
+                >
+                  Clear transactions on import
                 </CheckboxOption>
               </View>
             )}

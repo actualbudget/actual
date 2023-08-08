@@ -21,6 +21,7 @@ import {
 } from 'loot-core/src/shared/transactions';
 
 import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors } from '../../style';
 import SyncRefresh from '../SyncRefresh';
@@ -81,7 +82,6 @@ export default function Account(props) {
   let state = useSelector(state => ({
     payees: state.queries.payees,
     newTransactions: state.queries.newTransactions,
-    categories: state.queries.categories.list,
     prefs: state.prefs.local,
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
   }));
@@ -134,9 +134,6 @@ export default function Account(props) {
         }
       });
 
-      if (state.categories.length === 0) {
-        await actionCreators.getCategories();
-      }
       if (accounts.length === 0) {
         await actionCreators.getAccounts();
       }
@@ -151,6 +148,9 @@ export default function Account(props) {
 
     return () => unlisten();
   }, []);
+
+  // Load categories if necessary.
+  useCategories();
 
   const updateSearchQuery = debounce(() => {
     if (searchText === '' && currentQuery) {

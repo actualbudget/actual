@@ -19,12 +19,18 @@ export type TrieNode = {
   hash?: number;
 };
 
+type NumberTrieNodeKey = keyof Omit<TrieNode, 'hash'>;
+
 export function emptyTrie(): TrieNode {
   return { hash: 0 };
 }
 
-export function getKeys(trie: TrieNode): ('0' | '1' | '2')[] {
-  return Object.keys(trie).filter(x => x !== 'hash') as ('0' | '1' | '2')[];
+function isNumberTrieNodeKey(input: string): input is NumberTrieNodeKey {
+  return ['0', '1', '2'].includes(input);
+}
+
+export function getKeys(trie: TrieNode): NumberTrieNodeKey[] {
+  return Object.keys(trie).filter(isNumberTrieNodeKey);
 }
 
 export function keyToTimestamp(key: string): number {
@@ -43,19 +49,20 @@ export function insert(trie: TrieNode, timestamp: Timestamp) {
   let hash = timestamp.hash();
   let key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
 
-  trie = Object.assign({}, trie, { hash: trie.hash ^ hash });
+  trie = Object.assign({}, trie, { hash: (trie.hash || 0) ^ hash });
   return insertKey(trie, key, hash);
 }
 
-function insertKey(trie: TrieNode, key: string, hash: number) {
+function insertKey(trie: TrieNode, key: string, hash: number): TrieNode {
   if (key.length === 0) {
     return trie;
   }
   const c = key[0];
-  const n = trie[c] || {};
+  const t = isNumberTrieNodeKey(c) ? trie[c] : undefined;
+  const n = t || {};
   return Object.assign({}, trie, {
     [c]: Object.assign({}, n, insertKey(n, key.slice(1), hash), {
-      hash: n.hash ^ hash,
+      hash: (n.hash || 0) ^ hash,
     }),
   });
 }
@@ -68,7 +75,7 @@ export function build(timestamps: Timestamp[]) {
   return trie;
 }
 
-export function diff(trie1: TrieNode, trie2: TrieNode): number {
+export function diff(trie1: TrieNode, trie2: TrieNode): number | null {
   if (trie1.hash === trie2.hash) {
     return null;
   }
@@ -105,12 +112,13 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number {
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
 
-      if (!node1[key] || !node2[key]) {
+      let next1 = node1[key];
+      let next2 = node2[key];
+
+      if (!next1 || !next2) {
         break;
       }
 
-      let next1 = node1[key];
-      let next2 = node2[key];
       if (next1.hash !== next2.hash) {
         diffkey = key;
         break;
@@ -125,6 +133,8 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number {
     node1 = node1[diffkey] || emptyTrie();
     node2 = node2[diffkey] || emptyTrie();
   }
+
+  return null;
 }
 
 export function prune(trie: TrieNode, n = 2): TrieNode {
@@ -136,17 +146,23 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
   let keys = getKeys(trie);
   keys.sort();
 
-  let next = { hash: trie.hash };
+  let next: TrieNode = { hash: trie.hash };
 
   // Prune child nodes.
   for (let k of keys.slice(-n)) {
-    next[k] = prune(trie[k], n);
+    const node = trie[k];
+
+    if (!node) {
+      throw new Error(`TrieNode for key ${k} could not be found`);
+    }
+
+    next[k] = prune(node, n);
   }
 
   return next;
 }
 
-export function debug(trie: TrieNode, k = '', indent = 0) {
+export function debug(trie: TrieNode, k = '', indent = 0): string {
   const str =
     ' '.repeat(indent) +
     (k !== '' ? `k: ${k} ` : '') +
@@ -155,7 +171,9 @@ export function debug(trie: TrieNode, k = '', indent = 0) {
     str +
     getKeys(trie)
       .map(key => {
-        return debug(trie[key], key, indent + 2);
+        const node = trie[key];
+        if (!node) return '';
+        return debug(node, key, indent + 2);
       })
       .join('')
   );

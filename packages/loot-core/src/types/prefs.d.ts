@@ -1,6 +1,7 @@
 import { type numberFormats } from '../shared/util';
 
 export type FeatureFlag =
+  | 'categorySpendingReport'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'privacyMode'

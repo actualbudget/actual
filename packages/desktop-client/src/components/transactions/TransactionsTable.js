@@ -53,7 +53,7 @@ import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
 import Hyperlink2 from '../../icons/v2/Hyperlink2';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -266,12 +266,11 @@ const TransactionHeader = memo(
 
     return (
       <Row
-        borderColor={colors.n9}
-        backgroundColor="white"
         style={{
-          color: colors.n4,
           fontWeight: 300,
           zIndex: 200,
+          color: theme.tableHeaderText,
+          backgroundColor: theme.tableBackground,
         }}
       >
         <SelectCell
@@ -418,19 +417,6 @@ function StatusCell({
   let isClearedField = status === 'cleared' || status == null;
   let statusProps = getStatusProps(status);
 
-  let props = {
-    color:
-      status === 'cleared'
-        ? colors.g5
-        : status === 'missed'
-        ? colors.r6
-        : status === 'due'
-        ? colors.y5
-        : selected
-        ? colors.b7
-        : colors.n7,
-  };
-
   function onSelect() {
     if (isClearedField) {
       onUpdate('cleared', !(status === 'cleared'));
@@ -449,11 +435,12 @@ function StatusCell({
         style={[
           {
             padding: 3,
+            backgroundColor: 'transparent',
             border: '1px solid transparent',
             borderRadius: 50,
             ':focus': {
-              border: '1px solid ' + props.color,
-              boxShadow: `0 1px 2px ${props.color}`,
+              border: '1px solid ' + theme.formInputBorderSelected,
+              boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
             },
             cursor: isClearedField ? 'pointer' : 'default',
           },
@@ -467,7 +454,7 @@ function StatusCell({
           style: {
             width: 13,
             height: 13,
-            color: props.color,
+            color: statusProps.color,
             marginTop: status === 'due' ? -1 : 0,
           },
         })}
@@ -499,7 +486,7 @@ function HeaderCell({
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            color: colors.n4,
+            color: theme.tableHeaderText,
             fontWeight: 300,
             marginLeft: marginLeft,
             marginRight: marginRight,
@@ -550,7 +537,7 @@ function PayeeCell({
       name="payee"
       textAlign="flex"
       value={payeeId}
-      valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
+      valueStyle={[valueStyle, inherited && { color: theme.tableTextInactive }]}
       exposed={focused}
       onExpose={name => !isPreview && onEdit(id, name)}
       onUpdate={async value => {
@@ -684,7 +671,6 @@ const Transaction = memo(function Transaction(props) {
   let {
     transaction: originalTransaction,
     editing,
-    backgroundColor = 'white',
     showAccount,
     showBalance,
     showCleared,
@@ -812,7 +798,6 @@ const Transaction = memo(function Transaction(props) {
   }
 
   let isChild = transaction.is_child;
-  let borderColor = selected ? colors.b8 : colors.border;
   let isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   let isOffBudget = account && account.offbudget === 1;
 
@@ -820,48 +805,56 @@ const Transaction = memo(function Transaction(props) {
   let backgroundFocus = hovered || focusedField === 'select';
   let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
+  let statusProps = getStatusProps(notes);
+
   return (
     <Row
-      borderColor={borderColor}
-      backgroundColor={
-        selected
-          ? colors.selected
-          : backgroundFocus
-          ? colors.hover
-          : isPreview
-          ? '#fcfcfc'
-          : backgroundColor
-      }
       highlighted={highlighted}
       style={[
+        {
+          backgroundColor: selected
+            ? theme.tableRowBackgroundHighlight
+            : backgroundFocus
+            ? theme.tableRowBackgroundHover
+            : theme.tableBackground,
+        },
+        highlighted || selected
+          ? { color: theme.tableRowBackgroundHighlightText }
+          : { color: theme.tableText },
         style,
-        isPreview && { color: colors.n5, fontStyle: 'italic' },
+        isPreview && {
+          color: theme.tableTextInactive,
+          fontStyle: 'italic',
+        },
         _unmatched && { opacity: 0.5 },
       ]}
       onMouseEnter={() => onHover && onHover(transaction.id)}
     >
       {isChild && (
         <Field
-          borderColor="transparent"
+          /* Checkmark blank placeholder for Child transaction */
           width={110}
           style={{
             width: 110,
-            backgroundColor: colors.n11,
-            borderBottomWidth: 0,
-          }}
-        />
-      )}
-      {isChild && showAccount && (
-        <Field
-          borderColor="transparent"
-          style={{
-            flex: 1,
-            backgroundColor: colors.n11,
-            opacity: 0,
+            backgroundColor: theme.tableRowBackgroundHover,
+            border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
         />
       )}
 
+      {isChild && showAccount && (
+        <Field
+          /* Account blank placeholder for Child transaction */
+          style={{
+            flex: 1,
+            backgroundColor: theme.tableRowBackgroundHover,
+            border: 0,
+          }}
+        />
+      )}
+
+      {/* Checkmark - for Child transaction
+      between normal Date and Payee or Account and Payee if needed */}
       {isTemporaryId(transaction.id) ? (
         isChild ? (
           <DeleteCell
@@ -874,6 +867,7 @@ const Transaction = memo(function Transaction(props) {
         )
       ) : (
         <SelectCell
+          /* Checkmark field for non-child transaction */
           exposed={hovered || selected || editing}
           focused={focusedField === 'select'}
           onSelect={e => {
@@ -884,14 +878,14 @@ const Transaction = memo(function Transaction(props) {
           style={[isChild && { borderLeftWidth: 1 }]}
           value={
             matched && (
-              <Hyperlink2 style={{ width: 13, height: 13, color: colors.n7 }} />
+              <Hyperlink2 style={{ width: 13, height: 13, color: 'inherit' }} />
             )
           }
         />
       )}
-
       {!isChild && (
         <CustomCell
+          /* Date field for non-child transaction */
           name="date"
           width={110}
           textAlign="flex"
@@ -929,6 +923,7 @@ const Transaction = memo(function Transaction(props) {
 
       {!isChild && showAccount && (
         <CustomCell
+          /* Account field for non-child transaction */
           name="account"
           width="flex"
           textAlign="flex"
@@ -975,6 +970,7 @@ const Transaction = memo(function Transaction(props) {
       )}
       {(() => (
         <PayeeCell
+          /* Payee field for all transactions */
           id={id}
           payeeId={payeeId}
           accountId={accountId}
@@ -998,6 +994,7 @@ const Transaction = memo(function Transaction(props) {
       ))()}
 
       {isPreview ? (
+        /* Notes field for all transactions */
         <Cell name="notes" width="flex" />
       ) : (
         <InputCell
@@ -1017,26 +1014,13 @@ const Transaction = memo(function Transaction(props) {
       )}
 
       {isPreview ? (
+        // Category field for preview transactions
         <Cell width="flex" style={{ alignItems: 'flex-start' }} exposed={true}>
           {() => (
             <View
               style={{
-                color:
-                  notes === 'missed'
-                    ? colors.r6
-                    : notes === 'due'
-                    ? colors.y4
-                    : selected
-                    ? colors.b5
-                    : colors.n6,
-                backgroundColor:
-                  notes === 'missed'
-                    ? colors.r10
-                    : notes === 'due'
-                    ? colors.y9
-                    : selected
-                    ? colors.b8
-                    : colors.n10,
+                color: statusProps.color,
+                backgroundColor: statusProps.backgroundColor,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
@@ -1048,6 +1032,7 @@ const Transaction = memo(function Transaction(props) {
         </Cell>
       ) : isParent ? (
         <Cell
+          /* Category field (Split button) for parent transactions */
           name="category"
           width="flex"
           focused={focusedField === 'category'}
@@ -1055,14 +1040,13 @@ const Transaction = memo(function Transaction(props) {
           plain
         >
           <CellButton
+            bare
             style={{
               alignSelf: 'flex-start',
-              color: colors.n6,
               borderRadius: 4,
-              transition: 'none',
-              '&:hover': {
-                backgroundColor: 'rgba(100, 100, 100, .15)',
-                color: colors.n5,
+              border: '1px solid transparent', // so it doesn't shift on hover
+              ':hover': {
+                border: '1px solid ' + theme.buttonNormalBorder,
               },
             }}
             disabled={isTemporaryId(transaction.id)}
@@ -1082,6 +1066,7 @@ const Transaction = memo(function Transaction(props) {
               {isParent && (
                 <CheveronDown
                   style={{
+                    color: 'inherit',
                     width: 14,
                     height: 14,
                     transition: 'transform .08s',
@@ -1097,6 +1082,8 @@ const Transaction = memo(function Transaction(props) {
         </Cell>
       ) : isBudgetTransfer || isOffBudget || isPreview ? (
         <InputCell
+          /* Category field for transfer and off-budget transactions
+     (NOT preview, it is covered first) */
           name="category"
           width="flex"
           exposed={focusedField === 'category'}
@@ -1112,11 +1099,7 @@ const Transaction = memo(function Transaction(props) {
               : ''
           }
           valueStyle={valueStyle}
-          style={{
-            fontStyle: 'italic',
-            color: '#c0c0c0',
-            fontWeight: 300,
-          }}
+          style={{ fontStyle: 'italic', fontWeight: 300 }}
           inputProps={{
             readOnly: true,
             style: { fontStyle: 'italic' },
@@ -1124,6 +1107,7 @@ const Transaction = memo(function Transaction(props) {
         />
       ) : (
         <CustomCell
+          /* Category field for normal and child transactions */
           name="category"
           width="flex"
           textAlign="flex"
@@ -1143,9 +1127,10 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={
             !categoryId
               ? {
+                  // uncategorized transaction
                   fontStyle: 'italic',
                   fontWeight: 300,
-                  color: colors.p8,
+                  color: theme.formInputTextHighlight,
                 }
               : valueStyle
           }
@@ -1182,6 +1167,7 @@ const Transaction = memo(function Transaction(props) {
       )}
 
       <InputCell
+        /* Debit field for all transactions */
         type="input"
         width={90}
         name="debit"
@@ -1203,6 +1189,7 @@ const Transaction = memo(function Transaction(props) {
       />
 
       <InputCell
+        /* Credit field for all transactions */
         type="input"
         width={85}
         name="credit"
@@ -1225,9 +1212,12 @@ const Transaction = memo(function Transaction(props) {
 
       {showBalance && (
         <Cell
+          /* Balance field for all transactions */
           name="balance"
           value={balance == null || isChild ? '' : integerToCurrency(balance)}
-          valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
+          valueStyle={{
+            color: balance < 0 ? theme.errorText : theme.noticeText,
+          }}
           style={[styles.tnum, amountStyle]}
           width={88}
           textAlign="right"
@@ -1237,6 +1227,7 @@ const Transaction = memo(function Transaction(props) {
 
       {showCleared && (
         <StatusCell
+          /* Icon field for all transactions */
           id={id}
           focused={focusedField === 'cleared'}
           selected={selected}
@@ -1352,9 +1343,9 @@ function NewTransaction({
   return (
     <View
       style={{
-        borderBottom: '1px solid #ebebeb',
+        borderBottom: '1px solid ' + theme.tableBorderHover,
         paddingBottom: 6,
-        backgroundColor: 'white',
+        backgroundColor: theme.tableBackground,
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
@@ -1569,7 +1560,13 @@ function TransactionTableInner({
   return (
     <View
       innerRef={containerRef}
-      style={[{ flex: 1, cursor: 'default' }, props.style]}
+      style={[
+        {
+          flex: 1,
+          cursor: 'default',
+        },
+        props.style,
+      ]}
     >
       <View>
         <TransactionHeader
@@ -1650,7 +1647,7 @@ function TransactionTableInner({
               left: 0,
               right: 0,
               height: 20,
-              backgroundColor: 'red',
+              backgroundColor: theme.errorText,
               boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
             }}
           />
