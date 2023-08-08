@@ -378,7 +378,7 @@ export function looselyParseAdditionalInformation(additionalInformation) {
         let key = match[2].trim();
         let value = (match[4] || match[5]).trim();
         // Remove square brackets and single quotes and commas
-        value = value.replace(/[\[\]',]/g, '');
+        value = value.replace(/[[\]',]/g, '');
         result[key] = value;
       }
       additionalInformationJson = result;
