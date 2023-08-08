@@ -28,7 +28,7 @@ import AnimatedLoading from '../icons/AnimatedLoading';
 import DeleteIcon from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
-import { styles, colors } from '../style';
+import { styles, theme } from '../style';
 
 import Button from './common/Button';
 import Input from './common/Input';
@@ -48,7 +48,6 @@ import useSheetValue from './spreadsheet/useSheetValue';
 import { Tooltip, IntersectionBoundary } from './tooltips';
 
 export const ROW_HEIGHT = 32;
-const TABLE_BACKGROUND_COLOR = colors.n11;
 
 function fireBlur(onBlur, e) {
   if (document.hasFocus()) {
@@ -63,8 +62,8 @@ function fireBlur(onBlur, e) {
 }
 
 const CellContext = createContext({
-  backgroundColor: 'white',
-  borderColor: colors.n9,
+  backgroundColor: theme.tableBackground,
+  borderColor: theme.tableBorder,
 });
 
 type CellProviderProps = {
@@ -96,26 +95,10 @@ type FieldProps = ComponentProps<typeof View> & {
   contentStyle?: CSSProperties;
 };
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
-  {
-    width,
-    name,
-    borderColor: oldBorderColor,
-    truncate = true,
-    children,
-    style,
-    contentStyle,
-    ...props
-  },
+  { width, name, truncate = true, children, style, contentStyle, ...props },
   ref,
 ) {
   let { backgroundColor, borderColor } = useContext(CellContext);
-
-  // TODO: Get rid of this. Go through and remove all the places where
-  // the border color is manually passed in.
-  if (oldBorderColor) {
-    borderColor = oldBorderColor;
-  }
-
   return (
     <View
       innerRef={ref}
@@ -228,6 +211,8 @@ export function Cell({
   // the border color is manually passed in.
   if (oldBorderColor) {
     borderColor = oldBorderColor;
+  } else {
+    borderColor = theme.tableBorder;
   }
 
   const widthStyle = width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
@@ -338,8 +323,8 @@ type RowProps = ComponentProps<typeof View> & {
   highlighted?: boolean;
 };
 export function Row({
-  backgroundColor = 'white',
-  borderColor = colors.border,
+  backgroundColor = theme.tableBackground,
+  borderColor = theme.tableBorder,
   inset = 0,
   collapsed,
   focused,
@@ -378,8 +363,10 @@ export function Row({
 
   return (
     <CellProvider
-      backgroundColor={shouldHighlight ? colors.y9 : backgroundColor}
-      borderColor={shouldHighlight ? colors.y8 : borderColor}
+      backgroundColor={
+        shouldHighlight ? theme.tableRowBackgroundHighlight : backgroundColor
+      }
+      borderColor={shouldHighlight ? theme.tableBorderSelected : borderColor}
     >
       <View
         innerRef={rowRef}
@@ -408,14 +395,13 @@ export function Row({
 }
 
 const inputCellStyle = {
-  backgroundColor: 'white',
   padding: '5px 3px',
   margin: '0 1px',
 };
 
 const readonlyInputStyle = {
   backgroundColor: 'transparent',
-  '::selection': { backgroundColor: '#d9d9d9' },
+  '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
 type InputValueProps = ComponentProps<typeof Input> & {
@@ -605,6 +591,8 @@ export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
 
 type CellButtonProps = {
   style?: CSSProperties;
+  primary?: boolean;
+  bare?: boolean;
   disabled?: boolean;
   clickBehavior?: string;
   onSelect?: (e) => void;
@@ -612,7 +600,19 @@ type CellButtonProps = {
   children: ReactNode;
 };
 export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
-  ({ style, disabled, clickBehavior, onSelect, onEdit, children }, ref) => {
+  (
+    {
+      style,
+      primary,
+      bare,
+      disabled,
+      clickBehavior,
+      onSelect,
+      onEdit,
+      children,
+    },
+    ref,
+  ) => {
     // This represents a cell that acts like a button: it's clickable,
     // focusable, etc. The reason we don't use a button is because the
     // full behavior is undesirable: we really don't want stuff like
@@ -645,10 +645,34 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             alignItems: 'center',
             cursor: 'default',
             transition: 'box-shadow .15s',
-            ':focus': {
-              outline: 0,
-              boxShadow: `0 0 0 3px white, 0 0 0 5px ${colors.b5}`,
-            },
+            backgroundColor: bare
+              ? 'transparent'
+              : disabled // always use disabled before primary since we can have a disabled primary button
+              ? theme.buttonNormalDisabledBackground
+              : primary
+              ? theme.buttonPrimaryBackground
+              : theme.buttonNormalBackground,
+            border: bare
+              ? 'none'
+              : '1px solid ' +
+                (disabled
+                  ? theme.buttonNormalDisabledBorder
+                  : primary
+                  ? theme.buttonPrimaryBorder
+                  : theme.buttonNormalBorder),
+            color: bare
+              ? 'inherit'
+              : disabled
+              ? theme.buttonNormalDisabledText
+              : primary
+              ? theme.buttonPrimaryText
+              : theme.buttonNormalText,
+            ':focus': bare
+              ? null
+              : {
+                  outline: 0,
+                  boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
+                },
           },
           style,
         ]}
@@ -679,7 +703,6 @@ type SelectCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
 export function SelectCell({
   focused,
   selected,
-  partial,
   style,
   onSelect,
   onEdit,
@@ -700,26 +723,24 @@ export function SelectCell({
     >
       {() => (
         <CellButton
-          style={[
-            {
-              width: 12,
-              height: 12,
-              border: '1px solid ' + colors.n8,
-              borderRadius: 3,
-              justifyContent: 'center',
-              alignItems: 'center',
-
-              ':focus': {
-                border: '1px solid ' + colors.b5,
-                boxShadow: '0 1px 2px ' + colors.b5,
-              },
+          style={{
+            width: 12,
+            height: 12,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: 3,
+            border: selected
+              ? '1px solid ' + theme.altformInputBorderSelected
+              : '1px solid ' + theme.formInputBorder,
+            color: theme.tableBackground,
+            backgroundColor: selected
+              ? theme.tableTextEditingBackground
+              : theme.tableBackground,
+            ':focus': {
+              border: '1px solid ' + theme.altformInputBorderSelected,
+              boxShadow: '0 1px 2px ' + theme.altformInputShadowSelected,
             },
-            selected && {
-              backgroundColor: partial ? colors.b9 : colors.b5,
-              borderColor: partial ? colors.b9 : colors.b5,
-              color: 'white',
-            },
-          ]}
+          }}
           onEdit={onEdit}
           onSelect={onSelect}
           clickBehavior="none"
@@ -817,26 +838,22 @@ export function TableHeader({
 }: TableHeaderProps) {
   return (
     <View
-      style={
-        version === 'v2' && {
-          borderRadius: '6px 6px 0 0',
-          overflow: 'hidden',
-          flexShrink: 0,
-        }
-      }
+      style={{
+        borderRadius: '6px 6px 0 0',
+        overflow: 'hidden',
+        flexShrink: 0,
+      }}
     >
       <Row
-        backgroundColor="white"
-        borderColor={colors.border}
         collapsed={true}
         {...rowProps}
-        style={[
-          { zIndex: 200 },
-          version === 'v2'
-            ? { color: colors.n4, fontWeight: 500 }
-            : { color: colors.n4 },
-          rowProps.style,
-        ]}
+        style={{
+          color: theme.tableHeaderText,
+          backgroundColor: theme.tableHeaderBackground,
+          zIndex: 200,
+          fontWeight: 500,
+          ...rowProps.style,
+        }}
       >
         {headers
           ? headers.map(header => {
@@ -870,10 +887,14 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
 
       <Button
         type="bare"
-        style={{ color: colors.b3 }}
+        style={{ color: theme.pageTextPositive }}
         onClick={() => setMenuOpen(true)}
       >
-        <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
+        <ExpandArrow
+          width={8}
+          height={8}
+          style={{ marginRight: 5, color: theme.pageText }}
+        />
         {selectedItems.size} {name}
       </Button>
 
@@ -881,7 +902,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
         <Tooltip
           position="bottom-right"
           width={200}
-          style={{ padding: 0 }}
+          style={{ padding: 0, backgroundColor: 'transparent' }}
           onClose={() => setMenuOpen(false)}
         >
           <Menu
@@ -962,7 +983,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
-      backgroundColor = TABLE_BACKGROUND_COLOR,
+      backgroundColor = theme.tableHeaderBackground,
       renderItem,
       renderEmpty,
       getItemKey,
@@ -1133,7 +1154,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
             justifyContent: 'center',
             alignItems: 'center',
             fontStyle: 'italic',
-            color: colors.n6,
+            color: theme.tableText,
             flex: 1,
           }}
         >
@@ -1154,7 +1175,7 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
             },
           ]}
         >
-          <AnimatedLoading width={25} color={colors.n1} />
+          <AnimatedLoading width={25} color={theme.tableText} />
         </View>
       );
     }
@@ -1177,7 +1198,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       >
         {headers && (
           <TableHeader
-            version={version}
             height={rowHeight}
             {...(Array.isArray(headers) ? { headers } : { children: headers })}
           />
@@ -1218,7 +1238,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
                             ? getScrollOffset(height, initialScrollTo.current)
                             : 0
                         }
-                        version={version}
                         animated={animated}
                         overscanCount={5}
                         onItemsRendered={onItemsRendered}
