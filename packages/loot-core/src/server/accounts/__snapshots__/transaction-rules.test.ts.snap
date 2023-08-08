@@ -8,9 +8,9 @@ Array [
         "field": "category",
         "op": "set",
         "options": undefined,
-        "rawValue": "food",
+        "rawValue": "🍞 Food",
         "type": "id",
-        "value": "food",
+        "value": "🍞 Food",
       },
     ],
     "conditions": Array [
@@ -34,9 +34,9 @@ Array [
         "field": "category",
         "op": "set",
         "options": undefined,
-        "rawValue": "food",
+        "rawValue": "🍞 Food",
         "type": "id",
-        "value": "food",
+        "value": "🍞 Food",
       },
     ],
     "conditions": Array [
