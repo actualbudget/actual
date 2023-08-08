@@ -7,7 +7,11 @@ import {
   makeChild as makeChildTransaction,
   recalculateSplit,
 } from '../../shared/transactions';
-import { hasFieldsChanged, amountToInteger, looselyParseAdditionalInformation } from '../../shared/util';
+import {
+  hasFieldsChanged,
+  amountToInteger,
+  looselyParseAdditionalInformation,
+} from '../../shared/util';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 import { post } from '../post';
@@ -363,15 +367,21 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
     trans.account = acctId;
     trans.payee = await resolvePayee(trans, payee_name, payeesToCreate);
     trans.cleared = Boolean(trans.booked);
-    let remittanceInformation = trans.remittanceInformationUnstructured || ((trans.remittanceInformationUnstructuredArray || []).join(', ')) 
+    let remittanceInformation =
+      trans.remittanceInformationUnstructured ||
+      (trans.remittanceInformationUnstructuredArray || []).join(', ');
     // Handle additional information
-    let additionalInformationParsedForNotes = "";
+    let additionalInformationParsedForNotes = '';
     if (trans.additionalInformation) {
-        let additionalInformationParsed = looselyParseAdditionalInformation(trans.additionalInformation);
-        additionalInformationParsedForNotes = [
-            additionalInformationParsed?.atmPosName ?? "",
-            additionalInformationParsed?.narrative ?? ""
-        ].filter(Boolean).join(' - ');
+      let additionalInformationParsed = looselyParseAdditionalInformation(
+        trans.additionalInformation,
+      );
+      additionalInformationParsedForNotes = [
+        additionalInformationParsed?.atmPosName ?? '',
+        additionalInformationParsed?.narrative ?? '',
+      ]
+        .filter(Boolean)
+        .join(' - ');
     }
 
     normalized.push({
@@ -381,10 +391,9 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
         payee: trans.payee,
         account: trans.account,
         date: trans.date,
-        notes: [
-              remittanceInformation,
-              additionalInformationParsedForNotes
-          ].filter(Boolean).join(' - '),
+        notes: [remittanceInformation, additionalInformationParsedForNotes]
+          .filter(Boolean)
+          .join(' - '),
         imported_id: trans.transactionId,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
