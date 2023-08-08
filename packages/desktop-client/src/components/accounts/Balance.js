@@ -23,7 +23,7 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
         marginLeft: 15,
         borderRadius: 4,
         padding: '4px 6px',
-        color: theme.altpageTextSubdued,
+        color: theme.alt2PillText,
         backgroundColor: theme.pillBackground,
       }}
     >

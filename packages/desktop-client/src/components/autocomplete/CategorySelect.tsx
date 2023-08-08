@@ -8,7 +8,6 @@ import React, {
 import { css } from 'glamor';
 
 import Split from '../../icons/v0/Split';
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -45,10 +44,6 @@ function CategoryList({
   groupHeaderStyle,
 }: CategoryListProps) {
   let lastGroup = null;
-  const { isNarrowWidth } = useResponsive();
-  const highlightedIndexColor = isNarrowWidth
-    ? 'rgba(100, 100, 100, .15)'
-    : colors.n4;
 
   return (
     <View>
@@ -138,11 +133,10 @@ function CategoryList({
                 role="button"
                 className={`${css([
                   {
-                    backgrou
-                  backgroundColor:
-                    highlightedIndex === idx
-                      ? theme.alt2MenuItemBackgroundHover
-                      : 'transparent',
+                    backgroundColor:
+                      highlightedIndex === idx
+                        ? theme.alt2MenuItemBackgroundHover
+                        : 'transparent',
                     padding: 4,
                     paddingLeft: 20,
                     borderRadius: embedded ? 4 : 0,

@@ -4,7 +4,6 @@ import { css } from 'glamor';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import View from '../common/View';
 
@@ -18,10 +17,6 @@ function AccountList({
   groupHeaderStyle,
 }) {
   let lastItem = null;
-  const { isNarrowWidth } = useResponsive();
-  const highlightedIndexColor = isNarrowWidth
-    ? 'rgba(100, 100, 100, .15)'
-    : colors.n4;
 
   return (
     <View>
@@ -93,10 +88,10 @@ function AccountList({
               key={item.id}
               className={`${css([
                 {
-                backgroundColor:
-                  highlightedIndex === idx
-                    ? theme.alt2MenuItemBackgroundHover
-                    : 'transparent',
+                  backgroundColor:
+                    highlightedIndex === idx
+                      ? theme.alt2MenuItemBackgroundHover
+                      : 'transparent',
                   padding: 4,
                   paddingLeft: 20,
                   borderRadius: embedded ? 4 : 0,

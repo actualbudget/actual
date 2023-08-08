@@ -7,7 +7,7 @@ import ArrowsExpand3 from '../../icons/v2/ArrowsExpand3';
 import ArrowsShrink3 from '../../icons/v2/ArrowsShrink3';
 import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
 import Pencil1 from '../../icons/v2/Pencil1';
-import { styles, theme } from '../../style';
+import { styles } from '../../style';
 import AnimatedRefresh from '../AnimatedRefresh';
 import Button from '../common/Button';
 import InitialFocus from '../common/InitialFocus';
@@ -244,10 +244,7 @@ export function AccountHeader({
           />
           {workingHard ? (
             <View>
-              <AnimatedLoading
-                color={theme.menuItemText}
-                style={{ width: 16, height: 16 }}
-              />
+              <AnimatedLoading style={{ width: 16, height: 16 }} />
             </View>
           ) : (
             <SelectedTransactionsButton

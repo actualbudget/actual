@@ -55,10 +55,6 @@ function PayeeList({
   footer,
 }) {
   const { isNarrowWidth } = useResponsive();
-  const highlightedIndexColor = isNarrowWidth
-    ? 'rgba(100, 100, 100, .15)'
-    : colors.n4;
-  const createNewColor = isNarrowWidth ? colors.g5 : colors.g8;
   let isFiltered = items.filtered;
   let createNew = null;
   items = [...items];
@@ -171,10 +167,10 @@ function PayeeList({
                 key={item.id}
                 className={`${css([
                   {
-                  backgroundColor:
-                    highlightedIndex === idx + offset
-                      ? theme.alt2MenuItemBackgroundHover
-                      : 'transparent',
+                    backgroundColor:
+                      highlightedIndex === idx + offset
+                        ? theme.alt2MenuItemBackgroundHover
+                        : 'transparent',
                     borderRadius: embedded ? 4 : 0,
                     padding: 4,
                     paddingLeft: 20,
