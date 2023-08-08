@@ -15,7 +15,6 @@ import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
-  getSplit,
   isPreviewId,
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
@@ -185,7 +184,6 @@ export default function Account(props) {
     setSearchText(text);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSelectTransaction = transaction => {
     if (isPreviewId(transaction.id)) {
       let parts = transaction.id.split('/');
@@ -214,17 +212,7 @@ export default function Account(props) {
         },
       );
     } else {
-      let trans = [transaction];
-      if (transaction.parent_id || transaction.is_parent) {
-        let index = transactions.findIndex(
-          t => t.id === (transaction.parent_id || transaction.id),
-        );
-        trans = getSplit(transactions, index);
-      }
-
-      navigate('Transaction', {
-        transactions: trans,
-      });
+      navigate(`transactions/${transaction.id}`);
     }
   };
 
@@ -269,7 +257,7 @@ export default function Account(props) {
                     paged?.fetchNext();
                   }}
                   onSearch={onSearch}
-                  onSelectTransaction={() => {}} // onSelectTransaction}
+                  onSelectTransaction={onSelectTransaction}
                 />
               )
             }
