@@ -93,7 +93,7 @@ async function processTemplate(month, force, category_templates) {
   let setToZero = [];
 
   let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0',
+    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
   );
 
   //clears templated categories
