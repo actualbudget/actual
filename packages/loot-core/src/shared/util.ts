@@ -362,3 +362,29 @@ export function sortByKey<T>(arr: T[], key: keyof T): T[] {
     return 0;
   });
 }
+
+export function looselyParseAdditionalInformation(additionalInformation) {
+  let additionalInformationJson;
+  try {
+      additionalInformationJson = JSON.parse(additionalInformation);
+  } catch (e) {
+      try {
+          // It was not valid JSON, attempt to make the payload valid JSON using regex. 
+          let result = {};
+          let matches = additionalInformation.matchAll(/(, )?([^:]+): ((\[.*?\])|([^,]*))/g);
+          for(let match of matches) {
+              let key = match[2].trim();
+              let value = (match[4] || match[5]).trim();
+              // Remove square brackets and single quotes and commas
+              value = value.replace(/[\[\]',]/g, '');
+              result[key] = value;
+          }
+          additionalInformationJson = result;
+      } catch (e) {
+          additionalInformationJson = {};
+      }
+  }
+  return additionalInformationJson;
+}
+
+
