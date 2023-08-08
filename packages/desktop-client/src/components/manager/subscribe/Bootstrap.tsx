@@ -61,10 +61,7 @@ export default function Bootstrap() {
         To secure your data, you’ll need to set a password for your server.
       </Paragraph>
 
-      <Paragraph
-        isLast
-        style={{ fontSize: 16, color: theme.pageTextDark }}
-      >
+      <Paragraph isLast style={{ fontSize: 16, color: theme.pageTextDark }}>
         Consider opening{' '}
         <ExternalLink to="https://actualbudget.org/docs/tour/">
           our tour

@@ -11,7 +11,7 @@ import useSelected, {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { getParent } from '../../util/router-tools';
 import { ButtonWithLoading } from '../common/Button';
 import Paragraph from '../common/Paragraph';
@@ -26,7 +26,6 @@ import { ScheduleAmountCell } from './SchedulesTable';
 let ROW_HEIGHT = 43;
 
 function DiscoverSchedulesTable({ schedules, loading }) {
-  let pageType = usePageType();
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
 
@@ -39,16 +38,23 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       <Row
         height={ROW_HEIGHT}
         inset={15}
-        backgroundColor="transparent"
         onClick={e => {
           dispatchSelected({ type: 'select', id: item.id, event: e });
         }}
-        borderColor={selected ? colors.b8 : colors.border}
         style={{
+          borderColor: selected
+            ? theme.alttableBorderSelected
+            : theme.tableBorder,
           cursor: 'pointer',
-          backgroundColor: selected ? colors.selected : 'white',
+          color: selected
+            ? theme.tableRowBackgroundHighlightText
+            : theme.tableText,
+          backgroundColor: selected
+            ? theme.tableRowBackgroundHighlight
+            : theme.tableBackground,
           ':hover': {
-            backgroundColor: selected ? colors.selected : colors.hover,
+            backgroundColor: theme.tableRowBackgroundHover,
+            color: theme.tableText,
           },
         }}
       >
@@ -76,7 +82,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
+      <TableHeader height={ROW_HEIGHT} inset={15}>
         <SelectCell
           exposed={!loading}
           focused={false}
@@ -94,12 +100,8 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
-        version="v2"
-        backgroundColor={pageType.type === 'modal' ? 'transparent' : undefined}
         style={{
           flex: 1,
-          backgroundColor:
-            pageType.type === 'modal' ? 'transparent' : undefined,
         }}
         items={schedules}
         loading={loading}
@@ -160,38 +162,40 @@ export default function DiscoverSchedules() {
 
   return (
     <Page title="Found schedules" modalSize={{ width: 850, height: 650 }}>
-      <Paragraph>
-        We found some possible schedules in your current transactions. Select
-        the ones you want to create.
-      </Paragraph>
-      <Paragraph>
-        If you expected a schedule here and don’t see it, it might be because
-        the payees of the transactions don’t match. Make sure you rename payees
-        on all transactions for a schedule to be the same payee.
-      </Paragraph>
+      <View style={{ color: theme.pageText }}>
+        <Paragraph>
+          We found some possible schedules in your current transactions. Select
+          the ones you want to create.
+        </Paragraph>
+        <Paragraph>
+          If you expected a schedule here and don’t see it, it might be because
+          the payees of the transactions don’t match. Make sure you rename
+          payees on all transactions for a schedule to be the same payee.
+        </Paragraph>
 
-      <SelectedProvider instance={selectedInst}>
-        <DiscoverSchedulesTable loading={isLoading} schedules={schedules} />
-      </SelectedProvider>
+        <SelectedProvider instance={selectedInst}>
+          <DiscoverSchedulesTable loading={isLoading} schedules={schedules} />
+        </SelectedProvider>
 
-      <Stack
-        direction="row"
-        align="center"
-        justify="flex-end"
-        style={{
-          paddingTop: 20,
-          paddingBottom: pageType.type === 'modal' ? 0 : 20,
-        }}
-      >
-        <ButtonWithLoading
-          type="primary"
-          loading={creating}
-          disabled={selectedInst.items.size === 0}
-          onClick={onCreate}
+        <Stack
+          direction="row"
+          align="center"
+          justify="flex-end"
+          style={{
+            paddingTop: 20,
+            paddingBottom: pageType.type === 'modal' ? 0 : 20,
+          }}
         >
-          Create schedules
-        </ButtonWithLoading>
-      </Stack>
+          <ButtonWithLoading
+            type="primary"
+            loading={creating}
+            disabled={selectedInst.items.size === 0}
+            onClick={onCreate}
+          >
+            Create schedules
+          </ButtonWithLoading>
+        </Stack>
+      </View>
     </Page>
   );
 }
