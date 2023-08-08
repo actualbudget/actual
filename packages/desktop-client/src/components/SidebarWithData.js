@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 
-import { bindActionCreators } from 'redux';
-
-import * as actions from 'loot-core/src/client/actions';
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import { useActions } from '../hooks/useActions';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import { styles, colors } from '../style';
 
-import { Button, Input, InitialFocus, Text, Tooltip, Menu } from './common';
+import Button from './common/Button';
+import InitialFocus from './common/InitialFocus';
+import Input from './common/Input';
+import Menu from './common/Menu';
+import Text from './common/Text';
 import { Sidebar } from './sidebar';
+import { Tooltip } from './tooltips';
 
 function EditableBudgetName({ prefs, savePrefs }) {
   let dispatch = useDispatch();
@@ -103,17 +106,17 @@ function EditableBudgetName({ prefs, savePrefs }) {
   }
 }
 
-function SidebarWithData({
-  accounts,
-  failedAccounts,
-  updatedAccounts,
-  replaceModal,
-  prefs,
-  floatingSidebar,
-  savePrefs,
-  saveGlobalPrefs,
-  getAccounts,
-}) {
+export default function SidebarWithData() {
+  let accounts = useSelector(state => state.queries.accounts);
+  let failedAccounts = useSelector(state => state.account.failedAccounts);
+  let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+  let prefs = useSelector(state => state.prefs.local);
+  let floatingSidebar = useSelector(
+    state => state.prefs.global.floatingSidebar,
+  );
+
+  let { getAccounts, replaceModal, savePrefs, saveGlobalPrefs } = useActions();
+
   useEffect(() => void getAccounts(), [getAccounts]);
 
   async function onReorder(id, dropPos, targetId) {
@@ -150,14 +153,3 @@ function SidebarWithData({
     />
   );
 }
-
-export default connect(
-  state => ({
-    accounts: state.queries.accounts,
-    failedAccounts: state.account.failedAccounts,
-    updatedAccounts: state.queries.updatedAccounts,
-    prefs: state.prefs.local,
-    floatingSidebar: state.prefs.global.floatingSidebar,
-  }),
-  dispatch => bindActionCreators(actions, dispatch),
-)(SidebarWithData);

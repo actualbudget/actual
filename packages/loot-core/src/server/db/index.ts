@@ -131,11 +131,11 @@ function resetQueryCache() {
   _queryCache = new LRU({ max: 100 });
 }
 
-export function transaction(fn) {
+export function transaction(fn: () => void) {
   return sqlite.transaction(db, fn);
 }
 
-export function asyncTransaction(fn) {
+export function asyncTransaction(fn: () => Promise<void>) {
   return sqlite.asyncTransaction(db, fn);
 }
 

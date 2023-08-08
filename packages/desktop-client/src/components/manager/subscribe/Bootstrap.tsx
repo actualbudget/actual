@@ -6,7 +6,11 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { colors } from '../../../style';
-import { View, Text, Button, P, ExternalLink } from '../../common';
+import Button from '../../common/Button';
+import ExternalLink from '../../common/ExternalLink';
+import Paragraph from '../../common/Paragraph';
+import Text from '../../common/Text';
+import View from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -52,19 +56,19 @@ export default function Bootstrap() {
   return (
     <View style={{ maxWidth: 450, marginTop: -30 }}>
       <Title text="Welcome to Actual!" />
-      <P style={{ fontSize: 16, color: colors.n2 }}>
+      <Paragraph style={{ fontSize: 16, color: colors.n2 }}>
         Actual is a super fast privacy-focused app for managing your finances.
         To secure your data, you’ll need to set a password for your server.
-      </P>
+      </Paragraph>
 
-      <P isLast style={{ fontSize: 16, color: colors.n2 }}>
+      <Paragraph isLast style={{ fontSize: 16, color: colors.n2 }}>
         Consider opening{' '}
         <ExternalLink to="https://actualbudget.org/docs/tour/">
           our tour
         </ExternalLink>{' '}
         in a new tab for some guidance on what to do when you’ve set your
         password.
-      </P>
+      </Paragraph>
 
       {error && (
         <Text

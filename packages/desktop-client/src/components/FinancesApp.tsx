@@ -1,7 +1,6 @@
 import React, { type ReactElement, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
-import { connect } from 'react-redux';
 import {
   Route,
   Routes,
@@ -15,13 +14,13 @@ import {
 
 import hotkeys from 'hotkeys-js';
 
-import * as actions from 'loot-core/src/client/actions';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
+import { useActions } from '../hooks/useActions';
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
@@ -32,7 +31,7 @@ import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import BankSyncStatus from './BankSyncStatus';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import { View } from './common';
+import View from './common/View';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
@@ -44,6 +43,7 @@ import { NarrowAlternate, WideComponent } from './responsive';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
+import { TransactionEdit } from './transactions/MobileTransaction';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -60,6 +60,17 @@ function NarrowNotSupported({
     }
   }, [isNarrowWidth, navigate, redirectTo]);
   return isNarrowWidth ? null : children;
+}
+
+function WideNotSupported({ children, redirectTo = '/budget' }) {
+  const { isNarrowWidth } = useResponsive();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isNarrowWidth) {
+      navigate(redirectTo);
+    }
+  }, [isNarrowWidth, navigate, redirectTo]);
+  return isNarrowWidth ? children : null;
 }
 
 function StackedRoutesInner({ location }) {
@@ -148,12 +159,30 @@ function StackedRoutesInner({ location }) {
         }
       />
 
+      <Route path="/accounts" element={<NarrowAlternate name="Accounts" />} />
+
       <Route
         path="/accounts/:id"
         element={<NarrowAlternate name="Account" />}
       />
 
-      <Route path="/accounts" element={<NarrowAlternate name="Accounts" />} />
+      <Route
+        path="/accounts/:id/transactions/:transactionId"
+        element={
+          <WideNotSupported>
+            <TransactionEdit />
+          </WideNotSupported>
+        }
+      />
+
+      <Route
+        path="/accounts/:id/transactions/new"
+        element={
+          <WideNotSupported>
+            <TransactionEdit />
+          </WideNotSupported>
+        }
+      />
     </Routes>
   );
 }
@@ -164,9 +193,7 @@ function NavTab({ icon: TabIcon, name, path }) {
       to={path}
       style={({ isActive }) => ({
         alignItems: 'center',
-        color: isActive
-          ? theme.sidebarItemAccentSelected
-          : theme.sidebarItemText,
+        color: isActive ? theme.mobileNavItemSelected : theme.mobileNavItem,
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
@@ -183,7 +210,7 @@ function MobileNavTabs() {
   return (
     <div
       style={{
-        backgroundColor: theme.sidebarBackground,
+        backgroundColor: theme.mobileNavBackground,
         borderTop: `1px solid ${theme.menuBorder}`,
         bottom: 0,
         ...styles.shadow,
@@ -223,7 +250,8 @@ function RouterBehaviors({ getAccounts }) {
   return null;
 }
 
-function FinancesApp(props) {
+function FinancesApp() {
+  let actions = useActions();
   useEffect(() => {
     // The default key handler scope
     hotkeys.setScope('app');
@@ -231,21 +259,21 @@ function FinancesApp(props) {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {
-      await props.sync();
+      await actions.sync();
 
       await checkForUpdateNotification(
-        props.addNotification,
+        actions.addNotification,
         getIsOutdated,
         getLatestVersion,
-        props.loadPrefs,
-        props.savePrefs,
+        actions.loadPrefs,
+        actions.savePrefs,
       );
     }, 100);
   }, []);
 
   return (
     <BrowserRouter>
-      <RouterBehaviors getAccounts={props.getAccounts} />
+      <RouterBehaviors getAccounts={actions.getAccounts} />
       <ExposeNavigate />
 
       <View style={{ height: '100%' }}>
@@ -263,16 +291,6 @@ function FinancesApp(props) {
               width: '100%',
             }}
           >
-            <Titlebar
-              style={{
-                WebkitAppRegion: 'drag',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-              }}
-            />
             <div
               style={{
                 flex: 1,
@@ -281,6 +299,16 @@ function FinancesApp(props) {
                 position: 'relative',
               }}
             >
+              <Titlebar
+                style={{
+                  WebkitAppRegion: 'drag',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                }}
+              />
               <Notifications />
               <BankSyncStatus />
               <StackedRoutes
@@ -302,8 +330,8 @@ function FinancesApp(props) {
   );
 }
 
-function FinancesAppWithContext(props) {
-  let app = useMemo(() => <FinancesApp {...props} />, [props]);
+export default function FinancesAppWithContext() {
+  let app = useMemo(() => <FinancesApp />, []);
 
   return (
     <SpreadsheetProvider>
@@ -321,5 +349,3 @@ function FinancesAppWithContext(props) {
     </SpreadsheetProvider>
   );
 }
-
-export default connect(null, actions)(FinancesAppWithContext);

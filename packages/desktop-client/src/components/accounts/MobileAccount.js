@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import debounce from 'debounce';
@@ -15,13 +15,14 @@ import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
-  getSplit,
   isPreviewId,
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
+import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
+import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors } from '../../style';
-import { withThemeColor } from '../../util/withThemeColor';
 import SyncRefresh from '../SyncRefresh';
 
 import AccountDetails from './MobileAccountDetails';
@@ -68,7 +69,10 @@ function PreviewTransactions({ accountId, children }) {
 
 let paged;
 
-function Account(props) {
+export default function Account(props) {
+  const accounts = useSelector(state => state.queries.accounts);
+  const { syncAndDownload } = useActions();
+
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -77,7 +81,6 @@ function Account(props) {
   let state = useSelector(state => ({
     payees: state.queries.payees,
     newTransactions: state.queries.newTransactions,
-    categories: state.queries.categories.list,
     prefs: state.prefs.local,
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
   }));
@@ -130,10 +133,7 @@ function Account(props) {
         }
       });
 
-      if (state.categories.length === 0) {
-        await actionCreators.getCategories();
-      }
-      if (props.accounts.length === 0) {
+      if (accounts.length === 0) {
         await actionCreators.getAccounts();
       }
 
@@ -147,6 +147,9 @@ function Account(props) {
 
     return () => unlisten();
   }, []);
+
+  // Load categories if necessary.
+  const categories = useCategories();
 
   const updateSearchQuery = debounce(() => {
     if (searchText === '' && currentQuery) {
@@ -164,11 +167,13 @@ function Account(props) {
 
   useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
 
-  if (!props.accounts || !props.accounts.length) {
+  useSetThemeColor(colors.n11);
+
+  if (!accounts || !accounts.length) {
     return null;
   }
 
-  const account = props.accounts.find(acct => acct.id === accountId);
+  const account = accounts.find(acct => acct.id === accountId);
 
   const isNewTransaction = id => {
     return state.newTransactions.includes(id);
@@ -179,7 +184,6 @@ function Account(props) {
     setSearchText(text);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSelectTransaction = transaction => {
     if (isPreviewId(transaction.id)) {
       let parts = transaction.id.split('/');
@@ -208,22 +212,12 @@ function Account(props) {
         },
       );
     } else {
-      let trans = [transaction];
-      if (transaction.parent_id || transaction.is_parent) {
-        let index = transactions.findIndex(
-          t => t.id === (transaction.parent_id || transaction.id),
-        );
-        trans = getSplit(transactions, index);
-      }
-
-      navigate('Transaction', {
-        transactions: trans,
-      });
+      navigate(`transactions/${transaction.id}`);
     }
   };
 
   const onRefresh = async () => {
-    await props.syncAndDownload();
+    await syncAndDownload();
   };
 
   let balance = queries.accountBalance(account);
@@ -246,8 +240,8 @@ function Account(props) {
                   {...actionCreators}
                   key={numberFormat + hideFraction}
                   account={account}
-                  accounts={props.accounts}
-                  categories={state.categories}
+                  accounts={accounts}
+                  categories={categories.list}
                   payees={state.payees}
                   transactions={transactions}
                   prependTransactions={prependTransactions || []}
@@ -263,7 +257,7 @@ function Account(props) {
                     paged?.fetchNext();
                   }}
                   onSearch={onSearch}
-                  onSelectTransaction={() => {}} // onSelectTransaction}
+                  onSelectTransaction={onSelectTransaction}
                 />
               )
             }
@@ -273,14 +267,3 @@ function Account(props) {
     </SyncRefresh>
   );
 }
-
-export default connect(
-  state => ({
-    accounts: state.queries.accounts,
-    newTransactions: state.queries.newTransactions,
-    updatedAccounts: state.queries.updatedAccounts,
-    categories: state.queries.categories.list,
-    prefs: state.prefs.local,
-  }),
-  actions,
-)(withThemeColor(colors.n11)(Account));

@@ -20,7 +20,7 @@ function coerceBuffer(value) {
 export async function encode(
   groupId: string,
   fileId: string,
-  since: Timestamp,
+  since: Timestamp | string,
   messages: Message[],
 ): Promise<Uint8Array> {
   let { encryptKeyId } = prefs.getPrefs();

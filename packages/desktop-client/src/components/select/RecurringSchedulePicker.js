@@ -7,9 +7,14 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
-import { colors } from '../../style';
-import { Button, Select, Input, Tooltip, View, Text, Stack } from '../common';
-import { useTooltip } from '../tooltips';
+import { colors, theme } from '../../style';
+import Button from '../common/Button';
+import Input from '../common/Input';
+import Select from '../common/Select';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
+import { useTooltip, Tooltip } from '../tooltips';
 
 import DateSelect from './DateSelect';
 
@@ -203,10 +208,7 @@ function MonthlyPatterns({ config, dispatch }) {
             }
             disabledKeys={['-']}
             wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{
-              borderWidth: 1,
-              width: '100%',
-            }}
+            style={{ minHeight: '1px', width: '100%' }}
           />
           <Select
             options={[
@@ -218,7 +220,7 @@ function MonthlyPatterns({ config, dispatch }) {
             onChange={value => updateRecurrence(recurrence, 'type', value)}
             disabledKeys={['-']}
             wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{ borderWidth: 1, width: '100%' }}
+            style={{ minHeight: '1px', width: '100%' }}
           />
           <Button
             type="bare"
@@ -320,14 +322,21 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           defaultValue={config.interval || 1}
         />
         <Select
+          bare
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          style={{ borderWidth: 1, height: 27.5 }}
+          style={{ border: '1px solid ' + theme.formInputBorder, height: 27.5 }}
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
-          <Button onClick={() => dispatch({ type: 'add-recurrence' })}>
+          <Button
+            style={{
+              backgroundColor: theme.tableBackground,
+              ':hover': { backgroundColor: theme.tableBackground },
+            }}
+            onClick={() => dispatch({ type: 'add-recurrence' })}
+          >
             Add specific days
           </Button>
         ) : null}

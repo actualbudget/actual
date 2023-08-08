@@ -8,7 +8,12 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
 import { colors, styles } from '../../style';
-import { View, Text, Block, P, AlignedText } from '../common';
+import AlignedText from '../common/AlignedText';
+import Block from '../common/Block';
+import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
+import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
@@ -128,7 +133,7 @@ function CashFlow() {
             left={<Block>Income:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalIncome)}
+                <PrivacyFilter>{integerToCurrency(totalIncome)}</PrivacyFilter>
               </Text>
             }
           />
@@ -138,7 +143,9 @@ function CashFlow() {
             left={<Block>Expenses:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalExpenses)}
+                <PrivacyFilter>
+                  {integerToCurrency(totalExpenses)}
+                </PrivacyFilter>
               </Text>
             }
           />
@@ -148,12 +155,16 @@ function CashFlow() {
             left={<Block>Transfers:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalTransfers)}
+                <PrivacyFilter>
+                  {integerToCurrency(totalTransfers)}
+                </PrivacyFilter>
               </Text>
             }
           />
           <Text style={{ fontWeight: 600 }}>
-            <Change amount={totalIncome + totalExpenses + totalTransfers} />
+            <PrivacyFilter>
+              <Change amount={totalIncome + totalExpenses + totalTransfers} />
+            </PrivacyFilter>
           </Text>
         </View>
 
@@ -165,15 +176,15 @@ function CashFlow() {
         />
 
         <View style={{ marginTop: 30 }}>
-          <P>
+          <Paragraph>
             <strong>How is cash flow calculated?</strong>
-          </P>
-          <P>
+          </Paragraph>
+          <Paragraph>
             Cash flow shows the balance of your budgeted accounts over time, and
             the amount of expenses/income each day or month. Your budgeted
             accounts are considered to be “cash on hand,” so this gives you a
             picture of how available money fluctuates.
-          </P>
+          </Paragraph>
         </View>
       </View>
     </View>

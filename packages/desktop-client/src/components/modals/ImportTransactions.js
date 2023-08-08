@@ -12,16 +12,13 @@ import {
 
 import { useActions } from '../../hooks/useActions';
 import { colors, styles } from '../../style';
-import {
-  View,
-  Text,
-  Stack,
-  Modal,
-  Select,
-  Input,
-  Button,
-  ButtonWithLoading,
-} from '../common';
+import Button, { ButtonWithLoading } from '../common/Button';
+import Input from '../common/Input';
+import Modal from '../common/Modal';
+import Select from '../common/Select';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
 import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 
@@ -587,6 +584,8 @@ export default function ImportTransactions({ modalProps, options }) {
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
 
+  let [clearOnImport, setClearOnImport] = useState(true);
+
   async function parse(filename, options) {
     setLoadingState('parsing');
 
@@ -744,6 +743,7 @@ export default function ImportTransactions({ modalProps, options }) {
         ...finalTransaction,
         date,
         amount: amountToInteger(amount),
+        cleared: clearOnImport,
       });
     }
 
@@ -945,6 +945,15 @@ export default function ImportTransactions({ modalProps, options }) {
                   }}
                 >
                   File has header row
+                </CheckboxOption>
+                <CheckboxOption
+                  id="clear_on_import"
+                  checked={clearOnImport}
+                  onChange={() => {
+                    setClearOnImport(!clearOnImport);
+                  }}
+                >
+                  Clear transactions on import
                 </CheckboxOption>
               </View>
             )}

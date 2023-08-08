@@ -15,6 +15,7 @@ import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   deleteTransaction,
   updateTransaction,
@@ -28,7 +29,9 @@ import { authorizeBank } from '../../gocardless';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, colors } from '../../style';
 import { useActiveLocation } from '../ActiveLocation';
-import { View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import TransactionList from '../transactions/TransactionList';
 import {
   SplitsExpandedProvider,
@@ -135,7 +138,7 @@ function AllTransactions({
       .map(scheduledTransaction => {
         let amount =
           (scheduledTransaction._inverse ? -1 : 1) *
-          scheduledTransaction.amount;
+          getScheduledAmount(scheduledTransaction.amount);
         return {
           balance: (runningBalance += amount),
           id: scheduledTransaction.id,
@@ -1047,12 +1050,12 @@ class AccountInternal extends PureComponent {
         },
         () => {
           this.fetchTransactions();
-
-          if (this.state.sort.length !== 0) {
-            this.applySort();
-          }
         },
       );
+    }
+
+    if (this.state.sort.length !== 0) {
+      this.applySort();
     }
   };
 
@@ -1217,6 +1220,7 @@ class AccountInternal extends PureComponent {
                 showEmptyMessage={showEmptyMessage}
                 balanceQuery={balanceQuery}
                 canCalculateBalance={this.canCalculateBalance}
+                isSorted={this.state.sort.length !== 0}
                 reconcileAmount={reconcileAmount}
                 search={this.state.search}
                 filters={this.state.filters}
@@ -1265,7 +1269,7 @@ class AccountInternal extends PureComponent {
                   categoryGroups={categoryGroups}
                   payees={payees}
                   balances={allBalances}
-                  showBalances={showBalances}
+                  showBalances={!!allBalances}
                   showCleared={showCleared}
                   showAccount={
                     !accountId ||
@@ -1297,6 +1301,9 @@ class AccountInternal extends PureComponent {
                       </View>
                     ) : null
                   }
+                  onSort={this.onSort}
+                  sortField={this.state.sort.field}
+                  ascDesc={this.state.sort.ascDesc}
                   onChange={this.onTransactionsChange}
                   onRefetch={this.refetchTransactions}
                   onRefetchUpToRow={row =>

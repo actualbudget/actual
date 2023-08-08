@@ -101,7 +101,7 @@ describe('Budgets', () => {
 describe('Accounts', () => {
   test('create accounts with correct starting balance', async () => {
     prefs.loadPrefs();
-    prefs.savePrefs({ clientId: 'client', groupId: 'group' });
+    prefs.savePrefs({ groupId: 'group' });
 
     await runMutator(async () => {
       // An income category is required because the starting balance is
