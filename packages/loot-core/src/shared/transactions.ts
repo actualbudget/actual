@@ -70,7 +70,7 @@ function findParentIndex(transactions, idx) {
   return null;
 }
 
-export function getSplit(transactions, parentIndex) {
+function getSplit(transactions, parentIndex) {
   let split = [transactions[parentIndex]];
   let curr = parentIndex + 1;
   while (curr < transactions.length && transactions[curr].is_child) {

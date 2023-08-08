@@ -43,6 +43,7 @@ import { NarrowAlternate, WideComponent } from './responsive';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
+import { TransactionEdit } from './transactions/MobileTransaction';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -59,6 +60,17 @@ function NarrowNotSupported({
     }
   }, [isNarrowWidth, navigate, redirectTo]);
   return isNarrowWidth ? null : children;
+}
+
+function WideNotSupported({ children, redirectTo = '/budget' }) {
+  const { isNarrowWidth } = useResponsive();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isNarrowWidth) {
+      navigate(redirectTo);
+    }
+  }, [isNarrowWidth, navigate, redirectTo]);
+  return isNarrowWidth ? children : null;
 }
 
 function StackedRoutesInner({ location }) {
@@ -147,12 +159,30 @@ function StackedRoutesInner({ location }) {
         }
       />
 
+      <Route path="/accounts" element={<NarrowAlternate name="Accounts" />} />
+
       <Route
         path="/accounts/:id"
         element={<NarrowAlternate name="Account" />}
       />
 
-      <Route path="/accounts" element={<NarrowAlternate name="Accounts" />} />
+      <Route
+        path="/accounts/:id/transactions/:transactionId"
+        element={
+          <WideNotSupported>
+            <TransactionEdit />
+          </WideNotSupported>
+        }
+      />
+
+      <Route
+        path="/accounts/:id/transactions/new"
+        element={
+          <WideNotSupported>
+            <TransactionEdit />
+          </WideNotSupported>
+        }
+      />
     </Routes>
   );
 }
