@@ -10,11 +10,11 @@ export type UndoState = {
 
 export function setUndoState<K extends keyof Omit<UndoState, 'id'>>(
   name: K,
-  value: State[K],
+  value: UndoState[K],
 ): void;
 export type SetUndoState = typeof setUndoState;
 
-export function getUndoState(name: keyof UndoState): unknown;
+export function getUndoState<K extends keyof UndoState>(name: K): UndoState[K];
 export type GetUndoState = typeof getUndoState;
 
 export function getTaggedState(id: string): UndoState | undefined;
