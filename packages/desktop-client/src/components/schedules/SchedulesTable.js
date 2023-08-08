@@ -9,7 +9,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
@@ -93,7 +93,7 @@ export function ScheduleAmountCell({ amount, op }) {
         <View
           style={{
             textAlign: 'left',
-            color: colors.n7,
+            color: theme.tableText,
             lineHeight: '1em',
             marginRight: 10,
           }}
@@ -105,7 +105,7 @@ export function ScheduleAmountCell({ amount, op }) {
       <Text
         style={{
           flex: 1,
-          color: num > 0 ? colors.g5 : null,
+          color: num > 0 ? theme.noticeText : theme.tableText,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -192,17 +192,19 @@ export function SchedulesTable({
       <Row
         height={ROW_HEIGHT}
         inset={15}
-        backgroundColor="transparent"
         onClick={() => onSelect(item.id)}
         style={{
           cursor: 'pointer',
-          backgroundColor: 'white',
-          ':hover': { backgroundColor: colors.hover },
+          backgroundColor: theme.tableBackground,
+          color: theme.tableText,
+          ':hover': { backgroundColor: theme.tableRowBackgroundHover },
         }}
       >
         <Field width="flex" name="name">
           <Text
-            style={item.name == null ? { color: colors.n8 } : null}
+            style={
+              item.name == null ? { color: theme.buttonNormalDisabledText } : null
+            }
             title={item.name ? item.name : ''}
           >
             {item.name ? item.name : 'None'}
@@ -226,7 +228,7 @@ export function SchedulesTable({
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
             {item._date && item._date.frequency && (
-              <Check style={{ width: 13, height: 13 }} />
+              <Check style={{ width: 13, height: 13, color: 'inherit' }} />
             )}
           </Field>
         )}
@@ -249,11 +251,10 @@ export function SchedulesTable({
         <Row
           height={ROW_HEIGHT}
           inset={15}
-          backgroundColor="transparent"
           style={{
             cursor: 'pointer',
-            backgroundColor: 'white',
-            ':hover': { backgroundColor: colors.hover },
+            backgroundColor: 'transparent',
+            ':hover': { backgroundColor: theme.tableRowBackgroundHover },
           }}
           onClick={() => setShowCompleted(true)}
         >
@@ -262,7 +263,7 @@ export function SchedulesTable({
             style={{
               fontStyle: 'italic',
               textAlign: 'center',
-              color: colors.n6,
+              color: theme.tableText,
             }}
           >
             Show completed schedules
@@ -275,7 +276,7 @@ export function SchedulesTable({
 
   return (
     <View style={[{ flex: 1 }, tableStyle]}>
-      <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
+      <TableHeader height={ROW_HEIGHT} inset={15}>
         <Field width="flex">Name</Field>
         <Field width="flex">Payee</Field>
         <Field width="flex">Account</Field>
@@ -293,8 +294,6 @@ export function SchedulesTable({
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
-        backgroundColor="transparent"
-        version="v2"
         style={[{ flex: 1, backgroundColor: 'transparent' }, style]}
         items={items}
         renderItem={renderItem}

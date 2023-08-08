@@ -9,7 +9,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
 import ExpandArrow from '../icons/v0/ExpandArrow';
-import { styles, colors } from '../style';
+import { styles, theme } from '../style';
 
 import Button from './common/Button';
 import InitialFocus from './common/InitialFocus';
@@ -79,8 +79,8 @@ function EditableBudgetName({ prefs, savePrefs }) {
     return (
       <Button
         type="bare"
-        color={colors.n9}
         style={{
+          color: theme.sidebarItemText,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,

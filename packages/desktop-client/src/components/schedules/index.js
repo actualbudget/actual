@@ -84,7 +84,6 @@ export default function Schedules() {
           allowCompleted={true}
           onSelect={onEdit}
           onAction={onAction}
-          style={{ backgroundColor: 'white' }}
         />
       </View>
 
