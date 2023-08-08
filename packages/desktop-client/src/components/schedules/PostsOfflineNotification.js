@@ -34,9 +34,9 @@ export default function PostsOfflineNotification() {
           <Text>
             The {plural ? 'payees ' : 'payee '}
             {payees.map((id, idx) => (
-              <Text>
+              <Text key={id}>
                 <Text style={{ color: colors.p4 }}>
-                  <DisplayId key={id} id={id} type="payees" />
+                  <DisplayId id={id} type="payees" />
                 </Text>
                 {idx === payees.length - 1
                   ? ' '

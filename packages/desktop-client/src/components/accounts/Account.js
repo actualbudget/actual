@@ -413,7 +413,7 @@ class AccountInternal extends PureComponent {
     );
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
