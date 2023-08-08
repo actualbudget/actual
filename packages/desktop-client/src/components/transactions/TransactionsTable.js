@@ -669,7 +669,6 @@ function PayeeIcons({
 
 const Transaction = memo(function Transaction(props) {
   let {
-    isNew = false,
     transaction: originalTransaction,
     editing,
     showAccount,
@@ -703,7 +702,6 @@ const Transaction = memo(function Transaction(props) {
 
   let dispatchSelected = useSelectedDispatch();
 
-  let [hovered, setHovered] = useState(showZeroInDeposit);
   let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   let [prevTransaction, setPrevTransaction] = useState(originalTransaction);
   let [transaction, setTransaction] = useState(() =>
@@ -802,7 +800,7 @@ const Transaction = memo(function Transaction(props) {
   let isOffBudget = account && account.offbudget === 1;
 
   let valueStyle = added ? { fontWeight: 600 } : null;
-  let backgroundFocus = hovered || focusedField === 'select';
+  let backgroundFocus = focusedField === 'select';
   let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
   let statusProps = getStatusProps(notes);
@@ -818,6 +816,12 @@ const Transaction = memo(function Transaction(props) {
             ? theme.tableRowBackgroundHover
             : theme.tableBackground,
         },
+        {
+          ':hover': {
+            backgroundColor: theme.tableRowBackgroundHover,
+            color: theme.tableRowBackgroundHighlightText,
+          },
+        },
         highlighted || selected
           ? { color: theme.tableRowBackgroundHighlightText }
           : { color: theme.tableText },
@@ -828,8 +832,6 @@ const Transaction = memo(function Transaction(props) {
         },
         _unmatched && { opacity: 0.5 },
       ]}
-      onMouseEnter={() => !isNew && setHovered(true)}
-      onMouseLeave={() => !isNew && setHovered(false)}
     >
       {isChild && (
         <Field
@@ -860,7 +862,7 @@ const Transaction = memo(function Transaction(props) {
         isChild ? (
           <DeleteCell
             onDelete={() => onDelete && onDelete(transaction.id)}
-            exposed={hovered || editing}
+            exposed={editing}
             style={[isChild && { borderLeftWidth: 1 }, { lineHeight: 0 }]}
           />
         ) : (
@@ -869,7 +871,7 @@ const Transaction = memo(function Transaction(props) {
       ) : (
         <SelectCell
           /* Checkmark field for non-child transaction */
-          exposed={hovered || selected || editing}
+          exposed={selected || editing}
           focused={focusedField === 'select'}
           onSelect={e => {
             dispatchSelected({ type: 'select', id: transaction.id, event: e });
