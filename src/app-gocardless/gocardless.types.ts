@@ -65,7 +65,7 @@ export type GetTransactionsParams = {
   /**
    * End date of the period from which we want to download transactions
    */
-  endDate: string;
+  endDate?: string;
 };
 
 export type GetTransactionsResponse = {
