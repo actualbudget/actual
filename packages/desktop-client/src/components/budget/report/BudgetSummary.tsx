@@ -16,22 +16,20 @@ import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
 import { colors, styles } from '../../../style';
-import {
-  View,
-  Text,
-  Button,
-  Tooltip,
-  Menu,
-  Stack,
-  HoverTarget,
-  AlignedText,
-} from '../../common';
+import AlignedText from '../../common/AlignedText';
+import Button from '../../common/Button';
+import HoverTarget from '../../common/HoverTarget';
+import Menu from '../../common/Menu';
+import Stack from '../../common/Stack';
+import Text from '../../common/Text';
+import View from '../../common/View';
 import NotesButton from '../../NotesButton';
 import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
 import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import useSheetValue from '../../spreadsheet/useSheetValue';
+import { Tooltip } from '../../tooltips';
 import { MONTH_BOX_SHADOW } from '../constants';
 import { makeAmountFullStyle } from '../util';
 
@@ -423,7 +421,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                       { name: 'set-zero', text: 'Set budgets to zero' },
                       {
                         name: 'set-3-avg',
-                        text: 'Set budgets to 3 month avg',
+                        text: 'Set budgets to 3 month average',
                       },
                       isGoalTemplatesEnabled && {
                         name: 'check-templates',

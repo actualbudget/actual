@@ -6,11 +6,9 @@ import React, { Component, memo, PureComponent } from 'react';
 // } from 'react-native-gesture-handler';
 // import Animated, { Easing } from 'react-native-reanimated';
 // import AndroidKeyboardAvoidingView from './AndroidKeyboardAvoidingView';
-import { connect } from 'react-redux';
 
 import memoizeOne from 'memoize-one';
 
-import * as actions from 'loot-core/src/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
@@ -19,7 +17,11 @@ import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { colors, styles } from '../../style';
-import { Button, Card, Label, Text, View } from '../common';
+import Button from '../common/Button';
+import Card from '../common/Card';
+import Label from '../common/Label';
+import Text from '../common/Text';
+import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
@@ -994,15 +996,13 @@ export class BudgetTable extends Component {
   }
 }
 
-function UnconnectedBudgetHeader({
+function BudgetHeader({
   currentMonth,
   monthBounds,
   editMode,
   onDone,
   onPrevMonth,
   onNextMonth,
-  sync,
-  localPrefs,
 }) {
   // let [menuOpen, setMenuOpen] = useState(false);
 
@@ -1112,8 +1112,6 @@ function UnconnectedBudgetHeader({
               paddingLeft: 12,
               paddingRight: 12,
             }}
-            localPrefs={localPrefs}
-            onSync={sync}
           />
           {/* <Button
             type="bare"
@@ -1155,10 +1153,3 @@ function UnconnectedBudgetHeader({
     </View>
   );
 }
-
-const BudgetHeader = connect(
-  state => ({
-    localPrefs: state.prefs.local,
-  }),
-  actions,
-)(UnconnectedBudgetHeader);

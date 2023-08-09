@@ -12,6 +12,7 @@ import * as connection from '../../platform/server/connection';
 import logger from '../../platform/server/log';
 import { sequential, once } from '../../shared/async';
 import { setIn, getIn } from '../../shared/util';
+import { LocalPrefs } from '../../types/prefs';
 import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import * as db from '../db';
 import { PostError, SyncError } from '../errors';
@@ -303,7 +304,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     return data;
   }
 
-  let prefsToSet: Record<string, unknown> = {};
+  let prefsToSet: LocalPrefs = {};
   let oldData = await fetchData();
 
   undo.appendMessages(messages, oldData);
@@ -537,12 +538,16 @@ function getTablesFromMessages(messages: Message[]): string[] {
 // spreadsheet to finish any processing. This is useful if we want to
 // perform a full sync and wait for everything to finish, usually if
 // you're doing an initial sync before working with a file.
-export async function initialFullSync(): Promise<void> {
+export async function initialFullSync(): Promise<{
+  error?: { message: string; reason: string; meta: unknown };
+}> {
   let result = await fullSync();
   if (isError(result)) {
     // Make sure to wait for anything in the spreadsheet to process
     await sheet.waitOnSpreadsheet();
+    return result;
   }
+  return {};
 }
 
 export const fullSync = once(async function (): Promise<

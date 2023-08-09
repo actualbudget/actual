@@ -11,7 +11,7 @@ import {
   amountToInteger,
 } from 'loot-core/src/shared/util';
 
-import { AlignedText } from '../../common';
+import AlignedText from '../../common/AlignedText';
 import { index } from '../util';
 
 export default function createSpreadsheet(

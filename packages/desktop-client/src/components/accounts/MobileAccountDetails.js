@@ -5,8 +5,11 @@ import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { colors, styles } from '../../style';
-import { Button, InputWithContent, Label, View } from '../common';
+import Button from '../common/Button';
+import InputWithContent from '../common/InputWithContent';
+import Label from '../common/Label';
 import Text from '../common/Text';
+import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import { TransactionList } from '../transactions/MobileTransaction';
 
@@ -71,6 +74,7 @@ export default function AccountDetails({
   onLoadMore,
   onSearch,
   onSelectTransaction,
+  pushModal,
   // refreshControl
 }) {
   let allTransactions = useMemo(() => {
@@ -130,7 +134,7 @@ export default function AccountDetails({
               TODO: connect to an add transaction modal
               Only left here but hidden for flex centering of the account name.
           */}
-          <Link to="transaction/new" style={{ visibility: 'hidden' }}>
+          <Link to="transactions/new">
             <Button
               type="bare"
               style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
@@ -167,6 +171,7 @@ export default function AccountDetails({
         // refreshControl={refreshControl}
         onLoadMore={onLoadMore}
         onSelect={onSelectTransaction}
+        pushModal={pushModal}
       />
     </View>
   );

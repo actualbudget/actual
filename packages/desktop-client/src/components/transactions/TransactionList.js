@@ -11,7 +11,7 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
-import { usePushModal } from '../../util/router-tools';
+import { theme } from '../../style';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -77,6 +77,7 @@ export default function TransactionList({
   dateFormat,
   hideFraction,
   addNotification,
+  pushModal,
   renderEmpty,
   onSort,
   sortField,
@@ -88,7 +89,6 @@ export default function TransactionList({
 }) {
   let transactionsLatest = useRef();
   let navigate = useNavigate();
-  let pushModal = usePushModal();
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -162,7 +162,7 @@ export default function TransactionList({
   });
 
   let onNavigateToSchedule = useCallback(scheduleId => {
-    pushModal(`/schedule/edit/${scheduleId}`);
+    pushModal('schedule-edit', { id: scheduleId });
   });
 
   return (
@@ -198,7 +198,7 @@ export default function TransactionList({
       onAddSplit={onAddSplit}
       onManagePayees={onManagePayees}
       onCreatePayee={onCreatePayee}
-      style={{ backgroundColor: 'white' }}
+      style={{ backgroundColor: theme.tableBackground }}
       onNavigateToTransferAccount={onNavigateToTransferAccount}
       onNavigateToSchedule={onNavigateToSchedule}
       onSort={onSort}

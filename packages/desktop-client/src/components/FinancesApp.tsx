@@ -6,7 +6,6 @@ import React, {
 } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
-import { connect } from 'react-redux';
 import {
   Route,
   Routes,
@@ -21,24 +20,24 @@ import {
 
 import hotkeys from 'hotkeys-js';
 
-import * as actions from 'loot-core/src/client/actions';
 import { AccountsProvider } from 'loot-core/src/client/data-hooks/accounts';
 import { PayeesProvider } from 'loot-core/src/client/data-hooks/payees';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import checkForUpdateNotification from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
+import { useActions } from '../hooks/useActions';
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles } from '../style';
-import { ExposeNavigate, StackedRoutes } from '../util/router-tools';
+import { ExposeNavigate } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import BankSyncStatus from './BankSyncStatus';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import { View } from './common';
+import View from './common/View';
 import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
@@ -47,9 +46,9 @@ import Notifications from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
-import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
+import { TransactionEdit } from './transactions/MobileTransaction';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -68,6 +67,17 @@ function NarrowNotSupported({
   return isNarrowWidth ? null : children;
 }
 
+function WideNotSupported({ children, redirectTo = '/budget' }) {
+  const { isNarrowWidth } = useResponsive();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isNarrowWidth) {
+      navigate(redirectTo);
+    }
+  }, [isNarrowWidth, navigate, redirectTo]);
+  return isNarrowWidth ? children : null;
+}
+
 // Always rendered, either visible or hidden, whether they match the route or not
 // To prevent re-processing all data when switching back to a common, data-heavy route
 function PersistentRoute({ element, path }) {
@@ -84,114 +94,13 @@ function PersistentRoute({ element, path }) {
   );
 }
 
-function StackedRoutesInner({ location }) {
-  return (
-    <Routes location={location}>
-      <Route path="/" element={<Navigate to="/budget" replace />} />
-
-      <Route
-        path="/reports/*"
-        element={
-          <NarrowNotSupported>
-            {/* Has its own lazy loading logic */}
-            <Reports />
-          </NarrowNotSupported>
-        }
-      />
-
-      <PersistentRoute
-        path="/budget"
-        element={<NarrowAlternate name="Budget" />}
-      />
-
-      <Route
-        path="/schedules"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="Schedules" />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route
-        path="/schedule/edit"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="EditSchedule" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/schedule/edit/:id"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="EditSchedule" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/schedule/link"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="LinkSchedule" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/schedule/discover"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="DiscoverSchedules" />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route
-        path="/schedule/posts-offline-notification"
-        element={<PostsOfflineNotification />}
-      />
-
-      <Route path="/payees" element={<ManagePayeesPage />} />
-      <Route path="/rules" element={<ManageRulesPage />} />
-      <Route path="/settings" element={<Settings />} />
-
-      {/* TODO: remove Nordigen route after v23.8.0 */}
-      <Route
-        path="/nordigen/link"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="GoCardlessLink" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/gocardless/link"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="GoCardlessLink" />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route
-        path="/accounts/:id"
-        element={<NarrowAlternate name="Account" />}
-      />
-
-      <Route path="/accounts" element={<NarrowAlternate name="Accounts" />} />
-    </Routes>
-  );
-}
-
 function NavTab({ icon: TabIcon, name, path }) {
   return (
     <NavLink
       to={path}
       style={({ isActive }) => ({
         alignItems: 'center',
-        color: isActive
-          ? theme.sidebarItemAccentSelected
-          : theme.sidebarItemText,
+        color: isActive ? theme.mobileNavItemSelected : theme.mobileNavItem,
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
@@ -208,7 +117,7 @@ function MobileNavTabs() {
   return (
     <div
       style={{
-        backgroundColor: theme.sidebarBackground,
+        backgroundColor: theme.mobileNavBackground,
         borderTop: `1px solid ${theme.menuBorder}`,
         bottom: 0,
         ...styles.shadow,
@@ -248,7 +157,8 @@ function RouterBehaviors({ getAccounts }) {
   return null;
 }
 
-function FinancesApp(props) {
+function FinancesApp() {
+  let actions = useActions();
   useEffect(() => {
     // The default key handler scope
     hotkeys.setScope('app');
@@ -256,21 +166,21 @@ function FinancesApp(props) {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {
-      await props.sync();
+      await actions.sync();
 
       await checkForUpdateNotification(
-        props.addNotification,
+        actions.addNotification,
         getIsOutdated,
         getLatestVersion,
-        props.loadPrefs,
-        props.savePrefs,
+        actions.loadPrefs,
+        actions.savePrefs,
       );
     }, 100);
   }, []);
 
   return (
     <BrowserRouter>
-      <RouterBehaviors getAccounts={props.getAccounts} />
+      <RouterBehaviors getAccounts={actions.getAccounts} />
       <ExposeNavigate />
 
       <View style={{ height: '100%' }}>
@@ -288,16 +198,6 @@ function FinancesApp(props) {
               width: '100%',
             }}
           >
-            <Titlebar
-              style={{
-                WebkitAppRegion: 'drag',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-              }}
-            />
             <div
               style={{
                 flex: 1,
@@ -306,11 +206,88 @@ function FinancesApp(props) {
                 position: 'relative',
               }}
             >
+              <Titlebar
+                style={{
+                  WebkitAppRegion: 'drag',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                }}
+              />
               <Notifications />
               <BankSyncStatus />
-              <StackedRoutes
-                render={location => <StackedRoutesInner location={location} />}
-              />
+
+              <Routes>
+                <Route path="/" element={<Navigate to="/budget" replace />} />
+
+                <Route
+                  path="/reports/*"
+                  element={
+                    <NarrowNotSupported>
+                      {/* Has its own lazy loading logic */}
+                      <Reports />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <PersistentRoute
+                  path="/budget"
+                  element={<NarrowAlternate name="Budget" />}
+                />
+
+                <Route
+                  path="/schedules"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="Schedules" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route path="/payees" element={<ManagePayeesPage />} />
+                <Route path="/rules" element={<ManageRulesPage />} />
+                <Route path="/settings" element={<Settings />} />
+
+                <Route
+                  path="/gocardless/link"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="GoCardlessLink" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/accounts"
+                  element={<NarrowAlternate name="Accounts" />}
+                />
+
+                <Route
+                  path="/accounts/:id"
+                  element={<NarrowAlternate name="Account" />}
+                />
+
+                <Route
+                  path="/accounts/:id/transactions/:transactionId"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/accounts/:id/transactions/new"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
+                />
+              </Routes>
+
               <Modals />
             </div>
 
@@ -327,8 +304,8 @@ function FinancesApp(props) {
   );
 }
 
-function FinancesAppWithContext(props) {
-  let app = useMemo(() => <FinancesApp {...props} />, [props]);
+export default function FinancesAppWithContext() {
+  let app = useMemo(() => <FinancesApp />, []);
 
   return (
     <SpreadsheetProvider>
@@ -346,5 +323,3 @@ function FinancesAppWithContext(props) {
     </SpreadsheetProvider>
   );
 }
-
-export default connect(null, actions)(FinancesAppWithContext);

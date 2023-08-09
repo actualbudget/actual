@@ -15,6 +15,7 @@ import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   deleteTransaction,
   updateTransaction,
@@ -27,8 +28,9 @@ import { applyChanges, groupById } from 'loot-core/src/shared/util';
 import { authorizeBank } from '../../gocardless';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, colors } from '../../style';
-import { useActiveLocation } from '../ActiveLocation';
-import { View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import TransactionList from '../transactions/TransactionList';
 import {
   SplitsExpandedProvider,
@@ -135,7 +137,7 @@ function AllTransactions({
       .map(scheduledTransaction => {
         let amount =
           (scheduledTransaction._inverse ? -1 : 1) *
-          scheduledTransaction.amount;
+          getScheduledAmount(scheduledTransaction.amount);
         return {
           balance: (runningBalance += amount),
           id: scheduledTransaction.id,
@@ -1047,12 +1049,12 @@ class AccountInternal extends PureComponent {
         },
         () => {
           this.fetchTransactions();
-
-          if (this.state.sort.length !== 0) {
-            this.applySort();
-          }
         },
       );
+    }
+
+    if (this.state.sort.length !== 0) {
+      this.applySort();
     }
   };
 
@@ -1141,6 +1143,7 @@ class AccountInternal extends PureComponent {
       hideFraction,
       addNotification,
       accountsSyncing,
+      pushModal,
       replaceModal,
       showExtraBalances,
       accountId,
@@ -1217,11 +1220,13 @@ class AccountInternal extends PureComponent {
                 showEmptyMessage={showEmptyMessage}
                 balanceQuery={balanceQuery}
                 canCalculateBalance={this.canCalculateBalance}
+                isSorted={this.state.sort.length !== 0}
                 reconcileAmount={reconcileAmount}
                 search={this.state.search}
                 filters={this.state.filters}
                 conditionsOp={this.state.conditionsOp}
                 savePrefs={this.props.savePrefs}
+                pushModal={this.props.pushModal}
                 onSearch={this.onSearch}
                 onShowTransactions={this.onShowTransactions}
                 onMenuSelect={this.onMenuSelect}
@@ -1265,7 +1270,7 @@ class AccountInternal extends PureComponent {
                   categoryGroups={categoryGroups}
                   payees={payees}
                   balances={allBalances}
-                  showBalances={showBalances}
+                  showBalances={!!allBalances}
                   showCleared={showCleared}
                   showAccount={
                     !accountId ||
@@ -1297,6 +1302,10 @@ class AccountInternal extends PureComponent {
                       </View>
                     ) : null
                   }
+                  pushModal={pushModal}
+                  onSort={this.onSort}
+                  sortField={this.state.sort.field}
+                  ascDesc={this.state.sort.ascDesc}
                   onChange={this.onTransactionsChange}
                   onRefetch={this.refetchTransactions}
                   onRefetchUpToRow={row =>
@@ -1335,7 +1344,6 @@ function AccountHack(props) {
 export default function Account() {
   let params = useParams();
   let location = useLocation();
-  let activeLocation = useActiveLocation();
 
   let state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
@@ -1396,12 +1404,9 @@ export default function Account() {
         <AccountHack
           {...state}
           {...actionCreators}
-          modalShowing={
-            state.modalShowing ||
-            !!(activeLocation.state && activeLocation.state.parent)
-          }
+          modalShowing={state.modalShowing}
           accountId={params.id}
-          categoryId={activeLocation?.state?.filter?.category}
+          categoryId={location?.state?.filter?.category}
           location={location}
           filtersList={filtersList}
         />

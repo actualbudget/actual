@@ -1,9 +1,9 @@
 import React, { Component, createContext, createRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { css, before } from 'glamor';
+import { css } from 'glamor';
 
-import { styles } from '../style';
+import { styles, theme } from '../style';
 
 export const IntersectionBoundary = createContext();
 
@@ -299,7 +299,8 @@ export class Tooltip extends Component {
       width,
       ...styles.shadowLarge,
       borderRadius: 4,
-      backgroundColor: 'white',
+      backgroundColor: theme.menuBackground,
+      color: theme.menuItemText,
       // opacity: 0,
       // transition: 'transform .1s, opacity .1s',
       // transitionTimingFunction: 'ease-out'
@@ -337,83 +338,4 @@ export class Tooltip extends Component {
       </div>
     );
   }
-}
-
-export function Pointer({
-  pointerDirection = 'up',
-  pointerPosition = 'left',
-  backgroundColor,
-  borderColor = '#c0c0c0',
-  border = true,
-  color,
-  style,
-  innerStyle,
-  pointerStyle,
-  children,
-}) {
-  return (
-    <div {...css({ position: 'relative' }, style)}>
-      <div
-        {...css(
-          {
-            zIndex: 3000,
-            backgroundColor: backgroundColor,
-            color: color,
-            padding: 10,
-            boxShadow: '0 2px 6px rgba(0, 0, 0, .25)',
-            border: border && '1px solid ' + borderColor,
-            borderRadius: 2,
-          },
-          before({
-            position: 'absolute',
-            display: 'inline-block',
-            backgroundColor,
-            border: border && '1px solid ' + borderColor,
-            borderLeft: 0,
-            borderBottom: 0,
-            width: 7,
-            height: 7,
-            boxShadow: '1px -1px 1px rgba(0, 0, 0, .05)',
-            ...(pointerDirection === 'up'
-              ? {
-                  transform: 'rotate(-45deg)',
-                  top: border ? -4 : -3,
-                  // eslint-disable-next-line rulesdir/typography
-                  content: '" "',
-                  ...(pointerPosition === 'center'
-                    ? { left: 'calc(50% - 3.5px)' }
-                    : pointerPosition === 'left'
-                    ? { left: 40 }
-                    : { right: 40 }),
-                }
-              : pointerDirection === 'down'
-              ? {
-                  transform: 'rotate(135deg)',
-                  bottom: border ? -4 : -3,
-                  // eslint-disable-next-line rulesdir/typography
-                  content: '" "',
-                  ...(pointerPosition === 'center'
-                    ? { left: 'calc(50% - 3.5px)' }
-                    : pointerPosition === 'left'
-                    ? { left: 40 }
-                    : { right: 40 }),
-                }
-              : pointerDirection === 'right'
-              ? {
-                  transform: 'rotate(45deg)',
-                  // eslint-disable-next-line rulesdir/typography
-                  content: '" "',
-                  top: 'calc(50% - 3.5px)',
-                  right: -3,
-                }
-              : {}),
-            ...pointerStyle,
-          }),
-          innerStyle,
-        )}
-      >
-        {children}
-      </div>
-    </div>
-  );
 }

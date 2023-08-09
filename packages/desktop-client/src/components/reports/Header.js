@@ -2,7 +2,10 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
 import { styles } from '../../style';
-import { View, Button, ButtonLink, Select } from '../common';
+import Button from '../common/Button';
+import ButtonLink from '../common/ButtonLink';
+import Select from '../common/Select';
+import View from '../common/View';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
 function validateStart(allMonths, start, end) {
@@ -57,6 +60,7 @@ function Header({
   onUpdateFilter,
   onDeleteFilter,
   onCondOpChange,
+  headerPrefixItems,
 }) {
   return (
     <View
@@ -83,6 +87,8 @@ function Header({
           gap: 15,
         }}
       >
+        {headerPrefixItems}
+
         <View
           style={{
             flexDirection: 'row',
@@ -110,7 +116,7 @@ function Header({
           />
         </View>
 
-        <FilterButton onApply={onApply} />
+        {filters && <FilterButton onApply={onApply} />}
 
         {show1Month && (
           <Button
@@ -139,7 +145,7 @@ function Header({
           All Time
         </Button>
       </View>
-      {filters.length > 0 && (
+      {filters && filters.length > 0 && (
         <View
           style={{ marginTop: 5 }}
           spacing={2}

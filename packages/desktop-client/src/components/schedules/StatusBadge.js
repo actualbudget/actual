@@ -10,7 +10,8 @@ import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
 import { colors } from '../../style';
-import { View, Text } from '../common';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export function getStatusProps(status) {
   let color, backgroundColor, Icon;

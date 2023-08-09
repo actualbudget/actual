@@ -2,17 +2,15 @@ import React, { Component, useState } from 'react';
 
 import { theme } from '../style';
 
-import {
-  View,
-  Stack,
-  Text,
-  Block,
-  Modal,
-  P,
-  LinkButton,
-  Button,
-  ExternalLink,
-} from './common';
+import Block from './common/Block';
+import Button from './common/Button';
+import ExternalLink from './common/ExternalLink';
+import LinkButton from './common/LinkButton';
+import Modal from './common/Modal';
+import Paragraph from './common/Paragraph';
+import Stack from './common/Stack';
+import Text from './common/Text';
+import View from './common/View';
 import { Checkbox } from './forms';
 
 class FatalError extends Component {
@@ -112,20 +110,22 @@ class FatalError extends Component {
       <Modal isCurrent={true} showClose={false} title="Fatal Error">
         {() => (
           <View style={{ maxWidth: 500 }}>
-            <P>There was an unrecoverable error in the UI. Sorry!</P>
-            <P>
+            <Paragraph>
+              There was an unrecoverable error in the UI. Sorry!
+            </Paragraph>
+            <Paragraph>
               If this error persists, please get{' '}
               <ExternalLink to="https://actualbudget.org/contact">
                 in touch
               </ExternalLink>{' '}
               so it can be investigated.
-            </P>
-            <P>
+            </Paragraph>
+            <Paragraph>
               <Button onClick={() => window.Actual.relaunch()}>
                 {buttonText}
               </Button>
-            </P>
-            <P isLast={true} style={{ fontSize: 11 }}>
+            </Paragraph>
+            <Paragraph isLast={true} style={{ fontSize: 11 }}>
               <LinkButton onClick={() => this.setState({ showError: true })}>
                 Show Error
               </LinkButton>
@@ -140,7 +140,7 @@ class FatalError extends Component {
                   {error.stack}
                 </Block>
               )}
-            </P>
+            </Paragraph>
           </View>
         )}
       </Modal>
@@ -155,13 +155,13 @@ function SharedArrayBufferOverride() {
 
   return expanded ? (
     <>
-      <P style={{ marginTop: 10 }}>
+      <Paragraph style={{ marginTop: 10 }}>
         Actual uses <code>SharedArrayBuffer</code> to allow usage from multiple
         tabs at once and to ensure correct behavior when switching files. While
         it can run without access to <code>SharedArrayBuffer</code>, you may
         encounter data loss or notice multiple budget files being merged with
         each other.
-      </P>
+      </Paragraph>
       <label
         style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}
       >

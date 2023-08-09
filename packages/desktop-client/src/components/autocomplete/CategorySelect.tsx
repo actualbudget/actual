@@ -5,29 +5,36 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import { css } from 'glamor';
+
 import Split from '../../icons/v0/Split';
+import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
-import { View, Text } from '../common';
+import Text from '../common/Text';
+import View from '../common/View';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
-type CategoryGroup = {
+export type Category = {
   id: string;
+  cat_group: unknown;
+  groupName: string;
   name: string;
-  categories: Array<{ id: string; name: string }>;
 };
 
-type CategoryListProps = {
-  items: Array<{
-    id: string;
-    cat_group: unknown;
-    groupName: string;
-    name: string;
-  }>;
+export type CategoryGroup = {
+  id: string;
+  name: string;
+  categories: Array<Category>;
+};
+
+export type CategoryListProps = {
+  items: Array<Category>;
   getItemProps?: (arg: { item }) => Partial<ComponentProps<typeof View>>;
   highlightedIndex: number;
   embedded: boolean;
   footer?: ReactNode;
+  groupHeaderStyle?: object;
 };
 function CategoryList({
   items,
@@ -35,8 +42,13 @@ function CategoryList({
   highlightedIndex,
   embedded,
   footer,
+  groupHeaderStyle,
 }: CategoryListProps) {
   let lastGroup = null;
+  const { isNarrowWidth } = useResponsive();
+  const highlightedIndexColor = isNarrowWidth
+    ? 'rgba(100, 100, 100, .15)'
+    : colors.n4;
 
   return (
     <View>
@@ -55,9 +67,33 @@ function CategoryList({
               <View
                 key="split"
                 {...(getItemProps ? getItemProps({ item }) : null)}
+                // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
+                // event handler they set on this element. When this code runs
+                // in WebKit on touch-enabled devices, taps on this element end
+                // up not triggering the `onClick` event (and therefore delaying
+                // response to user input) until after the `setTimeout` callback
+                // finishes executing. This is caused by content observation code
+                // that implements various strategies to prevent the user from
+                // accidentally clicking content that changed as a result of code
+                // run in the `onMouseMove` event.
+                //
+                // Long story short, we don't want any delay here between the user
+                // tapping and the resulting action being performed. It turns out
+                // there's some "fast path" logic that can be triggered in various
+                // ways to force WebKit to bail on the content observation process.
+                // One of those ways is setting `role="button"` (or a number of
+                // other aria roles) on the element, which is what we're doing here.
+                //
+                // ref:
+                // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
+                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
+                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+                role="button"
                 style={{
                   backgroundColor:
-                    highlightedIndex === idx ? colors.n4 : 'transparent',
+                    highlightedIndex === idx
+                      ? highlightedIndexColor
+                      : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   flexShrink: 0,
                   flexDirection: 'row',
@@ -66,6 +102,9 @@ function CategoryList({
                   fontWeight: 500,
                   color: colors.g8,
                   padding: '6px 8px',
+                  ':active': {
+                    backgroundColor: 'rgba(100, 100, 100, .25)',
+                  },
                 }}
                 data-testid="split-transaction-button"
               >
@@ -86,6 +125,7 @@ function CategoryList({
                   style={{
                     color: colors.y9,
                     padding: '4px 9px',
+                    ...groupHeaderStyle,
                   }}
                   data-testid="category-item-group"
                 >
@@ -94,13 +134,22 @@ function CategoryList({
               )}
               <div
                 {...(getItemProps ? getItemProps({ item }) : null)}
-                style={{
-                  backgroundColor:
-                    highlightedIndex === idx ? colors.n4 : 'transparent',
-                  padding: 4,
-                  paddingLeft: 20,
-                  borderRadius: embedded ? 4 : 0,
-                }}
+                // See comment above.
+                role="button"
+                className={`${css([
+                  {
+                    backgroundColor:
+                      highlightedIndex === idx
+                        ? highlightedIndexColor
+                        : 'transparent',
+                    padding: 4,
+                    paddingLeft: 20,
+                    borderRadius: embedded ? 4 : 0,
+                    ':active': {
+                      backgroundColor: 'rgba(100, 100, 100, .25)',
+                    },
+                  },
+                ])}`}
                 data-testid={
                   'category-item' +
                   (highlightedIndex === idx ? '-highlighted' : '')
@@ -120,11 +169,14 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: CategoryGroup[];
   showSplitOption?: boolean;
+  groupHeaderStyle?: object;
 };
 export default function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,
   embedded,
+  closeOnBlur,
+  groupHeaderStyle,
   ...props
 }: CategoryAutocompleteProps) {
   let categorySuggestions = useMemo(
@@ -147,6 +199,7 @@ export default function CategoryAutocomplete({
       strict={true}
       highlightFirst={true}
       embedded={embedded}
+      closeOnBlur={closeOnBlur}
       getHighlightedIndex={suggestions => {
         if (suggestions.length === 0) {
           return null;
@@ -171,6 +224,7 @@ export default function CategoryAutocomplete({
           embedded={embedded}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
+          groupHeaderStyle={groupHeaderStyle}
         />
       )}
       {...props}

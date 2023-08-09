@@ -5,16 +5,16 @@ import React, {
   useRef,
   useContext,
 } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 import { css, media } from 'glamor';
 
-import * as actions from 'loot-core/src/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
+import { useActions } from '../hooks/useActions';
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
@@ -28,21 +28,18 @@ import tokens from '../tokens';
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
-import {
-  View,
-  Text,
-  ButtonLink,
-  Button,
-  ButtonWithLoading,
-  Tooltip,
-  P,
-  ExternalLink,
-} from './common';
+import Button, { ButtonWithLoading } from './common/Button';
+import ButtonLink from './common/ButtonLink';
+import ExternalLink from './common/ExternalLink';
+import Paragraph from './common/Paragraph';
+import Text from './common/Text';
+import View from './common/View';
 import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import useSheetValue from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
+import { Tooltip } from './tooltips';
 
 export let TitlebarContext = createContext();
 
@@ -82,19 +79,19 @@ function UncategorizedButton() {
   );
 }
 
-function PrivacyButton({ localPrefs, onTogglePrivacy }) {
-  let [isPrivacyEnabled, setIsPrivacyEnabled] = useState(
-    localPrefs.isPrivacyEnabled,
+function PrivacyButton() {
+  let isPrivacyEnabled = useSelector(
+    state => state.prefs.local.isPrivacyEnabled,
   );
-  let togglePrivacy = () => {
-    setIsPrivacyEnabled(!isPrivacyEnabled);
-    onTogglePrivacy(!isPrivacyEnabled);
-  };
+  let { savePrefs } = useActions();
 
   let privacyIconStyle = { width: 23, height: 23 };
 
   return (
-    <Button type="bare" onClick={togglePrivacy}>
+    <Button
+      type="bare"
+      onClick={() => savePrefs({ isPrivacyEnabled: !isPrivacyEnabled })}
+    >
       {isPrivacyEnabled ? (
         <SvgEyeSlashed style={privacyIconStyle} />
       ) : (
@@ -104,7 +101,10 @@ function PrivacyButton({ localPrefs, onTogglePrivacy }) {
   );
 }
 
-export function SyncButton({ localPrefs, style, onSync }) {
+export function SyncButton({ style }) {
+  let cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
+  let { sync } = useActions();
+
   let [syncing, setSyncing] = useState(false);
   let [syncState, setSyncState] = useState(null);
 
@@ -128,7 +128,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
         // file.
         if (subtype === 'network') {
           setSyncState('offline');
-        } else if (!localPrefs.cloudFileId) {
+        } else if (!cloudFileId) {
           setSyncState('local');
         } else {
           setSyncState('error');
@@ -168,7 +168,7 @@ export function SyncButton({ localPrefs, style, onSync }) {
               : null,
         }),
       )}
-      onClick={onSync}
+      onClick={sync}
     >
       {syncState === 'error' ? (
         <AlertTriangle width={13} />
@@ -186,8 +186,12 @@ export function SyncButton({ localPrefs, style, onSync }) {
   );
 }
 
-function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
+function BudgetTitlebar() {
+  let maxMonths = useSelector(state => state.prefs.global.maxMonths);
+  let budgetType = useSelector(state => state.prefs.local.budgetType);
+  let { saveGlobalPrefs } = useActions();
   let { sendEvent } = useContext(TitlebarContext);
+
   let [loading, setLoading] = useState(false);
   let [showTooltip, setShowTooltip] = useState(false);
 
@@ -202,14 +206,12 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
 
   useEffect(() => {
     setLoading(false);
-  }, [localPrefs.budgetType]);
-
-  let { budgetType } = localPrefs;
+  }, [budgetType]);
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <MonthCountSelector
-        maxMonths={globalPrefs.maxMonths || 1}
+        maxMonths={maxMonths || 1}
         onChange={value => saveGlobalPrefs({ maxMonths: value })}
       />
       {reportBudgetEnabled && (
@@ -235,7 +237,7 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                 maxWidth: 400,
               }}
             >
-              <P>
+              <Paragraph>
                 You are currently using a{' '}
                 <Text style={{ fontWeight: 600 }}>
                   {budgetType === 'report'
@@ -244,8 +246,8 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                   .
                 </Text>{' '}
                 Switching will not lose any data and you can always switch back.
-              </P>
-              <P>
+              </Paragraph>
+              <Paragraph>
                 <ButtonWithLoading
                   type="primary"
                   loading={loading}
@@ -256,15 +258,15 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
                     ? 'Rollover budget'
                     : 'Report budget'}
                 </ButtonWithLoading>
-              </P>
-              <P isLast={true}>
+              </Paragraph>
+              <Paragraph isLast={true}>
                 <ExternalLink
                   to="https://actualbudget.org/docs/experimental/report-budget"
                   linkColor="muted"
                 >
                   How do these types of budgeting work?
                 </ExternalLink>
-              </P>
+              </Paragraph>
             </Tooltip>
           )}
         </View>
@@ -273,26 +275,18 @@ function BudgetTitlebar({ globalPrefs, saveGlobalPrefs, localPrefs }) {
   );
 }
 
-function Titlebar({
-  globalPrefs,
-  saveGlobalPrefs,
-  savePrefs,
-  localPrefs,
-  floatingSidebar,
-  style,
-  sync,
-}) {
+export default function Titlebar({ style }) {
   let navigate = useNavigate();
   let location = useLocation();
   let sidebar = useSidebar();
   let { isNarrowWidth } = useResponsive();
-  const serverURL = useServerURL();
+  let serverURL = useServerURL();
+  let floatingSidebar = useSelector(
+    state => state.prefs.global.floatingSidebar,
+  );
 
   let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let themesFlag = useFeatureFlag('themes');
-  let onTogglePrivacy = enabled => {
-    savePrefs({ isPrivacyEnabled: enabled });
-  };
 
   return isNarrowWidth ? null : (
     <View
@@ -359,46 +353,16 @@ function Titlebar({
 
         <Route path="/accounts/:id" element={<AccountSyncCheck />} />
 
-        <Route
-          path="/budget"
-          element={
-            <BudgetTitlebar
-              globalPrefs={globalPrefs}
-              saveGlobalPrefs={saveGlobalPrefs}
-              localPrefs={localPrefs}
-            />
-          }
-        />
+        <Route path="/budget" element={<BudgetTitlebar />} />
 
         <Route path="*" element={null} />
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
       {themesFlag && <ThemeSelector />}
-      {privacyModeFeatureFlag && (
-        <PrivacyButton
-          localPrefs={localPrefs}
-          onTogglePrivacy={onTogglePrivacy}
-        />
-      )}
-      {serverURL ? (
-        <SyncButton
-          style={{ marginLeft: 10 }}
-          localPrefs={localPrefs}
-          onSync={sync}
-        />
-      ) : null}
+      {privacyModeFeatureFlag && <PrivacyButton />}
+      {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    globalPrefs: state.prefs.global,
-    localPrefs: state.prefs.local,
-    userData: state.user.data,
-    floatingSidebar: state.prefs.global.floatingSidebar,
-  }),
-  actions,
-)(Titlebar);

@@ -1,14 +1,22 @@
 import * as fs from '../platform/server/fs';
 
-let config = null;
+type ServerConfig = {
+  BASE_SERVER: string;
+  SYNC_SERVER: string;
+  SIGNUP_SERVER: string;
+  PLAID_SERVER: string;
+  GOCARDLESS_SERVER: string;
+};
 
-function joinURL(base, ...paths) {
+let config: ServerConfig | null = null;
+
+function joinURL(base: string | URL, ...paths: string[]): string {
   let url = new URL(base);
   url.pathname = fs.join(...paths);
   return url.toString();
 }
 
-export function setServer(url) {
+export function setServer(url: string): void {
   if (url == null) {
     config = null;
   } else {
@@ -17,7 +25,7 @@ export function setServer(url) {
 }
 
 // `url` is optional; if not given it will provide the global config
-export function getServer(url?) {
+export function getServer(url?: string): ServerConfig | null {
   if (url) {
     return {
       BASE_SERVER: url,

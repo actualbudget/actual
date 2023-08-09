@@ -282,9 +282,12 @@ export interface ServerHandlers {
 
   'get-server-version': () => Promise<{ error?: string } | { version: string }>;
 
-  'get-server-url': () => Promise<unknown>;
+  'get-server-url': () => Promise<string | null>;
 
-  'set-server-url': (arg: { url; validate }) => Promise<unknown>;
+  'set-server-url': (arg: {
+    url: string;
+    validate?: boolean;
+  }) => Promise<{ error?: string }>;
 
   sync: () => Promise<
     | { error: { message: string; reason: string; meta: unknown } }
@@ -301,7 +304,9 @@ export interface ServerHandlers {
 
   'download-budget': (arg: { fileId; replace? }) => Promise<{ error; id }>;
 
-  'sync-budget': () => Promise<EmptyObject>;
+  'sync-budget': () => Promise<{
+    error?: { message: string; reason: string; meta: unknown };
+  }>;
 
   'load-budget': (arg: { id }) => Promise<{ error }>;
 

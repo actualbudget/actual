@@ -23,6 +23,10 @@ import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
+import DiscoverSchedules from './schedules/DiscoverSchedules';
+import ScheduleDetails from './schedules/EditSchedule';
+import ScheduleLink from './schedules/LinkSchedule';
+import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 
 export default function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);
@@ -204,7 +208,6 @@ export default function Modals() {
             <EditField
               key={name}
               modalProps={modalProps}
-              actions={actions}
               name={options.name}
               onSubmit={options.onSubmit}
             />
@@ -216,6 +219,44 @@ export default function Modals() {
               key={name}
               modalProps={modalProps}
               month={options.month}
+            />
+          );
+
+        case 'schedule-edit':
+          return (
+            <ScheduleDetails
+              key={name}
+              modalProps={modalProps}
+              id={options?.id || null}
+              actions={actions}
+            />
+          );
+
+        case 'schedule-link':
+          return (
+            <ScheduleLink
+              key={name}
+              modalProps={modalProps}
+              actions={actions}
+              transactionIds={options?.transactionIds}
+            />
+          );
+
+        case 'schedules-discover':
+          return (
+            <DiscoverSchedules
+              key={name}
+              modalProps={modalProps}
+              actions={actions}
+            />
+          );
+
+        case 'schedule-posts-offline-notification':
+          return (
+            <PostsOfflineNotification
+              key={name}
+              modalProps={modalProps}
+              actions={actions}
             />
           );
 

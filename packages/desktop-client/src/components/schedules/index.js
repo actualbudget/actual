@@ -3,15 +3,16 @@ import React, { useState } from 'react';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { usePushModal } from '../../util/router-tools';
-import { View, Button, Search } from '../common';
+import { useActions } from '../../hooks/useActions';
+import Button from '../common/Button';
+import Search from '../common/Search';
+import View from '../common/View';
 import { Page } from '../Page';
 
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {
-  let pushModal = usePushModal();
-
+  let { pushModal } = useActions();
   let [filter, setFilter] = useState('');
 
   let scheduleData = useSchedules();
@@ -23,15 +24,15 @@ export default function Schedules() {
   let { schedules, statuses } = scheduleData;
 
   function onEdit(id) {
-    pushModal(`/schedule/edit/${id}`);
+    pushModal('schedule-edit', { id });
   }
 
   function onAdd() {
-    pushModal('/schedule/edit');
+    pushModal('schedule-edit');
   }
 
   function onDiscover() {
-    pushModal('/schedule/discover');
+    pushModal('schedules-discover');
   }
 
   async function onAction(name, id) {
@@ -70,7 +71,7 @@ export default function Schedules() {
 
       <View
         style={{
-          marginTop: 20,
+          marginTop: 15,
           flexBasis: (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1),
           overflow: 'hidden',
         }}

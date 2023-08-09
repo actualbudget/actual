@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import * as actions from 'loot-core/src/client/actions';
-
 import { authorizeBank } from '../../gocardless';
+import { useActions } from '../../hooks/useActions';
 import ExclamationOutline from '../../icons/v1/ExclamationOutline';
 import { colors } from '../../style';
-import { View, Button, Tooltip, ExternalLink } from '../common';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {
@@ -46,12 +48,11 @@ function getErrorMessage(type, code) {
   );
 }
 
-function AccountSyncCheck({
-  accounts,
-  failedAccounts,
-  unlinkAccount,
-  pushModal,
-}) {
+export default function AccountSyncCheck() {
+  let accounts = useSelector(state => state.queries.accounts);
+  let failedAccounts = useSelector(state => state.account.failedAccounts);
+  let { unlinkAccount, pushModal } = useActions();
+
   let { id } = useParams();
   let [open, setOpen] = useState(false);
   if (!failedAccounts) {
@@ -133,11 +134,3 @@ function AccountSyncCheck({
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    accounts: state.queries.accounts,
-    failedAccounts: state.account.failedAccounts,
-  }),
-  actions,
-)(AccountSyncCheck);

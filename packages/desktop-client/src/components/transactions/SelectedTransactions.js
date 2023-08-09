@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { useSelectedItems } from '../../hooks/useSelected';
-import { usePushModal } from '../../util/router-tools';
-import { Menu } from '../common';
+import Menu from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
 import { isPreviewId } from './TransactionsTable';
@@ -16,8 +15,8 @@ export function SelectedTransactionsButton({
   onUnlink,
   onCreateRule,
   onScheduleAction,
+  pushModal,
 }) {
-  let pushModal = usePushModal();
   let selectedItems = useSelectedItems();
 
   let types = useMemo(() => {
@@ -130,11 +129,11 @@ export function SelectedTransactionsButton({
             }
 
             if (scheduleId) {
-              pushModal(`/schedule/edit/${scheduleId}`);
+              pushModal('schedule-edit', { id: scheduleId });
             }
             break;
           case 'link-schedule':
-            pushModal('/schedule/link', {
+            pushModal('schedule-link', {
               transactionIds: [...selectedItems],
             });
             break;

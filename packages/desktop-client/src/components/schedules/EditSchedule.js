@@ -1,6 +1,5 @@
 import React, { useEffect, useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
@@ -13,29 +12,19 @@ import useSelected, { SelectedProvider } from '../../hooks/useSelected';
 import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { Stack, View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Modal from '../common/Modal';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
 import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRule';
-import { Page } from '../Page';
 import DateSelect from '../select/DateSelect';
 import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '../table';
 import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import GenericInput from '../util/GenericInput';
-
-function mergeFields(defaults, initial) {
-  let res = { ...defaults };
-  if (initial) {
-    // Only merge in fields from `initial` that exist in `defaults`
-    Object.keys(initial).forEach(key => {
-      if (key in defaults) {
-        res[key] = initial[key];
-      }
-    });
-  }
-  return res;
-}
 
 function updateScheduleConditions(schedule, fields) {
   let conds = extractScheduleConds(schedule._conditions);
@@ -77,11 +66,9 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export default function ScheduleDetails() {
-  let { id, initialFields } = useParams();
+export default function ScheduleDetails({ modalProps, actions, id }) {
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
-  let navigate = useNavigate();
   let globalDispatch = useDispatch();
   let dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
@@ -190,18 +177,15 @@ export default function ScheduleDetails() {
       schedule: null,
       upcomingDates: null,
       error: null,
-      fields: mergeFields(
-        {
-          payee: null,
-          account: null,
-          amount: null,
-          amountOp: null,
-          date: null,
-          posts_transaction: false,
-          name: null,
-        },
-        initialFields,
-      ),
+      fields: {
+        payee: null,
+        account: null,
+        amount: null,
+        amountOp: null,
+        date: null,
+        posts_transaction: false,
+        name: null,
+      },
       transactions: [],
       transactionsMode: adding ? 'matched' : 'linked',
     },
@@ -379,7 +363,7 @@ export default function ScheduleDetails() {
       if (adding) {
         await onLinkTransactions([...selectedInst.items], res.data);
       }
-      navigate(-1);
+      actions.popModal();
     }
   }
 
@@ -429,9 +413,10 @@ export default function ScheduleDetails() {
   let repeats = state.fields.date ? !!state.fields.date.frequency : false;
 
   return (
-    <Page
+    <Modal
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
-      modalSize="medium"
+      size="medium"
+      {...modalProps}
     >
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
@@ -769,13 +754,13 @@ export default function ScheduleDetails() {
         style={{ marginTop: 20 }}
       >
         {state.error && <Text style={{ color: colors.r4 }}>{state.error}</Text>}
-        <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
+        <Button style={{ marginRight: 10 }} onClick={actions.popModal}>
           Cancel
         </Button>
         <Button type="primary" onClick={onSave}>
           {adding ? 'Add' : 'Save'}
         </Button>
       </Stack>
-    </Page>
+    </Modal>
   );
 }

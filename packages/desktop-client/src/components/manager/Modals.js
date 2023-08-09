@@ -1,11 +1,8 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import { bindActionCreators } from 'redux';
-
-import * as actions from 'loot-core/src/client/actions';
-
-import { View } from '../common';
+import { useActions } from '../../hooks/useActions';
+import View from '../common/View';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
 import LoadBackup from '../modals/LoadBackup';
@@ -16,8 +13,12 @@ import ImportActual from './ImportActual';
 import ImportYNAB4 from './ImportYNAB4';
 import ImportYNAB5 from './ImportYNAB5';
 
-function Modals({ modalStack, isHidden, actions }) {
-  let stack = modalStack.map(({ name, options }, idx) => {
+export default function Modals() {
+  let modalStack = useSelector(state => state.modals.modalStack);
+  let isHidden = useSelector(state => state.modals.isHidden);
+  let actions = useActions();
+
+  let stack = modalStack.map(({ name, options = {} }, idx) => {
     const modalProps = {
       onClose: actions.popModal,
       onPush: actions.pushModal,
@@ -89,12 +90,3 @@ function Modals({ modalStack, isHidden, actions }) {
 
   return <View style={{ flex: 1, padding: 50 }}>{stack}</View>;
 }
-
-export default connect(
-  state => ({
-    modalStack: state.modals.modalStack,
-    isHidden: state.modals.isHidden,
-    budgets: state.budgets.budgets,
-  }),
-  dispatch => ({ actions: bindActionCreators(actions, dispatch) }),
-)(Modals);
