@@ -6,30 +6,30 @@ import IntegrationBank from '../banks/integration-bank.js';
 
 describe('BankFactory', () => {
   it('should return MbankRetailBrexplpw when institutionId is mbank-retail-brexplpw', () => {
-    const institutionId = MbankRetailBrexplpw.institutionId;
+    const institutionId = MbankRetailBrexplpw.institutionIds[0];
     const result = BankFactory(institutionId);
 
-    expect(result.institutionId).toBe(institutionId);
+    expect(result.institutionIds).toContain(institutionId);
   });
 
   it('should return SandboxfinanceSfin0000 when institutionId is sandboxfinance-sfin0000', () => {
-    const institutionId = SandboxfinanceSfin0000.institutionId;
+    const institutionId = SandboxfinanceSfin0000.institutionIds[0];
     const result = BankFactory(institutionId);
 
-    expect(result.institutionId).toBe(institutionId);
+    expect(result.institutionIds).toContain(institutionId);
   });
 
   it('should return IngPlIngbplpw when institutionId is ing-pl-ingbplpw', () => {
-    const institutionId = IngPlIngbplpw.institutionId;
+    const institutionId = IngPlIngbplpw.institutionIds[0];
     const result = BankFactory(institutionId);
 
-    expect(result.institutionId).toBe(institutionId);
+    expect(result.institutionIds).toContain(institutionId);
   });
 
   it('should return IntegrationBank when institutionId is not found', () => {
-    const institutionId = IntegrationBank.institutionId;
+    const institutionId = IntegrationBank.institutionIds[0];
     const result = BankFactory(institutionId);
 
-    expect(result.institutionId).toBe(institutionId);
+    expect(result.institutionIds).toContain(institutionId);
   });
 });

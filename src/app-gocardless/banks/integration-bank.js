@@ -12,7 +12,7 @@ const SORTED_BALANCE_TYPE_LIST = [
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionId: 'IntegrationBank',
+  institutionIds: ['IntegrationBank'],
   normalizeAccount(account) {
     console.log(
       'Available account properties for new institution integration',
@@ -31,6 +31,11 @@ export default {
       type: 'checking',
     };
   },
+
+  normalizeTransaction(transaction, _booked) {
+    return transaction;
+  },
+
   sortTransactions(transactions = []) {
     console.log(
       'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
@@ -38,6 +43,7 @@ export default {
     );
     return sortByBookingDate(transactions);
   },
+
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     console.log(
       'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',

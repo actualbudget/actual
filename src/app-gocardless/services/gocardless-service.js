@@ -195,6 +195,7 @@ export const goCardlessService = {
     const [accountMetadata, transactions, accountBalance] = await Promise.all([
       goCardlessService.getAccountMetadata(accountId),
       goCardlessService.getTransactions({
+        institutionId: institution_id,
         accountId,
         startDate,
         endDate,
@@ -429,7 +430,7 @@ export const goCardlessService = {
    * @throws {ServiceError}
    * @returns {Promise<import('../gocardless.types.js').GetTransactionsResponse>}
    */
-  getTransactions: async ({ accountId, startDate, endDate }) => {
+  getTransactions: async ({ institutionId, accountId, startDate, endDate }) => {
     const response = await client.getTransactions({
       accountId,
       dateFrom: startDate,
@@ -437,6 +438,16 @@ export const goCardlessService = {
     });
 
     handleGoCardlessError(response);
+
+    const bankAccount = BankFactory(institutionId);
+    response.transactions.booked = response.transactions.booked
+      .map((transaction) => bankAccount.normalizeTransaction(transaction, true))
+      .filter((transaction) => transaction);
+    response.transactions.pending = response.transactions.pending
+      .map((transaction) =>
+        bankAccount.normalizeTransaction(transaction, false),
+      )
+      .filter((transaction) => transaction);
 
     return response;
   },

@@ -5,13 +5,21 @@ import {
 import { Transaction, Balance } from '../gocardless-node.types.js';
 
 export interface IBank {
-  institutionId: string;
+  institutionIds: string[];
   /**
    * Returns normalized object with required data for the frontend
    */
   normalizeAccount: (
     account: DetailedAccountWithInstitution,
   ) => NormalizedAccountDetails;
+
+  /**
+   * Returns a normalized transaction object
+   */
+  normalizeTransaction: (
+    transaction: Transaction,
+    booked: boolean,
+  ) => Transaction | null;
 
   /**
    * Function sorts an array of transactions from newest to oldest

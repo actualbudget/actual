@@ -53,6 +53,11 @@ export type NormalizedAccountDetails = {
 
 export type GetTransactionsParams = {
   /**
+   * Id of the institution from GoCardless
+   */
+  institutionId: string;
+
+  /**
    * Id of account from the GoCardless app
    */
   accountId: string;

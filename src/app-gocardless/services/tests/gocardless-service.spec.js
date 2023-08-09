@@ -477,6 +477,7 @@ describe('goCardlessService', () => {
 
       expect(
         await goCardlessService.getTransactions({
+          institutionId: 'SANDBOXFINANCE_SFIN0000',
           accountId,
           startDate: '',
           endDate: '',
@@ -530,6 +531,7 @@ describe('goCardlessService', () => {
 
       await expect(() =>
         goCardlessService.getTransactions({
+          institutionId: 'SANDBOXFINANCE_SFIN0000',
           accountId,
           startDate: '',
           endDate: '',

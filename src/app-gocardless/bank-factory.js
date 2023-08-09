@@ -1,9 +1,16 @@
+import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
 import MbankRetailBrexplpw from './banks/mbank-retail-brexplpw.js';
 import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
 
-const banks = [MbankRetailBrexplpw, SandboxfinanceSfin0000, IngPlIngbplpw];
+const banks = [
+  AmericanExpressAesudef1,
+  IngPlIngbplpw,
+  MbankRetailBrexplpw,
+  SandboxfinanceSfin0000,
+];
 
 export default (institutionId) =>
-  banks.find((b) => b.institutionId === institutionId) || IntegrationBank;
+  banks.find((b) => b.institutionIds.includes(institutionId)) ||
+  IntegrationBank;

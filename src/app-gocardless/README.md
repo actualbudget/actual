@@ -26,7 +26,7 @@ your bank.
 Create new a bank class based on `app-gocardless/banks/sandboxfinance-sfin0000.js`. Name of the file and class should be
 created based on the ID of the integrated institution.
 
-Fill the logic of `normalizeAccount`, `sortTransactions`, and `calculateStartingBalance` functions.
+Fill the logic of `normalizeAccount`, `normalizeTransaction`, `sortTransactions`, and `calculateStartingBalance` functions.
 You should do it based on the data which you found in the logs.
 
 Example logs which help you to fill:

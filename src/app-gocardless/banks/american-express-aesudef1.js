@@ -1,32 +1,38 @@
-import { printIban, amountToInteger } from '../utils.js';
+import { amountToInteger, sortByBookingDate } from '../utils.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: ['SANDBOXFINANCE_SFIN0000'],
+  institutionIds: ['AMERICAN_EXPRESS_AESUDEF1'],
 
   normalizeAccount(account) {
     return {
       account_id: account.id,
       institution: account.institution,
-      mask: account.iban.slice(-4),
-      iban: account.iban,
-      name: [account.name, printIban(account)].join(' '),
-      official_name: account.product,
+      // The `iban` field for these American Express cards is actually a masked
+      // version of the PAN.  No IBAN is provided.
+      mask: account.iban.slice(-5),
+      iban: null,
+      name: [account.details, `(${account.iban.slice(-5)})`].join(' '),
+      official_name: account.details,
+      // The Actual account `type` field is legacy and is currently not used
+      // for anything, so we leave it as the default of `checking`.
       type: 'checking',
     };
   },
 
   normalizeTransaction(transaction, _booked) {
+    /**
+     * The American Express Europe integration sends the actual date of
+     * purchase as `bookingDate`, and `valueDate` appears to contain a date
+     * related to the actual booking date, though sometimes offset by a day
+     * compared to the American Express website.
+     */
+    delete transaction.valueDate;
     return transaction;
   },
 
   sortTransactions(transactions = []) {
-    return transactions.sort((a, b) => {
-      const [aTime, aSeq] = a.transactionId.split('-');
-      const [bTime, bSeq] = b.transactionId.split('-');
-
-      return Number(bTime) - Number(aTime) || Number(bSeq) - Number(aSeq);
-    });
+    return sortByBookingDate(transactions);
   },
 
   /**
@@ -39,7 +45,7 @@ export default {
    */
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
-      (balance) => 'interimAvailable' === balance.balanceType,
+      (balance) => 'information' === balance.balanceType.toString(),
     );
 
     return sortedTransactions.reduce((total, trans) => {
