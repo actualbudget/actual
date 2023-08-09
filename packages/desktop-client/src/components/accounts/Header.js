@@ -52,6 +52,7 @@ export function AccountHeader({
   filters,
   conditionsOp,
   savePrefs,
+  pushModal,
   onSearch,
   onAddTransaction,
   onShowTransactions,
@@ -256,6 +257,7 @@ export function AccountHeader({
               onUnlink={onBatchUnlink}
               onCreateRule={onCreateRule}
               onScheduleAction={onScheduleAction}
+              pushModal={pushModal}
             />
           )}
           <Button

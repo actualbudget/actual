@@ -28,7 +28,6 @@ import { applyChanges, groupById } from 'loot-core/src/shared/util';
 import { authorizeBank } from '../../gocardless';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, theme } from '../../style';
-import { useActiveLocation } from '../ActiveLocation';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -1147,6 +1146,7 @@ class AccountInternal extends PureComponent {
       hideFraction,
       addNotification,
       accountsSyncing,
+      pushModal,
       replaceModal,
       showExtraBalances,
       accountId,
@@ -1229,6 +1229,7 @@ class AccountInternal extends PureComponent {
                 filters={this.state.filters}
                 conditionsOp={this.state.conditionsOp}
                 savePrefs={this.props.savePrefs}
+                pushModal={this.props.pushModal}
                 onSearch={this.onSearch}
                 onShowTransactions={this.onShowTransactions}
                 onMenuSelect={this.onMenuSelect}
@@ -1305,6 +1306,7 @@ class AccountInternal extends PureComponent {
                       </View>
                     ) : null
                   }
+                  pushModal={pushModal}
                   onSort={this.onSort}
                   sortField={this.state.sort.field}
                   ascDesc={this.state.sort.ascDesc}
@@ -1346,7 +1348,6 @@ function AccountHack(props) {
 export default function Account() {
   let params = useParams();
   let location = useLocation();
-  let activeLocation = useActiveLocation();
 
   let state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
@@ -1407,12 +1408,9 @@ export default function Account() {
         <AccountHack
           {...state}
           {...actionCreators}
-          modalShowing={
-            state.modalShowing ||
-            !!(activeLocation.state && activeLocation.state.parent)
-          }
+          modalShowing={state.modalShowing}
           accountId={params.id}
-          categoryId={activeLocation?.state?.filter?.category}
+          categoryId={location?.state?.filter?.category}
           location={location}
           filtersList={filtersList}
         />

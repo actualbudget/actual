@@ -74,6 +74,7 @@ export default function AccountDetails({
   onLoadMore,
   onSearch,
   onSelectTransaction,
+  pushModal,
   // refreshControl
 }) {
   let allTransactions = useMemo(() => {
@@ -169,6 +170,7 @@ export default function AccountDetails({
         // refreshControl={refreshControl}
         onLoadMore={onLoadMore}
         onSelect={onSelectTransaction}
+        pushModal={pushModal}
       />
     </View>
   );
