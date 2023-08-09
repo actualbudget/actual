@@ -184,8 +184,6 @@ async function downloadGoCardlessTransactions(
   let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
-  const endDate = new Date().toISOString().split('T')[0];
-
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/transactions',
     {
@@ -194,7 +192,6 @@ async function downloadGoCardlessTransactions(
       requisitionId: bankId,
       accountId: acctId,
       startDate: since,
-      endDate,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
