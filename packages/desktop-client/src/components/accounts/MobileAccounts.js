@@ -22,7 +22,7 @@ function AccountHeader({ name, amount }) {
         flexDirection: 'row',
         marginTop: 28,
         marginBottom: 10,
-        color: theme.pageText,
+        color: theme.altpageTextSubdued,
       }}
     >
       <View style={{ flex: 1 }}>
@@ -55,7 +55,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         flex: '1 0 auto',
         flexDirection: 'row',
         backgroundColor: theme.tableBackground,
-        boxShadow: `0 1px 1px ${theme.cardShadow}`,
+        boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         borderRadius: 6,
         marginTop: 10,
       }}
@@ -90,6 +90,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
                 {
                   fontSize: 17,
                   fontWeight: 600,
+                  color: updated ? theme.mobileAccountText : theme.pillText,
                   paddingRight: 30,
                 },
               ]}
@@ -122,7 +123,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
 
 function EmptyMessage({ onAdd }) {
   return (
-    <View style={{ flex: 1, padding: 30, color: theme.tableText }}>
+    <View style={{ flex: 1, padding: 30 }}>
       <Text style={styles.text}>
         For Actual to be useful, you need to add an account. You can link an
         account to automatically download transactions, or manage it locally
@@ -141,7 +142,7 @@ function EmptyMessage({ onAdd }) {
         Add Account
       </Button>
 
-      <Text style={{ marginTop: 20, color: theme.tableText }}>
+      <Text style={{ marginTop: 20, color: theme.altpageTextSubdued }}>
         In the future, you can add accounts using the add button in the header.
       </Text>
     </View>
