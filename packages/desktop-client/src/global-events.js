@@ -144,7 +144,6 @@ export function handleGlobalEvents(actions, store) {
 
   listen('start-import', () => {
     actions.closeBudgetUI();
-    actions.setAppState({ loadingText: 'Importing...' });
   });
 
   listen('finish-import', () => {

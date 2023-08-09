@@ -282,9 +282,12 @@ export interface ServerHandlers {
 
   'get-server-version': () => Promise<{ error?: string } | { version: string }>;
 
-  'get-server-url': () => Promise<unknown>;
+  'get-server-url': () => Promise<string | null>;
 
-  'set-server-url': (arg: { url; validate }) => Promise<unknown>;
+  'set-server-url': (arg: {
+    url: string;
+    validate?: boolean;
+  }) => Promise<{ error?: string }>;
 
   sync: () => Promise<
     | { error: { message: string; reason: string; meta: unknown } }

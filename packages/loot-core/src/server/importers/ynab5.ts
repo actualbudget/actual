@@ -294,10 +294,13 @@ export function parseFile(buffer: Buffer): YNAB5.Budget {
   if (data.data) {
     data = data.data;
   }
+  if (data.budget) {
+    data = data.budget;
+  }
 
   return data;
 }
 
 export function getBudgetName(_filepath: string, data: YNAB5.Budget) {
-  return data.budget_name;
+  return data.budget_name || data.name;
 }

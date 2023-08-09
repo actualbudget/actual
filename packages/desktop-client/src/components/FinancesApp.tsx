@@ -42,6 +42,7 @@ import Reports from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
+import { TransactionEdit } from './transactions/MobileTransaction';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -60,15 +61,24 @@ function NarrowNotSupported({
   return isNarrowWidth ? null : children;
 }
 
+function WideNotSupported({ children, redirectTo = '/budget' }) {
+  const { isNarrowWidth } = useResponsive();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isNarrowWidth) {
+      navigate(redirectTo);
+    }
+  }, [isNarrowWidth, navigate, redirectTo]);
+  return isNarrowWidth ? children : null;
+}
+
 function NavTab({ icon: TabIcon, name, path }) {
   return (
     <NavLink
       to={path}
       style={({ isActive }) => ({
         alignItems: 'center',
-        color: isActive
-          ? theme.sidebarItemAccentSelected
-          : theme.sidebarItemText,
+        color: isActive ? theme.mobileNavItemSelected : theme.mobileNavItem,
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
@@ -85,7 +95,7 @@ function MobileNavTabs() {
   return (
     <div
       style={{
-        backgroundColor: theme.sidebarBackground,
+        backgroundColor: theme.mobileNavBackground,
         borderTop: `1px solid ${theme.menuBorder}`,
         bottom: 0,
         ...styles.shadow,
@@ -166,16 +176,6 @@ function FinancesApp() {
               width: '100%',
             }}
           >
-            <Titlebar
-              style={{
-                WebkitAppRegion: 'drag',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-              }}
-            />
             <div
               style={{
                 flex: 1,
@@ -184,6 +184,16 @@ function FinancesApp() {
                 position: 'relative',
               }}
             >
+              <Titlebar
+                style={{
+                  WebkitAppRegion: 'drag',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 1000,
+                }}
+              />
               <Notifications />
               <BankSyncStatus />
 
@@ -218,15 +228,6 @@ function FinancesApp() {
                 <Route path="/rules" element={<ManageRulesPage />} />
                 <Route path="/settings" element={<Settings />} />
 
-                {/* TODO: remove Nordigen route after v23.8.0 */}
-                <Route
-                  path="/nordigen/link"
-                  element={
-                    <NarrowNotSupported>
-                      <WideComponent name="GoCardlessLink" />
-                    </NarrowNotSupported>
-                  }
-                />
                 <Route
                   path="/gocardless/link"
                   element={
@@ -237,13 +238,31 @@ function FinancesApp() {
                 />
 
                 <Route
+                  path="/accounts"
+                  element={<NarrowAlternate name="Accounts" />}
+                />
+
+                <Route
                   path="/accounts/:id"
                   element={<NarrowAlternate name="Account" />}
                 />
 
                 <Route
-                  path="/accounts"
-                  element={<NarrowAlternate name="Accounts" />}
+                  path="/accounts/:id/transactions/:transactionId"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/accounts/:id/transactions/new"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
                 />
               </Routes>
 

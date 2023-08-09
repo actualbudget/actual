@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import * as queries from 'loot-core/src/client/queries';
 
 import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { colors, styles } from '../../style';
 import Button from '../common/Button';
@@ -233,7 +234,6 @@ export default function Accounts() {
   let accounts = useSelector(state => state.queries.accounts);
   let newTransactions = useSelector(state => state.queries.newTransactions);
   let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  let categories = useSelector(state => state.queries.categories.list);
   let numberFormat = useSelector(
     state => state.prefs.local.numberFormat || 'comma-dot',
   );
@@ -241,19 +241,14 @@ export default function Accounts() {
     state => state.prefs.local.hideFraction || false,
   );
 
-  let { getCategories, getAccounts } = useActions();
+  const { list: categories } = useCategories();
+  let { getAccounts } = useActions();
 
   const transactions = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    (async () => {
-      if (categories.length === 0) {
-        await getCategories();
-      }
-
-      getAccounts();
-    })();
+    (async () => getAccounts())();
   }, []);
 
   // const sync = async () => {

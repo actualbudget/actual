@@ -378,15 +378,15 @@ function AccountMenu({
         items={[
           isSorted && {
             name: 'remove-sorting',
-            text: 'Remove all Sorting',
+            text: 'Remove all sorting',
           },
           canShowBalances && {
             name: 'toggle-balance',
-            text: (showBalances ? 'Hide' : 'Show') + ' Running Balance',
+            text: (showBalances ? 'Hide' : 'Show') + ' running balance',
           },
           {
             name: 'toggle-cleared',
-            text: (showCleared ? 'Hide' : 'Show') + ' “Cleared” Checkboxes',
+            text: (showCleared ? 'Hide' : 'Show') + ' “cleared” checkboxes',
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },
@@ -395,15 +395,15 @@ function AccountMenu({
             (canSync
               ? {
                   name: 'unlink',
-                  text: 'Unlink Account',
+                  text: 'Unlink account',
                 }
               : syncServerStatus === 'online' && {
                   name: 'link',
-                  text: 'Link Account',
+                  text: 'Link account',
                 }),
           account.closed
-            ? { name: 'reopen', text: 'Reopen Account' }
-            : { name: 'close', text: 'Close Account' },
+            ? { name: 'reopen', text: 'Reopen account' }
+            : { name: 'close', text: 'Close account' },
         ].filter(x => x)}
       />
     </MenuTooltip>
@@ -420,7 +420,7 @@ function CategoryMenu({ onClose, onMenuSelect, isSorted }) {
         items={[
           isSorted && {
             name: 'remove-sorting',
-            text: 'Remove all Sorting',
+            text: 'Remove all sorting',
           },
           { name: 'export', text: 'Export' },
         ]}

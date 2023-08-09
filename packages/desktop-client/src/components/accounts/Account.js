@@ -15,6 +15,7 @@ import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   deleteTransaction,
   updateTransaction,
@@ -136,7 +137,7 @@ function AllTransactions({
       .map(scheduledTransaction => {
         let amount =
           (scheduledTransaction._inverse ? -1 : 1) *
-          scheduledTransaction.amount;
+          getScheduledAmount(scheduledTransaction.amount);
         return {
           balance: (runningBalance += amount),
           id: scheduledTransaction.id,

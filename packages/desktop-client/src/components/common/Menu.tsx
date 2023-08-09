@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 
 import Text from './Text';
 import View from './View';
@@ -16,7 +16,11 @@ type KeybindingProps = {
 };
 
 function Keybinding({ keyName }: KeybindingProps) {
-  return <Text style={{ fontSize: 10, color: colors.n6 }}>{keyName}</Text>;
+  return (
+    <Text style={{ fontSize: 10, color: theme.menuKeybindingText }}>
+      {keyName}
+    </Text>
+  );
 }
 
 type MenuItem = {
@@ -106,7 +110,7 @@ export default function Menu({
         if (item === Menu.line) {
           return (
             <View key={idx} style={{ margin: '3px 0px' }}>
-              <View style={{ borderTop: '1px solid ' + colors.n10 }} />
+              <View style={{ borderTop: '1px solid ' + theme.menuBorder }} />
             </View>
           );
         } else if (item.type === Menu.label) {
@@ -114,7 +118,7 @@ export default function Menu({
             <Text
               key={item.name}
               style={{
-                color: colors.n6,
+                color: theme.altMenuItemTextHeader,
                 fontSize: 11,
                 lineHeight: '1em',
                 textTransform: 'uppercase',
@@ -145,10 +149,14 @@ export default function Menu({
                     : -3,
                 flexDirection: 'row',
                 alignItems: 'center',
+                color: theme.menuItemText,
               },
-              item.disabled && { color: colors.n7 },
+              item.disabled && { color: theme.buttonBareDisabledText },
               !item.disabled &&
-                hoveredIndex === idx && { backgroundColor: colors.n10 },
+                hoveredIndex === idx && {
+                  backgroundColor: theme.menuItemBackgroundHover,
+                  color: theme.menuItemTextHover,
+                },
             ]}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
