@@ -436,6 +436,16 @@ export type Transaction = {
   remittanceInformationStructured?: string;
 
   /**
+   * Reference as contained in the unstructured remittance reference structure
+   */
+  remittanceInformationUnstructured?: string;
+
+  /**
+   * Reference as contained in the unstructured remittance array reference structure
+   */
+  remittanceInformationUnstructuredArray?: string[];
+
+  /**
    * The amount of the transaction as billed to the account
    */
   transactionAmount: Amount;
