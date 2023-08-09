@@ -4,8 +4,7 @@ import { css } from 'glamor';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 
-import { useResponsive } from '../../ResponsiveProvider';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import View from '../common/View';
 
 import Autocomplete from './Autocomplete';
@@ -18,16 +17,16 @@ function AccountList({
   groupHeaderStyle,
 }) {
   let lastItem = null;
-  const { isNarrowWidth } = useResponsive();
-  const highlightedIndexColor = isNarrowWidth
-    ? 'rgba(100, 100, 100, .15)'
-    : colors.n4;
 
   return (
     <View>
       <View
         style={[
-          { overflow: 'auto', padding: '5px 0' },
+          {
+            overflow: 'auto',
+            padding: '5px 0',
+            color: theme.altMenuItemText,
+          },
           !embedded && { maxHeight: 175 },
         ]}
       >
@@ -52,7 +51,7 @@ function AccountList({
               <div
                 key={group}
                 style={{
-                  color: colors.y9,
+                  color: theme.alt2MenuItemTextHeader,
                   padding: '4px 9px',
                   ...groupHeaderStyle,
                 }}
@@ -62,6 +61,7 @@ function AccountList({
               </div>
             ) : null,
             <div
+              // List each account up to a max
               {...(getItemProps ? getItemProps({ item }) : null)}
               // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
               // event handler they set on this element. When this code runs
@@ -90,14 +90,11 @@ function AccountList({
                 {
                   backgroundColor:
                     highlightedIndex === idx
-                      ? highlightedIndexColor
+                      ? theme.alt2MenuItemBackgroundHover
                       : 'transparent',
                   padding: 4,
                   paddingLeft: 20,
                   borderRadius: embedded ? 4 : 0,
-                  ':active': {
-                    backgroundColor: 'rgba(100, 100, 100, .25)',
-                  },
                 },
               ])}`}
               data-testid={

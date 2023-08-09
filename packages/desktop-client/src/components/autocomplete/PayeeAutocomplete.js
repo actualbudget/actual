@@ -10,7 +10,7 @@ import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
 import { useResponsive } from '../../ResponsiveProvider';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import View from '../common/View';
 
@@ -55,10 +55,6 @@ function PayeeList({
   footer,
 }) {
   const { isNarrowWidth } = useResponsive();
-  const highlightedIndexColor = isNarrowWidth
-    ? 'rgba(100, 100, 100, .15)'
-    : colors.n4;
-  const createNewColor = isNarrowWidth ? colors.g5 : colors.g8;
   let isFiltered = items.filtered;
   let createNew = null;
   items = [...items];
@@ -90,7 +86,9 @@ function PayeeList({
               flexShrink: 0,
               padding: '6px 9px',
               backgroundColor:
-                highlightedIndex === 0 ? highlightedIndexColor : 'transparent',
+                highlightedIndex === 0
+                  ? theme.alt2MenuItemBackgroundHover
+                  : 'transparent',
               borderRadius: embedded ? 4 : 0,
               ':active': {
                 backgroundColor: 'rgba(100, 100, 100, .25)',
@@ -100,7 +98,7 @@ function PayeeList({
             <View
               style={{
                 display: 'block',
-                color: createNewColor,
+                color: theme.noticeAccent,
                 borderRadius: 4,
                 fontSize: isNarrowWidth ? 'inherit' : 11,
                 fontWeight: 500,
@@ -133,7 +131,7 @@ function PayeeList({
                 <div
                   key={'title-' + idx}
                   style={{
-                    color: colors.y9,
+                    color: theme.alt2MenuItemTextHeader,
                     padding: '4px 9px',
                     ...groupHeaderStyle,
                   }}
@@ -171,14 +169,11 @@ function PayeeList({
                   {
                     backgroundColor:
                       highlightedIndex === idx + offset
-                        ? highlightedIndexColor
+                        ? theme.alt2MenuItemBackgroundHover
                         : 'transparent',
                     borderRadius: embedded ? 4 : 0,
                     padding: 4,
                     paddingLeft: 20,
-                    ':active': {
-                      backgroundColor: 'rgba(100, 100, 100, .25)',
-                    },
                   },
                 ])}`}
               >
@@ -190,7 +185,7 @@ function PayeeList({
                   style={{
                     fontSize: isNarrowWidth ? 'inherit' : 11,
                     padding: 5,
-                    color: colors.n5,
+                    color: theme.altpageTextSubdued,
                     textAlign: 'center',
                   }}
                 >

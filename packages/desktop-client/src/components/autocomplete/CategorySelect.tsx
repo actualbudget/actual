@@ -8,8 +8,7 @@ import React, {
 import { css } from 'glamor';
 
 import Split from '../../icons/v0/Split';
-import { useResponsive } from '../../ResponsiveProvider';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
@@ -45,10 +44,6 @@ function CategoryList({
   groupHeaderStyle,
 }: CategoryListProps) {
   let lastGroup = null;
-  const { isNarrowWidth } = useResponsive();
-  const highlightedIndexColor = isNarrowWidth
-    ? 'rgba(100, 100, 100, .15)'
-    : colors.n4;
 
   return (
     <View>
@@ -92,7 +87,7 @@ function CategoryList({
                 style={{
                   backgroundColor:
                     highlightedIndex === idx
-                      ? highlightedIndexColor
+                      ? theme.alt2MenuItemBackgroundHover
                       : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   flexShrink: 0,
@@ -100,7 +95,7 @@ function CategoryList({
                   alignItems: 'center',
                   fontSize: 11,
                   fontWeight: 500,
-                  color: colors.g8,
+                  color: theme.noticeAccent,
                   padding: '6px 8px',
                   ':active': {
                     backgroundColor: 'rgba(100, 100, 100, .25)',
@@ -123,7 +118,7 @@ function CategoryList({
               {showGroup && (
                 <div
                   style={{
-                    color: colors.y9,
+                    color: theme.alt2MenuItemTextHeader,
                     padding: '4px 9px',
                     ...groupHeaderStyle,
                   }}
@@ -140,14 +135,11 @@ function CategoryList({
                   {
                     backgroundColor:
                       highlightedIndex === idx
-                        ? highlightedIndexColor
+                        ? theme.alt2MenuItemBackgroundHover
                         : 'transparent',
                     padding: 4,
                     paddingLeft: 20,
                     borderRadius: embedded ? 4 : 0,
-                    ':active': {
-                      backgroundColor: 'rgba(100, 100, 100, .25)',
-                    },
                   },
                 ])}`}
                 data-testid={
