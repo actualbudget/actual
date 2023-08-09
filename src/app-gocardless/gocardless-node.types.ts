@@ -433,7 +433,7 @@ export type Transaction = {
   /**
    * Reference as contained in the structured remittance reference structure
    */
-  remittanceInformation?: string;
+  remittanceInformationStructured?: string;
 
   /**
    * The amount of the transaction as billed to the account

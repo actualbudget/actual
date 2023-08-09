@@ -1,5 +1,5 @@
 import { mockTransactionAmount } from '../services/tests/fixtures.js';
-import { sortByBookingDate } from '../utils.js';
+import { sortByBookingDateOrValueDate } from '../utils.js';
 
 describe('utils', () => {
   describe('#sortByBookingDate', () => {
@@ -18,7 +18,7 @@ describe('utils', () => {
           transactionAmount: mockTransactionAmount,
         },
       ];
-      expect(sortByBookingDate(transactions)).toEqual([
+      expect(sortByBookingDateOrValueDate(transactions)).toEqual([
         {
           bookingDate: '2023-01-20',
           transactionAmount: mockTransactionAmount,

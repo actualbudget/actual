@@ -1,4 +1,8 @@
-import { sortByBookingDate, amountToInteger, printIban } from '../utils.js';
+import {
+  sortByBookingDateOrValueDate,
+  amountToInteger,
+  printIban,
+} from '../utils.js';
 
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
@@ -41,7 +45,7 @@ export default {
       'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
       { top10Transactions: JSON.stringify(transactions.slice(0, 10)) },
     );
-    return sortByBookingDate(transactions);
+    return sortByBookingDateOrValueDate(transactions);
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
