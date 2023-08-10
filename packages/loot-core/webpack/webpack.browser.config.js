@@ -1,5 +1,6 @@
 let path = require('path');
 
+const TerserPlugin = require('terser-webpack-plugin');
 let webpack = require('webpack');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
@@ -49,13 +50,18 @@ module.exports = {
     rules: [
       {
         test: /\.m?[tj]sx?$/,
+        exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: 'swc-loader',
           options: {
-            presets: [
-              ['@babel/preset-env', { bugfixes: true }],
-              '@babel/preset-typescript',
-            ],
+            jsc: {
+              target: 'es2022',
+              externalHelpers: true,
+              parser: {
+                syntax: 'typescript',
+                tsx: true,
+              },
+            },
           },
         },
       },
@@ -67,6 +73,19 @@ module.exports = {
   },
   optimization: {
     chunkIds: 'named',
+    ...(process.env.NODE_ENV !== 'development'
+      ? {
+          minimize: true,
+          minimizer: [
+            new TerserPlugin({
+              minify: TerserPlugin.swcMinify,
+              // `terserOptions` options will be passed to `swc` (`@swc/core`)
+              // Link to options - https://swc.rs/docs/config-js-minify
+              terserOptions: {},
+            }),
+          ],
+        }
+      : {}),
   },
   plugins: [
     new webpack.DefinePlugin({

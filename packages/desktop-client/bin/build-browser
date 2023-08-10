@@ -9,7 +9,7 @@ rm -fr build
 
 export IS_GENERIC_BROWSER=1
 export INLINE_RUNTIME_CHUNK=false
-export REACT_APP_BACKEND_WORKER_HASH=`ls "$ROOT"/../public/kcab/kcab.worker.*.js |  sed 's/.*kcab\.worker\.\(.*\)\.js/\1/'`
+export REACT_APP_BACKEND_WORKER_HASH=`ls "$ROOT"/../public/kcab/kcab.worker.*.js | sed 's/.*kcab\.worker\.\(.*\)\.js/\1/'`
 
 yarn build
 
