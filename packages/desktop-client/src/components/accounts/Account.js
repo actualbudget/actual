@@ -91,7 +91,6 @@ function AllTransactions({
   let scheduleData = useCachedSchedules();
 
   transactions ??= [];
-  console.log('transactions', transactions);
 
   let schedules = useMemo(
     () =>
