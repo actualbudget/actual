@@ -600,8 +600,8 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               {skipWeekend && (
                 <Select
                   options={[
-                    ['before', 'Execute Before'],
-                    ['after', 'Execute After'],
+                    ['before', 'Schedule Before'],
+                    ['after', 'Schedule After'],
                   ]}
                   value={state.fields.date.weekendSolveMode}
                   onChange={value =>
