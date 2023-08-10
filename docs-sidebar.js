@@ -65,7 +65,10 @@ const sidebars = {
           type: 'category',
           label: 'Project Leadership',
           collapsible: false,
-          items: ['contributing/leadership/funding'],
+          items: [
+            'contributing/leadership/funding',
+            'contributing/leadership/new-core-contributors-guide',
+          ],
         },
       ],
     },
@@ -213,10 +216,7 @@ const sidebars = {
             type: 'doc',
             id: 'reports-filters/index',
           },
-          items: [
-            'reports-filters/reports',
-            'reports-filters/filters',
-          ],
+          items: ['reports-filters/reports', 'reports-filters/filters'],
         },
         {
           type: 'category',
