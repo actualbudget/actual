@@ -14,6 +14,7 @@ import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
+import Select from '../common/Select';
 import Stack from '../common/Stack';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -168,6 +169,29 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
         case 'switch-transactions':
           return { ...state, transactionsMode: action.mode };
+        case 'set-skip-weekend':
+          return {
+            ...state,
+            fields: {
+              ...state.fields,
+              date: {
+                ...state.fields.date,
+                skipWeekend: action.skipWeekend,
+                weekendSolveMode: 'after',
+              },
+            },
+          };
+        case 'set-weekend-solve':
+          return {
+            ...state,
+            fields: {
+              ...state.fields,
+              date: {
+                ...state.fields.date,
+                weekendSolveMode: action.value,
+              },
+            },
+          };
 
         default:
           throw new Error('Unknown action: ' + action.type);
@@ -203,6 +227,8 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
           start: monthUtils.currentDay(),
           frequency: 'monthly',
           patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'after',
         };
         let schedule = {
           posts_transaction: false,
@@ -411,6 +437,9 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
   // This is derived from the date
   let repeats = state.fields.date ? !!state.fields.date.frequency : false;
+  let skipWeekend = state.fields.date.hasOwnProperty('skipWeekend')
+    ? state.fields.date.skipWeekend
+    : false;
 
   return (
     <Modal
@@ -527,7 +556,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       </View>
 
       <Stack direction="row" align="flex-start">
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, width: '13.44rem' }}>
           {repeats ? (
             <RecurringSchedulePicker
               value={state.fields.date}
@@ -543,6 +572,45 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               }
               dateFormat={dateFormat}
             />
+          )}
+          {repeats && (
+            <View
+              style={{
+                marginTop: 5,
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                userSelect: 'none',
+                minHeight: '2.125rem',
+              }}
+            >
+              <Checkbox
+                id="form_skipwe"
+                checked={skipWeekend}
+                onChange={e => {
+                  dispatch({
+                    type: 'set-skip-weekend',
+                    skipWeekend: e.target.checked,
+                  });
+                }}
+              />
+              <label htmlFor="form_skipwe" style={{ userSelect: 'none' }}>
+                Skip Weekends
+              </label>
+              {skipWeekend && (
+                <Select
+                  options={[
+                    ['before', 'Execute Before'],
+                    ['after', 'Execute After'],
+                  ]}
+                  value={state.fields.date.weekendSolveMode}
+                  onChange={value =>
+                    dispatch({ type: 'set-weekend-solve', value: value })
+                  }
+                  style={{ minHeight: '1px', width: '100%', fontSize: 11 }}
+                />
+              )}
+            </View>
           )}
 
           {state.upcomingDates && (

@@ -84,6 +84,17 @@ export function getNextDate(dateCond, start = new Date()) {
 
     if (dates.length > 0) {
       let date = dates[0].date;
+      if (d.isWeekend(date) && value.schedule.data.skipWeekend) {
+        if (value.schedule.data.weekendSolve === 'after') {
+          date = d.nextMonday(date);
+        } else if (value.schedule.data.weekendSolve === 'before') {
+          date = d.previousFriday(date);
+        } else {
+          throw new Error(
+            'Unknown weekend solve mode, this should not happen!',
+          );
+        }
+      }
       return dayFromDate(date);
     }
   }
