@@ -9,6 +9,7 @@ categorygroup
 clsx
 codemirror
 commandlet
+Cardless
 Crd
 crdt
 creditcards
