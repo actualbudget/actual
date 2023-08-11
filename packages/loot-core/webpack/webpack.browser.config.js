@@ -59,7 +59,8 @@ module.exports = {
               externalHelpers: true,
               parser: {
                 syntax: 'typescript',
-                tsx: true,
+                decorators: true,
+                dynamicImport: true,
               },
             },
           },
@@ -73,19 +74,15 @@ module.exports = {
   },
   optimization: {
     chunkIds: 'named',
-    ...(process.env.NODE_ENV !== 'development'
-      ? {
-          minimize: true,
-          minimizer: [
-            new TerserPlugin({
-              minify: TerserPlugin.swcMinify,
-              // `terserOptions` options will be passed to `swc` (`@swc/core`)
-              // Link to options - https://swc.rs/docs/config-js-minify
-              terserOptions: {},
-            }),
-          ],
-        }
-      : {}),
+    minimize: process.env.NODE_ENV !== 'development',
+    minimizer: [
+      new TerserPlugin({
+        minify: TerserPlugin.swcMinify,
+        // `terserOptions` options will be passed to `swc` (`@swc/core`)
+        // Link to options - https://swc.rs/docs/config-js-minify
+        terserOptions: {},
+      }),
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
