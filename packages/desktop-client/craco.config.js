@@ -5,7 +5,6 @@ const {
   removeLoaders,
   addAfterLoader,
   addPlugins,
-  whenProd,
 } = require('@craco/craco');
 const chokidar = require('chokidar');
 const TerserPlugin = require('terser-webpack-plugin');
