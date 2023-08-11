@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTransition, animated } from 'react-spring';
 
-import { colors, styles } from '../style';
+import { theme, styles } from '../style';
 
 import AnimatedRefresh from './AnimatedRefresh';
 import Text from './common/Text';
@@ -43,8 +43,8 @@ export default function BankSyncStatus() {
               <View
                 style={{
                   borderRadius: 4,
-                  backgroundColor: colors.b9,
-                  color: colors.b1,
+                  backgroundColor: theme.pillBackgroundSelected,
+                  color: theme.pillTextSelected,
                   padding: '5px 13px',
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -53,7 +53,7 @@ export default function BankSyncStatus() {
               >
                 <AnimatedRefresh
                   animating={true}
-                  iconStyle={{ color: colors.b1 }}
+                  iconStyle={{ color: theme.pillTextSelected }}
                 />
                 <Text>Syncing {item}</Text>
               </View>

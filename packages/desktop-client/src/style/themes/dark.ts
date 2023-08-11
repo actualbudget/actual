@@ -11,6 +11,7 @@ export const pageText = colorPalette.navy150;
 export const pageTextLight = pageText;
 export const pageTextSubdued = colorPalette.navy500;
 export const altpageTextSubdued = pageTextSubdued;
+export const pageTextDark = pageText;
 export const pageTextPositive = colorPalette.purple200;
 export const pageTextLink = colorPalette.purple400;
 
@@ -82,6 +83,9 @@ export const mobileNavItem = colorPalette.navy150;
 export const mobileNavItemSelected = colorPalette.purple400;
 export const mobileAccountShadow = cardShadow;
 export const mobileAccountText = colorPalette.blue800;
+export const mobileModalBackground = colorPalette.navy900;
+export const mobileModalText = colorPalette.white;
+export const altMobileModalText = colorPalette.blue100;
 
 // Button
 export const buttonMenuText = colorPalette.navy100;

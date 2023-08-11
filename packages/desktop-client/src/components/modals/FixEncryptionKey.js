@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
 import InitialFocus from '../common/InitialFocus';
@@ -53,7 +53,6 @@ export default function FixEncryptionKey({
             style={{
               fontSize: 25,
               fontWeight: 700,
-              color: colors.n2,
               margin: '20px 0',
             }}
           >
@@ -96,7 +95,7 @@ export default function FixEncryptionKey({
               {error && (
                 <View
                   style={{
-                    color: colors.r4,
+                    color: theme.errorText,
                     textAlign: 'center',
                     fontSize: 13,
                     marginBottom: 3,

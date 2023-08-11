@@ -11,7 +11,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
 import Input from '../common/Input';
 import Modal from '../common/Modal';
@@ -131,11 +131,13 @@ function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
     <Text>
       <Text>
         {date || (
-          <Text style={{ color: colors.n4, fontStyle: 'italic' }}>Empty</Text>
+          <Text style={{ color: theme.pageTextLight, fontStyle: 'italic' }}>
+            Empty
+          </Text>
         )}{' '}
         &rarr;{' '}
       </Text>
-      <Text style={{ color: parsed ? colors.g3 : colors.r4 }}>
+      <Text style={{ color: parsed ? theme.noticeText : theme.errorText }}>
         {parsed || 'Invalid'}
       </Text>
     </Text>
@@ -274,8 +276,13 @@ function Transaction({
   inflow = amountToCurrency(inflow);
 
   return (
-    <Row style={{ backgroundColor: 'white' }}>
-      <Field width={200} borderColor={colors.border}>
+    <Row
+      style={{
+        backgroundColor: theme.tableBackground,
+        color: theme.tableText,
+      }}
+    >
+      <Field width={200} style={{ borderColor: theme.tableBorder }}>
         {showParsed ? (
           <ParsedDate
             parseDateFormat={parseDateFormat}
@@ -288,19 +295,23 @@ function Transaction({
       </Field>
       <Field
         width="flex"
-        borderColor={colors.border}
+        style={{ borderColor: theme.tableBorder }}
         title={transaction.imported_payee || transaction.payee_name}
       >
         {transaction.payee_name}
       </Field>
-      <Field width="flex" borderColor={colors.border} title={transaction.notes}>
+      <Field
+        width="flex"
+        style={{ borderColor: theme.tableBorder }}
+        title={transaction.notes}
+      >
         {transaction.notes}
       </Field>
       {splitMode ? (
         <>
           <Field
             width={90}
-            borderColor={colors.border}
+            style={{ borderColor: theme.tableBorder }}
             contentStyle={[{ textAlign: 'right' }, styles.tnum]}
             title={outflow}
           >
@@ -308,7 +319,7 @@ function Transaction({
           </Field>
           <Field
             width={90}
-            borderColor={colors.border}
+            style={{ borderColor: theme.tableBorder }}
             contentStyle={[{ textAlign: 'right' }, styles.tnum]}
             title={inflow}
           >
@@ -318,7 +329,7 @@ function Transaction({
       ) : (
         <Field
           width={90}
-          borderColor={colors.border}
+          style={{ borderColor: theme.tableBorder }}
           contentStyle={[{ textAlign: 'right' }, styles.tnum]}
           title={amount}
         >
@@ -331,7 +342,7 @@ function Transaction({
 
 function SubLabel({ title }) {
   return (
-    <Text style={{ fontSize: 13, marginBottom: 3, color: colors.n3 }}>
+    <Text style={{ fontSize: 13, marginBottom: 3, color: theme.pageText }}>
       {title}
     </Text>
   );
@@ -419,7 +430,10 @@ function CheckboxOption({ id, checked, disabled, onChange, children, style }) {
       />
       <label
         htmlFor={id}
-        style={{ userSelect: 'none', color: disabled ? colors.n6 : null }}
+        style={{
+          userSelect: 'none',
+          color: disabled ? theme.pageTextSubdued : null,
+        }}
       >
         {children}
       </label>
@@ -805,7 +819,7 @@ export default function ImportTransactions({ modalProps, options }) {
     >
       {error && !error.parsed && (
         <View style={{ alignItems: 'center', marginBottom: 15 }}>
-          <Text style={{ marginRight: 10, color: colors.r4 }}>
+          <Text style={{ marginRight: 10, color: theme.errorText }}>
             <strong>Error:</strong> {error.message}
           </Text>
         </View>
@@ -815,7 +829,7 @@ export default function ImportTransactions({ modalProps, options }) {
           style={{
             flex: 'unset',
             height: 300,
-            border: '1px solid ' + colors.border,
+            border: '1px solid ' + theme.tableBorder,
           }}
         >
           <TableHeader headers={headers} />
@@ -823,7 +837,7 @@ export default function ImportTransactions({ modalProps, options }) {
           <TableWithNavigator
             items={transactions}
             fields={['payee', 'amount']}
-            style={{ backgroundColor: colors.n11 }}
+            style={{ backgroundColor: theme.tableHeaderBackground }}
             getItemKey={index => index}
             renderEmpty={() => {
               return (
@@ -831,7 +845,7 @@ export default function ImportTransactions({ modalProps, options }) {
                   style={{
                     textAlign: 'center',
                     marginTop: 25,
-                    color: colors.n4,
+                    color: theme.tableHeaderText,
                     fontStyle: 'italic',
                   }}
                 >
@@ -859,7 +873,7 @@ export default function ImportTransactions({ modalProps, options }) {
       {error && error.parsed && (
         <View
           style={{
-            color: colors.r4,
+            color: theme.errorText,
             alignItems: 'center',
             marginTop: 10,
           }}

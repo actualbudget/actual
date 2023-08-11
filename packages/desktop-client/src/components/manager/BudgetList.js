@@ -13,7 +13,7 @@ import FileDouble from '../../icons/v1/FileDouble';
 import CloudUnknown from '../../icons/v2/CloudUnknown';
 import Key from '../../icons/v2/Key';
 import RefreshArrow from '../../icons/v2/RefreshArrow';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import tokens from '../../tokens';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
@@ -56,7 +56,7 @@ function FileMenu({ onDelete, onClose }) {
   return <Menu onMenuSelect={onMenuSelect} items={items} />;
 }
 
-function DetailButton({ state, onDelete }) {
+function DetailButton({ style, state, onDelete }) {
   let [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -68,7 +68,9 @@ function DetailButton({ state, onDelete }) {
           setMenuOpen(true);
         }}
       >
-        <DotsHorizontalTriple style={{ width: 16, height: 16 }} />
+        <DotsHorizontalTriple
+          style={{ width: 16, height: 16, color: 'inherit', ...style }}
+        />
       </Button>
       {menuOpen && (
         <Tooltip
@@ -96,7 +98,7 @@ function FileState({ file }) {
     case 'unknown':
       Icon = CloudUnknown;
       status = 'Network unavailable';
-      color = colors.n7;
+      color = theme.buttonNormalDisabledText;
       break;
     case 'remote':
       Icon = CloudDownload;
@@ -160,12 +162,15 @@ function File({ file, onSelect, onDelete }) {
           ...styles.shadow,
           margin: 10,
           padding: '12px 15px',
-          backgroundColor: 'white',
+          backgroundColor: theme.buttonNormalBackground,
+          color: theme.buttonNormalText,
+          border: '1px solid ' + theme.buttonNormalBorder,
           borderRadius: 6,
           flexShrink: 0,
           cursor: 'pointer',
           ':hover': {
-            backgroundColor: colors.hover,
+            backgroundColor: theme.buttonNormalBackgroundHover,
+            color: theme.buttonNormalTextHover,
           },
         },
       ]}
@@ -185,7 +190,9 @@ function File({ file, onSelect, onDelete }) {
               width: 13,
               height: 13,
               marginRight: 8,
-              color: file.hasKey ? colors.b5 : colors.n8,
+              color: file.hasKey
+                ? theme.formLabelText
+                : theme.buttonNormalDisabledText,
             }}
           />
         )}
@@ -278,7 +285,11 @@ export default function BudgetList() {
         },
       }}
     >
-      <View>
+      <View
+        style={{
+          color: theme.pageText,
+        }}
+      >
         <Text style={[styles.veryLargeText, { margin: 20 }]}>Files</Text>
         <View
           style={{
@@ -322,7 +333,7 @@ export default function BudgetList() {
           type="bare"
           style={{
             marginLeft: 10,
-            color: colors.n4,
+            color: theme.pageTextLight,
           }}
           onClick={e => {
             e.preventDefault();

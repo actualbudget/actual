@@ -8,7 +8,7 @@ import {
 
 import { useActions } from '../../hooks/useActions';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
 import { BigInput } from '../common/Input';
 import Text from '../common/Text';
@@ -18,7 +18,7 @@ import { useServerURL, useSetServerURL } from '../ServerContext';
 import { Title } from './subscribe/common';
 
 export default function ConfigServer() {
-  useSetThemeColor(colors.p5);
+  useSetThemeColor(theme.pageTextPositive);
   let { createBudget, signOut, loggedIn } = useActions();
   let navigate = useNavigate();
   let [url, setUrl] = useState('');
@@ -95,7 +95,7 @@ export default function ConfigServer() {
       <Text
         style={{
           fontSize: 16,
-          color: colors.n2,
+          color: theme.tableRowHeaderText,
           lineHeight: 1.5,
         }}
       >
@@ -117,7 +117,7 @@ export default function ConfigServer() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.r4,
+            color: theme.errorText,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -167,7 +167,11 @@ export default function ConfigServer() {
         }}
       >
         {currentUrl ? (
-          <Button type="bare" style={{ color: colors.n4 }} onClick={onSkip}>
+          <Button
+            type="bare"
+            style={{ color: theme.pageTextLight }}
+            onClick={onSkip}
+          >
             Stop using a server
           </Button>
         ) : (
@@ -176,7 +180,7 @@ export default function ConfigServer() {
               <Button
                 type="bare"
                 style={{
-                  color: colors.n4,
+                  color: theme.pageTextLight,
                   margin: 5,
                   marginRight: 15,
                 }}
@@ -187,7 +191,7 @@ export default function ConfigServer() {
             )}
             <Button
               type="bare"
-              style={{ color: colors.n4, margin: 5 }}
+              style={{ color: theme.pageTextLight, margin: 5 }}
               onClick={onSkip}
             >
               Don’t use a server

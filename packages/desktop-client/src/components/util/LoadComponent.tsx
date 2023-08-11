@@ -1,7 +1,7 @@
 import { type ComponentType, useEffect, useState } from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
@@ -43,7 +43,7 @@ function LoadComponentInner<K extends string>({
         {message && (
           <Block style={{ marginBottom: 20, fontSize: 18 }}>{message}</Block>
         )}
-        <AnimatedLoading width={25} color={colors.n1} />
+        <AnimatedLoading width={25} color={theme.pageText} />
       </View>
     );
   }
