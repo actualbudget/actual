@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { savePrefs } from 'loot-core/src/client/actions';
 
 import { useResponsive } from '../ResponsiveProvider';
-import { colors, styles } from '../style';
+import { theme, styles } from '../style';
 
 import Button from './common/Button';
 import Text from './common/Text';
@@ -55,8 +55,8 @@ export default function MobileWebMessage() {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: colors.n1,
-        color: 'white',
+        backgroundColor: theme.mobileModalBackground,
+        color: theme.mobileModalText,
         padding: 10,
         margin: 10,
         borderRadius: 6,

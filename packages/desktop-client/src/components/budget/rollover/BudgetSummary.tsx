@@ -8,7 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
-import { colors, styles } from '../../../style';
+import { theme, styles } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import Block from '../../common/Block';
 import Button from '../../common/Button';
@@ -23,7 +23,6 @@ import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import useSheetName from '../../spreadsheet/useSheetName';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
-import { MONTH_BOX_SHADOW } from '../constants';
 
 import HoldTooltip from './HoldTooltip';
 import { useRollover } from './RolloverContext';
@@ -45,10 +44,11 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
         !collapsed && {
           padding: '5px 0',
           marginTop: 17,
-          backgroundColor: colors.n11,
+          backgroundColor: theme.tableRowHeaderBackground,
+          color: theme.tableRowHeaderText,
           borderTopWidth: 1,
           borderBottomWidth: 1,
-          borderColor: colors.n9,
+          borderColor: theme.tableBorder,
         },
         collapsed && {
           padding: 7,
@@ -186,11 +186,13 @@ function ToBudget({
                   fontWeight: 400,
                   userSelect: 'none',
                   cursor: 'pointer',
-                  color: isNegative ? colors.r4 : colors.p5,
+                  color: isNegative ? theme.errorText : theme.pageTextPositive,
                   marginBottom: -1,
                   borderBottom: '1px solid transparent',
                   ':hover': {
-                    borderColor: isNegative ? colors.r4 : colors.p5,
+                    borderColor: isNegative
+                      ? theme.errorText
+                      : theme.pageTextPositive,
                   },
                 },
               ])}
@@ -289,8 +291,9 @@ export function BudgetSummary({
     <View
       data-testid="budget-summary"
       style={{
-        backgroundColor: 'white',
-        boxShadow: MONTH_BOX_SHADOW,
+        backgroundColor: theme.tableBackground,
+        color: theme.tableText,
+        boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,
@@ -331,7 +334,7 @@ export function BudgetSummary({
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: colors.n6, margin: 1 }}
+                style={{ color: theme.tableText, margin: 1 }}
               />
             </Button>
           </View>
@@ -366,7 +369,7 @@ export function BudgetSummary({
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={colors.n6}
+                defaultColor={theme.altMenuItemTextHeader}
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
@@ -374,7 +377,7 @@ export function BudgetSummary({
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: colors.n5 }}
+                  style={{ color: theme.alt2PillText }}
                 />
               </Button>
               {menuOpen && (
@@ -426,8 +429,8 @@ export function BudgetSummary({
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: colors.n11,
-              borderTop: '1px solid ' + colors.n10,
+              backgroundColor: theme.tableHeaderBackground,
+              borderTop: '1px solid ' + theme.tableBorder,
             }}
           >
             <ToBudget

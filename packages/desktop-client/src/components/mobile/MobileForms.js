@@ -2,13 +2,12 @@ import { forwardRef } from 'react';
 
 import { css } from 'glamor';
 
-import { theme } from '../../style';
+import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Text from '../common/Text';
 import View from '../common/View';
 
-export const EDITING_PADDING = 12;
 const FIELD_HEIGHT = 40;
 
 export function FieldLabel({ title, flush, style }) {
@@ -20,7 +19,7 @@ export function FieldLabel({ title, flush, style }) {
           marginTop: flush ? 0 : 25,
           fontSize: 13,
           color: theme.tableRowHeaderText,
-          paddingLeft: EDITING_PADDING,
+          paddingLeft: styles.mobileEditingPadding,
           textTransform: 'uppercase',
           userSelect: 'none',
         },
@@ -38,7 +37,7 @@ const valueStyle = {
   marginLeft: -1,
   marginRight: -1,
   height: FIELD_HEIGHT,
-  paddingHorizontal: EDITING_PADDING,
+  paddingHorizontal: styles.mobileEditingPadding,
 };
 
 export const InputField = forwardRef(function InputField(
@@ -118,7 +117,7 @@ export function BooleanField({ checked, onUpdate, style }) {
       onChange={e => onUpdate(e.target.checked)}
       {...css([
         {
-          marginInline: EDITING_PADDING,
+          marginInline: styles.mobileEditingPadding,
         },
         style,
       ])}

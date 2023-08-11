@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { useActions } from '../hooks/useActions';
 import Close from '../icons/v1/Close';
-import { colors } from '../style';
+import { theme } from '../style';
 
 import Button from './common/Button';
 import LinkButton from './common/LinkButton';
@@ -36,8 +36,8 @@ export default function UpdateNotification() {
           bottom: 0,
           right: 0,
           margin: '15px 17px',
-          backgroundColor: colors.p6,
-          color: 'white',
+          backgroundColor: theme.pageTextPositive,
+          color: theme.tableBackground,
           padding: '7px 10px',
           borderRadius: 4,
           zIndex: 10000,
@@ -51,15 +51,8 @@ export default function UpdateNotification() {
           <View style={{ flex: 1 }} />
           <View style={{ marginTop: -1 }}>
             <Text>
+              <LinkButton onClick={updateApp}>Restart</LinkButton> (
               <LinkButton
-                onClick={updateApp}
-                style={{ color: 'white', textDecoration: 'underline' }}
-              >
-                Restart
-              </LinkButton>{' '}
-              (
-              <LinkButton
-                style={{ color: 'white', textDecoration: 'underline' }}
                 onClick={() =>
                   window.Actual.openURLInBrowser(
                     'https://actualbudget.org/docs/releases',
@@ -74,7 +67,7 @@ export default function UpdateNotification() {
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onClick={() => closeNotification(setAppState)}
               >
-                <Close width={9} style={{ color: 'white' }} />
+                <Close width={9} style={{ color: theme.pageText }} />
               </Button>
             </Text>
           </View>

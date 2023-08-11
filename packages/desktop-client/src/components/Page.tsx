@@ -3,7 +3,7 @@ import React, { type ReactNode } from 'react';
 import { type CSSProperties } from 'glamor';
 
 import { useResponsive } from '../ResponsiveProvider';
-import { colors, styles } from '../style';
+import { theme, styles } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -23,8 +23,8 @@ function PageTitle({
         style={[
           {
             alignItems: 'center',
-            backgroundColor: colors.b2,
-            color: 'white',
+            backgroundColor: theme.sidebarBackground,
+            color: theme.mobileModalText,
             flexDirection: 'row',
             flex: '1 0 auto',
             fontSize: 18,

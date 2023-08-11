@@ -3,7 +3,7 @@ import React from 'react';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Text from '../common/Text';
@@ -33,6 +33,7 @@ function BudgetSummary({ month, modalProps }) {
               style={[
                 styles.text,
                 {
+                  color: theme.tableText,
                   fontWeight: '600',
                   textAlign: 'right',
                   marginRight: 10,
@@ -84,7 +85,8 @@ function BudgetSummary({ month, modalProps }) {
                 {
                   fontWeight: '600',
                   fontSize: 22,
-                  color: budgetAmount < 0 ? colors.r4 : colors.n1,
+                  color:
+                    budgetAmount < 0 ? theme.errorText : theme.tableTextHover,
                 },
               ]}
             >

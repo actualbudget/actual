@@ -7,7 +7,7 @@ import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
-import { colors } from '../style';
+import { theme } from '../style';
 
 import Button from './common/Button';
 import Text from './common/Text';
@@ -41,7 +41,7 @@ function NotesTooltip({
         <textarea
           ref={inputRef}
           {...css({
-            border: '1px solid ' + colors.border,
+            border: '1px solid ' + theme.buttonNormalBorder,
             padding: 7,
             minWidth: 300,
             minHeight: 120,
@@ -79,7 +79,7 @@ export default function NotesButton({
   id,
   width = 12,
   height = 12,
-  defaultColor = colors.n8,
+  defaultColor = theme.buttonNormalText,
   tooltipPosition,
   style,
 }: NotesButtonProps) {
@@ -125,7 +125,7 @@ export default function NotesButton({
           { color: defaultColor },
           style,
           hasNotes && { display: 'flex !important' },
-          tooltipOpen && { color: colors.n1 },
+          tooltipOpen && { color: theme.buttonNormalText },
         ]}
         {...tooltip.getOpenEvents()}
       >

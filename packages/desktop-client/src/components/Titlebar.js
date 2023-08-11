@@ -22,7 +22,7 @@ import SvgEye from '../icons/v2/Eye';
 import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
-import { colors } from '../style';
+import { theme } from '../style';
 import tokens from '../tokens';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
@@ -71,7 +71,9 @@ function UncategorizedButton() {
       <ButtonLink
         type="bare"
         to="/accounts/uncategorized"
-        style={{ color: colors.r5 }}
+        style={{
+          color: theme.errorText,
+        }}
       >
         {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
       </ButtonLink>
@@ -150,21 +152,21 @@ export function SyncButton({ style }) {
           WebkitAppRegion: 'none',
           color:
             syncState === 'error'
-              ? colors.r7
+              ? theme.errorText
               : syncState === 'disabled' ||
                 syncState === 'offline' ||
                 syncState === 'local'
-              ? colors.n9
+              ? theme.tableTextInactive
               : null,
         },
         media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
             syncState === 'error'
-              ? colors.r4
+              ? theme.errorText
               : syncState === 'disabled' ||
                 syncState === 'offline' ||
                 syncState === 'local'
-              ? colors.n6
+              ? theme.pageTextSubdued
               : null,
         }),
       )}
@@ -329,7 +331,7 @@ export default function Titlebar({ style }) {
         >
           <NavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: colors.n5, left: 0 }}
+            style={{ width: 15, height: 15, color: theme.pageText, left: 0 }}
           />
         </Button>
       )}

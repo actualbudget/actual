@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../hooks/useActions';
-import { colors, styles } from '../style';
+import { theme, styles } from '../style';
 
 import Button from './common/Button';
 import Menu from './common/Menu';
@@ -70,7 +70,7 @@ export default function LoggedInUser({ hideIfNoServer, style, color }) {
       <Text
         style={[
           {
-            color: colors.n5,
+            color: theme.pageText,
             fontStyle: 'italic',
           },
           styles.delayedFadeIn,

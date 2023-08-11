@@ -16,7 +16,7 @@ import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
 import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Card from '../common/Card';
 import Label from '../common/Label';
@@ -46,14 +46,14 @@ function ToBudget({ toBudget, onClick }) {
     >
       <Label
         title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
-        style={{ color: colors.n1, flexShrink: 0 }}
+        style={{ color: theme.tableText, flexShrink: 0 }}
       />
       <Text
         style={[
           styles.smallText,
           {
             fontWeight: '500',
-            color: amount < 0 ? colors.r4 : colors.n1,
+            color: amount < 0 ? theme.errorText : theme.tableText,
           },
         ]}
       >
@@ -72,11 +72,11 @@ function Saved({ projected }) {
   return (
     <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
       {projected ? (
-        <Label title="PROJECTED SAVINGS" style={{ color: colors.n1 }} />
+        <Label title="PROJECTED SAVINGS" style={{ color: theme.tableText }} />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: colors.n1 }}
+          style={{ color: theme.tableText }}
         />
       )}
 
@@ -85,7 +85,11 @@ function Saved({ projected }) {
           styles.smallText,
           {
             fontWeight: '500',
-            color: projected ? colors.y3 : isNegative ? colors.r4 : colors.n1,
+            color: projected
+              ? theme.warningText
+              : isNegative
+              ? theme.errorText
+              : theme.tableText,
           },
         ]}
       >
@@ -273,7 +277,9 @@ class BudgetCategory extends PureComponent {
         // ref={el => (this.container = el)}
         style={[
           {
-            backgroundColor: editing ? colors.p11 : 'transparent',
+            backgroundColor: editing
+              ? theme.formInputBackground
+              : 'transparent',
             borderBottomWidth: 0,
             borderTopWidth: index > 0 ? 1 : 0,
           },
@@ -312,7 +318,7 @@ class BudgetCategory extends PureComponent {
             name="balance"
             binding={balance}
             style={[styles.smallText, { width: 90, textAlign: 'right' }]}
-            getStyle={value => value < 0 && { color: colors.r4 }}
+            getStyle={value => value < 0 && { color: theme.errorText }}
             type="financial"
           />
         </View>
@@ -381,7 +387,8 @@ class TotalsRow extends PureComponent {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: colors.n11,
+          color: theme.tableHeaderText,
+          backgroundColor: theme.tableHeaderBackground,
         }}
         data-testid="totals"
       >
@@ -529,7 +536,7 @@ class IncomeCategory extends PureComponent {
 //           flexDirection: 'row',
 //           justifyContent: 'flex-end',
 //           alignItems: 'stretch',
-//           backgroundColor: colors.n10,
+//           backgroundColor: colorsm.tableBackground,
 //           padding: 5,
 //           height: 45
 //         }}
@@ -674,7 +681,10 @@ class IncomeBudgetGroup extends Component {
             }
             nameTextStyle={{ fontWeight: '500' }}
             amountTextStyle={{ fontWeight: '500' }}
-            style={{ backgroundColor: colors.n11 }}
+            style={{
+              backgroundColor: theme.tableHeaderBackground,
+              color: theme.tableHeaderText,
+            }}
           />
 
           {group.categories.map((category, index) => {
@@ -892,9 +902,10 @@ export class BudgetTable extends Component {
               flex: '1 0 auto',
               padding: 10,
               paddingRight: 14,
-              backgroundColor: 'white',
+              backgroundColor: theme.tableBackground,
               borderBottomWidth: 1,
-              borderColor: colors.n9,
+              borderColor: theme.tableBorder,
+              color: theme.tableText,
             }}
           >
             {type === 'report' ? (
@@ -908,13 +919,16 @@ export class BudgetTable extends Component {
             <View style={{ flex: 1 }} />
 
             <View style={{ width: 90 }}>
-              <Label title="BUDGETED" style={{ color: colors.n1 }} />
+              <Label title="BUDGETED" style={{ color: theme.tableText }} />
               <CellValue
                 binding={reportBudget.totalBudgetedExpense}
                 type="financial"
                 style={[
                   styles.smallText,
-                  { color: colors.n1, textAlign: 'right', fontWeight: '500' },
+                  {
+                    textAlign: 'right',
+                    fontWeight: '500',
+                  },
                 ]}
                 formatter={value => {
                   return format(-parseFloat(value || '0'), 'financial');
@@ -922,13 +936,13 @@ export class BudgetTable extends Component {
               />
             </View>
             <View style={{ width: 90 }}>
-              <Label title="BALANCE" style={{ color: colors.n1 }} />
+              <Label title="BALANCE" style={{ color: theme.tableText }} />
               <CellValue
                 binding={rolloverBudget.totalBalance}
                 type="financial"
                 style={[
                   styles.smallText,
-                  { color: colors.n1, textAlign: 'right', fontWeight: '500' },
+                  { textAlign: 'right', fontWeight: '500' },
                 ]}
               />
             </View>
@@ -941,7 +955,7 @@ export class BudgetTable extends Component {
               //   ref={el => (this.list = el)}
               //   keyboardShouldPersistTaps="always"
               //   refreshControl={refreshControl}
-              //   style={{ backgroundColor: colors.n10 }}
+              //   style={{ backgroundColor: colorsm.tableBackground }}
               //   automaticallyAdjustContentInsets={false}
               // >
               <View>
@@ -1034,7 +1048,8 @@ function BudgetHeader({
         flexShrink: 0,
         height: 50,
         justifyContent: 'center',
-        backgroundColor: colors.p5,
+        backgroundColor: theme.buttonPrimaryBackground,
+        color: theme.buttonPrimaryText,
       }}
     >
       {!editMode && (
@@ -1052,7 +1067,7 @@ function BudgetHeader({
             },
           ]}
         >
-          <ArrowThinLeft style={{ color: colors.n11 }} width="15" height="15" />
+          <ArrowThinLeft style={{ color: 'inherit' }} width="15" height="15" />
         </Button>
       )}
       <Text
@@ -1061,7 +1076,6 @@ function BudgetHeader({
           {
             marginTop: 12,
             marginBottom: 12,
-            color: colors.n11,
             textAlign: 'center',
             // zIndex: -1
           },
@@ -1079,7 +1093,6 @@ function BudgetHeader({
             { position: 'absolute', top: 0, bottom: 0, right: 0 },
           ]}
           textStyle={{
-            color: colors.n11,
             fontSize: 15,
             fontWeight: '500',
           }}
@@ -1095,7 +1108,7 @@ function BudgetHeader({
             style={[buttonStyle, { opacity: nextEnabled ? 1 : 0.6 }]}
           >
             <ArrowThinRight
-              style={{ color: colors.n11 }}
+              style={{ color: 'inherit' }}
               width="15"
               height="15"
             />
@@ -1103,7 +1116,7 @@ function BudgetHeader({
 
           <SyncButton
             style={{
-              color: 'white',
+              color: theme.buttonPrimaryText,
               position: 'absolute',
               top: 0,
               bottom: 0,

@@ -12,7 +12,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
@@ -29,7 +29,6 @@ import { Row, InputCell, ROW_HEIGHT } from '../table';
 import { Tooltip, IntersectionBoundary } from '../tooltips';
 
 import BudgetSummaries from './BudgetSummaries';
-import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
 import { MonthPicker } from './MonthPicker';
 import { MonthsProvider, MonthsContext } from './MonthsContext';
 import { separateGroups, findSortDown, findSortUp } from './util';
@@ -215,7 +214,7 @@ export class BudgetTable extends Component {
               backgroundColor: 'transparent',
             },
             '& ::-webkit-scrollbar-thumb:vertical': {
-              backgroundColor: 'white',
+              backgroundColor: theme.tableBackground,
             },
           },
         ]}
@@ -315,7 +314,7 @@ function SidebarCategory({
   dragging,
   editing,
   style,
-  borderColor = colors.border,
+  borderColor = theme.tableBorder,
   isLast,
   onDragChange,
   onEditMonth,
@@ -355,12 +354,12 @@ function SidebarCategory({
             e.stopPropagation();
             setMenuOpen(true);
           }}
-          style={{ color: 'currentColor', padding: 3 }}
+          style={{ color: theme.tableText, padding: 3 }}
         >
           <CheveronDown
             width={14}
             height={14}
-            style={{ color: 'currentColor' }}
+            style={{ color: theme.tableText }}
           />
         </Button>
         {menuOpen && (
@@ -396,7 +395,7 @@ function SidebarCategory({
       <View style={{ flex: 1 }} />
       <NotesButton
         id={category.id}
-        style={dragging && { color: 'currentColor' }}
+        style={dragging && { color: theme.tableText }}
       />
     </View>
   );
@@ -411,14 +410,17 @@ function SidebarCategory({
         },
         !dragging &&
           !dragPreview && {
-            '&:hover button': { display: 'flex', color: colors.n1 },
+            '&:hover button': {
+              display: 'flex',
+              color: theme.tableText,
+            },
           },
-        dragging && { color: colors.n8 },
+        dragging && { color: theme.tableTextHover },
 
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
         dragPreview && {
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
@@ -468,7 +470,7 @@ function SidebarGroup({
   dragPreview,
   innerRef,
   style,
-  borderColor = colors.border,
+  borderColor = theme.tableBorder,
   onEdit,
   onSave,
   onDelete,
@@ -575,9 +577,9 @@ function SidebarGroup({
         style,
         {
           width: 200,
-          backgroundColor: colors.n11,
+          backgroundColor: theme.tableHeaderBackground,
           '& button': { display: 'none' },
-          '&:hover button': { display: 'flex', color: colors.n1 },
+          '&:hover button': { display: 'flex', color: theme.tableTextHover },
         },
         dragPreview && {
           paddingLeft: 10,
@@ -598,7 +600,7 @@ function SidebarGroup({
         formatter={value => displayed}
         width="flex"
         exposed={editing}
-        borderColor={colors.border}
+        borderColor={theme.tableBorder}
         onUpdate={value => {
           if (temporary) {
             if (value === '') {
@@ -635,7 +637,7 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
         <View
           style={[
             { flex: 1 },
-            { borderLeft: '1px solid ' + colors.border },
+            { borderLeft: '1px solid ' + theme.tableBorder },
             style,
           ]}
         >
@@ -657,20 +659,20 @@ const BudgetTotals = memo(function BudgetTotals({
     <View
       data-testid="budget-totals"
       style={{
-        backgroundColor: 'white',
+        color: theme.tableHeaderText,
+        backgroundColor: theme.tableBackground,
         flexDirection: 'row',
         flexShrink: 0,
-        boxShadow: MONTH_BOX_SHADOW,
+        boxShadow: styles.cardShadow,
         marginLeft: 5,
         marginRight: 5 + getScrollbarWidth(),
         borderRadius: '4px 4px 0 0',
-        borderBottom: '1px solid ' + colors.border,
+        borderBottom: '1px solid ' + theme.tableBorder,
       }}
     >
       <View
         style={{
           width: 200,
-          color: colors.n4,
           justifyContent: 'center',
           paddingLeft: 15,
           paddingRight: 5,
@@ -692,7 +694,7 @@ const BudgetTotals = memo(function BudgetTotals({
           <DotsHorizontalTriple
             width={15}
             height={15}
-            style={{ color: colors.n5 }}
+            style={{ color: 'inherit' }}
           />
           {menuOpen && (
             <Tooltip
@@ -783,8 +785,9 @@ function ExpenseGroup({
   return (
     <Row
       collapsed={true}
-      backgroundColor={colors.n11}
       style={{
+        backgroundColor: theme.tableRowHeaderBackground,
+        color: theme.tableRowHeaderText,
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
       }}
@@ -937,8 +940,11 @@ function IncomeGroup({
   return (
     <Row
       collapsed={true}
-      backgroundColor={colors.n11}
-      style={{ fontWeight: 600 }}
+      style={{
+        fontWeight: 600,
+        color: theme.tableHeaderText,
+        backgroundColor: theme.tableRowHeaderBackground,
+      }}
     >
       <SidebarGroup
         group={group}
@@ -1154,9 +1160,9 @@ const BudgetCategories = memo(
       <View
         style={{
           marginBottom: 10,
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           overflow: 'hidden',
-          boxShadow: MONTH_BOX_SHADOW,
+          boxShadow: styles.cardShadow,
           borderRadius: '0 0 4px 4px',
           flex: 1,
         }}
@@ -1166,7 +1172,7 @@ const BudgetCategories = memo(
           switch (item.type) {
             case 'new-group':
               content = (
-                <Row style={{ backgroundColor: colors.n11 }}>
+                <Row style={{ backgroundColor: theme.tableHeaderBackground }}>
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
                     editing={true}
@@ -1239,8 +1245,7 @@ const BudgetCategories = memo(
               content = (
                 <View
                   style={{
-                    height: INCOME_HEADER_HEIGHT,
-                    backgroundColor: 'white',
+                    height: styles.incomeHeaderHeight,
                   }}
                 >
                   <IncomeHeader
@@ -1303,7 +1308,9 @@ const BudgetCategories = memo(
               <View
                 style={
                   !dragState && {
-                    ':hover': { backgroundColor: '#fcfcfc' },
+                    ':hover': {
+                      backgroundColor: theme.tableRowBackgroundHover,
+                    },
                   }
                 }
               >
