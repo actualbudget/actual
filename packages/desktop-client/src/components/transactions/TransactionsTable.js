@@ -629,39 +629,44 @@ function PayeeIcons({
 
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
 
-  return schedule ? (
-    <Button
-      type="bare"
-      style={buttonStyle}
-      onClick={e => {
-        e.stopPropagation();
-        onNavigateToSchedule(scheduleId);
-      }}
-    >
-      {recurring ? (
-        <ArrowsSynchronize style={scheduleIconStyle} />
-      ) : (
-        <CalendarIcon style={scheduleIconStyle} />
+  return (
+    <>
+      {schedule && (
+        <Button
+          type="bare"
+          style={buttonStyle}
+          onClick={e => {
+            e.stopPropagation();
+            onNavigateToSchedule(scheduleId);
+          }}
+        >
+          {recurring ? (
+            <ArrowsSynchronize style={scheduleIconStyle} />
+          ) : (
+            <CalendarIcon style={scheduleIconStyle} />
+          )}
+        </Button>
       )}
-    </Button>
-  ) : transferAccount ? (
-    <Button
-      type="bare"
-      style={buttonStyle}
-      onClick={e => {
-        e.stopPropagation();
-        if (!isTemporaryId(transaction.id)) {
-          onNavigateToTransferAccount(transferAccount.id);
-        }
-      }}
-    >
-      {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
-        <LeftArrow2 style={transferIconStyle} />
-      ) : (
-        <RightArrow2 style={transferIconStyle} />
+      {transferAccount && (
+        <Button
+          type="bare"
+          style={buttonStyle}
+          onClick={e => {
+            e.stopPropagation();
+            if (!isTemporaryId(transaction.id)) {
+              onNavigateToTransferAccount(transferAccount.id);
+            }
+          }}
+        >
+          {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+            <LeftArrow2 style={transferIconStyle} />
+          ) : (
+            <RightArrow2 style={transferIconStyle} />
+          )}
+        </Button>
       )}
-    </Button>
-  ) : null;
+    </>
+  );
 }
 
 const Transaction = memo(function Transaction(props) {
