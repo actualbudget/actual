@@ -652,15 +652,14 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       <View style={{ marginTop: 30, flex: 1 }}>
         <SelectedProvider instance={selectedInst}>
           {adding ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: '5px 0',
-              }}
-            >
-              <Text>These transactions match this schedule:</Text>
+            <View style={{ flexDirection: 'row', padding: '5px 0' }}>
+              <Text style={{ color: theme.pageTextLight }}>
+                These transactions match this schedule:
+              </Text>
               <View style={{ flex: 1 }} />
-              <Text>Select transactions to link on save</Text>
+              <Text style={{ color: theme.pageTextSubdued }}>
+                Select transactions to link on save
+              </Text>
             </View>
           ) : (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -670,7 +669,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
                   color:
                     state.transactionsMode === 'linked'
                       ? theme.tableTextEditingBackground
-                      : 'transparent',
+                      : 'inherit',
                   marginRight: 10,
                   fontSize: 14,
                 }}
@@ -684,7 +683,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
                   color:
                     state.transactionsMode === 'matched'
                       ? theme.tableTextEditingBackground
-                      : 'transparent',
+                      : 'inherit',
                   fontSize: 14,
                 }}
                 onClick={() => onSwitchTransactions('matched')}
@@ -738,6 +737,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
             transactions={state.transactions}
             fields={['date', 'payee', 'amount']}
             style={{
+              border: '1px solid ' + theme.tableBorder,
               borderRadius: 4,
               overflow: 'hidden',
               marginTop: 5,
