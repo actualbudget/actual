@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -12,12 +11,11 @@ import useSelected, {
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
 import { theme } from '../../style';
-import { getParent } from '../../util/router-tools';
 import { ButtonWithLoading } from '../common/Button';
+import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import Stack from '../common/Stack';
 import View from '../common/View';
-import { Page, usePageType } from '../Page';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
@@ -102,6 +100,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
         rowHeight={ROW_HEIGHT}
         style={{
           flex: 1,
+          backgroundColor: 'transparent',
         }}
         items={schedules}
         loading={loading}
@@ -113,9 +112,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
   );
 }
 
-export default function DiscoverSchedules() {
-  let pageType = usePageType();
-  let navigate = useNavigate();
+export default function DiscoverSchedules({ modalProps, actions }) {
   let { data: schedules, isLoading } =
     useSendPlatformRequest('schedule/discover');
   if (!schedules) schedules = [];
@@ -123,11 +120,6 @@ export default function DiscoverSchedules() {
   let [creating, setCreating] = useState(false);
 
   let selectedInst = useSelected('discover-schedules', schedules, []);
-
-  let location = useLocation();
-  if (!getParent(location)) {
-    return <Navigate to="/schedules" replace />;
-  }
 
   async function onCreate() {
     let selected = schedules.filter(s => selectedInst.items.has(s.id));
@@ -157,45 +149,47 @@ export default function DiscoverSchedules() {
     }
 
     setCreating(false);
-    navigate(-1);
+    actions.popModal();
   }
 
   return (
-    <Page title="Found schedules" modalSize={{ width: 850, height: 650 }}>
-      <View style={{ color: theme.pageText }}>
-        <Paragraph>
-          We found some possible schedules in your current transactions. Select
-          the ones you want to create.
-        </Paragraph>
-        <Paragraph>
-          If you expected a schedule here and don’t see it, it might be because
-          the payees of the transactions don’t match. Make sure you rename
-          payees on all transactions for a schedule to be the same payee.
-        </Paragraph>
+    <Modal
+      title="Found schedules"
+      size={{ width: 850, height: 650 }}
+      {...modalProps}
+    >
+      <Paragraph>
+        We found some possible schedules in your current transactions. Select
+        the ones you want to create.
+      </Paragraph>
+      <Paragraph>
+        If you expected a schedule here and don’t see it, it might be because
+        the payees of the transactions don’t match. Make sure you rename payees
+        on all transactions for a schedule to be the same payee.
+      </Paragraph>
 
-        <SelectedProvider instance={selectedInst}>
-          <DiscoverSchedulesTable loading={isLoading} schedules={schedules} />
-        </SelectedProvider>
+      <SelectedProvider instance={selectedInst}>
+        <DiscoverSchedulesTable loading={isLoading} schedules={schedules} />
+      </SelectedProvider>
 
-        <Stack
-          direction="row"
-          align="center"
-          justify="flex-end"
-          style={{
-            paddingTop: 20,
-            paddingBottom: pageType.type === 'modal' ? 0 : 20,
-          }}
+      <Stack
+        direction="row"
+        align="center"
+        justify="flex-end"
+        style={{
+          paddingTop: 20,
+          paddingBottom: 0,
+        }}
+      >
+        <ButtonWithLoading
+          type="primary"
+          loading={creating}
+          disabled={selectedInst.items.size === 0}
+          onClick={onCreate}
         >
-          <ButtonWithLoading
-            type="primary"
-            loading={creating}
-            disabled={selectedInst.items.size === 0}
-            onClick={onCreate}
-          >
-            Create schedules
-          </ButtonWithLoading>
-        </Stack>
-      </View>
-    </Page>
+          Create schedules
+        </ButtonWithLoading>
+      </Stack>
+    </Modal>
   );
 }

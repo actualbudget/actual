@@ -14,14 +14,18 @@ export const altpageTextSubdued = pageTextSubdued;
 export const pageTextDark = colorPalette.navy800;
 export const pageTextPositive = colorPalette.purple200;
 export const pageTextLink = colorPalette.purple400;
+
 export const modalBackground = colorPalette.gray800;
 export const modalBorder = colorPalette.navy600;
+
 export const cardBackground = colorPalette.gray800;
 export const cardBorder = colorPalette.purple400;
 export const cardShadow = colorPalette.navy700;
+
 export const tableBackground = colorPalette.navy800;
 export const tableRowBackgroundHover = colorPalette.navy700;
 export const tableText = colorPalette.navy150;
+export const altTableText = tableText;
 export const tableTextSelected = colorPalette.navy150;
 export const tableTextHover = colorPalette.navy400;
 export const tableTextEditing = colorPalette.black;
@@ -38,6 +42,7 @@ export const tableRowBackgroundHighlight = colorPalette.purple800;
 export const tableRowBackgroundHighlightText = colorPalette.navy150;
 export const tableRowHeaderBackground = colorPalette.navy700;
 export const tableRowHeaderText = colorPalette.navy150;
+
 export const sidebarBackground = colorPalette.navy800;
 export const sidebarItemBackground = colorPalette.navy800;
 export const sidebarItemBackgroundSelected = colorPalette.navy800;
@@ -48,8 +53,10 @@ export const sidebarItemAccentHover = colorPalette.navy700;
 export const sidebarItemText = colorPalette.navy150;
 export const sidebarItemTextSelected = colorPalette.purple400;
 export const sidebarItemTextHover = colorPalette.navy150;
+
 export const tooltipBackground = colorPalette.navy600;
 export const tooltipBorder = colorPalette.navy500;
+
 export const menuBackground = colorPalette.navy600;
 export const menuItemBackground = colorPalette.navy600;
 export const menuItemBackgroundHover = colorPalette.navy500;
@@ -63,15 +70,20 @@ export const menuKeybindingText = colorPalette.navy500;
 export const altMenuBackground = colorPalette.navy700;
 export const altMenuItemBackground = colorPalette.navy700;
 export const altMenuItemBackgroundHover = colorPalette.navy600;
+export const alt2MenuItemBackgroundHover = altMenuItemBackgroundHover;
 export const altMenuItemText = colorPalette.navy150;
 export const altMenuItemTextHover = colorPalette.navy150;
 export const altMenuItemTextSelected = colorPalette.purple400;
 export const altMenuItemTextHeader = colorPalette.purple500;
+export const alt2MenuItemTextHeader = altMenuItemTextHeader;
 export const altMenuBorder = colorPalette.navy200;
 export const altMenuBorderHover = colorPalette.purple400;
+
 export const mobileNavBackground = colorPalette.navy800;
 export const mobileNavItem = colorPalette.navy150;
 export const mobileNavItemSelected = colorPalette.purple400;
+export const mobileAccountShadow = cardShadow;
+export const mobileAccountText = colorPalette.blue800;
 
 // Button
 export const buttonMenuText = colorPalette.navy100;
@@ -79,7 +91,6 @@ export const buttonMenuTextHover = colorPalette.navy50;
 export const buttonMenuBackground = 'transparent';
 export const buttonMenuBackgroundHover = 'rgba(200, 200, 200, .25)';
 export const buttonMenuBorder = colorPalette.navy500;
-
 export const buttonMenuSelectedText = colorPalette.green800;
 export const buttonMenuSelectedTextHover = colorPalette.orange800;
 export const buttonMenuSelectedBackground = colorPalette.orange200;
@@ -92,7 +103,6 @@ export const buttonPrimaryBackground = colorPalette.purple400;
 export const buttonPrimaryBackgroundHover = buttonPrimaryBackground;
 export const buttonPrimaryBorder = buttonPrimaryBackground;
 export const buttonPrimaryShadow = 'rgba(0, 0, 0, 0.6)';
-
 export const buttonPrimaryDisabledText = colorPalette.navy700;
 export const buttonPrimaryDisabledBackground = colorPalette.navy400;
 export const buttonPrimaryDisabledBorder = buttonPrimaryDisabledBackground;
@@ -133,18 +143,21 @@ export const upcomingBackground = tableBackground;
 export const upcomingText = tableTextInactive;
 export const upcomingAccent = tableBorder;
 export const formLabelText = colorPalette.purple150;
+export const altFormLabelText = formLabelText;
 export const formInputBackground = colorPalette.navy800;
 export const formInputBackgroundSelected = colorPalette.navy700;
 export const formInputBackgroundSelection = colorPalette.purple400;
 export const formInputBorder = colorPalette.navy600;
 export const formInputTextReadOnlySelection = colorPalette.navy800;
 export const formInputBorderSelected = colorPalette.purple400;
+export const altFormInputBorderSelected = formInputBorderSelected;
 export const formInputText = colorPalette.navy150;
 export const formInputTextSelected = colorPalette.black;
 export const formInputTextPlaceholder = colorPalette.navy150;
 export const formInputTextPlaceholderSelected = colorPalette.navy100;
 export const formInputTextSelection = colorPalette.navy800;
 export const formInputShadowSelected = colorPalette.purple200;
+export const altFormInputShadowSelected = formInputShadowSelected;
 export const formInputTextHighlight = colorPalette.purple400;
 
 export const pillBackground = colorPalette.navy600;
@@ -154,3 +167,6 @@ export const pillBorder = colorPalette.navy700;
 export const pillBackgroundSelected = colorPalette.purple600;
 export const pillTextSelected = colorPalette.navy150;
 export const pillBorderSelected = colorPalette.purple400;
+export const altPillBackground = pillBackground;
+export const altPillText = pillText;
+export const alt2PillText = pillText;

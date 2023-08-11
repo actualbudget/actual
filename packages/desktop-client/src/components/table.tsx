@@ -730,15 +730,15 @@ export function SelectCell({
             alignItems: 'center',
             borderRadius: 3,
             border: selected
-              ? '1px solid ' + theme.altformInputBorderSelected
+              ? '1px solid ' + theme.altFormInputBorderSelected
               : '1px solid ' + theme.formInputBorder,
             color: theme.tableBackground,
             backgroundColor: selected
               ? theme.tableTextEditingBackground
               : theme.tableBackground,
             ':focus': {
-              border: '1px solid ' + theme.altformInputBorderSelected,
-              boxShadow: '0 1px 2px ' + theme.altformInputShadowSelected,
+              border: '1px solid ' + theme.altFormInputBorderSelected,
+              boxShadow: '0 1px 2px ' + theme.altFormInputShadowSelected,
             },
           }}
           onEdit={onEdit}
@@ -902,7 +902,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
         <Tooltip
           position="bottom-right"
           width={200}
-          style={{ padding: 0, backgroundColor: 'transparent' }}
+          style={{ padding: 0, backgroundColor: theme.menuBackground }}
           onClose={() => setMenuOpen(false)}
         >
           <Menu

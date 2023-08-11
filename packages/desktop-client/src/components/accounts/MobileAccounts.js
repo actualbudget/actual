@@ -7,7 +7,7 @@ import * as queries from 'loot-core/src/client/queries';
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import TextOneLine from '../common/TextOneLine';
@@ -22,13 +22,17 @@ function AccountHeader({ name, amount }) {
         flexDirection: 'row',
         marginTop: 28,
         marginBottom: 10,
+        color: theme.altpageTextSubdued,
       }}
     >
       <View style={{ flex: 1 }}>
         <Text
           style={[
             styles.text,
-            { textTransform: 'uppercase', color: colors.n5, fontSize: 13 },
+            {
+              textTransform: 'uppercase',
+              fontSize: 13,
+            },
           ]}
           data-testid="name"
         >
@@ -37,7 +41,7 @@ function AccountHeader({ name, amount }) {
       </View>
       <CellValue
         binding={amount}
-        style={[styles.text, { color: colors.n5, fontSize: 13 }]}
+        style={[styles.text, { fontSize: 13 }]}
         type="financial"
       />
     </View>
@@ -50,8 +54,8 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
       style={{
         flex: '1 0 auto',
         flexDirection: 'row',
-        backgroundColor: 'white',
-        boxShadow: `0 1px 1px ${colors.n7}`,
+        backgroundColor: theme.tableBackground,
+        boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         borderRadius: 6,
         marginTop: 10,
       }}
@@ -86,7 +90,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
                 {
                   fontSize: 17,
                   fontWeight: 600,
-                  color: updated ? colors.b2 : colors.n2,
+                  color: updated ? theme.mobileAccountText : theme.pillText,
                   paddingRight: 30,
                 },
               ]}
@@ -96,7 +100,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             {account.bankId && (
               <View
                 style={{
-                  backgroundColor: colors.g5,
+                  backgroundColor: theme.noticeText,
                   marginLeft: '-23px',
                   width: 8,
                   height: 8,
@@ -109,8 +113,8 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         <CellValue
           binding={getBalanceQuery(account)}
           type="financial"
-          style={{ fontSize: 16, color: colors.n3 }}
-          getStyle={value => value < 0 && { color: colors.r4 }}
+          style={{ fontSize: 16, color: 'inherit' }}
+          getStyle={value => value < 0 && { color: 'inherit' }}
         />
       </Button>
     </View>
@@ -138,7 +142,7 @@ function EmptyMessage({ onAdd }) {
         Add Account
       </Button>
 
-      <Text style={{ marginTop: 20, color: colors.n5 }}>
+      <Text style={{ marginTop: 20, color: theme.altpageTextSubdued }}>
         In the future, you can add accounts using the add button in the header.
       </Text>
     </View>
@@ -263,7 +267,7 @@ export default function Accounts() {
     navigate(`/transaction/${transaction}`);
   };
 
-  useSetThemeColor(colors.b2);
+  useSetThemeColor(theme.altMenuBackground);
 
   return (
     <View style={{ flex: 1 }}>
