@@ -2,7 +2,7 @@ import { type ReactNode } from 'react';
 
 import { type CSSProperties } from 'glamor';
 
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 
 import Text from './Text';
 
@@ -17,7 +17,7 @@ export default function Label({ title, style }: LabelProps) {
       style={[
         styles.text,
         {
-          color: colors.n2,
+          color: theme.tableRowHeaderText,
           textAlign: 'right',
           fontSize: 12,
           marginBottom: 2,
