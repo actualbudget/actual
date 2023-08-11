@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type Handlers } from 'loot-core/src/types/handlers';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button';
 import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
@@ -39,7 +39,7 @@ function renderResults(results: Results) {
   return (
     <Paragraph
       style={{
-        color: colors.g3,
+        color: theme.noticeText,
         marginBottom: 0,
         marginLeft: '1em',
         textAlign: 'right',

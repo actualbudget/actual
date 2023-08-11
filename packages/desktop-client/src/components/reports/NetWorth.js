@@ -8,7 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
-import { styles } from '../../style';
+import { theme, styles } from '../../style';
 import Paragraph from '../common/Paragraph';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
@@ -83,7 +83,12 @@ export default function NetWorth() {
   }
 
   return (
-    <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
+    <View
+      style={[
+        styles.page,
+        { minWidth: 650, overflow: 'hidden', color: theme.pageText },
+      ]}
+    >
       <Header
         title="Net Worth"
         allMonths={allMonths}
@@ -101,7 +106,7 @@ export default function NetWorth() {
 
       <View
         style={{
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           padding: 30,
           paddingTop: 0,
           overflow: 'auto',

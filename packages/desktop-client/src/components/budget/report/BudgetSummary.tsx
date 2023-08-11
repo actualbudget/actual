@@ -15,7 +15,7 @@ import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
-import { colors, styles } from '../../../style';
+import { theme, styles } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import Button from '../../common/Button';
 import HoverTarget from '../../common/HoverTarget';
@@ -30,7 +30,6 @@ import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
-import { MONTH_BOX_SHADOW } from '../constants';
 import { makeAmountFullStyle } from '../util';
 
 import { useReport } from './ReportContext';
@@ -100,8 +99,8 @@ function IncomeProgress({ current, target }: IncomeProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? colors.r7 : colors.g5}
-      backgroundColor={over ? colors.r10 : colors.n10}
+      color={over ? theme.errorText : theme.noticeText}
+      backgroundColor={over ? theme.errorBackground : theme.noticeBackground}
       style={{ width: 20, height: 20 }}
     />
   );
@@ -133,8 +132,8 @@ function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? colors.r7 : colors.g5}
-      backgroundColor={over ? colors.r10 : colors.n10}
+      color={over ? theme.errorText : theme.noticeText}
+      backgroundColor={over ? theme.errorBackground : theme.noticeBackground}
       style={{ width: 20, height: 20 }}
     />
   );
@@ -170,12 +169,12 @@ function BudgetTotal({
 
       <View style={{ marginLeft: 10 }}>
         <View>
-          <Text style={{ color: colors.n4 }}>{title}</Text>
+          <Text style={{ color: theme.pageTextLight }}>{title}</Text>
         </View>
 
         <Text>
           <CellValue binding={current} type="financial" />
-          <Text style={{ color: colors.n6, fontStyle: 'italic' }}>
+          <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
             {' of '}
             <CellValue
               binding={target}
@@ -232,9 +231,9 @@ function Saved({ projected, style }: SavedProps) {
   return (
     <View style={[{ alignItems: 'center', fontSize: 14 }, style]}>
       {projected ? (
-        <Text style={{ color: colors.n4 }}>Projected Savings:</Text>
+        <Text style={{ color: theme.pageTextLight }}>Projected Savings:</Text>
       ) : (
-        <View style={{ color: colors.n4 }}>
+        <View style={{ color: theme.pageTextLight }}>
           {isNegative ? 'Overspent:' : 'Saved:'}
         </View>
       )}
@@ -276,7 +275,11 @@ function Saved({ projected, style }: SavedProps) {
           {...css([
             {
               fontSize: 25,
-              color: projected ? colors.y3 : isNegative ? colors.r4 : colors.p5,
+              color: projected
+                ? theme.warningText
+                : isNegative
+                ? theme.errorText
+                : theme.pageTextPositive,
             },
           ])}
         >
@@ -316,8 +319,9 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   return (
     <View
       style={{
-        backgroundColor: 'white',
-        boxShadow: MONTH_BOX_SHADOW,
+        color: theme.tableText,
+        backgroundColor: theme.tableBackground,
+        boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,
@@ -358,7 +362,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: colors.n6, margin: 1 }}
+                style={{ color: 'inherit', margin: 1 }}
               />
             </Button>
           </View>
@@ -393,7 +397,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={colors.n6}
+                defaultColor={theme.pageTextSubdued} // notes page color
               />
             </View>
             <View style={{ userSelect: 'none' }}>
@@ -401,7 +405,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: colors.n5 }}
+                  style={{ color: theme.altpageTextSubdued }}
                 />
               </Button>
               {menuOpen && (
@@ -448,7 +452,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             spacing={2}
             style={{
               alignSelf: 'center',
-              backgroundColor: colors.n11,
+              backgroundColor: theme.tableRowHeaderBackground,
               borderRadius: 4,
               padding: '10px 15px',
               marginTop: 13,
@@ -465,8 +469,8 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: colors.n11,
-              borderTop: '1px solid ' + colors.n10,
+              backgroundColor: theme.tableRowHeaderBackground,
+              borderTop: '1px solid ' + theme.tableRowHeaderText,
             }}
           >
             <Saved projected={month >= currentMonth} />

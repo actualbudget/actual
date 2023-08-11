@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
 import Text from '../common/Text';
@@ -27,7 +27,7 @@ export default function EncryptionSettings() {
       primaryAction={<Button onClick={onChangeKey}>Generate new key</Button>}
     >
       <Text>
-        <Text style={{ color: colors.g4, fontWeight: 600 }}>
+        <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
           End-to-end Encryption is turned on.
         </Text>{' '}
         Your data is encrypted with a key that only you have before sending it

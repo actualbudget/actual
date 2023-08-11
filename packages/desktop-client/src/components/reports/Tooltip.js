@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import { css, before } from 'glamor';
 import { VictoryTooltip } from 'victory';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 
 class Tooltip extends Component {
   static defaultEvents = VictoryTooltip.defaultEvents;
@@ -57,8 +57,8 @@ class Tooltip extends Component {
             borderRadius: 2,
             boxShadow: light ? 'none' : '0 1px 6px rgba(0, 0, 0, .20)',
             // TODO: Transparent background
-            backgroundColor: light ? 'transparent' : colors.n1,
-            color: light ? 'inherit' : 'white',
+            backgroundColor: light ? 'transparent' : theme.alt2MenuBackground,
+            color: light ? 'inherit' : theme.alt2MenuItemText,
             padding: 10,
           },
           !light &&
@@ -68,7 +68,7 @@ class Tooltip extends Component {
               borderTop: '7px solid transparent',
               borderBottom: '7px solid transparent',
               [position === 'right' ? 'borderRight' : 'borderLeft']:
-                '7px solid ' + colors.n1,
+                '7px solid ' + theme.alt2MenuBackground,
               [position === 'right' ? 'left' : 'right']: -6,
               top: 'calc(50% - 7px)',
               // eslint-disable-next-line rulesdir/typography

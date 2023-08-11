@@ -7,7 +7,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import AlignedText from '../common/AlignedText';
 import Block from '../common/Block';
 import Paragraph from '../common/Paragraph';
@@ -113,7 +113,7 @@ function CashFlow() {
 
       <View
         style={{
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           padding: 30,
           paddingTop: 0,
           overflow: 'auto',
@@ -125,7 +125,7 @@ function CashFlow() {
             paddingRight: 20,
             flexShrink: 0,
             alignItems: 'flex-end',
-            color: colors.n3,
+            color: theme.pageText,
           }}
         >
           <AlignedText

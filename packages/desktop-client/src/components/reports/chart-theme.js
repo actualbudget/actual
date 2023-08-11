@@ -1,5 +1,7 @@
-import { colors } from '../../style';
+import { theme } from '../../style';
 
+// Since these are rgba, they have to be hard-coded
+// and must work for both light and dark theme.
 let colorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',
   blueFadeEnd: 'rgba(229, 245, 255, 0)',
@@ -18,7 +20,7 @@ const baseLabelStyles = {
   fontFamily: sansSerif,
   fontSize,
   letterSpacing,
-  fill: colors.n1,
+  fill: theme.pageText,
   stroke: 'transparent',
 };
 
@@ -41,17 +43,17 @@ const axisBaseStyles = {
   tickLabels: baseLabelStyles,
 };
 
-const theme = {
+const chartTheme = {
   colors: {
     ...colorFades,
-    red: colors.r7,
-    blue: colors.b6,
+    red: theme.reportsRed,
+    blue: theme.reportsBlue,
   },
   area: {
     style: {
       labels: baseLabelStyles,
       data: {
-        stroke: colors.b6,
+        stroke: theme.reportsBlue,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',
@@ -82,7 +84,7 @@ const theme = {
   bar: {
     style: {
       labels: baseLabelStyles,
-      data: { fill: colors.b6, stroke: 'none' },
+      data: { fill: theme.reportsBlue, stroke: 'none' },
     },
   },
   line: {
@@ -90,7 +92,7 @@ const theme = {
       labels: baseLabelStyles,
       data: {
         fill: 'none',
-        stroke: colors.b6,
+        stroke: theme.reportsBlue,
         strokeWidth: 2,
         strokeLinejoin: 'round',
         strokeLinecap: 'round',
@@ -111,4 +113,4 @@ const theme = {
     },
   },
 };
-export default theme;
+export default chartTheme;

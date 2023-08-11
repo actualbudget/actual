@@ -6,7 +6,7 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
-import { styles, colors } from '../../../style';
+import { styles, theme } from '../../../style';
 import Button from '../../common/Button';
 import Menu from '../../common/Menu';
 import Text from '../../common/Text';
@@ -17,49 +17,53 @@ import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell } from '../../table';
 import { Tooltip, useTooltip } from '../../tooltips';
 import BalanceWithCarryover from '../BalanceWithCarryover';
-import { MONTH_RIGHT_PADDING } from '../constants';
 import { makeAmountGrey } from '../util';
 
 export { BudgetSummary } from './BudgetSummary';
 
-let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
-
+let headerLabelStyle = {
+  color: theme.tableHeaderText,
+  flex: 1,
+  padding: '0 5px',
+  textAlign: 'right',
+};
+let valueStyle = { fontWeight: 600 };
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'row',
-        marginRight: MONTH_RIGHT_PADDING,
+        marginRight: styles.monthRightPadding,
         paddingTop: 10,
         paddingBottom: 10,
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: colors.n4 }}>Budgeted</Text>
+        <Text>Budgeted</Text>
         <CellValue
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
-          style={{ color: colors.n4, fontWeight: 600 }}
+          style={valueStyle}
           formatter={value => {
             return format(parseFloat(value || '0'), 'financial');
           }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: colors.n4 }}>Spent</Text>
+        <Text>Spent</Text>
         <CellValue
           binding={reportBudget.totalSpent}
           type="financial"
-          style={{ color: colors.n4, fontWeight: 600 }}
+          style={valueStyle}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: colors.n4 }}>Balance</Text>
+        <Text>Balance</Text>
         <CellValue
           binding={reportBudget.totalLeftover}
           type="financial"
-          style={{ color: colors.n4, fontWeight: 600 }}
+          style={valueStyle}
         />
       </View>
     </View>
@@ -71,15 +75,15 @@ export function IncomeHeaderMonth() {
     <View
       style={{
         flexDirection: 'row',
-        marginRight: MONTH_RIGHT_PADDING,
+        marginRight: styles.monthRightPadding,
         paddingBottom: 5,
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: colors.n4 }}>Budgeted</Text>
+        <Text>Budgeted</Text>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: colors.n4 }}>Received</Text>
+        <Text>Received</Text>
       </View>
     </View>
   );
@@ -89,7 +93,7 @@ type GroupMonthProps = {
   group: { id: string; is_income: boolean };
 };
 export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
-  let borderColor = colors.border;
+  let borderColor = theme.tableBorder;
   let { id } = group;
 
   return (
@@ -123,7 +127,7 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           borderColor={borderColor}
           textAlign="right"
           style={[
-            { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
+            { fontWeight: 600, paddingRight: styles.monthRightPadding },
             styles.tnum,
           ]}
           valueProps={{
@@ -131,7 +135,7 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
             type: 'financial',
             privacyFilter: {
               style: {
-                paddingRight: MONTH_RIGHT_PADDING,
+                paddingRight: styles.monthRightPadding,
               },
             },
           }}
@@ -199,7 +203,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
-  let borderColor = colors.border;
+  let borderColor = theme.tableBorder;
   let balanceTooltip = useTooltip();
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
@@ -226,7 +230,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor,
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
         }}
         onMouseOverCapture={() => setHover(true)}
         onMouseLeave={() => {
@@ -303,7 +307,6 @@ export const CategoryMonth = memo(function CategoryMonth({
           exposed={editing}
           focused={editing}
           width="flex"
-          borderColor="white"
           onExpose={() => onEdit(category.id, monthIndex)}
           style={[editing && { zIndex: 100 }, styles.tnum]}
           textAlign="right"
@@ -316,8 +319,8 @@ export const CategoryMonth = memo(function CategoryMonth({
             },
             {
               ':hover': {
-                boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-                backgroundColor: 'white',
+                boxShadow: styles.cardShadow,
+                backgroundColor: theme.tableBackground,
               },
             },
           ]}
@@ -348,8 +351,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       <Field
         name="spent"
         width="flex"
-        borderColor={borderColor}
-        style={{ textAlign: 'right' }}
+        style={{ textAlign: 'right', borderColor: borderColor }}
       >
         <span
           data-testid="category-month-spent"
@@ -373,8 +375,11 @@ export const CategoryMonth = memo(function CategoryMonth({
         <Field
           name="balance"
           width="flex"
-          borderColor={borderColor}
-          style={{ paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' }}
+          style={{
+            paddingRight: styles.monthRightPadding,
+            textAlign: 'right',
+            borderColor: borderColor,
+          }}
         >
           <span {...(category.is_income ? {} : balanceTooltip.getOpenEvents())}>
             <BalanceWithCarryover
