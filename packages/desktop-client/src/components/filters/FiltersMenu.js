@@ -32,7 +32,7 @@ import Select from '../common/Select';
 import Stack from '../common/Stack';
 import Text from '../common/Text';
 import View from '../common/View';
-import { Value } from '../ManageRules';
+import Value from '../rules/Value';
 import { Tooltip } from '../tooltips';
 import GenericInput from '../util/GenericInput';
 
