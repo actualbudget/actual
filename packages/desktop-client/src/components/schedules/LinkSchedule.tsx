@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type Query } from 'loot-core/src/shared/query';
 
 import { type BoundActions } from '../../hooks/useActions';
 import Modal from '../common/Modal';
@@ -24,7 +25,7 @@ export default function ScheduleLink({
   let [filter, setFilter] = useState('');
 
   let scheduleData = useSchedules({
-    transform: useCallback((q: any) => q.filter({ completed: false }), []),
+    transform: useCallback((q: Query) => q.filter({ completed: false }), []),
   });
 
   let searchInput = useRef(null);
