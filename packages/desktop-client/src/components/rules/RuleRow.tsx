@@ -86,7 +86,7 @@ const RuleRow = memo(
                   inline={true}
                   value={cond.value}
                   options={cond.options}
-                  prefix={i > 0 ? friendlyOp(cond.conditionsOp) : null}
+                  prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
                   style={i !== 0 && { marginTop: 3 }}
                 />
               ))}
