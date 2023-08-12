@@ -26,7 +26,7 @@ import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles } from '../style';
-import { ExposeNavigate, StackedRoutes } from '../util/router-tools';
+import { ExposeNavigate } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import BankSyncStatus from './BankSyncStatus';
@@ -40,7 +40,6 @@ import Notifications from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
-import PostsOfflineNotification from './schedules/PostsOfflineNotification';
 import Settings from './settings';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 import { TransactionEdit } from './transactions/MobileTransaction';
@@ -71,120 +70,6 @@ function WideNotSupported({ children, redirectTo = '/budget' }) {
     }
   }, [isNarrowWidth, navigate, redirectTo]);
   return isNarrowWidth ? children : null;
-}
-
-function StackedRoutesInner({ location }) {
-  return (
-    <Routes location={location}>
-      <Route path="/" element={<Navigate to="/budget" replace />} />
-
-      <Route
-        path="/reports/*"
-        element={
-          <NarrowNotSupported>
-            {/* Has its own lazy loading logic */}
-            <Reports />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route path="/budget" element={<NarrowAlternate name="Budget" />} />
-
-      <Route
-        path="/schedules"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="Schedules" />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route
-        path="/schedule/edit"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="EditSchedule" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/schedule/edit/:id"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="EditSchedule" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/schedule/link"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="LinkSchedule" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/schedule/discover"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="DiscoverSchedules" />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route
-        path="/schedule/posts-offline-notification"
-        element={<PostsOfflineNotification />}
-      />
-
-      <Route path="/payees" element={<ManagePayeesPage />} />
-      <Route path="/rules" element={<ManageRulesPage />} />
-      <Route path="/settings" element={<Settings />} />
-
-      {/* TODO: remove Nordigen route after v23.8.0 */}
-      <Route
-        path="/nordigen/link"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="GoCardlessLink" />
-          </NarrowNotSupported>
-        }
-      />
-      <Route
-        path="/gocardless/link"
-        element={
-          <NarrowNotSupported>
-            <WideComponent name="GoCardlessLink" />
-          </NarrowNotSupported>
-        }
-      />
-
-      <Route path="/accounts" element={<NarrowAlternate name="Accounts" />} />
-
-      <Route
-        path="/accounts/:id"
-        element={<NarrowAlternate name="Account" />}
-      />
-
-      <Route
-        path="/accounts/:id/transactions/:transactionId"
-        element={
-          <WideNotSupported>
-            <TransactionEdit />
-          </WideNotSupported>
-        }
-      />
-
-      <Route
-        path="/accounts/:id/transactions/new"
-        element={
-          <WideNotSupported>
-            <TransactionEdit />
-          </WideNotSupported>
-        }
-      />
-    </Routes>
-  );
 }
 
 function NavTab({ icon: TabIcon, name, path }) {
@@ -311,9 +196,76 @@ function FinancesApp() {
               />
               <Notifications />
               <BankSyncStatus />
-              <StackedRoutes
-                render={location => <StackedRoutesInner location={location} />}
-              />
+
+              <Routes>
+                <Route path="/" element={<Navigate to="/budget" replace />} />
+
+                <Route
+                  path="/reports/*"
+                  element={
+                    <NarrowNotSupported>
+                      {/* Has its own lazy loading logic */}
+                      <Reports />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/budget"
+                  element={<NarrowAlternate name="Budget" />}
+                />
+
+                <Route
+                  path="/schedules"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="Schedules" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route path="/payees" element={<ManagePayeesPage />} />
+                <Route path="/rules" element={<ManageRulesPage />} />
+                <Route path="/settings" element={<Settings />} />
+
+                <Route
+                  path="/gocardless/link"
+                  element={
+                    <NarrowNotSupported>
+                      <WideComponent name="GoCardlessLink" />
+                    </NarrowNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/accounts"
+                  element={<NarrowAlternate name="Accounts" />}
+                />
+
+                <Route
+                  path="/accounts/:id"
+                  element={<NarrowAlternate name="Account" />}
+                />
+
+                <Route
+                  path="/accounts/:id/transactions/:transactionId"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
+                />
+
+                <Route
+                  path="/accounts/:id/transactions/new"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
+                />
+              </Routes>
+
               <Modals />
             </div>
 

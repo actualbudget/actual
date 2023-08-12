@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
 import FormError from '../common/FormError';
@@ -103,7 +103,7 @@ function CreateLocalAccount({ modalProps, actions }) {
                   style={{
                     textAlign: 'right',
                     fontSize: '0.7em',
-                    color: colors.n5,
+                    color: theme.altpageTextSubdued,
                     marginTop: 3,
                   }}
                 >
