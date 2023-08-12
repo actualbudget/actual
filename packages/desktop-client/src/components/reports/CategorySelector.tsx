@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
 import Eye from '../../icons/v2/Eye';
 import EyeSlashed from '../../icons/v2/EyeSlashed';
@@ -67,7 +67,7 @@ export default function CategorySelector({
                 ),
             );
             return (
-              <>
+              <Fragment key={categoryGroup.id}>
                 <li
                   style={{
                     display:
@@ -75,7 +75,6 @@ export default function CategorySelector({
                     marginBottom: 4,
                     flexDirection: 'row',
                   }}
-                  key={categoryGroup.id}
                 >
                   <Checkbox
                     id={`form_${categoryGroup.id}`}
@@ -162,7 +161,7 @@ export default function CategorySelector({
                     })}
                   </ul>
                 </li>
-              </>
+              </Fragment>
             );
           })}
       </ul>
