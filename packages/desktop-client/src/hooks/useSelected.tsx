@@ -5,14 +5,20 @@ import React, {
   useCallback,
   useEffect,
   useRef,
+  type Dispatch,
+  type ReactElement,
 } from 'react';
 import { useSelector } from 'react-redux';
 
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
+import { type UndoState } from 'loot-core/src/server/undo';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
-function iterateRange(range, func) {
+type Range<T> = { start: T; end: T | null };
+type Item = { id: string };
+
+function iterateRange(range: Range<number>, func: (i: number) => void): void {
   let from = Math.min(range.start, range.end);
   let to = Math.max(range.start, range.end);
 
@@ -21,9 +27,35 @@ function iterateRange(range, func) {
   }
 }
 
-export default function useSelected(name, items, initialSelectedIds) {
+type State = {
+  selectedRange: Range<string> | null;
+  selectedItems: Set<string>;
+};
+
+type WithOptionalMouseEvent = {
+  event?: MouseEvent;
+};
+type SelectAction = {
+  type: 'select';
+  id: string;
+} & WithOptionalMouseEvent;
+type SelectNoneAction = {
+  type: 'select-none';
+} & WithOptionalMouseEvent;
+type SelectAllAction = {
+  type: 'select-all';
+  ids?: string[];
+} & WithOptionalMouseEvent;
+
+type Actions = SelectAction | SelectNoneAction | SelectAllAction;
+
+export default function useSelected<T extends Item>(
+  name: string,
+  items: T[],
+  initialSelectedIds: string[],
+) {
   let [state, dispatch] = useReducer(
-    (state, action) => {
+    (state: State, action: Actions) => {
       switch (action.type) {
         case 'select': {
           let { selectedRange } = state;
@@ -34,8 +66,8 @@ export default function useSelected(name, items, initialSelectedIds) {
             let idx = items.findIndex(p => p.id === id);
             let startIdx = items.findIndex(p => p.id === selectedRange.start);
             let endIdx = items.findIndex(p => p.id === selectedRange.end);
-            let range;
-            let deleteUntil;
+            let range: Range<number>;
+            let deleteUntil: Range<number>;
 
             if (endIdx === -1) {
               range = { start: startIdx, end: idx };
@@ -93,7 +125,7 @@ export default function useSelected(name, items, initialSelectedIds) {
         }
 
         case 'select-none':
-          return { ...state, selectedItems: new Set() };
+          return { ...state, selectedItems: new Set<string>() };
 
         case 'select-all':
           return {
@@ -106,12 +138,12 @@ export default function useSelected(name, items, initialSelectedIds) {
           };
 
         default:
-          throw new Error('Unexpected action: ' + action.type);
+          throw new Error('Unexpected action: ' + JSON.stringify(action));
       }
     },
     null,
     () => ({
-      selectedItems: new Set(initialSelectedIds || []),
+      selectedItems: new Set<string>(initialSelectedIds || []),
       selectedRange:
         initialSelectedIds && initialSelectedIds.length === 1
           ? { start: initialSelectedIds[0], end: null }
@@ -165,7 +197,7 @@ export default function useSelected(name, items, initialSelectedIds) {
   let lastUndoState = useSelector(state => state.app.lastUndoState);
 
   useEffect(() => {
-    function onUndo({ messages, undoTag }) {
+    function onUndo({ messages, undoTag }: UndoState) {
       let tagged = undo.getTaggedState(undoTag);
 
       let deletedIds = new Set(
@@ -174,11 +206,7 @@ export default function useSelected(name, items, initialSelectedIds) {
           .map(msg => msg.row),
       );
 
-      if (
-        tagged &&
-        tagged.selectedItems &&
-        tagged.selectedItems.name === name
-      ) {
+      if (tagged?.selectedItems?.name === name) {
         dispatch({
           type: 'select-all',
           // Coerce the Set into an array
@@ -198,13 +226,12 @@ export default function useSelected(name, items, initialSelectedIds) {
 
   return {
     items: state.selectedItems,
-    setItems: state.setSelectedItems,
     dispatch,
   };
 }
 
-let SelectedDispatch = createContext(null);
-let SelectedItems = createContext(null);
+let SelectedDispatch = createContext<(action: Actions) => void>(null);
+let SelectedItems = createContext<Set<unknown>>(null);
 
 export function useSelectedDispatch() {
   return useContext(SelectedDispatch);
@@ -214,7 +241,17 @@ export function useSelectedItems() {
   return useContext(SelectedItems);
 }
 
-export function SelectedProvider({ instance, fetchAllIds, children }) {
+type SelectedProviderProps<T extends Item> = {
+  instance: ReturnType<typeof useSelected<T>>;
+  fetchAllIds?: () => Promise<string[]>;
+  children: ReactElement;
+};
+
+export function SelectedProvider<T extends Item>({
+  instance,
+  fetchAllIds,
+  children,
+}: SelectedProviderProps<T>) {
   let latestItems = useRef(null);
 
   useEffect(() => {
@@ -222,7 +259,7 @@ export function SelectedProvider({ instance, fetchAllIds, children }) {
   }, [instance.items]);
 
   let dispatch = useCallback(
-    async action => {
+    async (action: Actions) => {
       if (!action.event && isNonProductionEnvironment()) {
         throw new Error('SelectedDispatch actions must have an event');
       }
@@ -257,24 +294,33 @@ export function SelectedProvider({ instance, fetchAllIds, children }) {
   );
 }
 
+type SelectedProviderWithItemsProps<T extends Item> = {
+  name: string;
+  items: T[];
+  initialSelectedIds: string[];
+  fetchAllIds: () => Promise<string[]>;
+  registerDispatch?: (dispatch: Dispatch<Actions>) => void;
+  children: ReactElement;
+};
+
 // This can be helpful in class components if you cannot use the
 // custom hook
-export function SelectedProviderWithItems({
+export function SelectedProviderWithItems<T extends Item>({
   name,
   items,
   initialSelectedIds,
   fetchAllIds,
   registerDispatch,
   children,
-}) {
-  let selected = useSelected(name, items, initialSelectedIds);
+}: SelectedProviderWithItemsProps<T>) {
+  let selected = useSelected<T>(name, items, initialSelectedIds);
 
   useEffect(() => {
     registerDispatch?.(selected.dispatch);
   }, [registerDispatch]);
 
   return (
-    <SelectedProvider
+    <SelectedProvider<T>
       instance={selected}
       fetchAllIds={fetchAllIds}
       children={children}
