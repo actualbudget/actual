@@ -187,7 +187,12 @@ function BudgetGroupPreview({ group, pending, style }) {
       <TotalsRow group={group} blank={true} />
 
       {group.categories.map((cat, index) => (
-        <BudgetCategory category={cat} blank={true} index={index} />
+        <BudgetCategory
+          key={cat.id}
+          category={cat}
+          blank={true}
+          index={index}
+        />
       ))}
     </Card>
     // </Animated.View>

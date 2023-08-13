@@ -6,11 +6,13 @@ packages/crdt/dist
 
 packages/desktop-client/bundle.browser.js
 packages/desktop-client/build/
+packages/desktop-client/build-stats/
 packages/desktop-client/public/kcab/
 packages/desktop-client/public/data/
 packages/desktop-client/**/node_modules/*
 packages/desktop-client/node_modules/
 packages/desktop-client/src/icons/**/*
+packages/desktop-client/test-results/
 
 packages/desktop-electron/client-build/
 packages/desktop-electron/dist/
