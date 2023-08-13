@@ -393,7 +393,10 @@ function getPayeePretty(transaction, payee, transferAcct) {
         </div>
       </View>
     );
-  } else if (payee) {
+  } else if (payee && !payee.transfer_acct) {
+    // Check to make sure this isn't a transfer because in the rare
+    // occasion that the account has been deleted but the payee is
+    // still there, we don't want to show the name.
     return payee.name;
   } else if (payeeId && payeeId.startsWith('new:')) {
     return payeeId.slice('new:'.length);
@@ -986,7 +989,7 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={valueStyle}
           transaction={transaction}
           payee={payee}
-          transferAcct={showAccount ? null : transferAcct}
+          transferAcct={transferAcct}
           importedPayee={importedPayee}
           isPreview={isPreview}
           onEdit={onEdit}
