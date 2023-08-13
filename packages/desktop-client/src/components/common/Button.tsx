@@ -94,11 +94,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     hoveredStyle = [
       type !== 'bare' && styles.shadow,
-      hoveredStyle,
       {
         backgroundColor: backgroundColorHover[type],
         color: color || textColorHover[type],
       },
+      hoveredStyle,
     ];
     activeStyle = [
       type === 'bare'

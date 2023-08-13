@@ -401,6 +401,7 @@ class TransactionEditInner extends PureComponent {
                 fontWeight: 600,
                 userSelect: 'none',
               }}
+              role="heading"
             >
               {payeeId == null
                 ? adding
@@ -473,6 +474,7 @@ class TransactionEditInner extends PureComponent {
               <TapField
                 value={descriptionPretty}
                 onClick={() => this.onClick(transaction.id, 'payee')}
+                data-testid="payee-field"
               />
             </View>
 
@@ -506,6 +508,7 @@ class TransactionEditInner extends PureComponent {
                   //   </Button>
                   // }
                   onClick={() => this.onClick(transaction.id, 'category')}
+                  data-testid="category-field"
                 />
               ) : (
                 <Text style={{ paddingLeft: EDITING_PADDING }}>
