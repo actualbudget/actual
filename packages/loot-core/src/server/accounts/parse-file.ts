@@ -168,7 +168,7 @@ function sgml2Xml(sgml) {
     .replace(/>\s+</g, '><') // remove whitespace inbetween tag close/open
     .replace(/\s+</g, '<') // remove whitespace before a close tag
     .replace(/>\s+/g, '>') // remove whitespace after a close tag
-    .replace(/<([A-Z\d_]*)+\.+([A-Z\d_]*)>([^<]+)/g, '<$1$2>$3') // Remove dots in start-tags names and remove end-tags with dots
+    .replace(/\.(?=[^<>]*>)/g, '') // Remove dots in start-tags names and remove end-tags with dots
     .replace(/<(\w+?)>([^<]+)/g, '<$1>$2</$1>'); // Add a new end-tags for the ofx elements
 }
 
