@@ -18,8 +18,6 @@ Instead of creating an export from the Web app, you can also create a zip archiv
 
 ## Migration from other apps
 
-[YNAB4](ynab4) is the only built-in importer right now. We're hoping the community can help build other importers on top of the [API](../api/index.md).
-
 :::note
 There are guides [here](../advanced/index.md) for some advanced migration tasks.
 :::
