@@ -43,6 +43,7 @@ module.exports = {
       // used by memfs in a check which we can ignore I think
       url: false,
       zlib: require.resolve('browserify-zlib'),
+      timers: false,
     },
   },
   module: {
