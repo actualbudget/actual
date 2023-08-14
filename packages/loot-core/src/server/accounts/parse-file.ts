@@ -197,8 +197,8 @@ async function parse(data) {
   try {
     dataParsed = await parseXml(content);
   } catch (e) {
-    let converted = sgml2Xml(content);
-    dataParsed = await parseXml(converted);
+    let sanitized = sgml2Xml(content);
+    dataParsed = await parseXml(sanitized);
   }
 
   // put the headers into the returned data
