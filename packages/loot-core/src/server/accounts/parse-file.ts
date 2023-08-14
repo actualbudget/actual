@@ -106,9 +106,10 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
 
-  let data;
+  let transactions;
   try {
-    data = await parse(contents);
+    let data = await parse(contents);
+    transactions = getStmtTrn(data).map(mapTransaction);
   } catch (err) {
     errors.push({
       message: 'Failed importing file',
@@ -119,7 +120,7 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
 
   return {
     errors,
-    transactions: getStmtTrn(data).map(mapTransaction),
+    transactions: transactions ?? [],
   };
 }
 
@@ -168,7 +169,7 @@ function sgml2Xml(sgml) {
     .replace(/>\s+</g, '><') // remove whitespace inbetween tag close/open
     .replace(/\s+</g, '<') // remove whitespace before a close tag
     .replace(/>\s+/g, '>') // remove whitespace after a close tag
-    .replace(/\.(?=[^<>]*>)/g, '') // Remove dots in start-tags names and remove end-tags with dots
+    .replace(/\.(?=[^<>]*>)/g, '') // Remove dots in tag names
     .replace(/<(\w+?)>([^<]+)/g, '<$1>$2</$1>'); // Add a new end-tags for the ofx elements
 }
 
