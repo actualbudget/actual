@@ -1,5 +1,4 @@
 import React, {
-  createContext,
   forwardRef,
   useState,
   useCallback,
@@ -7,7 +6,6 @@ import React, {
   useEffect,
   useLayoutEffect,
   useImperativeHandle,
-  useContext,
   useMemo,
   type ComponentProps,
   type ReactNode,
@@ -61,32 +59,6 @@ function fireBlur(onBlur, e) {
   }
 }
 
-const CellContext = createContext({
-  backgroundColor: theme.tableBackground,
-  borderColor: theme.tableBorder,
-});
-
-type CellProviderProps = {
-  backgroundColor: string;
-  borderColor: string;
-  children: ReactNode;
-};
-function CellProvider({
-  backgroundColor,
-  borderColor,
-  children,
-}: CellProviderProps) {
-  let value = useMemo(
-    () => ({
-      backgroundColor,
-      borderColor,
-    }),
-    [backgroundColor, borderColor],
-  );
-
-  return <CellContext.Provider value={value}>{children}</CellContext.Provider>;
-}
-
 type FieldProps = ComponentProps<typeof View> & {
   width: number | 'flex';
   name?: string;
@@ -98,7 +70,6 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   { width, name, truncate = true, children, style, contentStyle, ...props },
   ref,
 ) {
-  let { backgroundColor, borderColor } = useContext(CellContext);
   return (
     <View
       innerRef={ref}
@@ -106,11 +77,9 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
       style={[
         width === 'flex' ? { flex: 1, flexBasis: 0 } : { width },
         {
-          position: 'relative',
-          borderTopWidth: borderColor ? 1 : 0,
-          borderBottomWidth: borderColor ? 1 : 0,
-          borderColor,
-          backgroundColor,
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor: theme.tableBorder,
         },
         styles.smallText,
         style,
@@ -191,7 +160,6 @@ export function Cell({
   textAlign,
   alignItems,
   onExpose,
-  borderColor: oldBorderColor,
   children,
   plain,
   style,
@@ -203,27 +171,16 @@ export function Cell({
   let mouseCoords = useRef(null);
   let viewRef = useRef(null);
 
-  let { backgroundColor, borderColor } = useContext(CellContext);
-
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
-
-  // TODO: Get rid of this. Go through and remove all the places where
-  // the border color is manually passed in.
-  if (oldBorderColor) {
-    borderColor = oldBorderColor;
-  } else {
-    borderColor = theme.tableBorder;
-  }
 
   const widthStyle = width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
   const cellStyle = {
     position: 'relative',
     textAlign: textAlign || 'left',
     justifyContent: 'center',
-    borderTopWidth: borderColor ? 1 : 0,
-    borderBottomWidth: borderColor ? 1 : 0,
-    borderColor,
-    backgroundColor,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: theme.tableBorder,
     alignItems: alignItems,
   };
 
@@ -305,7 +262,6 @@ export function Cell({
     <View
       innerRef={viewRef}
       style={[widthStyle, cellStyle, style]}
-      className="animated-cell"
       {...viewProps}
       data-testid={name}
     >
@@ -320,7 +276,6 @@ type RowProps = ComponentProps<typeof View> & {
   inset?: number;
   collapsed?: boolean;
   focused?: boolean;
-  highlighted?: boolean;
 };
 export function Row({
   backgroundColor = theme.tableBackground,
@@ -328,69 +283,30 @@ export function Row({
   inset = 0,
   collapsed,
   focused,
-  highlighted,
   children,
   height,
   style,
   ...nativeProps
 }: RowProps) {
-  let [shouldHighlight, setShouldHighlight] = useState(false);
-  let prevHighlighted = useRef(false);
-  let rowRef = useRef(null);
-  let timer = useRef(null);
-
-  useEffect(() => {
-    if (highlighted && !prevHighlighted.current && rowRef.current) {
-      rowRef.current.classList.add('animated');
-      setShouldHighlight(true);
-
-      clearTimeout(timer.current);
-      timer.current = setTimeout(() => {
-        setShouldHighlight(false);
-
-        timer.current = setTimeout(() => {
-          if (rowRef.current) {
-            rowRef.current.classList.remove('animated');
-          }
-        }, 500);
-      }, 500);
-    }
-  }, [highlighted]);
-
-  useEffect(() => {
-    prevHighlighted.current = highlighted;
-  });
-
   return (
-    <CellProvider
-      backgroundColor={
-        shouldHighlight ? theme.tableRowBackgroundHighlight : backgroundColor
-      }
-      borderColor={shouldHighlight ? theme.tableBorderSelected : borderColor}
+    <View
+      style={[
+        {
+          flexDirection: 'row',
+          height: height || ROW_HEIGHT,
+          flex: '0 0 ' + (height || ROW_HEIGHT) + 'px',
+          userSelect: 'text',
+        },
+        collapsed && { marginTop: -1 },
+        style,
+      ]}
+      data-testid="row"
+      {...nativeProps}
     >
-      <View
-        innerRef={rowRef}
-        style={[
-          {
-            flexDirection: 'row',
-            height: height || ROW_HEIGHT,
-            flex: '0 0 ' + (height || ROW_HEIGHT) + 'px',
-            userSelect: 'text',
-            '&.animated .animated-cell': {
-              transition: '.7s background-color',
-            },
-          },
-          collapsed && { marginTop: -1 },
-          style,
-        ]}
-        data-testid="row"
-        {...nativeProps}
-      >
-        {inset !== 0 && <Field width={inset} />}
-        {children}
-        {inset !== 0 && <Field width={inset} />}
-      </View>
-    </CellProvider>
+      {inset !== 0 && <Field width={inset} />}
+      {children}
+      {inset !== 0 && <Field width={inset} />}
+    </View>
   );
 }
 
@@ -968,7 +884,6 @@ type TableProps = {
   listRef;
   onScroll: () => void;
   version?: string;
-  animated?: boolean;
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
   saveScrollWidth: (parent, child) => void;
@@ -993,7 +908,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       listRef,
       onScroll,
       version = 'v1',
-      animated,
       allowPopupsEscape,
       isSelected,
       saveScrollWidth,
@@ -1109,7 +1023,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       return (
         <View
           key={key}
-          className="animated-row"
           style={[
             rowStyle,
             {
@@ -1188,7 +1101,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
           {
             flex: 1,
             outline: 'none',
-            '& .animated .animated-row': { transition: '.25s transform' },
           },
           style,
         ]}
@@ -1238,7 +1150,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
                             ? getScrollOffset(height, initialScrollTo.current)
                             : 0
                         }
-                        animated={animated}
                         overscanCount={5}
                         onItemsRendered={onItemsRendered}
                         onScroll={onScroll}
