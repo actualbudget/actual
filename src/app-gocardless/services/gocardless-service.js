@@ -439,14 +439,12 @@ export const goCardlessService = {
 
     handleGoCardlessError(response);
 
-    const bankAccount = BankFactory(institutionId);
+    const bank = BankFactory(institutionId);
     response.transactions.booked = response.transactions.booked
-      .map((transaction) => bankAccount.normalizeTransaction(transaction, true))
+      .map((transaction) => bank.normalizeTransaction(transaction, true))
       .filter((transaction) => transaction);
     response.transactions.pending = response.transactions.pending
-      .map((transaction) =>
-        bankAccount.normalizeTransaction(transaction, false),
-      )
+      .map((transaction) => bank.normalizeTransaction(transaction, false))
       .filter((transaction) => transaction);
 
     return response;

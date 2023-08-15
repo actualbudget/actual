@@ -17,7 +17,10 @@ export default {
   },
 
   normalizeTransaction(transaction, _booked) {
-    return transaction;
+    return {
+      ...transaction,
+      date: transaction.bookingDate || transaction.valueDate,
+    };
   },
 
   sortTransactions(transactions = []) {

@@ -15,11 +15,16 @@ export interface IBank {
 
   /**
    * Returns a normalized transaction object
+   *
+   * The GoCardless integrations with different banks are very inconsistent in
+   * what each of the different date fields actually mean, so this function is
+   * expected to set a `date` field which corresponds to the expected
+   * transaction date.
    */
   normalizeTransaction: (
     transaction: Transaction,
     booked: boolean,
-  ) => Transaction | null;
+  ) => (Transaction & { date?: string }) | null;
 
   /**
    * Function sorts an array of transactions from newest to oldest

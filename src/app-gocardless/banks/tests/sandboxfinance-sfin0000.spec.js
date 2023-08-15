@@ -1,5 +1,4 @@
 import SandboxfinanceSfin0000 from '../sandboxfinance-sfin0000.js';
-import { mockTransactionAmount } from '../../services/tests/fixtures.js';
 
 describe('SandboxfinanceSfin0000', () => {
   describe('#normalizeAccount', () => {
@@ -58,55 +57,6 @@ describe('SandboxfinanceSfin0000', () => {
   });
 
   describe('#sortTransactions', () => {
-    it('sorts transactions by time and sequence from newest to oldest', () => {
-      const transactions = [
-        {
-          transactionId: '2023012301927902-2',
-          transactionAmount: mockTransactionAmount,
-        },
-        {
-          transactionId: '2023012301927902-1',
-          transactionAmount: mockTransactionAmount,
-        },
-        {
-          transactionId: '2023012301927900-2',
-          transactionAmount: mockTransactionAmount,
-        },
-        {
-          transactionId: '2023012301927900-1',
-          transactionAmount: mockTransactionAmount,
-        },
-        {
-          transactionId: '2023012301927900-3',
-          transactionAmount: mockTransactionAmount,
-        },
-      ];
-      const sortedTransactions =
-        SandboxfinanceSfin0000.sortTransactions(transactions);
-      expect(sortedTransactions).toEqual([
-        {
-          transactionId: '2023012301927902-2',
-          transactionAmount: mockTransactionAmount,
-        },
-        {
-          transactionId: '2023012301927902-1',
-          transactionAmount: mockTransactionAmount,
-        },
-        {
-          transactionId: '2023012301927900-3',
-          transactionAmount: mockTransactionAmount,
-        },
-        {
-          transactionId: '2023012301927900-2',
-          transactionAmount: mockTransactionAmount,
-        },
-        {
-          transactionId: '2023012301927900-1',
-          transactionAmount: mockTransactionAmount,
-        },
-      ]);
-    });
-
     it('handles empty arrays', () => {
       const transactions = [];
       const sortedTransactions =

@@ -28,50 +28,45 @@ export default {
   },
 
   normalizeTransaction(transaction, booked) {
-    /**
-     * The way Bank Norwegian handles the date fields is rather strange and
-     * countrary to GoCardless's documentation.
-     *
-     * For booked transactions Bank Norwegian sends a `valueDate` field that
-     * doesn't match the NextGenPSD2 definition of `valueDate` which is what we
-     * expect to receive from GoCardless.  Therefore we remove the incorrect
-     * field so that transactions are correctly imported.
-     */
     if (booked) {
-      delete transaction.valueDate;
-      return transaction;
+      return {
+        ...transaction,
+        date: transaction.bookingDate,
+      };
     }
 
     /**
-     * For pending transactions there are two possibilities.  Either the
-     * transaction has a `valueDate`, in which case the `valueDate` we receive
-     * corresponds to when the transaction actually occurred, and so we simply
-     * return the transaction as-is.
+     * For pending transactions there are two possibilities:
+     *
+     * - Either a `valueDate` was set, in which case it corresponds to when the
+     *   transaction actually occurred, or
+     * - There is no date field, in which case we try to parse the correct date
+     *   out of the `remittanceInformationStructured` field.
+     *
+     * If neither case succeeds then we return `null` causing this transaction
+     * to be filtered out for now, and hopefully we'll be able to import it
+     * once the bank has processed it further.
      */
     if (transaction.valueDate !== undefined) {
-      return transaction;
+      return {
+        ...transaction,
+        date: transaction.valueDate,
+      };
     }
 
-    /**
-     * If the pending transaction didn't have a `valueDate` field then it
-     * should have a `remittanceInformationStructured` field which contains the
-     * date we expect to receive as the `valueDate`.  In this case we extract
-     * the date from that field and set it as `valueDate`.
-     */
     if (transaction.remittanceInformationStructured) {
       const remittanceInfoRegex = / (\d{4}-\d{2}-\d{2}) /;
       const matches =
         transaction.remittanceInformationStructured.match(remittanceInfoRegex);
       if (matches) {
         transaction.valueDate = matches[1];
-        return transaction;
+        return {
+          ...transaction,
+          date: matches[1],
+        };
       }
     }
 
-    /**
-     * If neither pending case is true we return `null` and ignore the
-     * transaction until it's been further processed by the bank.
-     */
     return null;
   },
 

@@ -489,6 +489,7 @@ describe('goCardlessService', () => {
               {
                 "bankTransactionCode": "string",
                 "bookingDate": "date",
+                "date": "date",
                 "debtorAccount": {
                   "iban": "string",
                 },
@@ -503,6 +504,7 @@ describe('goCardlessService', () => {
               {
                 "bankTransactionCode": "string",
                 "bookingDate": "date",
+                "date": "date",
                 "transactionAmount": {
                   "amount": "947.26",
                   "currency": "EUR",
@@ -513,6 +515,7 @@ describe('goCardlessService', () => {
             ],
             "pending": [
               {
+                "date": "date",
                 "transactionAmount": {
                   "amount": "947.26",
                   "currency": "EUR",

@@ -21,14 +21,10 @@ export default {
   },
 
   normalizeTransaction(transaction, _booked) {
-    /**
-     * The American Express Europe integration sends the actual date of
-     * purchase as `bookingDate`, and `valueDate` appears to contain a date
-     * related to the actual booking date, though sometimes offset by a day
-     * compared to the American Express website.
-     */
-    delete transaction.valueDate;
-    return transaction;
+    return {
+      ...transaction,
+      date: transaction.bookingDate,
+    };
   },
 
   sortTransactions(transactions = []) {
@@ -36,12 +32,12 @@ export default {
   },
 
   /**
-   *  For SANDBOXFINANCE_SFIN0000 we don't know what balance was
+   *  For AMERICAN_EXPRESS_AESUDEF1 we don't know what balance was
    *  after each transaction so we have to calculate it by getting
    *  current balance from the account and subtract all the transactions
    *
-   *  As a current balance we use `interimBooked` balance type because
-   *  it includes transaction placed during current day
+   *  As a current balance we use the non-standard `information` balance type
+   *  which is the only one provided for American Express.
    */
   calculateStartingBalance(sortedTransactions = [], balances = []) {
     const currentBalance = balances.find(
