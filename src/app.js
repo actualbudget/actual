@@ -17,6 +17,7 @@ process.on('unhandledRejection', (reason) => {
   console.log('Rejection:', reason);
 });
 
+app.disable('x-powered-by');
 app.use(cors());
 app.use(
   rateLimit({
