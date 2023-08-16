@@ -12,7 +12,7 @@ import { useSelector } from 'react-redux';
 import { useResponsive } from '../../ResponsiveProvider';
 import View from '../common/View';
 
-import { SIDEBAR_WIDTH } from './sidebar';
+import { SIDEBAR_WIDTH } from './Sidebar';
 import SidebarWithData from './SidebarWithData';
 
 type SidebarContextValue = {

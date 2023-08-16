@@ -18,7 +18,7 @@ import Menu from '../common/Menu';
 import Text from '../common/Text';
 import { Tooltip } from '../tooltips';
 
-import { Sidebar } from './sidebar';
+import { Sidebar } from './Sidebar';
 
 type EditableBudgetNameProps = {
   prefs: LocalPrefs;

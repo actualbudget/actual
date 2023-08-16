@@ -35,17 +35,21 @@ function useMergedRefs<T>(
     return ref;
   }, [ref1, ref2]);
 }
-type UseDraggableArgs = {
-  item: unknown;
-  type: string;
-  canDrag: boolean;
-  onDragChange: (drag: DragState) => void;
-};
+
 type DragState = {
   state: 'start-preview' | 'start' | 'end';
   type?: string;
   item?: unknown;
 };
+
+export type OnDragChangeCallback = (drag: DragState) => void;
+type UseDraggableArgs = {
+  item: unknown;
+  type: string;
+  canDrag: boolean;
+  onDragChange: OnDragChangeCallback;
+};
+
 export function useDraggable({
   item,
   type,
@@ -83,12 +87,22 @@ export function useDraggable({
   return { dragRef };
 }
 type DropPosition = 'top' | 'bottom';
+
+export type OnDropCallback = (
+  id: unknown,
+  dropPos: DropPosition,
+  targetId: unknown,
+) => void;
+
+type OnLongHoverCallback = () => void;
+
 type UseDroppableArgs = {
   types: string | string[];
   id: unknown;
-  onDrop: (id: unknown, dropPos: DropPosition, targetId: unknown) => void;
-  onLongHover?: () => void;
+  onDrop: OnDropCallback;
+  onLongHover?: OnLongHoverCallback;
 };
+
 export function useDroppable({
   types,
   id,
