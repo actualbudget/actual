@@ -60,7 +60,7 @@ async function setGoalBudget({ month, templateBudget }) {
   });
 }
 
-async function processTemplate(month, force, category_templates) {
+async function processTemplate(month, force, category_templates):Promise<Notification> {
   let templateBudget = [];
   let num_applied = 0;
   let errors = [];
