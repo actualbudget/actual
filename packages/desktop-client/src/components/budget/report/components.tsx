@@ -218,7 +218,6 @@ export const CategoryMonth = memo(function CategoryMonth({
         style={{
           flex: 1,
           flexDirection: 'row',
-          backgroundColor: 'white',
         }}
         onMouseOverCapture={() => setHover(true)}
         onMouseLeave={() => {
@@ -326,6 +325,9 @@ export const CategoryMonth = memo(function CategoryMonth({
           inputProps={{
             onBlur: () => {
               onEdit(null);
+            },
+            style: {
+              backgroundColor: 'white',
             },
           }}
           onSave={amount => {

@@ -336,7 +336,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         style={{
           flex: 1,
           flexDirection: 'row',
-          backgroundColor: 'white',
         }}
         onMouseOverCapture={() => setHover(true)}
         onMouseLeave={() => {
@@ -444,6 +443,9 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           inputProps={{
             onBlur: () => {
               onEdit(null);
+            },
+            style: {
+              backgroundColor: 'white',
             },
           }}
           onSave={amount => {

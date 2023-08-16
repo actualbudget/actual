@@ -725,8 +725,8 @@ export function SheetCell({
             onUpdate={value => {
               onSave(unformatExpr ? unformatExpr(value) : value);
             }}
-            style={{ textAlign }}
             {...inputProps}
+            style={{ textAlign, ...(inputProps?.style || {}) }}
           />
         );
       }}
