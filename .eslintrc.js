@@ -228,6 +228,7 @@ module.exports = {
         './packages/desktop-client/src/components/SidebarWithData.*',
         './packages/desktop-client/src/components/Titlebar.*',
         './packages/desktop-client/src/components/UpdateNotification.*',
+        './packages/desktop-client/src/components/accounts/Header.*',
         './packages/desktop-client/src/components/alerts.*',
         './packages/desktop-client/src/components/budget/MobileBudget.*',
         './packages/desktop-client/src/components/budget/MobileBudgetTable.*',
