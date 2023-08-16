@@ -13,7 +13,7 @@ import Text from './common/Text';
 import View from './common/View';
 import { Checkbox } from './forms';
 
-export type FatalAppError = Error & {
+type AppError = Error & {
   type?: string;
   IDBFailure?: boolean;
   SharedArrayBufferMissing?: boolean;
@@ -21,12 +21,12 @@ export type FatalAppError = Error & {
 
 type FatalErrorProps = {
   buttonText: string;
-  error: FatalAppError;
+  error: Error | AppError;
 };
 
-function renderSimple(error: FatalAppError) {
+function renderSimple(error: FatalErrorProps['error']) {
   let msg;
-  if (error.IDBFailure) {
+  if ('IDBFailure' in error && error.IDBFailure) {
     // IndexedDB wasn't able to open the database
     msg = (
       <Text>
@@ -36,7 +36,10 @@ function renderSimple(error: FatalAppError) {
         browsing.
       </Text>
     );
-  } else if (error.SharedArrayBufferMissing) {
+  } else if (
+    'SharedArrayBufferMissing' in error &&
+    error.SharedArrayBufferMissing
+  ) {
     // SharedArrayBuffer isn't available
     msg = (
       <Text>
@@ -106,7 +109,7 @@ function renderSimple(error: FatalAppError) {
 export default function FatalError({ buttonText, error }: FatalErrorProps) {
   let [showError, setShowError] = useState(false);
 
-  if (error.type === 'app-init-failure') {
+  if ('type' in error && error.type === 'app-init-failure') {
     return renderSimple(error);
   }
 

@@ -16,7 +16,8 @@ import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 
 import AppBackground from './AppBackground';
 import DevelopmentTopBar from './DevelopmentTopBar';
-import FatalError, { type FatalAppError } from './FatalError';
+import ErrorBoundary from './ErrorBoundary';
+import FatalError from './FatalError';
 import FinancesApp from './FinancesApp';
 import ManagementApp from './manager/ManagementApp';
 import MobileWebMessage from './MobileWebMessage';
@@ -43,7 +44,6 @@ function App({
   closeBudget,
   loadGlobalPrefs,
 }: AppProps) {
-  const [fatalError, setFatalError] = useState<FatalAppError>(null);
   const [initializing, setInitializing] = useState(true);
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
@@ -57,7 +57,6 @@ function App({
     } catch (e) {
       if (e.type === 'app-init-failure') {
         setInitializing(false);
-        setFatalError(e);
         return;
       } else {
         throw e;
@@ -98,7 +97,7 @@ function App({
       window.addEventListener('focus', checkScrollbars);
     }
 
-    initAll().catch(e => setFatalError(e));
+    initAll().catch(e => console.error(e));
 
     return () => window.removeEventListener('focus', checkScrollbars);
   }, []);
@@ -107,53 +106,50 @@ function App({
     global.Actual.updateAppMenu(!!budgetId);
   }, [budgetId]);
 
-  // TODO: Error boundary
-  // componentDidCatch(error) {
-  //   this.setState({ fatalError: error });
-  // }
-
   return (
-    <ResponsiveProvider>
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
-        <div
-          key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-          className={`${css([
-            {
-              flexGrow: 1,
-              overflow: 'hidden',
-            },
-            styles.lightScrollbar,
-          ])}`}
-        >
-          {fatalError ? (
-            <>
-              <AppBackground />
-              <FatalError error={fatalError} buttonText="Restart app" />
-            </>
-          ) : initializing ? (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
+      <div
+        key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+        className={`${css([
+          {
+            flexGrow: 1,
+            overflow: 'hidden',
+          },
+          styles.lightScrollbar,
+        ])}`}
+      >
+        {initializing ? (
+          <AppBackground
+            initializing={initializing}
+            loadingText={loadingText}
+          />
+        ) : budgetId ? (
+          <FinancesApp />
+        ) : (
+          <>
             <AppBackground
               initializing={initializing}
               loadingText={loadingText}
             />
-          ) : budgetId ? (
-            <FinancesApp />
-          ) : (
-            <>
-              <AppBackground
-                initializing={initializing}
-                loadingText={loadingText}
-              />
-              <ManagementApp isLoading={loadingText != null} />
-            </>
-          )}
+            <ManagementApp isLoading={loadingText != null} />
+          </>
+        )}
 
-          <UpdateNotification />
-          <MobileWebMessage />
-        </div>
+        <UpdateNotification />
+        <MobileWebMessage />
       </div>
-      <ThemeStyle />
-    </ResponsiveProvider>
+    </div>
+  );
+}
+
+function ErrorFallback(props) {
+  return (
+    <>
+      {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
+      <AppBackground />
+      <FatalError error={props.error} buttonText="Restart app" />
+    </>
   );
 }
 
@@ -168,13 +164,18 @@ export default function AppWrapper() {
   let { loadBudget, closeBudget, loadGlobalPrefs } = useActions();
 
   return (
-    <App
-      budgetId={budgetId}
-      cloudFileId={cloudFileId}
-      loadingText={loadingText}
-      loadBudget={loadBudget}
-      closeBudget={closeBudget}
-      loadGlobalPrefs={loadGlobalPrefs}
-    />
+    <ResponsiveProvider>
+      <ErrorBoundary fallback={ErrorFallback}>
+        <App
+          budgetId={budgetId}
+          cloudFileId={cloudFileId}
+          loadingText={loadingText}
+          loadBudget={loadBudget}
+          closeBudget={closeBudget}
+          loadGlobalPrefs={loadGlobalPrefs}
+        />
+      </ErrorBoundary>
+      <ThemeStyle />
+    </ResponsiveProvider>
   );
 }
