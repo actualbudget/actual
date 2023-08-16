@@ -62,7 +62,6 @@ function fireBlur(onBlur, e) {
 type FieldProps = ComponentProps<typeof View> & {
   width: number | 'flex';
   name?: string;
-  borderColor?: string;
   truncate?: boolean;
   contentStyle?: CSSProperties;
 };
@@ -140,7 +139,6 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   focused?: boolean;
   textAlign?: string;
   alignItems?: string;
-  borderColor?: string;
   plain?: boolean;
   exposed?: boolean;
   children?: ReactNode | (() => ReactNode);
@@ -271,18 +269,12 @@ export function Cell({
 }
 
 type RowProps = ComponentProps<typeof View> & {
-  backgroundColor?: string;
-  borderColor?: string;
   inset?: number;
   collapsed?: boolean;
-  focused?: boolean;
 };
 export function Row({
-  backgroundColor = theme.tableBackground,
-  borderColor = theme.tableBorder,
   inset = 0,
   collapsed,
-  focused,
   children,
   height,
   style,

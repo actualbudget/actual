@@ -249,7 +249,6 @@ export function SchedulesTable({
         <Row
           height={ROW_HEIGHT}
           inset={15}
-          backgroundColor="transparent"
           style={{
             cursor: 'pointer',
             backgroundColor: 'white',

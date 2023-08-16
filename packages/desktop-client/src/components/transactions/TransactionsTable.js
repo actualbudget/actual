@@ -813,7 +813,6 @@ const Transaction = memo(function Transaction(props) {
 
   return (
     <Row
-      highlighted={highlighted}
       style={[
         {
           backgroundColor: selected
