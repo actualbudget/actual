@@ -813,7 +813,6 @@ const Transaction = memo(function Transaction(props) {
 
   return (
     <Row
-      highlighted={highlighted}
       style={[
         {
           backgroundColor: selected
@@ -825,7 +824,6 @@ const Transaction = memo(function Transaction(props) {
         {
           ':hover': {
             backgroundColor: theme.tableRowBackgroundHover,
-            color: theme.tableRowBackgroundHighlightText,
           },
         },
         highlighted || selected
