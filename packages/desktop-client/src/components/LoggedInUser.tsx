@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type CSSProperties } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../hooks/useActions';
@@ -11,7 +11,16 @@ import View from './common/View';
 import { useServerURL } from './ServerContext';
 import { Tooltip } from './tooltips';
 
-export default function LoggedInUser({ hideIfNoServer, style, color }) {
+type LoggedInUserProps = {
+  hideIfNoServer?: boolean;
+  style?: CSSProperties;
+  color?: string;
+};
+export default function LoggedInUser({
+  hideIfNoServer,
+  style,
+  color,
+}: LoggedInUserProps) {
   let userData = useSelector(state => state.user.data);
   let { getUserData, signOut, closeBudget } = useActions();
   let [loading, setLoading] = useState(true);

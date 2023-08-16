@@ -1,15 +1,32 @@
-import React, { createContext, useState, useContext, useMemo } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useMemo,
+  type ReactNode,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 import { useSelector } from 'react-redux';
 
-import { useResponsive } from '../ResponsiveProvider';
+import { useResponsive } from '../../ResponsiveProvider';
+import View from '../common/View';
 
-import View from './common/View';
 import { SIDEBAR_WIDTH } from './sidebar';
 import SidebarWithData from './SidebarWithData';
 
-const SidebarContext = createContext(null);
+type SidebarContextValue = {
+  hidden: boolean;
+  setHidden: Dispatch<SetStateAction<boolean>>;
+  floating: boolean;
+  alwaysFloats: boolean;
+};
+const SidebarContext = createContext<SidebarContextValue>(null);
 
-export function SidebarProvider({ children }) {
+type SidebarProviderProps = {
+  children: ReactNode;
+};
+export function SidebarProvider({ children }: SidebarProviderProps) {
   let floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );

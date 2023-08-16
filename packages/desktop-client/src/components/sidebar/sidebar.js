@@ -5,27 +5,28 @@ import { css } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
-import Add from '../icons/v1/Add';
-import CheveronDown from '../icons/v1/CheveronDown';
-import CheveronRight from '../icons/v1/CheveronRight';
-import Cog from '../icons/v1/Cog';
-import Pin from '../icons/v1/Pin';
-import Reports from '../icons/v1/Reports';
-import StoreFrontIcon from '../icons/v1/StoreFront';
-import TuningIcon from '../icons/v1/Tuning';
-import Wallet from '../icons/v1/Wallet';
-import ArrowButtonLeft1 from '../icons/v2/ArrowButtonLeft1';
-import CalendarIcon from '../icons/v2/Calendar';
-import { styles, colors } from '../style';
+import Add from '../../icons/v1/Add';
+import CheveronDown from '../../icons/v1/CheveronDown';
+import CheveronRight from '../../icons/v1/CheveronRight';
+import Cog from '../../icons/v1/Cog';
+import Pin from '../../icons/v1/Pin';
+import Reports from '../../icons/v1/Reports';
+import StoreFrontIcon from '../../icons/v1/StoreFront';
+import TuningIcon from '../../icons/v1/Tuning';
+import Wallet from '../../icons/v1/Wallet';
+import ArrowButtonLeft1 from '../../icons/v2/ArrowButtonLeft1';
+import CalendarIcon from '../../icons/v2/Calendar';
+// eslint-disable-next-line no-restricted-imports
+import { styles, colors } from '../../style';
+import AlignedText from '../common/AlignedText';
+import AnchorLink from '../common/AnchorLink';
+import Block from '../common/Block';
+import Button from '../common/Button';
+import View from '../common/View';
+import { useDraggable, useDroppable, DropHighlight } from '../sort';
+import CellValue from '../spreadsheet/CellValue';
 
-import AlignedText from './common/AlignedText';
-import AnchorLink from './common/AnchorLink';
-import Block from './common/Block';
-import Button from './common/Button';
-import View from './common/View';
-import { useSidebar } from './FloatableSidebar';
-import { useDraggable, useDroppable, DropHighlight } from './sort';
-import CellValue from './spreadsheet/CellValue';
+import { useSidebar } from '.';
 
 export const SIDEBAR_WIDTH = 240;
 

@@ -6,20 +6,25 @@ import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
-import { useActions } from '../hooks/useActions';
-import ExpandArrow from '../icons/v0/ExpandArrow';
-import { styles, colors } from '../style';
+import { useActions } from '../../hooks/useActions';
+import ExpandArrow from '../../icons/v0/ExpandArrow';
+import { styles, theme } from '../../style';
+import Button from '../common/Button';
+import InitialFocus from '../common/InitialFocus';
+import Input from '../common/Input';
+import Menu from '../common/Menu';
+import Text from '../common/Text';
+import { Tooltip } from '../tooltips';
 
-import Button from './common/Button';
-import InitialFocus from './common/InitialFocus';
-import Input from './common/Input';
-import Menu from './common/Menu';
-import Text from './common/Text';
 import { Sidebar } from './sidebar';
-import { Tooltip } from './tooltips';
 
-function EditableBudgetName({ prefs, savePrefs }) {
+type EditableBudgetNameProps = {
+  prefs: LocalPrefs;
+  savePrefs: (prefs: Partial<LocalPrefs>) => Promise<void>;
+};
+function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
   let dispatch = useDispatch();
   let navigate = useNavigate();
   const [editing, setEditing] = useState(false);
@@ -63,10 +68,11 @@ function EditableBudgetName({ prefs, savePrefs }) {
           }}
           defaultValue={prefs.budgetName}
           onEnter={async e => {
-            const newBudgetName = e.target.value;
+            const inputEl = e.target as HTMLInputElement;
+            const newBudgetName = inputEl.value;
             if (newBudgetName.trim() !== '') {
               await savePrefs({
-                budgetName: e.target.value,
+                budgetName: inputEl.value,
               });
               setEditing(false);
             }
@@ -79,7 +85,7 @@ function EditableBudgetName({ prefs, savePrefs }) {
     return (
       <Button
         type="bare"
-        color={colors.n9}
+        color={theme.buttonNormalBorder}
         style={{
           fontSize: 16,
           fontWeight: 500,

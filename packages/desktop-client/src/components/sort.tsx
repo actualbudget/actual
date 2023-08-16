@@ -6,6 +6,10 @@ import React, {
   useMemo,
   useState,
   useContext,
+  type RefCallback,
+  type MutableRefObject,
+  type Context,
+  type Ref,
 } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 
@@ -13,7 +17,10 @@ import { theme } from '../style';
 
 import View from './common/View';
 
-function useMergedRefs(ref1, ref2) {
+function useMergedRefs<T>(
+  ref1: RefCallback<T> | MutableRefObject<T>,
+  ref2: RefCallback<T> | MutableRefObject<T>,
+): Ref<T> {
   return useMemo(() => {
     function ref(value) {
       [ref1, ref2].forEach(ref => {
@@ -28,8 +35,23 @@ function useMergedRefs(ref1, ref2) {
     return ref;
   }, [ref1, ref2]);
 }
-
-export function useDraggable({ item, type, canDrag, onDragChange }) {
+type UseDraggableArgs = {
+  item: unknown;
+  type: string;
+  canDrag: boolean;
+  onDragChange: (drag: DragState) => void;
+};
+type DragState = {
+  state: 'start-preview' | 'start' | 'end';
+  type?: string;
+  item?: unknown;
+};
+export function useDraggable({
+  item,
+  type,
+  canDrag,
+  onDragChange,
+}: UseDraggableArgs) {
   let _onDragChange = useRef(onDragChange);
 
   const [, dragRef] = useDrag({
@@ -60,10 +82,21 @@ export function useDraggable({ item, type, canDrag, onDragChange }) {
 
   return { dragRef };
 }
-
-export function useDroppable({ types, id, onDrop, onLongHover }) {
+type DropPosition = 'top' | 'bottom';
+type UseDroppableArgs = {
+  types: string | string[];
+  id: unknown;
+  onDrop: (id: unknown, dropPos: DropPosition, targetId: unknown) => void;
+  onLongHover?: () => void;
+};
+export function useDroppable({
+  types,
+  id,
+  onDrop,
+  onLongHover,
+}: UseDroppableArgs) {
   let ref = useRef(null);
-  let [dropPos, setDropPos] = useState(null);
+  let [dropPos, setDropPos] = useState<DropPosition>(null);
 
   let [{ isOver }, dropRef] = useDrop({
     accept: types,
@@ -75,7 +108,7 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
       let hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       let clientOffset = monitor.getClientOffset();
       let hoverClientY = clientOffset.y - hoverBoundingRect.top;
-      let pos = hoverClientY < hoverMiddleY ? 'top' : 'bottom';
+      let pos: DropPosition = hoverClientY < hoverMiddleY ? 'top' : 'bottom';
 
       setDropPos(pos);
     },
@@ -99,17 +132,26 @@ export function useDroppable({ types, id, onDrop, onLongHover }) {
   };
 }
 
-export const DropHighlightPosContext = createContext(null);
+type ItemPosition = 'first' | 'last';
+export const DropHighlightPosContext: Context<ItemPosition> =
+  createContext(null);
 
-export function DropHighlight({ pos, offset = {} }) {
+type DropHighlightProps = {
+  pos: 'top' | 'bottom';
+  offset?: {
+    top?: number;
+    bottom?: number;
+  };
+};
+export function DropHighlight({ pos, offset }: DropHighlightProps) {
   let itemPos = useContext(DropHighlightPosContext);
 
   if (pos == null) {
     return null;
   }
 
-  let topOffset = (itemPos === 'first' ? 2 : 0) + (offset.top || 0);
-  let bottomOffset = (itemPos === 'last' ? 2 : 0) + (offset.bottom || 0);
+  let topOffset = (itemPos === 'first' ? 2 : 0) + (offset?.top || 0);
+  let bottomOffset = (itemPos === 'last' ? 2 : 0) + (offset?.bottom || 0);
 
   let posStyle =
     pos === 'top' ? { top: -2 + topOffset } : { bottom: -1 + bottomOffset };
