@@ -34,8 +34,14 @@ if (process.env.ACTUAL_CONFIG_PATH) {
   );
   userConfig = parseJSON(process.env.ACTUAL_CONFIG_PATH);
 } else {
-  debug(`loading config from default path: '${defaultDataDir}/config.json'`);
-  userConfig = parseJSON(path.join(defaultDataDir, 'config.json'), true);
+  let configFile = path.join(projectRoot, 'config.json');
+
+  if (!fs.existsSync(configFile)) {
+    configFile = path.join(defaultDataDir, 'config.json');
+  }
+
+  debug(`loading config from default path: '${configFile}'`);
+  userConfig = parseJSON(configFile, true);
 }
 
 /** @type {Omit<import('./config-types.js').Config, 'mode' | 'serverFiles' | 'userFiles'>} */
