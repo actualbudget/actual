@@ -1106,7 +1106,11 @@ const Transaction = memo(function Transaction(props) {
               : ''
           }
           valueStyle={valueStyle}
-          style={{ fontStyle: 'italic', fontWeight: 300 }}
+          style={{
+            fontStyle: 'italic',
+            color: '#c0c0c0',
+            fontWeight: 300,
+          }}
           inputProps={{
             readOnly: true,
             style: { fontStyle: 'italic' },
