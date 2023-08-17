@@ -10,25 +10,10 @@ import React, {
 import { useSelector } from 'react-redux';
 
 import { useResponsive } from '../../ResponsiveProvider';
-// eslint-disable-next-line no-restricted-imports
-import { styles, colors } from '../../style';
 import View from '../common/View';
 
 import { SIDEBAR_WIDTH } from './Sidebar';
 import SidebarWithData from './SidebarWithData';
-
-const accountNameStyle = {
-  marginTop: -2,
-  marginBottom: 2,
-  paddingTop: 4,
-  paddingBottom: 4,
-  paddingRight: 15,
-  paddingLeft: 10,
-  textDecoration: 'none',
-  color: colors.n9,
-  ':hover': { backgroundColor: colors.n2 },
-  ...styles.smallText,
-};
 
 type SidebarContextValue = {
   hidden: boolean;
@@ -119,5 +104,5 @@ function FloatableSidebar() {
   );
 }
 
-export { SidebarProvider, useSidebar, accountNameStyle };
+export { SidebarProvider, useSidebar };
 export default FloatableSidebar;

@@ -5,7 +5,7 @@ import { css } from 'glamor';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 // eslint-disable-next-line no-restricted-imports
-import { colors } from '../../style';
+import { styles, colors } from '../../style';
 import AlignedText from '../common/AlignedText';
 import AnchorLink from '../common/AnchorLink';
 import View from '../common/View';
@@ -19,7 +19,18 @@ import {
 import { type Binding } from '../spreadsheet';
 import CellValue from '../spreadsheet/CellValue';
 
-import { accountNameStyle } from '.';
+export const accountNameStyle = {
+  marginTop: -2,
+  marginBottom: 2,
+  paddingTop: 4,
+  paddingBottom: 4,
+  paddingRight: 15,
+  paddingLeft: 10,
+  textDecoration: 'none',
+  color: colors.n9,
+  ':hover': { backgroundColor: colors.n2 },
+  ...styles.smallText,
+};
 
 type AccountProps = {
   name: string;

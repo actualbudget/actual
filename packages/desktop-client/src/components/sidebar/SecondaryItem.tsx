@@ -10,9 +10,8 @@ import { colors } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
+import { accountNameStyle } from './Account';
 import ItemContent from './ItemContent';
-
-import { accountNameStyle } from '.';
 
 const fontWeight = 600;
 
