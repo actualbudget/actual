@@ -1,6 +1,9 @@
-import React, { useEffect, useRef, type ReactChild } from 'react';
-
-import { type CSSProperties } from 'glamor';
+import React, {
+  useEffect,
+  useRef,
+  type CSSProperties,
+  type ReactChild,
+} from 'react';
 
 import View from '../common/View';
 

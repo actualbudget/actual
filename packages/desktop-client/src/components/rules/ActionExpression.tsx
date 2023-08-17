@@ -1,6 +1,4 @@
-import React from 'react';
-
-import { type CSSProperties } from 'glamor';
+import React, { type CSSProperties } from 'react';
 
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
