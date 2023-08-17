@@ -153,7 +153,7 @@ function ErrorFallback(props) {
   );
 }
 
-export default function AppWrapper() {
+function AppWrapper() {
   let budgetId = useSelector(
     state => state.prefs.local && state.prefs.local.id,
   );
@@ -179,3 +179,5 @@ export default function AppWrapper() {
     </ResponsiveProvider>
   );
 }
+
+export default AppWrapper;
