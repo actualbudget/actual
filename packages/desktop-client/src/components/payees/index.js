@@ -90,9 +90,7 @@ let Payee = memo(
     style,
     payee,
     ruleCount,
-    categoryGroups,
     selected,
-    highlighted,
     hovered,
     editing,
     focusedField,
@@ -101,7 +99,6 @@ let Payee = memo(
     onHover,
     onEdit,
     onUpdate,
-    ruleActions,
   }) => {
     let { id } = payee;
     let dispatchSelected = useSelectedDispatch();
@@ -110,16 +107,18 @@ let Payee = memo(
 
     return (
       <Row
-        borderColor={borderColor}
-        backgroundColor={
-          selected ? colors.b9 : backgroundFocus ? colors.hover : 'white'
-        }
-        highlighted={highlighted}
         style={[
           { alignItems: 'stretch' },
           style,
           {
-            backgroundColor: hovered ? colors.hover : null,
+            borderColor,
+            backgroundColor: hovered
+              ? colors.hover
+              : selected
+              ? colors.b9
+              : backgroundFocus
+              ? colors.hover
+              : 'white',
           },
           selected && {
             backgroundColor: colors.b9,
@@ -230,8 +229,8 @@ function PayeeTableHeader() {
   return (
     <View>
       <TableHeader
-        borderColor={borderColor}
         style={{
+          borderColor,
           backgroundColor: 'white',
           color: colors.n4,
           zIndex: 200,

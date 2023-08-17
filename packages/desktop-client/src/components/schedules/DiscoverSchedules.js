@@ -36,13 +36,12 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       <Row
         height={ROW_HEIGHT}
         inset={15}
-        backgroundColor="transparent"
         onClick={e => {
           dispatchSelected({ type: 'select', id: item.id, event: e });
         }}
-        borderColor={selected ? colors.b8 : colors.border}
         style={{
           cursor: 'pointer',
+          borderColor: selected ? colors.b8 : colors.border,
           backgroundColor: selected ? colors.selected : 'white',
           ':hover': {
             backgroundColor: selected ? colors.selected : colors.hover,

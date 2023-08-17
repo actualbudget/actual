@@ -768,6 +768,7 @@ const Transaction = memo(function Transaction(props) {
 
   let {
     id,
+    amount,
     debit,
     credit,
     payee: payeeId,
@@ -806,10 +807,12 @@ const Transaction = memo(function Transaction(props) {
   let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
   let statusProps = getStatusProps(notes);
+  let runningBalance = !isTemporaryId(id)
+    ? balance
+    : balance + (_inverse ? -1 : 1) * amount;
 
   return (
     <Row
-      highlighted={highlighted}
       style={[
         {
           backgroundColor: selected
@@ -821,7 +824,6 @@ const Transaction = memo(function Transaction(props) {
         {
           ':hover': {
             backgroundColor: theme.tableRowBackgroundHover,
-            color: theme.tableRowBackgroundHighlightText,
           },
         },
         highlighted || selected
@@ -986,7 +988,7 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={valueStyle}
           transaction={transaction}
           payee={payee}
-          transferAcct={showAccount ? null : transferAcct}
+          transferAcct={transferAcct}
           importedPayee={importedPayee}
           isPreview={isPreview}
           onEdit={onEdit}
@@ -1104,7 +1106,11 @@ const Transaction = memo(function Transaction(props) {
               : ''
           }
           valueStyle={valueStyle}
-          style={{ fontStyle: 'italic', fontWeight: 300 }}
+          style={{
+            fontStyle: 'italic',
+            color: '#c0c0c0',
+            fontWeight: 300,
+          }}
           inputProps={{
             readOnly: true,
             style: { fontStyle: 'italic' },
@@ -1219,9 +1225,13 @@ const Transaction = memo(function Transaction(props) {
         <Cell
           /* Balance field for all transactions */
           name="balance"
-          value={balance == null || isChild ? '' : integerToCurrency(balance)}
+          value={
+            runningBalance == null || isChild
+              ? ''
+              : integerToCurrency(runningBalance)
+          }
           valueStyle={{
-            color: balance < 0 ? theme.errorText : theme.noticeText,
+            color: runningBalance < 0 ? theme.errorText : theme.noticeText,
           }}
           style={[styles.tnum, amountStyle]}
           width={88}
@@ -1339,6 +1349,7 @@ function NewTransaction({
   onCreatePayee,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
+  balance,
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1357,7 +1368,7 @@ function NewTransaction({
         }
       }}
     >
-      {transactions.map((transaction, idx) => (
+      {transactions.map(transaction => (
         <Transaction
           isNew
           key={transaction.id}
@@ -1385,6 +1396,7 @@ function NewTransaction({
           style={{ marginTop: -1 }}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
+          balance={balance}
         />
       ))}
       <View
@@ -1607,6 +1619,11 @@ function TransactionTableInner({
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToTransferAccount}
+              balance={
+                props.transactions?.length > 0
+                  ? props.balances?.[props.transactions[0]?.id]?.balance
+                  : 0
+              }
             />
           </View>
         )}

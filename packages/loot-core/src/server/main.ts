@@ -2063,7 +2063,15 @@ handlers['import-budget'] = async function ({ filepath, type }) {
 };
 
 handlers['export-budget'] = async function () {
-  return await cloudStorage.exportBuffer();
+  try {
+    return {
+      data: await cloudStorage.exportBuffer(),
+    };
+  } catch (err) {
+    err.message = 'Error exporting budget: ' + err.message;
+    captureException(err);
+    return { error: 'internal-error' };
+  }
 };
 
 async function loadBudget(id) {
