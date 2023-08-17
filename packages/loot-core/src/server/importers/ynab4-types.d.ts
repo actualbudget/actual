@@ -16,6 +16,7 @@ export namespace YNAB4 {
   export interface MasterCategory {
     entityType: string;
     expanded: boolean;
+    note?: string;
     name: string;
     type: string;
     deleteable: boolean;
@@ -31,6 +32,7 @@ export namespace YNAB4 {
   export interface SubCategory {
     entityType: string;
     name: string;
+    note?: string;
     type: string;
     // cachedBalance: null;
     masterCategoryId: string;

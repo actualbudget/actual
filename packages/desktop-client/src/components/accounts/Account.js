@@ -115,7 +115,7 @@ function AllTransactions({
       date: schedule.next_date,
       notes: scheduleData.statuses.get(schedule.id),
       schedule: schedule.id,
-      _inverse: accountId !== schedule._account,
+      _inverse: accountId ? accountId !== schedule._account : false,
     }));
   }, [schedules, accountId]);
 
@@ -415,7 +415,7 @@ class AccountInternal extends PureComponent {
     );
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
