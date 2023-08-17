@@ -19,7 +19,7 @@ import {
 import { type Binding } from '../spreadsheet';
 import CellValue from '../spreadsheet/CellValue';
 
-export const accountNameStyle = {
+const accountNameStyle = {
   marginTop: -2,
   marginBottom: 2,
   paddingTop: 4,
@@ -144,4 +144,5 @@ function Account({
   );
 }
 
+export { accountNameStyle };
 export default Account;
