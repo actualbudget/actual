@@ -9,11 +9,7 @@ import Background from './Background';
 import Block from './common/Block';
 import View from './common/View';
 
-type AppBackgroundProps = {
-  initializing?: boolean;
-  loadingText?: string;
-};
-function AppBackground({ initializing, loadingText }: AppBackgroundProps) {
+function AppBackground({ initializing, loadingText }) {
   return (
     <>
       <Background />
