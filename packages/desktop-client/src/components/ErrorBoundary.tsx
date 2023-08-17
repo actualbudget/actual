@@ -9,10 +9,7 @@ type ErrorBoundaryState = {
   error?: Error;
 };
 
-export default class ErrorBoundary extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props) {
     super(props);
     this.state = { error: null };
@@ -30,3 +27,5 @@ export default class ErrorBoundary extends Component<
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;
