@@ -40,7 +40,7 @@ export default function MobileWebMessage() {
       let d = new Date();
       d.setTime(d.getTime() + 1000 * 60 * 5);
       document.cookie =
-        'hideMobileMessage=true;path=/;expires=' + d.toGMTString();
+        'hideMobileMessage=true;path=/;expires=' + d.toUTCString();
     }
   }
 
