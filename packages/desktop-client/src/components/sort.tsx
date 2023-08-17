@@ -42,7 +42,7 @@ type DragState = {
   item?: unknown;
 };
 
-export type OnDragChangeCallback = (drag: DragState) => void;
+export type OnDragChangeCallback = (drag: DragState) => Promise<void> | void;
 type UseDraggableArgs = {
   item: unknown;
   type: string;
@@ -92,9 +92,9 @@ export type OnDropCallback = (
   id: unknown,
   dropPos: DropPosition,
   targetId: unknown,
-) => void;
+) => Promise<void> | void;
 
-type OnLongHoverCallback = () => void;
+type OnLongHoverCallback = () => Promise<void> | void;
 
 type UseDroppableArgs = {
   types: string | string[];

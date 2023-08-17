@@ -137,8 +137,10 @@ export default function SidebarWithData() {
 
   return (
     <Sidebar
+      BudgetName={props => (
+        <EditableBudgetName {...props} prefs={prefs} savePrefs={savePrefs} />
+      )}
       isFloating={floatingSidebar}
-      budgetName={<EditableBudgetName prefs={prefs} savePrefs={savePrefs} />}
       accounts={accounts}
       failedAccounts={failedAccounts}
       updatedAccounts={updatedAccounts}
@@ -155,7 +157,10 @@ export default function SidebarWithData() {
           'ui.showClosedAccounts': !prefs['ui.showClosedAccounts'],
         })
       }
-      style={[{ flex: 1 }, styles.darkScrollbar]}
+      style={{
+        flex: 1,
+        ...styles.darkScrollbar,
+      }}
     />
   );
 }

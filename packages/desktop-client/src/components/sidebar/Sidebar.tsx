@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { type ComponentType, type CSSProperties } from 'react';
 
 import * as Platform from 'loot-core/src/client/platform';
+import { type AccountEntity } from 'loot-core/src/types/models';
 
 import Reports from '../../icons/v1/Reports';
 import Wallet from '../../icons/v1/Wallet';
@@ -8,6 +9,8 @@ import CalendarIcon from '../../icons/v2/Calendar';
 // eslint-disable-next-line no-restricted-imports
 import { colors } from '../../style';
 import View from '../common/View';
+import { type OnDropCallback } from '../sort';
+import { type Binding } from '../spreadsheet';
 
 import { Accounts } from './Accounts';
 import { Item } from './Item';
@@ -18,9 +21,32 @@ import { useSidebar } from '.';
 
 export const SIDEBAR_WIDTH = 240;
 
+type SidebarProps = {
+  style: CSSProperties;
+  BudgetName: ComponentType;
+  accounts: AccountEntity[];
+  failedAccounts: Map<
+    string,
+    {
+      type: string;
+      code: string;
+    }
+  >;
+  updatedAccounts: string[];
+  getBalanceQuery: (account: AccountEntity) => Binding;
+  getAllAccountBalance: () => Binding;
+  getOnBudgetBalance: () => Binding;
+  getOffBudgetBalance: () => Binding;
+  showClosedAccounts: boolean;
+  isFloating: boolean;
+  onFloat: () => void;
+  onAddAccount: () => void;
+  onToggleClosedAccounts: () => void;
+  onReorder: OnDropCallback;
+};
 export function Sidebar({
   style,
-  budgetName,
+  BudgetName,
   accounts,
   failedAccounts,
   updatedAccounts,
@@ -34,7 +60,7 @@ export function Sidebar({
   onAddAccount,
   onToggleClosedAccounts,
   onReorder,
-}) {
+}: SidebarProps) {
   let hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
   const sidebar = useSidebar();
@@ -75,7 +101,7 @@ export function Sidebar({
           },
         ]}
       >
-        {budgetName}
+        <BudgetName />
 
         <View style={{ flex: 1, flexDirection: 'row' }} />
 

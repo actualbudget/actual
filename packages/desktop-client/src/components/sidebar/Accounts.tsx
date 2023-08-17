@@ -1,12 +1,40 @@
 import React, { useState, useMemo } from 'react';
 
+import { type AccountEntity } from 'loot-core/src/types/models';
+
 import Add from '../../icons/v1/Add';
 import View from '../common/View';
+import { type OnDropCallback } from '../sort';
+import { type Binding } from '../spreadsheet';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
 
 const fontWeight = 600;
+
+type AccountsProps = {
+  accounts: AccountEntity[];
+  failedAccounts: Map<
+    string,
+    {
+      type: string;
+      code: string;
+    }
+  >;
+  updatedAccounts: string[];
+  getAccountPath: (account: AccountEntity) => string;
+  allAccountsPath: string;
+  budgetedAccountPath: string;
+  offBudgetAccountPath: string;
+  getBalanceQuery: (account: AccountEntity) => Binding;
+  getAllAccountBalance: () => Binding;
+  getOnBudgetBalance: () => Binding;
+  getOffBudgetBalance: () => Binding;
+  showClosedAccounts: boolean;
+  onAddAccount: () => void;
+  onToggleClosedAccounts: () => void;
+  onReorder: OnDropCallback;
+};
 
 export function Accounts({
   accounts,
@@ -24,7 +52,7 @@ export function Accounts({
   onAddAccount,
   onToggleClosedAccounts,
   onReorder,
-}) {
+}: AccountsProps) {
   let [isDragging, setIsDragging] = useState(false);
   let offbudgetAccounts = useMemo(
     () =>
@@ -82,7 +110,7 @@ export function Accounts({
           key={account.id}
           name={account.name}
           account={account}
-          connected={!!account.bankId}
+          connected={!!account.bank}
           failed={failedAccounts && failedAccounts.has(account.id)}
           updated={updatedAccounts && updatedAccounts.includes(account.id)}
           to={getAccountPath(account)}
@@ -107,7 +135,7 @@ export function Accounts({
           key={account.id}
           name={account.name}
           account={account}
-          connected={!!account.bankId}
+          connected={!!account.bank}
           failed={failedAccounts && failedAccounts.has(account.id)}
           updated={updatedAccounts && updatedAccounts.includes(account.id)}
           to={getAccountPath(account)}
