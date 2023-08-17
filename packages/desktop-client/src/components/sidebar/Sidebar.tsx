@@ -1,4 +1,4 @@
-import React, { type ComponentType, type CSSProperties } from 'react';
+import React, { type ReactNode, type CSSProperties } from 'react';
 
 import * as Platform from 'loot-core/src/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
@@ -23,7 +23,7 @@ export const SIDEBAR_WIDTH = 240;
 
 type SidebarProps = {
   style: CSSProperties;
-  BudgetName: ComponentType;
+  budgetName: ReactNode;
   accounts: AccountEntity[];
   failedAccounts: Map<
     string,
@@ -47,7 +47,7 @@ type SidebarProps = {
 
 function Sidebar({
   style,
-  BudgetName,
+  budgetName,
   accounts,
   failedAccounts,
   updatedAccounts,
@@ -102,7 +102,7 @@ function Sidebar({
           },
         ]}
       >
-        <BudgetName />
+        {budgetName}
 
         <View style={{ flex: 1, flexDirection: 'row' }} />
 

@@ -138,9 +138,7 @@ function SidebarWithData() {
 
   return (
     <Sidebar
-      BudgetName={props => (
-        <EditableBudgetName {...props} prefs={prefs} savePrefs={savePrefs} />
-      )}
+      budgetName={<EditableBudgetName prefs={prefs} savePrefs={savePrefs} />}
       isFloating={floatingSidebar}
       accounts={accounts}
       failedAccounts={failedAccounts}
