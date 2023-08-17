@@ -604,7 +604,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
 );
 
 type SelectCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
-  partial: boolean;
+  partial?: boolean;
   onEdit?: () => void;
   onSelect?: (e) => void;
 };
