@@ -15,7 +15,9 @@ export interface BudgetHandlers {
 
   'budget/check-templates': () => Promise<Notification>;
 
-  'budget/apply-goal-template': (arg: { month: string }) => Promise<Notification>;
+  'budget/apply-goal-template': (arg: {
+    month: string;
+  }) => Promise<Notification>;
 
   'budget/overwrite-goal-template': (arg: {
     month: string;
