@@ -15,7 +15,8 @@ type ItemContentProps = {
   children: ReactNode;
   forceActive?: boolean;
 };
-export function ItemContent({
+
+function ItemContent({
   style,
   to,
   onClick,
@@ -47,3 +48,5 @@ export function ItemContent({
     </AnchorLink>
   );
 }
+
+export default ItemContent;

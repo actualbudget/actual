@@ -6,26 +6,16 @@ import React, {
 } from 'react';
 
 // eslint-disable-next-line no-restricted-imports
-import { styles, colors } from '../../style';
+import { colors } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
-import { ItemContent } from './ItemContent';
+import ItemContent from './ItemContent';
+
+import { accountNameStyle } from '.';
 
 const fontWeight = 600;
 
-let accountNameStyle = {
-  marginTop: -2,
-  marginBottom: 2,
-  paddingTop: 4,
-  paddingBottom: 4,
-  paddingRight: 15,
-  paddingLeft: 10,
-  textDecoration: 'none',
-  color: colors.n9,
-  ':hover': { backgroundColor: colors.n2 },
-  ...styles.smallText,
-};
 type SecondaryItemProps = {
   title: string;
   to?: string;
@@ -35,7 +25,8 @@ type SecondaryItemProps = {
   bold?: boolean;
   indent?: number;
 };
-export function SecondaryItem({
+
+function SecondaryItem({
   Icon,
   title,
   style,
@@ -89,3 +80,5 @@ export function SecondaryItem({
     </View>
   );
 }
+
+export default SecondaryItem;

@@ -8,10 +8,10 @@ import StoreFrontIcon from '../../icons/v1/StoreFront';
 import TuningIcon from '../../icons/v1/Tuning';
 import View from '../common/View';
 
-import { Item } from './Item';
-import { SecondaryItem } from './SecondaryItem';
+import Item from './Item';
+import SecondaryItem from './SecondaryItem';
 
-export function Tools() {
+function Tools() {
   let [isOpen, setOpen] = useState(false);
   let onToggle = useCallback(() => setOpen(open => !open), []);
   let location = useLocation();
@@ -60,3 +60,5 @@ export function Tools() {
     </View>
   );
 }
+
+export default Tools;

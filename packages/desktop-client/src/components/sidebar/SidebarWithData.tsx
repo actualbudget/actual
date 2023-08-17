@@ -18,12 +18,13 @@ import Menu from '../common/Menu';
 import Text from '../common/Text';
 import { Tooltip } from '../tooltips';
 
-import { Sidebar } from './Sidebar';
+import Sidebar from './Sidebar';
 
 type EditableBudgetNameProps = {
   prefs: LocalPrefs;
   savePrefs: (prefs: Partial<LocalPrefs>) => Promise<void>;
 };
+
 function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
   let dispatch = useDispatch();
   let navigate = useNavigate();
@@ -112,7 +113,7 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
   }
 }
 
-export default function SidebarWithData() {
+function SidebarWithData() {
   let accounts = useSelector(state => state.queries.accounts);
   let failedAccounts = useSelector(state => state.account.failedAccounts);
   let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
@@ -164,3 +165,5 @@ export default function SidebarWithData() {
     />
   );
 }
+
+export default SidebarWithData;

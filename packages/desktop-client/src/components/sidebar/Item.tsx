@@ -11,12 +11,11 @@ import { styles, colors } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
-import { ItemContent } from './ItemContent';
+import ItemContent from './ItemContent';
 
 type ItemProps = {
   title: string;
   Icon: ComponentType<SVGProps<SVGElement>>;
-  Button?: ComponentType;
   to?: string;
   children?: ReactNode;
   style?: CSSProperties;
@@ -25,10 +24,10 @@ type ItemProps = {
   forceHover?: boolean;
   forceActive?: boolean;
 };
-export function Item({
+
+function Item({
   children,
   Icon,
-  Button,
   title,
   style,
   to,
@@ -40,11 +39,13 @@ export function Item({
   const hoverStyle = {
     backgroundColor: colors.n2,
   };
+
   const activeStyle = {
     borderLeft: '4px solid ' + colors.p8,
     paddingLeft: 19 + indent - 4,
     color: colors.p8,
   };
+
   const linkStyle = {
     ...styles.mediumText,
     paddingTop: 9,
@@ -68,7 +69,6 @@ export function Item({
       <Icon width={15} height={15} />
       <Block style={{ marginLeft: 8 }}>{title}</Block>
       <View style={{ flex: 1 }} />
-      {Button && <Button />}
     </View>
   );
 
@@ -87,3 +87,5 @@ export function Item({
     </View>
   );
 }
+
+export default Item;

@@ -12,11 +12,7 @@ type ToggleButtonProps = {
   style?: CSSProperties;
 };
 
-export function ToggleButton({
-  style,
-  isFloating,
-  onFloat,
-}: ToggleButtonProps) {
+function ToggleButton({ style, isFloating, onFloat }: ToggleButtonProps) {
   return (
     <View className="float" style={[style, { flexShrink: 0 }]}>
       <Button type="bare" onClick={onFloat} color={theme.buttonMenuBorder}>
@@ -36,3 +32,5 @@ export function ToggleButton({
     </View>
   );
 }
+
+export default ToggleButton;

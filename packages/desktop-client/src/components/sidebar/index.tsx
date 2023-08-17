@@ -10,10 +10,25 @@ import React, {
 import { useSelector } from 'react-redux';
 
 import { useResponsive } from '../../ResponsiveProvider';
+// eslint-disable-next-line no-restricted-imports
+import { styles, colors } from '../../style';
 import View from '../common/View';
 
 import { SIDEBAR_WIDTH } from './Sidebar';
 import SidebarWithData from './SidebarWithData';
+
+const accountNameStyle = {
+  marginTop: -2,
+  marginBottom: 2,
+  paddingTop: 4,
+  paddingBottom: 4,
+  paddingRight: 15,
+  paddingLeft: 10,
+  textDecoration: 'none',
+  color: colors.n9,
+  ':hover': { backgroundColor: colors.n2 },
+  ...styles.smallText,
+};
 
 type SidebarContextValue = {
   hidden: boolean;
@@ -21,12 +36,14 @@ type SidebarContextValue = {
   floating: boolean;
   alwaysFloats: boolean;
 };
+
 const SidebarContext = createContext<SidebarContextValue>(null);
 
 type SidebarProviderProps = {
   children: ReactNode;
 };
-export function SidebarProvider({ children }: SidebarProviderProps) {
+
+function SidebarProvider({ children }: SidebarProviderProps) {
   let floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
@@ -44,7 +61,7 @@ export function SidebarProvider({ children }: SidebarProviderProps) {
   );
 }
 
-export function useSidebar() {
+function useSidebar() {
   let { hidden, setHidden, floating, alwaysFloats } =
     useContext(SidebarContext);
 
@@ -54,7 +71,7 @@ export function useSidebar() {
   );
 }
 
-export default function Sidebar() {
+function FloatableSidebar() {
   let floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
@@ -101,3 +118,6 @@ export default function Sidebar() {
     </View>
   );
 }
+
+export { SidebarProvider, useSidebar, accountNameStyle };
+export default FloatableSidebar;

@@ -12,10 +12,10 @@ import View from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
 
-import { Accounts } from './Accounts';
-import { Item } from './Item';
-import { ToggleButton } from './ToggleButton';
-import { Tools } from './Tools';
+import Accounts from './Accounts';
+import Item from './Item';
+import ToggleButton from './ToggleButton';
+import Tools from './Tools';
 
 import { useSidebar } from '.';
 
@@ -44,7 +44,8 @@ type SidebarProps = {
   onToggleClosedAccounts: () => void;
   onReorder: OnDropCallback;
 };
-export function Sidebar({
+
+function Sidebar({
   style,
   BudgetName,
   accounts,
@@ -148,3 +149,5 @@ export function Sidebar({
     </View>
   );
 }
+
+export default Sidebar;
