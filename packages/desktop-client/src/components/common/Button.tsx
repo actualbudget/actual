@@ -1,6 +1,6 @@
-import React, { forwardRef, type ElementType } from 'react';
+import React, { forwardRef, type CSSProperties, type ElementType } from 'react';
 
-import { css, type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { styles, theme } from '../../style';
@@ -92,16 +92,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     let typeWithDisabled = disabled ? type + 'Disabled' : type;
 
-    hoveredStyle = [
-      type !== 'bare' && styles.shadow,
-      {
-        backgroundColor: backgroundColorHover[type],
-        color: color || textColorHover[type],
-      },
-      hoveredStyle,
-    ];
-    activeStyle = [
-      type === 'bare'
+    hoveredStyle = {
+      ...(type !== 'bare' && styles.shadow),
+      backgroundColor: backgroundColorHover[type],
+      color: color || textColorHover[type],
+      ...hoveredStyle,
+    };
+    activeStyle = {
+      ...(type === 'bare'
         ? { backgroundColor: theme.buttonBareBackgroundActive }
         : {
             transform: bounce && 'translateY(1px)',
@@ -111,9 +109,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 ? theme.buttonPrimaryShadow
                 : theme.buttonNormalShadow),
             transition: 'none',
-          },
-      activeStyle,
-    ];
+          }),
+      ...activeStyle,
+    };
 
     let Component = as;
     let buttonStyle = [

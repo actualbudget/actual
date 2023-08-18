@@ -1,6 +1,10 @@
-import React, { type ReactNode, type HTMLProps } from 'react';
+import React, {
+  type ReactNode,
+  type HTMLProps,
+  type CSSProperties,
+} from 'react';
 
-import { css, type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
 import { theme } from '../style';
 

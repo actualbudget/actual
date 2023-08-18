@@ -1,6 +1,6 @@
-import { type ReactNode } from 'react';
+import { type CSSProperties, type ReactNode } from 'react';
 
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
 type InlineFieldProps = {
   label: ReactNode;

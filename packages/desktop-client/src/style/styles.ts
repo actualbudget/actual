@@ -1,4 +1,5 @@
-import type { CSSProperties } from 'glamor';
+import { type CSSProperties } from 'react';
+
 import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
@@ -91,8 +92,21 @@ export const styles = {
     animationDelay: '0.5s',
   },
   // Dynamically set
-  lightScrollbar: null as CSSProperties | null,
-  darkScrollbar: null as CSSProperties | null,
+  // TODO: Figure out how to properly type these webkit properties.
+  lightScrollbar: null as
+    | (CSSProperties & {
+        '& ::-webkit-scrollbar';
+        '& ::-webkit-scrollbar-thumb';
+        '& ::-webkit-scrollbar-thumb:vertical';
+      })
+    | null,
+  // TODO: Figure out how to properly type these webkit properties.
+  darkScrollbar: null as
+    | (CSSProperties & {
+        '& ::-webkit-scrollbar';
+        '& ::-webkit-scrollbar-thumb:vertical';
+      })
+    | null,
   scrollbarWidth: null as number | null,
 };
 

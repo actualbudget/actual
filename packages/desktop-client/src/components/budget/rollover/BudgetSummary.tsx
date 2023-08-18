@@ -108,7 +108,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
 
         <CellValue
@@ -118,7 +118,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
 
         <CellValue
@@ -129,7 +129,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(Math.abs(n), 'financial');
             return n >= 0 ? '-' + v : '+' + v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
       </View>
 

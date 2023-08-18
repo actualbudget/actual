@@ -1,6 +1,4 @@
-import { type ReactNode } from 'react';
-
-import { type CSSProperties } from 'glamor';
+import { type CSSProperties, type ReactNode } from 'react';
 
 import { colors, styles } from '../../style';
 

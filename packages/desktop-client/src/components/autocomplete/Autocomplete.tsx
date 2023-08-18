@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useMemo,
   type ComponentProps,
+  type CSSProperties,
   type HTMLProps,
   type ReactNode,
   type KeyboardEvent,
@@ -11,7 +12,7 @@ import React, {
 } from 'react';
 
 import Downshift from 'downshift';
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
 import { theme } from '../../style';

@@ -1,12 +1,12 @@
 import React, {
-  type ReactNode,
   useEffect,
   useRef,
   useLayoutEffect,
+  type CSSProperties,
+  type ReactNode,
 } from 'react';
 import ReactModal from 'react-modal';
 
-import type { CSSProperties } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
@@ -118,24 +118,22 @@ const Modal = ({
         noAnimation={noAnimation}
         isCurrent={isCurrent}
         size={size}
-        style={[
-          {
-            willChange: 'opacity, transform',
-            minWidth: '100%',
-            minHeight: 0,
-            borderRadius: 4,
-            //border: '1px solid ' + theme.modalBorder,
-            color: theme.pageText,
-            backgroundColor: theme.modalBackground,
-            opacity: isHidden ? 0 : 1,
-            [`@media (min-width: ${tokens.breakpoint_small})`]: {
-              minWidth: tokens.breakpoint_small,
-            },
+        style={{
+          willChange: 'opacity, transform',
+          minWidth: '100%',
+          minHeight: 0,
+          borderRadius: 4,
+          //border: '1px solid ' + theme.modalBorder,
+          color: theme.pageText,
+          backgroundColor: theme.modalBackground,
+          opacity: isHidden ? 0 : 1,
+          [`@media (min-width: ${tokens.breakpoint_small})`]: {
+            minWidth: tokens.breakpoint_small,
           },
-          styles.shadowLarge,
-          style,
-          styles.lightScrollbar,
-        ]}
+          ...styles.shadowLarge,
+          ...style,
+          ...styles.lightScrollbar,
+        }}
       >
         {showHeader && (
           <View
