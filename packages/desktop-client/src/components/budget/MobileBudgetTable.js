@@ -273,7 +273,7 @@ class BudgetCategory extends PureComponent {
     let budgeted = rolloverBudget.catBudgeted(category.id);
     let balance = rolloverBudget.catBalance(category.id);
 
-    let content = (
+    let content = !category.hidden && (
       <ListItem
         // ref={el => (this.container = el)}
         style={[
