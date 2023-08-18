@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { css } from 'glamor';
-
 import {
   init as initConnection,
   send,
@@ -15,6 +13,7 @@ import { ResponsiveProvider } from '../ResponsiveProvider';
 import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 
 import AppBackground from './AppBackground';
+import View from './common/View';
 import DevelopmentTopBar from './DevelopmentTopBar';
 import ErrorBoundary from './ErrorBoundary';
 import FatalError from './FatalError';
@@ -107,17 +106,14 @@ function App({
   }, [budgetId]);
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
-      <div
+    <View style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <View
         key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-        className={`${css([
-          {
-            flexGrow: 1,
-            overflow: 'hidden',
-          },
-          styles.lightScrollbar,
-        ])}`}
+        style={{
+          flexGrow: 1,
+          overflow: 'hidden',
+          ...styles.lightScrollbar,
+        }}
       >
         {initializing ? (
           <AppBackground
@@ -138,15 +134,14 @@ function App({
 
         <UpdateNotification />
         <MobileWebMessage />
-      </div>
-    </div>
+      </View>
+    </View>
   );
 }
 
 function ErrorFallback(props) {
   return (
     <>
-      {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
       <AppBackground />
       <FatalError error={props.error} buttonText="Restart app" />
     </>
@@ -165,6 +160,7 @@ function AppWrapper() {
 
   return (
     <ResponsiveProvider>
+      {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
       <ErrorBoundary fallback={ErrorFallback}>
         <App
           budgetId={budgetId}
