@@ -1,3 +1,5 @@
+import { type CSSProperties } from 'react';
+
 import {
   ListboxInput,
   ListboxButton,
@@ -5,7 +7,7 @@ import {
   ListboxList,
   ListboxOption,
 } from '@reach/listbox';
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { theme, styles } from '../../style';

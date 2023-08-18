@@ -3,10 +3,9 @@ import React, {
   useEffect,
   useMemo,
   type SetStateAction,
+  type CSSProperties,
 } from 'react';
 import { useSelector } from 'react-redux';
-
-import { type CSSProperties } from 'glamor';
 
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 

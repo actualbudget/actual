@@ -1,7 +1,5 @@
-import React, { type ReactNode, useRef } from 'react';
+import React, { useRef, type CSSProperties, type ReactNode } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
-
-import { type CSSProperties } from 'glamor';
 
 import View from '../common/View';
 

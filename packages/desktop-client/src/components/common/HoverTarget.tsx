@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
-
-import { type CSSProperties } from 'glamor';
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 
 import View from './View';
 

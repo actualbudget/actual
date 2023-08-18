@@ -1,6 +1,4 @@
-import { type ComponentProps } from 'react';
-
-import { type CSSProperties } from 'glamor';
+import { type ComponentProps, type CSSProperties } from 'react';
 
 import Block from './Block';
 import View from './View';

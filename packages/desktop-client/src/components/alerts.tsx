@@ -1,6 +1,8 @@
-import React, { type ComponentType, type ReactNode } from 'react';
-
-import type { CSSProperties } from 'glamor';
+import React, {
+  type CSSProperties,
+  type ComponentType,
+  type ReactNode,
+} from 'react';
 
 import ExclamationOutline from '../icons/v1/ExclamationOutline';
 import InformationOutline from '../icons/v1/InformationOutline';
@@ -69,7 +71,11 @@ export const Information = ({ style, children }: ScopedAlertProps) => {
       icon={InformationOutline}
       color={colors.n4}
       backgroundColor="transparent"
-      style={[style, { boxShadow: 'none', padding: 5 }]}
+      style={{
+        ...style,
+        boxShadow: 'none',
+        padding: 5,
+      }}
     >
       {children}
     </Alert>

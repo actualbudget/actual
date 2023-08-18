@@ -1,6 +1,11 @@
-import React, { createRef, useState, useEffect } from 'react';
+import React, {
+  createRef,
+  useState,
+  useEffect,
+  type CSSProperties,
+} from 'react';
 
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
 import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';

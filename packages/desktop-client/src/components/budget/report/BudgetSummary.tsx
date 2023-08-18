@@ -1,12 +1,13 @@
 import React, {
   type ComponentProps,
   type ComponentType,
+  type CSSProperties,
   type ReactNode,
   useState,
   type SVGProps,
 } from 'react';
 
-import { css, type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';

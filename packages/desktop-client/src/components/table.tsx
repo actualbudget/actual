@@ -8,6 +8,7 @@ import React, {
   useImperativeHandle,
   useMemo,
   type ComponentProps,
+  type CSSProperties,
   type ReactNode,
   type KeyboardEvent,
   type UIEvent,
@@ -15,7 +16,7 @@ import React, {
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-import { type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
 import {
   AvoidRefocusScrollProvider,
@@ -648,11 +649,13 @@ export function SelectCell({
             backgroundColor: selected
               ? theme.tableTextEditingBackground
               : theme.tableBackground,
+          }}
+          className={`${css({
             ':focus': {
               border: '1px solid ' + theme.altFormInputBorderSelected,
               boxShadow: '0 1px 2px ' + theme.altFormInputShadowSelected,
             },
-          }}
+          })}`}
           onEdit={onEdit}
           onSelect={onSelect}
           clickBehavior="none"
@@ -706,7 +709,9 @@ export function SheetCell({
   return (
     <Cell
       valueStyle={
-        getValueStyle ? [valueStyle, getValueStyle(sheetValue)] : valueStyle
+        getValueStyle
+          ? { ...valueStyle, ...getValueStyle(sheetValue) }
+          : valueStyle
       }
       textAlign={textAlign}
       {...props}

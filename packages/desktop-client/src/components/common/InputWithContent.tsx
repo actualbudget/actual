@@ -1,6 +1,9 @@
-import { type ComponentProps, type ReactNode, useState } from 'react';
-
-import { type CSSProperties } from 'glamor';
+import {
+  useState,
+  type ComponentProps,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 
 import { theme } from '../../style';
 

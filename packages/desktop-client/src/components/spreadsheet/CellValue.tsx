@@ -1,6 +1,4 @@
-import React, { type ReactNode, useMemo } from 'react';
-
-import { type CSSProperties } from 'glamor';
+import React, { useMemo, type CSSProperties, type ReactNode } from 'react';
 
 import { styles } from '../../style';
 import Text from '../common/Text';

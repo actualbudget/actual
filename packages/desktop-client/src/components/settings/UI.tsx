@@ -1,8 +1,7 @@
-import React, { type ReactNode, useState } from 'react';
+import React, { useState, type CSSProperties, type ReactNode } from 'react';
 import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
-import type { CSSProperties } from 'glamor';
 
 import { colors } from '../../style';
 import tokens from '../../tokens';
