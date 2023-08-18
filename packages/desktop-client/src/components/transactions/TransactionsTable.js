@@ -825,6 +825,12 @@ const Transaction = memo(function Transaction(props) {
           ':hover': {
             backgroundColor: theme.tableRowBackgroundHover,
           },
+          '& .hover-visible': {
+            opacity: 0,
+          },
+          ':hover .hover-visible': {
+            opacity: 1,
+          },
         },
         highlighted || selected
           ? { color: theme.tableRowBackgroundHighlightText }
@@ -875,7 +881,8 @@ const Transaction = memo(function Transaction(props) {
       ) : (
         <SelectCell
           /* Checkmark field for non-child transaction */
-          exposed={selected || editing}
+          exposed
+          buttonProps={{ className: 'hover-visible' }}
           focused={focusedField === 'select'}
           onSelect={e => {
             dispatchSelected({ type: 'select', id: transaction.id, event: e });

@@ -49,13 +49,6 @@ export default function Select<Value extends string>({
   disabledKeys = [],
 }: SelectProps<Value>) {
   const arrowSize = 7;
-  const checkHeight = !style
-    ? '18px'
-    : style.minHeight
-    ? style.minHeight
-    : !style[0]
-    ? '18px'
-    : style[0].minHeight ?? '18px';
   const targetOption = options.filter(option => option[0] === value);
   return (
     <ListboxInput
@@ -64,14 +57,15 @@ export default function Select<Value extends string>({
       style={{
         color: bare ? 'inherit' : theme.formInputText,
         backgroundColor: bare ? 'transparent' : theme.cardBackground,
-        borderRadius: styles.menuBorderRadius,
-        border: bare ? 'none' : '1px solid ' + theme.formInputBorder,
         lineHeight: '1em',
         ...wrapperStyle,
       }}
     >
       <ListboxButton
-        {...css([{ borderWidth: 0, padding: 5, borderRadius: 4 }, style])}
+        {...css([
+          { borderWidth: 0, padding: '2px 5px', borderRadius: 4 },
+          style,
+        ])}
         arrow={
           <ExpandArrow
             style={{
@@ -90,7 +84,7 @@ export default function Select<Value extends string>({
             whiteSpace: 'nowrap',
             maxWidth: `calc(100% - ${arrowSize + 5}px)`,
             alignItems: 'center',
-            minHeight: checkHeight,
+            minHeight: '18px',
           }}
         >
           {targetOption.length !== 0 ? targetOption[0][1] : defaultLabel}
