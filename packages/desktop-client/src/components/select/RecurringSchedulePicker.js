@@ -155,8 +155,8 @@ function SchedulePreview({ previewDates }) {
       <View>
         <Text style={{ fontWeight: 600 }}>Upcoming dates</Text>
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
-          {previewDates.map(d => (
-            <View>
+          {previewDates.map((d, idx) => (
+            <View key={idx}>
               <Text>{monthUtils.format(d, dateFormat)}</Text>
               <Text>{monthUtils.format(d, 'EEEE')}</Text>
             </View>

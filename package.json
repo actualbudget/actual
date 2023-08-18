@@ -28,6 +28,7 @@
     "start:browser-backend": "yarn workspace loot-core watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
     "build:browser": "./bin/package-browser",
+    "build:desktop": "./bin/package-electron",
     "build:api": "yarn workspace @actual-app/api build",
     "test": "yarn workspaces foreach --parallel --verbose run test",
     "test:debug": "yarn workspaces foreach --verbose run test",

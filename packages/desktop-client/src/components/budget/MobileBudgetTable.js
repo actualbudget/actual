@@ -187,7 +187,12 @@ function BudgetGroupPreview({ group, pending, style }) {
       <TotalsRow group={group} blank={true} />
 
       {group.categories.map((cat, index) => (
-        <BudgetCategory category={cat} blank={true} index={index} />
+        <BudgetCategory
+          key={cat.id}
+          category={cat}
+          blank={true}
+          index={index}
+        />
       ))}
     </Card>
     // </Animated.View>
@@ -268,7 +273,7 @@ class BudgetCategory extends PureComponent {
     let budgeted = rolloverBudget.catBudgeted(category.id);
     let balance = rolloverBudget.catBalance(category.id);
 
-    let content = (
+    let content = !category.hidden && (
       <ListItem
         // ref={el => (this.container = el)}
         style={[

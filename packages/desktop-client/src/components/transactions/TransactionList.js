@@ -69,7 +69,6 @@ export default function TransactionList({
   showCleared,
   showAccount,
   headerContent,
-  animated,
   isAdding,
   isNew,
   isMatched,
@@ -178,7 +177,6 @@ export default function TransactionList({
       showCleared={showCleared}
       showAccount={showAccount}
       showCategory={true}
-      animated={animated}
       currentAccountId={account && account.id}
       currentCategoryId={category && category.id}
       isAdding={isAdding}
