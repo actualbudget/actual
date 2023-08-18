@@ -1,4 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import {
+  ErrorBoundary,
+  useErrorBoundary,
+  type FallbackProps,
+} from 'react-error-boundary';
 import { useSelector } from 'react-redux';
 
 import {
@@ -15,7 +20,6 @@ import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 import AppBackground from './AppBackground';
 import View from './common/View';
 import DevelopmentTopBar from './DevelopmentTopBar';
-import ErrorBoundary from './ErrorBoundary';
 import FatalError from './FatalError';
 import FinancesApp from './FinancesApp';
 import ManagementApp from './manager/ManagementApp';
@@ -44,23 +48,12 @@ function App({
   loadGlobalPrefs,
 }: AppProps) {
   const [initializing, setInitializing] = useState(true);
-  const [hiddenScrollbars, setHiddenScrollbars] = useState(
-    hasHiddenScrollbars(),
-  );
+  const { showBoundary: showErrorBoundary } = useErrorBoundary();
 
   async function init() {
     const socketName = await global.Actual.getServerSocket();
 
-    try {
-      await initConnection(socketName);
-    } catch (e) {
-      if (e.type === 'app-init-failure') {
-        setInitializing(false);
-        return;
-      } else {
-        throw e;
-      }
-    }
+    await initConnection(socketName);
 
     // Load any global prefs
     await loadGlobalPrefs();
@@ -84,21 +77,12 @@ function App({
   }
 
   useEffect(() => {
-    function checkScrollbars() {
-      if (hiddenScrollbars !== hasHiddenScrollbars()) {
-        setHiddenScrollbars(hasHiddenScrollbars());
-      }
-    }
-
     async function initAll() {
       await Promise.all([installPolyfills(), init()]);
       setInitializing(false);
-      window.addEventListener('focus', checkScrollbars);
     }
 
-    initAll().catch(e => console.error(e));
-
-    return () => window.removeEventListener('focus', checkScrollbars);
+    initAll().catch(showErrorBoundary);
   }, []);
 
   useEffect(() => {
@@ -106,44 +90,32 @@ function App({
   }, [budgetId]);
 
   return (
-    <View style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <View
-        key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
-        style={{
-          flexGrow: 1,
-          overflow: 'hidden',
-          ...styles.lightScrollbar,
-        }}
-      >
-        {initializing ? (
+    <>
+      {initializing ? (
+        <AppBackground initializing={initializing} loadingText={loadingText} />
+      ) : budgetId ? (
+        <FinancesApp />
+      ) : (
+        <>
           <AppBackground
             initializing={initializing}
             loadingText={loadingText}
           />
-        ) : budgetId ? (
-          <FinancesApp />
-        ) : (
-          <>
-            <AppBackground
-              initializing={initializing}
-              loadingText={loadingText}
-            />
-            <ManagementApp isLoading={loadingText != null} />
-          </>
-        )}
+          <ManagementApp isLoading={loadingText != null} />
+        </>
+      )}
 
-        <UpdateNotification />
-        <MobileWebMessage />
-      </View>
-    </View>
+      <UpdateNotification />
+      <MobileWebMessage />
+    </>
   );
 }
 
-function ErrorFallback(props) {
+function ErrorFallback({ error }: FallbackProps) {
   return (
     <>
       <AppBackground />
-      <FatalError error={props.error} buttonText="Restart app" />
+      <FatalError error={error} buttonText="Restart app" />
     </>
   );
 }
@@ -157,21 +129,49 @@ function AppWrapper() {
   );
   let loadingText = useSelector(state => state.app.loadingText);
   let { loadBudget, closeBudget, loadGlobalPrefs } = useActions();
+  const [hiddenScrollbars, setHiddenScrollbars] = useState(
+    hasHiddenScrollbars(),
+  );
+
+  useEffect(() => {
+    function checkScrollbars() {
+      if (hiddenScrollbars !== hasHiddenScrollbars()) {
+        setHiddenScrollbars(hasHiddenScrollbars());
+      }
+    }
+
+    window.addEventListener('focus', checkScrollbars);
+
+    return () => window.removeEventListener('focus', checkScrollbars);
+  }, []);
 
   return (
     <ResponsiveProvider>
-      {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
-      <ErrorBoundary fallback={ErrorFallback}>
-        <App
-          budgetId={budgetId}
-          cloudFileId={cloudFileId}
-          loadingText={loadingText}
-          loadBudget={loadBudget}
-          closeBudget={closeBudget}
-          loadGlobalPrefs={loadGlobalPrefs}
-        />
-      </ErrorBoundary>
-      <ThemeStyle />
+      <View
+        style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+      >
+        <View
+          key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+          style={{
+            flexGrow: 1,
+            overflow: 'hidden',
+            ...styles.lightScrollbar,
+          }}
+        >
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
+            <App
+              budgetId={budgetId}
+              cloudFileId={cloudFileId}
+              loadingText={loadingText}
+              loadBudget={loadBudget}
+              closeBudget={closeBudget}
+              loadGlobalPrefs={loadGlobalPrefs}
+            />
+          </ErrorBoundary>
+          <ThemeStyle />
+        </View>
+      </View>
     </ResponsiveProvider>
   );
 }
