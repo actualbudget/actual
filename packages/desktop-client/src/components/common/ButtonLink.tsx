@@ -23,6 +23,7 @@ export default function ButtonLink({
         ...style,
         ...(match ? activeStyle : {}),
       }}
+      activeStyle={activeStyle}
       {...props}
       onClick={e => {
         props.onClick?.(e);
