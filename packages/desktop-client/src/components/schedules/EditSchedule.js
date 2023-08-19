@@ -1,6 +1,5 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
@@ -14,9 +13,7 @@ import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import Button from '../common/Button';
-import LinkButton from '../common/LinkButton';
 import Modal from '../common/Modal';
-import Select from '../common/Select';
 import Stack from '../common/Stack';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -70,7 +67,6 @@ function updateScheduleConditions(schedule, fields) {
 }
 
 export default function ScheduleDetails({ modalProps, actions, id }) {
-  let [expanded, setExpanded] = useState(useLocation().hash === '#advanced');
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
   let globalDispatch = useDispatch();
@@ -172,29 +168,6 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
         case 'switch-transactions':
           return { ...state, transactionsMode: action.mode };
-        case 'set-skip-weekend':
-          return {
-            ...state,
-            fields: {
-              ...state.fields,
-              date: {
-                ...state.fields.date,
-                skipWeekend: action.skipWeekend,
-                weekendSolveMode: 'after',
-              },
-            },
-          };
-        case 'set-weekend-solve':
-          return {
-            ...state,
-            fields: {
-              ...state.fields,
-              date: {
-                ...state.fields.date,
-                weekendSolveMode: action.value,
-              },
-            },
-          };
 
         default:
           throw new Error('Unknown action: ' + action.type);
@@ -440,10 +413,6 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
   // This is derived from the date
   let repeats = state.fields.date ? !!state.fields.date.frequency : false;
-  let skipWeekend = state.fields.date.hasOwnProperty('skipWeekend')
-    ? state.fields.date.skipWeekend
-    : false;
-
   return (
     <Modal
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
@@ -687,91 +656,6 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
           )}
         </View>
       </Stack>
-      {expanded ? (
-        <Stack direction="column" style={{ marginTop: 25 }}>
-          <View
-            style={{
-              marginTop: 5,
-              flex: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              userSelect: 'none',
-            }}
-          >
-            <Checkbox
-              id="form_skipwe"
-              checked={skipWeekend}
-              onChange={e => {
-                dispatch({
-                  type: 'set-skip-weekend',
-                  skipWeekend: e.target.checked,
-                });
-              }}
-            />
-            <label
-              htmlFor="form_skipwe"
-              style={{ userSelect: 'none', marginRight: 5 }}
-            >
-              Move Schedule{' '}
-            </label>
-            <Select
-              id="solve_dropdown"
-              options={[
-                ['before', 'before'],
-                ['after', 'after'],
-              ]}
-              value={state.fields.date.weekendSolveMode}
-              onChange={value =>
-                dispatch({ type: 'set-weekend-solve', value: value })
-              }
-              style={{
-                minHeight: '1px',
-                width: '100%',
-              }}
-            />
-            <label
-              htmlFor="solve_dropdown"
-              style={{ userSelect: 'none', marginLeft: 5 }}
-            >
-              {' '}
-              weekend
-            </label>
-          </View>
-          <LinkButton
-            id="advanced"
-            style={{
-              marginTop: 5,
-              flex: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              userSelect: 'none',
-              flexShrink: 0,
-              alignSelf: 'flex-start',
-              color: colors.p4,
-            }}
-            onClick={() => setExpanded(false)}
-          >
-            Hide Advanced Options
-          </LinkButton>
-        </Stack>
-      ) : (
-        <LinkButton
-          id="advanced"
-          style={{
-            marginTop: 25,
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            userSelect: 'none',
-            flexShrink: 0,
-            alignSelf: 'flex-start',
-            color: colors.p4,
-          }}
-          onClick={() => setExpanded(true)}
-        >
-          Show Advanced Options
-        </LinkButton>
-      )}
 
       <View style={{ marginTop: 30, flex: 1 }}>
         <SelectedProvider instance={selectedInst}>
