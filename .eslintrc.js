@@ -299,6 +299,7 @@ module.exports = {
         './packages/desktop-client/src/components/settings/index.*',
         './packages/desktop-client/src/components/sidebar.*',
         './packages/desktop-client/src/components/transactions/MobileTransaction.*',
+        './packages/desktop-client/src/components/transactions/TransactionsTable.*',
         './packages/desktop-client/src/components/util/AmountInput.*',
         './packages/desktop-client/src/components/util/DisplayId.*',
         './packages/desktop-client/src/components/util/LoadComponent.*',
