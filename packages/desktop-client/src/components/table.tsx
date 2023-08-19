@@ -16,8 +16,6 @@ import React, {
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-import { css } from 'glamor';
-
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
@@ -507,7 +505,6 @@ type CellButtonProps = {
   onSelect?: (e) => void;
   onEdit?: () => void;
   children: ReactNode;
-  className?: string;
 };
 export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
   (
@@ -520,7 +517,6 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
       onSelect,
       onEdit,
       children,
-      className,
     },
     ref,
   ) => {
@@ -621,6 +617,12 @@ export function SelectCell({
   buttonProps = {},
   ...props
 }: SelectCellProps) {
+  const focusStyle = {
+    ':focus': {
+      border: '1px solid ' + theme.altFormInputBorderSelected,
+      boxShadow: '0 1px 2px ' + theme.altFormInputShadowSelected,
+    },
+  };
   return (
     <Cell
       {...props}
@@ -649,13 +651,8 @@ export function SelectCell({
             backgroundColor: selected
               ? theme.tableTextEditingBackground
               : theme.tableBackground,
+            ...focusStyle,
           }}
-          className={`${css({
-            ':focus': {
-              border: '1px solid ' + theme.altFormInputBorderSelected,
-              boxShadow: '0 1px 2px ' + theme.altFormInputShadowSelected,
-            },
-          })}`}
           onEdit={onEdit}
           onSelect={onSelect}
           clickBehavior="none"
