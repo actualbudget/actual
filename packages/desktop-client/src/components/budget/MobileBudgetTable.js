@@ -287,7 +287,9 @@ class BudgetCategory extends PureComponent {
         data-testid="row"
       >
         <View style={{ flex: 1 }}>
-          <Text style={styles.smallText}>{category.name}</Text>
+          <Text style={styles.smallText} data-testid="category-name">
+            {category.name}
+          </Text>
         </View>
         {/* <Animated.View
           style={{
