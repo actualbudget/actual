@@ -353,7 +353,7 @@ function SelectField({
         ]),
       ]}
       value={value === null ? 'choose-field' : value}
-      style={{ borderWidth: 1, width: '100%' }}
+      style={{ width: '100%' }}
       wrapperStyle={style}
       onChange={value => onChange(value)}
     />
@@ -387,7 +387,7 @@ function DateFormatSelect({
         ])}
         value={parseDateFormat || ''}
         onChange={value => onChange(value)}
-        style={{ borderWidth: 1, width: '100%' }}
+        style={{ width: '100%' }}
       />
     </View>
   );
@@ -926,7 +926,7 @@ export default function ImportTransactions({ modalProps, options }) {
                       setCsvDelimiter(value);
                       parse(filename, { delimiter: value, hasHeaderRow });
                     }}
-                    style={{ borderWidth: 1, width: 50 }}
+                    style={{ width: 50 }}
                   />
                 </label>
                 <CheckboxOption
