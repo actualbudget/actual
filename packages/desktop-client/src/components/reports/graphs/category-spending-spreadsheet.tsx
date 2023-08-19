@@ -52,7 +52,6 @@ export default function createSpreadsheet(
     setData: (graphData: CategorySpendingGraphData) => void,
   ) => {
     if (start === null || end === null || categories.length === 0) {
-      setData({ categories: [], tickValues: [], data: {} });
       return;
     }
 
@@ -72,7 +71,6 @@ export default function createSpreadsheet(
           .select('date'),
       );
       if (firstTransaction.data.length === 0) {
-        setData({ categories: [], tickValues: [], data: {} });
         return;
       }
 

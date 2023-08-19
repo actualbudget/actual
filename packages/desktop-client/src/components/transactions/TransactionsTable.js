@@ -393,10 +393,7 @@ function getPayeePretty(transaction, payee, transferAcct) {
         </div>
       </View>
     );
-  } else if (payee && !payee.transfer_acct) {
-    // Check to make sure this isn't a transfer because in the rare
-    // occasion that the account has been deleted but the payee is
-    // still there, we don't want to show the name.
+  } else if (payee) {
     return payee.name;
   } else if (payeeId && payeeId.startsWith('new:')) {
     return payeeId.slice('new:'.length);
@@ -632,39 +629,44 @@ function PayeeIcons({
 
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
 
-  return schedule ? (
-    <Button
-      type="bare"
-      style={buttonStyle}
-      onClick={e => {
-        e.stopPropagation();
-        onNavigateToSchedule(scheduleId);
-      }}
-    >
-      {recurring ? (
-        <ArrowsSynchronize style={scheduleIconStyle} />
-      ) : (
-        <CalendarIcon style={scheduleIconStyle} />
+  return (
+    <>
+      {schedule && (
+        <Button
+          type="bare"
+          style={buttonStyle}
+          onClick={e => {
+            e.stopPropagation();
+            onNavigateToSchedule(scheduleId);
+          }}
+        >
+          {recurring ? (
+            <ArrowsSynchronize style={scheduleIconStyle} />
+          ) : (
+            <CalendarIcon style={scheduleIconStyle} />
+          )}
+        </Button>
       )}
-    </Button>
-  ) : transferAccount ? (
-    <Button
-      type="bare"
-      style={buttonStyle}
-      onClick={e => {
-        e.stopPropagation();
-        if (!isTemporaryId(transaction.id)) {
-          onNavigateToTransferAccount(transferAccount.id);
-        }
-      }}
-    >
-      {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
-        <LeftArrow2 style={transferIconStyle} />
-      ) : (
-        <RightArrow2 style={transferIconStyle} />
+      {transferAccount && (
+        <Button
+          type="bare"
+          style={buttonStyle}
+          onClick={e => {
+            e.stopPropagation();
+            if (!isTemporaryId(transaction.id)) {
+              onNavigateToTransferAccount(transferAccount.id);
+            }
+          }}
+        >
+          {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+            <LeftArrow2 style={transferIconStyle} />
+          ) : (
+            <RightArrow2 style={transferIconStyle} />
+          )}
+        </Button>
       )}
-    </Button>
-  ) : null;
+    </>
+  );
 }
 
 const Transaction = memo(function Transaction(props) {
@@ -676,7 +678,6 @@ const Transaction = memo(function Transaction(props) {
     showCleared,
     showZeroInDeposit,
     style,
-    hovered,
     selected,
     highlighted,
     added,
@@ -692,7 +693,6 @@ const Transaction = memo(function Transaction(props) {
     hideFraction,
     onSave,
     onEdit,
-    onHover,
     onDelete,
     onSplit,
     onManagePayees,
@@ -768,6 +768,7 @@ const Transaction = memo(function Transaction(props) {
 
   let {
     id,
+    amount,
     debit,
     credit,
     payee: payeeId,
@@ -802,14 +803,16 @@ const Transaction = memo(function Transaction(props) {
   let isOffBudget = account && account.offbudget === 1;
 
   let valueStyle = added ? { fontWeight: 600 } : null;
-  let backgroundFocus = hovered || focusedField === 'select';
+  let backgroundFocus = focusedField === 'select';
   let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
   let statusProps = getStatusProps(notes);
+  let runningBalance = !isTemporaryId(id)
+    ? balance
+    : balance + (_inverse ? -1 : 1) * amount;
 
   return (
     <Row
-      highlighted={highlighted}
       style={[
         {
           backgroundColor: selected
@@ -817,6 +820,11 @@ const Transaction = memo(function Transaction(props) {
             : backgroundFocus
             ? theme.tableRowBackgroundHover
             : theme.tableBackground,
+        },
+        {
+          ':hover': {
+            backgroundColor: theme.tableRowBackgroundHover,
+          },
         },
         highlighted || selected
           ? { color: theme.tableRowBackgroundHighlightText }
@@ -828,7 +836,6 @@ const Transaction = memo(function Transaction(props) {
         },
         _unmatched && { opacity: 0.5 },
       ]}
-      onMouseEnter={() => onHover && onHover(transaction.id)}
     >
       {isChild && (
         <Field
@@ -859,7 +866,7 @@ const Transaction = memo(function Transaction(props) {
         isChild ? (
           <DeleteCell
             onDelete={() => onDelete && onDelete(transaction.id)}
-            exposed={hovered || editing}
+            exposed={editing}
             style={[isChild && { borderLeftWidth: 1 }, { lineHeight: 0 }]}
           />
         ) : (
@@ -868,7 +875,7 @@ const Transaction = memo(function Transaction(props) {
       ) : (
         <SelectCell
           /* Checkmark field for non-child transaction */
-          exposed={hovered || selected || editing}
+          exposed={selected || editing}
           focused={focusedField === 'select'}
           onSelect={e => {
             dispatchSelected({ type: 'select', id: transaction.id, event: e });
@@ -1099,7 +1106,11 @@ const Transaction = memo(function Transaction(props) {
               : ''
           }
           valueStyle={valueStyle}
-          style={{ fontStyle: 'italic', fontWeight: 300 }}
+          style={{
+            fontStyle: 'italic',
+            color: '#c0c0c0',
+            fontWeight: 300,
+          }}
           inputProps={{
             readOnly: true,
             style: { fontStyle: 'italic' },
@@ -1214,9 +1225,13 @@ const Transaction = memo(function Transaction(props) {
         <Cell
           /* Balance field for all transactions */
           name="balance"
-          value={balance == null || isChild ? '' : integerToCurrency(balance)}
+          value={
+            runningBalance == null || isChild
+              ? ''
+              : integerToCurrency(runningBalance)
+          }
           valueStyle={{
-            color: balance < 0 ? theme.errorText : theme.noticeText,
+            color: runningBalance < 0 ? theme.errorText : theme.noticeText,
           }}
           style={[styles.tnum, amountStyle]}
           width={88}
@@ -1316,7 +1331,6 @@ function NewTransaction({
   categoryGroups,
   payees,
   editingTransaction,
-  hoveredTransaction,
   focusedField,
   showAccount,
   showCategory,
@@ -1324,7 +1338,6 @@ function NewTransaction({
   showCleared,
   dateFormat,
   hideFraction,
-  onHover,
   onClose,
   onSplit,
   onEdit,
@@ -1336,6 +1349,7 @@ function NewTransaction({
   onCreatePayee,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
+  balance,
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1353,13 +1367,12 @@ function NewTransaction({
           onClose();
         }
       }}
-      onMouseLeave={() => onHover(null)}
     >
-      {transactions.map((transaction, idx) => (
+      {transactions.map(transaction => (
         <Transaction
+          isNew
           key={transaction.id}
           editing={editingTransaction === transaction.id}
-          hovered={hoveredTransaction === transaction.id}
           transaction={transaction}
           showAccount={showAccount}
           showCategory={showCategory}
@@ -1373,7 +1386,6 @@ function NewTransaction({
           dateFormat={dateFormat}
           hideFraction={hideFraction}
           expanded={true}
-          onHover={onHover}
           onEdit={onEdit}
           onSave={onSave}
           onSplit={onSplit}
@@ -1384,6 +1396,7 @@ function NewTransaction({
           style={{ marginTop: -1 }}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
+          balance={balance}
         />
       ))}
       <View
@@ -1429,7 +1442,6 @@ function TransactionTableInner({
   dateFormat = 'MM/dd/yyyy',
   newNavigator,
   renderEmpty,
-  onHover,
   onScroll,
   ...props
 }) {
@@ -1469,7 +1481,6 @@ function TransactionTableInner({
     const {
       transactions,
       selectedItems,
-      hoveredTransaction,
       accounts,
       categoryGroups,
       payees,
@@ -1485,7 +1496,6 @@ function TransactionTableInner({
     } = props;
 
     let trans = item;
-    let hovered = hoveredTransaction === trans.id;
     let selected = selectedItems.has(trans.id);
 
     let parent = props.transactionMap.get(trans.parent_id);
@@ -1525,7 +1535,6 @@ function TransactionTableInner({
           showCategory={showCategory}
           showBalance={showBalances}
           showCleared={showCleared}
-          hovered={hovered}
           selected={selected}
           highlighted={false}
           added={isNew?.(trans.id)}
@@ -1542,7 +1551,6 @@ function TransactionTableInner({
           }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
-          onHover={onHover}
           onEdit={tableNavigator.onEdit}
           onSave={props.onSave}
           onDelete={props.onDelete}
@@ -1590,7 +1598,6 @@ function TransactionTableInner({
             <NewTransaction
               transactions={props.newTransactions}
               editingTransaction={newNavigator.editingId}
-              hoveredTransaction={props.hoveredTransaction}
               focusedField={newNavigator.focusedField}
               accounts={props.accounts}
               categoryGroups={props.categoryGroups}
@@ -1608,11 +1615,15 @@ function TransactionTableInner({
               onEdit={newNavigator.onEdit}
               onSave={props.onSave}
               onDelete={props.onDelete}
-              onHover={onHover}
               onManagePayees={props.onManagePayees}
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToTransferAccount}
+              balance={
+                props.transactions?.length > 0
+                  ? props.balances?.[props.transactions[0]?.id]?.balance
+                  : 0
+              }
             />
           </View>
         )}
@@ -1623,7 +1634,6 @@ function TransactionTableInner({
       <View
         style={[{ flex: 1, overflow: 'hidden' }]}
         data-testid="transaction-table"
-        onMouseLeave={() => onHover(null)}
       >
         <Table
           navigator={tableNavigator}
@@ -1659,9 +1669,6 @@ function TransactionTableInner({
 
 export let TransactionTable = forwardRef((props, ref) => {
   let [newTransactions, setNewTransactions] = useState(null);
-  let [hoveredTransaction, setHoveredTransaction] = useState(
-    props.hoveredTransaction,
-  );
   let [prevIsAdding, setPrevIsAdding] = useState(false);
   let splitsExpanded = useSplitsExpanded();
   let prevSplitsExpanded = useRef(null);
@@ -1915,10 +1922,6 @@ export let TransactionTable = forwardRef((props, ref) => {
     [props.onSave],
   );
 
-  let onHover = useCallback(id => {
-    setHoveredTransaction(id);
-  }, []);
-
   let onDelete = useCallback(id => {
     let temporary = isTemporaryId(id);
 
@@ -2012,9 +2015,7 @@ export let TransactionTable = forwardRef((props, ref) => {
       transactions={transactions}
       transactionMap={transactionMap}
       selectedItems={selectedItems}
-      hoveredTransaction={hoveredTransaction}
       isExpanded={splitsExpanded.expanded}
-      onHover={onHover}
       onSave={onSave}
       onDelete={onDelete}
       onSplit={onSplit}
