@@ -848,7 +848,7 @@ const Transaction = memo(function Transaction(props) {
         style,
         isPreview && {
           color: theme.tableTextInactive,
-          backgroundColor: '#fcfcfc',
+          backgroundColor: !selected ? '#fcfcfc' : undefined,
           fontStyle: 'italic',
         },
         _unmatched && { opacity: 0.5 },
