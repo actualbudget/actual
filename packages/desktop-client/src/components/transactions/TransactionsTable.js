@@ -882,7 +882,9 @@ const Transaction = memo(function Transaction(props) {
         <SelectCell
           /* Checkmark field for non-child transaction */
           exposed
-          buttonProps={{ className: 'hover-visible' }}
+          buttonProps={{
+            className: selected || editing ? null : 'hover-visible',
+          }}
           focused={focusedField === 'select'}
           onSelect={e => {
             dispatchSelected({ type: 'select', id: transaction.id, event: e });
