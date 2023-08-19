@@ -149,6 +149,21 @@ export function SyncButton({ style }: SyncButtonProps) {
     return unlisten;
   }, []);
 
+  const mobileColor =
+    syncState === 'error'
+      ? colors.r7
+      : syncState === 'disabled' ||
+        syncState === 'offline' ||
+        syncState === 'local'
+      ? colors.n9
+      : style.color;
+  const activeStyle = css(
+    // mobile
+    media(`(max-width: ${tokens.breakpoint_small})`, {
+      color: mobileColor,
+    }),
+  );
+
   return (
     <Button
       type="bare"
@@ -156,14 +171,7 @@ export function SyncButton({ style }: SyncButtonProps) {
         style,
         {
           WebkitAppRegion: 'none',
-          color:
-            syncState === 'error'
-              ? colors.r7
-              : syncState === 'disabled' ||
-                syncState === 'offline' ||
-                syncState === 'local'
-              ? colors.n9
-              : null,
+          color: mobileColor,
         },
         media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
@@ -176,6 +184,8 @@ export function SyncButton({ style }: SyncButtonProps) {
               : null,
         }),
       )}
+      hoveredStyle={activeStyle}
+      activeStyle={activeStyle}
       onClick={sync}
     >
       {syncState === 'error' ? (
