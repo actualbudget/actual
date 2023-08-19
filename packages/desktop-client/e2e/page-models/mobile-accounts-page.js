@@ -1,10 +1,14 @@
 import { MobileAccountPage } from './mobile-account-page';
+import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 
 export class MobileAccountsPage {
   constructor(page) {
     this.page = page;
 
     this.accounts = this.page.getByTestId('account');
+    this.createTransactionButton = page.getByRole('button', {
+      name: 'Add Transaction',
+    });
   }
 
   /**
@@ -29,5 +33,13 @@ export class MobileAccountsPage {
     await this.accounts.nth(idx).getByRole('button').click();
 
     return new MobileAccountPage(this.page);
+  }
+
+  /**
+   * Go to transaction creation page
+   */
+  async clickCreateTransaction() {
+    this.createTransactionButton.click();
+    return new MobileTransactionEntryPage(this.page);
   }
 }

@@ -241,6 +241,14 @@ function FinancesApp() {
                   path="/accounts"
                   element={<NarrowAlternate name="Accounts" />}
                 />
+                <Route
+                  path="/accounts/transactions/new"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
+                />
 
                 <Route
                   path="/accounts/:id"
