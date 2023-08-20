@@ -22,6 +22,7 @@ type CellValueProps = {
   style?: CSSProperties;
   getStyle?: (value) => CSSProperties;
   privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
+  ['data-testid']?: string;
 };
 
 function CellValue({
@@ -31,6 +32,7 @@ function CellValue({
   style,
   getStyle,
   privacyFilter,
+  'data-testid': testId,
 }: CellValueProps) {
   let { fullSheetName } = useSheetName(binding);
   let sheetValue = useSheetValue(binding);
@@ -53,7 +55,7 @@ function CellValue({
             style,
             getStyle && getStyle(sheetValue),
           ]}
-          data-testid={fullSheetName}
+          data-testid={testId || fullSheetName}
           data-cellname={fullSheetName}
         >
           {formatter ? formatter(sheetValue) : format(sheetValue, type)}

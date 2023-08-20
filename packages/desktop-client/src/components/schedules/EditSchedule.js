@@ -203,6 +203,8 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
           start: monthUtils.currentDay(),
           frequency: 'monthly',
           patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'after',
         };
         let schedule = {
           posts_transaction: false,
@@ -411,7 +413,6 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
   // This is derived from the date
   let repeats = state.fields.date ? !!state.fields.date.frequency : false;
-
   return (
     <Modal
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
@@ -527,7 +528,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       </View>
 
       <Stack direction="row" align="flex-start">
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, width: '13.44rem' }}>
           {repeats ? (
             <RecurringSchedulePicker
               value={state.fields.date}

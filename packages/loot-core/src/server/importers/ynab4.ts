@@ -2,6 +2,7 @@
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
+import { send } from '@actual-app/api/injected';
 import * as actual from '@actual-app/api/methods';
 import { amountToInteger } from '@actual-app/api/utils';
 import AdmZip from 'adm-zip';
@@ -54,6 +55,9 @@ async function importCategories(
           is_income: false,
         });
         entityIdMap.set(masterCategory.entityId, id);
+        if (masterCategory.note) {
+          send('notes-save', { id, note: masterCategory.note });
+        }
 
         if (masterCategory.subCategories) {
           const subCategories = sortByKey(
@@ -71,6 +75,9 @@ async function importCategories(
                 group_id: entityIdMap.get(category.masterCategoryId),
               });
               entityIdMap.set(category.entityId, id);
+              if (category.note) {
+                send('notes-save', { id, note: category.note });
+              }
             }
           }
         }

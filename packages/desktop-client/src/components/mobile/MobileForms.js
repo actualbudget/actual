@@ -76,6 +76,7 @@ export function TapField({
   style,
   textStyle,
   onClick,
+  ...props
 }) {
   return (
     <Button
@@ -97,6 +98,7 @@ export function TapField({
         boxShadow: 'none',
       }}
       // activeOpacity={0.05}
+      {...props}
     >
       {children ? (
         children

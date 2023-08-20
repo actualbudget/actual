@@ -291,10 +291,6 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
 
   let normalized = [];
   for (let trans of transactions) {
-    if (!trans.date) {
-      trans.date = trans.valueDate || trans.bookingDate;
-    }
-
     if (!trans.amount) {
       trans.amount = trans.transactionAmount.amount;
     }
@@ -815,7 +811,7 @@ export async function syncGoCardlessAccount(
 
     const oldestDate =
       transactions.length > 0
-        ? oldestTransaction.valueDate || oldestTransaction.bookingDate
+        ? oldestTransaction.date
         : monthUtils.currentDay();
 
     const payee = await getStartingBalancePayee();
