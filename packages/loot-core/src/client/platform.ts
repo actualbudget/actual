@@ -1,16 +1,6 @@
-const isWindows =
-  navigator.platform && navigator.platform.toLowerCase() === 'win32';
+export const isPlaywright = false;
+export const isProbablySafari = false;
 
-const isMac =
-  navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-
-export const isPlaywright = navigator.userAgent === 'playwright';
-
-export const isProbablySafari = /^((?!chrome|android).)*safari/i.test(
-  navigator.userAgent,
-);
-
-export const OS = isWindows ? 'windows' : isMac ? 'mac' : 'linux';
+export const OS = 'electron';
 export const env: 'web' | 'mobile' = 'web';
-export const isBrowser =
-  typeof window !== 'undefined' && !!window.Actual?.IS_FAKE_WEB;
+export const isBrowser = false;

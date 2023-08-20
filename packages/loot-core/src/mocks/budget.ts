@@ -14,6 +14,7 @@ import type {
   PayeeEntity,
   TransactionEntity,
 } from '../types/models';
+
 import random from './random';
 
 function pickRandom(list) {

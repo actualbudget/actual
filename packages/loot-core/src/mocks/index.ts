@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as monthUtils from '../shared/months';
 import type { TransactionEntity } from '../types/models';
+
 import random from './random';
 
 export function generateAccount(name, isConnected, offbudget) {
