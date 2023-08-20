@@ -1,5 +1,6 @@
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBudgetPage } from './mobile-budget-page';
+import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 import { SettingsPage } from './settings-page';
 
 export class MobileNavigation {
@@ -19,6 +20,13 @@ export class MobileNavigation {
     await link.click();
 
     return new MobileAccountsPage(this.page);
+  }
+
+  async goToTransactionEntryPage() {
+    const link = this.page.getByRole('link', { name: 'Transaction' });
+    await link.click();
+
+    return new MobileTransactionEntryPage(this.page);
   }
 
   async goToSettingsPage() {
