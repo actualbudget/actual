@@ -896,7 +896,7 @@ export class BudgetTable extends Component {
           <View
             style={{
               flexDirection: 'row',
-              flex: '1 0 auto',
+              flex: '0 0 auto',
               padding: 10,
               paddingRight: 14,
               backgroundColor: 'white',
