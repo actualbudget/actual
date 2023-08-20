@@ -1,3 +1,5 @@
+import { MobileAccountPage } from './mobile-account-page';
+
 export class MobileTransactionEntryPage {
   constructor(page) {
     this.page = page;
@@ -11,5 +13,11 @@ export class MobileTransactionEntryPage {
     await fieldLocator.click();
     await this.page.locator('css=[role=combobox] input').fill(content);
     await this.page.keyboard.press('Enter');
+  }
+
+  async createTransaction() {
+    await this.add.click();
+
+    return new MobileAccountPage(this.page);
   }
 }

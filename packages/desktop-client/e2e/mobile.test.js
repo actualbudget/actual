@@ -71,7 +71,33 @@ test.describe('Mobile', () => {
     await expect(accountPage.transactions).not.toHaveCount(0);
   });
 
-  test('creates a transaction', async () => {
+  test('creates a transaction via footer button', async () => {
+    const transactionEntryPage = await navigation.goToTransactionEntryPage();
+
+    await expect(transactionEntryPage.header).toHaveText('New Transaction');
+
+    await transactionEntryPage.amountField.fill('12.34');
+    await transactionEntryPage.fillField(
+      page.getByTestId('payee-field'),
+      'Kroger',
+    );
+    await transactionEntryPage.fillField(
+      page.getByTestId('category-field'),
+      'Clothing',
+    );
+    await transactionEntryPage.fillField(
+      page.getByTestId('account-field'),
+      'Ally Savings',
+    );
+
+    const accountPage = await transactionEntryPage.createTransaction();
+
+    await expect(accountPage.transactions.nth(0)).toHaveText(
+      'KrogerClothing-12.34',
+    );
+  });
+
+  test('creates a transaction from `/accounts/:id` page', async () => {
     const accountsPage = await navigation.goToAccountsPage();
     const accountPage = await accountsPage.openNthAccount(1);
     const transactionEntryPage = await accountPage.clickCreateTransaction();
@@ -88,7 +114,7 @@ test.describe('Mobile', () => {
       'Clothing',
     );
 
-    await transactionEntryPage.add.click();
+    await transactionEntryPage.createTransaction();
 
     await expect(accountPage.transactions.nth(0)).toHaveText(
       'KrogerClothing-12.34',
