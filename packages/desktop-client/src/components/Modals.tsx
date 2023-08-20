@@ -1,11 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-import { type PopModalAction } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
+import { type CommonModalProps } from '../types/modals';
 
 import BudgetSummary from './modals/BudgetSummary';
 import CloseAccount from './modals/CloseAccount';
@@ -28,15 +28,6 @@ import DiscoverSchedules from './schedules/DiscoverSchedules';
 import ScheduleDetails from './schedules/EditSchedule';
 import ScheduleLink from './schedules/LinkSchedule';
 import PostsOfflineNotification from './schedules/PostsOfflineNotification';
-
-export type CommonModalProps = {
-  onClose: () => PopModalAction;
-  onBack: () => PopModalAction;
-  showBack: boolean;
-  isCurrent: boolean;
-  isHidden: boolean;
-  stackIndex: number;
-};
 
 export default function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);
