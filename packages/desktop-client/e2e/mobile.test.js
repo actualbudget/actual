@@ -52,8 +52,8 @@ test.describe('Mobile', () => {
 
     const account = await accountsPage.getNthAccount(0);
 
-    expect(account.name).toEqual('Ally Savings');
-    expect(account.balance).toBeGreaterThan(0);
+    await expect(account.name).toHaveText('Ally Savings');
+    await expect(account.balance).toHaveText('7,653.00');
     await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
@@ -65,8 +65,7 @@ test.describe('Mobile', () => {
     expect(await accountPage.getBalance()).toBeGreaterThan(0);
 
     await expect(accountPage.noTransactionsFoundError).not.toBeVisible();
-    // TODO: make the transaction list stable and then uncoment this
-    // await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
 
     await accountPage.searchByText('nothing should be found');
     await expect(accountPage.noTransactionsFoundError).toBeVisible();
@@ -75,8 +74,7 @@ test.describe('Mobile', () => {
 
     await accountPage.searchByText('Kroger');
     await expect(accountPage.transactions).not.toHaveCount(0);
-    // TODO: make the transaction list stable and then uncoment this
-    // await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
   test('creates a transaction', async () => {

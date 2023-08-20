@@ -19,6 +19,7 @@ export default defineConfig({
   retries: 1,
   testDir: 'e2e/',
   use: {
+    userAgent: 'playwright',
     screenshot: 'on',
     browserName: 'chromium',
     baseURL: process.env.E2E_START_URL ?? 'https://192.168.0.178:3001',

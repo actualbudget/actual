@@ -994,7 +994,6 @@ class Transaction extends PureComponent {
               textStyle,
               { marginLeft: 25, marginRight: 5, fontSize: 14 },
             ]}
-            data-vrt-mask
           >
             {integerToCurrency(amount)}
           </Text>
@@ -1080,7 +1079,6 @@ export class TransactionList extends Component {
                   </span>
                 }
                 key={section.id}
-                data-vrt-mask
               >
                 {section.data.map((transaction, index, transactions) => {
                   return (

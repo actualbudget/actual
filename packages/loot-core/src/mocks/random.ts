@@ -4,7 +4,7 @@ import * as Platform from '../client/platform';
 // e2e and visual regression tests
 let pseudoRandomIterator = 0;
 function pseudoRandom(): number {
-  pseudoRandomIterator += 0.05;
+  pseudoRandomIterator += 0.45;
 
   if (pseudoRandomIterator > 1) {
     pseudoRandomIterator = 0;
