@@ -6,6 +6,7 @@ import {
 } from 'react-error-boundary';
 import { useSelector } from 'react-redux';
 
+import * as Platform from 'loot-core/src/client/platform';
 import {
   init as initConnection,
   send,
@@ -159,7 +160,9 @@ function AppWrapper() {
           }}
         >
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-            {process.env.REACT_APP_REVIEW_ID && <DevelopmentTopBar />}
+            {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
+              <DevelopmentTopBar />
+            )}
             <App
               budgetId={budgetId}
               cloudFileId={cloudFileId}

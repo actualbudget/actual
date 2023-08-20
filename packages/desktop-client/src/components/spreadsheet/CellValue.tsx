@@ -57,7 +57,6 @@ function CellValue({
           ]}
           data-testid={testId || fullSheetName}
           data-cellname={fullSheetName}
-          data-vrt-mask
         >
           {formatter ? formatter(sheetValue) : format(sheetValue, type)}
         </Text>
