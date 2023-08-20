@@ -896,7 +896,7 @@ export class BudgetTable extends Component {
           <View
             style={{
               flexDirection: 'row',
-              flex: '1 0 auto',
+              flex: '0 0 auto',
               padding: 10,
               paddingRight: 14,
               backgroundColor: 'white',
@@ -914,7 +914,7 @@ export class BudgetTable extends Component {
             )}
             <View style={{ flex: 1 }} />
 
-            <View style={{ width: 90 }}>
+            <View style={{ width: 90, justifyContent: 'center' }}>
               <Label title="BUDGETED" style={{ color: colors.n1 }} />
               <CellValue
                 binding={reportBudget.totalBudgetedExpense}
@@ -928,7 +928,12 @@ export class BudgetTable extends Component {
                 }}
               />
             </View>
-            <View style={{ width: 90 }}>
+            <View
+              style={{
+                width: 90,
+                justifyContent: 'center',
+              }}
+            >
               <Label title="BALANCE" style={{ color: colors.n1 }} />
               <CellValue
                 binding={rolloverBudget.totalBalance}
