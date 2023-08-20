@@ -1,6 +1,5 @@
 export const isPlaywright = false;
-export const isProbablySafari = false;
 
-export const OS = 'electron';
-export const env: 'web' | 'mobile' = 'web';
+export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = 'unknown';
+export const env: 'web' | 'mobile' | 'unknown' = 'unknown';
 export const isBrowser = false;

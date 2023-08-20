@@ -6,11 +6,11 @@ const isMac =
 
 export const isPlaywright = navigator.userAgent === 'playwright';
 
-export const isProbablySafari = /^((?!chrome|android).)*safari/i.test(
-  navigator.userAgent,
-);
-
-export const OS = isWindows ? 'windows' : isMac ? 'mac' : 'linux';
-export const env: 'web' | 'mobile' = 'web';
+export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
+  ? 'windows'
+  : isMac
+  ? 'mac'
+  : 'linux';
+export const env: 'web' | 'mobile' | 'unknown' = 'web';
 export const isBrowser =
   typeof window !== 'undefined' && !!window.Actual?.IS_FAKE_WEB;
