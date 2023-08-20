@@ -1,4 +1,4 @@
-name: VRT Tests
+name: E2E Tests
 
 on: [pull_request]
 

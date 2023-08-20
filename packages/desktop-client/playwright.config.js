@@ -13,6 +13,7 @@ if (!process.env.VRT) {
   });
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export default defineConfig({
   timeout: 20000, // 20 seconds
   retries: 1,
