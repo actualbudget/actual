@@ -39,6 +39,7 @@
     "lint": "eslint . --max-warnings 0",
     "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
     "typecheck": "yarn tsc",
+    "jq": "./node_modules/node-jq/bin/jq",
     "postinstall": "patch-package"
   },
   "devDependencies": {
