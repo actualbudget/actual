@@ -7,17 +7,13 @@ import * as queries from 'loot-core/src/client/queries';
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import Add from '../../icons/v1/Add';
 import { theme, styles } from '../../style';
 import Button from '../common/Button';
-import ButtonLink from '../common/ButtonLink';
 import Text from '../common/Text';
 import TextOneLine from '../common/TextOneLine';
 import View from '../common/View';
 import { Page } from '../Page';
 import CellValue from '../spreadsheet/CellValue';
-
-const LEFT_RIGHT_FLEX_WIDTH = 70;
 
 function AccountHeader({ name, amount }) {
   return (
@@ -188,29 +184,7 @@ class AccountList extends Component {
     }
 
     const accountContent = (
-      <Page
-        title={
-          <>
-            <View>Accounts</View>
-
-            <View style={{ position: 'absolute', right: 0 }}>
-              <ButtonLink
-                to="transactions/new"
-                type="bare"
-                aria-label="Add Transaction"
-                style={{
-                  justifyContent: 'center',
-                  width: LEFT_RIGHT_FLEX_WIDTH,
-                }}
-                hoveredStyle={{ background: 'transparent' }}
-                activeStyle={{ background: 'transparent' }}
-              >
-                <Add width={20} height={20} style={{ color: 'white' }} />
-              </ButtonLink>
-            </View>
-          </>
-        }
-      >
+      <Page title="Accounts">
         <AccountHeader name="Budgeted" amount={getOnBudgetBalance()} />
         {budgetedAccounts.map((acct, idx) => (
           <AccountCard

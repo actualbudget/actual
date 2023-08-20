@@ -21,6 +21,7 @@ import checkForUpdateNotification from 'loot-core/src/client/update-notification
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useActions } from '../hooks/useActions';
+import Add from '../icons/v1/Add';
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
@@ -108,6 +109,7 @@ function MobileNavTabs() {
     >
       <NavTab name="Budget" path="/budget" icon={Wallet} />
       <NavTab name="Accounts" path="/accounts" icon={PiggyBank} />
+      <NavTab name="Transaction" path="/transactions/new" icon={Add} />
       <NavTab name="Settings" path="/settings" icon={Cog} />
     </div>
   );
@@ -241,14 +243,6 @@ function FinancesApp() {
                   path="/accounts"
                   element={<NarrowAlternate name="Accounts" />}
                 />
-                <Route
-                  path="/accounts/transactions/new"
-                  element={
-                    <WideNotSupported>
-                      <TransactionEdit />
-                    </WideNotSupported>
-                  }
-                />
 
                 <Route
                   path="/accounts/:id"
@@ -266,6 +260,14 @@ function FinancesApp() {
 
                 <Route
                   path="/accounts/:id/transactions/new"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
+                />
+                <Route
+                  path="/transactions/new"
                   element={
                     <WideNotSupported>
                       <TransactionEdit />

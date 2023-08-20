@@ -373,7 +373,7 @@ class TransactionEditInner extends PureComponent {
             }}
           >
             <Link
-              to={account ? `/accounts/${account.id}` : '/accounts'}
+              to={account ? `/accounts/${account.id}` : '/budget'}
               style={{
                 alignItems: 'center',
                 display: 'flex',

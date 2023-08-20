@@ -71,9 +71,8 @@ test.describe('Mobile', () => {
     await expect(accountPage.transactions).not.toHaveCount(0);
   });
 
-  test('creates a transaction from `/accounts` page', async () => {
-    const accountsPage = await navigation.goToAccountsPage();
-    const transactionEntryPage = await accountsPage.clickCreateTransaction();
+  test('creates a transaction via footer button', async () => {
+    const transactionEntryPage = await navigation.goToTransactionEntryPage();
 
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
 
