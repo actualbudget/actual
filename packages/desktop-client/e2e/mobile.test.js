@@ -43,6 +43,7 @@ test.describe('Mobile', () => {
       'Water',
       'Power',
     ]);
+    await expect(page).toHaveScreenshot();
   });
 
   test('opens the accounts page and asserts on balances', async () => {
@@ -52,6 +53,7 @@ test.describe('Mobile', () => {
 
     expect(account.name).toEqual('Ally Savings');
     expect(account.balance).toBeGreaterThan(0);
+    await expect(page).toHaveScreenshot();
   });
 
   test('opens individual account page and checks that filtering is working', async () => {
@@ -60,15 +62,18 @@ test.describe('Mobile', () => {
 
     await expect(accountPage.heading).toHaveText('Bank of America');
     expect(await accountPage.getBalance()).toBeGreaterThan(0);
+    await expect(page).toHaveScreenshot();
 
     await expect(accountPage.noTransactionsFoundError).not.toBeVisible();
 
     await accountPage.searchByText('nothing should be found');
     await expect(accountPage.noTransactionsFoundError).toBeVisible();
     await expect(accountPage.transactions).toHaveCount(0);
+    await expect(page).toHaveScreenshot();
 
     await accountPage.searchByText('Kroger');
     await expect(accountPage.transactions).not.toHaveCount(0);
+    await expect(page).toHaveScreenshot();
   });
 
   test('creates a transaction', async () => {
@@ -77,6 +82,7 @@ test.describe('Mobile', () => {
     const transactionEntryPage = await accountPage.clickCreateTransaction();
 
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
+    await expect(page).toHaveScreenshot();
 
     await transactionEntryPage.amountField.fill('12.34');
     await transactionEntryPage.fillField(
@@ -107,5 +113,6 @@ test.describe('Mobile', () => {
     expect(await download.suggestedFilename()).toMatch(
       /^\d{4}-\d{2}-\d{2}-.*.zip$/,
     );
+    await expect(page).toHaveScreenshot();
   });
 });

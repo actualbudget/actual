@@ -1,4 +1,4 @@
-name: E2E Tests
+name: VRT Tests
 
 on: [pull_request]
 
@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   test:
-    name: Run end-to-end tests on Netlify PR preview
+    name: Run visual regression tests on Netlify PR preview
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.37.0-jammy
@@ -25,8 +25,8 @@ jobs:
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./.github/actions/netlify-wait-for-build
-      - name: Run E2E Tests on Netlify URL
-        run: yarn e2e
+      - name: Run VRT Tests on Netlify URL
+        run: yarn vrt
         env:
           E2E_START_URL: ${{ steps.netlify.outputs.url }}
       - uses: actions/upload-artifact@v3
