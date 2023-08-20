@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   test:
-    name: Run visual regression tests on Netlify PR preview
+    name: Visual regression
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.37.0-jammy

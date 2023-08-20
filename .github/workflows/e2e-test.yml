@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   test:
-    name: Run end-to-end tests on Netlify PR preview
+    name: Functional
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.37.0-jammy
