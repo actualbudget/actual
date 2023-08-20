@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 
-import { theme } from '../style';
-
 import Block from './common/Block';
 import Button from './common/Button';
 import ExternalLink from './common/ExternalLink';
@@ -24,7 +22,11 @@ type FatalErrorProps = {
   error: Error | AppError;
 };
 
-function renderSimple(error: FatalErrorProps['error']) {
+type RenderSimpleProps = {
+  error: Error | AppError;
+};
+
+function RenderSimple({ error }: RenderSimpleProps) {
   let msg;
   if ('IDBFailure' in error && error.IDBFailure) {
     // IndexedDB wasn't able to open the database
@@ -76,33 +78,37 @@ function renderSimple(error: FatalErrorProps['error']) {
   }
 
   return (
-    <View
+    <Stack
       style={{
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
+        paddingBottom: 15,
+        lineHeight: '1.5em',
+        fontSize: 15,
       }}
     >
-      <Stack
-        style={{
-          paddingBottom: 100,
-          maxWidth: 500,
-          color: theme.errorText,
-          backgroundColor: theme.errorBackground,
-          lineHeight: '1.5em',
-          fontSize: 15,
-        }}
-      >
-        <Text>{msg}</Text>
-        <Text>
-          Please get{' '}
-          <ExternalLink linkColor="muted" to="https://actualbudget.org/contact">
-            in touch
-          </ExternalLink>{' '}
-          for support
-        </Text>
-      </Stack>
-    </View>
+      <Text>{msg}</Text>
+      <Text>
+        Please get{' '}
+        <ExternalLink linkColor="muted" to="https://actualbudget.org/contact">
+          in touch
+        </ExternalLink>{' '}
+        for support
+      </Text>
+    </Stack>
+  );
+}
+
+function RenderUIError() {
+  return (
+    <>
+      <Paragraph>There was an unrecoverable error in the UI. Sorry!</Paragraph>
+      <Paragraph>
+        If this error persists, please get{' '}
+        <ExternalLink to="https://actualbudget.org/contact">
+          in touch
+        </ExternalLink>{' '}
+        so it can be investigated.
+      </Paragraph>
+    </>
   );
 }
 
@@ -148,47 +154,34 @@ function SharedArrayBufferOverride() {
 function FatalError({ buttonText, error }: FatalErrorProps) {
   let [showError, setShowError] = useState(false);
 
-  if ('type' in error && error.type === 'app-init-failure') {
-    return renderSimple(error);
-  }
+  const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
 
   return (
     <Modal isCurrent={true} showClose={false} title="Fatal Error">
-      {() => (
-        <View style={{ maxWidth: 500 }}>
-          <Paragraph>
-            There was an unrecoverable error in the UI. Sorry!
-          </Paragraph>
-          <Paragraph>
-            If this error persists, please get{' '}
-            <ExternalLink to="https://actualbudget.org/contact">
-              in touch
-            </ExternalLink>{' '}
-            so it can be investigated.
-          </Paragraph>
-          <Paragraph>
-            <Button onClick={() => window.Actual.relaunch()}>
-              {buttonText}
-            </Button>
-          </Paragraph>
-          <Paragraph isLast={true} style={{ fontSize: 11 }}>
-            <LinkButton onClick={() => setShowError(true)}>
-              Show Error
-            </LinkButton>
-            {showError && (
-              <Block
-                style={{
-                  marginTop: 5,
-                  height: 100,
-                  overflow: 'auto',
-                }}
-              >
-                {error.stack}
-              </Block>
-            )}
-          </Paragraph>
-        </View>
-      )}
+      <View
+        style={{
+          maxWidth: 500,
+        }}
+      >
+        {showSimpleRender ? <RenderSimple error={error} /> : <RenderUIError />}
+        <Paragraph>
+          <Button onClick={() => window.Actual.relaunch()}>{buttonText}</Button>
+        </Paragraph>
+        <Paragraph isLast={true} style={{ fontSize: 11 }}>
+          <LinkButton onClick={() => setShowError(true)}>Show Error</LinkButton>
+          {showError && (
+            <Block
+              style={{
+                marginTop: 5,
+                height: 100,
+                overflow: 'auto',
+              }}
+            >
+              {error.stack}
+            </Block>
+          )}
+        </Paragraph>
+      </View>
     </Modal>
   );
 }
