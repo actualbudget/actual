@@ -552,6 +552,7 @@ class TransactionEditInner extends PureComponent {
                       ),
                     )
                   }
+                  data-vrt-mask
                 />
               </View>
 
@@ -993,6 +994,7 @@ class Transaction extends PureComponent {
               textStyle,
               { marginLeft: 25, marginRight: 5, fontSize: 14 },
             ]}
+            data-vrt-mask
           >
             {integerToCurrency(amount)}
           </Text>
@@ -1072,8 +1074,13 @@ export class TransactionList extends Component {
           {sections.map(section => {
             return (
               <Section
-                title={monthUtils.format(section.date, 'MMMM dd, yyyy')}
+                title={
+                  <span data-vrt-mask>
+                    {monthUtils.format(section.date, 'MMMM dd, yyyy')}
+                  </span>
+                }
                 key={section.id}
+                data-vrt-mask
               >
                 {section.data.map((transaction, index, transactions) => {
                   return (

@@ -56,6 +56,7 @@ function ToBudget({ toBudget, onClick }) {
             color: amount < 0 ? colors.r4 : colors.n1,
           },
         ]}
+        data-vrt-mask
       >
         {format(amount, 'financial')}
       </Text>
@@ -110,7 +111,7 @@ const BudgetCell = memo(function BudgetCell(props) {
   let sheetValue = useSheetValue(binding);
 
   return (
-    <View style={style}>
+    <View style={style} data-vrt-mask>
       <AmountInput
         value={integerToAmount(sheetValue || 0)}
         style={{
