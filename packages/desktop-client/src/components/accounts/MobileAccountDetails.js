@@ -95,7 +95,7 @@ export default function AccountDetails({
           alignItems: 'center',
           flexShrink: 0,
           overflowY: 'hidden',
-          paddingTop: 20,
+          paddingTop: 10,
           top: 0,
           width: '100%',
         }}
