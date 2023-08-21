@@ -14,18 +14,16 @@ const FIELD_HEIGHT = 40;
 export function FieldLabel({ title, flush, style }) {
   return (
     <Text
-      style={[
-        {
-          marginBottom: 5,
-          marginTop: flush ? 0 : 25,
-          fontSize: 13,
-          color: theme.tableRowHeaderText,
-          paddingLeft: EDITING_PADDING,
-          textTransform: 'uppercase',
-          userSelect: 'none',
-        },
-        style,
-      ]}
+      style={{
+        marginBottom: 5,
+        marginTop: flush ? 0 : 25,
+        fontSize: 13,
+        color: theme.tableRowHeaderText,
+        paddingLeft: EDITING_PADDING,
+        textTransform: 'uppercase',
+        userSelect: 'none',
+        ...style,
+      }}
     >
       {title}
     </Text>
@@ -82,13 +80,16 @@ export function TapField({
     <Button
       as={View}
       onClick={!disabled ? onClick : undefined}
-      style={[
-        { flexDirection: 'row', alignItems: 'center' },
-        style,
-        valueStyle,
-        { backgroundColor: 'white' },
-        disabled && { backgroundColor: theme.formInputTextReadOnlySelection },
-      ]}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        ...style,
+        ...valueStyle,
+        backgroundColor: 'white',
+        ...(disabled && {
+          backgroundColor: theme.formInputTextReadOnlySelection,
+        }),
+      }}
       bounce={false}
       activeStyle={{
         opacity: 0.5,
@@ -103,7 +104,7 @@ export function TapField({
       {children ? (
         children
       ) : (
-        <Text style={[{ flex: 1, userSelect: 'none' }, textStyle]}>
+        <Text style={{ flex: 1, userSelect: 'none', ...textStyle }}>
           {value}
         </Text>
       )}

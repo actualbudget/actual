@@ -146,7 +146,7 @@ export function DateHeader({ date }) {
         justifyContent: 'center',
       }}
     >
-      <Text style={[styles.text, { fontSize: 13, color: colors.n4 }]}>
+      <Text style={{ ...styles.text, fontSize: 13, color: colors.n4 }}>
         {monthUtils.format(date, 'MMMM dd, yyyy')}
       </Text>
     </ListItem>
@@ -631,7 +631,7 @@ class TransactionEditInner extends PureComponent {
               <Button onClick={() => this.onAdd()}>
                 <SvgAdd width={17} height={17} style={{ color: colors.b3 }} />
                 <Text
-                  style={[styles.text, { color: colors.b3, marginLeft: 5 }]}
+                  style={{ ...styles.text, color: colors.b3, marginLeft: 5 }}
                 >
                   Add transaction
                 </Text>
@@ -642,7 +642,7 @@ class TransactionEditInner extends PureComponent {
                   style={{ width: 16, height: 16, color: colors.n1 }}
                 />
                 <Text
-                  style={[styles.text, { marginLeft: 6, color: colors.n1 }]}
+                  style={{ ...styles.text, marginLeft: 6, color: colors.n1 }}
                 >
                   Save changes
                 </Text>
@@ -1002,11 +1002,13 @@ class Transaction extends PureComponent {
             )}
           </View>
           <Text
-            style={[
-              styles.text,
-              textStyle,
-              { marginLeft: 25, marginRight: 5, fontSize: 14 },
-            ]}
+            style={{
+              ...styles.text,
+              ...textStyle,
+              marginLeft: 25,
+              marginRight: 5,
+              fontSize: 14,
+            }}
           >
             {integerToCurrency(amount)}
           </Text>

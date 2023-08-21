@@ -286,15 +286,13 @@ export class FocusableAmountInput extends PureComponent {
             // Defines how far touch can start away from the button
             // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
             {...buttonProps}
-            style={[
-              buttonProps && buttonProps.style,
-              focused && { display: 'none' },
-              {
-                ':hover': {
-                  backgroundColor: 'transparent',
-                },
+            style={{
+              ...(buttonProps && buttonProps.style),
+              ...(focused && { display: 'none' }),
+              ':hover': {
+                backgroundColor: 'transparent',
               },
-            ]}
+            }}
             type="bare"
           >
             <View
@@ -308,7 +306,7 @@ export class FocusableAmountInput extends PureComponent {
                 style,
               ]}
             >
-              <Text style={[{ fontSize: 15, userSelect: 'none' }, textStyle]}>
+              <Text style={{ fontSize: 15, userSelect: 'none', ...textStyle }}>
                 {amountToCurrency(Math.abs(this.props.value))}
               </Text>
             </View>

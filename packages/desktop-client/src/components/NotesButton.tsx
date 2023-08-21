@@ -57,13 +57,13 @@ function NotesTooltip({
         />
       ) : (
         <Text
-          {...css({
+          style={{
             display: 'block',
             maxWidth: 225,
             padding: 8,
             whiteSpace: 'pre-wrap',
             overflowWrap: 'break-word',
-          })}
+          }}
         >
           {notes}
         </Text>
@@ -126,12 +126,12 @@ export default function NotesButton({
       <Button
         type="bare"
         className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
-        style={[
-          { color: defaultColor },
-          style,
-          hasNotes && { display: 'flex !important' },
-          tooltipOpen && { color: colors.n1 },
-        ]}
+        style={{
+          color: defaultColor,
+          ...style,
+          ...(hasNotes && { display: 'flex !important' }),
+          ...(tooltipOpen && { color: colors.n1 }),
+        }}
         {...tooltip.getOpenEvents()}
       >
         <CustomNotesPaper style={{ width, height }} />

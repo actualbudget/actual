@@ -77,14 +77,12 @@ export default function LoggedInUser({
   if (loading && serverUrl) {
     return (
       <Text
-        style={[
-          {
-            color: colors.n5,
-            fontStyle: 'italic',
-          },
-          styles.delayedFadeIn,
-          style,
-        ]}
+        style={{
+          color: colors.n5,
+          fontStyle: 'italic',
+          ...styles.delayedFadeIn,
+          ...style,
+        }}
       >
         Connecting...
       </Text>

@@ -41,14 +41,12 @@ function PageTitle({
 
   return (
     <Text
-      style={[
-        {
-          fontSize: 25,
-          fontWeight: 500,
-          marginBottom: 15,
-        },
-        style,
-      ]}
+      style={{
+        fontSize: 25,
+        fontWeight: 500,
+        marginBottom: 15,
+        ...style,
+      }}
     >
       {name}
     </Text>

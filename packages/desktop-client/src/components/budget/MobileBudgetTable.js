@@ -51,13 +51,11 @@ function ToBudget({ toBudget, onClick }) {
         style={{ color: colors.n1, flexShrink: 0 }}
       />
       <Text
-        style={[
-          styles.smallText,
-          {
-            fontWeight: '500',
-            color: amount < 0 ? colors.r4 : colors.n1,
-          },
-        ]}
+        style={{
+          ...styles.smallText,
+          fontWeight: '500',
+          color: amount < 0 ? colors.r4 : colors.n1,
+        }}
       >
         {format(amount, 'financial')}
       </Text>
@@ -84,13 +82,11 @@ function Saved({ projected }) {
       )}
 
       <Text
-        style={[
-          styles.smallText,
-          {
-            fontWeight: '500',
-            color: projected ? colors.y3 : isNegative ? colors.r4 : colors.n1,
-          },
-        ]}
+        style={{
+          ...styles.smallText,
+          fontWeight: '500',
+          color: projected ? colors.y3 : isNegative ? colors.r4 : colors.n1,
+        }}
       >
         {format(saved, 'financial')}
       </Text>
@@ -144,7 +140,7 @@ const BudgetCell = memo(function BudgetCell(props) {
           ...(editing && { display: 'none' }),
         }}
       >
-        <Text style={[styles.smallText, textStyle]} data-testid={name}>
+        <Text style={{ ...styles.smallText, ...textStyle }} data-testid={name}>
           {format(sheetValue || 0, 'financial')}
         </Text>
       </View>
@@ -398,7 +394,7 @@ class TotalsRow extends PureComponent {
       >
         <View style={{ flex: 1 }}>
           <Text
-            style={[styles.smallText, { fontWeight: '500' }]}
+            style={{ ...styles.smallText, fontWeight: '500' }}
             data-testid="name"
           >
             {group.name}
@@ -501,7 +497,10 @@ class IncomeCategory extends PureComponent {
         ]}
       >
         <View style={{ flex: 1 }}>
-          <Text style={[styles.smallText, nameTextStyle]} data-testid="name">
+          <Text
+            style={{ ...styles.smallText, ...nameTextStyle }}
+            data-testid="name"
+          >
             {name}
           </Text>
         </View>
@@ -969,29 +968,26 @@ function BudgetHeader({
           // hitSlop={{ top: 5, bottom: 5, left: 0, right: 30 }}
 
           onClick={prevEnabled && onPrevMonth}
-          style={[
-            buttonStyle,
-            {
-              left: 0,
-              opacity: prevEnabled ? 1 : 0.6,
-              padding: '5px 30px 5px 0',
-            },
-          ]}
+          style={{
+            ...buttonStyle,
+            left: 0,
+            opacity: prevEnabled ? 1 : 0.6,
+            padding: '5px 30px 5px 0',
+          }}
         >
           <ArrowThinLeft style={{ color: colors.n11 }} width="15" height="15" />
         </Button>
       )}
       <Text
-        style={[
-          styles.mediumText,
-          {
-            marginTop: 12,
-            marginBottom: 12,
-            color: colors.n11,
-            textAlign: 'center',
-            // zIndex: -1
-          },
-        ]}
+        style={{
+          ...styles.mediumText,
+          marginTop: 12,
+          marginBottom: 12,
+          color: colors.n11,
+          textAlign: 'center',
+          // zIndex: -1
+        }}
+        data-vrt-mask
       >
         {/* eslint-disable-next-line rulesdir/typography */}
         {monthUtils.format(currentMonth, "MMMM ''yy")}
@@ -1000,10 +996,13 @@ function BudgetHeader({
         <Button
           type="bare"
           onClick={onDone}
-          style={[
-            buttonStyle,
-            { position: 'absolute', top: 0, bottom: 0, right: 0 },
-          ]}
+          style={{
+            ...buttonStyle,
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            right: 0,
+          }}
           textStyle={{
             color: colors.n11,
             fontSize: 15,
@@ -1018,7 +1017,7 @@ function BudgetHeader({
             type="bare"
             onClick={nextEnabled && onNextMonth}
             // hitSlop={{ top: 5, bottom: 5, left: 30, right: 5 }}
-            style={[buttonStyle, { opacity: nextEnabled ? 1 : 0.6 }]}
+            style={{ ...buttonStyle, opacity: nextEnabled ? 1 : 0.6 }}
           >
             <ArrowThinRight
               style={{ color: colors.n11 }}

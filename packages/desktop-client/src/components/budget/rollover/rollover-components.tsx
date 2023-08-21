@@ -318,6 +318,15 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const budgetHoverStyle = {
+    ':hover': {
+      boxShadow: 'inset 0 0 0 1px ' + colors.n7,
+      backgroundColor: 'white',
+    },
+  };
+  const spentHoverStyle = {
+    ':hover': { textDecoration: 'underline' },
+  };
 
   return (
     <View
@@ -416,20 +425,13 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onExpose={() => onEdit(category.id, monthIndex)}
           style={[editing && { zIndex: 100 }, styles.tnum]}
           textAlign="right"
-          valueStyle={[
-            {
-              cursor: 'default',
-              margin: 1,
-              padding: '0 4px',
-              borderRadius: 4,
-            },
-            {
-              ':hover': {
-                boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-                backgroundColor: 'white',
-              },
-            },
-          ]}
+          valueStyle={{
+            cursor: 'default',
+            margin: 1,
+            padding: '0 4px',
+            borderRadius: 4,
+            ...budgetHoverStyle,
+          }}
           valueProps={{
             binding: rolloverBudget.catBudgeted(category.id),
             type: 'financial',
@@ -468,7 +470,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             getStyle={makeAmountGrey}
             style={{
               cursor: 'pointer',
-              ':hover': { textDecoration: 'underline' },
+              ...spentHoverStyle,
             }}
           />
         </span>
@@ -534,6 +536,10 @@ export function IncomeCategoryMonth({
   monthIndex,
   onShowActivity,
 }: IncomeCategoryMonthProps) {
+  const hoverStyle = {
+    ':hover': { textDecoration: 'underline' },
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <Field
@@ -552,7 +558,7 @@ export function IncomeCategoryMonth({
             type="financial"
             style={{
               cursor: 'pointer',
-              ':hover': { textDecoration: 'underline' },
+              ...hoverStyle,
             }}
           />
         </span>

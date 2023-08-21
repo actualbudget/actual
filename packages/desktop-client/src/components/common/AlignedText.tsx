@@ -20,7 +20,7 @@ export default function AlignedText({
   truncate = 'left',
   ...nativeProps
 }: AlignedTextProps) {
-  const truncateStyle = {
+  const truncateStyle: CSSProperties = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -32,20 +32,21 @@ export default function AlignedText({
       {...nativeProps}
     >
       <Block
-        style={[
-          { marginRight: 10 },
-          truncate === 'left' && truncateStyle,
-          leftStyle,
-        ]}
+        style={{
+          marginRight: 10,
+          ...(truncate === 'left' && truncateStyle),
+          ...leftStyle,
+        }}
       >
         {left}
       </Block>
       <Block
-        style={[
-          { flex: 1, textAlign: 'right' },
-          truncate === 'right' && truncateStyle,
-          rightStyle,
-        ]}
+        style={{
+          flex: 1,
+          textAlign: 'right',
+          ...(truncate === 'right' && truncateStyle),
+          ...rightStyle,
+        }}
       >
         {right}
       </Block>

@@ -254,7 +254,10 @@ function Saved({ projected, style }: SavedProps) {
                   left="Projected Savings:"
                   right={
                     <Text
-                      style={[makeAmountFullStyle(budgetedSaved), styles.tnum]}
+                      style={{
+                        ...makeAmountFullStyle(budgetedSaved),
+                        ...styles.tnum,
+                      }}
                     >
                       {format(budgetedSaved, 'financial-with-sign')}
                     </Text>
@@ -263,7 +266,9 @@ function Saved({ projected, style }: SavedProps) {
                 <AlignedText
                   left="Difference:"
                   right={
-                    <Text style={[makeAmountFullStyle(diff), styles.tnum]}>
+                    <Text
+                      style={{ ...makeAmountFullStyle(diff), ...styles.tnum }}
+                    >
                       {format(diff, 'financial-with-sign')}
                     </Text>
                   }

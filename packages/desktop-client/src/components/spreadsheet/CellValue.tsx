@@ -48,11 +48,11 @@ function CellValue({
         }
       >
         <Text
-          style={[
-            type === 'financial' && styles.tnum,
-            style,
-            getStyle && getStyle(sheetValue),
-          ]}
+          style={{
+            ...(type === 'financial' && styles.tnum),
+            ...style,
+            ...(getStyle && getStyle(sheetValue)),
+          }}
           data-testid={testId || fullSheetName}
           data-cellname={fullSheetName}
         >

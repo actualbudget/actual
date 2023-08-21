@@ -22,14 +22,12 @@ function ToBudget({ toBudget }) {
         {budgetAmount < 0 ? 'Overbudget:' : 'To budget:'}
       </Text>
       <Text
-        style={[
-          styles.text,
-          {
-            fontWeight: '600',
-            fontSize: 22,
-            color: budgetAmount < 0 ? colors.r4 : colors.n1,
-          },
-        ]}
+        style={{
+          ...styles.text,
+          fontWeight: '600',
+          fontSize: 22,
+          color: budgetAmount < 0 ? colors.r4 : colors.n1,
+        }}
       >
         {format(budgetAmount, 'financial')}
       </Text>

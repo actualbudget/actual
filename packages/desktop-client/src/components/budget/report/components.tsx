@@ -200,6 +200,15 @@ export const CategoryMonth = memo(function CategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const budgetHoverStyle = {
+    ':hover': {
+      boxShadow: 'inset 0 0 0 1px ' + colors.n7,
+      backgroundColor: 'white',
+    },
+  };
+  const spentHoverStyle = {
+    textDecoration: 'underline',
+  };
 
   return (
     <View
@@ -298,20 +307,13 @@ export const CategoryMonth = memo(function CategoryMonth({
           onExpose={() => onEdit(category.id, monthIndex)}
           style={[editing && { zIndex: 100 }, styles.tnum]}
           textAlign="right"
-          valueStyle={[
-            {
-              cursor: 'default',
-              margin: 1,
-              padding: '0 4px',
-              borderRadius: 4,
-            },
-            {
-              ':hover': {
-                boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-                backgroundColor: 'white',
-              },
-            },
-          ]}
+          valueStyle={{
+            cursor: 'default',
+            margin: 1,
+            padding: '0 4px',
+            borderRadius: 4,
+            ...budgetHoverStyle,
+          }}
           valueProps={{
             binding: reportBudget.catBudgeted(category.id),
             type: 'financial',
@@ -350,9 +352,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             getStyle={makeAmountGrey}
             style={{
               cursor: 'pointer',
-              ':hover': {
-                textDecoration: 'underline',
-              },
+              ...spentHoverStyle,
             }}
           />
         </span>

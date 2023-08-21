@@ -101,7 +101,7 @@ function NetWorthCard({ accounts }) {
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <Block
-              style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
               role="heading"
             >
               Net Worth
@@ -111,10 +111,11 @@ function NetWorthCard({ accounts }) {
           {data && (
             <View style={{ textAlign: 'right' }}>
               <Block
-                style={[
-                  styles.mediumText,
-                  { fontWeight: 500, marginBottom: 5 },
-                ]}
+                style={{
+                  ...styles.mediumText,
+                  fontWeight: 500,
+                  marginBottom: 5,
+                }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {integerToCurrency(data.netWorth)}
@@ -170,7 +171,7 @@ function CashFlowCard() {
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <Block
-              style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
               role="heading"
             >
               Cash Flow
@@ -300,7 +301,7 @@ function CategorySpendingCard() {
         <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
           <View style={{ flex: 1 }}>
             <Block
-              style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
               role="heading"
             >
               Spending

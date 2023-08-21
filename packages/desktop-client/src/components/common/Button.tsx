@@ -1,14 +1,18 @@
-import React, { forwardRef, type CSSProperties, type ElementType } from 'react';
+import React, {
+  forwardRef,
+  type CSSProperties,
+  type ElementType,
+  type HTMLProps,
+} from 'react';
 
 import { css } from 'glamor';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { styles, theme } from '../../style';
-import { type HTMLPropsWithStyle } from '../../types/utils';
 
 import View from './View';
 
-type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
+type ButtonProps = HTMLProps<HTMLButtonElement> & {
   pressed?: boolean;
   hover?: boolean;
   type?: ButtonType;
@@ -170,7 +174,7 @@ export const ButtonWithLoading = forwardRef<
     <Button
       {...buttonProps}
       ref={ref}
-      style={[{ position: 'relative' }, buttonProps.style]}
+      style={{ position: 'relative', ...buttonProps.style }}
     >
       {loading && (
         <View
