@@ -517,6 +517,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
       onSelect,
       onEdit,
       children,
+      className,
     },
     ref,
   ) => {
