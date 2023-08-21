@@ -373,7 +373,7 @@ class TransactionEditInner extends PureComponent {
             }}
           >
             <Link
-              to={`/accounts/${account.id}`}
+              to={account ? `/accounts/${account.id}` : '/budget'}
               style={{
                 alignItems: 'center',
                 display: 'flex',
@@ -524,6 +524,7 @@ class TransactionEditInner extends PureComponent {
                 disabled={!adding}
                 value={account ? account.name : null}
                 onClick={() => this.onClick(transaction.id, 'account')}
+                data-testid="account-field"
               />
             </View>
 

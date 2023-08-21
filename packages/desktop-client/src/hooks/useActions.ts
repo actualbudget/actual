@@ -12,7 +12,7 @@ type ActionReturnType<T extends (...args: unknown[]) => unknown> =
     ? ReturnType
     : ReturnType<T>;
 
-type BoundActions = {
+export type BoundActions = {
   [Key in keyof typeof actions]: (
     ...args: Parameters<(typeof actions)[Key]>
   ) => ActionReturnType<(typeof actions)[Key]>;

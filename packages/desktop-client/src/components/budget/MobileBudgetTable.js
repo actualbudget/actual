@@ -22,6 +22,7 @@ import Card from '../common/Card';
 import Label from '../common/Label';
 import Text from '../common/Text';
 import View from '../common/View';
+import { useServerURL } from '../ServerContext';
 import CellValue from '../spreadsheet/CellValue';
 import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
@@ -896,7 +897,7 @@ export class BudgetTable extends Component {
           <View
             style={{
               flexDirection: 'row',
-              flex: '1 0 auto',
+              flex: '0 0 auto',
               padding: 10,
               paddingRight: 14,
               backgroundColor: 'white',
@@ -914,7 +915,7 @@ export class BudgetTable extends Component {
             )}
             <View style={{ flex: 1 }} />
 
-            <View style={{ width: 90 }}>
+            <View style={{ width: 90, justifyContent: 'center' }}>
               <Label title="BUDGETED" style={{ color: colors.n1 }} />
               <CellValue
                 binding={reportBudget.totalBudgetedExpense}
@@ -928,7 +929,12 @@ export class BudgetTable extends Component {
                 }}
               />
             </View>
-            <View style={{ width: 90 }}>
+            <View
+              style={{
+                width: 90,
+                justifyContent: 'center',
+              }}
+            >
               <Label title="BALANCE" style={{ color: colors.n1 }} />
               <CellValue
                 binding={rolloverBudget.totalBalance}
@@ -1011,6 +1017,8 @@ function BudgetHeader({
   onPrevMonth,
   onNextMonth,
 }) {
+  let serverURL = useServerURL();
+
   // let [menuOpen, setMenuOpen] = useState(false);
 
   // let onMenuSelect = type => {
@@ -1108,18 +1116,20 @@ function BudgetHeader({
             />
           </Button>
 
-          <SyncButton
-            style={{
-              color: 'white',
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              right: 0,
-              backgroundColor: 'transparent',
-              paddingLeft: 12,
-              paddingRight: 12,
-            }}
-          />
+          {serverURL && (
+            <SyncButton
+              style={{
+                color: 'white',
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                right: 0,
+                backgroundColor: 'transparent',
+                paddingLeft: 12,
+                paddingRight: 12,
+              }}
+            />
+          )}
           {/* <Button
             type="bare"
             onClick={() => setMenuOpen(true)}
