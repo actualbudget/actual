@@ -28,13 +28,12 @@ test.describe('Accounts', () => {
       balance: 100,
     });
 
-    expect(await accountPage.getNthTransaction(0)).toMatchObject({
-      payee: 'Starting Balance',
-      notes: '',
-      category: 'Starting Balances',
-      debit: '',
-      credit: '100.00',
-    });
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.payee).toHaveText('Starting Balance');
+    await expect(transaction.notes).toHaveText('');
+    await expect(transaction.category).toHaveText('Starting Balances');
+    await expect(transaction.debit).toHaveText('');
+    await expect(transaction.credit).toHaveText('100.00');
   });
 
   test('closes an account', async () => {

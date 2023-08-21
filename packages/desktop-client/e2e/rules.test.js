@@ -55,10 +55,9 @@ test.describe('Rules', () => {
       debit: '12.34',
     });
 
-    expect(await accountPage.getNthTransaction(0)).toMatchObject({
-      payee: 'Fast Internet',
-      category: 'General',
-      debit: '12.34',
-    });
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.payee).toHaveText('Fast Internet');
+    await expect(transaction.category).toHaveText('General');
+    await expect(transaction.debit).toHaveText('12.34');
   });
 });

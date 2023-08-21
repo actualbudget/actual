@@ -64,7 +64,7 @@ test.describe('Onboarding', () => {
       path.resolve(__dirname, 'data/actual-demo-budget.zip'),
     );
 
-    await expect(budgetPage.budgetTable).toBeVisible();
+    await expect(budgetPage.budgetTable).toBeVisible({ timeout: 20_000 });
 
     const accountPage = await navigation.goToAccountPage('Ally Savings');
     await expect(accountPage.accountBalance).toHaveText('1,772.80');

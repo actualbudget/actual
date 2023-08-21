@@ -47,12 +47,11 @@ test.describe('Schedules', () => {
 
     // Go to transactions page
     const accountPage = await navigation.goToAccountPage('HSBC');
-    expect(await accountPage.getNthTransaction(0)).toMatchObject({
-      payee: 'Home Depot',
-      category: 'Categorize',
-      debit: '25.00',
-      credit: '',
-    });
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.payee).toHaveText('Home Depot');
+    await expect(transaction.category).toHaveText('Categorize');
+    await expect(transaction.debit).toHaveText('25.00');
+    await expect(transaction.credit).toHaveText('');
 
     // go to rules page
     const rulesPage = await navigation.goToRulesPage();
