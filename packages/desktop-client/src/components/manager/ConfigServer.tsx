@@ -160,6 +160,9 @@ export default function ConfigServer() {
 
       <View
         style={{
+          flexDirection: 'row',
+          flexFlow: 'row wrap',
+          justifyContent: 'center',
           marginTop: 15,
         }}
       >
@@ -169,40 +172,35 @@ export default function ConfigServer() {
           </Button>
         ) : (
           <>
-            <View
-              style={{
-                flexDirection: 'row',
-                flexFlow: 'row wrap',
-                justifyContent: 'center',
-                gap: 15,
-              }}
-            >
-              {!isElectron() && (
-                <Button
-                  type="bare"
-                  style={{
-                    color: colors.n4,
-                  }}
-                  onClick={onSameDomain}
-                >
-                  Use current domain
-                </Button>
-              )}
-              <Button type="bare" style={{ color: colors.n4 }} onClick={onSkip}>
-                Don’t use a server
+            {!isElectron() && (
+              <Button
+                type="bare"
+                style={{
+                  color: colors.n4,
+                  margin: 5,
+                  marginRight: 15,
+                }}
+                onClick={onSameDomain}
+              >
+                Use current domain
               </Button>
-            </View>
+            )}
+            <Button
+              type="bare"
+              style={{ color: colors.n4, margin: 5 }}
+              onClick={onSkip}
+            >
+              Don’t use a server
+            </Button>
 
             {isNonProductionEnvironment() && (
-              <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-                <Button
-                  type="primary"
-                  style={{ marginTop: 15 }}
-                  onClick={onCreateTestFile}
-                >
-                  Create test file
-                </Button>
-              </View>
+              <Button
+                type="primary"
+                style={{ marginLeft: 15 }}
+                onClick={onCreateTestFile}
+              >
+                Create test file
+              </Button>
             )}
           </>
         )}
