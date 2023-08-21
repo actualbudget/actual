@@ -14,6 +14,11 @@ test.describe('Budget', () => {
 
     await page.goto('/');
     budgetPage = await configurationPage.createTestFile();
+
+    // Move mouse to corner of the screen;
+    // sometimes the mouse hovers on a budget element thus rendering an input box
+    // and this breaks screenshot tests
+    await page.mouse.move(0, 0);
   });
 
   test.afterAll(async () => {

@@ -176,7 +176,6 @@ export default function ConfigServer() {
                 justifyContent: 'center',
                 gap: 15,
               }}
-              data-vrt-mask
             >
               {!isElectron() && (
                 <Button
@@ -186,7 +185,7 @@ export default function ConfigServer() {
                   }}
                   onClick={onSameDomain}
                 >
-                  Use {window.location.origin.replace(/https?:\/\//, '')}
+                  Use current domain
                 </Button>
               )}
               <Button type="bare" style={{ color: colors.n4 }} onClick={onSkip}>
