@@ -22,7 +22,7 @@ export default defineConfig({
     userAgent: 'playwright',
     screenshot: 'on',
     browserName: 'chromium',
-    baseURL: process.env.E2E_START_URL ?? 'https://192.168.0.178:3001',
+    baseURL: process.env.E2E_START_URL ?? 'http://localhost:3001',
     trace: 'on-first-retry',
     ignoreHTTPSErrors: true,
   },

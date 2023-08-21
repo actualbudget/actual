@@ -44,8 +44,8 @@ Next, run the standartised docker container and launch the visual regression tes
 # Run docker container
 docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.37.0-jammy /bin/bash
 
-# Run the VRT tests
-yarn vrt
+# Run the VRT tests: important - they MUST be ran against a HTTPS server
+E2E_START_URL=https://192.168.0.1 yarn vrt
 ```
 
 #### Running against a remote server
@@ -53,5 +53,5 @@ yarn vrt
 You can also run the tests against a remote server by passing the URL:
 
 ```sh
-E2E_START_URL=http://my-remote-server.com yarn vrt
+E2E_START_URL=https://my-remote-server.com yarn vrt
 ```
