@@ -437,7 +437,6 @@ function SidebarCategory({
         formatter={value => displayed}
         width="flex"
         exposed={editing || temporary}
-        borderColor={dragPreview ? 'transparent' : borderColor}
         onUpdate={value => {
           if (temporary) {
             if (value === '') {
@@ -598,7 +597,6 @@ function SidebarGroup({
         formatter={value => displayed}
         width="flex"
         exposed={editing}
-        borderColor={colors.border}
         onUpdate={value => {
           if (temporary) {
             if (value === '') {

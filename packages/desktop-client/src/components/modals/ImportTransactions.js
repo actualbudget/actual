@@ -275,7 +275,7 @@ function Transaction({
 
   return (
     <Row style={{ backgroundColor: 'white' }}>
-      <Field width={200} borderColor={colors.border}>
+      <Field width={200}>
         {showParsed ? (
           <ParsedDate
             parseDateFormat={parseDateFormat}
@@ -288,19 +288,17 @@ function Transaction({
       </Field>
       <Field
         width="flex"
-        borderColor={colors.border}
         title={transaction.imported_payee || transaction.payee_name}
       >
         {transaction.payee_name}
       </Field>
-      <Field width="flex" borderColor={colors.border} title={transaction.notes}>
+      <Field width="flex" title={transaction.notes}>
         {transaction.notes}
       </Field>
       {splitMode ? (
         <>
           <Field
             width={90}
-            borderColor={colors.border}
             contentStyle={[{ textAlign: 'right' }, styles.tnum]}
             title={outflow}
           >
@@ -308,7 +306,6 @@ function Transaction({
           </Field>
           <Field
             width={90}
-            borderColor={colors.border}
             contentStyle={[{ textAlign: 'right' }, styles.tnum]}
             title={inflow}
           >
@@ -318,7 +315,6 @@ function Transaction({
       ) : (
         <Field
           width={90}
-          borderColor={colors.border}
           contentStyle={[{ textAlign: 'right' }, styles.tnum]}
           title={amount}
         >
@@ -357,7 +353,7 @@ function SelectField({
         ]),
       ]}
       value={value === null ? 'choose-field' : value}
-      style={{ borderWidth: 1, width: '100%' }}
+      style={{ width: '100%' }}
       wrapperStyle={style}
       onChange={value => onChange(value)}
     />
@@ -391,7 +387,7 @@ function DateFormatSelect({
         ])}
         value={parseDateFormat || ''}
         onChange={value => onChange(value)}
-        style={{ borderWidth: 1, width: '100%' }}
+        style={{ width: '100%' }}
       />
     </View>
   );
@@ -930,7 +926,7 @@ export default function ImportTransactions({ modalProps, options }) {
                       setCsvDelimiter(value);
                       parse(filename, { delimiter: value, hasHeaderRow });
                     }}
-                    style={{ borderWidth: 1, width: 50 }}
+                    style={{ width: 50 }}
                   />
                 </label>
                 <CheckboxOption
