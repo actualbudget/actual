@@ -79,6 +79,7 @@ test.describe('Mobile', () => {
 
   test('creates a transaction via footer button', async () => {
     const transactionEntryPage = await navigation.goToTransactionEntryPage();
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
 
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
 
@@ -95,12 +96,14 @@ test.describe('Mobile', () => {
       page.getByTestId('account-field'),
       'Ally Savings',
     );
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
 
     const accountPage = await transactionEntryPage.createTransaction();
 
     await expect(accountPage.transactions.nth(0)).toHaveText(
       'KrogerClothing-12.34',
     );
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
   test('creates a transaction from `/accounts/:id` page', async () => {
