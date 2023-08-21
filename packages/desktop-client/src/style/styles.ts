@@ -92,21 +92,8 @@ export const styles = {
     animationDelay: '0.5s',
   },
   // Dynamically set
-  // TODO: Figure out how to properly type these webkit properties.
-  lightScrollbar: null as
-    | (CSSProperties & {
-        '& ::-webkit-scrollbar';
-        '& ::-webkit-scrollbar-thumb';
-        '& ::-webkit-scrollbar-thumb:vertical';
-      })
-    | null,
-  // TODO: Figure out how to properly type these webkit properties.
-  darkScrollbar: null as
-    | (CSSProperties & {
-        '& ::-webkit-scrollbar';
-        '& ::-webkit-scrollbar-thumb:vertical';
-      })
-    | null,
+  lightScrollbar: null as CSSProperties | null,
+  darkScrollbar: null as CSSProperties | null,
   scrollbarWidth: null as number | null,
 };
 
@@ -117,31 +104,35 @@ let hiddenScrollbars = false;
 // lightScrollbar => primary
 // darkScrollbar => secondary
 function onScrollbarChange() {
-  styles.lightScrollbar = !hiddenScrollbars && {
-    '& ::-webkit-scrollbar': {
-      width: 11,
-      backgroundColor: 'rgba(200, 200, 200, .2)',
-    },
-    '& ::-webkit-scrollbar-thumb': {
-      width: 7,
-      borderRadius: 30,
-      backgroundClip: 'padding-box',
-      border: '2px solid rgba(0, 0, 0, 0)',
-    },
-    '& ::-webkit-scrollbar-thumb:vertical': {
-      backgroundColor: '#d0d0d0',
-    },
-  };
+  styles.lightScrollbar = {
+    ...(!hiddenScrollbars && {
+      '& ::-webkit-scrollbar': {
+        width: 11,
+        backgroundColor: 'rgba(200, 200, 200, .2)',
+      },
+      '& ::-webkit-scrollbar-thumb': {
+        width: 7,
+        borderRadius: 30,
+        backgroundClip: 'padding-box',
+        border: '2px solid rgba(0, 0, 0, 0)',
+      },
+      '& ::-webkit-scrollbar-thumb:vertical': {
+        backgroundColor: '#d0d0d0',
+      },
+    }),
+  } as CSSProperties;
 
-  styles.darkScrollbar = !hiddenScrollbars && {
-    '& ::-webkit-scrollbar': {
-      width: 7,
-      backgroundColor: 'rgba(0, 0, 0, 0)',
-    },
-    '& ::-webkit-scrollbar-thumb:vertical': {
-      backgroundColor: 'rgba(200, 200, 200, .5)',
-    },
-  };
+  styles.darkScrollbar = {
+    ...(!hiddenScrollbars && {
+      '& ::-webkit-scrollbar': {
+        width: 7,
+        backgroundColor: 'rgba(0, 0, 0, 0)',
+      },
+      '& ::-webkit-scrollbar-thumb:vertical': {
+        backgroundColor: 'rgba(200, 200, 200, .5)',
+      },
+    }),
+  } as CSSProperties;
 
   styles.scrollbarWidth = hiddenScrollbars ? 0 : 13;
 }

@@ -401,7 +401,7 @@ function SingleAutocomplete({
                 }
               },
               onBlur: e => {
-                // @ts-expect-error Should this be e.nativeEvent
+                // Should this be e.nativeEvent
                 e.preventDownshiftDefault = true;
                 inputProps.onBlur?.(e);
 
@@ -591,6 +591,14 @@ function MultiAutocomplete({
     prevOnKeyDown?.(e);
   }
 
+  const inputStyle = {
+    flex: 1,
+    minWidth: 30,
+    border: 0,
+    ':focus': { border: 0, boxShadow: 'none' },
+    ...props?.inputProps?.style,
+  } as CSSProperties;
+
   return (
     <Autocomplete
       {...props}
@@ -646,15 +654,7 @@ function MultiAutocomplete({
               setFocused(false);
               props.onBlur(e);
             }}
-            style={[
-              {
-                flex: 1,
-                minWidth: 30,
-                border: 0,
-                ':focus': { border: 0, boxShadow: 'none' },
-              },
-              props.style,
-            ]}
+            style={inputStyle}
           />
         </View>
       )}

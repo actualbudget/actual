@@ -12,16 +12,14 @@ type LabelProps = {
 export default function Label({ title, style }: LabelProps) {
   return (
     <Text
-      style={[
-        styles.text,
-        {
-          color: colors.n2,
-          textAlign: 'right',
-          fontSize: 12,
-          marginBottom: 2,
-        },
-        style,
-      ]}
+      style={{
+        ...styles.text,
+        color: colors.n2,
+        textAlign: 'right',
+        fontSize: 12,
+        marginBottom: 2,
+        ...style,
+      }}
     >
       {title}
     </Text>

@@ -28,6 +28,14 @@ export default function InputWithContent({
   ...props
 }: InputWithContentProps) {
   let [focused, setFocused] = useState(false);
+  const hoverStyle = {
+    '&, &:focus, &:hover': {
+      border: 0,
+      backgroundColor: 'transparent',
+      boxShadow: 'none',
+      color: 'inherit',
+    },
+  } as CSSProperties;
 
   return (
     <View
@@ -49,18 +57,11 @@ export default function InputWithContent({
       {leftContent}
       <Input
         {...props}
-        style={[
-          inputStyle,
-          {
-            flex: 1,
-            '&, &:focus, &:hover': {
-              border: 0,
-              backgroundColor: 'transparent',
-              boxShadow: 'none',
-              color: 'inherit',
-            },
-          },
-        ]}
+        style={{
+          ...inputStyle,
+          flex: 1,
+          ...hoverStyle,
+        }}
         onFocus={e => {
           setFocused(true);
           props.onFocus?.(e);

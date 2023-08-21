@@ -352,11 +352,11 @@ function InputValue({
       onUpdate={text => setValue(text)}
       onBlur={onBlur_}
       onKeyDown={onKeyDown}
-      style={[
-        inputCellStyle,
-        props.readOnly ? readonlyInputStyle : null,
-        props.style,
-      ]}
+      style={{
+        ...inputCellStyle,
+        ...(props.readOnly ? readonlyInputStyle : null),
+        ...props.style,
+      }}
     />
   );
 }
@@ -365,7 +365,7 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   inputProps: ComponentProps<typeof InputValue>;
   onUpdate: ComponentProps<typeof InputValue>['onUpdate'];
   onBlur: ComponentProps<typeof InputValue>['onBlur'];
-  textAlign?: string;
+  textAlign?: CSSProperties['textAlign'];
   error?: ReactNode;
 };
 export function InputCell({
@@ -384,7 +384,7 @@ export function InputCell({
             value={props.value}
             onUpdate={onUpdate}
             onBlur={onBlur}
-            style={[{ textAlign }, inputProps && inputProps.style]}
+            style={{ textAlign, ...(inputProps && inputProps.style) }}
             {...inputProps}
           />
           {error && (
@@ -497,6 +497,7 @@ export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
 }
 
 type CellButtonProps = {
+  children: ReactNode;
   style?: CSSProperties;
   primary?: boolean;
   bare?: boolean;
@@ -504,11 +505,12 @@ type CellButtonProps = {
   clickBehavior?: string;
   onSelect?: (e) => void;
   onEdit?: () => void;
-  children: ReactNode;
+  className?: string;
 };
 export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
   (
     {
+      children,
       style,
       primary,
       bare,
@@ -516,7 +518,6 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
       clickBehavior,
       onSelect,
       onEdit,
-      children,
       className,
     },
     ref,
@@ -679,6 +680,7 @@ type SheetCellProps = ComponentProps<typeof Cell> & {
   valueProps: SheetCellValueProps;
   inputProps?: Omit<ComponentProps<typeof InputValue>, 'value' | 'onUpdate'>;
   onSave?: (value) => void;
+  textAlign?: CSSProperties['textAlign'];
 };
 export function SheetCell({
   valueProps,

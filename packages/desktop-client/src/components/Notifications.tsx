@@ -104,6 +104,12 @@ function Notification({
     [message, messageActions],
   );
 
+  const buttonStyle = {
+    '&:hover, &:active': {
+      backgroundColor: positive ? colors.g9 : error ? colors.r10 : colors.y9,
+    },
+  } as CSSProperties;
+
   return (
     <View
       style={{
@@ -171,13 +177,7 @@ function Notification({
                 color: 'currentColor',
                 fontSize: 14,
                 flexShrink: 0,
-                '&:hover, &:active': {
-                  backgroundColor: positive
-                    ? colors.g9
-                    : error
-                    ? colors.r10
-                    : colors.y9,
-                },
+                ...buttonStyle,
               }}
             >
               {button.title}

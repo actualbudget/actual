@@ -1,8 +1,8 @@
+import { type HTMLProps } from 'react';
+
 import { css } from 'glamor';
 
-import { type HTMLPropsWithStyle } from '../../types/utils';
-
-type ParagraphProps = HTMLPropsWithStyle<HTMLDivElement> & {
+type ParagraphProps = HTMLProps<HTMLDivElement> & {
   isLast?: boolean;
 };
 

@@ -45,7 +45,12 @@ type FormLabelProps = {
 export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
     <Text
-      style={[{ fontSize: 13, marginBottom: 3, color: theme.tableText }, style]}
+      style={{
+        fontSize: 13,
+        marginBottom: 3,
+        color: theme.tableText,
+        ...style,
+      }}
     >
       <label htmlFor={htmlFor} id={id}>
         {title}

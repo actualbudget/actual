@@ -399,14 +399,14 @@ function StageButton({ selected, children, style, onSelect }) {
   return (
     <Button
       type="bare"
-      style={[
-        { fontSize: 'inherit' },
-        selected && {
+      style={{
+        fontSize: 'inherit',
+        ...(selected && {
           backgroundColor: theme.pillBackgroundSelected,
           ':hover': { backgroundColor: theme.pillBackgroundSelected },
-        },
-        style,
-      ]}
+        }),
+        ...style,
+      }}
       onClick={onSelect}
     >
       {children}

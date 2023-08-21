@@ -1,4 +1,4 @@
-import { type ChangeEvent, type Ref } from 'react';
+import { type ChangeEvent, type CSSProperties, type Ref } from 'react';
 
 import SvgRemove from '../../icons/v2/Remove';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
@@ -24,6 +24,20 @@ export default function Search({
   isInModal,
   width = 250,
 }: SearchProps) {
+  const inputStyle = {
+    '::placeholder': {
+      color: theme.formInputTextPlaceholder,
+      transition: 'color .25s',
+    },
+    ':focus': isInModal
+      ? null
+      : {
+          '::placeholder': {
+            color: theme.formInputTextPlaceholderSelected,
+          },
+        },
+  } as CSSProperties;
+
   return (
     <InputWithContent
       inputRef={inputRef}
@@ -65,19 +79,7 @@ export default function Search({
           </Button>
         )
       }
-      inputStyle={{
-        '::placeholder': {
-          color: theme.formInputTextPlaceholder,
-          transition: 'color .25s',
-        },
-        ':focus': isInModal
-          ? null
-          : {
-              '::placeholder': {
-                color: theme.formInputTextPlaceholderSelected,
-              },
-            },
-      }}
+      inputStyle={inputStyle}
       value={value}
       placeholder={placeholder}
       onKeyDown={e => {

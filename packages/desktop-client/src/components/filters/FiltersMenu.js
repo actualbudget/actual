@@ -95,17 +95,18 @@ function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
       type="bare"
-      style={[
-        { backgroundColor: theme.altbuttonMenuBackground, marginBottom: 5 },
-        style,
-        selected && {
+      style={{
+        backgroundColor: theme.altbuttonMenuBackground,
+        marginBottom: 5,
+        ...style,
+        ...(selected && {
           color: theme.buttonNormalSelectedText,
           '&,:hover,:active': {
             backgroundColor: theme.buttonNormalSelectedBackground,
             color: theme.buttonNormalSelectedText,
           },
-        },
-      ]}
+        }),
+      }}
       onClick={onClick}
     >
       {friendlyOp(op)}

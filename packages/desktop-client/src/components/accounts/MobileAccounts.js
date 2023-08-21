@@ -28,13 +28,11 @@ function AccountHeader({ name, amount, style = {} }) {
     >
       <View style={{ flex: 1 }}>
         <Text
-          style={[
-            styles.text,
-            {
-              textTransform: 'uppercase',
-              fontSize: 13,
-            },
-          ]}
+          style={{
+            ...styles.text,
+            textTransform: 'uppercase',
+            fontSize: 13,
+          }}
           data-testid="name"
         >
           {name}

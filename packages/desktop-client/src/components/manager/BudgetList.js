@@ -171,7 +171,7 @@ function File({ file, onSelect, onDelete }) {
       ]}
     >
       <View style={{ alignItems: 'flex-start' }}>
-        <Text style={[{ fontSize: 16, fontWeight: 700 }]}>{file.name}</Text>
+        <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
 
         <FileState file={file} />
       </View>
@@ -279,7 +279,7 @@ export default function BudgetList() {
       }}
     >
       <View>
-        <Text style={[styles.veryLargeText, { margin: 20 }]}>Files</Text>
+        <Text style={{ ...styles.veryLargeText, margin: 20 }}>Files</Text>
         <View
           style={{
             position: 'absolute',

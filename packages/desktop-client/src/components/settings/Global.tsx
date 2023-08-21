@@ -33,6 +33,13 @@ export default function GlobalSettings() {
     }
   }
 
+  const webkitScrollbarStyle = {
+    // TODO: When we update electron, we should be able to
+    // remove this. In previous versions of Chrome, once the
+    // scrollbar appears it never goes away
+    '::-webkit-scrollbar': { display: 'none' },
+  };
+
   return (
     <Setting
       primaryAction={
@@ -58,10 +65,7 @@ export default function GlobalSettings() {
           borderRadius: 4,
           overflow: 'auto',
           whiteSpace: 'nowrap',
-          // TODO: When we update electron, we should be able to
-          // remove this. In previous versions of Chrome, once the
-          // scrollbar appears it never goes away
-          '::-webkit-scrollbar': { display: 'none' },
+          ...webkitScrollbarStyle,
         }}
       >
         {documentDir}
