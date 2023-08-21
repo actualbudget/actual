@@ -6,7 +6,12 @@ import View from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 
-function Calendar({ color, onClick }) {
+type CalendarProps = {
+  color: string;
+  onClick: () => void;
+};
+
+function Calendar({ color, onClick }: CalendarProps) {
   return (
     <CalendarIcon
       style={{ width: 13, height: 13, color, marginRight: 5 }}
@@ -15,7 +20,15 @@ function Calendar({ color, onClick }) {
   );
 }
 
-export function MonthCountSelector({ maxMonths, onChange }) {
+type MonthCountSelectorProps = {
+  maxMonths?: number;
+  onChange: () => void;
+};
+
+export function MonthCountSelector({
+  maxMonths,
+  onChange,
+}: MonthCountSelectorProps) {
   let { displayMax } = useBudgetMonthCount();
 
   // It doesn't make sense to show anything if we can only fit one
