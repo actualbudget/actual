@@ -10,7 +10,7 @@ Running against the local server:
 
 ```sh
 # Start the development server
-yarn start:browser
+yarn start
 
 # Run against the local server (localhost:3001)
 yarn e2e
@@ -24,4 +24,34 @@ E2E_START_URL=http://my-remote-server.com yarn e2e
 
 ### Visual regression
 
-TODO
+Visual regression tests (also known as screenshot tests) check that the visual appearance of the product has not regressed. Each environment has slightly different colors, fonts etc. Mac differs from Windows which differs from Linux. In order to have a stable test environment for visual comparisons - you must use a standartised docker container. This ensures that the tests are always ran in a consistent environment.
+
+Prerequisites:
+
+- Docker installed
+
+#### Running against the local server
+
+First start the dev server:
+
+```sh
+HTTPS=true yarn start
+```
+
+Next, run the standartised docker container and launch the visual regression tests from within it.
+
+```sh
+# Run docker container
+docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.37.0-jammy /bin/bash
+
+# Run the VRT tests
+yarn vrt
+```
+
+#### Running against a remote server
+
+You can also run the tests against a remote server by passing the URL:
+
+```sh
+E2E_START_URL=http://my-remote-server.com yarn vrt
+```
