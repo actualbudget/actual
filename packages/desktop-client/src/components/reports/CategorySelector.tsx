@@ -30,12 +30,12 @@ export default function CategorySelector({
           {uncheckedHidden ? (
             <>
               <Eye width={20} height={20} />
-              Show all categories
+              Show unchecked
             </>
           ) : (
             <>
               <EyeSlashed width={20} height={20} />
-              Hide unselected
+              Hide unchecked
             </>
           )}
         </Button>
