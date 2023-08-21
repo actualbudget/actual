@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Transactions', () => {
   let page;
@@ -26,6 +27,10 @@ test.describe('Transactions', () => {
     accountPage = await navigation.goToAccountPage('Ally Savings');
   });
 
+  test('checks the page visuals', async () => {
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
+  });
+
   test('creates a test transaction', async () => {
     await accountPage.createSingleTransaction({
       payee: 'Home Depot',
@@ -40,6 +45,7 @@ test.describe('Transactions', () => {
     await expect(transaction.category).toHaveText('Food');
     await expect(transaction.debit).toHaveText('12.34');
     await expect(transaction.credit).toHaveText('');
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
   test('creates a split test transaction', async () => {
@@ -78,5 +84,6 @@ test.describe('Transactions', () => {
     await expect(thirdTransaction.category).toHaveText('Categorize');
     await expect(thirdTransaction.debit).toHaveText('111.11');
     await expect(thirdTransaction.credit).toHaveText('');
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 });

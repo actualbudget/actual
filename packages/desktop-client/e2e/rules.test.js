@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Rules', () => {
   let page;
@@ -26,6 +27,10 @@ test.describe('Rules', () => {
     rulesPage = await navigation.goToRulesPage();
   });
 
+  test('checks the page visuals', async () => {
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
+  });
+
   test('creates a rule and makes sure it is applied when creating a transaction', async () => {
     await rulesPage.createRule({
       conditions: [
@@ -47,6 +52,7 @@ test.describe('Rules', () => {
       conditions: ['payee is Fast Internet'],
       actions: ['set category to General'],
     });
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
 
     const accountPage = await navigation.goToAccountPage('Bank of America');
 
@@ -59,5 +65,6 @@ test.describe('Rules', () => {
     await expect(transaction.payee).toHaveText('Fast Internet');
     await expect(transaction.category).toHaveText('General');
     await expect(transaction.debit).toHaveText('12.34');
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 });
