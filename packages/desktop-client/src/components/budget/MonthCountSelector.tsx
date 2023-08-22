@@ -21,8 +21,8 @@ function Calendar({ color, onClick }: CalendarProps) {
 }
 
 type MonthCountSelectorProps = {
-  maxMonths?: number;
-  onChange: () => void;
+  maxMonths: number;
+  onChange: (value: number) => Promise<void>;
 };
 
 export function MonthCountSelector({
