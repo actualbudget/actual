@@ -506,6 +506,7 @@ type CellButtonProps = {
   onSelect?: (e) => void;
   onEdit?: () => void;
   children: ReactNode;
+  className?: string;
 };
 export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
   (
@@ -518,6 +519,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
       onSelect,
       onEdit,
       children,
+      className,
     },
     ref,
   ) => {
@@ -537,7 +539,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
     return (
       <View
         innerRef={ref}
-        className="cell-button"
+        className={className}
         tabIndex={0}
         onKeyDown={e => {
           if (e.key === 'x' || e.key === ' ') {
@@ -604,9 +606,10 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
 );
 
 type SelectCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
-  partial: boolean;
+  partial?: boolean;
   onEdit?: () => void;
   onSelect?: (e) => void;
+  buttonProps?: Partial<CellButtonProps>;
 };
 export function SelectCell({
   focused,
@@ -614,6 +617,7 @@ export function SelectCell({
   style,
   onSelect,
   onEdit,
+  buttonProps = {},
   ...props
 }: SelectCellProps) {
   return (
@@ -652,6 +656,7 @@ export function SelectCell({
           onEdit={onEdit}
           onSelect={onSelect}
           clickBehavior="none"
+          {...buttonProps}
         >
           {selected && <Checkmark width={6} height={6} />}
         </CellButton>

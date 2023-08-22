@@ -84,6 +84,12 @@ export function getNextDate(dateCond, start = new Date()) {
 
     if (dates.length > 0) {
       let date = dates[0].date;
+      if (value.schedule.data.skipWeekend) {
+        date = getDateWithSkippedWeekend(
+          date,
+          value.schedule.data.weekendSolve,
+        );
+      }
       return dayFromDate(date);
     }
   }
@@ -372,7 +378,12 @@ async function getUpcomingDates({ config, count }) {
     return schedule
       .occurrences({ start: d.startOfDay(new Date()), take: count })
       .toArray()
-      .map(date => dayFromDate(date.date));
+      .map(date =>
+        config.skipWeekend
+          ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
+          : date.date,
+      )
+      .map(date => dayFromDate(date));
   } catch (err) {
     captureBreadcrumb(config);
     throw err;
@@ -563,5 +574,18 @@ app.events.on('sync', ({ type, subtype }) => {
     }
   }
 });
+
+function getDateWithSkippedWeekend(date, solveMode) {
+  if (d.isWeekend(date)) {
+    if (solveMode === 'after') {
+      return d.nextMonday(date);
+    } else if (solveMode === 'before') {
+      return d.previousFriday(date);
+    } else {
+      throw new Error('Unknown weekend solve mode, this should not happen!');
+    }
+  }
+  return date;
+}
 
 export default app;

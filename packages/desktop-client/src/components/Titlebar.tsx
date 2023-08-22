@@ -4,6 +4,8 @@ import React, {
   useEffect,
   useRef,
   useContext,
+  type ReactNode,
+  type CSSProperties,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
@@ -34,16 +36,19 @@ import ExternalLink from './common/ExternalLink';
 import Paragraph from './common/Paragraph';
 import Text from './common/Text';
 import View from './common/View';
-import { useSidebar } from './FloatableSidebar';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
+import { useSidebar } from './sidebar';
 import useSheetValue from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 import { Tooltip } from './tooltips';
 
-export let TitlebarContext = createContext();
+export let TitlebarContext = createContext(null);
 
-export function TitlebarProvider({ children }) {
+type TitlebarProviderProps = {
+  children?: ReactNode;
+};
+export function TitlebarProvider({ children }: TitlebarProviderProps) {
   let listeners = useRef([]);
 
   function sendEvent(msg) {
@@ -101,7 +106,10 @@ function PrivacyButton() {
   );
 }
 
-export function SyncButton({ style }) {
+type SyncButtonProps = {
+  style?: CSSProperties;
+};
+export function SyncButton({ style }: SyncButtonProps) {
   let cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
   let { sync } = useActions();
 
@@ -141,6 +149,21 @@ export function SyncButton({ style }) {
     return unlisten;
   }, []);
 
+  const mobileColor =
+    syncState === 'error'
+      ? colors.r7
+      : syncState === 'disabled' ||
+        syncState === 'offline' ||
+        syncState === 'local'
+      ? colors.n9
+      : style.color;
+  const activeStyle = css(
+    // mobile
+    media(`(max-width: ${tokens.breakpoint_small})`, {
+      color: mobileColor,
+    }),
+  );
+
   return (
     <Button
       type="bare"
@@ -148,14 +171,7 @@ export function SyncButton({ style }) {
         style,
         {
           WebkitAppRegion: 'none',
-          color:
-            syncState === 'error'
-              ? colors.r7
-              : syncState === 'disabled' ||
-                syncState === 'offline' ||
-                syncState === 'local'
-              ? colors.n9
-              : null,
+          color: mobileColor,
         },
         media(`(min-width: ${tokens.breakpoint_small})`, {
           color:
@@ -168,6 +184,8 @@ export function SyncButton({ style }) {
               : null,
         }),
       )}
+      hoveredStyle={activeStyle}
+      activeStyle={activeStyle}
       onClick={sync}
     >
       {syncState === 'error' ? (

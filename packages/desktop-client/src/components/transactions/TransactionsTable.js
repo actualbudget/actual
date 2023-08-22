@@ -53,7 +53,7 @@ import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
 import Hyperlink2 from '../../icons/v2/Hyperlink2';
-import { styles, theme } from '../../style';
+import { colors, styles, theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -414,6 +414,17 @@ function StatusCell({
   let isClearedField = status === 'cleared' || status == null;
   let statusProps = getStatusProps(status);
 
+  let statusColor =
+    status === 'cleared'
+      ? colors.g5
+      : status === 'missed'
+      ? colors.r6
+      : status === 'due'
+      ? colors.y5
+      : selected
+      ? colors.b7
+      : colors.n7;
+
   function onSelect() {
     if (isClearedField) {
       onUpdate('cleared', !(status === 'cleared'));
@@ -451,7 +462,7 @@ function StatusCell({
           style: {
             width: 13,
             height: 13,
-            color: statusProps.color,
+            color: statusColor,
             marginTop: status === 'due' ? -1 : 0,
           },
         })}
@@ -806,7 +817,6 @@ const Transaction = memo(function Transaction(props) {
   let backgroundFocus = focusedField === 'select';
   let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
-  let statusProps = getStatusProps(notes);
   let runningBalance = !isTemporaryId(id)
     ? balance
     : balance + (_inverse ? -1 : 1) * amount;
@@ -822,8 +832,14 @@ const Transaction = memo(function Transaction(props) {
             : theme.tableBackground,
         },
         {
-          ':hover': {
+          ':hover': !(backgroundFocus || selected) && {
             backgroundColor: theme.tableRowBackgroundHover,
+          },
+          '& .hover-visible': {
+            opacity: 0,
+          },
+          ':hover .hover-visible': {
+            opacity: 1,
           },
         },
         highlighted || selected
@@ -832,6 +848,7 @@ const Transaction = memo(function Transaction(props) {
         style,
         isPreview && {
           color: theme.tableTextInactive,
+          backgroundColor: !selected ? '#fcfcfc' : undefined,
           fontStyle: 'italic',
         },
         _unmatched && { opacity: 0.5 },
@@ -875,7 +892,10 @@ const Transaction = memo(function Transaction(props) {
       ) : (
         <SelectCell
           /* Checkmark field for non-child transaction */
-          exposed={selected || editing}
+          exposed
+          buttonProps={{
+            className: selected || editing ? null : 'hover-visible',
+          }}
           focused={focusedField === 'select'}
           onSelect={e => {
             dispatchSelected({ type: 'select', id: transaction.id, event: e });
@@ -1026,8 +1046,22 @@ const Transaction = memo(function Transaction(props) {
           {() => (
             <View
               style={{
-                color: statusProps.color,
-                backgroundColor: statusProps.backgroundColor,
+                color:
+                  notes === 'missed'
+                    ? colors.r6
+                    : notes === 'due'
+                    ? colors.y4
+                    : selected
+                    ? colors.b5
+                    : colors.n6,
+                backgroundColor:
+                  notes === 'missed'
+                    ? colors.r10
+                    : notes === 'due'
+                    ? colors.y9
+                    : selected
+                    ? colors.b8
+                    : colors.n10,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,

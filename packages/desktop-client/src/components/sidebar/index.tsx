@@ -1,15 +1,34 @@
-import React, { createContext, useState, useContext, useMemo } from 'react';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useMemo,
+  type ReactNode,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 import { useSelector } from 'react-redux';
 
-import { useResponsive } from '../ResponsiveProvider';
+import { useResponsive } from '../../ResponsiveProvider';
+import View from '../common/View';
 
-import View from './common/View';
-import { SIDEBAR_WIDTH } from './sidebar';
+import { SIDEBAR_WIDTH } from './Sidebar';
 import SidebarWithData from './SidebarWithData';
 
-const SidebarContext = createContext(null);
+type SidebarContextValue = {
+  hidden: boolean;
+  setHidden: Dispatch<SetStateAction<boolean>>;
+  floating: boolean;
+  alwaysFloats: boolean;
+};
 
-export function SidebarProvider({ children }) {
+const SidebarContext = createContext<SidebarContextValue>(null);
+
+type SidebarProviderProps = {
+  children: ReactNode;
+};
+
+function SidebarProvider({ children }: SidebarProviderProps) {
   let floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
@@ -27,7 +46,7 @@ export function SidebarProvider({ children }) {
   );
 }
 
-export function useSidebar() {
+function useSidebar() {
   let { hidden, setHidden, floating, alwaysFloats } =
     useContext(SidebarContext);
 
@@ -37,7 +56,7 @@ export function useSidebar() {
   );
 }
 
-export default function Sidebar() {
+function FloatableSidebar() {
   let floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
@@ -84,3 +103,6 @@ export default function Sidebar() {
     </View>
   );
 }
+
+export { SidebarProvider, useSidebar };
+export default FloatableSidebar;

@@ -26,30 +26,29 @@ export default function CategorySelector({
   return (
     <>
       <div>
-        <Button
-          type="bare"
-          style={{ padding: 4 }}
-          onClick={e => setUncheckedHidden(!uncheckedHidden)}
-        >
+        <Button onClick={() => setUncheckedHidden(state => !state)}>
           {uncheckedHidden ? (
             <>
               <Eye width={20} height={20} />
-              {'Checked'}
+              Show unchecked
             </>
           ) : (
             <>
               <EyeSlashed width={20} height={20} />
-              {'All'}
+              Hide unchecked
             </>
           )}
         </Button>
       </div>
+
       <ul
         style={{
           listStyle: 'none',
           marginLeft: 0,
           paddingLeft: 0,
           paddingRight: 10,
+          height: 320,
+          overflowY: 'scroll',
         }}
       >
         {categoryGroups &&
@@ -72,7 +71,7 @@ export default function CategorySelector({
                   style={{
                     display:
                       noCategorySelected && uncheckedHidden ? 'none' : 'flex',
-                    marginBottom: 4,
+                    marginBottom: 8,
                     flexDirection: 'row',
                   }}
                 >
@@ -128,7 +127,7 @@ export default function CategorySelector({
                             display:
                               !isChecked && uncheckedHidden ? 'none' : 'flex',
                             flexDirection: 'row',
-                            marginBottom: 2,
+                            marginBottom: 4,
                           }}
                         >
                           <Checkbox
