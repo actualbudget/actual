@@ -11,12 +11,12 @@ import { parse } from './goal-template.pegjs';
 
 export async function applyTemplate({ month }) {
   let category_templates = await getCategoryTemplates(null);
-  return processTemplate(month, false, category_templates);
+  return processTemplate({ month, force: false, category_templates });
 }
 
 export async function overwriteTemplate({ month }) {
   let category_templates = await getCategoryTemplates(null);
-  return processTemplate(month, true, category_templates);
+  return processTemplate({ month, force: true, category_templates });
 }
 
 export async function applySingleCategoryTemplate({ month, category }) {
@@ -29,7 +29,7 @@ export async function applySingleCategoryTemplate({ month, category }) {
     month,
     amount: 0,
   });
-  return processTemplate(month, false, category_templates);
+  return processTemplate({ month, force: false, category_templates });
 }
 
 export function runCheckTemplates() {
@@ -60,11 +60,16 @@ async function setGoalBudget({ month, templateBudget }) {
   });
 }
 
-async function processTemplate(
+type processTemplateProps = {
+  month: string;
+  force: boolean;
+  category_templates: any;
+};
+async function processTemplate({
   month,
   force,
   category_templates,
-): Promise<Notification> {
+}: processTemplateProps): Promise<Notification> {
   let templateBudget = [];
   let num_applied = 0;
   let errors = [];
@@ -206,17 +211,17 @@ async function processTemplate(
               `budget-${category.id}`,
             );
             let { amount: to_budget, errors: applyErrors } =
-              await applyCategoryTemplate(
+              await applyCategoryTemplate({
                 category,
-                template,
+                template_lines: template,
                 month,
                 priority,
                 remainder_scale,
                 available_start,
-                available_remaining,
-                prev_budgeted,
+                budgetAvailable: available_remaining,
+                budgeted: prev_budgeted,
                 force,
-              );
+              });
             if (to_budget != null) {
               num_applied++;
               templateBudget.push({
@@ -323,7 +328,18 @@ async function getCategoryTemplates(category) {
   return templates;
 }
 
-async function applyCategoryTemplate(
+type applyCategoryTemplateProps = {
+  category: any;
+  template_lines: any;
+  month: string;
+  priority: number;
+  remainder_scale: number;
+  available_start: number;
+  budgetAvailable: number;
+  budgeted: number;
+  force: boolean;
+};
+async function applyCategoryTemplate({
   category,
   template_lines,
   month,
@@ -333,7 +349,7 @@ async function applyCategoryTemplate(
   budgetAvailable,
   budgeted,
   force,
-) {
+}: applyCategoryTemplateProps) {
   let current_month = `${month}-01`;
   let errors = [];
   let all_schedule_names = await db.all(
