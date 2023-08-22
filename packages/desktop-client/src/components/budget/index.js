@@ -1,4 +1,11 @@
-import React, { memo, PureComponent, useContext, useMemo } from 'react';
+import React, {
+  memo,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
@@ -29,38 +36,45 @@ import { ReportProvider } from './report/ReportContext';
 import * as rollover from './rollover/rollover-components';
 import { RolloverContext } from './rollover/RolloverContext';
 
-let _initialBudgetMonth = null;
+const currentMonth = monthUtils.currentMonth();
 
-class Budget extends PureComponent {
-  constructor(props) {
-    super(props);
+function Budget(props) {
+  const tableRef = useRef(null);
 
-    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
-    this.state = {
-      initialized: false,
-      prewarmStartMonth: props.startMonth || currentMonth,
-      newCategoryForGroup: null,
-      isAddingGroup: false,
-      collapsed: props.collapsedPrefs || [],
-      bounds: { start: currentMonth, end: currentMonth },
-      categoryGroups: null,
-      summaryCollapsed: props.summaryCollapsed,
-    };
+  const [initialized, setInitialized] = useState(false);
+  const [prewarmStartMonth, setPrewarmStartMonth] = useState(
+    props.startMonth || currentMonth,
+  );
+  const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
+  const [isAddingGroup, setIsAddingGroup] = useState(false);
+  const [collapsed, setCollapsed] = useState(props.collapsedPrefs || []);
+  const [bounds, setBounds] = useState({
+    start: currentMonth,
+    end: currentMonth,
+  });
+  const [categoryGroups, setCategoryGroups] = useState(null);
+  const [summaryCollapsed, setSummaryCollapsed] = useState(
+    props.summaryCollapsed,
+  );
+
+  async function loadCategories() {
+    let result = await props.getCategories();
+    setCategoryGroups(result.grouped);
   }
 
-  async loadCategories() {
-    let result = await this.props.getCategories();
-    this.setState({ categoryGroups: result.grouped });
-  }
+  useEffect(() => {
+    let { titlebar, budgetType } = props;
 
-  async componentDidMount() {
-    let { titlebar, budgetType } = this.props;
-    this.loadCategories();
+    async function run() {
+      loadCategories();
 
-    let { start, end } = await send('get-budget-bounds');
-    this.setState({ bounds: { start, end } });
+      let { start, end } = await send('get-budget-bounds');
+      setBounds({ start, end });
 
-    this.prewarmAllMonths({ start, end }, budgetType);
+      prewarmAllMonths({ start, end }, budgetType);
+    }
+
+    run();
 
     let unlistens = [
       listen('sync-event', ({ type, tables }) => {
@@ -70,12 +84,12 @@ class Budget extends PureComponent {
             tables.includes('category_mapping') ||
             tables.includes('category_groups'))
         ) {
-          this.loadCategories();
+          loadCategories();
         }
       }),
 
       listen('undo-event', ({ tables }) => {
-        if (this.table) {
+        if (tableRef.current) {
           // g dammit
           // We need to clear the editing cell, otherwise when
           // the user navigates away from the page they will
@@ -83,56 +97,36 @@ class Budget extends PureComponent {
           // undo, since the cell will save itself on blur (worst case:
           // undo takes you to another screen and then you can't redo
           // any of the budget changes)
-          this.table.clearEditing();
+          tableRef.current.clearEditing();
         }
 
         if (tables.includes('categories')) {
-          this.loadCategories();
+          loadCategories();
         }
       }),
 
-      titlebar.subscribe(this.onTitlebarEvent),
+      titlebar.subscribe(onTitlebarEvent),
     ];
 
-    this.cleanup = () => {
+    return () => {
       unlistens.forEach(unlisten => unlisten());
     };
-  }
+  }, []);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.collapsed !== this.state.collapsed) {
-      this.props.savePrefs({ 'budget.collapsed': this.state.collapsed });
-    }
+  useEffect(() => {
+    props.savePrefs({ 'budget.collapsed': collapsed });
+  }, [collapsed]);
 
-    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
-    const startMonth = this.props.startMonth || currentMonth;
+  useEffect(() => {
+    send('get-budget-bounds').then(({ start, end }) => {
+      if (bounds.start !== start || bounds.end !== end) {
+        setBounds({ start, end });
+      }
+    });
+  }, [props.accountId]);
 
-    if (prevState.startMonth !== startMonth) {
-      // Save it off into a global state so if the component re-mounts
-      // we keep this state (but don't need to subscribe to it)
-      _initialBudgetMonth = startMonth;
-    }
-
-    if (this.props.accountId !== prevProps.accountId) {
-      // Make to sure to check if the budget bounds have changed, and
-      // if so reload the budget data
-      send('get-budget-bounds').then(({ start, end }) => {
-        let { bounds } = this.state;
-        if (bounds.start !== start || bounds.end !== end) {
-          this.setState({ bounds: { start, end } });
-        }
-      });
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.cleanup) {
-      this.cleanup();
-    }
-  }
-
-  prewarmMonth = async (month, type = null) => {
-    type = type || this.props.budgetType;
+  const prewarmMonth = async (month, type = null) => {
+    type = type || props.budgetType;
 
     let method =
       type === 'report' ? 'report-budget-month' : 'rollover-budget-month';
@@ -140,15 +134,14 @@ class Budget extends PureComponent {
     let values = await send(method, { month });
 
     for (let value of values) {
-      this.props.spreadsheet.prewarmCache(value.name, value);
+      props.spreadsheet.prewarmCache(value.name, value);
     }
   };
 
-  async prewarmAllMonths(bounds, type = null) {
+  async function prewarmAllMonths(bounds, type = null) {
     let numMonths = 3;
 
-    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
-    const startMonth = this.props.startMonth || currentMonth;
+    const startMonth = props.startMonth || currentMonth;
 
     bounds = getValidMonthBounds(
       bounds,
@@ -157,18 +150,17 @@ class Budget extends PureComponent {
     );
     let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
-    await Promise.all(months.map(month => this.prewarmMonth(month, type)));
+    await Promise.all(months.map(month => prewarmMonth(month, type)));
 
-    this.setState({ initialized: true });
+    setInitialized(true);
   }
 
-  onMonthSelect = async (month, numDisplayed) => {
-    this.setState({ prewarmStartMonth: month });
+  const onMonthSelect = async (month, numDisplayed) => {
+    setPrewarmStartMonth(month);
 
-    this.warmingMonth = month;
+    const warmingMonth = month;
 
-    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
-    const startMonth = this.props.startMonth || currentMonth;
+    const startMonth = props.startMonth || currentMonth;
 
     // We could be smarter about this, but this is a good start. We
     // optimize for the case where users press the left/right button
@@ -178,130 +170,106 @@ class Budget extends PureComponent {
     // but it will just load in some unnecessary data.
     if (month < startMonth) {
       // pre-warm prev month
-      await this.prewarmMonth(monthUtils.subMonths(month, 1));
+      await prewarmMonth(monthUtils.subMonths(month, 1));
     } else if (month > startMonth) {
       // pre-warm next month
-      await this.prewarmMonth(monthUtils.addMonths(month, numDisplayed));
+      await prewarmMonth(monthUtils.addMonths(month, numDisplayed));
     }
 
-    if (this.warmingMonth === month) {
-      this.props.savePrefs({ 'budget.startMonth': month });
+    if (warmingMonth === month) {
+      props.savePrefs({ 'budget.startMonth': month });
     }
   };
 
-  onShowNewCategory = groupId => {
-    this.setState({
-      newCategoryForGroup: groupId,
-      collapsed: this.state.collapsed.filter(c => c !== groupId),
-    });
+  const onShowNewCategory = groupId => {
+    setNewCategoryForGroup(groupId);
+    setCollapsed(state => state.filter(c => c !== groupId));
   };
 
-  onHideNewCategory = () => {
-    this.setState({ newCategoryForGroup: null });
+  const onHideNewCategory = () => {
+    setNewCategoryForGroup(null);
   };
 
-  onShowNewGroup = () => {
-    this.setState({ isAddingGroup: true });
+  const onShowNewGroup = () => {
+    setIsAddingGroup(true);
   };
 
-  onHideNewGroup = () => {
-    this.setState({ isAddingGroup: false });
+  const onHideNewGroup = () => {
+    setIsAddingGroup(false);
   };
 
-  setCollapsed = collapsed => {
-    this.setState({ collapsed });
-  };
-
-  onCopy(month) {
-    this.props.copyPreviousMonthInto(month, this.props.categories);
-  }
-
-  onSaveCategory = async category => {
-    let { categoryGroups } = this.state;
-
+  const onSaveCategory = async category => {
     if (category.id === 'new') {
-      let id = await this.props.createCategory(
+      let id = await props.createCategory(
         category.name,
         category.cat_group,
         category.is_income,
       );
 
-      this.setState({
-        newCategoryForGroup: null,
-        categoryGroups: addCategory(categoryGroups, {
+      setNewCategoryForGroup(null);
+      setCategoryGroups(state =>
+        addCategory(state, {
           ...category,
           is_income: category.is_income ? 1 : 0,
           id,
         }),
-      });
+      );
     } else {
       const cat = {
         ...category,
         hidden: category.hidden ? 1 : 0,
       };
 
-      this.props.updateCategory(cat);
-      this.setState({
-        categoryGroups: updateCategory(categoryGroups, cat),
-      });
+      props.updateCategory(cat);
+      setCategoryGroups(state => updateCategory(state, cat));
     }
   };
 
-  onDeleteCategory = async id => {
+  const onDeleteCategory = async id => {
     const mustTransfer = await send('must-category-transfer', { id });
-    let { categoryGroups } = this.state;
 
     if (mustTransfer) {
-      this.props.pushModal('confirm-category-delete', {
+      props.pushModal('confirm-category-delete', {
         category: id,
         onDelete: transferCategory => {
           if (id !== transferCategory) {
-            this.props.deleteCategory(id, transferCategory);
+            props.deleteCategory(id, transferCategory);
 
-            this.setState({
-              categoryGroups: deleteCategory(categoryGroups, id),
-            });
+            setCategoryGroups(state => deleteCategory(state, id));
           }
         },
       });
     } else {
-      this.props.deleteCategory(id);
+      props.deleteCategory(id);
 
-      this.setState({
-        categoryGroups: deleteCategory(categoryGroups, id),
-      });
+      setCategoryGroups(state => deleteCategory(state, id));
     }
   };
 
-  onSaveGroup = async group => {
-    let { categoryGroups } = this.state;
-
+  const onSaveGroup = async group => {
     if (group.id === 'new') {
-      let id = await this.props.createGroup(group.name);
-      this.setState({
-        isAddingGroup: false,
-        categoryGroups: addGroup(categoryGroups, {
+      let id = await props.createGroup(group.name);
+      setIsAddingGroup(false);
+      setCategoryGroups(state =>
+        addGroup(state, {
           ...group,
           is_income: 0,
           categories: group.categories || [],
           id,
         }),
-      });
+      );
     } else {
       const grp = {
         ...group,
         hidden: group.hidden ? 1 : 0,
       };
 
-      this.props.updateGroup(grp);
-      this.setState({
-        categoryGroups: updateGroup(categoryGroups, grp),
-      });
+      props.updateGroup(grp);
+      setCategoryGroups(state => updateGroup(state, grp));
     }
   };
 
-  onDeleteGroup = async id => {
-    let { categoryGroups } = this.state;
+  const onDeleteGroup = async id => {
     let group = categoryGroups.find(g => g.id === id);
 
     let mustTransfer = false;
@@ -313,31 +281,27 @@ class Budget extends PureComponent {
     }
 
     if (mustTransfer) {
-      this.props.pushModal('confirm-category-delete', {
+      props.pushModal('confirm-category-delete', {
         group: id,
         onDelete: transferCategory => {
-          this.props.deleteGroup(id, transferCategory);
+          props.deleteGroup(id, transferCategory);
 
-          this.setState({
-            categoryGroups: deleteGroup(categoryGroups, id),
-          });
+          setCategoryGroups(state => deleteGroup(state, id));
         },
       });
     } else {
-      this.props.deleteGroup(id);
+      props.deleteGroup(id);
 
-      this.setState({
-        categoryGroups: deleteGroup(categoryGroups, id),
-      });
+      setCategoryGroups(state => deleteGroup(state, id));
     }
   };
 
-  onBudgetAction = (month, type, args) => {
-    this.props.applyBudgetAction(month, type, args);
+  const onBudgetAction = (month, type, args) => {
+    props.applyBudgetAction(month, type, args);
   };
 
-  onShowActivity = (categoryName, categoryId, month) => {
-    this.props.navigate('/accounts', {
+  const onShowActivity = (categoryName, categoryId, month) => {
+    props.navigate('/accounts', {
       state: {
         goBack: true,
         filterName: `${categoryName} (${monthUtils.format(
@@ -352,165 +316,135 @@ class Budget extends PureComponent {
     });
   };
 
-  onReorderCategory = async sortInfo => {
-    let { categoryGroups } = this.state;
-
-    this.props.moveCategory(sortInfo.id, sortInfo.groupId, sortInfo.targetId);
-    this.setState({
-      categoryGroups: moveCategory(
-        categoryGroups,
-        sortInfo.id,
-        sortInfo.groupId,
-        sortInfo.targetId,
-      ),
-    });
+  const onReorderCategory = async sortInfo => {
+    props.moveCategory(sortInfo.id, sortInfo.groupId, sortInfo.targetId);
+    setCategoryGroups(state =>
+      moveCategory(state, sortInfo.id, sortInfo.groupId, sortInfo.targetId),
+    );
   };
 
-  onReorderGroup = async sortInfo => {
-    let { categoryGroups } = this.state;
-
-    this.props.moveCategoryGroup(sortInfo.id, sortInfo.targetId);
-    this.setState({
-      categoryGroups: moveCategoryGroup(
-        categoryGroups,
-        sortInfo.id,
-        sortInfo.targetId,
-      ),
-    });
+  const onReorderGroup = async sortInfo => {
+    props.moveCategoryGroup(sortInfo.id, sortInfo.targetId);
+    setCategoryGroups(state =>
+      moveCategoryGroup(state, sortInfo.id, sortInfo.targetId),
+    );
   };
 
-  onToggleCollapse = () => {
-    let collapsed = !this.state.summaryCollapsed;
-    this.setState({ summaryCollapsed: collapsed });
-    this.props.savePrefs({ 'budget.summaryCollapsed': collapsed });
+  const onToggleCollapse = () => {
+    let collapsed = !summaryCollapsed;
+    setSummaryCollapsed(collapsed);
+    props.savePrefs({ 'budget.summaryCollapsed': collapsed });
   };
 
-  onTitlebarEvent = async msg => {
+  const onTitlebarEvent = async msg => {
     switch (msg) {
       case 'budget/switch-type': {
-        let type = this.props.budgetType;
+        let type = props.budgetType;
         let newType = type === 'rollover' ? 'report' : 'rollover';
 
-        this.props.spreadsheet.disableObservers();
+        props.spreadsheet.disableObservers();
         await send('budget-set-type', { type: newType });
-        await this.prewarmAllMonths(this.state.bounds, newType);
-        this.props.spreadsheet.enableObservers();
-        this.props.loadPrefs();
+        await prewarmAllMonths(bounds, newType);
+        props.spreadsheet.enableObservers();
+        props.loadPrefs();
         break;
       }
       default:
     }
   };
 
-  render() {
-    let {
-      maxMonths,
-      budgetType: type,
-      reportComponents,
-      rolloverComponents,
-    } = this.props;
-    let {
-      initialized,
-      categoryGroups,
-      prewarmStartMonth,
-      newCategoryForGroup,
-      isAddingGroup,
-      collapsed,
-      summaryCollapsed,
-      bounds,
-    } = this.state;
+  let {
+    maxMonths,
+    budgetType: type,
+    reportComponents,
+    rolloverComponents,
+  } = props;
 
-    maxMonths = maxMonths || 1;
+  maxMonths = maxMonths || 1;
 
-    if (!initialized || !categoryGroups) {
-      return null;
-    }
+  if (!initialized || !categoryGroups) {
+    return null;
+  }
 
-    const currentMonth = _initialBudgetMonth || monthUtils.currentMonth();
-    const startMonth = this.props.startMonth || currentMonth;
+  const startMonth = props.startMonth || currentMonth;
 
-    let table;
-    if (type === 'report') {
-      table = (
-        <ReportProvider
-          summaryCollapsed={summaryCollapsed}
-          onBudgetAction={this.onBudgetAction}
-          onToggleSummaryCollapse={this.onToggleCollapse}
-        >
-          <DynamicBudgetTable
-            ref={el => (this.table = el)}
-            type={type}
-            categoryGroups={categoryGroups}
-            prewarmStartMonth={prewarmStartMonth}
-            startMonth={startMonth}
-            monthBounds={bounds}
-            maxMonths={maxMonths}
-            collapsed={collapsed}
-            setCollapsed={this.setCollapsed}
-            newCategoryForGroup={newCategoryForGroup}
-            isAddingGroup={isAddingGroup}
-            dataComponents={reportComponents}
-            onMonthSelect={this.onMonthSelect}
-            onShowNewCategory={this.onShowNewCategory}
-            onHideNewCategory={this.onHideNewCategory}
-            onShowNewGroup={this.onShowNewGroup}
-            onHideNewGroup={this.onHideNewGroup}
-            onDeleteCategory={this.onDeleteCategory}
-            onDeleteGroup={this.onDeleteGroup}
-            onSaveCategory={this.onSaveCategory}
-            onSaveGroup={this.onSaveGroup}
-            onBudgetAction={this.onBudgetAction}
-            onShowActivity={this.onShowActivity}
-            onReorderCategory={this.onReorderCategory}
-            onReorderGroup={this.onReorderGroup}
-          />
-        </ReportProvider>
-      );
-    } else {
-      table = (
-        <RolloverContext
+  let table;
+  if (type === 'report') {
+    table = (
+      <ReportProvider
+        summaryCollapsed={summaryCollapsed}
+        onBudgetAction={onBudgetAction}
+        onToggleSummaryCollapse={onToggleCollapse}
+      >
+        <DynamicBudgetTable
+          ref={tableRef}
+          type={type}
           categoryGroups={categoryGroups}
-          summaryCollapsed={summaryCollapsed}
-          onBudgetAction={this.onBudgetAction}
-          onToggleSummaryCollapse={this.onToggleCollapse}
-        >
-          <DynamicBudgetTable
-            ref={el => (this.table = el)}
-            type={type}
-            categoryGroups={categoryGroups}
-            prewarmStartMonth={prewarmStartMonth}
-            startMonth={startMonth}
-            monthBounds={bounds}
-            maxMonths={maxMonths}
-            collapsed={collapsed}
-            setCollapsed={this.setCollapsed}
-            newCategoryForGroup={newCategoryForGroup}
-            isAddingGroup={isAddingGroup}
-            dataComponents={rolloverComponents}
-            onMonthSelect={this.onMonthSelect}
-            onShowNewCategory={this.onShowNewCategory}
-            onHideNewCategory={this.onHideNewCategory}
-            onShowNewGroup={this.onShowNewGroup}
-            onHideNewGroup={this.onHideNewGroup}
-            onDeleteCategory={this.onDeleteCategory}
-            onDeleteGroup={this.onDeleteGroup}
-            onSaveCategory={this.onSaveCategory}
-            onSaveGroup={this.onSaveGroup}
-            onBudgetAction={this.onBudgetAction}
-            onShowActivity={this.onShowActivity}
-            onReorderCategory={this.onReorderCategory}
-            onReorderGroup={this.onReorderGroup}
-          />
-        </RolloverContext>
-      );
-    }
-
-    return (
-      <View style={{ flex: 1 }} innerRef={el => (this.page = el)}>
-        {table}
-      </View>
+          prewarmStartMonth={prewarmStartMonth}
+          startMonth={startMonth}
+          monthBounds={bounds}
+          maxMonths={maxMonths}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          newCategoryForGroup={newCategoryForGroup}
+          isAddingGroup={isAddingGroup}
+          dataComponents={reportComponents}
+          onMonthSelect={onMonthSelect}
+          onShowNewCategory={onShowNewCategory}
+          onHideNewCategory={onHideNewCategory}
+          onShowNewGroup={onShowNewGroup}
+          onHideNewGroup={onHideNewGroup}
+          onDeleteCategory={onDeleteCategory}
+          onDeleteGroup={onDeleteGroup}
+          onSaveCategory={onSaveCategory}
+          onSaveGroup={onSaveGroup}
+          onBudgetAction={onBudgetAction}
+          onShowActivity={onShowActivity}
+          onReorderCategory={onReorderCategory}
+          onReorderGroup={onReorderGroup}
+        />
+      </ReportProvider>
+    );
+  } else {
+    table = (
+      <RolloverContext
+        categoryGroups={categoryGroups}
+        summaryCollapsed={summaryCollapsed}
+        onBudgetAction={onBudgetAction}
+        onToggleSummaryCollapse={onToggleCollapse}
+      >
+        <DynamicBudgetTable
+          ref={tableRef}
+          type={type}
+          categoryGroups={categoryGroups}
+          prewarmStartMonth={prewarmStartMonth}
+          startMonth={startMonth}
+          monthBounds={bounds}
+          maxMonths={maxMonths}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          newCategoryForGroup={newCategoryForGroup}
+          isAddingGroup={isAddingGroup}
+          dataComponents={rolloverComponents}
+          onMonthSelect={onMonthSelect}
+          onShowNewCategory={onShowNewCategory}
+          onHideNewCategory={onHideNewCategory}
+          onShowNewGroup={onShowNewGroup}
+          onHideNewGroup={onHideNewGroup}
+          onDeleteCategory={onDeleteCategory}
+          onDeleteGroup={onDeleteGroup}
+          onSaveCategory={onSaveCategory}
+          onSaveGroup={onSaveGroup}
+          onBudgetAction={onBudgetAction}
+          onShowActivity={onShowActivity}
+          onReorderCategory={onReorderCategory}
+          onReorderGroup={onReorderGroup}
+        />
+      </RolloverContext>
     );
   }
+
+  return <View style={{ flex: 1 }}>{table}</View>;
 }
 
 const RolloverBudgetSummary = memo(props => {
