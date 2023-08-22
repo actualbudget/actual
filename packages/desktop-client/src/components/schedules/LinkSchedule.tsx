@@ -73,9 +73,11 @@ export default function ScheduleLink({
 
       <View
         style={{
+          flex: `1 1 ${
+            (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1)
+          }px`,
           marginTop: 15,
-          flexBasis: (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1),
-          overflow: 'hidden',
+          maxHeight: '50vh',
         }}
       >
         <SchedulesTable
