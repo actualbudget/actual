@@ -498,7 +498,6 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
 
       // Update the transaction
       const updates = {
-        date: trans.date,
         imported_id: trans.imported_id || null,
         payee: existing.payee || trans.payee || null,
         category: existing.category || trans.category || null,
