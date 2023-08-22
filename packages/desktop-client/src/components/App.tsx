@@ -140,8 +140,15 @@ function AppWrapper() {
       }
     }
 
-    function onVisibilityChange() {
-      sync();
+    let isSyncing = false;
+
+    async function onVisibilityChange() {
+      if (!isSyncing) {
+        console.debug('triggering sync because of visibility change');
+        isSyncing = true;
+        await sync();
+        isSyncing = false;
+      }
     }
 
     window.addEventListener('focus', checkScrollbars);
@@ -151,7 +158,7 @@ function AppWrapper() {
       window.removeEventListener('focus', checkScrollbars);
       window.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, []);
+  }, [sync]);
 
   return (
     <ResponsiveProvider>
