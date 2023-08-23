@@ -721,20 +721,10 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
           <SimpleTransactionsTable
             renderEmpty={
-              state.transactionsMode === 'matched' &&
-              (() => (
-                <View
-                  style={{ padding: 20, color: colors.n4, textAlign: 'center' }}
-                >
-                  {state.error ? (
-                    <Text style={{ color: colors.r4 }}>
-                      Could not search: {state.error}
-                    </Text>
-                  ) : (
-                    'No transactions found'
-                  )}
-                </View>
-              ))
+              <NoTransactionsMessage
+                error={state.error}
+                transactionsMode={state.transactionsMode}
+              />
             }
             transactions={state.transactions}
             fields={['date', 'payee', 'amount']}
@@ -763,5 +753,27 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         </Button>
       </Stack>
     </Modal>
+  );
+}
+
+function NoTransactionsMessage(props) {
+  return (
+    <View
+      style={{
+        padding: 20,
+        color: theme.pageTextLight,
+        textAlign: 'center',
+      }}
+    >
+      {props.error ? (
+        <Text style={{ color: theme.errorText }}>
+          Could not search: {props.error}
+        </Text>
+      ) : props.transactionsMode === 'matched' ? (
+        'No matching transactions'
+      ) : (
+        'No linked transactions'
+      )}
+    </View>
   );
 }
