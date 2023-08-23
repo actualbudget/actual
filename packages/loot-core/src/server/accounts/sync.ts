@@ -431,7 +431,7 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -509,6 +509,16 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
         updated.push({ id: existing.id, ...updates });
       }
+
+      if (existing.is_parent && existing.cleared !== updates.cleared) {
+        const children = await db.all(
+          'SELECT id FROM v_transactions WHERE parent_id = ?',
+          [existing.id],
+        );
+        for (const child of children) {
+          updated.push({ id: child.id, cleared: updates.cleared });
+        }
+      }
     } else {
       // Insert a new transaction
       let finalTransaction = {
@@ -575,7 +585,7 @@ export async function reconcileTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -653,6 +663,16 @@ export async function reconcileTransactions(acctId, transactions) {
 
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
         updated.push({ id: existing.id, ...updates });
+      }
+
+      if (existing.is_parent && existing.cleared !== updates.cleared) {
+        const children = await db.all(
+          'SELECT id FROM v_transactions WHERE parent_id = ?',
+          [existing.id],
+        );
+        for (const child of children) {
+          updated.push({ id: child.id, cleared: updates.cleared });
+        }
       }
     } else {
       // Insert a new transaction
