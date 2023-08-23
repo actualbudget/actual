@@ -9,7 +9,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import Button from '../common/Button';
@@ -488,7 +488,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               }}
               style={{
                 padding: '0 10px',
-                color: colors.n5,
+                color: theme.altpageTextSubdued,
                 fontSize: 12,
               }}
               onChange={(_, op) =>
@@ -548,13 +548,13 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
           {state.upcomingDates && (
             <View style={{ fontSize: 13, marginTop: 20 }}>
-              <Text style={{ color: colors.n4, fontWeight: 600 }}>
+              <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
                 Upcoming dates
               </Text>
               <Stack
                 direction="column"
                 spacing={1}
-                style={{ marginTop: 10, color: colors.n4 }}
+                style={{ marginTop: 10, color: theme.pageTextLight }}
               >
                 {state.upcomingDates.map(date => (
                   <View key={date}>
@@ -625,7 +625,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
             style={{
               width: 350,
               textAlign: 'right',
-              color: colors.n4,
+              color: theme.pageTextLight,
               marginTop: 10,
               fontSize: 13,
               lineHeight: '1.4em',
@@ -640,7 +640,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               {state.isCustom && (
                 <Text
                   style={{
-                    color: colors.b5,
+                    color: theme.altpageTextSubdued,
                     fontSize: 13,
                     textAlign: 'right',
                     width: 350,
@@ -661,11 +661,11 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         <SelectedProvider instance={selectedInst}>
           {adding ? (
             <View style={{ flexDirection: 'row', padding: '5px 0' }}>
-              <Text style={{ color: colors.n4 }}>
+              <Text style={{ color: theme.pageTextLight }}>
                 These transactions match this schedule:
               </Text>
               <View style={{ flex: 1 }} />
-              <Text style={{ color: colors.n6 }}>
+              <Text style={{ color: theme.pageTextLight }}>
                 Select transactions to link on save
               </Text>
             </View>
@@ -675,7 +675,9 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
                 type="bare"
                 style={{
                   color:
-                    state.transactionsMode === 'linked' ? colors.b4 : colors.n7,
+                    state.transactionsMode === 'linked'
+                      ? theme.pageTextLink
+                      : theme.pageTextSubdued,
                   marginRight: 10,
                   fontSize: 14,
                 }}
@@ -688,8 +690,8 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
                 style={{
                   color:
                     state.transactionsMode === 'matched'
-                      ? colors.b4
-                      : colors.n7,
+                      ? theme.pageTextLink
+                      : theme.pageTextSubdued,
                   fontSize: 14,
                 }}
                 onClick={() => onSwitchTransactions('matched')}
@@ -729,7 +731,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
             transactions={state.transactions}
             fields={['date', 'payee', 'amount']}
             style={{
-              border: '1px solid ' + colors.border,
+              border: '1px solid ' + theme.tableBorder,
               borderRadius: 4,
               overflow: 'hidden',
               marginTop: 5,
@@ -744,7 +746,9 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         align="center"
         style={{ marginTop: 20 }}
       >
-        {state.error && <Text style={{ color: colors.r4 }}>{state.error}</Text>}
+        {state.error && (
+          <Text style={{ color: theme.errorText }}>{state.error}</Text>
+        )}
         <Button style={{ marginRight: 10 }} onClick={actions.popModal}>
           Cancel
         </Button>
