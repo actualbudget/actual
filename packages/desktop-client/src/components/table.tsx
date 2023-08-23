@@ -1111,7 +1111,12 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
             {...(Array.isArray(headers) ? { headers } : { children: headers })}
           />
         )}
-        <View style={{ flex: 1, backgroundColor }}>
+        <View
+          style={{
+            flex: `1 1 ${rowHeight * Math.max(2, items.length)}px`,
+            backgroundColor,
+          }}
+        >
           {isEmpty ? (
             getEmptyContent(renderEmpty)
           ) : (
