@@ -2,7 +2,7 @@
   "name": "desktop-electron",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "23.8.0",
+  "version": "23.8.1",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",

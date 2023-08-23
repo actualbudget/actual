@@ -1,5 +1,3 @@
-import { usePushModal } from '../../desktop-client/src/util/router-tools';
-
 export {};
 
 declare global {
@@ -16,9 +14,9 @@ declare global {
       openFileDialog: (
         opts: Parameters<import('electron').Dialog['showOpenDialogSync']>[0],
       ) => Promise<string[]>;
+      relaunch: () => void;
     };
 
     __navigate?: import('react-router').NavigateFunction;
-    __pushModal?: ReturnType<typeof usePushModal>;
   }
 }

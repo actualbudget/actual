@@ -7,13 +7,14 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
-import { colors } from '../../style';
+import { colors, theme } from '../../style';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Select from '../common/Select';
 import Stack from '../common/Stack';
 import Text from '../common/Text';
 import View from '../common/View';
+import { Checkbox } from '../forms';
 import { useTooltip, Tooltip } from '../tooltips';
 
 import DateSelect from './DateSelect';
@@ -54,6 +55,8 @@ function parseConfig(config) {
       interval: 1,
       frequency: 'monthly',
       patterns: [createMonthlyRecurrence(monthUtils.currentDay())],
+      skipWeekend: false,
+      weekendSolveMode: 'before',
     }
   );
 }
@@ -131,6 +134,22 @@ function reducer(state, action) {
           patterns: state.config.patterns.filter(p => p !== action.recurrence),
         },
       };
+    case 'set-skip-weekend':
+      return {
+        ...state,
+        config: {
+          ...state.config,
+          skipWeekend: action.skipWeekend,
+        },
+      };
+    case 'set-weekend-solve':
+      return {
+        ...state,
+        config: {
+          ...state.config,
+          weekendSolveMode: action.value,
+        },
+      };
     default:
       return state;
   }
@@ -155,8 +174,8 @@ function SchedulePreview({ previewDates }) {
       <View>
         <Text style={{ fontWeight: 600 }}>Upcoming dates</Text>
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
-          {previewDates.map(d => (
-            <View>
+          {previewDates.map((d, idx) => (
+            <View key={idx}>
               <Text>{monthUtils.format(d, dateFormat)}</Text>
               <Text>{monthUtils.format(d, 'EEEE')}</Text>
             </View>
@@ -208,10 +227,7 @@ function MonthlyPatterns({ config, dispatch }) {
             }
             disabledKeys={['-']}
             wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{
-              borderWidth: 1,
-              width: '100%',
-            }}
+            style={{ minHeight: '1px', width: '100%' }}
           />
           <Select
             options={[
@@ -223,7 +239,7 @@ function MonthlyPatterns({ config, dispatch }) {
             onChange={value => updateRecurrence(recurrence, 'type', value)}
             disabledKeys={['-']}
             wrapperStyle={{ flex: 1, marginRight: 10 }}
-            style={{ borderWidth: 1, width: '100%' }}
+            style={{ minHeight: '1px', width: '100%' }}
           />
           <Button
             type="bare"
@@ -257,6 +273,9 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
     config: parseConfig(currentConfig),
   });
 
+  let skipWeekend = state.config.hasOwnProperty('skipWeekend')
+    ? state.config.skipWeekend
+    : false;
   let dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
@@ -325,14 +344,21 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           defaultValue={config.interval || 1}
         />
         <Select
+          bare
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          style={{ borderWidth: 1, height: 27.5 }}
+          style={{ border: '1px solid ' + theme.formInputBorder, height: 27.5 }}
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
-          <Button onClick={() => dispatch({ type: 'add-recurrence' })}>
+          <Button
+            style={{
+              backgroundColor: theme.tableBackground,
+              ':hover': { backgroundColor: theme.tableBackground },
+            }}
+            onClick={() => dispatch({ type: 'add-recurrence' })}
+          >
             Add specific days
           </Button>
         ) : null}
@@ -342,6 +368,56 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
         config.patterns.length > 0 && (
           <MonthlyPatterns config={config} dispatch={dispatch} />
         )}
+      <Stack direction="column" style={{ marginTop: 5 }}>
+        <View
+          style={{
+            marginTop: 5,
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            userSelect: 'none',
+          }}
+        >
+          <Checkbox
+            id="form_skipwe"
+            checked={skipWeekend}
+            onChange={e => {
+              dispatch({
+                type: 'set-skip-weekend',
+                skipWeekend: e.target.checked,
+              });
+            }}
+          />
+          <label
+            htmlFor="form_skipwe"
+            style={{ userSelect: 'none', marginRight: 5 }}
+          >
+            Move schedule{' '}
+          </label>
+          <Select
+            id="solve_dropdown"
+            options={[
+              ['before', 'before'],
+              ['after', 'after'],
+            ]}
+            value={state.config.weekendSolveMode}
+            onChange={value =>
+              dispatch({ type: 'set-weekend-solve', value: value })
+            }
+            style={{
+              minHeight: '1px',
+              width: '5rem',
+            }}
+          />
+          <label
+            htmlFor="solve_dropdown"
+            style={{ userSelect: 'none', marginLeft: 5 }}
+          >
+            {' '}
+            weekend
+          </label>
+        </View>
+      </Stack>
       <SchedulePreview previewDates={previewDates} />
       <div
         style={{ display: 'flex', marginTop: 15, justifyContent: 'flex-end' }}

@@ -6,6 +6,9 @@ import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import useCategories from '../../hooks/useCategories';
+import useFeatureFlag from '../../hooks/useFeatureFlag';
+import AnimatedLoading from '../../icons/AnimatedLoading';
 import { colors, styles } from '../../style';
 import AnchorLink from '../common/AnchorLink';
 import Block from '../common/Block';
@@ -17,6 +20,8 @@ import theme from './chart-theme';
 import Container from './Container';
 import DateRange from './DateRange';
 import { simpleCashFlow } from './graphs/cash-flow-spreadsheet';
+import categorySpendingSpreadsheet from './graphs/category-spending-spreadsheet';
+import CategorySpendingGraph from './graphs/CategorySpendingGraph';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
 import Tooltip from './Tooltip';
@@ -59,6 +64,20 @@ function Card({ flex, to, style, children }) {
   return content;
 }
 
+function LoadingIndicator() {
+  return (
+    <View
+      style={{
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <AnimatedLoading style={{ width: 25, height: 25 }} />
+    </View>
+  );
+}
+
 function NetWorthCard({ accounts }) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
@@ -71,10 +90,6 @@ function NetWorthCard({ accounts }) {
     [start, end, accounts],
   );
   const data = useReport('net_worth', params);
-
-  if (!data) {
-    return null;
-  }
 
   return (
     <Card flex={2} to="/reports/net-worth">
@@ -93,30 +108,39 @@ function NetWorthCard({ accounts }) {
             </Block>
             <DateRange start={start} end={end} />
           </View>
-          <View style={{ textAlign: 'right' }}>
-            <Block
-              style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
-            >
+          {data && (
+            <View style={{ textAlign: 'right' }}>
+              <Block
+                style={[
+                  styles.mediumText,
+                  { fontWeight: 500, marginBottom: 5 },
+                ]}
+              >
+                <PrivacyFilter activationFilters={[!isCardHovered]}>
+                  {integerToCurrency(data.netWorth)}
+                </PrivacyFilter>
+              </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
-                {integerToCurrency(data.netWorth)}
+                <Change
+                  amount={data.totalChange}
+                  style={{ color: colors.n6, fontWeight: 300 }}
+                />
               </PrivacyFilter>
-            </Block>
-            <PrivacyFilter activationFilters={[!isCardHovered]}>
-              <Change
-                amount={data.totalChange}
-                style={{ color: colors.n6, fontWeight: 300 }}
-              />
-            </PrivacyFilter>
-          </View>
+            </View>
+          )}
         </View>
 
-        <NetWorthGraph
-          start={start}
-          end={end}
-          graphData={data.graphData}
-          compact={true}
-          style={{ height: 'auto', flex: 1 }}
-        />
+        {data ? (
+          <NetWorthGraph
+            start={start}
+            end={end}
+            graphData={data.graphData}
+            compact={true}
+            style={{ height: 'auto', flex: 1 }}
+          />
+        ) : (
+          <LoadingIndicator />
+        )}
       </View>
     </Card>
   );
@@ -132,13 +156,9 @@ function CashFlowCard() {
   const onCardHover = useCallback(() => setIsCardHovered(true));
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
 
-  if (!data) {
-    return null;
-  }
-
-  const { graphData } = data;
-  const expense = -(graphData.expense || 0);
-  const income = graphData.income || 0;
+  const { graphData } = data || {};
+  const expense = -(graphData?.expense || 0);
+  const income = graphData?.income || 0;
 
   return (
     <Card flex={1} to="/reports/cash-flow">
@@ -157,101 +177,158 @@ function CashFlowCard() {
             </Block>
             <DateRange start={start} end={end} />
           </View>
-          <View style={{ textAlign: 'right' }}>
-            <PrivacyFilter activationFilters={[!isCardHovered]}>
-              <Change
-                amount={income - expense}
-                style={{ color: colors.n6, fontWeight: 300 }}
-              />
-            </PrivacyFilter>
-          </View>
+          {data && (
+            <View style={{ textAlign: 'right' }}>
+              <PrivacyFilter activationFilters={[!isCardHovered]}>
+                <Change
+                  amount={income - expense}
+                  style={{ color: colors.n6, fontWeight: 300 }}
+                />
+              </PrivacyFilter>
+            </View>
+          )}
         </View>
 
-        <Container style={{ height: 'auto', flex: 1 }}>
-          {(width, height, portalHost) => (
-            <VictoryGroup
-              colorScale={[theme.colors.blue, theme.colors.red]}
-              width={100}
-              height={height}
-              theme={theme}
-              domain={{
-                x: [0, 100],
-                y: [0, Math.max(income, expense, 100)],
-              }}
-              containerComponent={
-                <VictoryVoronoiContainer voronoiDimension="x" />
-              }
-              labelComponent={
-                <Tooltip
-                  portalHost={portalHost}
-                  offsetX={(width - 100) / 2}
-                  offsetY={y => (y + 40 > height ? height - 40 : y)}
-                  light={true}
-                  forceActive={true}
-                  style={{
-                    padding: 0,
-                  }}
+        {data ? (
+          <Container style={{ height: 'auto', flex: 1 }}>
+            {(width, height, portalHost) => (
+              <VictoryGroup
+                colorScale={[theme.colors.blue, theme.colors.red]}
+                width={100}
+                height={height}
+                theme={theme}
+                domain={{
+                  x: [0, 100],
+                  y: [0, Math.max(income, expense, 100)],
+                }}
+                containerComponent={
+                  <VictoryVoronoiContainer voronoiDimension="x" />
+                }
+                labelComponent={
+                  <Tooltip
+                    portalHost={portalHost}
+                    offsetX={(width - 100) / 2}
+                    offsetY={y => (y + 40 > height ? height - 40 : y)}
+                    light={true}
+                    forceActive={true}
+                    style={{
+                      padding: 0,
+                    }}
+                  />
+                }
+                padding={{
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                }}
+              >
+                <VictoryBar
+                  barWidth={13}
+                  data={[
+                    {
+                      x: 30,
+                      y: Math.max(income, 5),
+                      premadeLabel: (
+                        <View style={{ textAlign: 'right' }}>
+                          Income
+                          <View>
+                            <PrivacyFilter activationFilters={[!isCardHovered]}>
+                              {integerToCurrency(income)}
+                            </PrivacyFilter>
+                          </View>
+                        </View>
+                      ),
+                      labelPosition: 'left',
+                    },
+                  ]}
+                  labels={d => d.premadeLabel}
                 />
-              }
-              padding={{
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-              }}
-            >
-              <VictoryBar
-                barWidth={13}
-                data={[
-                  {
-                    x: 30,
-                    y: Math.max(income, 5),
-                    premadeLabel: (
-                      <View style={{ textAlign: 'right' }}>
-                        Income
+                <VictoryBar
+                  barWidth={13}
+                  data={[
+                    {
+                      x: 60,
+                      y: Math.max(expense, 5),
+                      premadeLabel: (
                         <View>
-                          <PrivacyFilter activationFilters={[!isCardHovered]}>
-                            {integerToCurrency(income)}
-                          </PrivacyFilter>
+                          Expenses
+                          <View>
+                            <PrivacyFilter activationFilters={[!isCardHovered]}>
+                              {integerToCurrency(expense)}
+                            </PrivacyFilter>
+                          </View>
                         </View>
-                      </View>
-                    ),
-                    labelPosition: 'left',
-                  },
-                ]}
-                labels={d => d.premadeLabel}
-              />
-              <VictoryBar
-                barWidth={13}
-                data={[
-                  {
-                    x: 60,
-                    y: Math.max(expense, 5),
-                    premadeLabel: (
-                      <View>
-                        Expenses
-                        <View>
-                          <PrivacyFilter activationFilters={[!isCardHovered]}>
-                            {integerToCurrency(expense)}
-                          </PrivacyFilter>
-                        </View>
-                      </View>
-                    ),
-                    labelPosition: 'right',
-                    fill: theme.colors.red,
-                  },
-                ]}
-                labels={d => d.premadeLabel}
-              />
-            </VictoryGroup>
-          )}
-        </Container>
+                      ),
+                      labelPosition: 'right',
+                      fill: theme.colors.red,
+                    },
+                  ]}
+                  labels={d => d.premadeLabel}
+                />
+              </VictoryGroup>
+            )}
+          </Container>
+        ) : (
+          <LoadingIndicator />
+        )}
       </View>
     </Card>
   );
 }
 
+function CategorySpendingCard() {
+  const { list: categories = [] } = useCategories();
+
+  const end = monthUtils.currentDay();
+  const start = monthUtils.subMonths(end, 3);
+
+  const params = useMemo(() => {
+    return categorySpendingSpreadsheet(
+      start,
+      end,
+      3,
+      categories.filter(category => !category.is_income && !category.hidden),
+    );
+  }, [start, end, categories]);
+
+  const perCategorySpending = useReport('category_spending', params);
+
+  return (
+    <Card flex={1} to="/reports/category-spending">
+      <View>
+        <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
+          <View style={{ flex: 1 }}>
+            <Block
+              style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              role="heading"
+            >
+              Spending
+            </Block>
+            <DateRange start={start} end={end} />
+          </View>
+        </View>
+      </View>
+
+      {perCategorySpending ? (
+        <CategorySpendingGraph
+          start={start}
+          end={end}
+          graphData={perCategorySpending}
+          compact={true}
+        />
+      ) : (
+        <LoadingIndicator />
+      )}
+    </Card>
+  );
+}
+
 export default function Overview() {
+  let categorySpendingReportFeatureFlag = useFeatureFlag(
+    'categorySpendingReport',
+  );
+
   let accounts = useSelector(state => state.queries.accounts);
   return (
     <View
@@ -270,27 +347,18 @@ export default function Overview() {
         <CashFlowCard />
       </View>
 
-      <View
-        style={{
-          flex: '0 0 auto',
-          flexDirection: 'row',
-        }}
-      >
-        <Card
-          style={[
-            {
-              color: '#a0a0a0',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: 200,
-            },
-            styles.mediumText,
-          ]}
+      {categorySpendingReportFeatureFlag && (
+        <View
+          style={{
+            flex: '0 0 auto',
+            flexDirection: 'row',
+          }}
         >
-          More reports
-          <br /> coming soon!
-        </Card>
-      </View>
+          <CategorySpendingCard />
+          <div style={{ flex: 1 }} />
+          <div style={{ flex: 1 }} />
+        </View>
+      )}
     </View>
   );
 }

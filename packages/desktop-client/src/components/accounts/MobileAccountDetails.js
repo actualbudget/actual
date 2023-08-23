@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
-import { colors, styles } from '../../style';
-import Button from '../common/Button';
+import { theme, styles } from '../../style';
+import ButtonLink from '../common/ButtonLink';
 import InputWithContent from '../common/InputWithContent';
 import Label from '../common/Label';
 import Text from '../common/Text';
@@ -21,7 +21,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.n11,
+        backgroundColor: theme.tableHeaderBackground,
         margin: '11px auto 4px',
         borderRadius: 4,
         padding: 10,
@@ -35,7 +35,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
               width: 13,
               height: 13,
               flexShrink: 0,
-              color: text ? colors.p7 : 'inherit',
+              color: text ? theme.formInputTextHighlight : 'inherit',
               margin: 5,
               marginRight: 0,
             }}
@@ -48,8 +48,8 @@ function TransactionSearchInput({ accountName, onSearch }) {
         }}
         placeholder={`Search ${accountName}`}
         style={{
-          backgroundColor: colors.n11,
-          border: `1px solid ${colors.n9}`,
+          backgroundColor: theme.formInputBackground,
+          border: `1px solid ${theme.formInputBorder}`,
           fontSize: 15,
           flex: 1,
           height: 32,
@@ -74,6 +74,7 @@ export default function AccountDetails({
   onLoadMore,
   onSearch,
   onSelectTransaction,
+  pushModal,
   // refreshControl
 }) {
   let allTransactions = useMemo(() => {
@@ -84,7 +85,7 @@ export default function AccountDetails({
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.n11,
+        backgroundColor: theme.tableHeaderBackground,
         overflowY: 'hidden',
         width: '100%',
       }}
@@ -92,10 +93,9 @@ export default function AccountDetails({
       <View
         style={{
           alignItems: 'center',
-          backgroundColor: colors.n11,
           flexShrink: 0,
           overflowY: 'hidden',
-          paddingTop: 20,
+          paddingTop: 10,
           top: 0,
           width: '100%',
         }}
@@ -111,7 +111,7 @@ export default function AccountDetails({
           <Link
             to="/accounts"
             style={{
-              color: colors.b5,
+              color: theme.formLabelText,
               alignItems: 'center',
               display: 'flex',
               textDecoration: 'none',
@@ -126,21 +126,21 @@ export default function AccountDetails({
               fontSize: 16,
               fontWeight: 500,
             }}
+            role="heading"
           >
             {account.name}
           </View>
-          {/*
-              TODO: connect to an add transaction modal
-              Only left here but hidden for flex centering of the account name.
-          */}
-          <Link to="transaction/new" style={{ visibility: 'hidden' }}>
-            <Button
-              type="bare"
-              style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
-            >
-              <Add width={20} height={20} />
-            </Button>
-          </Link>
+
+          <ButtonLink
+            to="transactions/new"
+            type="bare"
+            aria-label="Add Transaction"
+            style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
+            hoveredStyle={{ background: 'transparent' }}
+            activeStyle={{ background: 'transparent' }}
+          >
+            <Add width={20} height={20} />
+          </ButtonLink>
         </View>
         <Label title="BALANCE" style={{ marginTop: 10 }} />
         <CellValue
@@ -152,8 +152,9 @@ export default function AccountDetails({
             fontWeight: '500',
           }}
           getStyle={value => ({
-            color: value < 0 ? colors.r4 : colors.p5,
+            color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
           })}
+          data-testid="account-balance"
         />
         <TransactionSearchInput
           accountName={account.name}
@@ -170,6 +171,7 @@ export default function AccountDetails({
         // refreshControl={refreshControl}
         onLoadMore={onLoadMore}
         onSelect={onSelectTransaction}
+        pushModal={pushModal}
       />
     </View>
   );

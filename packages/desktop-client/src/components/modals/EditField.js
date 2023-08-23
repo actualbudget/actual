@@ -7,6 +7,7 @@ import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategorySelect';
@@ -39,11 +40,12 @@ export default function EditField({ modalProps, name, onSubmit }) {
     modalProps.onClose();
   }
 
+  const { isNarrowWidth } = useResponsive();
   let label, editor, minWidth;
   let inputStyle = { ':focus': { boxShadow: 0 } };
   let autocompleteProps = {
     inputProps: { style: inputStyle },
-    containerProps: { style: { height: 275 } },
+    containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
   switch (name) {
@@ -74,11 +76,19 @@ export default function EditField({ modalProps, name, onSubmit }) {
           accounts={accounts}
           focused={true}
           embedded={true}
+          closeOnBlur={false}
           onSelect={value => {
             if (value) {
               onSelect(value);
             }
           }}
+          groupHeaderStyle={
+            isNarrowWidth
+              ? {
+                  color: colors.n6,
+                }
+              : undefined
+          }
           {...autocompleteProps}
         />
       );
@@ -93,7 +103,9 @@ export default function EditField({ modalProps, name, onSubmit }) {
           value={null}
           focused={true}
           embedded={true}
+          closeOnBlur={false}
           showManagePayees={false}
+          showMakeTransfer={!isNarrowWidth}
           onSelect={async value => {
             if (value && value.startsWith('new:')) {
               value = await createPayee(value.slice('new:'.length));
@@ -102,6 +114,13 @@ export default function EditField({ modalProps, name, onSubmit }) {
             onSelect(value);
           }}
           isCreatable
+          groupHeaderStyle={
+            isNarrowWidth
+              ? {
+                  color: colors.n6,
+                }
+              : undefined
+          }
           {...autocompleteProps}
         />
       );
@@ -126,11 +145,19 @@ export default function EditField({ modalProps, name, onSubmit }) {
           value={null}
           focused={true}
           embedded={true}
+          closeOnBlur={false}
           showSplitOption={false}
           onUpdate={() => {}}
           onSelect={value => {
             onSelect(value);
           }}
+          groupHeaderStyle={
+            isNarrowWidth
+              ? {
+                  color: colors.n6,
+                }
+              : undefined
+          }
           {...autocompleteProps}
         />
       );
@@ -152,31 +179,35 @@ export default function EditField({ modalProps, name, onSubmit }) {
 
   return (
     <Modal
-      noAnimation={true}
-      showHeader={false}
+      title={label}
+      noAnimation={!isNarrowWidth}
+      showHeader={isNarrowWidth}
       focusAfterClose={false}
       {...modalProps}
       padding={0}
       style={[
         {
           flex: 0,
+          height: isNarrowWidth ? '85vh' : 275,
           padding: '15px 10px',
-          backgroundColor: colors.n1,
-          color: 'white',
+          borderRadius: '6px',
         },
         minWidth && { minWidth },
+        !isNarrowWidth && { backgroundColor: colors.n1, color: 'white' },
       ]}
     >
       {() => (
         <View>
-          <SectionLabel
-            title={label}
-            style={{
-              alignSelf: 'center',
-              color: colors.b10,
-              marginBottom: 10,
-            }}
-          />
+          {!isNarrowWidth && (
+            <SectionLabel
+              title={label}
+              style={{
+                alignSelf: 'center',
+                color: colors.b10,
+                marginBottom: 10,
+              }}
+            />
+          )}
           <View style={{ flex: 1 }}>{editor}</View>
         </View>
       )}
