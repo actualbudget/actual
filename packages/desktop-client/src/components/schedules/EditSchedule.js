@@ -735,6 +735,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               borderRadius: 4,
               overflow: 'hidden',
               marginTop: 5,
+              maxHeight: 200,
             }}
           />
         </SelectedProvider>
