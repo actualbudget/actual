@@ -438,7 +438,7 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -517,6 +517,16 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
         updated.push({ id: existing.id, ...updates });
       }
+
+      if (existing.is_parent && existing.cleared !== updates.cleared) {
+        const children = await db.all(
+          'SELECT id FROM v_transactions WHERE parent_id = ?',
+          [existing.id],
+        );
+        for (const child of children) {
+          updated.push({ id: child.id, cleared: updates.cleared });
+        }
+      }
     } else {
       // Insert a new transaction
       let finalTransaction = {
@@ -536,20 +546,6 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
 
   await createNewPayees(payeesToCreate, [...added, ...updated]);
   await batchUpdateTransactions({ added, updated });
-
-  // Make sure the "cleared" flag is synced up with the parent
-  // transactions
-  let clearedRows = await db.all(`
-    SELECT t.id, p.cleared FROM v_transactions t
-    LEFT JOIN v_transactions p ON t.parent_id = p.id
-    WHERE t.is_child = 1 AND t.cleared != p.cleared
-  `);
-
-  let updatedClearedRows = clearedRows.map(row => ({
-    id: row.id,
-    cleared: row.cleared === 1,
-  }));
-  await batchUpdateTransactions({ updated: updatedClearedRows });
 
   return {
     added: added.map(trans => trans.id),
@@ -597,7 +593,7 @@ export async function reconcileTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -676,6 +672,16 @@ export async function reconcileTransactions(acctId, transactions) {
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
         updated.push({ id: existing.id, ...updates });
       }
+
+      if (existing.is_parent && existing.cleared !== updates.cleared) {
+        const children = await db.all(
+          'SELECT id FROM v_transactions WHERE parent_id = ?',
+          [existing.id],
+        );
+        for (const child of children) {
+          updated.push({ id: child.id, cleared: updates.cleared });
+        }
+      }
     } else {
       // Insert a new transaction
       let finalTransaction = {
@@ -695,20 +701,6 @@ export async function reconcileTransactions(acctId, transactions) {
 
   await createNewPayees(payeesToCreate, [...added, ...updated]);
   await batchUpdateTransactions({ added, updated });
-
-  // Make sure the "cleared" flag is synced up with the parent
-  // transactions
-  let clearedRows = await db.all(`
-    SELECT t.id, p.cleared FROM v_transactions t
-    LEFT JOIN v_transactions p ON t.parent_id = p.id
-    WHERE t.is_child = 1 AND t.cleared != p.cleared
-  `);
-
-  let updatedClearedRows = clearedRows.map(row => ({
-    id: row.id,
-    cleared: row.cleared === 1,
-  }));
-  await batchUpdateTransactions({ updated: updatedClearedRows });
 
   return {
     added: added.map(trans => trans.id),
