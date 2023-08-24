@@ -13,7 +13,7 @@ export default function Hello() {
       <img alt="" src="/img/homepage/hero-bg.svg" class={classes.heroBg} />
 
       <div class={`${classes.main} ${classes.container}`}>
-        <h1>Your Finances - made simple</h1>
+        <h1>Your Finances — made simple</h1>
         <p class={classes.heroText}>
           Actual Budget is a super fast and privacy-focused app for managing
           your finances. At its heart is the well proven and much loved Envelope
@@ -23,17 +23,39 @@ export default function Hello() {
           it. Featuring multi-device sync, optional end-to-end encryption and so
           much more.
         </p>
-        <div>
-          <Button to="https://demo.actualbudget.org">Try Our Demo</Button>
-          <Button primary to="/docs/install/">
-            Install
-          </Button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1em' }}>
+          <div>
+            <Button primary to="https://www.pikapods.com/pods?run=actual">
+              Set up on PikaPods in 2 minutes
+              <sup
+                style={{
+                  lineHeight: 0,
+                  fontSize: '0.75em',
+                  display: 'inline-block',
+                  transform: 'translateY(0.1em)',
+                }}
+              >
+                *
+              </sup>{' '}
+              <span aria-hidden="true">↗</span>
+            </Button>
+            <Button to="/docs/install/">Set up manually</Button>
+          </div>
         </div>
         <div class={classes.heroImage}>
           <Image
             img={require('../../static/img/homepage/actual-main-budget.png')}
             alt="Actual Budget"
           />
+          <Button
+            to="https://demo.actualbudget.org/"
+            className={classes.demoButton}
+          >
+            <div class={classes.demoButtonContent}>
+              <div style={{ width: 24, height: 24 }}>{icons.play}</div> Try the
+              demo
+            </div>
+          </Button>
         </div>
 
         <MediumFeature
@@ -223,6 +245,24 @@ export default function Hello() {
             </div>
           </div>
         </div>
+
+        <p
+          class={classes.container}
+          style={{ maxWidth: 500, marginTop: '12em', marginBottom: '-12em' }}
+        >
+          <small style={{ opacity: 0.6 }}>
+            * PikaPods donates 20% of fees people like you pay to run Actual on
+            their servers to{' '}
+            <a
+              style={{ color: 'inherit', textDecoration: 'underline' }}
+              href="https://opencollective.org/actual"
+            >
+              our Open Collective
+            </a>
+            . Regardless of this relationship, we believe PikaPods is the
+            easiest way to get started with Actual.
+          </small>
+        </p>
       </div>
     </Layout>
   );
@@ -349,6 +389,11 @@ const icons = {
       <circle cx="12" cy="11.994" r="1.5"></circle>
       <path d="M12,4.744a1.752,1.752,0,0,0-1.75,1.75v1.25a.5.5,0,0,0,.5.5h2.5a.5.5,0,0,0,.5-.5V6.494A1.752,1.752,0,0,0,12,4.744Z"></path>
       <path d="M24,1.953A1.959,1.959,0,0,0,22.043.006H1.959A1.958,1.958,0,0,0,.012,1.965L0,9.306A15.146,15.146,0,0,0,11.861,23.975a1,1,0,0,0,.4,0A15.145,15.145,0,0,0,23.988,9.2ZM17,14.744a1,1,0,0,1-1,1H8a1,1,0,0,1-1-1v-5.5a1,1,0,0,1,1-1h.25a.5.5,0,0,0,.5-.5V6.494a3.25,3.25,0,0,1,6.5,0v1.25a.5.5,0,0,0,.5.5H16a1,1,0,0,1,1,1Z"></path>
+    </svg>
+  ),
+  play: (
+    <svg viewBox="0 0 20 20">
+      <path d="m4 4 12 6-12 6z" fill="currentColor" />
     </svg>
   ),
 };
