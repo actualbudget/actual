@@ -28,6 +28,7 @@ export default defineConfig({
   },
   expect: {
     toHaveScreenshot: {
+      // Approx. 2% difference (1000 pixels)
       maxDiffPixels: 1000,
     },
     toMatchSnapshot: {
