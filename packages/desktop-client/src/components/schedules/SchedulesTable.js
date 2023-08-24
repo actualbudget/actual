@@ -103,20 +103,18 @@ export function ScheduleAmountCell({ amount, op }) {
           ~
         </View>
       )}
-      <PrivacyFilter>
-        <Text
-          style={{
-            flex: 1,
-            color: num > 0 ? colors.g5 : null,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-          title={(isApprox ? 'Approximately ' : '') + str}
-        >
-          {num > 0 ? `+${str}` : `${str}`}
-        </Text>
-      </PrivacyFilter>
+      <Text
+        style={{
+          flex: 1,
+          color: num > 0 ? colors.g5 : null,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+        title={(isApprox ? 'Approximately ' : '') + str}
+      >
+        <PrivacyFilter>{num > 0 ? `+${str}` : `${str}`}</PrivacyFilter>
+      </Text>
     </Cell>
   );
 }
