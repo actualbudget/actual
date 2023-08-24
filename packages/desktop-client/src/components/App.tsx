@@ -129,7 +129,7 @@ function AppWrapper() {
     state => state.prefs.local && state.prefs.local.cloudFileId,
   );
   let loadingText = useSelector(state => state.app.loadingText);
-  let { loadBudget, closeBudget, loadGlobalPrefs } = useActions();
+  let { loadBudget, closeBudget, loadGlobalPrefs, sync } = useActions();
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );
@@ -141,10 +141,25 @@ function AppWrapper() {
       }
     }
 
-    window.addEventListener('focus', checkScrollbars);
+    let isSyncing = false;
 
-    return () => window.removeEventListener('focus', checkScrollbars);
-  }, []);
+    async function onVisibilityChange() {
+      if (!isSyncing) {
+        console.debug('triggering sync because of visibility change');
+        isSyncing = true;
+        await sync();
+        isSyncing = false;
+      }
+    }
+
+    window.addEventListener('focus', checkScrollbars);
+    window.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', checkScrollbars);
+      window.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [sync]);
 
   return (
     <ResponsiveProvider>
