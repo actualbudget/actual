@@ -48,6 +48,7 @@ export default function CategorySelector({
           paddingLeft: 0,
           paddingRight: 10,
           height: 320,
+          flexGrow: 1,
           overflowY: 'scroll',
         }}
       >
