@@ -214,7 +214,7 @@ export function SchedulesTable({
         <Field width="flex" name="account">
           <DisplayId type="accounts" id={item._account} />
         </Field>
-        <Field width={110} name="date">
+        <Field width={110} name="date" data-vrt-mask>
           {item.next_date
             ? monthUtils.format(item.next_date, dateFormat)
             : null}
