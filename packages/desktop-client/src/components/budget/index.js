@@ -36,9 +36,8 @@ import { ReportProvider } from './report/ReportContext';
 import * as rollover from './rollover/rollover-components';
 import { RolloverContext } from './rollover/RolloverContext';
 
-const currentMonth = monthUtils.currentMonth();
-
 function Budget(props) {
+  const currentMonth = monthUtils.currentMonth();
   const tableRef = useRef(null);
 
   const [initialized, setInitialized] = useState(false);
