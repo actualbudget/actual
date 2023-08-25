@@ -1,5 +1,6 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
+
 import * as Platform from '../client/platform';
 
 type DateLike = string | Date;
