@@ -54,6 +54,7 @@ function About() {
             gridAutoFlow: 'column',
           }),
         ]}
+        data-vrt-mask
       >
         <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
         <Text>Server version: {version}</Text>

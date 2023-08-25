@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Settings', () => {
   let page;
@@ -24,6 +25,10 @@ test.describe('Settings', () => {
 
   test.beforeEach(async () => {
     settingsPage = await navigation.goToSettingsPage();
+  });
+
+  test('checks the page visuals', async () => {
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
   test('downloads the export of the budget', async () => {

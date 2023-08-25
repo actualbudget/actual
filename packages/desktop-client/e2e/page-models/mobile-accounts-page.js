@@ -14,11 +14,8 @@ export class MobileAccountsPage {
     const accountRow = this.accounts.nth(idx);
 
     return {
-      name: await accountRow.getByTestId('account-name').textContent(),
-      balance: parseInt(
-        await accountRow.getByTestId('account-balance').textContent(),
-        10,
-      ),
+      name: accountRow.getByTestId('account-name'),
+      balance: accountRow.getByTestId('account-balance'),
     };
   }
 
