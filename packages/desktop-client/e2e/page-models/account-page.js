@@ -70,15 +70,15 @@ export class AccountPage {
    * Retrieve the data for the nth-transaction.
    * 0-based index
    */
-  async getNthTransaction(index) {
+  getNthTransaction(index) {
     const row = this.transactionTableRow.nth(index);
 
     return {
-      payee: await row.getByTestId('payee').textContent(),
-      notes: await row.getByTestId('notes').textContent(),
-      category: await row.getByTestId('category').textContent(),
-      debit: await row.getByTestId('debit').textContent(),
-      credit: await row.getByTestId('credit').textContent(),
+      payee: row.getByTestId('payee'),
+      notes: row.getByTestId('notes'),
+      category: row.getByTestId('category'),
+      debit: row.getByTestId('debit'),
+      credit: row.getByTestId('credit'),
     };
   }
 

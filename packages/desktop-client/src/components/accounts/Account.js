@@ -425,6 +425,7 @@ class AccountInternal extends PureComponent {
           showBalances: nextProps.showBalances,
           balances: null,
           showCleared: nextProps.showCleared,
+          reconcileAmount: null,
         },
         () => {
           this.fetchTransactions();

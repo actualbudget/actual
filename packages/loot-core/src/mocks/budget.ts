@@ -15,12 +15,14 @@ import type {
   TransactionEntity,
 } from '../types/models';
 
+import random from './random';
+
 function pickRandom(list) {
-  return list[Math.floor(Math.random() * list.length) % list.length];
+  return list[Math.floor(random() * list.length) % list.length];
 }
 
 function number(start, end) {
-  return start + (end - start) * Math.random();
+  return start + (end - start) * random();
 }
 
 function integer(start, end) {
@@ -85,7 +87,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
   let transactions = [];
   for (let i = 0; i < numTransactions; i++) {
     let payee;
-    if (Math.random() < 0.09) {
+    if (random() < 0.09) {
       payee = incomePayee;
     } else {
       payee = pickRandom(expensePayees);
@@ -102,7 +104,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
     if (payee.name === 'Deposit') {
       amount = integer(50000, 70000);
     } else {
-      amount = integer(0, Math.random() < 0.05 ? -8000 : -700);
+      amount = integer(0, random() < 0.05 ? -8000 : -700);
     }
 
     let transaction: TransactionEntity = {
@@ -114,7 +116,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
     };
     transactions.push(transaction);
 
-    if (Math.random() < 0.2) {
+    if (random() < 0.2) {
       let a = Math.round(transaction.amount / 3);
       let pick = () =>
         payee === incomePayee
@@ -225,7 +227,7 @@ async function fillChecking(handlers, account, payees, groups) {
   let transactions = [];
   for (let i = 0; i < numTransactions; i++) {
     let payee;
-    if (Math.random() < 0.04) {
+    if (random() < 0.04) {
       payee = incomePayee;
     } else {
       payee = pickRandom(expensePayees);
@@ -310,7 +312,7 @@ async function fillSavings(handlers, account, payees, groups) {
   let transactions = [];
   for (let i = 0; i < numTransactions; i++) {
     let payee;
-    if (Math.random() < 0.3) {
+    if (random() < 0.3) {
       payee = incomePayee;
     } else {
       payee = pickRandom(expensePayees);

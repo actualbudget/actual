@@ -594,7 +594,6 @@ function PayeeCell({
             }}
             showManagePayees={true}
             tableBehavior={true}
-            defaultFocusTransferPayees={transaction.is_child}
             focused={true}
             onUpdate={onUpdate}
             onSelect={onSave}
@@ -926,6 +925,7 @@ const Transaction = memo(function Transaction(props) {
           onUpdate={value => {
             onUpdate('date', value);
           }}
+          data-vrt-mask
         >
           {({
             onBlur,
