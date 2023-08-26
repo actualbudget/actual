@@ -181,7 +181,8 @@ function ConfigureField({
         <View style={{ marginBottom: 10 }}>
           <Stack direction="row" align="flex-start">
             {field === 'amount' || field === 'date' ? (
-              <Select
+              <Select style={{ borderWidth: 1, borderColor: 'transparent' }}
+
                 options={
                   field === 'amount'
                     ? [
