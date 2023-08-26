@@ -91,7 +91,7 @@ export default function Value<T>({
           if (valueIsRaw) {
             return value;
           }
-          if (data && data.length) {
+          if (data && Array.isArray(data)) {
             let item = data.find(item => item.id === value);
             if (item) {
               return describe(item);
