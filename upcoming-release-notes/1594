@@ -1,0 +1,7 @@
+---
+category: Bugfix
+authors: Dilandds
+---
+
+Fixed the Minor visual regression in filters menu: "the amount select box has 2x borders around it"
+By overwriting the css on the Select component
