@@ -50,19 +50,21 @@ export const directivesPlugin: Plugin<[], Root> = () => {
         hName: 'div',
         hProperties: { class: 'md-directive-wrapper' },
       },
-      children: [{
-        type: 'emphasis',
-        children: [
-          {
-            type: 'text',
-            value: text,
+      children: [
+        {
+          type: 'emphasis',
+          children: [
+            {
+              type: 'text',
+              value: text,
+            },
+          ],
+          data: {
+            hName: 'span',
+            hProperties: { class: 'md-directive' },
           },
-        ],
-        data: {
-          hName: 'span',
-          hProperties: { class: 'md-directive' },
         },
-      }]
+      ],
     } as PhrasingContent;
   };
 
@@ -74,7 +76,9 @@ export const directivesPlugin: Plugin<[], Root> = () => {
     const lines = child.value.split('\n');
     const newChildren: PhrasingContent[] = [];
     lines.forEach(rawText => {
-      const directive = supportedDirectives.find(dir => rawText.startsWith(`#${dir} `));
+      const directive = supportedDirectives.find(dir =>
+        rawText.startsWith(`#${dir} `),
+      );
 
       if (!directive) {
         newChildren.push({
@@ -84,9 +88,9 @@ export const directivesPlugin: Plugin<[], Root> = () => {
       } else {
         const directiveText = rawText.substring(`#${directive} `.length);
 
-        console.log('Found directive', directive, `with text '${directiveText}'`, { child, p: node });
-
-        const labelText = `${directive[0].toUpperCase()}${directive.substring(1)}: ${directiveText}`;
+        const labelText = `${directive[0].toUpperCase()}${directive.substring(
+          1,
+        )}: ${directiveText}`;
         newChildren.push(label(labelText));
       }
     });
@@ -99,7 +103,7 @@ export const directivesPlugin: Plugin<[], Root> = () => {
       data: {
         hName: 'div',
         hProperties: { class: 'md-directives-list' },
-      }
+      },
     };
 
     const pIndex = parent.children.indexOf(node);

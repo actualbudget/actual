@@ -10,7 +10,11 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
 import { colors, theme } from '../style';
-import { directivesPlugin, remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
+import {
+  directivesPlugin,
+  remarkBreaks,
+  sequentialNewlinesPlugin,
+} from '../util/markdown';
 
 import Button from './common/Button';
 import Text from './common/Text';
@@ -134,7 +138,7 @@ function NotesTooltip({
           })}
           value={notes || ''}
           onChange={e => setNotes(e.target.value)}
-          placeholder='Notes (markdown supported)'
+          placeholder="Notes (markdown supported)"
         />
       ) : (
         <Text {...markdownStyles}>
