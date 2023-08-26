@@ -2,7 +2,6 @@ import React, { createRef, useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import { type CSSProperties, css } from 'glamor';
-import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 
 import q from 'loot-core/src/client/query-helpers';
@@ -10,47 +9,20 @@ import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
-import { colors } from '../style';
+import { colors, theme } from '../style';
+import { directivesPlugin, remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
 import Button from './common/Button';
 import Text from './common/Text';
 import View from './common/View';
 import { Tooltip, useTooltip } from './tooltips';
 
-function sequentialNewlinesPlugin() {
-  // Adapted from https://codesandbox.io/s/create-react-app-forked-h3rmcy?file=/src/sequentialNewlinePlugin.js:0-774
-  const data = this.data();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function add(field: string, value: any) {
-    const list = data[field] ? data[field] : (data[field] = []);
-
-    list.push(value);
-  }
-
-  add('fromMarkdownExtensions', {
-    enter: {
-      lineEndingBlank: function enterLineEndingBlank(token: unknown) {
-        this.enter(
-          {
-            type: 'break',
-            value: '',
-            data: {},
-            children: [],
-          },
-          token,
-        );
-      },
-    },
-    exit: {
-      lineEndingBlank: function exitLineEndingBlank(token: unknown) {
-        this.exit(token);
-      },
-    },
-  });
-}
-
-const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
+const remarkPlugins = [
+  directivesPlugin,
+  sequentialNewlinesPlugin,
+  remarkGfm,
+  remarkBreaks,
+];
 
 const markdownStyles = css({
   display: 'block',
@@ -114,6 +86,17 @@ const markdownStyles = css({
   '& td': {
     padding: '0.25rem 0.75rem',
   },
+  '& .md-directives-list': {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  '& .md-directive': {
+    backgroundColor: theme.pillBackground,
+    borderRadius: '0.25rem',
+    padding: '0.1rem 0.5rem',
+    display: 'inline-block',
+  },
 });
 
 type NotesTooltipProps = {
@@ -151,6 +134,7 @@ function NotesTooltip({
           })}
           value={notes || ''}
           onChange={e => setNotes(e.target.value)}
+          placeholder='Notes (markdown supported)'
         />
       ) : (
         <Text {...markdownStyles}>
