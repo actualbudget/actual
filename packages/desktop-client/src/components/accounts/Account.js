@@ -26,6 +26,7 @@ import {
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
 import { authorizeBank } from '../../gocardless';
+import useCategories from '../../hooks/useCategories';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, theme } from '../../style';
 import Button from '../common/Button';
@@ -272,9 +273,6 @@ class AccountInternal extends PureComponent {
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    if (this.props.categoryGroups.length === 0) {
-      await this.props.getCategories();
-    }
     await this.props.initiallyLoadPayees();
     await this.fetchTransactions();
 
@@ -1350,12 +1348,12 @@ export default function Account() {
   let params = useParams();
   let location = useLocation();
 
+  let { grouped: categoryGroups } = useCategories();
   let state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
     matchedTransactions: state.queries.matchedTransactions,
     accounts: state.queries.accounts,
     failedAccounts: state.account.failedAccounts,
-    categoryGroups: state.queries.categories.grouped,
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     hideFraction: state.prefs.local.hideFraction || false,
     expandSplits: state.prefs.local['expand-splits'],
@@ -1408,6 +1406,7 @@ export default function Account() {
       >
         <AccountHack
           {...state}
+          categoryGroups={categoryGroups}
           {...actionCreators}
           modalShowing={state.modalShowing}
           accountId={params.id}

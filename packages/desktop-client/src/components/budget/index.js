@@ -17,6 +17,7 @@ import {
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { styles } from '../../style';
 import View from '../common/View';
@@ -535,7 +536,7 @@ export default function BudgetWrapper(props) {
     state => state.prefs.local.budgetType || 'rollover',
   );
   let maxMonths = useSelector(state => state.prefs.global.maxMonths);
-  let categoryGroups = useSelector(state => state.queries.categories.grouped);
+  let { grouped: categoryGroups } = useCategories();
 
   let actions = useActions();
   let spreadsheet = useSpreadsheet();
