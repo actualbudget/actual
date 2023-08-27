@@ -62,7 +62,7 @@ If you enter a new month and have a negative "To Be Budgeted" amount and you're 
 
 ### Overspending
 
-When you overspend in a category, that needs to rollover as well. You spent money that wasn't budgeted, so now you need to go back and take it out from somewhere. Doing this keeps your budget in tact.
+When you overspend in a category, that needs to rollover as well. You spent money that wasn't budgeted, so now you need to go back and take it out from somewhere. Doing this keeps your budget intact.
 
 One way to do this would be to simply roll it over into next month's budget for that category, subtracting it from the available amount. This hardly ever works in real life — if you have a food budget it's highly unlikely you'll be able go under it next month just because you overspent.
 
