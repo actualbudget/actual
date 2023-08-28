@@ -63,7 +63,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
           padding: '3px 6px',
           backgroundColor: theme.noticeBackground,
           border: '1px solid ' + theme.noticeBackground,
-          color: theme.noticeText,
+          color: theme.altNoticeText,
           fontSize: 12,
         }}
         onEdit={onEdit}
@@ -110,7 +110,9 @@ let Payee = memo(
         style={[
           {
             borderColor: borderColor,
-            backgroundColor: selected
+            backgroundColor: hovered
+              ? theme.tableRowBackgroundHover
+              : selected
               ? theme.tableRowBackgroundHighlight
               : backgroundFocus
               ? theme.tableRowBackgroundHover
@@ -136,13 +138,9 @@ let Payee = memo(
         />
         <InputCell
           value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
-          style={{
-            color: selected
-              ? theme.tableRowBackgroundHighlightText
-              : payee.transfer_acct
-              ? theme.tableTextInactive
-              : theme.tableText,
-          }}
+          valueStyle={
+            !selected && payee.transfer_acct && { color: theme.pageTextSubdued }
+          }
           exposed={focusedField === 'name'}
           width="flex"
           onUpdate={value =>
@@ -233,7 +231,7 @@ function PayeeTableHeader() {
         borderColor={theme.tableborder}
         style={{
           backgroundColor: theme.tableBackground,
-          color: theme.tableText,
+          color: theme.pageTextLight,
           zIndex: 200,
           userSelect: 'none',
         }}
@@ -257,7 +255,7 @@ function EmptyMessage({ text, style }) {
       style={[
         {
           textAlign: 'center',
-          color: theme.pageText,
+          color: theme.pageTextSubdued,
           fontStyle: 'italic',
           fontSize: 13,
           marginTop: 5,
@@ -302,6 +300,7 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
               padding: 3,
               fontSize: 11,
               fontStyle: 'italic',
+              color: theme.pageTextSubdued,
             }}
           >
             {[...selectedPayees]

@@ -130,8 +130,9 @@ export const buttonBareBackgroundActive = 'rgba(100, 100, 100, .25)';
 export const buttonBareDisabledText = buttonNormalDisabledText;
 export const buttonBareDisabledBackground = buttonBareBackground;
 
-export const noticeBackground = colorPalette.green50;
+export const noticeBackground = colorPalette.green150;
 export const noticeText = colorPalette.green500;
+export const altNoticeText = colorPalette.green900;
 export const noticeAccent = colorPalette.green200;
 export const warningBackground = colorPalette.orange200;
 export const warningText = colorPalette.orange800;

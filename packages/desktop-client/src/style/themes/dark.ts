@@ -132,6 +132,7 @@ export const buttonBareDisabledBackground = buttonBareBackground;
 
 export const noticeBackground = colorPalette.green800;
 export const noticeText = colorPalette.green300;
+export const altNoticeText = noticeText;
 export const noticeAccent = colorPalette.green500;
 export const warningBackground = colorPalette.orange800;
 export const warningText = colorPalette.orange200;
