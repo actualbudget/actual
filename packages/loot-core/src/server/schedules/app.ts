@@ -65,7 +65,7 @@ export function updateConditions(conditions, newConditions) {
   return updated.concat(added);
 }
 
-export function getNextDate(dateCond, start = new Date()) {
+export function getNextDate(dateCond, start = new Date(currentDay())) {
   start = d.startOfDay(start);
 
   let cond = new Condition(
