@@ -4,6 +4,7 @@ import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Search from '../common/Search';
 import View from '../common/View';
@@ -82,6 +83,7 @@ export default function Schedules() {
           allowCompleted={true}
           onSelect={onEdit}
           onAction={onAction}
+          style={{ backgroundColor: theme.tableBackground }}
         />
       </View>
 

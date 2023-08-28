@@ -61,7 +61,6 @@ export default function ChangePassword() {
           style={{
             marginTop: 20,
             color: theme.errorText,
-            backgroundColor: theme.errorBackground,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -75,7 +74,6 @@ export default function ChangePassword() {
           style={{
             marginTop: 20,
             color: theme.noticeText,
-            backgroundColor: theme.noticeBackground,
             borderRadius: 4,
             fontSize: 15,
           }}

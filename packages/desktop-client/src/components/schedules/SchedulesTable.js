@@ -93,7 +93,7 @@ export function ScheduleAmountCell({ amount, op }) {
         <View
           style={{
             textAlign: 'left',
-            color: theme.tableText,
+            color: theme.pageTextSubdued,
             lineHeight: '1em',
             marginRight: 10,
           }}

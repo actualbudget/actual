@@ -75,7 +75,6 @@ export default function Bootstrap() {
           style={{
             marginTop: 20,
             color: theme.errorText,
-            backgroundColor: theme.errorBackground,
             borderRadius: 4,
             fontSize: 15,
           }}
