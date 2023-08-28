@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Reports', () => {
   let page;
@@ -31,5 +32,6 @@ test.describe('Reports', () => {
     const reports = await reportsPage.getAvailableReportList();
 
     expect(reports).toEqual(['Net Worth', 'Cash Flow']);
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 });
