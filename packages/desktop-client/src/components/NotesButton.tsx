@@ -11,7 +11,6 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
 import { colors, theme } from '../style';
 import {
-  directivesPlugin,
   remarkBreaks,
   sequentialNewlinesPlugin,
 } from '../util/markdown';
@@ -22,7 +21,6 @@ import View from './common/View';
 import { Tooltip, useTooltip } from './tooltips';
 
 const remarkPlugins = [
-  directivesPlugin,
   sequentialNewlinesPlugin,
   remarkGfm,
   remarkBreaks,
