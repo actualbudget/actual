@@ -328,7 +328,7 @@ export interface ServerHandlers {
     type: 'ynab4' | 'ynab5' | 'actual';
   }) => Promise<{ error?: string }>;
 
-  'export-budget': () => Promise<Buffer | null>;
+  'export-budget': () => Promise<{ data: Buffer } | { error: string }>;
 
   'upload-file-web': (arg: {
     filename: string;

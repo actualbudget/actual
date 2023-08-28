@@ -25,8 +25,8 @@ export function indexCashFlow(data, date, isTransfer) {
   const results = {};
   data.forEach(item => {
     let findExisting = results[item.date]
-      ? results[item.date][item.xfer]
-        ? results[item.date][item.xfer]
+      ? results[item.date][item.isTransfer]
+        ? results[item.date][item.isTransfer]
         : 0
       : 0;
     let result = { [item[isTransfer]]: item.amount + findExisting };

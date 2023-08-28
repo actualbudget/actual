@@ -249,7 +249,7 @@ async function importBudgets(
       await Promise.all(
         budget.categories.map(async catBudget => {
           let catId = entityIdMap.get(catBudget.id);
-          let amount = catBudget.budgeted / 10;
+          let amount = Math.round(catBudget.budgeted / 10);
 
           if (
             !catId ||

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import * as Platform from 'loot-core/src/client/platform';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
@@ -140,9 +141,10 @@ export const MonthPicker = ({
               onClick={() => onSelect(month)}
               onMouseEnter={() => setHoverId(idx)}
               onMouseLeave={() => setHoverId(null)}
+              data-vrt-mask
             >
               {size === 'small' ? monthName[0] : monthName}
-              {showYearHeader && (
+              {!Platform.isPlaywright && showYearHeader && (
                 <View
                   style={[
                     {

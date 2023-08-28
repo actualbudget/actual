@@ -3,13 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import * as monthUtils from '../shared/months';
 import type { TransactionEntity } from '../types/models';
 
+import random from './random';
+
 export function generateAccount(name, isConnected, offbudget) {
   return {
     id: uuidv4(),
     name,
-    balance_current: isConnected ? Math.floor(Math.random() * 100000) : null,
-    bank: isConnected ? Math.floor(Math.random() * 10000) : null,
-    bankId: isConnected ? Math.floor(Math.random() * 10000) : null,
+    balance_current: isConnected ? Math.floor(random() * 100000) : null,
+    bank: isConnected ? Math.floor(random() * 10000) : null,
+    bankId: isConnected ? Math.floor(random() * 10000) : null,
     bankName: isConnected ? 'boa' : null,
     offbudget: offbudget ? 1 : 0,
     closed: 0,
@@ -54,7 +56,7 @@ function _generateTransaction(data): TransactionEntity {
   const id = data.id || uuidv4();
   return {
     id: id,
-    amount: data.amount || Math.floor(Math.random() * 10000 - 7000),
+    amount: data.amount || Math.floor(random() * 10000 - 7000),
     payee: data.payee || 'payed-to',
     notes: 'Notes',
     account: data.account,

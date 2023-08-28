@@ -203,6 +203,8 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
           start: monthUtils.currentDay(),
           frequency: 'monthly',
           patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'after',
         };
         let schedule = {
           posts_transaction: false,
@@ -411,7 +413,6 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
   // This is derived from the date
   let repeats = state.fields.date ? !!state.fields.date.frequency : false;
-
   return (
     <Modal
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
@@ -487,7 +488,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               }}
               style={{
                 padding: '0 10px',
-                color: theme.pageText,
+                color: theme.altpageTextSubdued,
                 fontSize: 12,
               }}
               onChange={(_, op) =>
@@ -527,7 +528,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       </View>
 
       <Stack direction="row" align="flex-start">
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, width: '13.44rem' }}>
           {repeats ? (
             <RecurringSchedulePicker
               value={state.fields.date}
@@ -547,8 +548,14 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
           {state.upcomingDates && (
             <View style={{ fontSize: 13, marginTop: 20 }}>
-              <Text style={{ fontWeight: 600 }}>Upcoming dates</Text>
-              <Stack direction="column" spacing={1} style={{ marginTop: 10 }}>
+              <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
+                Upcoming dates
+              </Text>
+              <Stack
+                direction="column"
+                spacing={1}
+                style={{ marginTop: 10, color: theme.pageTextLight }}
+              >
                 {state.upcomingDates.map(date => (
                   <View key={date}>
                     {monthUtils.format(date, `${dateFormat} EEEE`)}
@@ -618,6 +625,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
             style={{
               width: 350,
               textAlign: 'right',
+              color: theme.pageTextLight,
               marginTop: 10,
               fontSize: 13,
               lineHeight: '1.4em',
@@ -632,7 +640,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               {state.isCustom && (
                 <Text
                   style={{
-                    color: theme.tableTextEditingBackground,
+                    color: theme.altpageTextSubdued,
                     fontSize: 13,
                     textAlign: 'right',
                     width: 350,
@@ -657,7 +665,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
                 These transactions match this schedule:
               </Text>
               <View style={{ flex: 1 }} />
-              <Text style={{ color: theme.pageTextSubdued }}>
+              <Text style={{ color: theme.pageTextLight }}>
                 Select transactions to link on save
               </Text>
             </View>
@@ -668,8 +676,8 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
                 style={{
                   color:
                     state.transactionsMode === 'linked'
-                      ? theme.tableTextEditingBackground
-                      : 'inherit',
+                      ? theme.pageTextLink
+                      : theme.pageTextSubdued,
                   marginRight: 10,
                   fontSize: 14,
                 }}
@@ -682,8 +690,8 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
                 style={{
                   color:
                     state.transactionsMode === 'matched'
-                      ? theme.tableTextEditingBackground
-                      : 'inherit',
+                      ? theme.pageTextLink
+                      : theme.pageTextSubdued,
                   fontSize: 14,
                 }}
                 onClick={() => onSwitchTransactions('matched')}
@@ -715,24 +723,10 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
           <SimpleTransactionsTable
             renderEmpty={
-              state.transactionsMode === 'matched' &&
-              (() => (
-                <View
-                  style={{
-                    padding: 20,
-                    color: theme.tableText,
-                    textAlign: 'center',
-                  }}
-                >
-                  {state.error ? (
-                    <Text style={{ color: theme.errorText }}>
-                      Could not search: {state.error}
-                    </Text>
-                  ) : (
-                    'No transactions found'
-                  )}
-                </View>
-              ))
+              <NoTransactionsMessage
+                error={state.error}
+                transactionsMode={state.transactionsMode}
+              />
             }
             transactions={state.transactions}
             fields={['date', 'payee', 'amount']}
@@ -741,6 +735,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               borderRadius: 4,
               overflow: 'hidden',
               marginTop: 5,
+              maxHeight: 200,
             }}
           />
         </SelectedProvider>
@@ -763,5 +758,27 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         </Button>
       </Stack>
     </Modal>
+  );
+}
+
+function NoTransactionsMessage(props) {
+  return (
+    <View
+      style={{
+        padding: 20,
+        color: theme.pageTextLight,
+        textAlign: 'center',
+      }}
+    >
+      {props.error ? (
+        <Text style={{ color: theme.errorText }}>
+          Could not search: {props.error}
+        </Text>
+      ) : props.transactionsMode === 'matched' ? (
+        'No matching transactions'
+      ) : (
+        'No linked transactions'
+      )}
+    </View>
   );
 }

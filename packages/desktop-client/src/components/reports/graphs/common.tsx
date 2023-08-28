@@ -14,7 +14,7 @@ export function Area({ start, end, scale, range }: AreaProps) {
   const startX = scale.x(d.parseISO(start + '-01'));
   const endX = scale.x(d.parseISO(end + '-01'));
 
-  if (startX < 0 || endX < 0) {
+  if (startX < 0 || endX < 0 || startX === undefined || endX === undefined) {
     return null;
   }
 

@@ -5,6 +5,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
+import { type CommonModalProps } from '../types/modals';
 
 import BudgetSummary from './modals/BudgetSummary';
 import CloseAccount from './modals/CloseAccount';
@@ -43,7 +44,7 @@ export default function Modals() {
 
   let modals = modalStack
     .map(({ name, options }, idx) => {
-      const modalProps = {
+      const modalProps: CommonModalProps = {
         onClose: actions.popModal,
         onBack: actions.popModal,
         showBack: idx > 0,

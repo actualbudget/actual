@@ -90,9 +90,7 @@ let Payee = memo(
     style,
     payee,
     ruleCount,
-    categoryGroups,
     selected,
-    highlighted,
     hovered,
     editing,
     focusedField,
@@ -101,7 +99,6 @@ let Payee = memo(
     onHover,
     onEdit,
     onUpdate,
-    ruleActions,
   }) => {
     let { id } = payee;
     let dispatchSelected = useSelectedDispatch();
@@ -113,7 +110,6 @@ let Payee = memo(
         highlighted={highlighted}
         style={[
           {
-            alignItems: 'stretch',
             borderColor: borderColor,
             backgroundColor: selected
               ? theme.tableRowBackgroundHighlight
