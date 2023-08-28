@@ -1,7 +1,4 @@
-import type { Paragraph, Root, PhrasingContent } from 'mdast';
 import { newlineToBreak } from 'mdast-util-newline-to-break';
-import type { Plugin, Transformer } from 'unified';
-import { visit, type Visitor, type VisitorResult } from 'unist-util-visit';
 
 export function sequentialNewlinesPlugin() {
   // Adapted from https://codesandbox.io/s/create-react-app-forked-h3rmcy?file=/src/sequentialNewlinePlugin.js:0-774

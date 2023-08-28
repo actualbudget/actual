@@ -36,7 +36,6 @@
     "inter-ui": "^3.19.3",
     "jest": "^27.0.0",
     "jest-watch-typeahead": "^2.2.2",
-    "mdast": "^3.0.0",
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
     "pikaday": "1.8.0",
@@ -58,8 +57,6 @@
     "redux-thunk": "^2.3.0",
     "remark-gfm": "^3.0.1",
     "sass": "^1.63.6",
-    "unified": "^10.0.0",
-    "unist-util-visit": "^5.0.0",
     "uuid": "^9.0.0",
     "victory": "^36.6.8",
     "webpack-bundle-analyzer": "^4.9.0"

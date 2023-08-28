@@ -9,22 +9,15 @@ import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
-import { colors, theme } from '../style';
-import {
-  remarkBreaks,
-  sequentialNewlinesPlugin,
-} from '../util/markdown';
+import { colors } from '../style';
+import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
 import Button from './common/Button';
 import Text from './common/Text';
 import View from './common/View';
 import { Tooltip, useTooltip } from './tooltips';
 
-const remarkPlugins = [
-  sequentialNewlinesPlugin,
-  remarkGfm,
-  remarkBreaks,
-];
+const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
 const markdownStyles = css({
   display: 'block',
@@ -87,17 +80,6 @@ const markdownStyles = css({
   },
   '& td': {
     padding: '0.25rem 0.75rem',
-  },
-  '& .md-directives-list': {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5rem',
-  },
-  '& .md-directive': {
-    backgroundColor: theme.pillBackground,
-    borderRadius: '0.25rem',
-    padding: '0.1rem 0.5rem',
-    display: 'inline-block',
   },
 });
 

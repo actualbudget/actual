@@ -74,7 +74,6 @@ __metadata:
     inter-ui: ^3.19.3
     jest: ^27.0.0
     jest-watch-typeahead: ^2.2.2
-    mdast: ^3.0.0
     mdast-util-newline-to-break: ^2.0.0
     memoize-one: ^6.0.0
     pikaday: 1.8.0
@@ -96,8 +95,6 @@ __metadata:
     redux-thunk: ^2.3.0
     remark-gfm: ^3.0.1
     sass: ^1.63.6
-    unified: ^10.0.0
-    unist-util-visit: ^5.0.0
     uuid: ^9.0.0
     victory: ^36.6.8
     webpack-bundle-analyzer: ^4.9.0
@@ -13517,13 +13514,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mdast@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "mdast@npm:3.0.0"
-  checksum: 410594c6535d09a96c01384c21ff7ef4909f1b634836e9cda93b67627ed833e81511d5a420d6d2e4cb91123548c5926ca5fa0d3dadf04ab81b67a07c96d08966
-  languageName: node
-  linkType: hard
-
 "mdn-data@npm:2.0.14":
   version: 2.0.14
   resolution: "mdn-data@npm:2.0.14"
@@ -19675,17 +19665,6 @@ __metadata:
     unist-util-is: ^5.0.0
     unist-util-visit-parents: ^5.1.1
   checksum: 95a34e3f7b5b2d4b68fd722b6229972099eb97b6df18913eda44a5c11df8b1e27efe7206dd7b88c4ed244a48c474a5b2e2629ab79558ff9eb936840295549cee
-  languageName: node
-  linkType: hard
-
-"unist-util-visit@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "unist-util-visit@npm:5.0.0"
-  dependencies:
-    "@types/unist": ^3.0.0
-    unist-util-is: ^6.0.0
-    unist-util-visit-parents: ^6.0.0
-  checksum: 9ec42e618e7e5d0202f3c191cd30791b51641285732767ee2e6bcd035931032e3c1b29093f4d7fd0c79175bbc1f26f24f26ee49770d32be76f8730a652a857e6
   languageName: node
   linkType: hard
 
