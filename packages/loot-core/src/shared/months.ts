@@ -1,6 +1,8 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
+import * as Platform from '../client/platform';
+
 type DateLike = string | Date;
 
 export function _parse(value: DateLike): Date {
@@ -89,7 +91,7 @@ export function dayFromDate(date: DateLike): string {
 }
 
 export function currentMonth(): string {
-  if (global.IS_TESTING) {
+  if (global.IS_TESTING || Platform.isPlaywright) {
     return global.currentMonth || '2017-01';
   } else {
     return d.format(new Date(), 'yyyy-MM');
@@ -97,7 +99,7 @@ export function currentMonth(): string {
 }
 
 export function currentDay(): string {
-  if (global.IS_TESTING) {
+  if (global.IS_TESTING || Platform.isPlaywright) {
     return '2017-01-01';
   } else {
     return d.format(new Date(), 'yyyy-MM-dd');
