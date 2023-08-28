@@ -618,8 +618,8 @@ async function applyCategoryTemplate(
           0,
           Math.round(monthlyIncome * (percent / 100)),
         );
-        if (increment < budgetAvailable || !priority) {
-          to_budget = increment;
+        if (increment + to_budget <= budgetAvailable || !priority) {
+          to_budget += increment;
         } else {
           if (budgetAvailable > 0) to_budget = budgetAvailable;
           errors.push(`Insufficient funds.`);
