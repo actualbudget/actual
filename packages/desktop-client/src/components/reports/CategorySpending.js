@@ -6,9 +6,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useCategories from '../../hooks/useCategories';
-import Filter from '../../icons/v2/Filter2';
 import { styles } from '../../style';
-import Button from '../common/Button';
 import Select from '../common/Select';
 import View from '../common/View';
 
@@ -23,7 +21,6 @@ function CategoryAverage() {
   const categories = useCategories();
 
   const [selectedCategories, setSelectedCategories] = useState(null);
-  const [categorySelectorVisible, setCategorySelectorVisible] = useState(false);
 
   const [allMonths, setAllMonths] = useState(null);
 
@@ -106,38 +103,25 @@ function CategoryAverage() {
   const numberOfMonthsLine = numberOfMonthsOptions.length - 1;
 
   const headerPrefixItems = (
-    <>
-      <Button
-        type="bare"
-        onClick={() => setCategorySelectorVisible(!categorySelectorVisible)}
-      >
-        <Filter
-          width={14}
-          height={14}
-          style={{ opacity: categorySelectorVisible ? 0.6 : 1 }}
-        />
-      </Button>
-
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 5,
-        }}
-      >
-        <View>Average: </View>
-        <Select
-          style={{ backgroundColor: 'white' }}
-          onChange={setNumberOfMonthsAverage}
-          value={numberOfMonthsAverage}
-          options={numberOfMonthsOptions.map(number => [
-            number.value,
-            number.description,
-          ])}
-          line={numberOfMonthsLine}
-        />
-      </View>
-    </>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+      }}
+    >
+      <View>Average: </View>
+      <Select
+        style={{ backgroundColor: 'white' }}
+        onChange={setNumberOfMonthsAverage}
+        value={numberOfMonthsAverage}
+        options={numberOfMonthsOptions.map(number => [
+          number.value,
+          number.description,
+        ])}
+        line={numberOfMonthsLine}
+      />
+    </View>
   );
 
   return (
@@ -153,13 +137,7 @@ function CategoryAverage() {
       <View
         style={{ display: 'flex', flexDirection: 'row', padding: 15, gap: 15 }}
       >
-        <View
-          style={{
-            height: '360',
-            overflowY: 'scroll',
-            width: !categorySelectorVisible ? 0 : 'auto',
-          }}
-        >
+        <View style={{ width: 200 }}>
           <CategorySelector
             categoryGroups={categories.grouped.filter(
               categoryGroup => !categoryGroup.is_income,

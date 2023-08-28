@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 
+import { type Query } from '../../shared/query';
 import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
 import q, { liveQuery } from '../query-helpers';
 
@@ -18,7 +19,7 @@ function loadStatuses(schedules, onData) {
   });
 }
 
-type UseSchedulesArgs = { transform?: <T>(v: T) => T };
+type UseSchedulesArgs = { transform?: (q: Query) => Query };
 export function useSchedules({ transform }: UseSchedulesArgs = {}) {
   let [data, setData] = useState(null);
 

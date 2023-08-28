@@ -58,7 +58,7 @@ export function getStatusProps(status) {
       Icon = CheckCircle1;
       break;
     default:
-      color = colors.n1;
+      color = colors.n7;
       backgroundColor = colors.n11;
       Icon = CheckCircleHollow;
       break;

@@ -93,7 +93,6 @@ type GroupMonthProps = {
   group: { id: string; is_income: boolean };
 };
 export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
-  let borderColor = theme.tableBorder;
   let { id } = group;
 
   return (
@@ -101,7 +100,6 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
       <SheetCell
         name="budgeted"
         width="flex"
-        borderColor={borderColor}
         textAlign="right"
         style={[{ fontWeight: 600 }, styles.tnum]}
         valueProps={{
@@ -113,7 +111,6 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
         name="spent"
         width="flex"
         textAlign="right"
-        borderColor={borderColor}
         style={[{ fontWeight: 600 }, styles.tnum]}
         valueProps={{
           binding: reportBudget.groupSumAmount(id),
@@ -124,7 +121,6 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
         <SheetCell
           name="balance"
           width="flex"
-          borderColor={borderColor}
           textAlign="right"
           style={[
             { fontWeight: 600, paddingRight: styles.monthRightPadding },
@@ -203,7 +199,6 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
-  let borderColor = theme.tableBorder;
   let balanceTooltip = useTooltip();
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
@@ -227,10 +222,6 @@ export const CategoryMonth = memo(function CategoryMonth({
         style={{
           flex: 1,
           flexDirection: 'row',
-          borderTopWidth: 1,
-          borderBottomWidth: 1,
-          borderColor,
-          backgroundColor: theme.tableBackground,
         }}
         onMouseOverCapture={() => setHover(true)}
         onMouseLeave={() => {
@@ -339,6 +330,9 @@ export const CategoryMonth = memo(function CategoryMonth({
             onBlur: () => {
               onEdit(null);
             },
+            style: {
+              backgroundColor: 'white',
+            },
           }}
           onSave={amount => {
             onBudgetAction(monthIndex, 'budget-amount', {
@@ -379,7 +373,6 @@ export const CategoryMonth = memo(function CategoryMonth({
             paddingRight: styles.monthRightPadding,
             textAlign: 'right',
             borderColor: borderColor,
-          }}
         >
           <span {...(category.is_income ? {} : balanceTooltip.getOpenEvents())}>
             <BalanceWithCarryover

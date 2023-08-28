@@ -134,7 +134,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
 
       <View>
         <Block>Available Funds</Block>
-        <Block>Overspent in {prevMonthName}</Block>
+        <Block data-vrt-mask>Overspent in {prevMonthName}</Block>
         <Block>Budgeted</Block>
         <Block>For Next Month</Block>
       </View>
@@ -347,6 +347,7 @@ export function BudgetSummary({
               },
               currentMonth === month && { fontWeight: 'bold' },
             ])}
+            data-vrt-mask
           >
             {monthUtils.format(month, 'MMMM')}
           </div>

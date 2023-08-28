@@ -16,13 +16,13 @@ const View = (props: ViewProps) => {
   // everywhere and we can avoid any perf penalty that glamor would
   // incur.
 
-  const { style, nativeStyle, innerRef, ...restProps } = props;
+  const { style, nativeStyle, innerRef, className = '', ...restProps } = props;
   return (
     <div
       {...restProps}
       ref={innerRef}
       style={nativeStyle}
-      className={`view ${css([props.className, props.style])}`}
+      className={`view ${className} ${css(props.style)}`}
     />
   );
 };

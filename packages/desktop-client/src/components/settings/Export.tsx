@@ -1,30 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { format } from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import Button from '../common/Button';
+import { theme } from '../../style';
+import Block from '../common/Block';
+import { ButtonWithLoading } from '../common/Button';
 import Text from '../common/Text';
 
 import { Setting } from './UI';
 
 export default function ExportBudget() {
+  let [isLoading, setIsLoading] = useState(false);
+  let [error, setError] = useState<string | null>(null);
   let budgetId = useSelector(state => state.prefs.local.id);
   let encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);
 
   async function onExport() {
-    let data = await send('export-budget');
+    setIsLoading(true);
+    setError(null);
+
+    let response = await send('export-budget');
+
+    if ('error' in response) {
+      setError(response.error);
+      setIsLoading(false);
+      console.log('Export error code:', response.error);
+      return;
+    }
+
     window.Actual.saveFile(
-      data,
+      response.data,
       `${format(new Date(), 'yyyy-MM-dd')}-${budgetId}.zip`,
       'Export budget',
     );
+    setIsLoading(false);
   }
 
   return (
-    <Setting primaryAction={<Button onClick={onExport}>Export data</Button>}>
+    <Setting
+      primaryAction={
+        <>
+          <ButtonWithLoading onClick={onExport} loading={isLoading}>
+            Export data
+          </ButtonWithLoading>
+          {error && (
+            <Block style={{ color: theme.errorText, marginTop: 15 }}>
+              An unknown error occurred while exporting. Please report this as a
+              new issue on Github.
+            </Block>
+          )}
+        </>
+      }
+    >
       <Text>
         <strong>Export</strong> your data as a zip file containing{' '}
         <code>db.sqlite</code> and <code>metadata.json</code> files. It can be

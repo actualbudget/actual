@@ -13,9 +13,31 @@ import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 import useSheetValue from '../spreadsheet/useSheetValue';
 
+function ToBudget({ toBudget }) {
+  let budgetAmount = useSheetValue(toBudget);
+  return (
+    <View style={{ alignItems: 'center', marginBottom: 15 }}>
+      <Text style={styles.text}>
+        {budgetAmount < 0 ? 'Overbudget:' : 'To budget:'}
+      </Text>
+      <Text
+        style={[
+          styles.text,
+          {
+            fontWeight: '600',
+            fontSize: 22,
+            color: budgetAmount < 0 ? colors.r4 : colors.n1,
+          },
+        ]}
+      >
+        {format(budgetAmount, 'financial')}
+      </Text>
+    </View>
+  );
+}
+
 function BudgetSummary({ month, modalProps }) {
   const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
-  const budgetAmount = useSheetValue(rolloverBudget.toBudget);
 
   return (
     <Modal title="Budget Details" {...modalProps} animate>
@@ -74,23 +96,7 @@ function BudgetSummary({ month, modalProps }) {
             </View>
           </View>
 
-          <View style={{ alignItems: 'center', marginBottom: 15 }}>
-            <Text style={styles.text}>
-              {budgetAmount < 0 ? 'Overbudget:' : 'To budget:'}
-            </Text>
-            <Text
-              style={[
-                styles.text,
-                {
-                  fontWeight: '600',
-                  fontSize: 22,
-                  color: budgetAmount < 0 ? colors.r4 : colors.n1,
-                },
-              ]}
-            >
-              {format(budgetAmount, 'financial')}
-            </Text>
-          </View>
+          <ToBudget toBudget={rolloverBudget.toBudget} />
 
           <View
             style={{

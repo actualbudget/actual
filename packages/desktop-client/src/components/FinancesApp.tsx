@@ -21,6 +21,7 @@ import checkForUpdateNotification from 'loot-core/src/client/update-notification
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useActions } from '../hooks/useActions';
+import Add from '../icons/v1/Add';
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
 import Wallet from '../icons/v1/Wallet';
@@ -32,7 +33,6 @@ import { getIsOutdated, getLatestVersion } from '../util/versions';
 import BankSyncStatus from './BankSyncStatus';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import View from './common/View';
-import FloatableSidebar, { SidebarProvider } from './FloatableSidebar';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import Modals from './Modals';
@@ -41,6 +41,7 @@ import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
 import Settings from './settings';
+import FloatableSidebar, { SidebarProvider } from './sidebar';
 import Titlebar, { TitlebarProvider } from './Titlebar';
 import { TransactionEdit } from './transactions/MobileTransaction';
 
@@ -108,6 +109,7 @@ function MobileNavTabs() {
     >
       <NavTab name="Budget" path="/budget" icon={Wallet} />
       <NavTab name="Accounts" path="/accounts" icon={PiggyBank} />
+      <NavTab name="Transaction" path="/transactions/new" icon={Add} />
       <NavTab name="Settings" path="/settings" icon={Cog} />
     </div>
   );
@@ -258,6 +260,14 @@ function FinancesApp() {
 
                 <Route
                   path="/accounts/:id/transactions/new"
+                  element={
+                    <WideNotSupported>
+                      <TransactionEdit />
+                    </WideNotSupported>
+                  }
+                />
+                <Route
+                  path="/transactions/new"
                   element={
                     <WideNotSupported>
                       <TransactionEdit />

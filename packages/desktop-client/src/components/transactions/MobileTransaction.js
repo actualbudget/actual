@@ -373,7 +373,7 @@ class TransactionEditInner extends PureComponent {
             }}
           >
             <Link
-              to={`/accounts/${account.id}`}
+              to={account ? `/accounts/${account.id}` : '/budget'}
               style={{
                 alignItems: 'center',
                 display: 'flex',
@@ -401,6 +401,7 @@ class TransactionEditInner extends PureComponent {
                 fontWeight: 600,
                 userSelect: 'none',
               }}
+              role="heading"
             >
               {payeeId == null
                 ? adding
@@ -473,6 +474,7 @@ class TransactionEditInner extends PureComponent {
               <TapField
                 value={descriptionPretty}
                 onClick={() => this.onClick(transaction.id, 'payee')}
+                data-testid="payee-field"
               />
             </View>
 
@@ -506,6 +508,7 @@ class TransactionEditInner extends PureComponent {
                   //   </Button>
                   // }
                   onClick={() => this.onClick(transaction.id, 'category')}
+                  data-testid="category-field"
                 />
               ) : (
                 <Text style={{ paddingLeft: EDITING_PADDING }}>
@@ -521,6 +524,7 @@ class TransactionEditInner extends PureComponent {
                 disabled={!adding}
                 value={account ? account.name : null}
                 onClick={() => this.onClick(transaction.id, 'account')}
+                data-testid="account-field"
               />
             </View>
 
@@ -549,6 +553,7 @@ class TransactionEditInner extends PureComponent {
                       ),
                     )
                   }
+                  data-vrt-mask
                 />
               </View>
 
@@ -1069,7 +1074,11 @@ export class TransactionList extends Component {
           {sections.map(section => {
             return (
               <Section
-                title={monthUtils.format(section.date, 'MMMM dd, yyyy')}
+                title={
+                  <span data-vrt-mask>
+                    {monthUtils.format(section.date, 'MMMM dd, yyyy')}
+                  </span>
+                }
                 key={section.id}
               >
                 {section.data.map((transaction, index, transactions) => {
