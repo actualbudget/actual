@@ -5,8 +5,7 @@ import React, {
   type SVGProps,
 } from 'react';
 
-// eslint-disable-next-line no-restricted-imports
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
@@ -35,17 +34,17 @@ function SecondaryItem({
   indent = 0,
 }: SecondaryItemProps) {
   const hoverStyle = {
-    backgroundColor: colors.n2,
+    backgroundColor: theme.sidebarItemBackgroundHover,
   };
   const activeStyle = {
-    borderLeft: '4px solid ' + colors.p8,
+    color: theme.sidebarItemTextSelected,
+    borderLeft: '4px solid ' + theme.sidebarItemAccentSelected,
     paddingLeft: 14 - 4 + indent,
-    color: colors.p8,
     fontWeight: bold ? fontWeight : null,
   };
   const linkStyle = {
     ...accountNameStyle,
-    color: colors.n9,
+    color: theme.sidebarItemText,
     paddingLeft: 14 + indent,
     fontWeight: bold ? fontWeight : null,
     ':hover': hoverStyle,

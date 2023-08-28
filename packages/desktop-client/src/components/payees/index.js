@@ -107,7 +107,6 @@ let Payee = memo(
 
     return (
       <Row
-        highlighted={highlighted}
         style={[
           {
             borderColor: borderColor,

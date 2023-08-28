@@ -6,8 +6,7 @@ import React, {
   type SVGProps,
 } from 'react';
 
-// eslint-disable-next-line no-restricted-imports
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
@@ -37,13 +36,13 @@ function Item({
   forceActive = false,
 }: ItemProps) {
   const hoverStyle = {
-    backgroundColor: colors.n2,
+    backgroundColor: theme.sidebarItemBackgroundHover,
   };
 
   const activeStyle = {
-    borderLeft: '4px solid ' + colors.p8,
+    color: theme.sidebarItemTextSelected,
+    borderLeft: '4px solid ' + theme.sidebarItemAccentSelected,
     paddingLeft: 19 + indent - 4,
-    color: colors.p8,
   };
 
   const linkStyle = {
@@ -53,7 +52,7 @@ function Item({
     paddingLeft: 19 + indent,
     paddingRight: 10,
     textDecoration: 'none',
-    color: colors.n9,
+    color: theme.sidebarItemText,
     ...(forceHover ? hoverStyle : {}),
     ':hover': hoverStyle,
   };
