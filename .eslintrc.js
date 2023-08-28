@@ -35,7 +35,11 @@ const restrictedImportColors = [
 
 module.exports = {
   plugins: ['prettier', 'import', 'rulesdir', '@typescript-eslint'],
-  extends: ['react-app', 'plugin:@typescript-eslint/recommended'],
+  extends: [
+    'react-app',
+    'plugin:react/recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
   parser: '@typescript-eslint/parser',
   parserOptions: { project: [path.join(__dirname, './tsconfig.json')] },
   reportUnusedDisableDirectives: true,
@@ -67,8 +71,14 @@ module.exports = {
     // https://github.com/eslint/eslint/issues/16953
     'no-loop-func': 'off',
 
+    // Do don't need this as we're using TypeScript
+    'react/prop-types': 'off',
+
     // TODO: re-enable these rules
     'react-hooks/exhaustive-deps': 'off',
+    'react/no-children-prop': 'off',
+    'react/display-name': 'off',
+    'react/react-in-jsx-scope': 'off',
     // 'react-hooks/exhaustive-deps': [
     //   'error',
     //   {
@@ -216,6 +226,8 @@ module.exports = {
         './packages/desktop-client/src/components/SidebarWithData.*',
         './packages/desktop-client/src/components/Titlebar.*',
         './packages/desktop-client/src/components/UpdateNotification.*',
+        './packages/desktop-client/src/components/accounts/Header.*',
+        './packages/desktop-client/src/components/alerts.*',
         './packages/desktop-client/src/components/budget/MobileBudget.*',
         './packages/desktop-client/src/components/budget/MobileBudgetTable.*',
         './packages/desktop-client/src/components/budget/MobileTable.*',
@@ -269,6 +281,7 @@ module.exports = {
         './packages/desktop-client/src/components/settings/index.*',
         './packages/desktop-client/src/components/sidebar.*',
         './packages/desktop-client/src/components/transactions/MobileTransaction.*',
+        './packages/desktop-client/src/components/transactions/TransactionsTable.*',
         './packages/desktop-client/src/components/util/AmountInput.*',
         './packages/desktop-client/src/style/*',
       ],

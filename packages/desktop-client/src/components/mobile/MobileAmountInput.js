@@ -227,13 +227,17 @@ export class FocusableAmountInput extends PureComponent {
     });
   };
 
+  maybeApplyNegative = value => {
+    const absValue = Math.abs(value);
+    return this.state.isNegative ? -absValue : absValue;
+  };
+
   onBlur = value => {
     this.setState({ focused: false, reallyFocused: false });
-    if (this.props.onBlur) {
-      const absValue = Math.abs(value);
-      this.props.onBlur(this.state.isNegative ? -absValue : absValue);
-    }
+    this.props.onBlur?.(this.maybeApplyNegative(value));
   };
+
+  onChange = value => this.props.onChange?.(this.maybeApplyNegative(value));
 
   render() {
     const { textStyle, style, focusedStyle, buttonProps } = this.props;
@@ -244,6 +248,7 @@ export class FocusableAmountInput extends PureComponent {
         <AmountInput
           {...this.props}
           ref={el => (this.amount = el)}
+          onChange={this.onChange}
           onBlur={this.onBlur}
           focused={focused}
           style={[

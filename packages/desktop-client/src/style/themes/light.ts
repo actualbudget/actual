@@ -24,15 +24,15 @@ export const cardShadow = colorPalette.navy700;
 
 export const tableBackground = colorPalette.white;
 export const tableRowBackgroundHover = colorPalette.navy50;
-export const tableText = colorPalette.navy700;
+export const tableText = pageText;
 export const altTableText = colorPalette.navy400;
 export const tableTextSelected = colorPalette.navy700;
 export const tableTextHover = colorPalette.navy900;
 export const tableTextEditing = colorPalette.navy50;
 export const tableTextEditingBackground = colorPalette.blue500;
-export const tableTextInactive = colorPalette.navy200;
+export const tableTextInactive = colorPalette.navy500;
 export const tableHeaderText = colorPalette.navy600;
-export const tableHeaderBackground = colorPalette.navy50;
+export const tableHeaderBackground = colorPalette.white;
 export const tableBorder = colorPalette.navy100;
 export const tableBorderSelected = colorPalette.purple500;
 export const tableBorderHover = colorPalette.purple400;
@@ -133,7 +133,7 @@ export const buttonBareDisabledText = buttonNormalDisabledText;
 export const buttonBareDisabledBackground = buttonBareBackground;
 
 export const noticeBackground = colorPalette.green50;
-export const noticeText = colorPalette.green600;
+export const noticeText = colorPalette.green500;
 export const noticeAccent = colorPalette.green200;
 export const warningBackground = colorPalette.orange200;
 export const warningText = colorPalette.orange800;

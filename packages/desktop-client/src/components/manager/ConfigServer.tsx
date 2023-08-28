@@ -186,7 +186,7 @@ export default function ConfigServer() {
                 }}
                 onClick={onSameDomain}
               >
-                Use {window.location.origin.replace(/https?:\/\//, '')}
+                Use current domain
               </Button>
             )}
             <Button

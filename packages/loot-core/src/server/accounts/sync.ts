@@ -291,10 +291,6 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
 
   let normalized = [];
   for (let trans of transactions) {
-    if (!trans.date) {
-      trans.date = trans.valueDate || trans.bookingDate;
-    }
-
     if (!trans.amount) {
       trans.amount = trans.transactionAmount.amount;
     }
@@ -435,7 +431,7 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -502,7 +498,6 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
 
       // Update the transaction
       const updates = {
-        date: trans.date,
         imported_id: trans.imported_id || null,
         payee: existing.payee || trans.payee || null,
         category: existing.category || trans.category || null,
@@ -513,6 +508,16 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
 
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
         updated.push({ id: existing.id, ...updates });
+      }
+
+      if (existing.is_parent && existing.cleared !== updates.cleared) {
+        const children = await db.all(
+          'SELECT id FROM v_transactions WHERE parent_id = ?',
+          [existing.id],
+        );
+        for (const child of children) {
+          updated.push({ id: child.id, cleared: updates.cleared });
+        }
       }
     } else {
       // Insert a new transaction
@@ -580,7 +585,7 @@ export async function reconcileTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -658,6 +663,16 @@ export async function reconcileTransactions(acctId, transactions) {
 
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
         updated.push({ id: existing.id, ...updates });
+      }
+
+      if (existing.is_parent && existing.cleared !== updates.cleared) {
+        const children = await db.all(
+          'SELECT id FROM v_transactions WHERE parent_id = ?',
+          [existing.id],
+        );
+        for (const child of children) {
+          updated.push({ id: child.id, cleared: updates.cleared });
+        }
       }
     } else {
       // Insert a new transaction
@@ -756,29 +771,27 @@ export async function syncGoCardlessAccount(
       'SELECT date FROM v_transactions WHERE account = ? ORDER BY date ASC LIMIT 1',
       [id],
     );
-    const startingDate = db.fromDateRepr(startingTransaction.date);
-    // assert(startingTransaction)
+    const startingDate = monthUtils.parseDate(
+      db.fromDateRepr(startingTransaction.date),
+    );
 
-    // Get all transactions since the latest transaction, plus any 5
-    // days before the latest transaction. This gives us a chance to
-    // resolve any transactions that were entered manually.
-    //
-    // TODO: What this really should do is query the last imported_id
-    // and since then
-    let date = monthUtils.subDays(db.fromDateRepr(latestTransaction.date), 31);
+    const startDate = monthUtils.dayFromDate(
+      dateFns.max([
+        // Many GoCardless integrations do not support getting more than 90 days
+        // worth of data, so make that the earliest possible limit.
+        monthUtils.parseDate(monthUtils.subDays(monthUtils.currentDay(), 90)),
 
-    // Never download transactions before the starting date. This was
-    // when the account was added to the system.
-    if (date < startingDate) {
-      date = startingDate;
-    }
+        // Never download transactions before the starting date.
+        startingDate,
+      ]),
+    );
 
     let { transactions, accountBalance } = await downloadGoCardlessTransactions(
       userId,
       userKey,
       acctId,
       bankId,
-      date,
+      startDate,
     );
 
     if (transactions.length === 0) {
@@ -793,8 +806,8 @@ export async function syncGoCardlessAccount(
       return result;
     });
   } else {
-    // Otherwise, download transaction for the past 30 days
-    const startingDay = monthUtils.subDays(monthUtils.currentDay(), 30);
+    // Otherwise, download transaction for the past 90 days
+    const startingDay = monthUtils.subDays(monthUtils.currentDay(), 90);
 
     const { transactions, startingBalance } =
       await downloadGoCardlessTransactions(
@@ -802,7 +815,7 @@ export async function syncGoCardlessAccount(
         userKey,
         acctId,
         bankId,
-        dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd'),
+        startingDay,
       );
 
     // We need to add a transaction that represents the starting
@@ -815,7 +828,7 @@ export async function syncGoCardlessAccount(
 
     const oldestDate =
       transactions.length > 0
-        ? oldestTransaction.valueDate || oldestTransaction.bookingDate
+        ? oldestTransaction.date
         : monthUtils.currentDay();
 
     const payee = await getStartingBalancePayee();

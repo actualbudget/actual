@@ -44,6 +44,7 @@ function compileMessage(
                   let actionName = href.slice(1);
                   return (
                     <LinkButton
+                      key={idx}
                       onClick={async e => {
                         e.preventDefault();
                         if (actions[actionName]) {

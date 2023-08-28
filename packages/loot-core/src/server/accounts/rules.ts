@@ -27,7 +27,13 @@ function parseRecurDate(desc) {
 
     return {
       type: 'recur',
-      schedule: new RSchedule({ rrules: rules }),
+      schedule: new RSchedule({
+        rrules: rules,
+        data: {
+          skipWeekend: desc.skipWeekend,
+          weekendSolve: desc.weekendSolveMode,
+        },
+      }),
     };
   } catch (e) {
     throw new RuleError('parse-recur-date', e.message);

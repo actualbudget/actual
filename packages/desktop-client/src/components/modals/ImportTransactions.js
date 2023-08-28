@@ -279,10 +279,9 @@ function Transaction({
     <Row
       style={{
         backgroundColor: theme.tableBackground,
-        color: theme.tableText,
       }}
     >
-      <Field width={200} style={{ borderColor: theme.tableBorder }}>
+      <Field width={200}>
         {showParsed ? (
           <ParsedDate
             parseDateFormat={parseDateFormat}
@@ -304,7 +303,6 @@ function Transaction({
         width="flex"
         style={{ borderColor: theme.tableBorder }}
         title={transaction.notes}
-      >
         {transaction.notes}
       </Field>
       {splitMode ? (
@@ -368,7 +366,7 @@ function SelectField({
         ]),
       ]}
       value={value === null ? 'choose-field' : value}
-      style={{ borderWidth: 1, width: '100%' }}
+      style={{ width: '100%' }}
       wrapperStyle={style}
       onChange={value => onChange(value)}
     />
@@ -402,7 +400,7 @@ function DateFormatSelect({
         ])}
         value={parseDateFormat || ''}
         onChange={value => onChange(value)}
-        style={{ borderWidth: 1, width: '100%' }}
+        style={{ width: '100%' }}
       />
     </View>
   );
@@ -944,7 +942,7 @@ export default function ImportTransactions({ modalProps, options }) {
                       setCsvDelimiter(value);
                       parse(filename, { delimiter: value, hasHeaderRow });
                     }}
-                    style={{ borderWidth: 1, width: 50 }}
+                    style={{ width: 50 }}
                   />
                 </label>
                 <CheckboxOption

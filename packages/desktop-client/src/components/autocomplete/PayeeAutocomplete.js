@@ -206,7 +206,6 @@ export default function PayeeAutocomplete({
   inputProps,
   showMakeTransfer = true,
   showManagePayees = false,
-  defaultFocusTransferPayees = false,
   tableBehavior,
   embedded,
   closeOnBlur,
@@ -228,9 +227,7 @@ export default function PayeeAutocomplete({
     accounts = cachedAccounts;
   }
 
-  let [focusTransferPayees, setFocusTransferPayees] = useState(
-    defaultFocusTransferPayees,
-  );
+  let [focusTransferPayees, setFocusTransferPayees] = useState(false);
   let [rawPayee, setRawPayee] = useState('');
   let hasPayeeInput = !!rawPayee;
   let payeeSuggestions = useMemo(() => {

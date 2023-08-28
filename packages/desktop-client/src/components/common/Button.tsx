@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, type ElementType } from 'react';
 
 import { css, type CSSProperties } from 'glamor';
 
@@ -19,7 +19,7 @@ type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
   activeStyle?: CSSProperties;
   textStyle?: CSSProperties;
   bounce?: boolean;
-  as?: 'button';
+  as?: ElementType;
 };
 
 type ButtonType = 'normal' | 'primary' | 'bare';
@@ -94,11 +94,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     hoveredStyle = [
       type !== 'bare' && styles.shadow,
-      hoveredStyle,
       {
         backgroundColor: backgroundColorHover[type],
         color: color || textColorHover[type],
       },
+      hoveredStyle,
     ];
     activeStyle = [
       type === 'bare'
