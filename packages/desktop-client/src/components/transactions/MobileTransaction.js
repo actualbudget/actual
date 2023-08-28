@@ -553,6 +553,7 @@ class TransactionEditInner extends PureComponent {
                       ),
                     )
                   }
+                  data-vrt-mask
                 />
               </View>
 
@@ -1073,7 +1074,11 @@ export class TransactionList extends Component {
           {sections.map(section => {
             return (
               <Section
-                title={monthUtils.format(section.date, 'MMMM dd, yyyy')}
+                title={
+                  <span data-vrt-mask>
+                    {monthUtils.format(section.date, 'MMMM dd, yyyy')}
+                  </span>
+                }
                 key={section.id}
               >
                 {section.data.map((transaction, index, transactions) => {
