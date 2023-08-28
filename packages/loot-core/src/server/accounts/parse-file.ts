@@ -13,14 +13,16 @@ export type ParseFileResult = {
   transactions?: unknown[];
 };
 
+type ParseFileOptions = {
+  hasHeaderRow?: boolean;
+  delimiter?: string;
+  fallbackMissingPayeeToMemo?: boolean;
+  enableExperimentalOfxParser?: boolean;
+};
+
 export async function parseFile(
   filepath,
-  options?: {
-    delimiter?: string;
-    hasHeaderRow?: boolean;
-    fallbackMissingPayeeToMemo?: boolean;
-    enableExperimentalOfxParser?: boolean;
-  },
+  options?: ParseFileOptions,
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let m = filepath.match(/\.[^.]*$/);
@@ -33,10 +35,10 @@ export async function parseFile(
         return parseQIF(filepath);
       case '.csv':
       case '.tsv':
-        return parseCSV(filepath, options);
+        return parseCSV(filepath, options?.hasHeaderRow, options?.delimiter);
       case '.ofx':
       case '.qfx':
-        if (options.enableExperimentalOfxParser) {
+        if (options?.enableExperimentalOfxParser) {
           return parseOFX(filepath);
         } else {
           return parseOFXNodeLibOFX(filepath, options);
@@ -53,10 +55,9 @@ export async function parseFile(
 }
 
 async function parseCSV(
-  filepath,
-  options: { delimiter?: string; hasHeaderRow?: boolean } = {
-    hasHeaderRow: true,
-  },
+  filepath: string,
+  hasHeaderRow = true,
+  delimiter?: string,
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
@@ -64,9 +65,9 @@ async function parseCSV(
   let data;
   try {
     data = csv2json(contents, {
-      columns: options.hasHeaderRow,
+      columns: hasHeaderRow,
       bom: true,
-      delimiter: options.delimiter || ',',
+      delimiter: delimiter || ',',
       // eslint-disable-next-line rulesdir/typography
       quote: '"',
       trim: true,
