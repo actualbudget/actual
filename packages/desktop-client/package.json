@@ -56,7 +56,8 @@
     "sass": "^1.63.6",
     "uuid": "^9.0.0",
     "victory": "^36.6.8",
-    "webpack-bundle-analyzer": "^4.9.0"
+    "webpack-bundle-analyzer": "^4.9.0",
+    "xml2js": "^0.6.2"
   },
   "scripts": {
     "start": "cross-env PORT=3001 react-app-rewired start",
