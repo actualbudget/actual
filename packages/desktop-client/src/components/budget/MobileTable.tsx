@@ -1,11 +1,15 @@
-import React, { type CSSProperties, type ReactNode } from 'react';
+import React, {
+  type ComponentProps,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 
 import { colors } from '../../style';
 import View from '../common/View';
 
 export const ROW_HEIGHT = 50;
 
-type ListItemProps = {
+type ListItemProps = ComponentProps<typeof View> & {
   children?: ReactNode;
   style: CSSProperties;
 };
