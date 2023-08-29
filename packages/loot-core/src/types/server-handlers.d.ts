@@ -36,6 +36,8 @@ export interface ServerHandlers {
 
   'transaction-delete': (transaction) => Promise<EmptyObject>;
 
+  'transaction-move': (arg: { id; accountId; targetId }) => Promise<unknown>;
+
   'transactions-parse-file': (arg: {
     filepath: string;
     options;

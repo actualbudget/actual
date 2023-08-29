@@ -129,6 +129,19 @@ handlers['transaction-delete'] = mutator(async function (transaction) {
   return {};
 });
 
+handlers['transaction-move'] = mutator(async function ({
+  id,
+  accountId,
+  targetId,
+}) {
+  return withUndo(async () => {
+    await batchMessages(async () => {
+      await db.moveTransaction(id, accountId, targetId);
+    });
+    return 'ok';
+  });
+});
+
 handlers['transactions-parse-file'] = async function ({ filepath, options }) {
   return parseFile(filepath, options);
 };

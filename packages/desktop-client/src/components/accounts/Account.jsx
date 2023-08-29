@@ -363,6 +363,18 @@ class AccountInternal extends PureComponent {
       this.paged.unsubscribe();
     }
 
+    if (
+      query.state.orderExpressions &&
+      query.state.orderExpressions.length > 0
+    ) {
+      // If there are no order expressions in the query,
+      // transactions are sorted by sort_order by default.
+      // In case there are order expressions, let's add back
+      // the sort_order sorting so that transactions still
+      // maintain the correct order.
+      query = query.orderBy({ sort_order: 'desc' });
+    }
+
     this.paged = pagedQuery(
       query.select('*'),
       async (data, prevData) => {

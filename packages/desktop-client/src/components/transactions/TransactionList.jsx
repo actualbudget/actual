@@ -12,6 +12,7 @@ import {
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
 import { theme } from '../../style';
+import { findSortUp } from '../budget/util';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -164,6 +165,74 @@ export function TransactionList({
     pushModal('schedule-edit', { id: scheduleId });
   });
 
+  async function onReorder(id, dropPos, targetId) {
+    if (sortField || isFiltered) {
+      // Don't support reorder while sorted or filtered.
+      return;
+    }
+
+    if (id === targetId) {
+      return;
+    }
+
+    const transIdx = transactions.findIndex(t => t.id === id);
+    const targetTransIdx = transactions.findIndex(t => t.id === targetId);
+
+    const trans = transactions[transIdx];
+    const targetTrans = transactions[targetTransIdx];
+
+    // Check date bounds.
+    // Only allow same reorder within same date.
+    if (targetTrans && targetTrans.date !== trans.date) {
+      if (dropPos === 'top') {
+        if (targetTrans.date > trans.date) {
+          return;
+        } else if (targetTrans.date < trans.date) {
+          const topOfTargetTransIdx = targetTransIdx - 1;
+          const topOfTargetTrans =
+            topOfTargetTransIdx >= 0 ? transactions[topOfTargetTransIdx] : null;
+
+          if (
+            topOfTargetTrans?.id === trans.id ||
+            topOfTargetTrans?.date < trans.date
+          ) {
+            // Top of target is the dropped transaction itself
+            // or top of target is earlier then the dropped transaction.
+            return;
+          }
+        }
+      } else if (dropPos === 'bottom') {
+        if (targetTrans.date < trans.date) {
+          return;
+        } else if (targetTrans.date > trans.date) {
+          const bottomOfTargetTransIdx = targetTransIdx + 1;
+          const bottomOfTargetTrans =
+            transactions.length > bottomOfTargetTransIdx
+              ? transactions[bottomOfTargetTransIdx]
+              : null;
+
+          if (
+            bottomOfTargetTrans?.id === trans.id ||
+            bottomOfTargetTrans?.date > trans.date
+          ) {
+            // Bottom of target is the dropped transaction itself
+            // or bottom of target is later then the dropped transaction.
+            return;
+          }
+        }
+      }
+    }
+
+    const sort = findSortUp(transactions, dropPos, targetId);
+
+    await send('transaction-move', {
+      id,
+      accountId: trans.account,
+      targetId: sort.targetId,
+    });
+    onRefetch();
+  }
+
   return (
     <TransactionTable
       ref={tableRef}
@@ -203,6 +272,7 @@ export function TransactionList({
       onSort={onSort}
       sortField={sortField}
       ascDesc={ascDesc}
+      onReorder={onReorder}
     />
   );
 }

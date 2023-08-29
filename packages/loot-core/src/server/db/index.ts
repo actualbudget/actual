@@ -612,15 +612,6 @@ export async function getTransaction(id) {
   return rows[0];
 }
 
-export async function getTransactionsByDate(
-  accountId,
-  startDate,
-  endDate,
-  options = {},
-) {
-  throw new Error('`getTransactionsByDate` is deprecated');
-}
-
 export async function getTransactions(accountId) {
   if (arguments.length > 1) {
     throw new Error(
@@ -635,12 +626,38 @@ export async function getTransactions(accountId) {
   );
 }
 
-export function insertTransaction(transaction) {
+export async function insertTransaction(transaction) {
+  const lastTransaction = await first(
+    `SELECT sort_order FROM v_transactions WHERE date = ? ORDER BY sort_order DESC LIMIT 1`,
+    [transaction.date.replace(/-/g, '')], // Remove hyphens
+  );
+  const sort_order =
+    (lastTransaction ? lastTransaction.sort_order : 0) + SORT_INCREMENT;
+
+  transaction = {
+    ...transaction,
+    sort_order: sort_order,
+  };
+
   return insertWithSchema('transactions', transaction);
 }
 
 export function updateTransaction(transaction) {
   return updateWithSchema('transactions', transaction);
+}
+
+export async function moveTransaction(id, accountId, targetId) {
+  const transactions = await all(
+    'SELECT vt.id, vt.sort_order FROM v_transactions vt WHERE vt.account = ? ' +
+      'AND vt.date = (SELECT vt2.date FROM v_transactions vt2 WHERE vt2.id = ? LIMIT 1) ORDER BY sort_order',
+    [accountId, id],
+  );
+
+  const { updates, sort_order } = shoveSortOrders(transactions, targetId);
+  for (let info of updates) {
+    await update('transactions', info);
+  }
+  await update('transactions', { id, sort_order });
 }
 
 export async function deleteTransaction(transaction) {
