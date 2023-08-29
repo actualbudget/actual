@@ -311,6 +311,11 @@ export default function DateSelect({
         {...inputProps}
         inputRef={inputRef}
         value={value}
+        onPointerUp={e => {
+          if (!embedded) {
+            setOpen(true);
+          }
+        }}
         onKeyDown={onKeyDown}
         onChange={onChange}
         onFocus={e => {
