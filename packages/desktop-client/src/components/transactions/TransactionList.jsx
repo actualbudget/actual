@@ -181,6 +181,10 @@ export function TransactionList({
     const trans = transactions[transIdx];
     const targetTrans = transactions[targetTransIdx];
 
+    if (targetTrans.is_child || targetTrans.parent_id) {
+      return;
+    }
+
     // Check date bounds.
     // Only allow same reorder within same date.
     if (targetTrans && targetTrans.date !== trans.date) {

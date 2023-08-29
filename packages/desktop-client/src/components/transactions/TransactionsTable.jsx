@@ -14,6 +14,7 @@ import React, {
   useReducer,
 } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 import {
   format as formatDate,
@@ -718,7 +719,7 @@ const Transaction = memo(function Transaction(props) {
     onNavigateToSchedule,
     canDrag = true,
     onDragChange = () => {},
-    onDrop,
+    onDrop = () => {},
   } = props;
 
   const dispatchSelected = useSelectedDispatch();
@@ -868,17 +869,17 @@ const Transaction = memo(function Transaction(props) {
     ? balance
     : balance + (_inverse ? -1 : 1) * amount;
 
-  let { dragRef } = useDraggable({
+  const { dragRef } = useDraggable({
     type: 'transaction',
-    onDragChange: onDragChange,
+    onDragChange,
     item: { id: transaction && transaction.id },
     canDrag: transaction != null && !isNew && !isPreview && canDrag,
   });
 
-  let { dropRef, dropPos } = useDroppable({
+  const { dropRef, dropPos } = useDroppable({
     types: 'transaction',
     id: transaction && transaction.id,
-    onDrop: onDrop,
+    onDrop,
   });
 
   return (
@@ -913,6 +914,9 @@ const Transaction = memo(function Transaction(props) {
           ...(_unmatched && { opacity: 0.5 }),
         }}
       >
+        {!isChild && !isNew && !isPreview && (
+          <DropHighlight pos={dropPos} offset={{ top: 1 }} />
+        )}
         {isChild && (
           <Field
             /* Checkmark blank placeholder for Child transaction */
@@ -957,14 +961,20 @@ const Transaction = memo(function Transaction(props) {
             }}
             focused={focusedField === 'select'}
             onSelect={e => {
-              dispatchSelected({ type: 'select', id: transaction.id, event: e });
+              dispatchSelected({
+                type: 'select',
+                id: transaction.id,
+                event: e,
+              });
             }}
             onEdit={() => onEdit(id, 'select')}
             selected={selected}
             style={{ ...(isChild && { borderLeftWidth: 1 }) }}
             value={
               matched && (
-                <Hyperlink2 style={{ width: 13, height: 13, color: 'inherit' }} />
+                <Hyperlink2
+                  style={{ width: 13, height: 13, color: 'inherit' }}
+                />
               )
             }
           />
@@ -978,13 +988,21 @@ const Transaction = memo(function Transaction(props) {
             exposed={focusedField === 'date'}
             value={date}
             valueStyle={valueStyle}
-            formatter={date =>
-              date ? formatDate(parseISO(date), dateFormat) : ''
-            }
             onExpose={name => !isPreview && onEdit(id, name)}
             onUpdate={value => {
               onUpdate('date', value);
             }}
+            unexposedContent={
+              <View innerRef={dragRef}>
+                <UnexposedCellContent
+                  value={date}
+                  formatter={date =>
+                    date ? formatDate(parseISO(date), dateFormat) : ''
+                  }
+                />
+              </View>
+            }
+            data-vrt-mask
           >
             {({
               onBlur,
@@ -1101,7 +1119,11 @@ const Transaction = memo(function Transaction(props) {
 
         {isPreview ? (
           // Category field for preview transactions
-          <Cell width="flex" style={{ alignItems: 'flex-start' }} exposed={true}>
+          <Cell
+            width="flex"
+            style={{ alignItems: 'flex-start' }}
+            exposed={true}
+          >
             {() => (
               <View
                 style={{
@@ -1183,7 +1205,7 @@ const Transaction = memo(function Transaction(props) {
         ) : isBudgetTransfer || isOffBudget || isPreview ? (
           <InputCell
             /* Category field for transfer and off-budget transactions
-      (NOT preview, it is covered first) */
+    (NOT preview, it is covered first) */
             name="category"
             width="flex"
             exposed={focusedField === 'category'}
@@ -1254,13 +1276,13 @@ const Transaction = memo(function Transaction(props) {
               shouldSaveFromKey,
               inputStyle,
             }) => (
-              <AccountAutocomplete
-                includeClosedAccounts={false}
-                value={accountId}
-                accounts={accounts}
-                shouldSaveFromKey={shouldSaveFromKey}
-                tableBehavior={true}
+              <CategoryAutocomplete
+                categoryGroups={categoryGroups}
+                value={categoryId}
                 focused={true}
+                tableBehavior={true}
+                showSplitOption={!isChild && !isParent}
+                shouldSaveFromKey={shouldSaveFromKey}
                 inputProps={{ onBlur, onKeyDown, style: inputStyle }}
                 onUpdate={onUpdate}
                 onSelect={onSave}
@@ -1332,7 +1354,8 @@ const Transaction = memo(function Transaction(props) {
                 : integerToCurrency(runningBalance)
             }
             valueStyle={{
-              color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
+              color:
+                runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
             }}
             style={{ ...styles.tnum, ...amountStyle }}
             width={88}
@@ -1585,6 +1608,13 @@ function TransactionTableInner({
     }
   }, [isAddingPrev, props.isAdding, newNavigator]);
 
+  // Disable reordering on below pages.
+  const { id: accountIdParam } = useParams();
+  const isOnAllAccountsPage = accountIdParam == null;
+  const isOnBudgetedAccountsPage = accountIdParam === 'budgeted';
+  const isOnOffBudgetAccountsPage = accountIdParam === 'offbudget';
+  const isOnUncategorizedPage = accountIdParam === 'uncategorized';
+
   const renderRow = ({ item, index, position, editing }) => {
     const {
       transactions,
@@ -1673,7 +1703,14 @@ function TransactionTableInner({
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
           pushModal={props.pushModal}
-          canDrag={!sortField && !isFiltered}
+          canDrag={
+            !sortField &&
+            !isFiltered &&
+            !isOnAllAccountsPage &&
+            !isOnBudgetedAccountsPage &&
+            !isOnOffBudgetAccountsPage &&
+            !isOnUncategorizedPage
+          }
           onDragChange={onDragChange}
           onDrop={onReorder}
         />

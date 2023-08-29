@@ -110,10 +110,12 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   );
 });
 
+type UnexposedCellContentProps = Pick<CellProps, 'value' | 'formatter'>;
+
 export function UnexposedCellContent({
   value,
   formatter,
-}: Pick<CellProps, 'value' | 'formatter'>) {
+}: UnexposedCellContentProps) {
   return (
     <Text
       style={{
