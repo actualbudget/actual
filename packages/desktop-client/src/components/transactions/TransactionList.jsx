@@ -107,9 +107,6 @@ export function TransactionList({
     if (changes.diff.updated.length > 0) {
       const dateChanged = !!changes.diff.updated[0].date;
       if (dateChanged) {
-        // Make sure it stays at the top of the list of transactions
-        // for that date
-        changes.diff.updated[0].sort_order = Date.now();
         await saveDiff(changes.diff);
         onRefetch();
       } else {
