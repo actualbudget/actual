@@ -8,6 +8,7 @@ import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme, styles } from '../../style';
+import { blue800 } from '../../style/palette';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import TextOneLine from '../common/TextOneLine';
@@ -275,7 +276,8 @@ export default function Accounts() {
     navigate(`/transaction/${transaction}`);
   };
 
-  useSetThemeColor(theme.altMenuBackground);
+  // theme-color meta tag does not support CSS variables
+  useSetThemeColor(blue800);
 
   return (
     <View style={{ flex: 1 }}>
