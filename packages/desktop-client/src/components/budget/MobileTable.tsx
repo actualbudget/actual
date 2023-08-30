@@ -1,11 +1,20 @@
-import React from 'react';
+import React, {
+  type ComponentProps,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 
 import { colors } from '../../style';
 import View from '../common/View';
 
 export const ROW_HEIGHT = 50;
 
-export const ListItem = ({ children, style, ...props }) => {
+type ListItemProps = ComponentProps<typeof View> & {
+  children?: ReactNode;
+  style: CSSProperties;
+};
+
+export const ListItem = ({ children, style, ...props }: ListItemProps) => {
   return (
     <View
       style={[
