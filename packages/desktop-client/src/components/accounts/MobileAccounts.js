@@ -275,7 +275,6 @@ export default function Accounts() {
     navigate(`/transaction/${transaction}`);
   };
 
-  // theme-color meta tag does not support CSS variables
   useSetThemeColor(theme.mobileAccountsPageTheme);
 
   return (
