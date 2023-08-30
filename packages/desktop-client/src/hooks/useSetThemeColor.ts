@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+const VAR_STRING_REGEX = /^var\((--.*)\)$/;
+
 export function useSetThemeColor(color: string) {
   useEffect(() => {
     setThemeColor(getPropertyValueFromVarString(color));
@@ -13,11 +15,9 @@ function setThemeColor(color: string) {
 }
 
 function getPropertyValueFromVarString(varString: string) {
-  const varStringMatch = varString.match(/^var\((--.*)\)$/);
-
-  return varStringMatch[1]
+  return VAR_STRING_REGEX.test(varString)
     ? window
         .getComputedStyle(document.documentElement)
-        .getPropertyValue(varStringMatch[1])
+        .getPropertyValue(varString.match(VAR_STRING_REGEX)[1])
     : varString;
 }
