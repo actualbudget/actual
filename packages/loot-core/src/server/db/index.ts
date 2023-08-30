@@ -28,7 +28,11 @@ import {
 } from '../models';
 import { sendMessages, batchMessages } from '../sync';
 
-import { shoveSortOrders, SORT_INCREMENT } from './sort';
+import {
+  shoveSortOrders,
+  SORT_INCREMENT,
+  TRANSACTION_SORT_INCREMENT,
+} from './sort';
 
 export { toDateRepr, fromDateRepr } from '../models';
 
@@ -628,15 +632,22 @@ export async function getTransactions(accountId) {
 
 export async function insertTransaction(transaction) {
   const lastTransaction = await first(
-    `SELECT sort_order FROM v_transactions WHERE date = ? ORDER BY sort_order DESC LIMIT 1`,
+    'SELECT sort_order FROM v_transactions ' +
+      'WHERE date = ? AND is_child <> 1 AND parent_id IS NULL ' +
+      'ORDER BY sort_order DESC LIMIT 1',
     [transaction.date.replace(/-/g, '')], // Remove hyphens
   );
-  const sort_order =
-    (lastTransaction ? lastTransaction.sort_order : 0) + SORT_INCREMENT;
+
+  // Child transactions have relative sort orders.
+  const isChild = transaction.is_child || transaction.parent_id;
+  const sortIncrement =
+    TRANSACTION_SORT_INCREMENT +
+    (isChild && transaction.sort_order ? transaction.sort_order : 0);
 
   transaction = {
     ...transaction,
-    sort_order: sort_order,
+    sort_order:
+      (lastTransaction ? lastTransaction.sort_order : 0) + sortIncrement,
   };
 
   return insertWithSchema('transactions', transaction);
@@ -653,11 +664,33 @@ export async function moveTransaction(id, accountId, targetId) {
     [accountId, id],
   );
 
-  const { updates, sort_order } = shoveSortOrders(transactions, targetId);
+  const { updates, sort_order } = shoveSortOrders(
+    transactions,
+    targetId,
+    TRANSACTION_SORT_INCREMENT,
+  );
+
   for (let info of updates) {
     await update('transactions', info);
+    moveSubtransactions(info.id, info.sort_order);
   }
   await update('transactions', { id, sort_order });
+  moveSubtransactions(id, sort_order);
+}
+
+async function moveSubtransactions(parentId, parentSortOrder) {
+  const subtransactions = await all(
+    'SELECT id FROM v_transactions WHERE parent_id = ? ORDER BY sort_order DESC',
+    [parentId],
+  );
+
+  for (let [index, sub] of subtransactions.entries()) {
+    const newIndex = index + 1;
+    await update('transactions', {
+      id: sub.id,
+      sort_order: parentSortOrder - newIndex,
+    });
+  }
 }
 
 export async function deleteTransaction(transaction) {

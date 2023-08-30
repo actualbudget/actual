@@ -34,6 +34,17 @@ async function getTransactionsByIds(
   );
 }
 
+type BatchedTransaction = {
+  id: string;
+  account?: string;
+  category?: string;
+  payee?: string;
+  schedule?: string;
+} & Omit<
+  TransactionEntity,
+  'id' | 'account' | 'category' | 'payee' | 'schedule'
+>;
+
 export async function batchUpdateTransactions({
   added,
   deleted,
@@ -42,14 +53,9 @@ export async function batchUpdateTransactions({
   detectOrphanPayees = true,
   runTransfers = true,
 }: {
-  added?: Array<{ id: string; payee: unknown; category: unknown }>;
-  deleted?: Array<{ id: string; payee: unknown }>;
-  updated?: Array<{
-    id: string;
-    payee?: unknown;
-    account?: unknown;
-    category?: unknown;
-  }>;
+  added?: BatchedTransaction[];
+  deleted?: BatchedTransaction[];
+  updated?: BatchedTransaction[];
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;
   runTransfers?: boolean;
@@ -82,6 +88,7 @@ export async function batchUpdateTransactions({
   // and makes bulk updates much faster
   await batchMessages(async () => {
     if (added) {
+      added = assignChildSortOrders(added);
       addedIds = await Promise.all(
         added.map(async t => db.insertTransaction(t)),
       );
@@ -185,4 +192,20 @@ export async function batchUpdateTransactions({
     added: resultAdded,
     updated: runTransfers ? transfersUpdated : resultUpdated,
   };
+}
+
+function assignChildSortOrders(transactions: BatchedTransaction[]) {
+  const childSortOrderPerParent = Object.fromEntries(
+    transactions.map(t => [t.parent_id, 0]),
+  );
+
+  function nextChildSortOrder(parentId) {
+    return ++childSortOrderPerParent[parentId];
+  }
+
+  // Set relative sort order of children
+  return transactions.map(t => ({
+    ...t,
+    sort_order: t.parent_id ? -nextChildSortOrder(t.parent_id) : undefined,
+  }));
 }
