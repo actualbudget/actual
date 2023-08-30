@@ -15,14 +15,15 @@ import View from '../common/View';
 import { Page } from '../Page';
 import CellValue from '../spreadsheet/CellValue';
 
-function AccountHeader({ name, amount }) {
+function AccountHeader({ name, amount, style = {} }) {
   return (
     <View
       style={{
+        flex: '1 0 auto',
         flexDirection: 'row',
-        marginTop: 28,
-        marginBottom: 10,
+        marginTop: 10,
         color: theme.altpageTextSubdued,
+        ...style,
       }}
     >
       <View style={{ flex: 1 }}>
@@ -196,7 +197,11 @@ class AccountList extends Component {
           />
         ))}
 
-        <AccountHeader name="Off budget" amount={getOffBudgetBalance()} />
+        <AccountHeader
+          name="Off budget"
+          amount={getOffBudgetBalance()}
+          style={{ marginTop: 30 }}
+        />
         {offbudgetAccounts.map((acct, idx) => (
           <AccountCard
             account={acct}

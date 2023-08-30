@@ -14,6 +14,7 @@ import Button from '../common/Button';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
+import PrivacyFilter from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
 import { Tooltip } from '../tooltips';
 import DisplayId from '../util/DisplayId';
@@ -112,7 +113,7 @@ export function ScheduleAmountCell({ amount, op }) {
         }}
         title={(isApprox ? 'Approximately ' : '') + str}
       >
-        {num > 0 ? `+${str}` : `${str}`}
+        <PrivacyFilter>{num > 0 ? `+${str}` : `${str}`}</PrivacyFilter>
       </Text>
     </Cell>
   );
@@ -214,7 +215,7 @@ export function SchedulesTable({
         <Field width="flex" name="account">
           <DisplayId type="accounts" id={item._account} />
         </Field>
-        <Field width={110} name="date">
+        <Field width={110} name="date" data-vrt-mask>
           {item.next_date
             ? monthUtils.format(item.next_date, dateFormat)
             : null}
