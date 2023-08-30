@@ -25,7 +25,6 @@ function AccountList({
           {
             overflow: 'auto',
             padding: '5px 0',
-            color: theme.altMenuItemText,
           },
           !embedded && { maxHeight: 175 },
         ]}
