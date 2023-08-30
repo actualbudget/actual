@@ -167,6 +167,7 @@ export default function Account(props) {
 
   useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
 
+  // theme-color meta tag does not support CSS variables
   useSetThemeColor(blue800);
 
   if (!accounts || !accounts.length) {
