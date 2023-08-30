@@ -1,12 +1,8 @@
 import { useEffect } from 'react';
 
 export function useSetThemeColor(color: string) {
-  window
-    .getComputedStyle(document.documentElement)
-    .getPropertyValue(getPropertyName(color));
-
   useEffect(() => {
-    setThemeColor(color);
+    setThemeColor(getPropertyValueFromVarString(color));
   }, [color]);
 }
 
@@ -16,8 +12,12 @@ function setThemeColor(color: string) {
   themeTag.setAttribute('content', color);
 }
 
-function getPropertyName(color: string) {
-  const isVariable = color.match(/^var\(--(.*)\)$/);
+function getPropertyValueFromVarString(varString: string) {
+  const varStringMatch = varString.match(/^var\((--.*)\)$/);
 
-  return isVariable ? isVariable[1] : color;
+  return varStringMatch[1]
+    ? window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue(varStringMatch[1])
+    : varString;
 }
