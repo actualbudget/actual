@@ -82,6 +82,7 @@ export const mobileNavItem = colorPalette.navy150;
 export const mobileNavItemSelected = colorPalette.purple400;
 export const mobileAccountShadow = cardShadow;
 export const mobileAccountText = colorPalette.blue800;
+export const mobileAccountsPageTheme = colorPalette.blue800;
 
 // Button
 export const buttonMenuText = colorPalette.navy100;

@@ -22,7 +22,7 @@ import {
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { blue800 } from '../../style/palette';
+import { theme } from '../../style';
 import SyncRefresh from '../SyncRefresh';
 
 import AccountDetails from './MobileAccountDetails';
@@ -168,7 +168,7 @@ export default function Account(props) {
   useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
 
   // theme-color meta tag does not support CSS variables
-  useSetThemeColor(blue800);
+  useSetThemeColor(theme.mobileAccountsPageTheme);
 
   if (!accounts || !accounts.length) {
     return null;

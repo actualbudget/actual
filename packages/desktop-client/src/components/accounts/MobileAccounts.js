@@ -8,7 +8,6 @@ import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme, styles } from '../../style';
-import { blue800 } from '../../style/palette';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import TextOneLine from '../common/TextOneLine';
@@ -277,7 +276,7 @@ export default function Accounts() {
   };
 
   // theme-color meta tag does not support CSS variables
-  useSetThemeColor(blue800);
+  useSetThemeColor(theme.mobileAccountsPageTheme);
 
   return (
     <View style={{ flex: 1 }}>
