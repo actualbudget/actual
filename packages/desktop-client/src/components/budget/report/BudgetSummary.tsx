@@ -374,7 +374,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               },
               currentMonth === month && { textDecoration: 'underline' },
             ])}
-            data-vrt-mask
           >
             {monthUtils.format(month, 'MMMM')}
           </div>
