@@ -14,6 +14,7 @@ jobs:
     name: Wait for Netlify build to finish
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Wait for Netlify build to finish
