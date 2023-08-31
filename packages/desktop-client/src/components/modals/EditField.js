@@ -10,7 +10,7 @@ import { useActions } from '../../hooks/useActions';
 import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import Input from '../common/Input';
 import Modal from '../common/Modal';
