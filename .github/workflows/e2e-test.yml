@@ -12,6 +12,7 @@ concurrency:
 jobs:
   netlify:
     name: Wait for Netlify build to finish
+    runs-on: ubuntu-latest
     steps:
       - name: Set up environment
         uses: ./.github/actions/setup
