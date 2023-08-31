@@ -55,7 +55,7 @@ test.describe('Transactions', () => {
       await expect(page).toHaveScreenshot(screenshotConfig(page));
     });
 
-    test.only('by category', async () => {
+    test('by category', async () => {
       const filterTooltip = await accountPage.filterBy('Category');
       await expect(filterTooltip.page).toHaveScreenshot(screenshotConfig(page));
 
