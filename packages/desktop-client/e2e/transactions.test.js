@@ -54,6 +54,37 @@ test.describe('Transactions', () => {
       await expect(accountPage.transactionTable).toHaveText('No transactions');
       await expect(page).toHaveScreenshot(screenshotConfig(page));
     });
+
+    test.only('by category', async () => {
+      const filterTooltip = await accountPage.filterBy('Category');
+      await expect(filterTooltip.page).toHaveScreenshot(screenshotConfig(page));
+
+      // Type in the autocomplete box
+      const autocomplete = page.getByTestId('autocomplete');
+      await expect(autocomplete).toHaveScreenshot(screenshotConfig(page));
+
+      // Select the active item
+      await page.getByRole('button', { name: 'Clothing' }).click();
+      await filterTooltip.applyButton.click();
+
+      // Assert that there are only clothing transactions
+      await expect(accountPage.getNthTransaction(0).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(1).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(2).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(3).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(4).category).toHaveText(
+        'Clothing',
+      );
+      await expect(page).toHaveScreenshot(screenshotConfig(page));
+    });
   });
 
   test('creates a test transaction', async () => {
