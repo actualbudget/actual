@@ -7,7 +7,7 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
 import { styles, colors } from '../../../style';
-import CategoryAutocomplete from '../../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
 import Button from '../../common/Button';
 import InitialFocus from '../../common/InitialFocus';
 import Menu from '../../common/Menu';
