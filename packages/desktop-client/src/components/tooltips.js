@@ -43,11 +43,7 @@ export class Tooltip extends Component {
         // Allow clicking reach popover that mount outside of
         // tooltips. Might need to think about this more, like what
         // kind of things can be click that shouldn't close a tooltip?
-        if (
-          node.dataset.testid === 'tooltip' ||
-          node.dataset.testid === this.props['data-testid'] ||
-          node.dataset.reachPopover != null
-        ) {
+        if (node.dataset.istooltip || node.dataset.reachPopover != null) {
           break;
         }
 
@@ -320,6 +316,7 @@ export class Tooltip extends Component {
             {...css(contentStyle, style, styles.darkScrollbar)}
             ref={this.contentRef}
             data-testid={this.props['data-testid'] || 'tooltip'}
+            data-istooltip
             onClick={e => {
               // Click events inside a tooltip (e.g. when selecting a menu item) will bubble up
               // through the portal to parents in the React tree (as opposed to DOM parents).
