@@ -13,7 +13,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useActions } from '../../hooks/useActions';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import View from '../common/View';
 import SyncRefresh from '../SyncRefresh';
 
@@ -303,7 +303,7 @@ export default function BudgetWrapper() {
   let actions = useActions();
   let spreadsheet = useSpreadsheet();
 
-  useSetThemeColor(colors.p5);
+  useSetThemeColor(theme.mobileBudgetViewTheme);
   return (
     <Budget
       categoryGroups={categoryGroups}
