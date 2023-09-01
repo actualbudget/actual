@@ -1057,7 +1057,7 @@ export class TransactionList extends Component {
         >
           {sections.length === 0 ? (
             <Section>
-              <Item>
+              <Item textValue="No transactions">
                 <div
                   style={{
                     display: 'flex',
