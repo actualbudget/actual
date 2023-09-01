@@ -176,6 +176,7 @@ function ConfigureField({
       style={{ padding: 15, color: theme.altmenuItemTextHeader }}
       width={275}
       onClose={() => dispatch({ type: 'close' })}
+      data-testid="filters-menu-tooltip"
     >
       <FocusScope>
         <View style={{ marginBottom: 10 }}>
@@ -427,6 +428,7 @@ export function FilterButton({ onApply }) {
           position="bottom-left"
           style={{ padding: 0 }}
           onClose={() => dispatch({ type: 'close' })}
+          data-testid="filters-select-tooltip"
         >
           <Menu
             onMenuSelect={name => {
@@ -536,7 +538,7 @@ function FilterExpression({
           )}
         </div>
       </Button>
-      <Button type="bare" onClick={onDelete}>
+      <Button type="bare" onClick={onDelete} aria-label="Delete filter">
         <DeleteIcon
           style={{
             width: 8,

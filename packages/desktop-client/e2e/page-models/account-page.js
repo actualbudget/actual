@@ -20,9 +20,11 @@ export class AccountPage {
       name: 'Menu',
     });
 
-    this.transactionTableRow = this.page
-      .getByTestId('table')
-      .getByTestId('row');
+    this.transactionTable = this.page.getByTestId('transaction-table');
+    this.transactionTableRow = this.transactionTable.getByTestId('row');
+
+    this.filterButton = this.page.getByRole('button', { name: 'Filter' });
+    this.filterSelectTooltip = this.page.getByTestId('filters-select-tooltip');
   }
 
   /**
@@ -94,6 +96,26 @@ export class AccountPage {
     );
   }
 
+  /**
+   * Open the filtering popover.
+   */
+  async filterBy(field) {
+    await this.filterButton.click();
+    await this.filterSelectTooltip.getByRole('button', { name: field }).click();
+
+    return new FilterTooltip(this.page.getByTestId('filters-menu-tooltip'));
+  }
+
+  /**
+   * Remove the nth filter
+   */
+  async removeFilter(idx) {
+    await this.page
+      .getByRole('button', { name: 'Delete filter' })
+      .nth(idx)
+      .click();
+  }
+
   async _fillTransactionFields(transactionRow, transaction) {
     if (transaction.payee) {
       await transactionRow.getByTestId('payee').click();
@@ -129,5 +151,12 @@ export class AccountPage {
       await this.page.keyboard.type(transaction.credit);
       await this.page.keyboard.press('Tab');
     }
+  }
+}
+
+class FilterTooltip {
+  constructor(page) {
+    this.page = page;
+    this.applyButton = page.getByRole('button', { name: 'Apply' });
   }
 }

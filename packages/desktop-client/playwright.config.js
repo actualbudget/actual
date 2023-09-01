@@ -26,14 +26,4 @@ export default defineConfig({
     trace: 'on-first-retry',
     ignoreHTTPSErrors: true,
   },
-  expect: {
-    toHaveScreenshot: {
-      // Approx. 2% difference (1000 pixels)
-      maxDiffPixels: 1000,
-    },
-    toMatchSnapshot: {
-      // 2% difference is acceptable
-      maxDiffPixelRatio: 0.02,
-    },
-  },
 });
