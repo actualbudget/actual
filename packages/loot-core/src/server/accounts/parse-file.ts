@@ -14,7 +14,11 @@ export type ParseFileResult = {
 
 export async function parseFile(
   filepath,
-  options?: { delimiter?: string; hasHeaderRow: boolean },
+  options?: {
+    delimiter?: string;
+    hasHeaderRow: boolean;
+    fallbackMissingPayeeToMemo?: boolean;
+  },
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let m = filepath.match(/\.[^.]*$/);
@@ -30,7 +34,7 @@ export async function parseFile(
         return parseCSV(filepath, options);
       case '.ofx':
       case '.qfx':
-        return parseOFX(filepath);
+        return parseOFX(filepath, options);
       default:
     }
   }
@@ -101,7 +105,12 @@ async function parseQIF(filepath): Promise<ParseFileResult> {
   };
 }
 
-async function parseOFX(filepath): Promise<ParseFileResult> {
+async function parseOFX(
+  filepath,
+  options: { fallbackMissingPayeeToMemo?: boolean } = {
+    fallbackMissingPayeeToMemo: true,
+  },
+): Promise<ParseFileResult> {
   let { getOFXTransactions, initModule } = await import(
     /* webpackChunkName: 'xfo' */ 'node-libofx'
   );
@@ -123,7 +132,9 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
 
   // Banks don't always implement the OFX standard properly
   // If no payee is available try and fallback to memo
-  let useName = data.some(trans => trans.name != null && trans.name !== '');
+  let useName =
+    !options.fallbackMissingPayeeToMemo ||
+    data.some(trans => trans.name != null && trans.name !== '');
 
   return {
     errors,
