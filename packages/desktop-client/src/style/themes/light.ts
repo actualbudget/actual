@@ -82,9 +82,14 @@ export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
 export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
-export const mobileAccountPageTheme = colorPalette.navy50;
-export const mobileAccountsPageTheme = colorPalette.blue800;
-export const mobileSettingsPageTheme = colorPalette.navy50;
+
+// Mobile view themes (for the top bar)
+export const mobileAccountViewTheme = colorPalette.navy50;
+export const mobileAccountsViewTheme = colorPalette.blue800;
+export const mobileBudgetViewTheme = colorPalette.purple500;
+export const mobileConfigServerViewTheme = colorPalette.purple500;
+export const mobileSettingsViewTheme = colorPalette.navy50;
+export const mobileTransactionViewTheme = colorPalette.purple500;
 
 // Button
 export const buttonMenuText = colorPalette.navy100;

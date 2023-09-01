@@ -699,7 +699,7 @@ function TransactionEditUnconnected(props) {
   let adding = false;
   let deleted = false;
 
-  useSetThemeColor(colors.p5);
+  useSetThemeColor(theme.mobileTransactionViewTheme);
 
   useEffect(() => {
     // May as well update categories / accounts when transaction ID changes

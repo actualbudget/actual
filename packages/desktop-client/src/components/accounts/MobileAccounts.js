@@ -275,7 +275,7 @@ export default function Accounts() {
     navigate(`/transaction/${transaction}`);
   };
 
-  useSetThemeColor(theme.mobileAccountsPageTheme);
+  useSetThemeColor(theme.mobileAccountsViewTheme);
 
   return (
     <View style={{ flex: 1 }}>

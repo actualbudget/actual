@@ -133,7 +133,7 @@ export default function Settings() {
   const { isNarrowWidth } = useResponsive();
   const themesFlag = useFeatureFlag('themes');
 
-  useSetThemeColor(theme.mobileSettingsPageTheme);
+  useSetThemeColor(theme.mobileSettingsViewTheme);
   return (
     <View
       style={{
