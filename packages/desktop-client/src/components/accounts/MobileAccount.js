@@ -13,7 +13,7 @@ import {
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { listen } from 'loot-core/src/platform/client/fetch';
 import {
   isPreviewId,
   ungroupTransactions,
@@ -185,33 +185,8 @@ export default function Account(props) {
   };
 
   const onSelectTransaction = transaction => {
-    if (isPreviewId(transaction.id)) {
-      let parts = transaction.id.split('/');
-      let scheduleId = parts[1];
-
-      let options = ['Post transaction', 'Skip scheduled date', 'Cancel'];
-      let cancelButtonIndex = 2;
-
-      props.showActionSheetWithOptions(
-        {
-          options,
-          cancelButtonIndex,
-        },
-        buttonIndex => {
-          switch (buttonIndex) {
-            case 0:
-              // Post
-              send('schedule/post-transaction', { id: scheduleId });
-              break;
-            case 1:
-              // Skip
-              send('schedule/skip-next-date', { id: scheduleId });
-              break;
-            default:
-          }
-        },
-      );
-    } else {
+    // details of how the native app used to handle preview transactions here can be found at commit 05e58279
+    if (!isPreviewId(transaction.id)) {
       navigate(`transactions/${transaction.id}`);
     }
   };
