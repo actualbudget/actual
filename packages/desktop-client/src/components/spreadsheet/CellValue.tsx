@@ -9,7 +9,7 @@ import {
   type ConditionalPrivacyFilterProps,
 } from '../PrivacyFilter';
 
-import { useFormat } from './format';
+import useFormat from './useFormat';
 import useSheetName from './useSheetName';
 import useSheetValue from './useSheetValue';
 

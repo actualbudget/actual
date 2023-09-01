@@ -9,12 +9,13 @@ import Modal from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
-import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
+import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 
 function ToBudget({ toBudget }) {
   let budgetAmount = useSheetValue(toBudget);
+  let format = useFormat();
   return (
     <View style={{ alignItems: 'center', marginBottom: 15 }}>
       <Text style={styles.text}>

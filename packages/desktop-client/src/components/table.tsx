@@ -41,7 +41,7 @@ import {
   type ConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 import { type Binding } from './spreadsheet';
-import format from './spreadsheet/format';
+import useFormat from './spreadsheet/useFormat';
 import useSheetValue from './spreadsheet/useSheetValue';
 import { Tooltip, IntersectionBoundary } from './tooltips';
 
@@ -702,6 +702,7 @@ export function SheetCell({
       inputProps.onBlur(e);
     }
   });
+  let format = useFormat();
 
   return (
     <Cell
