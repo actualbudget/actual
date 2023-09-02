@@ -285,16 +285,6 @@ export function BudgetSummary({
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
 
-  let hoverStyle = {
-    '& .hover-visible': {
-      opacity: 0,
-      transition: 'opacity .25s',
-    },
-    '&:hover .hover-visible': {
-      opacity: 1,
-    },
-  };
-
   return (
     <View
       data-testid="budget-summary"
@@ -309,7 +299,13 @@ export function BudgetSummary({
         cursor: 'default',
         marginBottom: 5,
         overflow: 'hidden',
-        ...hoverStyle,
+        '& .hover-visible': {
+          opacity: 0,
+          transition: 'opacity .25s',
+        },
+        '&:hover .hover-visible': {
+          opacity: 1,
+        },
       }}
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>

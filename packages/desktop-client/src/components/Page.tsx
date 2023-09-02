@@ -1,7 +1,7 @@
-import React, { type ReactNode, type CSSProperties } from 'react';
+import React, { type ReactNode } from 'react';
 
 import { useResponsive } from '../ResponsiveProvider';
-import { colors, styles } from '../style';
+import { colors, styles, type CSSProperties } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';

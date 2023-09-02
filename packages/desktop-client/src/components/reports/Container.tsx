@@ -1,6 +1,7 @@
-import React, { useRef, type CSSProperties, type ReactNode } from 'react';
+import React, { useRef, type ReactNode } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import { type CSSProperties } from '../../style';
 import View from '../common/View';
 
 type ContainerProps = {

@@ -1,11 +1,11 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
 
 import { css } from 'glamor';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 // eslint-disable-next-line no-restricted-imports
-import { styles, colors } from '../../style';
+import { styles, colors, type CSSProperties } from '../../style';
 import AlignedText from '../common/AlignedText';
 import AnchorLink from '../common/AnchorLink';
 import View from '../common/View';
@@ -19,7 +19,7 @@ import {
 import { type Binding } from '../spreadsheet';
 import CellValue from '../spreadsheet/CellValue';
 
-const accountNameStyle = {
+export const accountNameStyle: CSSProperties = {
   marginTop: -2,
   marginBottom: 2,
   paddingTop: 4,
@@ -80,13 +80,6 @@ function Account({
     onDrop: onDrop,
   });
 
-  const dotStyle = {
-    '& .dot': {
-      backgroundColor: colors.p8,
-      transform: 'translateX(-4.5px)',
-    },
-  };
-
   return (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
       <View>
@@ -110,7 +103,10 @@ function Account({
               // unbolds it, but it still "flashes" bold so this just
               // ignores it if it's active
               fontWeight: (style && style.fontWeight) || 'normal',
-              ...dotStyle,
+              '& .dot': {
+                backgroundColor: colors.p8,
+                transform: 'translateX(-4.5px)',
+              },
             }}
           >
             <View
@@ -149,5 +145,4 @@ function Account({
   );
 }
 
-export { accountNameStyle };
 export default Account;

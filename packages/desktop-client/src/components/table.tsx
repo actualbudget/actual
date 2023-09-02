@@ -8,7 +8,6 @@ import React, {
   useImperativeHandle,
   useMemo,
   type ComponentProps,
-  type CSSProperties,
   type ReactNode,
   type KeyboardEvent,
   type UIEvent,
@@ -25,7 +24,7 @@ import AnimatedLoading from '../icons/AnimatedLoading';
 import DeleteIcon from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
-import { styles, theme } from '../style';
+import { type CSSProperties, styles, theme } from '../style';
 
 import Button from './common/Button';
 import Input from './common/Input';
@@ -132,8 +131,8 @@ export function UnexposedCellContent({
 type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   formatter?: (value: string, type?: unknown) => string;
   focused?: boolean;
-  textAlign?: string;
-  alignItems?: string;
+  textAlign?: CSSProperties['textAlign'];
+  alignItems?: CSSProperties['alignItems'];
   plain?: boolean;
   exposed?: boolean;
   children?: ReactNode | (() => ReactNode);
@@ -166,8 +165,9 @@ export function Cell({
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
-  const widthStyle = width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
-  const cellStyle = {
+  const widthStyle: CSSProperties =
+    width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
+  const cellStyle: CSSProperties = {
     position: 'relative',
     textAlign: textAlign || 'left',
     justifyContent: 'center',
@@ -252,7 +252,7 @@ export function Cell({
   return (
     <View
       innerRef={viewRef}
-      style={{ ...widthStyle, ...cellStyle, ...style } as CSSProperties}
+      style={{ ...widthStyle, ...cellStyle, ...style }}
       {...viewProps}
       data-testid={name}
     >
@@ -514,14 +514,6 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
     },
     ref,
   ) => {
-    const focusStyle = {
-      ':focus': bare
-        ? null
-        : {
-            outline: 0,
-            boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
-          },
-    };
     // This represents a cell that acts like a button: it's clickable,
     // focusable, etc. The reason we don't use a button is because the
     // full behavior is undesirable: we really don't want stuff like
@@ -575,7 +567,12 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             : primary
             ? theme.buttonPrimaryText
             : theme.buttonNormalText,
-          ...focusStyle,
+          ':focus': bare
+            ? null
+            : {
+                outline: 0,
+                boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
+              },
           ...style,
         }}
         onFocus={() => onEdit && onEdit()}
@@ -612,12 +609,6 @@ export function SelectCell({
   buttonProps = {},
   ...props
 }: SelectCellProps) {
-  const focusStyle = {
-    ':focus': {
-      border: '1px solid ' + theme.altFormInputBorderSelected,
-      boxShadow: '0 1px 2px ' + theme.altFormInputShadowSelected,
-    },
-  };
   return (
     <Cell
       {...props}
@@ -646,7 +637,10 @@ export function SelectCell({
             backgroundColor: selected
               ? theme.tableTextEditingBackground
               : theme.tableBackground,
-            ...focusStyle,
+            ':focus': {
+              border: '1px solid ' + theme.altFormInputBorderSelected,
+              boxShadow: '0 1px 2px ' + theme.altFormInputShadowSelected,
+            },
           }}
           onEdit={onEdit}
           onSelect={onSelect}
@@ -830,7 +824,11 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
   );
 }
 
-let rowStyle = { position: 'absolute', willChange: 'transform', width: '100%' };
+let rowStyle: CSSProperties = {
+  position: 'absolute',
+  willChange: 'transform',
+  width: '100%',
+};
 
 type TableHandleRef = {
   scrollTo: (id: number, alignment?: string) => void;
@@ -1019,13 +1017,11 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       return (
         <View
           key={key}
-          style={
-            {
-              ...rowStyle,
-              zIndex: editing || selected ? 101 : 'auto',
-              transform: 'translateY(var(--pos))',
-            } as CSSProperties
-          }
+          style={{
+            ...rowStyle,
+            zIndex: editing || selected ? 101 : 'auto',
+            transform: 'translateY(var(--pos))',
+          }}
           // @ts-expect-error not a recognised style attribute
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}

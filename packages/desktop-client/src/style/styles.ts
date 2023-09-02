@@ -1,10 +1,14 @@
-import { type CSSProperties } from 'react';
+import { type CSSProperties as ReactCSSProperties } from 'react';
 
 import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from '../tokens';
+
+export type CSSProperties = ReactCSSProperties & {
+  [propertyName: string]: unknown;
+};
 
 export const styles = {
   incomeHeaderHeight: 70,
@@ -120,7 +124,7 @@ function onScrollbarChange() {
         backgroundColor: '#d0d0d0',
       },
     }),
-  } as CSSProperties;
+  };
 
   styles.darkScrollbar = {
     ...(!hiddenScrollbars && {
@@ -132,7 +136,7 @@ function onScrollbarChange() {
         backgroundColor: 'rgba(200, 200, 200, .5)',
       },
     }),
-  } as CSSProperties;
+  };
 
   styles.scrollbarWidth = hiddenScrollbars ? 0 : 13;
 }

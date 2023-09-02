@@ -1,4 +1,4 @@
-import React, { type CSSProperties, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { importBudget } from 'loot-core/src/client/actions/budgets';
@@ -54,10 +54,6 @@ function Import({ modalProps }: ImportProps) {
     }
   }
 
-  const lineHeightStyle = {
-    '& > div': { lineHeight: '1.7em' },
-  } as CSSProperties;
-
   return (
     <Modal
       {...modalProps}
@@ -72,7 +68,7 @@ function Import({ modalProps }: ImportProps) {
             </Block>
           )}
 
-          <View style={lineHeightStyle}>
+          <View style={{ '& > div': { lineHeight: '1.7em' } }}>
             <Paragraph>
               You can import data from another Actual account or instance. First
               export your data from a different account, and it will give you a

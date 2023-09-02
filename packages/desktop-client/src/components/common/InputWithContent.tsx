@@ -1,11 +1,6 @@
-import {
-  useState,
-  type ComponentProps,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import { useState, type ComponentProps, type ReactNode } from 'react';
 
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 
 import Input, { defaultInputStyle } from './Input';
 import View from './View';
@@ -28,14 +23,6 @@ export default function InputWithContent({
   ...props
 }: InputWithContentProps) {
   let [focused, setFocused] = useState(false);
-  const hoverStyle = {
-    '&, &:focus, &:hover': {
-      border: 0,
-      backgroundColor: 'transparent',
-      boxShadow: 'none',
-      color: 'inherit',
-    },
-  } as CSSProperties;
 
   return (
     <View
@@ -58,7 +45,12 @@ export default function InputWithContent({
         style={{
           ...inputStyle,
           flex: 1,
-          ...hoverStyle,
+          '&, &:focus, &:hover': {
+            border: 0,
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            color: 'inherit',
+          },
         }}
         onFocus={e => {
           setFocused(true);

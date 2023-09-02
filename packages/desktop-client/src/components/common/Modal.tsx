@@ -2,7 +2,6 @@ import React, {
   useEffect,
   useRef,
   useLayoutEffect,
-  type CSSProperties,
   type ReactNode,
 } from 'react';
 import ReactModal from 'react-modal';
@@ -11,7 +10,7 @@ import hotkeys from 'hotkeys-js';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import Delete from '../../icons/v0/Delete';
-import { styles, theme } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 import tokens from '../../tokens';
 
 import Button from './Button';

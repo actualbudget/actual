@@ -1,10 +1,4 @@
-import React, {
-  type ComponentProps,
-  type CSSProperties,
-  memo,
-  useContext,
-  useState,
-} from 'react';
+import React, { type ComponentProps, memo, useContext, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
@@ -12,7 +6,7 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
-import { styles, colors } from '../../../style';
+import { styles, colors, type CSSProperties } from '../../../style';
 import CategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
 import Button from '../../common/Button';
 import InitialFocus from '../../common/InitialFocus';
@@ -329,31 +323,19 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const budgetHoverStyle = {
-    ':hover': {
-      boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-      backgroundColor: 'white',
-    },
-  };
-  const spentHoverStyle = {
-    ':hover': { textDecoration: 'underline' },
-  };
-  const hoverStyle = {
-    '& .hover-visible': {
-      opacity: 0,
-      transition: 'opacity .25s',
-    },
-    '&:hover .hover-visible': {
-      opacity: 1,
-    },
-  };
 
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...hoverStyle,
+        '& .hover-visible': {
+          opacity: 0,
+          transition: 'opacity .25s',
+        },
+        '&:hover .hover-visible': {
+          opacity: 1,
+        },
       }}
     >
       <View
@@ -444,7 +426,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             margin: 1,
             padding: '0 4px',
             borderRadius: 4,
-            ...budgetHoverStyle,
+            ':hover': {
+              boxShadow: 'inset 0 0 0 1px ' + colors.n7,
+              backgroundColor: 'white',
+            },
           }}
           valueProps={{
             binding: rolloverBudget.catBudgeted(category.id),
@@ -484,7 +469,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             getStyle={makeAmountGrey}
             style={{
               cursor: 'pointer',
-              ...spentHoverStyle,
+              ':hover': { textDecoration: 'underline' },
             }}
           />
         </span>
@@ -551,10 +536,6 @@ export function IncomeCategoryMonth({
   monthIndex,
   onShowActivity,
 }: IncomeCategoryMonthProps) {
-  const hoverStyle = {
-    ':hover': { textDecoration: 'underline' },
-  };
-
   return (
     <View style={{ flex: 1 }}>
       <Field
@@ -574,7 +555,7 @@ export function IncomeCategoryMonth({
             type="financial"
             style={{
               cursor: 'pointer',
-              ...hoverStyle,
+              ':hover': { textDecoration: 'underline' },
             }}
           />
         </span>

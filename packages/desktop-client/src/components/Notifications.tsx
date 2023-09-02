@@ -3,7 +3,6 @@ import React, {
   useEffect,
   useMemo,
   type SetStateAction,
-  type CSSProperties,
 } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -12,7 +11,7 @@ import type { NotificationWithId } from 'loot-core/src/client/state-types/notifi
 import { useActions } from '../hooks/useActions';
 import AnimatedLoading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
-import { styles, colors } from '../style';
+import { styles, colors, type CSSProperties } from '../style';
 
 import Button, { ButtonWithLoading } from './common/Button';
 import ExternalLink from './common/ExternalLink';
@@ -104,16 +103,6 @@ function Notification({
     [message, messageActions],
   );
 
-  const buttonStyle = {
-    '&:hover, &:active': {
-      backgroundColor: positive ? colors.g9 : error ? colors.r10 : colors.y9,
-    },
-  } as CSSProperties;
-
-  const anchorStyle = {
-    '& a': { color: 'currentColor' },
-  };
-
   return (
     <View
       style={{
@@ -137,7 +126,7 @@ function Notification({
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
-          ...anchorStyle,
+          '& a': { color: 'currentColor' },
         }}
       >
         <Stack align="flex-start">
@@ -180,7 +169,13 @@ function Notification({
                 color: 'currentColor',
                 fontSize: 14,
                 flexShrink: 0,
-                ...buttonStyle,
+                '&:hover, &:active': {
+                  backgroundColor: positive
+                    ? colors.g9
+                    : error
+                    ? colors.r10
+                    : colors.y9,
+                },
               }}
             >
               {button.title}

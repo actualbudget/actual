@@ -1,6 +1,6 @@
-import React, { useMemo, type CSSProperties, type ReactNode } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 
-import { styles } from '../../style';
+import { type CSSProperties, styles } from '../../style';
 import Text from '../common/Text';
 import {
   ConditionalPrivacyFilter,

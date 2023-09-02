@@ -1,8 +1,8 @@
-import React, { type CSSProperties, type MouseEventHandler } from 'react';
+import React, { type MouseEventHandler } from 'react';
 
 import Pin from '../../icons/v1/Pin';
 import ArrowButtonLeft1 from '../../icons/v2/ArrowButtonLeft1';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import Button from '../common/Button';
 import View from '../common/View';
 

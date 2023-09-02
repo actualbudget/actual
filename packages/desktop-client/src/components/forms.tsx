@@ -1,12 +1,8 @@
-import React, {
-  type ReactNode,
-  type HTMLProps,
-  type CSSProperties,
-} from 'react';
+import React, { type ReactNode, type HTMLProps } from 'react';
 
 import { css } from 'glamor';
 
-import { theme } from '../style';
+import { type CSSProperties, theme } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -68,8 +64,8 @@ export const FormField = ({ style, children }: FormFieldProps) => {
 
 // Custom inputs
 
-type CheckboxProps = Omit<HTMLProps<HTMLInputElement>, 'type' | 'styles'> & {
-  styles?: CSSProperties;
+type CheckboxProps = Omit<HTMLProps<HTMLInputElement>, 'type'> & {
+  style?: CSSProperties;
 };
 
 export const Checkbox = (props: CheckboxProps) => {
@@ -123,7 +119,7 @@ export const Checkbox = (props: CheckboxProps) => {
             },
           },
         ],
-        props.styles,
+        props.style,
       )}
     />
   );

@@ -1,4 +1,4 @@
-import React, { createElement, type CSSProperties } from 'react';
+import React, { createElement } from 'react';
 
 import * as d from 'date-fns';
 import {
@@ -10,6 +10,7 @@ import {
   VictoryGroup,
 } from 'victory';
 
+import { type CSSProperties } from '../../../style';
 import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';

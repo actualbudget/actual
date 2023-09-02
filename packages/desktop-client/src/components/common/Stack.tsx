@@ -5,8 +5,9 @@ import React, {
   cloneElement,
   forwardRef,
   type ReactNode,
-  type CSSProperties,
 } from 'react';
+
+import { type CSSProperties } from '../../style';
 
 import Text from './Text';
 import View from './View';

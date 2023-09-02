@@ -1,7 +1,6 @@
 import React, {
   type ComponentProps,
   type ComponentType,
-  type CSSProperties,
   type ReactNode,
   useState,
   type SVGProps,
@@ -16,7 +15,7 @@ import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
-import { colors, styles } from '../../../style';
+import { colors, type CSSProperties, styles } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import Button from '../../common/Button';
 import HoverTarget from '../../common/HoverTarget';
@@ -317,15 +316,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   }
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
-  let hoverStyle = {
-    '& .hover-visible': {
-      opacity: 0,
-      transition: 'opacity .25s',
-    },
-    '&:hover .hover-visible': {
-      opacity: 1,
-    },
-  };
 
   return (
     <View
@@ -340,7 +330,13 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
         cursor: 'default',
         marginBottom: 5,
         overflow: 'hidden',
-        ...hoverStyle,
+        '& .hover-visible': {
+          opacity: 0,
+          transition: 'opacity .25s',
+        },
+        '&:hover .hover-visible': {
+          opacity: 1,
+        },
       }}
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>

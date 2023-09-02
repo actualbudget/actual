@@ -1,6 +1,5 @@
 import React, {
   useRef,
-  type CSSProperties,
   type KeyboardEvent,
   type Ref,
   type HTMLProps,
@@ -10,7 +9,7 @@ import mergeRefs from 'react-merge-refs';
 import { css } from 'glamor';
 
 import { useProperFocus } from '../../hooks/useProperFocus';
-import { styles, theme } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 
 export const defaultInputStyle = {
   outline: 0,
@@ -23,6 +22,7 @@ export const defaultInputStyle = {
 };
 
 type InputProps = HTMLProps<HTMLInputElement> & {
+  style?: CSSProperties;
   inputRef?: Ref<HTMLInputElement>;
   onEnter?: (event: KeyboardEvent<HTMLInputElement>) => void;
   onUpdate?: (newValue: string) => void;
@@ -77,14 +77,17 @@ export default function Input({
 }
 
 export function BigInput(props: InputProps) {
-  const inputStyle = {
-    padding: 10,
-    fontSize: 15,
-    border: 'none',
-    ...styles.shadow,
-    ':focus': { border: 'none', ...styles.shadow },
-    ...props.style,
-  } as CSSProperties;
-
-  return <Input {...props} style={inputStyle} />;
+  return (
+    <Input
+      {...props}
+      style={{
+        padding: 10,
+        fontSize: 15,
+        border: 'none',
+        ...styles.shadow,
+        ':focus': { border: 'none', ...styles.shadow },
+        ...props.style,
+      }}
+    />
+  );
 }

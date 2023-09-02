@@ -2,7 +2,10 @@ import { type HTMLProps } from 'react';
 
 import { css } from 'glamor';
 
+import { type CSSProperties } from '../../style';
+
 type ParagraphProps = HTMLProps<HTMLDivElement> & {
+  style?: CSSProperties;
   isLast?: boolean;
 };
 

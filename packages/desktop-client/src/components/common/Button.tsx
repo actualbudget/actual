@@ -1,14 +1,9 @@
-import React, {
-  forwardRef,
-  type CSSProperties,
-  type ElementType,
-  type HTMLProps,
-} from 'react';
+import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
 import { css } from 'glamor';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { styles, theme } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 
 import View from './View';
 
@@ -19,6 +14,7 @@ type ButtonProps = HTMLProps<HTMLButtonElement> & {
   isSubmit?: boolean;
   disabled?: boolean;
   color?: string;
+  style?: CSSProperties;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
   textStyle?: CSSProperties;

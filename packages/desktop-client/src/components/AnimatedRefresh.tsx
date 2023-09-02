@@ -1,8 +1,9 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
 
 import { keyframes } from 'glamor';
 
 import Refresh from '../icons/v1/Refresh';
+import { type CSSProperties } from '../style';
 
 import View from './common/View';
 

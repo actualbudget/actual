@@ -1,10 +1,6 @@
-import React, {
-  type ComponentProps,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import React, { type ComponentProps, type ReactNode } from 'react';
 
-import { colors } from '../../style';
+import { type CSSProperties, colors } from '../../style';
 import View from '../common/View';
 
 export const ROW_HEIGHT = 50;

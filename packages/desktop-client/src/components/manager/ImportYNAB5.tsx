@@ -49,10 +49,6 @@ function Import({ modalProps }: ImportProps) {
     }
   }
 
-  const lineHeightStyle = {
-    '& > div': { lineHeight: '1.7em' },
-  };
-
   return (
     <Modal {...modalProps} title="Import from nYNAB" style={{ width: 400 }}>
       {() => (
@@ -63,7 +59,9 @@ function Import({ modalProps }: ImportProps) {
             </Block>
           )}
 
-          <View style={{ alignItems: 'center', ...lineHeightStyle }}>
+          <View
+            style={{ alignItems: 'center', '& > div': { lineHeight: '1.7em' } }}
+          >
             <Paragraph>
               <ExternalLink to="https://actualbudget.org/docs/migration/nynab">
                 Read here

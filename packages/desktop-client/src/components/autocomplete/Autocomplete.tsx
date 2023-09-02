@@ -4,7 +4,6 @@ import React, {
   useEffect,
   useMemo,
   type ComponentProps,
-  type CSSProperties,
   type HTMLProps,
   type ReactNode,
   type KeyboardEvent,
@@ -15,7 +14,7 @@ import Downshift from 'downshift';
 import { css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
-import { theme } from '../../style';
+import { theme, type CSSProperties } from '../../style';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import View from '../common/View';
@@ -591,14 +590,6 @@ function MultiAutocomplete({
     prevOnKeyDown?.(e);
   }
 
-  const inputStyle = {
-    flex: 1,
-    minWidth: 30,
-    border: 0,
-    ':focus': { border: 0, boxShadow: 'none' },
-    ...props?.inputProps?.style,
-  } as CSSProperties;
-
   return (
     <Autocomplete
       {...props}
@@ -652,7 +643,13 @@ function MultiAutocomplete({
               setFocused(false);
               props.onBlur(e);
             }}
-            style={inputStyle}
+            style={{
+              flex: 1,
+              minWidth: 30,
+              border: 0,
+              ':focus': { border: 0, boxShadow: 'none' },
+              ...props?.inputProps?.style,
+            }}
           />
         </View>
       )}

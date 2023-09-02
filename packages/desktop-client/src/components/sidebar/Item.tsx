@@ -1,5 +1,4 @@
 import React, {
-  type CSSProperties,
   type ComponentType,
   type MouseEventHandler,
   type ReactNode,
@@ -7,7 +6,7 @@ import React, {
 } from 'react';
 
 // eslint-disable-next-line no-restricted-imports
-import { styles, colors } from '../../style';
+import { styles, colors, type CSSProperties } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
@@ -40,24 +39,6 @@ function Item({
     backgroundColor: colors.n2,
   };
 
-  const activeStyle = {
-    borderLeft: '4px solid ' + colors.p8,
-    paddingLeft: 19 + indent - 4,
-    color: colors.p8,
-  };
-
-  const linkStyle = {
-    ...styles.mediumText,
-    paddingTop: 9,
-    paddingBottom: 9,
-    paddingLeft: 19 + indent,
-    paddingRight: 10,
-    textDecoration: 'none',
-    color: colors.n9,
-    ...(forceHover ? hoverStyle : {}),
-    ':hover': hoverStyle,
-  };
-
   const content = (
     <View
       style={{
@@ -75,10 +56,24 @@ function Item({
   return (
     <View style={{ flexShrink: 0, ...style }}>
       <ItemContent
-        style={linkStyle}
+        style={{
+          ...styles.mediumText,
+          paddingTop: 9,
+          paddingBottom: 9,
+          paddingLeft: 19 + indent,
+          paddingRight: 10,
+          textDecoration: 'none',
+          color: colors.n9,
+          ...(forceHover ? hoverStyle : {}),
+          ':hover': hoverStyle,
+        }}
         to={to}
         onClick={onClick}
-        activeStyle={activeStyle}
+        activeStyle={{
+          borderLeft: '4px solid ' + colors.p8,
+          paddingLeft: 19 + indent - 4,
+          color: colors.p8,
+        }}
         forceActive={forceActive}
       >
         {content}

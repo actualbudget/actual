@@ -1,9 +1,6 @@
-import React, {
-  type CSSProperties,
-  type MouseEventHandler,
-  type ReactNode,
-} from 'react';
+import React, { type MouseEventHandler, type ReactNode } from 'react';
 
+import { type CSSProperties } from '../../style';
 import AnchorLink from '../common/AnchorLink';
 import View from '../common/View';
 

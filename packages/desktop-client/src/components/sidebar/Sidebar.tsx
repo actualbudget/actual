@@ -1,4 +1,4 @@
-import React, { type ReactNode, type CSSProperties } from 'react';
+import React, { type ReactNode } from 'react';
 
 import * as Platform from 'loot-core/src/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
@@ -7,7 +7,7 @@ import Reports from '../../icons/v1/Reports';
 import Wallet from '../../icons/v1/Wallet';
 import CalendarIcon from '../../icons/v2/Calendar';
 // eslint-disable-next-line no-restricted-imports
-import { colors } from '../../style';
+import { type CSSProperties, colors } from '../../style';
 import View from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
@@ -66,25 +66,21 @@ function Sidebar({
 
   const sidebar = useSidebar();
 
-  const floatStyle = {
-    '& .float': {
-      opacity: isFloating ? 1 : 0,
-      transition: 'opacity .25s, width .25s',
-      width: hasWindowButtons || isFloating ? null : 0,
-    },
-    '&:hover .float': {
-      opacity: 1,
-      width: hasWindowButtons ? null : 'auto',
-    },
-  };
-
   return (
     <View
       style={{
         width: SIDEBAR_WIDTH,
         color: colors.n9,
         backgroundColor: colors.n1,
-        ...floatStyle,
+        '& .float': {
+          opacity: isFloating ? 1 : 0,
+          transition: 'opacity .25s, width .25s',
+          width: hasWindowButtons || isFloating ? null : 0,
+        },
+        '&:hover .float': {
+          opacity: 1,
+          width: hasWindowButtons ? null : 'auto',
+        },
         ...style,
       }}
     >

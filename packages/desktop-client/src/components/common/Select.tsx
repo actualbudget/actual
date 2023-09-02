@@ -1,5 +1,3 @@
-import { type CSSProperties } from 'react';
-
 import {
   ListboxInput,
   ListboxButton,
@@ -10,7 +8,7 @@ import {
 import { css } from 'glamor';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
-import { theme, styles } from '../../style';
+import { theme, styles, type CSSProperties } from '../../style';
 
 type SelectProps<Value extends string> = {
   bare?: boolean;
@@ -51,13 +49,7 @@ export default function Select<Value extends string>({
   disabledKeys = [],
 }: SelectProps<Value>) {
   const arrowSize = 7;
-  const checkHeight = !style
-    ? '18px'
-    : style.minHeight
-    ? style.minHeight
-    : !style[0]
-    ? '18px'
-    : style[0].minHeight ?? '18px';
+  const minHeight = style?.minHeight ? style.minHeight : '18px';
   const targetOption = options.filter(option => option[0] === value);
   return (
     <ListboxInput
@@ -92,7 +84,7 @@ export default function Select<Value extends string>({
             whiteSpace: 'nowrap',
             maxWidth: `calc(100% - ${arrowSize + 5}px)`,
             alignItems: 'center',
-            minHeight: checkHeight,
+            minHeight: minHeight,
           }}
         >
           {targetOption.length !== 0 ? targetOption[0][1] : defaultLabel}

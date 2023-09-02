@@ -1,6 +1,6 @@
-import { type CSSProperties, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
-import { colors, styles } from '../../style';
+import { type CSSProperties, colors, styles } from '../../style';
 
 import Text from './Text';
 

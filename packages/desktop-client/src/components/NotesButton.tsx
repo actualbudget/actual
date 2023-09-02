@@ -1,9 +1,4 @@
-import React, {
-  createRef,
-  useState,
-  useEffect,
-  type CSSProperties,
-} from 'react';
+import React, { createRef, useState, useEffect } from 'react';
 
 import { css } from 'glamor';
 
@@ -12,7 +7,7 @@ import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
-import { colors } from '../style';
+import { type CSSProperties, colors } from '../style';
 
 import Button from './common/Button';
 import Text from './common/Text';

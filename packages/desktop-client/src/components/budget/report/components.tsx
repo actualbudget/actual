@@ -1,4 +1,4 @@
-import React, { type CSSProperties, memo, useState } from 'react';
+import React, { memo, useState } from 'react';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
@@ -6,7 +6,7 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
-import { styles, colors } from '../../../style';
+import { styles, colors, type CSSProperties } from '../../../style';
 import Button from '../../common/Button';
 import Menu from '../../common/Menu';
 import Text from '../../common/Text';
@@ -205,32 +205,19 @@ export const CategoryMonth = memo(function CategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const budgetHoverStyle = {
-    ':hover': {
-      boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-      backgroundColor: 'white',
-    },
-  };
-  const spentHoverStyle = {
-    textDecoration: 'underline',
-  };
-
-  const hoverStyle = {
-    '& .hover-visible': {
-      opacity: 0,
-      transition: 'opacity .25s',
-    } as CSSProperties,
-    '&:hover .hover-visible': {
-      opacity: 1,
-    },
-  };
 
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'row',
-        ...hoverStyle,
+        '& .hover-visible': {
+          opacity: 0,
+          transition: 'opacity .25s',
+        },
+        '&:hover .hover-visible': {
+          opacity: 1,
+        },
       }}
     >
       <View
@@ -321,7 +308,10 @@ export const CategoryMonth = memo(function CategoryMonth({
             margin: 1,
             padding: '0 4px',
             borderRadius: 4,
-            ...budgetHoverStyle,
+            ':hover': {
+              boxShadow: 'inset 0 0 0 1px ' + colors.n7,
+              backgroundColor: 'white',
+            },
           }}
           valueProps={{
             binding: reportBudget.catBudgeted(category.id),
@@ -361,7 +351,9 @@ export const CategoryMonth = memo(function CategoryMonth({
             getStyle={makeAmountGrey}
             style={{
               cursor: 'pointer',
-              ...spentHoverStyle,
+              ':hover': {
+                textDecoration: 'underline',
+              },
             }}
           />
         </span>

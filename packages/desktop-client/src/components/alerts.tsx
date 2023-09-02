@@ -1,12 +1,8 @@
-import React, {
-  type CSSProperties,
-  type ComponentType,
-  type ReactNode,
-} from 'react';
+import React, { type ComponentType, type ReactNode } from 'react';
 
 import ExclamationOutline from '../icons/v1/ExclamationOutline';
 import InformationOutline from '../icons/v1/InformationOutline';
-import { styles, colors } from '../style';
+import { styles, colors, type CSSProperties } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -17,12 +13,6 @@ type AlertProps = {
   backgroundColor?: string;
   style?: CSSProperties;
   children?: ReactNode;
-};
-
-const activeStyle = {
-  '& a, & a:active, & a:visited': {
-    color: colors.b3,
-  },
 };
 
 const Alert = ({
@@ -42,7 +32,9 @@ const Alert = ({
         backgroundColor,
         padding: 10,
         flexDirection: 'row',
-        ...activeStyle,
+        '& a, & a:active, & a:visited': {
+          color: colors.b3,
+        },
         ...style,
       }}
     >
