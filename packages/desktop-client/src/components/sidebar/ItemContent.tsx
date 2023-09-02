@@ -28,16 +28,14 @@ function ItemContent({
     <View
       role="button"
       tabIndex={0}
-      style={[
-        style,
-        {
-          touchAction: 'auto',
-          userSelect: 'none',
-          userDrag: 'none',
-          cursor: 'pointer',
-          ...(forceActive ? activeStyle : {}),
-        },
-      ]}
+      style={{
+        ...style,
+        touchAction: 'auto',
+        userSelect: 'none',
+        // userDrag: 'none',
+        cursor: 'pointer',
+        ...(forceActive ? activeStyle : {}),
+      }}
       onClick={onClick}
     >
       {children}

@@ -42,16 +42,18 @@ export default function SimpleTable({
     }
   }, [contentRef.current, data]);
 
+  const animatedRowStyle = {
+    '& .animated .animated-row': { transition: '.25s transform' },
+  };
+
   return (
     <View
-      style={[
-        {
-          flex: 1,
-          outline: 'none',
-          '& .animated .animated-row': { transition: '.25s transform' },
-        },
-        style,
-      ]}
+      style={{
+        flex: 1,
+        outline: 'none',
+        ...animatedRowStyle,
+        ...style,
+      }}
       tabIndex={1}
       data-testid="table"
     >

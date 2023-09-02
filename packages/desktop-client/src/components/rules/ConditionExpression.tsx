@@ -33,20 +33,18 @@ export default function ConditionExpression({
 }: ConditionExpressionProps) {
   return (
     <View
-      style={[
-        {
-          display: 'block',
-          maxWidth: '100%',
-          color: theme.altPillText,
-          backgroundColor: theme.altPillBackground,
-          borderRadius: 4,
-          padding: '3px 5px',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        },
-        style,
-      ]}
+      style={{
+        display: 'block',
+        maxWidth: '100%',
+        color: theme.altPillText,
+        backgroundColor: theme.altPillBackground,
+        borderRadius: 4,
+        padding: '3px 5px',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        ...style,
+      }}
     >
       {prefix && <Text>{prefix} </Text>}
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}

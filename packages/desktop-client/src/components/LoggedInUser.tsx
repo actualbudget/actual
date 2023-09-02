@@ -90,7 +90,7 @@ export default function LoggedInUser({
   }
 
   return (
-    <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
       <Button type="bare" onClick={() => setMenuOpen(true)} style={{ color }}>
         {serverMessage()}
       </Button>

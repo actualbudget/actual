@@ -31,20 +31,18 @@ export default function ActionExpression({
 }: ActionExpressionProps) {
   return (
     <View
-      style={[
-        {
-          display: 'block',
-          maxWidth: '100%',
-          color: theme.altPillText,
-          backgroundColor: theme.altPillBackground,
-          borderRadius: 4,
-          padding: '3px 5px',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        },
-        style,
-      ]}
+      style={{
+        display: 'block',
+        maxWidth: '100%',
+        color: theme.altPillText,
+        backgroundColor: theme.altPillBackground,
+        borderRadius: 4,
+        padding: '3px 5px',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        ...style,
+      }}
     >
       {op === 'set' ? (
         <>

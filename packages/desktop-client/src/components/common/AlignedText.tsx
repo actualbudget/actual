@@ -28,7 +28,7 @@ export default function AlignedText({
 
   return (
     <View
-      style={[{ flexDirection: 'row', alignItems: 'center' }, style]}
+      style={{ flexDirection: 'row', alignItems: 'center', ...style }}
       {...nativeProps}
     >
       <Block

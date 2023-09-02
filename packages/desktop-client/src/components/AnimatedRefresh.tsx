@@ -22,7 +22,7 @@ export default function AnimatedRefresh({
 }: AnimatedRefreshProps) {
   return (
     <View
-      style={[{ animation: animating ? `${spin} 1s infinite linear` : null }]}
+      style={{ animation: animating ? `${spin} 1s infinite linear` : null }}
     >
       <Refresh width={14} height={14} style={iconStyle} />
     </View>

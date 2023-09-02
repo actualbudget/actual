@@ -110,6 +110,10 @@ function Notification({
     },
   } as CSSProperties;
 
+  const anchorStyle = {
+    '& a': { color: 'currentColor' },
+  };
+
   return (
     <View
       style={{
@@ -133,8 +137,7 @@ function Notification({
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
-
-          '& a': { color: 'currentColor' },
+          ...anchorStyle,
         }}
       >
         <Stack align="flex-start">
@@ -221,15 +224,13 @@ export default function Notifications({ style }: { style?: CSSProperties }) {
   let notifications = useSelector(state => state.notifications.notifications);
   return (
     <View
-      style={[
-        {
-          position: 'fixed',
-          bottom: 20,
-          right: 13,
-          zIndex: 10000,
-        },
-        style,
-      ]}
+      style={{
+        position: 'fixed',
+        bottom: 20,
+        right: 13,
+        zIndex: 10000,
+        ...style,
+      }}
     >
       {notifications.map(note => (
         <Notification

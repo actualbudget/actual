@@ -19,6 +19,12 @@ type AlertProps = {
   children?: ReactNode;
 };
 
+const activeStyle = {
+  '& a, & a:active, & a:visited': {
+    color: colors.b3,
+  },
+};
+
 const Alert = ({
   icon: Icon,
   color,
@@ -28,21 +34,17 @@ const Alert = ({
 }: AlertProps) => {
   return (
     <View
-      style={[
-        {
-          color,
-          fontSize: 13,
-          ...styles.shadow,
-          borderRadius: 4,
-          backgroundColor,
-          padding: 10,
-          flexDirection: 'row',
-          '& a, & a:active, & a:visited': {
-            color: colors.b3,
-          },
-        },
-        style,
-      ]}
+      style={{
+        color,
+        fontSize: 13,
+        ...styles.shadow,
+        borderRadius: 4,
+        backgroundColor,
+        padding: 10,
+        flexDirection: 'row',
+        ...activeStyle,
+        ...style,
+      }}
     >
       <View
         style={{

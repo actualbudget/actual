@@ -37,25 +37,23 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
   const format = useFormat();
   return (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          lineHeight: 1.5,
-          justifyContent: 'center',
-        },
-        !collapsed && {
+      style={{
+        flexDirection: 'row',
+        lineHeight: 1.5,
+        justifyContent: 'center',
+        ...(!collapsed && {
           padding: '5px 0',
           marginTop: 17,
           backgroundColor: colors.n11,
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor: colors.n9,
-        },
-        collapsed && {
+        }),
+        ...(collapsed && {
           padding: 7,
-        },
-        styles.smallText,
-      ]}
+        }),
+        ...styles.smallText,
+      }}
     >
       <View
         style={{
@@ -287,6 +285,16 @@ export function BudgetSummary({
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
 
+  let hoverStyle = {
+    '& .hover-visible': {
+      opacity: 0,
+      transition: 'opacity .25s',
+    },
+    '&:hover .hover-visible': {
+      opacity: 1,
+    },
+  };
+
   return (
     <View
       data-testid="budget-summary"
@@ -301,21 +309,15 @@ export function BudgetSummary({
         cursor: 'default',
         marginBottom: 5,
         overflow: 'hidden',
-        '& .hover-visible': {
-          opacity: 0,
-          transition: 'opacity .25s',
-        },
-        '&:hover .hover-visible': {
-          opacity: 1,
-        },
+        ...hoverStyle,
       }}
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
-          style={[
-            { padding: '0 13px' },
-            collapsed ? { margin: '10px 0' } : { marginTop: 16 },
-          ]}
+          style={{
+            padding: '0 13px',
+            ...(collapsed ? { margin: '10px 0' } : { marginTop: 16 }),
+          }}
         >
           <View
             style={{

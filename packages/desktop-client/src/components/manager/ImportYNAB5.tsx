@@ -49,19 +49,21 @@ function Import({ modalProps }: ImportProps) {
     }
   }
 
+  const lineHeightStyle = {
+    '& > div': { lineHeight: '1.7em' },
+  };
+
   return (
     <Modal {...modalProps} title="Import from nYNAB" style={{ width: 400 }}>
       {() => (
-        <View style={[styles.smallText, { lineHeight: 1.5, marginTop: 20 }]}>
+        <View style={{ ...styles.smallText, lineHeight: 1.5, marginTop: 20 }}>
           {error && (
             <Block style={{ color: colors.r4, marginBottom: 15 }}>
               {getErrorMessage(error)}
             </Block>
           )}
 
-          <View
-            style={{ alignItems: 'center', '& > div': { lineHeight: '1.7em' } }}
-          >
+          <View style={{ alignItems: 'center', ...lineHeightStyle }}>
             <Paragraph>
               <ExternalLink to="https://actualbudget.org/docs/migration/nynab">
                 Read here

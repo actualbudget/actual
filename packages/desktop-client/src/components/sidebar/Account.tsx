@@ -88,7 +88,7 @@ function Account({
   };
 
   return (
-    <View innerRef={dropRef} style={[{ flexShrink: 0 }, outerStyle]}>
+    <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
       <View>
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>

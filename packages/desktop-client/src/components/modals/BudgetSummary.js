@@ -51,14 +51,12 @@ function BudgetSummary({ month, modalProps }) {
             }}
           >
             <View
-              style={[
-                styles.text,
-                {
-                  fontWeight: '600',
-                  textAlign: 'right',
-                  marginRight: 10,
-                },
-              ]}
+              style={{
+                ...styles.text,
+                fontWeight: '600',
+                textAlign: 'right',
+                marginRight: 10,
+              }}
             >
               <CellValue
                 binding={rolloverBudget.incomeAvailable}
@@ -79,14 +77,12 @@ function BudgetSummary({ month, modalProps }) {
             </View>
 
             <View
-              style={[
-                styles.text,
-                {
-                  display: 'flex',
-                  flexDirection: 'column',
-                  textAlign: 'left',
-                },
-              ]}
+              style={{
+                ...styles.text,
+                display: 'flex',
+                flexDirection: 'column',
+                textAlign: 'left',
+              }}
             >
               <Text>Available Funds</Text>
               <Text>Overspent in {prevMonthName}</Text>

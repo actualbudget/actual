@@ -39,20 +39,18 @@ export default function InputWithContent({
 
   return (
     <View
-      style={[
-        defaultInputStyle,
-        {
-          padding: 0,
-          flexDirection: 'row',
-          alignItems: 'center',
-        },
-        style,
-        focused &&
+      style={{
+        ...defaultInputStyle,
+        padding: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+        ...style,
+        ...(focused &&
           (focusStyle ?? {
             boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
-          }),
-        getStyle && getStyle(focused),
-      ]}
+          })),
+        ...(getStyle && getStyle(focused)),
+      }}
     >
       {leftContent}
       <Input

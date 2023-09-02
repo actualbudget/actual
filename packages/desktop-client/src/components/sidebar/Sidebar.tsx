@@ -66,41 +66,41 @@ function Sidebar({
 
   const sidebar = useSidebar();
 
+  const floatStyle = {
+    '& .float': {
+      opacity: isFloating ? 1 : 0,
+      transition: 'opacity .25s, width .25s',
+      width: hasWindowButtons || isFloating ? null : 0,
+    },
+    '&:hover .float': {
+      opacity: 1,
+      width: hasWindowButtons ? null : 'auto',
+    },
+  };
+
   return (
     <View
-      style={[
-        {
-          width: SIDEBAR_WIDTH,
-          color: colors.n9,
-          backgroundColor: colors.n1,
-          '& .float': {
-            opacity: isFloating ? 1 : 0,
-            transition: 'opacity .25s, width .25s',
-            width: hasWindowButtons || isFloating ? null : 0,
-          },
-          '&:hover .float': {
-            opacity: 1,
-            width: hasWindowButtons ? null : 'auto',
-          },
-        },
-        style,
-      ]}
+      style={{
+        width: SIDEBAR_WIDTH,
+        color: colors.n9,
+        backgroundColor: colors.n1,
+        ...floatStyle,
+        ...style,
+      }}
     >
       <View
-        style={[
-          {
-            paddingTop: 35,
-            height: 30,
-            flexDirection: 'row',
-            alignItems: 'center',
-            margin: '0 8px 23px 20px',
-            transition: 'padding .4s',
-          },
-          hasWindowButtons && {
+        style={{
+          paddingTop: 35,
+          height: 30,
+          flexDirection: 'row',
+          alignItems: 'center',
+          margin: '0 8px 23px 20px',
+          transition: 'padding .4s',
+          ...(hasWindowButtons && {
             paddingTop: 20,
             justifyContent: 'flex-start',
-          },
-        ]}
+          }),
+        }}
       >
         {budgetName}
 

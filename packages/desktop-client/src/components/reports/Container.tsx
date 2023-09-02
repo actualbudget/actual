@@ -11,7 +11,9 @@ export default function Container({ style, children }: ContainerProps) {
   const portalHost = useRef<HTMLDivElement>(null);
 
   return (
-    <View style={[{ height: 300, position: 'relative', flexShrink: 0 }, style]}>
+    <View
+      style={{ height: 300, position: 'relative', flexShrink: 0, ...style }}
+    >
       <div ref={portalHost} />
       <AutoSizer>
         {({ width, height }) => (

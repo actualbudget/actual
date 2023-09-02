@@ -119,7 +119,7 @@ export default function NotesButton({
 
   return (
     <View
-      style={[{ flexShrink: 0 }]}
+      style={{ flexShrink: 0 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

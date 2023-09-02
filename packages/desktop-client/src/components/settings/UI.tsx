@@ -56,17 +56,15 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
   return expanded ? (
     <View
       id="advanced"
-      style={[
-        {
-          gap: 20,
-          alignItems: 'flex-start',
-          marginBottom: 25,
-          width: '100%',
-        },
-        media(`(min-width: ${tokens.breakpoint_small})`, {
+      style={{
+        gap: 20,
+        alignItems: 'flex-start',
+        marginBottom: 25,
+        width: '100%',
+        ...media(`(min-width: ${tokens.breakpoint_small})`, {
           width: 'auto',
         }),
-      ]}
+      }}
       innerRef={el => {
         if (el && location.hash === '#advanced') {
           el.scrollIntoView(true);

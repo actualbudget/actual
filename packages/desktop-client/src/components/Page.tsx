@@ -18,21 +18,19 @@ function PageTitle({
   if (isNarrowWidth) {
     return (
       <View
-        style={[
-          {
-            alignItems: 'center',
-            backgroundColor: colors.b2,
-            color: 'white',
-            flexDirection: 'row',
-            flex: '1 0 auto',
-            fontSize: 18,
-            fontWeight: 500,
-            height: 50,
-            justifyContent: 'center',
-            overflowY: 'auto',
-          },
-          style,
-        ]}
+        style={{
+          alignItems: 'center',
+          backgroundColor: colors.b2,
+          color: 'white',
+          flexDirection: 'row',
+          flex: '1 0 auto',
+          fontSize: 18,
+          fontWeight: 500,
+          height: 50,
+          justifyContent: 'center',
+          overflowY: 'auto',
+          ...style,
+        }}
       >
         {name}
       </View>

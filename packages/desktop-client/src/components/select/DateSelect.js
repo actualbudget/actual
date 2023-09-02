@@ -141,7 +141,7 @@ let DatePicker = forwardRef(
       }
     }, [value, dateFormat]);
 
-    return <View style={[pickerStyles, { flex: 1 }]} innerRef={mountPoint} />;
+    return <View style={{ ...pickerStyles, flex: 1 }} innerRef={mountPoint} />;
   },
 );
 

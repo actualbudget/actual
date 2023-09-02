@@ -78,7 +78,7 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={[{ color: theme.pageTextPositive }, style]}>
+    <View style={{ color: theme.pageTextPositive, ...style }}>
       <Select
         bare
         options={fields}
@@ -765,7 +765,7 @@ export default function EditRule({
       title="Rule"
       padding={0}
       {...modalProps}
-      style={[modalProps.style, { flex: 'inherit', maxWidth: '90%' }]}
+      style={{ ...modalProps.style, flex: 'inherit', maxWidth: '90%' }}
     >
       {() => (
         <View

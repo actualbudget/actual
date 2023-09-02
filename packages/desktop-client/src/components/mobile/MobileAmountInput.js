@@ -159,17 +159,15 @@ class AmountInput extends PureComponent {
 
     return (
       <View
-        style={[
-          {
-            justifyContent: 'center',
-            borderWidth: 1,
-            borderColor: theme.pillBorderSelected,
-            borderRadius: 4,
-            padding: 5,
-            backgroundColor: 'white',
-          },
-          style,
-        ]}
+        style={{
+          justifyContent: 'center',
+          borderWidth: 1,
+          borderColor: theme.pillBorderSelected,
+          borderRadius: 4,
+          padding: 5,
+          backgroundColor: 'white',
+          ...style,
+        }}
       >
         <View style={{ overflowY: 'auto' }}>{input}</View>
 
@@ -294,15 +292,13 @@ export class FocusableAmountInput extends PureComponent {
             type="bare"
           >
             <View
-              style={[
-                {
-                  borderBottomWidth: 1,
-                  borderColor: '#e0e0e0',
-                  justifyContent: 'center',
-                  transform: [{ translateY: 0.5 }],
-                },
-                style,
-              ]}
+              style={{
+                borderBottomWidth: 1,
+                borderColor: '#e0e0e0',
+                justifyContent: 'center',
+                transform: [{ translateY: 0.5 }],
+                ...style,
+              }}
             >
               <Text style={{ fontSize: 15, userSelect: 'none', ...textStyle }}>
                 {amountToCurrency(Math.abs(this.props.value))}

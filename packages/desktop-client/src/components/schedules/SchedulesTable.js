@@ -274,7 +274,7 @@ export function SchedulesTable({
   }
 
   return (
-    <View style={[{ flex: 1 }, tableStyle]}>
+    <View style={{ flex: 1, ...tableStyle }}>
       <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
         <Field width="flex">Name</Field>
         <Field width="flex">Payee</Field>

@@ -189,7 +189,7 @@ const PayeeTable = forwardRef(
     }, []);
 
     return (
-      <View style={[{ flex: 1 }]} onMouseLeave={() => setHovered(null)}>
+      <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
         <Table
           ref={ref}
           items={payees}
@@ -252,16 +252,14 @@ function PayeeTableHeader() {
 function EmptyMessage({ text, style }) {
   return (
     <View
-      style={[
-        {
-          textAlign: 'center',
-          color: colors.n7,
-          fontStyle: 'italic',
-          fontSize: 13,
-          marginTop: 5,
-        },
+      style={{
+        textAlign: 'center',
+        color: colors.n7,
+        fontStyle: 'italic',
+        fontSize: 13,
+        marginTop: 5,
         style,
-      ]}
+      }}
     >
       {text}
     </View>

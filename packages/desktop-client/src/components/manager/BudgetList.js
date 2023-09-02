@@ -152,23 +152,21 @@ function File({ file, onSelect, onDelete }) {
     <View
       onClick={() => _onSelect(file)}
       title={getFileDescription(file)}
-      style={[
-        {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          ...styles.shadow,
-          margin: 10,
-          padding: '12px 15px',
-          backgroundColor: 'white',
-          borderRadius: 6,
-          flexShrink: 0,
-          cursor: 'pointer',
-          ':hover': {
-            backgroundColor: colors.hover,
-          },
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        ...styles.shadow,
+        margin: 10,
+        padding: '12px 15px',
+        backgroundColor: 'white',
+        borderRadius: 6,
+        flexShrink: 0,
+        cursor: 'pointer',
+        ':hover': {
+          backgroundColor: colors.hover,
         },
-      ]}
+      }}
     >
       <View style={{ alignItems: 'flex-start' }}>
         <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>

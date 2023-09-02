@@ -208,17 +208,17 @@ export class BudgetTable extends Component {
     return (
       <View
         data-testid="budget-table"
-        style={[
-          { flex: 1 },
-          styles.lightScrollbar && {
+        style={{
+          flex: 1,
+          ...(styles.lightScrollbar && {
             '& ::-webkit-scrollbar': {
               backgroundColor: 'transparent',
             },
             '& ::-webkit-scrollbar-thumb:vertical': {
               backgroundColor: 'white',
             },
-          },
-        ]}
+          }),
+        }}
       >
         <View
           style={{
@@ -404,27 +404,25 @@ function SidebarCategory({
   return (
     <View
       innerRef={innerRef}
-      style={[
-        {
-          width: 200,
-          '& button': { display: 'none' },
-        },
-        !dragging &&
+      style={{
+        width: 200,
+        '& button': { display: 'none' },
+        ...(!dragging &&
           !dragPreview && {
             '&:hover button': { display: 'flex', color: colors.n1 },
-          },
-        dragging && { color: colors.n8 },
+          }),
+        ...(dragging && { color: colors.n8 }),
 
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
-        dragPreview && {
+        ...(dragPreview && {
           backgroundColor: 'white',
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
-        },
-        style,
-      ]}
+        }),
+        ...style,
+      }}
       onKeyDown={e => {
         if (e.key === 'Enter') {
           onEditName(null);
@@ -570,21 +568,19 @@ function SidebarGroup({
   return (
     <View
       innerRef={innerRef}
-      style={[
-        style,
-        {
-          width: 200,
-          backgroundColor: colors.n11,
-          '& button': { display: 'none' },
-          '&:hover button': { display: 'flex', color: colors.n1 },
-        },
-        dragPreview && {
+      style={{
+        ...style,
+        width: 200,
+        backgroundColor: colors.n11,
+        '& button': { display: 'none' },
+        '&:hover button': { display: 'flex', color: colors.n1 },
+        ...(dragPreview && {
           paddingLeft: 10,
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
-        },
-      ]}
+        }),
+      }}
       onKeyDown={e => {
         if (e.key === 'Enter') {
           onEdit(null);
@@ -631,11 +627,11 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
         value={monthUtils.sheetForMonth(month, type)}
       >
         <View
-          style={[
-            { flex: 1 },
-            { borderLeft: '1px solid ' + colors.border },
-            style,
-          ]}
+          style={{
+            flex: 1,
+            borderLeft: '1px solid ' + colors.border,
+            ...style,
+          }}
         >
           <Component monthIndex={index} editing={editing} {...args} />
         </View>
@@ -882,12 +878,10 @@ function ExpenseCategory({
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
       <View
-        style={[
-          {
-            flex: 1,
-            flexDirection: 'row',
-          },
-        ]}
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+        }}
       >
         <SidebarCategory
           innerRef={dragRef}

@@ -19,16 +19,14 @@ type SectionLabelProps = {
 export const SectionLabel = ({ title, style }: SectionLabelProps) => {
   return (
     <View
-      style={[
-        {
-          fontWeight: 500,
-          textTransform: 'uppercase',
-          color: theme.altFormLabelText,
-          marginBottom: 5,
-          lineHeight: '1em',
-        },
-        style,
-      ]}
+      style={{
+        fontWeight: 500,
+        textTransform: 'uppercase',
+        color: theme.altFormLabelText,
+        marginBottom: 5,
+        lineHeight: '1em',
+        ...style,
+      }}
     >
       {title}
     </View>

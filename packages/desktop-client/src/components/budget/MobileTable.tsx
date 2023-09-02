@@ -17,19 +17,17 @@ type ListItemProps = ComponentProps<typeof View> & {
 export const ListItem = ({ children, style, ...props }: ListItemProps) => {
   return (
     <View
-      style={[
-        {
-          height: ROW_HEIGHT,
-          borderBottomWidth: 1,
-          borderColor: colors.border,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingLeft: 10,
-          paddingRight: 10,
-          zIndex: 1,
-        },
-        style,
-      ]}
+      style={{
+        height: ROW_HEIGHT,
+        borderBottomWidth: 1,
+        borderColor: colors.border,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingLeft: 10,
+        paddingRight: 10,
+        zIndex: 1,
+        ...style,
+      }}
       {...props}
     >
       {children}

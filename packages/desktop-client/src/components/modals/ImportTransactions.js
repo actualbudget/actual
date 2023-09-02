@@ -397,16 +397,14 @@ function DateFormatSelect({
 function CheckboxOption({ id, checked, disabled, onChange, children, style }) {
   return (
     <View
-      style={[
-        {
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          userSelect: 'none',
-          minHeight: 28,
-        },
-        style,
-      ]}
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        userSelect: 'none',
+        minHeight: 28,
+        ...style,
+      }}
     >
       <Checkbox
         id={id}

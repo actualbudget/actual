@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { type CSSProperties, memo, useState } from 'react';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
@@ -22,7 +22,11 @@ import { makeAmountGrey } from '../util';
 
 export { BudgetSummary } from './BudgetSummary';
 
-let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
+let headerLabelStyle: CSSProperties = {
+  flex: 1,
+  padding: '0 5px',
+  textAlign: 'right',
+};
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   const format = useFormat();
@@ -211,18 +215,22 @@ export const CategoryMonth = memo(function CategoryMonth({
     textDecoration: 'underline',
   };
 
+  const hoverStyle = {
+    '& .hover-visible': {
+      opacity: 0,
+      transition: 'opacity .25s',
+    } as CSSProperties,
+    '&:hover .hover-visible': {
+      opacity: 1,
+    },
+  };
+
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'row',
-        '& .hover-visible': {
-          opacity: 0,
-          transition: 'opacity .25s',
-        },
-        '&:hover .hover-visible': {
-          opacity: 1,
-        },
+        ...hoverStyle,
       }}
     >
       <View

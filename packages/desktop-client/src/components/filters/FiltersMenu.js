@@ -261,13 +261,12 @@ function ConfigureField({
                 style={{ flexWrap: 'wrap' }}
               >
                 {ops.slice(0, 3).map(currOp => (
-                  <View key={currOp}>
-                    <OpButton
-                      op={currOp}
-                      selected={currOp === op}
-                      onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                    />
-                  </View>
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
                 ))}
               </Stack>
               <Stack
@@ -277,13 +276,12 @@ function ConfigureField({
                 style={{ flexWrap: 'wrap' }}
               >
                 {ops.slice(3, ops.length).map(currOp => (
-                  <View key={currOp}>
-                    <OpButton
-                      op={currOp}
-                      selected={currOp === op}
-                      onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                    />
-                  </View>
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
                 ))}
               </Stack>
             </>
@@ -503,17 +501,15 @@ function FilterExpression({
 
   return (
     <View
-      style={[
-        {
-          backgroundColor: theme.pillBackground,
-          borderRadius: 4,
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginRight: 10,
-          marginTop: 10,
-        },
-        style,
-      ]}
+      style={{
+        backgroundColor: theme.pillBackground,
+        borderRadius: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 10,
+        marginTop: 10,
+        ...style,
+      }}
     >
       <Button
         type="bare"

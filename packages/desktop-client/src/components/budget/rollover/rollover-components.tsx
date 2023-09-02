@@ -1,4 +1,10 @@
-import React, { type ComponentProps, memo, useContext, useState } from 'react';
+import React, {
+  type ComponentProps,
+  type CSSProperties,
+  memo,
+  useContext,
+  useState,
+} from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
@@ -187,7 +193,11 @@ function BalanceTooltip({
   );
 }
 
-let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
+let headerLabelStyle: CSSProperties = {
+  flex: 1,
+  padding: '0 5px',
+  textAlign: 'right',
+};
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   const format = useFormat();
@@ -270,7 +280,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         name="spent"
         width="flex"
         textAlign="right"
-        style={[{ fontWeight: 600 }, styles.tnum]}
+        style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
           binding: rolloverBudget.groupSumAmount(id),
           type: 'financial',
@@ -328,19 +338,22 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const spentHoverStyle = {
     ':hover': { textDecoration: 'underline' },
   };
+  const hoverStyle = {
+    '& .hover-visible': {
+      opacity: 0,
+      transition: 'opacity .25s',
+    },
+    '&:hover .hover-visible': {
+      opacity: 1,
+    },
+  };
 
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'row',
-        '& .hover-visible': {
-          opacity: 0,
-          transition: 'opacity .25s',
-        },
-        '&:hover .hover-visible': {
-          opacity: 1,
-        },
+        ...hoverStyle,
       }}
     >
       <View
@@ -424,7 +437,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           focused={editing}
           width="flex"
           onExpose={() => onEdit(category.id, monthIndex)}
-          style={[editing && { zIndex: 100 }, styles.tnum]}
+          style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
           textAlign="right"
           valueStyle={{
             cursor: 'default',
@@ -547,10 +560,11 @@ export function IncomeCategoryMonth({
       <Field
         name="received"
         width="flex"
-        style={[
-          { paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' },
-          isLast && { borderBottomWidth: 0 },
-        ]}
+        style={{
+          paddingRight: MONTH_RIGHT_PADDING,
+          textAlign: 'right',
+          ...(isLast && { borderBottomWidth: 0 }),
+        }}
       >
         <span
           onClick={() => onShowActivity(category.name, category.id, monthIndex)}

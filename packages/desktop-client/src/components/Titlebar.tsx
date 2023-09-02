@@ -308,22 +308,20 @@ export default function Titlebar({ style }) {
 
   return isNarrowWidth ? null : (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 15px',
-          height: 36,
-          pointerEvents: 'none',
-          '& *': {
-            pointerEvents: 'auto',
-          },
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: '0 15px',
+        height: 36,
+        pointerEvents: 'none',
+        '& *': {
+          pointerEvents: 'auto',
         },
-        !Platform.isBrowser &&
+        ...(!Platform.isBrowser &&
           Platform.OS === 'mac' &&
-          floatingSidebar && { paddingLeft: 80 },
-        style,
-      ]}
+          floatingSidebar && { paddingLeft: 80 }),
+        ...style,
+      }}
     >
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button

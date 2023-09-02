@@ -615,21 +615,19 @@ function MultiAutocomplete({
       }}
       renderInput={props => (
         <View
-          style={[
-            {
-              display: 'flex',
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: theme.tableBackground,
-              borderRadius: 4,
-              border: '1px solid ' + theme.formInputBorder,
-            },
-            focused && {
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.tableBackground,
+            borderRadius: 4,
+            border: '1px solid ' + theme.formInputBorder,
+            ...(focused && {
               border: '1px solid ' + theme.formInputBorderSelected,
               boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-            },
-          ]}
+            }),
+          }}
         >
           {selectedItems.map((item, idx) => {
             item = findItem(strict, suggestions, item);
@@ -675,10 +673,10 @@ export function AutocompleteFooter({
   return (
     show && (
       <View
-        style={[
-          { flexShrink: 0 },
-          embedded ? { paddingTop: 5 } : { padding: 5 },
-        ]}
+        style={{
+          flexShrink: 0,
+          ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
+        }}
         onMouseDown={e => e.preventDefault()}
       >
         {children}

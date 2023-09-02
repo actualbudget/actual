@@ -157,15 +157,13 @@ function BudgetTotal({
 }: BudgetTotalProps) {
   return (
     <View
-      style={[
-        {
-          lineHeight: 1.5,
-          flexDirection: 'row',
-          alignItems: 'center',
-          fontSize: 14,
-        },
-        style,
-      ]}
+      style={{
+        lineHeight: 1.5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        fontSize: 14,
+        ...style,
+      }}
     >
       <ProgressComponent current={current} target={target} />
 
@@ -232,7 +230,7 @@ function Saved({ projected, style }: SavedProps) {
   let isNegative = saved < 0;
 
   return (
-    <View style={[{ alignItems: 'center', fontSize: 14 }, style]}>
+    <View style={{ alignItems: 'center', fontSize: 14, ...style }}>
       {projected ? (
         <Text style={{ color: colors.n4 }}>Projected Savings:</Text>
       ) : (
@@ -319,6 +317,15 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   }
 
   let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
+  let hoverStyle = {
+    '& .hover-visible': {
+      opacity: 0,
+      transition: 'opacity .25s',
+    },
+    '&:hover .hover-visible': {
+      opacity: 1,
+    },
+  };
 
   return (
     <View
@@ -333,21 +340,15 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
         cursor: 'default',
         marginBottom: 5,
         overflow: 'hidden',
-        '& .hover-visible': {
-          opacity: 0,
-          transition: 'opacity .25s',
-        },
-        '&:hover .hover-visible': {
-          opacity: 1,
-        },
+        ...hoverStyle,
       }}
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
-          style={[
-            { padding: '0 13px' },
-            collapsed ? { margin: '10px 0' } : { marginTop: 16 },
-          ]}
+          style={{
+            padding: '0 13px',
+            ...(collapsed ? { margin: '10px 0' } : { marginTop: 16 }),
+          }}
         >
           <View
             style={{

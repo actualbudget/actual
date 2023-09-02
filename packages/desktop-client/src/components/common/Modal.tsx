@@ -296,11 +296,11 @@ const ModalContent = ({
   return (
     <View
       innerRef={contentRef}
-      style={[
-        style,
-        size && { width: size.width, height: size.height },
-        noAnimation && !isCurrent && { display: 'none' },
-      ]}
+      style={{
+        ...style,
+        ...(size && { width: size.width, height: size.height }),
+        ...(noAnimation && !isCurrent && { display: 'none' }),
+      }}
     >
       {children}
     </View>
@@ -337,13 +337,11 @@ export const ModalButtons = ({
   return (
     <View
       innerRef={containerRef}
-      style={[
-        {
-          flexDirection: 'row',
-          marginTop: 30,
-        },
-        style,
-      ]}
+      style={{
+        flexDirection: 'row',
+        marginTop: 30,
+        ...style,
+      }}
     >
       {leftContent}
       <View style={{ flex: 1 }} />

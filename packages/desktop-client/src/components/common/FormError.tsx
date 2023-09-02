@@ -9,6 +9,6 @@ type FormErrorProps = {
 
 export default function FormError({ style, children }: FormErrorProps) {
   return (
-    <View style={[{ color: 'red', fontSize: 13 }, style]}>{children}</View>
+    <View style={{ color: 'red', fontSize: 13, ...style }}>{children}</View>
   );
 }

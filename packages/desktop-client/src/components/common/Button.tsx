@@ -118,32 +118,28 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     let Component = as;
-    let buttonStyle = [
-      {
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-        padding: type === 'bare' ? '5px' : '5px 10px',
-        margin: 0,
-        overflow: 'hidden',
-        display: 'flex',
-        borderRadius: 4,
-        backgroundColor: backgroundColor[typeWithDisabled],
-        border:
-          type === 'bare'
-            ? 'none'
-            : '1px solid ' + borderColor[typeWithDisabled],
-        color: color || textColor[typeWithDisabled],
-        transition: 'box-shadow .25s',
-        WebkitAppRegion: 'no-drag',
-        ...styles.smallText,
-      },
-      { ':hover': !disabled && hoveredStyle },
-      { ':active': !disabled && activeStyle },
-      hover && hoveredStyle,
-      pressed && activeStyle,
-      style,
-    ];
+    let buttonStyle = {
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      padding: type === 'bare' ? '5px' : '5px 10px',
+      margin: 0,
+      overflow: 'hidden',
+      display: 'flex',
+      borderRadius: 4,
+      backgroundColor: backgroundColor[typeWithDisabled],
+      border:
+        type === 'bare' ? 'none' : '1px solid ' + borderColor[typeWithDisabled],
+      color: color || textColor[typeWithDisabled],
+      transition: 'box-shadow .25s',
+      WebkitAppRegion: 'no-drag',
+      ...styles.smallText,
+      ':hover': !disabled && hoveredStyle,
+      ':active': !disabled && activeStyle,
+      ...(hover && hoveredStyle),
+      ...(pressed && activeStyle),
+      ...style,
+    };
 
     return (
       <Component

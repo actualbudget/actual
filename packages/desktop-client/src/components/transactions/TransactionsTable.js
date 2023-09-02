@@ -1302,14 +1302,12 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
       if (error.version === 1) {
         return (
           <View
-            style={[
-              {
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: '0 5px',
-              },
-              style,
-            ]}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: '0 5px',
+              ...style,
+            }}
             data-testid="transaction-error"
           >
             <Text>
@@ -1605,13 +1603,11 @@ function TransactionTableInner({
   return (
     <View
       innerRef={containerRef}
-      style={[
-        {
-          flex: 1,
-          cursor: 'default',
-        },
-        props.style,
-      ]}
+      style={{
+        flex: 1,
+        cursor: 'default',
+        ...props.style,
+      }}
     >
       <View>
         <TransactionHeader
@@ -1669,7 +1665,7 @@ function TransactionTableInner({
          //   the full height of the container ??? */}
 
       <View
-        style={[{ flex: 1, overflow: 'hidden' }]}
+        style={{ flex: 1, overflow: 'hidden' }}
         data-testid="transaction-table"
       >
         <Table

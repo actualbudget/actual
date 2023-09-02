@@ -72,30 +72,26 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
     <View
       innerRef={ref}
       {...props}
-      style={[
-        width === 'flex' ? { flex: 1, flexBasis: 0 } : { width },
-        {
-          borderTopWidth: 1,
-          borderBottomWidth: 1,
-          borderColor: theme.tableBorder,
-        },
-        styles.smallText,
-        style,
-      ]}
+      style={{
+        ...(width === 'flex' ? { flex: 1, flexBasis: 0 } : { width }),
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: theme.tableBorder,
+        ...styles.smallText,
+        ...style,
+      }}
       data-testid={name}
     >
       {/* This is wrapped so that the padding is not taken into
           account with the flex width (which aligns it with the Cell
           component) */}
       <View
-        style={[
-          {
-            flex: 1,
-            padding: '0 5px',
-            justifyContent: 'center',
-          },
-          contentStyle,
-        ]}
+        style={{
+          flex: 1,
+          padding: '0 5px',
+          justifyContent: 'center',
+          ...contentStyle,
+        }}
       >
         {truncate ? (
           <Text
@@ -203,16 +199,14 @@ export function Cell({
           children()
         ) : (
           <View
-            style={[
-              {
-                flexDirection: 'row',
-                flex: 1,
-                padding: '0 5px',
-                alignItems: 'center',
-              },
-              styles.smallText,
-              valueStyle,
-            ]}
+            style={{
+              flexDirection: 'row',
+              flex: 1,
+              padding: '0 5px',
+              alignItems: 'center',
+              ...styles.smallText,
+              ...valueStyle,
+            }}
             // Can't use click because we only want to expose the cell if
             // the user does a direct click, not if they also drag the
             // mouse to select something
@@ -258,7 +252,7 @@ export function Cell({
   return (
     <View
       innerRef={viewRef}
-      style={[widthStyle, cellStyle, style]}
+      style={{ ...widthStyle, ...cellStyle, ...style } as CSSProperties}
       {...viewProps}
       data-testid={name}
     >
@@ -281,16 +275,14 @@ export function Row({
 }: RowProps) {
   return (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          height: height || ROW_HEIGHT,
-          flex: '0 0 ' + (height || ROW_HEIGHT) + 'px',
-          userSelect: 'text',
-        },
-        collapsed && { marginTop: -1 },
-        style,
-      ]}
+      style={{
+        flexDirection: 'row',
+        height: height || ROW_HEIGHT,
+        flex: '0 0 ' + (height || ROW_HEIGHT) + 'px',
+        userSelect: 'text',
+        ...(collapsed && { marginTop: -1 }),
+        ...style,
+      }}
       data-testid="row"
       {...nativeProps}
     >
@@ -522,6 +514,14 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
     },
     ref,
   ) => {
+    const focusStyle = {
+      ':focus': bare
+        ? null
+        : {
+            outline: 0,
+            boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
+          },
+    };
     // This represents a cell that acts like a button: it's clickable,
     // focusable, etc. The reason we don't use a button is because the
     // full behavior is undesirable: we really don't want stuff like
@@ -548,43 +548,36 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             }
           }
         }}
-        style={[
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-            cursor: 'default',
-            transition: 'box-shadow .15s',
-            backgroundColor: bare
-              ? 'transparent'
-              : disabled // always use disabled before primary since we can have a disabled primary button
-              ? theme.buttonNormalDisabledBackground
-              : primary
-              ? theme.buttonPrimaryBackground
-              : theme.buttonNormalBackground,
-            border: bare
-              ? 'none'
-              : '1px solid ' +
-                (disabled
-                  ? theme.buttonNormalDisabledBorder
-                  : primary
-                  ? theme.buttonPrimaryBorder
-                  : theme.buttonNormalBorder),
-            color: bare
-              ? 'inherit'
-              : disabled
-              ? theme.buttonNormalDisabledText
-              : primary
-              ? theme.buttonPrimaryText
-              : theme.buttonNormalText,
-            ':focus': bare
-              ? null
-              : {
-                  outline: 0,
-                  boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
-                },
-          },
-          style,
-        ]}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          cursor: 'default',
+          transition: 'box-shadow .15s',
+          backgroundColor: bare
+            ? 'transparent'
+            : disabled // always use disabled before primary since we can have a disabled primary button
+            ? theme.buttonNormalDisabledBackground
+            : primary
+            ? theme.buttonPrimaryBackground
+            : theme.buttonNormalBackground,
+          border: bare
+            ? 'none'
+            : '1px solid ' +
+              (disabled
+                ? theme.buttonNormalDisabledBorder
+                : primary
+                ? theme.buttonPrimaryBorder
+                : theme.buttonNormalBorder),
+          color: bare
+            ? 'inherit'
+            : disabled
+            ? theme.buttonNormalDisabledText
+            : primary
+            ? theme.buttonPrimaryText
+            : theme.buttonNormalText,
+          ...focusStyle,
+          ...style,
+        }}
         onFocus={() => onEdit && onEdit()}
         data-testid="cell-button"
         onClick={
@@ -1026,13 +1019,13 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       return (
         <View
           key={key}
-          style={[
-            rowStyle,
+          style={
             {
+              ...rowStyle,
               zIndex: editing || selected ? 101 : 'auto',
               transform: 'translateY(var(--pos))',
-            },
-          ]}
+            } as CSSProperties
+          }
           // @ts-expect-error not a recognised style attribute
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
@@ -1082,14 +1075,12 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
     if (loading) {
       return (
         <View
-          style={[
-            {
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor,
-            },
-          ]}
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor,
+          }}
         >
           <AnimatedLoading width={25} color={theme.tableText} />
         </View>
@@ -1100,13 +1091,11 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
 
     return (
       <View
-        style={[
-          {
-            flex: 1,
-            outline: 'none',
-          },
-          style,
-        ]}
+        style={{
+          flex: 1,
+          outline: 'none',
+          ...style,
+        }}
         tabIndex="1"
         {...getNavigatorProps(props)}
         data-testid="table"

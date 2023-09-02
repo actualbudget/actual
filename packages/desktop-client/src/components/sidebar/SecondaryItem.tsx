@@ -67,7 +67,7 @@ function SecondaryItem({
   );
 
   return (
-    <View style={[{ flexShrink: 0 }, style]}>
+    <View style={{ flexShrink: 0, ...style }}>
       <ItemContent
         style={linkStyle}
         to={to}
