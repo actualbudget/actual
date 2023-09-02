@@ -1189,7 +1189,7 @@ function ListBoxSection({ section, state }) {
       {section.rendered && (
         <div
           {...headingProps}
-          {...css(styles.smallText, {
+          className={`${css(styles.smallText, {
             backgroundColor: colors.n10,
             borderBottom: `1px solid ${colors.n9}`,
             borderTop: `1px solid ${colors.n9}`,
@@ -1202,7 +1202,7 @@ function ListBoxSection({ section, state }) {
             top: '0',
             width: '100%',
             zIndex: zIndices.SECTION_HEADING,
-          })}
+          })}`}
         >
           {section.rendered}
         </div>

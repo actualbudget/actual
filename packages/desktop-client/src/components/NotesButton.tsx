@@ -40,13 +40,13 @@ function NotesTooltip({
       {editable ? (
         <textarea
           ref={inputRef}
-          {...css({
+          className={`${css({
             border: '1px solid ' + colors.border,
             padding: 7,
             minWidth: 300,
             minHeight: 120,
             outline: 'none',
-          })}
+          })}`}
           value={notes || ''}
           onChange={e => setNotes(e.target.value)}
         />
