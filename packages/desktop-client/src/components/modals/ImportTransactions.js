@@ -911,7 +911,7 @@ export default function ImportTransactions({ modalProps, options }) {
             });
           }}
         >
-          Fallback missing payee to memo field
+          Use Memo as a fallback for empty Payees
         </CheckboxOption>
       )}
 

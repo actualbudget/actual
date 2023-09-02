@@ -132,9 +132,7 @@ async function parseOFX(
 
   // Banks don't always implement the OFX standard properly
   // If no payee is available try and fallback to memo
-  let useName =
-    !options.fallbackMissingPayeeToMemo ||
-    data.some(trans => trans.name != null && trans.name !== '');
+  let useMemoFallback = options.fallbackMissingPayeeToMemo;
 
   return {
     errors,
@@ -142,9 +140,9 @@ async function parseOFX(
       amount: trans.amount,
       imported_id: trans.fi_id,
       date: trans.date ? dayFromDate(new Date(trans.date * 1000)) : null,
-      payee_name: useName ? trans.name : trans.memo,
-      imported_payee: useName ? trans.name : trans.memo,
-      notes: useName ? trans.memo || null : null, //memo used for payee
+      payee_name: trans.name || useMemoFallback ? trans.memo : null,
+      imported_payee: trans.name || useMemoFallback ? trans.memo : null,
+      notes: !useMemoFallback ? trans.memo || null : null, //memo used for payee
     })),
   };
 }
