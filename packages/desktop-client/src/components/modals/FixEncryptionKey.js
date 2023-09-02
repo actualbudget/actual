@@ -127,7 +127,8 @@ export default function FixEncryptionKey({
               <Button
                 style={{ marginRight: 10 }}
                 onClick={() => modalProps.onBack()}
-                type="button"
+                type="normal"
+                isSubmit={false}
               >
                 Back
               </Button>
