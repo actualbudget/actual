@@ -29,7 +29,7 @@ function ItemContent({
         ...style,
         touchAction: 'auto',
         userSelect: 'none',
-        // userDrag: 'none',
+        userDrag: 'none',
         cursor: 'pointer',
         ...(forceActive ? activeStyle : {}),
       }}

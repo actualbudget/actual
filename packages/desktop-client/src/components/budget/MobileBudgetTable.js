@@ -1028,7 +1028,6 @@ function BudgetHeader({
           textAlign: 'center',
           // zIndex: -1
         }}
-        data-vrt-mask
       >
         {/* eslint-disable-next-line rulesdir/typography */}
         {monthUtils.format(currentMonth, "MMMM ''yy")}
