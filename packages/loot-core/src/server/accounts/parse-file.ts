@@ -140,8 +140,8 @@ async function parseOFX(
       amount: trans.amount,
       imported_id: trans.fi_id,
       date: trans.date ? dayFromDate(new Date(trans.date * 1000)) : null,
-      payee_name: trans.name ?? (useMemoFallback ? trans.memo : null),
-      imported_payee: trans.name ?? (useMemoFallback ? trans.memo : null),
+      payee_name: trans.name || (useMemoFallback ? trans.memo : null),
+      imported_payee: trans.name || (useMemoFallback ? trans.memo : null),
       notes: !!trans.name || !useMemoFallback ? trans.memo || null : null, //memo used for payee
     })),
   };
