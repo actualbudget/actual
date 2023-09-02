@@ -107,24 +107,22 @@ let Payee = memo(
 
     return (
       <Row
-        style={[
-          { alignItems: 'stretch' },
-          style,
-          {
-            borderColor,
-            backgroundColor: hovered
-              ? colors.hover
-              : selected
-              ? colors.b9
-              : backgroundFocus
-              ? colors.hover
-              : 'white',
-          },
-          selected && {
+        style={{
+          alignItems: 'stretch',
+          ...style,
+          borderColor,
+          backgroundColor: hovered
+            ? colors.hover
+            : selected
+            ? colors.b9
+            : backgroundFocus
+            ? colors.hover
+            : 'white',
+          ...(selected && {
             backgroundColor: colors.b9,
             zIndex: 100,
-          },
-        ]}
+          }),
+        }}
         data-focus-key={payee.id}
         onMouseEnter={() => onHover && onHover(payee.id)}
       >

@@ -40,7 +40,7 @@ function AccountHeader({ name, amount, style = {} }) {
       </View>
       <CellValue
         binding={amount}
-        style={[styles.text, { fontSize: 13 }]}
+        style={{ ...styles.text, fontSize: 13 }}
         type="financial"
       />
     </View>
@@ -85,15 +85,13 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             }}
           >
             <TextOneLine
-              style={[
-                styles.text,
-                {
-                  fontSize: 17,
-                  fontWeight: 600,
-                  color: updated ? theme.mobileAccountText : theme.pillText,
-                  paddingRight: 30,
-                },
-              ]}
+              style={{
+                ...styles.text,
+                fontSize: 17,
+                fontWeight: 600,
+                color: updated ? theme.mobileAccountText : theme.pillText,
+                paddingRight: 30,
+              }}
               data-testid="account-name"
             >
               {account.name}

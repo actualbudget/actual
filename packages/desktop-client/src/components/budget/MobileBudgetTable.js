@@ -123,7 +123,7 @@ const BudgetCell = memo(function BudgetCell(props) {
           }),
         }}
         focused={editing}
-        textStyle={[styles.smallText, textStyle]}
+        textStyle={{ ...styles.smallText, ...textStyle }}
         onChange={() => {}} // temporarily disabled for read-only view
         onBlur={value => {
           onBudgetAction(month, 'budget-amount', {
@@ -276,14 +276,12 @@ class BudgetCategory extends PureComponent {
     let content = !category.hidden && (
       <ListItem
         // ref={el => (this.container = el)}
-        style={[
-          {
-            backgroundColor: editing ? colors.p11 : 'transparent',
-            borderBottomWidth: 0,
-            borderTopWidth: index > 0 ? 1 : 0,
-          },
-          style,
-        ]}
+        style={{
+          backgroundColor: editing ? colors.p11 : 'transparent',
+          borderBottomWidth: 0,
+          borderTopWidth: index > 0 ? 1 : 0,
+          ...style,
+        }}
         data-testid="row"
       >
         <View style={{ flex: 1 }}>
@@ -310,7 +308,7 @@ class BudgetCategory extends PureComponent {
             binding={budgeted}
             editing={editing}
             style={{ width: 90 }}
-            textStyle={[styles.smallText, { textAlign: 'right' }]}
+            textStyle={{ ...styles.smallText, textAlign: 'right' }}
             categoryId={category.id}
             month={month}
             onBudgetAction={onBudgetAction}
@@ -318,7 +316,11 @@ class BudgetCategory extends PureComponent {
           <CellValue
             name="balance"
             binding={balance}
-            style={[styles.smallText, { width: 90, textAlign: 'right' }]}
+            style={{
+              ...styles.smallText,
+              width: 90,
+              textAlign: 'right',
+            }}
             getStyle={value => value < 0 && { color: colors.r4 }}
             type="financial"
           />
@@ -416,18 +418,22 @@ class TotalsRow extends PureComponent {
         >
           <CellValue
             binding={rolloverBudget.groupBudgeted(group.id)}
-            style={[
-              styles.smallText,
-              { width: 90, fontWeight: '500', textAlign: 'right' },
-            ]}
+            style={{
+              ...styles.smallText,
+              width: 90,
+              fontWeight: '500',
+              textAlign: 'right',
+            }}
             type="financial"
           />
           <CellValue
             binding={rolloverBudget.groupBalance(group.id)}
-            style={[
-              styles.smallText,
-              { width: 90, fontWeight: '500', textAlign: 'right' },
-            ]}
+            style={{
+              ...styles.smallText,
+              width: 90,
+              fontWeight: '500',
+              textAlign: 'right',
+            }}
             type="financial"
           />
         </View>
@@ -486,15 +492,13 @@ class IncomeCategory extends PureComponent {
       this.props;
     return (
       <ListItem
-        style={[
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: 10,
-            backgroundColor: 'transparent',
-          },
-          style,
-        ]}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 10,
+          backgroundColor: 'transparent',
+          ...style,
+        }}
       >
         <View style={{ flex: 1 }}>
           <Text
@@ -507,21 +511,23 @@ class IncomeCategory extends PureComponent {
         {budget && (
           <CellValue
             binding={budget}
-            style={[
-              styles.smallText,
-              { width: 90, textAlign: 'right' },
-              amountTextStyle,
-            ]}
+            style={{
+              ...styles.smallText,
+              width: 90,
+              textAlign: 'right',
+              ...amountTextStyle,
+            }}
             type="financial"
           />
         )}
         <CellValue
           binding={balance}
-          style={[
-            styles.smallText,
-            { width: 90, textAlign: 'right' },
-            amountTextStyle,
-          ]}
+          style={{
+            ...styles.smallText,
+            width: 90,
+            textAlign: 'right',
+            ...amountTextStyle,
+          }}
           type="financial"
         />
       </ListItem>
@@ -848,15 +854,50 @@ export function BudgetTable(props) {
               justifyContent: 'center',
             }}
           >
-            <Label title="BALANCE" style={{ color: colors.n1 }} />
-            <CellValue
-              binding={rolloverBudget.totalBalance}
-              type="financial"
-              style={[
-                styles.smallText,
-                { color: colors.n1, textAlign: 'right', fontWeight: '500' },
-              ]}
-            />
+            {type === 'report' ? (
+              <Saved projected={month >= currentMonth} />
+            ) : (
+              <ToBudget
+                toBudget={rolloverBudget.toBudget}
+                onClick={onShowBudgetDetails}
+              />
+            )}
+            <View style={{ flex: 1 }} />
+
+            <View style={{ width: 90, justifyContent: 'center' }}>
+              <Label title="BUDGETED" style={{ color: colors.n1 }} />
+              <CellValue
+                binding={reportBudget.totalBudgetedExpense}
+                type="financial"
+                style={{
+                  ...styles.smallText,
+                  color: colors.n1,
+                  textAlign: 'right',
+                  fontWeight: '500',
+                }}
+                formatter={value => {
+                  return format(-parseFloat(value || '0'), 'financial');
+                }}
+              />
+            </View>
+            <View
+              style={{
+                width: 90,
+                justifyContent: 'center',
+              }}
+            >
+              <Label title="BALANCE" style={{ color: colors.n1 }} />
+              <CellValue
+                binding={rolloverBudget.totalBalance}
+                type="financial"
+                style={{
+                  ...styles.smallText,
+                  color: colors.n1,
+                  textAlign: 'right',
+                  fontWeight: '500',
+                }}
+              />
+            </View>
           </View>
         </View>
 

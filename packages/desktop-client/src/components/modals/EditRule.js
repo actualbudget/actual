@@ -116,7 +116,7 @@ export function OpSelect({
       value={value}
       onChange={value => onChange('op', value)}
       line={line}
-      style={[{ minHeight: '1px' }, ...style]}
+      style={{ minHeight: '1px', ...style }}
       wrapperStyle={wrapperStyle}
     />
   );

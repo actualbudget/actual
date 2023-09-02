@@ -451,7 +451,7 @@ function SidebarCategory({
           }
         }}
         onBlur={() => onEditName(null)}
-        style={[{ paddingLeft: 13 }, isLast && { borderBottomWidth: 0 }]}
+        style={{ paddingLeft: 13, ...(isLast && { borderBottomWidth: 0 }) }}
         inputProps={{
           placeholder: temporary ? 'New Category Name' : '',
         }}

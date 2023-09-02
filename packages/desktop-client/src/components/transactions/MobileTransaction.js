@@ -934,11 +934,13 @@ class Transaction extends PureComponent {
         }}
       >
         <ListItem
-          style={[
-            { flex: 1, height: 60, padding: '5px 10px' }, // remove padding when Button is back
-            isPreview && { backgroundColor: colors.n11 },
-            style,
-          ]}
+          style={{
+            flex: 1,
+            height: 60,
+            padding: '5px 10px', // remove padding when Button is back
+            ...(isPreview && { backgroundColor: colors.n11 }),
+            ...style,
+          }}
         >
           <View style={[{ flex: 1 }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -953,15 +955,16 @@ class Transaction extends PureComponent {
                 />
               )}
               <TextOneLine
-                style={[
-                  styles.text,
-                  textStyle,
-                  { fontSize: 14, fontWeight: added ? '600' : '400' },
-                  prettyDescription === '' && {
+                style={{
+                  ...styles.text,
+                  ...textStyle,
+                  fontSize: 14,
+                  fontWeight: added ? '600' : '400',
+                  ...(prettyDescription === '' && {
                     color: colors.n6,
                     fontStyle: 'italic',
-                  },
-                ]}
+                  }),
+                }}
               >
                 {prettyDescription || 'Empty'}
               </TextOneLine>

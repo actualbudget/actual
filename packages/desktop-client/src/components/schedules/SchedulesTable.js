@@ -295,7 +295,7 @@ export function SchedulesTable({
         rowHeight={ROW_HEIGHT}
         backgroundColor="transparent"
         version="v2"
-        style={[{ flex: 1, backgroundColor: 'transparent' }, style]}
+        style={{ flex: 1, backgroundColor: 'transparent', ...style }}
         items={items}
         renderItem={renderItem}
         renderEmpty={filter ? 'No matching schedules' : 'No schedules'}

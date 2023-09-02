@@ -485,7 +485,7 @@ export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
       {...props}
       name="delete"
       width={20}
-      style={[{ alignItems: 'center', userSelect: 'none' }, style]}
+      style={{ alignItems: 'center', userSelect: 'none', ...style }}
       onClick={e => {
         e.stopPropagation();
         onDelete?.();
@@ -631,7 +631,7 @@ export function SelectCell({
       focused={focused}
       name="select"
       width={20}
-      style={[{ alignItems: 'center', userSelect: 'none' }, style]}
+      style={{ alignItems: 'center', userSelect: 'none', ...style }}
       onClick={e => {
         e.stopPropagation();
         onSelect?.(e);

@@ -293,7 +293,7 @@ export default function DateSelect({
       <Tooltip
         position="bottom-left"
         offset={2}
-        style={[{ padding: 0, minWidth: 225 }, tooltipStyle]}
+        style={{ padding: 0, minWidth: 225, ...tooltipStyle }}
         data-testid="date-select-tooltip"
       >
         {content}

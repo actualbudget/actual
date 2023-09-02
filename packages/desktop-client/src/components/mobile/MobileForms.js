@@ -52,15 +52,13 @@ export const InputField = forwardRef(function InputField(
       onBlur={e => {
         onUpdate?.(e.target.value);
       }}
-      style={[
-        valueStyle,
-        style,
-        {
-          backgroundColor: disabled
-            ? theme.formInputTextReadOnlySelection
-            : 'white',
-        },
-      ]}
+      style={{
+        ...valueStyle,
+        ...style,
+        backgroundColor: disabled
+          ? theme.formInputTextReadOnlySelection
+          : 'white',
+      }}
       {...props}
     />
   );

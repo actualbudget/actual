@@ -80,6 +80,13 @@ function Account({
     onDrop: onDrop,
   });
 
+  const dotStyle = {
+    '& .dot': {
+      backgroundColor: colors.p8,
+      transform: 'translateX(-4.5px)',
+    },
+  };
+
   return (
     <View innerRef={dropRef} style={[{ flexShrink: 0 }, outerStyle]}>
       <View>
@@ -87,12 +94,13 @@ function Account({
         <View innerRef={dragRef}>
           <AnchorLink
             to={to}
-            style={[
-              accountNameStyle,
-              style,
-              { position: 'relative', borderLeft: '4px solid transparent' },
-              updated && { fontWeight: 700 },
-            ]}
+            style={{
+              ...accountNameStyle,
+              ...style,
+              position: 'relative',
+              borderLeft: '4px solid transparent',
+              ...(updated && { fontWeight: 700 }),
+            }}
             activeStyle={{
               borderColor: colors.p8,
               color: colors.p8,
@@ -102,10 +110,7 @@ function Account({
               // unbolds it, but it still "flashes" bold so this just
               // ignores it if it's active
               fontWeight: (style && style.fontWeight) || 'normal',
-              '& .dot': {
-                backgroundColor: colors.p8,
-                transform: 'translateX(-4.5px)',
-              },
+              ...dotStyle,
             }}
           >
             <View

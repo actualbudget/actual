@@ -98,7 +98,7 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
         name="budgeted"
         width="flex"
         textAlign="right"
-        style={[{ fontWeight: 600 }, styles.tnum]}
+        style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
           binding: reportBudget.groupBudgeted(id),
           type: 'financial',
@@ -108,7 +108,7 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
         name="spent"
         width="flex"
         textAlign="right"
-        style={[{ fontWeight: 600 }, styles.tnum]}
+        style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
           binding: reportBudget.groupSumAmount(id),
           type: 'financial',
@@ -119,10 +119,11 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           name="balance"
           width="flex"
           textAlign="right"
-          style={[
-            { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
-            styles.tnum,
-          ]}
+          style={{
+            fontWeight: 600,
+            paddingRight: MONTH_RIGHT_PADDING,
+            ...styles.tnum,
+          }}
           valueProps={{
             binding: reportBudget.groupBalance(id),
             type: 'financial',
@@ -305,7 +306,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           focused={editing}
           width="flex"
           onExpose={() => onEdit(category.id, monthIndex)}
-          style={[editing && { zIndex: 100 }, styles.tnum]}
+          style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
           textAlign="right"
           valueStyle={{
             cursor: 'default',

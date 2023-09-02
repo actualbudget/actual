@@ -261,12 +261,13 @@ function ConfigureField({
                 style={{ flexWrap: 'wrap' }}
               >
                 {ops.slice(0, 3).map(currOp => (
-                  <OpButton
-                    key={currOp}
-                    op={currOp}
-                    selected={currOp === op}
-                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                  />
+                  <View key={currOp}>
+                    <OpButton
+                      op={currOp}
+                      selected={currOp === op}
+                      onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                    />
+                  </View>
                 ))}
               </Stack>
               <Stack

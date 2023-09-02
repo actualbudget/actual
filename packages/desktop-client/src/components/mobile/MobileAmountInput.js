@@ -251,21 +251,19 @@ export class FocusableAmountInput extends PureComponent {
           onChange={this.onChange}
           onBlur={this.onBlur}
           focused={focused}
-          style={[
-            {
-              width: 80,
-              transform: [{ translateX: 6 }],
-              justifyContent: 'center',
-            },
-            style,
-            focusedStyle,
-            !focused && {
+          style={{
+            width: 80,
+            transform: [{ translateX: 6 }],
+            justifyContent: 'center',
+            ...style,
+            ...focusedStyle,
+            ...(!focused && {
               opacity: 0,
               position: 'absolute',
               top: 0,
-            },
-          ]}
-          textStyle={[{ fontSize: 15, textAlign: 'right' }, textStyle]}
+            }),
+          }}
+          textStyle={{ fontSize: 15, textAlign: 'right', ...textStyle }}
         />
 
         <View>

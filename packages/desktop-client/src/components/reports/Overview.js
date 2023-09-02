@@ -55,7 +55,7 @@ function Card({ flex, to, style, children }) {
     return (
       <AnchorLink
         to={to}
-        style={[{ textDecoration: 'none', flex }, containerProps]}
+        style={{ textDecoration: 'none', flex, ...containerProps }}
       >
         {content}
       </AnchorLink>

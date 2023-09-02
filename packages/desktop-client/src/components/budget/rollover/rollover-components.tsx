@@ -260,7 +260,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         name="budgeted"
         width="flex"
         textAlign="right"
-        style={[{ fontWeight: 600 }, styles.tnum]}
+        style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
           binding: rolloverBudget.groupBudgeted(id),
           type: 'financial',
@@ -280,10 +280,11 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         name="balance"
         width="flex"
         textAlign="right"
-        style={[
-          { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
-          styles.tnum,
-        ]}
+        style={{
+          fontWeight: 600,
+          paddingRight: MONTH_RIGHT_PADDING,
+          ...styles.tnum,
+        }}
         valueProps={{
           binding: rolloverBudget.groupBalance(id),
           type: 'financial',
@@ -506,10 +507,11 @@ export function IncomeGroupMonth() {
         name="received"
         width="flex"
         textAlign="right"
-        style={[
-          { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
-          styles.tnum,
-        ]}
+        style={{
+          fontWeight: 600,
+          paddingRight: MONTH_RIGHT_PADDING,
+          ...styles.tnum,
+        }}
         valueProps={{
           binding: rolloverBudget.groupIncomeReceived,
           type: 'financial',
