@@ -1,14 +1,10 @@
-import { type CSSProperties as ReactCSSProperties } from 'react';
-
 import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from '../tokens';
 
-export type CSSProperties = ReactCSSProperties & {
-  [propertyName: string]: unknown;
-};
+import { type CSSProperties } from './types';
 
 export const styles = {
   incomeHeaderHeight: 70,

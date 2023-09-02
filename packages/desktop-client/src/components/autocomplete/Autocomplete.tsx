@@ -154,7 +154,7 @@ type SingleAutocompleteProps = {
   renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
   renderItems?: (
     items,
-    getItemProps: (arg: { item: unknown }) => HTMLProps<HTMLDivElement>,
+    getItemProps: (arg: { item: unknown }) => ComponentProps<typeof View>,
     idx: number,
     value?: unknown,
   ) => ReactNode;
@@ -604,7 +604,7 @@ function MultiAutocomplete({
       tooltipProps={{
         forceLayout: lastSelectedItems.current !== selectedItems,
       }}
-      renderInput={props => (
+      renderInput={inputProps => (
         <View
           style={{
             display: 'flex',
@@ -633,22 +633,22 @@ function MultiAutocomplete({
             );
           })}
           <Input
-            {...props}
-            onKeyDown={e => onKeyDown(e, props.onKeyDown)}
+            {...inputProps}
+            onKeyDown={e => onKeyDown(e, inputProps.onKeyDown)}
             onFocus={e => {
               setFocused(true);
-              props.onFocus(e);
+              inputProps.onFocus(e);
             }}
             onBlur={e => {
               setFocused(false);
-              props.onBlur(e);
+              inputProps.onBlur(e);
             }}
             style={{
               flex: 1,
               minWidth: 30,
               border: 0,
               ':focus': { border: 0, boxShadow: 'none' },
-              ...props?.inputProps?.style,
+              ...inputProps.style,
             }}
           />
         </View>
