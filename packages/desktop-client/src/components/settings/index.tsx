@@ -47,14 +47,14 @@ function About() {
         style={{
           flexDirection: 'column',
           gap: 10,
-          ...media(`(min-width: ${tokens.breakpoint_small})`, {
-            display: 'grid',
-            gridTemplateRows: '1fr 1fr',
-            gridTemplateColumns: '50% 50%',
-            columnGap: '2em',
-            gridAutoFlow: 'column',
-          }),
         }}
+        className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
+          display: 'grid',
+          gridTemplateRows: '1fr 1fr',
+          gridTemplateColumns: '50% 50%',
+          columnGap: '2em',
+          gridAutoFlow: 'column',
+        })}`}
         data-vrt-mask
       >
         <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>

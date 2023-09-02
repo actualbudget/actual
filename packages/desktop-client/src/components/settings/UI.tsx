@@ -61,10 +61,10 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
         alignItems: 'flex-start',
         marginBottom: 25,
         width: '100%',
-        ...media(`(min-width: ${tokens.breakpoint_small})`, {
-          width: 'auto',
-        }),
       }}
+      className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
+        width: 'auto',
+      })}`}
       innerRef={el => {
         if (el && location.hash === '#advanced') {
           el.scrollIntoView(true);
