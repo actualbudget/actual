@@ -7,6 +7,7 @@ import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import useCategories from '../../hooks/useCategories';
 import { theme } from '../../style';
 import LinkButton from '../common/LinkButton';
 import Text from '../common/Text';
@@ -33,31 +34,23 @@ export default function Value<T>({
   // @ts-expect-error fix this later
   describe = x => x.name,
 }: ValueProps<T>) {
-  let { data, dateFormat } = useSelector(state => {
-    let data;
-    if (dataProp) {
-      data = dataProp;
-    } else {
-      switch (field) {
-        case 'payee':
-          data = state.queries.payees;
-          break;
-        case 'category':
-          data = state.queries.categories.list;
-          break;
-        case 'account':
-          data = state.queries.accounts;
-          break;
-        default:
-          data = [];
-      }
-    }
+  let dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
+  let payees = useSelector(state => state.queries.payees);
+  let { list: categories } = useCategories();
+  let accounts = useSelector(state => state.queries.accounts);
 
-    return {
-      data,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    };
-  });
+  let data =
+    dataProp ||
+    (field === 'payee'
+      ? payees
+      : field === 'category'
+      ? categories
+      : field === 'account'
+      ? accounts
+      : []);
+
   let [expanded, setExpanded] = useState(false);
 
   function onExpand(e) {
@@ -98,7 +91,7 @@ export default function Value<T>({
           if (valueIsRaw) {
             return value;
           }
-          if (data && data.length) {
+          if (data && Array.isArray(data)) {
             let item = data.find(item => item.id === value);
             if (item) {
               return describe(item);

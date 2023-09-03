@@ -6,7 +6,7 @@ import React, {
   useState,
   useRef,
 } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 
 import { useFocusRing } from '@react-aria/focus';
@@ -23,7 +23,6 @@ import {
 import { css } from 'glamor';
 import memoizeOne from 'memoize-one';
 
-import * as actions from 'loot-core/src/client/actions';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -43,6 +42,8 @@ import {
   groupById,
 } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import SvgAdd from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
@@ -847,16 +848,28 @@ function TransactionEditUnconnected(props) {
   );
 }
 
-export const TransactionEdit = connect(
-  state => ({
-    categories: state.queries.categories.list,
-    payees: state.queries.payees,
-    lastTransaction: state.queries.lastTransaction,
-    accounts: state.queries.accounts,
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  }),
-  actions,
-)(TransactionEditUnconnected);
+export const TransactionEdit = props => {
+  const { list: categories } = useCategories();
+  const payees = useSelector(state => state.queries.payees);
+  const lastTransaction = useSelector(state => state.queries.lastTransaction);
+  const accounts = useSelector(state => state.queries.accounts);
+  const dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
+  const actions = useActions();
+
+  return (
+    <TransactionEditUnconnected
+      {...props}
+      {...actions}
+      categories={categories}
+      payees={payees}
+      lastTransaction={lastTransaction}
+      accounts={accounts}
+      dateFormat={dateFormat}
+    />
+  );
+};
 
 class Transaction extends PureComponent {
   render() {

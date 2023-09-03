@@ -13,6 +13,7 @@ import {
 } from 'loot-core/src/client/reducers/queries';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import useCategories from '../../hooks/useCategories';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import { theme, styles } from '../../style';
@@ -141,11 +142,11 @@ export default function SimpleTransactionsTable({
   fields = ['date', 'payee', 'amount'],
   style,
 }) {
-  let { payees, categories, accounts, dateFormat } = useSelector(state => {
+  let { grouped: categories } = useCategories();
+  let { payees, accounts, dateFormat } = useSelector(state => {
     return {
       payees: state.queries.payees,
       accounts: state.queries.accounts,
-      categories: state.queries.categories.grouped,
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
