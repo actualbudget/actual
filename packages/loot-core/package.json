@@ -52,7 +52,7 @@
     "@types/pegjs": "^0.10.3",
     "@types/react-redux": "^7.1.25",
     "@types/uuid": "^9.0.2",
-    "@types/webpack": "^5.28.0",
+    "@types/webpack": "^5.28.2",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "adm-zip": "^0.5.9",
     "buffer": "^6.0.3",
@@ -77,9 +77,9 @@
     "ts-node": "^10.7.0",
     "typescript": "^4.6.4",
     "uuid": "^9.0.0",
-    "webpack": "^5.86.0",
-    "webpack-bundle-analyzer": "^4.9.0",
-    "webpack-cli": "^5.1.3",
+    "webpack": "^5.88.2",
+    "webpack-bundle-analyzer": "^4.9.1",
+    "webpack-cli": "^5.1.4",
     "ws": "^4.1.0",
     "yargs": "^9.0.1"
   }

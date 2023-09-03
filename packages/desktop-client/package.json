@@ -63,7 +63,7 @@
     "terser-webpack-plugin": "^5.3.9",
     "uuid": "^9.0.0",
     "victory": "^36.6.8",
-    "webpack-bundle-analyzer": "^4.9.0",
+    "webpack-bundle-analyzer": "^4.9.1",
     "xml2js": "^0.6.2"
   },
   "scripts": {
