@@ -29,7 +29,12 @@ function CategorySpendingGraph({
   }
 
   return (
-    <Container style={[style, compact && { height: 'auto', flex: 1 }]}>
+    <Container
+      style={{
+        ...style,
+        ...(compact && { height: 'auto', flex: 1 }),
+      }}
+    >
       {(width, height, portalHost) => (
         <VictoryChart
           scale={{ x: 'time', y: 'linear' }}
