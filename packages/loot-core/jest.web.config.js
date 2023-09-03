@@ -18,5 +18,6 @@ module.exports = {
   transformIgnorePatterns: ['/node_modules/(?!absurd-sql)'],
   transform: {
     '\\.pegjs$': '<rootDir>/peg-transform.mjs',
+    '^.+\\.(t|j)sx?$': '@swc/jest',
   },
 };

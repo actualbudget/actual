@@ -23,28 +23,14 @@ if (process.env.REVIEW_ID) {
 module.exports = {
   webpack: {
     configure: (webpackConfig, { env, paths }) => {
+      webpackConfig.mode =
+        process.env.NODE_ENV === 'development' ? 'development' : 'production';
+
       // swc-loader
       addAfterLoader(webpackConfig, loaderByName('babel-loader'), {
         test: /\.m?[tj]sx?$/,
         exclude: /node_modules/,
         loader: require.resolve('swc-loader'),
-        options: {
-          jsc: {
-            target: 'es2022',
-            transform: {
-              react: {
-                runtime: 'automatic',
-              },
-            },
-            externalHelpers: true,
-            parser: {
-              syntax: 'typescript',
-              tsx: true,
-              decorators: true,
-              dynamicImport: true,
-            },
-          },
-        },
       });
 
       // remove the babel loaders
