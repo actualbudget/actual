@@ -5,7 +5,6 @@ import React, {
   useRef,
   useContext,
   type ReactNode,
-  type CSSProperties,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
@@ -24,7 +23,7 @@ import SvgEye from '../icons/v2/Eye';
 import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
-import { colors } from '../style';
+import { colors, type CSSProperties } from '../style';
 import tokens from '../tokens';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
@@ -308,22 +307,20 @@ export default function Titlebar({ style }) {
 
   return isNarrowWidth ? null : (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 15px',
-          height: 36,
-          pointerEvents: 'none',
-          '& *': {
-            pointerEvents: 'auto',
-          },
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: '0 15px',
+        height: 36,
+        pointerEvents: 'none',
+        '& *': {
+          pointerEvents: 'auto',
         },
-        !Platform.isBrowser &&
+        ...(!Platform.isBrowser &&
           Platform.OS === 'mac' &&
-          floatingSidebar && { paddingLeft: 80 },
-        style,
-      ]}
+          floatingSidebar && { paddingLeft: 80 }),
+        ...style,
+      }}
     >
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button

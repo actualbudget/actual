@@ -22,7 +22,12 @@ export default function ManageRulesModal({ modalProps, payeeId }) {
       padding={0}
       loading={loading}
       {...modalProps}
-      style={[modalProps.style, { flex: 1, maxWidth: '90%', maxHeight: '90%' }]}
+      style={{
+        ...modalProps.style,
+        flex: 1,
+        maxWidth: '90%',
+        maxHeight: '90%',
+      }}
     >
       {() => <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />}
     </Modal>

@@ -1,13 +1,13 @@
 import React, { createRef, useState, useEffect } from 'react';
 
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
 import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
-import { colors } from '../style';
+import { type CSSProperties, colors } from '../style';
 
 import Button from './common/Button';
 import Text from './common/Text';
@@ -52,13 +52,13 @@ function NotesTooltip({
         />
       ) : (
         <Text
-          {...css({
+          style={{
             display: 'block',
             maxWidth: 225,
             padding: 8,
             whiteSpace: 'pre-wrap',
             overflowWrap: 'break-word',
-          })}
+          }}
         >
           {notes}
         </Text>
@@ -114,19 +114,19 @@ export default function NotesButton({
 
   return (
     <View
-      style={[{ flexShrink: 0 }]}
+      style={{ flexShrink: 0 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <Button
         type="bare"
         className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
-        style={[
-          { color: defaultColor },
-          style,
-          hasNotes && { display: 'flex !important' },
-          tooltipOpen && { color: colors.n1 },
-        ]}
+        style={{
+          color: defaultColor,
+          ...style,
+          ...(hasNotes && { display: 'flex !important' }),
+          ...(tooltipOpen && { color: colors.n1 }),
+        }}
         {...tooltip.getOpenEvents()}
       >
         <CustomNotesPaper style={{ width, height }} />

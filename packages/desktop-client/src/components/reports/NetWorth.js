@@ -83,7 +83,7 @@ export default function NetWorth() {
   }
 
   return (
-    <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
+    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header
         title="Net Worth"
         allMonths={allMonths}
@@ -117,7 +117,7 @@ export default function NetWorth() {
           }}
         >
           <View
-            style={[styles.largeText, { fontWeight: 400, marginBottom: 5 }]}
+            style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
             <PrivacyFilter blurIntensity={5}>
               {integerToCurrency(data.netWorth)}

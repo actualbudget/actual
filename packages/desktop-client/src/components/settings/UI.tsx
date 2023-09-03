@@ -1,10 +1,9 @@
-import React, { type ReactNode, useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
-import type { CSSProperties } from 'glamor';
 
-import { colors } from '../../style';
+import { type CSSProperties, colors } from '../../style';
 import tokens from '../../tokens';
 import LinkButton from '../common/LinkButton';
 import View from '../common/View';
@@ -57,17 +56,15 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
   return expanded ? (
     <View
       id="advanced"
-      style={[
-        {
-          gap: 20,
-          alignItems: 'flex-start',
-          marginBottom: 25,
-          width: '100%',
-        },
-        media(`(min-width: ${tokens.breakpoint_small})`, {
-          width: 'auto',
-        }),
-      ]}
+      style={{
+        gap: 20,
+        alignItems: 'flex-start',
+        marginBottom: 25,
+        width: '100%',
+      }}
+      className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
+        width: 'auto',
+      })}`}
       innerRef={el => {
         if (el && location.hash === '#advanced') {
           el.scrollIntoView(true);

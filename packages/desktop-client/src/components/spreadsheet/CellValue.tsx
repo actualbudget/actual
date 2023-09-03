@@ -1,8 +1,6 @@
-import React, { type ReactNode, useMemo } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 
-import { type CSSProperties } from 'glamor';
-
-import { styles } from '../../style';
+import { type CSSProperties, styles } from '../../style';
 import Text from '../common/Text';
 import {
   ConditionalPrivacyFilter,
@@ -50,11 +48,11 @@ function CellValue({
         }
       >
         <Text
-          style={[
-            type === 'financial' && styles.tnum,
-            style,
-            getStyle && getStyle(sheetValue),
-          ]}
+          style={{
+            ...(type === 'financial' && styles.tnum),
+            ...style,
+            ...(getStyle && getStyle(sheetValue)),
+          }}
           data-testid={testId || fullSheetName}
           data-cellname={fullSheetName}
         >

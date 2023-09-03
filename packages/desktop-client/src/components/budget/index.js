@@ -510,10 +510,12 @@ export default function BudgetWrapper(props) {
   // appear. We might not need it anymore?
   return (
     <View
-      style={[
-        styles.page,
-        { paddingLeft: 8, paddingRight: 8, overflow: 'hidden' },
-      ]}
+      style={{
+        ...styles.page,
+        paddingLeft: 8,
+        paddingRight: 8,
+        overflow: 'hidden',
+      }}
     >
       <Budget
         startMonth={startMonth}
