@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { colors } from '../../style';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import Block from '../common/Block';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
