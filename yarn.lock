@@ -13063,6 +13063,7 @@ __metadata:
     source-map: ^0.7.3
     stream-browserify: ^3.0.0
     swc-loader: ^0.2.3
+    terser-webpack-plugin: ^5.3.9
     throttleit: ^1.0.0
     ts-jest: ^27.0.0
     ts-node: ^10.7.0
