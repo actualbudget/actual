@@ -26,9 +26,19 @@ module.exports = {
       webpackConfig.mode =
         process.env.NODE_ENV === 'development' ? 'development' : 'production';
 
-      // swc-loader
+      // esbuild-loader js/jsx
       addAfterLoader(webpackConfig, loaderByName('babel-loader'), {
-        test: /\.m?[tj]sx?$/,
+        test: /\.m?jsx?$/,
+        loader: require.resolve('esbuild-loader'),
+        options: {
+          loader: 'jsx',
+          target: 'es2022',
+        },
+      });
+
+      // esbuild-loader ts/tsx
+      addAfterLoader(webpackConfig, loaderByName('babel-loader'), {
+        test: /\.m?tsx?$/,
         loader: require.resolve('esbuild-loader'),
         options: {
           loader: 'tsx',

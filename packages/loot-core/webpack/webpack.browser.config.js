@@ -51,7 +51,17 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.m?[tj]sx?$/,
+        test: /\.m?jsx?$/,
+        use: {
+          loader: 'esbuild-loader',
+          options: {
+            loader: 'jsx',
+            target: 'es2022',
+          },
+        },
+      },
+      {
+        test: /\.m?tsx?$/,
         use: {
           loader: 'esbuild-loader',
           options: {
