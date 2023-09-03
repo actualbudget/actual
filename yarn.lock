@@ -35,6 +35,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
+    "@swc/core": ^1.3.82
     "@swc/jest": ^0.2.29
     "@types/jest": ^27.5.0
     "@types/uuid": ^9.0.2
