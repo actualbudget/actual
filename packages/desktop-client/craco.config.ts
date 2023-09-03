@@ -29,8 +29,11 @@ module.exports = {
       // swc-loader
       addAfterLoader(webpackConfig, loaderByName('babel-loader'), {
         test: /\.m?[tj]sx?$/,
-        exclude: /node_modules/,
-        loader: require.resolve('swc-loader'),
+        loader: require.resolve('esbuild-loader'),
+        options: {
+          loader: 'tsx',
+          target: 'es2022',
+        },
       });
 
       // remove the babel loaders
@@ -78,13 +81,17 @@ module.exports = {
           process.env.CI === 'true' || process.env.NODE_ENV !== 'development',
         minimizer: [
           new TerserPlugin({
-            minify: TerserPlugin.swcMinify,
-            // `terserOptions` options will be passed to `swc` (`@swc/core`)
-            // Link to options - https://swc.rs/docs/config-js-minify
-            terserOptions: {
-              compress: false,
-              mangle: true,
-            },
+            minify: TerserPlugin.esbuildMinify,
+            // `terserOptions` options will be passed to `esbuild`
+            // Link to options - https://esbuild.github.io/api/#minify
+            // Note: the `minify` options is true by default (and override other `minify*` options), so if you want to disable the `minifyIdentifiers` option (or other `minify*` options) please use:
+            // terserOptions: {
+            //   minify: false,
+            //   minifyWhitespace: true,
+            //   minifyIdentifiers: false,
+            //   minifySyntax: true,
+            // },
+            terserOptions: {},
           }),
         ],
       };
