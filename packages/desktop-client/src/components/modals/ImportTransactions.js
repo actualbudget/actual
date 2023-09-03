@@ -11,6 +11,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { colors, styles } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
 import Input from '../common/Input';
@@ -585,12 +586,19 @@ export default function ImportTransactions({ modalProps, options }) {
 
   let [clearOnImport, setClearOnImport] = useState(true);
 
+  const enableExperimentalOfxParser = useFeatureFlag('experimentalOfxParser');
+
   async function parse(filename, options) {
     setLoadingState('parsing');
 
     let filetype = getFileType(filename);
     setFilename(filename);
     setFileType(filetype);
+
+    options = {
+      ...options,
+      enableExperimentalOfxParser,
+    };
 
     let { errors, transactions } = await parseTransactions(filename, options);
     setLoadingState(null);
