@@ -74,7 +74,7 @@ module.exports = {
 
       webpackConfig.optimization = {
         ...webpackConfig.optimization,
-        minimize: process.env.NODE_ENV !== 'development',
+        minimize: process.env.CI === 'true' || process.env.MINIFY !== 'true',
         minimizer: [
           new TerserPlugin({
             minify: TerserPlugin.swcMinify,
