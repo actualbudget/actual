@@ -60,6 +60,7 @@
     "remark-gfm": "^3.0.1",
     "sass": "^1.63.6",
     "swc-loader": "^0.2.3",
+    "terser-webpack-plugin": "^5.3.9",
     "uuid": "^9.0.0",
     "victory": "^36.6.8",
     "webpack-bundle-analyzer": "^4.9.0",
