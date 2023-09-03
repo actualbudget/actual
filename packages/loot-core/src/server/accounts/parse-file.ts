@@ -21,7 +21,7 @@ type ParseFileOptions = {
 };
 
 export async function parseFile(
-  filepath,
+  filepath: string,
   options?: ParseFileOptions,
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
@@ -35,14 +35,10 @@ export async function parseFile(
         return parseQIF(filepath);
       case '.csv':
       case '.tsv':
-        return parseCSV(filepath, options?.hasHeaderRow, options?.delimiter);
+        return parseCSV(filepath, options);
       case '.ofx':
       case '.qfx':
-        if (options?.enableExperimentalOfxParser) {
-          return parseOFX(filepath);
-        } else {
-          return parseOFXNodeLibOFX(filepath, options);
-        }
+        return parseOFX(filepath, options);
       default:
     }
   }
@@ -56,8 +52,7 @@ export async function parseFile(
 
 async function parseCSV(
   filepath: string,
-  hasHeaderRow = true,
-  delimiter?: string,
+  options?: ParseFileOptions,
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
@@ -65,9 +60,9 @@ async function parseCSV(
   let data;
   try {
     data = csv2json(contents, {
-      columns: hasHeaderRow,
+      columns: options?.hasHeaderRow,
       bom: true,
-      delimiter: delimiter || ',',
+      delimiter: options?.delimiter || ',',
       // eslint-disable-next-line rulesdir/typography
       quote: '"',
       trim: true,
@@ -85,7 +80,7 @@ async function parseCSV(
   return { errors, transactions: data };
 }
 
-async function parseQIF(filepath): Promise<ParseFileResult> {
+async function parseQIF(filepath: string): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
 
@@ -112,7 +107,14 @@ async function parseQIF(filepath): Promise<ParseFileResult> {
   };
 }
 
-async function parseOFX(filepath): Promise<ParseFileResult> {
+async function parseOFX(
+  filepath: string,
+  options?: ParseFileOptions,
+): Promise<ParseFileResult> {
+  if (!options?.enableExperimentalOfxParser) {
+    return parseOFXNodeLibOFX(filepath, options);
+  }
+
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
@@ -127,25 +129,29 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
     return { errors };
   }
 
+  // Banks don't always implement the OFX standard properly
+  // If no payee is available try and fallback to memo
+  let useMemoFallback = options.fallbackMissingPayeeToMemo;
+
   return {
     errors,
     transactions: data.transactions.map(trans => {
-      // Banks don't always implement the OFX standard properly
-      // If no payee is available try and fallback to memo
-      const useName = trans.name != null;
       return {
         amount: trans.amount,
         imported_id: trans.fitId,
         date: trans.date,
-        payee_name: useName ? trans.name : trans.memo,
-        imported_payee: useName ? trans.name : trans.memo,
-        notes: useName ? trans.memo || null : null, //memo used for payee
+        payee_name: trans.name || (useMemoFallback ? trans.memo : null),
+        imported_payee: trans.name || (useMemoFallback ? trans.memo : null),
+        notes: !!trans.name || !useMemoFallback ? trans.memo || null : null, //memo used for payee
       };
     }),
   };
 }
 
-async function parseOFXNodeLibOFX(filepath, options): Promise<ParseFileResult> {
+async function parseOFXNodeLibOFX(
+  filepath: string,
+  options: ParseFileOptions,
+): Promise<ParseFileResult> {
   let { getOFXTransactions, initModule } = await import(
     /* webpackChunkName: 'xfo' */ 'node-libofx'
   );
