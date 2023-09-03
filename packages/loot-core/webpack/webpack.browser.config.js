@@ -51,14 +51,9 @@ module.exports = {
     rules: [
       {
         test: /\.m?[tj]sx?$/,
+        exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              ['@babel/preset-env', { bugfixes: true }],
-              '@babel/preset-typescript',
-            ],
-          },
+          loader: 'swc-loader',
         },
       },
       {
