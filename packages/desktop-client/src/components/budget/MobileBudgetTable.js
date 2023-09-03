@@ -839,10 +839,12 @@ export function BudgetTable(props) {
             <CellValue
               binding={reportBudget.totalBudgetedExpense}
               type="financial"
-              style={[
-                styles.smallText,
-                { color: colors.n1, textAlign: 'right', fontWeight: '500' },
-              ]}
+              style={{
+                ...styles.smallText,
+                color: colors.n1,
+                textAlign: 'right',
+                fontWeight: '500',
+              }}
               formatter={value => {
                 return format(-parseFloat(value || '0'), 'financial');
               }}
@@ -854,50 +856,17 @@ export function BudgetTable(props) {
               justifyContent: 'center',
             }}
           >
-            {type === 'report' ? (
-              <Saved projected={month >= currentMonth} />
-            ) : (
-              <ToBudget
-                toBudget={rolloverBudget.toBudget}
-                onClick={onShowBudgetDetails}
-              />
-            )}
-            <View style={{ flex: 1 }} />
-
-            <View style={{ width: 90, justifyContent: 'center' }}>
-              <Label title="BUDGETED" style={{ color: colors.n1 }} />
-              <CellValue
-                binding={reportBudget.totalBudgetedExpense}
-                type="financial"
-                style={{
-                  ...styles.smallText,
-                  color: colors.n1,
-                  textAlign: 'right',
-                  fontWeight: '500',
-                }}
-                formatter={value => {
-                  return format(-parseFloat(value || '0'), 'financial');
-                }}
-              />
-            </View>
-            <View
+            <Label title="BALANCE" style={{ color: colors.n1 }} />
+            <CellValue
+              binding={rolloverBudget.totalBalance}
+              type="financial"
               style={{
-                width: 90,
-                justifyContent: 'center',
+                ...styles.smallText,
+                color: colors.n1,
+                textAlign: 'right',
+                fontWeight: '500',
               }}
-            >
-              <Label title="BALANCE" style={{ color: colors.n1 }} />
-              <CellValue
-                binding={rolloverBudget.totalBalance}
-                type="financial"
-                style={{
-                  ...styles.smallText,
-                  color: colors.n1,
-                  textAlign: 'right',
-                  fontWeight: '500',
-                }}
-              />
-            </View>
+            />
           </View>
         </View>
 
