@@ -55,6 +55,11 @@ let defaultConfig = {
     'web',
     'build',
   ),
+  upload: {
+    fileSizeSyncLimitMB: 20,
+    syncEncryptedFileSizeLimitMB: 50,
+    fileSizeLimitMB: 20,
+  },
 };
 
 /** @type {import('./config-types.js').Config} */
@@ -91,6 +96,24 @@ const finalConfig = {
           ...(config.https || {}),
         }
       : config.https,
+  upload:
+    process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
+    process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
+    process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB
+      ? {
+          fileSizeSyncLimitMB:
+            +process.env.ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB ||
+            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+            config.upload.fileSizeSyncLimitMB,
+          syncEncryptedFileSizeLimitMB:
+            +process.env.ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB ||
+            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+            config.upload.syncEncryptedFileSizeLimitMB,
+          fileSizeLimitMB:
+            +process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB ||
+            config.upload.fileSizeLimitMB,
+        }
+      : config.upload,
 };
 
 debug(`using port ${finalConfig.port}`);
@@ -104,6 +127,14 @@ if (finalConfig.https) {
   debugSensitive(`using https key ${finalConfig.https.key}`);
   debug(`using https cert: ${'*'.repeat(finalConfig.https.cert.length)}`);
   debugSensitive(`using https cert ${finalConfig.https.cert}`);
+}
+
+if (finalConfig.upload) {
+  debug(`using file sync limit ${finalConfig.upload.fileSizeSyncLimitMB}mb`);
+  debug(
+    `using sync encrypted file limit ${finalConfig.upload.syncEncryptedFileSizeLimitMB}mb`,
+  );
+  debug(`using file limit ${finalConfig.upload.fileSizeLimitMB}mb`);
 }
 
 export default finalConfig;

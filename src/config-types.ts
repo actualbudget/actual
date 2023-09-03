@@ -11,4 +11,9 @@ export interface Config {
     key: string;
     cert: string;
   } & ServerOptions;
+  upload?: {
+    fileSizeSyncLimitMB: number;
+    syncEncryptedFileSizeLimitMB: number;
+    fileSizeLimitMB: number;
+  };
 }
