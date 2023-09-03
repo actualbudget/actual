@@ -20,10 +20,10 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@swc/jest": "^0.2.29",
     "@types/jest": "^27.5.0",
     "@types/uuid": "^9.0.2",
     "jest": "^27.0.0",
-    "ts-jest": "^27.0.0",
     "ts-protoc-gen": "^0.15.0",
     "typescript": "^5.0.2"
   }
