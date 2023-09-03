@@ -48,13 +48,11 @@ function CategoryList({
   return (
     <View>
       <View
-        style={[
-          {
-            overflow: 'auto',
-            padding: '5px 0',
-          },
-          !embedded && { maxHeight: 175 },
-        ]}
+        style={{
+          overflow: 'auto',
+          padding: '5px 0',
+          ...(!embedded && { maxHeight: 175 }),
+        }}
       >
         {items.map((item, idx) => {
           if (item.id === 'split') {

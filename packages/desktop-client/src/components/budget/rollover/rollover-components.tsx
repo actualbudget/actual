@@ -6,7 +6,7 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
-import { styles, colors } from '../../../style';
+import { styles, colors, type CSSProperties } from '../../../style';
 import CategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
 import Button from '../../common/Button';
 import InitialFocus from '../../common/InitialFocus';
@@ -187,7 +187,11 @@ function BalanceTooltip({
   );
 }
 
-let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
+let headerLabelStyle: CSSProperties = {
+  flex: 1,
+  padding: '0 5px',
+  textAlign: 'right',
+};
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   const format = useFormat();
@@ -260,7 +264,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         name="budgeted"
         width="flex"
         textAlign="right"
-        style={[{ fontWeight: 600 }, styles.tnum]}
+        style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
           binding: rolloverBudget.groupBudgeted(id),
           type: 'financial',
@@ -270,7 +274,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         name="spent"
         width="flex"
         textAlign="right"
-        style={[{ fontWeight: 600 }, styles.tnum]}
+        style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
           binding: rolloverBudget.groupSumAmount(id),
           type: 'financial',
@@ -280,10 +284,11 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         name="balance"
         width="flex"
         textAlign="right"
-        style={[
-          { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
-          styles.tnum,
-        ]}
+        style={{
+          fontWeight: 600,
+          paddingRight: MONTH_RIGHT_PADDING,
+          ...styles.tnum,
+        }}
         valueProps={{
           binding: rolloverBudget.groupBalance(id),
           type: 'financial',
@@ -414,22 +419,18 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           focused={editing}
           width="flex"
           onExpose={() => onEdit(category.id, monthIndex)}
-          style={[editing && { zIndex: 100 }, styles.tnum]}
+          style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
           textAlign="right"
-          valueStyle={[
-            {
-              cursor: 'default',
-              margin: 1,
-              padding: '0 4px',
-              borderRadius: 4,
+          valueStyle={{
+            cursor: 'default',
+            margin: 1,
+            padding: '0 4px',
+            borderRadius: 4,
+            ':hover': {
+              boxShadow: 'inset 0 0 0 1px ' + colors.n7,
+              backgroundColor: 'white',
             },
-            {
-              ':hover': {
-                boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-                backgroundColor: 'white',
-              },
-            },
-          ]}
+          }}
           valueProps={{
             binding: rolloverBudget.catBudgeted(category.id),
             type: 'financial',
@@ -504,10 +505,11 @@ export function IncomeGroupMonth() {
         name="received"
         width="flex"
         textAlign="right"
-        style={[
-          { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
-          styles.tnum,
-        ]}
+        style={{
+          fontWeight: 600,
+          paddingRight: MONTH_RIGHT_PADDING,
+          ...styles.tnum,
+        }}
         valueProps={{
           binding: rolloverBudget.groupIncomeReceived,
           type: 'financial',
@@ -539,10 +541,11 @@ export function IncomeCategoryMonth({
       <Field
         name="received"
         width="flex"
-        style={[
-          { paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' },
-          isLast && { borderBottomWidth: 0 },
-        ]}
+        style={{
+          paddingRight: MONTH_RIGHT_PADDING,
+          textAlign: 'right',
+          ...(isLast && { borderBottomWidth: 0 }),
+        }}
       >
         <span
           onClick={() => onShowActivity(category.name, category.id, monthIndex)}

@@ -300,14 +300,14 @@ function Transaction({
         <>
           <Field
             width={90}
-            contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+            contentStyle={{ textAlign: 'right', ...styles.tnum }}
             title={outflow}
           >
             {outflow}
           </Field>
           <Field
             width={90}
-            contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+            contentStyle={{ textAlign: 'right', ...styles.tnum }}
             title={inflow}
           >
             {inflow}
@@ -316,7 +316,7 @@ function Transaction({
       ) : (
         <Field
           width={90}
-          contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+          contentStyle={{ textAlign: 'right', ...styles.tnum }}
           title={amount}
         >
           {amount}
@@ -397,16 +397,14 @@ function DateFormatSelect({
 function CheckboxOption({ id, checked, disabled, onChange, children, style }) {
   return (
     <View
-      style={[
-        {
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          userSelect: 'none',
-          minHeight: 28,
-        },
-        style,
-      ]}
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        userSelect: 'none',
+        minHeight: 28,
+        ...style,
+      }}
     >
       <Checkbox
         id={id}

@@ -122,7 +122,7 @@ const TransactionRow = memo(function TransactionRow({
               <Field
                 key={i}
                 width={75}
-                style={[{ textAlign: 'right' }, styles.tnum]}
+                style={{ textAlign: 'right', ...styles.tnum }}
               >
                 {integerToCurrency(transaction.amount)}
               </Field>

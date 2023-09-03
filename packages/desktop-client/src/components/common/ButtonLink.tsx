@@ -1,7 +1,7 @@
 import React, { type ComponentProps } from 'react';
 import { useMatch, useNavigate } from 'react-router-dom';
 
-import { type CSSProperties } from 'glamor';
+import { type CSSProperties } from '../../style';
 
 import Button from './Button';
 

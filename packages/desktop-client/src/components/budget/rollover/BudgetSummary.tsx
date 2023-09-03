@@ -37,25 +37,23 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
   const format = useFormat();
   return (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          lineHeight: 1.5,
-          justifyContent: 'center',
-        },
-        !collapsed && {
+      style={{
+        flexDirection: 'row',
+        lineHeight: 1.5,
+        justifyContent: 'center',
+        ...(!collapsed && {
           padding: '5px 0',
           marginTop: 17,
           backgroundColor: colors.n11,
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor: colors.n9,
-        },
-        collapsed && {
+        }),
+        ...(collapsed && {
           padding: 7,
-        },
-        styles.smallText,
-      ]}
+        }),
+        ...styles.smallText,
+      }}
     >
       <View
         style={{
@@ -108,7 +106,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
 
         <CellValue
@@ -118,7 +116,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
 
         <CellValue
@@ -129,7 +127,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(Math.abs(n), 'financial');
             return n >= 0 ? '-' + v : '+' + v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
       </View>
 
@@ -312,10 +310,10 @@ export function BudgetSummary({
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
-          style={[
-            { padding: '0 13px' },
-            collapsed ? { margin: '10px 0' } : { marginTop: 16 },
-          ]}
+          style={{
+            padding: '0 13px',
+            ...(collapsed ? { margin: '10px 0' } : { marginTop: 16 }),
+          }}
         >
           <View
             style={{
