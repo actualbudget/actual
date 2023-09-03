@@ -14,7 +14,7 @@ import Menu from '../../common/Menu';
 import Text from '../../common/Text';
 import View from '../../common/View';
 import CellValue from '../../spreadsheet/CellValue';
-import format from '../../spreadsheet/format';
+import useFormat from '../../spreadsheet/useFormat';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell } from '../../table';
 import { Tooltip, useTooltip } from '../../tooltips';
@@ -190,6 +190,7 @@ function BalanceTooltip({
 let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+  const format = useFormat();
   return (
     <View
       style={{
