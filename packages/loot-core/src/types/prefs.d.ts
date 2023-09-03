@@ -34,6 +34,7 @@ export type LocalPrefs = Partial<
     [key: `csv-mappings-${string}`]: string;
     [key: `csv-delimiter-${string}`]: ',' | ';' | '\t';
     [key: `csv-has-header-${string}`]: boolean;
+    [key: `ofx-fallback-missing-payee-${string}`]: boolean;
     [key: `flip-amount-${string}-${'csv' | 'qif'}`]: boolean;
     'flags.updateNotificationShownForVersion': string;
     id: string;

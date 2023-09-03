@@ -554,7 +554,6 @@ class TransactionEditInner extends PureComponent {
                       ),
                     )
                   }
-                  data-vrt-mask
                 />
               </View>
 
@@ -700,7 +699,7 @@ function TransactionEditUnconnected(props) {
   let adding = false;
   let deleted = false;
 
-  useSetThemeColor(colors.p5);
+  useSetThemeColor(theme.mobileTransactionViewTheme);
 
   useEffect(() => {
     // May as well update categories / accounts when transaction ID changes
@@ -1071,7 +1070,7 @@ export class TransactionList extends Component {
         >
           {sections.length === 0 ? (
             <Section>
-              <Item>
+              <Item textValue="No transactions">
                 <div
                   style={{
                     display: 'flex',
@@ -1088,7 +1087,7 @@ export class TransactionList extends Component {
             return (
               <Section
                 title={
-                  <span data-vrt-mask>
+                  <span>
                     {monthUtils.format(section.date, 'MMMM dd, yyyy')}
                   </span>
                 }

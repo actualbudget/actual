@@ -8,7 +8,7 @@ import {
 
 import { useActions } from '../../hooks/useActions';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { colors } from '../../style';
+import { colors, theme } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
 import { BigInput } from '../common/Input';
 import Text from '../common/Text';
@@ -18,7 +18,7 @@ import { useServerURL, useSetServerURL } from '../ServerContext';
 import { Title } from './subscribe/common';
 
 export default function ConfigServer() {
-  useSetThemeColor(colors.p5);
+  useSetThemeColor(theme.mobileConfigServerViewTheme);
   let { createBudget, signOut, loggedIn } = useActions();
   let navigate = useNavigate();
   let [url, setUrl] = useState('');

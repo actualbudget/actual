@@ -92,12 +92,16 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
                 // eslint-disable-next-line rulesdir/typography
                 tickFormat={x => d.format(x, "MMM ''yy")}
                 tickValues={graphData.data.map(item => item.x)}
-                tickCount={Math.min(5, graphData.data.length)}
+                tickCount={Math.min(width / 220, graphData.data.length)}
                 offsetY={50}
               />
             )}
             {!compact && (
-              <VictoryAxis dependentAxis crossAxis={!graphData.hasNegative} />
+              <VictoryAxis
+                dependentAxis
+                tickCount={Math.round(height / 70)}
+                crossAxis={!graphData.hasNegative}
+              />
             )}
           </Chart>
         )

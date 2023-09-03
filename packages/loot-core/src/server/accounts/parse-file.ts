@@ -14,7 +14,11 @@ export type ParseFileResult = {
 
 export async function parseFile(
   filepath,
-  options?: { delimiter?: string; hasHeaderRow: boolean },
+  options?: {
+    delimiter?: string;
+    hasHeaderRow: boolean;
+    fallbackMissingPayeeToMemo?: boolean;
+  },
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let m = filepath.match(/\.[^.]*$/);
@@ -30,7 +34,7 @@ export async function parseFile(
         return parseCSV(filepath, options);
       case '.ofx':
       case '.qfx':
-        return parseOFX(filepath);
+        return parseOFX(filepath, options);
       default:
     }
   }
@@ -101,7 +105,12 @@ async function parseQIF(filepath): Promise<ParseFileResult> {
   };
 }
 
-async function parseOFX(filepath): Promise<ParseFileResult> {
+async function parseOFX(
+  filepath,
+  options: { fallbackMissingPayeeToMemo?: boolean } = {
+    fallbackMissingPayeeToMemo: true,
+  },
+): Promise<ParseFileResult> {
   let { getOFXTransactions, initModule } = await import(
     /* webpackChunkName: 'xfo' */ 'node-libofx'
   );
@@ -123,7 +132,7 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
 
   // Banks don't always implement the OFX standard properly
   // If no payee is available try and fallback to memo
-  let useName = data.some(trans => trans.name != null && trans.name !== '');
+  let useMemoFallback = options.fallbackMissingPayeeToMemo;
 
   return {
     errors,
@@ -131,9 +140,9 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
       amount: trans.amount,
       imported_id: trans.fi_id,
       date: trans.date ? dayFromDate(new Date(trans.date * 1000)) : null,
-      payee_name: useName ? trans.name : trans.memo,
-      imported_payee: useName ? trans.name : trans.memo,
-      notes: useName ? trans.memo || null : null, //memo used for payee
+      payee_name: trans.name || (useMemoFallback ? trans.memo : null),
+      imported_payee: trans.name || (useMemoFallback ? trans.memo : null),
+      notes: !!trans.name || !useMemoFallback ? trans.memo || null : null, //memo used for payee
     })),
   };
 }

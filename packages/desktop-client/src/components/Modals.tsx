@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -39,6 +40,13 @@ export default function Modals() {
     state => state.prefs.local && state.prefs.local.id,
   );
   const actions = useActions();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (modalStack.length > 0) {
+      actions.closeModal();
+    }
+  }, [location]);
 
   const syncServerStatus = useSyncServerStatus();
 

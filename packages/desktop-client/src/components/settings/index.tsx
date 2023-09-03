@@ -11,7 +11,7 @@ import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
-import { colors } from '../../style';
+import { colors, theme } from '../../style';
 import tokens from '../../tokens';
 import Button from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
@@ -133,7 +133,7 @@ export default function Settings() {
   const { isNarrowWidth } = useResponsive();
   const themesFlag = useFeatureFlag('themes');
 
-  useSetThemeColor(colors.n11);
+  useSetThemeColor(theme.mobileSettingsViewTheme);
   return (
     <View
       style={{
