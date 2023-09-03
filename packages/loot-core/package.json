@@ -43,6 +43,8 @@
   "devDependencies": {
     "@actual-app/api": "*",
     "@actual-app/crdt": "*",
+    "@swc/core": "^1.3.82",
+    "@swc/helpers": "^0.5.1",
     "@types/better-sqlite3": "^7.6.4",
     "@types/jest": "^27.5.0",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",

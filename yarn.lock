@@ -13020,6 +13020,8 @@ __metadata:
     "@rschedule/ical-tools": ^1.2.0
     "@rschedule/json-tools": ^1.2.0
     "@rschedule/standard-date-adapter": ^1.2.0
+    "@swc/core": ^1.3.82
+    "@swc/helpers": ^0.5.1
     "@types/adm-zip": ^0.5.0
     "@types/better-sqlite3": ^7.6.4
     "@types/jest": ^27.5.0
