@@ -8,12 +8,6 @@ runs:
       with:
         node-version: 18.16.0
         cache: yarn
-    # - name: Cache
-    #   uses: actions/cache@v3
-    #   id: cache
-    #   with:
-    #     path: '**/node_modules'
-    #     key: yarn-v1-${{ runner.os }}-${{ hashFiles('.nvmrc') }}-${{ hashFiles('**/yarn.lock') }}
     - name: Install
       run: yarn --immutable
       shell: bash
