@@ -17,7 +17,7 @@ __metadata:
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
     "@types/uuid": ^9.0.2
-    better-sqlite3: ^8.2.0
+    better-sqlite3: ^8.6.0
     node-fetch: ^3.3.2
     typescript: ^5.0.2
     uuid: ^9.0.0
@@ -5942,14 +5942,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^8.2.0":
-  version: 8.3.0
-  resolution: "better-sqlite3@npm:8.3.0"
+"better-sqlite3@npm:^8.6.0":
+  version: 8.6.0
+  resolution: "better-sqlite3@npm:8.6.0"
   dependencies:
     bindings: ^1.5.0
     node-gyp: latest
-    prebuild-install: ^7.1.0
-  checksum: 00fc9f12058d2d157f56fe57b0f5c8ba705aee22a1dfe33ef8f60755531eda8f809cdb2377af314f6ed9396ad036094576e0596649bd6ca5bcaec172613e2dc9
+    prebuild-install: ^7.1.1
+  checksum: 9ebdfd675352347cda1ba30d620a3c512d9db827a1eba66460fd48203a7ad8138b0195893bbf47d40f704bcdd598710041271d4ed69779979b6f784c0d3579a1
   languageName: node
   linkType: hard
 
@@ -12913,7 +12913,7 @@ __metadata:
     adm-zip: ^0.5.9
     assert: ^2.0.0
     babel-loader: ^9.1.2
-    better-sqlite3: ^8.2.0
+    better-sqlite3: ^8.6.0
     browserify-zlib: ^0.2.0
     buffer: ^6.0.3
     core-js: ^3.8.3
@@ -15435,7 +15435,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prebuild-install@npm:^7.1.0":
+"prebuild-install@npm:^7.1.1":
   version: 7.1.1
   resolution: "prebuild-install@npm:7.1.1"
   dependencies:
