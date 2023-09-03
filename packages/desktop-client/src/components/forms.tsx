@@ -75,6 +75,7 @@ export const Checkbox = (props: CheckboxProps) => {
           {
             position: 'relative',
             margin: 0,
+            flexShrink: 0,
             marginRight: 6,
             width: 15,
             height: 15,
