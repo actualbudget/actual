@@ -23,7 +23,7 @@
     "@rschedule/json-tools": "^1.2.0",
     "@rschedule/standard-date-adapter": "^1.2.0",
     "@types/adm-zip": "^0.5.0",
-    "absurd-sql": "0.0.53",
+    "absurd-sql": "0.0.54",
     "assert": "^2.0.0",
     "better-sqlite3": "^8.2.0",
     "browserify-zlib": "^0.2.0",
