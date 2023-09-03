@@ -42,7 +42,6 @@ createBackendWorker();
 global.Actual = {
   IS_DEV,
   ACTUAL_VERSION,
-  IS_FAKE_WEB: true,
 
   logToTerminal: (...args) => {
     console.log(...args);
