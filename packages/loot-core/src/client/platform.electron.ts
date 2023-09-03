@@ -11,5 +11,5 @@ export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
   : isMac
   ? 'mac'
   : 'linux';
-export const env: 'web' | 'mobile' | 'unknown' = 'web';
-export const isBrowser = true;
+export const env: 'web' | 'mobile' | 'unknown' = 'unknown';
+export const isBrowser = false;

@@ -6,7 +6,7 @@ import {
   type Category,
   type CategoryGroup,
   type CategoryListProps,
-} from '../autocomplete/CategorySelect';
+} from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
 import { Checkbox } from '../forms';
 
