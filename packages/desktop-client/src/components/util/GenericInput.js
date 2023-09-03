@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 
+import useCategories from '../../hooks/useCategories';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import Autocomplete from '../autocomplete/Autocomplete';
 import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
@@ -24,13 +25,11 @@ export default function GenericInput({
   style,
   onChange,
 }) {
-  let { saved, categoryGroups, dateFormat } = useSelector(state => {
-    return {
-      saved: state.queries.saved,
-      categoryGroups: state.queries.categories.grouped,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    };
-  });
+  let { grouped: categoryGroups } = useCategories();
+  let saved = useSelector(state => state.queries.saved);
+  let dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
 
   // This makes the UI more resilient in case of faulty data
   if (multi && !Array.isArray(value)) {

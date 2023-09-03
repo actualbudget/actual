@@ -7,6 +7,7 @@ import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import { useResponsive } from '../../ResponsiveProvider';
 import { colors } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
@@ -22,7 +23,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
   let dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-  let categoryGroups = useSelector(state => state.queries.categories.grouped);
+  let { grouped: categoryGroups } = useCategories();
   let accounts = useSelector(state => state.queries.accounts);
   let payees = useSelector(state => state.queries.payees);
 
