@@ -105,6 +105,7 @@ export default function NetWorth() {
           padding: 30,
           paddingTop: 0,
           overflow: 'auto',
+          flexGrow: 1,
         }}
       >
         <View
@@ -127,7 +128,12 @@ export default function NetWorth() {
           </PrivacyFilter>
         </View>
 
-        <NetWorthGraph start={start} end={end} graphData={data.graphData} />
+        <NetWorthGraph
+          style={{ flexGrow: 1 }}
+          start={start}
+          end={end}
+          graphData={data.graphData}
+        />
 
         <View style={{ marginTop: 30 }}>
           <Paragraph>
