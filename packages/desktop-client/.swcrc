@@ -9,9 +9,7 @@
     "externalHelpers": true,
     "parser": {
       "syntax": "typescript",
-      "tsx": true,
-      "decorators": true,
-      "dynamicImport": true
+      "tsx": true
     }
   }
 }
