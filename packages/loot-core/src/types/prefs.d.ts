@@ -5,7 +5,8 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'privacyMode'
-  | 'themes';
+  | 'themes'
+  | 'experimentalOfxParser';
 
 export type LocalPrefs = Partial<
   {
