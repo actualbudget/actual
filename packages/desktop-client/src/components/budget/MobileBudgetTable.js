@@ -1,4 +1,4 @@
-import React, { Component, memo, PureComponent } from 'react';
+import React, { Component, memo, PureComponent, useState } from 'react';
 // import {
 //   RectButton,
 //   PanGestureHandler,
@@ -24,8 +24,8 @@ import Text from '../common/Text';
 import View from '../common/View';
 import { useServerURL } from '../ServerContext';
 import CellValue from '../spreadsheet/CellValue';
-import format from '../spreadsheet/format';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
+import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { SyncButton } from '../Titlebar';
 import { AmountInput } from '../util/AmountInput';
@@ -39,6 +39,7 @@ import { ListItem, ROW_HEIGHT } from './MobileTable';
 
 function ToBudget({ toBudget, onClick }) {
   let amount = useSheetValue(toBudget);
+  let format = useFormat();
   return (
     <Button
       type="bare"
@@ -67,6 +68,7 @@ function ToBudget({ toBudget, onClick }) {
 function Saved({ projected }) {
   let budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
   let totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
+  let format = useFormat();
   let saved = projected ? budgetedSaved : totalSaved;
   let isNegative = saved < 0;
 
@@ -109,6 +111,7 @@ const BudgetCell = memo(function BudgetCell(props) {
   } = props;
 
   let sheetValue = useSheetValue(binding);
+  let format = useFormat();
 
   return (
     <View style={style}>
@@ -572,7 +575,7 @@ class BudgetGroup extends PureComponent {
       group,
       // editingId,
       editMode,
-      gestures,
+      // gestures,
       month,
       onEditCategory,
       onReorderCategory,
@@ -635,7 +638,7 @@ class BudgetGroup extends PureComponent {
               category={category}
               editing={undefined} //editing}
               editMode={editMode}
-              gestures={gestures}
+              // gestures={gestures}
               month={month}
               onEdit={onEditCategory}
               onReorder={onReorderCategory}
@@ -764,249 +767,157 @@ class BudgetGroups extends Component {
   }
 }
 
-export class BudgetTable extends Component {
-  // static contextType = AmountAccessoryContext;
-  state = { editingCategory: null };
+export function BudgetTable(props) {
+  const [editingCategory, setEditingCategory] = useState(null);
 
-  // constructor(props) {
-  //   super(props);
-  //   this.gestures = {
-  //     scroll: React.createRef(null),
-  //     pan: React.createRef(null),
-  //     rows: []
-  //   };
-  // }
+  function onEditCategory(id) {
+    setEditingCategory(id);
+  }
 
-  // componentDidMount() {
-  // if (ACTScrollViewManager) {
-  //   ACTScrollViewManager.activate(
-  //     (this.list.getNode
-  //       ? this.list.getNode()
-  //       : this.list
-  //     ).getScrollableNode()
-  //   );
-  // }
+  const {
+    type,
+    categoryGroups,
+    month,
+    monthBounds,
+    editMode,
+    // refreshControl,
+    onPrevMonth,
+    onNextMonth,
+    onAddCategory,
+    onEditMode,
+    onReorderCategory,
+    onReorderGroup,
+    onShowBudgetDetails,
+    onOpenActionSheet,
+    onBudgetAction,
+  } = props;
 
-  // const removeFocus = this.props.navigation.addListener('focus', () => {
-  //   if (ACTScrollViewManager) {
-  //     ACTScrollViewManager.activate(
-  //       (this.list.getNode
-  //         ? this.list.getNode()
-  //         : this.list
-  //       ).getScrollableNode()
-  //     );
-  //   }
-  // });
+  // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
+  let currentMonth = monthUtils.currentMonth();
+  let format = useFormat();
 
-  // const keyboardWillHide = e => {
-  //   if (ACTScrollViewManager) {
-  //     ACTScrollViewManager.setFocused(-1);
-  //   }
-  //   this.onEditCategory(null);
-  // };
-
-  // let keyListener = Keyboard.addListener(
-  //   Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-  //   keyboardWillHide
-  // );
-
-  //   let emitter = this.context;
-  //   emitter.on('done', this.onKeyboardDone);
-  //   emitter.on('moveUp', this.onMoveUp);
-  //   emitter.on('moveDown', this.onMoveDown);
-
-  //   this.cleanup = () => {
-  //     //   removeFocus();
-  //     //   keyListener.remove();
-
-  //     emitter.off('done', this.onKeyboardDone);
-  //     emitter.off('moveUp', this.onMoveUp);
-  //     emitter.off('moveDown', this.onMoveDown);
-  //   };
-  // }
-
-  // componentWillUnmount() {
-  //   this.cleanup();
-  // }
-
-  onEditCategory = id => {
-    this.setState({ editingCategory: id });
-  };
-
-  //   onKeyboardDone = () => {
-  //     Keyboard.dismiss();
-
-  // onMoveUp = () => {
-  //   const { categories } = this.props;
-  //   const { editingCategory } = this.state;
-  //   const expenseCategories = categories.filter(cat => !cat.is_income);
-
-  //   const idx = expenseCategories.findIndex(cat => editingCategory === cat.id);
-  //   if (idx - 1 >= 0) {
-  //     this.onEditCategory(expenseCategories[idx - 1].id);
-  //   }
-  // };
-
-  // onMoveDown = () => {
-  //   const { categories } = this.props;
-  //   const { editingCategory } = this.state;
-  //   const expenseCategories = categories.filter(cat => !cat.is_income);
-
-  //   const idx = expenseCategories.findIndex(cat => editingCategory === cat.id);
-  //   if (idx + 1 < expenseCategories.length) {
-  //     this.onEditCategory(expenseCategories[idx + 1].id);
-  //   }
-  // };
-
-  render() {
-    const {
-      type,
-      categoryGroups,
-      month,
-      monthBounds,
-      editMode,
-      // refreshControl,
-      onPrevMonth,
-      onNextMonth,
-      onAddCategory,
-      onReorderCategory,
-      onReorderGroup,
-      onShowBudgetDetails,
-      onOpenActionSheet,
-      onBudgetAction,
-    } = this.props;
-    // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
-    let { editingCategory } = this.state;
-    let currentMonth = monthUtils.currentMonth();
-
-    return (
-      <NamespaceContext.Provider value={monthUtils.sheetForMonth(month, type)}>
+  return (
+    <NamespaceContext.Provider value={monthUtils.sheetForMonth(month, type)}>
+      <View style={{ flex: 1, overflowY: 'hidden' }} data-testid="budget-table">
+        <BudgetHeader
+          currentMonth={month}
+          monthBounds={monthBounds}
+          editMode={editMode}
+          onDone={() => onEditMode(false)}
+          onOpenActionSheet={onOpenActionSheet}
+          onPrevMonth={onPrevMonth}
+          onNextMonth={onNextMonth}
+        />
         <View
-          style={{ flex: 1, overflowY: 'hidden' }}
-          data-testid="budget-table"
+          style={{
+            flexDirection: 'row',
+            flex: '0 0 auto',
+            padding: 10,
+            paddingRight: 14,
+            backgroundColor: 'white',
+            borderBottomWidth: 1,
+            borderColor: colors.n9,
+          }}
         >
-          <BudgetHeader
-            currentMonth={month}
-            monthBounds={monthBounds}
-            editMode={editMode}
-            onDone={() => this.props.onEditMode(false)}
-            onOpenActionSheet={onOpenActionSheet}
-            onPrevMonth={onPrevMonth}
-            onNextMonth={onNextMonth}
-          />
+          {type === 'report' ? (
+            <Saved projected={month >= currentMonth} />
+          ) : (
+            <ToBudget
+              toBudget={rolloverBudget.toBudget}
+              onClick={onShowBudgetDetails}
+            />
+          )}
+          <View style={{ flex: 1 }} />
+
+          <View style={{ width: 90, justifyContent: 'center' }}>
+            <Label title="BUDGETED" style={{ color: colors.n1 }} />
+            <CellValue
+              binding={reportBudget.totalBudgetedExpense}
+              type="financial"
+              style={[
+                styles.smallText,
+                { color: colors.n1, textAlign: 'right', fontWeight: '500' },
+              ]}
+              formatter={value => {
+                return format(-parseFloat(value || '0'), 'financial');
+              }}
+            />
+          </View>
           <View
             style={{
-              flexDirection: 'row',
-              flex: '0 0 auto',
-              padding: 10,
-              paddingRight: 14,
-              backgroundColor: 'white',
-              borderBottomWidth: 1,
-              borderColor: colors.n9,
+              width: 90,
+              justifyContent: 'center',
             }}
           >
-            {type === 'report' ? (
-              <Saved projected={month >= currentMonth} />
-            ) : (
-              <ToBudget
-                toBudget={rolloverBudget.toBudget}
-                onClick={onShowBudgetDetails}
-              />
-            )}
-            <View style={{ flex: 1 }} />
-
-            <View style={{ width: 90, justifyContent: 'center' }}>
-              <Label title="BUDGETED" style={{ color: colors.n1 }} />
-              <CellValue
-                binding={reportBudget.totalBudgetedExpense}
-                type="financial"
-                style={[
-                  styles.smallText,
-                  { color: colors.n1, textAlign: 'right', fontWeight: '500' },
-                ]}
-                formatter={value => {
-                  return format(-parseFloat(value || '0'), 'financial');
-                }}
-              />
-            </View>
-            <View
-              style={{
-                width: 90,
-                justifyContent: 'center',
-              }}
-            >
-              <Label title="BALANCE" style={{ color: colors.n1 }} />
-              <CellValue
-                binding={rolloverBudget.totalBalance}
-                type="financial"
-                style={[
-                  styles.smallText,
-                  { color: colors.n1, textAlign: 'right', fontWeight: '500' },
-                ]}
-              />
-            </View>
+            <Label title="BALANCE" style={{ color: colors.n1 }} />
+            <CellValue
+              binding={rolloverBudget.totalBalance}
+              type="financial"
+              style={[
+                styles.smallText,
+                { color: colors.n1, textAlign: 'right', fontWeight: '500' },
+              ]}
+            />
           </View>
+        </View>
 
-          {/* <AndroidKeyboardAvoidingView includeStatusBar={true}> */}
-          <View style={{ overflowY: 'auto' }}>
-            {!editMode ? (
-              // <ScrollView
-              //   ref={el => (this.list = el)}
-              //   keyboardShouldPersistTaps="always"
-              //   refreshControl={refreshControl}
-              //   style={{ backgroundColor: colors.n10 }}
-              //   automaticallyAdjustContentInsets={false}
-              // >
+        <View style={{ overflowY: 'auto' }}>
+          {!editMode ? (
+            // <ScrollView
+            //   ref={el => (this.list = el)}
+            //   keyboardShouldPersistTaps="always"
+            //   refreshControl={refreshControl}
+            //   style={{ backgroundColor: colors.n10 }}
+            //   automaticallyAdjustContentInsets={false}
+            // >
+            <View>
+              <BudgetGroups
+                type={type}
+                categoryGroups={categoryGroups}
+                editingId={editingCategory}
+                editMode={editMode}
+                // gestures={gestures}
+                month={month}
+                onEditCategory={onEditCategory}
+                onAddCategory={onAddCategory}
+                onReorderCategory={onReorderCategory}
+                onReorderGroup={onReorderGroup}
+                onBudgetAction={onBudgetAction}
+              />
+            </View>
+          ) : (
+            // </ScrollView>
+            // <DragDrop>
+            //   {({
+            //     dragging,
+            //     onGestureEvent,
+            //     onHandlerStateChange,
+            //     scrollRef,
+            //     onScroll
+            //   }) => (
+            <>
               <View>
                 <BudgetGroups
-                  type={type}
                   categoryGroups={categoryGroups}
                   editingId={editingCategory}
                   editMode={editMode}
-                  gestures={this.gestures}
-                  month={month}
-                  onEditCategory={this.onEditCategory}
+                  // gestures={gestures}
+                  onEditCategory={() => {}} //onEditCategory}
                   onAddCategory={onAddCategory}
                   onReorderCategory={onReorderCategory}
                   onReorderGroup={onReorderGroup}
-                  onBudgetAction={onBudgetAction}
                 />
               </View>
-            ) : (
-              // </ScrollView>
-              // <DragDrop>
-              //   {({
-              //     dragging,
-              //     onGestureEvent,
-              //     onHandlerStateChange,
-              //     scrollRef,
-              //     onScroll
-              //   }) => (
-              <>
-                <View>
-                  <BudgetGroups
-                    categoryGroups={categoryGroups}
-                    editingId={editingCategory}
-                    editMode={editMode}
-                    gestures={this.gestures}
-                    onEditCategory={() => {}} //this.onEditCategory}
-                    onAddCategory={onAddCategory}
-                    onReorderCategory={onReorderCategory}
-                    onReorderGroup={onReorderGroup}
-                  />
-                </View>
 
-                {/* <DragDropHighlight /> */}
-              </>
-              //   )}
-              // </DragDrop>
-            )}
-          </View>
-          {/* </AndroidKeyboardAvoidingView> */}
+              {/* <DragDropHighlight /> */}
+            </>
+            //   )}
+            // </DragDrop>
+          )}
         </View>
-      </NamespaceContext.Provider>
-    );
-  }
+      </View>
+    </NamespaceContext.Provider>
+  );
 }
 
 function BudgetHeader({

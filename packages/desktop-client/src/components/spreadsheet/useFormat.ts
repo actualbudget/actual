@@ -4,10 +4,7 @@ import { useSelector } from 'react-redux';
 import { selectNumberFormat } from 'loot-core/src/client/selectors';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-/**
- * @deprecated Please do not use this directly. Use `useFormat` hook
- */
-export default function format(
+function format(
   value: unknown,
   type = 'string',
   formatter?: Intl.NumberFormat,
@@ -48,7 +45,7 @@ export default function format(
   }
 }
 
-export function useFormat() {
+export default function useFormat() {
   const numberFormat = useSelector(selectNumberFormat);
 
   return useCallback(

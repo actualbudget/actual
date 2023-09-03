@@ -26,8 +26,8 @@ import View from '../../common/View';
 import NotesButton from '../../NotesButton';
 import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
-import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import useFormat from '../../spreadsheet/useFormat';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
 import { MONTH_BOX_SHADOW } from '../constants';
@@ -226,6 +226,7 @@ type SavedProps = {
 function Saved({ projected, style }: SavedProps) {
   let budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
   let totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
+  let format = useFormat();
   let saved = projected ? budgetedSaved : totalSaved;
   let isNegative = saved < 0;
 

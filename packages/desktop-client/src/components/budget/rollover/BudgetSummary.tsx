@@ -18,8 +18,8 @@ import View from '../../common/View';
 import NotesButton from '../../NotesButton';
 import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
-import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import useFormat from '../../spreadsheet/useFormat';
 import useSheetName from '../../spreadsheet/useSheetName';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
@@ -34,6 +34,7 @@ type TotalsListProps = {
   collapsed?: boolean;
 };
 function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
+  const format = useFormat();
   return (
     <View
       style={[
@@ -160,6 +161,7 @@ function ToBudget({
     name: rolloverBudget.toBudget,
     value: 0,
   });
+  let format = useFormat();
   let availableValue = parseInt(sheetValue);
   let num = isNaN(availableValue) ? 0 : availableValue;
   let isNegative = num < 0;
