@@ -885,7 +885,7 @@ export function BudgetTable(props) {
                 ...styles.smallText,
                 color: colors.n1,
                 textAlign: 'right',
-                fontWeight: '500' },
+                fontWeight: '500',
               }}
             />
           </View>
