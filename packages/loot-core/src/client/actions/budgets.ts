@@ -76,7 +76,6 @@ export function loadBudget(id: string, loadingText = '', options = {}) {
           );
 
           if (showBackups) {
-            // @ts-expect-error manager modals are not yet typed
             dispatch(pushModal('load-backup', { budgetId: id }));
           }
         } else {

@@ -18,9 +18,12 @@ export function pushModal(name: OptionlessModal): PushModalAction;
 export function pushModal<M extends ModalType>(
   name: M,
   options?: FinanceModals[M],
+): PushModalAction;
+export function pushModal<M extends ModalType>(
+  name: M,
+  options?: FinanceModals[M],
 ): PushModalAction {
-  // @ts-expect-error TS is unable to determine that `name` and `options` match
-  let modal: M = { name, options };
+  const modal = { name, options };
   return { type: constants.PUSH_MODAL, modal };
 }
 
