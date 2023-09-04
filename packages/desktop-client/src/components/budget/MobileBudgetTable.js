@@ -71,7 +71,7 @@ function Saved({ projected }) {
   let isNegative = saved < 0;
 
   return (
-    <View style={{ flexDirection: 'column', alignItems: 'flex-start' , flex-basis: 80px}}>
+    <View style={{ flexDirection: 'column', alignItems: 'flex-start' , flex-basis: '80px'}}>
       {projected ? (
         <Label title="PROJECTED SAVINGS" style={{ color: colors.n1 }} />
       ) : (
