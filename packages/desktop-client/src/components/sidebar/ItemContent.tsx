@@ -1,9 +1,6 @@
-import React, {
-  type CSSProperties,
-  type MouseEventHandler,
-  type ReactNode,
-} from 'react';
+import React, { type MouseEventHandler, type ReactNode } from 'react';
 
+import { type CSSProperties } from '../../style';
 import AnchorLink from '../common/AnchorLink';
 import View from '../common/View';
 
@@ -28,16 +25,14 @@ function ItemContent({
     <View
       role="button"
       tabIndex={0}
-      style={[
-        style,
-        {
-          touchAction: 'auto',
-          userSelect: 'none',
-          userDrag: 'none',
-          cursor: 'pointer',
-          ...(forceActive ? activeStyle : {}),
-        },
-      ]}
+      style={{
+        ...style,
+        touchAction: 'auto',
+        userSelect: 'none',
+        userDrag: 'none',
+        cursor: 'pointer',
+        ...(forceActive ? activeStyle : {}),
+      }}
       onClick={onClick}
     >
       {children}

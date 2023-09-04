@@ -1,11 +1,16 @@
-import React, { type Ref, type StyleHTMLAttributes } from 'react';
+import React, {
+  type HTMLProps,
+  type Ref,
+  type StyleHTMLAttributes,
+} from 'react';
 
 import { css } from 'glamor';
 
-import { type HTMLPropsWithStyle } from '../../types/utils';
+import { type CSSProperties } from '../../style';
 
-type ViewProps = HTMLPropsWithStyle<HTMLDivElement> & {
+type ViewProps = HTMLProps<HTMLDivElement> & {
   className?: string;
+  style?: CSSProperties;
   nativeStyle?: StyleHTMLAttributes<HTMLDivElement>;
   innerRef?: Ref<HTMLDivElement>;
 };

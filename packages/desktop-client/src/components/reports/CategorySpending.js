@@ -125,7 +125,7 @@ function CategoryAverage() {
   );
 
   return (
-    <View style={[styles.page, { overflow: 'hidden' }]}>
+    <View style={{ ...styles.page, overflow: 'hidden' }}>
       <Header
         title="Category Spending"
         allMonths={allMonths}

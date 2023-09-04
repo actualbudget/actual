@@ -1,7 +1,6 @@
 import React, { createElement } from 'react';
 
 import * as d from 'date-fns';
-import { type CSSProperties } from 'glamor';
 import {
   VictoryChart,
   VictoryBar,
@@ -11,6 +10,7 @@ import {
   VictoryGroup,
 } from 'victory';
 
+import { type CSSProperties } from '../../../style';
 import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
@@ -26,7 +26,12 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
   const Chart = compact ? VictoryGroup : VictoryChart;
 
   return (
-    <Container style={[style, compact && { height: 'auto' }]}>
+    <Container
+      style={{
+        ...style,
+        ...(compact && { height: 'auto' }),
+      }}
+    >
       {(width, height, portalHost) =>
         graphData && (
           <Chart

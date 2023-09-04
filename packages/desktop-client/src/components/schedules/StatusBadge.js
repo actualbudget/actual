@@ -71,18 +71,16 @@ export function StatusBadge({ status, style }) {
   let { color, backgroundColor, Icon } = getStatusProps(status);
   return (
     <View
-      style={[
-        {
-          color,
-          backgroundColor,
-          padding: '6px 8px',
-          borderRadius: 4,
-          flexDirection: 'row',
-          alignItems: 'center',
-          flexShrink: 0,
-        },
-        style,
-      ]}
+      style={{
+        color,
+        backgroundColor,
+        padding: '6px 8px',
+        borderRadius: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexShrink: 0,
+        ...style,
+      }}
     >
       <Icon
         style={{

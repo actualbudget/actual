@@ -186,16 +186,14 @@ export default function EditField({ modalProps, name, onSubmit }) {
       focusAfterClose={false}
       {...modalProps}
       padding={0}
-      style={[
-        {
-          flex: 0,
-          height: isNarrowWidth ? '85vh' : 275,
-          padding: '15px 10px',
-          borderRadius: '6px',
-        },
-        minWidth && { minWidth },
-        !isNarrowWidth && { backgroundColor: colors.n1, color: 'white' },
-      ]}
+      style={{
+        flex: 0,
+        height: isNarrowWidth ? '85vh' : 275,
+        padding: '15px 10px',
+        borderRadius: '6px',
+        ...(minWidth && { minWidth }),
+        ...(!isNarrowWidth && { backgroundColor: colors.n1, color: 'white' }),
+      }}
     >
       {() => (
         <View>

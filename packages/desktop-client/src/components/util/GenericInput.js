@@ -203,5 +203,5 @@ export default function GenericInput({
       break;
   }
 
-  return <View style={[{ flex: 1 }, style]}>{content}</View>;
+  return <View style={{ flex: 1, ...style }}>{content}</View>;
 }

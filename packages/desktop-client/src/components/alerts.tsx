@@ -1,10 +1,8 @@
 import React, { type ComponentType, type ReactNode } from 'react';
 
-import type { CSSProperties } from 'glamor';
-
 import ExclamationOutline from '../icons/v1/ExclamationOutline';
 import InformationOutline from '../icons/v1/InformationOutline';
-import { styles, colors } from '../style';
+import { styles, colors, type CSSProperties } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -26,21 +24,19 @@ const Alert = ({
 }: AlertProps) => {
   return (
     <View
-      style={[
-        {
-          color,
-          fontSize: 13,
-          ...styles.shadow,
-          borderRadius: 4,
-          backgroundColor,
-          padding: 10,
-          flexDirection: 'row',
-          '& a, & a:active, & a:visited': {
-            color: colors.b3,
-          },
+      style={{
+        color,
+        fontSize: 13,
+        ...styles.shadow,
+        borderRadius: 4,
+        backgroundColor,
+        padding: 10,
+        flexDirection: 'row',
+        '& a, & a:active, & a:visited': {
+          color: colors.b3,
         },
-        style,
-      ]}
+        ...style,
+      }}
     >
       <View
         style={{
@@ -69,7 +65,11 @@ export const Information = ({ style, children }: ScopedAlertProps) => {
       icon={InformationOutline}
       color={colors.n4}
       backgroundColor="transparent"
-      style={[style, { boxShadow: 'none', padding: 5 }]}
+      style={{
+        ...style,
+        boxShadow: 'none',
+        padding: 5,
+      }}
     >
       {children}
     </Alert>
