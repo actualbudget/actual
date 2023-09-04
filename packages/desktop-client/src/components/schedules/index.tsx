@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import { useActions } from '../../hooks/useActions';
 import Button from '../common/Button';
@@ -12,18 +13,18 @@ import { Page } from '../Page';
 import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
 
 export default function Schedules() {
-  let { pushModal } = useActions();
-  let [filter, setFilter] = useState('');
+  const { pushModal } = useActions();
+  const [filter, setFilter] = useState('');
 
-  let scheduleData = useSchedules();
+  const scheduleData = useSchedules();
 
   if (scheduleData == null) {
     return null;
   }
 
-  let { schedules, statuses } = scheduleData;
+  const { schedules, statuses } = scheduleData;
 
-  function onEdit(id) {
+  function onEdit(id: ScheduleEntity['id']) {
     pushModal('schedule-edit', { id });
   }
 
@@ -35,7 +36,8 @@ export default function Schedules() {
     pushModal('schedules-discover');
   }
 
-  async function onAction(name, id) {
+  // @todo: replace name: string with enum
+  async function onAction(name: string, id: ScheduleEntity['id']) {
     switch (name) {
       case 'post-transaction':
         await send('schedule/post-transaction', { id });
@@ -44,7 +46,9 @@ export default function Schedules() {
         await send('schedule/skip-next-date', { id });
         break;
       case 'complete':
-        await send('schedule/update', { schedule: { id, completed: true } });
+        await send('schedule/update', {
+          schedule: { id, completed: true },
+        });
         break;
       case 'restart':
         await send('schedule/update', {
@@ -83,6 +87,9 @@ export default function Schedules() {
           onSelect={onEdit}
           onAction={onAction}
           style={{ backgroundColor: 'white' }}
+          // @todo: Remove following props after typing SchedulesTable
+          minimal={undefined}
+          tableStyle={undefined}
         />
       </View>
 
