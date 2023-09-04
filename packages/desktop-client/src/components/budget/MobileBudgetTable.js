@@ -317,7 +317,11 @@ class BudgetCategory extends PureComponent {
           <CellValue
             name="spent"
             binding={spent}
-            style={[styles.smallText, { width: 90, textAlign: 'right' }]}
+            style={{ 
+              ...styles.smallText, 
+              width: 90, 
+              textAlign: 'right'
+            }}
             type="financial"
           />
           <CellValue
@@ -435,10 +439,12 @@ class TotalsRow extends PureComponent {
           />
           <CellValue
             binding={rolloverBudget.groupSumAmount(group.id)}
-            style={[
-              styles.smallText,
-              { width: 90, fontWeight: '500', textAlign: 'right' },
-            ]}
+            style={{
+              ...styles.smallText,
+              width: 90,
+              fontWeight: '500',
+              textAlign: 'right',
+            }}
             type="financial"
           />
           <CellValue
@@ -875,10 +881,12 @@ export function BudgetTable(props) {
             <CellValue
               binding={rolloverBudget.totalSpent}
               type="financial"
-              style={[
-                styles.smallText,
-                { color: colors.n1, textAlign: 'right', fontWeight: '500' },
-              ]}
+              style={{
+                ...styles.smallText,
+                color: colors.n1,
+                textAlign: 'right',
+                fontWeight: '500' },
+              }}
             />
           </View>
           <View
