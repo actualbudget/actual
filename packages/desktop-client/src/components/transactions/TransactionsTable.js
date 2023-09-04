@@ -1651,7 +1651,7 @@ function TransactionTableInner({
               onManagePayees={props.onManagePayees}
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
-              onNavigateToSchedule={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToSchedule}
               balance={
                 props.transactions?.length > 0
                   ? props.balances?.[props.transactions[0]?.id]?.balance
