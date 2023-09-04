@@ -172,19 +172,17 @@ export function DropHighlight({ pos, offset }: DropHighlightProps) {
 
   return (
     <View
-      style={[
-        {
-          position: 'absolute',
-          left: 2,
-          right: 2,
-          borderRadius: 3,
-          height: 3,
-          background: theme.pageTextLink,
-          zIndex: 10000,
-          pointerEvents: 'none',
-        },
-        posStyle,
-      ]}
+      style={{
+        position: 'absolute',
+        left: 2,
+        right: 2,
+        borderRadius: 3,
+        height: 3,
+        background: theme.pageTextLink,
+        zIndex: 10000,
+        pointerEvents: 'none',
+        ...posStyle,
+      }}
     />
   );
 }

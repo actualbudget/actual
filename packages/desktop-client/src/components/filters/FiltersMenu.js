@@ -95,17 +95,18 @@ function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
       type="bare"
-      style={[
-        { backgroundColor: theme.altbuttonMenuBackground, marginBottom: 5 },
-        style,
-        selected && {
+      style={{
+        backgroundColor: theme.altbuttonMenuBackground,
+        marginBottom: 5,
+        ...style,
+        ...(selected && {
           color: theme.buttonNormalSelectedText,
           '&,:hover,:active': {
             backgroundColor: theme.buttonNormalSelectedBackground,
             color: theme.buttonNormalSelectedText,
           },
-        },
-      ]}
+        }),
+      }}
       onClick={onClick}
     >
       {friendlyOp(op)}
@@ -176,6 +177,7 @@ function ConfigureField({
       style={{ padding: 15, color: theme.altmenuItemTextHeader }}
       width={275}
       onClose={() => dispatch({ type: 'close' })}
+      data-testid="filters-menu-tooltip"
     >
       <FocusScope>
         <View style={{ marginBottom: 10 }}>
@@ -274,13 +276,12 @@ function ConfigureField({
                 style={{ flexWrap: 'wrap' }}
               >
                 {ops.slice(3, ops.length).map(currOp => (
-                  <View key={currOp}>
-                    <OpButton
-                      op={currOp}
-                      selected={currOp === op}
-                      onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                    />
-                  </View>
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
                 ))}
               </Stack>
             </>
@@ -427,6 +428,7 @@ export function FilterButton({ onApply }) {
           position="bottom-left"
           style={{ padding: 0 }}
           onClose={() => dispatch({ type: 'close' })}
+          data-testid="filters-select-tooltip"
         >
           <Menu
             onMenuSelect={name => {
@@ -499,17 +501,15 @@ function FilterExpression({
 
   return (
     <View
-      style={[
-        {
-          backgroundColor: theme.pillBackground,
-          borderRadius: 4,
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginRight: 10,
-          marginTop: 10,
-        },
-        style,
-      ]}
+      style={{
+        backgroundColor: theme.pillBackground,
+        borderRadius: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 10,
+        marginTop: 10,
+        ...style,
+      }}
     >
       <Button
         type="bare"
@@ -536,7 +536,7 @@ function FilterExpression({
           )}
         </div>
       </Button>
-      <Button type="bare" onClick={onDelete}>
+      <Button type="bare" onClick={onDelete} aria-label="Delete filter">
         <DeleteIcon
           style={{
             width: 8,

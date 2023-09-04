@@ -98,6 +98,14 @@ export function currentMonth(): string {
   }
 }
 
+export function currentDate(): Date {
+  if (global.IS_TESTING || Platform.isPlaywright) {
+    return d.parse(currentDay(), 'yyyy-MM-dd', new Date());
+  }
+
+  return new Date();
+}
+
 export function currentDay(): string {
   if (global.IS_TESTING || Platform.isPlaywright) {
     return '2017-01-01';

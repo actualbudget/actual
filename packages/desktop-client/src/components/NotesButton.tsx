@@ -1,7 +1,7 @@
 import React, { createRef, useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 import remarkGfm from 'remark-gfm';
 
 import q from 'loot-core/src/client/query-helpers';
@@ -9,7 +9,7 @@ import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
-import { colors } from '../style';
+import { type CSSProperties, colors } from '../style';
 import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
 import Button from './common/Button';
@@ -180,19 +180,19 @@ export default function NotesButton({
 
   return (
     <View
-      style={[{ flexShrink: 0 }]}
+      style={{ flexShrink: 0 }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <Button
         type="bare"
         className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
-        style={[
-          { color: defaultColor },
-          style,
-          hasNotes && { display: 'flex !important' },
-          tooltipOpen && { color: colors.n1 },
-        ]}
+        style={{
+          color: defaultColor,
+          ...style,
+          ...(hasNotes && { display: 'flex !important' }),
+          ...(tooltipOpen && { color: colors.n1 }),
+        }}
         {...tooltip.getOpenEvents()}
       >
         <CustomNotesPaper style={{ width, height }} />

@@ -1,9 +1,9 @@
 import { type ReactNode } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
-import { styles } from '../../style';
+import { type CSSProperties, styles } from '../../style';
 
 type AnchorLinkProps = {
   to: string;

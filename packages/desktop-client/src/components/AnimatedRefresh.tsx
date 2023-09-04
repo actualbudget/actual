@@ -1,8 +1,9 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
 
 import { keyframes } from 'glamor';
 
 import Refresh from '../icons/v1/Refresh';
+import { type CSSProperties } from '../style';
 
 import View from './common/View';
 
@@ -22,7 +23,7 @@ export default function AnimatedRefresh({
 }: AnimatedRefreshProps) {
   return (
     <View
-      style={[{ animation: animating ? `${spin} 1s infinite linear` : null }]}
+      style={{ animation: animating ? `${spin} 1s infinite linear` : null }}
     >
       <Refresh width={14} height={14} style={iconStyle} />
     </View>

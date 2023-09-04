@@ -215,7 +215,7 @@ export function SchedulesTable({
         <Field width="flex" name="account">
           <DisplayId type="accounts" id={item._account} />
         </Field>
-        <Field width={110} name="date" data-vrt-mask>
+        <Field width={110} name="date">
           {item.next_date
             ? monthUtils.format(item.next_date, dateFormat)
             : null}
@@ -274,7 +274,7 @@ export function SchedulesTable({
   }
 
   return (
-    <View style={[{ flex: 1 }, tableStyle]}>
+    <View style={{ flex: 1, ...tableStyle }}>
       <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
         <Field width="flex">Name</Field>
         <Field width="flex">Payee</Field>
@@ -295,7 +295,7 @@ export function SchedulesTable({
         rowHeight={ROW_HEIGHT}
         backgroundColor="transparent"
         version="v2"
-        style={[{ flex: 1, backgroundColor: 'transparent' }, style]}
+        style={{ flex: 1, backgroundColor: 'transparent', ...style }}
         items={items}
         renderItem={renderItem}
         renderEmpty={filter ? 'No matching schedules' : 'No schedules'}

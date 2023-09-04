@@ -107,24 +107,22 @@ let Payee = memo(
 
     return (
       <Row
-        style={[
-          { alignItems: 'stretch' },
-          style,
-          {
-            borderColor,
-            backgroundColor: hovered
-              ? colors.hover
-              : selected
-              ? colors.b9
-              : backgroundFocus
-              ? colors.hover
-              : 'white',
-          },
-          selected && {
+        style={{
+          alignItems: 'stretch',
+          ...style,
+          borderColor,
+          backgroundColor: hovered
+            ? colors.hover
+            : selected
+            ? colors.b9
+            : backgroundFocus
+            ? colors.hover
+            : 'white',
+          ...(selected && {
             backgroundColor: colors.b9,
             zIndex: 100,
-          },
-        ]}
+          }),
+        }}
         data-focus-key={payee.id}
         onMouseEnter={() => onHover && onHover(payee.id)}
       >
@@ -191,7 +189,7 @@ const PayeeTable = forwardRef(
     }, []);
 
     return (
-      <View style={[{ flex: 1 }]} onMouseLeave={() => setHovered(null)}>
+      <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
         <Table
           ref={ref}
           items={payees}
@@ -254,16 +252,14 @@ function PayeeTableHeader() {
 function EmptyMessage({ text, style }) {
   return (
     <View
-      style={[
-        {
-          textAlign: 'center',
-          color: colors.n7,
-          fontStyle: 'italic',
-          fontSize: 13,
-          marginTop: 5,
-        },
+      style={{
+        textAlign: 'center',
+        color: colors.n7,
+        fontStyle: 'italic',
+        fontSize: 13,
+        marginTop: 5,
         style,
-      ]}
+      }}
     >
       {text}
     </View>

@@ -11,10 +11,10 @@ import React, {
 } from 'react';
 
 import Downshift from 'downshift';
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
-import { theme } from '../../style';
+import { theme, type CSSProperties } from '../../style';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import View from '../common/View';
@@ -154,7 +154,7 @@ type SingleAutocompleteProps = {
   renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
   renderItems?: (
     items,
-    getItemProps: (arg: { item: unknown }) => HTMLProps<HTMLDivElement>,
+    getItemProps: (arg: { item: unknown }) => ComponentProps<typeof View>,
     idx: number,
     value?: unknown,
   ) => ReactNode;
@@ -400,7 +400,7 @@ function SingleAutocomplete({
                 }
               },
               onBlur: e => {
-                // @ts-expect-error Should this be e.nativeEvent
+                // Should this be e.nativeEvent
                 e.preventDownshiftDefault = true;
                 inputProps.onBlur?.(e);
 
@@ -604,23 +604,21 @@ function MultiAutocomplete({
       tooltipProps={{
         forceLayout: lastSelectedItems.current !== selectedItems,
       }}
-      renderInput={props => (
+      renderInput={inputProps => (
         <View
-          style={[
-            {
-              display: 'flex',
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: theme.tableBackground,
-              borderRadius: 4,
-              border: '1px solid ' + theme.formInputBorder,
-            },
-            focused && {
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.tableBackground,
+            borderRadius: 4,
+            border: '1px solid ' + theme.formInputBorder,
+            ...(focused && {
               border: '1px solid ' + theme.formInputBorderSelected,
               boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-            },
-          ]}
+            }),
+          }}
         >
           {selectedItems.map((item, idx) => {
             item = findItem(strict, suggestions, item);
@@ -635,25 +633,23 @@ function MultiAutocomplete({
             );
           })}
           <Input
-            {...props}
-            onKeyDown={e => onKeyDown(e, props.onKeyDown)}
+            {...inputProps}
+            onKeyDown={e => onKeyDown(e, inputProps.onKeyDown)}
             onFocus={e => {
               setFocused(true);
-              props.onFocus(e);
+              inputProps.onFocus(e);
             }}
             onBlur={e => {
               setFocused(false);
-              props.onBlur(e);
+              inputProps.onBlur(e);
             }}
-            style={[
-              {
-                flex: 1,
-                minWidth: 30,
-                border: 0,
-                ':focus': { border: 0, boxShadow: 'none' },
-              },
-              props.style,
-            ]}
+            style={{
+              flex: 1,
+              minWidth: 30,
+              border: 0,
+              ':focus': { border: 0, boxShadow: 'none' },
+              ...inputProps.style,
+            }}
           />
         </View>
       )}
@@ -674,10 +670,10 @@ export function AutocompleteFooter({
   return (
     show && (
       <View
-        style={[
-          { flexShrink: 0 },
-          embedded ? { paddingTop: 5 } : { padding: 5 },
-        ]}
+        style={{
+          flexShrink: 0,
+          ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
+        }}
         onMouseDown={e => e.preventDefault()}
       >
         {children}

@@ -1,17 +1,16 @@
 import React, {
-  type ReactNode,
   useEffect,
   useRef,
   useLayoutEffect,
+  type ReactNode,
 } from 'react';
 import ReactModal from 'react-modal';
 
-import type { CSSProperties } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import Delete from '../../icons/v0/Delete';
-import { styles, theme } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 import tokens from '../../tokens';
 
 import Button from './Button';
@@ -118,24 +117,22 @@ const Modal = ({
         noAnimation={noAnimation}
         isCurrent={isCurrent}
         size={size}
-        style={[
-          {
-            willChange: 'opacity, transform',
-            minWidth: '100%',
-            minHeight: 0,
-            borderRadius: 4,
-            //border: '1px solid ' + theme.modalBorder,
-            color: theme.pageText,
-            backgroundColor: theme.modalBackground,
-            opacity: isHidden ? 0 : 1,
-            [`@media (min-width: ${tokens.breakpoint_small})`]: {
-              minWidth: tokens.breakpoint_small,
-            },
+        style={{
+          willChange: 'opacity, transform',
+          minWidth: '100%',
+          minHeight: 0,
+          borderRadius: 4,
+          //border: '1px solid ' + theme.modalBorder,
+          color: theme.pageText,
+          backgroundColor: theme.modalBackground,
+          opacity: isHidden ? 0 : 1,
+          [`@media (min-width: ${tokens.breakpoint_small})`]: {
+            minWidth: tokens.breakpoint_small,
           },
-          styles.shadowLarge,
-          style,
-          styles.lightScrollbar,
-        ]}
+          ...styles.shadowLarge,
+          ...style,
+          ...styles.lightScrollbar,
+        }}
       >
         {showHeader && (
           <View
@@ -298,11 +295,11 @@ const ModalContent = ({
   return (
     <View
       innerRef={contentRef}
-      style={[
-        style,
-        size && { width: size.width, height: size.height },
-        noAnimation && !isCurrent && { display: 'none' },
-      ]}
+      style={{
+        ...style,
+        ...(size && { width: size.width, height: size.height }),
+        ...(noAnimation && !isCurrent && { display: 'none' }),
+      }}
     >
       {children}
     </View>
@@ -339,13 +336,11 @@ export const ModalButtons = ({
   return (
     <View
       innerRef={containerRef}
-      style={[
-        {
-          flexDirection: 'row',
-          marginTop: 30,
-        },
-        style,
-      ]}
+      style={{
+        flexDirection: 'row',
+        marginTop: 30,
+        ...style,
+      }}
     >
       {leftContent}
       <View style={{ flex: 1 }} />

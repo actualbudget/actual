@@ -1,13 +1,14 @@
-import React, { type Ref, type ReactNode } from 'react';
+import React, { type HTMLProps, type Ref, type ReactNode } from 'react';
 
 import { css } from 'glamor';
 
-import { type HTMLPropsWithStyle } from '../../types/utils';
+import { type CSSProperties } from '../../style';
 
-type TextProps = HTMLPropsWithStyle<HTMLSpanElement> & {
+type TextProps = HTMLProps<HTMLSpanElement> & {
   innerRef?: Ref<HTMLSpanElement>;
   className?: string;
   children?: ReactNode;
+  style?: CSSProperties;
 };
 
 const Text = (props: TextProps) => {
@@ -16,7 +17,7 @@ const Text = (props: TextProps) => {
     <span
       {...restProps}
       ref={innerRef}
-      className={String(css([props.className, props.style]))}
+      className={`${props.className} ${css(props.style)}`}
     />
   );
 };

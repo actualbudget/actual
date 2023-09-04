@@ -41,7 +41,6 @@ function Version() {
           zIndex: 5001,
         },
       }}
-      data-vrt-mask
     >
       {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
     </Text>

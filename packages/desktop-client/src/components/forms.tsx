@@ -1,8 +1,8 @@
 import React, { type ReactNode, type HTMLProps } from 'react';
 
-import { css, type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
-import { theme } from '../style';
+import { type CSSProperties, theme } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -15,16 +15,14 @@ type SectionLabelProps = {
 export const SectionLabel = ({ title, style }: SectionLabelProps) => {
   return (
     <View
-      style={[
-        {
-          fontWeight: 500,
-          textTransform: 'uppercase',
-          color: theme.altFormLabelText,
-          marginBottom: 5,
-          lineHeight: '1em',
-        },
-        style,
-      ]}
+      style={{
+        fontWeight: 500,
+        textTransform: 'uppercase',
+        color: theme.altFormLabelText,
+        marginBottom: 5,
+        lineHeight: '1em',
+        ...style,
+      }}
     >
       {title}
     </View>
@@ -41,7 +39,12 @@ type FormLabelProps = {
 export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
     <Text
-      style={[{ fontSize: 13, marginBottom: 3, color: theme.tableText }, style]}
+      style={{
+        fontSize: 13,
+        marginBottom: 3,
+        color: theme.tableText,
+        ...style,
+      }}
     >
       <label htmlFor={htmlFor} id={id}>
         {title}
@@ -61,8 +64,8 @@ export const FormField = ({ style, children }: FormFieldProps) => {
 
 // Custom inputs
 
-type CheckboxProps = Omit<HTMLProps<HTMLInputElement>, 'type' | 'styles'> & {
-  styles?: CSSProperties;
+type CheckboxProps = Omit<HTMLProps<HTMLInputElement>, 'type'> & {
+  style?: CSSProperties;
 };
 
 export const Checkbox = (props: CheckboxProps) => {
@@ -75,6 +78,7 @@ export const Checkbox = (props: CheckboxProps) => {
           {
             position: 'relative',
             margin: 0,
+            flexShrink: 0,
             marginRight: 6,
             width: 15,
             height: 15,
@@ -115,7 +119,7 @@ export const Checkbox = (props: CheckboxProps) => {
             },
           },
         ],
-        props.styles,
+        props.style,
       )}
     />
   );

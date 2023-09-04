@@ -113,7 +113,7 @@ export function AccountHeader({
         }}
       />
 
-      <View style={[styles.pageContent, { paddingBottom: 10, flexShrink: 0 }]}>
+      <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View style={{ marginTop: 2, alignItems: 'flex-start' }}>
           <View>
             {editingName ? (
