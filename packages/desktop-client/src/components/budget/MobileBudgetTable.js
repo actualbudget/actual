@@ -272,6 +272,7 @@ class BudgetCategory extends PureComponent {
 
     let budgeted = rolloverBudget.catBudgeted(category.id);
     let balance = rolloverBudget.catBalance(category.id);
+    let spent = rolloverBudget.catSumAmount(category.id);
 
     let content = !category.hidden && (
       <ListItem
@@ -312,6 +313,12 @@ class BudgetCategory extends PureComponent {
             categoryId={category.id}
             month={month}
             onBudgetAction={onBudgetAction}
+          />
+          <CellValue
+            name="spent"
+            binding={spent}
+            style={[styles.smallText, { width: 90, textAlign: 'right' }]}
+            type="financial"
           />
           <CellValue
             name="balance"
@@ -424,6 +431,14 @@ class TotalsRow extends PureComponent {
               fontWeight: '500',
               textAlign: 'right',
             }}
+            type="financial"
+          />
+          <CellValue
+            binding={rolloverBudget.groupSumAmount(group.id)}
+            style={[
+              styles.smallText,
+              { width: 90, fontWeight: '500', textAlign: 'right' },
+            ]}
             type="financial"
           />
           <CellValue
@@ -848,6 +863,22 @@ export function BudgetTable(props) {
               formatter={value => {
                 return format(-parseFloat(value || '0'), 'financial');
               }}
+            />
+          </View>
+          <View
+            style={{
+              width: 90,
+              justifyContent: 'center',
+            }}
+          >
+            <Label title="SPENT" style={{ color: colors.n1 }} />
+            <CellValue
+              binding={rolloverBudget.totalSpent}
+              type="financial"
+              style={[
+                styles.smallText,
+                { color: colors.n1, textAlign: 'right', fontWeight: '500' },
+              ]}
             />
           </View>
           <View
