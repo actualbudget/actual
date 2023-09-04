@@ -317,10 +317,10 @@ class BudgetCategory extends PureComponent {
           <CellValue
             name="spent"
             binding={spent}
-            style={{ 
-              ...styles.smallText, 
-              width: 90, 
-              textAlign: 'right'
+            style={{
+              ...styles.smallText,
+              width: 90,
+              textAlign: 'right',
             }}
             type="financial"
           />
