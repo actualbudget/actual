@@ -12,7 +12,7 @@ export default function Block(props: BlockProps) {
     <div
       {...restProps}
       ref={innerRef}
-      className={`${className || ''} ${css(style)}`}
+      className={`${className} ${css(style)}`}
     />
   );
 }
