@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "23.8.1",
+  "version": "23.9.0",
   "license": "MIT",
   "files": [
     "build"
@@ -9,11 +9,11 @@
     "@juggle/resize-observer": "^3.1.2",
     "@playwright/test": "^1.37.1",
     "@reach/listbox": "^0.18.0",
-    "@react-aria/focus": "^3.8.0",
-    "@react-aria/listbox": "^3.6.1",
-    "@react-aria/utils": "^3.13.3",
-    "@react-stately/collections": "^3.4.3",
-    "@react-stately/list": "^3.5.3",
+    "@react-aria/focus": "^3.14.0",
+    "@react-aria/listbox": "^3.10.1",
+    "@react-aria/utils": "^3.19.0",
+    "@react-stately/collections": "^3.10.0",
+    "@react-stately/list": "^3.9.1",
     "@svgr/cli": "^8.0.1",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
@@ -36,6 +36,7 @@
     "inter-ui": "^3.19.3",
     "jest": "^27.0.0",
     "jest-watch-typeahead": "^2.2.2",
+    "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
     "pikaday": "1.8.0",
     "react": "18.2.0",
@@ -44,6 +45,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "18.2.0",
     "react-error-boundary": "^4.0.11",
+    "react-markdown": "^8.0.7",
     "react-merge-refs": "^1.1.0",
     "react-modal": "3.16.1",
     "react-redux": "7.2.1",
@@ -53,10 +55,12 @@
     "react-virtualized-auto-sizer": "^1.0.2",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
+    "remark-gfm": "^3.0.1",
     "sass": "^1.63.6",
     "uuid": "^9.0.0",
     "victory": "^36.6.8",
-    "webpack-bundle-analyzer": "^4.9.0"
+    "webpack-bundle-analyzer": "^4.9.0",
+    "xml2js": "^0.6.2"
   },
   "scripts": {
     "start": "cross-env PORT=3001 react-app-rewired start",

@@ -11,6 +11,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { colors, styles } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
 import Input from '../common/Input';
@@ -299,14 +300,14 @@ function Transaction({
         <>
           <Field
             width={90}
-            contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+            contentStyle={{ textAlign: 'right', ...styles.tnum }}
             title={outflow}
           >
             {outflow}
           </Field>
           <Field
             width={90}
-            contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+            contentStyle={{ textAlign: 'right', ...styles.tnum }}
             title={inflow}
           >
             {inflow}
@@ -315,7 +316,7 @@ function Transaction({
       ) : (
         <Field
           width={90}
-          contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+          contentStyle={{ textAlign: 'right', ...styles.tnum }}
           title={amount}
         >
           {amount}
@@ -396,16 +397,14 @@ function DateFormatSelect({
 function CheckboxOption({ id, checked, disabled, onChange, children, style }) {
   return (
     <View
-      style={[
-        {
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          userSelect: 'none',
-          minHeight: 28,
-        },
-        style,
-      ]}
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        userSelect: 'none',
+        minHeight: 28,
+        ...style,
+      }}
     >
       <Checkbox
         id={id}
@@ -577,10 +576,15 @@ export default function ImportTransactions({ modalProps, options }) {
   let [hasHeaderRow, setHasHeaderRow] = useState(
     prefs[`csv-has-header-${accountId}`] ?? true,
   );
+  let [fallbackMissingPayeeToMemo, setFallbackMissingPayeeToMemo] = useState(
+    prefs[`ofx-fallback-missing-payee-${accountId}`] ?? true,
+  );
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
 
   let [clearOnImport, setClearOnImport] = useState(true);
+
+  const enableExperimentalOfxParser = useFeatureFlag('experimentalOfxParser');
 
   async function parse(filename, options) {
     setLoadingState('parsing');
@@ -588,6 +592,11 @@ export default function ImportTransactions({ modalProps, options }) {
     let filetype = getFileType(filename);
     setFilename(filename);
     setFileType(filetype);
+
+    options = {
+      ...options,
+      enableExperimentalOfxParser,
+    };
 
     let { errors, transactions } = await parseTransactions(filename, options);
     setLoadingState(null);
@@ -645,10 +654,14 @@ export default function ImportTransactions({ modalProps, options }) {
   }
 
   useEffect(() => {
+    const fileType = getFileType(options.filename);
+
     parse(
       options.filename,
-      getFileType(options.filename) === 'csv'
+      fileType === 'csv'
         ? { delimiter: csvDelimiter, hasHeaderRow }
+        : fileType === 'ofx'
+        ? { fallbackMissingPayeeToMemo }
         : null,
     );
   }, [parseTransactions, options.filename]);
@@ -693,9 +706,15 @@ export default function ImportTransactions({ modalProps, options }) {
       ],
     });
 
+    const fileType = getFileType(res[0]);
+
     parse(
       res[0],
-      getFileType(res[0]) === 'csv' ? { delimiter: csvDelimiter } : null,
+      fileType === 'csv'
+        ? { delimiter: csvDelimiter }
+        : fileType === 'ofx'
+        ? { fallbackMissingPayeeToMemo }
+        : null,
     );
   }
 
@@ -752,6 +771,12 @@ export default function ImportTransactions({ modalProps, options }) {
     if (filetype !== 'ofx' && filetype !== 'qfx') {
       let key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
+    }
+
+    if (filetype === 'ofx') {
+      savePrefs({
+        [`ofx-fallback-missing-payee-${accountId}`]: fallbackMissingPayeeToMemo,
+      });
     }
 
     if (filetype === 'csv') {
@@ -879,6 +904,21 @@ export default function ImportTransactions({ modalProps, options }) {
             hasHeaderRow={hasHeaderRow}
           />
         </View>
+      )}
+
+      {filetype === 'ofx' && (
+        <CheckboxOption
+          id="form_fallback_missing_payee"
+          checked={fallbackMissingPayeeToMemo}
+          onChange={() => {
+            setFallbackMissingPayeeToMemo(state => !state);
+            parse(filename, {
+              fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
+            });
+          }}
+        >
+          Use Memo as a fallback for empty Payees
+        </CheckboxOption>
       )}
 
       {/*Import Options */}

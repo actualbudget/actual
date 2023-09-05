@@ -26,13 +26,13 @@ export default function BalanceWithCarryover({
         binding={balance}
         type="financial"
         getStyle={makeAmountStyle}
-        style={[
-          { textAlign: 'right' },
-          !disabled && {
+        style={{
+          textAlign: 'right',
+          ...(!disabled && {
             cursor: 'pointer',
             ':hover': { textDecoration: 'underline' },
-          },
-        ]}
+          }),
+        }}
       />
       {carryoverValue === true && (
         <View

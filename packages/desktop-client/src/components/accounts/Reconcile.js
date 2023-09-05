@@ -10,7 +10,7 @@ import InitialFocus from '../common/InitialFocus';
 import Input from '../common/Input';
 import Text from '../common/Text';
 import View from '../common/View';
-import format from '../spreadsheet/format';
+import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { Tooltip } from '../tooltips';
 
@@ -25,6 +25,7 @@ export function ReconcilingMessage({
     value: 0,
     query: balanceQuery.query.filter({ cleared: true }),
   });
+  let format = useFormat();
   let targetDiff = targetBalance - cleared;
 
   return (
@@ -96,6 +97,7 @@ export function ReconcilingMessage({
 
 export function ReconcileTooltip({ account, onReconcile, onClose }) {
   let balance = useSheetValue(queries.accountBalance(account));
+  let format = useFormat();
 
   function onSubmit(e) {
     e.preventDefault();

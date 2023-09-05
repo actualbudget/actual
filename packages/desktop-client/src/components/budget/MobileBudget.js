@@ -11,9 +11,10 @@ import {
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import View from '../common/View';
 import SyncRefresh from '../SyncRefresh';
 
@@ -293,8 +294,7 @@ class Budget extends Component {
 }
 
 export default function BudgetWrapper() {
-  let categoryGroups = useSelector(state => state.queries.categories.grouped);
-  let categories = useSelector(state => state.queries.categories.list);
+  let { list: categories, grouped: categoryGroups } = useCategories();
   let budgetType = useSelector(
     state => state.prefs.local.budgetType || 'rollover',
   );
@@ -303,7 +303,7 @@ export default function BudgetWrapper() {
   let actions = useActions();
   let spreadsheet = useSpreadsheet();
 
-  useSetThemeColor(colors.p5);
+  useSetThemeColor(theme.mobileBudgetViewTheme);
   return (
     <Budget
       categoryGroups={categoryGroups}

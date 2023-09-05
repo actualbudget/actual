@@ -100,6 +100,9 @@ export default function ExperimentalFeatures() {
             </FeatureToggle>
 
             <FeatureToggle flag="privacyMode">Privacy mode</FeatureToggle>
+            <FeatureToggle flag="experimentalOfxParser">
+              Experimental OFX parser
+            </FeatureToggle>
 
             <ThemeFeature />
           </View>

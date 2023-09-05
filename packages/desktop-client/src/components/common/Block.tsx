@@ -1,10 +1,8 @@
-import { type Ref } from 'react';
+import { type HTMLProps, type Ref } from 'react';
 
 import { css } from 'glamor';
 
-import type { HTMLPropsWithStyle } from '../../types/utils';
-
-type BlockProps = HTMLPropsWithStyle<HTMLDivElement> & {
+type BlockProps = HTMLProps<HTMLDivElement> & {
   innerRef?: Ref<HTMLDivElement>;
 };
 

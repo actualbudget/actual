@@ -1,11 +1,11 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
 
 import { css } from 'glamor';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 // eslint-disable-next-line no-restricted-imports
-import { styles, colors } from '../../style';
+import { styles, colors, type CSSProperties } from '../../style';
 import AlignedText from '../common/AlignedText';
 import AnchorLink from '../common/AnchorLink';
 import View from '../common/View';
@@ -19,7 +19,7 @@ import {
 import { type Binding } from '../spreadsheet';
 import CellValue from '../spreadsheet/CellValue';
 
-const accountNameStyle = {
+export const accountNameStyle: CSSProperties = {
   marginTop: -2,
   marginBottom: 2,
   paddingTop: 4,
@@ -81,18 +81,19 @@ function Account({
   });
 
   return (
-    <View innerRef={dropRef} style={[{ flexShrink: 0 }, outerStyle]}>
+    <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
       <View>
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
           <AnchorLink
             to={to}
-            style={[
-              accountNameStyle,
-              style,
-              { position: 'relative', borderLeft: '4px solid transparent' },
-              updated && { fontWeight: 700 },
-            ]}
+            style={{
+              ...accountNameStyle,
+              ...style,
+              position: 'relative',
+              borderLeft: '4px solid transparent',
+              ...(updated && { fontWeight: 700 }),
+            }}
             activeStyle={{
               borderColor: colors.p8,
               color: colors.p8,
@@ -144,5 +145,4 @@ function Account({
   );
 }
 
-export { accountNameStyle };
 export default Account;

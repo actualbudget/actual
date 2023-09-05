@@ -6,7 +6,7 @@ import React, {
   type SVGProps,
 } from 'react';
 
-import { css, type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -15,7 +15,7 @@ import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
-import { colors, styles } from '../../../style';
+import { colors, type CSSProperties, styles } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import Button from '../../common/Button';
 import HoverTarget from '../../common/HoverTarget';
@@ -26,8 +26,8 @@ import View from '../../common/View';
 import NotesButton from '../../NotesButton';
 import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
-import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import useFormat from '../../spreadsheet/useFormat';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
 import { MONTH_BOX_SHADOW } from '../constants';
@@ -156,15 +156,13 @@ function BudgetTotal({
 }: BudgetTotalProps) {
   return (
     <View
-      style={[
-        {
-          lineHeight: 1.5,
-          flexDirection: 'row',
-          alignItems: 'center',
-          fontSize: 14,
-        },
-        style,
-      ]}
+      style={{
+        lineHeight: 1.5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        fontSize: 14,
+        ...style,
+      }}
     >
       <ProgressComponent current={current} target={target} />
 
@@ -226,11 +224,12 @@ type SavedProps = {
 function Saved({ projected, style }: SavedProps) {
   let budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
   let totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
+  let format = useFormat();
   let saved = projected ? budgetedSaved : totalSaved;
   let isNegative = saved < 0;
 
   return (
-    <View style={[{ alignItems: 'center', fontSize: 14 }, style]}>
+    <View style={{ alignItems: 'center', fontSize: 14, ...style }}>
       {projected ? (
         <Text style={{ color: colors.n4 }}>Projected Savings:</Text>
       ) : (
@@ -252,7 +251,10 @@ function Saved({ projected, style }: SavedProps) {
                   left="Projected Savings:"
                   right={
                     <Text
-                      style={[makeAmountFullStyle(budgetedSaved), styles.tnum]}
+                      style={{
+                        ...makeAmountFullStyle(budgetedSaved),
+                        ...styles.tnum,
+                      }}
                     >
                       {format(budgetedSaved, 'financial-with-sign')}
                     </Text>
@@ -261,7 +263,9 @@ function Saved({ projected, style }: SavedProps) {
                 <AlignedText
                   left="Difference:"
                   right={
-                    <Text style={[makeAmountFullStyle(diff), styles.tnum]}>
+                    <Text
+                      style={{ ...makeAmountFullStyle(diff), ...styles.tnum }}
+                    >
                       {format(diff, 'financial-with-sign')}
                     </Text>
                   }
@@ -337,10 +341,10 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
-          style={[
-            { padding: '0 13px' },
-            collapsed ? { margin: '10px 0' } : { marginTop: 16 },
-          ]}
+          style={{
+            padding: '0 13px',
+            ...(collapsed ? { margin: '10px 0' } : { marginTop: 16 }),
+          }}
         >
           <View
             style={{
@@ -374,7 +378,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               },
               currentMonth === month && { textDecoration: 'underline' },
             ])}
-            data-vrt-mask
           >
             {monthUtils.format(month, 'MMMM')}
           </div>
