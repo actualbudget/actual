@@ -384,7 +384,6 @@ class TotalsRow extends PureComponent {
   render() {
     let { group, editMode, onAddCategory } = this.props;
 
-    //let content = !group.hidden && (
     let content = (
       <ListItem
         style={{
