@@ -32,8 +32,7 @@ export function getServer(url?: string): ServerConfig | null {
       SYNC_SERVER: joinURL(url, '/sync'),
       SIGNUP_SERVER: joinURL(url, '/account'),
       PLAID_SERVER: joinURL(url, '/plaid'),
-      // TODO: change to use `/gocardless` after v23.8.0
-      GOCARDLESS_SERVER: joinURL(url, '/nordigen'),
+      GOCARDLESS_SERVER: joinURL(url, '/gocardless'),
     };
   }
   return config;
