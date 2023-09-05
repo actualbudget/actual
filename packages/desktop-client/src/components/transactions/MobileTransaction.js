@@ -226,6 +226,7 @@ class TransactionEditInner extends PureComponent {
 
     if (transactions.find(t => t.account == null)) {
       // Ignore transactions if any of them don't have an account
+      // TODO: Should we display validation error?
       return;
     }
 
@@ -243,7 +244,7 @@ class TransactionEditInner extends PureComponent {
     }
 
     this.props.onSave(transactions);
-    this.props.navigation(`/accounts/${account.id}`);
+    this.props.navigate(`/accounts/${account.id}`, { replace: true });
   };
 
   onSaveChild = childTransaction => {
@@ -293,16 +294,22 @@ class TransactionEditInner extends PureComponent {
     });
   };
 
+  onDelete = () => {
+    this.props.onDelete();
+
+    const { transactions } = this.state;
+    const [transaction, ..._childTransactions] = transactions;
+    const { account: accountId } = transaction;
+    if (accountId) {
+      this.props.navigate(`/accounts/${accountId}`, { replace: true });
+    } else {
+      this.props.navigate(-1);
+    }
+  };
+
   render() {
-    const {
-      adding,
-      categories,
-      accounts,
-      payees,
-      renderChildEdit,
-      navigation,
-      onDelete,
-    } = this.props;
+    const { adding, categories, accounts, payees, renderChildEdit, navigate } =
+      this.props;
     const { editingChild } = this.state;
     const transactions = this.serializeTransactions(
       this.state.transactions || [],
@@ -374,7 +381,7 @@ class TransactionEditInner extends PureComponent {
             }}
           >
             <Link
-              to={account ? `/accounts/${account.id}` : '/budget'}
+              to={-1}
               style={{
                 alignItems: 'center',
                 display: 'flex',
@@ -583,7 +590,7 @@ class TransactionEditInner extends PureComponent {
             {!adding && (
               <View style={{ alignItems: 'center' }}>
                 <Button
-                  onClick={() => onDelete()}
+                  onClick={() => this.onDelete()}
                   style={{
                     borderWidth: 0,
                     paddingVertical: 5,
@@ -662,7 +669,7 @@ class TransactionEditInner extends PureComponent {
               editingChild && transactions.find(t => t.id === editingChild),
             amountSign: forcedSign,
             getCategoryName: id => (id ? lookupName(categories, id) : null),
-            navigation: navigation,
+            navigate: navigate,
             onEdit: this.onEdit,
             onStartClose: this.onSaveChild,
           })}
@@ -804,9 +811,6 @@ function TransactionEditUnconnected(props) {
   };
 
   const onDelete = async () => {
-    // Eagerly go back
-    navigate(`/accounts/${accountId}`);
-
     if (adding) {
       // Adding a new transactions, this disables saving when the component unmounts
       deleted = true;
@@ -833,7 +837,7 @@ function TransactionEditUnconnected(props) {
         accounts={accounts}
         payees={payees}
         pushModal={props.pushModal}
-        navigation={navigate}
+        navigate={navigate}
         // TODO: ChildEdit is complicated and heavily relies on RN
         // renderChildEdit={props => <ChildEdit {...props} />}
         renderChildEdit={props => {}}

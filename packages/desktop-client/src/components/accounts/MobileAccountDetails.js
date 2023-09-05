@@ -109,7 +109,7 @@ export default function AccountDetails({
           }}
         >
           <Link
-            to="/accounts"
+            to={-1}
             style={{
               color: theme.formLabelText,
               alignItems: 'center',
