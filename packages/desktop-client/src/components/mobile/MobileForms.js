@@ -117,12 +117,12 @@ export function BooleanField({ checked, onUpdate, style }) {
       type="checkbox"
       checked={checked}
       onChange={e => onUpdate(e.target.checked)}
-      {...css([
+      className={`${css([
         {
           marginInline: EDITING_PADDING,
         },
         style,
-      ])}
+      ])}`}
     />
   );
 }

@@ -43,7 +43,7 @@ export default function Input({
   return (
     <input
       ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
-      {...css(
+      className={`${css(
         defaultInputStyle,
         {
           whiteSpace: 'nowrap',
@@ -57,7 +57,7 @@ export default function Input({
         },
         styles.smallText,
         style,
-      )}
+      )}`}
       {...nativeProps}
       onKeyDown={e => {
         if (e.key === 'Enter' && onEnter) {

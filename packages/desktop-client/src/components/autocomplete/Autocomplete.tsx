@@ -117,14 +117,14 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
             // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
             role="button"
             key={name}
-            {...css({
+            className={`${css({
               padding: 5,
               cursor: 'default',
               backgroundColor:
                 highlightedIndex === index
                   ? theme.alt2MenuItemBackgroundHover
                   : null,
-            })}
+            })}`}
           >
             {name}
           </div>
@@ -384,10 +384,7 @@ function SingleAutocomplete({
         // Super annoying but it works best to return a div so we
         // can't use a View here, but we can fake it be using the
         // className
-        <div
-          className={'view ' + css({ display: 'flex' }).toString()}
-          {...containerProps}
-        >
+        <div className={`view ${css({ display: 'flex' })}`} {...containerProps}>
           {renderInput(
             getInputProps({
               focused,

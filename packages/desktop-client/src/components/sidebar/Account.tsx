@@ -120,8 +120,7 @@ function Account({
               }}
             >
               <div
-                className="dot"
-                {...css({
+                className={`dot ${css({
                   marginRight: 3,
                   width: 5,
                   height: 5,
@@ -130,7 +129,7 @@ function Account({
                   marginLeft: 2,
                   transition: 'transform .3s',
                   opacity: connected ? 1 : 0,
-                })}
+                })}`}
               />
             </View>
 
