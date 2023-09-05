@@ -858,7 +858,7 @@ type TableProps = {
   items: TableItem[];
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
-  contentHeader: ReactNode;
+  contentHeader?: ReactNode;
   loading: boolean;
   rowHeight?: number;
   backgroundColor?: string;
@@ -871,16 +871,15 @@ type TableProps = {
     position: number;
   }) => ReactNode;
   renderEmpty?: ReactNode | (() => ReactNode);
-  getItemKey: (index: number) => TableItem['id'];
+  getItemKey?: (index: number) => TableItem['id'];
   loadMore?: () => void;
   style?: CSSProperties;
-  navigator: ReturnType<typeof useTableNavigator>;
-  listRef;
-  onScroll: () => void;
+  navigator?: ReturnType<typeof useTableNavigator>;
+  onScroll?: () => void;
   version?: string;
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
-  saveScrollWidth: (parent, child) => void;
+  saveScrollWidth?: (parent, child) => void;
 };
 
 export const Table = forwardRef<TableHandleRef, TableProps>(
@@ -899,7 +898,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       loadMore,
       style,
       navigator,
-      listRef,
       onScroll,
       version = 'v1',
       allowPopupsEscape,
