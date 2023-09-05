@@ -180,7 +180,7 @@ function ToBudget({
             <Block
               onClick={() => setMenuOpen('actions')}
               data-cellname={sheetName}
-              {...css([
+              className={`${css([
                 styles.veryLargeText,
                 {
                   fontWeight: 400,
@@ -193,7 +193,7 @@ function ToBudget({
                     borderColor: isNegative ? colors.r4 : colors.p5,
                   },
                 },
-              ])}
+              ])}`}
             >
               {format(num, 'financial')}
             </Block>
@@ -337,7 +337,7 @@ export function BudgetSummary({
           </View>
 
           <div
-            {...css([
+            className={`${css([
               {
                 textAlign: 'center',
                 marginTop: 3,
@@ -346,7 +346,7 @@ export function BudgetSummary({
                 textDecorationSkip: 'ink',
               },
               currentMonth === month && { fontWeight: 'bold' },
-            ])}
+            ])}`}
           >
             {monthUtils.format(month, 'MMMM')}
           </div>

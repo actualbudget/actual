@@ -21,7 +21,7 @@ export default function InlineField({
 }: InlineFieldProps) {
   return (
     <label
-      {...css(
+      className={`${css(
         {
           display: 'flex',
           flexDirection: 'row',
@@ -30,7 +30,7 @@ export default function InlineField({
           width,
         },
         style,
-      )}
+      )}`}
     >
       <div
         style={{

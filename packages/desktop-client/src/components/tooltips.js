@@ -313,7 +313,7 @@ export class Tooltip extends Component {
       <div ref={el => (this.target = el)}>
         {ReactDOM.createPortal(
           <div
-            {...css(contentStyle, style, styles.darkScrollbar)}
+            className={`${css(contentStyle, style, styles.darkScrollbar)}`}
             ref={this.contentRef}
             data-testid={this.props['data-testid'] || 'tooltip'}
             data-istooltip

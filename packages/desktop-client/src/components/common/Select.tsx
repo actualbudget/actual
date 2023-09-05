@@ -65,7 +65,10 @@ export default function Select<Value extends string>({
       }}
     >
       <ListboxButton
-        {...css([{ borderWidth: 0, padding: 5, borderRadius: 4 }, style])}
+        className={`${css([
+          { borderWidth: 0, padding: 5, borderRadius: 4 },
+          style,
+        ])}`}
         arrow={
           <ExpandArrow
             style={{
@@ -100,7 +103,7 @@ export default function Select<Value extends string>({
           boxShadow: styles.cardShadow,
           border: '1px solid ' + theme.menuBorder,
         }}
-        {...css({
+        className={`${css({
           '[data-reach-listbox-option]': {
             background: theme.menuItemBackground,
             color: theme.menuItemText,
@@ -109,7 +112,7 @@ export default function Select<Value extends string>({
             background: theme.menuItemBackgroundHover,
             color: theme.menuItemTextHover,
           },
-        })}
+        })}`}
       >
         {!line ? (
           <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
