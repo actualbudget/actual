@@ -859,7 +859,7 @@ type TableProps = {
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
   contentHeader?: ReactNode;
-  loading: boolean;
+  loading?: boolean;
   rowHeight?: number;
   backgroundColor?: string;
   renderItem: (arg: {
