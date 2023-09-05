@@ -67,16 +67,15 @@ export function getStatusProps(status: Status) {
   return { color, backgroundColor, Icon };
 }
 
-enum Status {
-  Missed = 'missed',
-  Due = 'due',
-  Upcoming = 'upcoming',
-  Paid = 'paid',
-  Completed = 'completed',
-  Pending = 'pending',
-  Scheduled = 'scheduled',
-  Cleared = 'cleared',
-}
+type Status =
+  | 'missed'
+  | 'due'
+  | 'upcoming'
+  | 'paid'
+  | 'completed'
+  | 'pending'
+  | 'scheduled'
+  | 'cleared';
 
 type StatusBadgeProps = {
   status: Status;
