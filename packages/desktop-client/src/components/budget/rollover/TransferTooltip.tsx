@@ -16,7 +16,8 @@ import Input from '../../common/Input';
 import View from '../../common/View';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../tooltips';
-import { addToBeBudgetedGroup, CategoryGroupsContext } from '../util';
+import { CategoryGroupsContext } from '../CategoryGroupsContext';
+import { addToBeBudgetedGroup } from '../util';
 
 type TransferTooltipProps = {
   initialAmount?: number;

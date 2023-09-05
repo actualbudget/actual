@@ -182,7 +182,7 @@ class AccountList extends Component {
 
     const accountContent = (
       <Page title="Accounts">
-        <AccountHeader name="Budgeted" amount={getOnBudgetBalance()} />
+        <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
         {budgetedAccounts.map((acct, idx) => (
           <AccountCard
             account={acct}
