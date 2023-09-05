@@ -384,6 +384,7 @@ class TotalsRow extends PureComponent {
   render() {
     let { group, editMode, onAddCategory } = this.props;
 
+    //let content = !group.hidden && (
     let content = (
       <ListItem
         style={{
@@ -609,42 +610,45 @@ class BudgetGroup extends PureComponent {
       //   </Droppable>
       // </Draggable>
     }
+    if (!group.hidden) {
+      return editable(
+        <Card
+          style={{
+            marginTop: 7,
+            marginBottom: 7,
+          }}
+        >
+          <TotalsRow
+            group={group}
+            budgeted={rolloverBudget.groupBudgeted(group.id)}
+            balance={rolloverBudget.groupBalance(group.id)}
+            editMode={editMode}
+            onAddCategory={onAddCategory}
+            onReorderCategory={onReorderCategory}
+          />
 
-    return editable(
-      <Card
-        style={{
-          marginTop: 7,
-          marginBottom: 7,
-        }}
-      >
-        <TotalsRow
-          group={group}
-          budgeted={rolloverBudget.groupBudgeted(group.id)}
-          balance={rolloverBudget.groupBalance(group.id)}
-          editMode={editMode}
-          onAddCategory={onAddCategory}
-          onReorderCategory={onReorderCategory}
-        />
-
-        {group.categories.map((category, index) => {
-          // const editing = editingId === category.id;
-          return (
-            <BudgetCategory
-              key={category.id}
-              index={index}
-              category={category}
-              editing={undefined} //editing}
-              editMode={editMode}
-              gestures={gestures}
-              month={month}
-              onEdit={onEditCategory}
-              onReorder={onReorderCategory}
-              onBudgetAction={onBudgetAction}
-            />
-          );
-        })}
-      </Card>,
-    );
+          {group.categories.map((category, index) => {
+            // const editing = editingId === category.id;
+            return (
+              <BudgetCategory
+                key={category.id}
+                index={index}
+                category={category}
+                editing={undefined} //editing}
+                editMode={editMode}
+                gestures={gestures}
+                month={month}
+                onEdit={onEditCategory}
+                onReorder={onReorderCategory}
+                onBudgetAction={onBudgetAction}
+              />
+            );
+          })}
+        </Card>,
+      );
+    } else {
+      return null;
+    }
   }
 }
 
