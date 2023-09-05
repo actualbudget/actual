@@ -6,8 +6,9 @@ import { useActions } from '../../hooks/useActions';
 import View from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
-import { BudgetPageHeader, BudgetTable } from './misc';
-import { CategoryGroupsContext } from './util';
+import BudgetPageHeader from './BudgetPageHeader';
+import BudgetTable from './BudgetTable';
+import { CategoryGroupsContext } from './CategoryGroupsContext';
 
 function getNumPossibleMonths(width) {
   let estimatedTableWidth = width - 200;

@@ -655,15 +655,13 @@ export default function ImportTransactions({ modalProps, options }) {
 
   useEffect(() => {
     const fileType = getFileType(options.filename);
-
-    parse(
-      options.filename,
-      fileType === 'csv'
-        ? { delimiter: csvDelimiter, hasHeaderRow }
-        : fileType === 'ofx'
-        ? { fallbackMissingPayeeToMemo }
-        : null,
+    const parseOptions = getParseOptions(
+      fileType,
+      { csvDelimiter, hasHeaderRow },
+      { fallbackMissingPayeeToMemo },
     );
+
+    parse(options.filename, parseOptions);
   }, [parseTransactions, options.filename]);
 
   function onSplitMode() {
@@ -707,15 +705,13 @@ export default function ImportTransactions({ modalProps, options }) {
     });
 
     const fileType = getFileType(res[0]);
-
-    parse(
-      res[0],
-      fileType === 'csv'
-        ? { delimiter: csvDelimiter }
-        : fileType === 'ofx'
-        ? { fallbackMissingPayeeToMemo }
-        : null,
+    const parseOptions = getParseOptions(
+      fileType,
+      { csvDelimiter, hasHeaderRow },
+      { fallbackMissingPayeeToMemo },
     );
+
+    parse(res[0], parseOptions);
   }
 
   function onUpdateFields(field, name) {
@@ -731,10 +727,9 @@ export default function ImportTransactions({ modalProps, options }) {
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      let date =
-        filetype === 'qfx' || filetype === 'ofx'
-          ? trans.date
-          : parseDate(trans.date, parseDateFormat);
+      let date = isOfxFile(filetype)
+        ? trans.date
+        : parseDate(trans.date, parseDateFormat);
       if (date == null) {
         errorMessage = `Unable to parse date ${
           trans.date || '(empty)'
@@ -768,12 +763,12 @@ export default function ImportTransactions({ modalProps, options }) {
       return;
     }
 
-    if (filetype !== 'ofx' && filetype !== 'qfx') {
+    if (!isOfxFile(filetype)) {
       let key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
     }
 
-    if (filetype === 'ofx') {
+    if (isOfxFile(filetype)) {
       savePrefs({
         [`ofx-fallback-missing-payee-${accountId}`]: fallbackMissingPayeeToMemo,
       });
@@ -906,15 +901,18 @@ export default function ImportTransactions({ modalProps, options }) {
         </View>
       )}
 
-      {filetype === 'ofx' && (
+      {isOfxFile(filetype) && (
         <CheckboxOption
           id="form_fallback_missing_payee"
           checked={fallbackMissingPayeeToMemo}
           onChange={() => {
             setFallbackMissingPayeeToMemo(state => !state);
-            parse(filename, {
-              fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
-            });
+            parse(
+              filename,
+              getParseOptions('ofx', {
+                fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
+              }),
+            );
           }}
         >
           Use Memo as a fallback for empty Payees
@@ -964,7 +962,13 @@ export default function ImportTransactions({ modalProps, options }) {
                     value={csvDelimiter}
                     onChange={value => {
                       setCsvDelimiter(value);
-                      parse(filename, { delimiter: value, hasHeaderRow });
+                      parse(
+                        filename,
+                        getParseOptions('csv', {
+                          delimiter: value,
+                          hasHeaderRow,
+                        }),
+                      );
                     }}
                     style={{ width: 50 }}
                   />
@@ -974,10 +978,13 @@ export default function ImportTransactions({ modalProps, options }) {
                   checked={hasHeaderRow}
                   onChange={() => {
                     setHasHeaderRow(!hasHeaderRow);
-                    parse(filename, {
-                      delimiter: csvDelimiter,
-                      hasHeaderRow: !hasHeaderRow,
-                    });
+                    parse(
+                      filename,
+                      getParseOptions('csv', {
+                        delimiter: csvDelimiter,
+                        hasHeaderRow: !hasHeaderRow,
+                      }),
+                    );
                   }}
                 >
                   File has header row
@@ -1050,4 +1057,19 @@ export default function ImportTransactions({ modalProps, options }) {
       </View>
     </Modal>
   );
+}
+
+function getParseOptions(fileType, csvOptions, ofxOptions) {
+  if (fileType === 'csv') {
+    const { csvDelimiter, hasHeaderRow } = csvOptions;
+    return { csvDelimiter, hasHeaderRow };
+  } else if (isOfxFile(fileType)) {
+    const { fallbackMissingPayeeToMemo } = ofxOptions;
+    return { fallbackMissingPayeeToMemo };
+  }
+  return {};
+}
+
+function isOfxFile(fileType) {
+  return fileType === 'ofx' || fileType === 'qfx';
 }

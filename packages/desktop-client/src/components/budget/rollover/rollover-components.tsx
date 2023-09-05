@@ -19,12 +19,9 @@ import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell } from '../../table';
 import { Tooltip, useTooltip } from '../../tooltips';
 import BalanceWithCarryover from '../BalanceWithCarryover';
+import { CategoryGroupsContext } from '../CategoryGroupsContext';
 import { MONTH_RIGHT_PADDING } from '../constants';
-import {
-  makeAmountGrey,
-  addToBeBudgetedGroup,
-  CategoryGroupsContext,
-} from '../util';
+import { makeAmountGrey, addToBeBudgetedGroup } from '../util';
 
 import TransferTooltip from './TransferTooltip';
 
