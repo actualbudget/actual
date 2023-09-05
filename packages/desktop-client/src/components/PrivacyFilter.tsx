@@ -85,6 +85,9 @@ function BlurredOverlay({ blurIntensity, children, ...props }) {
     ...(!hovered && {
       filter: `blur(${blurIntensity})`,
       WebkitFilter: `blur(${blurIntensity})`,
+      // To fix blur performance issue in Safari.
+      // https://graffino.com/til/CjT2jrcLHP-how-to-fix-filter-blur-performance-issue-in-safari
+      transform: `translate3d(0, 0, 0)`,
     }),
   };
 
