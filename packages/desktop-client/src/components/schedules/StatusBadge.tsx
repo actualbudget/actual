@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { type ScheduleStatusType } from 'loot-core/src/client/data-hooks/schedules';
 import { titleFirst } from 'loot-core/src/shared/util';
 
 import AlertTriangle from '../../icons/v2/AlertTriangle';
@@ -13,7 +14,7 @@ import { theme, type CSSProperties } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
-export function getStatusProps(status: Status) {
+export function getStatusProps(status: ScheduleStatusType) {
   let color, backgroundColor, Icon;
 
   switch (status) {
@@ -67,22 +68,7 @@ export function getStatusProps(status: Status) {
   return { color, backgroundColor, Icon };
 }
 
-type Status =
-  | 'missed'
-  | 'due'
-  | 'upcoming'
-  | 'paid'
-  | 'completed'
-  | 'pending'
-  | 'scheduled'
-  | 'cleared';
-
-type StatusBadgeProps = {
-  status: Status;
-  style?: CSSProperties;
-};
-
-export function StatusBadge({ status, style }: StatusBadgeProps) {
+export function StatusBadge({ status }) {
   let { color, backgroundColor, Icon } = getStatusProps(status);
   return (
     <View
@@ -94,7 +80,6 @@ export function StatusBadge({ status, style }: StatusBadgeProps) {
         flexDirection: 'row',
         alignItems: 'center',
         flexShrink: 0,
-        ...style,
       }}
     >
       <Icon

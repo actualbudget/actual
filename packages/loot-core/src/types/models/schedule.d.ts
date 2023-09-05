@@ -3,7 +3,7 @@ import type { PayeeEntity } from './payee';
 import type { RuleEntity } from './rule';
 
 export interface ScheduleEntity {
-  id?: string;
+  id: string;
   name?: string;
   rule: RuleEntity;
   next_date: string;

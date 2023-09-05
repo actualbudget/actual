@@ -833,7 +833,7 @@ let rowStyle: CSSProperties = {
 type TableHandleRef = {
   scrollTo: (id: number, alignment?: string) => void;
   scrollToTop: () => void;
-  getScrolledItem: () => number;
+  getScrolledItem: () => TableItem['id'];
   setRowAnimation: (flag) => void;
   edit(id: number, field, shouldScroll): void;
   anchor(): void;
@@ -852,7 +852,7 @@ export const TableWithNavigator = forwardRef<
   return <Table {...props} navigator={navigator} />;
 });
 
-type TableItem = { id: number };
+type TableItem = { id: number | string };
 
 type TableProps = {
   items: TableItem[];
@@ -875,6 +875,7 @@ type TableProps = {
   loadMore?: () => void;
   style?: CSSProperties;
   navigator?: ReturnType<typeof useTableNavigator>;
+  listRef?: unknown;
   onScroll?: () => void;
   version?: string;
   allowPopupsEscape?: boolean;

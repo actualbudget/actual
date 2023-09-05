@@ -5,6 +5,8 @@ import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
 import { type ScheduleEntity } from '../../types/models';
 import q, { liveQuery } from '../query-helpers';
 
+export type ScheduleStatusType = ReturnType<typeof getStatus>;
+export type ScheduleStatuses = Map<string, ScheduleStatusType>;
 function loadStatuses(schedules: ScheduleEntity[], onData) {
   return liveQuery(getHasTransactionsQuery(schedules), onData, {
     mapper: data => {
@@ -23,13 +25,13 @@ function loadStatuses(schedules: ScheduleEntity[], onData) {
 type UseSchedulesArgs = { transform?: (q: Query) => Query };
 type UseSchedulesReturnType = {
   schedules: ScheduleEntity[];
-  statuses: Record<string, ReturnType<typeof getStatus>>;
+  statuses: ScheduleStatuses;
 } | null;
 export function useSchedules({ transform }: UseSchedulesArgs = {}) {
-  let [data, setData] = useState<UseSchedulesReturnType | null>(null);
+  const [data, setData] = useState<UseSchedulesReturnType>(null);
 
   useEffect(() => {
-    let query = q('schedules').select('*');
+    const query = q('schedules').select('*');
     let scheduleQuery, statusQuery;
 
     scheduleQuery = liveQuery(
@@ -40,10 +42,8 @@ export function useSchedules({ transform }: UseSchedulesArgs = {}) {
             statusQuery.unsubscribe();
           }
 
-          statusQuery = loadStatuses(
-            schedules,
-            (statuses: Record<string, ReturnType<typeof getStatus>>) =>
-              setData({ schedules, statuses }),
+          statusQuery = loadStatuses(schedules, (statuses: ScheduleStatuses) =>
+            setData({ schedules, statuses }),
           );
         }
       },

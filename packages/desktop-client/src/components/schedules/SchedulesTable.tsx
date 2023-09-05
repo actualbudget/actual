@@ -1,11 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, type CSSProperties } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
+import { type ScheduleStatuses } from 'loot-core/src/client/data-hooks/schedules';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
@@ -20,6 +22,20 @@ import { Tooltip } from '../tooltips';
 import DisplayId from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
+
+type SchedulesTableProps = {
+  schedules: ScheduleEntity[];
+  statuses: ScheduleStatuses;
+  filter: string;
+  allowCompleted: boolean;
+  onSelect: (id: ScheduleEntity['id']) => void;
+  onAction: (actionName: string, id: ScheduleEntity['id']) => void;
+  style: CSSProperties;
+  minimal?: boolean;
+  tableStyle?: CSSProperties;
+};
+
+type CompletedScheduleItem = { type: 'show-completed' };
 
 export let ROW_HEIGHT = 43;
 
@@ -129,17 +145,17 @@ export function SchedulesTable({
   onSelect,
   onAction,
   tableStyle,
-}) {
-  let dateFormat = useSelector(state => {
+}: SchedulesTableProps) {
+  const dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
 
-  let [showCompleted, setShowCompleted] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
 
-  let payees = useCachedPayees();
-  let accounts = useCachedAccounts();
+  const payees = useCachedPayees();
+  const accounts = useCachedAccounts();
 
-  let filteredSchedules = useMemo(() => {
+  const filteredSchedules = useMemo(() => {
     if (!filter) {
       return schedules;
     }
@@ -150,16 +166,16 @@ export function SchedulesTable({
         : false;
 
     return schedules.filter(schedule => {
-      let payee = payees.find(p => schedule._payee === p.id);
-      let account = accounts.find(a => schedule._account === a.id);
-      let amount = getScheduledAmount(schedule._amount);
-      let amountStr =
+      const payee = payees.find(p => schedule._payee === p.id);
+      const account = accounts.find(a => schedule._account === a.id);
+      const amount = getScheduledAmount(schedule._amount);
+      const amountStr =
         (schedule._amountOp === 'isapprox' || schedule._amountOp === 'isbetween'
           ? '~'
           : '') +
         (amount > 0 ? '+' : '') +
         integerToCurrency(Math.abs(amount || 0));
-      let dateStr = schedule.next_date
+      const dateStr = schedule.next_date
         ? monthUtils.format(schedule.next_date, dateFormat)
         : null;
 
@@ -174,21 +190,21 @@ export function SchedulesTable({
     });
   }, [schedules, filter, statuses]);
 
-  let items = useMemo(() => {
+  const items: ScheduleEntity[] | CompletedScheduleItem = useMemo(() => {
     if (!allowCompleted) {
       return filteredSchedules.filter(s => !s.completed);
     }
     if (showCompleted) {
       return filteredSchedules;
     }
-    let arr = filteredSchedules.filter(s => !s.completed);
+    const arr = filteredSchedules.filter(s => !s.completed);
     if (filteredSchedules.find(s => s.completed)) {
-      arr.push({ type: 'show-completed' });
+      arr.push({ type: 'show-completed' } as CompletedScheduleItem);
     }
     return arr;
   }, [filteredSchedules, showCompleted, allowCompleted]);
 
-  function renderSchedule({ item }) {
+  function renderSchedule({ item }: { item: ScheduleEntity }) {
     return (
       <Row
         height={ROW_HEIGHT}
