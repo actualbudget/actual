@@ -17,7 +17,7 @@ const Text = (props: TextProps) => {
     <span
       {...restProps}
       ref={innerRef}
-      className={`${className || ''} ${css(style)}`}
+      className={`${className} ${css(style)}`}
     />
   );
 };
