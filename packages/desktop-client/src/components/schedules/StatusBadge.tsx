@@ -80,7 +80,7 @@ enum Status {
 
 type StatusBadgeProps = {
   status: Status;
-  style: CSSProperties;
+  style?: CSSProperties;
 };
 
 export function StatusBadge({ status, style }: StatusBadgeProps) {
