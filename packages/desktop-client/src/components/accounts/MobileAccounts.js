@@ -1,6 +1,7 @@
-import React, { Component, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import PullToRefresh from 'react-simple-pull-to-refresh';
 
 import * as queries from 'loot-core/src/client/queries';
 
@@ -149,93 +150,61 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-class AccountList extends Component {
-  isNewTransaction = id => {
-    return this.props.newTransactions.includes(id);
-  };
+function AccountList({
+  accounts,
+  updatedAccounts,
+  getBalanceQuery,
+  getOnBudgetBalance,
+  getOffBudgetBalance,
+  onAddAccount,
+  onSelectAccount,
+}) {
+  const { syncAndDownload } = useActions();
 
-  render() {
-    const {
-      accounts,
-      updatedAccounts,
-      // transactions,
-      // categories,
-      getBalanceQuery,
-      getOnBudgetBalance,
-      getOffBudgetBalance,
-      onAddAccount,
-      onSelectAccount,
-      // onSelectTransaction,
-      // refreshControl
-    } = this.props;
-    const budgetedAccounts = accounts.filter(
-      account => account.offbudget === 0,
-    );
-    const offbudgetAccounts = accounts.filter(
-      account => account.offbudget === 1,
-    );
+  const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
+  const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
-    // If there are no accounts, show a helpful message
-    if (accounts.length === 0) {
-      return <EmptyMessage onAdd={onAddAccount} />;
-    }
+  // All accounts - check for any syncable account
+  const canSync = !!accounts.find(account => !!account.account_id);
 
-    const accountContent = (
-      <Page title="Accounts">
-        <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
-        {budgetedAccounts.map((acct, idx) => (
-          <AccountCard
-            account={acct}
-            key={acct.id}
-            updated={updatedAccounts.includes(acct.id)}
-            getBalanceQuery={getBalanceQuery}
-            onSelect={onSelectAccount}
-          />
-        ))}
-
-        <AccountHeader
-          name="Off budget"
-          amount={getOffBudgetBalance()}
-          style={{ marginTop: 30 }}
-        />
-        {offbudgetAccounts.map((acct, idx) => (
-          <AccountCard
-            account={acct}
-            key={acct.id}
-            updated={updatedAccounts.includes(acct.id)}
-            getBalanceQuery={getBalanceQuery}
-            onSelect={onSelectAccount}
-          />
-        ))}
-
-        {/*<Label
-          title="RECENT TRANSACTIONS"
-          style={{
-            textAlign: 'center',
-            marginTop: 50,
-            marginBottom: 20,
-            marginLeft: 10
-          }}
-          />*/}
-      </Page>
-    );
-
-    return (
-      <View style={{ flex: 1 }}>
-        {/* <TransactionList
-          transactions={transactions}
-          categories={categories}
-          isNew={this.isNewTransaction}
-          scrollProps={{
-            ListHeaderComponent: accountContent
-          }}
-          // refreshControl={refreshControl}
-          onSelect={onSelectTransaction}
-        /> */}
-        {accountContent}
-      </View>
-    );
+  // If there are no accounts, show a helpful message
+  if (accounts.length === 0) {
+    return <EmptyMessage onAdd={onAddAccount} />;
   }
+
+  return (
+    <View style={{ flex: 1 }}>
+      <Page title="Accounts">
+        <PullToRefresh onRefresh={syncAndDownload} isPullable={canSync}>
+          <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
+          {budgetedAccounts.map(acct => (
+            <AccountCard
+              account={acct}
+              key={acct.id}
+              updated={updatedAccounts.includes(acct.id)}
+              getBalanceQuery={getBalanceQuery}
+              onSelect={onSelectAccount}
+            />
+          ))}
+
+          <AccountHeader
+            name="Off budget"
+            amount={getOffBudgetBalance()}
+            style={{ marginTop: 30 }}
+          />
+          {offbudgetAccounts.map(acct => (
+            <AccountCard
+              account={acct}
+              key={acct.id}
+              updated={updatedAccounts.includes(acct.id)}
+              getBalanceQuery={getBalanceQuery}
+              onSelect={onSelectAccount}
+            />
+          ))}
+        </PullToRefresh>
+      </Page>
+    </View>
+  );
 }
 
 export default function Accounts() {
@@ -258,10 +227,6 @@ export default function Accounts() {
   useEffect(() => {
     (async () => getAccounts())();
   }, []);
-
-  // const sync = async () => {
-  //   await props.syncAndDownload();
-  // };
 
   const onSelectAccount = id => {
     navigate(`/accounts/${id}`);
@@ -290,9 +255,6 @@ export default function Accounts() {
         onAddAccount={() => {}} // () => navigate('AddAccountModal')
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
-        // refreshControl={
-        //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        // }
       />
     </View>
   );

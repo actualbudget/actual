@@ -99,6 +99,7 @@ __metadata:
     react-redux: 7.2.1
     react-router-dom: 6.11.2
     react-scripts: ^5.0.1
+    react-simple-pull-to-refresh: ^1.3.3
     react-spring: ^9.7.1
     react-virtualized-auto-sizer: ^1.0.2
     redux: ^4.0.5
@@ -16794,6 +16795,16 @@ __metadata:
   bin:
     react-scripts: bin/react-scripts.js
   checksum: 92afa2f245c7092ccc97d5609dc7a2130616262e34da7f15072d9442e2d2e1d4909a91022abd1faac1336eb17c5525a10d9bd43e1ae374c7ec941ca20addca68
+  languageName: node
+  linkType: hard
+
+"react-simple-pull-to-refresh@npm:^1.3.3":
+  version: 1.3.3
+  resolution: "react-simple-pull-to-refresh@npm:1.3.3"
+  peerDependencies:
+    react: ^16.10.2 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.10.2 || ^17.0.0 || ^18.0.0
+  checksum: 8b04ec1ccf9eae2d7bf9d8304c5a49ddb0a00c0289f703ba780e74af174df234642449ad26813daf146c3991999d8fdcbb75e8fca90e2d11d6239b91d033a666
   languageName: node
   linkType: hard
 

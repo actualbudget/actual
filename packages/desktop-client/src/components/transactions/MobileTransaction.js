@@ -1057,12 +1057,7 @@ export class TransactionList extends Component {
   });
 
   render() {
-    const {
-      transactions,
-      scrollProps = {},
-      onLoadMore,
-      // refreshControl
-    } = this.props;
+    const { transactions, scrollProps = {}, onLoadMore } = this.props;
 
     const sections = this.makeData(transactions);
 
