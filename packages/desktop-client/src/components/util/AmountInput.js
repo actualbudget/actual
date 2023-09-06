@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
-  integerToCurrency,
   currencyToInteger,
+  integerToCurrency,
 } from 'loot-core/src/shared/util';
 
 import Add from '../../icons/v1/Add';
@@ -12,21 +12,58 @@ import Button from '../common/Button';
 import InputWithContent from '../common/InputWithContent';
 import View from '../common/View';
 
-export function AmountInput({ id, defaultValue = 0, onChange, style }) {
-  let [negative, setNegative] = useState(defaultValue <= 0);
-  let [value, setValue] = useState(integerToCurrency(Math.abs(defaultValue)));
+export function AmountInput({
+  id,
+  initialValue = 0,
+  onChange,
+  focused,
+  style,
+  textStyle,
+}) {
+  let [negative, setNegative] = useState(initialValue <= 0);
+  let [value, setValue] = useState(
+    integerToCurrency(Math.abs(initialValue || 0)),
+  );
 
   function onSwitch() {
     setNegative(!negative);
-    fireChange(!negative);
+    fireChange(value, !negative);
   }
 
-  function fireChange(neg = negative) {
-    let v = currencyToInteger(value);
-    let amount = neg ? (v < 0 ? v : -v) : v > 0 ? v : -v;
+  function fireChange(val, neg) {
+    let valueOrInitial = Math.abs(currencyToInteger(val ? val : initialValue));
+    let amount = neg ? valueOrInitial * -1 : valueOrInitial;
 
-    onChange(amount);
+    onChange?.(amount);
   }
+
+  function onInputAmountChange(value) {
+    setValue(value ? value : '');
+  }
+
+  function onInputAmountBlur(e) {
+    fireChange(value, negative);
+  }
+
+  // Surely there must be a better way...
+  // Blue does not fire at the moment so I try to save
+  // when this component is unmounted.
+  function useFireChangeOnUnmount(value, negative) {
+    let valueRef = useRef(value);
+    let negativeRef = useRef(negative);
+    useEffect(() => {
+      valueRef.current = value;
+      negativeRef.current = negative;
+    }, [value, negative]);
+
+    useEffect(() => {
+      return () => {
+        fireChange(valueRef.current, negativeRef.current);
+      };
+    }, []);
+  }
+
+  useFireChangeOnUnmount(value, negative);
 
   return (
     <InputWithContent
@@ -41,10 +78,16 @@ export function AmountInput({ id, defaultValue = 0, onChange, style }) {
         </Button>
       }
       value={value}
+      focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
-      inputStyle={{ paddingLeft: 0 }}
-      onChange={e => setValue(e.target.value)}
-      onBlur={e => fireChange()}
+      inputStyle={{ paddingLeft: 0, ...textStyle }}
+      onKeyUp={e => {
+        if (e.key === 'Enter') {
+          fireChange(value, negative);
+        }
+      }}
+      onUpdate={onInputAmountChange}
+      onBlur={onInputAmountBlur}
     />
   );
 }
@@ -56,7 +99,7 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <AmountInput
-        defaultValue={num1}
+        initialValue={num1}
         onChange={value => {
           setNum1(value);
           onChange({ num1: value, num2 });
@@ -65,7 +108,7 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
       />
       <View style={{ margin: '0 5px' }}>and</View>
       <AmountInput
-        defaultValue={num2}
+        initialValue={num2}
         onChange={value => {
           setNum2(value);
           onChange({ num1, num2: value });

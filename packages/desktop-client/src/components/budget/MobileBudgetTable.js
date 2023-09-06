@@ -1,4 +1,4 @@
-import React, { Component, memo, PureComponent, useState } from 'react';
+import React, { Component, PureComponent, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 // import {
 //   RectButton,
@@ -13,7 +13,6 @@ import memoizeOne from 'memoize-one';
 import { savePrefs } from 'loot-core/src/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
 
 import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
@@ -110,7 +109,7 @@ function Saved({ projected }) {
   );
 }
 
-const BudgetCell = memo(function BudgetCell(props) {
+function BudgetCell(props) {
   const {
     name,
     binding,
@@ -120,49 +119,51 @@ const BudgetCell = memo(function BudgetCell(props) {
     categoryId,
     month,
     onBudgetAction,
+    onEdit,
   } = props;
 
   let sheetValue = useSheetValue(binding);
   let format = useFormat();
 
-  return (
-    <View style={style}>
-      <AmountInput
-        value={integerToAmount(sheetValue || 0)}
-        style={{
-          height: ROW_HEIGHT - 4,
-          transform: 'translateX(6px)',
-          ...(!editing && {
-            opacity: 0,
-            position: 'absolute',
-            top: 0,
-          }),
-        }}
-        focused={editing}
-        textStyle={{ ...styles.smallText, ...textStyle }}
-        onChange={() => {}} // temporarily disabled for read-only view
-        onBlur={value => {
-          onBudgetAction(month, 'budget-amount', {
-            category: categoryId,
-            amount: amountToInteger(value),
-          });
-        }}
-      />
+  function updateBudgetAmount(amount) {
+    onBudgetAction?.(month, 'budget-amount', {
+      category: categoryId,
+      amount: amount,
+    });
+  }
 
-      <View
-        style={{
-          justifyContent: 'center',
-          height: ROW_HEIGHT - 4,
-          ...(editing && { display: 'none' }),
-        }}
-      >
-        <Text style={{ ...styles.smallText, ...textStyle }} data-testid={name}>
-          {format(sheetValue || 0, 'financial')}
-        </Text>
-      </View>
+  return (
+    <View style={style} onPointerUp={() => onEdit?.(categoryId)}>
+      {editing ? (
+        <AmountInput
+          initialValue={sheetValue}
+          style={{
+            height: ROW_HEIGHT - 4,
+            transform: 'translateX(6px)',
+          }}
+          focused={editing}
+          textStyle={{ ...styles.smallText, ...textStyle }}
+          onChange={updateBudgetAmount}
+          onBlur={() => onEdit?.(null)}
+        />
+      ) : (
+        <View
+          style={{
+            justifyContent: 'center',
+            height: ROW_HEIGHT - 4,
+          }}
+        >
+          <Text
+            style={{ ...styles.smallText, ...textStyle }}
+            data-testid={name}
+          >
+            {format(sheetValue || 0, 'financial')}
+          </Text>
+        </View>
+      )}
     </View>
   );
-});
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function BudgetGroupPreview({ group, pending, style }) {
@@ -263,6 +264,7 @@ class BudgetCategory extends PureComponent {
       index,
       style,
       month,
+      onEdit,
       onBudgetAction,
       show3Cols,
       showBudgetedCol,
@@ -303,6 +305,7 @@ class BudgetCategory extends PureComponent {
               categoryId={category.id}
               month={month}
               onBudgetAction={onBudgetAction}
+              onEdit={onEdit}
             />
           ) : null}
           {show3Cols || !showBudgetedCol ? (
@@ -332,7 +335,8 @@ class BudgetCategory extends PureComponent {
       </ListItem>
     );
 
-    return <div>{content}</div>;
+    return <View>{content}</View>;
+
     // <Draggable
     //   id={category.id}
     //   type="category"
@@ -604,7 +608,7 @@ class BudgetGroup extends PureComponent {
   render() {
     const {
       group,
-      // editingId,
+      editingId,
       editMode,
       // gestures,
       month,
@@ -665,7 +669,7 @@ class BudgetGroup extends PureComponent {
           />
 
           {group.categories.map((category, index) => {
-            // const editing = editingId === category.id;
+            const editing = editingId === category.id;
             return (
               <BudgetCategory
                 show3Cols={show3Cols}
@@ -673,9 +677,9 @@ class BudgetGroup extends PureComponent {
                 index={index}
                 category={category}
                 showBudgetedCol={showBudgetedCol}
-                editing={undefined} //editing}
+                editing={editing}
                 editMode={editMode}
-                //gestures={gestures}
+                // gestures={gestures}
                 month={month}
                 onEdit={onEditCategory}
                 onReorder={onReorderCategory}
@@ -770,7 +774,7 @@ class BudgetGroups extends Component {
       type,
       categoryGroups,
       editingId,
-      // editMode,
+      editMode,
       gestures,
       month,
       onEditCategory,
@@ -795,7 +799,7 @@ class BudgetGroups extends Component {
               group={group}
               editingId={editingId}
               showBudgetedCol={showBudgetedCol}
-              editMode={undefined} //editMode}
+              editMode={editMode}
               gestures={gestures}
               month={month}
               onEditCategory={onEditCategory}
@@ -1018,25 +1022,24 @@ export function BudgetTable(props) {
             //     scrollRef,
             //     onScroll
             //   }) => (
-            <>
-              <View>
-                <BudgetGroups
-                  categoryGroups={categoryGroups}
-                  showBudgetedCol={showBudgetedCol}
-                  show3Cols={show3Cols}
-                  editingId={editingCategory}
-                  editMode={editMode}
-                  // gestures={gestures}
-                  onEditCategory={() => {}} //onEditCategory}
-                  onAddCategory={onAddCategory}
-                  onReorderCategory={onReorderCategory}
-                  onReorderGroup={onReorderGroup}
-                />
-              </View>
+            <View>
+              <BudgetGroups
+                type={type}
+                categoryGroups={categoryGroups}
+                showBudgetedCol={showBudgetedCol}
+                show3Cols={show3Cols}
+                editingId={editingCategory}
+                editMode={editMode}
+                // gestures={gestures}
+                onEditCategory={onEditCategory}
+                onAddCategory={onAddCategory}
+                onReorderCategory={onReorderCategory}
+                onReorderGroup={onReorderGroup}
+                onBudgetAction={onBudgetAction}
+              />
+            </View>
 
-              {/* <DragDropHighlight /> */}
-            </>
-            //   )}
+            // <DragDropHighlight />
             // </DragDrop>
           )}
         </View>
