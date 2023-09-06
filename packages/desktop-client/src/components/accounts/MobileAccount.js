@@ -222,12 +222,8 @@ export default function Account(props) {
                   prependTransactions={prependTransactions || []}
                   balance={balance}
                   isNewTransaction={isNewTransaction}
-                  // refreshControl={
-                  //   <RefreshControl
-                  //     refreshing={refreshing}
-                  //     onRefresh={onRefresh}
-                  //   />
-                  // }
+                  onRefresh={onRefresh}
+                  refreshing={refreshing}
                   onLoadMore={() => {
                     paged?.fetchNext();
                   }}

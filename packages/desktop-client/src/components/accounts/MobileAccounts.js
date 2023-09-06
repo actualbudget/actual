@@ -166,7 +166,6 @@ class AccountList extends Component {
       onAddAccount,
       onSelectAccount,
       // onSelectTransaction,
-      // refreshControl
     } = this.props;
     const budgetedAccounts = accounts.filter(
       account => account.offbudget === 0,
@@ -229,7 +228,6 @@ class AccountList extends Component {
           scrollProps={{
             ListHeaderComponent: accountContent
           }}
-          // refreshControl={refreshControl}
           onSelect={onSelectTransaction}
         /> */}
         {accountContent}
@@ -290,9 +288,6 @@ export default function Accounts() {
         onAddAccount={() => {}} // () => navigate('AddAccountModal')
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
-        // refreshControl={
-        //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        // }
       />
     </View>
   );

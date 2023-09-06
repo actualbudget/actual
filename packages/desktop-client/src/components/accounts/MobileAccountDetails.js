@@ -5,6 +5,8 @@ import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { theme, styles } from '../../style';
+import AnimatedRefresh from '../AnimatedRefresh';
+import Button from '../common/Button';
 import ButtonLink from '../common/ButtonLink';
 import InputWithContent from '../common/InputWithContent';
 import Label from '../common/Label';
@@ -61,7 +63,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
   );
 }
 
-const LEFT_RIGHT_FLEX_WIDTH = 70;
+const LEFT_RIGHT_FLEX_WIDTH = 80;
 export default function AccountDetails({
   account,
   prependTransactions,
@@ -75,7 +77,8 @@ export default function AccountDetails({
   onSearch,
   onSelectTransaction,
   pushModal,
-  // refreshControl
+  onRefresh,
+  refreshing,
 }) {
   let allTransactions = useMemo(() => {
     return prependTransactions.concat(transactions);
@@ -125,22 +128,52 @@ export default function AccountDetails({
             style={{
               fontSize: 16,
               fontWeight: 500,
+              position: 'relative',
             }}
             role="heading"
           >
             {account.name}
+            {account.bankId && (
+              <View
+                style={{
+                  backgroundColor: theme.noticeText,
+                  position: 'absolute',
+                  left: '-15px',
+                  top: '6px',
+                  width: 8,
+                  height: 8,
+                  borderRadius: 8,
+                }}
+              />
+            )}
           </View>
 
-          <ButtonLink
-            to="transactions/new"
-            type="bare"
-            aria-label="Add Transaction"
-            style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
-            hoveredStyle={{ background: 'transparent' }}
-            activeStyle={{ background: 'transparent' }}
+          <View
+            style={{
+              flexDirection: 'row',
+              width: LEFT_RIGHT_FLEX_WIDTH,
+              justifyContent: 'space-around',
+              paddingRight: '5px',
+            }}
           >
-            <Add width={20} height={20} />
-          </ButtonLink>
+            {account.bankId && (
+              <Button onClick={onRefresh}>
+                <AnimatedRefresh animating={refreshing} />
+              </Button>
+            )}
+            <ButtonLink
+              to="transactions/new"
+              type="bare"
+              aria-label="Add Transaction"
+              style={{
+                justifyContent: 'center',
+              }}
+              hoveredStyle={{ background: 'transparent' }}
+              activeStyle={{ background: 'transparent' }}
+            >
+              <Add width={20} height={20} />
+            </ButtonLink>
+          </View>
         </View>
         <Label title="BALANCE" style={{ marginTop: 10 }} />
         <CellValue
@@ -168,7 +201,6 @@ export default function AccountDetails({
         payees={payees}
         showCategory={!account.offbudget}
         isNew={isNewTransaction}
-        // refreshControl={refreshControl}
         onLoadMore={onLoadMore}
         onSelect={onSelectTransaction}
         pushModal={pushModal}
