@@ -53,41 +53,24 @@ function NarrowNotSupported({
   children: ReactElement;
 }) {
   const { isNarrowWidth } = useResponsive();
-  const { isExtraSmallWidth } = useResponsive();
-  let isWidth = false;
-
-  if (isNarrowWidth || isExtraSmallWidth) {
-    isWidth = true;
-  } else {
-    isWidth = false;
-  }
-
   const navigate = useNavigate();
   useEffect(() => {
-    if (isWidth) {
+    if (isNarrowWidth) {
       navigate(redirectTo);
     }
-  }, [isWidth, navigate, redirectTo]);
-  return isWidth ? null : children;
+  }, [isNarrowWidth, navigate, redirectTo]);
+  return isNarrowWidth ? null : children;
 }
 
 function WideNotSupported({ children, redirectTo = '/budget' }) {
   const { isNarrowWidth } = useResponsive();
-  const { isExtraSmallWidth } = useResponsive();
-  let isWidth = false;
-
-  if (isNarrowWidth || isExtraSmallWidth) {
-    isWidth = true;
-  } else {
-    isWidth = false;
-  }
   const navigate = useNavigate();
   useEffect(() => {
-    if (!isWidth) {
+    if (!isNarrowWidth) {
       navigate(redirectTo);
     }
-  }, [isWidth, navigate, redirectTo]);
-  return isWidth ? children : null;
+  }, [isNarrowWidth, navigate, redirectTo]);
+  return isNarrowWidth ? children : null;
 }
 
 function NavTab({ icon: TabIcon, name, path }) {
@@ -110,14 +93,6 @@ function NavTab({ icon: TabIcon, name, path }) {
 
 function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
-  const { isExtraSmallWidth } = useResponsive();
-  let isWidth = false;
-
-  if (isNarrowWidth || isExtraSmallWidth) {
-    isWidth = true;
-  } else {
-    isWidth = false;
-  }
   return (
     <div
       style={{
@@ -125,7 +100,7 @@ function MobileNavTabs() {
         borderTop: `1px solid ${theme.menuBorder}`,
         bottom: 0,
         ...styles.shadow,
-        display: isWidth ? 'flex' : 'none',
+        display: isNarrowWidth ? 'flex' : 'none',
         height: '80px',
         justifyContent: 'space-around',
         paddingTop: 10,
