@@ -6,7 +6,6 @@ import { breakpoints } from './tokens';
 
 type TResponsiveContext = {
   atLeastMediumWidth: boolean;
-  isExtraSmallWidth: boolean;
   isNarrowWidth: boolean;
   isSmallWidth: boolean;
   isMediumWidth: boolean;
@@ -35,8 +34,7 @@ export function ResponsiveProvider(props: { children: ReactNode }) {
   const viewportInfo = {
     // atLeastMediumWidth is provided to avoid checking (isMediumWidth || isWideWidth)
     atLeastMediumWidth: width >= breakpoints.medium,
-    isExtraSmallWidth: width < breakpoints.extrasmall,
-    isNarrowWidth: width >= breakpoints.extrasmall && width < breakpoints.small,
+    isNarrowWidth: width < breakpoints.small,
     isSmallWidth: width >= breakpoints.small && width < breakpoints.medium,
     isMediumWidth: width >= breakpoints.medium && width < breakpoints.wide,
     // No atLeastWideWidth because that's identical to isWideWidth

@@ -1,5 +1,4 @@
 enum BreakpointNames {
-  extrasmall = 'extrasmall',
   small = 'small',
   medium = 'medium',
   wide = 'wide',
@@ -10,7 +9,6 @@ type NumericBreakpoints = {
 };
 
 export const breakpoints: NumericBreakpoints = {
-  extrasmall: 370,
   small: 512,
   medium: 730,
   wide: 1100,
@@ -22,7 +20,6 @@ type BreakpointsPx = {
 
 // Provide the same breakpoints in a form usable by CSS media queries
 // {
-//   breakpoint_extrasmall: '370px',
 //   breakpoint_small: '512px',
 //   breakpoint_medium: '740px',
 //   breakpoint_wide: '1100px',
