@@ -193,7 +193,6 @@ export function SchedulesTable({
       <Row
         height={ROW_HEIGHT}
         inset={15}
-        backgroundColor="transparent"
         onClick={() => onSelect(item.id)}
         style={{
           cursor: 'pointer',
