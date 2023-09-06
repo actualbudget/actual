@@ -488,8 +488,18 @@ class TotalsRow extends PureComponent {
 
 class IncomeCategory extends PureComponent {
   render() {
-    const { name, budget, balance, style, nameTextStyle, amountTextStyle } =
-      this.props;
+    const {
+      name,
+      budget,
+      hidden,
+      balance,
+      style,
+      nameTextStyle,
+      amountTextStyle,
+    } = this.props;
+    if (hidden) {
+      return null;
+    }
     return (
       <ListItem
         style={{
@@ -699,6 +709,7 @@ class IncomeBudgetGroup extends Component {
                 key={category.id}
                 type={type}
                 name={category.name}
+                hidden={category.hidden}
                 budget={
                   type === 'report'
                     ? reportBudget.catBudgeted(category.id)
