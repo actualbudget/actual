@@ -17,7 +17,7 @@ type SettingProps = {
 export const Setting = ({ primaryAction, style, children }: SettingProps) => {
   return (
     <View
-      {...css([
+      className={`${css([
         {
           backgroundColor: colors.n9,
           alignSelf: 'flex-start',
@@ -28,7 +28,7 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
           width: '100%',
         },
         style,
-      ])}
+      ])}`}
     >
       <View
         style={{

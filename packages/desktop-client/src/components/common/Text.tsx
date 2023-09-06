@@ -12,12 +12,12 @@ type TextProps = HTMLProps<HTMLSpanElement> & {
 };
 
 const Text = (props: TextProps) => {
-  const { style, innerRef, ...restProps } = props;
+  const { className = '', style, innerRef, ...restProps } = props;
   return (
     <span
       {...restProps}
       ref={innerRef}
-      className={`${props.className} ${css(props.style)}`}
+      className={`${className} ${css(style)}`}
     />
   );
 };

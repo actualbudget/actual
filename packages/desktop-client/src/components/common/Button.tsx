@@ -143,8 +143,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...(typeof as === 'string'
           ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (css(buttonStyle) as any)
-          : { style: buttonStyle, type: isSubmit ? 'submit' : 'button' })}
+          : { style: buttonStyle })}
         disabled={disabled}
+        type={isSubmit ? 'submit' : 'button'}
         {...nativeProps}
       >
         {children}
