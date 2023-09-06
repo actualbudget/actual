@@ -137,7 +137,6 @@ function BudgetCell(props) {
   }
 
   function inputRef(inputRef) {
-    inputRef?.scrollIntoView(true);
     inputRef?.select();
   }
 
