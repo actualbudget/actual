@@ -9,11 +9,11 @@ import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
 import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
-import { colors } from '../../style';
+import { colors, type CSSProperties } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
-export function getStatusProps(status) {
+export function getStatusProps(status: Status) {
   let color, backgroundColor, Icon;
 
   switch (status) {
@@ -67,7 +67,22 @@ export function getStatusProps(status) {
   return { color, backgroundColor, Icon };
 }
 
-export function StatusBadge({ status, style }) {
+type Status =
+  | 'missed'
+  | 'due'
+  | 'upcoming'
+  | 'paid'
+  | 'completed'
+  | 'pending'
+  | 'scheduled'
+  | 'cleared';
+
+type StatusBadgeProps = {
+  status: Status;
+  style?: CSSProperties;
+};
+
+export function StatusBadge({ status, style }: StatusBadgeProps) {
   let { color, backgroundColor, Icon } = getStatusProps(status);
   return (
     <View
