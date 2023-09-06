@@ -37,6 +37,8 @@ import { AmountInput } from '../util/AmountInput';
 // import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
 
+const smallVPWidth = document.documentElement.clientWidth < 365;
+
 function ToBudget({ toBudget, onClick }) {
   let amount = useSheetValue(toBudget);
   let format = useFormat();
@@ -320,16 +322,18 @@ class BudgetCategory extends PureComponent {
             month={month}
             onBudgetAction={onBudgetAction}
           />
-          <CellValue
-            name="spent"
-            binding={spent}
-            style={{
-              ...styles.smallText,
-              width: 90,
-              textAlign: 'right',
-            }}
-            type="financial"
-          />
+          {!smallVPWidth ? (
+            <CellValue
+              name="spent"
+              binding={spent}
+              style={{
+                ...styles.smallText,
+                width: 90,
+                textAlign: 'right',
+              }}
+              type="financial"
+            />
+          ) : null}
           <CellValue
             name="balance"
             binding={balance}
@@ -443,16 +447,18 @@ class TotalsRow extends PureComponent {
             }}
             type="financial"
           />
-          <CellValue
-            binding={rolloverBudget.groupSumAmount(group.id)}
-            style={{
-              ...styles.smallText,
-              width: 90,
-              fontWeight: '500',
-              textAlign: 'right',
-            }}
-            type="financial"
-          />
+          {!smallVPWidth ? (
+            <CellValue
+              binding={rolloverBudget.groupSumAmount(group.id)}
+              style={{
+                ...styles.smallText,
+                width: 90,
+                fontWeight: '500',
+                textAlign: 'right',
+              }}
+              type="financial"
+            />
+          ) : null}
           <CellValue
             binding={rolloverBudget.groupBalance(group.id)}
             style={{
@@ -877,24 +883,26 @@ export function BudgetTable(props) {
               }}
             />
           </View>
-          <View
-            style={{
-              width: 90,
-              justifyContent: 'center',
-            }}
-          >
-            <Label title="SPENT" style={{ color: colors.n1 }} />
-            <CellValue
-              binding={rolloverBudget.totalSpent}
-              type="financial"
+          {!smallVPWidth ? (
+            <View
               style={{
-                ...styles.smallText,
-                color: colors.n1,
-                textAlign: 'right',
-                fontWeight: '500',
+                width: 90,
+                justifyContent: 'center',
               }}
-            />
-          </View>
+            >
+              <Label title="SPENT" style={{ color: colors.n1 }} />
+              <CellValue
+                binding={rolloverBudget.totalSpent}
+                type="financial"
+                style={{
+                  ...styles.smallText,
+                  color: colors.n1,
+                  textAlign: 'right',
+                  fontWeight: '500',
+                }}
+              />
+            </View>
+          ) : null}
           <View
             style={{
               width: 90,
