@@ -164,9 +164,6 @@ function AccountList({
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
-  // All accounts - check for any syncable account
-  const canSync = !!accounts.find(account => !!account.account_id);
-
   // If there are no accounts, show a helpful message
   if (accounts.length === 0) {
     return <EmptyMessage onAdd={onAddAccount} />;
@@ -175,7 +172,7 @@ function AccountList({
   return (
     <View style={{ flex: 1 }}>
       <Page title="Accounts">
-        <PullToRefresh onRefresh={syncAndDownload} isPullable={canSync}>
+        <PullToRefresh onRefresh={syncAndDownload}>
           <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
           {budgetedAccounts.map(acct => (
             <AccountCard

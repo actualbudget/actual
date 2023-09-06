@@ -934,7 +934,6 @@ class Transaction extends PureComponent {
           backgroundColor: 'white',
           border: 'none',
           width: '100%',
-          '&:active': { opacity: 0.1 },
         }}
       >
         <ListItem

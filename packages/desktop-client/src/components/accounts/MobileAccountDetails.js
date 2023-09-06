@@ -168,7 +168,7 @@ export default function AccountDetails({
         />
       </View>
 
-      <PullToRefresh onRefresh={onRefresh} isPullable={!!account.account_id}>
+      <PullToRefresh onRefresh={onRefresh}>
         <TransactionList
           transactions={allTransactions}
           categories={categories}
