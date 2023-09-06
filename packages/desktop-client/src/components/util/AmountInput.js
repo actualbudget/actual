@@ -19,6 +19,7 @@ export function AmountInput({
   onChange,
   style,
   textStyle,
+  focused,
 }) {
   let [negative, setNegative] = useState(initialValue <= 0);
   let initialValueAbsolute = integerToCurrency(Math.abs(initialValue || 0));
@@ -63,6 +64,7 @@ export function AmountInput({
         </Button>
       }
       value={value}
+      focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
       inputStyle={{ paddingLeft: 0, ...textStyle }}
       onKeyUp={e => {

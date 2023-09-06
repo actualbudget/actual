@@ -136,15 +136,10 @@ function BudgetCell(props) {
     onEdit?.(categoryId);
   }
 
-  function inputRef(inputRef) {
-    inputRef?.select();
-  }
-
   return (
     <View style={style} onPointerUp={onAmountClick}>
       {editing ? (
         <AmountInput
-          inputRef={inputRef}
           initialValue={sheetValue}
           style={{
             height: ROW_HEIGHT - 4,
