@@ -11,6 +11,7 @@ import React, {
   type ReactNode,
   type KeyboardEvent,
   type UIEvent,
+  type ReactElement,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -854,8 +855,8 @@ export const TableWithNavigator = forwardRef<
 
 type TableItem = { id: number | string };
 
-type TableProps = {
-  items: TableItem[];
+type TableProps<T = TableItem> = {
+  items: T[];
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
   contentHeader?: ReactNode;
@@ -863,7 +864,7 @@ type TableProps = {
   rowHeight?: number;
   backgroundColor?: string;
   renderItem: (arg: {
-    item: TableItem;
+    item: T;
     editing: boolean;
     focusedField: unknown;
     onEdit: (id, field) => void;
@@ -883,7 +884,9 @@ type TableProps = {
   saveScrollWidth?: (parent, child) => void;
 };
 
-export const Table = forwardRef<TableHandleRef, TableProps>(
+export const Table: <T extends TableItem>(
+  props: TableProps<T>,
+) => ReactElement = forwardRef<TableHandleRef, TableProps>(
   (
     {
       items,

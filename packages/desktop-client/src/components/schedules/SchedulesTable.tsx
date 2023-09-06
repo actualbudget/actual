@@ -3,7 +3,10 @@ import { useSelector } from 'react-redux';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
-import { type ScheduleStatuses } from 'loot-core/src/client/data-hooks/schedules';
+import {
+  type ScheduleStatusType,
+  type ScheduleStatuses,
+} from 'loot-core/src/client/data-hooks/schedules';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -35,11 +38,20 @@ type SchedulesTableProps = {
   tableStyle?: CSSProperties;
 };
 
-type CompletedScheduleItem = { type: 'show-completed' };
+type CompletedScheduleItem = { id: 'show-completed' };
+type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
 
 export let ROW_HEIGHT = 43;
 
-function OverflowMenu({ schedule, status, onAction }) {
+function OverflowMenu({
+  schedule,
+  status,
+  onAction,
+}: {
+  schedule: ScheduleEntity;
+  status: ScheduleStatusType;
+  onAction: SchedulesTableProps['onAction'];
+}) {
   let [open, setOpen] = useState(false);
 
   return (
@@ -89,10 +101,16 @@ function OverflowMenu({ schedule, status, onAction }) {
   );
 }
 
-export function ScheduleAmountCell({ amount, op }) {
-  let num = getScheduledAmount(amount);
-  let str = integerToCurrency(Math.abs(num || 0));
-  let isApprox = op === 'isapprox' || op === 'isbetween';
+export function ScheduleAmountCell({
+  amount,
+  op,
+}: {
+  amount: ScheduleEntity['_amount'];
+  op: ScheduleEntity['_amountOp'];
+}) {
+  const num = getScheduledAmount(amount);
+  const str = integerToCurrency(Math.abs(num || 0));
+  const isApprox = op === 'isapprox' || op === 'isbetween';
 
   return (
     <Cell
@@ -159,7 +177,7 @@ export function SchedulesTable({
     if (!filter) {
       return schedules;
     }
-    const filterIncludes = str =>
+    const filterIncludes = (str: string) =>
       str
         ? str.toLowerCase().includes(filter.toLowerCase()) ||
           filter.toLowerCase().includes(str.toLowerCase())
@@ -190,18 +208,21 @@ export function SchedulesTable({
     });
   }, [schedules, filter, statuses]);
 
-  const items: ScheduleEntity[] | CompletedScheduleItem = useMemo(() => {
+  const items: SchedulesTableItem[] = useMemo(() => {
+    const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);
+
     if (!allowCompleted) {
-      return filteredSchedules.filter(s => !s.completed);
+      return unCompletedSchedules;
     }
     if (showCompleted) {
       return filteredSchedules;
     }
-    const arr = filteredSchedules.filter(s => !s.completed);
-    if (filteredSchedules.find(s => s.completed)) {
-      arr.push({ type: 'show-completed' } as CompletedScheduleItem);
-    }
-    return arr;
+
+    const hasCompletedSchedule = filteredSchedules.find(s => s.completed);
+
+    if (!hasCompletedSchedule) return unCompletedSchedules;
+
+    return [...unCompletedSchedules, { id: 'show-completed' }];
   }, [filteredSchedules, showCompleted, allowCompleted]);
 
   function renderSchedule({ item }: { item: ScheduleEntity }) {
@@ -246,7 +267,7 @@ export function SchedulesTable({
         <ScheduleAmountCell amount={item._amount} op={item._amountOp} />
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
-            {item._date && item._date.frequency && (
+            {item._date && (item._date as any).frequency && (
               <Check style={{ width: 13, height: 13 }} />
             )}
           </Field>
@@ -264,8 +285,8 @@ export function SchedulesTable({
     );
   }
 
-  function renderItem({ item }) {
-    if (item.type === 'show-completed') {
+  function renderItem({ item }: { item: SchedulesTableItem }) {
+    if (item.id === 'show-completed') {
       return (
         <Row
           height={ROW_HEIGHT}
@@ -290,7 +311,7 @@ export function SchedulesTable({
         </Row>
       );
     }
-    return renderSchedule({ item });
+    return renderSchedule({ item: item as ScheduleEntity });
   }
 
   return (
@@ -316,7 +337,7 @@ export function SchedulesTable({
         backgroundColor="transparent"
         version="v2"
         style={{ flex: 1, backgroundColor: 'transparent', ...style }}
-        items={items}
+        items={items as ScheduleEntity[]}
         renderItem={renderItem}
         renderEmpty={filter ? 'No matching schedules' : 'No schedules'}
         allowPopupsEscape={items.length < 6}

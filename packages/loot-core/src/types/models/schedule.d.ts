@@ -14,7 +14,7 @@ export interface ScheduleEntity {
   // These are special fields that are actually pulled from the
   // underlying rule
   _payee: PayeeEntity;
-  _account: AccountEntity;
+  _account: AccountEntity['id'];
   _amount: unknown;
   _amountOp: string;
   _date: unknown;
