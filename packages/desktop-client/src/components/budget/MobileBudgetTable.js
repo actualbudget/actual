@@ -132,10 +132,20 @@ function BudgetCell(props) {
     });
   }
 
+  function onAmountClick(e) {
+    onEdit?.(categoryId);
+  }
+
+  function inputRef(inputRef) {
+    inputRef?.scrollIntoView(true);
+    inputRef?.select();
+  }
+
   return (
-    <View style={style} onPointerUp={() => onEdit?.(categoryId)}>
+    <View style={style} onPointerUp={onAmountClick}>
       {editing ? (
         <AmountInput
+          inputRef={inputRef}
           initialValue={sheetValue}
           style={{
             height: ROW_HEIGHT - 4,
@@ -144,7 +154,6 @@ function BudgetCell(props) {
           focused={editing}
           textStyle={{ ...styles.smallText, ...textStyle }}
           onChange={updateBudgetAmount}
-          onBlur={() => onEdit?.(null)}
         />
       ) : (
         <View
@@ -613,7 +622,7 @@ class BudgetGroup extends PureComponent {
       // gestures,
       month,
       onEditCategory,
-      onReorderCategory,
+      // onReorderCategory,
       // onReorderGroup,
       onAddCategory,
       onBudgetAction,
@@ -665,7 +674,7 @@ class BudgetGroup extends PureComponent {
             show3Cols={show3Cols}
             editMode={editMode}
             onAddCategory={onAddCategory}
-            onReorderCategory={onReorderCategory}
+            // onReorderCategory={onReorderCategory}
           />
 
           {group.categories.map((category, index) => {
@@ -682,7 +691,7 @@ class BudgetGroup extends PureComponent {
                 // gestures={gestures}
                 month={month}
                 onEdit={onEditCategory}
-                onReorder={onReorderCategory}
+                // onReorder={onReorderCategory}
                 onBudgetAction={onBudgetAction}
               />
             );
@@ -1048,6 +1057,8 @@ export function BudgetTable(props) {
   );
 }
 
+const BUDGET_HEADER_HEIGHT = 50;
+
 function BudgetHeader({
   currentMonth,
   monthBounds,
@@ -1089,7 +1100,7 @@ function BudgetHeader({
         alignItems: 'center',
         flexDirection: 'row',
         flexShrink: 0,
-        height: 50,
+        height: BUDGET_HEADER_HEIGHT,
         justifyContent: 'center',
         backgroundColor: theme.buttonPrimaryBackground,
       }}

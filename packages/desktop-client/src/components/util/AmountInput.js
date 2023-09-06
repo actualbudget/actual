@@ -14,9 +14,9 @@ import View from '../common/View';
 
 export function AmountInput({
   id,
+  inputRef,
   initialValue = 0,
   onChange,
-  focused,
   style,
   textStyle,
 }) {
@@ -51,6 +51,8 @@ export function AmountInput({
   return (
     <InputWithContent
       id={id}
+      inputRef={inputRef}
+      inputMode="decimal"
       leftContent={
         <Button type="bare" style={{ padding: '0 7px' }} onClick={onSwitch}>
           {negative ? (
@@ -61,7 +63,6 @@ export function AmountInput({
         </Button>
       }
       value={value}
-      focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
       inputStyle={{ paddingLeft: 0, ...textStyle }}
       onKeyUp={e => {
