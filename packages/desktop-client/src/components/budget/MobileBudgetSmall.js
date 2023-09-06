@@ -18,7 +18,7 @@ import { theme } from '../../style';
 import View from '../common/View';
 import SyncRefresh from '../SyncRefresh';
 
-import { BudgetTable } from './MobileBudgetTableSmall';
+import { BudgetTable } from './MobileBudgetTable';
 
 class Budget extends Component {
   constructor(props) {
