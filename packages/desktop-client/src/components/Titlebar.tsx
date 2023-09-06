@@ -172,7 +172,7 @@ export function SyncButton({ style }: SyncButtonProps) {
           WebkitAppRegion: 'none',
           color: mobileColor,
         },
-        media(`(min-width: ${tokens.breakpoint_small})`, {
+        media(`(min-width: ${tokens.breakpoint_extrasmall})`, {
           color:
             syncState === 'error'
               ? colors.r4
@@ -296,7 +296,15 @@ export default function Titlebar({ style }) {
   let navigate = useNavigate();
   let location = useLocation();
   let sidebar = useSidebar();
-  let { isNarrowWidth } = useResponsive();
+  const { isNarrowWidth } = useResponsive();
+  const { isExtraSmallWidth } = useResponsive();
+  let isWidth = false;
+
+  if (isNarrowWidth || isExtraSmallWidth) {
+    isWidth = true;
+  } else {
+    isWidth = false;
+  }
   let serverURL = useServerURL();
   let floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
@@ -305,7 +313,7 @@ export default function Titlebar({ style }) {
   let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let themesFlag = useFeatureFlag('themes');
 
-  return isNarrowWidth ? null : (
+  return isWidth ? null : (
     <View
       style={{
         flexDirection: 'row',
