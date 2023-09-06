@@ -103,7 +103,7 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
 }
 
 // Surely there must be a better way...
-// Blue does not fire at the moment so I try to save
+// Blur does not fire at the moment so I try to save
 // when this component is unmounted.
 function useFireChangeOnUnmount(fireChange, value, negative) {
   let valueRef = useRef(value);
