@@ -21,9 +21,8 @@ export function AmountInput({
   textStyle,
 }) {
   let [negative, setNegative] = useState(initialValue <= 0);
-  let [value, setValue] = useState(
-    integerToCurrency(Math.abs(initialValue || 0)),
-  );
+  let initialValueAbsolute = integerToCurrency(Math.abs(initialValue || 0));
+  let [value, setValue] = useState(initialValueAbsolute);
 
   function onSwitch() {
     setNegative(!negative);
@@ -31,7 +30,9 @@ export function AmountInput({
   }
 
   function fireChange(val, neg) {
-    let valueOrInitial = Math.abs(currencyToInteger(val ? val : initialValue));
+    let valueOrInitial = Math.abs(
+      currencyToInteger(val ? val : initialValueAbsolute),
+    );
     let amount = neg ? valueOrInitial * -1 : valueOrInitial;
 
     onChange?.(amount);
@@ -45,25 +46,7 @@ export function AmountInput({
     fireChange(value, negative);
   }
 
-  // Surely there must be a better way...
-  // Blue does not fire at the moment so I try to save
-  // when this component is unmounted.
-  function useFireChangeOnUnmount(value, negative) {
-    let valueRef = useRef(value);
-    let negativeRef = useRef(negative);
-    useEffect(() => {
-      valueRef.current = value;
-      negativeRef.current = negative;
-    }, [value, negative]);
-
-    useEffect(() => {
-      return () => {
-        fireChange(valueRef.current, negativeRef.current);
-      };
-    }, []);
-  }
-
-  useFireChangeOnUnmount(value, negative);
+  useFireChangeOnUnmount(fireChange, value, negative);
 
   return (
     <InputWithContent
@@ -117,4 +100,22 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
       />
     </View>
   );
+}
+
+// Surely there must be a better way...
+// Blue does not fire at the moment so I try to save
+// when this component is unmounted.
+function useFireChangeOnUnmount(fireChange, value, negative) {
+  let valueRef = useRef(value);
+  let negativeRef = useRef(negative);
+  useEffect(() => {
+    valueRef.current = value;
+    negativeRef.current = negative;
+  }, [value, negative]);
+
+  useEffect(() => {
+    return () => {
+      fireChange(valueRef.current, negativeRef.current);
+    };
+  }, []);
 }
