@@ -6,5 +6,6 @@
       "syntax": "typescript",
       "tsx": true
     }
-  }
+  },
+  "sourceMaps": true
 }
