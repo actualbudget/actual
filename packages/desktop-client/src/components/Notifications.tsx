@@ -48,7 +48,7 @@ function compileMessage(
                         if (actions[actionName]) {
                           setLoading(true);
                           await actions[actionName]();
-                          onRemove();
+                          onRemove?.();
                         }
                       }}
                     >

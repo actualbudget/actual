@@ -17,11 +17,11 @@ import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function Bootstrap() {
   let dispatch = useDispatch();
-  let [error, setError] = useState(null);
+  let [error, setError] = useState<string | null>(null);
 
   let { checked } = useBootstrapped();
 
-  function getErrorMessage(error) {
+  function getErrorMessage(error: string) {
     switch (error) {
       case 'invalid-password':
         return 'Password cannot be empty';
@@ -34,7 +34,7 @@ export default function Bootstrap() {
     }
   }
 
-  async function onSetPassword(password) {
+  async function onSetPassword(password: string) {
     setError(null);
     let { error } = await send('subscribe-bootstrap', { password });
 
@@ -94,7 +94,7 @@ export default function Bootstrap() {
           </Button>
         }
         onSetPassword={onSetPassword}
-        onError={setError}
+        onError={err => setError(err)}
       />
     </View>
   );

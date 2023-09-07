@@ -13,10 +13,10 @@ import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function ChangePassword() {
   let navigate = useNavigate();
-  let [error, setError] = useState(null);
-  let [msg, setMessage] = useState(null);
+  let [error, setError] = useState<string | null>(null);
+  let [msg, setMessage] = useState<string | null>(null);
 
-  function getErrorMessage(error) {
+  function getErrorMessage(error: string) {
     switch (error) {
       case 'invalid-password':
         return 'Password cannot be empty';
@@ -29,7 +29,7 @@ export default function ChangePassword() {
     }
   }
 
-  async function onSetPassword(password) {
+  async function onSetPassword(password: string) {
     setError(null);
     let { error } = await send('subscribe-change-password', { password });
 
@@ -93,7 +93,7 @@ export default function ChangePassword() {
           </Button>
         }
         onSetPassword={onSetPassword}
-        onError={setError}
+        onError={err => setError(err)}
       />
     </View>
   );

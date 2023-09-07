@@ -106,7 +106,7 @@ export function ScheduleAmountCell({ amount, op }) {
       <Text
         style={{
           flex: 1,
-          color: num > 0 ? colors.g5 : null,
+          color: num > 0 ? colors.g5 : undefined,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',

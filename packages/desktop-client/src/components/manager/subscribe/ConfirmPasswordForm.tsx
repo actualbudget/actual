@@ -1,10 +1,20 @@
-import React, { type ChangeEvent, useState } from 'react';
+import React, { type ChangeEvent, type ReactNode, useState } from 'react';
 
 import { ButtonWithLoading } from '../../common/Button';
 import { BigInput } from '../../common/Input';
 import View from '../../common/View';
 
-export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
+type ConfirmPasswordFormProps = {
+  buttons: ReactNode;
+  onSetPassword: (password: string) => void;
+  onError: (error: string) => void;
+};
+
+export function ConfirmPasswordForm({
+  buttons,
+  onSetPassword,
+  onError,
+}: ConfirmPasswordFormProps) {
   let [password1, setPassword1] = useState('');
   let [password2, setPassword2] = useState('');
   let [showPassword, setShowPassword] = useState(false);
