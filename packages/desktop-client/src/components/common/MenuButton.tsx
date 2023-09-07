@@ -4,7 +4,11 @@ import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 
 import Button from './Button';
 
-export default function MenuButton({ onClick }) {
+type MenuButtonProps = {
+  onClick: () => void;
+};
+
+export default function MenuButton({ onClick }: MenuButtonProps) {
   return (
     <Button type="bare" onClick={onClick} aria-label="Menu">
       <DotsHorizontalTriple
