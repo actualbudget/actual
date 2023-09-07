@@ -49,7 +49,7 @@ export default function ConfigServer() {
     let { error } = await setServerUrl(url);
 
     if (
-      error === 'network-failure' &&
+      ['network-failure', 'get-server-failure'].includes(error) &&
       !url.startsWith('http://') &&
       !url.startsWith('https://')
     ) {
