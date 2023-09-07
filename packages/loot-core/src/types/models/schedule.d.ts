@@ -5,7 +5,7 @@ import type { RuleEntity } from './rule';
 export interface ScheduleEntity {
   id: string;
   name?: string;
-  rule: RuleEntity;
+  rule: RuleEntity['id'];
   next_date: string;
   completed: boolean;
   posts_transaction: boolean;

@@ -12,6 +12,7 @@ import React, {
   type KeyboardEvent,
   type UIEvent,
   type ReactElement,
+  type Ref,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -885,7 +886,7 @@ type TableProps<T = TableItem> = {
 };
 
 export const Table: <T extends TableItem>(
-  props: TableProps<T>,
+  props: TableProps<T> & { ref?: Ref<TableHandleRef> },
 ) => ReactElement = forwardRef<TableHandleRef, TableProps>(
   (
     {

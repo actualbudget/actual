@@ -225,12 +225,12 @@ export function SchedulesTable({
     return [...unCompletedSchedules, { id: 'show-completed' }];
   }, [filteredSchedules, showCompleted, allowCompleted]);
 
-  function renderSchedule({ item }: { item: ScheduleEntity }) {
+  function renderSchedule({ schedule }: { schedule: ScheduleEntity }) {
     return (
       <Row
         height={ROW_HEIGHT}
         inset={15}
-        onClick={() => onSelect(item.id)}
+        onClick={() => onSelect(schedule.id)}
         style={{
           cursor: 'pointer',
           backgroundColor: theme.tableBackground,
@@ -241,31 +241,33 @@ export function SchedulesTable({
         <Field width="flex" name="name">
           <Text
             style={
-              item.name == null
+              schedule.name == null
                 ? { color: theme.buttonNormalDisabledText }
                 : null
             }
-            title={item.name ? item.name : ''}
+            title={schedule.name ? schedule.name : ''}
           >
-            {item.name ? item.name : 'None'}
+            {schedule.name ? schedule.name : 'None'}
           </Text>
         </Field>
         <Field width="flex" name="payee">
-          <DisplayId type="payees" id={item._payee} />
+          <DisplayId type="payees" id={schedule._payee} />
         </Field>
         <Field width="flex" name="account">
-          <DisplayId type="accounts" id={item._account} />
+          <DisplayId type="accounts" id={schedule._account} />
         </Field>
         <Field width={110} name="date">
-          {item.next_date ? monthUtilFormat(item.next_date, dateFormat) : null}
+          {schedule.next_date
+            ? monthUtilFormat(schedule.next_date, dateFormat)
+            : null}
         </Field>
         <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
-          <StatusBadge status={statuses.get(item.id)} />
+          <StatusBadge status={statuses.get(schedule.id)} />
         </Field>
-        <ScheduleAmountCell amount={item._amount} op={item._amountOp} />
+        <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
-            {item._date && (item._date as any).frequency && (
+            {schedule._date && (schedule._date as any).frequency && (
               <Check style={{ width: 13, height: 13 }} />
             )}
           </Field>
@@ -273,8 +275,8 @@ export function SchedulesTable({
         {!minimal && (
           <Field width={40} name="actions">
             <OverflowMenu
-              schedule={item}
-              status={statuses.get(item.id)}
+              schedule={schedule}
+              status={statuses.get(schedule.id)}
               onAction={onAction}
             />
           </Field>
@@ -309,7 +311,7 @@ export function SchedulesTable({
         </Row>
       );
     }
-    return renderSchedule({ item: item as ScheduleEntity });
+    return renderSchedule({ schedule: item as ScheduleEntity });
   }
 
   return (

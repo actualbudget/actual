@@ -6,7 +6,8 @@ import { type ScheduleEntity } from '../../types/models';
 import q, { liveQuery } from '../query-helpers';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
-export type ScheduleStatuses = Map<string, ScheduleStatusType>;
+export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
+
 function loadStatuses(schedules: ScheduleEntity[], onData) {
   return liveQuery(getHasTransactionsQuery(schedules), onData, {
     mapper: data => {
@@ -27,7 +28,9 @@ type UseSchedulesReturnType = {
   schedules: ScheduleEntity[];
   statuses: ScheduleStatuses;
 } | null;
-export function useSchedules({ transform }: UseSchedulesArgs = {}) {
+export function useSchedules({
+  transform,
+}: UseSchedulesArgs = {}): UseSchedulesReturnType {
   const [data, setData] = useState<UseSchedulesReturnType>(null);
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export function useSchedules({ transform }: UseSchedulesArgs = {}) {
 let SchedulesContext = createContext(null);
 
 export function SchedulesProvider({ transform, children }) {
-  let data = useSchedules({ transform });
+  const data = useSchedules({ transform });
   return <SchedulesContext.Provider value={data} children={children} />;
 }
 
