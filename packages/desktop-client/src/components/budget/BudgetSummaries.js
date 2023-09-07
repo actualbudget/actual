@@ -60,13 +60,13 @@ export default function BudgetSummaries({ SummaryComponent }) {
 
   return (
     <div
-      {...css([
+      className={`${css([
         { flex: 1, overflow: 'hidden' },
         months.length === 1 && {
           marginLeft: -4,
           marginRight: -4,
         },
-      ])}
+      ])}`}
       ref={containerRef}
     >
       <animated.div

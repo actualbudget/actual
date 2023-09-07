@@ -1,15 +1,17 @@
-const isWindows =
-  navigator.platform && navigator.platform.toLowerCase() === 'win32';
+const os = require('os');
 
-const isMac =
-  navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+const isWindows = os.platform() === 'win32';
+const isMac = os.platform() === 'darwin';
+const isLinux = os.platform() === 'linux';
 
-export const isPlaywright = navigator.userAgent === 'playwright';
+export const isPlaywright = false;
 
 export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
   ? 'windows'
   : isMac
   ? 'mac'
-  : 'linux';
+  : isLinux
+  ? 'linux'
+  : 'unknown';
 export const env: 'web' | 'mobile' | 'unknown' = 'unknown';
 export const isBrowser = false;

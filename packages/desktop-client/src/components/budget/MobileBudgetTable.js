@@ -564,8 +564,18 @@ class TotalsRow extends PureComponent {
 
 class IncomeCategory extends PureComponent {
   render() {
-    const { name, budget, balance, style, nameTextStyle, amountTextStyle } =
-      this.props;
+    const {
+      name,
+      budget,
+      hidden,
+      balance,
+      style,
+      nameTextStyle,
+      amountTextStyle,
+    } = this.props;
+    if (hidden) {
+      return null;
+    }
     return (
       <ListItem
         style={{
@@ -693,42 +703,45 @@ class BudgetGroup extends PureComponent {
       //   </Droppable>
       // </Draggable>
     }
+    if (!group.hidden) {
+      return editable(
+        <Card
+          style={{
+            marginTop: 7,
+            marginBottom: 7,
+          }}
+        >
+          <TotalsRow
+            group={group}
+            budgeted={rolloverBudget.groupBudgeted(group.id)}
+            balance={rolloverBudget.groupBalance(group.id)}
+            editMode={editMode}
+            onAddCategory={onAddCategory}
+            onReorderCategory={onReorderCategory}
+          />
 
-    return editable(
-      <Card
-        style={{
-          marginTop: 7,
-          marginBottom: 7,
-        }}
-      >
-        <TotalsRow
-          group={group}
-          budgeted={rolloverBudget.groupBudgeted(group.id)}
-          balance={rolloverBudget.groupBalance(group.id)}
-          editMode={editMode}
-          onAddCategory={onAddCategory}
-          onReorderCategory={onReorderCategory}
-        />
-
-        {group.categories.map((category, index) => {
-          // const editing = editingId === category.id;
-          return (
-            <BudgetCategory
-              key={category.id}
-              index={index}
-              category={category}
-              editing={undefined} //editing}
-              editMode={editMode}
-              // gestures={gestures}
-              month={month}
-              onEdit={onEditCategory}
-              onReorder={onReorderCategory}
-              onBudgetAction={onBudgetAction}
-            />
-          );
-        })}
-      </Card>,
-    );
+          {group.categories.map((category, index) => {
+            // const editing = editingId === category.id;
+            return (
+              <BudgetCategory
+                key={category.id}
+                index={index}
+                category={category}
+                editing={undefined} //editing}
+                editMode={editMode}
+                //gestures={gestures}
+                month={month}
+                onEdit={onEditCategory}
+                onReorder={onReorderCategory}
+                onBudgetAction={onBudgetAction}
+              />
+            );
+          })}
+        </Card>,
+      );
+    } else {
+      return null;
+    }
   }
 }
 
@@ -775,6 +788,7 @@ class IncomeBudgetGroup extends Component {
                 key={category.id}
                 type={type}
                 name={category.name}
+                hidden={category.hidden}
                 budget={
                   type === 'report'
                     ? reportBudget.catBudgeted(category.id)
@@ -1148,6 +1162,7 @@ function BudgetHeader({
 
           {serverURL && (
             <SyncButton
+              isMobile
               style={{
                 color: 'white',
                 position: 'absolute',
