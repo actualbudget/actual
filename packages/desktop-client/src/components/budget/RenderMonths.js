@@ -20,11 +20,11 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
         value={monthUtils.sheetForMonth(month, type)}
       >
         <View
-          style={[
-            { flex: 1 },
-            { borderLeft: '1px solid ' + colors.border },
-            style,
-          ]}
+          style={{
+            flex: 1,
+            borderLeft: '1px solid ' + colors.border,
+            ...style,
+          }}
         >
           <Component monthIndex={index} editing={editing} {...args} />
         </View>

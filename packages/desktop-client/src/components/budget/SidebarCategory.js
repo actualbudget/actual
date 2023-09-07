@@ -105,26 +105,24 @@ function SidebarCategory({
   return (
     <View
       innerRef={innerRef}
-      style={[
-        {
-          width: 200,
-          '& button': { display: 'none' },
-        },
-        !dragging &&
+      style={{
+        width: 200,
+        '& button': { display: 'none' },
+        ...(!dragging &&
           !dragPreview && {
             '&:hover button': { display: 'flex', color: colors.n1 },
-          },
-        dragging && { color: colors.n8 },
+          }),
+        ...(dragging && { color: colors.n8 }),
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
-        dragPreview && {
+        ...(dragPreview && {
           backgroundColor: 'white',
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
-        },
-        style,
-      ]}
+        }),
+        ...style,
+      }}
       onKeyDown={e => {
         if (e.key === 'Enter') {
           onEditName(null);
@@ -151,7 +149,7 @@ function SidebarCategory({
           }
         }}
         onBlur={() => onEditName(null)}
-        style={[{ paddingLeft: 13 }, isLast && { borderBottomWidth: 0 }]}
+        style={{ paddingLeft: 13, ...(isLast && { borderBottomWidth: 0 }) }}
         inputProps={{
           placeholder: temporary ? 'New Category Name' : '',
         }}

@@ -52,14 +52,7 @@ function ExpenseCategory({
     >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
-      <View
-        style={[
-          {
-            flex: 1,
-            flexDirection: 'row',
-          },
-        ]}
-      >
+      <View style={{ flex: 1, flexDirection: 'row' }}>
         <SidebarCategory
           innerRef={dragRef}
           category={cat}
