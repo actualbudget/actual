@@ -12,7 +12,7 @@ function useAccounts() {
 let AccountsContext = createContext(null);
 
 export function AccountsProvider({ children }) {
-  let data = useAccounts();
+  const data: AccountEntity[] = useAccounts();
   return <AccountsContext.Provider value={data} children={children} />;
 }
 
@@ -25,9 +25,9 @@ export function useCachedAccounts(): AccountEntity[];
 export function useCachedAccounts({
   idKey,
 }: {
-  idKey: string;
+  idKey: boolean;
 }): Record<AccountEntity['id'], AccountEntity>;
-export function useCachedAccounts({ idKey }: { idKey?: string } = {}) {
+export function useCachedAccounts({ idKey }: { idKey?: boolean } = {}) {
   const data: AccountEntity[] = useContext(AccountsContext);
   return idKey && data ? getAccountsById(data) : data;
 }

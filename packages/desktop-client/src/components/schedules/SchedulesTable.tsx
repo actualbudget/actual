@@ -7,7 +7,7 @@ import {
   type ScheduleStatusType,
   type ScheduleStatuses,
 } from 'loot-core/src/client/data-hooks/schedules';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { format as monthUtilFormat } from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
@@ -16,7 +16,7 @@ import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
 import { theme } from '../../style';
 import Button from '../common/Button';
-import Menu from '../common/Menu';
+import Menu, { type MenuItem } from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
@@ -41,7 +41,7 @@ type SchedulesTableProps = {
 type CompletedScheduleItem = { id: 'show-completed' };
 type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
 
-export let ROW_HEIGHT = 43;
+export const ROW_HEIGHT = 43;
 
 function OverflowMenu({
   schedule,
@@ -52,7 +52,7 @@ function OverflowMenu({
   status: ScheduleStatusType;
   onAction: SchedulesTableProps['onAction'];
 }) {
-  let [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
     <View>
@@ -77,7 +77,7 @@ function OverflowMenu({
           onClose={() => setOpen(false)}
         >
           <Menu
-            onMenuSelect={name => {
+            onMenuSelect={(name: MenuItem['name']) => {
               onAction(name, schedule.id);
               setOpen(false);
             }}
@@ -194,7 +194,7 @@ export function SchedulesTable({
         (amount > 0 ? '+' : '') +
         integerToCurrency(Math.abs(amount || 0));
       const dateStr = schedule.next_date
-        ? monthUtils.format(schedule.next_date, dateFormat)
+        ? monthUtilFormat(schedule.next_date, dateFormat)
         : null;
 
       return (
@@ -257,9 +257,7 @@ export function SchedulesTable({
           <DisplayId type="accounts" id={item._account} />
         </Field>
         <Field width={110} name="date">
-          {item.next_date
-            ? monthUtils.format(item.next_date, dateFormat)
-            : null}
+          {item.next_date ? monthUtilFormat(item.next_date, dateFormat) : null}
         </Field>
         <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
           <StatusBadge status={statuses.get(item.id)} />
