@@ -41,7 +41,6 @@ import { ListItem, ROW_HEIGHT } from './MobileTable';
 
 function ToBudget({ toBudget, onClick }) {
   let amount = useSheetValue(toBudget);
-  let format = useFormat();
   return (
     <Button
       type="bare"
@@ -52,24 +51,25 @@ function ToBudget({ toBudget, onClick }) {
         title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
         style={{ color: theme.formInputText, flexShrink: 0 }}
       />
-      <Text
+      <CellValue
+        binding={toBudget}
+        type="financial"
         style={{
           ...styles.smallText,
           fontWeight: '500',
           color: amount < 0 ? theme.errorText : theme.formInputText,
         }}
-      >
-        {format(amount, 'financial')}
-      </Text>
+      />
     </Button>
   );
 }
 
 function Saved({ projected }) {
-  let budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
-  let totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
-  let format = useFormat();
-  let saved = projected ? budgetedSaved : totalSaved;
+  let binding = projected
+    ? reportBudget.totalBudgetedSaved
+    : reportBudget.totalSaved;
+
+  let saved = useSheetValue(binding) || 0;
   let isNegative = saved < 0;
 
   return (
@@ -92,7 +92,9 @@ function Saved({ projected }) {
         />
       )}
 
-      <Text
+      <CellValue
+        binding={binding}
+        type="financial"
         style={{
           ...styles.smallText,
           fontWeight: '500',
@@ -102,9 +104,7 @@ function Saved({ projected }) {
             ? theme.alt2ErrorText
             : theme.formInputText,
         }}
-      >
-        {format(saved, 'financial')}
-      </Text>
+      />
     </View>
   );
 }
@@ -123,7 +123,6 @@ function BudgetCell(props) {
   } = props;
 
   let sheetValue = useSheetValue(binding);
-  let format = useFormat();
 
   function updateBudgetAmount(amount) {
     onBudgetAction?.(month, 'budget-amount', {
@@ -156,12 +155,12 @@ function BudgetCell(props) {
             height: ROW_HEIGHT - 4,
           }}
         >
-          <Text
+          <CellValue
+            binding={binding}
+            type="financial"
             style={{ ...styles.smallText, ...textStyle }}
             data-testid={name}
-          >
-            {format(sheetValue || 0, 'financial')}
-          </Text>
+          />
         </View>
       )}
     </View>
