@@ -21,7 +21,7 @@ function AppBackground({ initializing, loadingText }: AppBackgroundProps) {
 
       {(loadingText != null || initializing) && (
         <View
-          {...css({
+          className={`${css({
             position: 'absolute',
             top: 0,
             left: 0,
@@ -30,7 +30,7 @@ function AppBackground({ initializing, loadingText }: AppBackgroundProps) {
             paddingTop: 200,
             color: theme.pageText,
             alignItems: 'center',
-          })}
+          })}`}
         >
           <Block style={{ marginBottom: 20, fontSize: 18 }}>
             {loadingText}

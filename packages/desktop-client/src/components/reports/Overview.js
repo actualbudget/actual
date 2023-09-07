@@ -32,20 +32,18 @@ function Card({ flex, to, style, children }) {
 
   const content = (
     <View
-      style={[
-        {
-          backgroundColor: 'white',
-          borderRadius: 2,
-          height: 200,
-          boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
-          transition: 'box-shadow .25s',
-          ':hover': to && {
-            boxShadow: '0 4px 6px rgba(0, 0, 0, .15)',
-          },
+      style={{
+        backgroundColor: 'white',
+        borderRadius: 2,
+        height: 200,
+        boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
+        transition: 'box-shadow .25s',
+        ':hover': to && {
+          boxShadow: '0 4px 6px rgba(0, 0, 0, .15)',
         },
-        to ? null : containerProps,
-        style,
-      ]}
+        ...(to ? null : containerProps),
+        ...style,
+      }}
     >
       {children}
     </View>
@@ -55,7 +53,7 @@ function Card({ flex, to, style, children }) {
     return (
       <AnchorLink
         to={to}
-        style={[{ textDecoration: 'none', flex }, containerProps]}
+        style={{ textDecoration: 'none', flex, ...containerProps }}
       >
         {content}
       </AnchorLink>
@@ -101,7 +99,7 @@ function NetWorthCard({ accounts }) {
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <Block
-              style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
               role="heading"
             >
               Net Worth
@@ -111,10 +109,11 @@ function NetWorthCard({ accounts }) {
           {data && (
             <View style={{ textAlign: 'right' }}>
               <Block
-                style={[
-                  styles.mediumText,
-                  { fontWeight: 500, marginBottom: 5 },
-                ]}
+                style={{
+                  ...styles.mediumText,
+                  fontWeight: 500,
+                  marginBottom: 5,
+                }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {integerToCurrency(data.netWorth)}
@@ -170,7 +169,7 @@ function CashFlowCard() {
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <Block
-              style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
               role="heading"
             >
               Cash Flow
@@ -300,7 +299,7 @@ function CategorySpendingCard() {
         <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
           <View style={{ flex: 1 }}>
             <Block
-              style={[styles.mediumText, { fontWeight: 500, marginBottom: 5 }]}
+              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
               role="heading"
             >
               Spending
@@ -332,10 +331,10 @@ export default function Overview() {
   let accounts = useSelector(state => state.queries.accounts);
   return (
     <View
-      style={[
-        styles.page,
-        { paddingLeft: 40, paddingRight: 40, minWidth: 700 },
-      ]}
+      style={{
+        ...styles.page,
+        ...{ paddingLeft: 40, paddingRight: 40, minWidth: 700 },
+      }}
     >
       <View
         style={{

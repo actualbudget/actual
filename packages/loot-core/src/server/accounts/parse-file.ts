@@ -4,6 +4,7 @@ import * as fs from '../../platform/server/fs';
 import { dayFromDate } from '../../shared/months';
 import { looselyParseAmount } from '../../shared/util';
 
+import ofx2json from './ofx2json';
 import qif2json from './qif2json';
 
 type ParseError = { message: string; internal: string };
@@ -12,9 +13,16 @@ export type ParseFileResult = {
   transactions?: unknown[];
 };
 
+type ParseFileOptions = {
+  hasHeaderRow?: boolean;
+  delimiter?: string;
+  fallbackMissingPayeeToMemo?: boolean;
+  enableExperimentalOfxParser?: boolean;
+};
+
 export async function parseFile(
-  filepath,
-  options?: { delimiter?: string; hasHeaderRow: boolean },
+  filepath: string,
+  options?: ParseFileOptions,
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let m = filepath.match(/\.[^.]*$/);
@@ -30,7 +38,7 @@ export async function parseFile(
         return parseCSV(filepath, options);
       case '.ofx':
       case '.qfx':
-        return parseOFX(filepath);
+        return parseOFX(filepath, options);
       default:
     }
   }
@@ -39,14 +47,12 @@ export async function parseFile(
     message: 'Invalid file type',
     internal: '',
   });
-  return { errors, transactions: undefined };
+  return { errors, transactions: [] };
 }
 
 async function parseCSV(
-  filepath,
-  options: { delimiter?: string; hasHeaderRow: boolean } = {
-    hasHeaderRow: true,
-  },
+  filepath: string,
+  options?: ParseFileOptions,
 ): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
@@ -54,9 +60,9 @@ async function parseCSV(
   let data;
   try {
     data = csv2json(contents, {
-      columns: options.hasHeaderRow,
+      columns: options?.hasHeaderRow,
       bom: true,
-      delimiter: options.delimiter || ',',
+      delimiter: options?.delimiter || ',',
       // eslint-disable-next-line rulesdir/typography
       quote: '"',
       trim: true,
@@ -74,7 +80,7 @@ async function parseCSV(
   return { errors, transactions: data };
 }
 
-async function parseQIF(filepath): Promise<ParseFileResult> {
+async function parseQIF(filepath: string): Promise<ParseFileResult> {
   let errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
 
@@ -101,7 +107,51 @@ async function parseQIF(filepath): Promise<ParseFileResult> {
   };
 }
 
-async function parseOFX(filepath): Promise<ParseFileResult> {
+async function parseOFX(
+  filepath: string,
+  options?: ParseFileOptions,
+): Promise<ParseFileResult> {
+  if (!options?.enableExperimentalOfxParser) {
+    return parseOFXNodeLibOFX(filepath, options);
+  }
+
+  const errors = Array<ParseError>();
+  const contents = await fs.readFile(filepath);
+
+  let data;
+  try {
+    data = await ofx2json(contents);
+  } catch (err) {
+    errors.push({
+      message: 'Failed importing file',
+      internal: err.stack,
+    });
+    return { errors };
+  }
+
+  // Banks don't always implement the OFX standard properly
+  // If no payee is available try and fallback to memo
+  let useMemoFallback = options.fallbackMissingPayeeToMemo;
+
+  return {
+    errors,
+    transactions: data.transactions.map(trans => {
+      return {
+        amount: trans.amount,
+        imported_id: trans.fitId,
+        date: trans.date,
+        payee_name: trans.name || (useMemoFallback ? trans.memo : null),
+        imported_payee: trans.name || (useMemoFallback ? trans.memo : null),
+        notes: !!trans.name || !useMemoFallback ? trans.memo || null : null, //memo used for payee
+      };
+    }),
+  };
+}
+
+async function parseOFXNodeLibOFX(
+  filepath: string,
+  options: ParseFileOptions,
+): Promise<ParseFileResult> {
   let { getOFXTransactions, initModule } = await import(
     /* webpackChunkName: 'xfo' */ 'node-libofx'
   );
@@ -123,7 +173,7 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
 
   // Banks don't always implement the OFX standard properly
   // If no payee is available try and fallback to memo
-  let useName = data.some(trans => trans.name != null && trans.name !== '');
+  let useMemoFallback = options.fallbackMissingPayeeToMemo;
 
   return {
     errors,
@@ -131,9 +181,9 @@ async function parseOFX(filepath): Promise<ParseFileResult> {
       amount: trans.amount,
       imported_id: trans.fi_id,
       date: trans.date ? dayFromDate(new Date(trans.date * 1000)) : null,
-      payee_name: useName ? trans.name : trans.memo,
-      imported_payee: useName ? trans.name : trans.memo,
-      notes: useName ? trans.memo || null : null, //memo used for payee
+      payee_name: trans.name || (useMemoFallback ? trans.memo : null),
+      imported_payee: trans.name || (useMemoFallback ? trans.memo : null),
+      notes: !!trans.name || !useMemoFallback ? trans.memo || null : null, //memo used for payee
     })),
   };
 }

@@ -15,8 +15,6 @@ import React, {
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-import { type CSSProperties } from 'glamor';
-
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
@@ -26,7 +24,7 @@ import AnimatedLoading from '../icons/AnimatedLoading';
 import DeleteIcon from '../icons/v0/Delete';
 import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
-import { styles, theme } from '../style';
+import { type CSSProperties, styles, theme } from '../style';
 
 import Button from './common/Button';
 import Input from './common/Input';
@@ -41,7 +39,7 @@ import {
   type ConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 import { type Binding } from './spreadsheet';
-import format from './spreadsheet/format';
+import useFormat from './spreadsheet/useFormat';
 import useSheetValue from './spreadsheet/useSheetValue';
 import { Tooltip, IntersectionBoundary } from './tooltips';
 
@@ -73,30 +71,26 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
     <View
       innerRef={ref}
       {...props}
-      style={[
-        width === 'flex' ? { flex: 1, flexBasis: 0 } : { width },
-        {
-          borderTopWidth: 1,
-          borderBottomWidth: 1,
-          borderColor: theme.tableBorder,
-        },
-        styles.smallText,
-        style,
-      ]}
+      style={{
+        ...(width === 'flex' ? { flex: 1, flexBasis: 0 } : { width }),
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: theme.tableBorder,
+        ...styles.smallText,
+        ...style,
+      }}
       data-testid={name}
     >
       {/* This is wrapped so that the padding is not taken into
           account with the flex width (which aligns it with the Cell
           component) */}
       <View
-        style={[
-          {
-            flex: 1,
-            padding: '0 5px',
-            justifyContent: 'center',
-          },
-          contentStyle,
-        ]}
+        style={{
+          flex: 1,
+          padding: '0 5px',
+          justifyContent: 'center',
+          ...contentStyle,
+        }}
       >
         {truncate ? (
           <Text
@@ -137,8 +131,8 @@ export function UnexposedCellContent({
 type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   formatter?: (value: string, type?: unknown) => string;
   focused?: boolean;
-  textAlign?: string;
-  alignItems?: string;
+  textAlign?: CSSProperties['textAlign'];
+  alignItems?: CSSProperties['alignItems'];
   plain?: boolean;
   exposed?: boolean;
   children?: ReactNode | (() => ReactNode);
@@ -171,8 +165,9 @@ export function Cell({
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
-  const widthStyle = width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
-  const cellStyle = {
+  const widthStyle: CSSProperties =
+    width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
+  const cellStyle: CSSProperties = {
     position: 'relative',
     textAlign: textAlign || 'left',
     justifyContent: 'center',
@@ -204,16 +199,14 @@ export function Cell({
           children()
         ) : (
           <View
-            style={[
-              {
-                flexDirection: 'row',
-                flex: 1,
-                padding: '0 5px',
-                alignItems: 'center',
-              },
-              styles.smallText,
-              valueStyle,
-            ]}
+            style={{
+              flexDirection: 'row',
+              flex: 1,
+              padding: '0 5px',
+              alignItems: 'center',
+              ...styles.smallText,
+              ...valueStyle,
+            }}
             // Can't use click because we only want to expose the cell if
             // the user does a direct click, not if they also drag the
             // mouse to select something
@@ -259,7 +252,7 @@ export function Cell({
   return (
     <View
       innerRef={viewRef}
-      style={[widthStyle, cellStyle, style]}
+      style={{ ...widthStyle, ...cellStyle, ...style }}
       {...viewProps}
       data-testid={name}
     >
@@ -282,16 +275,14 @@ export function Row({
 }: RowProps) {
   return (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          height: height || ROW_HEIGHT,
-          flex: '0 0 ' + (height || ROW_HEIGHT) + 'px',
-          userSelect: 'text',
-        },
-        collapsed && { marginTop: -1 },
-        style,
-      ]}
+      style={{
+        flexDirection: 'row',
+        height: height || ROW_HEIGHT,
+        flex: '0 0 ' + (height || ROW_HEIGHT) + 'px',
+        userSelect: 'text',
+        ...(collapsed && { marginTop: -1 }),
+        ...style,
+      }}
       data-testid="row"
       {...nativeProps}
     >
@@ -353,11 +344,11 @@ function InputValue({
       onUpdate={text => setValue(text)}
       onBlur={onBlur_}
       onKeyDown={onKeyDown}
-      style={[
-        inputCellStyle,
-        props.readOnly ? readonlyInputStyle : null,
-        props.style,
-      ]}
+      style={{
+        ...inputCellStyle,
+        ...(props.readOnly ? readonlyInputStyle : null),
+        ...props.style,
+      }}
     />
   );
 }
@@ -366,7 +357,7 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   inputProps: ComponentProps<typeof InputValue>;
   onUpdate: ComponentProps<typeof InputValue>['onUpdate'];
   onBlur: ComponentProps<typeof InputValue>['onBlur'];
-  textAlign?: string;
+  textAlign?: CSSProperties['textAlign'];
   error?: ReactNode;
 };
 export function InputCell({
@@ -385,7 +376,7 @@ export function InputCell({
             value={props.value}
             onUpdate={onUpdate}
             onBlur={onBlur}
-            style={[{ textAlign }, inputProps && inputProps.style]}
+            style={{ textAlign, ...(inputProps && inputProps.style) }}
             {...inputProps}
           />
           {error && (
@@ -486,7 +477,7 @@ export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
       {...props}
       name="delete"
       width={20}
-      style={[{ alignItems: 'center', userSelect: 'none' }, style]}
+      style={{ alignItems: 'center', userSelect: 'none', ...style }}
       onClick={e => {
         e.stopPropagation();
         onDelete?.();
@@ -498,6 +489,7 @@ export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
 }
 
 type CellButtonProps = {
+  children: ReactNode;
   style?: CSSProperties;
   primary?: boolean;
   bare?: boolean;
@@ -505,12 +497,12 @@ type CellButtonProps = {
   clickBehavior?: string;
   onSelect?: (e) => void;
   onEdit?: () => void;
-  children: ReactNode;
   className?: string;
 };
 export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
   (
     {
+      children,
       style,
       primary,
       bare,
@@ -518,7 +510,6 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
       clickBehavior,
       onSelect,
       onEdit,
-      children,
       className,
     },
     ref,
@@ -549,43 +540,41 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             }
           }
         }}
-        style={[
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-            cursor: 'default',
-            transition: 'box-shadow .15s',
-            backgroundColor: bare
-              ? 'transparent'
-              : disabled // always use disabled before primary since we can have a disabled primary button
-              ? theme.buttonNormalDisabledBackground
-              : primary
-              ? theme.buttonPrimaryBackground
-              : theme.buttonNormalBackground,
-            border: bare
-              ? 'none'
-              : '1px solid ' +
-                (disabled
-                  ? theme.buttonNormalDisabledBorder
-                  : primary
-                  ? theme.buttonPrimaryBorder
-                  : theme.buttonNormalBorder),
-            color: bare
-              ? 'inherit'
-              : disabled
-              ? theme.buttonNormalDisabledText
-              : primary
-              ? theme.buttonPrimaryText
-              : theme.buttonNormalText,
-            ':focus': bare
-              ? null
-              : {
-                  outline: 0,
-                  boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
-                },
-          },
-          style,
-        ]}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          cursor: 'default',
+          transition: 'box-shadow .15s',
+          backgroundColor: bare
+            ? 'transparent'
+            : disabled // always use disabled before primary since we can have a disabled primary button
+            ? theme.buttonNormalDisabledBackground
+            : primary
+            ? theme.buttonPrimaryBackground
+            : theme.buttonNormalBackground,
+          border: bare
+            ? 'none'
+            : '1px solid ' +
+              (disabled
+                ? theme.buttonNormalDisabledBorder
+                : primary
+                ? theme.buttonPrimaryBorder
+                : theme.buttonNormalBorder),
+          color: bare
+            ? 'inherit'
+            : disabled
+            ? theme.buttonNormalDisabledText
+            : primary
+            ? theme.buttonPrimaryText
+            : theme.buttonNormalText,
+          ':focus': bare
+            ? null
+            : {
+                outline: 0,
+                boxShadow: `1px 1px 2px ${theme.buttonNormalShadow}`,
+              },
+          ...style,
+        }}
         onFocus={() => onEdit && onEdit()}
         data-testid="cell-button"
         onClick={
@@ -626,7 +615,7 @@ export function SelectCell({
       focused={focused}
       name="select"
       width={20}
-      style={[{ alignItems: 'center', userSelect: 'none' }, style]}
+      style={{ alignItems: 'center', userSelect: 'none', ...style }}
       onClick={e => {
         e.stopPropagation();
         onSelect?.(e);
@@ -678,6 +667,7 @@ type SheetCellProps = ComponentProps<typeof Cell> & {
   valueProps: SheetCellValueProps;
   inputProps?: Omit<ComponentProps<typeof InputValue>, 'value' | 'onUpdate'>;
   onSave?: (value) => void;
+  textAlign?: CSSProperties['textAlign'];
 };
 export function SheetCell({
   valueProps,
@@ -702,11 +692,14 @@ export function SheetCell({
       inputProps.onBlur(e);
     }
   });
+  let format = useFormat();
 
   return (
     <Cell
       valueStyle={
-        getValueStyle ? [valueStyle, getValueStyle(sheetValue)] : valueStyle
+        getValueStyle
+          ? { ...valueStyle, ...getValueStyle(sheetValue) }
+          : valueStyle
       }
       textAlign={textAlign}
       {...props}
@@ -831,7 +824,11 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
   );
 }
 
-let rowStyle = { position: 'absolute', willChange: 'transform', width: '100%' };
+let rowStyle: CSSProperties = {
+  position: 'absolute',
+  willChange: 'transform',
+  width: '100%',
+};
 
 type TableHandleRef = {
   scrollTo: (id: number, alignment?: string) => void;
@@ -861,8 +858,8 @@ type TableProps = {
   items: TableItem[];
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
-  contentHeader: ReactNode;
-  loading: boolean;
+  contentHeader?: ReactNode;
+  loading?: boolean;
   rowHeight?: number;
   backgroundColor?: string;
   renderItem: (arg: {
@@ -874,16 +871,15 @@ type TableProps = {
     position: number;
   }) => ReactNode;
   renderEmpty?: ReactNode | (() => ReactNode);
-  getItemKey: (index: number) => TableItem['id'];
+  getItemKey?: (index: number) => TableItem['id'];
   loadMore?: () => void;
   style?: CSSProperties;
-  navigator: ReturnType<typeof useTableNavigator>;
-  listRef;
-  onScroll: () => void;
+  navigator?: ReturnType<typeof useTableNavigator>;
+  onScroll?: () => void;
   version?: string;
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
-  saveScrollWidth: (parent, child) => void;
+  saveScrollWidth?: (parent, child) => void;
 };
 
 export const Table = forwardRef<TableHandleRef, TableProps>(
@@ -902,7 +898,6 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       loadMore,
       style,
       navigator,
-      listRef,
       onScroll,
       version = 'v1',
       allowPopupsEscape,
@@ -1020,13 +1015,11 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
       return (
         <View
           key={key}
-          style={[
-            rowStyle,
-            {
-              zIndex: editing || selected ? 101 : 'auto',
-              transform: 'translateY(var(--pos))',
-            },
-          ]}
+          style={{
+            ...rowStyle,
+            zIndex: editing || selected ? 101 : 'auto',
+            transform: 'translateY(var(--pos))',
+          }}
           // @ts-expect-error not a recognised style attribute
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
@@ -1076,14 +1069,12 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
     if (loading) {
       return (
         <View
-          style={[
-            {
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor,
-            },
-          ]}
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor,
+          }}
         >
           <AnimatedLoading width={25} color={theme.tableText} />
         </View>
@@ -1094,13 +1085,11 @@ export const Table = forwardRef<TableHandleRef, TableProps>(
 
     return (
       <View
-        style={[
-          {
-            flex: 1,
-            outline: 'none',
-          },
-          style,
-        ]}
+        style={{
+          flex: 1,
+          outline: 'none',
+          ...style,
+        }}
         tabIndex="1"
         {...getNavigatorProps(props)}
         data-testid="table"

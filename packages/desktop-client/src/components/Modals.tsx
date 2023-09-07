@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
+import useCategories from '../hooks/useCategories';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
 import { type CommonModalProps } from '../types/modals';
 
@@ -33,12 +35,18 @@ export default function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);
   const isHidden = useSelector(state => state.modals.isHidden);
   const accounts = useSelector(state => state.queries.accounts);
-  const categoryGroups = useSelector(state => state.queries.categories.grouped);
-  const categories = useSelector(state => state.queries.categories.list);
+  const { grouped: categoryGroups, list: categories } = useCategories();
   const budgetId = useSelector(
     state => state.prefs.local && state.prefs.local.id,
   );
   const actions = useActions();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (modalStack.length > 0) {
+      actions.closeModal();
+    }
+  }, [location]);
 
   const syncServerStatus = useSyncServerStatus();
 

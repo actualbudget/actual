@@ -1,6 +1,7 @@
-import React, { Component, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import PullToRefresh from 'react-simple-pull-to-refresh';
 
 import * as queries from 'loot-core/src/client/queries';
 
@@ -28,13 +29,11 @@ function AccountHeader({ name, amount, style = {} }) {
     >
       <View style={{ flex: 1 }}>
         <Text
-          style={[
-            styles.text,
-            {
-              textTransform: 'uppercase',
-              fontSize: 13,
-            },
-          ]}
+          style={{
+            ...styles.text,
+            textTransform: 'uppercase',
+            fontSize: 13,
+          }}
           data-testid="name"
         >
           {name}
@@ -42,7 +41,7 @@ function AccountHeader({ name, amount, style = {} }) {
       </View>
       <CellValue
         binding={amount}
-        style={[styles.text, { fontSize: 13 }]}
+        style={{ ...styles.text, fontSize: 13 }}
         type="financial"
       />
     </View>
@@ -87,15 +86,13 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             }}
           >
             <TextOneLine
-              style={[
-                styles.text,
-                {
-                  fontSize: 17,
-                  fontWeight: 600,
-                  color: updated ? theme.mobileAccountText : theme.pillText,
-                  paddingRight: 30,
-                },
-              ]}
+              style={{
+                ...styles.text,
+                fontSize: 17,
+                fontWeight: 600,
+                color: updated ? theme.mobileAccountText : theme.pillText,
+                paddingRight: 30,
+              }}
               data-testid="account-name"
             >
               {account.name}
@@ -153,93 +150,58 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-class AccountList extends Component {
-  isNewTransaction = id => {
-    return this.props.newTransactions.includes(id);
-  };
+function AccountList({
+  accounts,
+  updatedAccounts,
+  getBalanceQuery,
+  getOnBudgetBalance,
+  getOffBudgetBalance,
+  onAddAccount,
+  onSelectAccount,
+}) {
+  const { syncAndDownload } = useActions();
 
-  render() {
-    const {
-      accounts,
-      updatedAccounts,
-      // transactions,
-      // categories,
-      getBalanceQuery,
-      getOnBudgetBalance,
-      getOffBudgetBalance,
-      onAddAccount,
-      onSelectAccount,
-      // onSelectTransaction,
-      // refreshControl
-    } = this.props;
-    const budgetedAccounts = accounts.filter(
-      account => account.offbudget === 0,
-    );
-    const offbudgetAccounts = accounts.filter(
-      account => account.offbudget === 1,
-    );
+  const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
+  const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
-    // If there are no accounts, show a helpful message
-    if (accounts.length === 0) {
-      return <EmptyMessage onAdd={onAddAccount} />;
-    }
-
-    const accountContent = (
-      <Page title="Accounts">
-        <AccountHeader name="Budgeted" amount={getOnBudgetBalance()} />
-        {budgetedAccounts.map((acct, idx) => (
-          <AccountCard
-            account={acct}
-            key={acct.id}
-            updated={updatedAccounts.includes(acct.id)}
-            getBalanceQuery={getBalanceQuery}
-            onSelect={onSelectAccount}
-          />
-        ))}
-
-        <AccountHeader
-          name="Off budget"
-          amount={getOffBudgetBalance()}
-          style={{ marginTop: 30 }}
-        />
-        {offbudgetAccounts.map((acct, idx) => (
-          <AccountCard
-            account={acct}
-            key={acct.id}
-            updated={updatedAccounts.includes(acct.id)}
-            getBalanceQuery={getBalanceQuery}
-            onSelect={onSelectAccount}
-          />
-        ))}
-
-        {/*<Label
-          title="RECENT TRANSACTIONS"
-          style={{
-            textAlign: 'center',
-            marginTop: 50,
-            marginBottom: 20,
-            marginLeft: 10
-          }}
-          />*/}
-      </Page>
-    );
-
-    return (
-      <View style={{ flex: 1 }}>
-        {/* <TransactionList
-          transactions={transactions}
-          categories={categories}
-          isNew={this.isNewTransaction}
-          scrollProps={{
-            ListHeaderComponent: accountContent
-          }}
-          // refreshControl={refreshControl}
-          onSelect={onSelectTransaction}
-        /> */}
-        {accountContent}
-      </View>
-    );
+  // If there are no accounts, show a helpful message
+  if (accounts.length === 0) {
+    return <EmptyMessage onAdd={onAddAccount} />;
   }
+
+  return (
+    <View style={{ flex: 1 }}>
+      <Page title="Accounts">
+        <PullToRefresh onRefresh={syncAndDownload}>
+          <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
+          {budgetedAccounts.map(acct => (
+            <AccountCard
+              account={acct}
+              key={acct.id}
+              updated={updatedAccounts.includes(acct.id)}
+              getBalanceQuery={getBalanceQuery}
+              onSelect={onSelectAccount}
+            />
+          ))}
+
+          <AccountHeader
+            name="Off budget"
+            amount={getOffBudgetBalance()}
+            style={{ marginTop: 30 }}
+          />
+          {offbudgetAccounts.map(acct => (
+            <AccountCard
+              account={acct}
+              key={acct.id}
+              updated={updatedAccounts.includes(acct.id)}
+              getBalanceQuery={getBalanceQuery}
+              onSelect={onSelectAccount}
+            />
+          ))}
+        </PullToRefresh>
+      </Page>
+    </View>
+  );
 }
 
 export default function Accounts() {
@@ -263,10 +225,6 @@ export default function Accounts() {
     (async () => getAccounts())();
   }, []);
 
-  // const sync = async () => {
-  //   await props.syncAndDownload();
-  // };
-
   const onSelectAccount = id => {
     navigate(`/accounts/${id}`);
   };
@@ -275,7 +233,7 @@ export default function Accounts() {
     navigate(`/transaction/${transaction}`);
   };
 
-  useSetThemeColor(theme.altMenuBackground);
+  useSetThemeColor(theme.mobileAccountsViewTheme);
 
   return (
     <View style={{ flex: 1 }}>
@@ -294,9 +252,6 @@ export default function Accounts() {
         onAddAccount={() => {}} // () => navigate('AddAccountModal')
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
-        // refreshControl={
-        //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        // }
       />
     </View>
   );
