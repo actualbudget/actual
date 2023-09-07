@@ -33,7 +33,7 @@ export default function LoggedInUser({
 
   async function onChangePassword() {
     await closeBudget();
-    window.__navigate('/change-password');
+    window.__navigate?.('/change-password');
   }
 
   async function onMenuSelect(type) {
@@ -45,14 +45,14 @@ export default function LoggedInUser({
         break;
       case 'sign-in':
         await closeBudget();
-        window.__navigate('/login');
+        window.__navigate?.('/login');
         break;
       case 'sign-out':
         signOut();
         break;
       case 'config-server':
         await closeBudget();
-        window.__navigate('/config-server');
+        window.__navigate?.('/config-server');
         break;
       default:
     }

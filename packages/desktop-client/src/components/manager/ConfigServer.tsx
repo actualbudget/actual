@@ -25,7 +25,7 @@ export default function ConfigServer() {
   let currentUrl = useServerURL();
   let setServerUrl = useSetServerURL();
   useEffect(() => {
-    setUrl(currentUrl);
+    setUrl(currentUrl || '');
   }, [currentUrl]);
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState<string | null>(null);
@@ -77,15 +77,15 @@ export default function ConfigServer() {
   }
 
   async function onSkip() {
-    await setServerUrl(null);
+    await setServerUrl('');
     await loggedIn();
     navigate('/');
   }
 
   async function onCreateTestFile() {
-    await setServerUrl(null);
+    await setServerUrl('');
     await createBudget({ testMode: true });
-    window.__navigate('/');
+    window.__navigate?.('/');
   }
 
   return (
