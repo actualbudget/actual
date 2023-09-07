@@ -6,8 +6,8 @@ import View from '../common/View';
 
 type ItemContentProps = {
   style: CSSProperties;
-  to: string;
-  onClick: MouseEventHandler<HTMLDivElement>;
+  to?: string;
+  onClick?: MouseEventHandler<HTMLDivElement>;
   activeStyle: CSSProperties;
   children: ReactNode;
   forceActive?: boolean;
@@ -21,7 +21,7 @@ function ItemContent({
   forceActive,
   children,
 }: ItemContentProps) {
-  return onClick ? (
+  return onClick || !to ? (
     <View
       role="button"
       tabIndex={0}
