@@ -10,66 +10,74 @@ import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
 import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
-import { theme, type CSSProperties } from '../../style';
+import { theme, type CSSProperties, colors } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
-export function getStatusProps(status: ScheduleStatusType) {
-  let color, backgroundColor, Icon;
-
+// Consists of Schedule Statuses + Transaction statuses
+type StatusTypes = ScheduleStatusType | 'cleared' | 'pending';
+export function getStatusProps(status: StatusTypes) {
   switch (status) {
     case 'missed':
-      color = theme.altErrorText;
-      backgroundColor = theme.altErrorBackground;
-      Icon = EditSkull1;
-      break;
+      return {
+        color: colors.r1,
+        backgroundColor: colors.r10,
+        Icon: EditSkull1,
+      };
     case 'due':
-      color = theme.altWarningText;
-      backgroundColor = theme.altWarningBackground;
-      Icon = AlertTriangle;
-      break;
+      return {
+        color: colors.y1,
+        backgroundColor: colors.y9,
+        Icon: AlertTriangle,
+      };
     case 'upcoming':
-      color = theme.upcomingText;
-      backgroundColor = theme.upcomingBackground;
-      Icon = CalendarIcon;
-      break;
+      return {
+        color: colors.p1,
+        backgroundColor: colors.p10,
+        Icon: CalendarIcon,
+      };
     case 'paid':
-      color = theme.alt2NoticeText;
-      backgroundColor = theme.altNoticeBackground;
-      Icon = ValidationCheck;
-      break;
+      return {
+        color: colors.g2,
+        backgroundColor: colors.g10,
+        Icon: ValidationCheck,
+      };
     case 'completed':
-      color = theme.alt2TableText;
-      backgroundColor = theme.altTableBackground;
-      Icon = FavoriteStar;
-      break;
+      return {
+        color: colors.n4,
+        backgroundColor: colors.n11,
+        Icon: FavoriteStar,
+      };
+    // @todo: Check if 'pending' is still a valid status in Transaction
     case 'pending':
-      color = theme.alt3NoticeText;
-      backgroundColor = theme.alt2NoticeBackground;
-      Icon = CalendarIcon;
-      break;
+      return {
+        color: colors.g4,
+        backgroundColor: colors.g11,
+        Icon: CalendarIcon,
+      };
     case 'scheduled':
-      color = theme.menuItemText;
-      backgroundColor = theme.altTableBackground;
-      Icon = CalendarIcon;
-      break;
+      return {
+        color: colors.n1,
+        backgroundColor: colors.n11,
+        Icon: CalendarIcon,
+      };
     case 'cleared':
-      color = theme.noticeText;
-      backgroundColor = theme.altTableBackground;
-      Icon = CheckCircle1;
-      break;
+      return {
+        color: colors.g5,
+        backgroundColor: colors.n11,
+        Icon: CheckCircle1,
+      };
     default:
-      color = theme.buttonNormalDisabledText;
-      backgroundColor = theme.altTableBackground;
-      Icon = CheckCircleHollow;
-      break;
+      return {
+        color: colors.n7,
+        backgroundColor: colors.n11,
+        Icon: CheckCircleHollow,
+      };
   }
-
-  return { color, backgroundColor, Icon };
 }
 
-export function StatusBadge({ status }) {
-  let { color, backgroundColor, Icon } = getStatusProps(status);
+export function StatusBadge({ status }: { status: ScheduleStatusType }) {
+  const { color, backgroundColor, Icon } = getStatusProps(status);
   return (
     <View
       style={{
