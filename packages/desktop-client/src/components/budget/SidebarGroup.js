@@ -121,21 +121,19 @@ function SidebarGroup({
   return (
     <View
       innerRef={innerRef}
-      style={[
-        style,
-        {
-          width: 200,
-          backgroundColor: colors.n11,
-          '& button': { display: 'none' },
-          '&:hover button': { display: 'flex', color: colors.n1 },
-        },
-        dragPreview && {
+      style={{
+        ...style,
+        width: 200,
+        backgroundColor: colors.n11,
+        '& button': { display: 'none' },
+        '&:hover button': { display: 'flex', color: colors.n1 },
+        ...(dragPreview && {
           paddingLeft: 10,
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
-        },
-      ]}
+        }),
+      }}
       onKeyDown={e => {
         if (e.key === 'Enter') {
           onEdit(null);

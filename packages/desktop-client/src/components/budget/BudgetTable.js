@@ -182,17 +182,17 @@ class BudgetTable extends Component {
     return (
       <View
         data-testid="budget-table"
-        style={[
-          { flex: 1 },
-          styles.lightScrollbar && {
+        style={{
+          flex: 1,
+          ...(styles.lightScrollbar && {
             '& ::-webkit-scrollbar': {
               backgroundColor: 'transparent',
             },
             '& ::-webkit-scrollbar-thumb:vertical': {
               backgroundColor: 'white',
             },
-          },
-        ]}
+          }),
+        }}
       >
         <View
           style={{
