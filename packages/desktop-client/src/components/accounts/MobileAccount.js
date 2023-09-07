@@ -19,11 +19,9 @@ import {
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
-import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
-import SyncRefresh from '../SyncRefresh';
 
 import AccountDetails from './MobileAccountDetails';
 
@@ -71,7 +69,6 @@ let paged;
 
 export default function Account(props) {
   const accounts = useSelector(state => state.queries.accounts);
-  const { syncAndDownload } = useActions();
 
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
@@ -191,54 +188,40 @@ export default function Account(props) {
     }
   };
 
-  const onRefresh = async () => {
-    await syncAndDownload();
-  };
-
   let balance = queries.accountBalance(account);
   let numberFormat = state.prefs.numberFormat || 'comma-dot';
   let hideFraction = state.prefs.hideFraction || false;
 
   return (
-    <SyncRefresh onSync={onRefresh}>
-      {({ refreshing, onRefresh }) => (
-        <SchedulesProvider
-          transform={getSchedulesTransform(accountId, searchText !== '')}
-        >
-          <PreviewTransactions accountId={props.accountId}>
-            {prependTransactions =>
-              prependTransactions == null ? null : (
-                <AccountDetails
-                  // This key forces the whole table rerender when the number
-                  // format changes
-                  {...state}
-                  {...actionCreators}
-                  key={numberFormat + hideFraction}
-                  account={account}
-                  accounts={accounts}
-                  categories={categories.list}
-                  payees={state.payees}
-                  transactions={transactions}
-                  prependTransactions={prependTransactions || []}
-                  balance={balance}
-                  isNewTransaction={isNewTransaction}
-                  // refreshControl={
-                  //   <RefreshControl
-                  //     refreshing={refreshing}
-                  //     onRefresh={onRefresh}
-                  //   />
-                  // }
-                  onLoadMore={() => {
-                    paged?.fetchNext();
-                  }}
-                  onSearch={onSearch}
-                  onSelectTransaction={onSelectTransaction}
-                />
-              )
-            }
-          </PreviewTransactions>
-        </SchedulesProvider>
-      )}
-    </SyncRefresh>
+    <SchedulesProvider
+      transform={getSchedulesTransform(accountId, searchText !== '')}
+    >
+      <PreviewTransactions accountId={props.accountId}>
+        {prependTransactions =>
+          prependTransactions == null ? null : (
+            <AccountDetails
+              // This key forces the whole table rerender when the number
+              // format changes
+              {...state}
+              {...actionCreators}
+              key={numberFormat + hideFraction}
+              account={account}
+              accounts={accounts}
+              categories={categories.list}
+              payees={state.payees}
+              transactions={transactions}
+              prependTransactions={prependTransactions || []}
+              balance={balance}
+              isNewTransaction={isNewTransaction}
+              onLoadMore={() => {
+                paged?.fetchNext();
+              }}
+              onSearch={onSearch}
+              onSelectTransaction={onSelectTransaction}
+            />
+          )
+        }
+      </PreviewTransactions>
+    </SchedulesProvider>
   );
 }
