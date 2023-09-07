@@ -1051,6 +1051,7 @@ function BudgetHeader({
 
           {serverURL && (
             <SyncButton
+              isMobile
               style={{
                 color: 'white',
                 position: 'absolute',
