@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import PullToRefresh from 'react-simple-pull-to-refresh';
 
+import { useActions } from '../../hooks/useActions';
 import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
@@ -75,11 +77,15 @@ export default function AccountDetails({
   onSearch,
   onSelectTransaction,
   pushModal,
-  // refreshControl
 }) {
   let allTransactions = useMemo(() => {
     return prependTransactions.concat(transactions);
   }, [prependTransactions, transactions]);
+
+  const { syncAndDownload } = useActions();
+  const onRefresh = async () => {
+    await syncAndDownload(account.id);
+  };
 
   return (
     <View
@@ -161,18 +167,20 @@ export default function AccountDetails({
           onSearch={onSearch}
         />
       </View>
-      <TransactionList
-        transactions={allTransactions}
-        categories={categories}
-        accounts={accounts}
-        payees={payees}
-        showCategory={!account.offbudget}
-        isNew={isNewTransaction}
-        // refreshControl={refreshControl}
-        onLoadMore={onLoadMore}
-        onSelect={onSelectTransaction}
-        pushModal={pushModal}
-      />
+
+      <PullToRefresh onRefresh={onRefresh}>
+        <TransactionList
+          transactions={allTransactions}
+          categories={categories}
+          accounts={accounts}
+          payees={payees}
+          showCategory={!account.offbudget}
+          isNew={isNewTransaction}
+          onLoadMore={onLoadMore}
+          onSelect={onSelectTransaction}
+          pushModal={pushModal}
+        />
+      </PullToRefresh>
     </View>
   );
 }
