@@ -55,7 +55,7 @@ import CalendarIcon from '../../icons/v2/Calendar';
 import Hyperlink2 from '../../icons/v2/Hyperlink2';
 import { colors, styles, theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import Button from '../common/Button';
 import Text from '../common/Text';
@@ -440,21 +440,18 @@ function StatusCell({
       plain
     >
       <CellButton
-        style={[
-          {
-            padding: 3,
-            backgroundColor: 'transparent',
-            border: '1px solid transparent',
-            borderRadius: 50,
-            ':focus': {
-              border: '1px solid ' + theme.formInputBorderSelected,
-              boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
-            },
-            cursor: isClearedField ? 'pointer' : 'default',
+        style={{
+          padding: 3,
+          backgroundColor: 'transparent',
+          border: '1px solid transparent',
+          borderRadius: 50,
+          ':focus': {
+            border: '1px solid ' + theme.formInputBorderSelected,
+            boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
           },
-
-          isChild && { visibility: 'hidden' },
-        ]}
+          cursor: isClearedField ? 'pointer' : 'default',
+          ...(isChild && { visibility: 'hidden' }),
+        }}
         onEdit={() => onEdit(id, 'cleared')}
         onSelect={onSelect}
       >
@@ -545,7 +542,10 @@ function PayeeCell({
       name="payee"
       textAlign="flex"
       value={payeeId}
-      valueStyle={[valueStyle, inherited && { color: theme.tableTextInactive }]}
+      valueStyle={{
+        ...valueStyle,
+        ...(inherited && { color: theme.tableTextInactive }),
+      }}
       exposed={focused}
       onExpose={name => !isPreview && onEdit(id, name)}
       onUpdate={async value => {
@@ -822,36 +822,32 @@ const Transaction = memo(function Transaction(props) {
 
   return (
     <Row
-      style={[
-        {
-          backgroundColor: selected
-            ? theme.tableRowBackgroundHighlight
-            : backgroundFocus
-            ? theme.tableRowBackgroundHover
-            : theme.tableBackground,
+      style={{
+        backgroundColor: selected
+          ? theme.tableRowBackgroundHighlight
+          : backgroundFocus
+          ? theme.tableRowBackgroundHover
+          : theme.tableBackground,
+        ':hover': !(backgroundFocus || selected) && {
+          backgroundColor: theme.tableRowBackgroundHover,
         },
-        {
-          ':hover': !(backgroundFocus || selected) && {
-            backgroundColor: theme.tableRowBackgroundHover,
-          },
-          '& .hover-visible': {
-            opacity: 0,
-          },
-          ':hover .hover-visible': {
-            opacity: 1,
-          },
+        '& .hover-visible': {
+          opacity: 0,
         },
-        highlighted || selected
+        ':hover .hover-visible': {
+          opacity: 1,
+        },
+        ...(highlighted || selected
           ? { color: theme.tableRowBackgroundHighlightText }
-          : { color: theme.tableText },
-        style,
-        isPreview && {
+          : { color: theme.tableText }),
+        ...style,
+        ...(isPreview && {
           color: theme.tableTextInactive,
           backgroundColor: !selected ? '#fcfcfc' : undefined,
           fontStyle: 'italic',
-        },
-        _unmatched && { opacity: 0.5 },
-      ]}
+        }),
+        ...(_unmatched && { opacity: 0.5 }),
+      }}
     >
       {isChild && (
         <Field
@@ -883,7 +879,7 @@ const Transaction = memo(function Transaction(props) {
           <DeleteCell
             onDelete={() => onDelete && onDelete(transaction.id)}
             exposed={editing}
-            style={[isChild && { borderLeftWidth: 1 }, { lineHeight: 0 }]}
+            style={{ ...(isChild && { borderLeftWidth: 1 }), lineHeight: 0 }}
           />
         ) : (
           <Cell width={20} />
@@ -901,7 +897,7 @@ const Transaction = memo(function Transaction(props) {
           }}
           onEdit={() => onEdit(id, 'select')}
           selected={selected}
-          style={[isChild && { borderLeftWidth: 1 }]}
+          style={{ ...(isChild && { borderLeftWidth: 1 }) }}
           value={
             matched && (
               <Hyperlink2 style={{ width: 13, height: 13, color: 'inherit' }} />
@@ -925,7 +921,6 @@ const Transaction = memo(function Transaction(props) {
           onUpdate={value => {
             onUpdate('date', value);
           }}
-          data-vrt-mask
         >
           {({
             onBlur,
@@ -1223,7 +1218,11 @@ const Transaction = memo(function Transaction(props) {
         textAlign="right"
         title={debit}
         onExpose={name => !isPreview && onEdit(id, name)}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
+        style={{
+          ...(isParent && { fontStyle: 'italic' }),
+          ...styles.tnum,
+          ...amountStyle,
+        }}
         inputProps={{
           value: debit === '' && credit === '' ? '0.00' : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
@@ -1245,7 +1244,11 @@ const Transaction = memo(function Transaction(props) {
         textAlign="right"
         title={credit}
         onExpose={name => !isPreview && onEdit(id, name)}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
+        style={{
+          ...(isParent && { fontStyle: 'italic' }),
+          ...styles.tnum,
+          ...amountStyle,
+        }}
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
@@ -1267,7 +1270,7 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={{
             color: runningBalance < 0 ? theme.errorText : theme.noticeText,
           }}
-          style={[styles.tnum, amountStyle]}
+          style={{ ...styles.tnum, ...amountStyle }}
           width={88}
           textAlign="right"
           privacyFilter
@@ -1299,14 +1302,12 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
       if (error.version === 1) {
         return (
           <View
-            style={[
-              {
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: '0 5px',
-              },
-              style,
-            ]}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: '0 5px',
+              ...style,
+            }}
             data-testid="transaction-error"
           >
             <Text>
@@ -1602,13 +1603,11 @@ function TransactionTableInner({
   return (
     <View
       innerRef={containerRef}
-      style={[
-        {
-          flex: 1,
-          cursor: 'default',
-        },
-        props.style,
-      ]}
+      style={{
+        flex: 1,
+        cursor: 'default',
+        ...props.style,
+      }}
     >
       <View>
         <TransactionHeader
@@ -1652,7 +1651,7 @@ function TransactionTableInner({
               onManagePayees={props.onManagePayees}
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
-              onNavigateToSchedule={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToSchedule}
               balance={
                 props.transactions?.length > 0
                   ? props.balances?.[props.transactions[0]?.id]?.balance
@@ -1666,7 +1665,7 @@ function TransactionTableInner({
          //   the full height of the container ??? */}
 
       <View
-        style={[{ flex: 1, overflow: 'hidden' }]}
+        style={{ flex: 1, overflow: 'hidden' }}
         data-testid="transaction-table"
       >
         <Table

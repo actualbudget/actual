@@ -1,12 +1,11 @@
 import React, {
-  type CSSProperties,
   type ComponentType,
   type MouseEventHandler,
   type ReactNode,
   type SVGProps,
 } from 'react';
 
-import { styles, theme } from '../../style';
+import { styles, theme, type CSSProperties } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
@@ -39,24 +38,6 @@ function Item({
     backgroundColor: theme.sidebarItemBackgroundHover,
   };
 
-  const activeStyle = {
-    color: theme.sidebarItemTextSelected,
-    borderLeft: '4px solid ' + theme.sidebarItemAccentSelected,
-    paddingLeft: 19 + indent - 4,
-  };
-
-  const linkStyle = {
-    ...styles.mediumText,
-    paddingTop: 9,
-    paddingBottom: 9,
-    paddingLeft: 19 + indent,
-    paddingRight: 10,
-    textDecoration: 'none',
-    color: theme.sidebarItemText,
-    ...(forceHover ? hoverStyle : {}),
-    ':hover': hoverStyle,
-  };
-
   const content = (
     <View
       style={{
@@ -72,12 +53,26 @@ function Item({
   );
 
   return (
-    <View style={[{ flexShrink: 0 }, style]}>
+    <View style={{ flexShrink: 0, ...style }}>
       <ItemContent
-        style={linkStyle}
+        style={{
+          ...styles.mediumText,
+          paddingTop: 9,
+          paddingBottom: 9,
+          paddingLeft: 19 + indent,
+          paddingRight: 10,
+          textDecoration: 'none',
+          color: colors.n9,
+          ...(forceHover ? hoverStyle : {}),
+          ':hover': hoverStyle,
+        }}
         to={to}
         onClick={onClick}
-        activeStyle={activeStyle}
+        activeStyle={{
+          borderLeft: '4px solid ' + colors.p8,
+          paddingLeft: 19 + indent - 4,
+          color: colors.p8,
+        }}
         forceActive={forceActive}
       >
         {content}

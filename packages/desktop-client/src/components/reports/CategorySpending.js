@@ -125,7 +125,7 @@ function CategoryAverage() {
   );
 
   return (
-    <View style={[styles.page, { overflow: 'hidden' }]}>
+    <View style={{ ...styles.page, overflow: 'hidden' }}>
       <Header
         title="Category Spending"
         allMonths={allMonths}
@@ -135,7 +135,13 @@ function CategoryAverage() {
         headerPrefixItems={headerPrefixItems}
       />
       <View
-        style={{ display: 'flex', flexDirection: 'row', padding: 15, gap: 15 }}
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          padding: 15,
+          gap: 15,
+          flexGrow: 1,
+        }}
       >
         <View style={{ width: 200 }}>
           <CategorySelector
@@ -157,6 +163,7 @@ function CategoryAverage() {
           }}
         >
           <CategorySpendingGraph
+            style={{ flexGrow: 1 }}
             start={start}
             end={end}
             graphData={perCategorySpending}

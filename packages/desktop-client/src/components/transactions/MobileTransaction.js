@@ -6,7 +6,7 @@ import React, {
   useState,
   useRef,
 } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 
 import { useFocusRing } from '@react-aria/focus';
@@ -23,7 +23,6 @@ import {
 import { css } from 'glamor';
 import memoizeOne from 'memoize-one';
 
-import * as actions from 'loot-core/src/client/actions';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -43,6 +42,8 @@ import {
   groupById,
 } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import SvgAdd from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
@@ -145,7 +146,7 @@ export function DateHeader({ date }) {
         justifyContent: 'center',
       }}
     >
-      <Text style={[styles.text, { fontSize: 13, color: colors.n4 }]}>
+      <Text style={{ ...styles.text, fontSize: 13, color: colors.n4 }}>
         {monthUtils.format(date, 'MMMM dd, yyyy')}
       </Text>
     </ListItem>
@@ -225,6 +226,7 @@ class TransactionEditInner extends PureComponent {
 
     if (transactions.find(t => t.account == null)) {
       // Ignore transactions if any of them don't have an account
+      // TODO: Should we display validation error?
       return;
     }
 
@@ -242,7 +244,7 @@ class TransactionEditInner extends PureComponent {
     }
 
     this.props.onSave(transactions);
-    this.props.navigation(`/accounts/${account.id}`);
+    this.props.navigate(`/accounts/${account.id}`, { replace: true });
   };
 
   onSaveChild = childTransaction => {
@@ -292,16 +294,22 @@ class TransactionEditInner extends PureComponent {
     });
   };
 
+  onDelete = () => {
+    this.props.onDelete();
+
+    const { transactions } = this.state;
+    const [transaction, ..._childTransactions] = transactions;
+    const { account: accountId } = transaction;
+    if (accountId) {
+      this.props.navigate(`/accounts/${accountId}`, { replace: true });
+    } else {
+      this.props.navigate(-1);
+    }
+  };
+
   render() {
-    const {
-      adding,
-      categories,
-      accounts,
-      payees,
-      renderChildEdit,
-      navigation,
-      onDelete,
-    } = this.props;
+    const { adding, categories, accounts, payees, renderChildEdit, navigate } =
+      this.props;
     const { editingChild } = this.state;
     const transactions = this.serializeTransactions(
       this.state.transactions || [],
@@ -373,7 +381,7 @@ class TransactionEditInner extends PureComponent {
             }}
           >
             <Link
-              to={account ? `/accounts/${account.id}` : '/budget'}
+              to={-1}
               style={{
                 alignItems: 'center',
                 display: 'flex',
@@ -553,7 +561,6 @@ class TransactionEditInner extends PureComponent {
                       ),
                     )
                   }
-                  data-vrt-mask
                 />
               </View>
 
@@ -583,7 +590,7 @@ class TransactionEditInner extends PureComponent {
             {!adding && (
               <View style={{ alignItems: 'center' }}>
                 <Button
-                  onClick={() => onDelete()}
+                  onClick={() => this.onDelete()}
                   style={{
                     borderWidth: 0,
                     paddingVertical: 5,
@@ -631,7 +638,7 @@ class TransactionEditInner extends PureComponent {
               <Button onClick={() => this.onAdd()}>
                 <SvgAdd width={17} height={17} style={{ color: colors.b3 }} />
                 <Text
-                  style={[styles.text, { color: colors.b3, marginLeft: 5 }]}
+                  style={{ ...styles.text, color: colors.b3, marginLeft: 5 }}
                 >
                   Add transaction
                 </Text>
@@ -642,7 +649,7 @@ class TransactionEditInner extends PureComponent {
                   style={{ width: 16, height: 16, color: colors.n1 }}
                 />
                 <Text
-                  style={[styles.text, { marginLeft: 6, color: colors.n1 }]}
+                  style={{ ...styles.text, marginLeft: 6, color: colors.n1 }}
                 >
                   Save changes
                 </Text>
@@ -662,7 +669,7 @@ class TransactionEditInner extends PureComponent {
               editingChild && transactions.find(t => t.id === editingChild),
             amountSign: forcedSign,
             getCategoryName: id => (id ? lookupName(categories, id) : null),
-            navigation: navigation,
+            navigate: navigate,
             onEdit: this.onEdit,
             onStartClose: this.onSaveChild,
           })}
@@ -699,7 +706,7 @@ function TransactionEditUnconnected(props) {
   let adding = false;
   let deleted = false;
 
-  useSetThemeColor(colors.p5);
+  useSetThemeColor(theme.mobileTransactionViewTheme);
 
   useEffect(() => {
     // May as well update categories / accounts when transaction ID changes
@@ -804,9 +811,6 @@ function TransactionEditUnconnected(props) {
   };
 
   const onDelete = async () => {
-    // Eagerly go back
-    navigate(`/accounts/${accountId}`);
-
     if (adding) {
       // Adding a new transactions, this disables saving when the component unmounts
       deleted = true;
@@ -833,7 +837,7 @@ function TransactionEditUnconnected(props) {
         accounts={accounts}
         payees={payees}
         pushModal={props.pushModal}
-        navigation={navigate}
+        navigate={navigate}
         // TODO: ChildEdit is complicated and heavily relies on RN
         // renderChildEdit={props => <ChildEdit {...props} />}
         renderChildEdit={props => {}}
@@ -848,16 +852,28 @@ function TransactionEditUnconnected(props) {
   );
 }
 
-export const TransactionEdit = connect(
-  state => ({
-    categories: state.queries.categories.list,
-    payees: state.queries.payees,
-    lastTransaction: state.queries.lastTransaction,
-    accounts: state.queries.accounts,
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  }),
-  actions,
-)(TransactionEditUnconnected);
+export const TransactionEdit = props => {
+  const { list: categories } = useCategories();
+  const payees = useSelector(state => state.queries.payees);
+  const lastTransaction = useSelector(state => state.queries.lastTransaction);
+  const accounts = useSelector(state => state.queries.accounts);
+  const dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
+  const actions = useActions();
+
+  return (
+    <TransactionEditUnconnected
+      {...props}
+      {...actions}
+      categories={categories}
+      payees={payees}
+      lastTransaction={lastTransaction}
+      accounts={accounts}
+      dateFormat={dateFormat}
+    />
+  );
+};
 
 class Transaction extends PureComponent {
   render() {
@@ -918,17 +934,18 @@ class Transaction extends PureComponent {
           backgroundColor: 'white',
           border: 'none',
           width: '100%',
-          '&:active': { opacity: 0.1 },
         }}
       >
         <ListItem
-          style={[
-            { flex: 1, height: 60, padding: '5px 10px' }, // remove padding when Button is back
-            isPreview && { backgroundColor: colors.n11 },
-            style,
-          ]}
+          style={{
+            flex: 1,
+            height: 60,
+            padding: '5px 10px', // remove padding when Button is back
+            ...(isPreview && { backgroundColor: colors.n11 }),
+            ...style,
+          }}
         >
-          <View style={[{ flex: 1 }]}>
+          <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               {schedule && (
                 <ArrowsSynchronize
@@ -941,15 +958,16 @@ class Transaction extends PureComponent {
                 />
               )}
               <TextOneLine
-                style={[
-                  styles.text,
-                  textStyle,
-                  { fontSize: 14, fontWeight: added ? '600' : '400' },
-                  prettyDescription === '' && {
+                style={{
+                  ...styles.text,
+                  ...textStyle,
+                  fontSize: 14,
+                  fontWeight: added ? '600' : '400',
+                  ...(prettyDescription === '' && {
                     color: colors.n6,
                     fontStyle: 'italic',
-                  },
-                ]}
+                  }),
+                }}
               >
                 {prettyDescription || 'Empty'}
               </TextOneLine>
@@ -990,11 +1008,13 @@ class Transaction extends PureComponent {
             )}
           </View>
           <Text
-            style={[
-              styles.text,
-              textStyle,
-              { marginLeft: 25, marginRight: 5, fontSize: 14 },
-            ]}
+            style={{
+              ...styles.text,
+              ...textStyle,
+              marginLeft: 25,
+              marginRight: 5,
+              fontSize: 14,
+            }}
           >
             {integerToCurrency(amount)}
           </Text>
@@ -1036,12 +1056,7 @@ export class TransactionList extends Component {
   });
 
   render() {
-    const {
-      transactions,
-      scrollProps = {},
-      onLoadMore,
-      // refreshControl
-    } = this.props;
+    const { transactions, scrollProps = {}, onLoadMore } = this.props;
 
     const sections = this.makeData(transactions);
 
@@ -1058,7 +1073,7 @@ export class TransactionList extends Component {
         >
           {sections.length === 0 ? (
             <Section>
-              <Item>
+              <Item textValue="No transactions">
                 <div
                   style={{
                     display: 'flex',
@@ -1075,7 +1090,7 @@ export class TransactionList extends Component {
             return (
               <Section
                 title={
-                  <span data-vrt-mask>
+                  <span>
                     {monthUtils.format(section.date, 'MMMM dd, yyyy')}
                   </span>
                 }
@@ -1172,7 +1187,7 @@ function ListBoxSection({ section, state }) {
       {section.rendered && (
         <div
           {...headingProps}
-          {...css(styles.smallText, {
+          className={`${css(styles.smallText, {
             backgroundColor: colors.n10,
             borderBottom: `1px solid ${colors.n9}`,
             borderTop: `1px solid ${colors.n9}`,
@@ -1185,7 +1200,7 @@ function ListBoxSection({ section, state }) {
             top: '0',
             width: '100%',
             zIndex: zIndices.SECTION_HEADING,
-          })}
+          })}`}
         >
           {section.rendered}
         </div>
@@ -1240,16 +1255,14 @@ const ROW_HEIGHT = 50;
 const ListItem = forwardRef(({ children, style, ...props }, ref) => {
   return (
     <View
-      style={[
-        {
-          height: ROW_HEIGHT,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingLeft: 10,
-          paddingRight: 10,
-        },
-        style,
-      ]}
+      style={{
+        height: ROW_HEIGHT,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingLeft: 10,
+        paddingRight: 10,
+        ...style,
+      }}
       ref={ref}
       {...props}
     >

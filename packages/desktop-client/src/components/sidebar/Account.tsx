@@ -1,10 +1,10 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
 
 import { css } from 'glamor';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
-import { styles, theme } from '../../style';
+import { styles, theme, type CSSProperties } from '../../style';
 import AlignedText from '../common/AlignedText';
 import AnchorLink from '../common/AnchorLink';
 import View from '../common/View';
@@ -18,7 +18,7 @@ import {
 import { type Binding } from '../spreadsheet';
 import CellValue from '../spreadsheet/CellValue';
 
-const accountNameStyle = {
+export const accountNameStyle: CSSProperties = {
   marginTop: -2,
   marginBottom: 2,
   paddingTop: 4,
@@ -80,18 +80,19 @@ function Account({
   });
 
   return (
-    <View innerRef={dropRef} style={[{ flexShrink: 0 }, outerStyle]}>
+    <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>
       <View>
         <DropHighlight pos={dropPos} />
         <View innerRef={dragRef}>
           <AnchorLink
             to={to}
-            style={[
-              accountNameStyle,
-              style,
-              { position: 'relative', borderLeft: '4px solid transparent' },
-              updated && { fontWeight: 700 },
-            ]}
+            style={{
+              ...accountNameStyle,
+              ...style,
+              position: 'relative',
+              borderLeft: '4px solid transparent',
+              ...(updated && { fontWeight: 700 }),
+            }}
             activeStyle={{
               borderLeft: '4px solid ' + theme.sidebarItemAccentSelected,
               color: theme.sidebarItemTextSelected,
@@ -118,8 +119,7 @@ function Account({
               }}
             >
               <div
-                className="dot"
-                {...css({
+                className={`dot ${css({
                   marginRight: 3,
                   width: 5,
                   height: 5,
@@ -130,7 +130,7 @@ function Account({
                   marginLeft: 2,
                   transition: 'transform .3s',
                   opacity: connected ? 1 : 0,
-                })}
+                })}`}
               />
             </View>
 
@@ -145,5 +145,4 @@ function Account({
   );
 }
 
-export { accountNameStyle };
 export default Account;

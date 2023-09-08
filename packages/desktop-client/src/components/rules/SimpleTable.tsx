@@ -1,10 +1,6 @@
-import React, {
-  useEffect,
-  useRef,
-  type CSSProperties,
-  type ReactChild,
-} from 'react';
+import React, { type ReactNode, useEffect, useRef } from 'react';
 
+import { type CSSProperties } from '../../style';
 import View from '../common/View';
 
 type SimpleTableProps = {
@@ -12,7 +8,7 @@ type SimpleTableProps = {
   loadMore?: () => void;
   style?: CSSProperties;
   onHoverLeave?: () => void;
-  children: ReactChild;
+  children: ReactNode;
 };
 
 export default function SimpleTable({
@@ -44,14 +40,12 @@ export default function SimpleTable({
 
   return (
     <View
-      style={[
-        {
-          flex: 1,
-          outline: 'none',
-          '& .animated .animated-row': { transition: '.25s transform' },
-        },
-        style,
-      ]}
+      style={{
+        flex: 1,
+        outline: 'none',
+        '& .animated .animated-row': { transition: '.25s transform' },
+        ...style,
+      }}
       tabIndex={1}
       data-testid="table"
     >

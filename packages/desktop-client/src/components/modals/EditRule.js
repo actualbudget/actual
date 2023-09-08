@@ -78,7 +78,7 @@ function getTransactionFields(conditions, actions) {
 
 export function FieldSelect({ fields, style, value, onChange }) {
   return (
-    <View style={[{ color: theme.pageTextPositive }, style]}>
+    <View style={{ color: theme.pageTextPositive, ...style }}>
       <Select
         bare
         options={fields}
@@ -116,7 +116,7 @@ export function OpSelect({
       value={value}
       onChange={value => onChange('op', value)}
       line={line}
-      style={[{ minHeight: '1px' }, ...style]}
+      style={{ minHeight: '1px', ...style }}
       wrapperStyle={wrapperStyle}
     />
   );
@@ -399,14 +399,14 @@ function StageButton({ selected, children, style, onSelect }) {
   return (
     <Button
       type="bare"
-      style={[
-        { fontSize: 'inherit' },
-        selected && {
+      style={{
+        fontSize: 'inherit',
+        ...(selected && {
           backgroundColor: theme.pillBackgroundSelected,
           ':hover': { backgroundColor: theme.pillBackgroundSelected },
-        },
-        style,
-      ]}
+        }),
+        ...style,
+      }}
       onClick={onSelect}
     >
       {children}
@@ -765,7 +765,7 @@ export default function EditRule({
       title="Rule"
       padding={0}
       {...modalProps}
-      style={[modalProps.style, { flex: 'inherit', maxWidth: '90%' }]}
+      style={{ ...modalProps.style, flex: 'inherit', maxWidth: '90%' }}
     >
       {() => (
         <View

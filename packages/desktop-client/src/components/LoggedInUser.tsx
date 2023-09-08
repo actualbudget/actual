@@ -1,8 +1,8 @@
-import React, { useState, useEffect, type CSSProperties } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../hooks/useActions';
-import { colors, styles } from '../style';
+import { colors, styles, type CSSProperties } from '../style';
 
 import Button from './common/Button';
 import Menu from './common/Menu';
@@ -77,14 +77,12 @@ export default function LoggedInUser({
   if (loading && serverUrl) {
     return (
       <Text
-        style={[
-          {
-            color: colors.n5,
-            fontStyle: 'italic',
-          },
-          styles.delayedFadeIn,
-          style,
-        ]}
+        style={{
+          color: colors.n5,
+          fontStyle: 'italic',
+          ...styles.delayedFadeIn,
+          ...style,
+        }}
       >
         Connecting...
       </Text>
@@ -92,7 +90,7 @@ export default function LoggedInUser({
   }
 
   return (
-    <View style={[{ flexDirection: 'row', alignItems: 'center' }, style]}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
       <Button type="bare" onClick={() => setMenuOpen(true)} style={{ color }}>
         {serverMessage()}
       </Button>

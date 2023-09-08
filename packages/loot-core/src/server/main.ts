@@ -1628,8 +1628,12 @@ handlers['get-did-bootstrap'] = async function () {
 handlers['subscribe-needs-bootstrap'] = async function ({
   url,
 }: { url? } = {}) {
-  if (!getServer(url)) {
-    return { bootstrapped: true, hasServer: false };
+  try {
+    if (!getServer(url)) {
+      return { bootstrapped: true, hasServer: false };
+    }
+  } catch (err) {
+    return { error: 'get-server-failure' };
   }
 
   let res;

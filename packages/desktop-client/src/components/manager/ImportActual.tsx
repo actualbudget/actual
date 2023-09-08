@@ -61,7 +61,7 @@ function Import({ modalProps }: ImportProps) {
       style={{ width: 400 }}
     >
       {() => (
-        <View style={[styles.smallText, { lineHeight: 1.5, marginTop: 20 }]}>
+        <View style={{ ...styles.smallText, lineHeight: 1.5, marginTop: 20 }}>
           {error && (
             <Block style={{ color: colors.r4, marginBottom: 15 }}>
               {getErrorMessage(error)}

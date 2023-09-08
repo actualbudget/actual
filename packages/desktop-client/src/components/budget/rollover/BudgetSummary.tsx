@@ -18,8 +18,8 @@ import View from '../../common/View';
 import NotesButton from '../../NotesButton';
 import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
-import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import useFormat from '../../spreadsheet/useFormat';
 import useSheetName from '../../spreadsheet/useSheetName';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
@@ -34,27 +34,26 @@ type TotalsListProps = {
   collapsed?: boolean;
 };
 function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
+  const format = useFormat();
   return (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          lineHeight: 1.5,
-          justifyContent: 'center',
-        },
-        !collapsed && {
+      style={{
+        flexDirection: 'row',
+        lineHeight: 1.5,
+        justifyContent: 'center',
+        ...(!collapsed && {
           padding: '5px 0',
           marginTop: 17,
           backgroundColor: colors.n11,
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor: colors.n9,
-        },
-        collapsed && {
+        }),
+        ...(collapsed && {
           padding: 7,
-        },
-        styles.smallText,
-      ]}
+        }),
+        ...styles.smallText,
+      }}
     >
       <View
         style={{
@@ -107,7 +106,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
 
         <CellValue
@@ -117,7 +116,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
 
         <CellValue
@@ -128,13 +127,13 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(Math.abs(n), 'financial');
             return n >= 0 ? '-' + v : '+' + v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
       </View>
 
       <View>
         <Block>Available Funds</Block>
-        <Block data-vrt-mask>Overspent in {prevMonthName}</Block>
+        <Block>Overspent in {prevMonthName}</Block>
         <Block>Budgeted</Block>
         <Block>For Next Month</Block>
       </View>
@@ -160,6 +159,7 @@ function ToBudget({
     name: rolloverBudget.toBudget,
     value: 0,
   });
+  let format = useFormat();
   let availableValue = parseInt(sheetValue);
   let num = isNaN(availableValue) ? 0 : availableValue;
   let isNegative = num < 0;
@@ -180,7 +180,7 @@ function ToBudget({
             <Block
               onClick={() => setMenuOpen('actions')}
               data-cellname={sheetName}
-              {...css([
+              className={`${css([
                 styles.veryLargeText,
                 {
                   fontWeight: 400,
@@ -193,7 +193,7 @@ function ToBudget({
                     borderColor: isNegative ? colors.r4 : colors.p5,
                   },
                 },
-              ])}
+              ])}`}
             >
               {format(num, 'financial')}
             </Block>
@@ -310,10 +310,10 @@ export function BudgetSummary({
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
-          style={[
-            { padding: '0 13px' },
-            collapsed ? { margin: '10px 0' } : { marginTop: 16 },
-          ]}
+          style={{
+            padding: '0 13px',
+            ...(collapsed ? { margin: '10px 0' } : { marginTop: 16 }),
+          }}
         >
           <View
             style={{
@@ -337,7 +337,7 @@ export function BudgetSummary({
           </View>
 
           <div
-            {...css([
+            className={`${css([
               {
                 textAlign: 'center',
                 marginTop: 3,
@@ -346,8 +346,7 @@ export function BudgetSummary({
                 textDecorationSkip: 'ink',
               },
               currentMonth === month && { fontWeight: 'bold' },
-            ])}
-            data-vrt-mask
+            ])}`}
           >
             {monthUtils.format(month, 'MMMM')}
           </div>

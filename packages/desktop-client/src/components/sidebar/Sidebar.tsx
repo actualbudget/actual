@@ -1,4 +1,4 @@
-import React, { type ReactNode, type CSSProperties } from 'react';
+import React, { type ReactNode } from 'react';
 
 import * as Platform from 'loot-core/src/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
@@ -6,7 +6,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 import Reports from '../../icons/v1/Reports';
 import Wallet from '../../icons/v1/Wallet';
 import CalendarIcon from '../../icons/v2/Calendar';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import View from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
@@ -67,39 +67,35 @@ function Sidebar({
 
   return (
     <View
-      style={[
-        {
-          width: SIDEBAR_WIDTH,
-          color: theme.sidebarItemText,
-          backgroundColor: theme.sidebarBackground,
-          '& .float': {
-            opacity: isFloating ? 1 : 0,
-            transition: 'opacity .25s, width .25s',
-            width: hasWindowButtons || isFloating ? null : 0,
-          },
-          '&:hover .float': {
-            opacity: 1,
-            width: hasWindowButtons ? null : 'auto',
-          },
+      style={{
+        width: SIDEBAR_WIDTH,
+        color: theme.sidebarItemText,
+        backgroundColor: theme.sidebarBackground,
+        '& .float': {
+          opacity: isFloating ? 1 : 0,
+          transition: 'opacity .25s, width .25s',
+          width: hasWindowButtons || isFloating ? null : 0,
         },
-        style,
-      ]}
+        '&:hover .float': {
+          opacity: 1,
+          width: hasWindowButtons ? null : 'auto',
+        },
+        ...style,
+      }}
     >
       <View
-        style={[
-          {
-            paddingTop: 35,
-            height: 30,
-            flexDirection: 'row',
-            alignItems: 'center',
-            margin: '0 8px 23px 20px',
-            transition: 'padding .4s',
-          },
-          hasWindowButtons && {
+        style={{
+          paddingTop: 35,
+          height: 30,
+          flexDirection: 'row',
+          alignItems: 'center',
+          margin: '0 8px 23px 20px',
+          transition: 'padding .4s',
+          ...(hasWindowButtons && {
             paddingTop: 20,
             justifyContent: 'flex-start',
-          },
-        ]}
+          }),
+        }}
       >
         {budgetName}
 
