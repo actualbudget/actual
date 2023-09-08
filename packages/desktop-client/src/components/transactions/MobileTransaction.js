@@ -506,6 +506,9 @@ class TransactionEditInner extends PureComponent {
                 payees={payees}
                 accounts={accounts}
                 value={payeeId}
+                tooltipProps={{
+                  position: 'top-stretch',
+                }}
                 inputProps={{
                   inputRef: this.payeeInputRef,
                   style: {
@@ -572,6 +575,9 @@ class TransactionEditInner extends PureComponent {
                   tableBehavior={true}
                   // Split not yet supported.
                   showSplitOption={false} // {!transaction.is_child && !transaction.is_parent}
+                  tooltipProps={{
+                    position: 'top-stretch',
+                  }}
                   inputProps={{
                     inputRef: this.categoryInputRef,
                     disabled: account?.offbudget || transferAcct,
@@ -618,6 +624,9 @@ class TransactionEditInner extends PureComponent {
                 accounts={accounts}
                 tableBehavior={true}
                 // focused={focusedField === 'account'}
+                tooltipProps={{
+                  position: 'top-stretch',
+                }}
                 inputProps={{
                   disabled: !isAdding,
                   style: {
