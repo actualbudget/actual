@@ -14,7 +14,7 @@ import Text from '../common/Text';
 import View from '../common/View';
 
 export function getStatusProps(status: Status) {
-  let color, backgroundColor, Icon;
+  let color, backgroundColor, borderColor, Icon;
 
   switch (status) {
     case 'missed':
@@ -66,9 +66,9 @@ export function getStatusProps(status: Status) {
       Icon = CheckCircle1;
       break;
     default:
-      color = theme.buttonDisabledText;
-      backgroundColor = theme.buttonDisabledBackground;
-      borderColor = theme.buttonDisabledBorder;
+      color = theme.buttonNormalDisabledText;
+      backgroundColor = theme.buttonNormalDisabledBackground;
+      borderColor = theme.buttonNormalDisabledBorder;
       Icon = CheckCircleHollow;
       break;
   }
