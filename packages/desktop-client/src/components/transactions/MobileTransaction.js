@@ -506,18 +506,21 @@ class TransactionEditInner extends PureComponent {
                 accounts={accounts}
                 value={payeeId}
                 inputProps={{
-                  // inputRef: this.payeeInputRef,
+                  inputRef: this.payeeInputRef,
                   style: {
                     height: 40,
                   },
-                  // onPointerUp: e => this.payeeInputRef.current?.focus(),
                   'data-testid': 'payee-field',
                 }}
                 // showManagePayees={true}
                 tableBehavior={true}
                 // focused={focusedField === 'payee'}
-                onUpdate={payeeId => this.onEdit(transaction, 'payee', payeeId)}
-                onSelect={payeeId => this.onEdit(transaction, 'payee', payeeId)}
+                // onUpdate={payeeId => this.onEdit(transaction, 'payee', payeeId)}
+                onSelect={payeeId => {
+                  this.onEdit(transaction, 'payee', payeeId);
+                  // Go to next.
+                  this.categoryInputRef.current?.focus();
+                }}
                 // onManagePayees={() => onManagePayees(payeeId)}
                 isCreatable
                 menuPortalTarget={undefined}
@@ -569,6 +572,7 @@ class TransactionEditInner extends PureComponent {
                   // Split not yet supported.
                   showSplitOption={false} // {!transaction.is_child && !transaction.is_parent}
                   inputProps={{
+                    inputRef: this.categoryInputRef,
                     disabled: account?.offbudget || transferAcct,
                     style: {
                       ...((account?.offbudget || transferAcct) && {
@@ -576,19 +580,19 @@ class TransactionEditInner extends PureComponent {
                       }),
                       height: 40,
                     },
-                    // inputRef: this.categoryInputRef,
-                    // onPointerUp: e => this.categoryInputRef.current?.focus(),
                     'data-testid': 'category-field',
                   }}
                   groupHeaderStyle={autocompletePaddingStyle}
                   categoryListItemStyle={autocompletePaddingStyle}
                   splitButtonStyle={autocompletePaddingStyle}
-                  onUpdate={categoryId =>
-                    this.onEdit(transaction, 'category', categoryId)
-                  }
-                  onSelect={categoryId =>
-                    this.onEdit(transaction, 'category', categoryId)
-                  }
+                  // onUpdate={categoryId =>
+                  //   this.onEdit(transaction, 'category', categoryId)
+                  // }
+                  onSelect={categoryId => {
+                    this.onEdit(transaction, 'category', categoryId);
+                    // Go to next.
+                    this.accountInputRef.current?.focus();
+                  }}
                   menuPortalTarget={undefined}
                 />
               ) : (
@@ -621,13 +625,13 @@ class TransactionEditInner extends PureComponent {
                     }),
                     height: 40,
                   },
-                  ref: this.accountInputRef,
+                  inputRef: this.accountInputRef,
                   onPointerUp: e => this.accountInputRef.current?.focus(),
                   'data-testid': 'account-field',
                 }}
-                onUpdate={payeeId =>
-                  this.onEdit(transaction, 'account', payeeId)
-                }
+                // onUpdate={payeeId =>
+                //   this.onEdit(transaction, 'account', payeeId)
+                // }
                 onSelect={payeeId =>
                   this.onEdit(transaction, 'account', payeeId)
                 }
