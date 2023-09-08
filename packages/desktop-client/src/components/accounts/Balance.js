@@ -12,11 +12,12 @@ import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
-import format from '../spreadsheet/format';
+import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { isPreviewId } from '../transactions/TransactionsTable';
 
 function DetailedBalance({ name, balance, isExactBalance = true }) {
+  const format = useFormat();
   return (
     <Text
       style={{

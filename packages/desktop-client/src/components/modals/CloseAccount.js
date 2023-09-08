@@ -4,7 +4,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
 import FormError from '../common/FormError';
 import LinkButton from '../common/LinkButton';

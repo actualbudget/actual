@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import * as Platform from 'loot-core/src/client/platform';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
@@ -52,14 +51,12 @@ export const MonthPicker = ({
 
   return (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        },
-        style,
-      ]}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        ...style,
+      }}
     >
       <View
         innerRef={containerRef}
@@ -95,67 +92,62 @@ export const MonthPicker = ({
           return (
             <View
               key={month}
-              style={[
-                {
-                  padding: '3px 3px',
-                  width: size === 'big' ? '35px' : '20px',
-                  textAlign: 'center',
-                  userSelect: 'none',
-                  cursor: 'default',
-                  borderRadius: 2,
-                  border: 'none',
-                },
-                !isMonthBudgeted && {
+              style={{
+                padding: '3px 3px',
+                width: size === 'big' ? '35px' : '20px',
+                textAlign: 'center',
+                userSelect: 'none',
+                cursor: 'default',
+                borderRadius: 2,
+                border: 'none',
+                ...(!isMonthBudgeted && {
                   textDecoration: 'line-through',
                   color: colors.n7,
-                },
-                styles.smallText,
-                selected && {
+                }),
+                ...styles.smallText,
+                ...(selected && {
                   backgroundColor: colors.p6,
                   color: 'white',
-                },
-                (hovered || selected) && {
+                }),
+                ...((hovered || selected) && {
                   borderRadius: 0,
                   cursor: 'pointer',
-                },
-                hovered &&
+                }),
+                ...(hovered &&
                   !selected && {
                     backgroundColor: 'rgba(100, 100, 100, .15)',
-                  },
-                hovered &&
+                  }),
+                ...(hovered &&
                   selected && {
                     backgroundColor: colors.p7,
-                  },
-                (idx === firstSelectedIndex ||
+                  }),
+                ...((idx === firstSelectedIndex ||
                   (idx === hoverId && !selected)) && {
                   borderTopLeftRadius: 2,
                   borderBottomLeftRadius: 2,
-                },
-                (idx === lastSelectedIndex ||
+                }),
+                ...((idx === lastSelectedIndex ||
                   (idx === lastHoverId && !selected)) && {
                   borderTopRightRadius: 2,
                   borderBottomRightRadius: 2,
-                },
-                current && { fontWeight: 'bold' },
-              ]}
+                }),
+                ...(current && { fontWeight: 'bold' }),
+              }}
               onClick={() => onSelect(month)}
               onMouseEnter={() => setHoverId(idx)}
               onMouseLeave={() => setHoverId(null)}
-              data-vrt-mask
             >
               {size === 'small' ? monthName[0] : monthName}
-              {!Platform.isPlaywright && showYearHeader && (
+              {showYearHeader && (
                 <View
-                  style={[
-                    {
-                      position: 'absolute',
-                      top: -14,
-                      left: 0,
-                      fontSize: 10,
-                      fontWeight: 'bold',
-                      color: isMonthBudgeted ? '#272630' : colors.n7,
-                    },
-                  ]}
+                  style={{
+                    position: 'absolute',
+                    top: -14,
+                    left: 0,
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    color: isMonthBudgeted ? '#272630' : colors.n7,
+                  }}
                 >
                   {year}
                 </View>

@@ -12,5 +12,4 @@ export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
   ? 'mac'
   : 'linux';
 export const env: 'web' | 'mobile' | 'unknown' = 'web';
-export const isBrowser =
-  typeof window !== 'undefined' && !!window.Actual?.IS_FAKE_WEB;
+export const isBrowser = true;

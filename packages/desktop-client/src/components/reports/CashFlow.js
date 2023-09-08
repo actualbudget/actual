@@ -95,7 +95,7 @@ function CashFlow() {
   const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
 
   return (
-    <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
+    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header
         title="Cash Flow"
         allMonths={allMonths}

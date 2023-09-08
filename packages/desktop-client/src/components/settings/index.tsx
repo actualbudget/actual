@@ -44,16 +44,17 @@ function About() {
         your finances.
       </Text>
       <View
-        style={[
-          { flexDirection: 'column', gap: 10 },
-          media(`(min-width: ${tokens.breakpoint_small})`, {
-            display: 'grid',
-            gridTemplateRows: '1fr 1fr',
-            gridTemplateColumns: '50% 50%',
-            columnGap: '2em',
-            gridAutoFlow: 'column',
-          }),
-        ]}
+        style={{
+          flexDirection: 'column',
+          gap: 10,
+        }}
+        className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
+          display: 'grid',
+          gridTemplateRows: '1fr 1fr',
+          gridTemplateColumns: '50% 50%',
+          columnGap: '2em',
+          gridAutoFlow: 'column',
+        })}`}
         data-vrt-mask
       >
         <Text>Client version: v{window.Actual.ACTUAL_VERSION}</Text>
@@ -133,7 +134,7 @@ export default function Settings() {
   const { isNarrowWidth } = useResponsive();
   const themesFlag = useFeatureFlag('themes');
 
-  useSetThemeColor(theme.menuItemBackground);
+  useSetThemeColor(theme.mobileSettingsViewTheme);
   return (
     <View
       style={{

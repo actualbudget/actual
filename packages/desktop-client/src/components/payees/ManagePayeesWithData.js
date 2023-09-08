@@ -5,13 +5,14 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { applyChanges } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 
 import { ManagePayees } from '.';
 
 export default function ManagePayeesWithData({ initialSelectedIds }) {
   let initialPayees = useSelector(state => state.queries.payees);
   let lastUndoState = useSelector(state => state.app.lastUndoState);
-  let categoryGroups = useSelector(state => state.queries.categories.grouped);
+  let { grouped: categoryGroups } = useCategories();
 
   let { initiallyLoadPayees, getPayees, setLastUndoState, pushModal } =
     useActions();

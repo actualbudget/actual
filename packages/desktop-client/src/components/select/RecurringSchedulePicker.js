@@ -449,7 +449,10 @@ export default function RecurringSchedulePicker({
 
   return (
     <View>
-      <Button {...getOpenEvents()} style={[{ textAlign: 'left' }, buttonStyle]}>
+      <Button
+        {...getOpenEvents()}
+        style={{ textAlign: 'left', ...buttonStyle }}
+      >
         {value ? getRecurringDescription(value) : 'No recurring date'}
       </Button>
       {isOpen && (

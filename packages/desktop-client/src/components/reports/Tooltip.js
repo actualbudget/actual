@@ -43,7 +43,7 @@ class Tooltip extends Component {
 
     return ReactDOM.createPortal(
       <div
-        {...css(
+        className={`${css(
           {
             position: 'absolute',
             top: 0,
@@ -75,7 +75,7 @@ class Tooltip extends Component {
               content: '" "',
             }),
           style,
-        )}
+        )}`}
       >
         {datum.premadeLabel}
       </div>,

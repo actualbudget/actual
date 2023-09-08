@@ -12,18 +12,16 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <View
         {...props}
         ref={ref}
-        style={[
-          {
-            marginTop: 15,
-            marginLeft: 5,
-            marginRight: 5,
-            borderRadius: 6,
+        style={{
+          marginTop: 15,
+          marginLeft: 5,
+          marginRight: 5,
+          borderRadius: 6,
             backgroundColor: theme.cardBackground,
             borderColor: theme.cardBorder,
             boxShadow: '0 1px 2px ' + theme.cardShadow,
-          },
-          props.style,
-        ]}
+          ...props.style,
+        }}
       >
         <View
           style={{

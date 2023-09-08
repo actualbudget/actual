@@ -13,17 +13,15 @@ import {
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
 import { pagedQuery } from 'loot-core/src/client/query-helpers';
-import { send, listen } from 'loot-core/src/platform/client/fetch';
+import { listen } from 'loot-core/src/platform/client/fetch';
 import {
   isPreviewId,
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
-import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
-import SyncRefresh from '../SyncRefresh';
 
 import AccountDetails from './MobileAccountDetails';
 
@@ -71,7 +69,6 @@ let paged;
 
 export default function Account(props) {
   const accounts = useSelector(state => state.queries.accounts);
-  const { syncAndDownload } = useActions();
 
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
@@ -167,7 +164,7 @@ export default function Account(props) {
 
   useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
 
-  useSetThemeColor(theme.altMenuItemTextHover);
+  useSetThemeColor(theme.mobileAccountViewTheme);
 
   if (!accounts || !accounts.length) {
     return null;
@@ -185,39 +182,10 @@ export default function Account(props) {
   };
 
   const onSelectTransaction = transaction => {
-    if (isPreviewId(transaction.id)) {
-      let parts = transaction.id.split('/');
-      let scheduleId = parts[1];
-
-      let options = ['Post transaction', 'Skip scheduled date', 'Cancel'];
-      let cancelButtonIndex = 2;
-
-      props.showActionSheetWithOptions(
-        {
-          options,
-          cancelButtonIndex,
-        },
-        buttonIndex => {
-          switch (buttonIndex) {
-            case 0:
-              // Post
-              send('schedule/post-transaction', { id: scheduleId });
-              break;
-            case 1:
-              // Skip
-              send('schedule/skip-next-date', { id: scheduleId });
-              break;
-            default:
-          }
-        },
-      );
-    } else {
+    // details of how the native app used to handle preview transactions here can be found at commit 05e58279
+    if (!isPreviewId(transaction.id)) {
       navigate(`transactions/${transaction.id}`);
     }
-  };
-
-  const onRefresh = async () => {
-    await syncAndDownload();
   };
 
   let balance = queries.accountBalance(account);
@@ -225,45 +193,35 @@ export default function Account(props) {
   let hideFraction = state.prefs.hideFraction || false;
 
   return (
-    <SyncRefresh onSync={onRefresh}>
-      {({ refreshing, onRefresh }) => (
-        <SchedulesProvider
-          transform={getSchedulesTransform(accountId, searchText !== '')}
-        >
-          <PreviewTransactions accountId={props.accountId}>
-            {prependTransactions =>
-              prependTransactions == null ? null : (
-                <AccountDetails
-                  // This key forces the whole table rerender when the number
-                  // format changes
-                  {...state}
-                  {...actionCreators}
-                  key={numberFormat + hideFraction}
-                  account={account}
-                  accounts={accounts}
-                  categories={categories.list}
-                  payees={state.payees}
-                  transactions={transactions}
-                  prependTransactions={prependTransactions || []}
-                  balance={balance}
-                  isNewTransaction={isNewTransaction}
-                  // refreshControl={
-                  //   <RefreshControl
-                  //     refreshing={refreshing}
-                  //     onRefresh={onRefresh}
-                  //   />
-                  // }
-                  onLoadMore={() => {
-                    paged?.fetchNext();
-                  }}
-                  onSearch={onSearch}
-                  onSelectTransaction={onSelectTransaction}
-                />
-              )
-            }
-          </PreviewTransactions>
-        </SchedulesProvider>
-      )}
-    </SyncRefresh>
+    <SchedulesProvider
+      transform={getSchedulesTransform(accountId, searchText !== '')}
+    >
+      <PreviewTransactions accountId={props.accountId}>
+        {prependTransactions =>
+          prependTransactions == null ? null : (
+            <AccountDetails
+              // This key forces the whole table rerender when the number
+              // format changes
+              {...state}
+              {...actionCreators}
+              key={numberFormat + hideFraction}
+              account={account}
+              accounts={accounts}
+              categories={categories.list}
+              payees={state.payees}
+              transactions={transactions}
+              prependTransactions={prependTransactions || []}
+              balance={balance}
+              isNewTransaction={isNewTransaction}
+              onLoadMore={() => {
+                paged?.fetchNext();
+              }}
+              onSearch={onSearch}
+              onSelectTransaction={onSelectTransaction}
+            />
+          )
+        }
+      </PreviewTransactions>
+    </SchedulesProvider>
   );
 }

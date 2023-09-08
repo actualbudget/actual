@@ -159,17 +159,15 @@ class AmountInput extends PureComponent {
 
     return (
       <View
-        style={[
-          {
-            justifyContent: 'center',
-            borderWidth: 1,
-            borderColor: theme.pillBorderSelected,
-            borderRadius: 4,
-            padding: 5,
-            backgroundColor: 'white',
-          },
-          style,
-        ]}
+        style={{
+          justifyContent: 'center',
+          borderWidth: 1,
+          borderColor: theme.pillBorderSelected,
+          borderRadius: 4,
+          padding: 5,
+          backgroundColor: 'white',
+          ...style,
+        }}
       >
         <View style={{ overflowY: 'auto' }}>{input}</View>
 
@@ -251,21 +249,19 @@ export class FocusableAmountInput extends PureComponent {
           onChange={this.onChange}
           onBlur={this.onBlur}
           focused={focused}
-          style={[
-            {
-              width: 80,
-              transform: [{ translateX: 6 }],
-              justifyContent: 'center',
-            },
-            style,
-            focusedStyle,
-            !focused && {
+          style={{
+            width: 80,
+            transform: [{ translateX: 6 }],
+            justifyContent: 'center',
+            ...style,
+            ...focusedStyle,
+            ...(!focused && {
               opacity: 0,
               position: 'absolute',
               top: 0,
-            },
-          ]}
-          textStyle={[{ fontSize: 15, textAlign: 'right' }, textStyle]}
+            }),
+          }}
+          textStyle={{ fontSize: 15, textAlign: 'right', ...textStyle }}
         />
 
         <View>
@@ -286,29 +282,25 @@ export class FocusableAmountInput extends PureComponent {
             // Defines how far touch can start away from the button
             // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
             {...buttonProps}
-            style={[
-              buttonProps && buttonProps.style,
-              focused && { display: 'none' },
-              {
-                ':hover': {
-                  backgroundColor: 'transparent',
-                },
+            style={{
+              ...(buttonProps && buttonProps.style),
+              ...(focused && { display: 'none' }),
+              ':hover': {
+                backgroundColor: 'transparent',
               },
-            ]}
+            }}
             type="bare"
           >
             <View
-              style={[
-                {
-                  borderBottomWidth: 1,
-                  borderColor: '#e0e0e0',
-                  justifyContent: 'center',
-                  transform: [{ translateY: 0.5 }],
-                },
-                style,
-              ]}
+              style={{
+                borderBottomWidth: 1,
+                borderColor: '#e0e0e0',
+                justifyContent: 'center',
+                transform: [{ translateY: 0.5 }],
+                ...style,
+              }}
             >
-              <Text style={[{ fontSize: 15, userSelect: 'none' }, textStyle]}>
+              <Text style={{ fontSize: 15, userSelect: 'none', ...textStyle }}>
                 {amountToCurrency(Math.abs(this.props.value))}
               </Text>
             </View>
