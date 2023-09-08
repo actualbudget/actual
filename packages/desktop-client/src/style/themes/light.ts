@@ -124,7 +124,7 @@ export const buttonNormalShadow = 'rgba(0, 0, 0, 0.2)';
 
 export const altbuttonMenuBackground = colorPalette.navy100;
 export const buttonNormalSelectedText = colorPalette.white;
-export const buttonNormalSelectedBackground = colorPalette.navy500;
+export const buttonNormalSelectedBackground = colorPalette.blue600;
 
 export const buttonNormalDisabledText = colorPalette.navy300;
 export const buttonNormalDisabledBackground = buttonNormalBackground;
