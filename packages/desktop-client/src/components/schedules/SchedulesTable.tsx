@@ -231,7 +231,7 @@ export function SchedulesTable({
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
             {item._date && item._date.frequency && (
-              <Check style={{ width: 13, height: 13, color: 'inherit' }} />
+              <Check style={{ width: 13, height: 13 }} />
             )}
           </Field>
         )}

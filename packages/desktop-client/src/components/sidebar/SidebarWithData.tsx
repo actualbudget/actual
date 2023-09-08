@@ -88,7 +88,6 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
         type="bare"
         color={theme.buttonNormalBorder}
         style={{
-          color: theme.sidebarItemText,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,

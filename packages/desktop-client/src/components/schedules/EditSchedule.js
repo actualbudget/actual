@@ -419,7 +419,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       size="medium"
       {...modalProps}
     >
-      <Stack direction="row" style={{ marginTop: 10, color: theme.pageText }}>
+      <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
           <FormLabel title="Schedule Name" htmlFor="name-field" />
           <GenericInput

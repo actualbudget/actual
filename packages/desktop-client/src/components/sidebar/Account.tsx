@@ -94,7 +94,7 @@ function Account({
               ...(updated && { fontWeight: 700 }),
             }}
             activeStyle={{
-              borderLeft: '4px solid ' + theme.sidebarItemAccentSelected,
+              borderColor: theme.sidebarItemAccentSelected,
               color: theme.sidebarItemTextSelected,
               // This is kind of a hack, but we don't ever want the account
               // that the user is looking at to be "bolded" which means it

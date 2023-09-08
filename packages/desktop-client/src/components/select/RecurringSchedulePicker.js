@@ -172,9 +172,7 @@ function SchedulePreview({ previewDates }) {
   } else {
     content = (
       <View>
-        <Text style={{ color: theme.tableText, fontWeight: 600 }}>
-          Upcoming dates
-        </Text>
+        <Text style={{ fontWeight: 600 }}>Upcoming dates</Text>
         <Stack direction="row" spacing={4} style={{ marginTop: 10 }}>
           {previewDates.map((d, idx) => (
             <View key={idx}>

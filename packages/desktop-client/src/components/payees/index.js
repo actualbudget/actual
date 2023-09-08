@@ -222,14 +222,15 @@ const PayeeTable = forwardRef(
 );
 
 function PayeeTableHeader() {
+  let borderColor = theme.tableborder;
   let dispatchSelected = useSelectedDispatch();
   let selectedItems = useSelectedItems();
 
   return (
     <View>
       <TableHeader
-        borderColor={theme.tableborder}
         style={{
+          borderColor,
           backgroundColor: theme.tableBackground,
           color: theme.pageTextLight,
           zIndex: 200,

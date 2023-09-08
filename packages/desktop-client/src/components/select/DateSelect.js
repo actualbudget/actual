@@ -70,8 +70,7 @@ let pickerStyles = {
       textDecoration: 'underline',
     },
     '& .is-selected .pika-button': {
-      backgroundColor: theme.buttonNormalSelectedBackground,
-      color: theme.buttonNormalSelectedText,
+      backgroundColor: theme.altButtonNormalSelectedBackground,
       boxShadow: 'none',
     },
   },

@@ -14,66 +14,57 @@ import Text from '../common/Text';
 import View from '../common/View';
 
 export function getStatusProps(status: Status) {
-  let color, backgroundColor, borderColor, Icon;
+  let color, backgroundColor, Icon;
 
   switch (status) {
     case 'missed':
-      color = theme.errorText;
-      backgroundColor = theme.errorBackground;
-      borderColor = theme.errorAccent;
+      color = theme.altErrorText;
+      backgroundColor = theme.altErrorBackground;
       Icon = EditSkull1;
       break;
     case 'due':
-      color = theme.warningText;
-      backgroundColor = theme.warningBackground;
-      borderColor = theme.warningAccent;
+      color = theme.altWarningText;
+      backgroundColor = theme.altWarningBackground;
       Icon = AlertTriangle;
       break;
     case 'upcoming':
       color = theme.upcomingText;
       backgroundColor = theme.upcomingBackground;
-      borderColor = theme.upcomingAccent;
       Icon = CalendarIcon;
       break;
     case 'paid':
-      color = theme.noticeText;
-      backgroundColor = theme.noticeBackground;
-      borderColor = theme.noticeAccent;
+      color = theme.alt2NoticeText;
+      backgroundColor = theme.altNoticeBackground;
       Icon = ValidationCheck;
       break;
     case 'completed':
-      color = theme.tableText;
-      backgroundColor = theme.tableBackground;
-      borderColor = theme.tableBorder;
+      color = theme.alt2TableText;
+      backgroundColor = theme.altTableBackground;
       Icon = FavoriteStar;
       break;
     case 'pending':
-      color = theme.noticeText;
-      backgroundColor = theme.noticeBackground;
-      borderColor = theme.noticeAccent;
+      color = theme.alt3NoticeText;
+      backgroundColor = theme.alt2NoticeBackground;
       Icon = CalendarIcon;
       break;
     case 'scheduled':
-      color = theme.tableText;
-      backgroundColor = theme.tableBackground;
-      borderColor = theme.tableBorder;
+      color = theme.menuItemText;
+      backgroundColor = theme.altTableBackground;
       Icon = CalendarIcon;
       break;
     case 'cleared':
       color = theme.noticeText;
-      backgroundColor = theme.noticeBackground;
-      borderColor = theme.noticeAccent;
+      backgroundColor = theme.altTableBackground;
       Icon = CheckCircle1;
       break;
     default:
       color = theme.buttonNormalDisabledText;
-      backgroundColor = theme.buttonNormalDisabledBackground;
-      borderColor = theme.buttonNormalDisabledBorder;
+      backgroundColor = theme.altTableBackground;
       Icon = CheckCircleHollow;
       break;
   }
 
-  return { color, backgroundColor, borderColor, Icon };
+  return { color, backgroundColor, Icon };
 }
 
 type Status =
