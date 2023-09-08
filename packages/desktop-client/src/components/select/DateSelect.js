@@ -47,7 +47,7 @@ let pickerStyles = {
     },
     // month/year
     '& .pika-label': {
-      backgroundColor: theme.sidebarItemBackground,
+      backgroundColor: theme.sidebarBackground,
     },
     // Back/forward buttons
     '& .pika-prev': {
