@@ -105,7 +105,7 @@ export function StatusBadge({ status, style }: StatusBadgeProps) {
         flexShrink: 0,
         ...style,
       }}
-	>
+    >
       <Icon
         style={{
           width: 13,

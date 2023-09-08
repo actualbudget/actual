@@ -4,7 +4,7 @@ import React, {
   type SVGProps,
 } from 'react';
 
-import { type CSSProperties, theme } from '../../style';
+import { theme, type CSSProperties } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
@@ -52,17 +52,17 @@ function SecondaryItem({
       <ItemContent
         style={{
           ...accountNameStyle,
-          color: colors.n9,
+          color: theme.sidebarItemText,
           paddingLeft: 14 + indent,
           fontWeight: bold ? fontWeight : null,
-          ':hover': { backgroundColor: colors.n2 },
+          ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
         }}
         to={to}
         onClick={onClick}
         activeStyle={{
-          borderLeft: '4px solid ' + colors.p8,
+          borderLeft: '4px solid ' + theme.sidebarItemTextSelected,
           paddingLeft: 14 - 4 + indent,
-          color: colors.p8,
+          color: theme.sidebarItemTextSelected,
           fontWeight: bold ? fontWeight : null,
         }}
       >

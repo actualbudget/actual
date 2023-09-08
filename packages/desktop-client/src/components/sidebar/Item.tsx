@@ -62,16 +62,16 @@ function Item({
           paddingLeft: 19 + indent,
           paddingRight: 10,
           textDecoration: 'none',
-          color: colors.n9,
+          color: theme.sidebarItemText,
           ...(forceHover ? hoverStyle : {}),
           ':hover': hoverStyle,
         }}
         to={to}
         onClick={onClick}
         activeStyle={{
-          borderLeft: '4px solid ' + colors.p8,
+          borderLeft: '4px solid ' + theme.sidebarItemTextSelected,
           paddingLeft: 19 + indent - 4,
-          color: colors.p8,
+          color: theme.sidebarItemTextSelected,
         }}
         forceActive={forceActive}
       >

@@ -111,13 +111,13 @@ let Payee = memo(
           alignItems: 'stretch',
           ...style,
           borderColor,
-            backgroundColor: hovered
-              ? theme.tableRowBackgroundHover
-              : selected
-              ? theme.tableRowBackgroundHighlight
-              : backgroundFocus
-              ? theme.tableRowBackgroundHover
-              : theme.tableBackground,
+          backgroundColor: hovered
+            ? theme.tableRowBackgroundHover
+            : selected
+            ? theme.tableRowBackgroundHighlight
+            : backgroundFocus
+            ? theme.tableRowBackgroundHover
+            : theme.tableBackground,
           ...(selected && {
             backgroundColor: theme.tableRowBackgroundHighlight,
             zIndex: 100,
