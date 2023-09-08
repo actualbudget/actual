@@ -8,7 +8,10 @@ import Block from '../common/Block';
 function Change({ amount }) {
   return (
     <Block
-      style={{ ...styles.smallText, color: amount < 0 ? theme.errorText : theme.noticeText }}
+      style={{
+        ...styles.smallText,
+        color: amount < 0 ? theme.errorText : theme.noticeText,
+      }}
     >
       {amount >= 0 ? '+' : ''}
       {integerToCurrency(amount)}

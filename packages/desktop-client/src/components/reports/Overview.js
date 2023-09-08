@@ -122,7 +122,7 @@ function NetWorthCard({ accounts }) {
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
                   amount={data.totalChange}
-                  style={{ color: colors.n6, fontWeight: 300 }}
+                  style={{ color: theme.altTableText, fontWeight: 300 }}
                 />
               </PrivacyFilter>
             </View>
@@ -181,7 +181,7 @@ function CashFlowCard() {
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
                   amount={income - expense}
-                  style={{ color: colors.n6, fontWeight: 300 }}
+                  style={{ color: theme.altTableText, fontWeight: 300 }}
                 />
               </PrivacyFilter>
             </View>
@@ -192,7 +192,7 @@ function CashFlowCard() {
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height, portalHost) => (
               <VictoryGroup
-                colorScale={[theme.colors.blue, theme.colors.red]}
+                colorScale={[chartTheme.colors.blue, chartTheme.colors.red]}
                 width={100}
                 height={height}
                 theme={theme}
@@ -260,7 +260,7 @@ function CashFlowCard() {
                         </View>
                       ),
                       labelPosition: 'right',
-                      fill: theme.colors.red,
+                      fill: chartTheme.colors.red,
                     },
                   ]}
                   labels={d => d.premadeLabel}

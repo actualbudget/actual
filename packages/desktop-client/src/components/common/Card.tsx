@@ -17,9 +17,9 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
           marginLeft: 5,
           marginRight: 5,
           borderRadius: 6,
-            backgroundColor: theme.cardBackground,
-            borderColor: theme.cardBorder,
-            boxShadow: '0 1px 2px ' + theme.cardShadow,
+          backgroundColor: theme.cardBackground,
+          borderColor: theme.cardBorder,
+          boxShadow: '0 1px 2px ' + theme.cardShadow,
           ...props.style,
         }}
       >
