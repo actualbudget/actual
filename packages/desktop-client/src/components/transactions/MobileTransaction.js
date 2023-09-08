@@ -192,6 +192,7 @@ class TransactionEditInner extends PureComponent {
       editingChild: null,
     };
 
+    this.amountRef = createRef();
     this.payeeInputRef = createRef();
     this.categoryInputRef = createRef();
     this.accountInputRef = createRef();
@@ -204,8 +205,8 @@ class TransactionEditInner extends PureComponent {
   });
 
   componentDidMount() {
-    if (this.props.adding) {
-      this.amount.focus();
+    if (this.props.isAdding) {
+      this.amountRef.current?.focus();
     }
   }
 
@@ -244,7 +245,7 @@ class TransactionEditInner extends PureComponent {
       transactions = await this.onEdit(transaction, name, value);
     }
 
-    if (this.props.adding) {
+    if (this.props.isAdding) {
       transactions = realizeTempTransactions(transactions);
     }
 
@@ -472,7 +473,7 @@ class TransactionEditInner extends PureComponent {
                 style={{ marginBottom: 0, paddingLeft: 0 }}
               />
               <FocusableAmountInput
-                ref={el => (this.amount = el)}
+                ref={this.amountRef}
                 value={transaction.amount}
                 zeroIsNegative={true}
                 onBlur={value =>
@@ -606,7 +607,7 @@ class TransactionEditInner extends PureComponent {
             <View>
               <FieldLabel title="Account" />
               {/* <TapField
-                disabled={!adding}
+                disabled={!isAdding}
                 value={account ? account.name : null}
                 onClick={() => this.onClick(transaction.id, 'account')}
                 data-testid="account-field"
