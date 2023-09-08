@@ -43,6 +43,29 @@ import { AmountInput } from '../util/AmountInput';
 // import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
 
+function useWindowSize() {
+  const [smallVPWidth, setSmallVPWidth] = useState(window.innerWidth <= 365);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSmallVPWidth(window.innerWidth <= 365);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return smallVPWidth;
+}
+
+function ScreenSizeWrapper({ children }) {
+  const smallVPWidth = useWindowSize();
+
+  return children(smallVPWidth);
+}
+
 function ToBudget({ toBudget, onClick }) {
   let amount = useSheetValue(toBudget);
   let format = useFormat();
@@ -199,7 +222,7 @@ function BudgetGroupPreview({ group, pending, style }) {
       <TotalsRow group={group} blank={true} />
 
       {group.categories.map((cat, index) => (
-        <BudgetCategory
+        <BudgetCategoryWrapper
           key={cat.id}
           category={cat}
           blank={true}
@@ -249,66 +272,26 @@ class BudgetCategory extends PureComponent {
     super(props);
 
     let { editMode, blank } = props;
-    // this.opacity = new Animated.Value(editMode || blank ? 0 : 1);
     this.opacity = editMode || blank ? 0 : 1;
-
-    this.state = {
-      smallVPWidth: window.innerWidth < 365,
-    };
   }
 
-  //   componentDidUpdate(prevProps) {
-  //     if (prevProps.editing !== this.props.editing) {
-  //       if (this.props.editing && ACTScrollViewManager) {
-  //         ACTScrollViewManager.setFocused(findNodeHandle(this.container));
-  //       }
-  //     }
-
-  //     if (prevProps.editMode !== this.props.editMode) {
-  //       Animated.timing(this.opacity, {
-  //         toValue: this.props.editMode ? 0 : 1,
-  //         duration: 200,
-  //         easing: Easing.inOut(Easing.ease)
-  //       }).start();
-  //     }
-  //   }
-  componentDidMount() {
-    // Add event listener for window resize
-    window.addEventListener('resize', this.handleResize);
-  }
-
-  componentWillUnmount() {
-    // Remove the event listener when the component unmounts
-    window.removeEventListener('resize', this.handleResize);
-  }
-  handleResize = () => {
-    this.setState({
-      smallVPWidth: window.innerWidth < 365,
-    });
-  };
 
   render() {
     let {
       category,
       editing,
       index,
-      // gestures,
-      // editMode,
       style,
       month,
-      // onEdit,
       onBudgetAction,
+      smallVPWidth,
     } = this.props;
-
     let budgeted = rolloverBudget.catBudgeted(category.id);
     let balance = rolloverBudget.catBalance(category.id);
     let spent = rolloverBudget.catSumAmount(category.id);
 
-    const { smallVPWidth } = this.state;
-
     let content = !category.hidden && (
       <ListItem
-        // ref={el => (this.container = el)}
         style={{
           backgroundColor: editing ? colors.p11 : 'transparent',
           borderBottomWidth: 0,
@@ -322,13 +305,6 @@ class BudgetCategory extends PureComponent {
             {category.name}
           </Text>
         </View>
-        {/* <Animated.View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            opacity: this.opacity
-          }}
-        > */}
         <View
           style={{
             alignItems: 'center',
@@ -370,7 +346,6 @@ class BudgetCategory extends PureComponent {
             type="financial"
           />
         </View>
-        {/* </Animated.View> */}
       </ListItem>
     );
 
@@ -408,6 +383,13 @@ class BudgetCategory extends PureComponent {
   }
 }
 
+function BudgetCategoryWrapper(props) {
+  const smallVPWidth = useWindowSize();
+
+  return <BudgetCategory {...props} smallVPWidth={smallVPWidth} />;
+}
+
+
 class TotalsRow extends PureComponent {
   constructor(props) {
     super(props);
@@ -415,10 +397,6 @@ class TotalsRow extends PureComponent {
     let { editMode, blank } = props;
     // this.animation = new Animated.Value(editMode || blank ? 0 : 1);
     this.opacity = editMode || blank ? 0 : 1;
-
-    this.state = {
-      smallVPWidth: window.innerWidth < 365,
-    };
   }
 
   //   componentDidUpdate(prevProps) {
@@ -431,24 +409,8 @@ class TotalsRow extends PureComponent {
   //     }
   //   }
 
-  componentDidMount() {
-    // Add event listener for window resize
-    window.addEventListener('resize', this.handleResize);
-  }
-
-  componentWillUnmount() {
-    // Remove the event listener when the component unmounts
-    window.removeEventListener('resize', this.handleResize);
-  }
-  handleResize = () => {
-    this.setState({
-      smallVPWidth: window.innerWidth < 365,
-    });
-  };
-
   render() {
-    let { group, editMode, onAddCategory } = this.props;
-    const { smallVPWidth } = this.state;
+    let { group, editMode, onAddCategory, smallVPWidth } = this.props;
     let content = (
       <ListItem
         style={{
@@ -560,6 +522,12 @@ class TotalsRow extends PureComponent {
     //   {() => content}
     // </Droppable>
   }
+}
+
+function TotalsRowWrapper(props) {
+  const smallVPWidth = useWindowSize();
+
+  return <TotalsRow {...props} smallVPWidth={smallVPWidth} />;
 }
 
 class IncomeCategory extends PureComponent {
@@ -711,7 +679,7 @@ class BudgetGroup extends PureComponent {
             marginBottom: 7,
           }}
         >
-          <TotalsRow
+          <TotalsRowWrapper
             group={group}
             budgeted={rolloverBudget.groupBudgeted(group.id)}
             balance={rolloverBudget.groupBalance(group.id)}
@@ -723,7 +691,7 @@ class BudgetGroup extends PureComponent {
           {group.categories.map((category, index) => {
             // const editing = editingId === category.id;
             return (
-              <BudgetCategory
+              <BudgetCategoryWrapper
                 key={category.id}
                 index={index}
                 category={category}
@@ -864,25 +832,9 @@ class BudgetGroups extends Component {
 
 export function BudgetTable(props) {
   const [editingCategory, setEditingCategory] = useState(null);
-  const [smallVPWidth, setSmallVPWidth] = useState(window.innerWidth < 365);
   function onEditCategory(id) {
     setEditingCategory(id);
   }
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 365) {
-        setSmallVPWidth(true);
-      } else {
-        setSmallVPWidth(false);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   const {
     type,
@@ -905,6 +857,8 @@ export function BudgetTable(props) {
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
   let currentMonth = monthUtils.currentMonth();
   let format = useFormat();
+
+  const smallVPWidth = useWindowSize();
 
   return (
     <NamespaceContext.Provider value={monthUtils.sheetForMonth(month, type)}>
