@@ -175,6 +175,7 @@ function Status({ status }) {
         fontSize: 11,
         color,
         fontStyle: 'italic',
+        textAlign: 'left',
       }}
     >
       {titleFirst(status)}
