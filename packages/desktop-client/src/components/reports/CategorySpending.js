@@ -11,9 +11,9 @@ import Select from '../common/Select';
 import View from '../common/View';
 
 import CategorySelector from './CategorySelector';
-import categorySpendingSpreadsheet from './graphs/category-spending-spreadsheet';
 import CategorySpendingGraph from './graphs/CategorySpendingGraph';
 import Header from './Header';
+import categorySpendingSpreadsheet from './spreadsheets/category-spending-spreadsheet';
 import useReport from './useReport';
 import { fromDateRepr } from './util';
 

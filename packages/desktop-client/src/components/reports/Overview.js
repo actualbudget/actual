@@ -19,11 +19,11 @@ import Change from './Change';
 import theme from './chart-theme';
 import Container from './Container';
 import DateRange from './DateRange';
-import { simpleCashFlow } from './graphs/cash-flow-spreadsheet';
-import categorySpendingSpreadsheet from './graphs/category-spending-spreadsheet';
 import CategorySpendingGraph from './graphs/CategorySpendingGraph';
-import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
+import { simpleCashFlow } from './spreadsheets/cash-flow-spreadsheet';
+import categorySpendingSpreadsheet from './spreadsheets/category-spending-spreadsheet';
+import netWorthSpreadsheet from './spreadsheets/net-worth-spreadsheet';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
 

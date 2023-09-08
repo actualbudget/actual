@@ -16,9 +16,9 @@ import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
-import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
-import CashFlowGraph from './graphs/CashFlowGraph';
+import CashFlowGraph from './graphs/BarLineGraph';
 import Header from './Header';
+import { cashFlowByDate } from './spreadsheets/cash-flow-spreadsheet';
 import useReport from './useReport';
 
 function CashFlow() {
