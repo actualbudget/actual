@@ -506,9 +506,6 @@ class TransactionEditInner extends PureComponent {
                 payees={payees}
                 accounts={accounts}
                 value={payeeId}
-                tooltipProps={{
-                  position: 'top-stretch',
-                }}
                 inputProps={{
                   inputRef: this.payeeInputRef,
                   style: {
@@ -519,7 +516,7 @@ class TransactionEditInner extends PureComponent {
                 // showManagePayees={true}
                 tableBehavior={true}
                 // focused={focusedField === 'payee'}
-                // onUpdate={payeeId => this.onEdit(transaction, 'payee', payeeId)}
+                onUpdate={payeeId => this.onEdit(transaction, 'payee', payeeId)}
                 onSelect={payeeId => {
                   this.onEdit(transaction, 'payee', payeeId);
                   // Go to next.
@@ -575,9 +572,6 @@ class TransactionEditInner extends PureComponent {
                   tableBehavior={true}
                   // Split not yet supported.
                   showSplitOption={false} // {!transaction.is_child && !transaction.is_parent}
-                  tooltipProps={{
-                    position: 'top-stretch',
-                  }}
                   inputProps={{
                     inputRef: this.categoryInputRef,
                     disabled: account?.offbudget || transferAcct,
@@ -592,9 +586,9 @@ class TransactionEditInner extends PureComponent {
                   groupHeaderStyle={autocompletePaddingStyle}
                   categoryListItemStyle={autocompletePaddingStyle}
                   splitButtonStyle={autocompletePaddingStyle}
-                  // onUpdate={categoryId =>
-                  //   this.onEdit(transaction, 'category', categoryId)
-                  // }
+                  onUpdate={categoryId =>
+                    this.onEdit(transaction, 'category', categoryId)
+                  }
                   onSelect={categoryId => {
                     this.onEdit(transaction, 'category', categoryId);
                     // Go to next.
@@ -624,9 +618,6 @@ class TransactionEditInner extends PureComponent {
                 accounts={accounts}
                 tableBehavior={true}
                 // focused={focusedField === 'account'}
-                tooltipProps={{
-                  position: 'top-stretch',
-                }}
                 inputProps={{
                   inputRef: this.accountInputRef,
                   disabled: !isAdding,
@@ -638,9 +629,9 @@ class TransactionEditInner extends PureComponent {
                   },
                   'data-testid': 'account-field',
                 }}
-                // onUpdate={payeeId =>
-                //   this.onEdit(transaction, 'account', payeeId)
-                // }
+                onUpdate={payeeId =>
+                  this.onEdit(transaction, 'account', payeeId)
+                }
                 onSelect={payeeId =>
                   this.onEdit(transaction, 'account', payeeId)
                 }
