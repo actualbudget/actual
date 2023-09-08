@@ -359,6 +359,8 @@ class TransactionEditInner extends PureComponent {
       padding: '7px 7px',
     };
 
+    const disableCategoryField = account?.offbudget || transferAcct;
+
     return (
       // <KeyboardAvoidingView>
       <View
@@ -519,8 +521,10 @@ class TransactionEditInner extends PureComponent {
                 onUpdate={payeeId => this.onEdit(transaction, 'payee', payeeId)}
                 onSelect={payeeId => {
                   this.onEdit(transaction, 'payee', payeeId);
-                  // Go to next.
-                  this.categoryInputRef.current?.focus();
+                  if (!this.categoryInputRef.current?.disabled) {
+                    // Go to next.
+                    this.categoryInputRef.current?.focus();
+                  }
                 }}
                 // onManagePayees={() => onManagePayees(payeeId)}
                 isCreatable
@@ -574,9 +578,9 @@ class TransactionEditInner extends PureComponent {
                   showSplitOption={false} // {!transaction.is_child && !transaction.is_parent}
                   inputProps={{
                     inputRef: this.categoryInputRef,
-                    disabled: account?.offbudget || transferAcct,
+                    disabled: disableCategoryField,
                     style: {
-                      ...((account?.offbudget || transferAcct) && {
+                      ...(disableCategoryField && {
                         backgroundColor: theme.formInputTextReadOnlySelection,
                       }),
                       height: 40,
@@ -591,8 +595,10 @@ class TransactionEditInner extends PureComponent {
                   }
                   onSelect={categoryId => {
                     this.onEdit(transaction, 'category', categoryId);
-                    // Go to next.
-                    this.accountInputRef.current?.focus();
+                    if (!this.accountInputRef.current?.disabled) {
+                      // Go to next.
+                      this.accountInputRef.current?.focus();
+                    }
                   }}
                   menuPortalTarget={undefined}
                 />
