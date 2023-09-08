@@ -18,7 +18,7 @@ import { useServerURL, useSetServerURL } from '../ServerContext';
 import { Title } from './subscribe/common';
 
 export default function ConfigServer() {
-  useSetThemeColor(theme.pageTextPositive);
+  useSetThemeColor(theme.mobileConfigServerViewTheme);
   let { createBudget, signOut, loggedIn } = useActions();
   let navigate = useNavigate();
   let [url, setUrl] = useState('');
@@ -49,7 +49,7 @@ export default function ConfigServer() {
     let { error } = await setServerUrl(url);
 
     if (
-      error === 'network-failure' &&
+      ['network-failure', 'get-server-failure'].includes(error) &&
       !url.startsWith('http://') &&
       !url.startsWith('https://')
     ) {

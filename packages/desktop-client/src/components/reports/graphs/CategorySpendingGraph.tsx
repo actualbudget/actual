@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 import * as d from 'date-fns';
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryStack } from 'victory';
 
@@ -13,8 +15,10 @@ type CategorySpendingGraphProps = {
   end: string;
   graphData: CategorySpendingGraphData;
   compact?: boolean;
+  style?: CSSProperties;
 };
 function CategorySpendingGraph({
+  style,
   start,
   end,
   graphData,
@@ -25,17 +29,24 @@ function CategorySpendingGraph({
   }
 
   return (
-    <Container style={compact && { height: 'auto', flex: 1 }}>
+    <Container
+      style={{
+        ...style,
+        ...(compact && { height: 'auto', flex: 1 }),
+      }}
+    >
       {(width, height, portalHost) => (
         <VictoryChart
           scale={{ x: 'time', y: 'linear' }}
           theme={theme}
-          domainPadding={compact ? { x: 10, y: 5 } : { x: 50, y: 10 }}
           width={width}
           height={height}
         >
           <Area start={start} end={end} />
-          <VictoryStack colorScale="qualitative">
+          <VictoryStack
+            colorScale="qualitative"
+            domainPadding={{ x: compact ? 5 : 15 }}
+          >
             {graphData.categories.map(category => (
               <VictoryBar
                 key={category.id}
@@ -65,7 +76,7 @@ function CategorySpendingGraph({
             dependentAxis
             crossAxis={false}
             invertAxis
-            tickCount={compact ? 2 : undefined}
+            tickCount={compact ? 2 : height / 70}
           />
         </VictoryChart>
       )}

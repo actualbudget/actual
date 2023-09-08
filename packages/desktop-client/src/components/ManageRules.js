@@ -14,6 +14,7 @@ import * as undo from 'loot-core/src/platform/client/undo';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 
+import useCategories from '../hooks/useCategories';
 import useSelected, { SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
@@ -88,12 +89,19 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
   let dispatch = useDispatch();
 
   let { data: schedules } = SchedulesQuery.useQuery();
-  let filterData = useSelector(state => ({
+  let { list: categories } = useCategories();
+  let state = useSelector(state => ({
     payees: state.queries.payees,
-    categories: state.queries.categories.list,
     accounts: state.queries.accounts,
     schedules,
   }));
+  let filterData = useMemo(
+    () => ({
+      ...state,
+      categories,
+    }),
+    [state, categories],
+  );
 
   let filteredRules = useMemo(
     () =>

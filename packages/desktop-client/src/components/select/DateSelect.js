@@ -19,6 +19,7 @@ import {
   getDayMonthRegex,
   getShortYearFormat,
   getShortYearRegex,
+  currentDate,
 } from 'loot-core/src/shared/months';
 import { stringToInteger } from 'loot-core/src/shared/util';
 
@@ -115,8 +116,8 @@ let DatePicker = forwardRef(
         keyboardInput: false,
         firstDay: stringToInteger(firstDayOfWeekIdx),
         defaultDate: value
-          ? d.parse(value, dateFormat, new Date())
-          : new Date(),
+          ? d.parse(value, dateFormat, currentDate())
+          : currentDate(),
         setDefaultDate: true,
         toString(date) {
           return d.format(date, dateFormat);
@@ -140,7 +141,7 @@ let DatePicker = forwardRef(
       }
     }, [value, dateFormat]);
 
-    return <View style={[pickerStyles, { flex: 1 }]} innerRef={mountPoint} />;
+    return <View style={{ ...pickerStyles, flex: 1 }} innerRef={mountPoint} />;
   },
 );
 
@@ -292,7 +293,8 @@ export default function DateSelect({
       <Tooltip
         position="bottom-left"
         offset={2}
-        style={[{ padding: 0, minWidth: 225 }, tooltipStyle]}
+        style={{ padding: 0, minWidth: 225, ...tooltipStyle }}
+        data-testid="date-select-tooltip"
       >
         {content}
       </Tooltip>
@@ -306,6 +308,11 @@ export default function DateSelect({
         {...inputProps}
         inputRef={inputRef}
         value={value}
+        onPointerUp={e => {
+          if (!embedded) {
+            setOpen(true);
+          }
+        }}
         onKeyDown={onKeyDown}
         onChange={onChange}
         onFocus={e => {

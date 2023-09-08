@@ -1,9 +1,9 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
 
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
@@ -31,20 +31,18 @@ export default function ActionExpression({
 }: ActionExpressionProps) {
   return (
     <View
-      style={[
-        {
-          display: 'block',
-          maxWidth: '100%',
-          color: theme.altPillText,
-          backgroundColor: theme.altPillBackground,
-          borderRadius: 4,
-          padding: '3px 5px',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        },
-        style,
-      ]}
+      style={{
+        display: 'block',
+        maxWidth: '100%',
+        color: theme.altPillText,
+        backgroundColor: theme.altPillBackground,
+        borderRadius: 4,
+        padding: '3px 5px',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        ...style,
+      }}
     >
       {op === 'set' ? (
         <>

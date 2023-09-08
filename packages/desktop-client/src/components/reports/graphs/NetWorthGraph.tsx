@@ -1,7 +1,6 @@
 import React, { createElement } from 'react';
 
 import * as d from 'date-fns';
-import { type CSSProperties } from 'glamor';
 import {
   VictoryChart,
   VictoryBar,
@@ -11,6 +10,7 @@ import {
   VictoryGroup,
 } from 'victory';
 
+import { type CSSProperties } from '../../../style';
 import theme from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
@@ -26,7 +26,12 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
   const Chart = compact ? VictoryGroup : VictoryChart;
 
   return (
-    <Container style={[style, compact && { height: 'auto' }]}>
+    <Container
+      style={{
+        ...style,
+        ...(compact && { height: 'auto' }),
+      }}
+    >
       {(width, height, portalHost) =>
         graphData && (
           <Chart
@@ -92,12 +97,16 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
                 // eslint-disable-next-line rulesdir/typography
                 tickFormat={x => d.format(x, "MMM ''yy")}
                 tickValues={graphData.data.map(item => item.x)}
-                tickCount={Math.min(5, graphData.data.length)}
+                tickCount={Math.min(width / 220, graphData.data.length)}
                 offsetY={50}
               />
             )}
             {!compact && (
-              <VictoryAxis dependentAxis crossAxis={!graphData.hasNegative} />
+              <VictoryAxis
+                dependentAxis
+                tickCount={Math.round(height / 70)}
+                crossAxis={!graphData.hasNegative}
+              />
             )}
           </Chart>
         )

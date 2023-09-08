@@ -137,27 +137,25 @@ export default function Menu({
           <View
             role="button"
             key={item.name}
-            style={[
-              {
-                cursor: 'default',
-                padding: '9px 10px',
-                marginTop:
-                  idx === 0 ||
-                  lastItem === Menu.line ||
-                  lastItem.type === Menu.label
-                    ? 0
-                    : -3,
-                flexDirection: 'row',
-                alignItems: 'center',
-                color: theme.menuItemText,
-              },
-              item.disabled && { color: theme.buttonBareDisabledText },
-              !item.disabled &&
+            style={{
+              cursor: 'default',
+              padding: '9px 10px',
+              marginTop:
+                idx === 0 ||
+                lastItem === Menu.line ||
+                lastItem.type === Menu.label
+                  ? 0
+                  : -3,
+              flexDirection: 'row',
+              alignItems: 'center',
+              color: theme.menuItemText,
+              ...(item.disabled && { color: theme.buttonBareDisabledText }),
+              ...(!item.disabled &&
                 hoveredIndex === idx && {
                   backgroundColor: theme.menuItemBackgroundHover,
                   color: theme.menuItemTextHover,
-                },
-            ]}
+                }),
+            }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
             onClick={e =>

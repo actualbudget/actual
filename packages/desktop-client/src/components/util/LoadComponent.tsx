@@ -30,15 +30,13 @@ function LoadComponentInner<K extends string>({
   if (!Component) {
     return (
       <View
-        style={[
-          {
-            flex: 1,
-            gap: 20,
-            justifyContent: 'center',
-            alignItems: 'center',
-          },
-          styles.delayedFadeIn,
-        ]}
+        style={{
+          flex: 1,
+          gap: 20,
+          justifyContent: 'center',
+          alignItems: 'center',
+          ...styles.delayedFadeIn,
+        }}
       >
         {message && (
           <Block style={{ marginBottom: 20, fontSize: 18 }}>{message}</Block>

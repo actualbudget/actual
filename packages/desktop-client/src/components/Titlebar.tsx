@@ -5,12 +5,9 @@ import React, {
   useRef,
   useContext,
   type ReactNode,
-  type CSSProperties,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-
-import { css, media } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
@@ -24,8 +21,7 @@ import SvgEye from '../icons/v2/Eye';
 import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
-import { colors } from '../style';
-import tokens from '../tokens';
+import { colors, type CSSProperties } from '../style';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
@@ -108,8 +104,9 @@ function PrivacyButton() {
 
 type SyncButtonProps = {
   style?: CSSProperties;
+  isMobile?: boolean;
 };
-export function SyncButton({ style }: SyncButtonProps) {
+export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
   let cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
   let { sync } = useActions();
 
@@ -157,33 +154,29 @@ export function SyncButton({ style }: SyncButtonProps) {
         syncState === 'local'
       ? colors.n9
       : style.color;
-  const activeStyle = css(
-    // mobile
-    media(`(max-width: ${tokens.breakpoint_small})`, {
-      color: mobileColor,
-    }),
-  );
+  const desktopColor =
+    syncState === 'error'
+      ? colors.r4
+      : syncState === 'disabled' ||
+        syncState === 'offline' ||
+        syncState === 'local'
+      ? colors.n6
+      : null;
+
+  const activeStyle = isMobile
+    ? {
+        color: mobileColor,
+      }
+    : {};
 
   return (
     <Button
       type="bare"
-      style={css(
-        style,
-        {
-          WebkitAppRegion: 'none',
-          color: mobileColor,
-        },
-        media(`(min-width: ${tokens.breakpoint_small})`, {
-          color:
-            syncState === 'error'
-              ? colors.r4
-              : syncState === 'disabled' ||
-                syncState === 'offline' ||
-                syncState === 'local'
-              ? colors.n6
-              : null,
-        }),
-      )}
+      style={{
+        ...style,
+        WebkitAppRegion: 'none',
+        color: isMobile ? mobileColor : desktopColor,
+      }}
       hoveredStyle={activeStyle}
       activeStyle={activeStyle}
       onClick={sync}
@@ -308,22 +301,20 @@ export default function Titlebar({ style }) {
 
   return isNarrowWidth ? null : (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 15px',
-          height: 36,
-          pointerEvents: 'none',
-          '& *': {
-            pointerEvents: 'auto',
-          },
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: '0 15px',
+        height: 36,
+        pointerEvents: 'none',
+        '& *': {
+          pointerEvents: 'auto',
         },
-        !Platform.isBrowser &&
+        ...(!Platform.isBrowser &&
           Platform.OS === 'mac' &&
-          floatingSidebar && { paddingLeft: 80 },
-        style,
-      ]}
+          floatingSidebar && { paddingLeft: 80 }),
+        ...style,
+      }}
     >
       {(floatingSidebar || sidebar.alwaysFloats) && (
         <Button

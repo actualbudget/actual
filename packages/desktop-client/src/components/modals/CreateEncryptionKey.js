@@ -69,7 +69,12 @@ export default function CreateEncryptionKey({
                 </ExternalLink>
               </Paragraph>
               <Paragraph>
-                <ul {...css({ marginTop: 0, '& li': { marginBottom: 8 } })}>
+                <ul
+                  className={`${css({
+                    marginTop: 0,
+                    '& li': { marginBottom: 8 },
+                  })}`}
+                >
                   <li>
                     <strong>Important:</strong> if you forget this password{' '}
                     <em>and</em> you don’t have any local copies of your data,

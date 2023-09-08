@@ -103,14 +103,12 @@ export default function DeleteMenu({ modalProps, actions, file }) {
               <ButtonWithLoading
                 type={isRemote ? 'normal' : 'primary'}
                 loading={loadingState === 'local'}
-                style={[
-                  {
-                    alignSelf: 'center',
-                    marginTop: 10,
-                    padding: '10px 30px',
-                    fontSize: 14,
-                  },
-                  isRemote
+                style={{
+                  alignSelf: 'center',
+                  marginTop: 10,
+                  padding: '10px 30px',
+                  fontSize: 14,
+                  ...(isRemote
                     ? {
                         color: theme.errorText,
                         borderColor: theme.errorText,
@@ -118,8 +116,8 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                     : {
                         border: 0,
                         backgroundColor: theme.errorText,
-                      },
-                ]}
+                      }),
+                }}
                 onClick={onDeleteLocal}
               >
                 Delete file locally

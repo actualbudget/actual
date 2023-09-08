@@ -154,29 +154,24 @@ function File({ file, onSelect, onDelete }) {
     <View
       onClick={() => _onSelect(file)}
       title={getFileDescription(file)}
-      style={[
-        {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          ...styles.shadow,
-          margin: 10,
-          padding: '12px 15px',
-          backgroundColor: theme.buttonNormalBackground,
-          color: theme.buttonNormalText,
-          border: '1px solid ' + theme.buttonNormalBorder,
-          borderRadius: 6,
-          flexShrink: 0,
-          cursor: 'pointer',
-          ':hover': {
-            backgroundColor: theme.buttonNormalBackgroundHover,
-            color: theme.buttonNormalTextHover,
-          },
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        ...styles.shadow,
+        margin: 10,
+        padding: '12px 15px',
+        backgroundColor: theme.buttonNormalBackground,
+        borderRadius: 6,
+        flexShrink: 0,
+        cursor: 'pointer',
+        ':hover': {
+          backgroundColor: theme.buttonNormalBackgroundHover,
         },
-      ]}
+      }}
     >
       <View style={{ alignItems: 'flex-start' }}>
-        <Text style={[{ fontSize: 16, fontWeight: 700 }]}>{file.name}</Text>
+        <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
 
         <FileState file={file} />
       </View>
@@ -285,12 +280,8 @@ export default function BudgetList() {
         },
       }}
     >
-      <View
-        style={{
-          color: theme.pageText,
-        }}
-      >
-        <Text style={[styles.veryLargeText, { margin: 20 }]}>Files</Text>
+      <View>
+        <Text style={{ ...styles.veryLargeText, margin: 20 }}>Files</Text>
         <View
           style={{
             position: 'absolute',

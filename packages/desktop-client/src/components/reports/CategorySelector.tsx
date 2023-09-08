@@ -6,7 +6,7 @@ import {
   type Category,
   type CategoryGroup,
   type CategoryListProps,
-} from '../autocomplete/CategorySelect';
+} from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
 import { Checkbox } from '../forms';
 
@@ -48,6 +48,7 @@ export default function CategorySelector({
           paddingLeft: 0,
           paddingRight: 10,
           height: 320,
+          flexGrow: 1,
           overflowY: 'scroll',
         }}
       >

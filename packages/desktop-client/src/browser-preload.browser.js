@@ -1,5 +1,7 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
+import * as Platform from 'loot-core/src/client/platform';
+
 import packageJson from '../package.json';
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
@@ -10,7 +12,7 @@ const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 // everything else.
 
 let IS_DEV = process.env.NODE_ENV === 'development';
-let ACTUAL_VERSION = packageJson.version;
+let ACTUAL_VERSION = Platform.isPlaywright ? '99.9.9' : packageJson.version;
 
 // *** Start the backend ***
 let worker;
@@ -40,7 +42,6 @@ createBackendWorker();
 global.Actual = {
   IS_DEV,
   ACTUAL_VERSION,
-  IS_FAKE_WEB: true,
 
   logToTerminal: (...args) => {
     console.log(...args);

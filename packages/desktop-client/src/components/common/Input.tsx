@@ -1,11 +1,15 @@
-import React, { useRef, type KeyboardEvent, type Ref } from 'react';
+import React, {
+  useRef,
+  type KeyboardEvent,
+  type Ref,
+  type HTMLProps,
+} from 'react';
 import mergeRefs from 'react-merge-refs';
 
 import { css } from 'glamor';
 
 import { useProperFocus } from '../../hooks/useProperFocus';
-import { styles, theme } from '../../style';
-import { type HTMLPropsWithStyle } from '../../types/utils';
+import { type CSSProperties, styles, theme } from '../../style';
 
 export const defaultInputStyle = {
   outline: 0,
@@ -17,7 +21,8 @@ export const defaultInputStyle = {
   border: '1px solid ' + theme.formInputBorder,
 };
 
-type InputProps = HTMLPropsWithStyle<HTMLInputElement> & {
+type InputProps = HTMLProps<HTMLInputElement> & {
+  style?: CSSProperties;
   inputRef?: Ref<HTMLInputElement>;
   onEnter?: (event: KeyboardEvent<HTMLInputElement>) => void;
   onUpdate?: (newValue: string) => void;
@@ -38,7 +43,7 @@ export default function Input({
   return (
     <input
       ref={inputRef ? mergeRefs([inputRef, ref]) : ref}
-      {...css(
+      className={`${css(
         defaultInputStyle,
         {
           whiteSpace: 'nowrap',
@@ -52,7 +57,7 @@ export default function Input({
         },
         styles.smallText,
         style,
-      )}
+      )}`}
       {...nativeProps}
       onKeyDown={e => {
         if (e.key === 'Enter' && onEnter) {
@@ -75,16 +80,14 @@ export function BigInput(props: InputProps) {
   return (
     <Input
       {...props}
-      style={[
-        {
-          padding: 10,
-          fontSize: 15,
-          border: 'none',
-          ...styles.shadow,
-          ':focus': { border: 'none', ...styles.shadow },
-        },
-        props.style,
-      ]}
+      style={{
+        padding: 10,
+        fontSize: 15,
+        border: 'none',
+        ...styles.shadow,
+        ':focus': { border: 'none', ...styles.shadow },
+        ...props.style,
+      }}
     />
   );
 }

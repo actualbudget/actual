@@ -35,8 +35,6 @@ if [ "$OSTYPE" == "msys" ]; then
     fi
 fi
 
-yarn patch-package
-
 yarn rebuild-electron
 
 yarn workspace loot-core build:node
