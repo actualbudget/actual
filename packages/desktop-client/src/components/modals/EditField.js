@@ -192,8 +192,10 @@ export default function EditField({ modalProps, name, onSubmit }) {
         padding: '15px 10px',
         borderRadius: '6px',
         ...(minWidth && { minWidth }),
-        ...(!isNarrowWidth && { backgroundColor: theme.mobileModalBackground,
-          color: theme.mobileModalText, }),
+        ...(!isNarrowWidth && {
+          backgroundColor: theme.mobileModalBackground,
+          color: theme.mobileModalText,
+        }),
       }}
     >
       {() => (

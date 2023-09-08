@@ -300,10 +300,7 @@ function Transaction({
       >
         {transaction.payee_name}
       </Field>
-      <Field
-        width="flex"
-        style={{ borderColor: theme.tableBorder }}
-        title={transaction.notes}
+      <Field width="flex" title={transaction.notes}>
         {transaction.notes}
       </Field>
       {splitMode ? (
