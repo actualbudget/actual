@@ -1,7 +1,3 @@
-export function last<T>(arr: T[]) {
-  return arr[arr.length - 1];
-}
-
 export function getChangedValues(obj1, obj2) {
   // Keep the id field because this is mostly used to diff database
   // objects
