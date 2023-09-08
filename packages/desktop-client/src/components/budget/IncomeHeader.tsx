@@ -1,11 +1,11 @@
-import React, { type ComponentProps, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 import Button from '../common/Button';
 import View from '../common/View';
 
 import RenderMonths from './RenderMonths';
 
-type IncomeHeaderProps = ComponentProps<typeof RenderMonths> & {
+type IncomeHeaderProps = {
   MonthComponent?: ReactNode;
   onShowNewGroup: () => void;
 };
