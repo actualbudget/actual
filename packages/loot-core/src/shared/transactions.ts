@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { last, diffItems, applyChanges } from './util';
+import { diffItems, applyChanges } from './util';
 
 export function isPreviewId(id) {
   return id.indexOf('preview/') !== -1;
