@@ -628,6 +628,7 @@ class TransactionEditInner extends PureComponent {
                   position: 'top-stretch',
                 }}
                 inputProps={{
+                  inputRef: this.accountInputRef,
                   disabled: !isAdding,
                   style: {
                     ...(!isAdding && {
@@ -635,8 +636,6 @@ class TransactionEditInner extends PureComponent {
                     }),
                     height: 40,
                   },
-                  inputRef: this.accountInputRef,
-                  onPointerUp: e => this.accountInputRef.current?.focus(),
                   'data-testid': 'account-field',
                 }}
                 // onUpdate={payeeId =>
