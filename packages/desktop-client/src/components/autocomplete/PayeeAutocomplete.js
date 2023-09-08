@@ -51,7 +51,10 @@ function PayeeList({
   highlightedIndex,
   embedded,
   inputValue,
+  style,
+  itemStyle,
   groupHeaderStyle,
+  createPayeeButtonStyle,
   footer,
 }) {
   const { isNarrowWidth } = useResponsive();
@@ -78,6 +81,7 @@ function PayeeList({
           overflow: 'auto',
           padding: '5px 0',
           ...(!embedded && { maxHeight: 175 }),
+          ...style,
         }}
       >
         {createNew && (
@@ -94,6 +98,7 @@ function PayeeList({
               ':active': {
                 backgroundColor: 'rgba(100, 100, 100, .25)',
               },
+              ...createPayeeButtonStyle,
             }}
           >
             <View
@@ -176,6 +181,7 @@ function PayeeList({
                     padding: 4,
                     paddingLeft: 20,
                   },
+                  itemStyle,
                 ])}`}
               >
                 {item.name}
@@ -213,7 +219,12 @@ export default function PayeeAutocomplete({
   onUpdate,
   onSelect,
   onManagePayees,
+  payeeListStyle,
+  payeeListItemStyle,
   groupHeaderStyle,
+  createPayeeButtonStyle,
+  makeTransferButtonStyle,
+  managePayeesButtonStyle,
   accounts,
   payees,
   ...props
@@ -285,11 +296,15 @@ export default function PayeeAutocomplete({
       focused={payeeFieldFocused}
       inputProps={{
         ...inputProps,
-        onBlur: () => {
+        onBlur: e => {
           setRawPayee('');
           setPayeeFieldFocused(false);
+          inputProps?.onBlur?.(e);
         },
-        onFocus: () => setPayeeFieldFocused(true),
+        onFocus: e => {
+          setPayeeFieldFocused(true);
+          inputProps?.onFocus?.(e);
+        },
         onChange: setRawPayee,
       }}
       onUpdate={(value, inputValue) =>
@@ -360,13 +375,19 @@ export default function PayeeAutocomplete({
           highlightedIndex={highlightedIndex}
           inputValue={inputValue}
           embedded={embedded}
+          style={payeeListStyle}
+          itemStyle={payeeListItemStyle}
+          createPayeeButtonStyle={createPayeeButtonStyle}
           groupHeaderStyle={groupHeaderStyle}
           footer={
             <AutocompleteFooter embedded={embedded}>
               {showMakeTransfer && (
                 <Button
                   type={focusTransferPayees ? 'menuSelected' : 'menu'}
-                  style={showManagePayees && { marginBottom: 5 }}
+                  style={{
+                    ...(showManagePayees && { marginBottom: 5 }),
+                    ...makeTransferButtonStyle,
+                  }}
                   onClick={() => {
                     onUpdate?.(null);
                     setFocusTransferPayees(!focusTransferPayees);
@@ -376,7 +397,11 @@ export default function PayeeAutocomplete({
                 </Button>
               )}
               {showManagePayees && (
-                <Button type="menu" onClick={() => onManagePayees()}>
+                <Button
+                  type="menu"
+                  style={managePayeesButtonStyle}
+                  onClick={() => onManagePayees?.()}
+                >
                   Manage Payees
                 </Button>
               )}

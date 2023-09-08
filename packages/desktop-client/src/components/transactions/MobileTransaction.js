@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useState,
   useRef,
+  createRef,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams, Link } from 'react-router-dom';
@@ -53,6 +54,9 @@ import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import SvgPencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
 import { styles, colors, theme } from '../../style';
+import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
+import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import TextOneLine from '../common/TextOneLine';
@@ -60,7 +64,6 @@ import View from '../common/View';
 import { FocusableAmountInput } from '../mobile/MobileAmountInput';
 import {
   FieldLabel,
-  TapField,
   InputField,
   BooleanField,
   EDITING_PADDING,
@@ -188,6 +191,10 @@ class TransactionEditInner extends PureComponent {
       transactions: props.transactions,
       editingChild: null,
     };
+
+    this.payeeInputRef = createRef();
+    this.categoryInputRef = createRef();
+    this.accountInputRef = createRef();
   }
 
   serializeTransactions = memoizeOne(transactions => {
@@ -306,14 +313,26 @@ class TransactionEditInner extends PureComponent {
   };
 
   render() {
-    const { adding, categories, accounts, payees, renderChildEdit, navigate } =
-      this.props;
+    const {
+      isAdding,
+      categories,
+      categoryGroups,
+      accounts,
+      payees,
+      renderChildEdit,
+      navigate,
+      dateFormat,
+    } = this.props;
     const { editingChild } = this.state;
     const transactions = this.serializeTransactions(
       this.state.transactions || [],
     );
     const [transaction, ..._childTransactions] = transactions;
-    const { payee: payeeId, category, account: accountId } = transaction;
+    const {
+      payee: payeeId,
+      category: categoryId,
+      account: accountId,
+    } = transaction;
 
     // Child transactions should always default to the signage
     // of the parent transaction
@@ -332,12 +351,12 @@ class TransactionEditInner extends PureComponent {
       transferAcct,
     );
 
-    const transactionDate = parseDate(
-      transaction.date,
-      this.props.dateFormat,
-      new Date(),
-    );
+    const transactionDate = parseDate(transaction.date, dateFormat, new Date());
     const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
+
+    const autocompletePaddingStyle = {
+      padding: '7px 7px',
+    };
 
     return (
       // <KeyboardAvoidingView>
@@ -410,7 +429,7 @@ class TransactionEditInner extends PureComponent {
               role="heading"
             >
               {payeeId == null
-                ? adding
+                ? isAdding
                   ? 'New Transaction'
                   : 'Transaction'
                 : descriptionPretty}
@@ -477,10 +496,36 @@ class TransactionEditInner extends PureComponent {
 
             <View>
               <FieldLabel title="Payee" />
-              <TapField
+              {/* <TapField
                 value={descriptionPretty}
                 onClick={() => this.onClick(transaction.id, 'payee')}
                 data-testid="payee-field"
+              /> */}
+              <PayeeAutocomplete
+                payees={payees}
+                accounts={accounts}
+                value={payeeId}
+                inputProps={{
+                  // inputRef: this.payeeInputRef,
+                  style: {
+                    height: 40,
+                  },
+                  // onPointerUp: e => this.payeeInputRef.current?.focus(),
+                  'data-testid': 'payee-field',
+                }}
+                // showManagePayees={true}
+                tableBehavior={true}
+                // focused={focusedField === 'payee'}
+                onUpdate={payeeId => this.onEdit(transaction, 'payee', payeeId)}
+                onSelect={payeeId => this.onEdit(transaction, 'payee', payeeId)}
+                // onManagePayees={() => onManagePayees(payeeId)}
+                isCreatable
+                menuPortalTarget={undefined}
+                groupHeaderStyle={autocompletePaddingStyle}
+                payeeListItemStyle={autocompletePaddingStyle}
+                createPayeeButtonStyle={autocompletePaddingStyle}
+                makeTransferButtonStyle={autocompletePaddingStyle}
+                managePayeesButtonStyle={autocompletePaddingStyle}
               />
             </View>
 
@@ -491,30 +536,60 @@ class TransactionEditInner extends PureComponent {
                 }
               />
               {!transaction.is_parent ? (
-                <TapField
-                  value={category ? lookupName(categories, category) : null}
-                  disabled={(account && !!account.offbudget) || transferAcct}
-                  // TODO: the button to turn this transaction into a split
-                  // transaction was on top of the category button in the native
-                  // app, on the right-hand side
-                  //
-                  // On the web this doesn't work well and react gets upset if
-                  // nest a button in a button.
-                  //
-                  // rightContent={
-                  //   <Button
-                  //     contentStyle={{
-                  //       paddingVertical: 4,
-                  //       paddingHorizontal: 15,
-                  //       margin: 0,
-                  //     }}
-                  //     onPress={this.onSplit}
-                  //   >
-                  //     Split
-                  //   </Button>
-                  // }
-                  onClick={() => this.onClick(transaction.id, 'category')}
-                  data-testid="category-field"
+                // <TapField
+                //   value={category ? lookupName(categories, category) : null}
+                //   disabled={(account && !!account.offbudget) || transferAcct}
+                //   // TODO: the button to turn this transaction into a split
+                //   // transaction was on top of the category button in the native
+                //   // app, on the right-hand side
+                //   //
+                //   // On the web this doesn't work well and react gets upset if
+                //   // nest a button in a button.
+                //   //
+                //   // rightContent={
+                //   //   <Button
+                //   //     contentStyle={{
+                //   //       paddingVertical: 4,
+                //   //       paddingHorizontal: 15,
+                //   //       margin: 0,
+                //   //     }}
+                //   //     onPress={this.onSplit}
+                //   //   >
+                //   //     Split
+                //   //   </Button>
+                //   // }
+                //   onClick={() => this.onClick(transaction.id, 'category')}
+                //   data-testid="category-field"
+                // />
+                <CategoryAutocomplete
+                  categoryGroups={categoryGroups}
+                  value={categoryId}
+                  // focused={focusedField === 'category'}
+                  tableBehavior={true}
+                  // Split not yet supported.
+                  showSplitOption={false} // {!transaction.is_child && !transaction.is_parent}
+                  inputProps={{
+                    disabled: account?.offbudget || transferAcct,
+                    style: {
+                      ...((account?.offbudget || transferAcct) && {
+                        backgroundColor: theme.formInputTextReadOnlySelection,
+                      }),
+                      height: 40,
+                    },
+                    // inputRef: this.categoryInputRef,
+                    // onPointerUp: e => this.categoryInputRef.current?.focus(),
+                    'data-testid': 'category-field',
+                  }}
+                  groupHeaderStyle={autocompletePaddingStyle}
+                  categoryListItemStyle={autocompletePaddingStyle}
+                  splitButtonStyle={autocompletePaddingStyle}
+                  onUpdate={categoryId =>
+                    this.onEdit(transaction, 'category', categoryId)
+                  }
+                  onSelect={categoryId =>
+                    this.onEdit(transaction, 'category', categoryId)
+                  }
+                  menuPortalTarget={undefined}
                 />
               ) : (
                 <Text style={{ paddingLeft: EDITING_PADDING }}>
@@ -526,11 +601,38 @@ class TransactionEditInner extends PureComponent {
 
             <View>
               <FieldLabel title="Account" />
-              <TapField
+              {/* <TapField
                 disabled={!adding}
                 value={account ? account.name : null}
                 onClick={() => this.onClick(transaction.id, 'account')}
                 data-testid="account-field"
+              /> */}
+              <AccountAutocomplete
+                includeClosedAccounts={false}
+                value={accountId}
+                accounts={accounts}
+                tableBehavior={true}
+                // focused={focusedField === 'account'}
+                inputProps={{
+                  disabled: !isAdding,
+                  style: {
+                    ...(!isAdding && {
+                      backgroundColor: theme.formInputTextReadOnlySelection,
+                    }),
+                    height: 40,
+                  },
+                  ref: this.accountInputRef,
+                  onPointerUp: e => this.accountInputRef.current?.focus(),
+                  'data-testid': 'account-field',
+                }}
+                onUpdate={payeeId =>
+                  this.onEdit(transaction, 'account', payeeId)
+                }
+                onSelect={payeeId =>
+                  this.onEdit(transaction, 'account', payeeId)
+                }
+                menuPortalTarget={undefined}
+                accountListItemStyle={autocompletePaddingStyle}
               />
             </View>
 
@@ -546,17 +648,14 @@ class TransactionEditInner extends PureComponent {
                     this.onEdit(
                       transaction,
                       'date',
-                      formatDate(parseISO(value), this.props.dateFormat),
+                      formatDate(parseISO(value), dateFormat),
                     )
                   }
                   onChange={e =>
                     this.onQueueChange(
                       transaction,
                       'date',
-                      formatDate(
-                        parseISO(e.target.value),
-                        this.props.dateFormat,
-                      ),
+                      formatDate(parseISO(e.target.value), dateFormat),
                     )
                   }
                 />
@@ -585,7 +684,7 @@ class TransactionEditInner extends PureComponent {
               />
             </View>
 
-            {!adding && (
+            {!isAdding && (
               <View style={{ alignItems: 'center' }}>
                 <Button
                   onClick={() => this.onDelete()}
@@ -632,7 +731,7 @@ class TransactionEditInner extends PureComponent {
               flexShrink: 0,
             }}
           >
-            {adding ? (
+            {isAdding ? (
               <Button onClick={() => this.onAdd()}>
                 <SvgAdd width={17} height={17} style={{ color: colors.b3 }} />
                 <Text
@@ -696,12 +795,19 @@ function makeTemporaryTransactions(currentAccountId, lastDate) {
 }
 
 function TransactionEditUnconnected(props) {
-  const { categories, accounts, payees, lastTransaction, dateFormat } = props;
+  const {
+    categories,
+    categoryGroups,
+    accounts,
+    payees,
+    lastTransaction,
+    dateFormat,
+  } = props;
   let { id: accountId, transactionId } = useParams();
   let navigate = useNavigate();
   let [fetchedTransactions, setFetchedTransactions] = useState(null);
   let transactions = [];
-  let adding = false;
+  let isAdding = false;
   let deleted = false;
 
   useSetThemeColor(theme.mobileTransactionViewTheme);
@@ -750,7 +856,7 @@ function TransactionEditUnconnected(props) {
       accountId || (lastTransaction && lastTransaction.account) || null,
       lastTransaction && lastTransaction.date,
     );
-    adding = true;
+    isAdding = true;
   } else {
     transactions = fetchedTransactions;
   }
@@ -801,7 +907,7 @@ function TransactionEditUnconnected(props) {
       // }
     }
 
-    if (adding) {
+    if (isAdding) {
       // The first one is always the "parent" and the only one we care
       // about
       props.setLastTransaction(newTransactions[0]);
@@ -809,7 +915,7 @@ function TransactionEditUnconnected(props) {
   };
 
   const onDelete = async () => {
-    if (adding) {
+    if (isAdding) {
       // Adding a new transactions, this disables saving when the component unmounts
       deleted = true;
     } else {
@@ -830,8 +936,9 @@ function TransactionEditUnconnected(props) {
     >
       <TransactionEditInner
         transactions={transactions}
-        adding={adding}
+        isAdding={isAdding}
         categories={categories}
+        categoryGroups={categoryGroups}
         accounts={accounts}
         payees={payees}
         pushModal={props.pushModal}
@@ -851,7 +958,7 @@ function TransactionEditUnconnected(props) {
 }
 
 export const TransactionEdit = props => {
-  const { list: categories } = useCategories();
+  const { list: categories, grouped: categoryGroups } = useCategories();
   const payees = useSelector(state => state.queries.payees);
   const lastTransaction = useSelector(state => state.queries.lastTransaction);
   const accounts = useSelector(state => state.queries.accounts);
@@ -865,6 +972,7 @@ export const TransactionEdit = props => {
       {...props}
       {...actions}
       categories={categories}
+      categoryGroups={categoryGroups}
       payees={payees}
       lastTransaction={lastTransaction}
       accounts={accounts}

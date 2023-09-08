@@ -3,12 +3,13 @@ import React, {
   Fragment,
   useMemo,
   type ReactNode,
+  useState,
 } from 'react';
 
 import { css } from 'glamor';
 
 import Split from '../../icons/v0/Split';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
@@ -33,7 +34,10 @@ export type CategoryListProps = {
   highlightedIndex: number;
   embedded: boolean;
   footer?: ReactNode;
-  groupHeaderStyle?: object;
+  style?: CSSProperties;
+  groupHeaderStyle?: CSSProperties;
+  itemStyle?: CSSProperties;
+  splitButtonStyle?: CSSProperties;
 };
 function CategoryList({
   items,
@@ -41,7 +45,10 @@ function CategoryList({
   highlightedIndex,
   embedded,
   footer,
+  style,
   groupHeaderStyle,
+  itemStyle,
+  splitButtonStyle,
 }: CategoryListProps) {
   let lastGroup = null;
 
@@ -52,6 +59,7 @@ function CategoryList({
           overflow: 'auto',
           padding: '5px 0',
           ...(!embedded && { maxHeight: 175 }),
+          ...style,
         }}
       >
         {items.map((item, idx) => {
@@ -98,6 +106,7 @@ function CategoryList({
                   ':active': {
                     backgroundColor: 'rgba(100, 100, 100, .25)',
                   },
+                  ...splitButtonStyle,
                 }}
                 data-testid="split-transaction-button"
               >
@@ -139,6 +148,7 @@ function CategoryList({
                     paddingLeft: 20,
                     borderRadius: embedded ? 4 : 0,
                   },
+                  itemStyle,
                 ])}`}
                 data-testid={
                   'category-item' +
@@ -159,14 +169,21 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: CategoryGroup[];
   showSplitOption?: boolean;
-  groupHeaderStyle?: object;
+  categoryListStyle?: CSSProperties;
+  categoryListItemStyle?: CSSProperties;
+  groupHeaderStyle?: CSSProperties;
+  splitButtonStyle?: CSSProperties;
 };
 export default function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,
   embedded,
   closeOnBlur,
+  inputProps,
+  categoryListStyle,
   groupHeaderStyle,
+  categoryListItemStyle,
+  splitButtonStyle,
   ...props
 }: CategoryAutocompleteProps) {
   let categorySuggestions = useMemo(
@@ -183,6 +200,8 @@ export default function CategoryAutocomplete({
       ),
     [categoryGroups],
   );
+
+  const [categoryFieldFocused, setCategoryFieldFocused] = useState(false);
 
   return (
     <Autocomplete
@@ -207,6 +226,18 @@ export default function CategoryAutocomplete({
           );
         });
       }}
+      inputProps={{
+        ...inputProps,
+        onFocus: e => {
+          setCategoryFieldFocused(true);
+          inputProps?.onFocus?.(e);
+        },
+        onBlur: e => {
+          setCategoryFieldFocused(false);
+          inputProps?.onBlur?.(e);
+        },
+      }}
+      focused={categoryFieldFocused}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <CategoryList
@@ -214,7 +245,10 @@ export default function CategoryAutocomplete({
           embedded={embedded}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
+          style={categoryListStyle}
           groupHeaderStyle={groupHeaderStyle}
+          itemStyle={categoryListItemStyle}
+          splitButtonStyle={splitButtonStyle}
         />
       )}
       {...props}

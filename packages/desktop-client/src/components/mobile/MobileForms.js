@@ -64,7 +64,8 @@ export const InputField = forwardRef(function InputField(
   );
 });
 
-export function TapField({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function TapField({
   value,
   children,
   disabled,

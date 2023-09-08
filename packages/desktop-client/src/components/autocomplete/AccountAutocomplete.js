@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { css } from 'glamor';
 
@@ -14,6 +14,8 @@ function AccountList({
   getItemProps,
   highlightedIndex,
   embedded,
+  style,
+  itemStyle,
   groupHeaderStyle,
 }) {
   let lastItem = null;
@@ -25,6 +27,7 @@ function AccountList({
           overflow: 'auto',
           padding: '5px 0',
           ...(!embedded && { maxHeight: 175 }),
+          ...style,
         }}
       >
         {items.map((item, idx) => {
@@ -93,6 +96,7 @@ function AccountList({
                   paddingLeft: 20,
                   borderRadius: embedded ? 4 : 0,
                 },
+                itemStyle,
               ])}`}
               data-testid={
                 'account-item' +
@@ -111,8 +115,11 @@ function AccountList({
 export default function AccountAutocomplete({
   embedded,
   includeClosedAccounts = true,
+  accountListStyle,
+  accountListItemStyle,
   groupHeaderStyle,
   closeOnBlur,
+  inputProps,
   ...props
 }) {
   let accounts = useCachedAccounts() || [];
@@ -131,6 +138,8 @@ export default function AccountAutocomplete({
       }
     });
 
+  const [accountFieldFocused, setAccountFieldFocused] = useState(false);
+
   return (
     <Autocomplete
       strict={true}
@@ -138,12 +147,26 @@ export default function AccountAutocomplete({
       embedded={embedded}
       closeOnBlur={closeOnBlur}
       suggestions={accounts}
+      inputProps={{
+        ...inputProps,
+        onBlur: e => {
+          setAccountFieldFocused(false);
+          inputProps?.onBlur?.(e);
+        },
+        onFocus: e => {
+          setAccountFieldFocused(true);
+          inputProps?.onFocus?.(e);
+        },
+      }}
+      focused={accountFieldFocused}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <AccountList
           items={items}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
           embedded={embedded}
+          style={accountListStyle}
+          itemStyle={accountListItemStyle}
           groupHeaderStyle={groupHeaderStyle}
         />
       )}
