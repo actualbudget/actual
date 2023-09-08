@@ -1,6 +1,7 @@
 export class RulesPage {
   constructor(page) {
     this.page = page;
+    this.searchBox = page.getByPlaceholder('Filter rules...');
   }
 
   /**
@@ -22,17 +23,17 @@ export class RulesPage {
    * Retrieve the data for the nth-rule.
    * 0-based index
    */
-  async getNthRule(index) {
+  getNthRule(index) {
     const row = this.page.getByTestId('table').getByTestId('row').nth(index);
 
     return {
-      conditions: await row
-        .getByTestId('conditions')
-        .evaluate(el => [...el.children].map(c => c.textContent)),
-      actions: await row
-        .getByTestId('actions')
-        .evaluate(el => [...el.children].map(c => c.textContent)),
+      conditions: row.getByTestId('conditions').locator(':scope > div'),
+      actions: row.getByTestId('actions').locator(':scope > div'),
     };
+  }
+
+  async searchFor(text) {
+    await this.searchBox.fill(text);
   }
 
   async _fillRuleFields(data) {
