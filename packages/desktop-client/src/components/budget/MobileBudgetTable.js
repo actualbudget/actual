@@ -60,12 +60,6 @@ function useWindowSize() {
   return smallVPWidth;
 }
 
-function ScreenSizeWrapper({ children }) {
-  const smallVPWidth = useWindowSize();
-
-  return children(smallVPWidth);
-}
-
 function ToBudget({ toBudget, onClick }) {
   let amount = useSheetValue(toBudget);
   let format = useFormat();
@@ -275,7 +269,6 @@ class BudgetCategory extends PureComponent {
     this.opacity = editMode || blank ? 0 : 1;
   }
 
-
   render() {
     let {
       category,
@@ -388,7 +381,6 @@ function BudgetCategoryWrapper(props) {
 
   return <BudgetCategory {...props} smallVPWidth={smallVPWidth} />;
 }
-
 
 class TotalsRow extends PureComponent {
   constructor(props) {
