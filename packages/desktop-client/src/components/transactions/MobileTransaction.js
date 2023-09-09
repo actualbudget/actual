@@ -368,7 +368,7 @@ class TransactionEditInner extends PureComponent {
       this.accountInputRef,
     ];
 
-    function focusNextInput() {
+    function focusNextInputOrBlur() {
       const nextRef = orderedInputRef.find(r => !r.current?.value);
       if (nextRef) {
         nextRef?.current?.focus();
@@ -536,7 +536,7 @@ class TransactionEditInner extends PureComponent {
                 // focused={focusedField === 'payee'}
                 onSelect={payeeId => {
                   this.onEdit(transaction, 'payee', payeeId);
-                  focusNextInput();
+                  focusNextInputOrBlur();
                 }}
                 // onManagePayees={() => onManagePayees(payeeId)}
                 isCreatable
@@ -626,7 +626,7 @@ class TransactionEditInner extends PureComponent {
                   splitButtonStyle={autocompletePaddingStyle}
                   onSelect={categoryId => {
                     this.onEdit(transaction, 'category', categoryId);
-                    focusNextInput();
+                    focusNextInputOrBlur();
                   }}
                   menuPortalTarget={undefined}
                 />
@@ -656,7 +656,7 @@ class TransactionEditInner extends PureComponent {
                 }}
                 onSelect={payeeId => {
                   this.onEdit(transaction, 'account', payeeId);
-                  focusNextInput();
+                  focusNextInputOrBlur();
                 }}
                 menuPortalTarget={undefined}
                 accountListItemStyle={autocompletePaddingStyle}
