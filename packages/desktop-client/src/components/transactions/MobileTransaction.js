@@ -316,6 +316,7 @@ class TransactionEditInner extends PureComponent {
   render() {
     const {
       isAdding,
+      currentAccountId,
       categories,
       categoryGroups,
       accounts,
@@ -329,11 +330,8 @@ class TransactionEditInner extends PureComponent {
       this.state.transactions || [],
     );
     const [transaction, ..._childTransactions] = transactions;
-    const {
-      payee: payeeId,
-      category: categoryId,
-      account: accountId,
-    } = transaction;
+    const { payee: payeeId, category: categoryId } = transaction;
+    const accountId = currentAccountId || transaction?.account;
 
     // Child transactions should always default to the signage
     // of the parent transaction
@@ -359,7 +357,10 @@ class TransactionEditInner extends PureComponent {
       padding: '7px 7px',
     };
 
-    const disableCategoryField = account?.offbudget || transferAcct;
+    const isOffBudget = account && account?.offbudget;
+    const isBudgetTransfer = transferAcct && !transferAcct?.offbudget;
+    const isParent = transaction?.is_parent;
+    const isPreview = isPreviewId(transaction?.id);
 
     return (
       // <KeyboardAvoidingView>
@@ -516,9 +517,7 @@ class TransactionEditInner extends PureComponent {
                   'data-testid': 'payee-field',
                 }}
                 // showManagePayees={true}
-                tableBehavior={true}
                 // focused={focusedField === 'payee'}
-                onUpdate={payeeId => this.onEdit(transaction, 'payee', payeeId)}
                 onSelect={payeeId => {
                   this.onEdit(transaction, 'payee', payeeId);
                   if (!this.categoryInputRef.current?.disabled) {
@@ -539,11 +538,33 @@ class TransactionEditInner extends PureComponent {
 
             <View>
               <FieldLabel
-                title={
-                  transaction.is_parent ? 'Categories (split)' : 'Category'
-                }
+                title={isParent ? 'Categories (split)' : 'Category'}
               />
-              {!transaction.is_parent ? (
+              {isBudgetTransfer || isOffBudget || isPreview ? (
+                <InputField
+                  disabled
+                  value={
+                    isParent
+                      ? 'Split'
+                      : isOffBudget
+                      ? 'Off Budget'
+                      : isBudgetTransfer
+                      ? 'Transfer'
+                      : ''
+                  }
+                  style={{
+                    fontStyle: 'italic',
+                    color: '#c0c0c0',
+                    fontWeight: 300,
+                  }}
+                  data-testid="category-field"
+                />
+              ) : isParent ? (
+                <Text style={{ paddingLeft: EDITING_PADDING }}>
+                  Split transaction editing is not supported on mobile at this
+                  time.
+                </Text>
+              ) : (
                 // <TapField
                 //   value={category ? lookupName(categories, category) : null}
                 //   disabled={(account && !!account.offbudget) || transferAcct}
@@ -573,14 +594,13 @@ class TransactionEditInner extends PureComponent {
                   categoryGroups={categoryGroups}
                   value={categoryId}
                   // focused={focusedField === 'category'}
-                  tableBehavior={true}
                   // Split not yet supported.
                   showSplitOption={false} // {!transaction.is_child && !transaction.is_parent}
                   inputProps={{
                     inputRef: this.categoryInputRef,
-                    disabled: disableCategoryField,
+                    disabled: isBudgetTransfer || isOffBudget,
                     style: {
-                      ...(disableCategoryField && {
+                      ...((isBudgetTransfer || isOffBudget) && {
                         backgroundColor: theme.formInputTextReadOnlySelection,
                       }),
                       height: 40,
@@ -590,9 +610,6 @@ class TransactionEditInner extends PureComponent {
                   groupHeaderStyle={autocompletePaddingStyle}
                   categoryListItemStyle={autocompletePaddingStyle}
                   splitButtonStyle={autocompletePaddingStyle}
-                  onUpdate={categoryId =>
-                    this.onEdit(transaction, 'category', categoryId)
-                  }
                   onSelect={categoryId => {
                     this.onEdit(transaction, 'category', categoryId);
                     if (!this.accountInputRef.current?.disabled) {
@@ -602,11 +619,6 @@ class TransactionEditInner extends PureComponent {
                   }}
                   menuPortalTarget={undefined}
                 />
-              ) : (
-                <Text style={{ paddingLeft: EDITING_PADDING }}>
-                  Split transaction editing is not supported on mobile at this
-                  time.
-                </Text>
               )}
             </View>
 
@@ -622,22 +634,14 @@ class TransactionEditInner extends PureComponent {
                 includeClosedAccounts={false}
                 value={accountId}
                 accounts={accounts}
-                tableBehavior={true}
                 // focused={focusedField === 'account'}
                 inputProps={{
                   inputRef: this.accountInputRef,
-                  disabled: !isAdding,
                   style: {
-                    ...(!isAdding && {
-                      backgroundColor: theme.formInputTextReadOnlySelection,
-                    }),
                     height: 40,
                   },
                   'data-testid': 'account-field',
                 }}
-                onUpdate={payeeId =>
-                  this.onEdit(transaction, 'account', payeeId)
-                }
                 onSelect={payeeId =>
                   this.onEdit(transaction, 'account', payeeId)
                 }
@@ -817,8 +821,8 @@ function TransactionEditUnconnected(props) {
   let navigate = useNavigate();
   let [fetchedTransactions, setFetchedTransactions] = useState(null);
   let transactions = [];
-  let isAdding = false;
-  let deleted = false;
+  let isAdding = useRef(false);
+  let isDeleted = useRef(false);
 
   useSetThemeColor(theme.mobileTransactionViewTheme);
 
@@ -866,7 +870,7 @@ function TransactionEditUnconnected(props) {
       accountId || (lastTransaction && lastTransaction.account) || null,
       lastTransaction && lastTransaction.date,
     );
-    isAdding = true;
+    isAdding.current = true;
   } else {
     transactions = fetchedTransactions;
   }
@@ -893,7 +897,7 @@ function TransactionEditUnconnected(props) {
   };
 
   const onSave = async newTransactions => {
-    if (deleted) {
+    if (isDeleted.current) {
       return;
     }
 
@@ -917,7 +921,7 @@ function TransactionEditUnconnected(props) {
       // }
     }
 
-    if (isAdding) {
+    if (isAdding.current) {
       // The first one is always the "parent" and the only one we care
       // about
       props.setLastTransaction(newTransactions[0]);
@@ -925,9 +929,9 @@ function TransactionEditUnconnected(props) {
   };
 
   const onDelete = async () => {
-    if (isAdding) {
+    if (isAdding.current) {
       // Adding a new transactions, this disables saving when the component unmounts
-      deleted = true;
+      isDeleted.current = true;
     } else {
       const changes = { deleted: transactions };
       const _remoteUpdates = await send('transactions-batch-update', changes);
@@ -946,7 +950,8 @@ function TransactionEditUnconnected(props) {
     >
       <TransactionEditInner
         transactions={transactions}
-        isAdding={isAdding}
+        isAdding={isAdding.current}
+        currentAccountId={accountId}
         categories={categories}
         categoryGroups={categoryGroups}
         accounts={accounts}

@@ -113,6 +113,7 @@ function AccountList({
 }
 
 export default function AccountAutocomplete({
+  accounts,
   embedded,
   includeClosedAccounts = true,
   accountListStyle,
@@ -122,11 +123,11 @@ export default function AccountAutocomplete({
   inputProps,
   ...props
 }) {
-  let accounts = useCachedAccounts() || [];
+  const cachedAccounts = useCachedAccounts() || [];
 
   //remove closed accounts if needed
   //then sort by closed, then offbudget
-  accounts = accounts
+  accounts = (accounts || cachedAccounts)
     .filter(item => {
       return includeClosedAccounts ? item : !item.closed;
     })
