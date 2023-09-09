@@ -1183,7 +1183,7 @@ function BudgetHeader({
               // zIndex: -1
             }}
           >
-            {showBudgetView ? 'Show Budget' : 'Show Spent'}
+            {showBudgetView ? 'Show Budgeted' : 'Show Spent'}
           </Text>
         </Button>
       ) : null}
