@@ -9,7 +9,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
@@ -94,7 +94,7 @@ export function ScheduleAmountCell({ amount, op }) {
         <View
           style={{
             textAlign: 'left',
-            color: colors.n7,
+            color: theme.pageTextSubdued,
             lineHeight: '1em',
             marginRight: 10,
           }}
@@ -106,7 +106,7 @@ export function ScheduleAmountCell({ amount, op }) {
       <Text
         style={{
           flex: 1,
-          color: num > 0 ? colors.g5 : null,
+          color: num > 0 ? theme.noticeText : theme.tableText,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -196,13 +196,18 @@ export function SchedulesTable({
         onClick={() => onSelect(item.id)}
         style={{
           cursor: 'pointer',
-          backgroundColor: 'white',
-          ':hover': { backgroundColor: colors.hover },
+          backgroundColor: theme.tableBackground,
+          color: theme.tableText,
+          ':hover': { backgroundColor: theme.tableRowBackgroundHover },
         }}
       >
         <Field width="flex" name="name">
           <Text
-            style={item.name == null ? { color: colors.n8 } : null}
+            style={
+              item.name == null
+                ? { color: theme.buttonNormalDisabledText }
+                : null
+            }
             title={item.name ? item.name : ''}
           >
             {item.name ? item.name : 'None'}
@@ -251,8 +256,8 @@ export function SchedulesTable({
           inset={15}
           style={{
             cursor: 'pointer',
-            backgroundColor: 'white',
-            ':hover': { backgroundColor: colors.hover },
+            backgroundColor: 'transparent',
+            ':hover': { backgroundColor: theme.tableRowBackgroundHover },
           }}
           onClick={() => setShowCompleted(true)}
         >
@@ -261,7 +266,7 @@ export function SchedulesTable({
             style={{
               fontStyle: 'italic',
               textAlign: 'center',
-              color: colors.n6,
+              color: theme.tableText,
             }}
           >
             Show completed schedules

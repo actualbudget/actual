@@ -10,7 +10,7 @@ import useSelected, {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button';
 import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
@@ -40,11 +40,19 @@ function DiscoverSchedulesTable({ schedules, loading }) {
           dispatchSelected({ type: 'select', id: item.id, event: e });
         }}
         style={{
+          borderColor: selected
+            ? theme.alttableBorderSelected
+            : theme.tableBorder,
           cursor: 'pointer',
-          borderColor: selected ? colors.b8 : colors.border,
-          backgroundColor: selected ? colors.selected : 'white',
+          color: selected
+            ? theme.tableRowBackgroundHighlightText
+            : theme.tableText,
+          backgroundColor: selected
+            ? theme.tableRowBackgroundHighlight
+            : theme.tableBackground,
           ':hover': {
-            backgroundColor: selected ? colors.selected : colors.hover,
+            backgroundColor: theme.tableRowBackgroundHover,
+            color: theme.tableText,
           },
         }}
       >
@@ -72,7 +80,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
+      <TableHeader height={ROW_HEIGHT} inset={15}>
         <SelectCell
           exposed={!loading}
           focused={false}
@@ -90,8 +98,6 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
-        version="v2"
-        backgroundColor="transparent"
         style={{
           flex: 1,
           backgroundColor: 'transparent',
