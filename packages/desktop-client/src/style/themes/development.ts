@@ -22,9 +22,11 @@ export const cardBorder = colorPalette.purple400;
 export const cardShadow = colorPalette.purple100;
 
 export const tableBackground = colorPalette.red900;
+export const altTableBackground = tableBackground;
 export const tableRowBackgroundHover = colorPalette.red800;
 export const tableText = colorPalette.red200;
 export const altTableText = colorPalette.navy400;
+export const alt2TableText = altTableText;
 export const tableTextSelected = colorPalette.red150;
 export const tableTextHover = colorPalette.red400;
 export const tableTextEditing = colorPalette.black;
@@ -82,6 +84,9 @@ export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
 export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
+export const mobileModalBackground = colorPalette.navy900;
+export const mobileModalText = colorPalette.white;
+export const altMobileModalText = colorPalette.blue100;
 
 // Button
 export const buttonMenuText = colorPalette.navy150;
@@ -115,6 +120,7 @@ export const buttonNormalShadow = colorPalette.navy700;
 export const altbuttonMenuBackground = colorPalette.navy100;
 export const buttonNormalSelectedText = colorPalette.purple200;
 export const buttonNormalSelectedBackground = colorPalette.purple400;
+export const altButtonNormalSelectedBackground = buttonNormalSelectedBackground;
 
 export const buttonNormalDisabledText = colorPalette.navy500;
 export const buttonNormalDisabledBackground = colorPalette.navy800;
@@ -129,13 +135,22 @@ export const buttonBareDisabledText = buttonNormalDisabledText;
 export const buttonBareDisabledBackground = buttonBareBackground;
 
 export const noticeBackground = colorPalette.green800;
+export const altNoticeBackground = noticeBackground;
+export const alt2NoticeBackground = noticeBackground;
 export const noticeText = colorPalette.green300;
+export const altNoticeText = noticeText;
+export const alt2NoticeText = noticeText;
+export const alt3NoticeText = noticeText;
 export const noticeAccent = colorPalette.green500;
 export const warningBackground = colorPalette.orange800;
+export const altWarningBackground = warningBackground;
 export const warningText = colorPalette.orange200;
+export const altWarningText = warningText;
 export const warningAccent = colorPalette.orange500;
 export const errorBackground = colorPalette.red800;
+export const altErrorBackground = errorBackground;
 export const errorText = colorPalette.red200;
+export const altErrorText = errorText;
 export const errorAccent = colorPalette.red500;
 
 export const formLabelText = colorPalette.purple200;

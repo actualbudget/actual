@@ -5,6 +5,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import { useActions } from '../../hooks/useActions';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Search from '../common/Search';
 import View from '../common/View';
@@ -86,7 +87,7 @@ export default function Schedules() {
           allowCompleted={true}
           onSelect={onEdit}
           onAction={onAction}
-          style={{ backgroundColor: 'white' }}
+          style={{ backgroundColor: theme.tableBackground }}
           // @todo: Remove following props after typing SchedulesTable
           minimal={undefined}
           tableStyle={undefined}
