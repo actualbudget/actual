@@ -901,8 +901,7 @@ export function BudgetTable(props) {
   });
 
   let [showBudgetView, setshowBudgetView] = useState(
-    smallVPWidth &&
-      !toggleMobileDisplayPref &&
+    !toggleMobileDisplayPref &&
       !document.cookie.match(/toggleMobileDisplayPref=true/),
   );
 
@@ -910,7 +909,7 @@ export function BudgetTable(props) {
 
   function toggleDisplay() {
     setshowBudgetView(!showBudgetView);
-    if (showBudgetView) {
+    if (!showBudgetView) {
       // remember the pref indefinitely
       dispatch(savePrefs({ toggleMobileDisplayPref: true }));
     } else {
@@ -1169,7 +1168,9 @@ function BudgetHeader({
             ...buttonStyle,
             left: 0,
             opacity: prevEnabled ? 1 : 0.6,
-            padding: '5px 30px 5px 0',
+            padding: '10px',
+            width: '80px',
+            position: 'absolute',
           }}
         >
           <Text
