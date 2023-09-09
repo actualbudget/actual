@@ -6,8 +6,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 import Reports from '../../icons/v1/Reports';
 import Wallet from '../../icons/v1/Wallet';
 import CalendarIcon from '../../icons/v2/Calendar';
-// eslint-disable-next-line no-restricted-imports
-import { type CSSProperties, colors } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import View from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
@@ -70,8 +69,8 @@ function Sidebar({
     <View
       style={{
         width: SIDEBAR_WIDTH,
-        color: colors.n9,
-        backgroundColor: colors.n1,
+        color: theme.sidebarItemText,
+        backgroundColor: theme.sidebarBackground,
         '& .float': {
           opacity: isFloating ? 1 : 0,
           transition: 'opacity .25s, width .25s',
@@ -118,7 +117,7 @@ function Sidebar({
         <View
           style={{
             height: 1,
-            backgroundColor: colors.n3,
+            backgroundColor: theme.sidebarItemBackgroundHover,
             marginTop: 15,
             flexShrink: 0,
           }}

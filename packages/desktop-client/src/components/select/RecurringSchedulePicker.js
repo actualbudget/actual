@@ -7,7 +7,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
-import { colors, theme } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Select from '../common/Select';
@@ -189,7 +189,7 @@ function SchedulePreview({ previewDates }) {
     <Stack
       direction="column"
       spacing={1}
-      style={{ marginTop: 15, color: colors.n4 }}
+      style={{ marginTop: 15, color: theme.tableText }}
     >
       {content}
     </Stack>
