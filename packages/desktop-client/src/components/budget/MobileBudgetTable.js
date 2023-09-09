@@ -102,11 +102,11 @@ function Saved({ projected }) {
       }}
     >
       {projected ? (
-        <Label title="PROJECTED SAVINGS" style={{ color: colors.n1, }} />
+        <Label title="PROJECTED SAVINGS" style={{ color: colors.n1 }} />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: colors.n1}}
+          style={{ color: colors.n1 }}
         />
       )}
 
