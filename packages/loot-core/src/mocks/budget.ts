@@ -10,6 +10,7 @@ import { batchMessages, setSyncingMode } from '../server/sync';
 import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 import type {
+  CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
@@ -585,7 +586,7 @@ export async function createTestBudget(handlers) {
     }),
   );
 
-  let payees: PayeeEntity[] = [
+  let payees: Array<PayeeEntity & { bill?: boolean }> = [
     { name: 'Starting Balance' },
     { name: 'Kroger' },
     { name: 'Publix' },
@@ -608,7 +609,9 @@ export async function createTestBudget(handlers) {
     }),
   );
 
-  let categoryGroups: CategoryGroupEntity[] = [
+  let categoryGroups: Array<
+    CategoryGroupEntity & { categories: Omit<CategoryEntity, 'group'>[] }
+  > = [
     {
       name: 'Usual Expenses',
       categories: [
@@ -650,7 +653,6 @@ export async function createTestBudget(handlers) {
         isIncome: group.is_income ? 1 : 0,
       });
 
-      // @ts-expect-error Missing proper type refinement
       for (let category of group.categories) {
         category.id = await handlers['category-create']({
           ...category,
