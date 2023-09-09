@@ -96,7 +96,7 @@ export function ReconcilingMessage({
 }
 
 export function ReconcileTooltip({ account, onReconcile, onClose }) {
-  let balanceQuery = queries.accountBalance(account)
+  let balanceQuery = queries.accountBalance(account);
   let clearedBalance = useSheetValue({
     name: balanceQuery.name + '-cleared',
     value: null,
