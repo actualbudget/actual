@@ -28,6 +28,7 @@ test.describe('Rules', () => {
   });
 
   test('checks the page visuals', async () => {
+    await rulesPage.searchFor('Dominion');
     await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
@@ -48,6 +49,7 @@ test.describe('Rules', () => {
       ],
     });
 
+    await rulesPage.searchFor('Fast Internet');
     const rule = rulesPage.getNthRule(0);
     await expect(rule.conditions).toHaveText(['payee is Fast Internet']);
     await expect(rule.actions).toHaveText(['set category to General']);
