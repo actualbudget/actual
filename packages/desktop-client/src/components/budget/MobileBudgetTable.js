@@ -44,11 +44,11 @@ import { AmountInput } from '../util/AmountInput';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
 
 function useWindowSize() {
-  const [smallVPWidth, setSmallVPWidth] = useState(window.innerWidth <= 365);
+  const [smallVPWidth, setSmallVPWidth] = useState(window.outerWidth <= 365);
 
   useEffect(() => {
     const handleResize = () => {
-      setSmallVPWidth(window.innerWidth <= 365);
+      setSmallVPWidth(window.outerWidth <= 365);
     };
 
     window.addEventListener('resize', handleResize);
@@ -102,11 +102,11 @@ function Saved({ projected }) {
       }}
     >
       {projected ? (
-        <Label title="PROJECTED SAVINGS" style={{ color: colors.n1 }} />
+        <Label title="PROJECTED SAVINGS" style={{ color: colors.n1, }} />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: colors.n1 }}
+          style={{ color: colors.n1}}
         />
       )}
 
