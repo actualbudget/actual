@@ -11,7 +11,7 @@ export class MobileTransactionEntryPage {
 
   async fillField(fieldLocator, content) {
     await fieldLocator.click();
-    await this.page.locator('css=[role=combobox] input').fill(content);
+    await fieldLocator.fill(content);
     await this.page.keyboard.press('Enter');
   }
 

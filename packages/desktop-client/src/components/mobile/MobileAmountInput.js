@@ -89,8 +89,8 @@ class AmountInput extends PureComponent {
   //   });
   // }
 
-  onKeyPress = e => {
-    if (e.nativeEvent.key === 'Backspace' && this.state.text === '') {
+  onKeyUp = e => {
+    if (e.key === 'Backspace' && this.state.text === '') {
       this.setState({ editing: true });
     }
   };
@@ -151,7 +151,7 @@ class AmountInput extends PureComponent {
         autoCapitalize="none"
         onChange={e => this.onChangeText(e.target.value)}
         onBlur={this.onBlur}
-        onKeyPress={this.onKeyPress}
+        onKeyUp={this.onKeyUp}
         data-testid="amount-input"
         style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
       />

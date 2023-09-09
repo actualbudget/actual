@@ -192,7 +192,7 @@ class TransactionEditInner extends PureComponent {
       editingChild: null,
     };
 
-    this.amountRef = createRef();
+    this.amountInputRef = createRef();
     this.payeeInputRef = createRef();
     this.categoryInputRef = createRef();
     this.accountInputRef = createRef();
@@ -206,7 +206,7 @@ class TransactionEditInner extends PureComponent {
 
   componentDidMount() {
     if (this.props.isAdding) {
-      this.amountRef.current?.focus();
+      this.amountInputRef.current?.focus();
     }
   }
 
@@ -362,6 +362,21 @@ class TransactionEditInner extends PureComponent {
     const isParent = transaction?.is_parent;
     const isPreview = isPreviewId(transaction?.id);
 
+    const orderedInputRef = [
+      this.payeeInputRef,
+      this.categoryInputRef,
+      this.accountInputRef,
+    ];
+
+    function focusNextInput() {
+      const nextRef = orderedInputRef.find(r => !r.current?.value);
+      if (nextRef) {
+        nextRef?.current?.focus();
+      } else {
+        orderedInputRef.forEach(r => r.current?.blur());
+      }
+    }
+
     return (
       // <KeyboardAvoidingView>
       <View
@@ -476,7 +491,7 @@ class TransactionEditInner extends PureComponent {
                 style={{ marginBottom: 0, paddingLeft: 0 }}
               />
               <FocusableAmountInput
-                ref={this.amountRef}
+                ref={this.amountInputRef}
                 value={transaction.amount}
                 zeroIsNegative={true}
                 onBlur={value =>
@@ -509,6 +524,7 @@ class TransactionEditInner extends PureComponent {
                 payees={payees}
                 accounts={accounts}
                 value={payeeId}
+                closeOnBlur={true}
                 inputProps={{
                   inputRef: this.payeeInputRef,
                   style: {
@@ -520,10 +536,7 @@ class TransactionEditInner extends PureComponent {
                 // focused={focusedField === 'payee'}
                 onSelect={payeeId => {
                   this.onEdit(transaction, 'payee', payeeId);
-                  if (!this.categoryInputRef.current?.disabled) {
-                    // Go to next.
-                    this.categoryInputRef.current?.focus();
-                  }
+                  focusNextInput();
                 }}
                 // onManagePayees={() => onManagePayees(payeeId)}
                 isCreatable
@@ -593,6 +606,7 @@ class TransactionEditInner extends PureComponent {
                 <CategoryAutocomplete
                   categoryGroups={categoryGroups}
                   value={categoryId}
+                  closeOnBlur={true}
                   // focused={focusedField === 'category'}
                   // Split not yet supported.
                   showSplitOption={false} // {!transaction.is_child && !transaction.is_parent}
@@ -612,10 +626,7 @@ class TransactionEditInner extends PureComponent {
                   splitButtonStyle={autocompletePaddingStyle}
                   onSelect={categoryId => {
                     this.onEdit(transaction, 'category', categoryId);
-                    if (!this.accountInputRef.current?.disabled) {
-                      // Go to next.
-                      this.accountInputRef.current?.focus();
-                    }
+                    focusNextInput();
                   }}
                   menuPortalTarget={undefined}
                 />
@@ -633,6 +644,7 @@ class TransactionEditInner extends PureComponent {
               <AccountAutocomplete
                 includeClosedAccounts={false}
                 value={accountId}
+                closeOnBlur={true}
                 accounts={accounts}
                 // focused={focusedField === 'account'}
                 inputProps={{
@@ -642,9 +654,10 @@ class TransactionEditInner extends PureComponent {
                   },
                   'data-testid': 'account-field',
                 }}
-                onSelect={payeeId =>
-                  this.onEdit(transaction, 'account', payeeId)
-                }
+                onSelect={payeeId => {
+                  this.onEdit(transaction, 'account', payeeId);
+                  focusNextInput();
+                }}
                 menuPortalTarget={undefined}
                 accountListItemStyle={autocompletePaddingStyle}
               />
