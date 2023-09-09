@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
@@ -30,7 +30,7 @@ export default function PostsOfflineNotification({ modalProps, actions }) {
             The {plural ? 'payees ' : 'payee '}
             {payees.map((id, idx) => (
               <Text key={id}>
-                <Text style={{ color: colors.p4 }}>
+                <Text style={{ color: theme.pageTextPositive }}>
                   <DisplayId id={id} type="payees" />
                 </Text>
                 {idx === payees.length - 1
