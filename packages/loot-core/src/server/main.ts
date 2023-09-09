@@ -13,7 +13,6 @@ import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import q, { Query } from '../shared/query';
-import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { Handlers } from '../types/handlers';
 
@@ -21,7 +20,6 @@ import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
 import { parseFile } from './accounts/parse-file';
 import { getStartingBalancePayee } from './accounts/payees';
-import { Condition, Action, rankRules } from './accounts/rules';
 import * as bankSync from './accounts/sync';
 import * as rules from './accounts/transaction-rules';
 import { batchUpdateTransactions } from './accounts/transactions';
@@ -40,7 +38,7 @@ import * as cloudStorage from './cloud-storage';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
-import { APIError, TransactionError, PostError, RuleError } from './errors';
+import { APIError, TransactionError, PostError } from './errors';
 import filtersApp from './filters/app';
 import { handleBudgetImport } from './importers';
 import app from './main-app';
@@ -49,6 +47,7 @@ import notesApp from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
 import * as prefs from './prefs';
+import rulesApp from './rules/app';
 import schedulesApp from './schedules/app';
 import { getServer, setServer } from './server-config';
 import * as sheet from './sheet';
@@ -497,128 +496,6 @@ handlers['payees-check-orphaned'] = async function ({ ids }) {
 
 handlers['payees-get-rules'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
-};
-
-function validateRule(rule) {
-  // Returns an array of errors, the array is the same link as the
-  // passed-in `array`, or null if there are no errors
-  function runValidation(array, validate) {
-    let result = array.map(item => {
-      try {
-        validate(item);
-      } catch (e) {
-        if (e instanceof RuleError) {
-          console.warn('Invalid rule', e);
-          return e.type;
-        }
-        throw e;
-      }
-      return null;
-    });
-
-    return result.some(Boolean) ? result : null;
-  }
-
-  let conditionErrors = runValidation(
-    rule.conditions,
-    cond =>
-      new Condition(
-        cond.op,
-        cond.field,
-        cond.value,
-        cond.options,
-        ruleFieldTypes,
-      ),
-  );
-
-  let actionErrors = runValidation(
-    rule.actions,
-    action =>
-      new Action(
-        action.op,
-        action.field,
-        action.value,
-        action.options,
-        ruleFieldTypes,
-      ),
-  );
-
-  if (conditionErrors || actionErrors) {
-    return {
-      conditionErrors,
-      actionErrors,
-    };
-  }
-
-  return null;
-}
-
-handlers['rule-validate'] = async function (rule) {
-  let error = validateRule(rule);
-  return { error };
-};
-
-handlers['rule-add'] = mutator(async function (rule) {
-  let error = validateRule(rule);
-  if (error) {
-    return { error };
-  }
-
-  let id = await rules.insertRule(rule);
-  return { id };
-});
-
-handlers['rule-update'] = mutator(async function (rule) {
-  let error = validateRule(rule);
-  if (error) {
-    return { error };
-  }
-
-  await rules.updateRule(rule);
-  return {};
-});
-
-handlers['rule-delete'] = mutator(async function (rule) {
-  return rules.deleteRule(rule);
-});
-
-handlers['rule-delete-all'] = mutator(async function (ids) {
-  let someDeletionsFailed = false;
-
-  await batchMessages(async () => {
-    for (let id of ids) {
-      let res = await rules.deleteRule({ id });
-      if (res === false) {
-        someDeletionsFailed = true;
-      }
-    }
-  });
-
-  return { someDeletionsFailed };
-});
-
-handlers['rule-apply-actions'] = mutator(async function ({
-  transactionIds,
-  actions,
-}) {
-  return rules.applyActions(transactionIds, actions, handlers);
-});
-
-handlers['rule-add-payee-rename'] = mutator(async function ({ fromNames, to }) {
-  return rules.updatePayeeRenameRule(fromNames, to);
-});
-
-handlers['rules-get'] = async function () {
-  return rankRules(rules.getRules()).map(rule => rule.serialize());
-};
-
-handlers['rule-get'] = async function ({ id }) {
-  let rule = rules.getRules().find(rule => rule.id === id);
-  return rule ? rule.serialize() : null;
-};
-
-handlers['rules-run'] = async function ({ transaction }) {
-  return rules.runRules(transaction);
 };
 
 handlers['make-filters-from-conditions'] = async function ({ conditions }) {
@@ -2252,7 +2129,7 @@ injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 
 // A hack for now until we clean up everything
 app.handlers = handlers;
-app.combine(schedulesApp, budgetApp, notesApp, toolsApp, filtersApp);
+app.combine(schedulesApp, budgetApp, notesApp, toolsApp, filtersApp, rulesApp);
 
 function getDefaultDocumentDir() {
   if (Platform.isMobile) {

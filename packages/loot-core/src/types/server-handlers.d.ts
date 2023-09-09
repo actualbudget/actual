@@ -97,26 +97,6 @@ export interface ServerHandlers {
 
   'payees-get-rules': (arg: { id }) => Promise<unknown>;
 
-  'rule-validate': (rule) => Promise<{ error: unknown }>;
-
-  'rule-add': (rule) => Promise<{ error: unknown } | { id: string }>;
-
-  'rule-add': (rule) => Promise<{ error: unknown } | unknown>;
-
-  'rule-delete': (rule) => Promise<unknown>;
-
-  'rule-delete-all': (ids) => Promise<unknown>;
-
-  'rule-apply-actions': (arg: { transactionIds; actions }) => Promise<unknown>;
-
-  'rule-add-payee-rename': (arg: { fromNames; to }) => Promise<unknown>;
-
-  'rules-get': () => Promise<unknown>;
-
-  'rule-get': (arg: { id }) => Promise<unknown>;
-
-  'rules-run': (arg: { transaction }) => Promise<unknown>;
-
   'make-filters-from-conditions': (arg: {
     conditions;
   }) => Promise<{ filters: unknown[] }>;
