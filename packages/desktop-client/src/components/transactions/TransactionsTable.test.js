@@ -454,6 +454,7 @@ describe('Transactions', () => {
 
     items = tooltip.querySelectorAll('[data-testid*="category-item"]');
     expect(items.length).toBe(0);
+  });
 
   test('dropdown selects an item with keyboard', async () => {
     const { container, getTransactions } = renderTransactions();
