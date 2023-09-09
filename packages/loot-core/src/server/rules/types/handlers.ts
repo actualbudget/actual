@@ -21,7 +21,7 @@ export interface RulesHandlers {
 
   'rule-update': (
     rule: Partial<RuleEntity>,
-  ) => Promise<{ error: ValidationError } | Object>;
+  ) => Promise<{ error: ValidationError } | object>;
 
   'rule-delete': (rule: RuleEntity) => Promise<false | void>;
 
