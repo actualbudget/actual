@@ -202,8 +202,7 @@ export default function CategoryAutocomplete({
         return suggestions.filter(suggestion => {
           return (
             suggestion.id === 'split' ||
-            defaultFilterSuggestion(suggestion, value) ||
-            suggestion.groupName.toLowerCase().includes(value.toLowerCase())
+            defaultFilterSuggestion(suggestion, value) 
           );
         });
       }}
