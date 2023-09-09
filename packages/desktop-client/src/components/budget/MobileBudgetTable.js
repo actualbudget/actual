@@ -5,6 +5,7 @@ import React, {
   useState,
   useEffect,
 } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 // import {
 //   RectButton,
 //   PanGestureHandler,
@@ -15,6 +16,7 @@ import React, {
 
 import memoizeOne from 'memoize-one';
 
+import { savePrefs } from 'loot-core/src/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
@@ -42,23 +44,6 @@ import { AmountInput } from '../util/AmountInput';
 
 // import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
-
-function useWindowSize() {
-  const [smallVPWidth, setSmallVPWidth] = useState(window.outerWidth <= 365);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setSmallVPWidth(window.outerWidth <= 365);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  return smallVPWidth;
-}
 
 function ToBudget({ toBudget, onClick }) {
   let amount = useSheetValue(toBudget);
@@ -216,7 +201,7 @@ function BudgetGroupPreview({ group, pending, style }) {
       <TotalsRow group={group} blank={true} />
 
       {group.categories.map((cat, index) => (
-        <BudgetCategoryWrapper
+        <BudgetCategory
           key={cat.id}
           category={cat}
           blank={true}
@@ -278,6 +263,7 @@ class BudgetCategory extends PureComponent {
       month,
       onBudgetAction,
       smallVPWidth,
+      showBudgetView,
     } = this.props;
     let budgeted = rolloverBudget.catBudgeted(category.id);
     let balance = rolloverBudget.catBalance(category.id);
@@ -305,17 +291,41 @@ class BudgetCategory extends PureComponent {
             opacity: this.opacity,
           }}
         >
-          <BudgetCell
-            name="budgeted"
-            binding={budgeted}
-            editing={editing}
-            style={{ width: 90 }}
-            textStyle={{ ...styles.smallText, textAlign: 'right' }}
-            categoryId={category.id}
-            month={month}
-            onBudgetAction={onBudgetAction}
-          />
           {!smallVPWidth ? (
+            <BudgetCell
+              name="budgeted"
+              binding={budgeted}
+              editing={editing}
+              style={{ width: 90 }}
+              textStyle={{ ...styles.smallText, textAlign: 'right' }}
+              categoryId={category.id}
+              month={month}
+              onBudgetAction={onBudgetAction}
+            />
+          ) : !showBudgetView ? (
+            <BudgetCell
+              name="budgeted"
+              binding={budgeted}
+              editing={editing}
+              style={{ width: 90 }}
+              textStyle={{ ...styles.smallText, textAlign: 'right' }}
+              categoryId={category.id}
+              month={month}
+              onBudgetAction={onBudgetAction}
+            />
+          ) : null}
+          {!smallVPWidth ? (
+            <CellValue
+              name="spent"
+              binding={spent}
+              style={{
+                ...styles.smallText,
+                width: 90,
+                textAlign: 'right',
+              }}
+              type="financial"
+            />
+          ) : showBudgetView ? (
             <CellValue
               name="spent"
               binding={spent}
@@ -376,12 +386,6 @@ class BudgetCategory extends PureComponent {
   }
 }
 
-function BudgetCategoryWrapper(props) {
-  const smallVPWidth = useWindowSize();
-
-  return <BudgetCategory {...props} smallVPWidth={smallVPWidth} />;
-}
-
 class TotalsRow extends PureComponent {
   constructor(props) {
     super(props);
@@ -402,7 +406,8 @@ class TotalsRow extends PureComponent {
   //   }
 
   render() {
-    let { group, editMode, onAddCategory, smallVPWidth } = this.props;
+    let { group, editMode, onAddCategory, smallVPWidth, showBudgetView } =
+      this.props;
     let content = (
       <ListItem
         style={{
@@ -434,17 +439,41 @@ class TotalsRow extends PureComponent {
             opacity: this.opacity,
           }}
         >
-          <CellValue
-            binding={rolloverBudget.groupBudgeted(group.id)}
-            style={{
-              ...styles.smallText,
-              width: 90,
-              fontWeight: '500',
-              textAlign: 'right',
-            }}
-            type="financial"
-          />
           {!smallVPWidth ? (
+            <CellValue
+              binding={rolloverBudget.groupBudgeted(group.id)}
+              style={{
+                ...styles.smallText,
+                width: 90,
+                fontWeight: '500',
+                textAlign: 'right',
+              }}
+              type="financial"
+            />
+          ) : !showBudgetView ? (
+            <CellValue
+              binding={rolloverBudget.groupBudgeted(group.id)}
+              style={{
+                ...styles.smallText,
+                width: 90,
+                fontWeight: '500',
+                textAlign: 'right',
+              }}
+              type="financial"
+            />
+          ) : null}
+          {!smallVPWidth ? (
+            <CellValue
+              binding={rolloverBudget.groupSumAmount(group.id)}
+              style={{
+                ...styles.smallText,
+                width: 90,
+                fontWeight: '500',
+                textAlign: 'right',
+              }}
+              type="financial"
+            />
+          ) : showBudgetView ? (
             <CellValue
               binding={rolloverBudget.groupSumAmount(group.id)}
               style={{
@@ -515,13 +544,6 @@ class TotalsRow extends PureComponent {
     // </Droppable>
   }
 }
-
-function TotalsRowWrapper(props) {
-  const smallVPWidth = useWindowSize();
-
-  return <TotalsRow {...props} smallVPWidth={smallVPWidth} />;
-}
-
 class IncomeCategory extends PureComponent {
   render() {
     const {
@@ -633,6 +655,8 @@ class BudgetGroup extends PureComponent {
       // onReorderGroup,
       onAddCategory,
       onBudgetAction,
+      showBudgetView,
+      smallVPWidth,
     } = this.props;
 
     function editable(content) {
@@ -671,10 +695,12 @@ class BudgetGroup extends PureComponent {
             marginBottom: 7,
           }}
         >
-          <TotalsRowWrapper
+          <TotalsRow
             group={group}
+            showBudgetView={showBudgetView}
             budgeted={rolloverBudget.groupBudgeted(group.id)}
             balance={rolloverBudget.groupBalance(group.id)}
+            smallVPWidth={smallVPWidth}
             editMode={editMode}
             onAddCategory={onAddCategory}
             onReorderCategory={onReorderCategory}
@@ -683,10 +709,12 @@ class BudgetGroup extends PureComponent {
           {group.categories.map((category, index) => {
             // const editing = editingId === category.id;
             return (
-              <BudgetCategoryWrapper
+              <BudgetCategory
+                smallVPWidth={smallVPWidth}
                 key={category.id}
                 index={index}
                 category={category}
+                showBudgetView={showBudgetView}
                 editing={undefined} //editing}
                 editMode={editMode}
                 //gestures={gestures}
@@ -790,6 +818,8 @@ class BudgetGroups extends Component {
       onReorderCategory,
       onReorderGroup,
       onBudgetAction,
+      showBudgetView,
+      smallVPWidth,
     } = this.props;
     const { incomeGroup, expenseGroups } = this.getGroups(categoryGroups);
 
@@ -804,6 +834,7 @@ class BudgetGroups extends Component {
               key={group.id}
               group={group}
               editingId={editingId}
+              showBudgetView={showBudgetView}
               editMode={undefined} //editMode}
               gestures={gestures}
               month={month}
@@ -812,6 +843,7 @@ class BudgetGroups extends Component {
               onReorderCategory={onReorderCategory}
               onReorderGroup={onReorderGroup}
               onBudgetAction={onBudgetAction}
+              smallVPWidth={smallVPWidth}
             />
           );
         })}
@@ -828,6 +860,18 @@ export function BudgetTable(props) {
     setEditingCategory(id);
   }
 
+  const [smallVPWidth, setSmallVPWidth] = useState(window.outerWidth <= 365);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSmallVPWidth(window.outerWidth <= 365);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   const {
     type,
     categoryGroups,
@@ -850,13 +894,42 @@ export function BudgetTable(props) {
   let currentMonth = monthUtils.currentMonth();
   let format = useFormat();
 
-  const smallVPWidth = useWindowSize();
+  const toggleMobileDisplayPref = useSelector(state => {
+    return (
+      (state.prefs.local && state.prefs.local.toggleMobileDisplayPref) || true
+    );
+  });
+
+  let [showBudgetView, setshowBudgetView] = useState(
+    smallVPWidth &&
+      !toggleMobileDisplayPref &&
+      !document.cookie.match(/toggleMobileDisplayPref=true/),
+  );
+
+  let dispatch = useDispatch();
+
+  function toggleDisplay() {
+    setshowBudgetView(!showBudgetView);
+    if (showBudgetView) {
+      // remember the pref indefinitely
+      dispatch(savePrefs({ toggleMobileDisplayPref: true }));
+    } else {
+      // Set a cookie for 5 minutes
+      let d = new Date();
+      d.setTime(d.getTime() + 1000 * 60 * 5);
+      document.cookie =
+        'toggleMobileDisplayPref=true;path=/;expires=' + d.toUTCString();
+    }
+  }
 
   return (
     <NamespaceContext.Provider value={monthUtils.sheetForMonth(month, type)}>
       <View style={{ flex: 1, overflowY: 'hidden' }} data-testid="budget-table">
         <BudgetHeader
+          smallVPWidth={smallVPWidth}
           currentMonth={month}
+          toggleDisplay={toggleDisplay}
+          showBudgetView={showBudgetView}
           monthBounds={monthBounds}
           editMode={editMode}
           onDone={() => onEditMode(false)}
@@ -884,24 +957,61 @@ export function BudgetTable(props) {
             />
           )}
           <View style={{ flex: 1 }} />
-
-          <View style={{ width: 90, justifyContent: 'center' }}>
-            <Label title="BUDGETED" style={{ color: colors.n1 }} />
-            <CellValue
-              binding={reportBudget.totalBudgetedExpense}
-              type="financial"
-              style={{
-                ...styles.smallText,
-                color: colors.n1,
-                textAlign: 'right',
-                fontWeight: '500',
-              }}
-              formatter={value => {
-                return format(-parseFloat(value || '0'), 'financial');
-              }}
-            />
-          </View>
           {!smallVPWidth ? (
+            <View style={{ width: 90, justifyContent: 'center' }}>
+              <Label title="BUDGETED" style={{ color: colors.n1 }} />
+              <CellValue
+                binding={reportBudget.totalBudgetedExpense}
+                type="financial"
+                style={{
+                  ...styles.smallText,
+                  color: colors.n1,
+                  textAlign: 'right',
+                  fontWeight: '500',
+                }}
+                formatter={value => {
+                  return format(-parseFloat(value || '0'), 'financial');
+                }}
+              />
+            </View>
+          ) : !showBudgetView ? (
+            <View style={{ width: 90, justifyContent: 'center' }}>
+              <Label title="BUDGETED" style={{ color: colors.n1 }} />
+              <CellValue
+                binding={reportBudget.totalBudgetedExpense}
+                type="financial"
+                style={{
+                  ...styles.smallText,
+                  color: colors.n1,
+                  textAlign: 'right',
+                  fontWeight: '500',
+                }}
+                formatter={value => {
+                  return format(-parseFloat(value || '0'), 'financial');
+                }}
+              />
+            </View>
+          ) : null}
+          {!smallVPWidth ? (
+            <View
+              style={{
+                width: 90,
+                justifyContent: 'center',
+              }}
+            >
+              <Label title="SPENT" style={{ color: colors.n1 }} />
+              <CellValue
+                binding={rolloverBudget.totalSpent}
+                type="financial"
+                style={{
+                  ...styles.smallText,
+                  color: colors.n1,
+                  textAlign: 'right',
+                  fontWeight: '500',
+                }}
+              />
+            </View>
+          ) : showBudgetView ? (
             <View
               style={{
                 width: 90,
@@ -956,6 +1066,8 @@ export function BudgetTable(props) {
                 categoryGroups={categoryGroups}
                 editingId={editingCategory}
                 editMode={editMode}
+                showBudgetView={showBudgetView}
+                smallVPWidth={smallVPWidth}
                 // gestures={gestures}
                 month={month}
                 onEditCategory={onEditCategory}
@@ -979,6 +1091,8 @@ export function BudgetTable(props) {
               <View>
                 <BudgetGroups
                   categoryGroups={categoryGroups}
+                  showBudgetView={showBudgetView}
+                  smallVPWidth={smallVPWidth}
                   editingId={editingCategory}
                   editMode={editMode}
                   // gestures={gestures}
@@ -1007,6 +1121,9 @@ function BudgetHeader({
   onDone,
   onPrevMonth,
   onNextMonth,
+  toggleDisplay,
+  showBudgetView,
+  smallVPWidth,
 }) {
   let serverURL = useServerURL();
 
@@ -1043,6 +1160,32 @@ function BudgetHeader({
         backgroundColor: colors.p5,
       }}
     >
+      {smallVPWidth ? (
+        <Button
+          type="bare"
+          // hitSlop={{ top: 5, bottom: 5, left: 0, right: 30 }}
+          onClick={toggleDisplay}
+          style={{
+            ...buttonStyle,
+            left: 0,
+            opacity: prevEnabled ? 1 : 0.6,
+            padding: '5px 30px 5px 0',
+          }}
+        >
+          <Text
+            style={{
+              ...styles.smallText,
+              marginTop: 12,
+              marginBottom: 12,
+              color: colors.n11,
+              textAlign: 'center',
+              // zIndex: -1
+            }}
+          >
+            {showBudgetView ? 'Show Budget' : 'Show Spent'}
+          </Text>
+        </Button>
+      ) : null}
       {!editMode && (
         <Button
           type="bare"
