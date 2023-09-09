@@ -96,12 +96,7 @@ export function ReconcilingMessage({
 }
 
 export function ReconcileTooltip({ account, onReconcile, onClose }) {
-  let balanceQuery = queries.accountBalance(account);
-  let clearedBalance = useSheetValue({
-    name: balanceQuery.name + '-cleared',
-    value: null,
-    query: balanceQuery.query.filter({ cleared: true }),
-  });
+  let balance = useSheetValue(queries.accountBalance(account));
   let format = useFormat();
 
   function onSubmit(e) {
@@ -109,7 +104,7 @@ export function ReconcileTooltip({ account, onReconcile, onClose }) {
     let input = e.target.elements[0];
     let amount = currencyToInteger(input.value);
     if (amount != null) {
-      onReconcile(amount == null ? clearedBalance : amount);
+      onReconcile(amount == null ? balance : amount);
       onClose();
     } else {
       input.select();
@@ -124,10 +119,10 @@ export function ReconcileTooltip({ account, onReconcile, onClose }) {
           reconcile with:
         </Text>
         <form onSubmit={onSubmit}>
-          {clearedBalance != null && (
+          {balance != null && (
             <InitialFocus>
               <Input
-                defaultValue={format(clearedBalance, 'financial')}
+                defaultValue={format(balance, 'financial')}
                 style={{ margin: '7px 0' }}
               />
             </InitialFocus>
