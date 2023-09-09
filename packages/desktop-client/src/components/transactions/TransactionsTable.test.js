@@ -448,18 +448,12 @@ describe('Transactions', () => {
     expect(items[1].textContent).toBe('General');
     expect(items[1].dataset['testid']).toBe('category-item-highlighted');
 
-    // It should also allow filtering on group names
+    // It should not allow filtering on group names
     await userEvent.clear(input);
-    await userEvent.type(input, 'Usual');
+    await userEvent.type(input, 'Usual Expenses');
 
     items = tooltip.querySelectorAll('[data-testid*="category-item"]');
-    expect(items.length).toBe(4);
-    expect(items[0].textContent).toBe('Usual Expenses');
-    expect(items[1].textContent).toBe('Food');
-    expect(items[2].textContent).toBe('General');
-    expect(items[3].textContent).toBe('Home');
-    expect(items[1].dataset['testid']).toBe('category-item-highlighted');
-  });
+    expect(items.length).toBe(0);
 
   test('dropdown selects an item with keyboard', async () => {
     const { container, getTransactions } = renderTransactions();
