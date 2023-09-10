@@ -1,10 +1,4 @@
-import React, {
-  Component,
-  memo,
-  PureComponent,
-  useState,
-  useEffect,
-} from 'react';
+import React, { Component, memo, PureComponent, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 // import {
 //   RectButton,
@@ -24,6 +18,7 @@ import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
 import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
+import { useResponsive } from '../../ResponsiveProvider';
 import { colors, styles } from '../../style';
 import Button from '../common/Button';
 import Card from '../common/Card';
@@ -262,8 +257,8 @@ class BudgetCategory extends PureComponent {
       style,
       month,
       onBudgetAction,
-      smallVPWidth,
-      showBudgetView,
+      show3Cols,
+      showBudgetedCol,
     } = this.props;
     let budgeted = rolloverBudget.catBudgeted(category.id);
     let balance = rolloverBudget.catBalance(category.id);
@@ -291,18 +286,7 @@ class BudgetCategory extends PureComponent {
             opacity: this.opacity,
           }}
         >
-          {!smallVPWidth ? (
-            <BudgetCell
-              name="budgeted"
-              binding={budgeted}
-              editing={editing}
-              style={{ width: 90 }}
-              textStyle={{ ...styles.smallText, textAlign: 'right' }}
-              categoryId={category.id}
-              month={month}
-              onBudgetAction={onBudgetAction}
-            />
-          ) : !showBudgetView ? (
+          {show3Cols || showBudgetedCol ? (
             <BudgetCell
               name="budgeted"
               binding={budgeted}
@@ -314,18 +298,7 @@ class BudgetCategory extends PureComponent {
               onBudgetAction={onBudgetAction}
             />
           ) : null}
-          {!smallVPWidth ? (
-            <CellValue
-              name="spent"
-              binding={spent}
-              style={{
-                ...styles.smallText,
-                width: 90,
-                textAlign: 'right',
-              }}
-              type="financial"
-            />
-          ) : showBudgetView ? (
+          {show3Cols || !showBudgetedCol ? (
             <CellValue
               name="spent"
               binding={spent}
@@ -406,7 +379,7 @@ class TotalsRow extends PureComponent {
   //   }
 
   render() {
-    let { group, editMode, onAddCategory, smallVPWidth, showBudgetView } =
+    let { group, editMode, onAddCategory, show3Cols, showBudgetedCol } =
       this.props;
     let content = (
       <ListItem
@@ -439,18 +412,7 @@ class TotalsRow extends PureComponent {
             opacity: this.opacity,
           }}
         >
-          {!smallVPWidth ? (
-            <CellValue
-              binding={rolloverBudget.groupBudgeted(group.id)}
-              style={{
-                ...styles.smallText,
-                width: 90,
-                fontWeight: '500',
-                textAlign: 'right',
-              }}
-              type="financial"
-            />
-          ) : !showBudgetView ? (
+          {show3Cols || showBudgetedCol ? (
             <CellValue
               binding={rolloverBudget.groupBudgeted(group.id)}
               style={{
@@ -462,18 +424,7 @@ class TotalsRow extends PureComponent {
               type="financial"
             />
           ) : null}
-          {!smallVPWidth ? (
-            <CellValue
-              binding={rolloverBudget.groupSumAmount(group.id)}
-              style={{
-                ...styles.smallText,
-                width: 90,
-                fontWeight: '500',
-                textAlign: 'right',
-              }}
-              type="financial"
-            />
-          ) : showBudgetView ? (
+          {show3Cols || !showBudgetedCol ? (
             <CellValue
               binding={rolloverBudget.groupSumAmount(group.id)}
               style={{
@@ -655,8 +606,8 @@ class BudgetGroup extends PureComponent {
       // onReorderGroup,
       onAddCategory,
       onBudgetAction,
-      showBudgetView,
-      smallVPWidth,
+      showBudgetedCol,
+      show3Cols,
     } = this.props;
 
     function editable(content) {
@@ -697,10 +648,10 @@ class BudgetGroup extends PureComponent {
         >
           <TotalsRow
             group={group}
-            showBudgetView={showBudgetView}
+            showBudgetedCol={showBudgetedCol}
             budgeted={rolloverBudget.groupBudgeted(group.id)}
             balance={rolloverBudget.groupBalance(group.id)}
-            smallVPWidth={smallVPWidth}
+            show3Cols={show3Cols}
             editMode={editMode}
             onAddCategory={onAddCategory}
             onReorderCategory={onReorderCategory}
@@ -710,11 +661,11 @@ class BudgetGroup extends PureComponent {
             // const editing = editingId === category.id;
             return (
               <BudgetCategory
-                smallVPWidth={smallVPWidth}
+                show3Cols={show3Cols}
                 key={category.id}
                 index={index}
                 category={category}
-                showBudgetView={showBudgetView}
+                showBudgetedCol={showBudgetedCol}
                 editing={undefined} //editing}
                 editMode={editMode}
                 //gestures={gestures}
@@ -818,8 +769,8 @@ class BudgetGroups extends Component {
       onReorderCategory,
       onReorderGroup,
       onBudgetAction,
-      showBudgetView,
-      smallVPWidth,
+      showBudgetedCol,
+      show3Cols,
     } = this.props;
     const { incomeGroup, expenseGroups } = this.getGroups(categoryGroups);
 
@@ -834,7 +785,7 @@ class BudgetGroups extends Component {
               key={group.id}
               group={group}
               editingId={editingId}
-              showBudgetView={showBudgetView}
+              showBudgetedCol={showBudgetedCol}
               editMode={undefined} //editMode}
               gestures={gestures}
               month={month}
@@ -843,7 +794,7 @@ class BudgetGroups extends Component {
               onReorderCategory={onReorderCategory}
               onReorderGroup={onReorderGroup}
               onBudgetAction={onBudgetAction}
-              smallVPWidth={smallVPWidth}
+              show3Cols={show3Cols}
             />
           );
         })}
@@ -859,19 +810,8 @@ export function BudgetTable(props) {
   function onEditCategory(id) {
     setEditingCategory(id);
   }
-
-  const [smallVPWidth, setSmallVPWidth] = useState(window.outerWidth <= 365);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setSmallVPWidth(window.outerWidth <= 365);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  const { width } = useResponsive();
+  const show3Cols = width >= 360;
   const {
     type,
     categoryGroups,
@@ -894,41 +834,39 @@ export function BudgetTable(props) {
   let currentMonth = monthUtils.currentMonth();
   let format = useFormat();
 
-  const toggleMobileDisplayPref = useSelector(state => {
+  const mobileShowBudgetedColPref = useSelector(state => {
     return (
       (state.prefs.local && state.prefs.local.toggleMobileDisplayPref) || true
     );
   });
 
-  let [showBudgetView, setshowBudgetView] = useState(
-    !toggleMobileDisplayPref &&
-      !document.cookie.match(/toggleMobileDisplayPref=true/),
+  let [showBudgetedCol, setShowBudgetedCol] = useState(
+    !mobileShowBudgetedColPref &&
+      !document.cookie.match(/mobileShowBudgetedColPref=true/),
   );
 
   let dispatch = useDispatch();
 
   function toggleDisplay() {
-    setshowBudgetView(!showBudgetView);
-    if (!showBudgetView) {
+    setShowBudgetedCol(!showBudgetedCol);
+    if (!showBudgetedCol) {
       // remember the pref indefinitely
-      dispatch(savePrefs({ toggleMobileDisplayPref: true }));
-    } else {
-      // Set a cookie for 5 minutes
-      let d = new Date();
-      d.setTime(d.getTime() + 1000 * 60 * 5);
-      document.cookie =
-        'toggleMobileDisplayPref=true;path=/;expires=' + d.toUTCString();
+      dispatch(savePrefs({ mobileShowBudgetedColPref: true }));
     }
   }
+  let buttonStyle = {
+    padding: 0,
+    backgroundColor: 'transparent',
+  };
 
   return (
     <NamespaceContext.Provider value={monthUtils.sheetForMonth(month, type)}>
       <View style={{ flex: 1, overflowY: 'hidden' }} data-testid="budget-table">
         <BudgetHeader
-          smallVPWidth={smallVPWidth}
+          show3Cols={show3Cols}
           currentMonth={month}
           toggleDisplay={toggleDisplay}
-          showBudgetView={showBudgetView}
+          showBudgetedCol={showBudgetedCol}
           monthBounds={monthBounds}
           editMode={editMode}
           onDone={() => onEditMode(false)}
@@ -956,80 +894,62 @@ export function BudgetTable(props) {
             />
           )}
           <View style={{ flex: 1 }} />
-          {!smallVPWidth ? (
-            <View style={{ width: 90, justifyContent: 'center' }}>
-              <Label title="BUDGETED" style={{ color: colors.n1 }} />
-              <CellValue
-                binding={reportBudget.totalBudgetedExpense}
-                type="financial"
+          <Button
+            type="bare"
+            disabled={show3Cols}
+            onClick={toggleDisplay}
+            style={{
+              ...buttonStyle,
+              padding: '0 8px',
+              margin: '0 -8px',
+              background:
+                showBudgetedCol && !show3Cols
+                  ? `linear-gradient(-45deg, ${colors.p5} 8px, transparent 0)`
+                  : !show3Cols
+                  ? `linear-gradient(45deg, ${colors.p5} 8px, transparent 0)`
+                  : null,
+              // 45deg to flip it to the lower left corner
+            }}
+          >
+            {show3Cols || showBudgetedCol ? (
+              <View style={{ width: 90, justifyContent: 'center' }}>
+                <Label title="BUDGETED" style={{ color: colors.n1 }} />
+                <CellValue
+                  binding={reportBudget.totalBudgetedExpense}
+                  type="financial"
+                  style={{
+                    ...styles.smallText,
+                    color: colors.n1,
+                    textAlign: 'right',
+                    fontWeight: '500',
+                  }}
+                  formatter={value => {
+                    return format(-parseFloat(value || '0'), 'financial');
+                  }}
+                />
+              </View>
+            ) : null}
+            {show3Cols || !showBudgetedCol ? (
+              <View
                 style={{
-                  ...styles.smallText,
-                  color: colors.n1,
-                  textAlign: 'right',
-                  fontWeight: '500',
+                  width: 90,
+                  justifyContent: 'center',
                 }}
-                formatter={value => {
-                  return format(-parseFloat(value || '0'), 'financial');
-                }}
-              />
-            </View>
-          ) : !showBudgetView ? (
-            <View style={{ width: 90, justifyContent: 'center' }}>
-              <Label title="BUDGETED" style={{ color: colors.n1 }} />
-              <CellValue
-                binding={reportBudget.totalBudgetedExpense}
-                type="financial"
-                style={{
-                  ...styles.smallText,
-                  color: colors.n1,
-                  textAlign: 'right',
-                  fontWeight: '500',
-                }}
-                formatter={value => {
-                  return format(-parseFloat(value || '0'), 'financial');
-                }}
-              />
-            </View>
-          ) : null}
-          {!smallVPWidth ? (
-            <View
-              style={{
-                width: 90,
-                justifyContent: 'center',
-              }}
-            >
-              <Label title="SPENT" style={{ color: colors.n1 }} />
-              <CellValue
-                binding={rolloverBudget.totalSpent}
-                type="financial"
-                style={{
-                  ...styles.smallText,
-                  color: colors.n1,
-                  textAlign: 'right',
-                  fontWeight: '500',
-                }}
-              />
-            </View>
-          ) : showBudgetView ? (
-            <View
-              style={{
-                width: 90,
-                justifyContent: 'center',
-              }}
-            >
-              <Label title="SPENT" style={{ color: colors.n1 }} />
-              <CellValue
-                binding={rolloverBudget.totalSpent}
-                type="financial"
-                style={{
-                  ...styles.smallText,
-                  color: colors.n1,
-                  textAlign: 'right',
-                  fontWeight: '500',
-                }}
-              />
-            </View>
-          ) : null}
+              >
+                <Label title="SPENT" style={{ color: colors.n1 }} />
+                <CellValue
+                  binding={rolloverBudget.totalSpent}
+                  type="financial"
+                  style={{
+                    ...styles.smallText,
+                    color: colors.n1,
+                    textAlign: 'right',
+                    fontWeight: '500',
+                  }}
+                />
+              </View>
+            ) : null}
+          </Button>
           <View
             style={{
               width: 90,
@@ -1065,8 +985,8 @@ export function BudgetTable(props) {
                 categoryGroups={categoryGroups}
                 editingId={editingCategory}
                 editMode={editMode}
-                showBudgetView={showBudgetView}
-                smallVPWidth={smallVPWidth}
+                showBudgetedCol={showBudgetedCol}
+                show3Cols={show3Cols}
                 // gestures={gestures}
                 month={month}
                 onEditCategory={onEditCategory}
@@ -1090,8 +1010,8 @@ export function BudgetTable(props) {
               <View>
                 <BudgetGroups
                   categoryGroups={categoryGroups}
-                  showBudgetView={showBudgetView}
-                  smallVPWidth={smallVPWidth}
+                  showBudgetedCol={showBudgetedCol}
+                  show3Cols={show3Cols}
                   editingId={editingCategory}
                   editMode={editMode}
                   // gestures={gestures}
@@ -1121,8 +1041,8 @@ function BudgetHeader({
   onPrevMonth,
   onNextMonth,
   toggleDisplay,
-  showBudgetView,
-  smallVPWidth,
+  showBudgetedCol,
+  show3Cols,
 }) {
   let serverURL = useServerURL();
 
@@ -1159,34 +1079,6 @@ function BudgetHeader({
         backgroundColor: colors.p5,
       }}
     >
-      {smallVPWidth ? (
-        <Button
-          type="bare"
-          // hitSlop={{ top: 5, bottom: 5, left: 0, right: 30 }}
-          onClick={toggleDisplay}
-          style={{
-            ...buttonStyle,
-            left: 0,
-            opacity: prevEnabled ? 1 : 0.6,
-            padding: '10px',
-            width: '80px',
-            position: 'absolute',
-          }}
-        >
-          <Text
-            style={{
-              ...styles.smallText,
-              marginTop: 12,
-              marginBottom: 12,
-              color: colors.n11,
-              textAlign: 'center',
-              // zIndex: -1
-            }}
-          >
-            {showBudgetView ? 'Show Budgeted' : 'Show Spent'}
-          </Text>
-        </Button>
-      ) : null}
       {!editMode && (
         <Button
           type="bare"
