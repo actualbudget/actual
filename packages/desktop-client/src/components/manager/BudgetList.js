@@ -56,7 +56,7 @@ function FileMenu({ onDelete, onClose }) {
   return <Menu onMenuSelect={onMenuSelect} items={items} />;
 }
 
-function DetailButton({ style, state, onDelete }) {
+function DetailButton({ state, onDelete }) {
   let [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -68,9 +68,7 @@ function DetailButton({ style, state, onDelete }) {
           setMenuOpen(true);
         }}
       >
-        <DotsHorizontalTriple
-          style={{ width: 16, height: 16, color: 'inherit', ...style }}
-        />
+        <DotsHorizontalTriple style={{ width: 16, height: 16 }} />
       </Button>
       {menuOpen && (
         <Tooltip

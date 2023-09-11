@@ -76,7 +76,7 @@ export default function PlaidExternalMsg({
           {waiting ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
-                color={theme.pageTextPositive}
+                color={theme.pageTextDark}
                 style={{ width: 20, height: 20 }}
               />
               <View style={{ marginTop: 10, color: theme.pageText }}>
@@ -95,8 +95,8 @@ export default function PlaidExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: theme.noticeText,
-                borderColor: theme.noticeBackground,
+                backgroundColor: theme.alt3NoticeText,
+                borderColor: theme.alt3NoticeText,
               }}
               onClick={onContinue}
             >

@@ -138,7 +138,7 @@ function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
         )}{' '}
         &rarr;{' '}
       </Text>
-      <Text style={{ color: parsed ? theme.noticeText : theme.errorText }}>
+      <Text style={{ color: parsed ? theme.alt3NoticeText : theme.errorText }}>
         {parsed || 'Invalid'}
       </Text>
     </Text>
@@ -295,7 +295,6 @@ function Transaction({
       </Field>
       <Field
         width="flex"
-        style={{ borderColor: theme.tableBorder }}
         title={transaction.imported_payee || transaction.payee_name}
       >
         {transaction.payee_name}

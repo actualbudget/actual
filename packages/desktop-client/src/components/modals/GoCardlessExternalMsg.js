@@ -154,7 +154,7 @@ export default function GoCardlessExternalMsg({
             be misconfigured. Please{' '}
             <LinkButton
               onClick={onGoCardlessInit}
-              style={{ display: 'inline' }}
+              style={{ color: theme.altFormLabelText, display: 'inline' }}
             >
               set them up
             </LinkButton>{' '}
@@ -293,8 +293,8 @@ export default function GoCardlessExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: theme.noticeBackground,
-                borderColor: theme.noticeAccent,
+                backgroundColor: theme.alt3NoticeText,
+                borderColor: theme.alt3NoticeText,
               }}
               onClick={onContinue}
             >

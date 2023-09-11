@@ -41,7 +41,7 @@ function LoadComponentInner<K extends string>({
         {message && (
           <Block style={{ marginBottom: 20, fontSize: 18 }}>{message}</Block>
         )}
-        <AnimatedLoading width={25} color={theme.pageText} />
+        <AnimatedLoading width={25} color={theme.pageTextDark} />
       </View>
     );
   }

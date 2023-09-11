@@ -53,6 +53,7 @@ export default function FixEncryptionKey({
             style={{
               fontSize: 25,
               fontWeight: 700,
+              color: theme.pageTextDark,
               margin: '20px 0',
             }}
           >

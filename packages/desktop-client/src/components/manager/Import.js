@@ -59,15 +59,21 @@ function Import({ modalProps, actions }) {
 
           <Button style={itemStyle} onClick={() => onSelectType('ynab4')}>
             <span style={{ fontWeight: 700 }}>YNAB4</span>
-            <View>The old unsupported desktop app</View>
+            <View style={{ color: theme.alt2PillText }}>
+              The old unsupported desktop app
+            </View>
           </Button>
           <Button style={itemStyle} onClick={() => onSelectType('ynab5')}>
             <span style={{ fontWeight: 700 }}>nYNAB</span>
-            <View>The newer web app</View>
+            <View style={{ color: theme.alt2PillText }}>
+              <div>The newer web app</div>
+            </View>
           </Button>
           <Button style={itemStyle} onClick={() => onSelectType('actual')}>
             <span style={{ fontWeight: 700 }}>Actual</span>
-            <View>Import a file exported from Actual</View>
+            <View style={{ color: theme.alt2PillText }}>
+              <div>Import a file exported from Actual</div>
+            </View>
           </Button>
         </View>
       )}
