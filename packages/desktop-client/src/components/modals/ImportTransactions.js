@@ -11,6 +11,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { colors, styles } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
 import Input from '../common/Input';
@@ -275,7 +276,7 @@ function Transaction({
 
   return (
     <Row style={{ backgroundColor: 'white' }}>
-      <Field width={200} borderColor={colors.border}>
+      <Field width={200}>
         {showParsed ? (
           <ParsedDate
             parseDateFormat={parseDateFormat}
@@ -288,28 +289,25 @@ function Transaction({
       </Field>
       <Field
         width="flex"
-        borderColor={colors.border}
         title={transaction.imported_payee || transaction.payee_name}
       >
         {transaction.payee_name}
       </Field>
-      <Field width="flex" borderColor={colors.border} title={transaction.notes}>
+      <Field width="flex" title={transaction.notes}>
         {transaction.notes}
       </Field>
       {splitMode ? (
         <>
           <Field
             width={90}
-            borderColor={colors.border}
-            contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+            contentStyle={{ textAlign: 'right', ...styles.tnum }}
             title={outflow}
           >
             {outflow}
           </Field>
           <Field
             width={90}
-            borderColor={colors.border}
-            contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+            contentStyle={{ textAlign: 'right', ...styles.tnum }}
             title={inflow}
           >
             {inflow}
@@ -318,8 +316,7 @@ function Transaction({
       ) : (
         <Field
           width={90}
-          borderColor={colors.border}
-          contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+          contentStyle={{ textAlign: 'right', ...styles.tnum }}
           title={amount}
         >
           {amount}
@@ -357,7 +354,7 @@ function SelectField({
         ]),
       ]}
       value={value === null ? 'choose-field' : value}
-      style={{ borderWidth: 1, width: '100%' }}
+      style={{ width: '100%' }}
       wrapperStyle={style}
       onChange={value => onChange(value)}
     />
@@ -391,7 +388,7 @@ function DateFormatSelect({
         ])}
         value={parseDateFormat || ''}
         onChange={value => onChange(value)}
-        style={{ borderWidth: 1, width: '100%' }}
+        style={{ width: '100%' }}
       />
     </View>
   );
@@ -400,16 +397,14 @@ function DateFormatSelect({
 function CheckboxOption({ id, checked, disabled, onChange, children, style }) {
   return (
     <View
-      style={[
-        {
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          userSelect: 'none',
-          minHeight: 28,
-        },
-        style,
-      ]}
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        userSelect: 'none',
+        minHeight: 28,
+        ...style,
+      }}
     >
       <Checkbox
         id={id}
@@ -581,10 +576,15 @@ export default function ImportTransactions({ modalProps, options }) {
   let [hasHeaderRow, setHasHeaderRow] = useState(
     prefs[`csv-has-header-${accountId}`] ?? true,
   );
+  let [fallbackMissingPayeeToMemo, setFallbackMissingPayeeToMemo] = useState(
+    prefs[`ofx-fallback-missing-payee-${accountId}`] ?? true,
+  );
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
 
   let [clearOnImport, setClearOnImport] = useState(true);
+
+  const enableExperimentalOfxParser = useFeatureFlag('experimentalOfxParser');
 
   async function parse(filename, options) {
     setLoadingState('parsing');
@@ -592,6 +592,11 @@ export default function ImportTransactions({ modalProps, options }) {
     let filetype = getFileType(filename);
     setFilename(filename);
     setFileType(filetype);
+
+    options = {
+      ...options,
+      enableExperimentalOfxParser,
+    };
 
     let { errors, transactions } = await parseTransactions(filename, options);
     setLoadingState(null);
@@ -649,12 +654,14 @@ export default function ImportTransactions({ modalProps, options }) {
   }
 
   useEffect(() => {
-    parse(
-      options.filename,
-      getFileType(options.filename) === 'csv'
-        ? { delimiter: csvDelimiter, hasHeaderRow }
-        : null,
+    const fileType = getFileType(options.filename);
+    const parseOptions = getParseOptions(
+      fileType,
+      { csvDelimiter, hasHeaderRow },
+      { fallbackMissingPayeeToMemo },
     );
+
+    parse(options.filename, parseOptions);
   }, [parseTransactions, options.filename]);
 
   function onSplitMode() {
@@ -697,10 +704,14 @@ export default function ImportTransactions({ modalProps, options }) {
       ],
     });
 
-    parse(
-      res[0],
-      getFileType(res[0]) === 'csv' ? { delimiter: csvDelimiter } : null,
+    const fileType = getFileType(res[0]);
+    const parseOptions = getParseOptions(
+      fileType,
+      { csvDelimiter, hasHeaderRow },
+      { fallbackMissingPayeeToMemo },
     );
+
+    parse(res[0], parseOptions);
   }
 
   function onUpdateFields(field, name) {
@@ -716,10 +727,9 @@ export default function ImportTransactions({ modalProps, options }) {
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      let date =
-        filetype === 'qfx' || filetype === 'ofx'
-          ? trans.date
-          : parseDate(trans.date, parseDateFormat);
+      let date = isOfxFile(filetype)
+        ? trans.date
+        : parseDate(trans.date, parseDateFormat);
       if (date == null) {
         errorMessage = `Unable to parse date ${
           trans.date || '(empty)'
@@ -753,9 +763,15 @@ export default function ImportTransactions({ modalProps, options }) {
       return;
     }
 
-    if (filetype !== 'ofx' && filetype !== 'qfx') {
+    if (!isOfxFile(filetype)) {
       let key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
+    }
+
+    if (isOfxFile(filetype)) {
+      savePrefs({
+        [`ofx-fallback-missing-payee-${accountId}`]: fallbackMissingPayeeToMemo,
+      });
     }
 
     if (filetype === 'csv') {
@@ -885,6 +901,24 @@ export default function ImportTransactions({ modalProps, options }) {
         </View>
       )}
 
+      {isOfxFile(filetype) && (
+        <CheckboxOption
+          id="form_fallback_missing_payee"
+          checked={fallbackMissingPayeeToMemo}
+          onChange={() => {
+            setFallbackMissingPayeeToMemo(state => !state);
+            parse(
+              filename,
+              getParseOptions('ofx', {
+                fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
+              }),
+            );
+          }}
+        >
+          Use Memo as a fallback for empty Payees
+        </CheckboxOption>
+      )}
+
       {/*Import Options */}
       {(filetype === 'qif' || filetype === 'csv') && (
         <View style={{ marginTop: 25 }}>
@@ -928,9 +962,15 @@ export default function ImportTransactions({ modalProps, options }) {
                     value={csvDelimiter}
                     onChange={value => {
                       setCsvDelimiter(value);
-                      parse(filename, { delimiter: value, hasHeaderRow });
+                      parse(
+                        filename,
+                        getParseOptions('csv', {
+                          delimiter: value,
+                          hasHeaderRow,
+                        }),
+                      );
                     }}
-                    style={{ borderWidth: 1, width: 50 }}
+                    style={{ width: 50 }}
                   />
                 </label>
                 <CheckboxOption
@@ -938,10 +978,13 @@ export default function ImportTransactions({ modalProps, options }) {
                   checked={hasHeaderRow}
                   onChange={() => {
                     setHasHeaderRow(!hasHeaderRow);
-                    parse(filename, {
-                      delimiter: csvDelimiter,
-                      hasHeaderRow: !hasHeaderRow,
-                    });
+                    parse(
+                      filename,
+                      getParseOptions('csv', {
+                        delimiter: csvDelimiter,
+                        hasHeaderRow: !hasHeaderRow,
+                      }),
+                    );
                   }}
                 >
                   File has header row
@@ -1014,4 +1057,19 @@ export default function ImportTransactions({ modalProps, options }) {
       </View>
     </Modal>
   );
+}
+
+function getParseOptions(fileType, csvOptions, ofxOptions) {
+  if (fileType === 'csv') {
+    const { csvDelimiter, hasHeaderRow } = csvOptions;
+    return { csvDelimiter, hasHeaderRow };
+  } else if (isOfxFile(fileType)) {
+    const { fallbackMissingPayeeToMemo } = ofxOptions;
+    return { fallbackMissingPayeeToMemo };
+  }
+  return {};
+}
+
+function isOfxFile(fileType) {
+  return fileType === 'ofx' || fileType === 'qfx';
 }

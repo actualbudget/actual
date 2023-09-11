@@ -7,7 +7,7 @@ import ArrowsExpand3 from '../../icons/v2/ArrowsExpand3';
 import ArrowsShrink3 from '../../icons/v2/ArrowsShrink3';
 import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
 import Pencil1 from '../../icons/v2/Pencil1';
-import { styles, colors } from '../../style';
+import { colors, styles } from '../../style';
 import AnimatedRefresh from '../AnimatedRefresh';
 import Button from '../common/Button';
 import InitialFocus from '../common/InitialFocus';
@@ -52,6 +52,7 @@ export function AccountHeader({
   filters,
   conditionsOp,
   savePrefs,
+  pushModal,
   onSearch,
   onAddTransaction,
   onShowTransactions,
@@ -112,7 +113,7 @@ export function AccountHeader({
         }}
       />
 
-      <View style={[styles.pageContent, { paddingBottom: 10, flexShrink: 0 }]}>
+      <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View style={{ marginTop: 2, alignItems: 'flex-start' }}>
           <View>
             {editingName ? (
@@ -244,10 +245,7 @@ export function AccountHeader({
           />
           {workingHard ? (
             <View>
-              <AnimatedLoading
-                color={colors.n1}
-                style={{ width: 16, height: 16 }}
-              />
+              <AnimatedLoading style={{ width: 16, height: 16 }} />
             </View>
           ) : (
             <SelectedTransactionsButton
@@ -259,6 +257,7 @@ export function AccountHeader({
               onUnlink={onBatchUnlink}
               onCreateRule={onCreateRule}
               onScheduleAction={onScheduleAction}
+              pushModal={pushModal}
             />
           )}
           <Button

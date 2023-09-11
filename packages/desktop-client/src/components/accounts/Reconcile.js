@@ -4,13 +4,13 @@ import * as queries from 'loot-core/src/client/queries';
 import { currencyToInteger } from 'loot-core/src/shared/util';
 
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import Button from '../common/Button';
 import InitialFocus from '../common/InitialFocus';
 import Input from '../common/Input';
 import Text from '../common/Text';
 import View from '../common/View';
-import format from '../spreadsheet/format';
+import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { Tooltip } from '../tooltips';
 
@@ -25,6 +25,7 @@ export function ReconcilingMessage({
     value: 0,
     query: balanceQuery.query.filter({ cleared: true }),
   });
+  let format = useFormat();
   let targetDiff = targetBalance - cleared;
 
   return (
@@ -32,7 +33,7 @@ export function ReconcilingMessage({
       style={{
         flexDirection: 'row',
         alignSelf: 'center',
-        backgroundColor: 'white',
+        backgroundColor: theme.tableBackground,
         ...styles.shadow,
         borderRadius: 4,
         marginTop: 5,
@@ -44,7 +45,7 @@ export function ReconcilingMessage({
         {targetDiff === 0 ? (
           <View
             style={{
-              color: colors.g4,
+              color: theme.noticeText,
               flex: 1,
               flexDirection: 'row',
               alignItems: 'center',
@@ -55,14 +56,14 @@ export function ReconcilingMessage({
               style={{
                 width: 13,
                 height: 13,
-                color: colors.g5,
+                color: 'inherit',
                 marginRight: 3,
               }}
             />
             All reconciled!
           </View>
         ) : (
-          <View style={{ color: colors.n3 }}>
+          <View style={{ color: theme.tableText }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
               Your cleared balance{' '}
               <strong>{format(cleared, 'financial')}</strong> needs{' '}
@@ -96,6 +97,7 @@ export function ReconcilingMessage({
 
 export function ReconcileTooltip({ account, onReconcile, onClose }) {
   let balance = useSheetValue(queries.accountBalance(account));
+  let format = useFormat();
 
   function onSubmit(e) {
     e.preventDefault();

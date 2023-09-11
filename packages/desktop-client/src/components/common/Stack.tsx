@@ -7,6 +7,8 @@ import React, {
   type ReactNode,
 } from 'react';
 
+import { type CSSProperties } from '../../style';
+
 import Text from './Text';
 import View from './View';
 
@@ -28,7 +30,7 @@ function getChildren(key, children) {
 }
 
 type StackProps = ComponentProps<typeof View> & {
-  direction?: string;
+  direction?: CSSProperties['flexDirection'];
   align?: string;
   justify?: string;
   spacing?: number;
@@ -54,14 +56,12 @@ const Stack = forwardRef<HTMLDivElement, StackProps>(
 
     return (
       <View
-        style={[
-          {
-            flexDirection: direction,
-            alignItems: align,
-            justifyContent: justify,
-          },
-          style,
-        ]}
+        style={{
+          flexDirection: direction,
+          alignItems: align,
+          justifyContent: justify,
+          ...style,
+        }}
         innerRef={ref}
         {...props}
       >
@@ -79,11 +79,11 @@ const Stack = forwardRef<HTMLDivElement, StackProps>(
             typeof child === 'string' ? <Text>{child}</Text> : child,
             {
               key,
-              style: [
-                debug && { borderWidth: 1, borderColor: 'red' },
-                isLastChild ? null : { [marginProp]: spacing * 5 },
-                child.props ? child.props.style : null,
-              ],
+              style: {
+                ...(debug && { borderWidth: 1, borderColor: 'red' }),
+                ...(isLastChild ? null : { [marginProp]: spacing * 5 }),
+                ...(child.props ? child.props.style : null),
+              },
             },
           );
         })}

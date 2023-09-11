@@ -1628,8 +1628,12 @@ handlers['get-did-bootstrap'] = async function () {
 handlers['subscribe-needs-bootstrap'] = async function ({
   url,
 }: { url? } = {}) {
-  if (!getServer(url)) {
-    return { bootstrapped: true, hasServer: false };
+  try {
+    if (!getServer(url)) {
+      return { bootstrapped: true, hasServer: false };
+    }
+  } catch (err) {
+    return { error: 'get-server-failure' };
   }
 
   let res;
@@ -2063,7 +2067,15 @@ handlers['import-budget'] = async function ({ filepath, type }) {
 };
 
 handlers['export-budget'] = async function () {
-  return await cloudStorage.exportBuffer();
+  try {
+    return {
+      data: await cloudStorage.exportBuffer(),
+    };
+  } catch (err) {
+    err.message = 'Error exporting budget: ' + err.message;
+    captureException(err);
+    return { error: 'internal-error' };
+  }
 };
 
 async function loadBudget(id) {

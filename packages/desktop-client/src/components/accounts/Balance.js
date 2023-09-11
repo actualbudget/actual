@@ -6,25 +6,26 @@ import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
-import format from '../spreadsheet/format';
+import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { isPreviewId } from '../transactions/TransactionsTable';
 
 function DetailedBalance({ name, balance, isExactBalance = true }) {
+  const format = useFormat();
   return (
     <Text
       style={{
         marginLeft: 15,
-        backgroundColor: colors.n9,
         borderRadius: 4,
         padding: '4px 6px',
-        color: colors.n5,
+        color: theme.alt2PillText,
+        backgroundColor: theme.pillBackground,
       }}
     >
       {name}{' '}
@@ -154,7 +155,12 @@ export function Balances({
           type="financial"
           style={{ fontSize: 22, fontWeight: 400 }}
           getStyle={value => ({
-            color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
+            color:
+              value < 0
+                ? theme.errorText
+                : value > 0
+                ? theme.noticeText
+                : theme.pageTextSubdued,
           })}
           privacyFilter={{
             blurIntensity: 5,
@@ -166,7 +172,7 @@ export function Balances({
             width: 10,
             height: 10,
             marginLeft: 10,
-            color: colors.n5,
+            color: theme.alt2PillText,
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
           }}
         />

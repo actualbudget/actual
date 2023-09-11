@@ -32,7 +32,7 @@ import Select from '../common/Select';
 import Stack from '../common/Stack';
 import Text from '../common/Text';
 import View from '../common/View';
-import { Value } from '../ManageRules';
+import Value from '../rules/Value';
 import { Tooltip } from '../tooltips';
 import GenericInput from '../util/GenericInput';
 
@@ -95,17 +95,18 @@ function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
       type="bare"
-      style={[
-        { backgroundColor: theme.altbuttonMenuBackground, marginBottom: 5 },
-        style,
-        selected && {
+      style={{
+        backgroundColor: theme.altbuttonMenuBackground,
+        marginBottom: 5,
+        ...style,
+        ...(selected && {
           color: theme.buttonNormalSelectedText,
           '&,:hover,:active': {
             backgroundColor: theme.buttonNormalSelectedBackground,
             color: theme.buttonNormalSelectedText,
           },
-        },
-      ]}
+        }),
+      }}
       onClick={onClick}
     >
       {friendlyOp(op)}
@@ -176,6 +177,7 @@ function ConfigureField({
       style={{ padding: 15, color: theme.altmenuItemTextHeader }}
       width={275}
       onClose={() => dispatch({ type: 'close' })}
+      data-testid="filters-menu-tooltip"
     >
       <FocusScope>
         <View style={{ marginBottom: 10 }}>
@@ -229,61 +231,61 @@ function ConfigureField({
           spacing={1}
           style={{ flexWrap: 'wrap' }}
         >
-          {type === 'boolean'
-            ? [
-                <OpButton
-                  key="true"
-                  op="true"
-                  selected={value === true}
-                  onClick={() => {
-                    dispatch({ type: 'set-op', op: 'is' });
-                    dispatch({ type: 'set-value', value: true });
-                  }}
-                />,
-                <OpButton
-                  key="false"
-                  op="false"
-                  selected={value === false}
-                  onClick={() => {
-                    dispatch({ type: 'set-op', op: 'is' });
-                    dispatch({ type: 'set-value', value: false });
-                  }}
-                />,
-              ]
-            : [
-                <Stack
-                  direction="row"
-                  align="flex-start"
-                  spacing={1}
-                  style={{ flexWrap: 'wrap' }}
-                >
-                  {ops.slice(0, 3).map(currOp => (
-                    <OpButton
-                      key={currOp}
-                      op={currOp}
-                      selected={currOp === op}
-                      onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                    />
-                  ))}
-                </Stack>,
-                <Stack
-                  direction="row"
-                  align="flex-start"
-                  spacing={1}
-                  style={{ flexWrap: 'wrap' }}
-                >
-                  {ops.slice(3, ops.length).map(currOp => (
-                    <View>
-                      <OpButton
-                        key={currOp}
-                        op={currOp}
-                        selected={currOp === op}
-                        onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                      />
-                    </View>
-                  ))}
-                </Stack>,
-              ]}
+          {type === 'boolean' ? (
+            <>
+              <OpButton
+                key="true"
+                op="true"
+                selected={value === true}
+                onClick={() => {
+                  dispatch({ type: 'set-op', op: 'is' });
+                  dispatch({ type: 'set-value', value: true });
+                }}
+              />
+              <OpButton
+                key="false"
+                op="false"
+                selected={value === false}
+                onClick={() => {
+                  dispatch({ type: 'set-op', op: 'is' });
+                  dispatch({ type: 'set-value', value: false });
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Stack
+                direction="row"
+                align="flex-start"
+                spacing={1}
+                style={{ flexWrap: 'wrap' }}
+              >
+                {ops.slice(0, 3).map(currOp => (
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
+                ))}
+              </Stack>
+              <Stack
+                direction="row"
+                align="flex-start"
+                spacing={1}
+                style={{ flexWrap: 'wrap' }}
+              >
+                {ops.slice(3, ops.length).map(currOp => (
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
+                ))}
+              </Stack>
+            </>
+          )}
         </Stack>
 
         <form action="#">
@@ -426,6 +428,7 @@ export function FilterButton({ onApply }) {
           position="bottom-left"
           style={{ padding: 0 }}
           onClose={() => dispatch({ type: 'close' })}
+          data-testid="filters-select-tooltip"
         >
           <Menu
             onMenuSelect={name => {
@@ -498,17 +501,15 @@ function FilterExpression({
 
   return (
     <View
-      style={[
-        {
-          backgroundColor: theme.pillBackground,
-          borderRadius: 4,
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginRight: 10,
-          marginTop: 10,
-        },
-        style,
-      ]}
+      style={{
+        backgroundColor: theme.pillBackground,
+        borderRadius: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 10,
+        marginTop: 10,
+        ...style,
+      }}
     >
       <Button
         type="bare"
@@ -535,7 +536,7 @@ function FilterExpression({
           )}
         </div>
       </Button>
-      <Button type="bare" onClick={onDelete}>
+      <Button type="bare" onClick={onDelete} aria-label="Delete filter">
         <DeleteIcon
           style={{
             width: 8,

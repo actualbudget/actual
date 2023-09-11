@@ -1,9 +1,9 @@
 import { type ReactNode } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
-import { styles } from '../../style';
+import { type CSSProperties, styles } from '../../style';
 
 type AnchorLinkProps = {
   to: string;
@@ -23,7 +23,11 @@ export default function AnchorLink({
   return (
     <NavLink
       to={to}
-      {...css([styles.smallText, style, match ? activeStyle : null])}
+      className={`${css([
+        styles.smallText,
+        style,
+        match ? activeStyle : null,
+      ])}`}
     >
       {children}
     </NavLink>

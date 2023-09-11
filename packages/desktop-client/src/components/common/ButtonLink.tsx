@@ -1,7 +1,7 @@
 import React, { type ComponentProps } from 'react';
 import { useMatch, useNavigate } from 'react-router-dom';
 
-import { type CSSProperties } from 'glamor';
+import { type CSSProperties } from '../../style';
 
 import Button from './Button';
 
@@ -23,6 +23,7 @@ export default function ButtonLink({
         ...style,
         ...(match ? activeStyle : {}),
       }}
+      activeStyle={activeStyle}
       {...props}
       onClick={e => {
         props.onClick?.(e);

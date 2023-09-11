@@ -14,7 +14,7 @@ export default function LinkButton({
   return (
     <button
       type="button"
-      {...css([
+      className={`${css([
         {
           textDecoration: 'none',
           color: theme.pageTextLink,
@@ -34,7 +34,7 @@ export default function LinkButton({
         },
         styles.smallText,
         style,
-      ])}
+      ])}`}
       {...nativeProps}
     >
       {children}

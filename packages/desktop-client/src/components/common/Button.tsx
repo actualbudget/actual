@@ -1,25 +1,25 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
-import { css, type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { styles, theme } from '../../style';
-import { type HTMLPropsWithStyle } from '../../types/utils';
+import { type CSSProperties, styles, theme } from '../../style';
 
 import View from './View';
 
-type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
+type ButtonProps = HTMLProps<HTMLButtonElement> & {
   pressed?: boolean;
   hover?: boolean;
   type?: ButtonType;
   isSubmit?: boolean;
   disabled?: boolean;
   color?: string;
+  style?: CSSProperties;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
   textStyle?: CSSProperties;
   bounce?: boolean;
-  as?: 'button';
+  as?: ElementType;
 };
 
 type ButtonType = 'normal' | 'primary' | 'bare';
@@ -92,16 +92,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     let typeWithDisabled = disabled ? type + 'Disabled' : type;
 
-    hoveredStyle = [
-      type !== 'bare' && styles.shadow,
-      hoveredStyle,
-      {
-        backgroundColor: backgroundColorHover[type],
-        color: color || textColorHover[type],
-      },
-    ];
-    activeStyle = [
-      type === 'bare'
+    hoveredStyle = {
+      ...(type !== 'bare' && styles.shadow),
+      backgroundColor: backgroundColorHover[type],
+      color: color || textColorHover[type],
+      ...hoveredStyle,
+    };
+    activeStyle = {
+      ...(type === 'bare'
         ? { backgroundColor: theme.buttonBareBackgroundActive }
         : {
             transform: bounce && 'translateY(1px)',
@@ -111,37 +109,33 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 ? theme.buttonPrimaryShadow
                 : theme.buttonNormalShadow),
             transition: 'none',
-          },
-      activeStyle,
-    ];
+          }),
+      ...activeStyle,
+    };
 
     let Component = as;
-    let buttonStyle = [
-      {
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-        padding: type === 'bare' ? '5px' : '5px 10px',
-        margin: 0,
-        overflow: 'hidden',
-        display: 'flex',
-        borderRadius: 4,
-        backgroundColor: backgroundColor[typeWithDisabled],
-        border:
-          type === 'bare'
-            ? 'none'
-            : '1px solid ' + borderColor[typeWithDisabled],
-        color: color || textColor[typeWithDisabled],
-        transition: 'box-shadow .25s',
-        WebkitAppRegion: 'no-drag',
-        ...styles.smallText,
-      },
-      { ':hover': !disabled && hoveredStyle },
-      { ':active': !disabled && activeStyle },
-      hover && hoveredStyle,
-      pressed && activeStyle,
-      style,
-    ];
+    let buttonStyle = {
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      padding: type === 'bare' ? '5px' : '5px 10px',
+      margin: 0,
+      overflow: 'hidden',
+      display: 'flex',
+      borderRadius: 4,
+      backgroundColor: backgroundColor[typeWithDisabled],
+      border:
+        type === 'bare' ? 'none' : '1px solid ' + borderColor[typeWithDisabled],
+      color: color || textColor[typeWithDisabled],
+      transition: 'box-shadow .25s',
+      WebkitAppRegion: 'no-drag',
+      ...styles.smallText,
+      ':hover': !disabled && hoveredStyle,
+      ':active': !disabled && activeStyle,
+      ...(hover && hoveredStyle),
+      ...(pressed && activeStyle),
+      ...style,
+    };
 
     return (
       <Component
@@ -149,8 +143,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...(typeof as === 'string'
           ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (css(buttonStyle) as any)
-          : { style: buttonStyle, type: isSubmit ? 'submit' : 'button' })}
+          : { style: buttonStyle })}
         disabled={disabled}
+        type={isSubmit ? 'submit' : 'button'}
         {...nativeProps}
       >
         {children}
@@ -172,7 +167,7 @@ export const ButtonWithLoading = forwardRef<
     <Button
       {...buttonProps}
       ref={ref}
-      style={[{ position: 'relative' }, buttonProps.style]}
+      style={{ position: 'relative', ...buttonProps.style }}
     >
       {loading && (
         <View
