@@ -320,6 +320,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+
   return (
     <View
       style={{
