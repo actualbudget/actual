@@ -731,6 +731,116 @@ export async function createTestBudget(handlers) {
 
   await sheet.waitOnSpreadsheet();
 
+  // Create some schedules
+  await runMutator(() =>
+    batchMessages(async () => {
+      const account = accounts.find(acc => acc.name === 'Bank of America');
+
+      await runHandler(handlers['schedule/create'], {
+        schedule: {
+          name: 'Phone bills',
+          posts_transaction: false,
+        },
+        conditions: [
+          {
+            op: 'is',
+            field: 'payee',
+            value: payees.find(item => item.name === 'Dominion Power').id,
+          },
+          {
+            op: 'is',
+            field: 'account',
+            value: account.id,
+          },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: monthUtils.currentDay(),
+              frequency: 'monthly',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+            },
+          },
+          { op: 'isapprox', field: 'amount', value: -12000 },
+        ],
+      });
+
+      await runHandler(handlers['schedule/create'], {
+        schedule: {
+          name: 'Internet bill',
+          posts_transaction: false,
+        },
+        conditions: [
+          {
+            op: 'is',
+            field: 'payee',
+            value: payees.find(item => item.name === 'Fast Internet').id,
+          },
+          {
+            op: 'is',
+            field: 'account',
+            value: account.id,
+          },
+          {
+            op: 'is',
+            field: 'date',
+            value: monthUtils.subDays(monthUtils.currentDay(), 1),
+          },
+          { op: 'isapprox', field: 'amount', value: -14000 },
+        ],
+      });
+
+      await runHandler(handlers['schedule/create'], {
+        schedule: {
+          name: 'Wedding',
+          posts_transaction: false,
+        },
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: monthUtils.subDays(monthUtils.currentDay(), 3),
+              frequency: 'monthly',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+            },
+          },
+          { op: 'is', field: 'amount', value: -2700000 },
+        ],
+      });
+
+      await runHandler(handlers['schedule/create'], {
+        schedule: {
+          name: 'Utilities',
+          posts_transaction: false,
+        },
+        conditions: [
+          {
+            op: 'is',
+            field: 'account',
+            value: account.id,
+          },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: monthUtils.addDays(monthUtils.currentDay(), 1),
+              frequency: 'monthly',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+            },
+          },
+          { op: 'is', field: 'amount', value: -190000 },
+        ],
+      });
+    }),
+  );
+
   // Create a budget
   await createBudget(accounts, payees, allGroups);
 }
