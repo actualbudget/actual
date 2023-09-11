@@ -5,8 +5,7 @@ import React, {
   type SVGProps,
 } from 'react';
 
-// eslint-disable-next-line no-restricted-imports
-import { styles, colors, type CSSProperties } from '../../style';
+import { styles, theme, type CSSProperties } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
@@ -36,7 +35,7 @@ function Item({
   forceActive = false,
 }: ItemProps) {
   const hoverStyle = {
-    backgroundColor: colors.n2,
+    backgroundColor: theme.sidebarItemBackgroundHover,
   };
 
   const content = (
@@ -63,16 +62,16 @@ function Item({
           paddingLeft: 19 + indent,
           paddingRight: 10,
           textDecoration: 'none',
-          color: colors.n9,
+          color: theme.sidebarItemText,
           ...(forceHover ? hoverStyle : {}),
           ':hover': hoverStyle,
         }}
         to={to}
         onClick={onClick}
         activeStyle={{
-          borderLeft: '4px solid ' + colors.p8,
+          borderLeft: '4px solid ' + theme.sidebarItemTextSelected,
           paddingLeft: 19 + indent - 4,
-          color: colors.p8,
+          color: theme.sidebarItemTextSelected,
         }}
         forceActive={forceActive}
       >

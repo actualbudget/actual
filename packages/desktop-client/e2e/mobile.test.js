@@ -108,7 +108,7 @@ test.describe('Mobile', () => {
 
   test('creates a transaction from `/accounts/:id` page', async () => {
     const accountsPage = await navigation.goToAccountsPage();
-    const accountPage = await accountsPage.openNthAccount(1);
+    const accountPage = await accountsPage.openNthAccount(2);
     const transactionEntryPage = await accountPage.clickCreateTransaction();
 
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
