@@ -857,6 +857,7 @@ export function BudgetTable(props) {
   let buttonStyle = {
     padding: 0,
     backgroundColor: 'transparent',
+    borderRadius: 'unset',
   };
 
   return (
