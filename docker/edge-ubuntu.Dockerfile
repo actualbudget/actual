@@ -7,7 +7,7 @@ RUN yarn workspaces focus --all --production
 
 RUN mkdir /public
 ADD artifacts.json /tmp/artifacts.json
-RUN jq -r '[.artifacts[] | select(.workflow_run.head_branch == "master")][0]' /tmp/artifacts.json > /tmp/latest-build.json
+RUN jq -r '[.artifacts[] | select(.workflow_run.head_branch == "master" and .workflow_run.head_repository_id == .workflow_run.repository_id)][0]' /tmp/artifacts.json > /tmp/latest-build.json
 
 ARG GITHUB_TOKEN
 RUN curl -L -o /tmp/desktop-client.zip --header "Authorization: Bearer ${GITHUB_TOKEN}" $(jq -r '.archive_download_url' /tmp/latest-build.json)
