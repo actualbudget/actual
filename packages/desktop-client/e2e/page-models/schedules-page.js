@@ -31,15 +31,15 @@ export class SchedulesPage {
    * Retrieve the data for the nth-schedule.
    * 0-based index
    */
-  async getNthSchedule(index) {
+  getNthSchedule(index) {
     const row = this.getNthScheduleRow(index);
 
     return {
-      payee: await row.getByTestId('payee').textContent(),
-      account: await row.getByTestId('account').textContent(),
-      date: await row.getByTestId('date').textContent(),
-      status: await row.getByTestId('status').textContent(),
-      amount: await row.getByTestId('amount').textContent(),
+      payee: row.getByTestId('payee'),
+      account: row.getByTestId('account'),
+      date: row.getByTestId('date'),
+      status: row.getByTestId('status'),
+      amount: row.getByTestId('amount'),
     };
   }
 
