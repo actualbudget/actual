@@ -244,22 +244,19 @@ async function processTemplate(
                   category: category.id,
                   amount: to_budget,
                 });
-                if (to_budget <= budgetAvailable || !priority) {
-                  templateBudget.push({
-                    category: category.id,
-                    amount: to_budget + prev_budgeted,
-                  });
-                } else if (
-                  to_budget > budgetAvailable &&
-                  budgetAvailable >= 0
-                ) {
-                  to_budget = budgetAvailable;
-                  errors.push(`Insufficient funds.`);
-                  templateBudget.push({
-                    category: category.id,
-                    amount: to_budget + prev_budgeted,
-                  });
-                }
+              }
+              if (to_budget <= budgetAvailable || !priority) {
+                templateBudget.push({
+                  category: category.id,
+                  amount: to_budget + prev_budgeted,
+                });
+              } else if (to_budget > budgetAvailable && budgetAvailable >= 0) {
+                to_budget = budgetAvailable;
+                errors.push(`Insufficient funds.`);
+                templateBudget.push({
+                  category: category.id,
+                  amount: to_budget + prev_budgeted,
+                });
               }
               budgetAvailable -= to_budget;
             }
