@@ -86,6 +86,9 @@ export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
 export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
+export const mobileModalBackground = colorPalette.navy900;
+export const mobileModalText = colorPalette.white;
+export const altMobileModalText = colorPalette.blue100;
 
 // Mobile view themes (for the top bar)
 export const mobileAccountViewTheme = colorPalette.navy50;
