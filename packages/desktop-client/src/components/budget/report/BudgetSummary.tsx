@@ -323,7 +323,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   return (
     <View
       style={{
-        color: theme.tableText,
         backgroundColor: theme.tableBackground,
         boxShadow: styles.cardShadow,
         borderRadius: 6,
@@ -366,7 +365,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: 'inherit', margin: 1 }}
+                style={{ color: theme.pageTextSubdued, margin: 1 }}
               />
             </Button>
           </View>

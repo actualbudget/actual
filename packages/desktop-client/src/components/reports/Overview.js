@@ -33,7 +33,7 @@ function Card({ flex, to, style, children }) {
   const content = (
     <View
       style={{
-        backgroundColor: theme.pageBackground,
+        backgroundColor: theme.tableBackground,
         borderRadius: 2,
         height: 200,
         boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',

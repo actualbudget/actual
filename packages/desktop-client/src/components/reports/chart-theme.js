@@ -1,7 +1,5 @@
 import { theme } from '../../style';
 
-// Since these are rgba, they have to be hard-coded
-// and must work for both light and dark theme.
 let colorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',
   blueFadeEnd: 'rgba(229, 245, 255, 0)',

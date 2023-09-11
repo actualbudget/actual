@@ -39,30 +39,30 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text>Budgeted</Text>
+        <Text style={{ color: theme.pageTextLight }}>Budgeted</Text>
         <CellValue
           binding={reportBudget.totalBudgetedExpense}
           type="financial"
-          style={valueStyle}
+          style={{ color: theme.pageTextLight, fontWeight: 600 }}
           formatter={value => {
             return format(parseFloat(value || '0'), 'financial');
           }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text>Spent</Text>
+        <Text style={{ color: theme.pageTextLight }}>Spent</Text>
         <CellValue
           binding={reportBudget.totalSpent}
           type="financial"
-          style={valueStyle}
+          style={{ color: theme.pageTextLight, fontWeight: 600 }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text>Balance</Text>
+        <Text style={{ color: theme.pageTextLight }}>Balance</Text>
         <CellValue
           binding={reportBudget.totalLeftover}
           type="financial"
-          style={valueStyle}
+          style={{ color: theme.pageTextLight, fontWeight: 600 }}
         />
       </View>
     </View>
@@ -79,10 +79,10 @@ export function IncomeHeaderMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text>Budgeted</Text>
+        <Text style={{ color: theme.pageTextLight }}>Budgeted</Text>
       </View>
       <View style={headerLabelStyle}>
-        <Text>Received</Text>
+        <Text style={{ color: theme.pageTextLight }}>Received</Text>
       </View>
     </View>
   );
@@ -123,7 +123,7 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
           textAlign="right"
           style={{
             fontWeight: 600,
-            paddingRight: MONTH_RIGHT_PADDING,
+            paddingRight: styles.monthRightPadding,
             ...styles.tnum,
           }}
           valueProps={{
@@ -338,11 +338,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           }}
         />
       </View>
-      <Field
-        name="spent"
-        width="flex"
-        style={{ textAlign: 'right', borderColor: borderColor }}
-      >
+      <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.name, category.id, monthIndex)}
@@ -365,10 +361,7 @@ export const CategoryMonth = memo(function CategoryMonth({
         <Field
           name="balance"
           width="flex"
-          style={{
-            paddingRight: styles.monthRightPadding,
-            textAlign: 'right',
-            borderColor: borderColor,
+          style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
         >
           <span {...(category.is_income ? {} : balanceTooltip.getOpenEvents())}>
             <BalanceWithCarryover
