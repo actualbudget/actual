@@ -12,7 +12,7 @@ type IncomeGroupProps = {
   collapsed: boolean;
   MonthComponent?: ReactNode;
   onEditName: (id: string) => void;
-  onSave: () => void; // -------------- not sure about this one down -------------- onSaveGroup
+  onSave: () => void;
   onToggleCollapse: (id: string) => void;
   onShowNewCategory: (id: string) => void;
 };
