@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 import { colors } from '../../style';
 import { Row } from '../table';
 
 import RenderMonths from './RenderMonths';
 import SidebarGroup from './SidebarGroup';
+
+type IncomeGroupProps = {
+  group: { id: string; name: string };
+  editingCell: { id: string; cell: string };
+  collapsed: boolean;
+  MonthComponent?: ReactNode;
+  onEditName: (id: string) => void;
+  onSave: () => void; // -------------- not sure about this one down -------------- onSaveGroup
+  onToggleCollapse: (id: string) => void;
+  onShowNewCategory: (id: string) => void;
+};
 
 function IncomeGroup({
   group,
@@ -15,7 +26,7 @@ function IncomeGroup({
   onSave,
   onToggleCollapse,
   onShowNewCategory,
-}) {
+}: IncomeGroupProps) {
   return (
     <Row
       collapsed={true}
@@ -33,8 +44,18 @@ function IncomeGroup({
         onSave={onSave}
         onToggleCollapse={onToggleCollapse}
         onShowNewCategory={onShowNewCategory}
+        dragPreview={undefined}
+        innerRef={undefined}
+        style={undefined}
+        onDelete={undefined}
+        onHideNewGroup={undefined}
       />
-      <RenderMonths component={MonthComponent} args={{ group }} />
+      <RenderMonths
+        component={MonthComponent}
+        args={{ group }}
+        editingIndex={undefined}
+        style={undefined}
+      />
     </Row>
   );
 }
