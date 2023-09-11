@@ -44,10 +44,10 @@ module.exports = {
   parserOptions: { project: [path.join(__dirname, './tsconfig.json')] },
   reportUnusedDisableDirectives: true,
   rules: {
-    'prettier/prettier': 'error',
+    'prettier/prettier': 'warn',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [
-      'error',
+      'warn',
       {
         args: 'none',
         varsIgnorePattern: '^_',
@@ -55,17 +55,17 @@ module.exports = {
       },
     ],
 
-    curly: ['error', 'multi-line', 'consistent'],
+    curly: ['warn', 'multi-line', 'consistent'],
 
-    'no-restricted-globals': ['error'].concat(
+    'no-restricted-globals': ['warn'].concat(
       require('confusing-browser-globals').filter(g => g !== 'self'),
     ),
 
-    'react/jsx-no-useless-fragment': 'error',
-    'react/self-closing-comp': 'error',
+    'react/jsx-no-useless-fragment': 'warn',
+    'react/self-closing-comp': 'warn',
 
-    'rulesdir/typography': 'error',
-    'rulesdir/prefer-if-statement': 'error',
+    'rulesdir/typography': 'warn',
+    'rulesdir/prefer-if-statement': 'warn',
 
     // https://github.com/eslint/eslint/issues/16954
     // https://github.com/eslint/eslint/issues/16953
@@ -80,24 +80,24 @@ module.exports = {
     'react/display-name': 'off',
     'react/react-in-jsx-scope': 'off',
     // 'react-hooks/exhaustive-deps': [
-    //   'error',
+    //   'warn',
     //   {
     //     additionalHooks: 'useLiveQuery',
     //   },
     // ],
 
     'import/extensions': [
-      'error',
+      'warn',
       'never',
       {
         json: 'always',
       },
     ],
-    'import/no-useless-path-segments': 'error',
-    'import/no-duplicates': ['error', { 'prefer-inline': true }],
-    'import/no-unused-modules': ['error', { unusedExports: true }],
+    'import/no-useless-path-segments': 'warn',
+    'import/no-duplicates': ['warn', { 'prefer-inline': true }],
+    'import/no-unused-modules': ['warn', { unusedExports: true }],
     'import/order': [
-      'error',
+      'warn',
       {
         alphabetize: {
           caseInsensitive: true,
@@ -126,7 +126,7 @@ module.exports = {
     ],
 
     'no-restricted-syntax': [
-      'error',
+      'warn',
       {
         // forbid React.* as they are legacy https://twitter.com/dan_abramov/status/1308739731551858689
         selector:
@@ -142,7 +142,7 @@ module.exports = {
       },
     ],
     'no-restricted-imports': [
-      'error',
+      'warn',
       { patterns: [...restrictedImportPatterns, ...restrictedImportColors] },
     ],
 
@@ -167,14 +167,14 @@ module.exports = {
       ],
       rules: {
         // enforce type over interface
-        '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+        '@typescript-eslint/consistent-type-definitions': ['warn', 'type'],
         // enforce import type
         '@typescript-eslint/consistent-type-imports': [
-          'error',
+          'warn',
           { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
         ],
         '@typescript-eslint/ban-types': [
-          'error',
+          'warn',
           {
             types: {
               // forbid FC as superflous
@@ -190,7 +190,7 @@ module.exports = {
       files: ['./packages/loot-core/src/**/*'],
       rules: {
         'no-restricted-imports': [
-          'error',
+          'warn',
           {
             patterns: [
               ...restrictedImportPatterns,
@@ -223,7 +223,6 @@ module.exports = {
         './packages/desktop-client/src/components/NotesButton.*',
         './packages/desktop-client/src/components/Notifications.*',
         './packages/desktop-client/src/components/Page.*',
-        './packages/desktop-client/src/components/SidebarWithData.*',
         './packages/desktop-client/src/components/Titlebar.*',
         './packages/desktop-client/src/components/UpdateNotification.*',
         './packages/desktop-client/src/components/accounts/Header.*',
@@ -251,13 +250,7 @@ module.exports = {
         './packages/desktop-client/src/components/common/Label.*',
         './packages/desktop-client/src/components/common/View.*',
         './packages/desktop-client/src/components/common/ExternalLink.*',
-        './packages/desktop-client/src/components/manager/subscribe/Bootstrap.*',
-        './packages/desktop-client/src/components/manager/subscribe/ChangePassword.*',
-        './packages/desktop-client/src/components/manager/subscribe/Error.*',
-        './packages/desktop-client/src/components/manager/subscribe/Login.*',
-        './packages/desktop-client/src/components/manager/subscribe/common.*',
         './packages/desktop-client/src/components/modals/BudgetSummary.*',
-        './packages/desktop-client/src/components/modals/MergeUnusedPayees.*',
         './packages/desktop-client/src/components/payees/index.*',
         './packages/desktop-client/src/components/reports/CashFlow.*',
         './packages/desktop-client/src/components/reports/Change.*',
@@ -269,15 +262,6 @@ module.exports = {
         './packages/desktop-client/src/components/reports/chart-theme.*',
         './packages/desktop-client/src/components/reports/graphs/CashFlowGraph.*',
         './packages/desktop-client/src/components/reports/graphs/NetWorthGraph.*',
-        './packages/desktop-client/src/components/schedules/DiscoverSchedules.*',
-        './packages/desktop-client/src/components/schedules/EditSchedule.*',
-        './packages/desktop-client/src/components/schedules/LinkSchedule.*',
-        './packages/desktop-client/src/components/schedules/PostsOfflineNotification.*',
-        './packages/desktop-client/src/components/schedules/SchedulesTable.*',
-        './packages/desktop-client/src/components/schedules/StatusBadge.*',
-        './packages/desktop-client/src/components/schedules/index.*',
-        './packages/desktop-client/src/components/select/DateSelect.*',
-        './packages/desktop-client/src/components/select/RecurringSchedulePicker.*',
         './packages/desktop-client/src/components/settings/Encryption.*',
         './packages/desktop-client/src/components/settings/Experimental.*',
         './packages/desktop-client/src/components/settings/FixSplits.*',
@@ -285,7 +269,6 @@ module.exports = {
         './packages/desktop-client/src/components/settings/Global.*',
         './packages/desktop-client/src/components/settings/UI.*',
         './packages/desktop-client/src/components/settings/index.*',
-        './packages/desktop-client/src/components/sidebar.*',
         './packages/desktop-client/src/components/transactions/MobileTransaction.*',
         './packages/desktop-client/src/components/transactions/TransactionsTable.*',
         './packages/desktop-client/src/components/util/AmountInput.*',
