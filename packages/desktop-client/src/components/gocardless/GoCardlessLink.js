@@ -13,7 +13,7 @@ export default function GoCardlessLink() {
         <View style={{ maxWidth: 500 }}>
           <Paragraph>Please wait...</Paragraph>
           <Paragraph>
-            The window should close automatically. If nothing happend you can
+            The window should close automatically. If nothing happened you can
             close this window or tab.
           </Paragraph>
         </View>
