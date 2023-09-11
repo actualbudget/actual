@@ -164,7 +164,7 @@ function File({ file, onSelect, onDelete }) {
         flexShrink: 0,
         cursor: 'pointer',
         ':hover': {
-          backgroundColor: theme.buttonNormalBackgroundHover,
+          backgroundColor: theme.hover,
         },
       }}
     >
