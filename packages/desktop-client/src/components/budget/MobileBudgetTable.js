@@ -707,7 +707,7 @@ class IncomeBudgetGroup extends Component {
 
         <Card style={{ marginTop: 0 }}>
           <IncomeCategory
-            name="Income"
+            name={group.name}
             budget={
               type === 'report' ? reportBudget.groupBudgeted(group.id) : null
             }

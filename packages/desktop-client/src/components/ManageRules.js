@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
@@ -116,7 +110,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
   );
   let selectedInst = useSelected('manage-rules', allRules, []);
   let [hoveredRule, setHoveredRule] = useState(null);
-  let tableRef = useRef(null);
 
   async function loadRules() {
     setLoading(true);
@@ -283,7 +276,6 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
         <View style={{ flex: 1 }}>
           <RulesHeader />
           <SimpleTable
-            ref={tableRef}
             data={filteredRules}
             loadMore={loadMore}
             // Hide the last border of the item in the table

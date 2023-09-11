@@ -212,7 +212,7 @@ export async function createSchedule({
   schedule = null,
   conditions = [],
 } = {}) {
-  let scheduleId = (schedule && schedule.id) || uuidv4();
+  let scheduleId = schedule?.id || uuidv4();
 
   let { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {
@@ -235,8 +235,7 @@ export async function createSchedule({
   }
 
   // Create the rule here based on the info
-  let ruleId;
-  ruleId = await insertRule({
+  let ruleId = await insertRule({
     stage: null,
     conditionsOp: 'and',
     conditions,
