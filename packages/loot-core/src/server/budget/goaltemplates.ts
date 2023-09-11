@@ -61,18 +61,6 @@ async function setGoalBudget({ month, templateBudget }) {
 }
 
 async function setCategoryTargets({ month, idealTemplate }) {
-  let categories = await db.all('SELECT * FROM zero_budgets WHERE month = ?', [
-    parseInt(month.replace('-', '')),
-  ]);
-
-  //clear set values
-  for (let cat of categories) {
-    await setGoal({
-      category: cat.category,
-      goal: 0,
-      month: month,
-    });
-  }
   await batchMessages(async () => {
     idealTemplate.forEach(element => {
       setGoal({
@@ -84,7 +72,11 @@ async function setCategoryTargets({ month, idealTemplate }) {
   });
 }
 
-async function processTemplate(month, force, category_templates) {
+async function processTemplate(
+  month,
+  force,
+  category_templates,
+): Promise<Notification> {
   let num_applied = 0;
   let errors = [];
   let lowestPriority = 0;
@@ -447,7 +439,7 @@ async function applyCategoryTemplate(
   let to_budget = 0;
   let limit;
   let hold;
-  let idealTarget;
+  let idealTarget = 0;
   let last_month_balance = balance - spent - budgeted;
   let remainder = 0;
   for (let l = 0; l < template_lines.length; l++) {
@@ -473,12 +465,11 @@ async function applyCategoryTemplate(
         }
         if (to_budget + increment < budgetAvailable || !priority) {
           to_budget += increment;
-          idealTarget = to_budget;
         } else {
-          idealTarget = to_budget + increment;
           if (budgetAvailable > 0) to_budget += budgetAvailable;
           errors.push(`Insufficient funds.`);
         }
+        idealTarget += increment;
         break;
       }
       case 'by': {
@@ -515,13 +506,12 @@ async function applyCategoryTemplate(
           if (diff >= 0) {
             if (to_budget + diff < budgetAvailable || !priority) {
               to_budget += diff;
-              idealTarget = to_budget;
             } else {
-              idealTarget = to_budget + diff;
               if (budgetAvailable > 0) to_budget += budgetAvailable;
               errors.push(`Insufficient funds.`);
             }
           }
+          idealTarget += diff;
         } else {
           errors.push(`by templates are not supported in Report budgets`);
         }
@@ -547,15 +537,15 @@ async function applyCategoryTemplate(
           if (w >= current_month) {
             if (to_budget + amount < budgetAvailable || !priority) {
               to_budget += amount;
-              idealTarget = to_budget;
             } else {
-              idealTarget = to_budget + budgetAvailable;
               if (budgetAvailable > 0) to_budget += budgetAvailable;
               errors.push(`Insufficient funds.`);
             }
+            idealTarget += amount;
           }
           w = monthUtils.addWeeks(w, weeks);
         }
+
         break;
       }
       case 'spend': {
@@ -611,12 +601,11 @@ async function applyCategoryTemplate(
         }
         if (increment < budgetAvailable || !priority) {
           to_budget = increment;
-          idealTarget = to_budget;
         } else {
-          idealTarget = increment;
           if (budgetAvailable > 0) to_budget = budgetAvailable;
           errors.push(`Insufficient funds.`);
         }
+        idealTarget = increment;
         break;
       }
       case 'percentage': {
@@ -670,10 +659,10 @@ async function applyCategoryTemplate(
         if (increment + to_budget <= budgetAvailable || !priority) {
           to_budget += increment;
         } else {
-          idealTarget = increment;
           if (budgetAvailable > 0) to_budget = budgetAvailable;
           errors.push(`Insufficient funds.`);
         }
+        idealTarget += increment;
         break;
       }
       case 'schedule': {
@@ -832,6 +821,7 @@ async function applyCategoryTemplate(
             to_budget = budgetAvailable;
             errors.push(`Insufficient funds.`);
           }
+          idealTarget += diff;
         }
         break;
       }
@@ -844,12 +834,11 @@ async function applyCategoryTemplate(
           // can over budget with the rounding, so checking that
           if (to_budget >= budgetAvailable) {
             to_budget = budgetAvailable;
-            idealTarget = to_budget;
             // check if there is 1 cent leftover from rounding
           } else if (budgetAvailable - to_budget === 1) {
             to_budget = to_budget + 1;
-            idealTarget = budgetAvailable;
           }
+          idealTarget = to_budget;
         }
         break;
       }
