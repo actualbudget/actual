@@ -8,9 +8,17 @@ let replyHandlers = new Map();
 let listeners = new Map();
 let messageQueue = [];
 let socketClient = null;
+let activePort = null;
 
 function connectSocket(port, onOpen) {
+  // Do nothing if connection to this port is already active
+  if (socketClient && port === activePort) {
+    return;
+  }
+
   let client = new WebSocket('ws://localhost:' + port);
+  socketClient = client;
+  activePort = port;
 
   client.onmessage = event => {
     const msg = JSON.parse(event.data);
@@ -62,7 +70,6 @@ function connectSocket(port, onOpen) {
   };
 
   client.onopen = event => {
-    socketClient = client;
     // Send any messages that were queued while closed
     if (messageQueue.length > 0) {
       messageQueue.forEach(msg => {
@@ -73,10 +80,13 @@ function connectSocket(port, onOpen) {
 
     onOpen();
   };
+
+  client.onclose = () => {
+    socketClient = null;
+  };
 }
 
 export const init: T.Init = async function (socketName) {
-  await clearServer();
   return new Promise(resolve => connectSocket(socketName, resolve));
 };
 
