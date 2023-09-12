@@ -99,7 +99,6 @@ export default function ExperimentalFeatures() {
               Goal templates
             </FeatureToggle>
 
-            <FeatureToggle flag="privacyMode">Privacy mode</FeatureToggle>
             <FeatureToggle flag="experimentalOfxParser">
               Experimental OFX parser
             </FeatureToggle>
