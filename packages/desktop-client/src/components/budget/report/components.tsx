@@ -307,7 +307,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             padding: '0 4px',
             borderRadius: 4,
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + styles.cardShadow,
+              boxShadow: 'inset 0 0 0 1px ' + theme.mobileAccountShadow,
               backgroundColor: theme.tableBackground,
             },
           }}
