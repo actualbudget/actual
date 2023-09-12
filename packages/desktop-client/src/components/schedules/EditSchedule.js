@@ -527,8 +527,8 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         <FormLabel title="Date" />
       </View>
 
-      <Stack direction="row" align="flex-start">
-        <View style={{ flex: 1, width: '13.44rem' }}>
+      <Stack direction="row" align="flex-start" justify="space-between">
+        <View style={{ width: '13.44rem' }}>
           {repeats ? (
             <RecurringSchedulePicker
               value={state.fields.date}
@@ -569,7 +569,6 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         <View
           style={{
             marginTop: 5,
-            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
             userSelect: 'none',
@@ -587,12 +586,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
           </label>
         </View>
 
-        <View
-          style={{
-            alignItems: 'flex-end',
-            flex: 1,
-          }}
-        >
+        <Stack align="flex-end">
           <View
             style={{
               marginTop: 5,
@@ -636,7 +630,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
           </Text>
 
           {!adding && state.schedule.rule && (
-            <Stack direction="row" align="center" style={{ marginTop: 30 }}>
+            <Stack direction="row" align="center" style={{ marginTop: 20 }}>
               {state.isCustom && (
                 <Text
                   style={{
@@ -654,7 +648,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               </Button>
             </Stack>
           )}
-        </View>
+        </Stack>
       </Stack>
 
       <View style={{ marginTop: 30, flex: 1 }}>
