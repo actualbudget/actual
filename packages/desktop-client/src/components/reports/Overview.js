@@ -260,7 +260,6 @@ function CashFlowCard() {
                         </View>
                       ),
                       labelPosition: 'right',
-                      fill: chartTheme.colors.red,
                     },
                   ]}
                   labels={d => d.premadeLabel}

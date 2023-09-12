@@ -35,9 +35,7 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
             }
           >
             <VictoryGroup>
-              <VictoryBar
-                data={graphData.expenses}
-              />
+              <VictoryBar data={graphData.expenses} />
               <VictoryBar data={graphData.income} />
             </VictoryGroup>
             <VictoryLine
