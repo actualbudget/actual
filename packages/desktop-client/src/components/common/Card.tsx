@@ -19,7 +19,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
           borderRadius: 6,
           backgroundColor: theme.cardBackground,
           borderColor: theme.cardBorder,
-          boxShadow: '0 1px 2px ' + theme.cardShadow,
+          boxShadow: '0 1px 2px #9594A8',
           ...props.style,
         }}
       >
