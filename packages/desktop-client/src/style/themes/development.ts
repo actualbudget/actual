@@ -186,3 +186,4 @@ export const alt2PillText = pillText;
 
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
+export const reportsLabel = colorPalette.navy900;

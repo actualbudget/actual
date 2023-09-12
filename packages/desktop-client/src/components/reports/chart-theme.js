@@ -18,7 +18,7 @@ const baseLabelStyles = {
   fontFamily: sansSerif,
   fontSize,
   letterSpacing,
-  fill: theme.pageText,
+  fill: theme.reportsLabel,
   stroke: 'transparent',
 };
 

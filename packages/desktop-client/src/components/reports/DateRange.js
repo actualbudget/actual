@@ -26,7 +26,7 @@ function DateRange({ start, end }) {
     content = d.format(end, 'MMMM yyyy');
   }
 
-  return <Block style={{ color: theme.pageTextSubdue }}>{content}</Block>;
+  return <Block style={{ color: theme.pageTextSubdued }}>{content}</Block>;
 }
 
 export default DateRange;
