@@ -11,7 +11,11 @@ import Search from '../common/Search';
 import View from '../common/View';
 import { Page } from '../Page';
 
-import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
+import {
+  SchedulesTable,
+  ROW_HEIGHT,
+  ScheduleItemAction,
+} from './SchedulesTable';
 
 export default function Schedules() {
   const { pushModal } = useActions();
@@ -37,27 +41,26 @@ export default function Schedules() {
     pushModal('schedules-discover');
   }
 
-  // @todo: replace name: string with enum
-  async function onAction(name: string, id: ScheduleEntity['id']) {
+  async function onAction(name: ScheduleItemAction, id: ScheduleEntity['id']) {
     switch (name) {
-      case 'post-transaction':
+      case ScheduleItemAction.PostTransaction:
         await send('schedule/post-transaction', { id });
         break;
-      case 'skip':
+      case ScheduleItemAction.SkipSchedule:
         await send('schedule/skip-next-date', { id });
         break;
-      case 'complete':
+      case ScheduleItemAction.CompleteSchedule:
         await send('schedule/update', {
           schedule: { id, completed: true },
         });
         break;
-      case 'restart':
+      case ScheduleItemAction.RestartSchedule:
         await send('schedule/update', {
           schedule: { id, completed: false },
           resetNextDate: true,
         });
         break;
-      case 'delete':
+      case ScheduleItemAction.DeleteSchedule:
         await send('schedule/delete', { id });
         break;
       default:
@@ -88,9 +91,6 @@ export default function Schedules() {
           onSelect={onEdit}
           onAction={onAction}
           style={{ backgroundColor: theme.tableBackground }}
-          // @todo: Remove following props after typing SchedulesTable
-          minimal={undefined}
-          tableStyle={undefined}
         />
       </View>
 

@@ -41,6 +41,14 @@ type SchedulesTableProps = {
 type CompletedScheduleItem = { id: 'show-completed' };
 type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
 
+export enum ScheduleItemAction {
+  PostTransaction = 'post-transaction',
+  SkipSchedule = 'skip',
+  CompleteSchedule = 'complete',
+  RestartSchedule = 'restart',
+  DeleteSchedule = 'delete',
+}
+
 export const ROW_HEIGHT = 43;
 
 function OverflowMenu({
@@ -83,16 +91,27 @@ function OverflowMenu({
             }}
             items={[
               status === 'due' && {
-                name: 'post-transaction',
+                name: ScheduleItemAction.PostTransaction,
                 text: 'Post transaction',
               },
               ...(schedule.completed
-                ? [{ name: 'restart', text: 'Restart' }]
+                ? [
+                    {
+                      name: ScheduleItemAction.RestartSchedule,
+                      text: 'Restart',
+                    },
+                  ]
                 : [
-                    { name: 'skip', text: 'Skip next date' },
-                    { name: 'complete', text: 'Complete' },
+                    {
+                      name: ScheduleItemAction.SkipSchedule,
+                      text: 'Skip next date',
+                    },
+                    {
+                      name: ScheduleItemAction.CompleteSchedule,
+                      text: 'Complete',
+                    },
                   ]),
-              { name: 'delete', text: 'Delete' },
+              { name: ScheduleItemAction.DeleteSchedule, text: 'Delete' },
             ]}
           />
         </Tooltip>
