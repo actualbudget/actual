@@ -82,7 +82,10 @@ function Saved({ projected }) {
       }}
     >
       {projected ? (
-        <Label title="PROJECTED SAVINGS" style={{ color: theme.formInputText }} />
+        <Label
+          title="PROJECTED SAVINGS"
+          style={{ color: theme.formInputText }}
+        />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
@@ -1101,7 +1104,11 @@ function BudgetHeader({
             padding: '5px 30px 5px 0',
           }}
         >
-          <ArrowThinLeft style={{ color: theme.formInputTextReadOnlySelection }} width="15" height="15" />
+          <ArrowThinLeft
+            style={{ color: theme.formInputTextReadOnlySelection }}
+            width="15"
+            height="15"
+          />
         </Button>
       )}
       <Text

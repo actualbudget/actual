@@ -14,6 +14,7 @@ export const altpageTextSubdued = pageTextSubdued;
 export const pageTextDark = colorPalette.navy800;
 export const pageTextPositive = colorPalette.purple200;
 export const pageTextLink = colorPalette.purple400;
+export const altPageTextLink = pageTextLink;
 
 export const modalBackground = colorPalette.gray800;
 export const modalBorder = colorPalette.navy600;
@@ -24,6 +25,7 @@ export const cardShadow = colorPalette.navy700;
 
 export const tableBackground = colorPalette.navy800;
 export const altTableBackground = tableBackground;
+export const alt2TableBackground = tableBackground;
 export const tableRowBackgroundHover = colorPalette.navy700;
 export const tableText = colorPalette.navy150;
 export const altTableText = tableText;
@@ -140,6 +142,7 @@ export const buttonNormalDisabledBackground = colorPalette.navy800;
 export const buttonNormalDisabledBorder = colorPalette.navy500;
 
 export const buttonBareText = buttonNormalText;
+export const altButtonBareText = buttonBareText;
 export const buttonBareTextHover = buttonNormalText;
 export const buttonBareBackground = 'transparent';
 export const buttonBareBackgroundHover = 'rgba(200, 200, 200, .3)';
@@ -160,6 +163,7 @@ export const altWarningBackground = warningBackground;
 export const warningText = colorPalette.orange200;
 export const altWarningText = warningText;
 export const alt2WarningText = warningText;
+export const alt3WarningText = warningText;
 export const warningAccent = colorPalette.orange500;
 export const errorBackground = colorPalette.red800;
 export const altErrorBackground = errorBackground;
@@ -174,6 +178,7 @@ export const upcomingAccent = tableBorder;
 
 export const formLabelText = colorPalette.purple150;
 export const altFormLabelText = formLabelText;
+export const formLabelBackground = colorPalette.blue900;
 export const formInputBackground = colorPalette.navy800;
 export const formInputBackgroundSelected = colorPalette.navy700;
 export const formInputBackgroundSelection = colorPalette.purple400;

@@ -14,6 +14,7 @@ export const altpageTextSubdued = colorPalette.navy500;
 export const pageTextDark = colorPalette.navy800;
 export const pageTextPositive = colorPalette.purple600;
 export const pageTextLink = colorPalette.blue600;
+export const altPageTextLink = colorPalette.blue300;
 
 export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;
@@ -24,6 +25,7 @@ export const cardShadow = colorPalette.navy700;
 
 export const tableBackground = colorPalette.white;
 export const altTableBackground = colorPalette.navy50;
+export const alt2TableBackground = colorPalette.navy100;
 export const tableRowBackgroundHover = colorPalette.navy50;
 export const tableText = pageText;
 export const altTableText = colorPalette.navy400;
@@ -140,6 +142,7 @@ export const buttonNormalDisabledBackground = buttonNormalBackground;
 export const buttonNormalDisabledBorder = buttonNormalBorder;
 
 export const buttonBareText = buttonNormalText;
+export const altButtonBareText = colorPalette.navy200;
 export const buttonBareTextHover = buttonNormalText;
 export const buttonBareBackground = 'transparent';
 export const buttonBareBackgroundHover = 'rgba(100, 100, 100, .15)';
@@ -160,6 +163,7 @@ export const altWarningBackground = colorPalette.orange150;
 export const warningText = colorPalette.orange800;
 export const altWarningText = colorPalette.orange900;
 export const alt2WarningText = colorPalette.orange700;
+export const alt3WarningText = colorPalette.orange500;
 export const warningAccent = colorPalette.orange400;
 export const errorBackground = colorPalette.red50;
 export const altErrorBackground = colorPalette.red100;
@@ -174,6 +178,7 @@ export const upcomingAccent = colorPalette.purple100;
 
 export const formLabelText = colorPalette.blue500;
 export const altFormLabelText = colorPalette.blue700;
+export const formLabelBackground = colorPalette.blue200;
 export const formInputBackground = colorPalette.navy50;
 export const formInputBackgroundSelected = colorPalette.white;
 export const formInputBackgroundSelection = colorPalette.purple500;

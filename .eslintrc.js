@@ -216,12 +216,9 @@ module.exports = {
       rules: { 'import/no-unused-modules': 'off' },
     },
     {
-      //This is temporary. We will remove these as dark theme gets ported
       files: [
-        './packages/desktop-client/src/components/common/ExternalLink.*',
-        './packages/desktop-client/src/components/payees/index.*',
-        './packages/desktop-client/src/components/util/AmountInput.*',
-        './packages/desktop-client/src/style/*',
+        './packages/desktop-client/src/style/index.*',
+        './packages/desktop-client/src/style/palette.*',
       ],
       rules: {
         'no-restricted-imports': ['off', { patterns: restrictedImportColors }],
