@@ -51,8 +51,15 @@ export default function UpdateNotification() {
           <View style={{ flex: 1 }} />
           <View style={{ marginTop: -1 }}>
             <Text>
-              <LinkButton onClick={updateApp}>Restart</LinkButton> (
               <LinkButton
+                onClick={updateApp}
+                style={{ color: theme.buttonPrimaryText, textDecoration: 'underline' }}
+              >
+                Restart
+              </LinkButton>{' '}
+              (
+              <LinkButton
+                style={{ color: theme.buttonPrimaryText, textDecoration: 'underline' }}
                 onClick={() =>
                   window.Actual.openURLInBrowser(
                     'https://actualbudget.org/docs/releases',
@@ -67,7 +74,7 @@ export default function UpdateNotification() {
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onClick={() => closeNotification(setAppState)}
               >
-                <Close width={9} style={{ color: theme.pageText }} />
+                <Close width={9} style={{ color: theme.buttonPrimaryText }} />
               </Button>
             </Text>
           </View>

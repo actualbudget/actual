@@ -193,7 +193,6 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
     <View
       style={{
-        color: theme.tableHeaderText,
         flex: 1,
         flexDirection: 'row',
         marginRight: styles.monthRightPadding,
@@ -206,26 +205,26 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         <CellValue
           binding={rolloverBudget.totalBudgeted}
           type="financial"
-          style={valueStyle}
+          style={{ color: theme.alt2TableText, fontWeight: 600 }}
           formatter={value => {
             return format(-parseFloat(value || '0'), 'financial');
           }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text>Spent</Text>
+        <Text style={{ color: theme.alt2TableText }}>Spent</Text>
         <CellValue
           binding={rolloverBudget.totalSpent}
           type="financial"
-          style={valueStyle}
+          style={{ color: theme.alt2TableText, fontWeight: 600 }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text>Balance</Text>
+        <Text style={{ color: theme.alt2TableText }}>Balance</Text>
         <CellValue
           binding={rolloverBudget.totalBalance}
           type="financial"
-          style={valueStyle}
+          style={{ color: theme.alt2TableText, fontWeight: 600 }}
         />
       </View>
     </View>
@@ -423,7 +422,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             padding: '0 4px',
             borderRadius: 4,
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + colors.n7,
+              boxShadow: 'inset 0 0 0 1px ' + styles.cardShadow,
               backgroundColor: 'white',
             },
           }}

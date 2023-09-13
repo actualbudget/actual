@@ -51,7 +51,7 @@ function ToBudget({ toBudget, onClick }) {
     >
       <Label
         title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
-        style={{ color: theme.tableText, flexShrink: 0 }}
+        style={{ color: theme.formInputText, flexShrink: 0 }}
       />
       <Text
         style={{
@@ -82,11 +82,11 @@ function Saved({ projected }) {
       }}
     >
       {projected ? (
-        <Label title="PROJECTED SAVINGS" style={{ color: theme.tableText }} />
+        <Label title="PROJECTED SAVINGS" style={{ color: theme.formInputText }} />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: theme.tableText }}
+          style={{ color: theme.formInputText }}
         />
       )}
 
@@ -390,7 +390,6 @@ class TotalsRow extends PureComponent {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          color: theme.tableHeaderText,
           backgroundColor: theme.tableHeaderBackground,
         }}
         data-testid="totals"
@@ -725,7 +724,6 @@ class IncomeBudgetGroup extends Component {
             amountTextStyle={{ fontWeight: '500' }}
             style={{
               backgroundColor: theme.tableHeaderBackground,
-              color: theme.tableHeaderText,
             }}
           />
 
@@ -1088,7 +1086,6 @@ function BudgetHeader({
         height: 50,
         justifyContent: 'center',
         backgroundColor: theme.buttonPrimaryBackground,
-        color: theme.buttonPrimaryText,
       }}
     >
       {!editMode && (
@@ -1104,7 +1101,7 @@ function BudgetHeader({
             padding: '5px 30px 5px 0',
           }}
         >
-          <ArrowThinLeft style={{ color: 'inherit' }} width="15" height="15" />
+          <ArrowThinLeft style={{ color: theme.formInputTextReadOnlySelection }} width="15" height="15" />
         </Button>
       )}
       <Text
@@ -1132,6 +1129,7 @@ function BudgetHeader({
             right: 0,
           }}
           textStyle={{
+            color: theme.formInputTextReadOnlySelection,
             fontSize: 15,
             fontWeight: '500',
           }}
@@ -1147,7 +1145,7 @@ function BudgetHeader({
             style={{ ...buttonStyle, opacity: nextEnabled ? 1 : 0.6 }}
           >
             <ArrowThinRight
-              style={{ color: 'inherit' }}
+              style={{ color: theme.formInputTextReadOnlySelection }}
               width="15"
               height="15"
             />

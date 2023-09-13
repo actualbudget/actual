@@ -183,10 +183,10 @@ function Notification({
                 flexShrink: 0,
                 '&:hover, &:active': {
                   backgroundColor: positive
-                    ? theme.noticeBackground
+                    ? theme.altNoticeBackground
                     : error
-                    ? theme.errorBackground
-                    : theme.warningBackground,
+                    ? theme.altErrorBackground
+                    : theme.altWarningBackground,
                 },
               }}
             >

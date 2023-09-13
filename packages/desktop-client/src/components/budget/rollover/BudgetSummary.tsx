@@ -44,7 +44,6 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
           padding: '5px 0',
           marginTop: 17,
           backgroundColor: theme.tableRowHeaderBackground,
-          color: theme.tableRowHeaderText,
           borderTopWidth: 1,
           borderBottomWidth: 1,
           borderColor: theme.tableBorder,
@@ -292,7 +291,6 @@ export function BudgetSummary({
       data-testid="budget-summary"
       style={{
         backgroundColor: theme.tableBackground,
-        color: theme.tableText,
         boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
