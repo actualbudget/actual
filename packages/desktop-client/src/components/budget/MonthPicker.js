@@ -139,15 +139,16 @@ export const MonthPicker = ({
             >
               {size === 'small' ? monthName[0] : monthName}
               {showYearHeader && (
+                <View
                   style={{
                     position: 'absolute',
                     top: -14,
                     left: 0,
                     fontSize: 10,
                     fontWeight: 'bold',
-                    color: isMonthBudgeted 
-                        ? theme.pageText
-                        : theme.pageTextSubdued,
+                    color: isMonthBudgeted
+                      ? theme.pageText
+                      : theme.pageTextSubdued,
                   }}
                 >
                   {year}

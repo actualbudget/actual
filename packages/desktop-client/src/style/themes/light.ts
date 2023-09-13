@@ -31,6 +31,7 @@ export const alt2TableText = colorPalette.navy600;
 export const tableTextSelected = colorPalette.navy700;
 export const tableTextHover = colorPalette.navy900;
 export const tableTextEditing = colorPalette.navy50;
+export const altTableTextEditing = colorPalette.purple50;
 export const tableTextEditingBackground = colorPalette.blue500;
 export const tableTextInactive = colorPalette.navy500;
 export const tableHeaderText = colorPalette.navy600;

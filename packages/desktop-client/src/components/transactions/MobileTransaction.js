@@ -642,7 +642,11 @@ class TransactionEditInner extends PureComponent {
                   style={{ color: theme.altFormLabelText }}
                 />
                 <Text
-                  style={{ ...styles.text, color: theme.altFormLabelText, marginLeft: 5 }}
+                  style={{
+                    ...styles.text,
+                    color: theme.altFormLabelText,
+                    marginLeft: 5,
+                  }}
                 >
                   Add transaction
                 </Text>
@@ -653,7 +657,11 @@ class TransactionEditInner extends PureComponent {
                   style={{ width: 16, height: 16, color: theme.formInputText }}
                 />
                 <Text
-                  style={{ ...styles.text, marginLeft: 6, color: theme.formInputText }}
+                  style={{
+                    ...styles.text,
+                    marginLeft: 6,
+                    color: theme.formInputText,
+                  }}
                 >
                   Save changes
                 </Text>

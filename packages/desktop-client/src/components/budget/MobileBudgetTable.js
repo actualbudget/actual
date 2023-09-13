@@ -57,7 +57,7 @@ function ToBudget({ toBudget, onClick }) {
         style={{
           ...styles.smallText,
           fontWeight: '500',
-          color: amount < 0 ? colors.r4 : colors.n1,
+          color: amount < 0 ? theme.errorText : theme.formInputText,
         }}
       >
         {format(amount, 'financial')}
@@ -94,7 +94,11 @@ function Saved({ projected }) {
         style={{
           ...styles.smallText,
           fontWeight: '500',
-          color: projected ? colors.y3 : isNegative ? colors.r4 : colors.n1,
+          color: projected
+            ? theme.warningText
+            : isNegative
+            ? theme.errorText
+            : theme.formInputText,
         }}
       >
         {format(saved, 'financial')}
@@ -267,7 +271,7 @@ class BudgetCategory extends PureComponent {
     let content = !category.hidden && (
       <ListItem
         style={{
-          backgroundColor: editing ? colors.p11 : 'transparent',
+          backgroundColor: editing ? theme.altTableTextEditing : 'transparent',
           borderBottomWidth: 0,
           borderTopWidth: index > 0 ? 1 : 0,
           ...style,
@@ -318,7 +322,7 @@ class BudgetCategory extends PureComponent {
               width: 90,
               textAlign: 'right',
             }}
-            getStyle={value => value < 0 && { color: colors.r4 }}
+            getStyle={value => value < 0 && { color: theme.errorText }}
             type="financial"
           />
         </View>
@@ -887,7 +891,7 @@ export function BudgetTable(props) {
             paddingRight: 14,
             backgroundColor: 'white',
             borderBottomWidth: 1,
-            borderColor: colors.n9,
+            borderColor: theme.formInputBorder,
           }}
         >
           {type === 'report' ? (
@@ -909,22 +913,25 @@ export function BudgetTable(props) {
               margin: '0 -8px',
               background:
                 showBudgetedCol && !show3Cols
-                  ? `linear-gradient(-45deg, ${colors.p5} 8px, transparent 0)`
+                  ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
                   : !show3Cols
-                  ? `linear-gradient(45deg, ${colors.p5} 8px, transparent 0)`
+                  ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
                   : null,
               // 45deg to flip it to the lower left corner
             }}
           >
             {show3Cols || showBudgetedCol ? (
               <View style={{ width: 90, justifyContent: 'center' }}>
-                <Label title="BUDGETED" style={{ color: colors.n1 }} />
+                <Label
+                  title="BUDGETED"
+                  style={{ color: theme.buttonNormalText }}
+                />
                 <CellValue
                   binding={reportBudget.totalBudgetedExpense}
                   type="financial"
                   style={{
                     ...styles.smallText,
-                    color: colors.n1,
+                    color: theme.buttonNormalText,
                     textAlign: 'right',
                     fontWeight: '500',
                   }}
@@ -941,13 +948,13 @@ export function BudgetTable(props) {
                   justifyContent: 'center',
                 }}
               >
-                <Label title="SPENT" style={{ color: colors.n1 }} />
+                <Label title="SPENT" style={{ color: theme.formInputText }} />
                 <CellValue
                   binding={rolloverBudget.totalSpent}
                   type="financial"
                   style={{
                     ...styles.smallText,
-                    color: colors.n1,
+                    color: theme.formInputText,
                     textAlign: 'right',
                     fontWeight: '500',
                   }}
@@ -961,13 +968,13 @@ export function BudgetTable(props) {
               justifyContent: 'center',
             }}
           >
-            <Label title="BALANCE" style={{ color: colors.n1 }} />
+            <Label title="BALANCE" style={{ color: theme.formInputText }} />
             <CellValue
               binding={rolloverBudget.totalBalance}
               type="financial"
               style={{
                 ...styles.smallText,
-                color: colors.n1,
+                color: theme.formInputText,
                 textAlign: 'right',
                 fontWeight: '500',
               }}
@@ -1105,7 +1112,7 @@ function BudgetHeader({
           ...styles.mediumText,
           marginTop: 12,
           marginBottom: 12,
-          color: colors.n11,
+          color: theme.formInputTextSelected,
           textAlign: 'center',
           // zIndex: -1
         }}
