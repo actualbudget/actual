@@ -19,7 +19,7 @@ export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;
 
 export const cardBackground = colorPalette.white;
-export const cardBorder = colorPalette.purple500;
+export const cardBorder = colorPalette.purple700;
 export const cardShadow = colorPalette.navy700;
 
 export const tableBackground = colorPalette.white;
@@ -158,15 +158,19 @@ export const warningBackground = colorPalette.orange200;
 export const altWarningBackground = colorPalette.orange150;
 export const warningText = colorPalette.orange800;
 export const altWarningText = colorPalette.orange900;
+export const alt2WarningText = colorPalette.orange700;
 export const warningAccent = colorPalette.orange400;
 export const errorBackground = colorPalette.red50;
 export const altErrorBackground = colorPalette.red100;
 export const errorText = colorPalette.red500;
 export const altErrorText = colorPalette.red900;
+export const alt2ErrorText = colorPalette.red600;
 export const errorAccent = colorPalette.red200;
 export const upcomingBackground = colorPalette.purple100;
 export const upcomingText = colorPalette.purple900;
+export const altUpcomingText = colorPalette.purple500;
 export const upcomingAccent = colorPalette.purple100;
+
 export const formLabelText = colorPalette.blue500;
 export const altFormLabelText = colorPalette.blue700;
 export const formInputBackground = colorPalette.navy50;
@@ -189,6 +193,7 @@ export const pillBackground = colorPalette.navy150;
 export const pillText = colorPalette.navy800;
 export const pillTextHighlighted = colorPalette.purple600;
 export const pillBorder = colorPalette.navy150;
+export const altPillBorder = colorPalette.navy200;
 export const pillBackgroundSelected = colorPalette.blue150;
 export const pillTextSelected = colorPalette.blue900;
 export const pillBorderSelected = colorPalette.purple500;

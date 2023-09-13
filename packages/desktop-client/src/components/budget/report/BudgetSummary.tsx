@@ -100,7 +100,7 @@ function IncomeProgress({ current, target }: IncomeProgressProps) {
     <PieProgress
       progress={frac}
       color={over ? theme.errorText : theme.noticeText}
-      backgroundColor={over ? theme.errorBackground : theme.noticeBackground}
+      backgroundColor={over ? theme.errorBackground : theme.pageBackground}
       style={{ width: 20, height: 20 }}
     />
   );
@@ -133,7 +133,7 @@ function ExpenseProgress({ current, target }: ExpenseProgressProps) {
     <PieProgress
       progress={frac}
       color={over ? theme.errorText : theme.noticeText}
-      backgroundColor={over ? theme.errorBackground : theme.noticeBackground}
+      backgroundColor={over ? theme.errorBackground : theme.pageBackground}
       style={{ width: 20, height: 20 }}
     />
   );
@@ -280,10 +280,10 @@ function Saved({ projected, style }: SavedProps) {
             {
               fontSize: 25,
               color: projected
-                ? theme.warningText
+                ? theme.alt2WarningText
                 : isNegative
-                ? theme.errorText
-                : theme.pageTextPositive,
+                ? theme.alt2ErrorText
+                : theme.altUpcomingText,
             },
           ])}`}
         >
