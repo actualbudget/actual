@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import * as d from 'date-fns';
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryStack } from 'victory';
 
-import theme from '../chart-theme';
+import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
@@ -38,7 +38,7 @@ function CategorySpendingGraph({
       {(width, height, portalHost) => (
         <VictoryChart
           scale={{ x: 'time', y: 'linear' }}
-          theme={theme}
+          theme={chartTheme}
           width={width}
           height={height}
         >
