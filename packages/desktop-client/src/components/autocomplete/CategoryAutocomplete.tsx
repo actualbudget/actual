@@ -19,11 +19,13 @@ export type Category = {
   cat_group: unknown;
   groupName: string;
   name: string;
+  hidden: 1 | 0;
 };
 
 export type CategoryGroup = {
   id: string;
   name: string;
+  hidden: 1 | 0;
   categories: Array<Category>;
 };
 
