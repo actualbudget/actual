@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { Information } from '../alerts';
 import Button from '../common/Button';
 import Text from '../common/Text';
@@ -53,7 +53,7 @@ export default function GlobalSettings() {
       <Text
         innerRef={dirScrolled}
         style={{
-          backgroundColor: colors.n10,
+          backgroundColor: theme.pageBackground,
           padding: '7px 10px',
           borderRadius: 4,
           overflow: 'auto',
