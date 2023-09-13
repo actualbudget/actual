@@ -16,7 +16,7 @@ import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
-import chartTheme from './chart-theme';
+import { chartTheme } from './chart-theme';
 import Container from './Container';
 import DateRange from './DateRange';
 import { simpleCashFlow } from './graphs/cash-flow-spreadsheet';
@@ -195,7 +195,7 @@ function CashFlowCard() {
                 colorScale={[chartTheme.colors.blue, chartTheme.colors.red]}
                 width={100}
                 height={height}
-                theme={theme}
+                theme={chartTheme}
                 domain={{
                   x: [0, 100],
                   y: [0, Math.max(income, expense, 100)],

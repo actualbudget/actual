@@ -41,7 +41,7 @@ const axisBaseStyles = {
   tickLabels: baseLabelStyles,
 };
 
-const chartTheme = {
+export const chartTheme = {
   colors: {
     ...colorFades,
     red: theme.reportsRed,
@@ -111,4 +111,3 @@ const chartTheme = {
     },
   },
 };
-export default chartTheme;

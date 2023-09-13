@@ -11,7 +11,7 @@ import {
 } from 'victory';
 
 import { theme } from '../../../style';
-import chartTheme from '../chart-theme';
+import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
