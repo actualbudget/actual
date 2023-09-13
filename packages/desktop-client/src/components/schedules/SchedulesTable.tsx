@@ -16,7 +16,7 @@ import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
 import { theme } from '../../style';
 import Button from '../common/Button';
-import Menu, { type MenuItem } from '../common/Menu';
+import Menu from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
@@ -32,7 +32,7 @@ type SchedulesTableProps = {
   filter: string;
   allowCompleted: boolean;
   onSelect: (id: ScheduleEntity['id']) => void;
-  onAction: (actionName: string, id: ScheduleEntity['id']) => void;
+  onAction: (actionName: ScheduleItemAction, id: ScheduleEntity['id']) => void;
   style: CSSProperties;
   minimal?: boolean;
   tableStyle?: CSSProperties;
@@ -85,7 +85,7 @@ function OverflowMenu({
           onClose={() => setOpen(false)}
         >
           <Menu
-            onMenuSelect={(name: MenuItem['name']) => {
+            onMenuSelect={(name: ScheduleItemAction) => {
               onAction(name, schedule.id);
               setOpen(false);
             }}
