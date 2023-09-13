@@ -1,8 +1,6 @@
-import { type ComponentProps, type ReactNode, useState } from 'react';
+import { useState, type ComponentProps, type ReactNode } from 'react';
 
-import { type CSSProperties } from 'glamor';
-
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 
 import Input, { defaultInputStyle } from './Input';
 import View from './View';
@@ -28,36 +26,32 @@ export default function InputWithContent({
 
   return (
     <View
-      style={[
-        defaultInputStyle,
-        {
-          padding: 0,
-          flexDirection: 'row',
-          alignItems: 'center',
-        },
-        style,
-        focused &&
+      style={{
+        ...defaultInputStyle,
+        padding: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+        ...style,
+        ...(focused &&
           (focusStyle ?? {
             boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
-          }),
-        getStyle && getStyle(focused),
-      ]}
+          })),
+        ...(getStyle && getStyle(focused)),
+      }}
     >
       {leftContent}
       <Input
         {...props}
-        style={[
-          inputStyle,
-          {
-            flex: 1,
-            '&, &:focus, &:hover': {
-              border: 0,
-              backgroundColor: 'transparent',
-              boxShadow: 'none',
-              color: 'inherit',
-            },
+        style={{
+          ...inputStyle,
+          flex: 1,
+          '&, &:focus, &:hover': {
+            border: 0,
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            color: 'inherit',
           },
-        ]}
+        }}
         onFocus={e => {
           setFocused(true);
           props.onFocus?.(e);

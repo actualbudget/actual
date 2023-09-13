@@ -5,7 +5,7 @@ import { css } from 'glamor';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
 import InitialFocus from '../common/InitialFocus';
@@ -69,7 +69,12 @@ export default function CreateEncryptionKey({
                 </ExternalLink>
               </Paragraph>
               <Paragraph>
-                <ul {...css({ marginTop: 0, '& li': { marginBottom: 8 } })}>
+                <ul
+                  className={`${css({
+                    marginTop: 0,
+                    '& li': { marginBottom: 8 },
+                  })}`}
+                >
                   <li>
                     <strong>Important:</strong> if you forget this password{' '}
                     <em>and</em> you don’t have any local copies of your data,
@@ -123,7 +128,7 @@ export default function CreateEncryptionKey({
               {error && (
                 <View
                   style={{
-                    color: colors.r4,
+                    color: theme.errorText,
                     textAlign: 'center',
                     fontSize: 13,
                     marginBottom: 3,

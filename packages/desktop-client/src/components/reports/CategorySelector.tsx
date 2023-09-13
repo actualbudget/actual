@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
 import Eye from '../../icons/v2/Eye';
 import EyeSlashed from '../../icons/v2/EyeSlashed';
@@ -6,7 +6,7 @@ import {
   type Category,
   type CategoryGroup,
   type CategoryListProps,
-} from '../autocomplete/CategorySelect';
+} from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
 import { Checkbox } from '../forms';
 
@@ -26,30 +26,30 @@ export default function CategorySelector({
   return (
     <>
       <div>
-        <Button
-          type="bare"
-          style={{ padding: 4 }}
-          onClick={e => setUncheckedHidden(!uncheckedHidden)}
-        >
+        <Button onClick={() => setUncheckedHidden(state => !state)}>
           {uncheckedHidden ? (
             <>
               <Eye width={20} height={20} />
-              {'Checked'}
+              Show unchecked
             </>
           ) : (
             <>
               <EyeSlashed width={20} height={20} />
-              {'All'}
+              Hide unchecked
             </>
           )}
         </Button>
       </div>
+
       <ul
         style={{
           listStyle: 'none',
           marginLeft: 0,
           paddingLeft: 0,
           paddingRight: 10,
+          height: 320,
+          flexGrow: 1,
+          overflowY: 'scroll',
         }}
       >
         {categoryGroups &&
@@ -67,15 +67,14 @@ export default function CategorySelector({
                 ),
             );
             return (
-              <>
+              <Fragment key={categoryGroup.id}>
                 <li
                   style={{
                     display:
                       noCategorySelected && uncheckedHidden ? 'none' : 'flex',
-                    marginBottom: 4,
+                    marginBottom: 8,
                     flexDirection: 'row',
                   }}
-                  key={categoryGroup.id}
                 >
                   <Checkbox
                     id={`form_${categoryGroup.id}`}
@@ -129,7 +128,7 @@ export default function CategorySelector({
                             display:
                               !isChecked && uncheckedHidden ? 'none' : 'flex',
                             flexDirection: 'row',
-                            marginBottom: 2,
+                            marginBottom: 4,
                           }}
                         >
                           <Checkbox
@@ -162,7 +161,7 @@ export default function CategorySelector({
                     })}
                   </ul>
                 </li>
-              </>
+              </Fragment>
             );
           })}
       </ul>

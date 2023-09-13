@@ -1,9 +1,10 @@
-import type { CSSProperties } from 'glamor';
 import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from '../tokens';
+
+import { type CSSProperties } from './types';
 
 export const styles = {
   incomeHeaderHeight: 70,

@@ -67,7 +67,7 @@ export function mapField(field, opts) {
   }
 }
 
-export function friendlyOp(op, type) {
+export function friendlyOp(op, type?) {
   switch (op) {
     case 'oneOf':
       return 'one of';

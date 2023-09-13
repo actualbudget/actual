@@ -65,7 +65,7 @@ export function updateConditions(conditions, newConditions) {
   return updated.concat(added);
 }
 
-export function getNextDate(dateCond, start = new Date()) {
+export function getNextDate(dateCond, start = new Date(currentDay())) {
   start = d.startOfDay(start);
 
   let cond = new Condition(
@@ -84,6 +84,12 @@ export function getNextDate(dateCond, start = new Date()) {
 
     if (dates.length > 0) {
       let date = dates[0].date;
+      if (value.schedule.data.skipWeekend) {
+        date = getDateWithSkippedWeekend(
+          date,
+          value.schedule.data.weekendSolve,
+        );
+      }
       return dayFromDate(date);
     }
   }
@@ -206,7 +212,7 @@ export async function createSchedule({
   schedule = null,
   conditions = [],
 } = {}) {
-  let scheduleId = (schedule && schedule.id) || uuidv4();
+  let scheduleId = schedule?.id || uuidv4();
 
   let { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {
@@ -229,8 +235,7 @@ export async function createSchedule({
   }
 
   // Create the rule here based on the info
-  let ruleId;
-  ruleId = await insertRule({
+  let ruleId = await insertRule({
     stage: null,
     conditionsOp: 'and',
     conditions,
@@ -372,7 +377,12 @@ async function getUpcomingDates({ config, count }) {
     return schedule
       .occurrences({ start: d.startOfDay(new Date()), take: count })
       .toArray()
-      .map(date => dayFromDate(date.date));
+      .map(date =>
+        config.skipWeekend
+          ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
+          : date.date,
+      )
+      .map(date => dayFromDate(date));
   } catch (err) {
     captureBreadcrumb(config);
     throw err;
@@ -563,5 +573,18 @@ app.events.on('sync', ({ type, subtype }) => {
     }
   }
 });
+
+function getDateWithSkippedWeekend(date, solveMode) {
+  if (d.isWeekend(date)) {
+    if (solveMode === 'after') {
+      return d.nextMonday(date);
+    } else if (solveMode === 'before') {
+      return d.previousFriday(date);
+    } else {
+      throw new Error('Unknown weekend solve mode, this should not happen!');
+    }
+  }
+  return date;
+}
 
 export default app;

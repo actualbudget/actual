@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button';
 import Modal from '../common/Modal';
 import Text from '../common/Text';
@@ -62,7 +62,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                 type="primary"
                 loading={loadingState === 'cloud'}
                 style={{
-                  backgroundColor: colors.r4,
+                  backgroundColor: theme.errorText,
                   alignSelf: 'center',
                   border: 0,
                   padding: '10px 30px',
@@ -103,23 +103,21 @@ export default function DeleteMenu({ modalProps, actions, file }) {
               <ButtonWithLoading
                 type={isRemote ? 'normal' : 'primary'}
                 loading={loadingState === 'local'}
-                style={[
-                  {
-                    alignSelf: 'center',
-                    marginTop: 10,
-                    padding: '10px 30px',
-                    fontSize: 14,
-                  },
-                  isRemote
+                style={{
+                  alignSelf: 'center',
+                  marginTop: 10,
+                  padding: '10px 30px',
+                  fontSize: 14,
+                  ...(isRemote
                     ? {
-                        color: colors.r4,
-                        borderColor: colors.r4,
+                        color: theme.errorText,
+                        borderColor: theme.errorText,
                       }
                     : {
                         border: 0,
-                        backgroundColor: colors.r4,
-                      },
-                ]}
+                        backgroundColor: theme.errorText,
+                      }),
+                }}
                 onClick={onDeleteLocal}
               >
                 Delete file locally

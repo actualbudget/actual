@@ -76,11 +76,11 @@ if (isDev) {
 }
 
 function createBackgroundProcess(socketName) {
-  serverProcess = fork(__dirname + '/server.js', [
-    '--subprocess',
-    app.getVersion(),
-    socketName,
-  ]);
+  serverProcess = fork(
+    __dirname + '/server.js',
+    ['--subprocess', app.getVersion(), socketName],
+    isDev ? { execArgv: ['--inspect'] } : undefined,
+  );
 
   serverProcess.on('message', msg => {
     switch (msg.type) {
@@ -120,6 +120,10 @@ async function createWindow() {
     },
   });
   win.setBackgroundColor('#E8ECF0');
+
+  if (isDev) {
+    win.webContents.openDevTools();
+  }
 
   const unlistenToState = WindowState.listen(win, windowState);
 

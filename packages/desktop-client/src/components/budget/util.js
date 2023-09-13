@@ -1,8 +1,4 @@
-import { createContext } from 'react';
-
-import { theme } from '../../style';
-
-export let CategoryGroupsContext = createContext([]);
+import { styles, theme } from '../../style';
 
 export function addToBeBudgetedGroup(groups) {
   return [
@@ -88,4 +84,8 @@ export function findSortUp(arr, pos, targetId) {
       return { targetId: null };
     }
   }
+}
+
+export function getScrollbarWidth() {
+  return Math.max(styles.scrollbarWidth - 2, 0);
 }

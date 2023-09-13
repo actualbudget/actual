@@ -10,25 +10,56 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Run end-to-end tests on Netlify PR preview
+  netlify:
+    name: Wait for Netlify build to finish
     runs-on: ubuntu-latest
+    outputs:
+      netlify_url: ${{ steps.netlify.outputs.url }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up environment
         uses: ./.github/actions/setup
-      - name: Setup Playwright
-        run: npx playwright install chromium --with-deps
       - name: Wait for Netlify build to finish
         id: netlify
         env:
           COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./.github/actions/netlify-wait-for-build
+
+  functional:
+    name: Functional
+    needs: netlify
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.37.0-jammy
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
       - name: Run E2E Tests on Netlify URL
         run: yarn e2e
         env:
-          E2E_START_URL: ${{ steps.netlify.outputs.url }}
+          E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: desktop-client-test-results
+          path: packages/desktop-client/test-results/
+          retention-days: 30
+  vrt:
+    name: Visual regression
+    needs: netlify
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.37.0-jammy
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Run VRT Tests on Netlify URL
+        run: yarn vrt
+        env:
+          E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
       - uses: actions/upload-artifact@v3
         if: always()
         with:

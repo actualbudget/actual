@@ -6,13 +6,13 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
-import { styles, colors } from '../../../style';
+import { styles, colors, type CSSProperties } from '../../../style';
 import Button from '../../common/Button';
 import Menu from '../../common/Menu';
 import Text from '../../common/Text';
 import View from '../../common/View';
 import CellValue from '../../spreadsheet/CellValue';
-import format from '../../spreadsheet/format';
+import useFormat from '../../spreadsheet/useFormat';
 import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell } from '../../table';
 import { Tooltip, useTooltip } from '../../tooltips';
@@ -22,9 +22,14 @@ import { makeAmountGrey } from '../util';
 
 export { BudgetSummary } from './BudgetSummary';
 
-let headerLabelStyle = { flex: 1, padding: '0 5px', textAlign: 'right' };
+let headerLabelStyle: CSSProperties = {
+  flex: 1,
+  padding: '0 5px',
+  textAlign: 'right',
+};
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+  const format = useFormat();
   return (
     <View
       style={{
@@ -89,7 +94,6 @@ type GroupMonthProps = {
   group: { id: string; is_income: boolean };
 };
 export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
-  let borderColor = colors.border;
   let { id } = group;
 
   return (
@@ -97,9 +101,8 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
       <SheetCell
         name="budgeted"
         width="flex"
-        borderColor={borderColor}
         textAlign="right"
-        style={[{ fontWeight: 600 }, styles.tnum]}
+        style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
           binding: reportBudget.groupBudgeted(id),
           type: 'financial',
@@ -109,8 +112,7 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
         name="spent"
         width="flex"
         textAlign="right"
-        borderColor={borderColor}
-        style={[{ fontWeight: 600 }, styles.tnum]}
+        style={{ fontWeight: 600, ...styles.tnum }}
         valueProps={{
           binding: reportBudget.groupSumAmount(id),
           type: 'financial',
@@ -120,12 +122,12 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
         <SheetCell
           name="balance"
           width="flex"
-          borderColor={borderColor}
           textAlign="right"
-          style={[
-            { fontWeight: 600, paddingRight: MONTH_RIGHT_PADDING },
-            styles.tnum,
-          ]}
+          style={{
+            fontWeight: 600,
+            paddingRight: MONTH_RIGHT_PADDING,
+            ...styles.tnum,
+          }}
           valueProps={{
             binding: reportBudget.groupBalance(id),
             type: 'financial',
@@ -199,7 +201,6 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
-  let borderColor = colors.border;
   let balanceTooltip = useTooltip();
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
@@ -223,10 +224,6 @@ export const CategoryMonth = memo(function CategoryMonth({
         style={{
           flex: 1,
           flexDirection: 'row',
-          borderTopWidth: 1,
-          borderBottomWidth: 1,
-          borderColor,
-          backgroundColor: 'white',
         }}
         onMouseOverCapture={() => setHover(true)}
         onMouseLeave={() => {
@@ -303,24 +300,19 @@ export const CategoryMonth = memo(function CategoryMonth({
           exposed={editing}
           focused={editing}
           width="flex"
-          borderColor="white"
           onExpose={() => onEdit(category.id, monthIndex)}
-          style={[editing && { zIndex: 100 }, styles.tnum]}
+          style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
           textAlign="right"
-          valueStyle={[
-            {
-              cursor: 'default',
-              margin: 1,
-              padding: '0 4px',
-              borderRadius: 4,
+          valueStyle={{
+            cursor: 'default',
+            margin: 1,
+            padding: '0 4px',
+            borderRadius: 4,
+            ':hover': {
+              boxShadow: 'inset 0 0 0 1px ' + colors.n7,
+              backgroundColor: 'white',
             },
-            {
-              ':hover': {
-                boxShadow: 'inset 0 0 0 1px ' + colors.n7,
-                backgroundColor: 'white',
-              },
-            },
-          ]}
+          }}
           valueProps={{
             binding: reportBudget.catBudgeted(category.id),
             type: 'financial',
@@ -336,6 +328,9 @@ export const CategoryMonth = memo(function CategoryMonth({
             onBlur: () => {
               onEdit(null);
             },
+            style: {
+              backgroundColor: 'white',
+            },
           }}
           onSave={amount => {
             onBudgetAction(monthIndex, 'budget-amount', {
@@ -345,12 +340,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           }}
         />
       </View>
-      <Field
-        name="spent"
-        width="flex"
-        borderColor={borderColor}
-        style={{ textAlign: 'right' }}
-      >
+      <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.name, category.id, monthIndex)}
@@ -373,7 +363,6 @@ export const CategoryMonth = memo(function CategoryMonth({
         <Field
           name="balance"
           width="flex"
-          borderColor={borderColor}
           style={{ paddingRight: MONTH_RIGHT_PADDING, textAlign: 'right' }}
         >
           <span {...(category.is_income ? {} : balanceTooltip.getOpenEvents())}>

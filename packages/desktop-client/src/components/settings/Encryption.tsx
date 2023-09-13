@@ -18,7 +18,6 @@ export default function EncryptionSettings() {
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
 
   function onChangeKey() {
-    // @ts-expect-error useActions() type does not properly handle overloads
     pushModal('create-encryption-key', { recreate: true });
   }
 

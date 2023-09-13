@@ -1,9 +1,7 @@
 import React, { type ReactNode } from 'react';
 
-import { type CSSProperties } from 'glamor';
-
 import { useResponsive } from '../ResponsiveProvider';
-import { theme, styles } from '../style';
+import { theme, styles, type CSSProperties } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -20,21 +18,19 @@ function PageTitle({
   if (isNarrowWidth) {
     return (
       <View
-        style={[
-          {
-            alignItems: 'center',
-            backgroundColor: theme.sidebarBackground,
-            color: theme.mobileModalText,
-            flexDirection: 'row',
-            flex: '1 0 auto',
-            fontSize: 18,
-            fontWeight: 500,
-            height: 50,
-            justifyContent: 'center',
-            overflowY: 'auto',
-          },
-          style,
-        ]}
+        style={{
+          alignItems: 'center',
+          backgroundColor: theme.sidebarBackground,
+          color: theme.mobileModalText,
+          flexDirection: 'row',
+          flex: '1 0 auto',
+          fontSize: 18,
+          fontWeight: 500,
+          height: 50,
+          justifyContent: 'center',
+          overflowY: 'auto',
+          ...style,
+        }}
       >
         {name}
       </View>
@@ -43,14 +39,12 @@ function PageTitle({
 
   return (
     <Text
-      style={[
-        {
-          fontSize: 25,
-          fontWeight: 500,
-          marginBottom: 15,
-        },
-        style,
-      ]}
+      style={{
+        fontSize: 25,
+        fontWeight: 500,
+        marginBottom: 15,
+        ...style,
+      }}
     >
       {name}
     </Text>

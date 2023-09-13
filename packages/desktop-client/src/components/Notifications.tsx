@@ -6,14 +6,12 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
-import { type CSSProperties } from 'glamor';
-
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { useActions } from '../hooks/useActions';
 import AnimatedLoading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
-import { styles, theme } from '../style';
+import { styles, theme, type CSSProperties } from '../style';
 
 import Button, { ButtonWithLoading } from './common/Button';
 import ExternalLink from './common/ExternalLink';
@@ -44,6 +42,7 @@ function compileMessage(
                   let actionName = href.slice(1);
                   return (
                     <LinkButton
+                      key={idx}
                       onClick={async e => {
                         e.preventDefault();
                         if (actions[actionName]) {
@@ -135,7 +134,6 @@ function Notification({
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
-
           '& a': { color: 'currentColor' },
         }}
       >
@@ -233,15 +231,13 @@ export default function Notifications({ style }: { style?: CSSProperties }) {
   let notifications = useSelector(state => state.notifications.notifications);
   return (
     <View
-      style={[
-        {
-          position: 'fixed',
-          bottom: 20,
-          right: 13,
-          zIndex: 10000,
-        },
-        style,
-      ]}
+      style={{
+        position: 'fixed',
+        bottom: 20,
+        right: 13,
+        zIndex: 10000,
+        ...style,
+      }}
     >
       {notifications.map(note => (
         <Notification

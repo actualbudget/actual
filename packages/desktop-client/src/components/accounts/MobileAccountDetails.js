@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import PullToRefresh from 'react-simple-pull-to-refresh';
 
+import { useActions } from '../../hooks/useActions';
 import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { theme, styles } from '../../style';
-import Button from '../common/Button';
+import ButtonLink from '../common/ButtonLink';
 import InputWithContent from '../common/InputWithContent';
 import Label from '../common/Label';
 import Text from '../common/Text';
@@ -75,11 +77,15 @@ export default function AccountDetails({
   onSearch,
   onSelectTransaction,
   pushModal,
-  // refreshControl
 }) {
   let allTransactions = useMemo(() => {
     return prependTransactions.concat(transactions);
   }, [prependTransactions, transactions]);
+
+  const { syncAndDownload } = useActions();
+  const onRefresh = async () => {
+    await syncAndDownload(account.id);
+  };
 
   return (
     <View
@@ -95,7 +101,7 @@ export default function AccountDetails({
           alignItems: 'center',
           flexShrink: 0,
           overflowY: 'hidden',
-          paddingTop: 20,
+          paddingTop: 10,
           top: 0,
           width: '100%',
         }}
@@ -109,7 +115,7 @@ export default function AccountDetails({
           }}
         >
           <Link
-            to="/accounts"
+            to={-1}
             style={{
               color: theme.formLabelText,
               alignItems: 'center',
@@ -126,21 +132,21 @@ export default function AccountDetails({
               fontSize: 16,
               fontWeight: 500,
             }}
+            role="heading"
           >
             {account.name}
           </View>
-          {/*
-              TODO: connect to an add transaction modal
-              Only left here but hidden for flex centering of the account name.
-          */}
-          <Link to="transactions/new">
-            <Button
-              type="bare"
-              style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
-            >
-              <Add width={20} height={20} />
-            </Button>
-          </Link>
+
+          <ButtonLink
+            to="transactions/new"
+            type="bare"
+            aria-label="Add Transaction"
+            style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
+            hoveredStyle={{ background: 'transparent' }}
+            activeStyle={{ background: 'transparent' }}
+          >
+            <Add width={20} height={20} />
+          </ButtonLink>
         </View>
         <Label title="BALANCE" style={{ marginTop: 10 }} />
         <CellValue
@@ -154,24 +160,27 @@ export default function AccountDetails({
           getStyle={value => ({
             color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
           })}
+          data-testid="account-balance"
         />
         <TransactionSearchInput
           accountName={account.name}
           onSearch={onSearch}
         />
       </View>
-      <TransactionList
-        transactions={allTransactions}
-        categories={categories}
-        accounts={accounts}
-        payees={payees}
-        showCategory={!account.offbudget}
-        isNew={isNewTransaction}
-        // refreshControl={refreshControl}
-        onLoadMore={onLoadMore}
-        onSelect={onSelectTransaction}
-        pushModal={pushModal}
-      />
+
+      <PullToRefresh onRefresh={onRefresh}>
+        <TransactionList
+          transactions={allTransactions}
+          categories={categories}
+          accounts={accounts}
+          payees={payees}
+          showCategory={!account.offbudget}
+          isNew={isNewTransaction}
+          onLoadMore={onLoadMore}
+          onSelect={onSelectTransaction}
+          pushModal={pushModal}
+        />
+      </PullToRefresh>
     </View>
   );
 }

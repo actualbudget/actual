@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { colors } from '../../style';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import { theme } from '../../style';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import Block from '../common/Block';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
@@ -29,7 +29,16 @@ export default function ConfirmCategoryDelete({
         msg = 'Something bad happened, sorry!';
     }
 
-    return <Text style={{ marginTop: 15, color: colors.r4 }}>{msg}</Text>;
+    return (
+      <Text
+        style={{
+          marginTop: 15,
+          color: theme.errorText,
+        }}
+      >
+        {msg}
+      </Text>
+    );
   };
 
   const isIncome = !!(category || group).is_income;

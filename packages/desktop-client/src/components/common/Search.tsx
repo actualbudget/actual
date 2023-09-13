@@ -8,11 +8,11 @@ import Button from './Button';
 import InputWithContent from './InputWithContent';
 
 type SearchProps = {
-  inputRef: Ref<HTMLInputElement>;
+  inputRef?: Ref<HTMLInputElement>;
   value: string;
   onChange: (value: string) => unknown;
   placeholder: string;
-  isInModal: boolean;
+  isInModal?: boolean;
   width?: number;
 };
 
@@ -21,7 +21,7 @@ export default function Search({
   value,
   onChange,
   placeholder,
-  isInModal,
+  isInModal = false,
   width = 250,
 }: SearchProps) {
   return (

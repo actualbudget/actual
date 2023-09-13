@@ -12,11 +12,12 @@ import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
-import format from '../spreadsheet/format';
+import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { isPreviewId } from '../transactions/TransactionsTable';
 
 function DetailedBalance({ name, balance, isExactBalance = true }) {
+  const format = useFormat();
   return (
     <Text
       style={{
@@ -159,7 +160,7 @@ export function Balances({
                 ? theme.errorText
                 : value > 0
                 ? theme.noticeText
-                : theme.tableTextInactive,
+                : theme.pageTextSubdued,
           })}
           privacyFilter={{
             blurIntensity: 5,
@@ -171,7 +172,7 @@ export function Balances({
             width: 10,
             height: 10,
             marginLeft: 10,
-            color: 'inherit',
+            color: theme.alt2PillText,
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
           }}
         />

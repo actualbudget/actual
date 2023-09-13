@@ -7,10 +7,11 @@ import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
 import { useResponsive } from '../../ResponsiveProvider';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
 import Input from '../common/Input';
 import Modal from '../common/Modal';
@@ -22,7 +23,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
   let dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-  let categoryGroups = useSelector(state => state.queries.categories.grouped);
+  let { grouped: categoryGroups } = useCategories();
   let accounts = useSelector(state => state.queries.accounts);
   let payees = useSelector(state => state.queries.payees);
 
@@ -85,7 +86,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           groupHeaderStyle={
             isNarrowWidth
               ? {
-                  color: colors.n6,
+                  color: theme.altTableText,
                 }
               : undefined
           }
@@ -117,7 +118,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           groupHeaderStyle={
             isNarrowWidth
               ? {
-                  color: colors.n6,
+                  color: theme.altTableText,
                 }
               : undefined
           }
@@ -154,7 +155,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           groupHeaderStyle={
             isNarrowWidth
               ? {
-                  color: colors.n6,
+                  color: theme.altTableText,
                 }
               : undefined
           }
@@ -185,16 +186,17 @@ export default function EditField({ modalProps, name, onSubmit }) {
       focusAfterClose={false}
       {...modalProps}
       padding={0}
-      style={[
-        {
-          flex: 0,
-          height: isNarrowWidth ? '85vh' : 275,
-          padding: '15px 10px',
-          borderRadius: '6px',
-        },
-        minWidth && { minWidth },
-        !isNarrowWidth && { backgroundColor: colors.n1, color: 'white' },
-      ]}
+      style={{
+        flex: 0,
+        height: isNarrowWidth ? '85vh' : 275,
+        padding: '15px 10px',
+        borderRadius: '6px',
+        ...(minWidth && { minWidth }),
+        ...(!isNarrowWidth && {
+          backgroundColor: theme.mobileModalBackground,
+          color: theme.mobileModalText,
+        }),
+      }}
     >
       {() => (
         <View>
@@ -203,7 +205,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
               title={label}
               style={{
                 alignSelf: 'center',
-                color: colors.b10,
+                color: theme.altMobileModalText,
                 marginBottom: 10,
               }}
             />

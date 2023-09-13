@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import Block from '../common/Block';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
@@ -36,7 +36,7 @@ function Import({ modalProps, actions }) {
 
   let itemStyle = {
     padding: 10,
-    border: '1px solid ' + colors.border,
+    border: '1px solid ' + theme.tableBorder,
     borderRadius: 6,
     marginBottom: 10,
     display: 'block',
@@ -45,9 +45,9 @@ function Import({ modalProps, actions }) {
   return (
     <Modal {...modalProps} title="Import From" style={{ width: 400 }}>
       {() => (
-        <View style={[styles.smallText, { lineHeight: 1.5 }]}>
+        <View style={{ ...styles.smallText, lineHeight: 1.5 }}>
           {error && (
-            <Block style={{ color: colors.r4, marginBottom: 15 }}>
+            <Block style={{ color: theme.errorText, marginBottom: 15 }}>
               {getErrorMessage(error)}
             </Block>
           )}
@@ -59,19 +59,19 @@ function Import({ modalProps, actions }) {
 
           <Button style={itemStyle} onClick={() => onSelectType('ynab4')}>
             <span style={{ fontWeight: 700 }}>YNAB4</span>
-            <View style={{ color: colors.n5 }}>
+            <View style={{ color: theme.alt2PillText }}>
               The old unsupported desktop app
             </View>
           </Button>
           <Button style={itemStyle} onClick={() => onSelectType('ynab5')}>
             <span style={{ fontWeight: 700 }}>nYNAB</span>
-            <View style={{ color: colors.n5 }}>
+            <View style={{ color: theme.alt2PillText }}>
               <div>The newer web app</div>
             </View>
           </Button>
           <Button style={itemStyle} onClick={() => onSelectType('actual')}>
             <span style={{ fontWeight: 700 }}>Actual</span>
-            <View style={{ color: colors.n5 }}>
+            <View style={{ color: theme.alt2PillText }}>
               <div>Import a file exported from Actual</div>
             </View>
           </Button>
