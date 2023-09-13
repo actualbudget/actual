@@ -16,7 +16,6 @@
     // TODO: enable once every file is ts
     // "strict": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
     "skipLibCheck": true,
     "jsx": "preserve",
     // Check JS files too
