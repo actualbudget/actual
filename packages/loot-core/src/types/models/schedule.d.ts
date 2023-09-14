@@ -17,7 +17,17 @@ export interface ScheduleEntity {
   _account: AccountEntity['id'];
   _amount: unknown;
   _amountOp: string;
-  _date: unknown;
+  _date: {
+    interval: number;
+    patterns: {
+      value: number;
+      type: 'SU' | 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'day';
+    }[];
+    skipWeekend: boolean;
+    start: string;
+    weekendSolveMode: 'before' | 'after';
+    frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  };
   _conditions: unknown;
   _actions: unknown;
 }

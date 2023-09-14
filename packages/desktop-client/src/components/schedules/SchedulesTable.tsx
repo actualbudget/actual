@@ -286,7 +286,7 @@ export function SchedulesTable({
         <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
-            {schedule._date && (schedule._date as any).frequency && (
+            {schedule._date && schedule._date.frequency && (
               <Check style={{ width: 13, height: 13 }} />
             )}
           </Field>
