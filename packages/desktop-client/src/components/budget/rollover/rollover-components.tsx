@@ -201,7 +201,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text>Budgeted</Text>
+        <Text style={{ color: theme.alt2TableText }}>Budgeted</Text>
         <CellValue
           binding={rolloverBudget.totalBudgeted}
           type="financial"
@@ -235,7 +235,7 @@ export function IncomeHeaderMonth() {
   return (
     <Row
       style={{
-        color: theme.tableText,
+        color: theme.alt2TableText,
         alignItems: 'center',
         paddingRight: 10,
       }}
@@ -422,7 +422,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             padding: '0 4px',
             borderRadius: 4,
             ':hover': {
-              boxShadow: 'inset 0 0 0 1px ' + styles.cardShadow,
+              boxShadow: 'inset 0 0 0 1px ' + theme.mobileAccountShadow,
               backgroundColor: 'white',
             },
           }}
