@@ -352,7 +352,7 @@ class TransactionEditInner extends PureComponent {
 
           // This shadow make the card "pop" off of the screen below
           // it
-          shadowColor: theme.cardshadow,
+          shadowColor: theme.cardShadow,
           shadowOffset: { width: 0, height: 0 },
           shadowRadius: 4,
           shadowOpacity: 1,
