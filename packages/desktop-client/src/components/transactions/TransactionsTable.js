@@ -418,7 +418,7 @@ function StatusCell({
     status === 'cleared'
       ? theme.noticeText
       : status === 'missed'
-      ? theme.errorText
+      ? theme.alt5ErrorText
       : status === 'due'
       ? theme.alt3WarningText
       : selected
@@ -1043,9 +1043,9 @@ const Transaction = memo(function Transaction(props) {
               style={{
                 color:
                   notes === 'missed'
-                    ? theme.errorText
+                    ? theme.alt5ErrorText
                     : notes === 'due'
-                    ? theme.alt3WarningText
+                    ? theme.alt5WarningText
                     : selected
                     ? theme.formLabelText
                     : theme.altTableText,

@@ -98,9 +98,9 @@ function Saved({ projected }) {
           ...styles.smallText,
           fontWeight: '500',
           color: projected
-            ? theme.warningText
+            ? theme.alt2WarningText
             : isNegative
-            ? theme.errorText
+            ? theme.alt2ErrorText
             : theme.formInputText,
         }}
       >

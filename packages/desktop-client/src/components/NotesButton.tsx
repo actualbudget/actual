@@ -43,23 +43,23 @@ const markdownStyles = css({
   },
   '& blockquote': {
     paddingLeft: '0.75rem',
-    borderLeft: '3px solid ' + theme.formInputBorderSelected,
+    borderLeft: '3px solid ' + theme.markdownDark,
     margin: 0,
   },
   '& hr': {
     borderTop: 'none',
     borderLeft: 'none',
     borderRight: 'none',
-    borderBottom: '1px solid ' + theme.menuBorderHover,
+    borderBottom: '1px solid ' + theme.markdownNormal,
   },
   '& code': {
-    backgroundColor: theme.menuBorderHover,
+    backgroundColor: theme.markdownLight,
     padding: '0.1rem 0.5rem',
     borderRadius: '0.25rem',
   },
   '& pre': {
     padding: '0.5rem',
-    backgroundColor: theme.menuBorderHover,
+    backgroundColor: theme.markdownLight,
     borderRadius: '0.5rem',
     margin: 0,
     ':not(:first-child)': {
@@ -72,7 +72,7 @@ const markdownStyles = css({
     },
   },
   '& table, & th, & td': {
-    border: '1px solid ' + theme.menuBorderHover,
+    border: '1px solid ' + theme.markdownNormal,
   },
   '& table': {
     borderCollapse: 'collapse',

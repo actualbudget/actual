@@ -108,10 +108,10 @@ function Notification({
       style={{
         marginTop: 10,
         color: positive
-          ? theme.noticeText
+          ? theme.alt4NoticeText
           : error
-          ? theme.errorText
-          : theme.warningText,
+          ? theme.alt3ErrorText
+          : theme.alt4WarningText,
       }}
     >
       <Stack
@@ -121,16 +121,16 @@ function Notification({
           padding: '14px 14px',
           fontSize: 14,
           backgroundColor: positive
-            ? theme.noticeBackground
+            ? theme.alt2NoticeBackground
             : error
             ? theme.errorBackground
-            : theme.warningBackground,
+            : theme.alt2WarningBackground,
           borderTop: `3px solid ${
             positive
-              ? theme.noticeAccent
+              ? theme.altNoticeAccent
               : error
-              ? theme.errorAccent
-              : theme.warningAccent
+              ? theme.altErrorAccent
+              : theme.altWarningAccent
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
@@ -173,17 +173,17 @@ function Notification({
                 backgroundColor: 'transparent',
                 border: `1px solid ${
                   positive
-                    ? theme.noticeAccent
+                    ? theme.altNoticeAccent
                     : error
-                    ? theme.errorAccent
-                    : theme.warningAccent
+                    ? theme.altErrorAccent
+                    : theme.altWarningAccent
                 }`,
                 color: 'currentColor',
                 fontSize: 14,
                 flexShrink: 0,
                 '&:hover, &:active': {
                   backgroundColor: positive
-                    ? theme.altNoticeBackground
+                    ? theme.noticeBackground
                     : error
                     ? theme.altErrorBackground
                     : theme.altWarningBackground,
