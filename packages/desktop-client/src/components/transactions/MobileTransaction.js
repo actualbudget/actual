@@ -137,7 +137,7 @@ export function DateHeader({ date }) {
     <ListItem
       style={{
         height: 25,
-        backgroundColor: theme.tableRowHeaderBackground,
+        backgroundColor: theme.mobileDateBackground,
         borderColor: theme.tableBorder,
         justifyContent: 'center',
       }}
@@ -954,7 +954,9 @@ class Transaction extends PureComponent {
             flex: 1,
             height: 60,
             padding: '5px 10px', // remove padding when Button is back
-            ...(isPreview && { backgroundColor: theme.tableHeaderBackground }),
+            ...(isPreview && {
+              backgroundColor: theme.tableRowHeaderBackground,
+            }),
             ...style,
           }}
         >
@@ -977,7 +979,7 @@ class Transaction extends PureComponent {
                   fontSize: 14,
                   fontWeight: added ? '600' : '400',
                   ...(prettyDescription === '' && {
-                    color: theme.alt2TableText,
+                    color: theme.altTableText,
                     fontStyle: 'italic',
                   }),
                 }}
@@ -999,9 +1001,7 @@ class Transaction extends PureComponent {
                   style={{
                     width: 11,
                     height: 11,
-                    color: cleared
-                      ? theme.noticeAccent
-                      : theme.tableTextInactive,
+                    color: cleared ? theme.noticeText : theme.altButtonBareText,
                     marginRight: 5,
                   }}
                 />
@@ -1207,10 +1207,10 @@ function ListBoxSection({ section, state }) {
         <div
           {...headingProps}
           className={`${css(styles.smallText, {
-            backgroundColor: theme.tableRowHeaderBackground,
+            backgroundColor: theme.mobileDateBackground,
             borderBottom: `1px solid ${theme.tableBorder}`,
             borderTop: `1px solid ${theme.tableBorder}`,
-            color: theme.tableRowHeaderText,
+            color: theme.alt2TableText,
             display: 'flex',
             justifyContent: 'center',
             paddingBottom: 4,

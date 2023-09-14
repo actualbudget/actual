@@ -92,6 +92,7 @@ export const mobileAccountText = colorPalette.blue800;
 export const mobileModalBackground = colorPalette.navy900;
 export const mobileModalText = colorPalette.white;
 export const altMobileModalText = colorPalette.blue100;
+export const mobileDateBackground = colorPalette.navy100;
 
 // Button
 export const buttonMenuText = colorPalette.navy150;

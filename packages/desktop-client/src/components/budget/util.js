@@ -20,7 +20,7 @@ export function separateGroups(categoryGroups) {
 
 export function makeAmountGrey(value) {
   return value === 0 || value === '0' || value === ''
-    ? { color: theme.tableTextInactive }
+    ? { color: theme.altMenuItemText }
     : null;
 }
 
@@ -41,7 +41,7 @@ export function makeAmountFullStyle(value) {
       value < 0
         ? theme.errorText
         : value === 0
-        ? theme.pageTextSubdued
+        ? theme.altMenuItemText
         : theme.noticeText,
   };
 }

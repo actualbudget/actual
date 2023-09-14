@@ -78,7 +78,7 @@ export default function LoggedInUser({
     return (
       <Text
         style={{
-          color: theme.pageText,
+          color: theme.altpageTextSubdued,
           fontStyle: 'italic',
           ...styles.delayedFadeIn,
           ...style,
