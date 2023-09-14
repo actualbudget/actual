@@ -142,7 +142,9 @@ export function DateHeader({ date }) {
         justifyContent: 'center',
       }}
     >
-      <Text style={{ ...styles.text, fontSize: 13, color: theme.tableText }}>
+      <Text
+        style={{ ...styles.text, fontSize: 13, color: theme.alt2TableText }}
+      >
         {monthUtils.format(date, 'MMMM dd, yyyy')}
       </Text>
     </ListItem>
@@ -154,13 +156,13 @@ function Status({ status }) {
 
   switch (status) {
     case 'missed':
-      color = theme.errorText;
+      color = theme.alt2ErrorText;
       break;
     case 'due':
-      color = theme.warningText;
+      color = theme.alt2WarningText;
       break;
     case 'upcoming':
-      color = theme.tableText;
+      color = theme.alt2TableText;
       break;
     default:
   }
@@ -935,7 +937,7 @@ class Transaction extends PureComponent {
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
-      color: theme.tableText,
+      color: theme.altpageTextSubdued,
     };
 
     return (
@@ -975,7 +977,7 @@ class Transaction extends PureComponent {
                   fontSize: 14,
                   fontWeight: added ? '600' : '400',
                   ...(prettyDescription === '' && {
-                    color: theme.pageText,
+                    color: theme.alt2TableText,
                     fontStyle: 'italic',
                   }),
                 }}
@@ -1010,8 +1012,8 @@ class Transaction extends PureComponent {
                       marginTop: 1,
                       fontWeight: '400',
                       color: prettyCategory
-                        ? theme.tableText
-                        : theme.pageTextPositive,
+                        ? theme.tableTextSelected
+                        : theme.altMenuItemTextSelected,
                       fontStyle: prettyCategory ? null : 'italic',
                       textAlign: 'left',
                     }}
@@ -1259,7 +1261,7 @@ function Option({ isLast, item, state }) {
         background: isSelected
           ? theme.tableRowBackgroundHighlight
           : theme.tableBackground,
-        color: isSelected ? theme.tableText : null,
+        color: isSelected ? theme.mobileModalText : null,
         outline: isFocusVisible ? '2px solid orange' : 'none',
         ...(!isLast && { borderBottom: `1px solid ${theme.tableBorder}` }),
       }}

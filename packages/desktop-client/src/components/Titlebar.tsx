@@ -150,19 +150,19 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 
   const mobileColor =
     syncState === 'error'
-      ? colors.r7
+      ? theme.alt2ErrorText
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'
-      ? colors.n9
+      ? theme.sidebarItemText
       : style.color;
   const desktopColor =
     syncState === 'error'
-      ? colors.r4
+      ? theme.alt2ErrorText
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'
-      ? colors.n6
+      ? theme.altTableText
       : null;
 
   const activeStyle = isMobile

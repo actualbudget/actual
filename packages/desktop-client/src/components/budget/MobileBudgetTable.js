@@ -726,7 +726,7 @@ class IncomeBudgetGroup extends Component {
             nameTextStyle={{ fontWeight: '500' }}
             amountTextStyle={{ fontWeight: '500' }}
             style={{
-              backgroundColor: theme.tableHeaderBackground,
+              backgroundColor: theme.altTableBackground,
             }}
           />
 
@@ -892,7 +892,7 @@ export function BudgetTable(props) {
             paddingRight: 14,
             backgroundColor: 'white',
             borderBottomWidth: 1,
-            borderColor: theme.formInputBorder,
+            borderColor: theme.tableBorder,
           }}
         >
           {type === 'report' ? (

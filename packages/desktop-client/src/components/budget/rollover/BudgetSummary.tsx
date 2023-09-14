@@ -332,7 +332,7 @@ export function BudgetSummary({
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: theme.tableText, margin: 1 }}
+                style={{ color: theme.altTableText, margin: 1 }}
               />
             </Button>
           </View>
@@ -367,7 +367,7 @@ export function BudgetSummary({
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={theme.altMenuItemTextHeader}
+                defaultColor={theme.altTableText}
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
