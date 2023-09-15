@@ -28,6 +28,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
+  isPreviewId,
   ungroupTransactions,
   updateTransaction,
   realizeTempTransactions,
@@ -69,10 +70,6 @@ const zIndices = { SECTION_HEADING: 10 };
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 let getAccountsById = memoizeOne(accounts => groupById(accounts));
-
-function isPreviewId(id) {
-  return id.indexOf('preview/') !== -1;
-}
 
 function getDescriptionPretty(transaction, payee, transferAcct) {
   let { amount } = transaction;
@@ -1043,7 +1040,9 @@ export class TransactionList extends Component {
         }
 
         sections.push({
-          id: transaction.date,
+          id: `${isPreviewId(transaction.id) ? 'preview/' : ''}${
+            transaction.date
+          }`,
           date: transaction.date,
           data: [],
         });
@@ -1070,7 +1069,6 @@ export class TransactionList extends Component {
           label=""
           loadMore={onLoadMore}
           selectionMode="none"
-          style={{ flex: '1 auto', height: '100%', overflowY: 'auto' }}
         >
           {sections.length === 0 ? (
             <Section>
@@ -1163,7 +1161,6 @@ function ListBox(props) {
           padding: 0,
           listStyle: 'none',
           margin: 0,
-          overflowY: 'auto',
           width: '100%',
         }}
       >

@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 
-import { type CSSProperties, colors, styles } from '../../style';
+import { type CSSProperties, theme, styles } from '../../style';
 
 import Text from './Text';
 
@@ -14,7 +14,7 @@ export default function Label({ title, style }: LabelProps) {
     <Text
       style={{
         ...styles.text,
-        color: colors.n2,
+        color: theme.tableRowHeaderText,
         textAlign: 'right',
         fontSize: 12,
         marginBottom: 2,

@@ -296,7 +296,6 @@ export default function Titlebar({ style }) {
     state => state.prefs.global.floatingSidebar,
   );
 
-  let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let themesFlag = useFeatureFlag('themes');
 
   return isNarrowWidth ? null : (
@@ -369,7 +368,7 @@ export default function Titlebar({ style }) {
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
       {themesFlag && <ThemeSelector />}
-      {privacyModeFeatureFlag && <PrivacyButton />}
+      <PrivacyButton />
       {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>
