@@ -1069,7 +1069,6 @@ export class TransactionList extends Component {
           label=""
           loadMore={onLoadMore}
           selectionMode="none"
-          style={{ flex: '1 auto', height: '100%', overflowY: 'auto' }}
         >
           {sections.length === 0 ? (
             <Section>
@@ -1162,7 +1161,6 @@ function ListBox(props) {
           padding: 0,
           listStyle: 'none',
           margin: 0,
-          overflowY: 'auto',
           width: '100%',
         }}
       >
