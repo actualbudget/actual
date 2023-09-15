@@ -11,11 +11,13 @@ import { parse } from './goal-template.pegjs';
 
 export async function applyTemplate({ month }) {
   let category_templates = await getCategoryTemplates(null);
+  await resetCategoryTargets({ month });
   return processTemplate(month, false, category_templates);
 }
 
 export async function overwriteTemplate({ month }) {
   let category_templates = await getCategoryTemplates(null);
+  await resetCategoryTargets({ month });
   return processTemplate(month, true, category_templates);
 }
 
@@ -66,6 +68,21 @@ async function setCategoryTargets({ month, idealTemplate }) {
       setGoal({
         category: element.category,
         goal: element.amount,
+        month: month,
+      });
+    });
+  });
+}
+
+async function resetCategoryTargets({ month }) {
+  let categories = await db.all(
+    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
+  );
+  await batchMessages(async () => {
+    categories.forEach(element => {
+      setGoal({
+        category: element.id,
+        goal: 0,
         month: month,
       });
     });
