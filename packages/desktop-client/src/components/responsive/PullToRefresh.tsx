@@ -7,12 +7,15 @@ type PullToRefreshProps = ComponentProps<typeof BasePullToRefresh>;
 
 export default function PullToRefresh(props: PullToRefreshProps) {
   return (
-    <div style={{ overflow: 'auto', textAlign: 'center' }}>
+    <div style={{ overflow: 'auto' }}>
       <BasePullToRefresh
         pullDownThreshold={80}
         resistance={2}
         className={String(
           css({
+            '& .ptr__pull-down': {
+              textAlign: 'center',
+            },
             '& .ptr__children': {
               overflow: 'hidden auto',
             },
