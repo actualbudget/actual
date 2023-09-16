@@ -9,7 +9,7 @@ import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
-import { type CSSProperties, colors } from '../style';
+import { type CSSProperties, theme } from '../style';
 import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
 import Button from './common/Button';
@@ -43,23 +43,23 @@ const markdownStyles = css({
   },
   '& blockquote': {
     paddingLeft: '0.75rem',
-    borderLeft: '3px solid ' + colors.p6,
+    borderLeft: '3px solid ' + theme.markdownDark,
     margin: 0,
   },
   '& hr': {
     borderTop: 'none',
     borderLeft: 'none',
     borderRight: 'none',
-    borderBottom: '1px solid ' + colors.p9,
+    borderBottom: '1px solid ' + theme.markdownNormal,
   },
   '& code': {
-    backgroundColor: colors.p10,
+    backgroundColor: theme.markdownLight,
     padding: '0.1rem 0.5rem',
     borderRadius: '0.25rem',
   },
   '& pre': {
     padding: '0.5rem',
-    backgroundColor: colors.p10,
+    backgroundColor: theme.markdownLight,
     borderRadius: '0.5rem',
     margin: 0,
     ':not(:first-child)': {
@@ -72,7 +72,7 @@ const markdownStyles = css({
     },
   },
   '& table, & th, & td': {
-    border: '1px solid ' + colors.p9,
+    border: '1px solid ' + theme.markdownNormal,
   },
   '& table': {
     borderCollapse: 'collapse',
@@ -110,7 +110,7 @@ function NotesTooltip({
         <textarea
           ref={inputRef}
           className={`${css({
-            border: '1px solid ' + colors.border,
+            border: '1px solid ' + theme.buttonNormalBorder,
             padding: 7,
             minWidth: 350,
             minHeight: 120,
@@ -145,7 +145,7 @@ export default function NotesButton({
   id,
   width = 12,
   height = 12,
-  defaultColor = colors.n8,
+  defaultColor = theme.pageBackgroundModalActive,
   tooltipPosition,
   style,
 }: NotesButtonProps) {
@@ -191,7 +191,7 @@ export default function NotesButton({
           color: defaultColor,
           ...style,
           ...(hasNotes && { display: 'flex !important' }),
-          ...(tooltipOpen && { color: colors.n1 }),
+          ...(tooltipOpen && { color: theme.buttonNormalText }),
         }}
         {...tooltip.getOpenEvents()}
       >

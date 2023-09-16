@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../hooks/useActions';
-import { colors, styles, type CSSProperties } from '../style';
+import { theme, styles, type CSSProperties } from '../style';
 
 import Button from './common/Button';
 import Menu from './common/Menu';
@@ -78,7 +78,7 @@ export default function LoggedInUser({
     return (
       <Text
         style={{
-          color: colors.n5,
+          color: theme.altpageTextSubdued,
           fontStyle: 'italic',
           ...styles.delayedFadeIn,
           ...style,

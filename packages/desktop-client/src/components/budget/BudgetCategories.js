@@ -1,11 +1,10 @@
 import React, { memo, useState, useMemo } from 'react';
 
-import { colors } from '../../style';
+import { theme, styles } from '../../style';
 import View from '../common/View';
 import { DropHighlightPosContext } from '../sort';
 import { Row } from '../table';
 
-import { INCOME_HEADER_HEIGHT, MONTH_BOX_SHADOW } from './constants';
 import ExpenseCategory from './ExpenseCategory';
 import ExpenseGroup from './ExpenseGroup';
 import IncomeCategory from './IncomeCategory';
@@ -152,7 +151,7 @@ const BudgetCategories = memo(
           marginBottom: 10,
           backgroundColor: 'white',
           overflow: 'hidden',
-          boxShadow: MONTH_BOX_SHADOW,
+          boxShadow: styles.cardShadow,
           borderRadius: '0 0 4px 4px',
           flex: 1,
         }}
@@ -162,7 +161,7 @@ const BudgetCategories = memo(
           switch (item.type) {
             case 'new-group':
               content = (
-                <Row style={{ backgroundColor: colors.n11 }}>
+                <Row style={{ backgroundColor: theme.altTableBackground }}>
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
                     editing={true}
@@ -235,7 +234,7 @@ const BudgetCategories = memo(
               content = (
                 <View
                   style={{
-                    height: INCOME_HEADER_HEIGHT,
+                    height: styles.incomeHeaderHeight,
                     backgroundColor: 'white',
                   }}
                 >
