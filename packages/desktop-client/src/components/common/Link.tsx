@@ -65,11 +65,11 @@ const AnchorLink = ({ to, style, activeStyle, children }: AnchorLinkProps) => {
 };
 
 type LinkProps = {
-  type?: 'button' | 'anchor';
+  linkType?: 'button' | 'anchor';
 } & (ButtonLinkProps | AnchorLinkProps);
 
-export default function Link({ type = 'anchor', ...props }: LinkProps) {
-  switch (type) {
+export default function Link({ linkType = 'anchor', ...props }: LinkProps) {
+  switch (linkType) {
     case 'anchor':
       return <AnchorLink {...props} />;
 
@@ -77,6 +77,6 @@ export default function Link({ type = 'anchor', ...props }: LinkProps) {
       return <ButtonLink {...props} />;
 
     default:
-      throw new Error(`Unrecognised link type: ${type}`);
+      throw new Error(`Unrecognised link type: ${linkType}`);
   }
 }
