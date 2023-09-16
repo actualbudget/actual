@@ -54,7 +54,7 @@ export default function BalanceWithCarryover({
           <ArrowThinRight
             width={7}
             height={7}
-            style={makeAmountStyleGoal(balanceValue,goalValue)}
+            style={makeAmountStyleGoal(balanceValue, goalValue)}
           />
         </View>
       )}

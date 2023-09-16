@@ -42,18 +42,16 @@ export function makeAmountStyleGoal(value, goal) {
   }
 
   if (goal) {
-    if ( goal>=0 ) {
-      if(value<goal) {
-        return { color: theme.warningText }//TODO: Find the real theme value
+    if (goal >= 0) {
+      if (value < goal) {
+        return { color: theme.warningText }; //TODO: Find the real theme value
       }
-      return {color: theme.noticeText}
-
+      return { color: theme.noticeText };
     }
     if (value < 0) {
       return { color: theme.errorText };
     }
   }
-
 }
 
 export function makeAmountFullStyle(value) {
