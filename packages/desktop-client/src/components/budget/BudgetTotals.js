@@ -1,13 +1,12 @@
 import React, { memo, useState } from 'react';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { colors } from '../../style';
+import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
 import View from '../common/View';
 import { Tooltip } from '../tooltips';
 
-import { MONTH_BOX_SHADOW } from './constants';
 import RenderMonths from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
@@ -25,17 +24,17 @@ const BudgetTotals = memo(function BudgetTotals({
         backgroundColor: 'white',
         flexDirection: 'row',
         flexShrink: 0,
-        boxShadow: MONTH_BOX_SHADOW,
+        boxShadow: styles.cardShadow,
         marginLeft: 5,
         marginRight: 5 + getScrollbarWidth(),
         borderRadius: '4px 4px 0 0',
-        borderBottom: '1px solid ' + colors.border,
+        borderBottom: '1px solid ' + theme.tableBorder,
       }}
     >
       <View
         style={{
           width: 200,
-          color: colors.n4,
+          color: theme.pageTextLight,
           justifyContent: 'center',
           paddingLeft: 15,
           paddingRight: 5,
@@ -57,7 +56,7 @@ const BudgetTotals = memo(function BudgetTotals({
           <DotsHorizontalTriple
             width={15}
             height={15}
-            style={{ color: colors.n5 }}
+            style={{ color: theme.altpageTextSubdued }}
           />
           {menuOpen && (
             <Tooltip

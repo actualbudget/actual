@@ -1,6 +1,6 @@
 import * as d from 'date-fns';
 
-import theme from '../chart-theme';
+import { chartTheme } from '../chart-theme';
 
 type AreaProps = {
   start: string;
@@ -47,8 +47,8 @@ export function Area({ start, end, scale, range }: AreaProps) {
           x2={0}
           y2={zero}
         >
-          <stop offset="0%" stopColor={theme.colors.blueFadeStart} />
-          <stop offset="100%" stopColor={theme.colors.blueFadeEnd} />
+          <stop offset="0%" stopColor={chartTheme.colors.blueFadeStart} />
+          <stop offset="100%" stopColor={chartTheme.colors.blueFadeEnd} />
         </linearGradient>
         <linearGradient
           id="negative-gradient"
@@ -58,8 +58,8 @@ export function Area({ start, end, scale, range }: AreaProps) {
           x2={0}
           y2={range.y[0]}
         >
-          <stop offset="0%" stopColor={theme.colors.redFadeEnd} />
-          <stop offset="100%" stopColor={theme.colors.redFadeStart} />
+          <stop offset="0%" stopColor={chartTheme.colors.redFadeEnd} />
+          <stop offset="100%" stopColor={chartTheme.colors.redFadeStart} />
         </linearGradient>
       </defs>
     </svg>

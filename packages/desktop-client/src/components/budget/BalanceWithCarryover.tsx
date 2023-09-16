@@ -5,27 +5,32 @@ import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 
-import { makeAmountStyle } from './util';
+import { makeAmountStyle, makeAmountStyleGoal } from './util';
 
 type BalanceWithCarryoverProps = {
   carryover: ComponentProps<typeof CellValue>['binding'];
   balance: ComponentProps<typeof CellValue>['binding'];
+  goal: ComponentProps<typeof CellValue>['binding'];
   disabled?: boolean;
 };
 export default function BalanceWithCarryover({
   carryover,
   balance,
+  goal,
   disabled,
 }: BalanceWithCarryoverProps) {
   let carryoverValue = useSheetValue(carryover);
   let balanceValue = useSheetValue(balance);
+  //let goalValue = useSheetValue(goal);
+  let goalValue = '5000'; //TODO: figure out how to actually get this value for realzies
 
   return (
     <>
       <CellValue
         binding={balance}
+        goalValue={goalValue}
         type="financial"
-        getStyle={makeAmountStyle}
+        getStyle={makeAmountStyleGoal}
         style={{
           textAlign: 'right',
           ...(!disabled && {
@@ -49,7 +54,7 @@ export default function BalanceWithCarryover({
           <ArrowThinRight
             width={7}
             height={7}
-            style={makeAmountStyle(balanceValue)}
+            style={makeAmountStyleGoal(balanceValue,goalValue)}
           />
         </View>
       )}

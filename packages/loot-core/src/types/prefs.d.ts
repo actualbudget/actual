@@ -4,7 +4,6 @@ export type FeatureFlag =
   | 'categorySpendingReport'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'privacyMode'
   | 'themes'
   | 'experimentalOfxParser';
 
