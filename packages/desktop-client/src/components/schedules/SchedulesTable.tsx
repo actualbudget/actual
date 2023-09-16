@@ -41,13 +41,12 @@ type SchedulesTableProps = {
 type CompletedScheduleItem = { id: 'show-completed' };
 type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
 
-export enum ScheduleItemAction {
-  PostTransaction = 'post-transaction',
-  SkipSchedule = 'skip',
-  CompleteSchedule = 'complete',
-  RestartSchedule = 'restart',
-  DeleteSchedule = 'delete',
-}
+export type ScheduleItemAction =
+  | 'post-transaction'
+  | 'skip'
+  | 'complete'
+  | 'restart'
+  | 'delete';
 
 export const ROW_HEIGHT = 43;
 
@@ -61,6 +60,39 @@ function OverflowMenu({
   onAction: SchedulesTableProps['onAction'];
 }) {
   const [open, setOpen] = useState(false);
+
+  const getMenuItems = () => {
+    const menuItems: { name: ScheduleItemAction; text: string }[] = [];
+
+    if (status === 'due') {
+      menuItems.push({
+        name: 'post-transaction',
+        text: 'Post transaction',
+      });
+    }
+
+    if (status === 'completed') {
+      menuItems.push({
+        name: 'restart',
+        text: 'Restart',
+      });
+    } else {
+      menuItems.push(
+        {
+          name: 'skip',
+          text: 'Skip next date',
+        },
+        {
+          name: 'complete',
+          text: 'Complete',
+        },
+      );
+    }
+
+    menuItems.push({ name: 'delete', text: 'Delete' });
+
+    return menuItems;
+  };
 
   return (
     <View>
@@ -89,30 +121,7 @@ function OverflowMenu({
               onAction(name, schedule.id);
               setOpen(false);
             }}
-            items={[
-              status === 'due' && {
-                name: ScheduleItemAction.PostTransaction,
-                text: 'Post transaction',
-              },
-              ...(schedule.completed
-                ? [
-                    {
-                      name: ScheduleItemAction.RestartSchedule,
-                      text: 'Restart',
-                    },
-                  ]
-                : [
-                    {
-                      name: ScheduleItemAction.SkipSchedule,
-                      text: 'Skip next date',
-                    },
-                    {
-                      name: ScheduleItemAction.CompleteSchedule,
-                      text: 'Complete',
-                    },
-                  ]),
-              { name: ScheduleItemAction.DeleteSchedule, text: 'Delete' },
-            ]}
+            items={getMenuItems()}
           />
         </Tooltip>
       )}

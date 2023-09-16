@@ -14,7 +14,7 @@ import { Page } from '../Page';
 import {
   SchedulesTable,
   ROW_HEIGHT,
-  ScheduleItemAction,
+  type ScheduleItemAction,
 } from './SchedulesTable';
 
 export default function Schedules() {
@@ -43,24 +43,24 @@ export default function Schedules() {
 
   async function onAction(name: ScheduleItemAction, id: ScheduleEntity['id']) {
     switch (name) {
-      case ScheduleItemAction.PostTransaction:
+      case 'post-transaction':
         await send('schedule/post-transaction', { id });
         break;
-      case ScheduleItemAction.SkipSchedule:
+      case 'skip':
         await send('schedule/skip-next-date', { id });
         break;
-      case ScheduleItemAction.CompleteSchedule:
+      case 'complete':
         await send('schedule/update', {
           schedule: { id, completed: true },
         });
         break;
-      case ScheduleItemAction.RestartSchedule:
+      case 'restart':
         await send('schedule/update', {
           schedule: { id, completed: false },
           resetNextDate: true,
         });
         break;
-      case ScheduleItemAction.DeleteSchedule:
+      case 'delete':
         await send('schedule/delete', { id });
         break;
       default:
