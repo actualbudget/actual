@@ -84,7 +84,6 @@ export default function AccountDetails({
 
   const { syncAndDownload } = useActions();
   const onRefresh = async () => {
-    console.log('refresh');
     await syncAndDownload(account.id);
   };
 
