@@ -27,8 +27,8 @@ import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import Button, { ButtonWithLoading } from './common/Button';
-import ButtonLink from './common/ButtonLink';
 import ExternalLink from './common/ExternalLink';
+import Link from './common/Link';
 import Paragraph from './common/Paragraph';
 import Text from './common/Text';
 import View from './common/View';
@@ -69,13 +69,14 @@ function UncategorizedButton() {
   let count = useSheetValue(queries.uncategorizedCount());
   return (
     count !== 0 && (
-      <ButtonLink
+      <Link
+        linkType="button"
         type="bare"
         to="/accounts/uncategorized"
         style={{ color: colors.r5 }}
       >
         {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
-      </ButtonLink>
+      </Link>
     )
   );
 }
