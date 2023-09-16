@@ -53,7 +53,7 @@ import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
 import Hyperlink2 from '../../icons/v2/Hyperlink2';
-import { colors, styles, theme } from '../../style';
+import { styles, theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -416,14 +416,14 @@ function StatusCell({
 
   let statusColor =
     status === 'cleared'
-      ? colors.g5
+      ? theme.noticeText
       : status === 'missed'
-      ? colors.r6
+      ? theme.alt5ErrorText
       : status === 'due'
-      ? colors.y5
+      ? theme.alt3WarningText
       : selected
-      ? colors.b7
-      : colors.n7;
+      ? theme.altPageTextLink
+      : theme.pageTextSubdued;
 
   function onSelect() {
     if (isClearedField) {
@@ -1043,20 +1043,20 @@ const Transaction = memo(function Transaction(props) {
               style={{
                 color:
                   notes === 'missed'
-                    ? colors.r6
+                    ? theme.alt5ErrorText
                     : notes === 'due'
-                    ? colors.y4
+                    ? theme.alt5WarningText
                     : selected
-                    ? colors.b5
-                    : colors.n6,
+                    ? theme.formLabelText
+                    : theme.altTableText,
                 backgroundColor:
                   notes === 'missed'
-                    ? colors.r10
+                    ? theme.altErrorBackground
                     : notes === 'due'
-                    ? colors.y9
+                    ? theme.altWarningBackground
                     : selected
-                    ? colors.b8
-                    : colors.n10,
+                    ? theme.formLabelBackground
+                    : theme.alt2TableBackground,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
