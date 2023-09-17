@@ -19,7 +19,7 @@ import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { useResponsive } from '../../ResponsiveProvider';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Card from '../common/Card';
 import Label from '../common/Label';
@@ -51,13 +51,13 @@ function ToBudget({ toBudget, onClick }) {
     >
       <Label
         title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
-        style={{ color: colors.n1, flexShrink: 0 }}
+        style={{ color: theme.formInputText, flexShrink: 0 }}
       />
       <Text
         style={{
           ...styles.smallText,
           fontWeight: '500',
-          color: amount < 0 ? colors.r4 : colors.n1,
+          color: amount < 0 ? theme.errorText : theme.formInputText,
         }}
       >
         {format(amount, 'financial')}
@@ -82,11 +82,14 @@ function Saved({ projected }) {
       }}
     >
       {projected ? (
-        <Label title="PROJECTED SAVINGS" style={{ color: colors.n1 }} />
+        <Label
+          title="PROJECTED SAVINGS"
+          style={{ color: theme.formInputText }}
+        />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: colors.n1 }}
+          style={{ color: theme.formInputText }}
         />
       )}
 
@@ -94,7 +97,11 @@ function Saved({ projected }) {
         style={{
           ...styles.smallText,
           fontWeight: '500',
-          color: projected ? colors.y3 : isNegative ? colors.r4 : colors.n1,
+          color: projected
+            ? theme.alt2WarningText
+            : isNegative
+            ? theme.alt2ErrorText
+            : theme.formInputText,
         }}
       >
         {format(saved, 'financial')}
@@ -267,7 +274,7 @@ class BudgetCategory extends PureComponent {
     let content = !category.hidden && (
       <ListItem
         style={{
-          backgroundColor: editing ? colors.p11 : 'transparent',
+          backgroundColor: editing ? theme.altTableTextEditing : 'transparent',
           borderBottomWidth: 0,
           borderTopWidth: index > 0 ? 1 : 0,
           ...style,
@@ -318,7 +325,7 @@ class BudgetCategory extends PureComponent {
               width: 90,
               textAlign: 'right',
             }}
-            getStyle={value => value < 0 && { color: colors.r4 }}
+            getStyle={value => value < 0 && { color: theme.errorText }}
             type="financial"
           />
         </View>
@@ -386,7 +393,7 @@ class TotalsRow extends PureComponent {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: colors.n11,
+          backgroundColor: theme.tableHeaderBackground,
         }}
         data-testid="totals"
       >
@@ -564,7 +571,7 @@ class IncomeCategory extends PureComponent {
 //           flexDirection: 'row',
 //           justifyContent: 'flex-end',
 //           alignItems: 'stretch',
-//           backgroundColor: colors.n10,
+//           backgroundColor: colorsm.tableBackground,
 //           padding: 5,
 //           height: 45
 //         }}
@@ -718,7 +725,9 @@ class IncomeBudgetGroup extends Component {
             }
             nameTextStyle={{ fontWeight: '500' }}
             amountTextStyle={{ fontWeight: '500' }}
-            style={{ backgroundColor: colors.n11 }}
+            style={{
+              backgroundColor: theme.altTableBackground,
+            }}
           />
 
           {group.categories.map((category, index) => {
@@ -883,7 +892,7 @@ export function BudgetTable(props) {
             paddingRight: 14,
             backgroundColor: 'white',
             borderBottomWidth: 1,
-            borderColor: colors.n9,
+            borderColor: theme.tableBorder,
           }}
         >
           {type === 'report' ? (
@@ -905,22 +914,25 @@ export function BudgetTable(props) {
               margin: '0 -8px',
               background:
                 showBudgetedCol && !show3Cols
-                  ? `linear-gradient(-45deg, ${colors.p5} 8px, transparent 0)`
+                  ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
                   : !show3Cols
-                  ? `linear-gradient(45deg, ${colors.p5} 8px, transparent 0)`
+                  ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
                   : null,
               // 45deg to flip it to the lower left corner
             }}
           >
             {show3Cols || showBudgetedCol ? (
               <View style={{ width: 90, justifyContent: 'center' }}>
-                <Label title="BUDGETED" style={{ color: colors.n1 }} />
+                <Label
+                  title="BUDGETED"
+                  style={{ color: theme.buttonNormalText }}
+                />
                 <CellValue
                   binding={reportBudget.totalBudgetedExpense}
                   type="financial"
                   style={{
                     ...styles.smallText,
-                    color: colors.n1,
+                    color: theme.buttonNormalText,
                     textAlign: 'right',
                     fontWeight: '500',
                   }}
@@ -937,13 +949,13 @@ export function BudgetTable(props) {
                   justifyContent: 'center',
                 }}
               >
-                <Label title="SPENT" style={{ color: colors.n1 }} />
+                <Label title="SPENT" style={{ color: theme.formInputText }} />
                 <CellValue
                   binding={rolloverBudget.totalSpent}
                   type="financial"
                   style={{
                     ...styles.smallText,
-                    color: colors.n1,
+                    color: theme.formInputText,
                     textAlign: 'right',
                     fontWeight: '500',
                   }}
@@ -957,20 +969,19 @@ export function BudgetTable(props) {
               justifyContent: 'center',
             }}
           >
-            <Label title="BALANCE" style={{ color: colors.n1 }} />
+            <Label title="BALANCE" style={{ color: theme.formInputText }} />
             <CellValue
               binding={rolloverBudget.totalBalance}
               type="financial"
               style={{
                 ...styles.smallText,
-                color: colors.n1,
+                color: theme.formInputText,
                 textAlign: 'right',
                 fontWeight: '500',
               }}
             />
           </View>
         </View>
-
         <View style={{ overflowY: 'auto' }}>
           {!editMode ? (
             // <ScrollView
@@ -1077,7 +1088,7 @@ function BudgetHeader({
         flexShrink: 0,
         height: 50,
         justifyContent: 'center',
-        backgroundColor: colors.p5,
+        backgroundColor: theme.buttonPrimaryBackground,
       }}
     >
       {!editMode && (
@@ -1093,7 +1104,11 @@ function BudgetHeader({
             padding: '5px 30px 5px 0',
           }}
         >
-          <ArrowThinLeft style={{ color: colors.n11 }} width="15" height="15" />
+          <ArrowThinLeft
+            style={{ color: theme.formInputTextReadOnlySelection }}
+            width="15"
+            height="15"
+          />
         </Button>
       )}
       <Text
@@ -1101,7 +1116,7 @@ function BudgetHeader({
           ...styles.mediumText,
           marginTop: 12,
           marginBottom: 12,
-          color: colors.n11,
+          color: theme.formInputTextSelected,
           textAlign: 'center',
           // zIndex: -1
         }}
@@ -1121,7 +1136,7 @@ function BudgetHeader({
             right: 0,
           }}
           textStyle={{
-            color: colors.n11,
+            color: theme.formInputTextReadOnlySelection,
             fontSize: 15,
             fontWeight: '500',
           }}
@@ -1137,12 +1152,11 @@ function BudgetHeader({
             style={{ ...buttonStyle, opacity: nextEnabled ? 1 : 0.6 }}
           >
             <ArrowThinRight
-              style={{ color: colors.n11 }}
+              style={{ color: theme.formInputTextReadOnlySelection }}
               width="15"
               height="15"
             />
           </Button>
-
           {serverURL && (
             <SyncButton
               isMobile

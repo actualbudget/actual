@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import View from '../common/View';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
 
@@ -22,7 +22,7 @@ function RenderMonths({ component: Component, editingIndex, args, style }) {
         <View
           style={{
             flex: 1,
-            borderLeft: '1px solid ' + colors.border,
+            borderLeft: '1px solid ' + theme.tableBorder,
             ...style,
           }}
         >

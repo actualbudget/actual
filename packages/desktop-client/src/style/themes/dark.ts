@@ -14,6 +14,7 @@ export const altpageTextSubdued = pageTextSubdued;
 export const pageTextDark = colorPalette.navy800;
 export const pageTextPositive = colorPalette.purple200;
 export const pageTextLink = colorPalette.purple400;
+export const altPageTextLink = pageTextLink;
 
 export const modalBackground = colorPalette.gray800;
 export const modalBorder = colorPalette.navy600;
@@ -24,6 +25,7 @@ export const cardShadow = colorPalette.navy700;
 
 export const tableBackground = colorPalette.navy800;
 export const altTableBackground = tableBackground;
+export const alt2TableBackground = tableBackground;
 export const tableRowBackgroundHover = colorPalette.navy700;
 export const tableText = colorPalette.navy150;
 export const altTableText = tableText;
@@ -31,6 +33,7 @@ export const alt2TableText = tableText;
 export const tableTextSelected = colorPalette.navy150;
 export const tableTextHover = colorPalette.navy400;
 export const tableTextEditing = colorPalette.black;
+export const altTableTextEditing = tableTextEditing;
 export const tableTextEditingBackground = colorPalette.purple400;
 export const tableTextInactive = colorPalette.navy500;
 export const tableHeaderText = colorPalette.navy300;
@@ -47,6 +50,8 @@ export const tableRowHeaderText = colorPalette.navy150;
 
 export const sidebarBackground = colorPalette.navy800;
 export const sidebarItemBackground = colorPalette.navy800;
+export const sidebarItemBackgroundPositive = colorPalette.green500;
+export const sidebarItemBackgroundFailed = colorPalette.red300;
 export const sidebarItemBackgroundSelected = colorPalette.navy800;
 export const sidebarItemBackgroundHover = colorPalette.navy700;
 export const sidebarItemAccent = colorPalette.navy800;
@@ -91,6 +96,7 @@ export const mobileAccountText = colorPalette.blue800;
 export const mobileModalBackground = colorPalette.navy900;
 export const mobileModalText = colorPalette.white;
 export const altMobileModalText = colorPalette.blue100;
+export const mobileDateBackground = colorPalette.navy100;
 
 // Mobile view themes (for the top bar)
 export const mobileAccountViewTheme = colorPalette.navy50;
@@ -139,6 +145,7 @@ export const buttonNormalDisabledBackground = colorPalette.navy800;
 export const buttonNormalDisabledBorder = colorPalette.navy500;
 
 export const buttonBareText = buttonNormalText;
+export const altButtonBareText = buttonBareText;
 export const buttonBareTextHover = buttonNormalText;
 export const buttonBareBackground = 'transparent';
 export const buttonBareBackgroundHover = 'rgba(200, 200, 200, .3)';
@@ -159,6 +166,7 @@ export const altWarningBackground = warningBackground;
 export const warningText = colorPalette.orange200;
 export const altWarningText = warningText;
 export const alt2WarningText = warningText;
+export const alt3WarningText = warningText;
 export const warningAccent = colorPalette.orange500;
 export const errorBackground = colorPalette.red800;
 export const altErrorBackground = errorBackground;
@@ -173,6 +181,7 @@ export const upcomingAccent = tableBorder;
 
 export const formLabelText = colorPalette.purple150;
 export const altFormLabelText = formLabelText;
+export const formLabelBackground = colorPalette.blue900;
 export const formInputBackground = colorPalette.navy800;
 export const formInputBackgroundSelected = colorPalette.navy700;
 export const formInputBackgroundSelection = colorPalette.purple400;

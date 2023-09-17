@@ -13,6 +13,7 @@ export const pageTextSubdued = colorPalette.blue500;
 export const altpageTextSubdued = colorPalette.navy500;
 export const pageTextPositive = colorPalette.blue50;
 export const pageTextLink = colorPalette.blue400;
+export const altPageTextLink = pageTextLink;
 
 export const modalBackground = colorPalette.navy900;
 export const modalBorder = colorPalette.navy200;
@@ -23,6 +24,7 @@ export const cardShadow = colorPalette.purple100;
 
 export const tableBackground = colorPalette.red900;
 export const altTableBackground = tableBackground;
+export const alt2TableBackground = tableBackground;
 export const tableRowBackgroundHover = colorPalette.red800;
 export const tableText = colorPalette.red200;
 export const altTableText = colorPalette.navy400;
@@ -30,6 +32,7 @@ export const alt2TableText = altTableText;
 export const tableTextSelected = colorPalette.red150;
 export const tableTextHover = colorPalette.red400;
 export const tableTextEditing = colorPalette.black;
+export const altTableTextEditing = tableTextEditing;
 export const tableTextEditingBackground = colorPalette.red200;
 export const tableTextInactive = colorPalette.red500;
 export const tableHeaderText = colorPalette.red700;
@@ -89,6 +92,7 @@ export const mobileAccountText = colorPalette.blue800;
 export const mobileModalBackground = colorPalette.navy900;
 export const mobileModalText = colorPalette.white;
 export const altMobileModalText = colorPalette.blue100;
+export const mobileDateBackground = colorPalette.navy100;
 
 // Button
 export const buttonMenuText = colorPalette.navy150;
@@ -129,6 +133,7 @@ export const buttonNormalDisabledBackground = colorPalette.navy800;
 export const buttonNormalDisabledBorder = colorPalette.navy500;
 
 export const buttonBareText = colorPalette.navy50;
+export const altButtonBareText = buttonBareText;
 export const buttonBareTextHover = colorPalette.navy200;
 export const buttonBareBackground = colorPalette.navy400;
 export const buttonBareBackgroundHover = colorPalette.purple800;
@@ -149,6 +154,7 @@ export const altWarningBackground = warningBackground;
 export const warningText = colorPalette.orange200;
 export const altWarningText = warningText;
 export const alt2WarningText = warningText;
+export const alt3WarningText = warningText;
 export const warningAccent = colorPalette.orange500;
 export const errorBackground = colorPalette.red800;
 export const altErrorBackground = errorBackground;
@@ -163,6 +169,7 @@ export const upcomingAccent = colorPalette.purple100;
 
 export const formLabelText = colorPalette.purple200;
 export const altFormLabelText = formLabelText;
+export const formLabelBackground = colorPalette.blue200;
 export const formInputBackground = colorPalette.purple700;
 export const formInputBackgroundSelected = colorPalette.purple400;
 export const formInputBackgroundSelection = colorPalette.purple400;
