@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import CheveronDown from '../../icons/v1/CheveronDown';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
 import View from '../common/View';
@@ -16,7 +16,7 @@ function SidebarCategory({
   dragging,
   editing,
   style,
-  borderColor = colors.border,
+  borderColor = theme.tableBorder,
   isLast,
   onDragChange,
   onEditMonth,
@@ -110,9 +110,9 @@ function SidebarCategory({
         '& button': { display: 'none' },
         ...(!dragging &&
           !dragPreview && {
-            '&:hover button': { display: 'flex', color: colors.n1 },
+            '&:hover button': { display: 'flex', color: theme.tableTextHover },
           }),
-        ...(dragging && { color: colors.n8 }),
+        ...(dragging && { color: theme.formInputTextPlaceholderSelected }),
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
         ...(dragPreview && {

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { Row } from '../table';
 
 import RenderMonths from './RenderMonths';
@@ -19,7 +19,7 @@ function IncomeGroup({
   return (
     <Row
       collapsed={true}
-      style={{ fontWeight: 600, backgroundColor: colors.n11 }}
+      style={{ fontWeight: 600, backgroundColor: theme.altTableBackground }}
     >
       <SidebarGroup
         group={group}

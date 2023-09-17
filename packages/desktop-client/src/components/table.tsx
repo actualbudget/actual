@@ -11,6 +11,8 @@ import React, {
   type ReactNode,
   type KeyboardEvent,
   type UIEvent,
+  type ReactElement,
+  type Ref,
 } from 'react';
 import { useStore } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -833,7 +835,7 @@ let rowStyle: CSSProperties = {
 type TableHandleRef = {
   scrollTo: (id: number, alignment?: string) => void;
   scrollToTop: () => void;
-  getScrolledItem: () => number;
+  getScrolledItem: () => TableItem['id'];
   setRowAnimation: (flag) => void;
   edit(id: number, field, shouldScroll): void;
   anchor(): void;
@@ -852,10 +854,10 @@ export const TableWithNavigator = forwardRef<
   return <Table {...props} navigator={navigator} />;
 });
 
-type TableItem = { id: number };
+type TableItem = { id: number | string };
 
-type TableProps = {
-  items: TableItem[];
+type TableProps<T = TableItem> = {
+  items: T[];
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
   contentHeader?: ReactNode;
@@ -863,7 +865,7 @@ type TableProps = {
   rowHeight?: number;
   backgroundColor?: string;
   renderItem: (arg: {
-    item: TableItem;
+    item: T;
     editing: boolean;
     focusedField: unknown;
     onEdit: (id, field) => void;
@@ -875,6 +877,7 @@ type TableProps = {
   loadMore?: () => void;
   style?: CSSProperties;
   navigator?: ReturnType<typeof useTableNavigator>;
+  listRef?: unknown;
   onScroll?: () => void;
   version?: string;
   allowPopupsEscape?: boolean;
@@ -882,7 +885,9 @@ type TableProps = {
   saveScrollWidth?: (parent, child) => void;
 };
 
-export const Table = forwardRef<TableHandleRef, TableProps>(
+export const Table: <T extends TableItem>(
+  props: TableProps<T> & { ref?: Ref<TableHandleRef> },
+) => ReactElement = forwardRef<TableHandleRef, TableProps>(
   (
     {
       items,
