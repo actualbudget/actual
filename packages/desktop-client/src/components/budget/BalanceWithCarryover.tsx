@@ -5,7 +5,7 @@ import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 
-import { makeAmountStyle, makeAmountStyleGoal } from './util';
+import { makeAmountStyleGoal } from './util';
 
 type BalanceWithCarryoverProps = {
   carryover: ComponentProps<typeof CellValue>['binding'];

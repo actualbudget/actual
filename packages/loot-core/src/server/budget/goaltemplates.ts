@@ -82,7 +82,7 @@ async function resetCategoryTargets({ month }) {
     categories.forEach(element => {
       setGoal({
         category: element.id,
-        goal: 0,
+        goal: null,
         month: month,
       });
     });
