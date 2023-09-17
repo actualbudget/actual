@@ -21,8 +21,14 @@ type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
+  domainMinMax;
 };
-function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
+function NetWorthGraph({
+  style,
+  graphData,
+  compact,
+  domainMinMax,
+}: NetWorthGraphProps) {
   const Chart = compact ? VictoryGroup : VictoryChart;
 
   return (
@@ -38,6 +44,7 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
             scale={{ x: 'time', y: 'linear' }}
             theme={theme}
             domainPadding={{ x: 0, y: 10 }}
+            domain={domainMinMax}
             width={width}
             height={height}
             containerComponent={

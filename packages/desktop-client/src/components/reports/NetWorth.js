@@ -43,7 +43,6 @@ export default function NetWorth() {
     [start, end, accounts, filters, conditionsOp],
   );
   const data = useReport('net_worth', params);
-
   useEffect(() => {
     async function run() {
       const trans = await send('get-earliest-transaction');
@@ -133,6 +132,12 @@ export default function NetWorth() {
           start={start}
           end={end}
           graphData={data.graphData}
+          domainMinMax={{
+            y: [
+              data.lowestNetWorth - data.lowestNetWorth * 0.01,
+              data.highestNetWorth + data.highestNetWorth * 0.01,
+            ],
+          }}
         />
 
         <View style={{ marginTop: 30 }}>
