@@ -17,17 +17,19 @@ import Tooltip from '../Tooltip';
 
 import { Area } from './common';
 
+type domainProp = [number, number];
+
 type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
-  domainMinMax;
+  domain: domainProp;
 };
 function NetWorthGraph({
   style,
   graphData,
   compact,
-  domainMinMax,
+  domain,
 }: NetWorthGraphProps) {
   const Chart = compact ? VictoryGroup : VictoryChart;
 
@@ -44,7 +46,7 @@ function NetWorthGraph({
             scale={{ x: 'time', y: 'linear' }}
             theme={chartTheme}
             domainPadding={{ x: 0, y: 10 }}
-            domain={domainMinMax}
+            domain={domain}
             width={width}
             height={height}
             containerComponent={
