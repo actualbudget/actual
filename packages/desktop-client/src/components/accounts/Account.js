@@ -697,8 +697,39 @@ class AccountInternal extends PureComponent {
     this.setState({ reconcileAmount: balance });
   };
 
-  onDoneReconciling = () => {
+  onDoneReconciling = async () => {
     this.setState({ reconcileAmount: null });
+    this.setState({ workingHard: true });
+
+    let { data } = await runQuery(
+      q('transactions')
+        .filter({ cleared: true }) //scope to the current account as well here.
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+    let transactions = ungroupTransactions(data);
+
+    let changes = { updated: [] };
+
+    transactions.forEach(trans => {
+      let { diff } = updateTransaction(transactions, {
+        ...trans,
+        notes: 'reconciled',
+      });
+
+      // TODO: We need to keep an updated list of transactions so
+      // the logic in `updateTransaction`, particularly about
+      // updating split transactions, works. This isn't ideal and we
+      // should figure something else out
+      transactions = applyChanges(diff, transactions);
+
+      changes.updated = changes.updated
+        ? changes.updated.concat(diff.updated)
+        : diff.updated;
+    });
+
+    await send('transactions-batch-update', changes);
+    await this.refetchTransactions();
   };
 
   onCreateReconciliationTransaction = async diff => {

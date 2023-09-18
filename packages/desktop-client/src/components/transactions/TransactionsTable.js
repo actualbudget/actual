@@ -411,11 +411,13 @@ function StatusCell({
   onEdit,
   onUpdate,
 }) {
-  let isClearedField = status === 'cleared' || status == null;
+  let isClearedField = status === 'cleared' || status === 'reconciled' || status == null;
   let statusProps = getStatusProps(status);
 
   let statusColor =
     status === 'cleared'
+      ? theme.noticeText
+      : status === 'reconciled'
       ? theme.noticeText
       : status === 'missed'
       ? theme.alt5ErrorText
@@ -710,6 +712,7 @@ const Transaction = memo(function Transaction(props) {
     onToggleSplit,
     onNavigateToTransferAccount,
     onNavigateToSchedule,
+    pushModal,
   } = props;
 
   let dispatchSelected = useSelectedDispatch();
@@ -732,47 +735,60 @@ const Transaction = memo(function Transaction(props) {
     setPrevShowZero(showZeroInDeposit);
   }
 
-  function onUpdate(name, value) {
+  function onUpdate(name, value) { // this is called twice which wasn't a prob but now is.
     if (transaction[name] !== value) {
-      let newTransaction = { ...transaction, [name]: value };
-
-      // Don't change the note to an empty string if it's null (since they are both rendered the same)
-      if (name === 'note' && value === '' && transaction.note == null) {
-        return;
-      }
-
-      if (
-        name === 'account' &&
-        value &&
-        getAccountsById(accounts)[value].offbudget
-      ) {
-        newTransaction.category = null;
-      }
-
-      // If entering an amount in either of the credit/debit fields, we
-      // need to clear out the other one so it's always properly
-      // translated into the desired amount (see
-      // `deserializeTransaction`)
-      if (name === 'credit') {
-        newTransaction['debit'] = '';
-      } else if (name === 'debit') {
-        newTransaction['credit'] = '';
-      }
-
-      // Don't save a temporary value (a new payee) which will be
-      // filled in with a real id later
-      if (name === 'payee' && value && value.startsWith('new:')) {
-        setTransaction(newTransaction);
+      if (transaction.notes === 'reconciled') { // && (name === 'credit' || name === 'debit')
+        props.pushModal('confirm-transaction-edit', {
+          onConfirm: () => {
+            console.log('did confiiiem');
+            onUpdateAfterConfirm(name, value);
+          },
+        });
       } else {
-        let deserialized = deserializeTransaction(
-          newTransaction,
-          originalTransaction,
-        );
-        // Run the transaction through the formatting so that we know
-        // it's always showing the formatted result
-        setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
-        onSave(deserialized);
+        onUpdateAfterConfirm(name, value);
       }
+    }
+  }
+
+  function onUpdateAfterConfirm(name, value) {
+    let newTransaction = { ...transaction, [name]: value };
+
+    // Don't change the note to an empty string if it's null (since they are both rendered the same)
+    if (name === 'note' && value === '' && transaction.note == null) {
+      return;
+    }
+
+    if (
+      name === 'account' &&
+      value &&
+      getAccountsById(accounts)[value].offbudget
+    ) {
+      newTransaction.category = null;
+    }
+
+    // If entering an amount in either of the credit/debit fields, we
+    // need to clear out the other one so it's always properly
+    // translated into the desired amount (see
+    // `deserializeTransaction`)
+    if (name === 'credit') {
+      newTransaction['debit'] = '';
+    } else if (name === 'debit') {
+      newTransaction['credit'] = '';
+    }
+
+    // Don't save a temporary value (a new payee) which will be
+    // filled in with a real id later
+    if (name === 'payee' && value && value.startsWith('new:')) {
+      setTransaction(newTransaction);
+    } else {
+      let deserialized = deserializeTransaction(
+        newTransaction,
+        originalTransaction,
+      );
+      // Run the transaction through the formatting so that we know
+      // it's always showing the formatted result
+      setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
+      onSave(deserialized);
     }
   }
 
@@ -1284,7 +1300,7 @@ const Transaction = memo(function Transaction(props) {
           focused={focusedField === 'cleared'}
           selected={selected}
           isPreview={isPreview}
-          status={isPreview ? notes : cleared ? 'cleared' : null}
+          status={isPreview ? notes : notes === 'reconciled'? 'reconciled' : cleared ? 'cleared' : null}
           isChild={isChild}
           onEdit={onEdit}
           onUpdate={onUpdate}
@@ -1595,6 +1611,7 @@ function TransactionTableInner({
           onToggleSplit={props.onToggleSplit}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
+          pushModal={props.pushModal}
         />
       </>
     );
