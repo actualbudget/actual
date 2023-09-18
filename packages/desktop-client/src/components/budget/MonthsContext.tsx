@@ -13,7 +13,11 @@ type GetValidMonthBoundsParams = {
   endMonth: string | Date;
 };
 
-export function getValidMonthBounds({ bounds, startMonth, endMonth }: GetValidMonthBoundsParams) {
+export function getValidMonthBounds({
+  bounds,
+  startMonth,
+  endMonth,
+}: GetValidMonthBoundsParams) {
   return {
     start: startMonth < bounds.start ? bounds.start : startMonth,
     end: endMonth > bounds.end ? bounds.end : endMonth,
@@ -38,7 +42,11 @@ export function MonthsProvider({
   children,
 }: MonthsProviderProps) {
   let endMonth = monthUtils.addMonths(startMonth, numMonths - 1);
-  let bounds = getValidMonthBounds({ bounds: monthBounds, startMonth, endMonth });
+  let bounds = getValidMonthBounds({
+    bounds: monthBounds,
+    startMonth,
+    endMonth,
+  });
   let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
   return (
