@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import PullToRefresh from 'react-simple-pull-to-refresh';
 
 import { useActions } from '../../hooks/useActions';
 import Add from '../../icons/v1/Add';
@@ -12,6 +11,7 @@ import InputWithContent from '../common/InputWithContent';
 import Label from '../common/Label';
 import Text from '../common/Text';
 import View from '../common/View';
+import PullToRefresh from '../responsive/PullToRefresh';
 import CellValue from '../spreadsheet/CellValue';
 import { TransactionList } from '../transactions/MobileTransaction';
 
