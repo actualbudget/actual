@@ -16776,10 +16776,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-error-overlay@npm:6.0.9":
-  version: 6.0.9
-  resolution: "react-error-overlay@npm:6.0.9"
-  checksum: 695853bc885e798008a00c10d8d94e5ac91626e8130802fea37345f9c037f41b80104345db2ee87f225feb4a4ef71b0df572b17c378a6d397b6815f6d4a84293
+"react-error-overlay@npm:^6.0.11":
+  version: 6.0.11
+  resolution: "react-error-overlay@npm:6.0.11"
+  checksum: ce7b44c38fadba9cedd7c095cf39192e632daeccf1d0747292ed524f17dcb056d16bc197ddee5723f9dd888f0b9b19c3b486c430319e30504289b9296f2d2c42
   languageName: node
   linkType: hard
 
