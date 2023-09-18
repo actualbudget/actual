@@ -163,7 +163,7 @@ function recalculate(data, start, end) {
     },
     netWorth: endNetWorth,
     totalChange: endNetWorth - startNetWorth,
-    lowestNetWorth: lowestNetWorth,
-    highestNetWorth: highestNetWorth,
+    lowestNetWorth,
+    highestNetWorth,
   };
 }
