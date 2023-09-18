@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { type ScheduleStatusType } from 'loot-core/src/client/data-hooks/schedules';
 import { titleFirst } from 'loot-core/src/shared/util';
 
 import AlertTriangle from '../../icons/v2/AlertTriangle';
@@ -9,81 +10,73 @@ import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
 import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
-import { theme, type CSSProperties } from '../../style';
+import { theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
-export function getStatusProps(status: Status) {
-  let color, backgroundColor, Icon;
-
+// Consists of Schedule Statuses + Transaction statuses
+type StatusTypes = ScheduleStatusType | 'cleared' | 'pending';
+export function getStatusProps(status: StatusTypes) {
   switch (status) {
     case 'missed':
-      color = theme.altErrorText;
-      backgroundColor = theme.altErrorBackground;
-      Icon = EditSkull1;
-      break;
+      return {
+        color: theme.altErrorText,
+        backgroundColor: theme.altErrorBackground,
+        Icon: EditSkull1,
+      };
     case 'due':
-      color = theme.altWarningText;
-      backgroundColor = theme.altWarningBackground;
-      Icon = AlertTriangle;
-      break;
+      return {
+        color: theme.altWarningText,
+        backgroundColor: theme.altWarningBackground,
+        Icon: AlertTriangle,
+      };
     case 'upcoming':
-      color = theme.upcomingText;
-      backgroundColor = theme.upcomingBackground;
-      Icon = CalendarIcon;
-      break;
+      return {
+        color: theme.upcomingText,
+        backgroundColor: theme.upcomingBackground,
+        Icon: CalendarIcon,
+      };
     case 'paid':
-      color = theme.alt2NoticeText;
-      backgroundColor = theme.altNoticeBackground;
-      Icon = ValidationCheck;
-      break;
+      return {
+        color: theme.alt2NoticeText,
+        backgroundColor: theme.altNoticeBackground,
+        Icon: ValidationCheck,
+      };
     case 'completed':
-      color = theme.alt2TableText;
-      backgroundColor = theme.altTableBackground;
-      Icon = FavoriteStar;
-      break;
+      return {
+        color: theme.alt2TableText,
+        backgroundColor: theme.altTableBackground,
+        Icon: FavoriteStar,
+      };
     case 'pending':
-      color = theme.alt3NoticeText;
-      backgroundColor = theme.alt2NoticeBackground;
-      Icon = CalendarIcon;
-      break;
+      return {
+        color: theme.alt3NoticeText,
+        backgroundColor: theme.alt2NoticeBackground,
+        Icon: CalendarIcon,
+      };
     case 'scheduled':
-      color = theme.menuItemText;
-      backgroundColor = theme.altTableBackground;
-      Icon = CalendarIcon;
-      break;
+      return {
+        color: theme.menuItemText,
+        backgroundColor: theme.altTableBackground,
+        Icon: CalendarIcon,
+      };
     case 'cleared':
-      color = theme.noticeText;
-      backgroundColor = theme.altTableBackground;
-      Icon = CheckCircle1;
-      break;
+      return {
+        color: theme.noticeText,
+        backgroundColor: theme.altTableBackground,
+        Icon: CheckCircle1,
+      };
     default:
-      color = theme.buttonNormalDisabledText;
-      backgroundColor = theme.altTableBackground;
-      Icon = CheckCircleHollow;
-      break;
+      return {
+        color: theme.buttonNormalDisabledText,
+        backgroundColor: theme.altTableBackground,
+        Icon: CheckCircleHollow,
+      };
   }
-
-  return { color, backgroundColor, Icon };
 }
 
-type Status =
-  | 'missed'
-  | 'due'
-  | 'upcoming'
-  | 'paid'
-  | 'completed'
-  | 'pending'
-  | 'scheduled'
-  | 'cleared';
-
-type StatusBadgeProps = {
-  status: Status;
-  style?: CSSProperties;
-};
-
-export function StatusBadge({ status, style }: StatusBadgeProps) {
-  let { color, backgroundColor, Icon } = getStatusProps(status);
+export function StatusBadge({ status }: { status: ScheduleStatusType }) {
+  const { color, backgroundColor, Icon } = getStatusProps(status);
   return (
     <View
       style={{
@@ -94,7 +87,6 @@ export function StatusBadge({ status, style }: StatusBadgeProps) {
         flexDirection: 'row',
         alignItems: 'center',
         flexShrink: 0,
-        ...style,
       }}
     >
       <Icon

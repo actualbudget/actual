@@ -6,7 +6,6 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   categorySpendingReport: false,
   reportBudget: false,
   goalTemplatesEnabled: false,
-  privacyMode: true,
   themes: false,
   experimentalOfxParser: true,
 };

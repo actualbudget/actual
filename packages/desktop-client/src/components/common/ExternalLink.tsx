@@ -1,10 +1,10 @@
 import React, { type ReactNode, forwardRef } from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 
 let externalLinkColors = {
-  purple: colors.p4,
-  blue: colors.b4,
+  purple: theme.pageTextPositive,
+  blue: theme.pageTextLink,
   muted: 'inherit',
 };
 type ExternalLinkProps = {

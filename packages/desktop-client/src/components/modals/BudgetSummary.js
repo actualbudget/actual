@@ -3,7 +3,7 @@ import React from 'react';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Text from '../common/Text';
@@ -26,7 +26,7 @@ function ToBudget({ toBudget }) {
           ...styles.text,
           fontWeight: '600',
           fontSize: 22,
-          color: budgetAmount < 0 ? colors.r4 : colors.n1,
+          color: budgetAmount < 0 ? theme.errorText : theme.formInputText,
         }}
       >
         {format(budgetAmount, 'financial')}
@@ -90,7 +90,6 @@ function BudgetSummary({ month, modalProps }) {
               <Text>For Next Month</Text>
             </View>
           </View>
-
           <ToBudget toBudget={rolloverBudget.toBudget} />
 
           <View

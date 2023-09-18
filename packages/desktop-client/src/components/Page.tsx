@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react';
 
 import { useResponsive } from '../ResponsiveProvider';
-import { colors, styles, type CSSProperties } from '../style';
+import { theme, styles, type CSSProperties } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -20,8 +20,8 @@ function PageTitle({
       <View
         style={{
           alignItems: 'center',
-          backgroundColor: colors.b2,
-          color: 'white',
+          backgroundColor: theme.sidebarItemBackground,
+          color: theme.mobileModalText,
           flexDirection: 'row',
           flex: '1 0 auto',
           fontSize: 18,

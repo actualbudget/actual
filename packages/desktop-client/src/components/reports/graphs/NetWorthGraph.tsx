@@ -11,7 +11,7 @@ import {
 } from 'victory';
 
 import { type CSSProperties } from '../../../style';
-import theme from '../chart-theme';
+import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
@@ -42,7 +42,7 @@ function NetWorthGraph({
         graphData && (
           <Chart
             scale={{ x: 'time', y: 'linear' }}
-            theme={theme}
+            theme={chartTheme}
             domainPadding={{ x: 0, y: 10 }}
             domain={domainMinMax}
             width={width}
@@ -85,7 +85,7 @@ function NetWorthGraph({
                   data: {
                     clipPath: 'url(#negative)',
                     fill: 'url(#negative-gradient)',
-                    stroke: theme.colors.red,
+                    stroke: chartTheme.colors.red,
                     strokeLinejoin: 'round',
                   },
                 }}
@@ -100,7 +100,7 @@ function NetWorthGraph({
             />
             {!compact && (
               <VictoryAxis
-                style={{ ticks: { stroke: 'red' } }}
+                style={{ ticks: { stroke: chartTheme.colors.red } }}
                 // eslint-disable-next-line rulesdir/typography
                 tickFormat={x => d.format(x, "MMM ''yy")}
                 tickValues={graphData.data.map(item => item.x)}
