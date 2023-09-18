@@ -144,10 +144,10 @@ function recalculate(data, start, end) {
     arr.push({ x, y: integerToAmount(total), premadeLabel: label });
 
     arr.forEach(item => {
-      if (item.y < lowestNetWorth || lowestNetWorth == null) {
+      if (item.y < lowestNetWorth || lowestNetWorth === null) {
         lowestNetWorth = item.y;
       }
-      if (item.y > highestNetWorth || highestNetWorth == null) {
+      if (item.y > highestNetWorth || highestNetWorth === null) {
         highestNetWorth = item.y;
       }
     });
