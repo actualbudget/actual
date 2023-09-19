@@ -1,6 +1,4 @@
-import React, { createElement } from 'react';
-
-import { ComponentProps } from 'react';
+import React, { ComponentProps, createElement } from 'react';
 
 import * as d from 'date-fns';
 import {
