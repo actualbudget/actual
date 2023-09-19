@@ -23,7 +23,7 @@ type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
-  domain: domainProp;
+  domain: React.ComponentProps<typeof Chart>["domain"];
 };
 function NetWorthGraph({
   style,
