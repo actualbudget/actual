@@ -1,4 +1,4 @@
-import React, { ComponentProps, createElement } from 'react';
+import React, { createElement } from 'react';
 
 import * as d from 'date-fns';
 import {
@@ -21,7 +21,7 @@ type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
-  domain: ComponentProps<typeof Chart>['domain'];
+  domain: y?: [number, number];
 };
 function NetWorthGraph({
   style,
