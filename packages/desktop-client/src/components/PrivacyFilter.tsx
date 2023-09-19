@@ -42,13 +42,17 @@ export function ConditionalPrivacyFilter({
   );
 }
 
+type PrivacyReplacementProps = ComponentPropsWithRef<typeof View> & {
+  originalContent: ReactNode;
+};
+
 type PrivacyFilterProps = ComponentPropsWithRef<typeof View> & {
   activationFilters?: (boolean | (() => boolean))[];
   blurIntensity?: number;
 };
 export default function PrivacyFilter({
   activationFilters,
-  blurIntensity,
+  //blurIntensity,
   children,
   ...props
 }: PrivacyFilterProps) {
@@ -63,49 +67,67 @@ export default function PrivacyFilter({
         typeof value === 'boolean' ? value : value(),
       ));
 
-  let blurAmount = blurIntensity != null ? `${blurIntensity}px` : '3px';
+  //let blurAmount = blurIntensity != null ? `${blurIntensity}px` : '3px';
 
   return !activate ? (
     <>{Children.toArray(children)}</>
   ) : (
-    <BlurredOverlay blurIntensity={blurAmount} {...props}>
-      {children}
-    </BlurredOverlay>
+    <PrivacyReplacement originalContent={children} {...props} />
+    // <BlurredOverlay blurIntensity={blurAmount} {...props}>
+    //   {children}
+    // </BlurredOverlay>
   );
 }
 
-function BlurredOverlay({ blurIntensity, children, ...props }) {
-  let [hovered, setHovered] = useState(false);
-  let onHover = useCallback(() => setHovered(true), [setHovered]);
-  let onHoverEnd = useCallback(() => setHovered(false), [setHovered]);
+function PrivacyReplacement({
+  originalContent,
+  style,
+  ...props
+}: PrivacyReplacementProps) {
+  const [hovered, setHovered] = useState(false);
 
-  let blurStyle = {
-    ...(!hovered && {
-      filter: `blur(${blurIntensity})`,
-      WebkitFilter: `blur(${blurIntensity})`,
-      // To fix blur performance issue in Safari.
-      // https://graffino.com/til/CjT2jrcLHP-how-to-fix-filter-blur-performance-issue-in-safari
-      transform: `translate3d(0, 0, 0)`,
-    }),
-  };
-
-  let { style, ...restProps } = props;
+  const onHover = useCallback(() => setHovered(true), []);
+  const onHoverEnd = useCallback(() => setHovered(false), []);
 
   return (
-    <View
-      style={{
-        display: style?.display ? style.display : 'inline-flex',
-        ...blurStyle,
-        ...style,
-      }}
-      onPointerEnter={onHover}
-      onPointerLeave={onHoverEnd}
-      {...restProps}
-    >
-      {children}
+    <View {...props} onMouseEnter={onHover} onMouseLeave={onHoverEnd}>
+      {hovered ? originalContent : '???'}
     </View>
   );
 }
+
+// function BlurredOverlay({ blurIntensity, children, ...props }) {
+//   let [hovered, setHovered] = useState(false);
+//   let onHover = useCallback(() => setHovered(true), [setHovered]);
+//   let onHoverEnd = useCallback(() => setHovered(false), [setHovered]);
+
+//   let blurStyle = {
+//     ...(!hovered && {
+//       filter: `blur(${blurIntensity})`,
+//       WebkitFilter: `blur(${blurIntensity})`,
+//       // To fix blur performance issue in Safari.
+//       // https://graffino.com/til/CjT2jrcLHP-how-to-fix-filter-blur-performance-issue-in-safari
+//       transform: `translate3d(0, 0, 0)`,
+//     }),
+//   };
+
+//   let { style, ...restProps } = props;
+
+//   return (
+//     <View
+//       style={{
+//         display: style?.display ? style.display : 'inline-flex',
+//         ...blurStyle,
+//         ...style,
+//       }}
+//       onPointerEnter={onHover}
+//       onPointerLeave={onHoverEnd}
+//       {...restProps}
+//     >
+//       {children}
+//     </View>
+//   );
+// }
 export function mergeConditionalPrivacyFilterProps(
   defaultPrivacyFilterProps: PrivacyFilterProps = {},
   privacyFilter: ConditionalPrivacyFilterProps['privacyFilter'],
