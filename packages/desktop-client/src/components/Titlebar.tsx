@@ -70,7 +70,7 @@ function UncategorizedButton() {
   return (
     count !== 0 && (
       <Link
-        linkType="button"
+        variant="button"
         type="bare"
         to="/accounts/uncategorized"
         style={{
