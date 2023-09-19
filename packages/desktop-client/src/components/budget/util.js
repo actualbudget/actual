@@ -24,14 +24,21 @@ export function makeAmountGrey(value) {
     : null;
 }
 
-export function makeAmountStyle(value) {
-  const greyed = makeAmountGrey(value);
-  if (greyed) {
-    return greyed;
-  }
-
+export function makeAmountStyle(value, status) {
   if (value < 0) {
     return { color: theme.errorText };
+  }
+
+  if (status === null || status === '') {
+    const greyed = makeAmountGrey(value);
+    if (greyed) {
+      return greyed;
+    }
+  } else {
+    if (!status) {
+      return { color: theme.warningText };
+    }
+    return { color: theme.noticeText };
   }
 }
 

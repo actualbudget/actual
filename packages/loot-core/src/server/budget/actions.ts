@@ -113,6 +113,23 @@ export function setBudget({
   });
 }
 
+export function setGoal({ month, category, goal }): Promise<void> {
+  let existing = db.firstSync(
+    `SELECT id FROM zero_budgets WHERE month = ? AND category = ?`,
+    [dbMonth(month), category],
+  );
+  if (existing) {
+    return db.update('zero_budgets', {
+      id: existing.id,
+      goal: goal,
+    });
+  }
+  return db.insert('zero_budgets', {
+    id: month,
+    goal: goal,
+  });
+}
+
 export function setBuffer(month: string, amount: unknown): Promise<void> {
   let existing = db.firstSync(
     `SELECT id FROM zero_budget_months WHERE id = ?`,
