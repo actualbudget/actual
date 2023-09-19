@@ -21,7 +21,9 @@ type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
-  domain: y?: [number, number];
+  domain?: {
+    y?: [number, number];
+  };
 };
 function NetWorthGraph({
   style,
