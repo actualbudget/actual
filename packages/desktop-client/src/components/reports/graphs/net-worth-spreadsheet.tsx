@@ -93,6 +93,8 @@ function recalculate(data, start, end) {
   let hasNegative = false;
   let startNetWorth = 0;
   let endNetWorth = 0;
+  let lowestNetWorth = null;
+  let highestNetWorth = null;
 
   const graphData = months.reduce((arr, month, idx) => {
     let debt = 0;
@@ -140,6 +142,15 @@ function recalculate(data, start, end) {
     endNetWorth = total;
 
     arr.push({ x, y: integerToAmount(total), premadeLabel: label });
+
+    arr.forEach(item => {
+      if (item.y < lowestNetWorth || lowestNetWorth === null) {
+        lowestNetWorth = item.y;
+      }
+      if (item.y > highestNetWorth || highestNetWorth === null) {
+        highestNetWorth = item.y;
+      }
+    });
     return arr;
   }, []);
 
@@ -152,5 +163,7 @@ function recalculate(data, start, end) {
     },
     netWorth: endNetWorth,
     totalChange: endNetWorth - startNetWorth,
+    lowestNetWorth,
+    highestNetWorth,
   };
 }
