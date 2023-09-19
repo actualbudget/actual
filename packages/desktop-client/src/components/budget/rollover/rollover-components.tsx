@@ -479,6 +479,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             carryover={rolloverBudget.catCarryover(category.id)}
             balance={rolloverBudget.catBalance(category.id)}
             goal={rolloverBudget.catGoal(category.id)}
+            budgeted={rolloverBudget.catBudgeted(category.id)}
           />
         </span>
         {balanceTooltip.isOpen && (
