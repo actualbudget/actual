@@ -1,5 +1,7 @@
 import React, { createElement } from 'react';
 
+import { ComponentProps } from 'react';
+
 import * as d from 'date-fns';
 import {
   VictoryChart,
@@ -17,13 +19,11 @@ import Tooltip from '../Tooltip';
 
 import { Area } from './common';
 
-type domainProp = [number, number];
-
 type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
-  domain: React.ComponentProps<typeof Chart>["domain"];
+  domain: ComponentProps<typeof Chart>['domain'];
 };
 function NetWorthGraph({
   style,
