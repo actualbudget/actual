@@ -1,6 +1,6 @@
 import React, { type ComponentProps, type ReactNode } from 'react';
 
-import { type CSSProperties, colors } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import View from '../common/View';
 
 export const ROW_HEIGHT = 50;
@@ -16,7 +16,7 @@ export const ListItem = ({ children, style, ...props }: ListItemProps) => {
       style={{
         height: ROW_HEIGHT,
         borderBottomWidth: 1,
-        borderColor: colors.border,
+        borderColor: theme.tableBorder,
         flexDirection: 'row',
         alignItems: 'center',
         paddingLeft: 10,

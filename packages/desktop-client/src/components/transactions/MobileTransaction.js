@@ -28,6 +28,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
+  isPreviewId,
   ungroupTransactions,
   updateTransaction,
   realizeTempTransactions,
@@ -51,7 +52,7 @@ import SvgTrash from '../../icons/v1/Trash';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import SvgPencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
-import { styles, colors, theme } from '../../style';
+import { styles, theme } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import TextOneLine from '../common/TextOneLine';
@@ -62,17 +63,12 @@ import {
   TapField,
   InputField,
   BooleanField,
-  EDITING_PADDING,
 } from '../mobile/MobileForms';
 
 const zIndices = { SECTION_HEADING: 10 };
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
 let getAccountsById = memoizeOne(accounts => groupById(accounts));
-
-function isPreviewId(id) {
-  return id.indexOf('preview/') !== -1;
-}
 
 function getDescriptionPretty(transaction, payee, transferAcct) {
   let { amount } = transaction;
@@ -141,12 +137,14 @@ export function DateHeader({ date }) {
     <ListItem
       style={{
         height: 25,
-        backgroundColor: colors.n10,
-        borderColor: colors.n9,
+        backgroundColor: theme.mobileDateBackground,
+        borderColor: theme.tableBorder,
         justifyContent: 'center',
       }}
     >
-      <Text style={{ ...styles.text, fontSize: 13, color: colors.n4 }}>
+      <Text
+        style={{ ...styles.text, fontSize: 13, color: theme.alt2TableText }}
+      >
         {monthUtils.format(date, 'MMMM dd, yyyy')}
       </Text>
     </ListItem>
@@ -158,13 +156,13 @@ function Status({ status }) {
 
   switch (status) {
     case 'missed':
-      color = colors.r3;
+      color = theme.alt3ErrorText;
       break;
     case 'due':
-      color = colors.y3;
+      color = theme.alt2WarningText;
       break;
     case 'upcoming':
-      color = colors.n4;
+      color = theme.alt2TableText;
       break;
     default:
   }
@@ -348,13 +346,13 @@ class TransactionEditInner extends PureComponent {
         style={{
           margin: 10,
           marginTop: 3,
-          backgroundColor: colors.n11,
+          backgroundColor: theme.tableHeaderBackground,
           flex: 1,
           borderRadius: 4,
 
           // This shadow make the card "pop" off of the screen below
           // it
-          shadowColor: colors.n3,
+          shadowColor: theme.cardShadow,
           shadowOffset: { width: 0, height: 0 },
           shadowRadius: 4,
           shadowOpacity: 1,
@@ -371,8 +369,8 @@ class TransactionEditInner extends PureComponent {
           <View
             style={{
               borderBottomWidth: 1,
-              borderColor: colors.n9,
-              backgroundColor: 'white',
+              borderColor: theme.tableBorder,
+              backgroundColor: theme.tableBackground,
               alignItems: 'center',
               flexDirection: 'row',
               flexShrink: 0,
@@ -392,13 +390,17 @@ class TransactionEditInner extends PureComponent {
             >
               <CheveronLeft
                 style={{
-                  color: colors.b5,
+                  color: theme.formLabelText,
                   width: 32,
                   height: 32,
                 }}
               />
               <Text
-                style={{ ...styles.text, color: colors.b5, fontWeight: 500 }}
+                style={{
+                  ...styles.text,
+                  color: theme.formLabelText,
+                  fontWeight: 500,
+                }}
               >
                 Back
               </Text>
@@ -431,7 +433,6 @@ class TransactionEditInner extends PureComponent {
             automaticallyAdjustContentInsets={false}
             keyboardShouldPersistTaps="always"
             style={{
-              backgroundColor: colors.n11,
               flexGrow: 1,
               overflow: 'hidden',
             }}
@@ -520,7 +521,7 @@ class TransactionEditInner extends PureComponent {
                   data-testid="category-field"
                 />
               ) : (
-                <Text style={{ paddingLeft: EDITING_PADDING }}>
+                <Text style={{ paddingLeft: styles.mobileEditingPadding }}>
                   Split transaction editing is not supported on mobile at this
                   time.
                 </Text>
@@ -595,8 +596,8 @@ class TransactionEditInner extends PureComponent {
                   style={{
                     borderWidth: 0,
                     paddingVertical: 5,
-                    marginLeft: EDITING_PADDING,
-                    marginRight: EDITING_PADDING,
+                    marginLeft: styles.mobileEditingPadding,
+                    marginRight: styles.mobileEditingPadding,
                     marginTop: 20,
                     marginBottom: 15,
                     backgroundColor: 'transparent',
@@ -606,11 +607,11 @@ class TransactionEditInner extends PureComponent {
                   <SvgTrash
                     width={17}
                     height={17}
-                    style={{ color: colors.r4 }}
+                    style={{ color: theme.errorText }}
                   />
                   <Text
                     style={{
-                      color: colors.r4,
+                      color: theme.errorText,
                       marginLeft: 5,
                       userSelect: 'none',
                     }}
@@ -624,22 +625,30 @@ class TransactionEditInner extends PureComponent {
 
           <View
             style={{
-              paddingLeft: EDITING_PADDING,
-              paddingRight: EDITING_PADDING,
+              paddingLeft: styles.mobileEditingPadding,
+              paddingRight: styles.mobileEditingPadding,
               paddingTop: 15,
               paddingBottom: 15,
-              backgroundColor: colors.n11,
+              backgroundColor: theme.tableHeaderBackground,
               borderTopWidth: 1,
-              borderColor: colors.n10,
+              borderColor: theme.tableBorder,
               marginTop: 'auto',
               flexShrink: 0,
             }}
           >
             {adding ? (
               <Button onClick={() => this.onAdd()}>
-                <SvgAdd width={17} height={17} style={{ color: colors.b3 }} />
+                <SvgAdd
+                  width={17}
+                  height={17}
+                  style={{ color: theme.altFormLabelText }}
+                />
                 <Text
-                  style={{ ...styles.text, color: colors.b3, marginLeft: 5 }}
+                  style={{
+                    ...styles.text,
+                    color: theme.altFormLabelText,
+                    marginLeft: 5,
+                  }}
                 >
                   Add transaction
                 </Text>
@@ -647,10 +656,14 @@ class TransactionEditInner extends PureComponent {
             ) : (
               <Button onClick={() => this.onSave()}>
                 <SvgPencilWriteAlternate
-                  style={{ width: 16, height: 16, color: colors.n1 }}
+                  style={{ width: 16, height: 16, color: theme.formInputText }}
                 />
                 <Text
-                  style={{ ...styles.text, marginLeft: 6, color: colors.n1 }}
+                  style={{
+                    ...styles.text,
+                    marginLeft: 6,
+                    color: theme.formInputText,
+                  }}
                 >
                   Save changes
                 </Text>
@@ -706,7 +719,6 @@ function TransactionEditUnconnected(props) {
   let transactions = [];
   let adding = false;
   let deleted = false;
-
   useSetThemeColor(theme.mobileTransactionViewTheme);
 
   useEffect(() => {
@@ -828,7 +840,7 @@ function TransactionEditUnconnected(props) {
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.p5,
+        backgroundColor: theme.buttonPrimaryBackground,
       }}
     >
       <TransactionEditInner
@@ -925,7 +937,7 @@ class Transaction extends PureComponent {
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
-      color: colors.n5,
+      color: theme.altpageTextSubdued,
     };
 
     return (
@@ -942,7 +954,9 @@ class Transaction extends PureComponent {
             flex: 1,
             height: 60,
             padding: '5px 10px', // remove padding when Button is back
-            ...(isPreview && { backgroundColor: colors.n11 }),
+            ...(isPreview && {
+              backgroundColor: theme.tableRowHeaderBackground,
+            }),
             ...style,
           }}
         >
@@ -954,7 +968,7 @@ class Transaction extends PureComponent {
                     width: 12,
                     height: 12,
                     marginRight: 5,
-                    color: textStyle.color || colors.n1,
+                    color: textStyle.color || theme.menuItemText,
                   }}
                 />
               )}
@@ -965,7 +979,7 @@ class Transaction extends PureComponent {
                   fontSize: 14,
                   fontWeight: added ? '600' : '400',
                   ...(prettyDescription === '' && {
-                    color: colors.n6,
+                    color: theme.altTableText,
                     fontStyle: 'italic',
                   }),
                 }}
@@ -987,7 +1001,7 @@ class Transaction extends PureComponent {
                   style={{
                     width: 11,
                     height: 11,
-                    color: cleared ? colors.g6 : colors.n8,
+                    color: cleared ? theme.noticeText : theme.altButtonBareText,
                     marginRight: 5,
                   }}
                 />
@@ -997,7 +1011,9 @@ class Transaction extends PureComponent {
                       fontSize: 11,
                       marginTop: 1,
                       fontWeight: '400',
-                      color: prettyCategory ? colors.n3 : colors.p7,
+                      color: prettyCategory
+                        ? theme.tableTextSelected
+                        : theme.altMenuItemTextSelected,
                       fontStyle: prettyCategory ? null : 'italic',
                       textAlign: 'left',
                     }}
@@ -1043,7 +1059,9 @@ export class TransactionList extends Component {
         }
 
         sections.push({
-          id: transaction.date,
+          id: `${isPreviewId(transaction.id) ? 'preview/' : ''}${
+            transaction.date
+          }`,
           date: transaction.date,
           data: [],
         });
@@ -1070,7 +1088,6 @@ export class TransactionList extends Component {
           label=""
           loadMore={onLoadMore}
           selectionMode="none"
-          style={{ flex: '1 auto', height: '100%', overflowY: 'auto' }}
         >
           {sections.length === 0 ? (
             <Section>
@@ -1163,7 +1180,6 @@ function ListBox(props) {
           padding: 0,
           listStyle: 'none',
           margin: 0,
-          overflowY: 'auto',
           width: '100%',
         }}
       >
@@ -1189,10 +1205,10 @@ function ListBoxSection({ section, state }) {
         <div
           {...headingProps}
           className={`${css(styles.smallText, {
-            backgroundColor: colors.n10,
-            borderBottom: `1px solid ${colors.n9}`,
-            borderTop: `1px solid ${colors.n9}`,
-            color: colors.n4,
+            backgroundColor: theme.mobileDateBackground,
+            borderBottom: `1px solid ${theme.tableBorder}`,
+            borderTop: `1px solid ${theme.tableBorder}`,
+            color: theme.alt2TableText,
             display: 'flex',
             justifyContent: 'center',
             paddingBottom: 4,
@@ -1240,10 +1256,12 @@ function Option({ isLast, item, state }) {
       {...mergeProps(optionProps, focusProps)}
       ref={ref}
       style={{
-        background: isSelected ? 'blueviolet' : 'transparent',
-        color: isSelected ? 'white' : null,
+        background: isSelected
+          ? theme.tableRowBackgroundHighlight
+          : theme.tableBackground,
+        color: isSelected ? theme.mobileModalText : null,
         outline: isFocusVisible ? '2px solid orange' : 'none',
-        ...(!isLast && { borderBottom: `1px solid ${colors.border}` }),
+        ...(!isLast && { borderBottom: `1px solid ${theme.tableBorder}` }),
       }}
     >
       {item.rendered}
