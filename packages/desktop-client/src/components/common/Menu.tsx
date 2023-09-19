@@ -37,7 +37,7 @@ type MenuProps = {
   header?: ReactNode;
   footer?: ReactNode;
   items: Array<MenuItem | typeof Menu.line>;
-  onMenuSelect;
+  onMenuSelect: (itemName: MenuItem['name']) => void;
 };
 
 export default function Menu({
