@@ -1,14 +1,17 @@
 import type { CSSProperties } from 'react';
 
+
 import * as d from 'date-fns';
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryStack } from 'victory';
 
 import { chartTheme } from '../chart-theme';
 import Container from '../Container';
+import customColorScale from '../graphColors';
 import Tooltip from '../Tooltip';
 
 import { type CategorySpendingGraphData } from './category-spending-spreadsheet';
 import { Area } from './common';
+
 
 type CategorySpendingGraphProps = {
   start: string;
@@ -44,7 +47,7 @@ function CategorySpendingGraph({
         >
           <Area start={start} end={end} />
           <VictoryStack
-            colorScale="qualitative"
+            colorScale={customColorScale}
             domainPadding={{ x: compact ? 5 : 15 }}
           >
             {graphData.categories.map(category => (

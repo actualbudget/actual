@@ -10,6 +10,8 @@ import {
 import Button from '../common/Button';
 import { Checkbox } from '../forms';
 
+import customColorScale from './graphColors';
+
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroup>;
   selectedCategories: CategoryListProps['items'];
@@ -22,6 +24,8 @@ export default function CategorySelector({
   setSelectedCategories,
 }: CategorySelectorProps) {
   const [uncheckedHidden, setUncheckedHidden] = useState(false);
+
+  let colorIndex = 0; // Initialize a color index counter
 
   return (
     <>
@@ -66,6 +70,7 @@ export default function CategorySelector({
                   selectedCategory => selectedCategory.id === category.id,
                 ),
             );
+
             return (
               <Fragment key={categoryGroup.id}>
                 <li
@@ -121,6 +126,12 @@ export default function CategorySelector({
                       const isChecked = selectedCategories.some(
                         selectedCategory => selectedCategory.id === category.id,
                       );
+                      // Increment the colorIndex for each category
+                      const categoryColor =
+                        customColorScale[colorIndex % customColorScale.length];
+
+                      // Increment the colorIndex
+                      colorIndex++;
                       return (
                         <li
                           key={category.id}
@@ -148,6 +159,15 @@ export default function CategorySelector({
                                   category,
                                 ]);
                               }
+                            }}
+                          />
+                          <div
+                            style={{
+                              width: '10px',
+                              height: '10px',
+                              backgroundColor: categoryColor,
+                              marginRight: '5px',
+                              marginLeft: '2px',
                             }}
                           />
                           <label
