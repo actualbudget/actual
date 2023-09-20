@@ -11,7 +11,11 @@ import Search from '../common/Search';
 import View from '../common/View';
 import { Page } from '../Page';
 
-import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
+import {
+  SchedulesTable,
+  ROW_HEIGHT,
+  type ScheduleItemAction,
+} from './SchedulesTable';
 
 export default function Schedules() {
   const { pushModal } = useActions();
@@ -37,8 +41,7 @@ export default function Schedules() {
     pushModal('schedules-discover');
   }
 
-  // @todo: replace name: string with enum
-  async function onAction(name: string, id: ScheduleEntity['id']) {
+  async function onAction(name: ScheduleItemAction, id: ScheduleEntity['id']) {
     switch (name) {
       case 'post-transaction':
         await send('schedule/post-transaction', { id });
@@ -88,9 +91,6 @@ export default function Schedules() {
           onSelect={onEdit}
           onAction={onAction}
           style={{ backgroundColor: theme.tableBackground }}
-          // @todo: Remove following props after typing SchedulesTable
-          minimal={undefined}
-          tableStyle={undefined}
         />
       </View>
 
