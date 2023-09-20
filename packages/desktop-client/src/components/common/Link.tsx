@@ -64,9 +64,11 @@ const AnchorLink = ({ to, style, activeStyle, children }: AnchorLinkProps) => {
   );
 };
 
-type LinkProps = {
-  variant?: 'button' | 'anchor';
-} & (ButtonLinkProps | AnchorLinkProps);
+type LinkProps =
+  | ({
+      variant: 'button';
+    } & ButtonLinkProps)
+  | ({ variant?: 'anchor' } & AnchorLinkProps);
 
 export default function Link({ variant = 'anchor', ...props }: LinkProps) {
   switch (variant) {
