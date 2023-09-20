@@ -114,17 +114,18 @@ export function setBudget({
 }
 
 export function setGoal({ month, category, goal }): Promise<void> {
+  const table = getBudgetTable();
   let existing = db.firstSync(
-    `SELECT id FROM zero_budgets WHERE month = ? AND category = ?`,
+    `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
     [dbMonth(month), category],
   );
   if (existing) {
-    return db.update('zero_budgets', {
+    return db.update(table, {
       id: existing.id,
       goal: goal,
     });
   }
-  return db.insert('zero_budgets', {
+  return db.insert(table, {
     id: month,
     goal: goal,
   });
