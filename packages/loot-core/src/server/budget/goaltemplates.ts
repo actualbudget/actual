@@ -61,7 +61,6 @@ async function setGoalBudget({ month, templateBudget }) {
 }
 
 async function processTemplate(month, force, category_templates) {
-  let templateBudget = [];
   let num_applied = 0;
   let errors = [];
   let lowestPriority = 0;
@@ -105,9 +104,7 @@ async function processTemplate(month, force, category_templates) {
   }
   await setGoalBudget({
     month,
-    templateBudget: setToZero.filter(
-      f => f.isTemplate === true && f.isIncome === 0,
-    ),
+    templateBudget: setToZero.filter(f => f.isTemplate === true),
   });
 
   // find all remainder templates, place them after all other templates
@@ -136,6 +133,7 @@ async function processTemplate(month, force, category_templates) {
     ? await getSheetValue(sheetName, `total-saved`)
     : await getSheetValue(sheetName, `to-budget`);
   for (let priority = 0; priority <= lowestPriority; priority++) {
+    let templateBudget = [];
     // setup scaling for remainder
     let remainder_scale = 1;
     if (priority === lowestPriority) {
