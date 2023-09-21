@@ -231,11 +231,6 @@ async function processTemplate(month, force, category_templates) {
       }
     }
     await setGoalBudget({ month, templateBudget });
-    // higher priority levels wont budget anything 
-    //  if there is nothing remaining anyway
-    if (available_remaining<=0){
-      break;
-    }
   }
 
   if (!force) {
