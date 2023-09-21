@@ -114,7 +114,7 @@ async function processTemplate(month, force, category_templates) {
   // sort and filter down to just the requested priorities
   priority_list = priority_list
     .sort()
-    .filter((item, index) => priority_list.indexOf(item) === index);
+    .filter((item, index, curr) => curr.indexOf(item) === index);
 
   // find all remainder templates, place them at highest priority
   let remainder_found;
