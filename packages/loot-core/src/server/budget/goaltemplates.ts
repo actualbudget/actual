@@ -104,9 +104,7 @@ async function processTemplate(month, force, category_templates) {
   }
   await setGoalBudget({
     month,
-    templateBudget: setToZero.filter(
-      f => f.isTemplate === true,
-    ),
+    templateBudget: setToZero.filter(f => f.isTemplate === true),
   });
 
   // find all remainder templates, place them after all other templates
