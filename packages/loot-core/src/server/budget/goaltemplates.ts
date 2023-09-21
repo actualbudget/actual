@@ -81,10 +81,6 @@ async function processTemplate(month, force, category_templates) {
     let template = category_templates[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
-        //lowestPriority =
-        //  template[l].priority > lowestPriority
-        //    ? template[l].priority
-        //    : lowestPriority;
         //add each priority we need to a list.  Will sort later
         if (
           template[l].priority === null ||
