@@ -67,6 +67,7 @@ async function processTemplate(month, force, category_templates) {
   let lowestPriority = 0;
   let originalCategoryBalance = [];
   let setToZero = [];
+  let priority_list = []
 
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
@@ -82,10 +83,15 @@ async function processTemplate(month, force, category_templates) {
     let template = category_templates[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
-        lowestPriority =
-          template[l].priority > lowestPriority
-            ? template[l].priority
-            : lowestPriority;
+        //lowestPriority =
+        //  template[l].priority > lowestPriority
+        //    ? template[l].priority
+        //    : lowestPriority;
+        //add each priority we need to a list.  Will sort later
+        if(template[l].priority===null || template[l].priority==undefined) {
+          continue
+        }
+        priority_list.push(template[l].priority)
       }
     }
     if (budgeted) {
@@ -110,10 +116,18 @@ async function processTemplate(month, force, category_templates) {
     ),
   });
 
-  // find all remainder templates, place them after all other templates
+  // sort and filter down to just the requested priorities
+  priority_list=priority_list
+                .sort()
+                .filter(
+                  (item,index) => priority_list.indexOf(item) === index
+                );
+
+  // find all remainder templates, place them at highest priority
   let remainder_found;
-  let remainder_priority = lowestPriority + 1;
   let remainder_weight_total = 0;
+  let remainder_priority = priority_list[priority_list.length-1]+1;
+  priority_list.push(remainder_priority);
   for (let c = 0; c < categories.length; c++) {
     let category = categories[c];
     let templates = category_templates[category.id];
@@ -127,18 +141,18 @@ async function processTemplate(month, force, category_templates) {
       }
     }
   }
-  // so the remainders don't get skipped
-  if (remainder_found) lowestPriority = remainder_priority;
 
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
   let available_remaining = isReflectBudget()
     ? await getSheetValue(sheetName, `total-saved`)
     : await getSheetValue(sheetName, `to-budget`);
-  for (let priority = 0; priority <= lowestPriority; priority++) {
+  for (let ii = 0; ii <= priority_list.length; ii++) {
+    let priority = priority_list[ii]
+
     // setup scaling for remainder
     let remainder_scale = 1;
-    if (priority === lowestPriority) {
+    if (priority === remainder_priority) {
       let available_now = await getSheetValue(sheetName, `to-budget`);
       remainder_scale = available_now / remainder_weight_total;
     }
