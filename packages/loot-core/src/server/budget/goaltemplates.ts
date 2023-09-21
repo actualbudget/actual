@@ -84,7 +84,7 @@ async function processTemplate(month, force, category_templates) {
         //add each priority we need to a list.  Will sort later
         if (
           template[l].priority === null ||
-          template[l].priority == undefined
+          template[l].priority === undefined
         ) {
           continue;
         }
@@ -133,9 +133,7 @@ async function processTemplate(month, force, category_templates) {
       }
     }
   }
-  if(remainder_found){
-    priority_list.push(remainder_priority);
-  }
+  if (remainder_found) priority_list.push(remainder_priority);
 
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
