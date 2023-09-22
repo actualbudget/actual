@@ -274,6 +274,9 @@ function FinancesApp() {
                     </WideNotSupported>
                   }
                 />
+
+                {/* redirect all other traffic to the budget page */}
+                <Route path="/*" element={<Navigate to="/budget" replace />} />
               </Routes>
 
               <Modals />
