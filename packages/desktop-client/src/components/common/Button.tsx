@@ -81,10 +81,13 @@ const linkButtonHoverStyles = {
 };
 
 const _getBorder = (type, typeWithDisabled) => {
-  if (type === 'bare' || type === 'link') {
-    return 'none';
-  } else {
-    return '1px solid ' + borderColor[typeWithDisabled];
+  switch (type) {
+    case 'bare':
+    case 'link':
+      return 'none';
+
+    default:
+      return '1px solid ' + borderColor[typeWithDisabled];
   }
 };
 
