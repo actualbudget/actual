@@ -10,7 +10,7 @@ function Change({ amount }) {
     <Block
       style={{
         ...styles.smallText,
-        color: amount < 0 ? theme.errorText : theme.noticeText,
+        color: amount < 0 ? theme.errorText : theme.noticeTextLight,
       }}
     >
       {amount >= 0 ? '+' : ''}

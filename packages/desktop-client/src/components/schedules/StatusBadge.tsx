@@ -33,8 +33,8 @@ export function getStatusProps(status: Status) {
       Icon = CalendarIcon;
       break;
     case 'paid':
-      color = theme.alt2NoticeText;
-      backgroundColor = theme.altNoticeBackground;
+      color = theme.noticeText;
+      backgroundColor = theme.noticeBackgroundLight;
       Icon = ValidationCheck;
       break;
     case 'completed':
@@ -43,8 +43,8 @@ export function getStatusProps(status: Status) {
       Icon = FavoriteStar;
       break;
     case 'pending':
-      color = theme.alt3NoticeText;
-      backgroundColor = theme.alt2NoticeBackground;
+      color = theme.noticeTextLight;
+      backgroundColor = theme.noticeBackgroundLight;
       Icon = CalendarIcon;
       break;
     case 'scheduled':
@@ -53,7 +53,7 @@ export function getStatusProps(status: Status) {
       Icon = CalendarIcon;
       break;
     case 'cleared':
-      color = theme.noticeText;
+      color = theme.noticeTextLight;
       backgroundColor = theme.altTableBackground;
       Icon = CheckCircle1;
       break;

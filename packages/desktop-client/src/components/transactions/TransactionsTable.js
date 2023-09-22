@@ -416,7 +416,7 @@ function StatusCell({
 
   let statusColor =
     status === 'cleared'
-      ? theme.noticeText
+      ? theme.noticeTextLight
       : status === 'missed'
       ? theme.alt5ErrorText
       : status === 'due'
@@ -1268,7 +1268,7 @@ const Transaction = memo(function Transaction(props) {
               : integerToCurrency(runningBalance)
           }
           valueStyle={{
-            color: runningBalance < 0 ? theme.errorText : theme.noticeText,
+            color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
           }}
           style={{ ...styles.tnum, ...amountStyle }}
           width={88}

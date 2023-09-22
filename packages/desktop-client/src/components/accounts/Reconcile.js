@@ -45,7 +45,7 @@ export function ReconcilingMessage({
         {targetDiff === 0 ? (
           <View
             style={{
-              color: theme.noticeText,
+              color: theme.noticeTextLight,
               flex: 1,
               flexDirection: 'row',
               alignItems: 'center',

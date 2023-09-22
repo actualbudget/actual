@@ -99,7 +99,7 @@ function IncomeProgress({ current, target }: IncomeProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? theme.errorText : theme.noticeText}
+      color={over ? theme.errorText : theme.noticeTextLight}
       backgroundColor={over ? theme.errorBackground : theme.pageBackground}
       style={{ width: 20, height: 20 }}
     />
@@ -132,7 +132,7 @@ function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? theme.errorText : theme.noticeText}
+      color={over ? theme.errorText : theme.noticeTextLight}
       backgroundColor={over ? theme.errorBackground : theme.pageBackground}
       style={{ width: 20, height: 20 }}
     />

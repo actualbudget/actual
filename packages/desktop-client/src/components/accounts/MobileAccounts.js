@@ -100,7 +100,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             {account.bankId && (
               <View
                 style={{
-                  backgroundColor: theme.noticeText,
+                  backgroundColor: theme.noticeBackgroundDark,
                   marginLeft: '-23px',
                   width: 8,
                   height: 8,

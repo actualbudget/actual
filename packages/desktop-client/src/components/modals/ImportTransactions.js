@@ -138,7 +138,7 @@ function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
         )}{' '}
         &rarr;{' '}
       </Text>
-      <Text style={{ color: parsed ? theme.alt3NoticeText : theme.errorText }}>
+      <Text style={{ color: parsed ? theme.noticeTextLight : theme.errorText }}>
         {parsed || 'Invalid'}
       </Text>
     </Text>
