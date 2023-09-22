@@ -22,7 +22,7 @@ type ButtonProps = HTMLProps<HTMLButtonElement> & {
   as?: ElementType;
 };
 
-type ButtonType = 'normal' | 'primary' | 'bare';
+type ButtonType = 'normal' | 'primary' | 'bare' | 'link';
 
 const backgroundColor = {
   normal: theme.buttonNormalBackground,
@@ -33,6 +33,7 @@ const backgroundColor = {
   bareDisabled: theme.buttonBareDisabledBackground,
   menu: theme.buttonMenuBackground,
   menuSelected: theme.buttonMenuSelectedBackground,
+  link: theme.buttonBareBackground,
 };
 
 const backgroundColorHover = {
@@ -41,6 +42,7 @@ const backgroundColorHover = {
   bare: theme.buttonBareBackgroundHover,
   menu: theme.buttonMenuBackgroundHover,
   menuSelected: theme.buttonMenuSelectedBackgroundHover,
+  link: theme.buttonBareBackground,
 };
 
 const borderColor = {
@@ -50,6 +52,7 @@ const borderColor = {
   primaryDisabled: theme.buttonPrimaryDisabledBorder,
   menu: theme.buttonMenuBorder,
   menuSelected: theme.buttonMenuSelectedBorder,
+  link: theme.buttonBareBackground,
 };
 
 const textColor = {
@@ -61,6 +64,7 @@ const textColor = {
   bareDisabled: theme.buttonBareDisabledText,
   menu: theme.buttonMenuText,
   menuSelected: theme.buttonMenuSelectedText,
+  link: theme.pageTextLink,
 };
 
 const textColorHover = {
@@ -69,6 +73,11 @@ const textColorHover = {
   bare: theme.buttonBareTextHover,
   menu: theme.buttonMenuTextHover,
   menuSelected: theme.buttonMenuSelectedTextHover,
+};
+
+const linkButtonHoverStyles = {
+  textDecoration: 'underline',
+  boxShadow: 'none',
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -94,6 +103,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     hoveredStyle = {
       ...(type !== 'bare' && styles.shadow),
+      ...(type === 'link' && linkButtonHoverStyles),
       backgroundColor: backgroundColorHover[type],
       color: color || textColorHover[type],
       ...hoveredStyle,
