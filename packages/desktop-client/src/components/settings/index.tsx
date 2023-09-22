@@ -11,7 +11,7 @@ import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
-import { colors, theme } from '../../style';
+import { theme } from '../../style';
 import tokens from '../../tokens';
 import Button from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
@@ -67,7 +67,7 @@ function About() {
             New version available: {latestVersion}
           </ExternalLink>
         ) : (
-          <Text style={{ color: colors.g2, fontWeight: 600 }}>
+          <Text style={{ color: theme.alt2NoticeText, fontWeight: 600 }}>
             You’re up to date!
           </Text>
         )}
@@ -100,7 +100,7 @@ function AdvancedAbout() {
       <Text>
         <IDName>Budget ID:</IDName> {budgetId}
       </Text>
-      <Text style={{ color: colors.n5 }}>
+      <Text style={{ color: theme.pageText }}>
         <IDName>Sync ID:</IDName> {groupId || '(none)'}
       </Text>
       {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
@@ -146,8 +146,8 @@ export default function Settings() {
         titleStyle={
           isNarrowWidth
             ? {
-                backgroundColor: colors.n11,
-                color: colors.n1,
+                backgroundColor: theme.menuItemBackground,
+                color: theme.menuItemText,
               }
             : undefined
         }
@@ -160,7 +160,11 @@ export default function Settings() {
               {/* The only spot to close a budget on mobile */}
               <FormField>
                 <FormLabel title="Budget Name" />
-                <Input value={budgetName} disabled style={{ color: '#999' }} />
+                <Input
+                  value={budgetName}
+                  disabled
+                  style={{ color: theme.buttonNormalDisabledText }}
+                />
               </FormField>
               <Button onClick={closeBudget}>Close Budget</Button>
             </View>

@@ -125,7 +125,7 @@ function Account({
                   height: 5,
                   borderRadius: 5,
                   backgroundColor: failed
-                    ? theme.errorBackground
+                    ? theme.sidebarItemBackgroundFailed
                     : theme.sidebarItemBackgroundPositive,
                   marginLeft: 2,
                   transition: 'transform .3s',

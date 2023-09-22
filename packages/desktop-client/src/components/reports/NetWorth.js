@@ -8,7 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
-import { styles } from '../../style';
+import { theme, styles } from '../../style';
 import Paragraph from '../common/Paragraph';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
@@ -43,7 +43,6 @@ export default function NetWorth() {
     [start, end, accounts, filters, conditionsOp],
   );
   const data = useReport('net_worth', params);
-
   useEffect(() => {
     async function run() {
       const trans = await send('get-earliest-transaction');
@@ -101,7 +100,7 @@ export default function NetWorth() {
 
       <View
         style={{
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           padding: 30,
           paddingTop: 0,
           overflow: 'auto',
@@ -133,6 +132,9 @@ export default function NetWorth() {
           start={start}
           end={end}
           graphData={data.graphData}
+          domain={{
+            y: [data.lowestNetWorth * 0.99, data.highestNetWorth * 1.01],
+          }}
         />
 
         <View style={{ marginTop: 30 }}>

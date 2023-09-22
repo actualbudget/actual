@@ -1,6 +1,6 @@
 import React from 'react';
 
-import AnchorLink from '../common/AnchorLink';
+import Link from '../common/Link';
 import Text from '../common/Text';
 import View from '../common/View';
 import { useServerURL } from '../ServerContext';
@@ -30,9 +30,9 @@ export default function ServerURL() {
           <strong>No server configured</strong>
         )}
       </Text>
-      <AnchorLink to="/config-server" style={{ marginLeft: 15 }}>
+      <Link to="/config-server" style={{ marginLeft: 15 }}>
         Change
-      </AnchorLink>
+      </Link>
     </View>
   );
 }

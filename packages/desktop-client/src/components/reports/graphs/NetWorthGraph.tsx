@@ -11,7 +11,7 @@ import {
 } from 'victory';
 
 import { type CSSProperties } from '../../../style';
-import theme from '../chart-theme';
+import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
@@ -21,8 +21,16 @@ type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
+  domain?: {
+    y?: [number, number];
+  };
 };
-function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
+function NetWorthGraph({
+  style,
+  graphData,
+  compact,
+  domain,
+}: NetWorthGraphProps) {
   const Chart = compact ? VictoryGroup : VictoryChart;
 
   return (
@@ -36,8 +44,9 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
         graphData && (
           <Chart
             scale={{ x: 'time', y: 'linear' }}
-            theme={theme}
+            theme={chartTheme}
             domainPadding={{ x: 0, y: 10 }}
+            domain={domain}
             width={width}
             height={height}
             containerComponent={
@@ -78,7 +87,7 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
                   data: {
                     clipPath: 'url(#negative)',
                     fill: 'url(#negative-gradient)',
-                    stroke: theme.colors.red,
+                    stroke: chartTheme.colors.red,
                     strokeLinejoin: 'round',
                   },
                 }}
@@ -93,7 +102,7 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
             />
             {!compact && (
               <VictoryAxis
-                style={{ ticks: { stroke: 'red' } }}
+                style={{ ticks: { stroke: chartTheme.colors.red } }}
                 // eslint-disable-next-line rulesdir/typography
                 tickFormat={x => d.format(x, "MMM ''yy")}
                 tickValues={graphData.data.map(item => item.x)}
