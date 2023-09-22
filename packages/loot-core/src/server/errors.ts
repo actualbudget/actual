@@ -37,9 +37,9 @@ export class SyncError extends Error {
 export class TransactionError extends Error {}
 
 export class RuleError extends Error {
-  type;
+  type: string;
 
-  constructor(name, message) {
+  constructor(name: string, message: string) {
     super('RuleError: ' + message);
     this.type = name;
   }
