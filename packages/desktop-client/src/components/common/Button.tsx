@@ -80,6 +80,25 @@ const linkButtonHoverStyles = {
   boxShadow: 'none',
 };
 
+const _getBorder = (type, typeWithDisabled) => {
+  if (type === 'bare' || type === 'link') {
+    return 'none';
+  } else {
+    return '1px solid ' + borderColor[typeWithDisabled];
+  }
+};
+
+const _getPadding = type => {
+  switch (type) {
+    case 'bare':
+      return '5px';
+    case 'link':
+      return '0';
+    default:
+      return '5px 10px';
+  }
+};
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -128,14 +147,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
-      padding: type === 'bare' ? '5px' : '5px 10px',
+      padding: _getPadding(type),
       margin: 0,
       overflow: 'hidden',
-      display: 'flex',
+      display: type === 'link' ? 'inline' : 'flex',
       borderRadius: 4,
       backgroundColor: backgroundColor[typeWithDisabled],
-      border:
-        type === 'bare' ? 'none' : '1px solid ' + borderColor[typeWithDisabled],
+      border: _getBorder(type, typeWithDisabled),
       color: color || textColor[typeWithDisabled],
       transition: 'box-shadow .25s',
       WebkitAppRegion: 'no-drag',
