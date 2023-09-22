@@ -419,6 +419,12 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
             };
           }
           return apply(field, '$eq', number);
+        } else if (type === 'string') {
+          if (value === '') {
+            return {
+              $or: [apply(field, '$eq', null), apply(field, '$eq', '')],
+            };
+          }
         }
         return apply(field, '$eq', value);
       case 'isNot':
