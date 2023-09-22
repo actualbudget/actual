@@ -57,9 +57,6 @@
     "source-map-support": "^0.5.21",
     "typescript": "^5.0.2"
   },
-  "resolutions": {
-    "react-error-overlay": "6.0.9"
-  },
   "engines": {
     "node": ">=18.0.0"
   },

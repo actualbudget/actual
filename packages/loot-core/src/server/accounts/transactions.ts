@@ -51,7 +51,7 @@ export async function batchUpdateTransactions({
   }>;
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;
-}): Promise<{ added: TransactionEntity[]; updated: unknown[] }> {
+}) {
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];
   let updatedIds = updated ? updated.map(u => u.id) : [];
@@ -126,7 +126,7 @@ export async function batchUpdateTransactions({
   // to the client so that can apply them. Note that added
   // transactions just return the full transaction.
   let resultAdded = allAdded;
-  let resultUpdated: unknown[];
+  let resultUpdated: Awaited<ReturnType<typeof transfer.onUpdate>>[];
 
   await batchMessages(async () => {
     await Promise.all(allAdded.map(t => transfer.onInsert(t)));
