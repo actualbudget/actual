@@ -11,11 +11,7 @@ import Search from '../common/Search';
 import View from '../common/View';
 import { Page } from '../Page';
 
-import {
-  SchedulesTable,
-  ROW_HEIGHT,
-  type ScheduleItemAction,
-} from './SchedulesTable';
+import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
 
 export default function Schedules() {
   const { pushModal } = useActions();
