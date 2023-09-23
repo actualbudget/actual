@@ -33,7 +33,7 @@ function CashFlow() {
 
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 30),
+    monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
 
