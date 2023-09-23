@@ -210,10 +210,9 @@ async function checkIfScheduleExists(name, scheduleId) {
 
 async function nameFromScheduleId(scheduleId) {
   console.log(scheduleId);
-  let idForName = await db.first(
-    'SELECT name from schedules WHERE id = ?',
-    [scheduleId],
-  );
+  let idForName = await db.first('SELECT name from schedules WHERE id = ?', [
+    scheduleId,
+  ]);
   return idForName['name'];
 }
 
