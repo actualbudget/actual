@@ -69,30 +69,29 @@ export default function Schedules() {
 
   return (
     <Page title="Schedules">
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 0 15px',
-        }}
-      >
+      <View style={{ height: '100%' }}>
         <View
-          style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '0 0 15px',
+          }}
         >
-          <Search
-            placeholder="Filter schedules…"
-            value={filter}
-            onChange={setFilter}
-          />
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <Search
+              placeholder="Filter schedules…"
+              value={filter}
+              onChange={setFilter}
+            />
+          </View>
         </View>
-      </View>
 
-      <View
-        style={{
-          flexBasis: (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1),
-          marginTop: 15,
-        }}
-      >
         <SchedulesTable
           schedules={schedules}
           filter={filter}
@@ -102,20 +101,20 @@ export default function Schedules() {
           onAction={onAction}
           style={{ backgroundColor: theme.tableBackground }}
         />
-      </View>
 
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          margin: '20px 0',
-          flexShrink: 0,
-        }}
-      >
-        <Button onClick={onDiscover}>Find schedules</Button>
-        <Button type="primary" onClick={onAdd}>
-          Add new schedule
-        </Button>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            margin: '20px 0',
+            flexShrink: 0,
+          }}
+        >
+          <Button onClick={onDiscover}>Find schedules</Button>
+          <Button type="primary" onClick={onAdd}>
+            Add new schedule
+          </Button>
+        </View>
       </View>
     </Page>
   );
