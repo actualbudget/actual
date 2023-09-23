@@ -69,12 +69,22 @@ export default function Schedules() {
 
   return (
     <Page title="Schedules">
-      <View style={{ alignItems: 'flex-end' }}>
-        <Search
-          placeholder="Filter schedules…"
-          value={filter}
-          onChange={setFilter}
-        />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: '0 0 15px',
+        }}
+      >
+        <View
+          style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}
+        >
+          <Search
+            placeholder="Filter schedules…"
+            value={filter}
+            onChange={setFilter}
+          />
+        </View>
       </View>
 
       <View
