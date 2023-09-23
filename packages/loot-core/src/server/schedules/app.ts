@@ -208,6 +208,15 @@ async function checkIfScheduleExists(name, scheduleId) {
   return true;
 }
 
+async function nameFromScheduleId(scheduleId) {
+  console.log(scheduleId);
+  let idForName = await db.first(
+    'SELECT name from schedules WHERE id = ?',
+    [scheduleId],
+  );
+  return idForName['name'];
+}
+
 export async function createSchedule({
   schedule = null,
   conditions = [],
@@ -274,13 +283,13 @@ export async function updateSchedule({
   if (schedule.rule) {
     throw new Error('You cannot change the rule of a schedule');
   }
-
-  if (schedule.name) {
-    if (await checkIfScheduleExists(schedule.name, schedule.id)) {
+  let scheduleName = await nameFromScheduleId(schedule.id);
+  if (scheduleName) {
+    if (await checkIfScheduleExists(scheduleName, schedule.id)) {
       throw new Error('There is already a schedule with this name');
     }
   } else {
-    schedule.name = null;
+    scheduleName = null;
   }
   // We need the rule if there are conditions
   let rule;
