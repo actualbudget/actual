@@ -102,6 +102,28 @@ const _getPadding = type => {
   }
 };
 
+const _getActiveStyles = (type, bounce) => {
+  switch (type) {
+    case 'bare':
+      return { backgroundColor: theme.buttonBareBackgroundActive };
+    case 'link':
+      return {
+        transform: 'none',
+        boxShadow: 'none',
+      };
+    default:
+      return {
+        transform: bounce && 'translateY(1px)',
+        boxShadow: `0 1px 4px 0 ${
+          type === 'primary'
+            ? theme.buttonPrimaryShadow
+            : theme.buttonNormalShadow
+        }`,
+        transition: 'none',
+      };
+  }
+};
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -131,17 +153,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ...hoveredStyle,
     };
     activeStyle = {
-      ...(type === 'bare'
-        ? { backgroundColor: theme.buttonBareBackgroundActive }
-        : {
-            transform: bounce && 'translateY(1px)',
-            boxShadow:
-              '0 1px 4px 0 ' +
-              (type === 'primary'
-                ? theme.buttonPrimaryShadow
-                : theme.buttonNormalShadow),
-            transition: 'none',
-          }),
+      ..._getActiveStyles(type, bounce),
       ...activeStyle,
     };
 
