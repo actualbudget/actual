@@ -27,8 +27,6 @@ function IncomeHeader({ MonthComponent, onShowNewGroup }: IncomeHeaderProps) {
       <RenderMonths
         component={MonthComponent}
         style={{ border: 0, justifyContent: 'flex-end' }}
-        editingIndex={undefined}
-        args={undefined}
       />
     </View>
   );

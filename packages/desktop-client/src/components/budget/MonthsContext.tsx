@@ -7,6 +7,7 @@ type BoundsProps = {
   end: string;
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export function getValidMonthBounds(
   bounds: BoundsProps,
   startMonth: undefined | string,
@@ -33,6 +34,7 @@ type MonthsProviderProps = {
   children: ReactNode;
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export function MonthsProvider({
   startMonth,
   numMonths,
