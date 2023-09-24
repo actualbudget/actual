@@ -1,4 +1,5 @@
-import { MutableRefObject, Ref, RefCallback, useMemo } from 'react';
+import { useMemo } from 'react';
+import type { MutableRefObject, Ref, RefCallback } from 'react';
 
 export function useMergedRefs<T>(
   ref1: RefCallback<T> | MutableRefObject<T>,
