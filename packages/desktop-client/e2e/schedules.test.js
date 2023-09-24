@@ -78,5 +78,15 @@ test.describe('Schedules', () => {
       'Show completed schedules',
     );
     await expect(page).toHaveScreenshot(screenshotConfig(page));
+
+    // Schedules search shouldn't shrink with many schedules
+    for (let i = 0; i < 15; i++) {
+      await schedulesPage.addNewSchedule({
+        payee: 'Home Depot',
+        account: 'HSBC',
+        amount: 0,
+      });
+    }
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 });
