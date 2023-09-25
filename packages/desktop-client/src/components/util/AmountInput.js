@@ -68,7 +68,7 @@ export function AmountInput({
           type="bare"
           style={{ padding: '0 7px' }}
           onClick={onSwitch}
-          onMouseDown={e => e.preventDefault()}
+          onPointerDown={e => e.preventDefault()}
           ref={buttonRef}
         >
           {negative ? (
