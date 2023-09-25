@@ -116,8 +116,8 @@ export function AccountHeader({
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View
           style={{
-            marginTop: 5,
-            marginBottom: 5,
+            marginTop: 7,
+            marginBottom: 7,
             alignItems: 'flex-start',
           }}
         >
