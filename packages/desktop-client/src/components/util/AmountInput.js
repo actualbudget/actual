@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import {
   currencyToInteger,
@@ -55,8 +55,6 @@ export function AmountInput({
       onEdit?.(null);
     }
   }
-
-  useFireChangeOnUnmount(fireChange, value, negative);
 
   return (
     <InputWithContent
@@ -118,22 +116,4 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
       />
     </View>
   );
-}
-
-// Surely there must be a better way...
-// Blur does not fire at the moment so I try to save
-// when this component is unmounted.
-function useFireChangeOnUnmount(fireChange, value, negative) {
-  let valueRef = useRef(value);
-  let negativeRef = useRef(negative);
-  useEffect(() => {
-    valueRef.current = value;
-    negativeRef.current = negative;
-  }, [value, negative]);
-
-  useEffect(() => {
-    return () => {
-      fireChange(valueRef.current, negativeRef.current);
-    };
-  }, []);
 }
