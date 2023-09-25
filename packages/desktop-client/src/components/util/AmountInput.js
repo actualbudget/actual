@@ -18,6 +18,7 @@ export function AmountInput({
   inputRef,
   initialValue = 0,
   onChange,
+  onEdit,
   style,
   textStyle,
   focused,
@@ -26,6 +27,7 @@ export function AmountInput({
   let initialValueAbsolute = integerToCurrency(Math.abs(initialValue || 0));
   let [value, setValue] = useState(initialValueAbsolute);
   let ref = useRef();
+  let buttonRef = useRef();
   let mergedRef = useMergedRefs(inputRef, ref);
 
   function onSwitch() {
@@ -49,6 +51,9 @@ export function AmountInput({
 
   function onInputAmountBlur(e) {
     fireChange(value, negative);
+    if (!buttonRef.current?.contains(e.relatedTarget)) {
+      onEdit?.(null);
+    }
   }
 
   useFireChangeOnUnmount(fireChange, value, negative);
@@ -59,7 +64,13 @@ export function AmountInput({
       inputRef={mergedRef}
       inputMode="decimal"
       leftContent={
-        <Button type="bare" style={{ padding: '0 7px' }} onClick={onSwitch}>
+        <Button
+          type="bare"
+          style={{ padding: '0 7px' }}
+          onClick={onSwitch}
+          onMouseDown={e => e.preventDefault()}
+          ref={buttonRef}
+        >
           {negative ? (
             <Subtract style={{ width: 8, height: 8, color: 'inherit' }} />
           ) : (

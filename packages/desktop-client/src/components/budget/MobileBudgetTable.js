@@ -145,6 +145,7 @@ function BudgetCell({
           focused={editing}
           textStyle={{ ...styles.smallText, ...textStyle }}
           onChange={updateBudgetAmount}
+          onEdit={onEdit}
         />
       ) : (
         <View
