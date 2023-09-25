@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React, { type Component, type ReactNode } from 'react';
 
 import Button from '../common/Button';
 import View from '../common/View';
@@ -6,7 +6,7 @@ import View from '../common/View';
 import RenderMonths from './RenderMonths';
 
 type IncomeHeaderProps = {
-  MonthComponent?: ReactNode;
+  MonthComponent?: () => JSX.Element;
   onShowNewGroup: () => void;
 };
 
