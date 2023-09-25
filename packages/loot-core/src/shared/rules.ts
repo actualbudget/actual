@@ -17,7 +17,7 @@ export const TYPE_INFO = {
   },
   string: {
     ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
-    nullable: false,
+    nullable: true,
   },
   number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
