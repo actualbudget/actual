@@ -5,7 +5,6 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
-import { useMergedRefs } from '../../hooks/useMergedRefs';
 import Add from '../../icons/v1/Add';
 import Subtract from '../../icons/v1/Subtract';
 import { theme } from '../../style';
@@ -26,12 +25,9 @@ export function AmountInput({
   let [negative, setNegative] = useState(initialValue <= 0);
   let initialValueAbsolute = integerToCurrency(Math.abs(initialValue || 0));
   let [value, setValue] = useState(initialValueAbsolute);
-  let ref = useRef();
   let buttonRef = useRef();
-  let mergedInputRef = useMergedRefs(inputRef, ref);
 
   function onSwitch() {
-    ref.current?.focus();
     setNegative(!negative);
     fireChange(value, !negative);
   }
@@ -59,7 +55,7 @@ export function AmountInput({
   return (
     <InputWithContent
       id={id}
-      inputRef={mergedInputRef}
+      inputRef={inputRef}
       inputMode="decimal"
       leftContent={
         <Button
