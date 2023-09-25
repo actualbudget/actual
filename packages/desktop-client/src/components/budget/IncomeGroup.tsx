@@ -1,4 +1,4 @@
-import React, { type ComponentProps } from 'react';
+import React from 'react';
 
 import { theme } from '../../style';
 import { Row } from '../table';
@@ -35,15 +35,6 @@ function IncomeGroup({
   onToggleCollapse,
   onShowNewCategory,
 }: IncomeGroupProps) {
-  console.log('group', group);
-  console.log('editing cell', editingCell);
-  console.log('collapsed', collapsed);
-  console.log('MonthComponent', MonthComponent);
-  console.log('onEditName', onEditName);
-  console.log('onSave', onSave);
-  console.log('onToggleCollapse', onToggleCollapse);
-  console.log('onShowNewCategory', onShowNewCategory);
-
   return (
     <Row
       collapsed={true}
@@ -52,13 +43,16 @@ function IncomeGroup({
       <SidebarGroup
         group={group}
         collapsed={collapsed}
-        editing={editingCell &&
+        editing={
+          editingCell &&
           editingCell.cell === 'name' &&
-          editingCell.id === group.id}
+          editingCell.id === group.id
+        }
         onEdit={onEditName}
         onSave={onSave}
         onToggleCollapse={onToggleCollapse}
-        onShowNewCategory={onShowNewCategory} dragPreview={undefined} innerRef={undefined} style={undefined} onDelete={undefined} onHideNewGroup={undefined}      />
+        onShowNewCategory={onShowNewCategory}
+      />
       <RenderMonths component={MonthComponent} args={{ group }} />
     </Row>
   );
