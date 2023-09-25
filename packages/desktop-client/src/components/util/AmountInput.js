@@ -28,7 +28,7 @@ export function AmountInput({
   let [value, setValue] = useState(initialValueAbsolute);
   let ref = useRef();
   let buttonRef = useRef();
-  let mergedRef = useMergedRefs(inputRef, ref);
+  let mergedInputRef = useMergedRefs(inputRef, ref);
 
   function onSwitch() {
     ref.current?.focus();
@@ -59,13 +59,13 @@ export function AmountInput({
   return (
     <InputWithContent
       id={id}
-      inputRef={mergedRef}
+      inputRef={mergedInputRef}
       inputMode="decimal"
       leftContent={
         <Button
           type="bare"
           style={{ padding: '0 7px' }}
-          onClick={onSwitch}
+          onPointerUp={onSwitch}
           onPointerDown={e => e.preventDefault()}
           ref={buttonRef}
         >

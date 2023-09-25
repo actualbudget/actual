@@ -134,7 +134,11 @@ function BudgetCell({
   }
 
   return (
-    <View style={style} onPointerUp={onAmountClick}>
+    <View
+      style={style}
+      onPointerUp={onAmountClick}
+      onPointerDown={e => e.preventDefault()}
+    >
       {editing ? (
         <AmountInput
           initialValue={sheetValue}
