@@ -100,7 +100,7 @@ class Budget extends Component {
 
   onAddGroup = () => {
     this.props.pushModal('new-category-group', {
-      onValidate: name => (!name ? ['Name is required.'] : []),
+      onValidate: name => (!name ? 'Name is required.' : null),
       onSubmit: name => {
         this.props.createGroup(name);
       },
@@ -109,7 +109,7 @@ class Budget extends Component {
 
   onAddCategory = groupId => {
     this.props.pushModal('new-category', {
-      onValidate: name => (!name ? ['Name is required.'] : []),
+      onValidate: name => (!name ? 'Name is required.' : null),
       onSubmit: name => {
         this.props.createCategory(name, groupId);
       },

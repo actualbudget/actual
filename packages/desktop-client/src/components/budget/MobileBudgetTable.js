@@ -911,7 +911,11 @@ const IncomeCategory = memo(function IncomeCategory({
     >
       <View>
         <Text
-          style={{ ...styles.smallText, ...nameTextStyle }}
+          style={{
+            ...styles.smallText,
+            ...nameTextStyle,
+            ...styles.underlinedText,
+          }}
           data-testid="name"
           {...tooltip.getOpenEvents()}
         >
@@ -1162,7 +1166,7 @@ function IncomeGroup({
               ? reportBudget.groupSumAmount(group.id)
               : rolloverBudget.groupSumAmount(group.id)
           }
-          nameTextStyle={{ fontWeight: '500' }}
+          nameTextStyle={{ fontWeight: '500', ...styles.underlinedText }}
           amountTextStyle={{ fontWeight: '500' }}
           style={{
             backgroundColor: theme.altTableBackground,

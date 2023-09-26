@@ -26,12 +26,12 @@ function SingleInput({
   inputPlaceholder,
 }: SingleInputProps) {
   const [value, setValue] = useState('');
-  const [errorMessages, setErrorMessages] = useState([]);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const _onSubmit = value => {
-    const errors = onValidate?.(value);
-    if (errors?.length > 0) {
-      setErrorMessages(errors);
+    const error = onValidate?.(value);
+    if (error) {
+      setErrorMessage(error);
       return;
     }
 
@@ -57,11 +57,7 @@ function SingleInput({
                   onEnter={e => _onSubmit(e.currentTarget.value)}
                 />
               </InitialFocus>
-              {errorMessages?.map((errorMessage, i) => (
-                <FormError key={i} style={{ paddingTop: 5 }}>
-                  * {errorMessage}
-                </FormError>
-              ))}
+              <FormError style={{ paddingTop: 5 }}>* {errorMessage}</FormError>
             </View>
           </View>
 
