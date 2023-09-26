@@ -327,9 +327,6 @@ function CategorySpendingCard() {
 function SankeyCard({ categories }) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
-  const [isCardHovered, setIsCardHovered] = useState(false);
-  const onCardHover = useCallback(() => setIsCardHovered(true));
-  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
 
   const params = useMemo(
     () => sankeySpreadsheet(start, end, categories),
@@ -339,11 +336,7 @@ function SankeyCard({ categories }) {
 
   return (
     <Card flex={2} to="/reports/sankey">
-      <View
-        style={{ flex: 1 }}
-        onPointerEnter={onCardHover}
-        onPointerLeave={onCardHoverEnd}
-      >
+      <View>
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <Block
@@ -381,6 +374,7 @@ export default function Overview() {
   let categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );
+  let sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   let accounts = useSelector(state => state.queries.accounts);
   let categories = useSelector(state => state.queries.categories.grouped);
@@ -399,9 +393,20 @@ export default function Overview() {
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
-        <SankeyCard categories={categories} />
       </View>
 
+      {sankeyFeatureFlag && (
+        <View
+          style={{
+            flex: '0 0 auto',
+            flexDirection: 'row',
+          }}
+        >
+          <SankeyCard categories={categories} />
+          <div style={{ flex: 1 }} />
+          <div style={{ flex: 1 }} />
+        </View>
+      )}
       {categorySpendingReportFeatureFlag && (
         <View
           style={{
