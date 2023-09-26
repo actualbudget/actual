@@ -54,7 +54,11 @@ function ToBudget({ toBudget, onClick }) {
     >
       <Label
         title={amount < 0 ? 'OVERBUDGETED' : 'TO BUDGET'}
-        style={{ color: theme.formInputText, flexShrink: 0 }}
+        style={{
+          ...styles.underlinedText,
+          color: theme.formInputText,
+          flexShrink: 0,
+        }}
       />
       <CellValue
         binding={toBudget}
@@ -167,7 +171,11 @@ function BudgetCell({
           <CellValue
             binding={binding}
             type="financial"
-            style={{ ...styles.smallText, ...textStyle }}
+            style={{
+              ...styles.smallText,
+              ...textStyle,
+              ...styles.underlinedText,
+            }}
             data-testid={name}
           />
         </View>
@@ -343,6 +351,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         <Text
           style={{
             ...styles.smallText,
+            ...styles.underlinedText,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -361,7 +370,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             >
               <View style={{ flexDirection: 'row' }}>
                 <InputWithContent
-                  style={{ flex: 1, margin: 10 }}
+                  style={{ flex: 1, margin: '10px 0px 10px 10px' }}
                   leftContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
@@ -376,7 +385,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 />
                 <Button
                   type="bare"
-                  style={{ margin: '10px 10px 10px 0px' }}
+                  style={{ padding: 10 }}
                   onPointerUp={tooltip.close}
                 >
                   <Close width={9} height={9} />
@@ -550,6 +559,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         <Text
           style={{
             ...styles.smallText,
+            ...styles.underlinedText,
             fontWeight: '500',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -569,7 +579,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
             >
               <View style={{ flexDirection: 'row' }}>
                 <InputWithContent
-                  style={{ flex: 1, margin: 10 }}
+                  style={{ flex: 1, margin: '10px 0px 10px 10px' }}
                   leftContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
@@ -582,7 +592,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
                 />
                 <Button
                   type="bare"
-                  style={{ margin: '10px 10px 10px 0px' }}
+                  style={{ padding: 10 }}
                   onPointerUp={tooltip.close}
                 >
                   <Close width={9} height={9} />
@@ -780,7 +790,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             >
               <View style={{ flexDirection: 'row' }}>
                 <InputWithContent
-                  style={{ flex: 1, margin: 10 }}
+                  style={{ flex: 1, margin: '10px 0px 10px 10px' }}
                   leftContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
@@ -793,7 +803,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
                 />
                 <Button
                   type="bare"
-                  style={{ margin: '10px 10px 10px 0px' }}
+                  style={{ padding: 10 }}
                   onPointerUp={tooltip.close}
                 >
                   <Close width={9} height={9} />
@@ -916,7 +926,7 @@ const IncomeCategory = memo(function IncomeCategory({
             >
               <View style={{ flexDirection: 'row' }}>
                 <InputWithContent
-                  style={{ flex: 1, margin: 10 }}
+                  style={{ flex: 1, margin: '10px 0px 10px 10px' }}
                   leftContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
@@ -931,7 +941,7 @@ const IncomeCategory = memo(function IncomeCategory({
                 />
                 <Button
                   type="bare"
-                  style={{ margin: '10px 10px 10px 0px' }}
+                  style={{ padding: 10 }}
                   onPointerUp={tooltip.close}
                 >
                   <Close width={9} height={9} />
