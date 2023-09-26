@@ -116,21 +116,8 @@ class Budget extends Component {
     });
   };
 
-  onSaveGroup = async group => {
-    if (group.id === 'new') {
-      let id = await this.props.createGroup(group.name);
-      this.setState(state => ({
-        isAddingGroup: false,
-        categoryGroups: addGroup(state.categoryGroups, {
-          ...group,
-          is_income: 0,
-          categories: group.categories || [],
-          id,
-        }),
-      }));
-    } else {
-      this.props.updateGroup(group);
-    }
+  onSaveGroup = group => {
+    this.props.updateGroup(group);
   };
 
   onDeleteGroup = async groupId => {
@@ -156,25 +143,8 @@ class Budget extends Component {
     }
   };
 
-  onSaveCategory = async category => {
-    if (category.id === 'new') {
-      let id = await this.props.createCategory(
-        category.name,
-        category.cat_group,
-        category.is_income,
-      );
-
-      this.setState(state => ({
-        newCategoryForGroup: null,
-        categoryGroups: addCategory(state.categoryGroups, {
-          ...category,
-          is_income: category.is_income ? 1 : 0,
-          id,
-        }),
-      }));
-    } else {
-      this.props.updateCategory(category);
-    }
+  onSaveCategory = category => {
+    this.props.updateCategory(category);
   };
 
   onDeleteCategory = async categoryId => {
