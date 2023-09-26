@@ -10,6 +10,8 @@ import {
   VictoryGroup,
 } from 'victory';
 
+import { LineChart, Line } from 'recharts';
+
 import { type CSSProperties } from '../../../style';
 import { chartTheme } from '../chart-theme';
 import Container from '../Container';
@@ -32,6 +34,8 @@ function NetWorthGraph({
   domain,
 }: NetWorthGraphProps) {
   const Chart = compact ? VictoryGroup : VictoryChart;
+  console.log(graphData);
+  
 
   return (
     <Container

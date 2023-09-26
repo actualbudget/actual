@@ -64,5 +64,8 @@
   "browserslist": [
     "electron 24.0",
     "defaults"
-  ]
+  ],
+  "dependencies": {
+    "recharts": "^2.8.0"
+  }
 }
