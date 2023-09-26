@@ -117,7 +117,7 @@ function SidebarGroup({
                       onShowNewCategory(group.id);
                     } else if (type === 'delete') {
                       onDelete(group.id);
-                    } else if (type === 'toggleVisibility') {
+                    } else if (type === 'toggle-visibility') {
                       onSave({ ...group, hidden: !group.hidden });
                     }
                     setMenuOpen(false);
@@ -125,7 +125,7 @@ function SidebarGroup({
                   items={[
                     { name: 'add-category', text: 'Add category' },
                     {
-                      name: 'toggleVisibility',
+                      name: 'toggle-visibility',
                       text: group.hidden ? 'Show' : 'Hide',
                     },
                     { name: 'rename', text: 'Rename' },

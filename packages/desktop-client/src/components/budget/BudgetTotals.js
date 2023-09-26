@@ -69,7 +69,7 @@ const BudgetTotals = memo(function BudgetTotals({
             >
               <Menu
                 onMenuSelect={type => {
-                  if (type === 'toggleVisibility') {
+                  if (type === 'toggle-visibility') {
                     toggleHiddenCategories();
                   } else if (type === 'expandAllCategories') {
                     expandAllCategories();
@@ -80,7 +80,7 @@ const BudgetTotals = memo(function BudgetTotals({
                 }}
                 items={[
                   {
-                    name: 'toggleVisibility',
+                    name: 'toggle-visibility',
                     text: 'Toggle hidden',
                   },
                   {

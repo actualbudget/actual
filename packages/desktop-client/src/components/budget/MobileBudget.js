@@ -5,6 +5,7 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   addCategory,
+  addGroup,
   moveCategory,
   moveCategoryGroup,
 } from 'loot-core/src/shared/categories';
@@ -24,15 +25,13 @@ class Budget extends Component {
   constructor(props) {
     super(props);
 
-    this.summary = 0;
-
     const currentMonth = monthUtils.currentMonth();
     this.state = {
       bounds: { start: currentMonth, end: currentMonth },
       currentMonth: currentMonth,
       initialized: false,
       editMode: false,
-      categoryGroups: null,
+      categoryGroups: [],
     };
   }
 
@@ -72,7 +71,7 @@ class Budget extends Component {
   }
 
   componentWillUnmount() {
-    // this.cleanup();
+    this.cleanup();
   }
 
   prewarmMonth = async (month, type = null) => {
@@ -101,23 +100,100 @@ class Budget extends Component {
     this.props.applyBudgetAction(currentMonth, type, this.state.bounds);
   };
 
-  onAddCategory = groupId => {
-    this.props.navigation.navigate('AddCategoryModal', {
-      groupId,
-      onAdd: async name => {
-        let id = await this.props.createCategory(name, groupId);
-        let { categoryGroups } = this.state;
-
-        this.setState({
-          categoryGroups: addCategory(categoryGroups, {
-            name,
-            cat_group: groupId,
-            is_income: 0,
-            id,
-          }),
-        });
+  onAddGroup = () => {
+    this.props.pushModal('new-category-group', {
+      onSubmit: name => {
+        this.props.createGroup(name);
       },
     });
+  };
+
+  onAddCategory = groupId => {
+    this.props.pushModal('new-category', {
+      onSubmit: name => {
+        this.props.createCategory(name, groupId);
+      },
+    });
+  };
+
+  onSaveGroup = async group => {
+    if (group.id === 'new') {
+      let id = await this.props.createGroup(group.name);
+      this.setState(state => ({
+        isAddingGroup: false,
+        categoryGroups: addGroup(state.categoryGroups, {
+          ...group,
+          is_income: 0,
+          categories: group.categories || [],
+          id,
+        }),
+      }));
+    } else {
+      this.props.updateGroup(group);
+    }
+  };
+
+  onDeleteGroup = async groupId => {
+    let group = this.state.categoryGroups?.find(g => g.id === groupId);
+
+    let mustTransfer = false;
+    for (let category of group.categories) {
+      if (await send('must-category-transfer', { id: category.id })) {
+        mustTransfer = true;
+        break;
+      }
+    }
+
+    if (mustTransfer) {
+      this.props.pushModal('confirm-category-delete', {
+        group: groupId,
+        onDelete: transferCategory => {
+          this.props.deleteGroup(groupId, transferCategory);
+        },
+      });
+    } else {
+      this.props.deleteGroup(groupId);
+    }
+  };
+
+  onSaveCategory = async category => {
+    if (category.id === 'new') {
+      let id = await this.props.createCategory(
+        category.name,
+        category.cat_group,
+        category.is_income,
+      );
+
+      this.setState(state => ({
+        newCategoryForGroup: null,
+        categoryGroups: addCategory(state.categoryGroups, {
+          ...category,
+          is_income: category.is_income ? 1 : 0,
+          id,
+        }),
+      }));
+    } else {
+      this.props.updateCategory(category);
+    }
+  };
+
+  onDeleteCategory = async categoryId => {
+    const mustTransfer = await send('must-category-transfer', {
+      id: categoryId,
+    });
+
+    if (mustTransfer) {
+      this.props.pushModal('confirm-category-delete', {
+        category: categoryId,
+        onDelete: transferCategory => {
+          if (categoryId !== transferCategory) {
+            this.props.deleteCategory(categoryId, transferCategory);
+          }
+        },
+      });
+    } else {
+      this.props.deleteCategory(categoryId);
+    }
   };
 
   onReorderCategory = (id, { inGroup, aroundCategory }) => {
@@ -281,11 +357,17 @@ class Budget extends Component {
             onShowBudgetDetails={this.onShowBudgetDetails}
             onPrevMonth={this.onPrevMonth}
             onNextMonth={this.onNextMonth}
+            onSaveGroup={this.onSaveGroup}
+            onDeleteGroup={this.onDeleteGroup}
+            onAddGroup={this.onAddGroup}
             onAddCategory={this.onAddCategory}
+            onSaveCategory={this.onSaveCategory}
+            onDeleteCategory={this.onDeleteCategory}
             onReorderCategory={this.onReorderCategory}
             onReorderGroup={this.onReorderGroup}
             onOpenActionSheet={() => {}} //this.onOpenActionSheet}
             onBudgetAction={applyBudgetAction}
+            savePrefs={this.props.savePrefs}
           />
         )}
       </SyncRefresh>

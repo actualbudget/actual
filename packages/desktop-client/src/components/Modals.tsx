@@ -26,6 +26,7 @@ import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
+import SingleInput from './modals/SingleInput';
 import DiscoverSchedules from './schedules/DiscoverSchedules';
 import ScheduleDetails from './schedules/EditSchedule';
 import ScheduleLink from './schedules/LinkSchedule';
@@ -218,6 +219,28 @@ export default function Modals() {
               key={name}
               modalProps={modalProps}
               name={options.name}
+              onSubmit={options.onSubmit}
+            />
+          );
+
+        case 'new-category':
+          return (
+            <SingleInput
+              modalProps={modalProps}
+              title="New Category"
+              inputPlaceholder="Name"
+              buttonText="Add"
+              onSubmit={options.onSubmit}
+            />
+          );
+
+        case 'new-category-group':
+          return (
+            <SingleInput
+              modalProps={modalProps}
+              title="New Category Group"
+              inputPlaceholder="Name"
+              buttonText="Add"
               onSubmit={options.onSubmit}
             />
           );

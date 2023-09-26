@@ -1,5 +1,5 @@
 import React, { memo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 // import {
 //   RectButton,
 //   PanGestureHandler,
@@ -10,18 +10,21 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import memoizeOne from 'memoize-one';
 
-import { savePrefs } from 'loot-core/src/client/actions';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
+import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+import EditPencil from '../../icons/v1/EditPencil';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Card from '../common/Card';
+import InputWithContent from '../common/InputWithContent';
 import Label from '../common/Label';
+import Menu from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
 import { useServerURL } from '../ServerContext';
@@ -30,6 +33,7 @@ import NamespaceContext from '../spreadsheet/NamespaceContext';
 import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { SyncButton } from '../Titlebar';
+import { Tooltip, useTooltip } from '../tooltips';
 import { AmountInput } from '../util/AmountInput';
 // import {
 //   AmountAccessoryContext,
@@ -118,7 +122,7 @@ function BudgetCell({
   categoryId,
   month,
   onBudgetAction,
-  onEdit,
+  onEditing,
 }) {
   let sheetValue = useSheetValue(binding);
 
@@ -130,7 +134,7 @@ function BudgetCell({
   }
 
   function onAmountClick(e) {
-    onEdit?.(categoryId);
+    onEditing?.(categoryId);
   }
 
   return (
@@ -149,7 +153,8 @@ function BudgetCell({
           focused={editing}
           textStyle={{ ...styles.smallText, ...textStyle }}
           onChange={updateBudgetAmount}
-          onEdit={onEdit}
+          onEdit={onEditing}
+          onBlur={() => onEditing?.(null)}
         />
       ) : (
         <View
@@ -171,7 +176,7 @@ function BudgetCell({
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function BudgetGroupPreview({ group, pending, style }) {
+function ExpenseGroupPreview({ group, pending, style }) {
   //   let opacity = useMemo(() => new Animated.Value(0), []);
 
   //   useEffect(() => {
@@ -206,10 +211,10 @@ function BudgetGroupPreview({ group, pending, style }) {
         opacity: pending ? 1 : 0.4,
       }}
     >
-      <TotalsRow group={group} blank={true} />
+      <ExpenseGroupTotals group={group} blank={true} />
 
       {group.categories.map((cat, index) => (
-        <BudgetCategory
+        <ExpenseCategory
           key={cat.id}
           category={cat}
           blank={true}
@@ -222,7 +227,7 @@ function BudgetGroupPreview({ group, pending, style }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function BudgetCategoryPreview({ name, pending, style }) {
+function ExpenseCategoryPreview({ name, pending, style }) {
   return (
     // <Animated.View
     //   style={[
@@ -254,7 +259,7 @@ function BudgetCategoryPreview({ name, pending, style }) {
   );
 }
 
-const BudgetCategory = memo(function BudgetCategory({
+const ExpenseCategory = memo(function ExpenseCategory({
   category,
   editing,
   index,
@@ -263,7 +268,9 @@ const BudgetCategory = memo(function BudgetCategory({
   blank,
   style,
   month,
-  onEdit,
+  onEditingBudget,
+  onSave,
+  onDelete,
   onBudgetAction,
   show3Cols,
   showBudgetedCol,
@@ -285,23 +292,98 @@ const BudgetCategory = memo(function BudgetCategory({
   //   }).start();
   // }, [editMode]);
 
+  let [categoryName, setCategoryName] = useState(category.name);
+  let [isHidden, setIsHidden] = useState(category.hidden);
+
   let budgeted = rolloverBudget.catBudgeted(category.id);
   let balance = rolloverBudget.catBalance(category.id);
   let spent = rolloverBudget.catSumAmount(category.id);
 
-  let content = !category.hidden && (
+  let tooltip = useTooltip();
+
+  let onTooltipClosed = () => {
+    tooltip.close();
+    onSave?.({
+      ...category,
+      name: categoryName,
+    });
+  };
+
+  let onMenuSelect = type => {
+    tooltip.close();
+    switch (type) {
+      case 'toggle-visibility':
+        setIsHidden(!isHidden);
+        onSave?.({
+          ...category,
+          hidden: !isHidden,
+        });
+        break;
+      case 'delete':
+        onDelete?.(category.id);
+        break;
+      default:
+        throw new Error(`Unrecognized category menu type: ${type}`);
+    }
+  };
+
+  let content = (
     <ListItem
       style={{
         backgroundColor: editing ? theme.altTableTextEditing : 'transparent',
         borderBottomWidth: 0,
         borderTopWidth: index > 0 ? 1 : 0,
+        opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}
       data-testid="row"
     >
       <View style={{ flex: 1 }}>
-        <Text style={styles.smallText} data-testid="category-name">
+        <Text
+          style={{
+            ...styles.smallText,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+          data-testid="category-name"
+          {...tooltip.getOpenEvents()}
+        >
           {category.name}
+          {tooltip.isOpen && (
+            <Tooltip
+              position="bottom-left"
+              width={250}
+              offset={5}
+              style={{ padding: 0 }}
+              onClose={onTooltipClosed}
+            >
+              <View style={{ padding: 10 }}>
+                <InputWithContent
+                  value={categoryName}
+                  rightContent={
+                    <Button type="bare" disabled>
+                      <EditPencil width={9} height={9} />
+                    </Button>
+                  }
+                  onUpdate={setCategoryName}
+                />
+              </View>
+              <Menu
+                onMenuSelect={onMenuSelect}
+                items={[
+                  {
+                    name: 'toggle-visibility',
+                    text: isHidden ? 'Show' : 'Hide',
+                  },
+                  {
+                    name: 'delete',
+                    text: 'Delete',
+                  },
+                ]}
+              />
+            </Tooltip>
+          )}
         </Text>
       </View>
       <View
@@ -321,7 +403,7 @@ const BudgetCategory = memo(function BudgetCategory({
             categoryId={category.id}
             month={month}
             onBudgetAction={onBudgetAction}
-            onEdit={onEdit}
+            onEditing={onEditingBudget}
           />
         ) : null}
         {show3Cols || !showBudgetedCol ? (
@@ -385,11 +467,13 @@ const BudgetCategory = memo(function BudgetCategory({
   // </Draggable>
 });
 
-const TotalsRow = memo(function TotalsRow({
+const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   group,
   editMode,
   blank,
   onAddCategory,
+  onSave,
+  onDelete,
   show3Cols,
   showBudgetedCol,
 }) {
@@ -404,21 +488,102 @@ const TotalsRow = memo(function TotalsRow({
   // let animation = new Animated.Value(editMode || blank ? 0 : 1);
   let opacity = editMode || blank ? 0 : 1;
 
+  let [groupName, setGroupName] = useState(group.name);
+  let [isHidden, setIsHidden] = useState(group.hidden);
+
+  let tooltip = useTooltip();
+
+  let onTooltipClosed = () => {
+    tooltip.close();
+    onSave?.({
+      ...group,
+      name: groupName,
+    });
+  };
+
+  let onMenuSelect = type => {
+    tooltip.close();
+    switch (type) {
+      case 'add-category':
+        onAddCategory?.(group.id);
+        break;
+      case 'toggle-visibility':
+        setIsHidden(!isHidden);
+        onSave?.({
+          ...group,
+          hidden: !isHidden,
+        });
+        break;
+      case 'delete':
+        onDelete?.(group.id);
+        break;
+      default:
+        throw new Error(`Unrecognized group menu type: ${type}`);
+    }
+  };
+
   let content = (
     <ListItem
       style={{
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: theme.tableHeaderBackground,
+        opacity: isHidden ? 0.5 : undefined,
       }}
       data-testid="totals"
     >
       <View style={{ flex: 1 }}>
         <Text
-          style={{ ...styles.smallText, fontWeight: '500' }}
+          style={{
+            ...styles.smallText,
+            fontWeight: '500',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
           data-testid="name"
+          {...tooltip.getOpenEvents()}
         >
           {group.name}
+          {tooltip.isOpen && (
+            <Tooltip
+              position="bottom-left"
+              width={250}
+              offset={5}
+              style={{ padding: 0 }}
+              onClose={onTooltipClosed}
+            >
+              <View style={{ padding: 10 }}>
+                <InputWithContent
+                  rightContent={
+                    <Button type="bare" disabled>
+                      <EditPencil width={9} height={9} />
+                    </Button>
+                  }
+                  value={group.name}
+                  onUpdate={setGroupName}
+                />
+              </View>
+              <Menu
+                onMenuSelect={onMenuSelect}
+                items={[
+                  Menu.line,
+                  {
+                    name: 'add-category',
+                    text: 'Add category',
+                  },
+                  {
+                    name: 'toggle-visibility',
+                    text: isHidden ? 'Show' : 'Hide',
+                  },
+                  {
+                    name: 'delete',
+                    text: 'Delete',
+                  },
+                ]}
+              />
+            </Tooltip>
+          )}
         </Text>
       </View>
       {/* <Animated.View
@@ -518,18 +683,51 @@ const TotalsRow = memo(function TotalsRow({
   // </Droppable>
 });
 
-const IncomeCategory = memo(function IncomeCategory({
-  name,
+const IncomeGroupTotals = memo(function IncomeGroupTotals({
+  group,
   budget,
-  hidden,
   balance,
   style,
   nameTextStyle,
   amountTextStyle,
+  onAddCategory,
+  onSave,
+  onDelete,
 }) {
-  if (hidden) {
-    return null;
-  }
+  let [groupName, setGroupName] = useState(group.name);
+  let [isHidden, setIsHidden] = useState(group.name);
+
+  let tooltip = useTooltip();
+
+  let onTooltipClosed = () => {
+    tooltip.close();
+    onSave?.({
+      ...group,
+      name: groupName,
+    });
+  };
+
+  let onMenuSelect = type => {
+    tooltip.close();
+    switch (type) {
+      case 'add-category':
+        onAddCategory?.(group.id);
+        break;
+      case 'toggle-visibility':
+        setIsHidden(!isHidden);
+        onSave?.({
+          ...group,
+          hidden: !isHidden,
+        });
+        break;
+      case 'delete':
+        onDelete?.(group.id);
+        break;
+      default:
+        throw new Error(`Unrecognized group menu type: ${type}`);
+    }
+  };
+
   return (
     <ListItem
       style={{
@@ -537,15 +735,57 @@ const IncomeCategory = memo(function IncomeCategory({
         alignItems: 'center',
         padding: 10,
         backgroundColor: 'transparent',
+        opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}
     >
-      <View style={{ flex: 1 }}>
+      <View>
         <Text
           style={{ ...styles.smallText, ...nameTextStyle }}
           data-testid="name"
+          {...tooltip.getOpenEvents()}
         >
-          {name}
+          {group.name}
+          {tooltip.isOpen && (
+            <Tooltip
+              position="bottom-left"
+              width={250}
+              offset={5}
+              style={{ padding: 0 }}
+              onClose={onTooltipClosed}
+            >
+              <View style={{ padding: 10 }}>
+                <InputWithContent
+                  value={groupName}
+                  focused={true}
+                  rightContent={
+                    <Button type="bare" disabled>
+                      <EditPencil width={9} height={9} />
+                    </Button>
+                  }
+                  onUpdate={setGroupName}
+                />
+              </View>
+              <Menu
+                onMenuSelect={onMenuSelect}
+                items={[
+                  Menu.line,
+                  {
+                    name: 'add-category',
+                    text: 'Add category',
+                  },
+                  {
+                    name: 'toggle-visibility',
+                    text: isHidden ? 'Show' : 'Hide',
+                  },
+                  {
+                    name: 'delete',
+                    text: 'Delete',
+                  },
+                ]}
+              />
+            </Tooltip>
+          )}
         </Text>
       </View>
       {budget && (
@@ -553,9 +793,9 @@ const IncomeCategory = memo(function IncomeCategory({
           binding={budget}
           style={{
             ...styles.smallText,
-            width: 90,
             textAlign: 'right',
             ...amountTextStyle,
+            flex: 1,
           }}
           type="financial"
         />
@@ -564,9 +804,131 @@ const IncomeCategory = memo(function IncomeCategory({
         binding={balance}
         style={{
           ...styles.smallText,
-          width: 90,
           textAlign: 'right',
           ...amountTextStyle,
+          flex: 1,
+        }}
+        type="financial"
+      />
+    </ListItem>
+  );
+});
+
+const IncomeCategory = memo(function IncomeCategory({
+  category,
+  budget,
+  balance,
+  style,
+  nameTextStyle,
+  amountTextStyle,
+  onSave,
+  onDelete,
+}) {
+  let [categoryName, setCategoryName] = useState(category.name);
+  let [isHidden, setIsHidden] = useState(category.hidden);
+
+  let tooltip = useTooltip();
+
+  let onTooltipClosed = () => {
+    tooltip.close();
+    onSave?.({
+      ...category,
+      name: categoryName,
+    });
+  };
+
+  let onMenuSelect = type => {
+    tooltip.close();
+    switch (type) {
+      case 'toggle-visibility':
+        setIsHidden(!isHidden);
+        onSave?.({
+          ...category,
+          hidden: !isHidden,
+        });
+        break;
+      case 'delete':
+        onDelete?.(category.id);
+        break;
+      default:
+        throw new Error(`Unrecognized category menu type: ${type}`);
+    }
+  };
+
+  return (
+    <ListItem
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: 'transparent',
+        opacity: isHidden ? 0.5 : undefined,
+        ...style,
+      }}
+    >
+      <View>
+        <Text
+          style={{ ...styles.smallText, ...nameTextStyle }}
+          data-testid="name"
+          {...tooltip.getOpenEvents()}
+        >
+          {category.name}
+          {tooltip.isOpen && (
+            <Tooltip
+              position="bottom-left"
+              width={250}
+              offset={5}
+              style={{ padding: 0 }}
+              onClose={onTooltipClosed}
+            >
+              <View style={{ padding: 10 }}>
+                <InputWithContent
+                  value={categoryName}
+                  rightContent={
+                    <Button type="bare" disabled>
+                      <EditPencil width={9} height={9} />
+                    </Button>
+                  }
+                  onUpdate={setCategoryName}
+                />
+              </View>
+              <Menu
+                onMenuSelect={onMenuSelect}
+                items={[
+                  Menu.line,
+                  {
+                    name: 'toggle-visibility',
+                    text: isHidden ? 'Show' : 'Hide',
+                  },
+                  {
+                    name: 'delete',
+                    text: 'Delete',
+                  },
+                ]}
+              />
+            </Tooltip>
+          )}
+        </Text>
+      </View>
+      {budget && (
+        <CellValue
+          binding={budget}
+          style={{
+            ...styles.smallText,
+            textAlign: 'right',
+            ...amountTextStyle,
+            flex: 1,
+          }}
+          type="financial"
+        />
+      )}
+      <CellValue
+        binding={balance}
+        style={{
+          ...styles.smallText,
+          textAlign: 'right',
+          ...amountTextStyle,
+          flex: 1,
         }}
         type="financial"
       />
@@ -613,19 +975,24 @@ const IncomeCategory = memo(function IncomeCategory({
 //   );
 // }
 
-const BudgetGroup = memo(function BudgetGroup({
+const ExpenseGroup = memo(function ExpenseGroup({
   group,
   editingId,
+  onEditingCategoryBudget,
   editMode,
   // gestures,
   month,
-  onEditCategory,
+  onSaveCategory,
+  onDeleteCategory,
   // onReorderCategory,
   // onReorderGroup,
   onAddCategory,
+  onSave,
+  onDelete,
   onBudgetAction,
   showBudgetedCol,
   show3Cols,
+  showHiddenCategories,
 }) {
   function editable(content) {
     if (!editMode) {
@@ -656,10 +1023,6 @@ const BudgetGroup = memo(function BudgetGroup({
     // </Draggable>
   }
 
-  if (group.hidden) {
-    return null;
-  }
-
   return editable(
     <Card
       style={{
@@ -667,7 +1030,7 @@ const BudgetGroup = memo(function BudgetGroup({
         marginBottom: 7,
       }}
     >
-      <TotalsRow
+      <ExpenseGroupTotals
         group={group}
         showBudgetedCol={showBudgetedCol}
         budgeted={rolloverBudget.groupBudgeted(group.id)}
@@ -675,33 +1038,48 @@ const BudgetGroup = memo(function BudgetGroup({
         show3Cols={show3Cols}
         editMode={editMode}
         onAddCategory={onAddCategory}
+        onSave={onSave}
+        onDelete={onDelete}
         // onReorderCategory={onReorderCategory}
       />
 
-      {group.categories.map((category, index) => {
-        const editing = editingId === category.id;
-        return (
-          <BudgetCategory
-            show3Cols={show3Cols}
-            key={category.id}
-            index={index}
-            category={category}
-            showBudgetedCol={showBudgetedCol}
-            editing={editing}
-            editMode={editMode}
-            // gestures={gestures}
-            month={month}
-            onEdit={onEditCategory}
-            // onReorder={onReorderCategory}
-            onBudgetAction={onBudgetAction}
-          />
-        );
-      })}
+      {group.categories
+        .filter(category => !category.hidden || showHiddenCategories)
+        .map((category, index) => {
+          const editing = editingId === category.id;
+          return (
+            <ExpenseCategory
+              show3Cols={show3Cols}
+              key={category.id}
+              index={index}
+              category={category}
+              showBudgetedCol={showBudgetedCol}
+              editing={editing}
+              onEditingBudget={onEditingCategoryBudget}
+              editMode={editMode}
+              // gestures={gestures}
+              month={month}
+              onSave={onSaveCategory}
+              onDelete={onDeleteCategory}
+              // onReorder={onReorderCategory}
+              onBudgetAction={onBudgetAction}
+            />
+          );
+        })}
     </Card>,
   );
 });
 
-function IncomeBudgetGroup({ type, group }) {
+function IncomeGroup({
+  type,
+  group,
+  onSave,
+  onDelete,
+  onAddCategory,
+  onSaveCategory,
+  onDeleteCategory,
+  showHiddenCategories,
+}) {
   return (
     <View>
       <View
@@ -719,8 +1097,8 @@ function IncomeBudgetGroup({ type, group }) {
       </View>
 
       <Card style={{ marginTop: 0 }}>
-        <IncomeCategory
-          name={group.name}
+        <IncomeGroupTotals
+          group={group}
           budget={
             type === 'report' ? reportBudget.groupBudgeted(group.id) : null
           }
@@ -734,27 +1112,35 @@ function IncomeBudgetGroup({ type, group }) {
           style={{
             backgroundColor: theme.altTableBackground,
           }}
+          onAddCategory={onAddCategory}
+          onSave={onSave}
+          onDelete={onDelete}
         />
 
-        {group.categories.map((category, index) => {
-          return (
-            <IncomeCategory
-              key={category.id}
-              type={type}
-              name={category.name}
-              hidden={category.hidden}
-              budget={
-                type === 'report' ? reportBudget.catBudgeted(category.id) : null
-              }
-              balance={
-                type === 'report'
-                  ? reportBudget.catSumAmount(category.id)
-                  : rolloverBudget.catSumAmount(category.id)
-              }
-              index={index}
-            />
-          );
-        })}
+        {group.categories
+          .filter(category => !category.hidden || showHiddenCategories)
+          .map((category, index) => {
+            return (
+              <IncomeCategory
+                key={category.id}
+                category={category}
+                type={type}
+                budget={
+                  type === 'report'
+                    ? reportBudget.catBudgeted(category.id)
+                    : null
+                }
+                balance={
+                  type === 'report'
+                    ? reportBudget.catSumAmount(category.id)
+                    : rolloverBudget.catSumAmount(category.id)
+                }
+                index={index}
+                onSave={onSaveCategory}
+                onDelete={onDeleteCategory}
+              />
+            );
+          })}
       </Card>
     </View>
   );
@@ -764,60 +1150,95 @@ function BudgetGroups({
   type,
   categoryGroups,
   editingId,
+  onEditingCategoryBudget,
   editMode,
   gestures,
   month,
-  onEditCategory,
+  onSaveCategory,
+  onDeleteCategory,
   onAddCategory,
+  onAddGroup,
+  onSaveGroup,
+  onDeleteGroup,
   onReorderCategory,
   onReorderGroup,
   onBudgetAction,
   showBudgetedCol,
   show3Cols,
+  showHiddenCategories,
 }) {
-  const getGroups = memoizeOne(groups => {
+  const separateGroups = memoizeOne(groups => {
     return {
       incomeGroup: groups.find(group => group.is_income),
       expenseGroups: groups.filter(group => !group.is_income),
     };
   });
 
-  const { incomeGroup, expenseGroups } = getGroups(categoryGroups);
+  const { incomeGroup, expenseGroups } = separateGroups(categoryGroups);
 
   return (
     <View
       data-testid="budget-groups"
       style={{ flex: '1 0 auto', overflowY: 'auto', paddingBottom: 15 }}
     >
-      {expenseGroups.map(group => {
-        return (
-          <BudgetGroup
-            key={group.id}
-            group={group}
-            editingId={editingId}
-            showBudgetedCol={showBudgetedCol}
-            editMode={editMode}
-            gestures={gestures}
-            month={month}
-            onEditCategory={onEditCategory}
-            onAddCategory={onAddCategory}
-            onReorderCategory={onReorderCategory}
-            onReorderGroup={onReorderGroup}
-            onBudgetAction={onBudgetAction}
-            show3Cols={show3Cols}
-          />
-        );
-      })}
+      {expenseGroups
+        .filter(group => !group.hidden || showHiddenCategories)
+        .map(group => {
+          return (
+            <ExpenseGroup
+              key={group.id}
+              group={group}
+              editingId={editingId}
+              showBudgetedCol={showBudgetedCol}
+              editMode={editMode}
+              gestures={gestures}
+              month={month}
+              onEditingCategoryBudget={onEditingCategoryBudget}
+              onSaveCategory={onSaveCategory}
+              onDeleteCategory={onDeleteCategory}
+              onAddCategory={onAddCategory}
+              onSave={onSaveGroup}
+              onDelete={onDeleteGroup}
+              onReorderCategory={onReorderCategory}
+              onReorderGroup={onReorderGroup}
+              onBudgetAction={onBudgetAction}
+              show3Cols={show3Cols}
+              showHiddenCategories={showHiddenCategories}
+            />
+          );
+        })}
 
-      {incomeGroup && <IncomeBudgetGroup type={type} group={incomeGroup} />}
+      <View
+        style={{
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+        }}
+      >
+        <Button onPointerUp={onAddGroup} style={{ fontSize: 12, margin: 10 }}>
+          Add Group
+        </Button>
+      </View>
+
+      {incomeGroup && (
+        <IncomeGroup
+          type={type}
+          group={incomeGroup}
+          onSave={onSaveGroup}
+          onDelete={onDeleteGroup}
+          onAddCategory={onAddCategory}
+          onSaveCategory={onSaveCategory}
+          onDeleteCategory={onDeleteCategory}
+          showHiddenCategories={showHiddenCategories}
+        />
+      )}
     </View>
   );
 }
 
 export function BudgetTable(props) {
-  const [editingCategory, setEditingCategory] = useState(null);
-  function onEditCategory(id) {
-    setEditingCategory(id);
+  const [editingCategoryBudgetId, setEditingCategoryBudget] = useState(null);
+  function onEditingCategoryBudget(id) {
+    setEditingCategoryBudget(id);
   }
   const { width } = useResponsive();
   const show3Cols = width >= 360;
@@ -830,13 +1251,19 @@ export function BudgetTable(props) {
     // refreshControl,
     onPrevMonth,
     onNextMonth,
+    onSaveGroup,
+    onDeleteGroup,
+    onAddGroup,
     onAddCategory,
+    onSaveCategory,
+    onDeleteCategory,
     onEditMode,
     onReorderCategory,
     onReorderGroup,
     onShowBudgetDetails,
     onOpenActionSheet,
     onBudgetAction,
+    savePrefs,
   } = props;
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
@@ -844,9 +1271,11 @@ export function BudgetTable(props) {
   let format = useFormat();
 
   const mobileShowBudgetedColPref = useSelector(state => {
-    return (
-      (state.prefs.local && state.prefs.local.toggleMobileDisplayPref) || true
-    );
+    return state.prefs?.local?.toggleMobileDisplayPref || true;
+  });
+
+  const showHiddenCategories = useSelector(state => {
+    return state.prefs?.local?.['budget.showHiddenCategories'] || false;
   });
 
   let [showBudgetedCol, setShowBudgetedCol] = useState(
@@ -854,15 +1283,13 @@ export function BudgetTable(props) {
       !document.cookie.match(/mobileShowBudgetedColPref=true/),
   );
 
-  let dispatch = useDispatch();
-
   function toggleDisplay() {
     setShowBudgetedCol(!showBudgetedCol);
     if (!showBudgetedCol) {
-      // remember the pref indefinitely
-      dispatch(savePrefs({ mobileShowBudgetedColPref: true }));
+      savePrefs({ mobileShowBudgetedColPref: true });
     }
   }
+
   let buttonStyle = {
     padding: 0,
     backgroundColor: 'transparent',
@@ -883,6 +1310,7 @@ export function BudgetTable(props) {
           onOpenActionSheet={onOpenActionSheet}
           onPrevMonth={onPrevMonth}
           onNextMonth={onNextMonth}
+          savePrefs={savePrefs}
         />
         <View
           style={{
@@ -995,14 +1423,20 @@ export function BudgetTable(props) {
               <BudgetGroups
                 type={type}
                 categoryGroups={categoryGroups}
-                editingId={editingCategory}
+                editingId={editingCategoryBudgetId}
                 editMode={editMode}
                 showBudgetedCol={showBudgetedCol}
                 show3Cols={show3Cols}
+                showHiddenCategories={showHiddenCategories}
                 // gestures={gestures}
                 month={month}
-                onEditCategory={onEditCategory}
+                onEditingCategoryBudget={onEditingCategoryBudget}
+                onSaveCategory={onSaveCategory}
+                onDeleteCategory={onDeleteCategory}
                 onAddCategory={onAddCategory}
+                onAddGroup={onAddGroup}
+                onSaveGroup={onSaveGroup}
+                onDeleteGroup={onDeleteGroup}
                 onReorderCategory={onReorderCategory}
                 onReorderGroup={onReorderGroup}
                 onBudgetAction={onBudgetAction}
@@ -1024,11 +1458,17 @@ export function BudgetTable(props) {
                 categoryGroups={categoryGroups}
                 showBudgetedCol={showBudgetedCol}
                 show3Cols={show3Cols}
-                editingId={editingCategory}
+                showHiddenCategories={showHiddenCategories}
+                editingId={editingCategoryBudgetId}
                 editMode={editMode}
                 // gestures={gestures}
-                onEditCategory={onEditCategory}
+                onEditingCategoryBudget={onEditingCategoryBudget}
+                onSaveCategory={onSaveCategory}
+                onDeleteCategory={onDeleteCategory}
                 onAddCategory={onAddCategory}
+                onAddGroup={onAddGroup}
+                onSaveGroup={onSaveGroup}
+                onDeleteGroup={onDeleteGroup}
                 onReorderCategory={onReorderCategory}
                 onReorderGroup={onReorderGroup}
                 onBudgetAction={onBudgetAction}
@@ -1056,21 +1496,9 @@ function BudgetHeader({
   toggleDisplay,
   showBudgetedCol,
   show3Cols,
+  savePrefs,
 }) {
   let serverURL = useServerURL();
-
-  // let [menuOpen, setMenuOpen] = useState(false);
-
-  // let onMenuSelect = type => {
-  //   setMenuOpen(false);
-
-  //   switch (type) {
-  //     case 'sync':
-  //       sync();
-  //       break;
-  //     default:
-  //   }
-  // };
 
   let prevEnabled = currentMonth > monthBounds.start;
   let nextEnabled = currentMonth < monthUtils.subMonths(monthBounds.end, 1);
@@ -1079,6 +1507,29 @@ function BudgetHeader({
     paddingLeft: 15,
     paddingRight: 15,
     backgroundColor: 'transparent',
+  };
+
+  let showHiddenCategories = useSelector(
+    state => state.prefs?.local?.['budget.showHiddenCategories'],
+  );
+
+  let toggleHiddenCategories = () => {
+    savePrefs({
+      'budget.showHiddenCategories': !showHiddenCategories,
+    });
+  };
+
+  let tooltip = useTooltip();
+
+  let onMenuSelect = name => {
+    tooltip.close();
+    switch (name) {
+      case 'toggle-hidden':
+        toggleHiddenCategories();
+        break;
+      default:
+        throw new Error(`Unrecognized menu option: ${name}`);
+    }
   };
 
   return (
@@ -1096,7 +1547,6 @@ function BudgetHeader({
         <Button
           type="bare"
           // hitSlop={{ top: 5, bottom: 5, left: 0, right: 30 }}
-
           onClick={prevEnabled && onPrevMonth}
           style={{
             ...buttonStyle,
@@ -1173,9 +1623,8 @@ function BudgetHeader({
               }}
             />
           )}
-          {/* <Button
+          <Button
             type="bare"
-            onClick={() => setMenuOpen(true)}
             style={{
               position: 'absolute',
               top: 0,
@@ -1183,31 +1632,28 @@ function BudgetHeader({
               right: 0,
               backgroundColor: 'transparent',
               paddingLeft: 12,
-              paddingRight: 12
+              paddingRight: 12,
             }}
+            {...tooltip.getOpenEvents()}
           >
-            {menuOpen && (
+            {tooltip.isOpen && (
               <Tooltip
                 position="bottom-right"
                 style={{ padding: 0 }}
-                onClose={() => setMenuOpen(false)}
+                onClose={tooltip.close}
               >
                 <Menu
                   onMenuSelect={onMenuSelect}
-                  items={[
-                    { name: 'change-password', text: 'Change password' },
-                    { name: 'sign-out', text: 'Sign out' }
-                  ].filter(x => x)}
+                  items={[{ name: 'toggle-hidden', text: 'Toggle hidden' }]}
                 />
               </Tooltip>
-            )} */}
-
-          {/* <DotsHorizontalTriple
+            )}
+            <DotsHorizontalTriple
               width="20"
               height="20"
               style={{ color: 'white' }}
-            /> */}
-          {/* </Button> */}
+            />
+          </Button>
         </>
       )}
     </View>

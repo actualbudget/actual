@@ -61,11 +61,20 @@ export class Tooltip extends Component {
       }
     };
 
-    window.document.addEventListener('mousedown', mousedownHandler, false);
-    this.contentRef.current.addEventListener('keydown', escHandler, false);
+    window.document.addEventListener('pointerdown', mousedownHandler, false);
+    this.contentRef.current?.addEventListener('keydown', escHandler, false);
 
     this.cleanup = () => {
-      window.document.removeEventListener('mousedown', mousedownHandler);
+      window.document.removeEventListener(
+        'pointerdown',
+        mousedownHandler,
+        false,
+      );
+      this.contentRef.current?.removeEventListener(
+        'keydown',
+        escHandler,
+        false,
+      );
     };
   }
 
