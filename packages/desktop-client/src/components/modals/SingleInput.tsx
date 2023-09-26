@@ -57,7 +57,11 @@ function SingleInput({
                   onEnter={e => _onSubmit(e.currentTarget.value)}
                 />
               </InitialFocus>
-              <FormError style={{ paddingTop: 5 }}>* {errorMessage}</FormError>
+              {errorMessage && (
+                <FormError style={{ paddingTop: 5 }}>
+                  * {errorMessage}
+                </FormError>
+              )}
             </View>
           </View>
 
