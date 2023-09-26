@@ -697,7 +697,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   onDelete,
 }) {
   let [groupName, setGroupName] = useState(group.name);
-  let [isHidden, setIsHidden] = useState(group.name);
+  let [isHidden, setIsHidden] = useState(group.hidden);
 
   let tooltip = useTooltip();
 
