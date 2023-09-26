@@ -5,6 +5,7 @@ import CashFlow from './CashFlow';
 import CategorySpending from './CategorySpending';
 import NetWorth from './NetWorth';
 import Overview from './Overview';
+import Sankey from './Sankey';
 
 export function ReportRouter() {
   return (
@@ -13,6 +14,7 @@ export function ReportRouter() {
       <Route path="/net-worth" element={<NetWorth />} />
       <Route path="/cash-flow" element={<CashFlow />} />
       <Route path="/category-spending" element={<CategorySpending />} />
+      <Route path="/sankey" element={<Sankey />} />
     </Routes>
   );
 }

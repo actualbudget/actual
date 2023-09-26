@@ -1,0 +1,166 @@
+import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { send } from 'loot-core/src/platform/client/fetch';
+import { integerToAmount } from 'loot-core/src/shared/util';
+
+export default function createSpreadsheet(
+  start,
+  end,
+  categories,
+  conditions = [],
+  conditionsOp,
+) {
+  return async (spreadsheet, setData) => {
+    let { filters } = await send('make-filters-from-conditions', {
+      conditions: conditions.filter(cond => !cond.customName),
+    });
+    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+    const allIncomeSubcategories = [].concat(
+      ...categories
+        .filter(category => category.is_income === 1)
+        .map(category => category.categories),
+    );
+
+    async function fetchCategoryData(categories) {
+      try {
+        return await Promise.all(
+          categories.map(async mainCategory => {
+            let subcategoryBalances = await Promise.all(
+              mainCategory.categories
+                .filter(subcategory => subcategory.is_income !== 1)
+                .map(async subcategory => {
+                  const results = await runQuery(
+                    q('transactions')
+                      .filter({
+                        [conditionsOpKey]: filters,
+                        category: subcategory.id,
+                        $and: [
+                          { date: { $gte: start + '-01' } },
+                          { date: { $lte: end + '-31' } },
+                        ],
+                      })
+                      .calculate({ $sum: '$amount' }),
+                  );
+                  return {
+                    subcategory: subcategory.name,
+                    value: results.data * -1,
+                  };
+                }),
+            );
+
+            // Here you could combine, reduce or transform the subcategoryBalances if needed
+            return {
+              name: mainCategory.name,
+              balances: subcategoryBalances,
+            };
+          }),
+        );
+      } catch (error) {
+        console.error('Error fetching category data:', error);
+        throw error; // Re-throw if you want the error to propagate
+      }
+    }
+
+    async function fetchIncomeData() {
+      // Map over allIncomeSubcategories and return an array of promises
+      const promises = allIncomeSubcategories.map(subcategory => {
+        return runQuery(
+          q('transactions')
+            .filter({
+              [conditionsOpKey]: filters,
+              category: subcategory.id,
+              $and: [
+                { date: { $gte: start + '-01' } },
+                { date: { $lte: end + '-31' } },
+              ],
+            })
+            .groupBy(['payee'])
+            .select(['payee', { amount: { $sum: '$amount' } }]),
+        );
+      });
+
+      // Use Promise.all() to wait for all queries to complete
+      const resultsArrays = await Promise.all(promises);
+
+      // unravel the results
+      let payeesDict = {};
+      resultsArrays.forEach(item => {
+        item.data.forEach(innerItem => {
+          payeesDict[innerItem.payee] = innerItem.amount;
+        });
+      });
+
+      // Fetching names based on ID
+      let payeeNames = {};
+      for (let id in payeesDict) {
+        const result = await runQuery(
+          q('payees').filter({ id: id }).select(['name']),
+        );
+        payeeNames[result.data[0].name] = payeesDict[id];
+      }
+      return payeeNames;
+    }
+    const categoryData = await fetchCategoryData(categories);
+    const incomeData = await fetchIncomeData();
+    setData(transformToSankeyData(categoryData, incomeData));
+  };
+}
+
+function transformToSankeyData(categoryData, incomeData) {
+  const data = { nodes: [], links: [] };
+  const nodeNames = new Set();
+
+  // Add the Income node first.
+  data.nodes.push({ name: 'Income' });
+  nodeNames.add('Income');
+
+  // Handle the income sources and link them to the Income node.
+  Object.entries(incomeData).forEach(([sourceName, value]) => {
+    if (!nodeNames.has(sourceName) && integerToAmount(value) > 0) {
+      data.nodes.push({ name: sourceName });
+      nodeNames.add(sourceName);
+      data.links.push({
+        source: sourceName,
+        target: 'Income',
+        value: integerToAmount(value),
+      });
+    }
+  });
+
+  for (let mainCategory of categoryData) {
+    if (!nodeNames.has(mainCategory.name)) {
+      data.nodes.push({ name: mainCategory.name });
+      nodeNames.add(mainCategory.name);
+
+      let mainCategorySum = 0;
+      for (let subCategory of mainCategory.balances) {
+        if (!nodeNames.has(subCategory.subcategory) && subCategory.value > 0) {
+          data.nodes.push({ name: subCategory.subcategory });
+          nodeNames.add(subCategory.subcategory);
+
+          mainCategorySum += subCategory.value;
+
+          data.links.push({
+            source: mainCategory.name,
+            target: subCategory.subcategory,
+            value: integerToAmount(subCategory.value),
+          });
+        }
+      }
+      if (mainCategorySum > 0){
+        data.links.push({
+            source: 'Income',
+            target: mainCategory.name,
+            value: integerToAmount(mainCategorySum),
+        });
+    }
+    }
+  }
+
+  // Map source and target in links to the index of the node
+  data.links.forEach(link => {
+    link.source = data.nodes.findIndex(node => node.name === link.source);
+    link.target = data.nodes.findIndex(node => node.name === link.target);
+  });
+
+  return data;
+}

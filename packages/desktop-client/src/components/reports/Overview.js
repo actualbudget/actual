@@ -26,6 +26,8 @@ import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
+import SankeyGraph from './graphs/SankeyGraph';
+import sankeySpreadsheet from './graphs/sankey-spreadsheet';
 
 function Card({ flex, to, style, children }) {
   const containerProps = { flex, margin: 15 };
@@ -322,12 +324,67 @@ function CategorySpendingCard() {
   );
 }
 
+function SankeyCard({ categories }) {
+  const end = monthUtils.currentMonth();
+  const start = monthUtils.subMonths(end, 5);
+  const [isCardHovered, setIsCardHovered] = useState(false);
+  const onCardHover = useCallback(() => setIsCardHovered(true));
+  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
+
+  const params = useMemo(
+    () => sankeySpreadsheet(start, end, categories),
+    [start, end, categories],
+  );
+  const data = useReport('sankey', params);
+
+  return (
+    <Card flex={2} to="/reports/sankey">
+      <View
+        style={{ flex: 1 }}
+        onPointerEnter={onCardHover}
+        onPointerLeave={onCardHoverEnd}
+      >
+        <View style={{ flexDirection: 'row', padding: 20 }}>
+          <View style={{ flex: 1 }}>
+            <Block
+              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
+              role="heading"
+            >
+              Sankey
+            </Block>
+            <DateRange start={start} end={end} />
+          </View>
+          {data && (
+            <View style={{ textAlign: 'right' }}>
+              <Block
+                style={{
+                  ...styles.mediumText,
+                  fontWeight: 500,
+                  marginBottom: 5,
+                }}
+              >
+              </Block>
+            </View>
+          )}
+        </View>
+
+        {data ? (
+          <SankeyGraph data={data} /> // passing in correct data doesn't format correctly
+        ) : (
+          <LoadingIndicator />
+        )}
+      </View>
+    </Card>
+  );
+}
+
 export default function Overview() {
   let categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );
 
   let accounts = useSelector(state => state.queries.accounts);
+  let categories = useSelector(state => state.queries.categories.grouped);
   return (
     <View
       style={{
@@ -343,6 +400,7 @@ export default function Overview() {
       >
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
+        <SankeyCard categories={categories} />
       </View>
 
       {categorySpendingReportFeatureFlag && (
