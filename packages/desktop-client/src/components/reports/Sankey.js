@@ -123,7 +123,12 @@ export default function Sankey() {
           <Paragraph>
             <strong>What is a Sankey plot?</strong>
           </Paragraph>
-          <Paragraph>A Sankey plot visualizes the flow of quantities between multiple categories, emphasizing the distribution and proportional relationships of data streams. If you hover over the graph, you can see detailed flow values between categories.</Paragraph>
+          <Paragraph>
+            A Sankey plot visualizes the flow of quantities between multiple
+            categories, emphasizing the distribution and proportional
+            relationships of data streams. If you hover over the graph, you can
+            see detailed flow values between categories.
+          </Paragraph>
         </View>
       </View>
     </View>

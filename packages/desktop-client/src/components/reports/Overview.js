@@ -24,10 +24,10 @@ import categorySpendingSpreadsheet from './graphs/category-spending-spreadsheet'
 import CategorySpendingGraph from './graphs/CategorySpendingGraph';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
+import sankeySpreadsheet from './graphs/sankey-spreadsheet';
+import SankeyGraph from './graphs/SankeyGraph';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
-import SankeyGraph from './graphs/SankeyGraph';
-import sankeySpreadsheet from './graphs/sankey-spreadsheet';
 
 function Card({ flex, to, style, children }) {
   const containerProps = { flex, margin: 15 };
@@ -362,8 +362,7 @@ function SankeyCard({ categories }) {
                   fontWeight: 500,
                   marginBottom: 5,
                 }}
-              >
-              </Block>
+              />
             </View>
           )}
         </View>
