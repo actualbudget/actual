@@ -117,7 +117,7 @@ export default function Sankey() {
           />
         </View>
 
-        <SankeyGraph data={data} />
+        <SankeyGraph style={{ flexGrow: 1 }} data={data} />
 
         <View style={{ marginTop: 30 }}>
           <Paragraph>

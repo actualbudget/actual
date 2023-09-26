@@ -1,26 +1,33 @@
 import { Sankey, Tooltip } from 'recharts';
-
+import Container from '../Container';
 type SankeyProps = {
+  style;
   data;
 };
 
-function SankeyGraph({ data }: SankeyProps) {
+function SankeyGraph({ style, data }: SankeyProps) {
   return (
-    <Sankey
-      // width={"100%" as any}
-      // height={"100%" as any}
-      width={960}
-      height={500}
-      data={data}
-      margin={{
-        left: 25,
-        right: 25,
-        top: 25,
-        bottom: 25,
+    <Container
+      style={{
+        ...style,
+        ...{ height: 'auto' },
       }}
     >
-      <Tooltip />
-    </Sankey>
+      {(width, height, portalHost) =>
+        data && (<Sankey
+        width={width}
+        height={height}
+        data={data}
+        margin={{
+          left: 25,
+          right: 25,
+          top: 25,
+          bottom: 25,
+        }}
+      >
+        <Tooltip />
+      </Sankey>)}
+    </Container>
   );
 }
 
