@@ -146,13 +146,13 @@ function transformToSankeyData(categoryData, incomeData) {
           });
         }
       }
-      if (mainCategorySum > 0){
+      if (mainCategorySum > 0) {
         data.links.push({
-            source: 'Income',
-            target: mainCategory.name,
-            value: integerToAmount(mainCategorySum),
+          source: 'Income',
+          target: mainCategory.name,
+          value: integerToAmount(mainCategorySum),
         });
-    }
+      }
     }
   }
 
