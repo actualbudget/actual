@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { CSSProperties, useState } from 'react';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
@@ -10,6 +10,35 @@ import View from '../common/View';
 import NotesButton from '../NotesButton';
 import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
+
+type InputPropsProps = {
+  style: CSSProperties;
+  placeholder: string;
+}
+
+type SidebarGroupProps = {
+  group: {
+    id: string;
+    hidden: number;
+    categories: object[];
+    is_income: number;
+    name: string;
+    sort_order: number;
+    tombstone: number;
+  };
+  editing?: boolean;
+  collapsed: boolean;
+  dragPreview?: () => void;
+  innerRef?: () => void;
+  borderColor?: string;
+  style?: CSSProperties;
+  onEdit?: (id: string) => void;
+  onSave?: (group: object) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
+  onShowNewCategory?: (groupId: string) => void;
+  onHideNewGroup?: () => void;
+  onToggleCollapse?: (id: string) => void;
+}
 
 function SidebarGroup({
   group,
@@ -25,7 +54,20 @@ function SidebarGroup({
   onShowNewCategory,
   onHideNewGroup,
   onToggleCollapse,
-}) {
+}: SidebarGroupProps) {
+  console.log('group', group);
+  console.log('editing', editing);
+  console.log('collapsed', collapsed);
+  console.log('dragPreview', dragPreview);
+  console.log('innerRef', innerRef);
+  console.log('borderColor', borderColor);
+  console.log('onEdit', onEdit);
+  console.log('onSave', onSave);
+  console.log('onDelete', onDelete);
+  console.log('onShowNewCategory', onShowNewCategory);
+  console.log('onShowNewCategory', onShowNewCategory);
+  console.log('onHideNewGroup', onHideNewGroup);
+  console.log('onToggleCollapse', onToggleCollapse);
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -143,7 +185,7 @@ function SidebarGroup({
     >
       <InputCell
         value={group.name}
-        formatter={value => displayed}
+        formatter={value => displayed.toString()}
         width="flex"
         exposed={editing}
         onUpdate={value => {
@@ -160,6 +202,7 @@ function SidebarGroup({
         onBlur={() => onEdit(null)}
         style={{ fontWeight: 600 }}
         inputProps={{
+          value: undefined,
           style: { marginLeft: 20 },
           placeholder: temporary ? 'New Group Name' : '',
         }}
