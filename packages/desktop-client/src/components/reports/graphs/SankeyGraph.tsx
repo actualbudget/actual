@@ -14,19 +14,22 @@ function SankeyGraph({ style, data }: SankeyProps) {
       }}
     >
       {(width, height, portalHost) =>
-        data && (<Sankey
-        width={width}
-        height={height}
-        data={data}
-        margin={{
-          left: 25,
-          right: 25,
-          top: 25,
-          bottom: 25,
-        }}
-      >
-        <Tooltip />
-      </Sankey>)}
+        data && (
+          <Sankey
+            width={width}
+            height={height}
+            data={data}
+            margin={{
+              left: 25,
+              right: 25,
+              top: 25,
+              bottom: 25,
+            }}
+          >
+            <Tooltip />
+          </Sankey>
+        )
+      }
     </Container>
   );
 }
