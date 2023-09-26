@@ -528,7 +528,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.tableHeaderBackground,
+        backgroundColor: theme.tableRowHeaderBackground,
         opacity: isHidden ? 0.5 : undefined,
       }}
       data-testid="totals"
@@ -736,7 +736,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 10,
-        backgroundColor: 'transparent',
+        backgroundColor: theme.tableRowHeaderBackground,
         opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}

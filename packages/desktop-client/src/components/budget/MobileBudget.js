@@ -69,7 +69,7 @@ class Budget extends Component {
   }
 
   componentWillUnmount() {
-    this.cleanup();
+    this.cleanup?.();
   }
 
   prewarmMonth = async (month, type = null) => {
