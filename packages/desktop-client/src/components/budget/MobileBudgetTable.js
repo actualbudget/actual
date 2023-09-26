@@ -301,12 +301,12 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   let tooltip = useTooltip();
 
-  let onTooltipClosed = () => {
-    tooltip.close();
+  let onTooltipClose = () => {
     onSave?.({
       ...category,
       name: categoryName,
     });
+    tooltip.close();
   };
 
   let onMenuSelect = type => {
@@ -353,20 +353,21 @@ const ExpenseCategory = memo(function ExpenseCategory({
           {tooltip.isOpen && (
             <Tooltip
               position="bottom-left"
-              width={250}
+              width={300}
               offset={5}
               style={{ padding: 0 }}
-              onClose={onTooltipClosed}
+              onClose={onTooltipClose}
             >
               <View style={{ padding: 10 }}>
                 <InputWithContent
-                  value={categoryName}
                   rightContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
                     </Button>
                   }
+                  value={categoryName}
                   onUpdate={setCategoryName}
+                  onEnter={onTooltipClose}
                 />
               </View>
               <Menu
@@ -493,12 +494,12 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
 
   let tooltip = useTooltip();
 
-  let onTooltipClosed = () => {
-    tooltip.close();
+  let onTooltipClose = () => {
     onSave?.({
       ...group,
       name: groupName,
     });
+    tooltip.close();
   };
 
   let onMenuSelect = type => {
@@ -548,10 +549,10 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           {tooltip.isOpen && (
             <Tooltip
               position="bottom-left"
-              width={250}
+              width={300}
               offset={5}
               style={{ padding: 0 }}
-              onClose={onTooltipClosed}
+              onClose={onTooltipClose}
             >
               <View style={{ padding: 10 }}>
                 <InputWithContent
@@ -562,6 +563,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
                   }
                   value={group.name}
                   onUpdate={setGroupName}
+                  onEnter={onTooltipClose}
                 />
               </View>
               <Menu
@@ -699,12 +701,12 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
 
   let tooltip = useTooltip();
 
-  let onTooltipClosed = () => {
-    tooltip.close();
+  let onTooltipClose = () => {
     onSave?.({
       ...group,
       name: groupName,
     });
+    tooltip.close();
   };
 
   let onMenuSelect = type => {
@@ -749,21 +751,21 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           {tooltip.isOpen && (
             <Tooltip
               position="bottom-left"
-              width={250}
+              width={300}
               offset={5}
               style={{ padding: 0 }}
-              onClose={onTooltipClosed}
+              onClose={onTooltipClose}
             >
               <View style={{ padding: 10 }}>
                 <InputWithContent
-                  value={groupName}
-                  focused={true}
                   rightContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
                     </Button>
                   }
+                  value={groupName}
                   onUpdate={setGroupName}
+                  onEnter={onTooltipClose}
                 />
               </View>
               <Menu
@@ -829,12 +831,12 @@ const IncomeCategory = memo(function IncomeCategory({
 
   let tooltip = useTooltip();
 
-  let onTooltipClosed = () => {
-    tooltip.close();
+  let onTooltipClose = () => {
     onSave?.({
       ...category,
       name: categoryName,
     });
+    tooltip.close();
   };
 
   let onMenuSelect = type => {
@@ -876,20 +878,21 @@ const IncomeCategory = memo(function IncomeCategory({
           {tooltip.isOpen && (
             <Tooltip
               position="bottom-left"
-              width={250}
+              width={300}
               offset={5}
               style={{ padding: 0 }}
-              onClose={onTooltipClosed}
+              onClose={onTooltipClose}
             >
               <View style={{ padding: 10 }}>
                 <InputWithContent
-                  value={categoryName}
                   rightContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
                     </Button>
                   }
+                  value={categoryName}
                   onUpdate={setCategoryName}
+                  onEnter={onTooltipClose}
                 />
               </View>
               <Menu
@@ -1310,6 +1313,7 @@ export function BudgetTable(props) {
           onOpenActionSheet={onOpenActionSheet}
           onPrevMonth={onPrevMonth}
           onNextMonth={onNextMonth}
+          showHiddenCategories={showHiddenCategories}
           savePrefs={savePrefs}
         />
         <View
@@ -1496,6 +1500,7 @@ function BudgetHeader({
   toggleDisplay,
   showBudgetedCol,
   show3Cols,
+  showHiddenCategories,
   savePrefs,
 }) {
   let serverURL = useServerURL();
@@ -1508,10 +1513,6 @@ function BudgetHeader({
     paddingRight: 15,
     backgroundColor: 'transparent',
   };
-
-  let showHiddenCategories = useSelector(
-    state => state.prefs?.local?.['budget.showHiddenCategories'],
-  );
 
   let toggleHiddenCategories = () => {
     savePrefs({
@@ -1639,6 +1640,7 @@ function BudgetHeader({
             {tooltip.isOpen && (
               <Tooltip
                 position="bottom-right"
+                width={200}
                 style={{ padding: 0 }}
                 onClose={tooltip.close}
               >

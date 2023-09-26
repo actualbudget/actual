@@ -84,6 +84,7 @@ export function AmountInput({
       onKeyUp={e => {
         if (e.key === 'Enter') {
           fireChange(value, negative);
+          onBlur?.();
         }
       }}
       onUpdate={onInputAmountChange}

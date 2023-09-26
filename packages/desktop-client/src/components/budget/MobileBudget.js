@@ -4,8 +4,6 @@ import { useSelector } from 'react-redux';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
-  addCategory,
-  addGroup,
   moveCategory,
   moveCategoryGroup,
 } from 'loot-core/src/shared/categories';
