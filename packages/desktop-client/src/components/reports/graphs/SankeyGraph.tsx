@@ -21,10 +21,10 @@ function SankeyGraph({ style, data }: SankeyProps) {
             height={height}
             data={data}
             margin={{
-              left: 25,
-              right: 25,
-              top: 25,
-              bottom: 25,
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
             }}
           >
             <Tooltip />
