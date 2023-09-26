@@ -100,6 +100,7 @@ class Budget extends Component {
 
   onAddGroup = () => {
     this.props.pushModal('new-category-group', {
+      onValidate: name => (!name ? ['Name is required.'] : []),
       onSubmit: name => {
         this.props.createGroup(name);
       },
@@ -108,6 +109,7 @@ class Budget extends Component {
 
   onAddCategory = groupId => {
     this.props.pushModal('new-category', {
+      onValidate: name => (!name ? ['Name is required.'] : []),
       onSubmit: name => {
         this.props.createCategory(name, groupId);
       },
@@ -281,6 +283,7 @@ class Budget extends Component {
       categories,
       categoryGroups,
       prefs,
+      savePrefs,
       budgetType,
       navigation,
       applyBudgetAction,
@@ -335,7 +338,7 @@ class Budget extends Component {
             onReorderGroup={this.onReorderGroup}
             onOpenActionSheet={() => {}} //this.onOpenActionSheet}
             onBudgetAction={applyBudgetAction}
-            savePrefs={this.props.savePrefs}
+            savePrefs={savePrefs}
           />
         )}
       </SyncRefresh>

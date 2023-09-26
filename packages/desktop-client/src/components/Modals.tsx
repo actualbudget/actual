@@ -230,6 +230,7 @@ export default function Modals() {
               title="New Category"
               inputPlaceholder="Name"
               buttonText="Add"
+              onValidate={options.onValidate}
               onSubmit={options.onSubmit}
             />
           );
@@ -241,6 +242,7 @@ export default function Modals() {
               title="New Category Group"
               inputPlaceholder="Name"
               buttonText="Add"
+              onValidate={options.onValidate}
               onSubmit={options.onSubmit}
             />
           );

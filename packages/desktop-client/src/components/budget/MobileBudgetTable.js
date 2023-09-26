@@ -16,6 +16,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
+import Close from '../../icons/v1/Close';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import EditPencil from '../../icons/v1/EditPencil';
 import { useResponsive } from '../../ResponsiveProvider';
@@ -358,21 +359,33 @@ const ExpenseCategory = memo(function ExpenseCategory({
               style={{ padding: 0 }}
               onClose={onTooltipClose}
             >
-              <View style={{ padding: 10 }}>
+              <View style={{ flexDirection: 'row' }}>
                 <InputWithContent
-                  rightContent={
+                  style={{ flex: 1, margin: 10 }}
+                  leftContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
                     </Button>
                   }
+                  placeholder="Category Name"
                   value={categoryName}
-                  onUpdate={setCategoryName}
+                  onUpdate={name =>
+                    setCategoryName(name ? name : category.name)
+                  }
                   onEnter={onTooltipClose}
                 />
+                <Button
+                  type="bare"
+                  style={{ margin: '10px 10px 10px 0px' }}
+                  onPointerUp={tooltip.close}
+                >
+                  <Close width={9} height={9} />
+                </Button>
               </View>
               <Menu
                 onMenuSelect={onMenuSelect}
                 items={[
+                  Menu.line,
                   {
                     name: 'toggle-visibility',
                     text: isHidden ? 'Show' : 'Hide',
@@ -554,17 +567,26 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               style={{ padding: 0 }}
               onClose={onTooltipClose}
             >
-              <View style={{ padding: 10 }}>
+              <View style={{ flexDirection: 'row' }}>
                 <InputWithContent
-                  rightContent={
+                  style={{ flex: 1, margin: 10 }}
+                  leftContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
                     </Button>
                   }
-                  value={group.name}
-                  onUpdate={setGroupName}
+                  placeholder="Category Group Name"
+                  value={groupName}
+                  onUpdate={name => setGroupName(name ? name : group.name)}
                   onEnter={onTooltipClose}
                 />
+                <Button
+                  type="bare"
+                  style={{ margin: '10px 10px 10px 0px' }}
+                  onPointerUp={tooltip.close}
+                >
+                  <Close width={9} height={9} />
+                </Button>
               </View>
               <Menu
                 onMenuSelect={onMenuSelect}
@@ -756,17 +778,26 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
               style={{ padding: 0 }}
               onClose={onTooltipClose}
             >
-              <View style={{ padding: 10 }}>
+              <View style={{ flexDirection: 'row' }}>
                 <InputWithContent
-                  rightContent={
+                  style={{ flex: 1, margin: 10 }}
+                  leftContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
                     </Button>
                   }
+                  placeholder="Category Group Name"
                   value={groupName}
-                  onUpdate={setGroupName}
+                  onUpdate={name => setGroupName(name ? name : group.name)}
                   onEnter={onTooltipClose}
                 />
+                <Button
+                  type="bare"
+                  style={{ margin: '10px 10px 10px 0px' }}
+                  onPointerUp={tooltip.close}
+                >
+                  <Close width={9} height={9} />
+                </Button>
               </View>
               <Menu
                 onMenuSelect={onMenuSelect}
@@ -883,17 +914,28 @@ const IncomeCategory = memo(function IncomeCategory({
               style={{ padding: 0 }}
               onClose={onTooltipClose}
             >
-              <View style={{ padding: 10 }}>
+              <View style={{ flexDirection: 'row' }}>
                 <InputWithContent
-                  rightContent={
+                  style={{ flex: 1, margin: 10 }}
+                  leftContent={
                     <Button type="bare" disabled>
                       <EditPencil width={9} height={9} />
                     </Button>
                   }
+                  placeholder="Category Name"
                   value={categoryName}
-                  onUpdate={setCategoryName}
+                  onUpdate={name =>
+                    setCategoryName(name ? name : category.name)
+                  }
                   onEnter={onTooltipClose}
                 />
+                <Button
+                  type="bare"
+                  style={{ margin: '10px 10px 10px 0px' }}
+                  onPointerUp={tooltip.close}
+                >
+                  <Close width={9} height={9} />
+                </Button>
               </View>
               <Menu
                 onMenuSelect={onMenuSelect}
