@@ -53,13 +53,10 @@ function NetWorthGraph({
   compact,
   domain,
 }: NetWorthGraphProps) {
-  let chartValues = [];
-  for (let i = 0; i < graphData.data.length; i++) {
-    chartValues.push({
-      name: formatDate(graphData.data[i].x),
-      NetWorth: graphData.data[i].y,
-    });
-  }
+  let chartValues = graphData.data.map(data => ({
+    name: formatDate(data.x),
+    netWorth: data.y,
+  });
 
   return (
     <Container
