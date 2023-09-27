@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState } from 'react';
+import React, { type CSSProperties, useState } from 'react';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
@@ -10,11 +10,6 @@ import View from '../common/View';
 import NotesButton from '../NotesButton';
 import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
-
-type InputPropsProps = {
-  style: CSSProperties;
-  placeholder: string;
-}
 
 type SidebarGroupProps = {
   group: {
@@ -38,7 +33,7 @@ type SidebarGroupProps = {
   onShowNewCategory?: (groupId: string) => void;
   onHideNewGroup?: () => void;
   onToggleCollapse?: (id: string) => void;
-}
+};
 
 function SidebarGroup({
   group,
@@ -55,19 +50,6 @@ function SidebarGroup({
   onHideNewGroup,
   onToggleCollapse,
 }: SidebarGroupProps) {
-  console.log('group', group);
-  console.log('editing', editing);
-  console.log('collapsed', collapsed);
-  console.log('dragPreview', dragPreview);
-  console.log('innerRef', innerRef);
-  console.log('borderColor', borderColor);
-  console.log('onEdit', onEdit);
-  console.log('onSave', onSave);
-  console.log('onDelete', onDelete);
-  console.log('onShowNewCategory', onShowNewCategory);
-  console.log('onShowNewCategory', onShowNewCategory);
-  console.log('onHideNewGroup', onHideNewGroup);
-  console.log('onToggleCollapse', onToggleCollapse);
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -185,7 +167,7 @@ function SidebarGroup({
     >
       <InputCell
         value={group.name}
-        formatter={value => displayed.toString()}
+        formatter={value => displayed}
         width="flex"
         exposed={editing}
         onUpdate={value => {

@@ -27,7 +27,7 @@ function RenderMonths({
   args,
   style,
 }: RenderMonthsProps) {
-  let { months, type } = useContext(MonthsContext);
+  let { months } = useContext(MonthsContext);
 
   return months.map((month, index) => {
     let editing = editingIndex === index;
@@ -48,7 +48,7 @@ function RenderMonths({
         </View>
       </NamespaceContext.Provider>
     );
-  }) as any;
+  }) as unknown as JSX.Element;
 }
 
 export default RenderMonths;
