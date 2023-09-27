@@ -1,23 +1,10 @@
-import React, { createElement } from 'react';
+import React from 'react';
 
-import * as d from 'date-fns';
-import {
-  VictoryChart,
-  VictoryBar,
-  VictoryArea,
-  VictoryAxis,
-  VictoryVoronoiContainer,
-  VictoryGroup,
-} from 'victory';
-
-import { LineChart, Line } from 'recharts';
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend } from 'recharts';
 
 import { type CSSProperties } from '../../../style';
-import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
-
-import { Area } from './common';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -27,15 +14,47 @@ type NetWorthGraphProps = {
     y?: [number, number];
   };
 };
+
+function formatDate(date) {
+  // Array of month names
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  // Get the month and year from the date
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear().toString().slice(-2); // Get the last 2 digits of the year
+
+  // Format and return the result
+  return `${month} '${year}`;
+}
+
 function NetWorthGraph({
   style,
   graphData,
   compact,
   domain,
 }: NetWorthGraphProps) {
-  const Chart = compact ? VictoryGroup : VictoryChart;
   console.log(graphData);
-  
+  let chartValues = [];
+  for (let i = 0; i < graphData.data.length; i++) {
+    chartValues.push({
+      name: formatDate(graphData.data[i].x),
+      value: graphData.data[i].y,
+    });
+  }
+  console.log(chartValues);
 
   return (
     <Container
@@ -46,82 +65,19 @@ function NetWorthGraph({
     >
       {(width, height, portalHost) =>
         graphData && (
-          <Chart
-            scale={{ x: 'time', y: 'linear' }}
-            theme={chartTheme}
-            domainPadding={{ x: 0, y: 10 }}
-            domain={domain}
+          <LineChart
             width={width}
             height={height}
-            containerComponent={
-              <VictoryVoronoiContainer voronoiDimension="x" />
-            }
-            padding={
-              compact && {
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-              }
-            }
+            data={chartValues}
+            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
-            <Area start={graphData.start} end={graphData.end} />
-            {createElement(
-              // @ts-expect-error defaultProps mismatch causing issue
-              graphData.data.length === 1 ? VictoryBar : VictoryArea,
-              {
-                data: graphData.data,
-                labelComponent: <Tooltip portalHost={portalHost} />,
-                labels: x => x.premadeLabel,
-                style: {
-                  data:
-                    graphData.data.length === 1
-                      ? { width: 50 }
-                      : {
-                          clipPath: 'url(#positive)',
-                          fill: 'url(#positive-gradient)',
-                        },
-                },
-              },
-            )}
-            {graphData.data.length > 1 && (
-              <VictoryArea
-                data={graphData.data}
-                style={{
-                  data: {
-                    clipPath: 'url(#negative)',
-                    fill: 'url(#negative-gradient)',
-                    stroke: chartTheme.colors.red,
-                    strokeLinejoin: 'round',
-                  },
-                }}
-              />
-            )}
-            {/* Somehow the path `d` attributes are stripped from second
-             `<VictoryArea />` above if this is removed. I’m just as
-              confused as you are! */}
-            <VictoryArea
-              data={graphData.data}
-              style={{ data: { fill: 'none', stroke: 'none' } }}
-            />
-            {!compact && (
-              <VictoryAxis
-                style={{ ticks: { stroke: chartTheme.colors.red } }}
-                // eslint-disable-next-line rulesdir/typography
-                tickFormat={x => d.format(x, "MMM ''yy")}
-                tickValues={graphData.data.map(item => item.x)}
-                tickCount={Math.min(width / 220, graphData.data.length)}
-                offsetY={50}
-              />
-            )}
-            {!compact && (
-              <VictoryAxis
-                dependentAxis
-                tickCount={Math.round(height / 70)}
-                crossAxis={!graphData.hasNegative}
-              />
-            )}
-          </Chart>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+          </LineChart>
         )
       }
     </Container>
