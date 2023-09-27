@@ -27,7 +27,7 @@ function SankeyGraph({ style, data }: SankeyProps) {
               bottom: 0,
             }}
           >
-            <Tooltip />
+            <Tooltip formatter={value => Math.round(value)} />
           </Sankey>
         )
       }
