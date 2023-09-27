@@ -8,6 +8,7 @@ import {
   YAxis,
   Tooltip,
 } from 'recharts';
+
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import Container from '../Container';
@@ -43,7 +44,7 @@ function formatDate(date) {
   const year = date.getFullYear().toString().slice(-2); // Get the last 2 digits of the year
 
   // Format and return the result
-  return `${month} '${year}`;
+  return `${month} ’${year}`;
 }
 
 function NetWorthGraph({
