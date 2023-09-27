@@ -5,67 +5,64 @@
   "description": "A local-first personal finance system",
   "homepage": "https://github.com/actualbudget/actual/",
   "bugs": {
-    "url": "https://github.com/actualbudget/actual/issues/"
+      "url": "https://github.com/actualbudget/actual/issues/"
   },
   "repository": {
-    "type": "git",
-    "url": "git@github.com:actualbudget/actual.git"
+      "type": "git",
+      "url": "git@github.com:actualbudget/actual.git"
   },
   "license": "MIT",
   "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
+      "packages": [
+          "packages/*"
+      ]
   },
   "scripts": {
-    "start": "yarn start:browser",
-    "start:desktop": "yarn rebuild-electron && npm-run-all --parallel 'start:desktop-*'",
-    "start:desktop-node": "yarn workspace loot-core watch:node",
-    "start:desktop-client": "yarn workspace @actual-app/web watch",
-    "start:desktop-electron": "yarn workspace desktop-electron watch",
-    "start:electron": "yarn start:desktop",
-    "start:browser": "npm-run-all --parallel 'start:browser-*'",
-    "start:browser-backend": "yarn workspace loot-core watch:browser",
-    "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
-    "build:browser": "./bin/package-browser",
-    "build:desktop": "./bin/package-electron",
-    "build:api": "yarn workspace @actual-app/api build",
-    "test": "yarn workspaces foreach --parallel --verbose run test",
-    "test:debug": "yarn workspaces foreach --verbose run test",
-    "e2e": "yarn workspaces foreach --parallel --verbose run e2e",
-    "vrt": "yarn workspaces foreach --parallel --verbose run vrt",
-    "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
-    "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "eslint . --max-warnings 0",
-    "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
-    "typecheck": "yarn tsc",
-    "jq": "./node_modules/node-jq/bin/jq"
+      "start": "yarn start:browser",
+      "start:desktop": "yarn rebuild-electron && npm-run-all --parallel 'start:desktop-*'",
+      "start:desktop-node": "yarn workspace loot-core watch:node",
+      "start:desktop-client": "yarn workspace @actual-app/web watch",
+      "start:desktop-electron": "yarn workspace desktop-electron watch",
+      "start:electron": "yarn start:desktop",
+      "start:browser": "npm-run-all --parallel 'start:browser-*'",
+      "start:browser-backend": "yarn workspace loot-core watch:browser",
+      "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
+      "build:browser": "./bin/package-browser",
+      "build:desktop": "./bin/package-electron",
+      "build:api": "yarn workspace @actual-app/api build",
+      "test": "yarn workspaces foreach --parallel --verbose run test",
+      "test:debug": "yarn workspaces foreach --verbose run test",
+      "e2e": "yarn workspaces foreach --parallel --verbose run e2e",
+      "vrt": "yarn workspaces foreach --parallel --verbose run vrt",
+      "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
+      "rebuild-node": "yarn workspace loot-core rebuild",
+      "lint": "eslint . --max-warnings 0",
+      "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
+      "typecheck": "yarn tsc",
+      "jq": "./node_modules/node-jq/bin/jq"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "eslint": "^8.37.0",
-    "eslint-config-react-app": "7.0.1",
-    "eslint-import-resolver-typescript": "3.5.5",
-    "eslint-plugin-import": "2.27.5",
-    "eslint-plugin-prettier": "4.2.1",
-    "eslint-plugin-react": "7.32.2",
-    "eslint-plugin-rulesdir": "^0.2.2",
-    "node-jq": "^4.0.1",
-    "npm-run-all": "^4.1.3",
-    "prettier": "2.8.2",
-    "react-refresh": "^0.14.0",
-    "source-map-support": "^0.5.21",
-    "typescript": "^5.0.2"
+      "cross-env": "^7.0.3",
+      "eslint": "^8.37.0",
+      "eslint-config-react-app": "7.0.1",
+      "eslint-import-resolver-typescript": "3.5.5",
+      "eslint-plugin-import": "2.27.5",
+      "eslint-plugin-prettier": "4.2.1",
+      "eslint-plugin-react": "7.32.2",
+      "eslint-plugin-rulesdir": "^0.2.2",
+      "node-jq": "^4.0.1",
+      "npm-run-all": "^4.1.3",
+      "prettier": "2.8.2",
+      "react-refresh": "^0.14.0",
+      "source-map-support": "^0.5.21",
+      "typescript": "^5.0.2"
   },
   "engines": {
-    "node": ">=18.0.0"
+      "node": ">=18.0.0"
   },
   "packageManager": "yarn@3.5.1",
   "browserslist": [
-    "electron 24.0",
-    "defaults"
-  ],
-  "dependencies": {
-    "recharts": "^2.8.0"
-  }
+      "electron 24.0",
+      "defaults"
+  ]
 }
