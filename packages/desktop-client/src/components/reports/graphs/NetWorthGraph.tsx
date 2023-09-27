@@ -1,10 +1,17 @@
 import React from 'react';
 
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Legend } from 'recharts';
-
+import {
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Legend,
+  Tooltip,
+} from 'recharts';
+import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import Container from '../Container';
-import Tooltip from '../Tooltip';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -46,15 +53,13 @@ function NetWorthGraph({
   compact,
   domain,
 }: NetWorthGraphProps) {
-  console.log(graphData);
   let chartValues = [];
   for (let i = 0; i < graphData.data.length; i++) {
     chartValues.push({
       name: formatDate(graphData.data[i].x),
-      value: graphData.data[i].y,
+      NetWorth: graphData.data[i].y,
     });
   }
-  console.log(chartValues);
 
   return (
     <Container
@@ -69,14 +74,24 @@ function NetWorthGraph({
             width={width}
             height={height}
             data={chartValues}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            margin={{ top: 0, right: 5, left: 50, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
-            <YAxis />
+            <YAxis
+              dataKey="NetWorth"
+              domain= {[
+                dataMin => Math.min(dataMin * 0.85, dataMin * 1.15),
+                dataMax => Math.max(dataMax * 0.85, dataMax * 1.15),
+              ]}
+              tickFormatter={value => Math.round(value)}
+            />
             <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+            <Line
+              type="monotone"
+              dataKey="NetWorth"
+              stroke={theme.reportsBlue}
+            />
           </LineChart>
         )
       }
