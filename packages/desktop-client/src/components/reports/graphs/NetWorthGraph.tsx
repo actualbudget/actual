@@ -6,7 +6,6 @@ import {
   CartesianGrid,
   XAxis,
   YAxis,
-  Legend,
   Tooltip,
 } from 'recharts';
 import { theme } from '../../../style';
@@ -53,10 +52,14 @@ function NetWorthGraph({
   compact,
   domain,
 }: NetWorthGraphProps) {
-  let chartValues = graphData.data.map(data => ({
-    name: formatDate(data.x),
-    netWorth: data.y,
-  });
+  let chartValues = graphData.data.map(d => ({
+    name: formatDate(d.x),
+    NetWorth: d.y,
+  }));
+
+  const tickFormatter = tick => {
+    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+  };
 
   return (
     <Container
@@ -73,15 +76,12 @@ function NetWorthGraph({
             data={chartValues}
             margin={{ top: 0, right: 5, left: 50, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            {compact ? null : <CartesianGrid strokeDasharray="3 3" />}
             <XAxis dataKey="name" />
             <YAxis
               dataKey="NetWorth"
-              domain= {[
-                dataMin => Math.min(dataMin * 0.85, dataMin * 1.15),
-                dataMax => Math.max(dataMax * 0.85, dataMax * 1.15),
-              ]}
-              tickFormatter={value => Math.round(value)}
+              domain={['auto', 'auto']}
+              tickFormatter={tickFormatter}
             />
             <Tooltip />
             <Line
