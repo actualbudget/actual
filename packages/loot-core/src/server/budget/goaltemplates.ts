@@ -213,6 +213,9 @@ async function processTemplate(month, force, category_templates) {
               );
             if (to_budget != null) {
               num_applied++;
+              if (to_budget > available_remaining && priority > 0) {
+                to_budget = available_remaining;
+              }
               templateBudget.push({
                 category: category.id,
                 amount: to_budget + prev_budgeted,

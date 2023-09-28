@@ -274,15 +274,6 @@ export async function updateSchedule({
   if (schedule.rule) {
     throw new Error('You cannot change the rule of a schedule');
   }
-
-  if (schedule.name) {
-    if (await checkIfScheduleExists(schedule.name, schedule.id)) {
-      throw new Error('There is already a schedule with this name');
-    }
-  } else {
-    schedule.name = null;
-  }
-  // We need the rule if there are conditions
   let rule;
 
   // This must be outside the `batchMessages` call because we change

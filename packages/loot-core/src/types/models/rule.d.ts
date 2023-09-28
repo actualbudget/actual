@@ -3,8 +3,7 @@ import { type ScheduleEntity } from './schedule';
 export interface RuleEntity {
   id: string;
   stage: string;
-  conditions_op?: string;
-  conditionsOp?: string; // TODO: this should not be here.. figure out howto remove it
+  conditionsOp: 'any' | 'and';
   conditions: RuleConditionEntity[];
   actions: RuleActionEntity[];
   tombstone?: boolean;
