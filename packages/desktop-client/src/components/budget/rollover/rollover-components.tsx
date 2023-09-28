@@ -3,8 +3,6 @@ import React, { type ComponentProps, memo, useContext, useState } from 'react';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
-import NamespaceContext from '../../spreadsheet/NamespaceContext';
-//import { getGoal } from 'loot-core/src/server/budget/actions';
 
 import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
@@ -26,9 +24,6 @@ import { makeAmountGrey, addToBeBudgetedGroup } from '../util';
 
 import TransferTooltip from './TransferTooltip';
 
-import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import q from 'loot-core/src/client/query-helpers';
-//import * as db from 'loot-core/src/server/db';
 export { BudgetSummary } from './BudgetSummary';
 
 type CoverTooltipProps = {
