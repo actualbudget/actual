@@ -11,11 +11,7 @@ import Search from '../common/Search';
 import View from '../common/View';
 import { Page } from '../Page';
 
-import {
-  SchedulesTable,
-  ROW_HEIGHT,
-  type ScheduleItemAction,
-} from './SchedulesTable';
+import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
 
 export default function Schedules() {
   const { pushModal } = useActions();
@@ -69,30 +65,37 @@ export default function Schedules() {
 
   return (
     <Page title="Schedules">
-      <View style={{ alignItems: 'flex-end' }}>
-        <Search
-          placeholder="Filter schedules…"
-          value={filter}
-          onChange={setFilter}
-        />
-      </View>
-
       <View
         style={{
-          flexBasis: (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1),
-          marginTop: 15,
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: '0 0 15px',
         }}
       >
-        <SchedulesTable
-          schedules={schedules}
-          filter={filter}
-          statuses={statuses}
-          allowCompleted={true}
-          onSelect={onEdit}
-          onAction={onAction}
-          style={{ backgroundColor: theme.tableBackground }}
-        />
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <Search
+            placeholder="Filter schedules…"
+            value={filter}
+            onChange={setFilter}
+          />
+        </View>
       </View>
+
+      <SchedulesTable
+        schedules={schedules}
+        filter={filter}
+        statuses={statuses}
+        allowCompleted={true}
+        onSelect={onEdit}
+        onAction={onAction}
+        style={{ backgroundColor: theme.tableBackground }}
+      />
 
       <View
         style={{

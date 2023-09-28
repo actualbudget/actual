@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
+import type { MutableRefObject, Ref, RefCallback } from 'react';
 
-export function useMergedRefs(ref1, ref2) {
+export function useMergedRefs<T>(
+  ref1: RefCallback<T> | MutableRefObject<T>,
+  ref2: RefCallback<T> | MutableRefObject<T>,
+): Ref<T> {
   return useMemo(() => {
     function ref(value) {
       [ref1, ref2].forEach(ref => {
