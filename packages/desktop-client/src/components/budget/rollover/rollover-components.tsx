@@ -323,16 +323,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const sheetName = useContext(NamespaceContext);
-  const month = sheetName.slice('budget'.length);
-  //let goal = useLiveQuery(() => q('zero_budgets').filter({month: month, category: category.id}).select('goal'),[month, category.id]);
-  //let id = category.id;
-  //let data = useLiveQuery(() => q('notes').filter({ id: id }).select('*'), [id]);
-  //const goal = db.firstSync(
-  //  `SELECT goal FROM zero_budgets WHERE month = ? AND category = ?`,
-  //  [month, category.id]);
-  //const goal = getGoal(month, category.id);
-  //console.log(goal, sheetName);
 
   return (
     <View
