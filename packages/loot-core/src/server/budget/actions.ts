@@ -131,6 +131,15 @@ export function setGoal({ month, category, goal }): Promise<void> {
   });
 }
 
+export function getGoal( month, category) {
+  const table = getBudgetTable();
+  let goal = db.firstSync(
+    `SELECT id FROM ${table} WHERE month = ? AND category = ?`,
+    [dbMonth(month), category],
+  );
+  return goal;
+}
+
 export function setBuffer(month: string, amount: unknown): Promise<void> {
   let existing = db.firstSync(
     `SELECT id FROM zero_budget_months WHERE id = ?`,
