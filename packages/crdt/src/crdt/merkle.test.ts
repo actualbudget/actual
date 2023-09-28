@@ -1,13 +1,17 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as merkle from './merkle';
 import { Timestamp } from './timestamp';
 
-function message(timestamp, hash) {
-  timestamp = Timestamp.parse(timestamp);
+function message(timestampStr: string, hash: number) {
+  const timestamp = Timestamp.parse(timestampStr)!;
   timestamp.hash = () => hash;
   return { timestamp };
 }
 
-function insertMessages(trie, messages) {
+function insertMessages(
+  trie: merkle.TrieNode,
+  messages: ReturnType<typeof message>[],
+) {
   messages.forEach(msg => {
     trie = merkle.insert(trie, msg.timestamp);
   });
@@ -17,19 +21,19 @@ function insertMessages(trie, messages) {
 describe('merkle trie', () => {
   test('adding an item works', () => {
     let trie = merkle.insert(
-      {},
-      Timestamp.parse('2018-11-12T13:21:40.122Z-0000-0123456789ABCDEF'),
+      merkle.emptyTrie(),
+      Timestamp.parse('2018-11-12T13:21:40.122Z-0000-0123456789ABCDEF')!,
     );
     trie = merkle.insert(
       trie,
-      Timestamp.parse('2018-11-13T13:21:40.122Z-0000-0123456789ABCDEF'),
+      Timestamp.parse('2018-11-13T13:21:40.122Z-0000-0123456789ABCDEF')!,
     );
     expect(trie).toMatchSnapshot();
   });
 
   test('diff returns the correct time difference', () => {
-    let trie1: { hash?: unknown } = {};
-    let trie2: { hash?: unknown } = {};
+    let trie1 = merkle.emptyTrie();
+    let trie2 = merkle.emptyTrie();
 
     const messages = [
       // First client messages
@@ -51,7 +55,7 @@ describe('merkle trie', () => {
     trie2 = merkle.insert(trie2, messages[4].timestamp);
     expect(trie2.hash).toBe(108);
 
-    expect(new Date(merkle.diff(trie1, trie2)).toISOString()).toBe(
+    expect(new Date(merkle.diff(trie1, trie2)!).toISOString()).toBe(
       '2018-11-02T17:15:00.000Z',
     );
 
@@ -65,10 +69,10 @@ describe('merkle trie', () => {
   });
 
   test('diffing works with empty tries', () => {
-    let trie1 = {};
+    let trie1 = merkle.emptyTrie();
     let trie2 = merkle.insert(
-      {},
-      Timestamp.parse('2009-01-02T10:17:37.789Z-0000-0000testinguuid1'),
+      merkle.emptyTrie(),
+      Timestamp.parse('2009-01-02T10:17:37.789Z-0000-0000testinguuid1')!,
     );
 
     expect(merkle.diff(trie1, trie2)).toBe(0);
@@ -90,7 +94,7 @@ describe('merkle trie', () => {
       message('2018-11-01T02:37:00.000Z-0000-0123456789ABCDEF', 2100),
     ];
 
-    let trie: { hash?: unknown } = {};
+    let trie = merkle.emptyTrie();
     messages.forEach(msg => {
       trie = merkle.insert(trie, msg.timestamp);
     });
@@ -122,10 +126,10 @@ describe('merkle trie', () => {
 
     // Case 0: It always returns a base time when comparing with an
     // empty trie
-    expect(new Date(merkle.diff({}, trie)).toISOString()).toBe(
+    expect(new Date(merkle.diff(merkle.emptyTrie(), trie)!).toISOString()).toBe(
       '1970-01-01T00:00:00.000Z',
     );
-    expect(new Date(merkle.diff(trie, {})).toISOString()).toBe(
+    expect(new Date(merkle.diff(trie, merkle.emptyTrie())!).toISOString()).toBe(
       '1970-01-01T00:00:00.000Z',
     );
 
@@ -136,52 +140,52 @@ describe('merkle trie', () => {
       message('2018-11-01T00:59:00.000Z-0000-0123456789ABCDEF', 900),
     ]);
 
-    // Normal comparision works
-    expect(new Date(merkle.diff(trie1, trie)).toISOString()).toBe(
+    // Normal comparison works
+    expect(new Date(merkle.diff(trie1, trie)!).toISOString()).toBe(
       '2018-11-01T00:54:00.000Z',
     );
 
     // Comparing the pruned new trie is lossy, so it returns an even older time
-    expect(new Date(merkle.diff(merkle.prune(trie1), trie)).toISOString()).toBe(
-      '2018-11-01T00:45:00.000Z',
-    );
+    expect(
+      new Date(merkle.diff(merkle.prune(trie1), trie)!).toISOString(),
+    ).toBe('2018-11-01T00:45:00.000Z');
 
     // Comparing the pruned original trie is just as lossy
-    expect(new Date(merkle.diff(trie1, merkle.prune(trie))).toISOString()).toBe(
-      '2018-11-01T00:45:00.000Z',
-    );
+    expect(
+      new Date(merkle.diff(trie1, merkle.prune(trie))!).toISOString(),
+    ).toBe('2018-11-01T00:45:00.000Z');
 
     // Pruning both tries is just as lossy as well, since the changed
     // key is pruned away in both cases and it won't find a changed
     // key so it bails at the point
     expect(
       new Date(
-        merkle.diff(merkle.prune(trie1), merkle.prune(trie)),
+        merkle.diff(merkle.prune(trie1), merkle.prune(trie))!,
       ).toISOString(),
     ).toBe('2018-11-01T00:45:00.000Z');
 
     // Case 2: Add two messages similar to the above case, but the
     // second message modifies the 2nd key at the same level as the
-    // first message modifiying the 1st key
+    // first message modifying the 1st key
     let trie2 = insertMessages(trie, [
       message('2018-11-01T00:59:00.000Z-0000-0123456789ABCDEF', 900),
       message('2018-11-01T01:15:00.000Z-0000-0123456789ABCDEF', 1422),
     ]);
 
-    // Normal comparision works
-    expect(new Date(merkle.diff(trie2, trie)).toISOString()).toBe(
+    // Normal comparison works
+    expect(new Date(merkle.diff(trie2, trie)!).toISOString()).toBe(
       '2018-11-01T00:54:00.000Z',
     );
 
     // Same as case 1
-    expect(new Date(merkle.diff(merkle.prune(trie2), trie)).toISOString()).toBe(
-      '2018-11-01T00:45:00.000Z',
-    );
+    expect(
+      new Date(merkle.diff(merkle.prune(trie2), trie)!).toISOString(),
+    ).toBe('2018-11-01T00:45:00.000Z');
 
     // Same as case 1
-    expect(new Date(merkle.diff(trie2, merkle.prune(trie))).toISOString()).toBe(
-      '2018-11-01T00:45:00.000Z',
-    );
+    expect(
+      new Date(merkle.diff(trie2, merkle.prune(trie))!).toISOString(),
+    ).toBe('2018-11-01T00:45:00.000Z');
 
     // Pruning both tries is very lossy and this ends up returning a
     // time that only covers the second message. Syncing will need
@@ -190,7 +194,7 @@ describe('merkle trie', () => {
     // ignores the first message.
     expect(
       new Date(
-        merkle.diff(merkle.prune(trie2), merkle.prune(trie)),
+        merkle.diff(merkle.prune(trie2), merkle.prune(trie))!,
       ).toISOString(),
     ).toBe('2018-11-01T01:12:00.000Z');
   });

@@ -36,6 +36,14 @@ async function clearCategory(transaction, transferAcct) {
 }
 
 export async function addTransfer(transaction, transferredAccount) {
+  if (transaction.is_parent) {
+    // For split transactions, we should create transfers using child transactions.
+    // This is to ensure that the amounts received by the transferred account
+    // reflects the amounts in the child transactions and not the parent transaction
+    // amount which is the total amount.
+    return null;
+  }
+
   let { id: fromPayee } = await db.first(
     'SELECT id FROM payees WHERE transfer_acct = ?',
     [transaction.account],
@@ -61,10 +69,6 @@ export async function addTransfer(transaction, transferredAccount) {
         await db.updateTransaction({ id: transaction.id, payee: null });
         return { id: transaction.id, payee: null };
       }
-
-      // The parent has the same transfer payee, so it "owns" the
-      // transfer logic
-      return null;
     }
   }
 

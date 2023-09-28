@@ -4,7 +4,7 @@ import memoizeOne from 'memoize-one';
 
 import useResizeObserver from '../hooks/useResizeObserver';
 
-import { View } from './common';
+import View from './common/View';
 
 const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
 
@@ -206,7 +206,7 @@ export default class FixedSizeList extends PureComponent {
             style={{
               height,
               width,
-              overflow: 'auto',
+              overflow: 'hidden auto',
               ...style,
             }}
           >
@@ -336,7 +336,7 @@ export default class FixedSizeList extends PureComponent {
 
   getStopIndexForStartIndex = (startIndex, scrollOffset) => {
     const offset = startIndex * this.props.itemSize;
-    const size = this.props.width;
+    const size = this.props.height;
     const numVisibleItems = Math.ceil(
       (size + scrollOffset - offset) / this.props.itemSize,
     );

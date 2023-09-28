@@ -7,10 +7,10 @@ import {
   Timestamp,
 } from '@actual-app/crdt';
 import LRU from 'lru-cache';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
-import * as uuid from '../../platform/uuid';
 import { groupById } from '../../shared/util';
 import {
   schema,
@@ -131,11 +131,11 @@ function resetQueryCache() {
   _queryCache = new LRU({ max: 100 });
 }
 
-export function transaction(fn) {
+export function transaction(fn: () => void) {
   return sqlite.transaction(db, fn);
 }
 
-export function asyncTransaction(fn) {
+export function asyncTransaction(fn: () => Promise<void>) {
   return sqlite.asyncTransaction(db, fn);
 }
 
@@ -196,7 +196,7 @@ export async function update(table, params) {
 
 export async function insertWithUUID(table, row) {
   if (!row.id) {
-    row = { ...row, id: uuid.v4Sync() };
+    row = { ...row, id: uuidv4() };
   }
 
   await insert(table, row);
@@ -255,7 +255,7 @@ export function insertWithSchema(table, row) {
   // Even though `insertWithUUID` does this, we need to do it here so
   // the schema validation passes
   if (!row.id) {
-    row = { ...row, id: uuid.v4Sync() };
+    row = { ...row, id: uuidv4() };
   }
 
   return insertWithUUID(
@@ -491,7 +491,7 @@ export async function mergePayees(target, ids) {
       }),
     );
 
-    return Promise.all(
+    await Promise.all(
       ids.map(id =>
         Promise.all([
           update('payee_mapping', { id, targetId: target }),
@@ -583,7 +583,7 @@ export async function moveAccount(id, targetId) {
   }
 
   const { updates, sort_order } = shoveSortOrders(accounts, targetId);
-  await batchMessages(() => {
+  await batchMessages(async () => {
     for (let info of updates) {
       update('accounts', info);
     }

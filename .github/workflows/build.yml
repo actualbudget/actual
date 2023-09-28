@@ -12,7 +12,10 @@ on:
     branches:
       - master
   pull_request:
-    branches: '*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
   api:
@@ -60,27 +63,8 @@ jobs:
         with:
           name: actual-web
           path: packages/desktop-client/build
-
-  electron:
-    # As electron builds take longer, we only run them in master.
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up environment
-        uses: ./.github/actions/setup
-      - name: Build Electron
-        run: ./bin/package-electron
-      - name: Upload Build
+      - name: Upload Build Stats
         uses: actions/upload-artifact@v3
         with:
-          name: actual-electron-${{ matrix.os }}
-          path: |
-            packages/desktop-electron/dist/*.dmg
-            packages/desktop-electron/dist/*.exe
-            packages/desktop-electron/dist/*.AppImage
+          name: build-stats
+          path: packages/desktop-client/build-stats

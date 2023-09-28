@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
-import * as actions from 'loot-core/src/client/actions';
-
+import { authorizeBank } from '../../gocardless';
+import { useActions } from '../../hooks/useActions';
 import ExclamationOutline from '../../icons/v1/ExclamationOutline';
-import { authorizeBank } from '../../nordigen';
-import { colors } from '../../style';
-import { View, Button, Tooltip } from '../common';
+import { theme } from '../../style';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {
@@ -38,24 +40,19 @@ function getErrorMessage(type, code) {
   return (
     <>
       An internal error occurred. Try to login again, or get{' '}
-      <a
-        href="https://actualbudget.org/contact/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+      <ExternalLink to="https://actualbudget.org/contact/">
         in touch
-      </a>{' '}
+      </ExternalLink>{' '}
       for support.
     </>
   );
 }
 
-function AccountSyncCheck({
-  accounts,
-  failedAccounts,
-  unlinkAccount,
-  pushModal,
-}) {
+export default function AccountSyncCheck() {
+  let accounts = useSelector(state => state.queries.accounts);
+  let failedAccounts = useSelector(state => state.account.failedAccounts);
+  let { unlinkAccount, pushModal } = useActions();
+
   let { id } = useParams();
   let [open, setOpen] = useState(false);
   if (!failedAccounts) {
@@ -87,25 +84,18 @@ function AccountSyncCheck({
   return (
     <View>
       <Button
-        bare
+        type="bare"
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          color: colors.r5,
-          backgroundColor: colors.r10,
+          color: theme.errorText,
+          backgroundColor: theme.errorBackground,
           padding: '4px 8px',
           borderRadius: 4,
         }}
         onClick={() => setOpen(true)}
       >
-        <ExclamationOutline
-          style={{
-            width: 14,
-            height: 14,
-            marginRight: 5,
-            color: 'currentColor',
-          }}
-        />{' '}
+        <ExclamationOutline style={{ width: 14, height: 14, marginRight: 5 }} />{' '}
         This account is experiencing connection problems. Let’s fix it.
       </Button>
 
@@ -119,7 +109,7 @@ function AccountSyncCheck({
             The server returned the following error:
           </div>
 
-          <div style={{ marginBottom: '1.25em', color: colors.r5 }}>
+          <div style={{ marginBottom: '1.25em', color: theme.errorText }}>
             {getErrorMessage(error.type, error.code)}
           </div>
 
@@ -127,7 +117,11 @@ function AccountSyncCheck({
             {showAuth ? (
               <>
                 <Button onClick={unlink}>Unlink</Button>
-                <Button primary onClick={reauth} style={{ marginLeft: 5 }}>
+                <Button
+                  type="primary"
+                  onClick={reauth}
+                  style={{ marginLeft: 5 }}
+                >
                   Reauthorize
                 </Button>
               </>
@@ -140,11 +134,3 @@ function AccountSyncCheck({
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    accounts: state.queries.accounts,
-    failedAccounts: state.account.failedAccounts,
-  }),
-  actions,
-)(AccountSyncCheck);

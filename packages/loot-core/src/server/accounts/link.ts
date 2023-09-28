@@ -1,5 +1,6 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as uuid from '../../platform/uuid';
 import { amountToInteger } from '../../shared/util';
 import * as db from '../db';
 import { runMutator } from '../mutators';
@@ -18,7 +19,7 @@ export async function handoffPublicToken(institution, publicToken) {
     throw new Error('Invalid institution object');
   }
 
-  let id = uuid.v4Sync();
+  let id = uuidv4();
 
   // Make sure to generate an access token first before inserting it
   // into our local database in case it fails
@@ -51,7 +52,7 @@ export async function findOrCreateBank(institution, requisitionId) {
   }
 
   const bankData = {
-    id: uuid.v4Sync(),
+    id: uuidv4(),
     bank_id: requisitionId,
     name: institution.name,
   };
@@ -103,7 +104,7 @@ export async function addAccounts(bankId, accountIds, offbudgetIds = []) {
   );
 }
 
-export async function addNordigenAccounts(
+export async function addGoCardlessAccounts(
   bankId,
   accountIds,
   offbudgetIds = [],
@@ -114,7 +115,7 @@ export async function addNordigenAccounts(
   ]);
 
   // Get all the available accounts
-  let accounts = await bankSync.getNordigenAccounts(userId, userKey, bankId);
+  let accounts = await bankSync.getGoCardlessAccounts(userId, userKey, bankId);
 
   // Only add the selected accounts
   accounts = accounts.filter(acct => accountIds.includes(acct.account_id));
@@ -142,7 +143,7 @@ export async function addNordigenAccounts(
       });
 
       // Do an initial sync
-      await bankSync.syncNordigenAccount(
+      await bankSync.syncGoCardlessAccount(
         userId,
         userKey,
         id,

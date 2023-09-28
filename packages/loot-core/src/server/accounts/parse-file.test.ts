@@ -35,11 +35,14 @@ async function importFileWithRealTime(
 ) {
   // Emscripten requires a real Date.now!
   global.restoreDateNow();
-  let { errors, transactions } = await parseFile(filepath);
+  let { errors, transactions } = await parseFile(filepath, {
+    enableExperimentalOfxParser: true,
+  });
   global.restoreFakeDateNow();
 
   if (transactions) {
-    transactions = transactions.map(trans => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    transactions = (transactions as any[]).map(trans => ({
       ...trans,
       amount: amountToInteger(trans.amount),
       date: dateFormat

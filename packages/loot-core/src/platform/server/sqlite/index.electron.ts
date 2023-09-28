@@ -1,4 +1,7 @@
-import Database from 'better-sqlite3';
+import SQL from 'better-sqlite3';
+import { v4 as uuidv4 } from 'uuid';
+
+import { removeFile, readFile } from '../fs';
 
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
@@ -15,12 +18,17 @@ export function prepare(db, sql) {
   return db.prepare(sql);
 }
 
-export function runQuery(db, sql, params = [], fetchAll) {
+export function runQuery(
+  db: SQL.Database,
+  sql: string | SQL.Statement,
+  params: (string | number)[] = [],
+  fetchAll = false,
+) {
   if (params) {
     verifyParamTypes(sql, params);
   }
 
-  let stmt;
+  let stmt: SQL.Statement;
   try {
     stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
   } catch (e) {
@@ -47,11 +55,11 @@ export function runQuery(db, sql, params = [], fetchAll) {
   }
 }
 
-export function execQuery(db, sql) {
+export function execQuery(db: SQL.Database, sql: string) {
   db.exec(sql);
 }
 
-export function transaction(db, fn) {
+export function transaction(db: SQL.Database, fn: () => void) {
   db.transaction(fn)();
 }
 
@@ -61,7 +69,10 @@ export function transaction(db, fn) {
 // it. This is rarely used, and only needed for specific cases (like
 // batch importing a bunch of data). Don't use this.
 let transactionDepth = 0;
-export async function asyncTransaction(db, fn) {
+export async function asyncTransaction(
+  db: SQL.Database,
+  fn: () => Promise<void>,
+) {
   // Support nested transactions by "coalescing" them into the parent
   // one if one is already started
   if (transactionDepth === 0) {
@@ -83,8 +94,8 @@ export async function asyncTransaction(db, fn) {
   }
 }
 
-export function openDatabase(pathOrBuffer) {
-  let db = new Database(pathOrBuffer);
+export function openDatabase(pathOrBuffer: string | Buffer) {
+  let db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER and UPPER implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
   db.function('UNICODE_LOWER', { deterministic: true }, (arg: string | null) =>
@@ -96,10 +107,19 @@ export function openDatabase(pathOrBuffer) {
   return db;
 }
 
-export function closeDatabase(db) {
+export function closeDatabase(db: SQL.Database) {
   return db.close();
 }
 
-export function exportDatabase(db) {
-  return db.serialize();
+export async function exportDatabase(db: SQL.Database) {
+  // electron does not support better-sqlite serialize since v21
+  // save to file and read in the raw data.
+  let name = `backup-for-export-${uuidv4()}.db`;
+
+  await db.backup(name);
+
+  let data = await readFile(name, 'binary');
+  await removeFile(name);
+
+  return data;
 }

@@ -1,8 +1,8 @@
-import * as uuid from '../platform/uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export function generateAccount(balance) {
   return {
-    account_id: uuid.v4Sync(),
+    account_id: uuidv4(),
     balances: {
       available: balance,
       current: balance,
@@ -52,7 +52,7 @@ export function generateTransaction(
     },
     pending: pending,
     pending_transaction_id: null,
-    transaction_id: uuid.v4Sync(),
+    transaction_id: uuidv4(),
     transaction_type: 'special',
   };
 }

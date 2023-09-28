@@ -1,9 +1,9 @@
 import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
+import { v4 as uuidv4 } from 'uuid';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
-import * as uuid from '../../platform/uuid';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
 import q from '../../shared/query';
 import {
@@ -32,6 +32,7 @@ import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
+import { SchedulesHandlers } from './types/handlers';
 
 // Utilities
 
@@ -64,7 +65,7 @@ export function updateConditions(conditions, newConditions) {
   return updated.concat(added);
 }
 
-export function getNextDate(dateCond, start = new Date()) {
+export function getNextDate(dateCond, start = new Date(currentDay())) {
   start = d.startOfDay(start);
 
   let cond = new Condition(
@@ -83,6 +84,12 @@ export function getNextDate(dateCond, start = new Date()) {
 
     if (dates.length > 0) {
       let date = dates[0].date;
+      if (value.schedule.data.skipWeekend) {
+        date = getDateWithSkippedWeekend(
+          date,
+          value.schedule.data.weekendSolve,
+        );
+      }
       return dayFromDate(date);
     }
   }
@@ -187,9 +194,10 @@ export async function setNextDate({
 // Methods
 
 async function checkIfScheduleExists(name, scheduleId) {
-  let idForName = await db.first('SELECT id from schedules WHERE name = ?', [
-    name,
-  ]);
+  let idForName = await db.first(
+    'SELECT id from schedules WHERE tombstone = 0 AND name = ?',
+    [name],
+  );
 
   if (idForName == null) {
     return false;
@@ -204,7 +212,7 @@ export async function createSchedule({
   schedule = null,
   conditions = [],
 } = {}) {
-  let scheduleId = (schedule && schedule.id) || uuid.v4Sync();
+  let scheduleId = schedule?.id || uuidv4();
 
   let { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {
@@ -227,8 +235,7 @@ export async function createSchedule({
   }
 
   // Create the rule here based on the info
-  let ruleId;
-  ruleId = await insertRule({
+  let ruleId = await insertRule({
     stage: null,
     conditionsOp: 'and',
     conditions,
@@ -267,15 +274,6 @@ export async function updateSchedule({
   if (schedule.rule) {
     throw new Error('You cannot change the rule of a schedule');
   }
-
-  if (schedule.name) {
-    if (await checkIfScheduleExists(schedule.name, schedule.id)) {
-      throw new Error('There is already a schedule with this name');
-    }
-  } else {
-    schedule.name = null;
-  }
-  // We need the rule if there are conditions
   let rule;
 
   // This must be outside the `batchMessages` call because we change
@@ -357,11 +355,6 @@ async function skipNextDate({ id }) {
     },
   });
 }
-
-// `schedule` here might not be a saved schedule, so it might not have
-// an id
-function getPossibleTransactions({ schedule }) {}
-
 function discoverSchedules() {
   return findSchedules();
 }
@@ -375,7 +368,12 @@ async function getUpcomingDates({ config, count }) {
     return schedule
       .occurrences({ start: d.startOfDay(new Date()), take: count })
       .toArray()
-      .map(date => dayFromDate(date.date));
+      .map(date =>
+        config.skipWeekend
+          ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
+          : date.date,
+      )
+      .map(date => dayFromDate(date));
   } catch (err) {
     captureBreadcrumb(config);
     throw err;
@@ -437,7 +435,7 @@ function onApplySync(oldValues, newValues) {
 // This is the service that move schedules forward automatically and
 // posts transactions
 
-async function postTransactionForSchedule({ id }) {
+async function postTransactionForSchedule({ id }: { id: string }) {
   let { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
   let schedule = data[0];
   if (schedule == null || schedule._account == null) {
@@ -533,7 +531,7 @@ async function advanceSchedulesService(syncSuccess) {
 }
 
 // Expose functions to the client
-let app = createApp();
+let app = createApp<SchedulesHandlers>();
 
 app.method('schedule/create', mutator(undoable(createSchedule)));
 app.method('schedule/update', mutator(undoable(updateSchedule)));
@@ -547,7 +545,6 @@ app.method(
   'schedule/force-run-service',
   mutator(() => advanceSchedulesService(true)),
 );
-app.method('schedule/get-possible-transactions', getPossibleTransactions);
 app.method('schedule/discover', discoverSchedules);
 app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
@@ -567,5 +564,18 @@ app.events.on('sync', ({ type, subtype }) => {
     }
   }
 });
+
+function getDateWithSkippedWeekend(date, solveMode) {
+  if (d.isWeekend(date)) {
+    if (solveMode === 'after') {
+      return d.nextMonday(date);
+    } else if (solveMode === 'before') {
+      return d.previousFriday(date);
+    } else {
+      throw new Error('Unknown weekend solve mode, this should not happen!');
+    }
+  }
+  return date;
+}
 
 export default app;

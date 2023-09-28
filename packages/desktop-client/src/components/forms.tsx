@@ -1,10 +1,11 @@
 import React, { type ReactNode, type HTMLProps } from 'react';
 
-import { css, type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
-import { colors } from '../style';
+import { type CSSProperties, theme } from '../style';
 
-import { View, Text } from './common';
+import Text from './common/Text';
+import View from './common/View';
 
 type SectionLabelProps = {
   title?: string;
@@ -14,16 +15,14 @@ type SectionLabelProps = {
 export const SectionLabel = ({ title, style }: SectionLabelProps) => {
   return (
     <View
-      style={[
-        {
-          fontWeight: 500,
-          textTransform: 'uppercase',
-          color: colors.b3,
-          marginBottom: 5,
-          lineHeight: '1em',
-        },
-        style,
-      ]}
+      style={{
+        fontWeight: 500,
+        textTransform: 'uppercase',
+        color: theme.altFormLabelText,
+        marginBottom: 5,
+        lineHeight: '1em',
+        ...style,
+      }}
     >
       {title}
     </View>
@@ -39,7 +38,14 @@ type FormLabelProps = {
 
 export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
-    <Text style={[{ fontSize: 13, marginBottom: 3, color: colors.n3 }, style]}>
+    <Text
+      style={{
+        fontSize: 13,
+        marginBottom: 3,
+        color: theme.tableText,
+        ...style,
+      }}
+    >
       <label htmlFor={htmlFor} id={id}>
         {title}
       </label>
@@ -58,8 +64,8 @@ export const FormField = ({ style, children }: FormFieldProps) => {
 
 // Custom inputs
 
-type CheckboxProps = Omit<HTMLProps<HTMLInputElement>, 'type' | 'styles'> & {
-  styles?: CSSProperties;
+type CheckboxProps = Omit<HTMLProps<HTMLInputElement>, 'type'> & {
+  style?: CSSProperties;
 };
 
 export const Checkbox = (props: CheckboxProps) => {
@@ -67,30 +73,31 @@ export const Checkbox = (props: CheckboxProps) => {
     <input
       type="checkbox"
       {...props}
-      {...css(
+      className={`${css(
         [
           {
             position: 'relative',
             margin: 0,
+            flexShrink: 0,
             marginRight: 6,
             width: 15,
             height: 15,
             appearance: 'none',
             outline: 0,
-            border: '1px solid #d0d0d0',
+            border: '1px solid ' + theme.formInputBorder,
             borderRadius: 4,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
-            backgroundColor: 'white',
+            color: theme.tableBackground,
+            backgroundColor: theme.tableBackground,
             ':checked': {
-              border: '1px solid ' + colors.b6,
-              backgroundColor: colors.b6,
+              border: '1px solid ' + theme.altFormInputBorderSelected,
+              backgroundColor: theme.tableTextEditingBackground,
               '::after': {
                 display: 'block',
                 background:
-                  colors.b6 +
+                  theme.tableTextEditingBackground +
                   // eslint-disable-next-line rulesdir/typography
                   ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="white" d="M0 11l2-2 5 5L18 3l2 2L7 18z"/></svg>\') 9px 9px',
                 width: 9,
@@ -105,7 +112,7 @@ export const Checkbox = (props: CheckboxProps) => {
                 bottom: -5,
                 left: -5,
                 right: -5,
-                border: '2px solid ' + colors.b5,
+                border: '2px solid ' + theme.altFormInputBorderSelected,
                 borderRadius: 6,
                 content: ' ',
               },
@@ -113,7 +120,7 @@ export const Checkbox = (props: CheckboxProps) => {
           },
         ],
         props.style,
-      )}
+      )}`}
     />
   );
 };

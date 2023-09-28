@@ -11,7 +11,7 @@ import {
   amountToInteger,
 } from 'loot-core/src/shared/util';
 
-import { AlignedText } from '../../common';
+import AlignedText from '../../common/AlignedText';
 import { index } from '../util';
 
 export default function createSpreadsheet(
@@ -19,6 +19,7 @@ export default function createSpreadsheet(
   end,
   accounts,
   conditions = [],
+  conditionsOp,
 ) {
   return async (spreadsheet, setData) => {
     if (accounts.length === 0) {
@@ -28,6 +29,7 @@ export default function createSpreadsheet(
     let { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
+    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     const data = await Promise.all(
       accounts.map(async acct => {
@@ -35,7 +37,7 @@ export default function createSpreadsheet(
           runQuery(
             q('transactions')
               .filter({
-                $and: filters,
+                [conditionsOpKey]: filters,
                 account: acct.id,
                 date: { $lt: start + '-01' },
               })
@@ -45,9 +47,11 @@ export default function createSpreadsheet(
           runQuery(
             q('transactions')
               .filter({
+                [conditionsOpKey]: [...filters],
+              })
+              .filter({
                 account: acct.id,
                 $and: [
-                  ...filters,
                   { date: { $gte: start + '-01' } },
                   { date: { $lte: end + '-31' } },
                 ],
@@ -89,6 +93,8 @@ function recalculate(data, start, end) {
   let hasNegative = false;
   let startNetWorth = 0;
   let endNetWorth = 0;
+  let lowestNetWorth = null;
+  let highestNetWorth = null;
 
   const graphData = months.reduce((arr, month, idx) => {
     let debt = 0;
@@ -136,6 +142,15 @@ function recalculate(data, start, end) {
     endNetWorth = total;
 
     arr.push({ x, y: integerToAmount(total), premadeLabel: label });
+
+    arr.forEach(item => {
+      if (item.y < lowestNetWorth || lowestNetWorth === null) {
+        lowestNetWorth = item.y;
+      }
+      if (item.y > highestNetWorth || highestNetWorth === null) {
+        highestNetWorth = item.y;
+      }
+    });
     return arr;
   }, []);
 
@@ -148,5 +163,7 @@ function recalculate(data, start, end) {
     },
     netWorth: endNetWorth,
     totalChange: endNetWorth - startNetWorth,
+    lowestNetWorth,
+    highestNetWorth,
   };
 }

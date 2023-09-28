@@ -1,15 +1,9 @@
-import React, {
-  type ComponentProps,
-  forwardRef,
-  useEffect,
-  useState,
-} from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors, styles } from '../../../style';
-import { Input as BaseInput } from '../../common';
+import { theme } from '../../../style';
 import { useSetServerURL } from '../../ServerContext';
 
 // There are two URLs that dance with each other: `/login` and
@@ -23,7 +17,7 @@ import { useSetServerURL } from '../../ServerContext';
 // do any checks.
 export function useBootstrapped() {
   let [checked, setChecked] = useState(false);
-  let history = useHistory();
+  let navigate = useNavigate();
   let location = useLocation();
   let setServerURL = useSetServerURL();
 
@@ -31,7 +25,7 @@ export function useBootstrapped() {
     async function run() {
       let ensure = url => {
         if (location.pathname !== url) {
-          history.push(url);
+          navigate(url);
         } else {
           setChecked(true);
         }
@@ -47,7 +41,7 @@ export function useBootstrapped() {
         });
         if ('error' in result || !result.hasServer) {
           console.log('error' in result && result.error);
-          history.push('/config-server');
+          navigate('/config-server');
           return;
         }
 
@@ -61,7 +55,7 @@ export function useBootstrapped() {
       } else {
         let result = await send('subscribe-needs-bootstrap');
         if ('error' in result) {
-          history.push('/error', { error: result.error });
+          navigate('/error', { state: { error: result.error } });
         } else if (result.bootstrapped) {
           ensure('/login');
         } else {
@@ -70,7 +64,7 @@ export function useBootstrapped() {
       }
     }
     run();
-  }, [history, location]);
+  }, [location]);
 
   return { checked };
 }
@@ -84,7 +78,7 @@ export function Title({ text }: TitleProps) {
       style={{
         fontSize: 40,
         fontWeight: 700,
-        color: colors.p3,
+        color: theme.pageTextPositive,
         marginBottom: 20,
       }}
     >
@@ -92,22 +86,3 @@ export function Title({ text }: TitleProps) {
     </h1>
   );
 }
-
-type InputProps = ComponentProps<typeof BaseInput>;
-export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
-  return (
-    <BaseInput
-      {...props}
-      style={[
-        {
-          padding: 10,
-          fontSize: 15,
-          border: 'none',
-          ...styles.shadow,
-          ':focus': { border: 'none', ...styles.shadow },
-        },
-        props.style,
-      ]}
-    />
-  );
-});

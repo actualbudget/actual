@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../../style';
-import { View, Text, Button } from '../../common';
+import { theme } from '../../../style';
+import Button from '../../common/Button';
+import Text from '../../common/Text';
+import View from '../../common/View';
 
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function ChangePassword() {
-  let history = useHistory();
+  let navigate = useNavigate();
   let [error, setError] = useState(null);
   let [msg, setMessage] = useState(null);
 
@@ -36,7 +38,7 @@ export default function ChangePassword() {
     } else {
       setMessage('Password successfully changed');
       await send('subscribe-sign-in', { password });
-      history.push('/');
+      navigate('/');
     }
   }
 
@@ -46,7 +48,7 @@ export default function ChangePassword() {
       <Text
         style={{
           fontSize: 16,
-          color: colors.n2,
+          color: theme.pageTextDark,
           lineHeight: 1.4,
         }}
       >
@@ -58,7 +60,7 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.r4,
+            color: theme.errorText,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -71,7 +73,7 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.g4,
+            color: theme.noticeText,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -83,10 +85,9 @@ export default function ChangePassword() {
       <ConfirmPasswordForm
         buttons={
           <Button
-            bare
-            type="button"
+            type="bare"
             style={{ fontSize: 15, marginRight: 10 }}
-            onClick={() => history.push('/')}
+            onClick={() => navigate('/')}
           >
             Cancel
           </Button>

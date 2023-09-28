@@ -2,8 +2,8 @@ import React from 'react';
 
 import * as d from 'date-fns';
 
-import { colors } from '../../style';
-import { Block } from '../common';
+import { theme } from '../../style';
+import Block from '../common/Block';
 
 function DateRange({ start, end }) {
   start = d.parseISO(start);
@@ -26,7 +26,7 @@ function DateRange({ start, end }) {
     content = d.format(end, 'MMMM yyyy');
   }
 
-  return <Block style={{ color: colors.n6 }}>{content}</Block>;
+  return <Block style={{ color: theme.pageTextSubdued }}>{content}</Block>;
 }
 
 export default DateRange;

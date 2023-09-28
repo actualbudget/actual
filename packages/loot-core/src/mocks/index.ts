@@ -1,14 +1,17 @@
-import * as uuid from '../platform/uuid';
+import { v4 as uuidv4 } from 'uuid';
+
 import * as monthUtils from '../shared/months';
 import type { TransactionEntity } from '../types/models';
 
+import random from './random';
+
 export function generateAccount(name, isConnected, offbudget) {
   return {
-    id: uuid.v4Sync(),
+    id: uuidv4(),
     name,
-    balance_current: isConnected ? Math.floor(Math.random() * 100000) : null,
-    bank: isConnected ? Math.floor(Math.random() * 10000) : null,
-    bankId: isConnected ? Math.floor(Math.random() * 10000) : null,
+    balance_current: isConnected ? Math.floor(random() * 100000) : null,
+    bank: isConnected ? Math.floor(random() * 10000) : null,
+    bankId: isConnected ? Math.floor(random() * 10000) : null,
     bankName: isConnected ? 'boa' : null,
     offbudget: offbudget ? 1 : 0,
     closed: 0,
@@ -18,7 +21,7 @@ export function generateAccount(name, isConnected, offbudget) {
 let sortOrder = 1;
 export function generateCategory(name, group, isIncome = false) {
   return {
-    id: uuid.v4Sync(),
+    id: uuidv4(),
     name: name,
     cat_group: group,
     is_income: isIncome ? 1 : 0,
@@ -29,7 +32,7 @@ export function generateCategory(name, group, isIncome = false) {
 let groupSortOrder = 1;
 export function generateCategoryGroup(name, isIncome = false) {
   return {
-    id: uuid.v4Sync(),
+    id: uuidv4(),
     name: name,
     is_income: isIncome ? 1 : 0,
     sort_order: groupSortOrder++,
@@ -50,10 +53,9 @@ export function generateCategoryGroups(definition) {
 }
 
 function _generateTransaction(data): TransactionEntity {
-  const id = data.id || uuid.v4Sync();
   return {
-    id: id,
-    amount: data.amount || Math.floor(Math.random() * 10000 - 7000),
+    id: data.id || uuidv4(),
+    amount: data.amount || Math.floor(random() * 10000 - 7000),
     payee: data.payee || 'payed-to',
     notes: 'Notes',
     account: data.account,
@@ -61,7 +63,6 @@ function _generateTransaction(data): TransactionEntity {
     category: data.category,
     sort_order: data.sort_order != null ? data.sort_order : 1,
     cleared: false,
-    error: null,
   };
 }
 
@@ -73,11 +74,11 @@ export function generateTransaction(data, splitAmount?, showError = false) {
 
   if (splitAmount) {
     const parent = trans;
-    parent.isParent = true;
+    parent.is_parent = true;
 
     result.push(
       {
-        id: parent.id + '/' + uuid.v4Sync(),
+        id: parent.id + '/' + uuidv4(),
         amount: trans.amount - splitAmount,
         account: parent.account,
         date: parent.date,
@@ -86,7 +87,7 @@ export function generateTransaction(data, splitAmount?, showError = false) {
         isChild: true,
       },
       {
-        id: parent.id + '/' + uuid.v4Sync(),
+        id: parent.id + '/' + uuidv4(),
         amount: splitAmount,
         account: parent.account,
         date: parent.date,

@@ -1,8 +1,7 @@
 import './polyfills';
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
-import * as YNAB4 from '@actual-app/import-ynab4/importer';
-import * as YNAB5 from '@actual-app/import-ynab5/importer';
+import { v4 as uuidv4 } from 'uuid';
 
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
@@ -11,18 +10,16 @@ import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
 import logger from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
-import * as uuid from '../platform/uuid';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
 import q, { Query } from '../shared/query';
-import { FIELD_TYPES as ruleFieldTypes } from '../shared/rules';
 import { amountToInteger, stringToInteger } from '../shared/util';
+import { Handlers } from '../types/handlers';
 
 import { exportToCSV, exportQueryToCSV } from './accounts/export-to-csv';
 import * as link from './accounts/link';
 import { parseFile } from './accounts/parse-file';
 import { getStartingBalancePayee } from './accounts/payees';
-import { Condition, Action, rankRules } from './accounts/rules';
 import * as bankSync from './accounts/sync';
 import * as rules from './accounts/transaction-rules';
 import { batchUpdateTransactions } from './accounts/transactions';
@@ -41,13 +38,16 @@ import * as cloudStorage from './cloud-storage';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
-import { APIError, TransactionError, PostError, RuleError } from './errors';
+import { APIError, TransactionError, PostError } from './errors';
+import filtersApp from './filters/app';
+import { handleBudgetImport } from './importers';
 import app from './main-app';
 import { mutator, runHandler } from './mutators';
 import notesApp from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
 import * as prefs from './prefs';
+import rulesApp from './rules/app';
 import schedulesApp from './schedules/app';
 import { getServer, setServer } from './server-config';
 import * as sheet from './sheet';
@@ -59,7 +59,6 @@ import {
   setSyncingMode,
   makeTestMessage,
   clearFullSyncTimeout,
-  syncAndReceiveMessages,
   resetSync,
   repairSync,
 } from './sync';
@@ -84,7 +83,9 @@ function onSheetChange({ names }) {
 
 // handlers
 
-export let handlers = {};
+// need to work around the type system here because the object
+// is /currently/ empty but we promise to fill it in later
+export let handlers = {} as unknown as Handlers;
 
 handlers['undo'] = mutator(async function () {
   return undo();
@@ -260,7 +261,7 @@ handlers['report-budget-month'] = async function ({ month }) {
 };
 
 handlers['budget-set-type'] = async function ({ type }) {
-  if (type !== 'rollover' && type !== 'report') {
+  if (!prefs.BUDGET_TYPES.includes(type)) {
     throw new Error('Invalid budget type: ' + type);
   }
 
@@ -497,128 +498,6 @@ handlers['payees-get-rules'] = async function ({ id }) {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
-function validateRule(rule) {
-  // Returns an array of errors, the array is the same link as the
-  // passed-in `array`, or null if there are no errors
-  function runValidation(array, validate) {
-    let result = array.map(item => {
-      try {
-        validate(item);
-      } catch (e) {
-        if (e instanceof RuleError) {
-          console.warn('Invalid rule', e);
-          return e.type;
-        }
-        throw e;
-      }
-      return null;
-    });
-
-    return result.some(Boolean) ? result : null;
-  }
-
-  let conditionErrors = runValidation(
-    rule.conditions,
-    cond =>
-      new Condition(
-        cond.op,
-        cond.field,
-        cond.value,
-        cond.options,
-        ruleFieldTypes,
-      ),
-  );
-
-  let actionErrors = runValidation(
-    rule.actions,
-    action =>
-      new Action(
-        action.op,
-        action.field,
-        action.value,
-        action.options,
-        ruleFieldTypes,
-      ),
-  );
-
-  if (conditionErrors || actionErrors) {
-    return {
-      conditionErrors,
-      actionErrors,
-    };
-  }
-
-  return null;
-}
-
-handlers['rule-validate'] = async function (rule) {
-  let error = validateRule(rule);
-  return { error };
-};
-
-handlers['rule-add'] = mutator(async function (rule) {
-  let error = validateRule(rule);
-  if (error) {
-    return { error };
-  }
-
-  let id = await rules.insertRule(rule);
-  return { id };
-});
-
-handlers['rule-update'] = mutator(async function (rule) {
-  let error = validateRule(rule);
-  if (error) {
-    return { error };
-  }
-
-  await rules.updateRule(rule);
-  return {};
-});
-
-handlers['rule-delete'] = mutator(async function (rule) {
-  return rules.deleteRule(rule);
-});
-
-handlers['rule-delete-all'] = mutator(async function (ids) {
-  let someDeletionsFailed = false;
-
-  await batchMessages(async () => {
-    for (let id of ids) {
-      let res = await rules.deleteRule({ id });
-      if (res === false) {
-        someDeletionsFailed = true;
-      }
-    }
-  });
-
-  return { someDeletionsFailed };
-});
-
-handlers['rule-apply-actions'] = mutator(async function ({
-  transactionIds,
-  actions,
-}) {
-  return rules.applyActions(transactionIds, actions, handlers);
-});
-
-handlers['rule-add-payee-rename'] = mutator(async function ({ fromNames, to }) {
-  return rules.updatePayeeRenameRule(fromNames, to);
-});
-
-handlers['rules-get'] = async function () {
-  return rankRules(rules.getRules()).map(rule => rule.serialize());
-};
-
-handlers['rule-get'] = async function ({ id }) {
-  let rule = rules.getRules().find(rule => rule.id === id);
-  return rule ? rule.serialize() : null;
-};
-
-handlers['rules-run'] = async function ({ transaction }) {
-  return rules.runRules(transaction);
-};
-
 handlers['make-filters-from-conditions'] = async function ({ conditions }) {
   return rules.conditionsToAQL(conditions);
 };
@@ -737,7 +616,7 @@ handlers['accounts-link'] = async function ({
   ]);
 
   // Get all the available accounts and find the selected one
-  let accounts = await bankSync.getNordigenAccounts(userId, userKey, bankId);
+  let accounts = await bankSync.getGoCardlessAccounts(userId, userKey, bankId);
   let account = accounts.find(acct => acct.account_id === accountId);
 
   await db.update('accounts', {
@@ -767,7 +646,7 @@ handlers['accounts-link'] = async function ({
   return 'ok';
 };
 
-handlers['nordigen-accounts-link'] = async function ({
+handlers['gocardless-accounts-link'] = async function ({
   requisitionId,
   account,
   upgradingId,
@@ -786,7 +665,7 @@ handlers['nordigen-accounts-link'] = async function ({
       bank: bank.id,
     });
   } else {
-    id = uuid.v4Sync();
+    id = uuidv4();
     await db.insertWithUUID('accounts', {
       id,
       account_id: account.account_id,
@@ -801,7 +680,7 @@ handlers['nordigen-accounts-link'] = async function ({
     });
   }
 
-  await bankSync.syncNordigenAccount(
+  await bankSync.syncGoCardlessAccount(
     undefined,
     undefined,
     id,
@@ -828,14 +707,14 @@ handlers['accounts-connect'] = async function ({
   return ids;
 };
 
-handlers['nordigen-accounts-connect'] = async function ({
+handlers['gocardless-accounts-connect'] = async function ({
   institution,
   publicToken,
   accountIds,
   offbudgetIds,
 }) {
   let bankId = await link.handoffPublicToken(institution, publicToken);
-  let ids = await link.addNordigenAccounts(bankId, accountIds, offbudgetIds);
+  let ids = await link.addGoCardlessAccounts(bankId, accountIds, offbudgetIds);
   return ids;
 };
 
@@ -917,7 +796,7 @@ handlers['account-close'] = mutator(async function ({
         [id],
       );
 
-      await batchMessages(() => {
+      await batchMessages(async () => {
         // TODO: what this should really do is send a special message that
         // automatically marks the tombstone value for all transactions
         // within an account... or something? This is problematic
@@ -955,7 +834,7 @@ handlers['account-close'] = mutator(async function ({
         );
 
         await handlers['transaction-add']({
-          id: uuid.v4Sync(),
+          id: uuidv4(),
           payee: payeeId,
           amount: -balance,
           account: id,
@@ -1159,7 +1038,7 @@ handlers['secret-check'] = async function (name) {
   }
 };
 
-handlers['nordigen-poll-web-token'] = async function ({
+handlers['gocardless-poll-web-token'] = async function ({
   upgradingAccountId,
   requisitionId,
 }) {
@@ -1180,7 +1059,7 @@ handlers['nordigen-poll-web-token'] = async function ({
     }
 
     let data = await post(
-      getServer().NORDIGEN_SERVER + '/get-accounts',
+      getServer().GOCARDLESS_SERVER + '/get-accounts',
       {
         upgradingAccountId,
         requisitionId,
@@ -1212,7 +1091,7 @@ handlers['nordigen-poll-web-token'] = async function ({
   });
 };
 
-handlers['nordigen-status'] = async function () {
+handlers['gocardless-status'] = async function () {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1220,7 +1099,7 @@ handlers['nordigen-status'] = async function () {
   }
 
   return post(
-    getServer().NORDIGEN_SERVER + '/status',
+    getServer().GOCARDLESS_SERVER + '/status',
     {},
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1228,7 +1107,7 @@ handlers['nordigen-status'] = async function () {
   );
 };
 
-handlers['nordigen-get-banks'] = async function (country) {
+handlers['gocardless-get-banks'] = async function (country) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1236,7 +1115,7 @@ handlers['nordigen-get-banks'] = async function (country) {
   }
 
   return post(
-    getServer().NORDIGEN_SERVER + '/get-banks',
+    getServer().GOCARDLESS_SERVER + '/get-banks',
     { country, showDemo: isNonProductionEnvironment() },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1244,12 +1123,12 @@ handlers['nordigen-get-banks'] = async function (country) {
   );
 };
 
-handlers['nordigen-poll-web-token-stop'] = async function () {
+handlers['gocardless-poll-web-token-stop'] = async function () {
   stopPolling = true;
   return 'ok';
 };
 
-handlers['nordigen-create-web-token'] = async function ({
+handlers['gocardless-create-web-token'] = async function ({
   upgradingAccountId,
   institutionId,
   accessValidForDays,
@@ -1262,7 +1141,7 @@ handlers['nordigen-create-web-token'] = async function ({
 
   try {
     return await post(
-      getServer().NORDIGEN_SERVER + '/create-web-token',
+      getServer().GOCARDLESS_SERVER + '/create-web-token',
       {
         upgradingAccountId,
         institutionId,
@@ -1278,7 +1157,7 @@ handlers['nordigen-create-web-token'] = async function ({
   }
 };
 
-handlers['nordigen-accounts-sync'] = async function ({ id }) {
+handlers['gocardless-accounts-sync'] = async function ({ id }) {
   let [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
@@ -1304,7 +1183,7 @@ handlers['nordigen-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
-        const res = await bankSync.syncNordigenAccount(
+        const res = await bankSync.syncGoCardlessAccount(
           userId,
           userKey,
           acct.id,
@@ -1405,7 +1284,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   );
 
   // No more accounts are associated with this bank. We can remove
-  // it from Nordigen.
+  // it from GoCardless.
   let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return 'ok';
@@ -1418,7 +1297,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     );
     try {
       await post(
-        getServer().NORDIGEN_SERVER + '/remove-account',
+        getServer().GOCARDLESS_SERVER + '/remove-account',
         {
           requisitionId: requisitionId,
         },
@@ -1469,32 +1348,35 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('floatingSidebar' in prefs) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
+  if ('theme' in prefs) {
+    await asyncStorage.setItem('theme', prefs.theme);
+  }
   return 'ok';
 };
 
 handlers['load-global-prefs'] = async function () {
   let [
     [, floatingSidebar],
-    [, seenTutorial],
     [, maxMonths],
     [, autoUpdate],
     [, documentDir],
     [, encryptKey],
+    [, theme],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
-    'seen-tutorial',
     'max-months',
     'auto-update',
     'document-dir',
     'encrypt-key',
+    'theme',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
-    seenTutorial: seenTutorial === 'true' ? true : false,
     maxMonths: stringToInteger(maxMonths || ''),
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
+    theme: theme === 'light' || theme === 'dark' ? theme : 'light',
   };
 };
 
@@ -1538,7 +1420,7 @@ handlers['key-make'] = async function ({ password }) {
   }
 
   let salt = encryption.randomBytes(32).toString('base64');
-  let id = uuid.v4Sync();
+  let id = uuidv4();
   let key = await encryption.createKey({ id, password, salt });
 
   // Load the key
@@ -1623,8 +1505,12 @@ handlers['get-did-bootstrap'] = async function () {
 handlers['subscribe-needs-bootstrap'] = async function ({
   url,
 }: { url? } = {}) {
-  if (!getServer(url)) {
-    return { bootstrapped: true, hasServer: false };
+  try {
+    if (!getServer(url)) {
+      return { bootstrapped: true, hasServer: false };
+    }
+  } catch (err) {
+    return { error: 'get-server-failure' };
   }
 
   let res;
@@ -1923,9 +1809,9 @@ handlers['download-budget'] = async function ({ fileId }) {
 // open and sync, but don’t close
 handlers['sync-budget'] = async function () {
   setSyncingMode('enabled');
-  await initialFullSync();
+  let result = await initialFullSync();
 
-  return {};
+  return result;
 };
 
 handlers['load-budget'] = async function ({ id }) {
@@ -1987,7 +1873,7 @@ handlers['close-budget'] = async function () {
 handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
-  if (cloudFileId && !process.env.IS_BETA) {
+  if (cloudFileId) {
     await cloudStorage.removeFile(cloudFileId).catch(err => {});
   }
 
@@ -2066,11 +1952,6 @@ handlers['create-budget'] = async function ({
   return {};
 };
 
-handlers['set-tutorial-seen'] = async function () {
-  await asyncStorage.setItem('seen-tutorial', 'true');
-  return 'ok';
-};
-
 handlers['import-budget'] = async function ({ filepath, type }) {
   try {
     if (!(await fs.exists(filepath))) {
@@ -2078,91 +1959,25 @@ handlers['import-budget'] = async function ({ filepath, type }) {
     }
 
     let buffer = Buffer.from(await fs.readFile(filepath, 'binary'));
-
-    switch (type) {
-      case 'ynab4':
-        try {
-          await YNAB4.importBuffer(filepath, buffer);
-        } catch (e) {
-          let msg = e.message.toLowerCase();
-          if (
-            msg.includes('not a ynab4') ||
-            msg.includes('could not find file')
-          ) {
-            return { error: 'not-ynab4' };
-          }
-        }
-        break;
-      case 'ynab5':
-        let data;
-        try {
-          data = JSON.parse(buffer.toString());
-        } catch (e) {
-          return { error: 'parse-error' };
-        }
-
-        try {
-          await YNAB5.importYNAB5(data);
-        } catch (e) {
-          return { error: 'not-ynab5' };
-        }
-        break;
-      case 'actual':
-        // We should pull out import/export into its own app so this
-        // can be abstracted out better. Importing Actual files is a
-        // special case because we can directly write down the files,
-        // but because it doesn't go through the API layer we need to
-        // duplicate some of the workflow
-        await handlers['close-budget']();
-
-        let id;
-        try {
-          ({ id } = await cloudStorage.importBuffer(
-            { cloudFileId: null, groupId: null },
-            buffer,
-          ));
-        } catch (e) {
-          if (e.type === 'FileDownloadError') {
-            return { error: e.reason };
-          }
-          throw e;
-        }
-
-        // We never want to load cached data from imported files, so
-        // delete the cache
-        let sqliteDb = await sqlite.openDatabase(
-          fs.join(fs.getBudgetDir(id), 'db.sqlite'),
-        );
-        sqlite.execQuery(
-          sqliteDb,
-          `
-          DELETE FROM kvcache;
-          DELETE FROM kvcache_key;
-        `,
-        );
-        sqlite.closeDatabase(sqliteDb);
-
-        // Load the budget, force everything to be computed, and try
-        // to upload it as a cloud file
-        await handlers['load-budget']({ id });
-        await handlers['get-budget-bounds']();
-        await sheet.waitOnSpreadsheet();
-        await cloudStorage.upload().catch(err => {});
-
-        break;
-      default:
-    }
+    let results = await handleBudgetImport(type, filepath, buffer);
+    return results || {};
   } catch (err) {
     err.message = 'Error importing budget: ' + err.message;
     captureException(err);
     return { error: 'internal-error' };
   }
-
-  return {};
 };
 
 handlers['export-budget'] = async function () {
-  return await cloudStorage.exportBuffer();
+  try {
+    return {
+      data: await cloudStorage.exportBuffer(),
+    };
+  } catch (err) {
+    err.message = 'Error exporting budget: ' + err.message;
+    captureException(err);
+    return { error: 'internal-error' };
+  }
 };
 
 async function loadBudget(id) {
@@ -2268,7 +2083,7 @@ async function loadBudget(id) {
 
   // Ensure that syncing is enabled
   if (process.env.NODE_ENV !== 'test') {
-    if (process.env.IS_BETA || id === DEMO_BUDGET_ID) {
+    if (id === DEMO_BUDGET_ID) {
       setSyncingMode('disabled');
     } else {
       if (getServer()) {
@@ -2291,37 +2106,13 @@ async function loadBudget(id) {
   return {};
 }
 
-handlers['get-upgrade-notifications'] = async function () {
-  let { id } = prefs.getPrefs();
-  if (id === TEST_BUDGET_ID || id === DEMO_BUDGET_ID) {
-    return [];
-  }
-
-  let types = ['schedules', 'repair-splits'];
-  let unseen = [];
-
-  for (let type of types) {
-    let key = `notifications.${type}`;
-    if (prefs.getPrefs()[key] == null) {
-      unseen.push(type);
-    }
-  }
-
-  return unseen;
-};
-
-handlers['seen-upgrade-notification'] = async function ({ type }) {
-  let key = `notifications.${type}`;
-  prefs.savePrefs({ [key]: true });
-};
-
 handlers['upload-file-web'] = async function ({ filename, contents }) {
   if (!Platform.isWeb) {
     return null;
   }
 
   await fs.writeFile('/uploads/' + filename, contents);
-  return 'ok';
+  return {};
 };
 
 handlers['backups-get'] = async function ({ id }) {
@@ -2357,13 +2148,13 @@ handlers['app-focused'] = async function () {
   }
 };
 
-handlers = installAPI(handlers);
+handlers = installAPI(handlers) as Handlers;
 
 injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 
 // A hack for now until we clean up everything
 app.handlers = handlers;
-app.combine(schedulesApp, budgetApp, notesApp, toolsApp);
+app.combine(schedulesApp, budgetApp, notesApp, toolsApp, filtersApp, rulesApp);
 
 function getDefaultDocumentDir() {
   if (Platform.isMobile) {
@@ -2404,6 +2195,7 @@ async function setupDocumentsDir() {
   fs._setDocumentDir(documentDir);
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export async function initApp(isDev, socketName) {
   await sqlite.init();
   await Promise.all([asyncStorage.init(), fs.init()]);
@@ -2457,7 +2249,7 @@ export async function initApp(isDev, socketName) {
     });
   }
 
-  if (isDev || process.env.IS_BETA) {
+  if (isDev) {
     global.$send = (name, args) => runHandler(app.handlers[name], args);
     global.$query = aqlQuery;
     global.$q = q;
@@ -2466,6 +2258,7 @@ export async function initApp(isDev, socketName) {
   }
 }
 
+// eslint-disable-next-line import/no-unused-modules
 export async function init(config) {
   // Get from build
 
@@ -2504,6 +2297,7 @@ export async function init(config) {
 }
 
 // Export a few things required for the platform
+// eslint-disable-next-line import/no-unused-modules
 export const lib = {
   getDataDir: fs.getDataDir,
   sendMessage: (msg, args) => connection.send(msg, args),
@@ -2512,12 +2306,6 @@ export const lib = {
     return res;
   },
   on: (name, func) => app.events.on(name, func),
-  syncAndReceiveMessages,
   q,
   db,
-
-  // Expose CRDT mechanisms so server can use them
-  // Backwards compatability
-  ...CRDT,
-  timestamp: CRDT,
 };

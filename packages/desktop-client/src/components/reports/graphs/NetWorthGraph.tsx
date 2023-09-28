@@ -1,7 +1,6 @@
 import React, { createElement } from 'react';
 
 import * as d from 'date-fns';
-import { type CSSProperties } from 'glamor';
 import {
   VictoryChart,
   VictoryBar,
@@ -11,90 +10,43 @@ import {
   VictoryGroup,
 } from 'victory';
 
-import theme from '../chart-theme';
+import { type CSSProperties } from '../../../style';
+import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
-type AreaProps = {
-  start: string;
-  end: string;
-  scale?;
-  range?;
-};
-function Area({ start, end, scale, range }: AreaProps) {
-  const zero = scale.y(0);
-
-  const startX = scale.x(d.parseISO(start + '-01'));
-  const endX = scale.x(d.parseISO(end + '-01'));
-
-  if (startX < 0 || endX < 0) {
-    return null;
-  }
-
-  return (
-    <svg>
-      <defs>
-        <clipPath id="positive">
-          <rect
-            x={startX}
-            y={range.y[1]}
-            width={endX - startX}
-            height={zero - range.y[1] + 1}
-            fill="#ffffff"
-          />
-        </clipPath>
-        <clipPath id="negative">
-          <rect
-            x={startX}
-            y={zero + 1}
-            width={endX - startX}
-            height={Math.max(range.y[0] - zero - 1, 0)}
-            fill="#ffffff"
-          />
-        </clipPath>
-        <linearGradient
-          id="positive-gradient"
-          gradientUnits="userSpaceOnUse"
-          x1={0}
-          y1={range.y[1]}
-          x2={0}
-          y2={zero}
-        >
-          <stop offset="0%" stopColor={theme.colors.blueFadeStart} />
-          <stop offset="100%" stopColor={theme.colors.blueFadeEnd} />
-        </linearGradient>
-        <linearGradient
-          id="negative-gradient"
-          gradientUnits="userSpaceOnUse"
-          x1={0}
-          y1={zero}
-          x2={0}
-          y2={range.y[0]}
-        >
-          <stop offset="0%" stopColor={theme.colors.redFadeEnd} />
-          <stop offset="100%" stopColor={theme.colors.redFadeStart} />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
+import { Area } from './common';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
+  domain?: {
+    y?: [number, number];
+  };
 };
-function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
+function NetWorthGraph({
+  style,
+  graphData,
+  compact,
+  domain,
+}: NetWorthGraphProps) {
   const Chart = compact ? VictoryGroup : VictoryChart;
 
   return (
-    <Container style={[style, compact && { height: 'auto' }]}>
+    <Container
+      style={{
+        ...style,
+        ...(compact && { height: 'auto' }),
+      }}
+    >
       {(width, height, portalHost) =>
         graphData && (
           <Chart
             scale={{ x: 'time', y: 'linear' }}
-            theme={theme}
+            theme={chartTheme}
             domainPadding={{ x: 0, y: 10 }}
+            domain={domain}
             width={width}
             height={height}
             containerComponent={
@@ -135,7 +87,7 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
                   data: {
                     clipPath: 'url(#negative)',
                     fill: 'url(#negative-gradient)',
-                    stroke: theme.colors.red,
+                    stroke: chartTheme.colors.red,
                     strokeLinejoin: 'round',
                   },
                 }}
@@ -150,16 +102,20 @@ function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
             />
             {!compact && (
               <VictoryAxis
-                style={{ ticks: { stroke: 'red' } }}
+                style={{ ticks: { stroke: chartTheme.colors.red } }}
                 // eslint-disable-next-line rulesdir/typography
                 tickFormat={x => d.format(x, "MMM ''yy")}
                 tickValues={graphData.data.map(item => item.x)}
-                tickCount={Math.min(5, graphData.data.length)}
+                tickCount={Math.min(width / 220, graphData.data.length)}
                 offsetY={50}
               />
             )}
             {!compact && (
-              <VictoryAxis dependentAxis crossAxis={!graphData.hasNegative} />
+              <VictoryAxis
+                dependentAxis
+                tickCount={Math.round(height / 70)}
+                crossAxis={!graphData.hasNegative}
+              />
             )}
           </Chart>
         )

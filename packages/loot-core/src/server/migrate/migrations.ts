@@ -1,10 +1,12 @@
 // We have to bundle in JS migrations manually to avoid having to `eval`
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
+import { Database } from 'better-sqlite3';
+import { v4 as uuidv4 } from 'uuid';
+
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
-import * as uuid from '../../platform/uuid';
 
 let MIGRATIONS_DIR = fs.migrationsPath;
 
@@ -12,18 +14,21 @@ let javascriptMigrations = {
   1632571489012: m1632571489012,
 };
 
-export async function withMigrationsDir(dir, func) {
+export async function withMigrationsDir(
+  dir: string,
+  func: () => Promise<void>,
+): Promise<void> {
   let oldDir = MIGRATIONS_DIR;
   MIGRATIONS_DIR = dir;
   await func();
   MIGRATIONS_DIR = oldDir;
 }
 
-export function getMigrationsDir() {
+export function getMigrationsDir(): string {
   return MIGRATIONS_DIR;
 }
 
-function getMigrationId(name) {
+function getMigrationId(name: string): number {
   return parseInt(name.match(/^(\d)+/)[0]);
 }
 
@@ -35,7 +40,21 @@ export function getUpMigration(id, names) {
   }
 }
 
-export async function getAppliedMigrations(db) {
+async function patchBadMigrations(db: Database) {
+  let badFiltersMigration = 1685375406832;
+  let newFiltersMigration = 1688749527273;
+  let appliedIds = await getAppliedMigrations(db);
+  if (appliedIds.includes(badFiltersMigration)) {
+    await sqlite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = ?', [
+      badFiltersMigration,
+    ]);
+    await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
+      newFiltersMigration,
+    ]);
+  }
+}
+
+export async function getAppliedMigrations(db: Database): Promise<number[]> {
   const rows = await sqlite.runQuery<{ id: number }>(
     db,
     'SELECT * FROM __migrations__ ORDER BY id ASC',
@@ -45,7 +64,9 @@ export async function getAppliedMigrations(db) {
   return rows.map(row => row.id);
 }
 
-export async function getMigrationList(migrationsDir) {
+export async function getMigrationList(
+  migrationsDir: string,
+): Promise<string[]> {
   const files = await fs.listDir(migrationsDir);
   return files
     .filter(name => name.match(/(\.sql|\.js)$/))
@@ -61,7 +82,7 @@ export async function getMigrationList(migrationsDir) {
     });
 }
 
-export function getPending(appliedIds, all) {
+export function getPending(appliedIds: number[], all: string[]): string[] {
   return all.filter(name => {
     const id = getMigrationId(name);
     return appliedIds.indexOf(id) === -1;
@@ -81,7 +102,7 @@ async function applyJavaScript(db, id) {
   }
 
   let run = javascriptMigrations[id];
-  return run(dbInterface, () => uuid.v4Sync());
+  return run(dbInterface, () => uuidv4());
 }
 
 async function applySql(db, sql) {
@@ -93,7 +114,11 @@ async function applySql(db, sql) {
   }
 }
 
-export async function applyMigration(db, name, migrationsDir) {
+export async function applyMigration(
+  db: Database,
+  name: string,
+  migrationsDir: string,
+): Promise<void> {
   const code = await fs.readFile(fs.join(migrationsDir, name));
   if (name.match(/\.js$/)) {
     await applyJavaScript(db, getMigrationId(name));
@@ -105,18 +130,26 @@ export async function applyMigration(db, name, migrationsDir) {
   ]);
 }
 
-function checkDatabaseValidity(appliedIds, available) {
+function checkDatabaseValidity(
+  appliedIds: number[],
+  available: string[],
+): void {
   for (let i = 0; i < appliedIds.length; i++) {
     if (
       i >= available.length ||
       appliedIds[i] !== getMigrationId(available[i])
     ) {
+      console.error('Database is out of sync with migrations:', {
+        appliedIds,
+        available,
+      });
       throw new Error('out-of-sync-migrations');
     }
   }
 }
 
-export async function migrate(db) {
+export async function migrate(db: Database): Promise<string[]> {
+  await patchBadMigrations(db);
   let appliedIds = await getAppliedMigrations(db);
   let available = await getMigrationList(MIGRATIONS_DIR);
 

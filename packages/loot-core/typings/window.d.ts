@@ -6,11 +6,17 @@ declare global {
       IS_FAKE_WEB: boolean;
       ACTUAL_VERSION: string;
       openURLInBrowser: (url: string) => void;
+      saveFile: (
+        contents: Buffer,
+        filename: string,
+        dialogTitle: string,
+      ) => void;
+      openFileDialog: (
+        opts: Parameters<import('electron').Dialog['showOpenDialogSync']>[0],
+      ) => Promise<string[]>;
+      relaunch: () => void;
     };
 
-    __history?: {
-      location;
-      push(url: string, opts?: unknown): void;
-    };
+    __navigate?: import('react-router').NavigateFunction;
   }
 }

@@ -3,19 +3,15 @@ import React, { useState } from 'react';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/src/shared/errors';
 
-import { colors } from '../../style';
-import {
-  View,
-  Text,
-  Modal,
-  Button,
-  ButtonWithLoading,
-  P,
-  ModalButtons,
-  Input,
-  InitialFocus,
-  ExternalLink,
-} from '../common';
+import { theme } from '../../style';
+import Button, { ButtonWithLoading } from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import InitialFocus from '../common/InitialFocus';
+import Input from '../common/Input';
+import Modal, { ModalButtons } from '../common/Modal';
+import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function FixEncryptionKey({
   modalProps,
@@ -45,7 +41,7 @@ export default function FixEncryptionKey({
       }
 
       actions.popModal();
-      onSuccess && onSuccess();
+      onSuccess?.();
     }
   }
 
@@ -57,7 +53,7 @@ export default function FixEncryptionKey({
             style={{
               fontSize: 25,
               fontWeight: 700,
-              color: colors.n2,
+              color: theme.pageTextDark,
               margin: '20px 0',
             }}
           >
@@ -66,28 +62,22 @@ export default function FixEncryptionKey({
               : 'This file is encrypted'}
           </Text>
           {hasExistingKey ? (
-            <P>
+            <Paragraph>
               This file was encrypted with a different key than you are
               currently using. This probably means you changed your password.
               Enter your current password to update your key.{' '}
-              <ExternalLink
-                asAnchor
-                href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-              >
+              <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                 Learn more
               </ExternalLink>
-            </P>
+            </Paragraph>
           ) : (
-            <P>
+            <Paragraph>
               We don’t have a key that encrypts or decrypts this file. Enter the
               password for this file to create the key for encryption.{' '}
-              <ExternalLink
-                asAnchor
-                href="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-              >
+              <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
                 Learn more
               </ExternalLink>
-            </P>
+            </Paragraph>
           )}
           <form
             onSubmit={e => {
@@ -106,7 +96,7 @@ export default function FixEncryptionKey({
               {error && (
                 <View
                   style={{
-                    color: colors.r4,
+                    color: theme.errorText,
                     textAlign: 'center',
                     fontSize: 13,
                     marginBottom: 3,
@@ -137,13 +127,13 @@ export default function FixEncryptionKey({
               <Button
                 style={{ marginRight: 10 }}
                 onClick={() => modalProps.onBack()}
-                type="button"
+                type="normal"
               >
                 Back
               </Button>
               <ButtonWithLoading
+                type="primary"
                 loading={loading}
-                primary
                 onClick={onUpdateKey}
               >
                 {hasExistingKey ? 'Update key' : 'Create key'}

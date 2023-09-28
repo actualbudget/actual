@@ -131,7 +131,7 @@ function getMenu(isDev, createWindow) {
           enabled: false,
           click: function (menuItem, focusedWin) {
             focusedWin.webContents.executeJavaScript(
-              '__history && __history.push("/schedule/discover", { locationPtr: __history.location })',
+              'window.__actionsForMenu && window.__actionsForMenu.pushModal("schedules-discover")',
             );
           },
         },

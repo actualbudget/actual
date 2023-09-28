@@ -8,12 +8,16 @@ export const TYPE_INFO = {
     nullable: false,
   },
   id: {
-    ops: ['is', 'contains', 'oneOf'],
+    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: true,
   },
-  string: {
-    ops: ['is', 'contains', 'oneOf'],
+  saved: {
+    ops: [],
     nullable: false,
+  },
+  string: {
+    ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
+    nullable: true,
   },
   number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
@@ -23,19 +27,6 @@ export const TYPE_INFO = {
     ops: ['is'],
     nullable: false,
   },
-};
-
-export type FieldTypes = {
-  imported_payee: string;
-  payee: string;
-  date: string;
-  notes: string;
-  amount: number;
-  amountInflow: number;
-  amountOutfow: number;
-  category: string;
-  account: string;
-  cleared: boolean;
 };
 
 export const FIELD_TYPES = new Map(
@@ -50,6 +41,7 @@ export const FIELD_TYPES = new Map(
     category: 'id',
     account: 'id',
     cleared: 'boolean',
+    saved: 'saved',
   }),
 );
 
@@ -75,18 +67,24 @@ export function mapField(field, opts) {
   }
 }
 
-export function friendlyOp(op, type) {
+export function friendlyOp(op, type?) {
   switch (op) {
     case 'oneOf':
       return 'one of';
+    case 'notOneOf':
+      return 'not one of';
     case 'is':
       return 'is';
+    case 'isNot':
+      return 'is not';
     case 'isapprox':
       return 'is approx';
     case 'isbetween':
       return 'is between';
     case 'contains':
       return 'contains';
+    case 'doesNotContain':
+      return 'does not contain';
     case 'gt':
       if (type === 'date') {
         return 'is after';

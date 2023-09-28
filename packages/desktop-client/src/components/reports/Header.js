@@ -1,10 +1,12 @@
-import React from 'react';
-
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
 import { styles } from '../../style';
-import { View, Select, Button, ButtonLink } from '../common';
+import Button from '../common/Button';
+import ButtonLink from '../common/ButtonLink';
+import Select from '../common/Select';
+import View from '../common/View';
+import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
@@ -52,19 +54,25 @@ function Header({
   show1Month,
   allMonths,
   onChangeDates,
-  extraButtons,
+  filters,
+  conditionsOp,
+  onApply,
+  onUpdateFilter,
+  onDeleteFilter,
+  onCondOpChange,
+  headerPrefixItems,
 }) {
   return (
     <View
       style={{
-        padding: 20,
+        padding: 10,
         paddingTop: 0,
         flexShrink: 0,
       }}
     >
       <ButtonLink
+        type="bare"
         to="/reports"
-        bare
         style={{ marginBottom: '15', alignSelf: 'flex-start' }}
       >
         <ArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
@@ -79,56 +87,79 @@ function Header({
           gap: 15,
         }}
       >
-        <div>
+        {headerPrefixItems}
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 5,
+          }}
+        >
           <Select
-            style={{ flex: 0, backgroundColor: 'white' }}
-            onChange={e =>
-              onChangeDates(...validateStart(allMonths, e.target.value, end))
+            onChange={newValue =>
+              onChangeDates(...validateStart(allMonths, newValue, end))
             }
             value={start}
-          >
-            {allMonths.map(month => (
-              <option key={month.name} value={month.name}>
-                {month.pretty}
-              </option>
-            ))}
-          </Select>{' '}
-          to{' '}
+            defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
+            options={allMonths.map(({ name, pretty }) => [name, pretty])}
+          />
+          <View>to</View>
           <Select
-            style={{ flex: 0, backgroundColor: 'white' }}
-            onChange={e =>
-              onChangeDates(...validateEnd(allMonths, start, e.target.value))
+            onChange={newValue =>
+              onChangeDates(...validateEnd(allMonths, start, newValue))
             }
             value={end}
-          >
-            {allMonths.map(month => (
-              <option key={month.name} value={month.name}>
-                {month.pretty}
-              </option>
-            ))}
-          </Select>
-        </div>
+            options={allMonths.map(({ name, pretty }) => [name, pretty])}
+          />
+        </View>
 
-        {extraButtons}
+        {filters && <FilterButton onApply={onApply} />}
 
         {show1Month && (
-          <Button bare onClick={() => onChangeDates(...getLatestRange(1))}>
+          <Button
+            type="bare"
+            onClick={() => onChangeDates(...getLatestRange(1))}
+          >
             1 month
           </Button>
         )}
-        <Button bare onClick={() => onChangeDates(...getLatestRange(2))}>
+        <Button type="bare" onClick={() => onChangeDates(...getLatestRange(2))}>
           3 months
         </Button>
-        <Button bare onClick={() => onChangeDates(...getLatestRange(5))}>
+        <Button type="bare" onClick={() => onChangeDates(...getLatestRange(5))}>
           6 months
         </Button>
-        <Button bare onClick={() => onChangeDates(...getLatestRange(11))}>
+        <Button
+          type="bare"
+          onClick={() => onChangeDates(...getLatestRange(11))}
+        >
           1 Year
         </Button>
-        <Button bare onClick={() => onChangeDates(...getFullRange(allMonths))}>
+        <Button
+          type="bare"
+          onClick={() => onChangeDates(...getFullRange(allMonths))}
+        >
           All Time
         </Button>
       </View>
+      {filters && filters.length > 0 && (
+        <View
+          style={{ marginTop: 5 }}
+          spacing={2}
+          direction="row"
+          justify="flex-start"
+          align="flex-start"
+        >
+          <AppliedFilters
+            filters={filters}
+            onUpdate={onUpdateFilter}
+            onDelete={onDeleteFilter}
+            conditionsOp={conditionsOp}
+            onCondOpChange={onCondOpChange}
+          />
+        </View>
+      )}
     </View>
   );
 }

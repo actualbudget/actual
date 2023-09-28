@@ -1,7 +1,7 @@
 name: Bug Report
 description: File a bug report also known as an issue or problem.
 title: '[Bug]: '
-labels: ['bug', 'needs triage']
+labels: ['bug']
 body:
   - type: markdown
     id: intro-md
@@ -48,6 +48,7 @@ body:
         - Docker
         - Fly.io
         - NAS
+        - Desktop App (Electron)
         - Other
     validations:
       required: false
@@ -61,6 +62,7 @@ body:
         - Chrome
         - Safari
         - Microsoft Edge
+        - Desktop App (Electron)
         - Other
   - type: dropdown
     id: operating-system

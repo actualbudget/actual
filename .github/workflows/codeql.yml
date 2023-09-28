@@ -4,9 +4,12 @@ on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
   schedule:
     - cron: '23 11 * * 6'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
   analyze:

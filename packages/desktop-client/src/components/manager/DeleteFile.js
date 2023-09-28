@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 
-import { colors } from '../../style';
-import { View, Text, Modal, ButtonWithLoading } from '../common';
+import { theme } from '../../style';
+import { ButtonWithLoading } from '../common/Button';
+import Modal from '../common/Modal';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function DeleteMenu({ modalProps, actions, file }) {
   let [loadingState, setLoadingState] = useState(null);
@@ -39,9 +42,10 @@ export default function DeleteMenu({ modalProps, actions, file }) {
         <View
           style={{
             padding: 15,
+            gap: 15,
             paddingTop: 0,
             paddingBottom: 25,
-            width: 500,
+            maxWidth: 512,
             lineHeight: '1.5em',
           }}
         >
@@ -55,13 +59,12 @@ export default function DeleteMenu({ modalProps, actions, file }) {
               </Text>
 
               <ButtonWithLoading
-                primary
+                type="primary"
                 loading={loadingState === 'cloud'}
                 style={{
-                  backgroundColor: colors.r4,
+                  backgroundColor: theme.errorText,
                   alignSelf: 'center',
                   border: 0,
-                  marginTop: 10,
                   padding: '10px 30px',
                   fontSize: 14,
                 }}
@@ -74,53 +77,47 @@ export default function DeleteMenu({ modalProps, actions, file }) {
 
           {file.id && (
             <>
-              <Text style={[isRemote && { marginTop: 20 }]}>
-                {isRemote ? (
-                  <Text>
-                    You can also delete just the local copy. This will remove
-                    all local data and the file will be listed as available for
-                    download.
-                  </Text>
-                ) : (
-                  <Text>
-                    {file.state === 'broken' ? (
-                      <Text>
-                        This is a <strong>hosted file</strong> but it was
-                        created by another user. You can only delete the local
-                        copy.
-                      </Text>
-                    ) : (
-                      <Text>
-                        This a <strong>local file</strong> which is not stored
-                        on a server.
-                      </Text>
-                    )}{' '}
-                    Deleting it will remove it and all of its backups
-                    permanently.
-                  </Text>
-                )}
-              </Text>
+              {isRemote ? (
+                <Text>
+                  You can also delete just the local copy. This will remove all
+                  local data and the file will be listed as available for
+                  download.
+                </Text>
+              ) : (
+                <Text>
+                  {file.state === 'broken' ? (
+                    <>
+                      This is a <strong>hosted file</strong> but it was created
+                      by another user. You can only delete the local copy.
+                    </>
+                  ) : (
+                    <>
+                      This a <strong>local file</strong> which is not stored on
+                      a server.
+                    </>
+                  )}{' '}
+                  Deleting it will remove it and all of its backups permanently.
+                </Text>
+              )}
 
               <ButtonWithLoading
-                primary={!isRemote}
+                type={isRemote ? 'normal' : 'primary'}
                 loading={loadingState === 'local'}
-                style={[
-                  {
-                    alignSelf: 'center',
-                    marginTop: 10,
-                    padding: '10px 30px',
-                    fontSize: 14,
-                  },
-                  isRemote
+                style={{
+                  alignSelf: 'center',
+                  marginTop: 10,
+                  padding: '10px 30px',
+                  fontSize: 14,
+                  ...(isRemote
                     ? {
-                        color: colors.r4,
-                        borderColor: colors.r4,
+                        color: theme.errorText,
+                        borderColor: theme.errorText,
                       }
                     : {
                         border: 0,
-                        backgroundColor: colors.r4,
-                      },
-                ]}
+                        backgroundColor: theme.errorText,
+                      }),
+                }}
                 onClick={onDeleteLocal}
               >
                 Delete file locally

@@ -1,3 +1,5 @@
+import { AccountPage } from './account-page';
+
 export class BudgetPage {
   constructor(page) {
     this.page = page;
@@ -46,12 +48,25 @@ export class BudgetPage {
     );
   }
 
-  async transferAllBalance(fromIdx, toIdx) {
-    const toName = await this.budgetTable
+  async getCategoryNameForRow(idx) {
+    return this.budgetTable
       .getByTestId('row')
-      .nth(toIdx)
+      .nth(idx)
       .getByTestId('category-name')
       .textContent();
+  }
+
+  async clickOnSpentAmountForRow(idx) {
+    await this.budgetTable
+      .getByTestId('row')
+      .nth(idx)
+      .getByTestId('category-month-spent')
+      .click();
+    return new AccountPage(this.page);
+  }
+
+  async transferAllBalance(fromIdx, toIdx) {
+    const toName = await this.getCategoryNameForRow(toIdx);
 
     await this.budgetTable
       .getByTestId('row')

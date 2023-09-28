@@ -3,11 +3,14 @@ import { useSelector } from 'react-redux';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 
+import useCategories from '../../hooks/useCategories';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import Autocomplete from '../autocomplete/Autocomplete';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { View, Input } from '../common';
+import SavedFilterAutocomplete from '../autocomplete/SavedFilterAutocomplete';
+import Input from '../common/Input';
+import View from '../common/View';
 import { Checkbox } from '../forms';
 import DateSelect from '../select/DateSelect';
 import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
@@ -22,14 +25,11 @@ export default function GenericInput({
   style,
   onChange,
 }) {
-  let { payees, accounts, categoryGroups, dateFormat } = useSelector(state => {
-    return {
-      payees: state.queries.payees,
-      accounts: state.queries.accounts,
-      categoryGroups: state.queries.categories.grouped,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    };
-  });
+  let { grouped: categoryGroups } = useCategories();
+  let saved = useSelector(state => state.queries.saved);
+  let dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
 
   // This makes the UI more resilient in case of faulty data
   if (multi && !Array.isArray(value)) {
@@ -47,8 +47,6 @@ export default function GenericInput({
         case 'payee':
           content = (
             <PayeeAutocomplete
-              payees={payees}
-              accounts={accounts}
               multi={multi}
               showMakeTransfer={false}
               openOnFocus={true}
@@ -65,7 +63,6 @@ export default function GenericInput({
         case 'account':
           content = (
             <AccountAutocomplete
-              accounts={accounts}
               value={value}
               multi={multi}
               openOnFocus={true}
@@ -82,6 +79,28 @@ export default function GenericInput({
           content = (
             <CategoryAutocomplete
               categoryGroups={categoryGroups}
+              value={value}
+              multi={multi}
+              openOnFocus={true}
+              onSelect={onChange}
+              inputProps={{
+                inputRef,
+                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+              }}
+            />
+          );
+          break;
+
+        default:
+      }
+      break;
+
+    case 'saved':
+      switch (field) {
+        case 'saved':
+          content = (
+            <SavedFilterAutocomplete
+              saved={saved}
               value={value}
               multi={multi}
               openOnFocus={true}
@@ -184,5 +203,5 @@ export default function GenericInput({
       break;
   }
 
-  return <View style={[{ flex: 1 }, style]}>{content}</View>;
+  return <View style={{ flex: 1, ...style }}>{content}</View>;
 }

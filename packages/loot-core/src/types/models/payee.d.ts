@@ -5,6 +5,4 @@ export interface PayeeEntity {
   name: string;
   transfer_acct?: AccountEntity;
   tombstone?: boolean;
-  // TODO: remove once properly typed
-  [k: string]: unknown;
 }

@@ -1,9 +1,15 @@
-export function getUploadError({ reason, meta }) {
+export function getUploadError({
+  reason,
+  meta,
+}: {
+  reason: string;
+  meta?: unknown;
+}) {
   switch (reason) {
     case 'unauthorized':
       return 'You are not logged in.';
     case 'encrypt-failure':
-      if (meta.isMissingKey) {
+      if ((meta as { isMissingKey: boolean }).isMissingKey) {
         return 'Encrypting your file failed because you are missing your encryption key. Create your key in the next step.';
       }
       return 'Encrypting the file failed. You have the correct key so this is an internal bug. To fix this, generate a new key in the next step.';
@@ -16,8 +22,6 @@ export function getUploadError({ reason, meta }) {
       return 'Unable to encrypt your data because you are missing the key. Create the latest key in the next step.';
     case 'network':
       return 'Uploading the file failed. Check your network connection.';
-    case 'beta-version':
-      return 'You cannot perform this action in the beta version (resetting sync, deleting a file, etc).';
     default:
       return `An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: ${reason})`;
   }
@@ -47,10 +51,11 @@ export function getDownloadError({ reason, meta, fileName }) {
       );
 
     default:
-      let info = meta && meta.fileId ? `(fileId: ${meta.fileId})` : '';
+      let info = meta && meta.fileId ? `, fileId: ${meta.fileId}` : '';
       return (
-        'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. ' +
-        info
+        'Something went wrong trying to download that file, sorry! ' +
+        'Visit https://actualbudget.org/contact/ for support. ' +
+        `(reason: ${reason}${info})`
       );
   }
 }
@@ -73,19 +78,6 @@ export function getTestKeyError({ reason }) {
       return 'Unable to decrypt file with this password. Please try again.';
     default:
       return 'Something went wrong trying to create a key, sorry! Visit https://actualbudget.org/contact/ for support.';
-  }
-}
-
-export function getSubscribeError({ reason }) {
-  switch (reason) {
-    case 'network':
-      return 'Unable to reach the server. Check your internet connection';
-    case 'exists':
-      return 'An account with that email already exists. Did you mean to login?';
-    case 'invalid-email':
-      return 'Invalid email';
-    default:
-      return 'An error occurred. Please try again later.';
   }
 }
 

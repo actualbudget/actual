@@ -6,6 +6,7 @@ import * as sheet from '../sheet';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
 import * as encoder from './encoder';
+import { isError } from './utils';
 
 import { setSyncingMode, sendMessages, applyMessages, fullSync } from './index';
 
@@ -86,9 +87,9 @@ describe('Sync', () => {
 
     expect(mockSyncServer.getMessages().length).toBe(0);
 
-    const { messages, error } = await fullSync();
-    expect(error).toBeFalsy();
-    expect(messages.length).toBe(0);
+    const result = await fullSync();
+    if (isError(result)) throw result.error;
+    expect(result.messages.length).toBe(0);
     expect(mockSyncServer.getMessages().length).toBe(2);
   });
 
@@ -96,28 +97,32 @@ describe('Sync', () => {
     prefs.loadPrefs();
     prefs.savePrefs({
       groupId: 'group',
-      lastSyncedTimestamp: Timestamp.zero().toString(),
+      lastSyncedTimestamp: Timestamp.zero.toString(),
     });
 
     await mockSyncServer.handlers['/sync/sync'](
       await encoder.encode(
         'group',
         'client',
-        '1970-01-01T01:17:37.000Z-0000-0000testinguuid2',
+        Timestamp.parse('1970-01-01T01:17:37.000Z-0000-0000testinguuid2'),
         [
           {
             dataset: 'transactions',
             row: 'foo',
             column: 'amount',
             value: 'N:3200',
-            timestamp: '1970-01-02T05:17:36.789Z-0000-0000testinguuid2',
+            timestamp: Timestamp.parse(
+              '1970-01-02T05:17:36.789Z-0000-0000testinguuid2',
+            ),
           },
           {
             dataset: 'transactions',
             row: 'foo',
             column: 'amount',
             value: 'N:4200',
-            timestamp: '1970-01-02T10:17:36.999Z-0000-0000testinguuid2',
+            timestamp: Timestamp.parse(
+              '1970-01-02T10:17:36.999Z-0000-0000testinguuid2',
+            ),
           },
         ],
       ),
@@ -133,8 +138,9 @@ describe('Sync', () => {
       },
     ]);
 
-    const { messages } = await fullSync();
-    expect(messages.length).toBe(2);
+    const result = await fullSync();
+    if (isError(result)) throw result.error;
+    expect(result.messages.length).toBe(2);
     expect(mockSyncServer.getMessages().length).toBe(3);
   });
 });
@@ -151,7 +157,7 @@ async function asSecondClient(func) {
   prefs.loadPrefs();
   prefs.savePrefs({
     groupId: 'group',
-    lastSyncedTimestamp: Timestamp.zero().toString(),
+    lastSyncedTimestamp: Timestamp.zero.toString(),
   });
 
   await func();
@@ -159,7 +165,7 @@ async function asSecondClient(func) {
   await global.emptyDatabase()();
   prefs.savePrefs({
     groupId: 'group',
-    lastSyncedTimestamp: Timestamp.zero().toString(),
+    lastSyncedTimestamp: Timestamp.zero.toString(),
   });
 }
 
@@ -234,10 +240,7 @@ describe('Sync projections', () => {
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
-    let messages = mockSyncServer.getMessages().map(msg => ({
-      ...msg,
-      timestamp: Timestamp.parse(msg.timestamp),
-    }));
+    let messages = mockSyncServer.getMessages();
 
     // Apply all but the last message (which deletes the category)
     await applyMessages(messages.slice(0, -1));
@@ -288,10 +291,7 @@ describe('Sync projections', () => {
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
-    let messages = mockSyncServer.getMessages().map(msg => ({
-      ...msg,
-      timestamp: Timestamp.parse(msg.timestamp),
-    }));
+    let messages = mockSyncServer.getMessages();
 
     let firstMessages = messages.filter(m => m.column !== 'tombstone');
     let secondMessages = messages.filter(m => m.column === 'tombstone');
@@ -325,10 +325,7 @@ describe('Sync projections', () => {
     registerBudgetMonths(['2017-01', '2017-02']);
 
     // Get all the messages. We'll apply them in two passes
-    let messages = mockSyncServer.getMessages().map(msg => ({
-      ...msg,
-      timestamp: Timestamp.parse(msg.timestamp),
-    }));
+    let messages = mockSyncServer.getMessages();
 
     let firstMessages = messages.slice(0, -2);
     let secondMessages = messages.slice(-2);

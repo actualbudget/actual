@@ -7,9 +7,13 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
-import { colors, styles } from '../../style';
-import { FilterButton, AppliedFilters } from '../accounts/Filters';
-import { View, Text, Block, P, AlignedText } from '../common';
+import { theme, styles } from '../../style';
+import AlignedText from '../common/AlignedText';
+import Block from '../common/Block';
+import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
+import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
@@ -20,14 +24,16 @@ import useReport from './useReport';
 function CashFlow() {
   const {
     filters,
+    conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
+    onCondOpChange,
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 30),
+    monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
 
@@ -40,8 +46,8 @@ function CashFlow() {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, filters),
-    [start, end, isConcise, filters],
+    () => cashFlowByDate(start, end, isConcise, filters, conditionsOp),
+    [start, end, isConcise, filters, conditionsOp],
   );
   const data = useReport('cash_flow', params);
 
@@ -86,10 +92,10 @@ function CashFlow() {
     return null;
   }
 
-  const { graphData, totalExpenses, totalIncome } = data;
+  const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
 
   return (
-    <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
+    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header
         title="Cash Flow"
         allMonths={allMonths}
@@ -97,31 +103,19 @@ function CashFlow() {
         end={monthUtils.getMonth(end)}
         show1Month
         onChangeDates={onChangeDates}
-        extraButtons={<FilterButton onApply={onApplyFilter} />}
+        onApply={onApplyFilter}
+        filters={filters}
+        onUpdateFilter={onUpdateFilter}
+        onDeleteFilter={onDeleteFilter}
+        conditionsOp={conditionsOp}
+        onCondOpChange={onCondOpChange}
       />
 
       <View
         style={{
-          marginTop: -10,
-          paddingLeft: 20,
-          paddingRight: 20,
-          backgroundColor: 'white',
-        }}
-      >
-        {filters.length > 0 && (
-          <AppliedFilters
-            filters={filters}
-            onUpdate={onUpdateFilter}
-            onDelete={onDeleteFilter}
-          />
-        )}
-      </View>
-
-      <View
-        style={{
-          backgroundColor: 'white',
-          paddingLeft: 30,
-          paddingRight: 30,
+          backgroundColor: theme.tableBackground,
+          padding: 30,
+          paddingTop: 0,
           overflow: 'auto',
         }}
       >
@@ -131,7 +125,7 @@ function CashFlow() {
             paddingRight: 20,
             flexShrink: 0,
             alignItems: 'flex-end',
-            color: colors.n3,
+            color: theme.pageText,
           }}
         >
           <AlignedText
@@ -139,7 +133,7 @@ function CashFlow() {
             left={<Block>Income:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalIncome)}
+                <PrivacyFilter>{integerToCurrency(totalIncome)}</PrivacyFilter>
               </Text>
             }
           />
@@ -149,12 +143,28 @@ function CashFlow() {
             left={<Block>Expenses:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalExpenses)}
+                <PrivacyFilter>
+                  {integerToCurrency(totalExpenses)}
+                </PrivacyFilter>
+              </Text>
+            }
+          />
+
+          <AlignedText
+            style={{ marginBottom: 5, minWidth: 160 }}
+            left={<Block>Transfers:</Block>}
+            right={
+              <Text style={{ fontWeight: 600 }}>
+                <PrivacyFilter>
+                  {integerToCurrency(totalTransfers)}
+                </PrivacyFilter>
               </Text>
             }
           />
           <Text style={{ fontWeight: 600 }}>
-            <Change amount={totalIncome + totalExpenses} />
+            <PrivacyFilter>
+              <Change amount={totalIncome + totalExpenses + totalTransfers} />
+            </PrivacyFilter>
           </Text>
         </View>
 
@@ -166,15 +176,15 @@ function CashFlow() {
         />
 
         <View style={{ marginTop: 30 }}>
-          <P>
+          <Paragraph>
             <strong>How is cash flow calculated?</strong>
-          </P>
-          <P>
+          </Paragraph>
+          <Paragraph>
             Cash flow shows the balance of your budgeted accounts over time, and
             the amount of expenses/income each day or month. Your budgeted
             accounts are considered to be “cash on hand,” so this gives you a
             picture of how available money fluctuates.
-          </P>
+          </Paragraph>
         </View>
       </View>
     </View>

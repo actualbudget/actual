@@ -1,4 +1,4 @@
-import initSqlJS, { type SqlJsStatic } from '@jlongster/sql.js';
+import initSqlJS, { type SqlJsStatic, type Database } from '@jlongster/sql.js';
 
 let SQL: SqlJsStatic | null = null;
 
@@ -42,13 +42,13 @@ export function prepare(db, sql) {
 export function runQuery(
   db: unknown,
   sql: string,
-  params?: string[],
+  params?: (string | number)[],
   fetchAll?: false,
 ): { changes: unknown };
 export function runQuery(
   db: unknown,
   sql: string,
-  params: string[],
+  params: (string | number)[],
   fetchAll: true,
 ): unknown[];
 export function runQuery(db, sql, params = [], fetchAll = false) {
@@ -128,7 +128,7 @@ export function transaction(db, fn) {
 
 // See the comment about this function in index.electron.js. You
 // shouldn't normally use this. I'd like to get rid of it.
-export async function asyncTransaction(db, fn) {
+export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
   // Support nested transactions by "coalescing" them into the parent
   // one if one is already started
   if (transactionDepth === 0) {
@@ -195,10 +195,10 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
   return db;
 }
 
-export function closeDatabase(db) {
+export function closeDatabase(db: Database) {
   db.close();
 }
 
-export function exportDatabase(db) {
+export async function exportDatabase(db: Database) {
   return db.export();
 }

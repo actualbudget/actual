@@ -1,10 +1,9 @@
 import type { ChangeEvent } from 'react';
 import { useState } from 'react';
 
-import { ButtonWithLoading } from '../../common';
+import ButtonWithLoading from '../../common/Button';
+import Input from '../../common/Input';
 import { useServerURL } from '../../ServerContext';
-
-import { Input } from './common';
 
 export function OpenIdForm({ onSetOpenId, onError }) {
   let [issuer, setIssuer] = useState('');

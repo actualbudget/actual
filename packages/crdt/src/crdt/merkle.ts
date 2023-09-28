@@ -7,11 +7,33 @@
 // * Need to check to make sure if account exists when handling
 // * transaction changes in syncing
 
-export function getKeys(trie) {
-  return Object.keys(trie).filter(x => x !== 'hash');
+import { Timestamp } from './timestamp';
+
+/**
+ * Represents a node within a trinary radix trie.
+ */
+export type TrieNode = {
+  '0'?: TrieNode;
+  '1'?: TrieNode;
+  '2'?: TrieNode;
+  hash?: number;
+};
+
+type NumberTrieNodeKey = keyof Omit<TrieNode, 'hash'>;
+
+export function emptyTrie(): TrieNode {
+  return { hash: 0 };
 }
 
-export function keyToTimestamp(key) {
+function isNumberTrieNodeKey(input: string): input is NumberTrieNodeKey {
+  return ['0', '1', '2'].includes(input);
+}
+
+export function getKeys(trie: TrieNode): NumberTrieNodeKey[] {
+  return Object.keys(trie).filter(isNumberTrieNodeKey);
+}
+
+export function keyToTimestamp(key: string): number {
   // 16 is the length of the base 3 value of the current time in
   // minutes. Ensure it's padded to create the full value
   let fullkey = key + '0'.repeat(16 - key.length);
@@ -20,36 +42,40 @@ export function keyToTimestamp(key) {
   return parseInt(fullkey, 3) * 1000 * 60;
 }
 
-export function insert(trie, timestamp) {
+/**
+ * Mutates `trie` to insert a node at `timestamp`
+ */
+export function insert(trie: TrieNode, timestamp: Timestamp) {
   let hash = timestamp.hash();
   let key = Number(Math.floor(timestamp.millis() / 1000 / 60)).toString(3);
 
-  trie = Object.assign({}, trie, { hash: trie.hash ^ hash });
+  trie = Object.assign({}, trie, { hash: (trie.hash || 0) ^ hash });
   return insertKey(trie, key, hash);
 }
 
-function insertKey(trie, key, hash) {
+function insertKey(trie: TrieNode, key: string, hash: number): TrieNode {
   if (key.length === 0) {
     return trie;
   }
   const c = key[0];
-  const n = trie[c] || {};
+  const t = isNumberTrieNodeKey(c) ? trie[c] : undefined;
+  const n = t || {};
   return Object.assign({}, trie, {
     [c]: Object.assign({}, n, insertKey(n, key.slice(1), hash), {
-      hash: n.hash ^ hash,
+      hash: (n.hash || 0) ^ hash,
     }),
   });
 }
 
-export function build(timestamps) {
-  let trie = {};
+export function build(timestamps: Timestamp[]) {
+  let trie = emptyTrie();
   for (let timestamp of timestamps) {
     insert(trie, timestamp);
   }
   return trie;
 }
 
-export function diff(trie1, trie2) {
+export function diff(trie1: TrieNode, trie2: TrieNode): number | null {
   if (trie1.hash === trie2.hash) {
     return null;
   }
@@ -86,12 +112,13 @@ export function diff(trie1, trie2) {
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
 
-      if (!node1[key] || !node2[key]) {
+      let next1 = node1[key];
+      let next2 = node2[key];
+
+      if (!next1 || !next2) {
         break;
       }
 
-      let next1 = node1[key];
-      let next2 = node2[key];
       if (next1.hash !== next2.hash) {
         diffkey = key;
         break;
@@ -103,12 +130,14 @@ export function diff(trie1, trie2) {
     }
 
     k += diffkey;
-    node1 = node1[diffkey] || {};
-    node2 = node2[diffkey] || {};
+    node1 = node1[diffkey] || emptyTrie();
+    node2 = node2[diffkey] || emptyTrie();
   }
+
+  return null;
 }
 
-export function prune(trie, n = 2) {
+export function prune(trie: TrieNode, n = 2): TrieNode {
   // Do nothing if empty
   if (!trie.hash) {
     return trie;
@@ -117,13 +146,23 @@ export function prune(trie, n = 2) {
   let keys = getKeys(trie);
   keys.sort();
 
-  let next = { hash: trie.hash };
-  keys = keys.slice(-n).map(k => (next[k] = prune(trie[k], n)));
+  let next: TrieNode = { hash: trie.hash };
+
+  // Prune child nodes.
+  for (let k of keys.slice(-n)) {
+    const node = trie[k];
+
+    if (!node) {
+      throw new Error(`TrieNode for key ${k} could not be found`);
+    }
+
+    next[k] = prune(node, n);
+  }
 
   return next;
 }
 
-export function debug(trie, k = '', indent = 0) {
+export function debug(trie: TrieNode, k = '', indent = 0): string {
   const str =
     ' '.repeat(indent) +
     (k !== '' ? `k: ${k} ` : '') +
@@ -132,7 +171,9 @@ export function debug(trie, k = '', indent = 0) {
     str +
     getKeys(trie)
       .map(key => {
-        return debug(trie[key], key, indent + 2);
+        const node = trie[key];
+        if (!node) return '';
+        return debug(node, key, indent + 2);
       })
       .join('')
   );

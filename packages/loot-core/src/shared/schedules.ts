@@ -235,3 +235,11 @@ export function getScheduledAmount(amount) {
   }
   return amount;
 }
+
+export function describeSchedule(schedule, payee) {
+  if (payee) {
+    return `${payee.name} (${schedule.next_date})`;
+  } else {
+    return `Next: ${schedule.next_date}`;
+  }
+}

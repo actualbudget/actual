@@ -19,19 +19,22 @@ import {
   getDayMonthRegex,
   getShortYearFormat,
   getShortYearRegex,
+  currentDate,
 } from 'loot-core/src/shared/months';
 import { stringToInteger } from 'loot-core/src/shared/util';
 
-import { colors } from '../../style';
-import { View, Input, Tooltip } from '../common';
+import { theme } from '../../style';
+import Input from '../common/Input';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
 let pickerStyles = {
   '& .pika-single.actual-date-picker': {
-    color: colors.n11,
-    background: colors.n1,
+    color: theme.sidebarItemTextHover,
+    background: theme.sidebarBackground,
     border: 'none',
     boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
     borderRadius: 4,
@@ -42,28 +45,32 @@ let pickerStyles = {
       float: 'none',
       width: 'auto',
     },
+    // month/year
     '& .pika-label': {
-      backgroundColor: colors.n1,
+      backgroundColor: theme.sidebarBackground,
     },
+    // Back/forward buttons
     '& .pika-prev': {
       backgroundImage: `url(${DateSelectLeft})`,
     },
     '& .pika-next': {
       backgroundImage: `url(${DateSelectRight})`,
     },
+    // Day of week
     '& .pika-table th': {
-      color: colors.n11,
+      color: theme.sidebarItemText,
       '& abbr': { textDecoration: 'none' },
     },
+    // Numbered days
     '& .pika-button': {
-      backgroundColor: colors.n2,
-      color: colors.n11,
+      backgroundColor: theme.sidebarItemBackgroundHover,
+      color: theme.sidebarItemText,
     },
     '& .is-today .pika-button': {
       textDecoration: 'underline',
     },
     '& .is-selected .pika-button': {
-      backgroundColor: colors.n5,
+      backgroundColor: theme.altButtonNormalSelectedBackground,
       boxShadow: 'none',
     },
   },
@@ -100,7 +107,7 @@ let DatePicker = forwardRef(
           }
           if (newDate) {
             picker.current.setDate(newDate, true);
-            onUpdate && onUpdate(newDate);
+            onUpdate?.(newDate);
           }
         },
       }),
@@ -113,8 +120,8 @@ let DatePicker = forwardRef(
         keyboardInput: false,
         firstDay: stringToInteger(firstDayOfWeekIdx),
         defaultDate: value
-          ? d.parse(value, dateFormat, new Date())
-          : new Date(),
+          ? d.parse(value, dateFormat, currentDate())
+          : currentDate(),
         setDefaultDate: true,
         toString(date) {
           return d.format(date, dateFormat);
@@ -138,9 +145,7 @@ let DatePicker = forwardRef(
       }
     }, [value, dateFormat]);
 
-    return (
-      <View style={[pickerStyles, { flex: 1 }]} innerRef={mountPoint}></View>
-    );
+    return <View style={{ ...pickerStyles, flex: 1 }} innerRef={mountPoint} />;
   },
 );
 
@@ -213,21 +218,21 @@ export default function DateSelect({
       // the right day/month format from it
       let test = d.parse(value, getDayMonthFormat(dateFormat), new Date());
       if (d.isValid(test)) {
-        onUpdate && onUpdate(d.format(test, 'yyyy-MM-dd'));
+        onUpdate?.(d.format(test, 'yyyy-MM-dd'));
         setSelectedValue(d.format(test, dateFormat));
       }
     } else if (getShortYearRegex(dateFormat).test(value)) {
       // Support entering the year as only two digits (4/5/19)
       let test = d.parse(value, getShortYearFormat(dateFormat), new Date());
       if (d.isValid(test)) {
-        onUpdate && onUpdate(d.format(test, 'yyyy-MM-dd'));
+        onUpdate?.(d.format(test, 'yyyy-MM-dd'));
         setSelectedValue(d.format(test, dateFormat));
       }
     } else {
       let test = d.parse(value, dateFormat, new Date());
       if (d.isValid(test)) {
         let date = d.format(test, 'yyyy-MM-dd');
-        onUpdate && onUpdate(date);
+        onUpdate?.(date);
         setSelectedValue(value);
       }
     }
@@ -256,7 +261,7 @@ export default function DateSelect({
         }
       } else {
         setOpen(true);
-        onUpdate && onUpdate(defaultValue);
+        onUpdate?.(defaultValue);
       }
     } else if (shouldSaveFromKey(e)) {
       setValue(selectedValue);
@@ -265,16 +270,14 @@ export default function DateSelect({
       let date = d.parse(selectedValue, dateFormat, new Date());
       onSelect(d.format(date, 'yyyy-MM-dd'));
 
-      if (open) {
-        if (userSelectedValue.current !== selectedValue) {
-          // This stops the event from propagating up
-          e.stopPropagation();
-          e.preventDefault();
-        }
+      if (open && e.key === 'Enter') {
+        // This stops the event from propagating up
+        e.stopPropagation();
+        e.preventDefault();
       }
 
       let { onKeyDown } = inputProps || {};
-      onKeyDown && onKeyDown(e);
+      onKeyDown?.(e);
     } else if (!open) {
       setOpen(true);
       if (inputRef.current) {
@@ -294,7 +297,8 @@ export default function DateSelect({
       <Tooltip
         position="bottom-left"
         offset={2}
-        style={[{ padding: 0, minWidth: 225 }, tooltipStyle]}
+        style={{ padding: 0, minWidth: 225, ...tooltipStyle }}
+        data-testid="date-select-tooltip"
       >
         {content}
       </Tooltip>
@@ -308,19 +312,24 @@ export default function DateSelect({
         {...inputProps}
         inputRef={inputRef}
         value={value}
+        onPointerUp={e => {
+          if (!embedded) {
+            setOpen(true);
+          }
+        }}
         onKeyDown={onKeyDown}
         onChange={onChange}
         onFocus={e => {
           if (!embedded && openOnFocus) {
             setOpen(true);
           }
-          inputProps && inputProps.onFocus && inputProps.onFocus(e);
+          inputProps?.onFocus?.(e);
         }}
         onBlur={e => {
           if (!embedded) {
             setOpen(false);
           }
-          inputProps && inputProps.onBlur && inputProps.onBlur(e);
+          inputProps?.onBlur?.(e);
 
           if (!tableBehavior) {
             // If value is empty, that drives what gets selected.
@@ -349,7 +358,7 @@ export default function DateSelect({
             dateFormat={dateFormat}
             onUpdate={date => {
               setSelectedValue(d.format(date, dateFormat));
-              onUpdate && onUpdate(d.format(date, 'yyyy-MM-dd'));
+              onUpdate?.(d.format(date, 'yyyy-MM-dd'));
             }}
             onSelect={date => {
               setValue(d.format(date, dateFormat));

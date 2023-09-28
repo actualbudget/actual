@@ -10,18 +10,20 @@ import { batchMessages, setSyncingMode } from '../server/sync';
 import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 import type {
-  AccountEntity,
+  CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
 } from '../types/models';
 
+import random from './random';
+
 function pickRandom(list) {
-  return list[Math.floor(Math.random() * list.length) % list.length];
+  return list[Math.floor(random() * list.length) % list.length];
 }
 
 function number(start, end) {
-  return start + (end - start) * Math.random();
+  return start + (end - start) * random();
 }
 
 function integer(start, end) {
@@ -86,7 +88,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
   let transactions = [];
   for (let i = 0; i < numTransactions; i++) {
     let payee;
-    if (Math.random() < 0.09) {
+    if (random() < 0.09) {
       payee = incomePayee;
     } else {
       payee = pickRandom(expensePayees);
@@ -103,7 +105,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
     if (payee.name === 'Deposit') {
       amount = integer(50000, 70000);
     } else {
-      amount = integer(0, Math.random() < 0.05 ? -8000 : -700);
+      amount = integer(0, random() < 0.05 ? -8000 : -700);
     }
 
     let transaction: TransactionEntity = {
@@ -115,7 +117,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
     };
     transactions.push(transaction);
 
-    if (Math.random() < 0.2) {
+    if (random() < 0.2) {
       let a = Math.round(transaction.amount / 3);
       let pick = () =>
         payee === incomePayee
@@ -141,7 +143,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
   );
   let currentDay = monthUtils.currentDay();
   for (let month of months) {
-    let date = monthUtils.addDays(month, '12');
+    let date = monthUtils.addDays(month, 12);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -10000,
@@ -152,7 +154,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '18');
+    date = monthUtils.addDays(month, 18);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -9000,
@@ -163,7 +165,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '2');
+    date = monthUtils.addDays(month, 2);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -120000,
@@ -174,7 +176,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '20');
+    date = monthUtils.addDays(month, 20);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -6000,
@@ -186,7 +188,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       });
     }
 
-    date = monthUtils.addDays(month, '23');
+    date = monthUtils.addDays(month, 23);
     if (monthUtils.isBefore(date, currentDay)) {
       transactions.push({
         amount: -7500,
@@ -226,7 +228,7 @@ async function fillChecking(handlers, account, payees, groups) {
   let transactions = [];
   for (let i = 0; i < numTransactions; i++) {
     let payee;
-    if (Math.random() < 0.04) {
+    if (random() < 0.04) {
       payee = incomePayee;
     } else {
       payee = pickRandom(expensePayees);
@@ -311,7 +313,7 @@ async function fillSavings(handlers, account, payees, groups) {
   let transactions = [];
   for (let i = 0; i < numTransactions; i++) {
     let payee;
-    if (Math.random() < 0.3) {
+    if (random() < 0.3) {
       payee = incomePayee;
     } else {
       payee = pickRandom(expensePayees);
@@ -454,10 +456,10 @@ async function createBudget(accounts, payees, groups) {
   }
 
   function setBudgetIfSpent(month, cat) {
-    let spent = sheet.getCellValue(
+    let spent: number = sheet.getCellValue(
       monthUtils.sheetForMonth(month),
       `sum-amount-${cat.id}`,
-    );
+    ) as number;
 
     if (spent < 0) {
       setBudget(month, cat, -spent);
@@ -515,7 +517,10 @@ async function createBudget(accounts, payees, groups) {
           month <= monthUtils.currentMonth()
         ) {
           let sheetName = monthUtils.sheetForMonth(month);
-          let toBudget = sheet.getCellValue(sheetName, 'to-budget');
+          let toBudget: number = sheet.getCellValue(
+            sheetName,
+            'to-budget',
+          ) as number;
           let available = toBudget - prevSaved;
 
           if (available - 403000 > 0) {
@@ -534,7 +539,7 @@ async function createBudget(accounts, payees, groups) {
   await sheet.waitOnSpreadsheet();
 
   let sheetName = monthUtils.sheetForMonth(monthUtils.currentMonth());
-  let toBudget = sheet.getCellValue(sheetName, 'to-budget');
+  let toBudget: number = sheet.getCellValue(sheetName, 'to-budget') as number;
   if (toBudget < 0) {
     await addTransactions(primaryAccount.id, [
       {
@@ -563,7 +568,7 @@ export async function createTestBudget(handlers) {
   await db.runQuery('DELETE FROM categories;');
   await db.runQuery('DELETE FROM category_groups');
 
-  let accounts: AccountEntity[] = [
+  let accounts: { name: string; offBudget?: 1; id?: string }[] = [
     { name: 'Bank of America' },
     { name: 'Ally Savings' },
     { name: 'Capital One Checking' },
@@ -581,7 +586,7 @@ export async function createTestBudget(handlers) {
     }),
   );
 
-  let payees: PayeeEntity[] = [
+  let payees: Array<PayeeEntity & { bill?: boolean }> = [
     { name: 'Starting Balance' },
     { name: 'Kroger' },
     { name: 'Publix' },
@@ -604,7 +609,9 @@ export async function createTestBudget(handlers) {
     }),
   );
 
-  let categoryGroups: CategoryGroupEntity[] = [
+  let categoryGroups: Array<
+    CategoryGroupEntity & { categories: Omit<CategoryEntity, 'group'>[] }
+  > = [
     {
       name: 'Usual Expenses',
       categories: [
@@ -646,7 +653,6 @@ export async function createTestBudget(handlers) {
         isIncome: group.is_income ? 1 : 0,
       });
 
-      // @ts-expect-error Missing proper type refinement
       for (let category of group.categories) {
         category.id = await handlers['category-create']({
           ...category,
@@ -726,6 +732,116 @@ export async function createTestBudget(handlers) {
   await budget.createAllBudgets();
 
   await sheet.waitOnSpreadsheet();
+
+  // Create some schedules
+  await runMutator(() =>
+    batchMessages(async () => {
+      const account = accounts.find(acc => acc.name === 'Bank of America');
+
+      await runHandler(handlers['schedule/create'], {
+        schedule: {
+          name: 'Phone bills',
+          posts_transaction: false,
+        },
+        conditions: [
+          {
+            op: 'is',
+            field: 'payee',
+            value: payees.find(item => item.name === 'Dominion Power').id,
+          },
+          {
+            op: 'is',
+            field: 'account',
+            value: account.id,
+          },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: monthUtils.currentDay(),
+              frequency: 'monthly',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+            },
+          },
+          { op: 'isapprox', field: 'amount', value: -12000 },
+        ],
+      });
+
+      await runHandler(handlers['schedule/create'], {
+        schedule: {
+          name: 'Internet bill',
+          posts_transaction: false,
+        },
+        conditions: [
+          {
+            op: 'is',
+            field: 'payee',
+            value: payees.find(item => item.name === 'Fast Internet').id,
+          },
+          {
+            op: 'is',
+            field: 'account',
+            value: account.id,
+          },
+          {
+            op: 'is',
+            field: 'date',
+            value: monthUtils.subDays(monthUtils.currentDay(), 1),
+          },
+          { op: 'isapprox', field: 'amount', value: -14000 },
+        ],
+      });
+
+      await runHandler(handlers['schedule/create'], {
+        schedule: {
+          name: 'Wedding',
+          posts_transaction: false,
+        },
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: monthUtils.subDays(monthUtils.currentDay(), 3),
+              frequency: 'monthly',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+            },
+          },
+          { op: 'is', field: 'amount', value: -2700000 },
+        ],
+      });
+
+      await runHandler(handlers['schedule/create'], {
+        schedule: {
+          name: 'Utilities',
+          posts_transaction: false,
+        },
+        conditions: [
+          {
+            op: 'is',
+            field: 'account',
+            value: account.id,
+          },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: monthUtils.addDays(monthUtils.currentDay(), 1),
+              frequency: 'monthly',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+            },
+          },
+          { op: 'is', field: 'amount', value: -190000 },
+        ],
+      });
+    }),
+  );
 
   // Create a budget
   await createBudget(accounts, payees, allGroups);

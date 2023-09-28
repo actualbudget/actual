@@ -1,3 +1,4 @@
+import { Timestamp } from '@actual-app/crdt';
 import fc from 'fast-check';
 
 import * as arbs from '../../mocks/arbitrary-schema';
@@ -7,7 +8,7 @@ import * as db from '../db';
 
 import { listen, unlisten } from './migrate';
 
-import { addSyncListener, sendMessages } from './index';
+import { Message, addSyncListener, sendMessages } from './index';
 
 beforeEach(() => {
   listen();
@@ -25,7 +26,7 @@ function toInternalField(publicField) {
   return schemaConfig.views.transactions.fields[publicField];
 }
 
-let messageArb = fc
+let messageArb: fc.Arbitrary<Message> = fc
   .oneof(...fields.filter(f => f !== 'id').map(field => fc.constant(field)))
   .chain(field => {
     let value = arbs
@@ -39,9 +40,10 @@ let messageArb = fc
       })
       .noBias()
       .noShrink()
-      .map(date => date.toISOString() + '-0000-0123456789ABCDEF');
+      .map(date => date.toISOString() + '-0000-0123456789ABCDEF')
+      .map(Timestamp.parse);
 
-    return fc.record({
+    return fc.record<Message>({
       timestamp: timestamp,
       dataset: fc.constant('transactions'),
       column: fc.constant(toInternalField(field) || field),
@@ -61,7 +63,11 @@ describe('sync migrations', () => {
     tracer.start();
 
     let cleanup = addSyncListener((oldValues, newValues) => {
-      tracer.event('applied', [...newValues.get('transactions').keys()]);
+      let transactionsMap = newValues.get('transactions') as Map<
+        string,
+        unknown
+      >;
+      tracer.event('applied', [...transactionsMap.keys()]);
     });
 
     await db.insert('transactions', {
@@ -87,7 +93,10 @@ describe('sync migrations', () => {
           let tracer = execTracer();
           tracer.start();
           let cleanup = addSyncListener((oldValues, newValues) => {
-            let ts = newValues.get('transactions');
+            let ts = newValues.get('transactions') as Map<
+              string,
+              { isChild: number; parent_id: string | null; id: string }
+            >;
             if (
               ts &&
               [...ts.values()].find(

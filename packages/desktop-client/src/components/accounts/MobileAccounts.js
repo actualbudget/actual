@@ -1,31 +1,39 @@
-import React, { Component, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
-import * as actions from 'loot-core/src/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
-import { colors, styles } from '../../style';
-import { withThemeColor } from '../../util/withThemeColor';
-import { Button, Text, TextOneLine, View } from '../common';
+import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
+import { useSetThemeColor } from '../../hooks/useSetThemeColor';
+import { theme, styles } from '../../style';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import TextOneLine from '../common/TextOneLine';
+import View from '../common/View';
 import { Page } from '../Page';
+import PullToRefresh from '../responsive/PullToRefresh';
 import CellValue from '../spreadsheet/CellValue';
 
-function AccountHeader({ name, amount }) {
+function AccountHeader({ name, amount, style = {} }) {
   return (
     <View
       style={{
+        flex: '1 0 auto',
         flexDirection: 'row',
-        marginTop: 28,
-        marginBottom: 10,
+        marginTop: 10,
+        color: theme.altpageTextSubdued,
+        ...style,
       }}
     >
       <View style={{ flex: 1 }}>
         <Text
-          style={[
-            styles.text,
-            { textTransform: 'uppercase', color: colors.n5, fontSize: 13 },
-          ]}
+          style={{
+            ...styles.text,
+            textTransform: 'uppercase',
+            fontSize: 13,
+          }}
           data-testid="name"
         >
           {name}
@@ -33,7 +41,7 @@ function AccountHeader({ name, amount }) {
       </View>
       <CellValue
         binding={amount}
-        style={[styles.text, { color: colors.n5, fontSize: 13 }]}
+        style={{ ...styles.text, fontSize: 13 }}
         type="financial"
       />
     </View>
@@ -46,11 +54,12 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
       style={{
         flex: '1 0 auto',
         flexDirection: 'row',
-        backgroundColor: 'white',
-        boxShadow: `0 1px 1px ${colors.n7}`,
+        backgroundColor: theme.tableBackground,
+        boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         borderRadius: 6,
         marginTop: 10,
       }}
+      data-testid="account"
     >
       <Button
         onMouseDown={() => onSelect(account.id)}
@@ -67,8 +76,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         <View
           style={{
             flex: '1 auto',
-            height: 52,
-            marginTop: 10,
+            margin: '10px 0',
           }}
         >
           <View
@@ -78,22 +86,21 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             }}
           >
             <TextOneLine
-              style={[
-                styles.text,
-                {
-                  fontSize: 17,
-                  fontWeight: 600,
-                  color: updated ? colors.b2 : colors.n2,
-                  paddingRight: 30,
-                },
-              ]}
+              style={{
+                ...styles.text,
+                fontSize: 17,
+                fontWeight: 600,
+                color: updated ? theme.mobileAccountText : theme.pillText,
+                paddingRight: 30,
+              }}
+              data-testid="account-name"
             >
               {account.name}
             </TextOneLine>
             {account.bankId && (
               <View
                 style={{
-                  backgroundColor: colors.g5,
+                  backgroundColor: theme.noticeText,
                   marginLeft: '-23px',
                   width: 8,
                   height: 8,
@@ -106,8 +113,9 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         <CellValue
           binding={getBalanceQuery(account)}
           type="financial"
-          style={{ fontSize: 16, color: colors.n3 }}
-          getStyle={value => value < 0 && { color: colors.r4 }}
+          style={{ fontSize: 16, color: 'inherit' }}
+          getStyle={value => value < 0 && { color: 'inherit' }}
+          data-testid="account-balance"
         />
       </Button>
     </View>
@@ -124,7 +132,7 @@ function EmptyMessage({ onAdd }) {
       </Text>
 
       <Button
-        primary
+        type="primary"
         style={{ marginTop: 20, alignSelf: 'center' }}
         onClick={() =>
           alert(
@@ -135,117 +143,87 @@ function EmptyMessage({ onAdd }) {
         Add Account
       </Button>
 
-      <Text style={{ marginTop: 20, color: colors.n5 }}>
+      <Text style={{ marginTop: 20, color: theme.altpageTextSubdued }}>
         In the future, you can add accounts using the add button in the header.
       </Text>
     </View>
   );
 }
 
-class AccountList extends Component {
-  isNewTransaction = id => {
-    return this.props.newTransactions.includes(id);
-  };
+function AccountList({
+  accounts,
+  updatedAccounts,
+  getBalanceQuery,
+  getOnBudgetBalance,
+  getOffBudgetBalance,
+  onAddAccount,
+  onSelectAccount,
+}) {
+  const { syncAndDownload } = useActions();
 
-  render() {
-    const {
-      accounts,
-      updatedAccounts,
-      // transactions,
-      // categories,
-      getBalanceQuery,
-      getOnBudgetBalance,
-      getOffBudgetBalance,
-      onAddAccount,
-      onSelectAccount,
-      // onSelectTransaction,
-      // refreshControl
-    } = this.props;
-    const budgetedAccounts = accounts.filter(
-      account => account.offbudget === 0,
-    );
-    const offbudgetAccounts = accounts.filter(
-      account => account.offbudget === 1,
-    );
+  const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
+  const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
 
-    // If there are no accounts, show a helpful message
-    if (accounts.length === 0) {
-      return <EmptyMessage onAdd={onAddAccount} />;
-    }
-
-    const accountContent = (
-      <Page title="Accounts">
-        <AccountHeader name="Budgeted" amount={getOnBudgetBalance()} />
-        {budgetedAccounts.map((acct, idx) => (
-          <AccountCard
-            account={acct}
-            key={acct.id}
-            updated={updatedAccounts.includes(acct.id)}
-            getBalanceQuery={getBalanceQuery}
-            onSelect={onSelectAccount}
-          />
-        ))}
-
-        <AccountHeader name="Off budget" amount={getOffBudgetBalance()} />
-        {offbudgetAccounts.map((acct, idx) => (
-          <AccountCard
-            account={acct}
-            key={acct.id}
-            updated={updatedAccounts.includes(acct.id)}
-            getBalanceQuery={getBalanceQuery}
-            onSelect={onSelectAccount}
-          />
-        ))}
-
-        {/*<Label
-          title="RECENT TRANSACTIONS"
-          style={{
-            textAlign: 'center',
-            marginTop: 50,
-            marginBottom: 20,
-            marginLeft: 10
-          }}
-          />*/}
-      </Page>
-    );
-
-    return (
-      <View style={{ flex: 1 }}>
-        {/* <TransactionList
-          transactions={transactions}
-          categories={categories}
-          isNew={this.isNewTransaction}
-          scrollProps={{
-            ListHeaderComponent: accountContent
-          }}
-          // refreshControl={refreshControl}
-          onSelect={onSelectTransaction}
-        /> */}
-        {accountContent}
-      </View>
-    );
+  // If there are no accounts, show a helpful message
+  if (accounts.length === 0) {
+    return <EmptyMessage onAdd={onAddAccount} />;
   }
+
+  return (
+    <View style={{ flex: 1 }}>
+      <Page title="Accounts">
+        <PullToRefresh onRefresh={syncAndDownload}>
+          <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
+          {budgetedAccounts.map(acct => (
+            <AccountCard
+              account={acct}
+              key={acct.id}
+              updated={updatedAccounts.includes(acct.id)}
+              getBalanceQuery={getBalanceQuery}
+              onSelect={onSelectAccount}
+            />
+          ))}
+
+          <AccountHeader
+            name="Off budget"
+            amount={getOffBudgetBalance()}
+            style={{ marginTop: 30 }}
+          />
+          {offbudgetAccounts.map(acct => (
+            <AccountCard
+              account={acct}
+              key={acct.id}
+              updated={updatedAccounts.includes(acct.id)}
+              getBalanceQuery={getBalanceQuery}
+              onSelect={onSelectAccount}
+            />
+          ))}
+        </PullToRefresh>
+      </Page>
+    </View>
+  );
 }
 
-function Accounts(props) {
+export default function Accounts() {
+  let accounts = useSelector(state => state.queries.accounts);
+  let newTransactions = useSelector(state => state.queries.newTransactions);
+  let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+  let numberFormat = useSelector(
+    state => state.prefs.local.numberFormat || 'comma-dot',
+  );
+  let hideFraction = useSelector(
+    state => state.prefs.local.hideFraction || false,
+  );
+
+  const { list: categories } = useCategories();
+  let { getAccounts } = useActions();
+
   const transactions = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    const getAccounts = async () => {
-      if (props.categories.length === 0) {
-        await props.getCategories();
-      }
-
-      props.getAccounts();
-    };
-
-    getAccounts();
+    (async () => getAccounts())();
   }, []);
-
-  // const sync = async () => {
-  //   await props.syncAndDownload();
-  // };
 
   const onSelectAccount = id => {
     navigate(`/accounts/${id}`);
@@ -255,9 +233,7 @@ function Accounts(props) {
     navigate(`/transaction/${transaction}`);
   };
 
-  let { accounts, categories, newTransactions, updatedAccounts, prefs } = props;
-  let numberFormat = prefs.numberFormat || 'comma-dot';
-  let hideFraction = prefs.hideFraction || false;
+  useSetThemeColor(theme.mobileAccountsViewTheme);
 
   return (
     <View style={{ flex: 1 }}>
@@ -276,21 +252,7 @@ function Accounts(props) {
         onAddAccount={() => {}} // () => navigate('AddAccountModal')
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
-        // refreshControl={
-        //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        // }
       />
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    accounts: state.queries.accounts,
-    newTransactions: state.queries.newTransactions,
-    updatedAccounts: state.queries.updatedAccounts,
-    categories: state.queries.categories.list,
-    prefs: state.prefs.local,
-  }),
-  actions,
-)(withThemeColor(colors.b2)(Accounts));

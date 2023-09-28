@@ -3,27 +3,34 @@ import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 
-import useNordigenStatus from '../../hooks/useNordigenStatus';
-import { authorizeBank } from '../../nordigen';
-import { View, Text, Modal, P, Button, ButtonWithLoading } from '../common';
+import { authorizeBank } from '../../gocardless';
+import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
+import { theme } from '../../style';
+import Button, { ButtonWithLoading } from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import Modal from '../common/Modal';
+import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function CreateAccount({ modalProps, syncServerStatus }) {
   const dispatch = useDispatch();
-  const [isNordigenSetupComplete, setIsNordigenSetupComplete] = useState(null);
+  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
+    useState(null);
 
   const onConnect = () => {
-    if (!isNordigenSetupComplete) {
-      onNordigenInit();
+    if (!isGoCardlessSetupComplete) {
+      onGoCardlessInit();
       return;
     }
 
     authorizeBank((modal, params) => dispatch(pushModal(modal, params)));
   };
 
-  const onNordigenInit = () => {
+  const onGoCardlessInit = () => {
     dispatch(
-      pushModal('nordigen-init', {
-        onSuccess: () => setIsNordigenSetupComplete(true),
+      pushModal('gocardless-init', {
+        onSuccess: () => setIsGoCardlessSetupComplete(true),
       }),
     );
   };
@@ -32,18 +39,18 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
     dispatch(pushModal('add-local-account'));
   };
 
-  const { configured } = useNordigenStatus();
+  const { configured } = useGoCardlessStatus();
   useEffect(() => {
-    setIsNordigenSetupComplete(configured);
+    setIsGoCardlessSetupComplete(configured);
   }, [configured]);
 
   return (
     <Modal title="Add Account" {...modalProps}>
       {() => (
-        <View style={{ maxWidth: 500, gap: 30 }}>
+        <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
           <View style={{ gap: 10 }}>
             <Button
-              primary
+              type="primary"
               style={{
                 padding: '10px 0',
                 fontSize: 15,
@@ -57,13 +64,12 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
               <Text>
                 <strong>Create a local account</strong> if you want to add
                 transactions manually. You can also{' '}
-                <a
-                  href="https://actualbudget.org/docs/transactions/importing"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <ExternalLink
+                  to="https://actualbudget.org/docs/transactions/importing"
+                  linkColor="muted"
                 >
                   import QIF/OFX/QFX files into a local account
-                </a>
+                </ExternalLink>
                 .
               </Text>
             </View>
@@ -81,13 +87,13 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                   }}
                   onClick={onConnect}
                 >
-                  {isNordigenSetupComplete
-                    ? 'Link bank account with Nordigen'
-                    : 'Set up Nordigen for bank sync'}
+                  {isGoCardlessSetupComplete
+                    ? 'Link bank account with GoCardless'
+                    : 'Set up GoCardless for bank sync'}
                 </ButtonWithLoading>
                 <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                   <strong>Link a bank account</strong> to automatically download
-                  transactions. Nordigen provides reliable, up-to-date
+                  transactions. GoCardless provides reliable, up-to-date
                   information from hundreds of banks.
                 </Text>
               </>
@@ -101,19 +107,18 @@ export default function CreateAccount({ modalProps, syncServerStatus }) {
                     fontWeight: 600,
                   }}
                 >
-                  Set up Nordigen for bank sync
+                  Set up GoCardless for bank sync
                 </Button>
-                <P style={{ fontSize: 15 }}>
+                <Paragraph style={{ fontSize: 15 }}>
                   Connect to an Actual server to set up{' '}
-                  <a
-                    href="https://actualbudget.org/docs/advanced/bank-sync"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <ExternalLink
+                    to="https://actualbudget.org/docs/advanced/bank-sync"
+                    linkColor="muted"
                   >
-                    automatic syncing with Nordigen
-                  </a>
+                    automatic syncing with GoCardless
+                  </ExternalLink>
                   .
-                </P>
+                </Paragraph>
               </>
             )}
           </View>

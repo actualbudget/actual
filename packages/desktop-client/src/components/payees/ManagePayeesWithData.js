@@ -1,23 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import * as actions from 'loot-core/src/client/actions';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { applyChanges } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
+
 import { ManagePayees } from '.';
 
-function ManagePayeesWithData({
-  modalProps,
-  initialSelectedIds,
-  lastUndoState,
-  initialPayees,
-  categoryGroups,
-  initiallyLoadPayees,
-  getPayees,
-  setLastUndoState,
-  pushModal,
-}) {
+export default function ManagePayeesWithData({ initialSelectedIds }) {
+  let initialPayees = useSelector(state => state.queries.payees);
+  let lastUndoState = useSelector(state => state.app.lastUndoState);
+  let { grouped: categoryGroups } = useCategories();
+
+  let { initiallyLoadPayees, getPayees, setLastUndoState, pushModal } =
+    useActions();
+
   let [payees, setPayees] = useState(initialPayees);
   let [ruleCounts, setRuleCounts] = useState({ value: new Map() });
   let [orphans, setOrphans] = useState({ value: new Map() });
@@ -121,7 +120,6 @@ function ManagePayeesWithData({
   return (
     <ManagePayees
       ref={payeesRef}
-      modalProps={modalProps}
       payees={payees}
       ruleCounts={ruleCounts.value}
       orphanedPayees={orphans}
@@ -165,12 +163,3 @@ function ManagePayeesWithData({
     />
   );
 }
-
-export default connect(
-  state => ({
-    initialPayees: state.queries.payees,
-    lastUndoState: state.app.lastUndoState,
-    categoryGroups: state.queries.categories.grouped,
-  }),
-  actions,
-)(ManagePayeesWithData);

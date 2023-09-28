@@ -1,8 +1,10 @@
-import { SyncProtoBuf } from '@actual-app/crdt';
+import { Timestamp, SyncProtoBuf } from '@actual-app/crdt';
 
 import * as encryption from '../encryption';
 import { SyncError } from '../errors';
 import * as prefs from '../prefs';
+
+import { Message } from './index';
 
 function coerceBuffer(value) {
   // The web encryption APIs give us back raw Uint8Array... but our
@@ -15,20 +17,25 @@ function coerceBuffer(value) {
   return value;
 }
 
-export async function encode(groupId, fileId, since, messages) {
+export async function encode(
+  groupId: string,
+  fileId: string,
+  since: Timestamp | string,
+  messages: Message[],
+): Promise<Uint8Array> {
   let { encryptKeyId } = prefs.getPrefs();
   let requestPb = new SyncProtoBuf.SyncRequest();
 
   for (let i = 0; i < messages.length; i++) {
     let msg = messages[i];
     let envelopePb = new SyncProtoBuf.MessageEnvelope();
-    envelopePb.setTimestamp(msg.timestamp);
+    envelopePb.setTimestamp(msg.timestamp.toString());
 
     let messagePb = new SyncProtoBuf.Message();
     messagePb.setDataset(msg.dataset);
     messagePb.setRow(msg.row);
     messagePb.setColumn(msg.column);
-    messagePb.setValue(msg.value);
+    messagePb.setValue(msg.value as string);
     let binaryMsg = messagePb.serializeBinary();
 
     if (encryptKeyId) {
@@ -59,12 +66,14 @@ export async function encode(groupId, fileId, since, messages) {
   requestPb.setGroupid(groupId);
   requestPb.setFileid(fileId);
   requestPb.setKeyid(encryptKeyId);
-  requestPb.setSince(since);
+  requestPb.setSince(since.toString());
 
   return requestPb.serializeBinary();
 }
 
-export async function decode(data) {
+export async function decode(
+  data: Uint8Array,
+): Promise<{ messages: Message[]; merkle: { hash: number } }> {
   let { encryptKeyId } = prefs.getPrefs();
 
   let responsePb = SyncProtoBuf.SyncResponse.deserializeBinary(data);
@@ -74,7 +83,7 @@ export async function decode(data) {
 
   for (let i = 0; i < list.length; i++) {
     let envelopePb = list[i];
-    let timestamp = envelopePb.getTimestamp();
+    let timestamp = Timestamp.parse(envelopePb.getTimestamp());
     let encrypted = envelopePb.getIsencrypted();
     let msg;
 

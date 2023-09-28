@@ -1,26 +1,33 @@
 import React, { createContext, useContext } from 'react';
 
+import { type AccountEntity } from '../../types/models';
 import q from '../query-helpers';
 import { useLiveQuery } from '../query-hooks';
 import { getAccountsById } from '../reducers/queries';
 
-function useAccounts() {
+function useAccounts(): AccountEntity[] {
   return useLiveQuery(() => q('accounts').select('*'), []);
 }
 
-let AccountsContext = createContext(null);
+const AccountsContext = createContext<AccountEntity[]>(null);
 
 export function AccountsProvider({ children }) {
-  let data = useAccounts();
+  const data = useAccounts();
   return <AccountsContext.Provider value={data} children={children} />;
 }
 
 export function CachedAccounts({ children, idKey }) {
-  let data = useCachedAccounts({ idKey });
+  const data = useCachedAccounts({ idKey });
   return children(data);
 }
 
-export function useCachedAccounts({ idKey }: { idKey? } = {}) {
-  let data = useContext(AccountsContext);
+export function useCachedAccounts(): AccountEntity[];
+export function useCachedAccounts({
+  idKey,
+}: {
+  idKey: boolean;
+}): Record<AccountEntity['id'], AccountEntity>;
+export function useCachedAccounts({ idKey }: { idKey?: boolean } = {}) {
+  const data = useContext(AccountsContext);
   return idKey && data ? getAccountsById(data) : data;
 }

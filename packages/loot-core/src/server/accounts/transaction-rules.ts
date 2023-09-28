@@ -11,6 +11,7 @@ import {
   getApproxNumberThreshold,
 } from '../../shared/rules';
 import { partitionByField, fastSetMerge } from '../../shared/util';
+import { type RuleActionEntity, type RuleEntity } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
 import { getMappings } from '../db/mappings';
@@ -27,6 +28,7 @@ import {
   migrateIds,
   iterateIds,
 } from './rules';
+import { batchUpdateTransactions } from './transactions';
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead
@@ -62,18 +64,40 @@ function invert(obj) {
 let internalFields = schemaConfig.views.transactions.fields;
 let publicFields = invert(schemaConfig.views.transactions.fields);
 
-function fromInternalField(obj) {
+function fromInternalField<T extends { field: string }>(obj: T): T {
   return {
     ...obj,
     field: publicFields[obj.field] || obj.field,
   };
 }
 
-function toInternalField(obj) {
+function toInternalField<T extends { field: string }>(obj: T): T {
   return {
     ...obj,
     field: internalFields[obj.field] || obj.field,
   };
+}
+
+function parseArray(str) {
+  let value;
+  try {
+    value = typeof str === 'string' ? JSON.parse(str) : str;
+  } catch (e) {
+    throw new RuleError('internal', 'Cannot parse rule json');
+  }
+
+  if (!Array.isArray(value)) {
+    throw new RuleError('internal', 'Rule json must be an array');
+  }
+  return value;
+}
+
+export function parseConditionsOrActions(str) {
+  return str ? parseArray(str).map(item => fromInternalField(item)) : [];
+}
+
+export function serializeConditionsOrActions(arr) {
+  return JSON.stringify(arr.map(item => toInternalField(item)));
 }
 
 export const ruleModel = {
@@ -99,30 +123,12 @@ export const ruleModel = {
   },
 
   toJS(row) {
-    function parseArray(str) {
-      let value;
-      try {
-        value = typeof str === 'string' ? JSON.parse(str) : str;
-      } catch (e) {
-        throw new RuleError('internal', 'Cannot parse rule json');
-      }
-
-      if (!Array.isArray(value)) {
-        throw new RuleError('internal', 'Rule json must be an array');
-      }
-      return value;
-    }
-
     let { conditions, conditions_op, actions, ...fields } = row;
     return {
       ...fields,
       conditionsOp: conditions_op,
-      conditions: conditions
-        ? parseArray(conditions).map(cond => fromInternalField(cond))
-        : [],
-      actions: actions
-        ? parseArray(actions).map(action => fromInternalField(action))
-        : [],
+      conditions: parseConditionsOrActions(conditions),
+      actions: parseConditionsOrActions(actions),
     };
   },
 
@@ -132,12 +138,10 @@ export const ruleModel = {
       row.conditions_op = conditionsOp;
     }
     if (Array.isArray(conditions)) {
-      let value = conditions.map(cond => toInternalField(cond));
-      row.conditions = JSON.stringify(value);
+      row.conditions = serializeConditionsOrActions(conditions);
     }
     if (Array.isArray(actions)) {
-      let value = actions.map(action => toInternalField(action));
-      row.actions = JSON.stringify(value);
+      row.actions = serializeConditionsOrActions(actions);
     }
     return row;
   },
@@ -200,7 +204,9 @@ export function getRules() {
   return [...allRules.values()];
 }
 
-export async function insertRule(rule) {
+export async function insertRule(
+  rule: Omit<RuleEntity, 'id'> & { id?: string },
+) {
   rule = ruleModel.validate(rule);
   return db.insertWithUUID('rules', ruleModel.fromJS(rule));
 }
@@ -210,7 +216,7 @@ export async function updateRule(rule) {
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
-export async function deleteRule(rule) {
+export async function deleteRule<T extends { id: string }>(rule: T) {
   let schedule = await db.first('SELECT id FROM schedules WHERE rule = ?', [
     rule.id,
   ]);
@@ -413,9 +419,16 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
             };
           }
           return apply(field, '$eq', number);
+        } else if (type === 'string') {
+          if (value === '') {
+            return {
+              $or: [apply(field, '$eq', null), apply(field, '$eq', '')],
+            };
+          }
         }
-
         return apply(field, '$eq', value);
+      case 'isNot':
+        return apply(field, '$ne', value);
 
       case 'isbetween':
         // This operator is only applicable to the specific `between`
@@ -432,6 +445,14 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           '$like',
           '%' + value + '%',
         );
+      case 'doesNotContain':
+        // Running contains with id will automatically reach into
+        // the `name` of the referenced table and do a string match
+        return apply(
+          type === 'id' ? field + '.name' : field,
+          '$notlike',
+          '%' + value + '%',
+        );
       case 'oneOf':
         let values = value;
         if (values.length === 0) {
@@ -439,6 +460,13 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
           return { id: null };
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
+      case 'notOneOf':
+        let notValues = value;
+        if (notValues.length === 0) {
+          // This forces it to match nothing
+          return { id: null };
+        }
+        return { $and: notValues.map(v => apply(field, '$ne', v)) };
       case 'gt':
         return apply(field, '$gt', getValue(value));
       case 'gte':
@@ -459,7 +487,10 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
   return { filters, errors };
 }
 
-export function applyActions(transactionIds, actions, handlers) {
+export function applyActions(
+  transactionIds: string[],
+  actions: Array<Action | RuleActionEntity>,
+) {
   let parsedActions = actions
     .map(action => {
       if (action instanceof Action) {
@@ -467,6 +498,10 @@ export function applyActions(transactionIds, actions, handlers) {
       }
 
       try {
+        if (action.op === 'link-schedule') {
+          return new Action(action.op, null, action.value, null, FIELD_TYPES);
+        }
+
         return new Action(
           action.op,
           action.field,
@@ -494,7 +529,7 @@ export function applyActions(transactionIds, actions, handlers) {
     return update;
   });
 
-  return handlers['transactions-batch-update']({ updated });
+  return batchUpdateTransactions({ updated });
 }
 
 export function getRulesForPayee(payeeId) {
@@ -525,7 +560,7 @@ function* getIsSetterRules(
       rule.actions[0].field === actionField &&
       (actionValue === undefined || rule.actions[0].value === actionValue) &&
       rule.conditions.length === 1 &&
-      rule.conditions[0].op === 'is' &&
+      (rule.conditions[0].op === 'is' || rule.conditions[0].op === 'isNot') &&
       rule.conditions[0].field === condField &&
       (condValue === undefined || rule.conditions[0].value === condValue)
     ) {
@@ -553,7 +588,8 @@ function* getOneOfSetterRules(
       rule.actions[0].field === actionField &&
       (actionValue == null || rule.actions[0].value === actionValue) &&
       rule.conditions.length === 1 &&
-      rule.conditions[0].op === 'oneOf' &&
+      (rule.conditions[0].op === 'oneOf' ||
+        rule.conditions[0].op === 'oneOf') &&
       rule.conditions[0].field === condField &&
       (condValue == null || rule.conditions[0].value.indexOf(condValue) !== -1)
     ) {
@@ -564,7 +600,7 @@ function* getOneOfSetterRules(
   return null;
 }
 
-export async function updatePayeeRenameRule(fromNames, to) {
+export async function updatePayeeRenameRule(fromNames: string[], to: string) {
   let renameRule = getOneOfSetterRules('pre', 'imported_payee', 'payee', {
     actionValue: to,
   }).next().value;

@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-import * as actions from 'loot-core/src/client/actions';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
@@ -11,10 +10,12 @@ import {
 } from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
+import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colors } from '../../style';
-import { withThemeColor } from '../../util/withThemeColor';
-import { View } from '../common';
+import { theme } from '../../style';
+import View from '../common/View';
 import SyncRefresh from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';
@@ -248,7 +249,7 @@ class Budget extends Component {
         <View
           style={{
             flex: 1,
-            backgroundColor: 'white',
+            backgroundColor: theme.pageBackgroundLineTop,
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 25,
@@ -292,18 +293,24 @@ class Budget extends Component {
   }
 }
 
-function BudgetWrapper(props) {
-  let spreadsheet = useSpreadsheet();
-  return <Budget {...props} spreadsheet={spreadsheet} />;
-}
+export default function BudgetWrapper() {
+  let { list: categories, grouped: categoryGroups } = useCategories();
+  let budgetType = useSelector(
+    state => state.prefs.local.budgetType || 'rollover',
+  );
+  let prefs = useSelector(state => state.prefs.local);
 
-export default connect(
-  state => ({
-    categoryGroups: state.queries.categories.grouped,
-    categories: state.queries.categories.list,
-    budgetType: state.prefs.local.budgetType || 'rollover',
-    prefs: state.prefs.local,
-    initialBudgetMonth: state.app.budgetMonth,
-  }),
-  actions,
-)(withThemeColor(colors.p5)(BudgetWrapper));
+  let actions = useActions();
+  let spreadsheet = useSpreadsheet();
+  useSetThemeColor(theme.mobileBudgetViewTheme);
+  return (
+    <Budget
+      categoryGroups={categoryGroups}
+      categories={categories}
+      budgetType={budgetType}
+      prefs={prefs}
+      {...actions}
+      spreadsheet={spreadsheet}
+    />
+  );
+}

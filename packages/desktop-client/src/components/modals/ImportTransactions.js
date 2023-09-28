@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
-import * as actions from 'loot-core/src/client/actions';
 import { format as formatDate_ } from 'loot-core/src/shared/months';
 import {
   amountToCurrency,
@@ -11,17 +10,16 @@ import {
   looselyParseAmount,
 } from 'loot-core/src/shared/util';
 
-import { colors, styles } from '../../style';
-import {
-  View,
-  Text,
-  Stack,
-  Modal,
-  Select,
-  Input,
-  Button,
-  ButtonWithLoading,
-} from '../common';
+import { useActions } from '../../hooks/useActions';
+import useFeatureFlag from '../../hooks/useFeatureFlag';
+import { theme, styles } from '../../style';
+import Button, { ButtonWithLoading } from '../common/Button';
+import Input from '../common/Input';
+import Modal from '../common/Modal';
+import Select from '../common/Select';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
 import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 
@@ -117,7 +115,10 @@ function formatDate(date, format) {
 
 function getFileType(filepath) {
   let m = filepath.match(/\.([^.]*)$/);
-  return m ? m[1].toLowerCase() : 'ofx';
+  if (!m) return 'ofx';
+  let rawType = m[1].toLowerCase();
+  if (rawType === 'tsv') return 'csv';
+  return rawType;
 }
 
 function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
@@ -131,11 +132,13 @@ function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
     <Text>
       <Text>
         {date || (
-          <Text style={{ color: colors.n4, fontStyle: 'italic' }}>Empty</Text>
+          <Text style={{ color: theme.pageTextLight, fontStyle: 'italic' }}>
+            Empty
+          </Text>
         )}{' '}
         &rarr;{' '}
       </Text>
-      <Text style={{ color: parsed ? colors.g3 : colors.r4 }}>
+      <Text style={{ color: parsed ? theme.alt3NoticeText : theme.errorText }}>
         {parsed || 'Invalid'}
       </Text>
     </Text>
@@ -274,8 +277,12 @@ function Transaction({
   inflow = amountToCurrency(inflow);
 
   return (
-    <Row style={{ backgroundColor: 'white' }}>
-      <Field width={200} borderColor={colors.border}>
+    <Row
+      style={{
+        backgroundColor: theme.tableBackground,
+      }}
+    >
+      <Field width={200}>
         {showParsed ? (
           <ParsedDate
             parseDateFormat={parseDateFormat}
@@ -288,28 +295,25 @@ function Transaction({
       </Field>
       <Field
         width="flex"
-        borderColor={colors.border}
         title={transaction.imported_payee || transaction.payee_name}
       >
         {transaction.payee_name}
       </Field>
-      <Field width="flex" borderColor={colors.border} title={transaction.notes}>
+      <Field width="flex" title={transaction.notes}>
         {transaction.notes}
       </Field>
       {splitMode ? (
         <>
           <Field
             width={90}
-            borderColor={colors.border}
-            contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+            contentStyle={{ textAlign: 'right', ...styles.tnum }}
             title={outflow}
           >
             {outflow}
           </Field>
           <Field
             width={90}
-            borderColor={colors.border}
-            contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+            contentStyle={{ textAlign: 'right', ...styles.tnum }}
             title={inflow}
           >
             {inflow}
@@ -318,8 +322,7 @@ function Transaction({
       ) : (
         <Field
           width={90}
-          borderColor={colors.border}
-          contentStyle={[{ textAlign: 'right' }, styles.tnum]}
+          contentStyle={{ textAlign: 'right', ...styles.tnum }}
           title={amount}
         >
           {amount}
@@ -331,26 +334,36 @@ function Transaction({
 
 function SubLabel({ title }) {
   return (
-    <Text style={{ fontSize: 13, marginBottom: 3, color: colors.n3 }}>
+    <Text style={{ fontSize: 13, marginBottom: 3, color: theme.pageText }}>
       {title}
     </Text>
   );
 }
 
-function SelectField({ width, style, options, value, onChange }) {
+function SelectField({
+  style,
+  options,
+  value,
+  onChange,
+  hasHeaderRow,
+  firstTransaction,
+}) {
   return (
     <Select
-      value={value}
-      style={style}
-      onChange={e => onChange(e.target.value)}
-    >
-      <option value="">Choose field...</option>
-      {options.map(x => (
-        <option key={x} value={x}>
-          {x}
-        </option>
-      ))}
-    </Select>
+      options={[
+        ['choose-field', 'Choose field...'],
+        ...options.map(option => [
+          option,
+          hasHeaderRow
+            ? option
+            : `Column ${parseInt(option) + 1} (${firstTransaction[option]})`,
+        ]),
+      ]}
+      value={value === null ? 'choose-field' : value}
+      style={{ width: '100%' }}
+      wrapperStyle={style}
+      onChange={value => onChange(value)}
+    />
   );
 }
 
@@ -375,20 +388,19 @@ function DateFormatSelect({
     <View style={{ width: 120 }}>
       <SectionLabel title="Date format" />
       <Select
+        options={dateFormats.map(f => [
+          f.format,
+          f.label.replace(/ /g, delimiter),
+        ])}
         value={parseDateFormat || ''}
-        onChange={e => onChange(e.target.value)}
-      >
-        {dateFormats.map(f => (
-          <option key={f.format} value={f.format}>
-            {f.label.replace(/ /g, delimiter)}
-          </option>
-        ))}
-      </Select>
+        onChange={value => onChange(value)}
+        style={{ width: '100%' }}
+      />
     </View>
   );
 }
 
-function MultipliersOption({ value, onChange }) {
+function CheckboxOption({ id, checked, disabled, onChange, children, style }) {
   return (
     <View
       style={{
@@ -396,59 +408,62 @@ function MultipliersOption({ value, onChange }) {
         flexDirection: 'row',
         alignItems: 'center',
         userSelect: 'none',
-      }}
-    >
-      <Checkbox id="add_multiplier" checked={value} onChange={onChange} />
-      <label htmlFor="add_multiplier">Add Multiplier</label>
-    </View>
-  );
-}
-
-function FlipAmountOption({ value, disabled, onChange }) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        userSelect: 'none',
+        minHeight: 28,
+        ...style,
       }}
     >
       <Checkbox
-        id="form_flip"
-        checked={value}
+        id={id}
+        checked={checked}
         disabled={disabled}
         onChange={onChange}
       />
       <label
-        htmlFor="form_flip"
-        style={{ userSelect: 'none', color: disabled ? colors.n6 : null }}
+        htmlFor={id}
+        style={{
+          userSelect: 'none',
+          color: disabled ? theme.pageTextSubdued : null,
+        }}
       >
-        Flip amount
+        {children}
       </label>
     </View>
   );
 }
 
-function SplitOption({ value, onChange }) {
+function MultiplierOption({
+  multiplierEnabled,
+  multiplierAmount,
+  onToggle,
+  onChangeAmount,
+}) {
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        userSelect: 'none',
-      }}
-    >
-      <Checkbox id="form_split" checked={value} onChange={onChange} />
-      <label htmlFor="form_split" style={{ userSelect: 'none' }}>
-        Split amount into separate inflow/outflow columns
-      </label>
+    <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
+      <CheckboxOption
+        id="add_multiplier"
+        checked={multiplierEnabled}
+        onChange={onToggle}
+      >
+        Add multiplier
+      </CheckboxOption>
+      <Input
+        type="text"
+        style={{ display: multiplierEnabled ? 'inherit' : 'none' }}
+        value={multiplierAmount}
+        placeholder="Multiplier"
+        onUpdate={onChangeAmount}
+      />
     </View>
   );
 }
 
-function FieldMappings({ transactions, mappings, onChange, splitMode }) {
+function FieldMappings({
+  transactions,
+  mappings,
+  onChange,
+  splitMode,
+  hasHeaderRow,
+}) {
   if (transactions.length === 0) {
     return null;
   }
@@ -465,65 +480,71 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
         spacing={1}
         style={{ marginTop: 5 }}
       >
-        <View style={{ width: 200 }}>
+        <View style={{ flex: 1 }}>
           <SubLabel title="Date" />
           <SelectField
-            width={200}
             options={options}
-            value={mappings.date || ''}
+            value={mappings.date}
             style={{ marginRight: 5 }}
             onChange={name => onChange('date', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
           />
         </View>
         <View style={{ flex: 1 }}>
           <SubLabel title="Payee" />
           <SelectField
-            width="flex"
             options={options}
-            value={mappings.payee || ''}
+            value={mappings.payee}
             style={{ marginRight: 5 }}
             onChange={name => onChange('payee', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
           />
         </View>
         <View style={{ flex: 1 }}>
           <SubLabel title="Notes" />
           <SelectField
-            width="flex"
             options={options}
-            value={mappings.notes || ''}
+            value={mappings.notes}
             style={{ marginRight: 5 }}
             onChange={name => onChange('notes', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
           />
         </View>
         {splitMode ? (
           <>
-            <View style={{ width: 90 }}>
+            <View style={{ flex: 0.5 }}>
               <SubLabel title="Outflow" />
               <SelectField
-                width={90}
                 options={options}
-                value={mappings.outflow || ''}
+                value={mappings.outflow}
                 onChange={name => onChange('outflow', name)}
+                hasHeaderRow={hasHeaderRow}
+                firstTransaction={transactions[0]}
               />
             </View>
-            <View style={{ width: 90 }}>
+            <View style={{ flex: 0.5 }}>
               <SubLabel title="Inflow" />
               <SelectField
-                width={90}
                 options={options}
-                value={mappings.inflow || ''}
+                value={mappings.inflow}
                 onChange={name => onChange('inflow', name)}
+                hasHeaderRow={hasHeaderRow}
+                firstTransaction={transactions[0]}
               />
             </View>
           </>
         ) : (
-          <View style={{ width: 90 }}>
+          <View style={{ flex: 1 }}>
             <SubLabel title="Amount" />
             <SelectField
-              width={90}
               options={options}
-              value={mappings.amount || ''}
+              value={mappings.amount}
               onChange={name => onChange('amount', name)}
+              hasHeaderRow={hasHeaderRow}
+              firstTransaction={transactions[0]}
             />
           </View>
         )}
@@ -532,30 +553,14 @@ function FieldMappings({ transactions, mappings, onChange, splitMode }) {
   );
 }
 
-function MultipliersField({ multiplierCB, value, onChange }) {
-  const styl = multiplierCB ? 'inherit' : 'none';
-
-  return (
-    <Input
-      type="text"
-      style={{ display: styl }}
-      value={value}
-      placeholder="Optional"
-      onUpdate={onChange}
-    />
+export default function ImportTransactions({ modalProps, options }) {
+  let dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-}
+  let prefs = useSelector(state => state.prefs.local);
+  let { parseTransactions, importTransactions, getPayees, savePrefs } =
+    useActions();
 
-function ImportTransactions({
-  modalProps,
-  options,
-  dateFormat = 'MM/dd/yyyy',
-  prefs,
-  parseTransactions,
-  importTransactions,
-  getPayees,
-  savePrefs,
-}) {
   let [multiplierAmount, setMultiplierAmount] = useState('');
   let [loadingState, setLoadingState] = useState('parsing');
   let [error, setError] = useState(null);
@@ -574,10 +579,21 @@ function ImportTransactions({
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
   let [csvDelimiter, setCsvDelimiter] = useState(
-    prefs[`csv-delimiter-${accountId}`] || ',',
+    prefs[`csv-delimiter-${accountId}`] ||
+      (filename.endsWith('.tsv') ? '\t' : ','),
+  );
+  let [hasHeaderRow, setHasHeaderRow] = useState(
+    prefs[`csv-has-header-${accountId}`] ?? true,
+  );
+  let [fallbackMissingPayeeToMemo, setFallbackMissingPayeeToMemo] = useState(
+    prefs[`ofx-fallback-missing-payee-${accountId}`] ?? true,
   );
 
   let [parseDateFormat, setParseDateFormat] = useState(null);
+
+  let [clearOnImport, setClearOnImport] = useState(true);
+
+  const enableExperimentalOfxParser = useFeatureFlag('experimentalOfxParser');
 
   async function parse(filename, options) {
     setLoadingState('parsing');
@@ -585,6 +601,11 @@ function ImportTransactions({
     let filetype = getFileType(filename);
     setFilename(filename);
     setFileType(filetype);
+
+    options = {
+      ...options,
+      enableExperimentalOfxParser,
+    };
 
     let { errors, transactions } = await parseTransactions(filename, options);
     setLoadingState(null);
@@ -642,12 +663,14 @@ function ImportTransactions({
   }
 
   useEffect(() => {
-    parse(
-      options.filename,
-      getFileType(options.filename) === 'csv'
-        ? { delimiter: csvDelimiter }
-        : null,
+    const fileType = getFileType(options.filename);
+    const parseOptions = getParseOptions(
+      fileType,
+      { csvDelimiter, hasHeaderRow },
+      { fallbackMissingPayeeToMemo },
     );
+
+    parse(options.filename, parseOptions);
   }, [parseTransactions, options.filename]);
 
   function onSplitMode() {
@@ -680,17 +703,24 @@ function ImportTransactions({
     setFieldMappings({ ...fieldMappings, ...newFieldMappings });
   }
 
-  function onNewFile() {
-    const res = window.Actual.openFileDialog({
+  async function onNewFile() {
+    const res = await window.Actual.openFileDialog({
       filters: [
-        { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
+        {
+          name: 'Financial Files',
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv'],
+        },
       ],
     });
 
-    parse(
-      res[0],
-      getFileType(res[0]) === 'csv' ? { delimiter: csvDelimiter } : null,
+    const fileType = getFileType(res[0]);
+    const parseOptions = getParseOptions(
+      fileType,
+      { csvDelimiter, hasHeaderRow },
+      { fallbackMissingPayeeToMemo },
     );
+
+    parse(res[0], parseOptions);
   }
 
   function onUpdateFields(field, name) {
@@ -706,10 +736,9 @@ function ImportTransactions({
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      let date =
-        filetype === 'qfx' || filetype === 'ofx'
-          ? trans.date
-          : parseDate(trans.date, parseDateFormat);
+      let date = isOfxFile(filetype)
+        ? trans.date
+        : parseDate(trans.date, parseDateFormat);
       if (date == null) {
         errorMessage = `Unable to parse date ${
           trans.date || '(empty)'
@@ -733,6 +762,7 @@ function ImportTransactions({
         ...finalTransaction,
         date,
         amount: amountToInteger(amount),
+        cleared: clearOnImport,
       });
     }
 
@@ -742,9 +772,15 @@ function ImportTransactions({
       return;
     }
 
-    if (filetype !== 'ofx' && filetype !== 'qfx') {
+    if (!isOfxFile(filetype)) {
       let key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
+    }
+
+    if (isOfxFile(filetype)) {
+      savePrefs({
+        [`ofx-fallback-missing-payee-${accountId}`]: fallbackMissingPayeeToMemo,
+      });
     }
 
     if (filetype === 'csv') {
@@ -794,7 +830,7 @@ function ImportTransactions({
     >
       {error && !error.parsed && (
         <View style={{ alignItems: 'center', marginBottom: 15 }}>
-          <Text style={{ marginRight: 10, color: colors.r4 }}>
+          <Text style={{ marginRight: 10, color: theme.errorText }}>
             <strong>Error:</strong> {error.message}
           </Text>
         </View>
@@ -804,7 +840,7 @@ function ImportTransactions({
           style={{
             flex: 'unset',
             height: 300,
-            border: '1px solid ' + colors.border,
+            border: '1px solid ' + theme.tableBorder,
           }}
         >
           <TableHeader headers={headers} />
@@ -812,7 +848,7 @@ function ImportTransactions({
           <TableWithNavigator
             items={transactions}
             fields={['payee', 'amount']}
-            style={{ backgroundColor: colors.n11 }}
+            style={{ backgroundColor: theme.tableHeaderBackground }}
             getItemKey={index => index}
             renderEmpty={() => {
               return (
@@ -820,7 +856,7 @@ function ImportTransactions({
                   style={{
                     textAlign: 'center',
                     marginTop: 25,
-                    color: colors.n4,
+                    color: theme.tableHeaderText,
                     fontStyle: 'italic',
                   }}
                 >
@@ -848,7 +884,7 @@ function ImportTransactions({
       {error && error.parsed && (
         <View
           style={{
-            color: colors.r4,
+            color: theme.errorText,
             alignItems: 'center',
             marginTop: 10,
           }}
@@ -869,8 +905,27 @@ function ImportTransactions({
             onChange={onUpdateFields}
             mappings={fieldMappings}
             splitMode={splitMode}
+            hasHeaderRow={hasHeaderRow}
           />
         </View>
+      )}
+
+      {isOfxFile(filetype) && (
+        <CheckboxOption
+          id="form_fallback_missing_payee"
+          checked={fallbackMissingPayeeToMemo}
+          onChange={() => {
+            setFallbackMissingPayeeToMemo(state => !state);
+            parse(
+              filename,
+              getParseOptions('ofx', {
+                fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
+              }),
+            );
+          }}
+        >
+          Use Memo as a fallback for empty Payees
+        </CheckboxOption>
       )}
 
       {/*Import Options */}
@@ -894,61 +949,97 @@ function ImportTransactions({
               )}
             </View>
 
-            {/*csv Delimiter */}
-            <View>
-              {filetype === 'csv' && (
-                <View style={{ marginLeft: 25 }}>
-                  <SectionLabel title="CSV DELIMITER" />
+            {/* CSV Options */}
+            {filetype === 'csv' && (
+              <View style={{ marginLeft: 25, gap: 5 }}>
+                <SectionLabel title="CSV OPTIONS" />
+                <label
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: 5,
+                    alignItems: 'baseline',
+                  }}
+                >
+                  Delimiter:
                   <Select
+                    options={[
+                      [',', ','],
+                      [';', ';'],
+                      ['\t', 'tab'],
+                    ]}
                     value={csvDelimiter}
-                    onChange={e => {
-                      setCsvDelimiter(e.target.value);
-                      parse(filename, { delimiter: e.target.value });
+                    onChange={value => {
+                      setCsvDelimiter(value);
+                      parse(
+                        filename,
+                        getParseOptions('csv', {
+                          delimiter: value,
+                          hasHeaderRow,
+                        }),
+                      );
                     }}
-                  >
-                    <option value=",">,</option>
-                    <option value=";">;</option>
-                  </Select>
-                </View>
-              )}
-            </View>
+                    style={{ width: 50 }}
+                  />
+                </label>
+                <CheckboxOption
+                  id="form_has_header"
+                  checked={hasHeaderRow}
+                  onChange={() => {
+                    setHasHeaderRow(!hasHeaderRow);
+                    parse(
+                      filename,
+                      getParseOptions('csv', {
+                        delimiter: csvDelimiter,
+                        hasHeaderRow: !hasHeaderRow,
+                      }),
+                    );
+                  }}
+                >
+                  File has header row
+                </CheckboxOption>
+                <CheckboxOption
+                  id="clear_on_import"
+                  checked={clearOnImport}
+                  onChange={() => {
+                    setClearOnImport(!clearOnImport);
+                  }}
+                >
+                  Clear transactions on import
+                </CheckboxOption>
+              </View>
+            )}
 
             <View style={{ flex: 1 }} />
 
-            <View style={{ marginRight: 25 }}>
-              <SectionLabel title="IMPORT OPTIONS" />
-              <View style={{ marginTop: 5 }}>
-                <FlipAmountOption
-                  value={flipAmount}
-                  disabled={splitMode}
-                  onChange={() => {
-                    setFlipAmount(!flipAmount);
-                  }}
-                />
-              </View>
+            <View style={{ marginRight: 25, gap: 5 }}>
+              <SectionLabel title="AMOUNT OPTIONS" />
+              <CheckboxOption
+                id="form_flip"
+                checked={flipAmount}
+                disabled={splitMode}
+                onChange={() => setFlipAmount(!flipAmount)}
+              >
+                Flip amount
+              </CheckboxOption>
               {filetype === 'csv' && (
-                <View style={{ marginTop: 10 }}>
-                  <SplitOption value={splitMode} onChange={onSplitMode} />
-                </View>
+                <CheckboxOption
+                  id="form_split"
+                  checked={splitMode}
+                  onChange={onSplitMode}
+                >
+                  Split amount into separate inflow/outflow columns
+                </CheckboxOption>
               )}
-              <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                <View style={{ marginRight: 30 }}>
-                  <MultipliersOption
-                    value={multiplierEnabled}
-                    onChange={() => {
-                      setMultiplierEnabled(!multiplierEnabled);
-                      setMultiplierAmount('');
-                    }}
-                  />
-                </View>
-                <View style={{ width: 75 }}>
-                  <MultipliersField
-                    multiplierCB={multiplierEnabled}
-                    value={multiplierAmount}
-                    onChange={onMultiplierChange}
-                  />
-                </View>
-              </View>
+              <MultiplierOption
+                multiplierEnabled={multiplierEnabled}
+                multiplierAmount={multiplierAmount}
+                onToggle={() => {
+                  setMultiplierEnabled(!multiplierEnabled);
+                  setMultiplierAmount('');
+                }}
+                onChangeAmount={onMultiplierChange}
+              />
             </View>
           </Stack>
         </View>
@@ -964,7 +1055,7 @@ function ImportTransactions({
           }}
         >
           <ButtonWithLoading
-            primary
+            type="primary"
             disabled={transactions.length === 0}
             loading={loadingState === 'importing'}
             onClick={onImport}
@@ -977,10 +1068,17 @@ function ImportTransactions({
   );
 }
 
-export default connect(
-  state => ({
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    prefs: state.prefs.local,
-  }),
-  actions,
-)(ImportTransactions);
+function getParseOptions(fileType, csvOptions, ofxOptions) {
+  if (fileType === 'csv') {
+    const { csvDelimiter, hasHeaderRow } = csvOptions;
+    return { csvDelimiter, hasHeaderRow };
+  } else if (isOfxFile(fileType)) {
+    const { fallbackMissingPayeeToMemo } = ofxOptions;
+    return { fallbackMissingPayeeToMemo };
+  }
+  return {};
+}
+
+function isOfxFile(fileType) {
+  return fileType === 'ofx' || fileType === 'qfx';
+}

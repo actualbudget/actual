@@ -1,12 +1,20 @@
-import * as uuid from '../../platform/uuid';
-import * as constants from '../constants';
+import { v4 as uuidv4 } from 'uuid';
 
-export function addNotification(notification) {
+import * as constants from '../constants';
+import type {
+  AddNotificationAction,
+  RemoveNotificationAction,
+  Notification,
+} from '../state-types/notifications';
+
+export function addNotification(
+  notification: Omit<Notification, 'id'> & { id?: string },
+): AddNotificationAction {
   return {
     type: constants.ADD_NOTIFICATION,
     notification: {
       ...notification,
-      id: notification.id || uuid.v4Sync(),
+      id: notification.id || uuidv4(),
     },
   };
 }
@@ -20,7 +28,7 @@ export function addGenericErrorNotification() {
   });
 }
 
-export function removeNotification(id) {
+export function removeNotification(id: string): RemoveNotificationAction {
   return {
     type: constants.REMOVE_NOTIFICATION,
     id,

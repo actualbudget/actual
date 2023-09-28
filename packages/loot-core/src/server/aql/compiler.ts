@@ -674,6 +674,27 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
 
       return `${left} = ${right}`;
     }
+    case '$ne': {
+      if (castInput(state, rhs, lhs.type).type === 'null') {
+        return `${val(state, lhs)} IS NULL`;
+      }
+
+      let [left, right] = valArray(state, [lhs, rhs], [null, lhs.type]);
+
+      if (rhs.type === 'param') {
+        let orders = state.namedParameters.map(param => {
+          return param === rhs || param === lhs ? [param, { ...param }] : param;
+        });
+        state.namedParameters = [].concat.apply([], orders);
+
+        return `CASE
+          WHEN ${left} IS NULL THEN ${right} IS NULL
+          ELSE ${left} != ${right}
+        END`;
+      }
+
+      return `${left} != ${right}`;
+    }
     case '$oneof': {
       let [left, right] = valArray(state, [lhs, rhs], [null, 'array']);
       // Dedupe the ids
@@ -684,6 +705,10 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
     case '$like': {
       let [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `${left} LIKE ${right}`;
+    }
+    case '$notlike': {
+      let [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
+      return `(${left} NOT LIKE ${right}\n OR ${left} IS NULL)`;
     }
     default:
       throw new CompileError(`Unknown operator: ${op}`);
@@ -1117,8 +1142,4 @@ export function generateSQLWithState(
 ) {
   let { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
   return { sql: defaultConstructQuery(queryState, state, sqlPieces), state };
-}
-
-export function generateSQL(queryState) {
-  return generateSQLWithState(queryState).sql;
 }

@@ -1,19 +1,26 @@
-import React, { type ComponentProps, type ReactNode } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 
-import { type CSSProperties } from 'glamor';
-
-import { styles } from '../../style';
+import { type CSSProperties, styles } from '../../style';
 import Text from '../common/Text';
+import {
+  ConditionalPrivacyFilter,
+  type ConditionalPrivacyFilterProps,
+} from '../PrivacyFilter';
 
-import format from './format';
-import SheetValue from './SheetValue';
+import useFormat from './useFormat';
+import useSheetName from './useSheetName';
+import useSheetValue from './useSheetValue';
+
+import { type Binding } from '.';
 
 type CellValueProps = {
-  binding: ComponentProps<typeof SheetValue>['binding'];
+  binding: string | Binding;
   type?: string;
   formatter?: (value) => ReactNode;
   style?: CSSProperties;
   getStyle?: (value) => CSSProperties;
+  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
+  ['data-testid']?: string;
 };
 
 function CellValue({
@@ -22,25 +29,47 @@ function CellValue({
   formatter,
   style,
   getStyle,
+  privacyFilter,
+  'data-testid': testId,
 }: CellValueProps) {
-  return (
-    <SheetValue binding={binding}>
-      {({ name, value }) => {
-        return (
-          <Text
-            style={[
-              type === 'financial' && styles.tnum,
-              style,
-              getStyle && getStyle(value),
-            ]}
-            data-testid={name}
-            data-cellname={name}
-          >
-            {formatter ? formatter(value) : format(value, type)}
-          </Text>
-        );
-      }}
-    </SheetValue>
+  let { fullSheetName } = useSheetName(binding);
+  let sheetValue = useSheetValue(binding);
+  let format = useFormat();
+
+  return useMemo(
+    () => (
+      <ConditionalPrivacyFilter
+        privacyFilter={
+          privacyFilter != null
+            ? privacyFilter
+            : type === 'financial'
+            ? true
+            : undefined
+        }
+      >
+        <Text
+          style={{
+            ...(type === 'financial' && styles.tnum),
+            ...style,
+            ...(getStyle && getStyle(sheetValue)),
+          }}
+          data-testid={testId || fullSheetName}
+          data-cellname={fullSheetName}
+        >
+          {formatter ? formatter(sheetValue) : format(sheetValue, type)}
+        </Text>
+      </ConditionalPrivacyFilter>
+    ),
+    [
+      privacyFilter,
+      type,
+      style,
+      getStyle,
+      fullSheetName,
+      formatter,
+      format,
+      sheetValue,
+    ],
   );
 }
 
