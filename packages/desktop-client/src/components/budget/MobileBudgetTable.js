@@ -311,10 +311,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
   let tooltip = useTooltip();
 
   let onTooltipClose = () => {
-    onSave?.({
-      ...category,
-      name: categoryName,
-    });
+    if (categoryName) {
+      onSave?.({
+        ...category,
+        name: categoryName,
+      });
+    } else {
+      setCategoryName(category.name);
+    }
     tooltip.close();
   };
 
@@ -378,9 +382,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
                   }
                   placeholder="Category Name"
                   value={categoryName}
-                  onUpdate={name =>
-                    setCategoryName(name ? name : category.name)
-                  }
+                  onUpdate={setCategoryName}
                   onEnter={onTooltipClose}
                 />
                 <Button
@@ -873,10 +875,14 @@ const IncomeCategory = memo(function IncomeCategory({
   let tooltip = useTooltip();
 
   let onTooltipClose = () => {
-    onSave?.({
-      ...category,
-      name: categoryName,
-    });
+    if (categoryName) {
+      onSave?.({
+        ...category,
+        name: categoryName,
+      });
+    } else {
+      setCategoryName(category.name);
+    }
     tooltip.close();
   };
 
@@ -938,9 +944,7 @@ const IncomeCategory = memo(function IncomeCategory({
                   }
                   placeholder="Category Name"
                   value={categoryName}
-                  onUpdate={name =>
-                    setCategoryName(name ? name : category.name)
-                  }
+                  onUpdate={setCategoryName}
                   onEnter={onTooltipClose}
                 />
                 <Button
