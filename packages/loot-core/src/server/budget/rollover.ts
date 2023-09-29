@@ -43,8 +43,6 @@ export function createCategory(cat, sheetName, prevSheetName) {
 
     sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
 
-    //sheet.get().createStatic(sheetName, `goal-${cat.id}`, null);
-
     sheet.get().createDynamic(sheetName, `leftover-${cat.id}`, {
       initialValue: 0,
       dependencies: [

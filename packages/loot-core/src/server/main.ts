@@ -210,7 +210,6 @@ handlers['rollover-budget-month'] = async function ({ month }) {
           value(`sum-amount-${cat.id}`),
           value(`leftover-${cat.id}`),
           value(`carryover-${cat.id}`),
-          //value(`goal-${cat.id}`),
         ]);
       }
     }
@@ -250,7 +249,6 @@ handlers['report-budget-month'] = async function ({ month }) {
         value(`budget-${cat.id}`),
         value(`sum-amount-${cat.id}`),
         value(`leftover-${cat.id}`),
-        //value(`goal-${cat.id}`),
       ]);
 
       if (!group.is_income) {
