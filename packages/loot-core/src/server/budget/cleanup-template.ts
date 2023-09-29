@@ -57,6 +57,18 @@ async function processCleanup(month: string): Promise<Notification> {
       [db_month, categoryId],
     );
 
+    if (carryover === null) {
+      await setBudget({
+        category: category.id,
+        month,
+        amount: budgeted,
+      });
+      carryover = await db.first(
+        `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
+        [db_month, categoryId],
+      );
+    }
+
     if (
       balance < 0 &&
       Math.abs(balance) <= budgetAvailable &&
