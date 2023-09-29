@@ -11,13 +11,13 @@ import { parse } from './goal-template.pegjs';
 
 export async function applyTemplate({ month }) {
   let category_templates = await getCategoryTemplates(null);
-  await resetCategoryTargets({ month });
+  await resetCategoryTargets({ month, category: null });
   return processTemplate(month, false, category_templates);
 }
 
 export async function overwriteTemplate({ month }) {
   let category_templates = await getCategoryTemplates(null);
-  await resetCategoryTargets({ month });
+  await resetCategoryTargets({ month, category: null });
   return processTemplate(month, true, category_templates);
 }
 
@@ -26,6 +26,7 @@ export async function applySingleCategoryTemplate({ month, category }) {
     category,
   ]);
   let category_templates = await getCategoryTemplates(categories[0]);
+  await resetCategoryTargets({ month, category: categories });
   await setBudget({
     category: category,
     month,
@@ -74,10 +75,15 @@ async function setCategoryTargets({ month, idealTemplate }) {
   });
 }
 
-async function resetCategoryTargets({ month }) {
-  let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
-  );
+async function resetCategoryTargets({ month, category }) {
+  let categories;
+  if (category===null) {
+    categories = await db.all(
+      'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
+    );
+  }else{
+    categories = category;
+  }
   await batchMessages(async () => {
     categories.forEach(element => {
       setGoal({
