@@ -39,6 +39,12 @@ export function runCheckTemplates() {
   return checkTemplates();
 }
 
+async function getCategories() {
+  return await db.all(
+      'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
+    );
+}
+
 function checkScheduleTemplates(template) {
   let lowPriority = template[0].priority;
   let errorNotice = false;
@@ -78,9 +84,7 @@ async function setCategoryTargets({ month, idealTemplate }) {
 async function resetCategoryTargets({ month, category }) {
   let categories;
   if (category===null) {
-    categories = await db.all(
-      'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
-    );
+    categories = await getCategories();
   }else{
     categories = category;
   }
@@ -107,9 +111,7 @@ async function processTemplate(
   let idealTemplate = [];
   let setToZero = [];
 
-  let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
-  );
+  let categories = await getCategories();
 
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
