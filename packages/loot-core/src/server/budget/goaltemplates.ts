@@ -6,16 +6,18 @@ import * as db from '../db';
 import { getRuleForSchedule, getNextDate } from '../schedules/app';
 import { batchMessages } from '../sync';
 
-import { setBudget, getSheetValue, isReflectBudget } from './actions';
+import { setBudget, getSheetValue, isReflectBudget, setGoal } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export async function applyTemplate({ month }) {
   let category_templates = await getCategoryTemplates(null);
+  await resetCategoryTargets({ month, category: null });
   return processTemplate(month, false, category_templates);
 }
 
 export async function overwriteTemplate({ month }) {
   let category_templates = await getCategoryTemplates(null);
+  await resetCategoryTargets({ month, category: null });
   return processTemplate(month, true, category_templates);
 }
 
@@ -24,6 +26,7 @@ export async function applySingleCategoryTemplate({ month, category }) {
     category,
   ]);
   let category_templates = await getCategoryTemplates(categories[0]);
+  await resetCategoryTargets({ month, category: categories });
   await setBudget({
     category: category,
     month,
@@ -34,6 +37,12 @@ export async function applySingleCategoryTemplate({ month, category }) {
 
 export function runCheckTemplates() {
   return checkTemplates();
+}
+
+async function getCategories() {
+  return await db.all(
+      'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
+    );
 }
 
 function checkScheduleTemplates(template) {
@@ -60,16 +69,49 @@ async function setGoalBudget({ month, templateBudget }) {
   });
 }
 
-async function processTemplate(month, force, category_templates) {
+async function setCategoryTargets({ month, idealTemplate }) {
+  await batchMessages(async () => {
+    idealTemplate.forEach(element => {
+      setGoal({
+        category: element.category,
+        goal: element.amount,
+        month: month,
+      });
+    });
+  });
+}
+
+async function resetCategoryTargets({ month, category }) {
+  let categories;
+  if (category===null) {
+    categories = await getCategories();
+  }else{
+    categories = category;
+  }
+  await batchMessages(async () => {
+    categories.forEach(element => {
+      setGoal({
+        category: element.id,
+        goal: null,
+        month: month,
+      });
+    });
+  });
+}
+
+async function processTemplate(
+  month,
+  force,
+  category_templates,
+): Promise<Notification> {
   let num_applied = 0;
   let errors = [];
   let lowestPriority = 0;
   let originalCategoryBalance = [];
+  let idealTemplate = [];
   let setToZero = [];
 
-  let categories = await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
-  );
+  let categories = await getCategories();
 
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
@@ -129,7 +171,7 @@ async function processTemplate(month, force, category_templates) {
 
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
-  let available_remaining = isReflectBudget()
+  let budgetAvailable = isReflectBudget()
     ? await getSheetValue(sheetName, `total-saved`)
     : await getSheetValue(sheetName, `to-budget`);
   for (let priority = 0; priority <= lowestPriority; priority++) {
@@ -143,20 +185,20 @@ async function processTemplate(month, force, category_templates) {
 
     for (let c = 0; c < categories.length; c++) {
       let category = categories[c];
-      let template = category_templates[category.id];
-      if (template) {
+      let template_lines = category_templates[category.id];
+      if (template_lines) {
         //check that all schedule and by lines have the same priority level
         let skipSchedule = false;
         let isScheduleOrBy = false;
         let priorityCheck = 0;
         if (
-          template.filter(
+          template_lines.filter(
             t =>
               (t.type === 'schedule' || t.type === 'by') &&
               t.priority === priority,
           ).length > 0
         ) {
-          template = template.filter(
+          template_lines = template_lines.filter(
             t =>
               (t.priority === priority &&
                 (t.type !== 'schedule' || t.type !== 'by')) ||
@@ -164,7 +206,7 @@ async function processTemplate(month, force, category_templates) {
               t.type === 'by',
           );
           let { lowPriority, errorNotice } = await checkScheduleTemplates(
-            template,
+            template_lines,
           );
           priorityCheck = lowPriority;
           skipSchedule = priorityCheck !== priority ? true : false;
@@ -179,11 +221,13 @@ async function processTemplate(month, force, category_templates) {
         }
         if (!skipSchedule) {
           if (!isScheduleOrBy) {
-            template = template.filter(t => t.priority === priority);
+            template_lines = template_lines.filter(
+              t => t.priority === priority,
+            );
           }
-          if (template.length > 0) {
+          if (template_lines.length > 0) {
             errors = errors.concat(
-              template
+              template_lines
                 .filter(t => t.type === 'error')
                 .map(({ line, error }) =>
                   [
@@ -202,25 +246,42 @@ async function processTemplate(month, force, category_templates) {
             let { amount: to_budget, errors: applyErrors } =
               await applyCategoryTemplate(
                 category,
-                template,
+                template_lines,
                 month,
-                priority,
                 remainder_scale,
                 available_start,
-                available_remaining,
+                budgetAvailable,
                 prev_budgeted,
                 force,
               );
             if (to_budget != null) {
               num_applied++;
-              if (to_budget > available_remaining && priority > 0) {
-                to_budget = available_remaining;
+              if (
+                idealTemplate.filter(c => c.category === category.id).length > 0
+              ) {
+                idealTemplate.filter(
+                  c => c.category === category.id,
+                )[0].amount += to_budget;
+              } else {
+                idealTemplate.push({
+                  category: category.id,
+                  amount: to_budget,
+                });
               }
-              templateBudget.push({
-                category: category.id,
-                amount: to_budget + prev_budgeted,
-              });
-              available_remaining -= to_budget;
+              if (to_budget <= budgetAvailable || !priority) {
+                templateBudget.push({
+                  category: category.id,
+                  amount: to_budget + prev_budgeted,
+                });
+              } else if (to_budget > budgetAvailable && budgetAvailable >= 0) {
+                to_budget = budgetAvailable;
+                errors.push(`Insufficient funds.`);
+                templateBudget.push({
+                  category: category.id,
+                  amount: to_budget + prev_budgeted,
+                });
+              }
+              budgetAvailable -= to_budget;
             }
             if (applyErrors != null) {
               errors = errors.concat(
@@ -233,7 +294,7 @@ async function processTemplate(month, force, category_templates) {
     }
     await setGoalBudget({ month, templateBudget });
   }
-
+  await setCategoryTargets({ month, idealTemplate });
   if (!force) {
     //if overwrite is not preferred, set cell to original value;
     originalCategoryBalance = originalCategoryBalance.filter(
@@ -261,7 +322,6 @@ async function processTemplate(month, force, category_templates) {
       }
     }
   }
-
   if (num_applied === 0) {
     if (errors.length) {
       return {
@@ -324,11 +384,10 @@ async function applyCategoryTemplate(
   category,
   template_lines,
   month,
-  priority,
   remainder_scale,
   available_start,
   budgetAvailable,
-  budgeted,
+  prev_budgeted,
   force,
 ) {
   let current_month = `${month}-01`;
@@ -406,9 +465,10 @@ async function applyCategoryTemplate(
   let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
   let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
   let to_budget = 0;
-  let limit;
-  let hold;
-  let last_month_balance = balance - spent - budgeted;
+  let limit = 0;
+  let hold = false;
+  let limitCheck = false;
+  let last_month_balance = balance - spent - prev_budgeted;
   let remainder = 0;
   for (let l = 0; l < template_lines.length; l++) {
     let template = template_lines[l];
@@ -416,10 +476,11 @@ async function applyCategoryTemplate(
       case 'simple': {
         // simple has 'monthly' and/or 'limit' params
         if (template.limit != null) {
-          if (limit != null) {
+          if (limitCheck) {
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
+            limitCheck = true;
             limit = amountToInteger(template.limit.amount);
             hold = template.limit.hold;
           }
@@ -431,12 +492,7 @@ async function applyCategoryTemplate(
         } else {
           increment = limit;
         }
-        if (to_budget + increment < budgetAvailable || !priority) {
-          to_budget += increment;
-        } else {
-          if (budgetAvailable > 0) to_budget += budgetAvailable;
-          errors.push(`Insufficient funds.`);
-        }
+        to_budget += increment;
         break;
       }
       case 'by': {
@@ -468,16 +524,9 @@ async function applyCategoryTemplate(
             target = 0;
             remainder = Math.abs(remainder);
           }
-          let diff =
+          let increment =
             num_months >= 0 ? Math.round(target / (num_months + 1)) : 0;
-          if (diff >= 0) {
-            if (to_budget + diff < budgetAvailable || !priority) {
-              to_budget += diff;
-            } else {
-              if (budgetAvailable > 0) to_budget += budgetAvailable;
-              errors.push(`Insufficient funds.`);
-            }
-          }
+          to_budget += increment;
         } else {
           errors.push(`by templates are not supported in Report budgets`);
         }
@@ -492,6 +541,7 @@ async function applyCategoryTemplate(
             errors.push(`More than one “up to” limit found.`);
             return { errors };
           } else {
+            limitCheck = true;
             limit = amountToInteger(template.limit.amount);
             hold = template.limit.hold;
           }
@@ -501,12 +551,7 @@ async function applyCategoryTemplate(
 
         while (w < next_month) {
           if (w >= current_month) {
-            if (to_budget + amount < budgetAvailable || !priority) {
-              to_budget += amount;
-            } else {
-              if (budgetAvailable > 0) to_budget += budgetAvailable;
-              errors.push(`Insufficient funds.`);
-            }
+            to_budget += amount;
           }
           w = monthUtils.addWeeks(w, weeks);
         }
@@ -563,12 +608,7 @@ async function applyCategoryTemplate(
             (target - already_budgeted) / (num_months + 1),
           );
         }
-        if (increment < budgetAvailable || !priority) {
-          to_budget = increment;
-        } else {
-          if (budgetAvailable > 0) to_budget = budgetAvailable;
-          errors.push(`Insufficient funds.`);
-        }
+        to_budget = increment;
         break;
       }
       case 'percentage': {
@@ -619,12 +659,7 @@ async function applyCategoryTemplate(
           0,
           Math.round(monthlyIncome * (percent / 100)),
         );
-        if (increment + to_budget <= budgetAvailable || !priority) {
-          to_budget += increment;
-        } else {
-          if (budgetAvailable > 0) to_budget = budgetAvailable;
-          errors.push(`Insufficient funds.`);
-        }
+        to_budget += increment;
         break;
       }
       case 'schedule': {
@@ -702,7 +737,7 @@ async function applyCategoryTemplate(
           t = t.filter(t => t.completed === 0);
           t = t.sort((a, b) => b.target - a.target);
 
-          let diff = 0;
+          let increment = 0;
           if (balance >= totalScheduledGoal) {
             for (let ll = 0; ll < t.length; ll++) {
               if (t[ll].num_months < 0) {
@@ -716,11 +751,11 @@ async function applyCategoryTemplate(
                 t[ll].target_frequency === 'weekly' ||
                 t[ll].target_frequency === 'daily'
               ) {
-                diff += t[ll].target;
+                increment += t[ll].target;
               } else if (t[ll].template.full && t[ll].num_months > 0) {
-                diff += 0;
+                increment += 0;
               } else {
-                diff += t[ll].target / t[ll].target_interval;
+                increment += t[ll].target / t[ll].target_interval;
               }
             }
           } else if (balance < totalScheduledGoal) {
@@ -764,25 +799,17 @@ async function applyCategoryTemplate(
                   t[ll].target_frequency === 'weekly' ||
                   t[ll].target_frequency === 'daily'
                 ) {
-                  diff += tg;
+                  increment += tg;
                 } else if (t[ll].template.full && t[ll].num_months > 0) {
-                  diff += 0;
+                  increment += 0;
                 } else {
-                  diff += tg / (t[ll].num_months + 1);
+                  increment += tg / (t[ll].num_months + 1);
                 }
               }
             }
           }
-          diff = Math.round(diff);
-          if ((diff > 0 && to_budget + diff <= budgetAvailable) || !priority) {
-            to_budget += diff;
-          } else if (
-            to_budget + diff > budgetAvailable &&
-            budgetAvailable >= 0
-          ) {
-            to_budget = budgetAvailable;
-            errors.push(`Insufficient funds.`);
-          }
+          increment = Math.round(increment);
+          to_budget += increment;
         }
         break;
       }
@@ -808,7 +835,7 @@ async function applyCategoryTemplate(
     }
   }
 
-  if (limit != null) {
+  if (limitCheck) {
     if (hold && balance > limit) {
       to_budget = 0;
     } else if (to_budget + balance > limit) {

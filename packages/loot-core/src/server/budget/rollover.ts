@@ -16,6 +16,7 @@ export function createBlankCategory(cat, months) {
     sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
     sheet.get().createStatic(sheetName, `leftover-${cat.id}`, 0);
     sheet.get().createStatic(sheetName, `leftover-pos-${cat.id}`, 0);
+    sheet.get().createStatic(sheetName, `goal-${cat.id}`, null);
   }
 }
 
