@@ -100,7 +100,7 @@ function Saved({ projected }) {
           color: projected
             ? theme.alt2WarningText
             : isNegative
-            ? theme.alt2ErrorText
+            ? theme.errorTextDark
             : theme.formInputText,
         }}
       >

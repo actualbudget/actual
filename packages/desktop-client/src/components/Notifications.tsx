@@ -110,7 +110,7 @@ function Notification({
         color: positive
           ? theme.alt4NoticeText
           : error
-          ? theme.alt3ErrorText
+          ? theme.errorTextDark
           : theme.alt4WarningText,
       }}
     >
@@ -129,7 +129,7 @@ function Notification({
             positive
               ? theme.altNoticeAccent
               : error
-              ? theme.altErrorAccent
+              ? theme.errorBorder
               : theme.altWarningAccent
           }`,
           ...styles.shadowLarge,
@@ -175,7 +175,7 @@ function Notification({
                   positive
                     ? theme.altNoticeAccent
                     : error
-                    ? theme.altErrorAccent
+                    ? theme.errorBorder
                     : theme.altWarningAccent
                 }`,
                 color: 'currentColor',
@@ -185,7 +185,7 @@ function Notification({
                   backgroundColor: positive
                     ? theme.noticeBackground
                     : error
-                    ? theme.altErrorBackground
+                    ? theme.errorBackground
                     : theme.altWarningBackground,
                 },
               }}

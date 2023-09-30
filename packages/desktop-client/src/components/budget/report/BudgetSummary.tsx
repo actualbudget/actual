@@ -282,7 +282,7 @@ function Saved({ projected, style }: SavedProps) {
               color: projected
                 ? theme.alt2WarningText
                 : isNegative
-                ? theme.alt2ErrorText
+                ? theme.errorTextDark
                 : theme.altUpcomingText,
             },
           ])}`}
