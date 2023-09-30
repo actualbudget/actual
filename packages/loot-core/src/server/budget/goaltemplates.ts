@@ -842,25 +842,16 @@ async function applyCategoryTemplate(
       to_budget = limit - balance;
     }
   }
-  if (
-    ((category.budgeted != null && category.budgeted !== 0) ||
-      to_budget === 0) &&
-    !force
-  ) {
-    return { errors };
-  } else if (category.budgeted === to_budget) {
-    return null;
-  } else {
-    let str = category.name + ': ' + integerToAmount(last_month_balance);
-    str +=
-      ' + ' +
-      integerToAmount(to_budget) +
-      ' = ' +
-      integerToAmount(last_month_balance + to_budget);
-    str += ' ' + template_lines.map(x => x.line).join('\n');
-    console.log(str);
-    return { amount: to_budget, errors };
-  }
+  // setup notifications
+  let str = category.name + ': ' + integerToAmount(last_month_balance);
+  str +=
+    ' + ' +
+    integerToAmount(to_budget) +
+    ' = ' +
+    integerToAmount(last_month_balance + to_budget);
+  str += ' ' + template_lines.map(x => x.line).join('\n');
+  console.log(str);
+  return { amount: to_budget, errors };
 }
 
 async function checkTemplates(): Promise<Notification> {
