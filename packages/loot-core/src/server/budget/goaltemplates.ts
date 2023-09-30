@@ -41,8 +41,8 @@ export function runCheckTemplates() {
 
 async function getCategories() {
   return await db.all(
-      'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
-    );
+    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
+  );
 }
 
 function checkScheduleTemplates(template) {
@@ -83,9 +83,9 @@ async function setCategoryTargets({ month, idealTemplate }) {
 
 async function resetCategoryTargets({ month, category }) {
   let categories;
-  if (category===null) {
+  if (category === null) {
     categories = await getCategories();
-  }else{
+  } else {
     categories = category;
   }
   await batchMessages(async () => {
