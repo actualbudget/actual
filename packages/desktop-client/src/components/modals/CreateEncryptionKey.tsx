@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { type ChangeEvent, useState } from 'react';
 
 import { css } from 'glamor';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/src/shared/errors';
 
+import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
+import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
 import InitialFocus from '../common/InitialFocus';
@@ -15,11 +17,19 @@ import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
 
+type CreateEncryptionKeyProps = {
+  modalProps: CommonModalProps;
+  actions: BoundActions;
+  options: {
+    recreate: boolean;
+  };
+};
+
 export default function CreateEncryptionKey({
   modalProps,
   actions,
-  options = {},
-}) {
+  options,
+}: CreateEncryptionKeyProps) {
   let [password, setPassword] = useState('');
   let [loading, setLoading] = useState(false);
   let [error, setError] = useState('');
@@ -142,7 +152,9 @@ export default function CreateEncryptionKey({
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   style={{ width: 300 }}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setPassword(e.target.value)
+                  }
                 />
               </InitialFocus>
               <Text style={{ marginTop: 5 }}>
