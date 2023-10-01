@@ -10,13 +10,15 @@ import { setBudget, getSheetValue, isReflectBudget, setGoal } from './actions';
 import { parse } from './goal-template.pegjs';
 
 export async function applyTemplate({ month }) {
-  let category_templates = await getCategoryTemplates(null);
+  await storeTemplates();
+  let category_templates = await getTemplates(null);
   await resetCategoryTargets({ month, category: null });
   return processTemplate(month, false, category_templates);
 }
 
 export async function overwriteTemplate({ month }) {
-  let category_templates = await getCategoryTemplates(null);
+  await storeTemplates();
+  let category_templates = await getTemplates(null);
   await resetCategoryTargets({ month, category: null });
   return processTemplate(month, true, category_templates);
 }
@@ -25,7 +27,8 @@ export async function applySingleCategoryTemplate({ month, category }) {
   let categories = await db.all(`SELECT * FROM v_categories WHERE id = ?`, [
     category,
   ]);
-  let category_templates = await getCategoryTemplates(categories[0]);
+  await storeTemplates();
+  let category_templates = await getTemplates(categories[0]);
   await resetCategoryTargets({ month, category: categories });
   await setBudget({
     category: category,
@@ -97,6 +100,41 @@ async function resetCategoryTargets({ month, category }) {
       });
     });
   });
+}
+
+async function storeTemplates() {
+  //stores the template definitions to the database
+  let templates = await getCategoryTemplates(null);
+  let categories = await getCategories();
+
+  for (let c = 0; c < categories.length; c++) {
+    let template = templates[categories[c].id];
+    if (template) {
+      db.update('categories', {
+        id: categories[c].id,
+        goal_def: JSON.stringify(template),
+      });
+    }
+  }
+}
+
+async function getTemplates(category) {
+  //retrieves template definitions from the database
+  const goal_def = await db.all(
+    'SELECT * FROM categories WHERE goal_def IS NOT NULL',
+  );
+
+  let templates = [];
+  for (let ll = 0; ll < goal_def.length; ll++) {
+    templates[goal_def[ll].id] = JSON.parse(goal_def[ll].goal_def);
+  }
+  if (category) {
+    let singleCategoryTemplate = [];
+    singleCategoryTemplate[category.id] = templates[category.id];
+    return singleCategoryTemplate;
+  } else {
+    return templates;
+  }
 }
 
 async function processTemplate(
