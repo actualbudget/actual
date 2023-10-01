@@ -30,12 +30,7 @@ export async function applySingleCategoryTemplate({ month, category }) {
   await storeTemplates();
   let category_templates = await getTemplates(categories[0]);
   await resetCategoryTargets({ month, category: categories });
-  await setBudget({
-    category: category,
-    month,
-    amount: 0,
-  });
-  return processTemplate(month, false, category_templates);
+  return processTemplate(month, true, category_templates);
 }
 
 export function runCheckTemplates() {
@@ -110,9 +105,14 @@ async function storeTemplates() {
   for (let c = 0; c < categories.length; c++) {
     let template = templates[categories[c].id];
     if (template) {
-      db.update('categories', {
+      await db.update('categories', {
         id: categories[c].id,
         goal_def: JSON.stringify(template),
+      });
+    } else {
+      await db.update('categories', {
+        id: categories[c].id,
+        goal_def: null,
       });
     }
   }
@@ -129,8 +129,10 @@ async function getTemplates(category) {
     templates[goal_def[ll].id] = JSON.parse(goal_def[ll].goal_def);
   }
   if (category) {
-    let singleCategoryTemplate = [];
-    singleCategoryTemplate[category.id] = templates[category.id];
+    let singleCategoryTemplate = {};
+    if (templates[category.id] !== undefined) {
+      singleCategoryTemplate[category.id] = templates[category.id];
+    }
     return singleCategoryTemplate;
   } else {
     return templates;
