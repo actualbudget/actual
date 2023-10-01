@@ -6,6 +6,7 @@ import CellValue from '../spreadsheet/CellValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 
 import { makeAmountStyle } from './util';
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 
 type BalanceWithCarryoverProps = {
   carryover: ComponentProps<typeof CellValue>['binding'];
@@ -25,13 +26,14 @@ export default function BalanceWithCarryover({
   let balanceValue = useSheetValue(balance);
   let goalValue = useSheetValue(goal);
   let budgetedValue = useSheetValue(budgeted);
+  let isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   // if a goal is passed in then check if that goal is met or not.
   let goalStatus = goalValue != null ? budgetedValue >= goalValue : null;
   return (
     <>
       <CellValue
         binding={balance}
-        goalStatus={goalStatus}
+        goalStatus={isGoalTemplatesEnabled ? goalStatus : null}
         type="financial"
         getStyle={makeAmountStyle}
         style={{
