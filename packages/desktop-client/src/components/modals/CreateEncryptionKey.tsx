@@ -21,14 +21,14 @@ type CreateEncryptionKeyProps = {
   modalProps: CommonModalProps;
   actions: BoundActions;
   options: {
-    recreate: boolean;
+    recreate?: boolean;
   };
 };
 
 export default function CreateEncryptionKey({
   modalProps,
   actions,
-  options,
+  options = {},
 }: CreateEncryptionKeyProps) {
   let [password, setPassword] = useState('');
   let [loading, setLoading] = useState(false);
