@@ -19,7 +19,7 @@ export default function MobileNavTabs() {
   const { scrollY } = useScroll();
 
   const totalRowCount = 2;
-  const rowHeight = 60;
+  const rowHeight = 70;
   const totalHeight = rowHeight * totalRowCount;
   const openY = 0;
   const closeY = rowHeight;
