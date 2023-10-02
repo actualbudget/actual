@@ -84,7 +84,7 @@ function NetWorthGraph({
               domain={['auto', 'auto']}
               tickFormatter={tickFormatter}
             />
-            <Tooltip />
+            <Tooltip formatter={value => Math.round(value)} />
             <Line
               type="monotone"
               dataKey="NetWorth"
