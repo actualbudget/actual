@@ -109,28 +109,25 @@ function transformToSankeyData(categoryData, incomeData) {
   const data = { nodes: [], links: [] };
   const nodeNames = new Set();
 
-  // Add the Income node first.
-  data.nodes.push({ name: 'Income' });
-  nodeNames.add('Income');
+  // Add the Budget node first.
+  data.nodes.push({ name: 'Budget' });
+  nodeNames.add('Budget');
 
-  // Handle the income sources and link them to the Income node.
+  // Handle the income sources and link them to the Budget node.
   Object.entries(incomeData).forEach(([sourceName, value]) => {
     if (!nodeNames.has(sourceName) && integerToAmount(value) > 0) {
       data.nodes.push({ name: sourceName });
       nodeNames.add(sourceName);
       data.links.push({
         source: sourceName,
-        target: 'Income',
+        target: 'Budget',
         value: integerToAmount(value),
       });
     }
   });
 
   for (let mainCategory of categoryData) {
-    if (!nodeNames.has(mainCategory.name)) {
-      data.nodes.push({ name: mainCategory.name });
-      nodeNames.add(mainCategory.name);
-
+    if (!nodeNames.has(mainCategory.name) && mainCategory.balances.length > 0) {
       let mainCategorySum = 0;
       for (let subCategory of mainCategory.balances) {
         if (!nodeNames.has(subCategory.subcategory) && subCategory.value > 0) {
@@ -147,8 +144,10 @@ function transformToSankeyData(categoryData, incomeData) {
         }
       }
       if (mainCategorySum > 0) {
+        data.nodes.push({ name: mainCategory.name });
+        nodeNames.add(mainCategory.name);
         data.links.push({
-          source: 'Income',
+          source: 'Budget',
           target: mainCategory.name,
           value: integerToAmount(mainCategorySum),
         });
