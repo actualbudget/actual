@@ -14,6 +14,7 @@ export default function createSpreadsheet(
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+
     const allIncomeSubcategories = [].concat(
       ...categories
         .filter(category => category.is_income === 1)
@@ -32,12 +33,14 @@ export default function createSpreadsheet(
                     q('transactions')
                       .filter({
                         [conditionsOpKey]: filters,
-                        category: subcategory.id,
+                      })
+                      .filter({
                         $and: [
                           { date: { $gte: start + '-01' } },
                           { date: { $lte: end + '-31' } },
                         ],
                       })
+                      .filter({ category: subcategory.id })
                       .calculate({ $sum: '$amount' }),
                   );
                   return {
@@ -67,12 +70,14 @@ export default function createSpreadsheet(
           q('transactions')
             .filter({
               [conditionsOpKey]: filters,
-              category: subcategory.id,
+            })
+            .filter({
               $and: [
                 { date: { $gte: start + '-01' } },
                 { date: { $lte: end + '-31' } },
               ],
             })
+            .filter({ category: subcategory.id })
             .groupBy(['payee'])
             .select(['payee', { amount: { $sum: '$amount' } }]),
         );
