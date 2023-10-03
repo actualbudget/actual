@@ -347,25 +347,14 @@ function SankeyCard({ categories }) {
             </Block>
             <DateRange start={start} end={end} />
           </View>
-          {data && (
-            <View style={{ textAlign: 'right' }}>
-              <Block
-                style={{
-                  ...styles.mediumText,
-                  fontWeight: 500,
-                  marginBottom: 5,
-                }}
-              />
-            </View>
-          )}
         </View>
-
-        {data ? (
-          <SankeyGraph data={data} /> // passing in correct data doesn't format correctly
-        ) : (
-          <LoadingIndicator />
-        )}
       </View>
+
+      {data ? (
+        <SankeyGraph data={data} /> // passing in correct data doesn't format correctly
+      ) : (
+        <LoadingIndicator />
+      )}
     </Card>
   );
 }
