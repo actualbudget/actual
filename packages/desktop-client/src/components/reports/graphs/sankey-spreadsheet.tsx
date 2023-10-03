@@ -10,17 +10,20 @@ export default function createSpreadsheet(
   conditionsOp,
 ) {
   return async (spreadsheet, setData) => {
+    // gather filters user has set
     let { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
+    // create list of Income subcategories
     const allIncomeSubcategories = [].concat(
       ...categories
         .filter(category => category.is_income === 1)
         .map(category => category.categories),
     );
 
+    // retrieve sum of subcategory expenses
     async function fetchCategoryData(categories) {
       try {
         return await Promise.all(
@@ -63,6 +66,7 @@ export default function createSpreadsheet(
       }
     }
 
+    // retrieve all income subcategory payees
     async function fetchIncomeData() {
       // Map over allIncomeSubcategories and return an array of promises
       const promises = allIncomeSubcategories.map(subcategory => {
@@ -94,7 +98,7 @@ export default function createSpreadsheet(
         });
       });
 
-      // Fetching names based on ID
+      // Fetching names based on payee ID
       let payeeNames = {};
       for (let id in payeesDict) {
         const result = await runQuery(
@@ -106,6 +110,8 @@ export default function createSpreadsheet(
     }
     const categoryData = await fetchCategoryData(categories);
     const incomeData = await fetchIncomeData();
+
+    // convert retrieved data into the proper sankey format
     setData(transformToSankeyData(categoryData, incomeData));
   };
 }
@@ -131,6 +137,7 @@ function transformToSankeyData(categoryData, incomeData) {
     }
   });
 
+  // add all category expenses that have valid subcategories and a balance
   for (let mainCategory of categoryData) {
     if (!nodeNames.has(mainCategory.name) && mainCategory.balances.length > 0) {
       let mainCategorySum = 0;

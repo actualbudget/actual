@@ -48,6 +48,7 @@ function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
 }
 
 function SankeyGraph({ style, data }: SankeyProps) {
+  console.log(data);
   return (
     <Container
       style={{
@@ -56,21 +57,23 @@ function SankeyGraph({ style, data }: SankeyProps) {
       }}
     >
       {(width, height, portalHost) =>
-        data && (
+        data.links &&
+        data.links.length > 0 && (
           <Sankey
             width={width}
             height={height}
             data={data}
             node={<SankeyNode />}
+            sort={false}
             nodePadding={23}
             margin={{
-              left: 100,
+              left: 25,
               right: 100,
               top: 25,
               bottom: 25,
             }}
           >
-            <Tooltip formatter={value => Math.round(value)} />
+            <Tooltip formatter={value => Math.round(value as number)} />
           </Sankey>
         )
       }
