@@ -379,7 +379,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 fontWeight: 500,
                 textDecorationSkip: 'ink',
               },
-              currentMonth === month && { textDecoration: 'underline' },
             ])}`}
           >
             {monthUtils.format(month, 'MMMM')}
@@ -473,7 +472,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               padding: '10px 20px',
               justifyContent: 'space-between',
               backgroundColor: theme.tableRowHeaderBackground,
-              borderTop: '1px solid ' + theme.tableRowHeaderText,
+              borderTop: '1px solid ' + theme.tableBorder,
             }}
           >
             <Saved projected={month >= currentMonth} />
