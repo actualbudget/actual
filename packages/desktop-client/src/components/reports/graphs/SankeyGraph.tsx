@@ -48,7 +48,6 @@ function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
 }
 
 function SankeyGraph({ style, data }: SankeyProps) {
-  console.log(data);
   return (
     <Container
       style={{
