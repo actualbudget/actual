@@ -38,8 +38,8 @@ export function getStatusProps(status: StatusTypes) {
       };
     case 'paid':
       return {
-        color: theme.alt2NoticeText,
-        backgroundColor: theme.altNoticeBackground,
+        color: theme.noticeText,
+        backgroundColor: theme.noticeBackgroundLight,
         Icon: ValidationCheck,
       };
     case 'completed':
@@ -50,8 +50,8 @@ export function getStatusProps(status: StatusTypes) {
       };
     case 'pending':
       return {
-        color: theme.alt3NoticeText,
-        backgroundColor: theme.alt2NoticeBackground,
+        color: theme.noticeTextLight,
+        backgroundColor: theme.noticeBackgroundLight,
         Icon: CalendarIcon,
       };
     case 'scheduled':
@@ -62,7 +62,7 @@ export function getStatusProps(status: StatusTypes) {
       };
     case 'cleared':
       return {
-        color: theme.noticeText,
+        color: theme.noticeTextLight,
         backgroundColor: theme.altTableBackground,
         Icon: CheckCircle1,
       };
