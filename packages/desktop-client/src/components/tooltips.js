@@ -36,7 +36,7 @@ export class Tooltip extends Component {
   setup() {
     this.layout();
 
-    let mousedownHandler = e => {
+    let pointerDownHandler = e => {
       let node = e.target;
 
       while (node && node !== document.documentElement) {
@@ -61,13 +61,13 @@ export class Tooltip extends Component {
       }
     };
 
-    window.document.addEventListener('pointerdown', mousedownHandler, false);
+    window.document.addEventListener('pointerdown', pointerDownHandler, false);
     this.contentRef.current?.addEventListener('keydown', escHandler, false);
 
     this.cleanup = () => {
       window.document.removeEventListener(
         'pointerdown',
-        mousedownHandler,
+        pointerDownHandler,
         false,
       );
       this.contentRef.current?.removeEventListener(
