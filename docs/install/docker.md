@@ -16,7 +16,7 @@ We publish a number of tags to the official repository now so that users who wan
 The `latest` tag points to the most recent official release of Actual. This is the recommended tag to use for most users.
 
 - `latest`
-- `latest-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
+- `latest-alpine` - Based on Alpine Linux, which is tiny so it's great for low powered devices.
 
 ### `edge` Tag
 
