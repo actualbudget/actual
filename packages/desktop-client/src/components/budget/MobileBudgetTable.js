@@ -1,12 +1,5 @@
 import React, { memo, useState } from 'react';
 import { useSelector } from 'react-redux';
-// import {
-//   RectButton,
-//   PanGestureHandler,
-//   NativeViewGestureHandler
-// } from 'react-native-gesture-handler';
-// import Animated, { Easing } from 'react-native-reanimated';
-// import AndroidKeyboardAvoidingView from './AndroidKeyboardAvoidingView';
 
 import memoizeOne from 'memoize-one';
 
@@ -186,33 +179,7 @@ function BudgetCell({
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ExpenseGroupPreview({ group, pending, style }) {
-  //   let opacity = useMemo(() => new Animated.Value(0), []);
-
-  //   useEffect(() => {
-  //     Animated.timing(opacity, {
-  //       toValue: 1,
-  //       duration: 100,
-  //       easing: Easing.inOut(Easing.ease)
-  //     }).start();
-  //   }, []);
-
   return (
-    // <Animated.View
-    //   style={[
-    //     style,
-    //     { opacity },
-    //     pending && {
-    //       shadowColor: '#000',
-    //       shadowOffset: {
-    //         width: 0,
-    //         height: 3
-    //       },
-    //       shadowOpacity: 0.45,
-    //       shadowRadius: 20,
-    //       elevation: 5
-    //     }
-    //   ]}
-    // >
     <Card
       style={{
         marginTop: 7,
@@ -231,30 +198,12 @@ function ExpenseGroupPreview({ group, pending, style }) {
         />
       ))}
     </Card>
-    // </Animated.View>
   );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ExpenseCategoryPreview({ name, pending, style }) {
   return (
-    // <Animated.View
-    //   style={[
-    //     style,
-    //     { opacity: pending ? 1 : 0.4 },
-    //     {
-    //       backgroundColor: 'white',
-    //       shadowColor: '#000',
-    //       shadowOffset: {
-    //         width: 0,
-    //         height: 2
-    //       },
-    //       shadowOpacity: 0.25,
-    //       shadowRadius: 10,
-    //       elevation: 5
-    //     }
-    //   ]}
-    // >
     <ListItem
       style={{
         flex: 1,
@@ -264,7 +213,6 @@ function ExpenseCategoryPreview({ name, pending, style }) {
     >
       <Text style={styles.smallText}>{name}</Text>
     </ListItem>
-    // </Animated.View>
   );
 }
 
@@ -284,22 +232,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   show3Cols,
   showBudgetedCol,
 }) {
-  // let opacity = new Animated.Value(editMode || blank ? 0 : 1);
   let opacity = editMode || blank ? 0 : 1;
-
-  // useEffect(() => {
-  //   if (editing && ACTScrollViewManager) {
-  //     ACTScrollViewManager.setFocused(findNodeHandle(container.current));
-  //   }
-  // }, [editing]);
-
-  // useEffect(() => {
-  //   Animated.timing(this.opacity, {
-  //     toValue: this.props.editMode ? 0 : 1,
-  //     duration: 200,
-  //     easing: Easing.inOut(Easing.ease),
-  //   }).start();
-  // }, [editMode]);
 
   let [categoryName, setCategoryName] = useState(category.name);
   let [isHidden, setIsHidden] = useState(category.hidden);
@@ -415,7 +348,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         style={{
           alignItems: 'center',
           flexDirection: 'row',
-          opacity: opacity,
+          opacity,
         }}
       >
         {show3Cols || showBudgetedCol ? (
@@ -502,15 +435,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   show3Cols,
   showBudgetedCol,
 }) {
-  // useEffect(() => {
-  //   Animated.timing(this.animation, {
-  //     toValue: this.props.editMode ? 0 : 1,
-  //     duration: 200,
-  //     easing: Easing.inOut(Easing.ease),
-  //   }).start();
-  // }, [editMode]);
-
-  // let animation = new Animated.Value(editMode || blank ? 0 : 1);
   let opacity = editMode || blank ? 0 : 1;
 
   let [groupName, setGroupName] = useState(group.name);
@@ -622,18 +546,11 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           )}
         </Text>
       </View>
-      {/* <Animated.View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          opacity: animation
-        }}
-      > */}
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          opacity: opacity,
+          opacity,
         }}
       >
         {show3Cols || showBudgetedCol ? (
@@ -671,23 +588,8 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           type="financial"
         />
       </View>
-      {/* </Animated.View> */}
 
       {editMode && (
-        //   <Animated.View
-        //     style={{
-        //       flexDirection: 'row',
-        //       alignItems: 'center',
-        //       opacity: opacity,
-        //       position: 'absolute',
-        //       top: 0,
-        //       bottom: 0,
-        //       right: animation.interpolate({
-        //         inputRange: [0, 1],
-        //         outputRange: [5, -30]
-        //       })
-        //     }}
-        //   >
         <View>
           <Button
             onClick={() => onAddCategory(group.id)}
@@ -696,7 +598,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
             <Add width={15} height={15} />
           </Button>
         </View>
-        //   </Animated.View>
       )}
     </ListItem>
   );
