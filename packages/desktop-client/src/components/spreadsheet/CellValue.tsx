@@ -1,4 +1,4 @@
-import React, { useMemo, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 import { type CSSProperties, styles } from '../../style';
 import Text from '../common/Text';
@@ -36,40 +36,28 @@ function CellValue({
   let sheetValue = useSheetValue(binding);
   let format = useFormat();
 
-  return useMemo(
-    () => (
-      <ConditionalPrivacyFilter
-        privacyFilter={
-          privacyFilter != null
-            ? privacyFilter
-            : type === 'financial'
-            ? true
-            : undefined
-        }
+  return (
+    <ConditionalPrivacyFilter
+      privacyFilter={
+        privacyFilter != null
+          ? privacyFilter
+          : type === 'financial'
+          ? true
+          : undefined
+      }
+    >
+      <Text
+        style={{
+          ...(type === 'financial' && styles.tnum),
+          ...style,
+          ...(getStyle && getStyle(sheetValue)),
+        }}
+        data-testid={testId || fullSheetName}
+        data-cellname={fullSheetName}
       >
-        <Text
-          style={{
-            ...(type === 'financial' && styles.tnum),
-            ...style,
-            ...(getStyle && getStyle(sheetValue)),
-          }}
-          data-testid={testId || fullSheetName}
-          data-cellname={fullSheetName}
-        >
-          {formatter ? formatter(sheetValue) : format(sheetValue, type)}
-        </Text>
-      </ConditionalPrivacyFilter>
-    ),
-    [
-      privacyFilter,
-      type,
-      style,
-      getStyle,
-      fullSheetName,
-      formatter,
-      format,
-      sheetValue,
-    ],
+        {formatter ? formatter(sheetValue) : format(sheetValue, type)}
+      </Text>
+    </ConditionalPrivacyFilter>
   );
 }
 
