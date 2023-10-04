@@ -73,7 +73,7 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: theme.noticeText,
+            color: theme.noticeTextLight,
             borderRadius: 4,
             fontSize: 15,
           }}
