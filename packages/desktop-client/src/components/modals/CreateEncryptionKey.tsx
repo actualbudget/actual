@@ -1,4 +1,4 @@
-import React, { type ChangeEvent, useState } from 'react';
+import React, { useState } from 'react';
 
 import { css } from 'glamor';
 
@@ -152,9 +152,7 @@ export default function CreateEncryptionKey({
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   style={{ width: 300 }}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setPassword(e.target.value)
-                  }
+                  onChange={e => setPassword(e.target.value)}
                 />
               </InitialFocus>
               <Text style={{ marginTop: 5 }}>
