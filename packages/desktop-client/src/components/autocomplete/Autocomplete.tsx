@@ -398,7 +398,7 @@ function SingleAutocomplete({
               },
               onBlur: e => {
                 // Should this be e.nativeEvent
-                e.preventDownshiftDefault = true;
+                e['preventDownshiftDefault'] = true;
                 inputProps.onBlur?.(e);
 
                 if (!closeOnBlur) return;
