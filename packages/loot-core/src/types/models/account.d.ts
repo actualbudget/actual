@@ -5,7 +5,6 @@ export type AccountEntity = {
   closed: 0 | 1;
   sort_order: number;
   tombstone: 0 | 1;
-  subtype: string | null; // TODO: remove?
 } & (_SyncFields<true> | _SyncFields<false>);
 
 type _SyncFields<T> = {
