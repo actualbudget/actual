@@ -99,7 +99,7 @@ function PayeeList({
             <View
               style={{
                 display: 'block',
-                color: theme.noticeAccent,
+                color: theme.noticeTextMenu,
                 borderRadius: 4,
                 fontSize: isNarrowWidth ? 'inherit' : 11,
                 fontWeight: 500,
