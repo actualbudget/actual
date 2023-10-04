@@ -398,7 +398,10 @@ function SingleAutocomplete({
               },
               onBlur: e => {
                 // Should this be e.nativeEvent
-                e.preventDownshiftDefault = true;
+                // preventDownshiftDefault is a downshift.js property - they don't have types for it on the React event
+                // Suggested way to make this work with typescript is to cast as any... https://github.com/downshift-js/downshift/issues/734
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (e as any).preventDownshiftDefault = true;
                 inputProps.onBlur?.(e);
 
                 if (!closeOnBlur) return;
