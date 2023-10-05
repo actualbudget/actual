@@ -1,9 +1,16 @@
-import { Sankey, Tooltip, Rectangle, Layer } from 'recharts';
+import {
+  Sankey,
+  Tooltip,
+  Rectangle,
+  Layer,
+  ResponsiveContainer,
+} from 'recharts';
 
 import Container from '../Container';
 type SankeyProps = {
   style;
   data;
+  compact: boolean;
 };
 
 function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
@@ -37,7 +44,7 @@ function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
         textAnchor={isOut ? 'end' : 'start'}
         x={isOut ? x - 6 : x + width + 6}
         y={y + height / 2 + 13}
-        fontSize="12"
+        fontSize="9"
         stroke="#333"
         strokeOpacity="0.5"
       >
@@ -47,33 +54,35 @@ function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
   );
 }
 
-function SankeyGraph({ style, data }: SankeyProps) {
+function SankeyGraph({ style, data, compact }: SankeyProps) {
   return (
     <Container
       style={{
         ...style,
-        ...{ height: 'auto' },
+        ...(compact && { height: 'auto' }),
       }}
     >
       {(width, height, portalHost) =>
         data.links &&
         data.links.length > 0 && (
-          <Sankey
-            width={width}
-            height={height}
-            data={data}
-            node={<SankeyNode />}
-            sort={false}
-            nodePadding={23}
-            margin={{
-              left: 25,
-              right: 100,
-              top: 25,
-              bottom: 25,
-            }}
-          >
-            <Tooltip formatter={value => Math.round(value as number)} />
-          </Sankey>
+          <ResponsiveContainer>
+            <Sankey
+              width={width}
+              height={height}
+              data={data}
+              node={<SankeyNode containerWidth={width} />}
+              sort={false}
+              nodePadding={23}
+              margin={{
+                left: 0,
+                right: 0,
+                top: 10,
+                bottom: 25,
+              }}
+            >
+              <Tooltip formatter={value => Math.round(value as number)} />
+            </Sankey>
+          </ResponsiveContainer>
         )
       }
     </Container>

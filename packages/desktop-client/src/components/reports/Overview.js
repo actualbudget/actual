@@ -351,7 +351,7 @@ function SankeyCard({ categories }) {
       </View>
 
       {data ? (
-        <SankeyGraph data={data} /> // passing in correct data doesn't format correctly
+        <SankeyGraph data={data} compact={true} /> // passing in correct data doesn't format correctly
       ) : (
         <LoadingIndicator />
       )}
