@@ -1,7 +1,7 @@
 import React, {
-  type FunctionComponent,
   useContext,
   type CSSProperties,
+  type ComponentType,
 } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -12,10 +12,8 @@ import NamespaceContext from '../spreadsheet/NamespaceContext';
 
 import { MonthsContext } from './MonthsContext';
 
-type ComponentProps = { monthIndex: number; editing: boolean };
-
 type RenderMonthsProps = {
-  component?: FunctionComponent<ComponentProps>;
+  component?: ComponentType<{ monthIndex: number; editing: boolean }>;
   editingIndex?: undefined;
   args?: object;
   style?: CSSProperties;
