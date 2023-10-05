@@ -23,7 +23,6 @@ env:
   IMAGES: |
     actualbudget/actual-server
     ghcr.io/actualbudget/actual-server
-    jlongster/actual-server
 
   # Creates the following tags:
   # - actual-server:edge
