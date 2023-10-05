@@ -18,7 +18,7 @@
     "@actual-app/crdt": "2.1.0",
     "@actual-app/web": "23.10.0",
     "bcrypt": "^5.1.0",
-    "better-sqlite3": "^8.2.0",
+    "better-sqlite3": "^8.6.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@babel/preset-typescript": "^7.20.2",
     "@types/bcrypt": "^5.0.0",
-    "@types/better-sqlite3": "^7.6.3",
+    "@types/better-sqlite3": "^7.6.5",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/express-actuator": "^1.8.0",

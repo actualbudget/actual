@@ -1169,12 +1169,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/better-sqlite3@npm:^7.6.3":
-  version: 7.6.3
-  resolution: "@types/better-sqlite3@npm:7.6.3"
+"@types/better-sqlite3@npm:^7.6.5":
+  version: 7.6.5
+  resolution: "@types/better-sqlite3@npm:7.6.5"
   dependencies:
     "@types/node": "*"
-  checksum: 37ffd2507beb55f284261fc72b2f0b5585aecd65ffaffbc1f48a4d59958c3bcc16e54b83d9fd6af5f6a0edab830e384aef7ed79dbbfc3d443f850cb1eab091f5
+  checksum: 3999d79378b35f793b89d089b18866922dcc225a24c7218caf3d81ab0b3510cf2a9b88782c6aee8c9c98690e1c5fe72047752172bcb8db1361bb0eb0399ff59f
   languageName: node
   linkType: hard
 
@@ -1568,7 +1568,7 @@ __metadata:
     "@actual-app/web": 23.10.0
     "@babel/preset-typescript": ^7.20.2
     "@types/bcrypt": ^5.0.0
-    "@types/better-sqlite3": ^7.6.3
+    "@types/better-sqlite3": ^7.6.5
     "@types/cors": ^2.8.13
     "@types/express": ^4.17.17
     "@types/express-actuator": ^1.8.0
@@ -1579,7 +1579,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.51.0
     "@typescript-eslint/parser": ^5.51.0
     bcrypt: ^5.1.0
-    better-sqlite3: ^8.2.0
+    better-sqlite3: ^8.6.0
     body-parser: ^1.20.1
     cors: ^2.8.5
     date-fns: ^2.30.0
@@ -1875,14 +1875,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^8.2.0":
-  version: 8.2.0
-  resolution: "better-sqlite3@npm:8.2.0"
+"better-sqlite3@npm:^8.6.0":
+  version: 8.6.0
+  resolution: "better-sqlite3@npm:8.6.0"
   dependencies:
     bindings: ^1.5.0
     node-gyp: latest
-    prebuild-install: ^7.1.0
-  checksum: ab8a00bcc33c4a7467f78fcbb103c784705cf170ecc9c8eb1149a89a2153c03a7f65681064667eb214fa7f555797abd8183380a0396ce04eaf36efef921ce103
+    prebuild-install: ^7.1.1
+  checksum: 9ebdfd675352347cda1ba30d620a3c512d9db827a1eba66460fd48203a7ad8138b0195893bbf47d40f704bcdd598710041271d4ed69779979b6f784c0d3579a1
   languageName: node
   linkType: hard
 
@@ -4986,7 +4986,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prebuild-install@npm:^7.1.0":
+"prebuild-install@npm:^7.1.1":
   version: 7.1.1
   resolution: "prebuild-install@npm:7.1.1"
   dependencies:
