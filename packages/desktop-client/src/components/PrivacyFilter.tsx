@@ -8,10 +8,9 @@ import React, {
 
 import usePrivacyMode from 'loot-core/src/client/privacy';
 
-import useFeatureFlag from '../hooks/useFeatureFlag';
 import { useResponsive } from '../ResponsiveProvider';
 
-import { View } from './common';
+import View from './common/View';
 
 export type ConditionalPrivacyFilterProps = {
   children: ReactNode;
@@ -53,7 +52,6 @@ export default function PrivacyFilter({
   children,
   ...props
 }: PrivacyFilterProps) {
-  let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let privacyMode = usePrivacyMode();
   // Limit mobile support for now.
   let { isNarrowWidth } = useResponsive();
@@ -67,7 +65,7 @@ export default function PrivacyFilter({
 
   let blurAmount = blurIntensity != null ? `${blurIntensity}px` : '3px';
 
-  return !privacyModeFeatureFlag || !activate ? (
+  return !activate ? (
     <>{Children.toArray(children)}</>
   ) : (
     <BlurredOverlay blurIntensity={blurAmount} {...props}>
@@ -85,6 +83,9 @@ function BlurredOverlay({ blurIntensity, children, ...props }) {
     ...(!hovered && {
       filter: `blur(${blurIntensity})`,
       WebkitFilter: `blur(${blurIntensity})`,
+      // To fix blur performance issue in Safari.
+      // https://graffino.com/til/CjT2jrcLHP-how-to-fix-filter-blur-performance-issue-in-safari
+      transform: `translate3d(0, 0, 0)`,
     }),
   };
 

@@ -7,9 +7,13 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useFilters from '../../hooks/useFilters';
-import { colors, styles } from '../../style';
-import { View, Text, Block, AlignedText } from '../common';
+import { theme, styles } from '../../style';
+import AlignedText from '../common/AlignedText';
+import Block from '../common/Block';
 import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
+import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
 import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
@@ -29,7 +33,7 @@ function CashFlow() {
 
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 30),
+    monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
 
@@ -91,7 +95,7 @@ function CashFlow() {
   const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
 
   return (
-    <View style={[styles.page, { minWidth: 650, overflow: 'hidden' }]}>
+    <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header
         title="Cash Flow"
         allMonths={allMonths}
@@ -109,7 +113,7 @@ function CashFlow() {
 
       <View
         style={{
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           padding: 30,
           paddingTop: 0,
           overflow: 'auto',
@@ -121,7 +125,7 @@ function CashFlow() {
             paddingRight: 20,
             flexShrink: 0,
             alignItems: 'flex-end',
-            color: colors.n3,
+            color: theme.pageText,
           }}
         >
           <AlignedText
@@ -129,7 +133,7 @@ function CashFlow() {
             left={<Block>Income:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalIncome)}
+                <PrivacyFilter>{integerToCurrency(totalIncome)}</PrivacyFilter>
               </Text>
             }
           />
@@ -139,7 +143,9 @@ function CashFlow() {
             left={<Block>Expenses:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalExpenses)}
+                <PrivacyFilter>
+                  {integerToCurrency(totalExpenses)}
+                </PrivacyFilter>
               </Text>
             }
           />
@@ -149,12 +155,16 @@ function CashFlow() {
             left={<Block>Transfers:</Block>}
             right={
               <Text style={{ fontWeight: 600 }}>
-                {integerToCurrency(totalTransfers)}
+                <PrivacyFilter>
+                  {integerToCurrency(totalTransfers)}
+                </PrivacyFilter>
               </Text>
             }
           />
           <Text style={{ fontWeight: 600 }}>
-            <Change amount={totalIncome + totalExpenses + totalTransfers} />
+            <PrivacyFilter>
+              <Change amount={totalIncome + totalExpenses + totalTransfers} />
+            </PrivacyFilter>
           </Text>
         </View>
 

@@ -1,8 +1,4 @@
-import { createContext } from 'react';
-
-import { colors } from '../../style';
-
-export let CategoryGroupsContext = createContext([]);
+import { styles, theme } from '../../style';
 
 export function addToBeBudgetedGroup(groups) {
   return [
@@ -24,7 +20,7 @@ export function separateGroups(categoryGroups) {
 
 export function makeAmountGrey(value) {
   return value === 0 || value === '0' || value === ''
-    ? { color: colors.n10 }
+    ? { color: theme.altMenuItemText }
     : null;
 }
 
@@ -35,13 +31,18 @@ export function makeAmountStyle(value) {
   }
 
   if (value < 0) {
-    return { color: colors.r4 };
+    return { color: theme.errorText };
   }
 }
 
 export function makeAmountFullStyle(value) {
   return {
-    color: value < 0 ? colors.r4 : value === 0 ? colors.n10 : colors.g4,
+    color:
+      value < 0
+        ? theme.errorText
+        : value === 0
+        ? theme.altMenuItemText
+        : theme.noticeText,
   };
 }
 
@@ -83,4 +84,8 @@ export function findSortUp(arr, pos, targetId) {
       return { targetId: null };
     }
   }
+}
+
+export function getScrollbarWidth() {
+  return Math.max(styles.scrollbarWidth - 2, 0);
 }

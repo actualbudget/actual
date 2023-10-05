@@ -1,7 +1,7 @@
 import React, { type ComponentProps } from 'react';
 
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { View } from '../common';
+import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 
@@ -26,13 +26,13 @@ export default function BalanceWithCarryover({
         binding={balance}
         type="financial"
         getStyle={makeAmountStyle}
-        style={[
-          { textAlign: 'right' },
-          !disabled && {
+        style={{
+          textAlign: 'right',
+          ...(!disabled && {
             cursor: 'pointer',
             ':hover': { textDecoration: 'underline' },
-          },
-        ]}
+          }),
+        }}
       />
       {carryoverValue === true && (
         <View

@@ -5,9 +5,12 @@ import { createBudget } from 'loot-core/src/client/actions/budgets';
 import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../../style';
-import { View, Text, Button, ExternalLink } from '../../common';
+import { theme } from '../../../style';
+import Button from '../../common/Button';
+import ExternalLink from '../../common/ExternalLink';
 import Paragraph from '../../common/Paragraph';
+import Text from '../../common/Text';
+import View from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -53,12 +56,12 @@ export default function Bootstrap() {
   return (
     <View style={{ maxWidth: 450, marginTop: -30 }}>
       <Title text="Welcome to Actual!" />
-      <Paragraph style={{ fontSize: 16, color: colors.n2 }}>
+      <Paragraph style={{ fontSize: 16, color: theme.pageTextDark }}>
         Actual is a super fast privacy-focused app for managing your finances.
         To secure your data, you’ll need to set a password for your server.
       </Paragraph>
 
-      <Paragraph isLast style={{ fontSize: 16, color: colors.n2 }}>
+      <Paragraph isLast style={{ fontSize: 16, color: theme.pageTextDark }}>
         Consider opening{' '}
         <ExternalLink to="https://actualbudget.org/docs/tour/">
           our tour
@@ -71,7 +74,7 @@ export default function Bootstrap() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.r4,
+            color: theme.errorText,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -84,7 +87,7 @@ export default function Bootstrap() {
         buttons={
           <Button
             type="bare"
-            style={{ fontSize: 15, color: colors.b4, marginRight: 15 }}
+            style={{ fontSize: 15, color: theme.pageTextLink, marginRight: 15 }}
             onClick={onDemo}
           >
             Try Demo

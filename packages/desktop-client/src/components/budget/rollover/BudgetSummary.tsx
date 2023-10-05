@@ -8,24 +8,21 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
-import { colors, styles } from '../../../style';
-import {
-  View,
-  Block,
-  Button,
-  Tooltip,
-  Menu,
-  HoverTarget,
-  AlignedText,
-} from '../../common';
+import { theme, styles } from '../../../style';
+import AlignedText from '../../common/AlignedText';
+import Block from '../../common/Block';
+import Button from '../../common/Button';
+import HoverTarget from '../../common/HoverTarget';
+import Menu from '../../common/Menu';
+import View from '../../common/View';
 import NotesButton from '../../NotesButton';
 import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
-import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import useFormat from '../../spreadsheet/useFormat';
 import useSheetName from '../../spreadsheet/useSheetName';
 import useSheetValue from '../../spreadsheet/useSheetValue';
-import { MONTH_BOX_SHADOW } from '../constants';
+import { Tooltip } from '../../tooltips';
 
 import HoldTooltip from './HoldTooltip';
 import { useRollover } from './RolloverContext';
@@ -36,27 +33,26 @@ type TotalsListProps = {
   collapsed?: boolean;
 };
 function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
+  const format = useFormat();
   return (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          lineHeight: 1.5,
-          justifyContent: 'center',
-        },
-        !collapsed && {
+      style={{
+        flexDirection: 'row',
+        lineHeight: 1.5,
+        justifyContent: 'center',
+        ...(!collapsed && {
           padding: '5px 0',
           marginTop: 17,
-          backgroundColor: colors.n11,
+          backgroundColor: theme.tableRowHeaderBackground,
           borderTopWidth: 1,
           borderBottomWidth: 1,
-          borderColor: colors.n9,
-        },
-        collapsed && {
+          borderColor: theme.tableBorder,
+        }),
+        ...(collapsed && {
           padding: 7,
-        },
-        styles.smallText,
-      ]}
+        }),
+        ...styles.smallText,
+      }}
     >
       <View
         style={{
@@ -109,7 +105,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
 
         <CellValue
@@ -119,7 +115,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
 
         <CellValue
@@ -130,7 +126,7 @@ function TotalsList({ prevMonthName, collapsed }: TotalsListProps) {
             let v = format(Math.abs(n), 'financial');
             return n >= 0 ? '-' + v : '+' + v;
           }}
-          style={[{ fontWeight: 600 }, styles.tnum]}
+          style={{ fontWeight: 600, ...styles.tnum }}
         />
       </View>
 
@@ -162,6 +158,7 @@ function ToBudget({
     name: rolloverBudget.toBudget,
     value: 0,
   });
+  let format = useFormat();
   let availableValue = parseInt(sheetValue);
   let num = isNaN(availableValue) ? 0 : availableValue;
   let isNegative = num < 0;
@@ -182,20 +179,22 @@ function ToBudget({
             <Block
               onClick={() => setMenuOpen('actions')}
               data-cellname={sheetName}
-              {...css([
+              className={`${css([
                 styles.veryLargeText,
                 {
                   fontWeight: 400,
                   userSelect: 'none',
                   cursor: 'pointer',
-                  color: isNegative ? colors.r4 : colors.p5,
+                  color: isNegative ? theme.errorText : theme.pageTextPositive,
                   marginBottom: -1,
                   borderBottom: '1px solid transparent',
                   ':hover': {
-                    borderColor: isNegative ? colors.r4 : colors.p5,
+                    borderColor: isNegative
+                      ? theme.errorText
+                      : theme.pageTextPositive,
                   },
                 },
-              ])}
+              ])}`}
             >
               {format(num, 'financial')}
             </Block>
@@ -291,8 +290,8 @@ export function BudgetSummary({
     <View
       data-testid="budget-summary"
       style={{
-        backgroundColor: 'white',
-        boxShadow: MONTH_BOX_SHADOW,
+        backgroundColor: theme.tableBackground,
+        boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,
@@ -312,10 +311,10 @@ export function BudgetSummary({
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
-          style={[
-            { padding: '0 13px' },
-            collapsed ? { margin: '10px 0' } : { marginTop: 16 },
-          ]}
+          style={{
+            padding: '0 13px',
+            ...(collapsed ? { margin: '10px 0' } : { marginTop: 16 }),
+          }}
         >
           <View
             style={{
@@ -333,13 +332,13 @@ export function BudgetSummary({
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: colors.n6, margin: 1 }}
+                style={{ color: theme.altTableText, margin: 1 }}
               />
             </Button>
           </View>
 
           <div
-            {...css([
+            className={`${css([
               {
                 textAlign: 'center',
                 marginTop: 3,
@@ -348,7 +347,7 @@ export function BudgetSummary({
                 textDecorationSkip: 'ink',
               },
               currentMonth === month && { fontWeight: 'bold' },
-            ])}
+            ])}`}
           >
             {monthUtils.format(month, 'MMMM')}
           </div>
@@ -368,7 +367,7 @@ export function BudgetSummary({
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={colors.n6}
+                defaultColor={theme.altTableText}
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
@@ -376,7 +375,7 @@ export function BudgetSummary({
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: colors.n5 }}
+                  style={{ color: theme.alt2PillText }}
                 />
               </Button>
               {menuOpen && (
@@ -396,7 +395,7 @@ export function BudgetSummary({
                       { name: 'set-zero', text: 'Set budgets to zero' },
                       {
                         name: 'set-3-avg',
-                        text: 'Set budgets to 3 month avg',
+                        text: 'Set budgets to 3 month average',
                       },
                       isGoalTemplatesEnabled && {
                         name: 'check-templates',
@@ -428,8 +427,8 @@ export function BudgetSummary({
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: colors.n11,
-              borderTop: '1px solid ' + colors.n10,
+              backgroundColor: theme.tableHeaderBackground,
+              borderTop: '1px solid ' + theme.tableBorder,
             }}
           >
             <ToBudget

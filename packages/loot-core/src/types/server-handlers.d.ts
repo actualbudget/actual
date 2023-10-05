@@ -97,26 +97,6 @@ export interface ServerHandlers {
 
   'payees-get-rules': (arg: { id }) => Promise<unknown>;
 
-  'rule-validate': (rule) => Promise<{ error: unknown }>;
-
-  'rule-add': (rule) => Promise<{ error: unknown } | { id: string }>;
-
-  'rule-add': (rule) => Promise<{ error: unknown } | unknown>;
-
-  'rule-delete': (rule) => Promise<unknown>;
-
-  'rule-delete-all': (ids) => Promise<unknown>;
-
-  'rule-apply-actions': (arg: { transactionIds; actions }) => Promise<unknown>;
-
-  'rule-add-payee-rename': (arg: { fromNames; to }) => Promise<unknown>;
-
-  'rules-get': () => Promise<unknown>;
-
-  'rule-get': (arg: { id }) => Promise<unknown>;
-
-  'rules-run': (arg: { transaction }) => Promise<unknown>;
-
   'make-filters-from-conditions': (arg: {
     conditions;
   }) => Promise<{ filters: unknown[] }>;
@@ -253,7 +233,9 @@ export interface ServerHandlers {
 
   'sync-repair': () => Promise<unknown>;
 
-  'key-make': (arg: { password }) => Promise<unknown>;
+  'key-make': (arg: {
+    password;
+  }) => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
   'key-test': (arg: {
     fileId;
@@ -282,9 +264,12 @@ export interface ServerHandlers {
 
   'get-server-version': () => Promise<{ error?: string } | { version: string }>;
 
-  'get-server-url': () => Promise<unknown>;
+  'get-server-url': () => Promise<string | null>;
 
-  'set-server-url': (arg: { url; validate }) => Promise<unknown>;
+  'set-server-url': (arg: {
+    url: string;
+    validate?: boolean;
+  }) => Promise<{ error?: string }>;
 
   sync: () => Promise<
     | { error: { message: string; reason: string; meta: unknown } }
@@ -301,7 +286,9 @@ export interface ServerHandlers {
 
   'download-budget': (arg: { fileId; replace? }) => Promise<{ error; id }>;
 
-  'sync-budget': () => Promise<EmptyObject>;
+  'sync-budget': () => Promise<{
+    error?: { message: string; reason: string; meta: unknown };
+  }>;
 
   'load-budget': (arg: { id }) => Promise<{ error }>;
 
@@ -323,7 +310,7 @@ export interface ServerHandlers {
     type: 'ynab4' | 'ynab5' | 'actual';
   }) => Promise<{ error?: string }>;
 
-  'export-budget': () => Promise<Buffer | null>;
+  'export-budget': () => Promise<{ data: Buffer } | { error: string }>;
 
   'upload-file-web': (arg: {
     filename: string;

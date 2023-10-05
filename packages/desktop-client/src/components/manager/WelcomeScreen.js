@@ -1,9 +1,12 @@
 import React from 'react';
 
 import { useActions } from '../../hooks/useActions';
-import { colors, styles } from '../../style';
-import { View, Button, Text, ExternalLink } from '../common';
+import { styles, theme } from '../../style';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
 import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 export default function WelcomeScreen() {
   let { createBudget, pushModal } = useActions();
@@ -45,7 +48,7 @@ export default function WelcomeScreen() {
           to help you get your bearings, and check out the rest of the
           documentation while you’re there to learn more about advanced topics.
         </Paragraph>
-        <Paragraph style={{ color: colors.n5 }}>
+        <Paragraph style={{ color: theme.altpageTextSubdued }}>
           Get started by importing an existing budget file from Actual or
           another budgeting app, or start fresh with an empty budget. You can
           always create or import another budget later.

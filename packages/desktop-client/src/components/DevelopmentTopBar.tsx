@@ -1,24 +1,22 @@
 import { theme } from '../style';
 
-import { ExternalLink } from './common';
+import ExternalLink from './common/ExternalLink';
 import View from './common/View';
 
 export default function DevelopmentTopBar() {
   return (
     <View
-      style={[
-        {
-          padding: '6px 20px',
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          color: theme.warningText,
-          backgroundColor: theme.warningBackground,
-          borderBottom: `1px solid ${theme.warningAccent}`,
-          zIndex: 1,
-          flexShrink: 0,
-        },
-      ]}
+      style={{
+        padding: '6px 20px',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        color: theme.warningText,
+        backgroundColor: theme.warningBackground,
+        borderBottom: `1px solid ${theme.warningAccent}`,
+        zIndex: 1,
+        flexShrink: 0,
+      }}
     >
       <View>This is a demo build of Actual.</View>
       <View>

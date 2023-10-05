@@ -25,9 +25,15 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
-import { colors } from '../../style';
-import { View, Text, Tooltip, Stack, Button, Menu, Select } from '../common';
-import { Value } from '../ManageRules';
+import { theme } from '../../style';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Select from '../common/Select';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
+import Value from '../rules/Value';
+import { Tooltip } from '../tooltips';
 import GenericInput from '../util/GenericInput';
 
 import { CondOpMenu } from './SavedFilters';
@@ -89,14 +95,18 @@ function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
       type="bare"
-      style={[
-        { backgroundColor: colors.n10, marginBottom: 5 },
-        style,
-        selected && {
-          color: 'white',
-          '&,:hover,:active': { backgroundColor: colors.b4 },
-        },
-      ]}
+      style={{
+        backgroundColor: theme.altbuttonMenuBackground,
+        marginBottom: 5,
+        ...style,
+        ...(selected && {
+          color: theme.buttonNormalSelectedText,
+          '&,:hover,:active': {
+            backgroundColor: theme.buttonNormalSelectedBackground,
+            color: theme.buttonNormalSelectedText,
+          },
+        }),
+      }}
       onClick={onClick}
     >
       {friendlyOp(op)}
@@ -164,47 +174,52 @@ function ConfigureField({
   return (
     <Tooltip
       position="bottom-left"
-      style={{ padding: 15 }}
+      style={{ padding: 15, color: theme.altmenuItemTextHeader }}
       width={275}
       onClose={() => dispatch({ type: 'close' })}
+      data-testid="filters-menu-tooltip"
     >
       <FocusScope>
         <View style={{ marginBottom: 10 }}>
-          {field === 'amount' || field === 'date' ? (
-            <Select
-              options={
-                field === 'amount'
-                  ? [
-                      ['amount', 'Amount'],
-                      ['amount-inflow', 'Amount (inflow)'],
-                      ['amount-outflow', 'Amount (outflow)'],
-                    ]
-                  : field === 'date'
-                  ? [
-                      ['date', 'Date'],
-                      ['month', 'Month'],
-                      ['year', 'Year'],
-                    ]
-                  : null
-              }
-              value={subfield}
-              onChange={sub => {
-                setSubfield(sub);
-
-                if (sub === 'month' || sub === 'year') {
-                  dispatch({ type: 'set-op', op: 'is' });
+          <Stack direction="row" align="flex-start">
+            {field === 'amount' || field === 'date' ? (
+              <Select
+                bare
+                options={
+                  field === 'amount'
+                    ? [
+                        ['amount', 'Amount'],
+                        ['amount-inflow', 'Amount (inflow)'],
+                        ['amount-outflow', 'Amount (outflow)'],
+                      ]
+                    : field === 'date'
+                    ? [
+                        ['date', 'Date'],
+                        ['month', 'Month'],
+                        ['year', 'Year'],
+                      ]
+                    : null
                 }
-              }}
-              style={{ borderWidth: 1 }}
-            />
-          ) : (
-            titleFirst(mapField(field))
-          )}
+                value={subfield}
+                onChange={sub => {
+                  setSubfield(sub);
+
+                  if (sub === 'month' || sub === 'year') {
+                    dispatch({ type: 'set-op', op: 'is' });
+                  }
+                }}
+                style={{ borderWidth: 1 }}
+              />
+            ) : (
+              titleFirst(mapField(field))
+            )}
+            <View style={{ flex: 1 }} />
+          </Stack>
         </View>
 
         <View
           style={{
-            color: colors.n4,
+            color: theme.pageTextLight,
             marginBottom: 10,
           }}
         >
@@ -217,61 +232,61 @@ function ConfigureField({
           spacing={1}
           style={{ flexWrap: 'wrap' }}
         >
-          {type === 'boolean'
-            ? [
-                <OpButton
-                  key="true"
-                  op="true"
-                  selected={value === true}
-                  onClick={() => {
-                    dispatch({ type: 'set-op', op: 'is' });
-                    dispatch({ type: 'set-value', value: true });
-                  }}
-                />,
-                <OpButton
-                  key="false"
-                  op="false"
-                  selected={value === false}
-                  onClick={() => {
-                    dispatch({ type: 'set-op', op: 'is' });
-                    dispatch({ type: 'set-value', value: false });
-                  }}
-                />,
-              ]
-            : [
-                <Stack
-                  direction="row"
-                  align="flex-start"
-                  spacing={1}
-                  style={{ flexWrap: 'wrap' }}
-                >
-                  {ops.slice(0, 3).map(currOp => (
-                    <OpButton
-                      key={currOp}
-                      op={currOp}
-                      selected={currOp === op}
-                      onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                    />
-                  ))}
-                </Stack>,
-                <Stack
-                  direction="row"
-                  align="flex-start"
-                  spacing={1}
-                  style={{ flexWrap: 'wrap' }}
-                >
-                  {ops.slice(3, ops.length).map(currOp => (
-                    <View>
-                      <OpButton
-                        key={currOp}
-                        op={currOp}
-                        selected={currOp === op}
-                        onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                      />
-                    </View>
-                  ))}
-                </Stack>,
-              ]}
+          {type === 'boolean' ? (
+            <>
+              <OpButton
+                key="true"
+                op="true"
+                selected={value === true}
+                onClick={() => {
+                  dispatch({ type: 'set-op', op: 'is' });
+                  dispatch({ type: 'set-value', value: true });
+                }}
+              />
+              <OpButton
+                key="false"
+                op="false"
+                selected={value === false}
+                onClick={() => {
+                  dispatch({ type: 'set-op', op: 'is' });
+                  dispatch({ type: 'set-value', value: false });
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Stack
+                direction="row"
+                align="flex-start"
+                spacing={1}
+                style={{ flexWrap: 'wrap' }}
+              >
+                {ops.slice(0, 3).map(currOp => (
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
+                ))}
+              </Stack>
+              <Stack
+                direction="row"
+                align="flex-start"
+                spacing={1}
+                style={{ flexWrap: 'wrap' }}
+              >
+                {ops.slice(3, ops.length).map(currOp => (
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
+                ))}
+              </Stack>
+            </>
+          )}
         </Stack>
 
         <form action="#">
@@ -414,6 +429,7 @@ export function FilterButton({ onApply }) {
           position="bottom-left"
           style={{ padding: 0 }}
           onClose={() => dispatch({ type: 'close' })}
+          data-testid="filters-select-tooltip"
         >
           <Menu
             onMenuSelect={name => {
@@ -486,17 +502,15 @@ function FilterExpression({
 
   return (
     <View
-      style={[
-        {
-          backgroundColor: colors.n9,
-          borderRadius: 4,
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginRight: 10,
-          marginTop: 10,
-        },
-        style,
-      ]}
+      style={{
+        backgroundColor: theme.pillBackground,
+        borderRadius: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 10,
+        marginTop: 10,
+        ...style,
+      }}
     >
       <Button
         type="bare"
@@ -506,13 +520,13 @@ function FilterExpression({
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
-            <Text style={{ color: colors.p4 }}>{customName}</Text>
+            <Text style={{ color: theme.pageTextPositive }}>{customName}</Text>
           ) : (
             <>
-              <Text style={{ color: colors.p4 }}>
+              <Text style={{ color: theme.pageTextPositive }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colors.n3 }}>{friendlyOp(op, null)}</Text>{' '}
+              <Text>{friendlyOp(op, null)}</Text>{' '}
               <Value
                 value={value}
                 field={field}
@@ -523,7 +537,7 @@ function FilterExpression({
           )}
         </div>
       </Button>
-      <Button type="bare" onClick={onDelete}>
+      <Button type="bare" onClick={onDelete} aria-label="Delete filter">
         <DeleteIcon
           style={{
             width: 8,

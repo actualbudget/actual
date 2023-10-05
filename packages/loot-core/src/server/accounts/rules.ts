@@ -27,7 +27,13 @@ function parseRecurDate(desc) {
 
     return {
       type: 'recur',
-      schedule: new RSchedule({ rrules: rules }),
+      schedule: new RSchedule({
+        rrules: rules,
+        data: {
+          skipWeekend: desc.skipWeekend,
+          weekendSolve: desc.weekendSolveMode,
+        },
+      }),
     };
   } catch (e) {
     throw new RuleError('parse-recur-date', e.message);
@@ -125,7 +131,7 @@ let CONDITION_TYPES = {
   },
   string: {
     ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
-    nullable: false,
+    nullable: true,
     parse(op, value, fieldName) {
       if (op === 'oneOf' || op === 'notOneOf') {
         assert(

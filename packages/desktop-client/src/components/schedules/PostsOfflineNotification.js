@@ -1,40 +1,37 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../style';
-import { Text, Button, Stack } from '../common';
+import { theme } from '../../style';
+import Button from '../common/Button';
+import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
-import { Page } from '../Page';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
 import DisplayId from '../util/DisplayId';
 
-export default function PostsOfflineNotification() {
+export default function PostsOfflineNotification({ modalProps, actions }) {
   let location = useLocation();
-  let navigate = useNavigate();
 
   let payees = (location.state && location.state.payees) || [];
   let plural = payees.length > 1;
 
-  function onClose() {
-    navigate(-1);
-  }
-
   async function onPost() {
     await send('schedule/force-run-service');
-    navigate(-1);
+    actions.popModal();
   }
 
   return (
-    <Page title="Post transactions?" modalSize="small">
+    <Modal title="Post transactions?" size="small" {...modalProps}>
       <Paragraph>
         {payees.length > 0 ? (
           <Text>
             The {plural ? 'payees ' : 'payee '}
             {payees.map((id, idx) => (
-              <Text>
-                <Text style={{ color: colors.p4 }}>
-                  <DisplayId key={id} id={id} type="payees" />
+              <Text key={id}>
+                <Text style={{ color: theme.pageTextPositive }}>
+                  <DisplayId id={id} type="payees" />
                 </Text>
                 {idx === payees.length - 1
                   ? ' '
@@ -71,11 +68,11 @@ export default function PostsOfflineNotification() {
         style={{ marginTop: 20 }}
         spacing={2}
       >
-        <Button onClick={onClose}>Decide later</Button>
+        <Button onClick={actions.popModal}>Decide later</Button>
         <Button type="primary" onClick={onPost}>
           Post transactions
         </Button>
       </Stack>
-    </Page>
+    </Modal>
   );
 }

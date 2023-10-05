@@ -3,8 +3,8 @@ import { useState } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
-import { styles, colors } from '../../style';
-import { View } from '../common';
+import { styles, theme } from '../../style';
+import View from '../common/View';
 
 export const MonthPicker = ({
   startMonth,
@@ -51,14 +51,12 @@ export const MonthPicker = ({
 
   return (
     <View
-      style={[
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        },
-        style,
-      ]}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        ...style,
+      }}
     >
       <View
         innerRef={containerRef}
@@ -94,49 +92,47 @@ export const MonthPicker = ({
           return (
             <View
               key={month}
-              style={[
-                {
-                  padding: '3px 3px',
-                  width: size === 'big' ? '35px' : '20px',
-                  textAlign: 'center',
-                  userSelect: 'none',
-                  cursor: 'default',
-                  borderRadius: 2,
-                  border: 'none',
-                },
-                !isMonthBudgeted && {
+              style={{
+                padding: '3px 3px',
+                width: size === 'big' ? '35px' : '20px',
+                textAlign: 'center',
+                userSelect: 'none',
+                cursor: 'default',
+                borderRadius: 2,
+                border: 'none',
+                ...(!isMonthBudgeted && {
                   textDecoration: 'line-through',
-                  color: colors.n7,
-                },
-                styles.smallText,
-                selected && {
-                  backgroundColor: colors.p6,
-                  color: 'white',
-                },
-                (hovered || selected) && {
+                  color: theme.pageTextSubdued,
+                }),
+                ...styles.smallText,
+                ...(selected && {
+                  backgroundColor: theme.tableBorderHover,
+                  color: theme.buttonPrimaryText,
+                }),
+                ...((hovered || selected) && {
                   borderRadius: 0,
                   cursor: 'pointer',
-                },
-                hovered &&
+                }),
+                ...(hovered &&
                   !selected && {
                     backgroundColor: 'rgba(100, 100, 100, .15)',
-                  },
-                hovered &&
+                  }),
+                ...(hovered &&
                   selected && {
-                    backgroundColor: colors.p7,
-                  },
-                (idx === firstSelectedIndex ||
+                    backgroundColor: theme.tableBorderHover,
+                  }),
+                ...((idx === firstSelectedIndex ||
                   (idx === hoverId && !selected)) && {
                   borderTopLeftRadius: 2,
                   borderBottomLeftRadius: 2,
-                },
-                (idx === lastSelectedIndex ||
+                }),
+                ...((idx === lastSelectedIndex ||
                   (idx === lastHoverId && !selected)) && {
                   borderTopRightRadius: 2,
                   borderBottomRightRadius: 2,
-                },
-                current && { fontWeight: 'bold' },
-              ]}
+                }),
+                ...(current && { fontWeight: 'bold' }),
+              }}
               onClick={() => onSelect(month)}
               onMouseEnter={() => setHoverId(idx)}
               onMouseLeave={() => setHoverId(null)}
@@ -144,16 +140,16 @@ export const MonthPicker = ({
               {size === 'small' ? monthName[0] : monthName}
               {showYearHeader && (
                 <View
-                  style={[
-                    {
-                      position: 'absolute',
-                      top: -14,
-                      left: 0,
-                      fontSize: 10,
-                      fontWeight: 'bold',
-                      color: isMonthBudgeted ? '#272630' : colors.n7,
-                    },
-                  ]}
+                  style={{
+                    position: 'absolute',
+                    top: -14,
+                    left: 0,
+                    fontSize: 10,
+                    fontWeight: 'bold',
+                    color: isMonthBudgeted
+                      ? theme.pageText
+                      : theme.pageTextSubdued,
+                  }}
                 >
                   {year}
                 </View>

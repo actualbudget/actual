@@ -2,31 +2,38 @@ import React from 'react';
 
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import q from 'loot-core/src/client/query-helpers';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
-import { colors } from '../../style';
-import { View, Text, Button } from '../common';
+import { theme } from '../../style';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
-import format from '../spreadsheet/format';
+import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { isPreviewId } from '../transactions/TransactionsTable';
 
-function DetailedBalance({ name, balance }) {
+function DetailedBalance({ name, balance, isExactBalance = true }) {
+  const format = useFormat();
   return (
     <Text
       style={{
         marginLeft: 15,
-        backgroundColor: colors.n9,
         borderRadius: 4,
         padding: '4px 6px',
-        color: colors.n5,
+        color: theme.alt2PillText,
+        backgroundColor: theme.pillBackground,
       }}
     >
       {name}{' '}
       <PrivacyFilter>
-        <Text style={{ fontWeight: 600 }}>{format(balance, 'financial')}</Text>
+        <Text style={{ fontWeight: 600 }}>
+          {!isExactBalance && '~ '}
+          {format(balance, 'financial')}
+        </Text>
       </PrivacyFilter>
     </Text>
   );
@@ -61,12 +68,19 @@ function SelectedBalance({ selectedItems, account }) {
   let previewIds = [...selectedItems]
     .filter(id => isPreviewId(id))
     .map(id => id.slice(8));
+  let isExactBalance = true;
+
   for (let s of schedules) {
     if (previewIds.includes(s.id)) {
+      // If a schedule is `between X and Y` then we calculate the average
+      if (s._amountOp === 'isbetween') {
+        isExactBalance = false;
+      }
+
       if (!account || account.id === s._account) {
-        scheduleBalance += s._amount;
+        scheduleBalance += getScheduledAmount(s._amount);
       } else {
-        scheduleBalance -= s._amount;
+        scheduleBalance -= getScheduledAmount(s._amount);
       }
     }
   }
@@ -81,7 +95,13 @@ function SelectedBalance({ selectedItems, account }) {
     balance += scheduleBalance;
   }
 
-  return <DetailedBalance name="Selected balance:" balance={balance} />;
+  return (
+    <DetailedBalance
+      name="Selected balance:"
+      balance={balance}
+      isExactBalance={isExactBalance}
+    />
+  );
 }
 
 function MoreBalances({ balanceQuery }) {
@@ -135,7 +155,12 @@ export function Balances({
           type="financial"
           style={{ fontSize: 22, fontWeight: 400 }}
           getStyle={value => ({
-            color: value < 0 ? colors.r5 : value > 0 ? colors.g5 : colors.n8,
+            color:
+              value < 0
+                ? theme.errorText
+                : value > 0
+                ? theme.noticeTextLight
+                : theme.pageTextSubdued,
           })}
           privacyFilter={{
             blurIntensity: 5,
@@ -147,7 +172,7 @@ export function Balances({
             width: 10,
             height: 10,
             marginLeft: 10,
-            color: colors.n5,
+            color: theme.alt2PillText,
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
           }}
         />

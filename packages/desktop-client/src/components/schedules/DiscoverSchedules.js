@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -11,11 +10,12 @@ import useSelected, {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
-import { colors } from '../../style';
-import { getParent } from '../../util/router-tools';
-import { View, Stack, ButtonWithLoading } from '../common';
+import { theme } from '../../style';
+import { ButtonWithLoading } from '../common/Button';
+import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
-import { Page, usePageType } from '../Page';
+import Stack from '../common/Stack';
+import View from '../common/View';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
@@ -24,7 +24,6 @@ import { ScheduleAmountCell } from './SchedulesTable';
 let ROW_HEIGHT = 43;
 
 function DiscoverSchedulesTable({ schedules, loading }) {
-  let pageType = usePageType();
   let selectedItems = useSelectedItems();
   let dispatchSelected = useSelectedDispatch();
 
@@ -37,16 +36,23 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       <Row
         height={ROW_HEIGHT}
         inset={15}
-        backgroundColor="transparent"
         onClick={e => {
           dispatchSelected({ type: 'select', id: item.id, event: e });
         }}
-        borderColor={selected ? colors.b8 : colors.border}
         style={{
+          borderColor: selected
+            ? theme.alttableBorderSelected
+            : theme.tableBorder,
           cursor: 'pointer',
-          backgroundColor: selected ? colors.selected : 'white',
+          color: selected
+            ? theme.tableRowBackgroundHighlightText
+            : theme.tableText,
+          backgroundColor: selected
+            ? theme.tableRowBackgroundHighlight
+            : theme.tableBackground,
           ':hover': {
-            backgroundColor: selected ? colors.selected : colors.hover,
+            backgroundColor: theme.tableRowBackgroundHover,
+            color: theme.tableText,
           },
         }}
       >
@@ -74,7 +80,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <TableHeader height={ROW_HEIGHT} inset={15} version="v2">
+      <TableHeader height={ROW_HEIGHT} inset={15}>
         <SelectCell
           exposed={!loading}
           focused={false}
@@ -92,12 +98,9 @@ function DiscoverSchedulesTable({ schedules, loading }) {
       </TableHeader>
       <Table
         rowHeight={ROW_HEIGHT}
-        version="v2"
-        backgroundColor={pageType.type === 'modal' ? 'transparent' : undefined}
         style={{
           flex: 1,
-          backgroundColor:
-            pageType.type === 'modal' ? 'transparent' : undefined,
+          backgroundColor: 'transparent',
         }}
         items={schedules}
         loading={loading}
@@ -109,9 +112,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
   );
 }
 
-export default function DiscoverSchedules() {
-  let pageType = usePageType();
-  let navigate = useNavigate();
+export default function DiscoverSchedules({ modalProps, actions }) {
   let { data: schedules, isLoading } =
     useSendPlatformRequest('schedule/discover');
   if (!schedules) schedules = [];
@@ -119,11 +120,6 @@ export default function DiscoverSchedules() {
   let [creating, setCreating] = useState(false);
 
   let selectedInst = useSelected('discover-schedules', schedules, []);
-
-  let location = useLocation();
-  if (!getParent(location)) {
-    return <Navigate to="/schedules" replace />;
-  }
 
   async function onCreate() {
     let selected = schedules.filter(s => selectedInst.items.has(s.id));
@@ -153,11 +149,15 @@ export default function DiscoverSchedules() {
     }
 
     setCreating(false);
-    navigate(-1);
+    actions.popModal();
   }
 
   return (
-    <Page title="Found schedules" modalSize={{ width: 850, height: 650 }}>
+    <Modal
+      title="Found schedules"
+      size={{ width: 850, height: 650 }}
+      {...modalProps}
+    >
       <Paragraph>
         We found some possible schedules in your current transactions. Select
         the ones you want to create.
@@ -178,7 +178,7 @@ export default function DiscoverSchedules() {
         justify="flex-end"
         style={{
           paddingTop: 20,
-          paddingBottom: pageType.type === 'modal' ? 0 : 20,
+          paddingBottom: 0,
         }}
       >
         <ButtonWithLoading
@@ -190,6 +190,6 @@ export default function DiscoverSchedules() {
           Create schedules
         </ButtonWithLoading>
       </Stack>
-    </Page>
+    </Modal>
   );
 }

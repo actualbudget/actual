@@ -1,6 +1,8 @@
 import { type ReactNode } from 'react';
 
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
+
+import { type CSSProperties } from '../../style';
 
 type InlineFieldProps = {
   label: ReactNode;
@@ -19,7 +21,7 @@ export default function InlineField({
 }: InlineFieldProps) {
   return (
     <label
-      {...css(
+      className={`${css(
         {
           display: 'flex',
           flexDirection: 'row',
@@ -28,7 +30,7 @@ export default function InlineField({
           width,
         },
         style,
-      )}
+      )}`}
     >
       <div
         style={{

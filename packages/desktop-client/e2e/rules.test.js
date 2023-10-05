@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Rules', () => {
   let page;
@@ -26,6 +27,11 @@ test.describe('Rules', () => {
     rulesPage = await navigation.goToRulesPage();
   });
 
+  test('checks the page visuals', async () => {
+    await rulesPage.searchFor('Dominion');
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
+  });
+
   test('creates a rule and makes sure it is applied when creating a transaction', async () => {
     await rulesPage.createRule({
       conditions: [
@@ -43,22 +49,23 @@ test.describe('Rules', () => {
       ],
     });
 
-    expect(await rulesPage.getNthRule(0)).toMatchObject({
-      conditions: ['payee is Fast Internet'],
-      actions: ['set category to General'],
-    });
+    await rulesPage.searchFor('Fast Internet');
+    const rule = rulesPage.getNthRule(0);
+    await expect(rule.conditions).toHaveText(['payee is Fast Internet']);
+    await expect(rule.actions).toHaveText(['set category to General']);
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
 
-    const accountPage = await navigation.goToAccountPage('Bank of America');
+    const accountPage = await navigation.goToAccountPage('HSBC');
 
     await accountPage.createSingleTransaction({
       payee: 'Fast Internet',
       debit: '12.34',
     });
 
-    expect(await accountPage.getNthTransaction(0)).toMatchObject({
-      payee: 'Fast Internet',
-      category: 'General',
-      debit: '12.34',
-    });
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.payee).toHaveText('Fast Internet');
+    await expect(transaction.category).toHaveText('General');
+    await expect(transaction.debit).toHaveText('12.34');
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 });

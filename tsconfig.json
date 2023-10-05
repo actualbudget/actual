@@ -7,7 +7,7 @@
   "compilerOptions": {
     // "composite": true,
     "target": "ES2022",
-    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -24,7 +24,7 @@
     // Used for temp builds
     "outDir": "build",
     "moduleResolution": "Node",
-    "module": "ESNext",
+    "module": "ES2022",
     // Until/if we build using tsc
     "noEmit": true
   },

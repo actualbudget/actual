@@ -1,0 +1,16 @@
+{
+  "jsc": {
+    "target": "es2022",
+    "transform": {
+      "react": {
+        "runtime": "automatic"
+      }
+    },
+    "externalHelpers": true,
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true
+    }
+  },
+  "sourceMaps": true
+}

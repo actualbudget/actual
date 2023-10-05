@@ -5,8 +5,11 @@ import { useParams } from 'react-router-dom';
 import { authorizeBank } from '../../gocardless';
 import { useActions } from '../../hooks/useActions';
 import ExclamationOutline from '../../icons/v1/ExclamationOutline';
-import { colors } from '../../style';
-import { View, Button, Tooltip, ExternalLink } from '../common';
+import { theme } from '../../style';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 function getErrorMessage(type, code) {
   switch (type.toUpperCase()) {
@@ -85,8 +88,8 @@ export default function AccountSyncCheck() {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          color: colors.r5,
-          backgroundColor: colors.r10,
+          color: theme.errorText,
+          backgroundColor: theme.errorBackground,
           padding: '4px 8px',
           borderRadius: 4,
         }}
@@ -106,7 +109,7 @@ export default function AccountSyncCheck() {
             The server returned the following error:
           </div>
 
-          <div style={{ marginBottom: '1.25em', color: colors.r5 }}>
+          <div style={{ marginBottom: '1.25em', color: theme.errorText }}>
             {getErrorMessage(error.type, error.code)}
           </div>
 

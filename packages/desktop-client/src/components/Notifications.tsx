@@ -6,24 +6,19 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 
-import { type CSSProperties } from 'glamor';
-
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { useActions } from '../hooks/useActions';
 import AnimatedLoading from '../icons/AnimatedLoading';
 import Delete from '../icons/v0/Delete';
-import { styles, colors } from '../style';
+import { styles, theme, type CSSProperties } from '../style';
 
-import {
-  View,
-  Text,
-  Button,
-  ButtonWithLoading,
-  Stack,
-  ExternalLink,
-  LinkButton,
-} from './common';
+import Button, { ButtonWithLoading } from './common/Button';
+import ExternalLink from './common/ExternalLink';
+import LinkButton from './common/LinkButton';
+import Stack from './common/Stack';
+import Text from './common/Text';
+import View from './common/View';
 
 function compileMessage(
   message: string,
@@ -47,6 +42,7 @@ function compileMessage(
                   let actionName = href.slice(1);
                   return (
                     <LinkButton
+                      key={idx}
                       onClick={async e => {
                         e.preventDefault();
                         if (actions[actionName]) {
@@ -111,7 +107,11 @@ function Notification({
     <View
       style={{
         marginTop: 10,
-        color: positive ? colors.g3 : error ? colors.r3 : colors.y2,
+        color: positive
+          ? theme.noticeText
+          : error
+          ? theme.alt3ErrorText
+          : theme.alt4WarningText,
       }}
     >
       <Stack
@@ -121,16 +121,19 @@ function Notification({
           padding: '14px 14px',
           fontSize: 14,
           backgroundColor: positive
-            ? colors.g11
+            ? theme.noticeBackgroundLight
             : error
-            ? colors.r11
-            : colors.y10,
+            ? theme.errorBackground
+            : theme.alt2WarningBackground,
           borderTop: `3px solid ${
-            positive ? colors.g5 : error ? colors.r5 : colors.y4
+            positive
+              ? theme.noticeBorder
+              : error
+              ? theme.altErrorAccent
+              : theme.altWarningAccent
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
-
           '& a': { color: 'currentColor' },
         }}
       >
@@ -169,17 +172,21 @@ function Notification({
               style={{
                 backgroundColor: 'transparent',
                 border: `1px solid ${
-                  positive ? colors.g5 : error ? colors.r4 : colors.y3
+                  positive
+                    ? theme.noticeBorder
+                    : error
+                    ? theme.altErrorAccent
+                    : theme.altWarningAccent
                 }`,
                 color: 'currentColor',
                 fontSize: 14,
                 flexShrink: 0,
                 '&:hover, &:active': {
                   backgroundColor: positive
-                    ? colors.g9
+                    ? theme.noticeBackground
                     : error
-                    ? colors.r10
-                    : colors.y9,
+                    ? theme.altErrorBackground
+                    : theme.altWarningBackground,
                 },
               }}
             >
@@ -205,7 +212,7 @@ function Notification({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(250, 250, 250, .75)',
+            backgroundColor: theme.tableBackground,
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -224,15 +231,13 @@ export default function Notifications({ style }: { style?: CSSProperties }) {
   let notifications = useSelector(state => state.notifications.notifications);
   return (
     <View
-      style={[
-        {
-          position: 'fixed',
-          bottom: 20,
-          right: 13,
-          zIndex: 10000,
-        },
-        style,
-      ]}
+      style={{
+        position: 'fixed',
+        bottom: 20,
+        right: 13,
+        zIndex: 10000,
+        ...style,
+      }}
     >
       {notifications.map(note => (
         <Notification

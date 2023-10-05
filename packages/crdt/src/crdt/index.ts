@@ -8,6 +8,6 @@ export {
   makeClientId,
   serializeClock,
   deserializeClock,
-  Clock,
+  type Clock,
   Timestamp,
 } from './timestamp';

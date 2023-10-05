@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
 import FormError from '../common/FormError';
 import LinkButton from '../common/LinkButton';
@@ -156,7 +156,7 @@ function CloseAccount({
                         .forceCloseAccount(account.id)
                         .then(() => modalProps.onClose());
                     }}
-                    style={{ color: colors.r6 }}
+                    style={{ color: theme.errorText }}
                   >
                     force close
                   </LinkButton>{' '}

@@ -5,20 +5,21 @@ import {
   ListboxList,
   ListboxOption,
 } from '@reach/listbox';
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
-import { colors } from '../../style';
+import { theme, styles, type CSSProperties } from '../../style';
 
-type CustomSelectProps = {
-  options: Array<[string, string]>;
-  value: string;
+type SelectProps<Value extends string> = {
+  bare?: boolean;
+  options: Array<[Value, string]>;
+  value: Value;
   defaultLabel?: string;
-  onChange?: (newValue: string) => void;
+  onChange?: (newValue: Value) => void;
   style?: CSSProperties;
   wrapperStyle?: CSSProperties;
-  line: number;
-  disabledKeys?: string[];
+  line?: number;
+  disabledKeys?: Value[];
 };
 
 /**
@@ -36,7 +37,8 @@ type CustomSelectProps = {
  * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
  */
 
-export default function Select({
+export default function Select<Value extends string>({
+  bare,
   options,
   value,
   defaultLabel = '',
@@ -45,37 +47,73 @@ export default function Select({
   wrapperStyle,
   line,
   disabledKeys = [],
-}: CustomSelectProps) {
+}: SelectProps<Value>) {
   const arrowSize = 7;
+  const minHeight = style?.minHeight ? style.minHeight : '18px';
   const targetOption = options.filter(option => option[0] === value);
   return (
     <ListboxInput
       value={value}
       onChange={onChange}
-      style={{ lineHeight: '1em', ...wrapperStyle }}
+      style={{
+        color: bare ? 'inherit' : theme.formInputText,
+        backgroundColor: bare ? 'transparent' : theme.cardBackground,
+        borderRadius: styles.menuBorderRadius,
+        border: bare ? 'none' : '1px solid ' + theme.formInputBorder,
+        lineHeight: '1em',
+        ...wrapperStyle,
+      }}
     >
       <ListboxButton
-        {...css([
-          { borderWidth: 0, padding: '2px 5px', borderRadius: 4 },
+        className={`${css([
+          { borderWidth: 0, padding: 5, borderRadius: 4 },
           style,
-        ])}
-        arrow={<ExpandArrow style={{ width: arrowSize, height: arrowSize }} />}
+        ])}`}
+        arrow={
+          <ExpandArrow
+            style={{
+              width: arrowSize,
+              height: arrowSize,
+              color: 'inherit',
+            }}
+          />
+        }
       >
         <span
           style={{
             display: 'flex',
-            overflowX: 'hidden',
+            overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             maxWidth: `calc(100% - ${arrowSize + 5}px)`,
-            minHeight: '18px',
             alignItems: 'center',
+            minHeight: minHeight,
           }}
         >
           {targetOption.length !== 0 ? targetOption[0][1] : defaultLabel}
         </span>
       </ListboxButton>
-      <ListboxPopover style={{ zIndex: 10000, outline: 0, borderRadius: 4 }}>
+      <ListboxPopover
+        style={{
+          zIndex: 10000,
+          outline: 0,
+          borderRadius: styles.menuBorderRadius,
+          backgroundColor: theme.menuBackground,
+          color: theme.menuItemText,
+          boxShadow: styles.cardShadow,
+          border: '1px solid ' + theme.menuBorder,
+        }}
+        className={`${css({
+          '[data-reach-listbox-option]': {
+            background: theme.menuItemBackground,
+            color: theme.menuItemText,
+          },
+          '[data-reach-listbox-option][data-current-nav]': {
+            background: theme.menuItemBackgroundHover,
+            color: theme.menuItemTextHover,
+          },
+        })}`}
+      >
         {!line ? (
           <ListboxList style={{ maxHeight: 250, overflowY: 'auto' }}>
             {options.map(([value, label]) => (
@@ -103,7 +141,7 @@ export default function Select({
               style={{
                 padding: '2px',
                 marginTop: 5,
-                borderTop: '1px solid ' + colors.n10,
+                borderTop: '1px solid ' + theme.menuBorder,
               }}
             />
             {options.slice(line, options.length).map(([value, label]) => (

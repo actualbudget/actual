@@ -431,7 +431,7 @@ describe('Transactions', () => {
     const { container } = renderTransactions();
 
     let input = await editField(container, 'category', 2);
-    let tooltip = container.querySelector('[data-testid="tooltip"]');
+    let tooltip = container.querySelector('[data-testid="autocomplete"]');
     expect(tooltip).toBeTruthy();
     expect(
       [...tooltip.querySelectorAll('[data-testid*="category-item"]')].length,
@@ -448,24 +448,19 @@ describe('Transactions', () => {
     expect(items[1].textContent).toBe('General');
     expect(items[1].dataset['testid']).toBe('category-item-highlighted');
 
-    // It should also allow filtering on group names
+    // It should not allow filtering on group names
     await userEvent.clear(input);
-    await userEvent.type(input, 'Usual');
+    await userEvent.type(input, 'Usual Expenses');
 
     items = tooltip.querySelectorAll('[data-testid*="category-item"]');
-    expect(items.length).toBe(4);
-    expect(items[0].textContent).toBe('Usual Expenses');
-    expect(items[1].textContent).toBe('Food');
-    expect(items[2].textContent).toBe('General');
-    expect(items[3].textContent).toBe('Home');
-    expect(items[1].dataset['testid']).toBe('category-item-highlighted');
+    expect(items.length).toBe(0);
   });
 
   test('dropdown selects an item with keyboard', async () => {
     const { container, getTransactions } = renderTransactions();
 
     let input = await editField(container, 'category', 2);
-    let tooltip = container.querySelector('[data-testid="tooltip"]');
+    let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
     // No item should be highlighted
     let highlighted = tooltip.querySelector(
@@ -497,7 +492,7 @@ describe('Transactions', () => {
     // The category field should still be editing
     expectToBeEditingField(container, 'category', 2);
     // No dropdown should be open
-    expect(container.querySelector('[data-testid="tooltip"]')).toBe(null);
+    expect(container.querySelector('[data-testid="autocomplete"]')).toBe(null);
 
     // Pressing enter should now move down
     await userEvent.type(input, '[Enter]');
@@ -509,7 +504,7 @@ describe('Transactions', () => {
 
     await editField(container, 'category', 2);
 
-    let tooltip = container.querySelector('[data-testid="tooltip"]');
+    let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
     // Make sure none of the items are highlighted
     let items = tooltip.querySelectorAll('[data-testid="category-item"]');
@@ -539,7 +534,7 @@ describe('Transactions', () => {
     );
 
     // It should still be editing the category
-    tooltip = container.querySelector('[data-testid="tooltip"]');
+    tooltip = container.querySelector('[data-testid="autocomplete"]');
     expect(tooltip).toBe(null);
     expectToBeEditingField(container, 'category', 2);
   });
@@ -549,7 +544,7 @@ describe('Transactions', () => {
 
     let input = await editField(container, 'category', 2);
     let oldCategory = getTransactions()[2].category;
-    let tooltip = container.querySelector('[data-testid="tooltip"]');
+    let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
     let items = tooltip.querySelectorAll('[data-testid="category-item"]');
 
@@ -624,7 +619,7 @@ describe('Transactions', () => {
     expect(input.value).toBe(oldValue);
 
     // The tooltip be closed
-    let tooltip = container.querySelector('[data-testid="tooltip"]');
+    let tooltip = container.querySelector('[data-testid="autocomplete"]');
     expect(tooltip).toBeNull();
   });
 
@@ -674,7 +669,7 @@ describe('Transactions', () => {
 
     await editNewField(container, 'category');
     let splitButton = document.body.querySelector(
-      '[data-testid="tooltip"] [data-testid="split-transaction-button"]',
+      '[data-testid="autocomplete"] [data-testid="split-transaction-button"]',
     );
     await userEvent.click(splitButton);
     await waitForAutocomplete();
@@ -797,7 +792,7 @@ describe('Transactions', () => {
     }
 
     let input = await editField(container, 'category', 0);
-    let tooltip = container.querySelector('[data-testid="tooltip"]');
+    let tooltip = container.querySelector('[data-testid="autocomplete"]');
     let splitButton = tooltip.querySelector(
       '[data-testid="split-transaction-button"]',
     );
@@ -915,7 +910,7 @@ describe('Transactions', () => {
     const { container, getTransactions } = renderTransactions();
 
     let input = await editField(container, 'category', 0);
-    let tooltip = container.querySelector('[data-testid="tooltip"]');
+    let tooltip = container.querySelector('[data-testid="autocomplete"]');
     let splitButton = tooltip.querySelector(
       '[data-testid="split-transaction-button"',
     );

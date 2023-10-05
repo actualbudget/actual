@@ -1,10 +1,13 @@
 import React, { useState, useRef } from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { Error } from '../alerts';
-import { View, Text, Modal, Button, ModalButtons } from '../common';
+import Button from '../common/Button';
+import Modal, { ModalButtons } from '../common/Modal';
 import Paragraph from '../common/Paragraph';
+import Text from '../common/Text';
+import View from '../common/View';
 
 function renderError(error) {
   return (
@@ -73,10 +76,10 @@ export default function PlaidExternalMsg({
           {waiting ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
-                color={colors.n1}
+                color={theme.pageTextDark}
                 style={{ width: 20, height: 20 }}
               />
-              <View style={{ marginTop: 10, color: colors.n4 }}>
+              <View style={{ marginTop: 10, color: theme.pageText }}>
                 {waiting === 'browser'
                   ? 'Waiting on browser...'
                   : waiting === 'accounts'
@@ -92,8 +95,8 @@ export default function PlaidExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: colors.g4,
-                borderColor: colors.g4,
+                backgroundColor: theme.noticeBackgroundDark,
+                borderColor: theme.noticeBorder,
               }}
               onClick={onContinue}
             >
@@ -114,17 +117,17 @@ export default function PlaidExternalMsg({
             </Button>
           )}
           <div style={{ marginTop: waiting ? 30 : 35 }}>
-            <Text style={{ color: colors.n5, fontWeight: 600 }}>
+            <Text style={{ color: theme.pageText, fontWeight: 600 }}>
               Why not link it in the app?
             </Text>
           </div>
           <Text
             style={{
               marginTop: 10,
-              color: colors.n5,
+              color: theme.pageText,
               fontSize: 13,
               '& a, & a:visited': {
-                color: colors.n5,
+                color: theme.pageText,
               },
             }}
           >

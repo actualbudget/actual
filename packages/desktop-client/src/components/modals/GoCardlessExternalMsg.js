@@ -7,20 +7,18 @@ import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
-import {
-  View,
-  Modal,
-  Button,
-  LinkButton,
-  Menu,
-  Tooltip,
-  ExternalLink,
-} from '../common';
+import Button from '../common/Button';
+import ExternalLink from '../common/ExternalLink';
+import LinkButton from '../common/LinkButton';
+import Menu from '../common/Menu';
+import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
+import View from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { Tooltip } from '../tooltips';
 
 import { COUNTRY_OPTIONS } from './countries';
 
@@ -156,7 +154,7 @@ export default function GoCardlessExternalMsg({
             be misconfigured. Please{' '}
             <LinkButton
               onClick={onGoCardlessInit}
-              style={{ color: colors.b3, display: 'inline' }}
+              style={{ color: theme.altFormLabelText, display: 'inline' }}
             >
               set them up
             </LinkButton>{' '}
@@ -268,10 +266,10 @@ export default function GoCardlessExternalMsg({
           {waiting || isConfigurationLoading ? (
             <View style={{ alignItems: 'center', marginTop: 15 }}>
               <AnimatedLoading
-                color={colors.n1}
+                color={theme.pageTextDark}
                 style={{ width: 20, height: 20 }}
               />
-              <View style={{ marginTop: 10, color: colors.n4 }}>
+              <View style={{ marginTop: 10, color: theme.pageText }}>
                 {isConfigurationLoading
                   ? 'Checking GoCardless configuration..'
                   : waiting === 'browser'
@@ -295,8 +293,8 @@ export default function GoCardlessExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: colors.g4,
-                borderColor: colors.g4,
+                backgroundColor: theme.noticeBackgroundDark,
+                borderColor: theme.noticeBackgroundDark,
               }}
               onClick={onContinue}
             >
@@ -306,7 +304,7 @@ export default function GoCardlessExternalMsg({
             renderLinkButton()
           ) : (
             <>
-              <Paragraph style={{ color: colors.r5 }}>
+              <Paragraph style={{ color: theme.errorText }}>
                 GoCardless integration has not yet been configured.
               </Paragraph>
               <Button type="primary" onClick={onGoCardlessInit}>

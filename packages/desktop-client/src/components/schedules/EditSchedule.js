@@ -1,6 +1,5 @@
 import React, { useEffect, useReducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
@@ -10,32 +9,22 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
 import useSelected, { SelectedProvider } from '../../hooks/useSelected';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { Stack, View, Text, Button } from '../common';
+import Button from '../common/Button';
+import Modal from '../common/Modal';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
 import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRule';
-import { Page } from '../Page';
 import DateSelect from '../select/DateSelect';
 import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '../table';
 import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import GenericInput from '../util/GenericInput';
-
-function mergeFields(defaults, initial) {
-  let res = { ...defaults };
-  if (initial) {
-    // Only merge in fields from `initial` that exist in `defaults`
-    Object.keys(initial).forEach(key => {
-      if (key in defaults) {
-        res[key] = initial[key];
-      }
-    });
-  }
-  return res;
-}
 
 function updateScheduleConditions(schedule, fields) {
   let conds = extractScheduleConds(schedule._conditions);
@@ -77,11 +66,9 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export default function ScheduleDetails() {
-  let { id, initialFields } = useParams();
+export default function ScheduleDetails({ modalProps, actions, id }) {
   let adding = id == null;
   let payees = useCachedPayees({ idKey: true });
-  let navigate = useNavigate();
   let globalDispatch = useDispatch();
   let dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
@@ -190,18 +177,15 @@ export default function ScheduleDetails() {
       schedule: null,
       upcomingDates: null,
       error: null,
-      fields: mergeFields(
-        {
-          payee: null,
-          account: null,
-          amount: null,
-          amountOp: null,
-          date: null,
-          posts_transaction: false,
-          name: null,
-        },
-        initialFields,
-      ),
+      fields: {
+        payee: null,
+        account: null,
+        amount: null,
+        amountOp: null,
+        date: null,
+        posts_transaction: false,
+        name: null,
+      },
       transactions: [],
       transactionsMode: adding ? 'matched' : 'linked',
     },
@@ -219,6 +203,8 @@ export default function ScheduleDetails() {
           start: monthUtils.currentDay(),
           frequency: 'monthly',
           patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'after',
         };
         let schedule = {
           posts_transaction: false,
@@ -379,7 +365,7 @@ export default function ScheduleDetails() {
       if (adding) {
         await onLinkTransactions([...selectedInst.items], res.data);
       }
-      navigate(-1);
+      actions.popModal();
     }
   }
 
@@ -427,11 +413,11 @@ export default function ScheduleDetails() {
 
   // This is derived from the date
   let repeats = state.fields.date ? !!state.fields.date.frequency : false;
-
   return (
-    <Page
+    <Modal
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}
-      modalSize="medium"
+      size="medium"
+      {...modalProps}
     >
       <Stack direction="row" style={{ marginTop: 10 }}>
         <FormField style={{ flex: 1 }}>
@@ -502,7 +488,7 @@ export default function ScheduleDetails() {
               }}
               style={{
                 padding: '0 10px',
-                color: colors.n5,
+                color: theme.altpageTextSubdued,
                 fontSize: 12,
               }}
               onChange={(_, op) =>
@@ -524,7 +510,7 @@ export default function ScheduleDetails() {
           ) : (
             <AmountInput
               id="amount-field"
-              defaultValue={state.fields.amount}
+              initialValue={state.fields.amount}
               onChange={value =>
                 dispatch({
                   type: 'set-field',
@@ -541,8 +527,8 @@ export default function ScheduleDetails() {
         <FormLabel title="Date" />
       </View>
 
-      <Stack direction="row" align="flex-start">
-        <View style={{ flex: 1 }}>
+      <Stack direction="row" align="flex-start" justify="space-between">
+        <View style={{ width: '13.44rem' }}>
           {repeats ? (
             <RecurringSchedulePicker
               value={state.fields.date}
@@ -562,13 +548,13 @@ export default function ScheduleDetails() {
 
           {state.upcomingDates && (
             <View style={{ fontSize: 13, marginTop: 20 }}>
-              <Text style={{ color: colors.n4, fontWeight: 600 }}>
+              <Text style={{ color: theme.pageTextLight, fontWeight: 600 }}>
                 Upcoming dates
               </Text>
               <Stack
                 direction="column"
                 spacing={1}
-                style={{ marginTop: 10, color: colors.n4 }}
+                style={{ marginTop: 10, color: theme.pageTextLight }}
               >
                 {state.upcomingDates.map(date => (
                   <View key={date}>
@@ -583,7 +569,6 @@ export default function ScheduleDetails() {
         <View
           style={{
             marginTop: 5,
-            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
             userSelect: 'none',
@@ -601,12 +586,7 @@ export default function ScheduleDetails() {
           </label>
         </View>
 
-        <View
-          style={{
-            alignItems: 'flex-end',
-            flex: 1,
-          }}
-        >
+        <Stack align="flex-end">
           <View
             style={{
               marginTop: 5,
@@ -639,7 +619,7 @@ export default function ScheduleDetails() {
             style={{
               width: 350,
               textAlign: 'right',
-              color: colors.n4,
+              color: theme.pageTextLight,
               marginTop: 10,
               fontSize: 13,
               lineHeight: '1.4em',
@@ -650,11 +630,11 @@ export default function ScheduleDetails() {
           </Text>
 
           {!adding && state.schedule.rule && (
-            <Stack direction="row" align="center" style={{ marginTop: 30 }}>
+            <Stack direction="row" align="center" style={{ marginTop: 20 }}>
               {state.isCustom && (
                 <Text
                   style={{
-                    color: colors.b5,
+                    color: theme.altpageTextSubdued,
                     fontSize: 13,
                     textAlign: 'right',
                     width: 350,
@@ -668,18 +648,18 @@ export default function ScheduleDetails() {
               </Button>
             </Stack>
           )}
-        </View>
+        </Stack>
       </Stack>
 
       <View style={{ marginTop: 30, flex: 1 }}>
         <SelectedProvider instance={selectedInst}>
           {adding ? (
             <View style={{ flexDirection: 'row', padding: '5px 0' }}>
-              <Text style={{ color: colors.n4 }}>
+              <Text style={{ color: theme.pageTextLight }}>
                 These transactions match this schedule:
               </Text>
               <View style={{ flex: 1 }} />
-              <Text style={{ color: colors.n6 }}>
+              <Text style={{ color: theme.pageTextLight }}>
                 Select transactions to link on save
               </Text>
             </View>
@@ -689,7 +669,9 @@ export default function ScheduleDetails() {
                 type="bare"
                 style={{
                   color:
-                    state.transactionsMode === 'linked' ? colors.b4 : colors.n7,
+                    state.transactionsMode === 'linked'
+                      ? theme.pageTextLink
+                      : theme.pageTextSubdued,
                   marginRight: 10,
                   fontSize: 14,
                 }}
@@ -702,8 +684,8 @@ export default function ScheduleDetails() {
                 style={{
                   color:
                     state.transactionsMode === 'matched'
-                      ? colors.b4
-                      : colors.n7,
+                      ? theme.pageTextLink
+                      : theme.pageTextSubdued,
                   fontSize: 14,
                 }}
                 onClick={() => onSwitchTransactions('matched')}
@@ -735,28 +717,19 @@ export default function ScheduleDetails() {
 
           <SimpleTransactionsTable
             renderEmpty={
-              state.transactionsMode === 'matched' &&
-              (() => (
-                <View
-                  style={{ padding: 20, color: colors.n4, textAlign: 'center' }}
-                >
-                  {state.error ? (
-                    <Text style={{ color: colors.r4 }}>
-                      Could not search: {state.error}
-                    </Text>
-                  ) : (
-                    'No transactions found'
-                  )}
-                </View>
-              ))
+              <NoTransactionsMessage
+                error={state.error}
+                transactionsMode={state.transactionsMode}
+              />
             }
             transactions={state.transactions}
             fields={['date', 'payee', 'amount']}
             style={{
-              border: '1px solid ' + colors.border,
+              border: '1px solid ' + theme.tableBorder,
               borderRadius: 4,
               overflow: 'hidden',
               marginTop: 5,
+              maxHeight: 200,
             }}
           />
         </SelectedProvider>
@@ -768,14 +741,38 @@ export default function ScheduleDetails() {
         align="center"
         style={{ marginTop: 20 }}
       >
-        {state.error && <Text style={{ color: colors.r4 }}>{state.error}</Text>}
-        <Button style={{ marginRight: 10 }} onClick={() => navigate(-1)}>
+        {state.error && (
+          <Text style={{ color: theme.errorText }}>{state.error}</Text>
+        )}
+        <Button style={{ marginRight: 10 }} onClick={actions.popModal}>
           Cancel
         </Button>
         <Button type="primary" onClick={onSave}>
           {adding ? 'Add' : 'Save'}
         </Button>
       </Stack>
-    </Page>
+    </Modal>
+  );
+}
+
+function NoTransactionsMessage(props) {
+  return (
+    <View
+      style={{
+        padding: 20,
+        color: theme.pageTextLight,
+        textAlign: 'center',
+      }}
+    >
+      {props.error ? (
+        <Text style={{ color: theme.errorText }}>
+          Could not search: {props.error}
+        </Text>
+      ) : props.transactionsMode === 'matched' ? (
+        'No matching transactions'
+      ) : (
+        'No linked transactions'
+      )}
+    </View>
   );
 }

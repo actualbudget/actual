@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../../style';
-import { View, Text, Button } from '../../common';
+import { theme } from '../../../style';
+import Button from '../../common/Button';
+import Text from '../../common/Text';
+import View from '../../common/View';
 
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
@@ -46,7 +48,7 @@ export default function ChangePassword() {
       <Text
         style={{
           fontSize: 16,
-          color: colors.n2,
+          color: theme.pageTextDark,
           lineHeight: 1.4,
         }}
       >
@@ -58,7 +60,7 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.r4,
+            color: theme.errorText,
             borderRadius: 4,
             fontSize: 15,
           }}
@@ -71,7 +73,7 @@ export default function ChangePassword() {
         <Text
           style={{
             marginTop: 20,
-            color: colors.g4,
+            color: theme.noticeTextLight,
             borderRadius: 4,
             fontSize: 15,
           }}

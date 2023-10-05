@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Transactions', () => {
   let page;
@@ -26,6 +27,66 @@ test.describe('Transactions', () => {
     accountPage = await navigation.goToAccountPage('Ally Savings');
   });
 
+  test('checks the page visuals', async () => {
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
+  });
+
+  test.describe('filters transactions', () => {
+    // Reset filters
+    test.afterEach(async () => {
+      await accountPage.removeFilter(0);
+    });
+
+    test('by date', async () => {
+      const filterTooltip = await accountPage.filterBy('Date');
+      await expect(filterTooltip.page).toHaveScreenshot(screenshotConfig(page));
+
+      // Open datepicker
+      await page.keyboard.press('Space');
+      const datepicker = page.getByTestId('date-select-tooltip');
+      await expect(datepicker).toHaveScreenshot(screenshotConfig(page));
+
+      // Select "is xxxxx"
+      await datepicker.getByRole('button', { name: '20' }).click();
+      await filterTooltip.applyButton.click();
+
+      // Assert that there are no transactions
+      await expect(accountPage.transactionTable).toHaveText('No transactions');
+      await expect(page).toHaveScreenshot(screenshotConfig(page));
+    });
+
+    test('by category', async () => {
+      const filterTooltip = await accountPage.filterBy('Category');
+      await expect(filterTooltip.page).toHaveScreenshot(screenshotConfig(page));
+
+      // Type in the autocomplete box
+      const autocomplete = page.getByTestId('autocomplete');
+      await expect(autocomplete).toHaveScreenshot(screenshotConfig(page));
+
+      // Select the active item
+      await page.getByRole('button', { name: 'Clothing' }).click();
+      await filterTooltip.applyButton.click();
+
+      // Assert that there are only clothing transactions
+      await expect(accountPage.getNthTransaction(0).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(1).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(2).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(3).category).toHaveText(
+        'Clothing',
+      );
+      await expect(accountPage.getNthTransaction(4).category).toHaveText(
+        'Clothing',
+      );
+      await expect(page).toHaveScreenshot(screenshotConfig(page));
+    });
+  });
+
   test('creates a test transaction', async () => {
     await accountPage.createSingleTransaction({
       payee: 'Home Depot',
@@ -34,13 +95,13 @@ test.describe('Transactions', () => {
       debit: '12.34',
     });
 
-    expect(await accountPage.getNthTransaction(0)).toMatchObject({
-      payee: 'Home Depot',
-      notes: 'Notes field',
-      category: 'Food',
-      debit: '12.34',
-      credit: '',
-    });
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.payee).toHaveText('Home Depot');
+    await expect(transaction.notes).toHaveText('Notes field');
+    await expect(transaction.category).toHaveText('Food');
+    await expect(transaction.debit).toHaveText('12.34');
+    await expect(transaction.credit).toHaveText('');
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
   test('creates a split test transaction', async () => {
@@ -59,26 +120,26 @@ test.describe('Transactions', () => {
       },
     ]);
 
-    expect(await accountPage.getNthTransaction(0)).toMatchObject({
-      payee: 'Krogger',
-      notes: 'Notes',
-      category: 'Split',
-      debit: '333.33',
-      credit: '',
-    });
-    expect(await accountPage.getNthTransaction(1)).toMatchObject({
-      payee: 'Krogger',
-      notes: '',
-      category: 'General',
-      debit: '222.22',
-      credit: '',
-    });
-    expect(await accountPage.getNthTransaction(2)).toMatchObject({
-      payee: 'Krogger',
-      notes: '',
-      category: 'Categorize',
-      debit: '111.11',
-      credit: '',
-    });
+    const firstTransaction = accountPage.getNthTransaction(0);
+    await expect(firstTransaction.payee).toHaveText('Krogger');
+    await expect(firstTransaction.notes).toHaveText('Notes');
+    await expect(firstTransaction.category).toHaveText('Split');
+    await expect(firstTransaction.debit).toHaveText('333.33');
+    await expect(firstTransaction.credit).toHaveText('');
+
+    const secondTransaction = accountPage.getNthTransaction(1);
+    await expect(secondTransaction.payee).toHaveText('Krogger');
+    await expect(secondTransaction.notes).toHaveText('');
+    await expect(secondTransaction.category).toHaveText('General');
+    await expect(secondTransaction.debit).toHaveText('222.22');
+    await expect(secondTransaction.credit).toHaveText('');
+
+    const thirdTransaction = accountPage.getNthTransaction(2);
+    await expect(thirdTransaction.payee).toHaveText('Krogger');
+    await expect(thirdTransaction.notes).toHaveText('');
+    await expect(thirdTransaction.category).toHaveText('Categorize');
+    await expect(thirdTransaction.debit).toHaveText('111.11');
+    await expect(thirdTransaction.credit).toHaveText('');
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 });

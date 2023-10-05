@@ -5,8 +5,10 @@ import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
-import { colors, useTheme } from '../../style';
-import { LinkButton, Text, View } from '../common';
+import { theme, useTheme } from '../../style';
+import LinkButton from '../common/LinkButton';
+import Text from '../common/Text';
+import View from '../common/View';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
@@ -32,16 +34,26 @@ function FeatureToggle({
       <Checkbox
         checked={enabled}
         onChange={() => {
+          // @ts-expect-error key type is not correctly inferred
           savePrefs({
             [`flags.${flag}`]: !enabled,
           });
         }}
         disabled={disableToggle}
       />
-      <View style={{ color: disableToggle ? colors.n5 : 'inherit' }}>
+      <View
+        style={{ color: disableToggle ? theme.pageTextSubdued : 'inherit' }}
+      >
         {children}
         {disableToggle && (
-          <Text style={{ color: colors.r3, fontWeight: 500 }}>{error}</Text>
+          <Text
+            style={{
+              color: theme.errorText,
+              fontWeight: 500,
+            }}
+          >
+            {error}
+          </Text>
         )}
       </View>
     </label>
@@ -86,13 +98,19 @@ export default function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
+            <FeatureToggle flag="categorySpendingReport">
+              Category spending report
+            </FeatureToggle>
+
             <ReportBudgetFeature />
 
             <FeatureToggle flag="goalTemplatesEnabled">
               Goal templates
             </FeatureToggle>
 
-            <FeatureToggle flag="privacyMode">Privacy mode</FeatureToggle>
+            <FeatureToggle flag="experimentalOfxParser">
+              Experimental OFX parser
+            </FeatureToggle>
 
             <ThemeFeature />
           </View>
@@ -102,7 +120,7 @@ export default function ExperimentalFeatures() {
             style={{
               flexShrink: 0,
               alignSelf: 'flex-start',
-              color: colors.p4,
+              color: theme.pageTextPositive,
             }}
           >
             I understand the risks, show experimental features

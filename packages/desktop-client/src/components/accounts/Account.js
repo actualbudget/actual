@@ -15,6 +15,7 @@ import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   deleteTransaction,
   updateTransaction,
@@ -25,10 +26,12 @@ import {
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
 import { authorizeBank } from '../../gocardless';
+import useCategories from '../../hooks/useCategories';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
-import { styles, colors } from '../../style';
-import { useActiveLocation } from '../ActiveLocation';
-import { View, Text, Button } from '../common';
+import { styles, theme } from '../../style';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import TransactionList from '../transactions/TransactionList';
 import {
   SplitsExpandedProvider,
@@ -41,11 +44,12 @@ function EmptyMessage({ onAdd }) {
   return (
     <View
       style={{
-        backgroundColor: 'white',
+        color: theme.tableText,
+        backgroundColor: theme.tableBackground,
         flex: 1,
         alignItems: 'center',
         borderTopWidth: 1,
-        borderColor: colors.n9,
+        borderColor: theme.tableBorder,
       }}
     >
       <View
@@ -66,7 +70,9 @@ function EmptyMessage({ onAdd }) {
           Add account
         </Button>
 
-        <View style={{ marginTop: 20, fontSize: 13, color: colors.n5 }}>
+        <View
+          style={{ marginTop: 20, fontSize: 13, color: theme.alttableText }}
+        >
           In the future, you can add accounts from the sidebar.
         </View>
       </View>
@@ -110,7 +116,7 @@ function AllTransactions({
       date: schedule.next_date,
       notes: scheduleData.statuses.get(schedule.id),
       schedule: schedule.id,
-      _inverse: accountId !== schedule._account,
+      _inverse: accountId ? accountId !== schedule._account : false,
     }));
   }, [schedules, accountId]);
 
@@ -135,7 +141,7 @@ function AllTransactions({
       .map(scheduledTransaction => {
         let amount =
           (scheduledTransaction._inverse ? -1 : 1) *
-          scheduledTransaction.amount;
+          getScheduledAmount(scheduledTransaction.amount);
         return {
           balance: (runningBalance += amount),
           id: scheduledTransaction.id,
@@ -267,9 +273,6 @@ class AccountInternal extends PureComponent {
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    if (this.props.categoryGroups.length === 0) {
-      await this.props.getCategories();
-    }
     await this.props.initiallyLoadPayees();
     await this.fetchTransactions();
 
@@ -410,7 +413,7 @@ class AccountInternal extends PureComponent {
     );
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
@@ -420,6 +423,7 @@ class AccountInternal extends PureComponent {
           showBalances: nextProps.showBalances,
           balances: null,
           showCleared: nextProps.showCleared,
+          reconcileAmount: null,
         },
         () => {
           this.fetchTransactions();
@@ -1141,6 +1145,7 @@ class AccountInternal extends PureComponent {
       hideFraction,
       addNotification,
       accountsSyncing,
+      pushModal,
       replaceModal,
       showExtraBalances,
       accountId,
@@ -1197,7 +1202,7 @@ class AccountInternal extends PureComponent {
             fetchAllIds={this.fetchAllIds}
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
           >
-            <View style={[styles.page]}>
+            <View style={styles.page}>
               <AccountHeader
                 tableRef={this.table}
                 editingName={editingName}
@@ -1223,6 +1228,7 @@ class AccountInternal extends PureComponent {
                 filters={this.state.filters}
                 conditionsOp={this.state.conditionsOp}
                 savePrefs={this.props.savePrefs}
+                pushModal={this.props.pushModal}
                 onSearch={this.onSearch}
                 onShowTransactions={this.onShowTransactions}
                 onMenuSelect={this.onMenuSelect}
@@ -1289,6 +1295,7 @@ class AccountInternal extends PureComponent {
                     ) : !loading ? (
                       <View
                         style={{
+                          color: theme.tableText,
                           marginTop: 20,
                           textAlign: 'center',
                           fontStyle: 'italic',
@@ -1298,6 +1305,7 @@ class AccountInternal extends PureComponent {
                       </View>
                     ) : null
                   }
+                  pushModal={pushModal}
                   onSort={this.onSort}
                   sortField={this.state.sort.field}
                   ascDesc={this.state.sort.ascDesc}
@@ -1339,14 +1347,13 @@ function AccountHack(props) {
 export default function Account() {
   let params = useParams();
   let location = useLocation();
-  let activeLocation = useActiveLocation();
 
+  let { grouped: categoryGroups } = useCategories();
   let state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
     matchedTransactions: state.queries.matchedTransactions,
     accounts: state.queries.accounts,
     failedAccounts: state.account.failedAccounts,
-    categoryGroups: state.queries.categories.grouped,
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     hideFraction: state.prefs.local.hideFraction || false,
     expandSplits: state.prefs.local['expand-splits'],
@@ -1399,13 +1406,11 @@ export default function Account() {
       >
         <AccountHack
           {...state}
+          categoryGroups={categoryGroups}
           {...actionCreators}
-          modalShowing={
-            state.modalShowing ||
-            !!(activeLocation.state && activeLocation.state.parent)
-          }
+          modalShowing={state.modalShowing}
           accountId={params.id}
-          categoryId={activeLocation?.state?.filter?.category}
+          categoryId={location?.state?.filter?.category}
           location={location}
           filtersList={filtersList}
         />

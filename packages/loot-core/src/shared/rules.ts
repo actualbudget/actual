@@ -17,7 +17,7 @@ export const TYPE_INFO = {
   },
   string: {
     ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
-    nullable: false,
+    nullable: true,
   },
   number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
@@ -67,7 +67,7 @@ export function mapField(field, opts) {
   }
 }
 
-export function friendlyOp(op, type) {
+export function friendlyOp(op, type?) {
   switch (op) {
     case 'oneOf':
       return 'one of';

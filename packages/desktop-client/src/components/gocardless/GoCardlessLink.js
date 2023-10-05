@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { Modal, View } from '../common';
+import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
+import View from '../common/View';
 
 export default function GoCardlessLink() {
   window.close();
@@ -12,7 +13,7 @@ export default function GoCardlessLink() {
         <View style={{ maxWidth: 500 }}>
           <Paragraph>Please wait...</Paragraph>
           <Paragraph>
-            The window should close automatically. If nothing happend you can
+            The window should close automatically. If nothing happened you can
             close this window or tab.
           </Paragraph>
         </View>

@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
-import { View } from '../common';
+import View from '../common/View';
 import CreateEncryptionKey from '../modals/CreateEncryptionKey';
 import FixEncryptionKey from '../modals/FixEncryptionKey';
 import LoadBackup from '../modals/LoadBackup';
@@ -18,7 +18,7 @@ export default function Modals() {
   let isHidden = useSelector(state => state.modals.isHidden);
   let actions = useActions();
 
-  let stack = modalStack.map(({ name, options }, idx) => {
+  let stack = modalStack.map(({ name, options = {} }, idx) => {
     const modalProps = {
       onClose: actions.popModal,
       onPush: actions.pushModal,

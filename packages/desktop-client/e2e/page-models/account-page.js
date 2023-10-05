@@ -20,9 +20,11 @@ export class AccountPage {
       name: 'Menu',
     });
 
-    this.transactionTableRow = this.page
-      .getByTestId('table')
-      .getByTestId('row');
+    this.transactionTable = this.page.getByTestId('transaction-table');
+    this.transactionTableRow = this.transactionTable.getByTestId('row');
+
+    this.filterButton = this.page.getByRole('button', { name: 'Filter' });
+    this.filterSelectTooltip = this.page.getByTestId('filters-select-tooltip');
   }
 
   /**
@@ -70,15 +72,15 @@ export class AccountPage {
    * Retrieve the data for the nth-transaction.
    * 0-based index
    */
-  async getNthTransaction(index) {
+  getNthTransaction(index) {
     const row = this.transactionTableRow.nth(index);
 
     return {
-      payee: await row.getByTestId('payee').textContent(),
-      notes: await row.getByTestId('notes').textContent(),
-      category: await row.getByTestId('category').textContent(),
-      debit: await row.getByTestId('debit').textContent(),
-      credit: await row.getByTestId('credit').textContent(),
+      payee: row.getByTestId('payee'),
+      notes: row.getByTestId('notes'),
+      category: row.getByTestId('category'),
+      debit: row.getByTestId('debit'),
+      credit: row.getByTestId('credit'),
     };
   }
 
@@ -92,6 +94,26 @@ export class AccountPage {
       this.page.locator('css=[aria-modal]'),
       this.page,
     );
+  }
+
+  /**
+   * Open the filtering popover.
+   */
+  async filterBy(field) {
+    await this.filterButton.click();
+    await this.filterSelectTooltip.getByRole('button', { name: field }).click();
+
+    return new FilterTooltip(this.page.getByTestId('filters-menu-tooltip'));
+  }
+
+  /**
+   * Remove the nth filter
+   */
+  async removeFilter(idx) {
+    await this.page
+      .getByRole('button', { name: 'Delete filter' })
+      .nth(idx)
+      .click();
   }
 
   async _fillTransactionFields(transactionRow, transaction) {
@@ -129,5 +151,12 @@ export class AccountPage {
       await this.page.keyboard.type(transaction.credit);
       await this.page.keyboard.press('Tab');
     }
+  }
+}
+
+class FilterTooltip {
+  constructor(page) {
+    this.page = page;
+    this.applyButton = page.getByRole('button', { name: 'Apply' });
   }
 }
