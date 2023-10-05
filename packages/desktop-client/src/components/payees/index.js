@@ -63,7 +63,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
           padding: '3px 6px',
           backgroundColor: theme.noticeBackground,
           border: '1px solid ' + theme.noticeBackground,
-          color: theme.altNoticeText,
+          color: theme.noticeTextDark,
           fontSize: 12,
         }}
         onEdit={onEdit}

@@ -99,7 +99,7 @@ function IncomeProgress({ current, target }: IncomeProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? theme.errorText : theme.noticeText}
+      color={over ? theme.errorText : theme.noticeTextLight}
       backgroundColor={over ? theme.errorBackground : theme.pageBackground}
       style={{ width: 20, height: 20 }}
     />
@@ -132,7 +132,7 @@ function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? theme.errorText : theme.noticeText}
+      color={over ? theme.errorText : theme.noticeTextLight}
       backgroundColor={over ? theme.errorBackground : theme.pageBackground}
       style={{ width: 20, height: 20 }}
     />
@@ -379,7 +379,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 fontWeight: 500,
                 textDecorationSkip: 'ink',
               },
-              currentMonth === month && { textDecoration: 'underline' },
             ])}`}
           >
             {monthUtils.format(month, 'MMMM')}
@@ -473,7 +472,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               padding: '10px 20px',
               justifyContent: 'space-between',
               backgroundColor: theme.tableRowHeaderBackground,
-              borderTop: '1px solid ' + theme.tableRowHeaderText,
+              borderTop: '1px solid ' + theme.tableBorder,
             }}
           >
             <Saved projected={month >= currentMonth} />
