@@ -6,6 +6,25 @@ import { Row } from '../table';
 import RenderMonths from './RenderMonths';
 import SidebarGroup from './SidebarGroup';
 
+type IncomeGroupProps = {
+  group: {
+    id: string;
+    hidden: number;
+    categories: object[];
+    is_income: number;
+    name: string;
+    sort_order: number;
+    tombstone: number;
+  };
+  editingCell: { id: string; cell: string } | null;
+  collapsed: boolean;
+  MonthComponent: () => JSX.Element;
+  onEditName: (id: string) => void;
+  onSave: (group: object) => Promise<void>;
+  onToggleCollapse: (id: string) => void;
+  onShowNewCategory: (groupId: string) => void;
+};
+
 function IncomeGroup({
   group,
   editingCell,
@@ -15,7 +34,7 @@ function IncomeGroup({
   onSave,
   onToggleCollapse,
   onShowNewCategory,
-}) {
+}: IncomeGroupProps) {
   return (
     <Row
       collapsed={true}
