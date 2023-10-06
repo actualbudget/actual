@@ -45,6 +45,7 @@ function Budget(props) {
   const [prewarmStartMonth, setPrewarmStartMonth] = useState(
     props.startMonth || currentMonth,
   );
+
   const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [collapsed, setCollapsed] = useState(props.collapsedPrefs || []);
