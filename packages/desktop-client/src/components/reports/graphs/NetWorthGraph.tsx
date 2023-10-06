@@ -78,13 +78,17 @@ function NetWorthGraph({
             margin={{ top: 0, right: 5, left: 50, bottom: 0 }}
           >
             {compact ? null : <CartesianGrid strokeDasharray="3 3" />}
-            <XAxis dataKey="name" />
-            <YAxis
-              dataKey="NetWorth"
-              domain={['auto', 'auto']}
-              tickFormatter={tickFormatter}
-            />
-            <Tooltip formatter={value => Math.round(value)} />
+            {compact ? null : <XAxis dataKey="name" />}
+            {compact ? null : (
+              <YAxis
+                dataKey="NetWorth"
+                domain={['auto', 'auto']}
+                tickFormatter={tickFormatter}
+              />
+            )}
+            {compact ? null : (
+              <Tooltip formatter={value => Math.round(value)} />
+            )}
             <Line
               type="monotone"
               dataKey="NetWorth"
