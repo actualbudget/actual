@@ -45,7 +45,7 @@ export default function MobileNavTabs() {
         position: 'fixed',
         zIndex: 100,
         bottom: isVisible ? 0 : -height,
-        transition: 'bottom 0.4s ease-out',
+        transition: 'bottom 0.2s ease-out',
       }}
     >
       <NavTab name="Budget" path="/budget" icon={Wallet} />
