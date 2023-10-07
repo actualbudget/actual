@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 
 type IScrollContext = {
-  scrollY: number;
+  scrollY: number | undefined;
 };
 
 const ScrollContext = createContext<IScrollContext | undefined>(undefined);
@@ -17,7 +17,7 @@ type ScrollProviderProps = {
 };
 
 export default function ScrollProvider({ children }: ScrollProviderProps) {
-  const [scrollY, setScrollY] = useState(0);
+  const [scrollY, setScrollY] = useState(undefined);
 
   useEffect(() => {
     const listenToScroll = e => {

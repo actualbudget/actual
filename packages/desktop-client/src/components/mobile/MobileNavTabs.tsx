@@ -12,13 +12,13 @@ import { useScroll } from '../ScrollProvider';
 export default function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
   const { scrollY } = useScroll();
-  const previousScrollY = useRef(0);
+  const previousScrollY = useRef(null);
   const [isVisible, setIsVisible] = useState(true);
 
   const height = 70;
 
   useEffect(() => {
-    if (scrollY > previousScrollY.current && previousScrollY.current !== 0) {
+    if (previousScrollY.current != null && scrollY > previousScrollY.current) {
       if (isVisible) {
         setIsVisible(false);
       }
