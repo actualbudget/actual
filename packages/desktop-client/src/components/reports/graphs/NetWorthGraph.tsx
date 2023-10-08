@@ -70,14 +70,14 @@ function NetWorthGraph({
         >
           <div>
             <div style={{ marginBottom: 10 }}>
-              <strong>{label}</strong>
+              <strong>{payload[0].payload.date}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <AlignedText left="Assets:" right={payload[0].payload.assets} />
               <AlignedText left="Debt:" right={payload[0].payload.debt} />
               <AlignedText
                 left="Net worth:"
-                right={<strong>{payload[0].payload.y}</strong>}
+                right={<strong>{payload[0].payload.networth}</strong>}
               />
               <AlignedText left="Change:" right={payload[0].payload.change} />
             </div>

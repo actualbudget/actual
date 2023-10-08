@@ -152,6 +152,8 @@ function recalculate(data, start, end) {
       assets: integerToCurrency(assets),
       debt: `-${integerToCurrency(debt)}`,
       change: integerToCurrency(change),
+      networth: integerToCurrency(total),
+      date: d.format(x, 'MMMM yyyy'),
     });
 
     arr.forEach(item => {
