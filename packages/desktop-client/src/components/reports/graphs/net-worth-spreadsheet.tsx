@@ -1,5 +1,3 @@
-import React from 'react';
-
 import * as d from 'date-fns';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
@@ -11,8 +9,32 @@ import {
   amountToInteger,
 } from 'loot-core/src/shared/util';
 
-import AlignedText from '../../common/AlignedText';
 import { index } from '../util';
+
+function formatDate(date) {
+  // Array of month names
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  // Get the month and year from the date
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear().toString().slice(-2); // Get the last 2 digits of the year
+
+  // Format and return the result
+  return `${month} ’${year}`;
+}
 
 export default function createSpreadsheet(
   start,
@@ -119,29 +141,18 @@ function recalculate(data, start, end) {
     const x = d.parseISO(month + '-01');
     const change = last ? total - amountToInteger(last.y) : 0;
 
-    const label = (
-      <div>
-        <div style={{ marginBottom: 10 }}>
-          <strong>{d.format(x, 'MMMM yyyy')}</strong>
-        </div>
-        <div style={{ lineHeight: 1.5 }}>
-          <AlignedText left="Assets:" right={integerToCurrency(assets)} />
-          <AlignedText left="Debt:" right={`-${integerToCurrency(debt)}`} />
-          <AlignedText
-            left="Net worth:"
-            right={<strong>{integerToCurrency(total)}</strong>}
-          />
-          <AlignedText left="Change:" right={integerToCurrency(change)} />
-        </div>
-      </div>
-    );
-
     if (arr.length === 0) {
       startNetWorth = total;
     }
     endNetWorth = total;
 
-    arr.push({ x, y: integerToAmount(total), premadeLabel: label });
+    arr.push({
+      x: formatDate(x),
+      y: integerToAmount(total),
+      assets: integerToCurrency(assets),
+      debt: `-${integerToCurrency(debt)}`,
+      change: integerToCurrency(change),
+    });
 
     arr.forEach(item => {
       if (item.y < lowestNetWorth || lowestNetWorth === null) {

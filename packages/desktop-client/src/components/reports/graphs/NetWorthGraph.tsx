@@ -1,16 +1,18 @@
 import React from 'react';
 
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
+  ResponsiveContainer,
 } from 'recharts';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
+import AlignedText from '../../common/AlignedText';
 import Container from '../Container';
 
 type NetWorthGraphProps = {
@@ -22,44 +24,53 @@ type NetWorthGraphProps = {
   };
 };
 
-function formatDate(date) {
-  // Array of month names
-  const monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  // Get the month and year from the date
-  const month = monthNames[date.getMonth()];
-  const year = date.getFullYear().toString().slice(-2); // Get the last 2 digits of the year
-
-  // Format and return the result
-  return `${month} ’${year}`;
-}
-
 function NetWorthGraph({
   style,
   graphData,
   compact,
   domain,
 }: NetWorthGraphProps) {
-  let chartValues = graphData.data.map(d => ({
-    name: formatDate(d.x),
-    NetWorth: d.y,
-  }));
-
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+  };
+
+  const gradientOffset = () => {
+    const dataMax = Math.max(...graphData.data.map(i => i.y));
+    const dataMin = Math.min(...graphData.data.map(i => i.y));
+
+    if (dataMax <= 0) {
+      return 0;
+    }
+    if (dataMin >= 0) {
+      return 1;
+    }
+
+    return dataMax / (dataMax - dataMin);
+  };
+
+  const off = gradientOffset();
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{''}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <AlignedText left="Assets:" right={payload[0].payload.assets} />
+            <AlignedText left="Debt:" right={payload[0].payload.debt} />
+            <AlignedText
+              left="Net worth:"
+              right={<strong>{payload[0].payload.y}</strong>}
+            />
+            <AlignedText left="Change:" right={payload[0].payload.change} />
+          </div>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -71,30 +82,56 @@ function NetWorthGraph({
     >
       {(width, height, portalHost) =>
         graphData && (
-          <LineChart
-            width={width}
-            height={height}
-            data={chartValues}
-            margin={{ top: 0, right: 5, left: 50, bottom: 0 }}
-          >
-            {compact ? null : <CartesianGrid strokeDasharray="3 3" />}
-            {compact ? null : <XAxis dataKey="name" />}
-            {compact ? null : (
-              <YAxis
-                dataKey="NetWorth"
-                domain={['auto', 'auto']}
-                tickFormatter={tickFormatter}
+          <ResponsiveContainer>
+            <AreaChart
+              width={width}
+              height={height}
+              data={graphData.data}
+              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+            >
+              {compact ? null : (
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              )}
+              {compact ? null : <XAxis dataKey="x" />}
+              {compact ? null : (
+                <YAxis
+                  dataKey="y"
+                  domain={['auto', 'auto']}
+                  tickFormatter={tickFormatter}
+                />
+              )}
+              <Tooltip
+                content={<CustomTooltip />}
+                formatter={value => Math.round(value)}
+                isAnimationActive={false}
               />
-            )}
-            {compact ? null : (
-              <Tooltip formatter={value => Math.round(value)} />
-            )}
-            <Line
-              type="monotone"
-              dataKey="NetWorth"
-              stroke={theme.reportsBlue}
-            />
-          </LineChart>
+              <defs>
+                <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset={off}
+                    stopColor={theme.reportsBlue}
+                    stopOpacity={0.2}
+                  />
+                  <stop
+                    offset={off}
+                    stopColor={theme.reportsRed}
+                    stopOpacity={0.2}
+                  />
+                </linearGradient>
+              </defs>
+
+              <Area
+                type="monotone"
+                dot={false}
+                activeDot={false}
+                animationDuration={0}
+                dataKey="y"
+                stroke={theme.reportsBlue}
+                fill="url(#splitColor)"
+                fillOpacity={1}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         )
       }
     </Container>
