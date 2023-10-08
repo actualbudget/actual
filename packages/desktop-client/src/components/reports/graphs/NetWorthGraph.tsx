@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { css } from 'glamor';
 import {
   AreaChart,
   Area,
@@ -53,24 +54,37 @@ function NetWorthGraph({
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <strong>{''}</strong>
-          </div>
-          <div style={{ lineHeight: 1.5 }}>
-            <AlignedText left="Assets:" right={payload[0].payload.assets} />
-            <AlignedText left="Debt:" right={payload[0].payload.debt} />
-            <AlignedText
-              left="Net worth:"
-              right={<strong>{payload[0].payload.y}</strong>}
-            />
-            <AlignedText left="Change:" right={payload[0].payload.change} />
+        <div
+          className={`${css(
+            {
+              zIndex: 1000,
+              pointerEvents: 'none',
+              borderRadius: 2,
+              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+              backgroundColor: theme.alt2MenuBackground,
+              color: theme.alt2MenuItemText,
+              padding: 10,
+            },
+            style,
+          )}`}
+        >
+          <div>
+            <div style={{ marginBottom: 10 }}>
+              <strong>{label}</strong>
+            </div>
+            <div style={{ lineHeight: 1.5 }}>
+              <AlignedText left="Assets:" right={payload[0].payload.assets} />
+              <AlignedText left="Debt:" right={payload[0].payload.debt} />
+              <AlignedText
+                left="Net worth:"
+                right={<strong>{payload[0].payload.y}</strong>}
+              />
+              <AlignedText left="Change:" right={payload[0].payload.change} />
+            </div>
           </div>
         </div>
       );
     }
-
-    return null;
   };
 
   return (
