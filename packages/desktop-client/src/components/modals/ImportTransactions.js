@@ -578,7 +578,7 @@ export default function ImportTransactions({ modalProps, options }) {
   // options which are simple post-processing. That means if you
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
-  let [csvDelimiter, setCsvDelimiter] = useState(
+  let [delimiter, setdelimiter] = useState(
     prefs[`csv-delimiter-${accountId}`] ||
       (filename.endsWith('.tsv') ? '\t' : ','),
   );
@@ -666,7 +666,7 @@ export default function ImportTransactions({ modalProps, options }) {
     const fileType = getFileType(options.filename);
     const parseOptions = getParseOptions(
       fileType,
-      { csvDelimiter, hasHeaderRow },
+      { delimiter, hasHeaderRow },
       { fallbackMissingPayeeToMemo },
     );
 
@@ -716,7 +716,7 @@ export default function ImportTransactions({ modalProps, options }) {
     const fileType = getFileType(res[0]);
     const parseOptions = getParseOptions(
       fileType,
-      { csvDelimiter, hasHeaderRow },
+      { delimiter, hasHeaderRow },
       { fallbackMissingPayeeToMemo },
     );
 
@@ -787,7 +787,7 @@ export default function ImportTransactions({ modalProps, options }) {
       savePrefs({
         [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings),
       });
-      savePrefs({ [`csv-delimiter-${accountId}`]: csvDelimiter });
+      savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
     }
 
     if (filetype === 'csv' || filetype === 'qif') {
@@ -969,9 +969,9 @@ export default function ImportTransactions({ modalProps, options }) {
                       ['|', '|'],
                       ['\t', 'tab'],
                     ]}
-                    value={csvDelimiter}
+                    value={delimiter}
                     onChange={value => {
-                      setCsvDelimiter(value);
+                      setdelimiter(value);
                       parse(
                         filename,
                         getParseOptions('csv', {
@@ -991,7 +991,7 @@ export default function ImportTransactions({ modalProps, options }) {
                     parse(
                       filename,
                       getParseOptions('csv', {
-                        delimiter: csvDelimiter,
+                        delimiter,
                         hasHeaderRow: !hasHeaderRow,
                       }),
                     );
