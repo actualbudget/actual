@@ -966,6 +966,7 @@ export default function ImportTransactions({ modalProps, options }) {
                     options={[
                       [',', ','],
                       [';', ';'],
+                      ['|', '|'],
                       ['\t', 'tab'],
                     ]}
                     value={csvDelimiter}
