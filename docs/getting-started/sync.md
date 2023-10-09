@@ -1,8 +1,8 @@
 # Syncing Across Devices
 
-Actual is a different kind of app. Instead of storing all of your data on the internet by default, it stores all of your data locally. That means it works regardless of your network connection, and you always have direct access to your data.
+Actual is a different kind of app. It stores all of your data on your installed Actual server by default AND it stores all of your data on your local device. That means it works regardless of your network connection, and you always have direct access to your data. Your data never goes to any external servers that you don't choose.  It's your data, and you're in control.
 
-We don't want to throw away the internet though. It's too useful. When your data is stored in the cloud, you can access it from any device easily, and you never have to worry about losing your data in case you drop your laptop or phone into a lake.
+We don't want to throw away the internet though. It's too useful. You can set up your server to access it through a VPN or through the wider internet. The choice is yours. You can access it from any device easily, and you never have to worry about losing your data in case you drop your laptop or phone into a lake.
 
 That's why we automatically sync all of your data to your selected server in the background. You get the best of both worlds: all data is local by default, but if internet is available, your data is seamlessly backed up and synced to all other devices. This is the opposite of most apps which heavily rely on the internet to be available.
 
@@ -20,7 +20,7 @@ In addition to the requirement to enter your password before the Actual server w
 
 End-to-end encryption offers the ability for you to generate a key based on a password and encrypt it so that hosted services can't read the data. Before your data leaves your device, it is encrypted using keys only you have.
 
-This guarantees that only you will ever have access to your data. This is optional and using it requires you to enter a password whenever downloading cloud files (this only needs to be done once per device). The password you enter can be different from the main server password.
+This guarantees that only you will ever have access to your data. This is optional and using it requires you to enter a password whenever downloading [cloud files](#this-file-is-not-a-cloud-file) (this only needs to be done once per device). The password you enter can be different from the main server password.
 
 Data on your local device is still unencrypted. We recommend full disk encryption if you are interested in local encryption.
 
