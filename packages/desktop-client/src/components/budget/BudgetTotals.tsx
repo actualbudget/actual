@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { type ComponentType, memo, useState } from 'react';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { theme, styles } from '../../style';
@@ -10,12 +10,22 @@ import { Tooltip } from '../tooltips';
 import RenderMonths from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
+type BudgetTotalsProps = {
+  MonthComponent: ComponentType<{
+    monthIndex: number;
+    editing: boolean;
+  }>;
+  toggleHiddenCategories: () => void;
+  expandAllCategories: () => void;
+  collapseAllCategories: () => void;
+};
+
 const BudgetTotals = memo(function BudgetTotals({
   MonthComponent,
   toggleHiddenCategories,
   expandAllCategories,
   collapseAllCategories,
-}) {
+}: BudgetTotalsProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <View
