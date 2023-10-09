@@ -1070,8 +1070,8 @@ export default function ImportTransactions({ modalProps, options }) {
 
 function getParseOptions(fileType, csvOptions, ofxOptions) {
   if (fileType === 'csv') {
-    const { csvDelimiter, hasHeaderRow } = csvOptions;
-    return { csvDelimiter, hasHeaderRow };
+    const { delimiter, hasHeaderRow } = csvOptions;
+    return { delimiter, hasHeaderRow };
   } else if (isOfxFile(fileType)) {
     const { fallbackMissingPayeeToMemo } = ofxOptions;
     return { fallbackMissingPayeeToMemo };
