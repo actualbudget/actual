@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { type CSSProperties, memo } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -7,9 +7,23 @@ import View from '../common/View';
 import { MonthPicker } from './MonthPicker';
 import { getScrollbarWidth } from './util';
 
+type BudgetPageHeaderProps = {
+  startMonth: string;
+  onMonthSelect: (month: string) => string;
+  numMonths: number;
+  monthBounds: { start: string; end: string };
+  style?: CSSProperties;
+};
+
 const BudgetPageHeader = memo(
-  ({ startMonth, onMonthSelect, numMonths, monthBounds, style }) => {
-    function getValidMonth(month) {
+  ({
+    startMonth,
+    onMonthSelect,
+    numMonths,
+    monthBounds,
+    style,
+  }: BudgetPageHeaderProps) => {
+    function getValidMonth(month: string) {
       let start = monthBounds.start;
       let end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
 
