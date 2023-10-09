@@ -578,7 +578,7 @@ export default function ImportTransactions({ modalProps, options }) {
   // options which are simple post-processing. That means if you
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
-  let [delimiter, setdelimiter] = useState(
+  let [delimiter, setDelimiter] = useState(
     prefs[`csv-delimiter-${accountId}`] ||
       (filename.endsWith('.tsv') ? '\t' : ','),
   );
@@ -971,7 +971,7 @@ export default function ImportTransactions({ modalProps, options }) {
                     ]}
                     value={delimiter}
                     onChange={value => {
-                      setdelimiter(value);
+                      setDelimiter(value);
                       parse(
                         filename,
                         getParseOptions('csv', {
