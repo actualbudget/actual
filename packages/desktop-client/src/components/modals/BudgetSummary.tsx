@@ -1,9 +1,10 @@
 import React from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
-import * as monthUtils from 'loot-core/src/shared/months';
+import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
 import { theme, styles } from '../../style';
+import { type CommonModalProps } from '../../types/modals';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Text from '../common/Text';
@@ -35,13 +36,18 @@ function ToBudget({ toBudget }) {
   );
 }
 
-function BudgetSummary({ month, modalProps }) {
-  const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
+type BudgetSummaryProps = {
+  modalProps: CommonModalProps;
+  month: string;
+};
+
+function BudgetSummary({ month, modalProps }: BudgetSummaryProps) {
+  const prevMonthName = format(prevMonth(month), 'MMM');
 
   return (
-    <Modal title="Budget Details" {...modalProps} animate>
+    <Modal title="Budget Details" {...modalProps}>
       {() => (
-        <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
+        <NamespaceContext.Provider value={sheetForMonth(month)}>
           <View
             style={{
               flexDirection: 'row',
