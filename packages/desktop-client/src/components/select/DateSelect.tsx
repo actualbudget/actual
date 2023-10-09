@@ -6,10 +6,12 @@ import React, {
   useLayoutEffect,
   useImperativeHandle,
   useMemo,
+  type MutableRefObject,
+  type KeyboardEvent,
 } from 'react';
 import { useSelector } from 'react-redux';
 
-import * as d from 'date-fns';
+import { parse, parseISO, format, subDays, addDays, isValid } from 'date-fns';
 import Pikaday from 'pikaday';
 
 import 'pikaday/css/pikaday.css';
@@ -23,9 +25,9 @@ import {
 } from 'loot-core/src/shared/months';
 import { stringToInteger } from 'loot-core/src/shared/util';
 
-import { theme } from '../../style';
-import Input from '../common/Input';
-import View from '../common/View';
+import { type CSSProperties, theme } from '../../style';
+import Input, { type InputProps } from '../common/Input';
+import View, { type ViewProps } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import DateSelectLeft from './DateSelect.left.png';
@@ -76,7 +78,18 @@ let pickerStyles = {
   },
 };
 
-let DatePicker = forwardRef(
+type DatePickerProps = {
+  value: string;
+  firstDayOfWeekIdx: string;
+  dateFormat: string;
+  onUpdate?: (selectedDate: Date) => void;
+  onSelect: (selectedDate: Date | null) => void;
+};
+
+type DatePickerForwardedRef = {
+  handleInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
+};
+let DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
   ({ value, firstDayOfWeekIdx, dateFormat, onUpdate, onSelect }, ref) => {
     let picker = useRef(null);
     let mountPoint = useRef(null);
@@ -89,22 +102,23 @@ let DatePicker = forwardRef(
           switch (e.key) {
             case 'ArrowLeft':
               e.preventDefault();
-              newDate = d.subDays(picker.current.getDate(), 1);
+              newDate = subDays(picker.current.getDate(), 1);
               break;
             case 'ArrowUp':
               e.preventDefault();
-              newDate = d.subDays(picker.current.getDate(), 7);
+              newDate = subDays(picker.current.getDate(), 7);
               break;
             case 'ArrowRight':
               e.preventDefault();
-              newDate = d.addDays(picker.current.getDate(), 1);
+              newDate = addDays(picker.current.getDate(), 1);
               break;
             case 'ArrowDown':
               e.preventDefault();
-              newDate = d.addDays(picker.current.getDate(), 7);
+              newDate = addDays(picker.current.getDate(), 7);
               break;
             default:
           }
+
           if (newDate) {
             picker.current.setDate(newDate, true);
             onUpdate?.(newDate);
@@ -120,14 +134,14 @@ let DatePicker = forwardRef(
         keyboardInput: false,
         firstDay: stringToInteger(firstDayOfWeekIdx),
         defaultDate: value
-          ? d.parse(value, dateFormat, currentDate())
+          ? parse(value, dateFormat, currentDate())
           : currentDate(),
         setDefaultDate: true,
         toString(date) {
-          return d.format(date, dateFormat);
+          return format(date, dateFormat);
         },
         parse(dateString) {
-          return d.parse(dateString, dateFormat, new Date());
+          return parse(dateString, dateFormat, new Date());
         },
         onSelect,
       });
@@ -141,7 +155,7 @@ let DatePicker = forwardRef(
 
     useEffect(() => {
       if (picker.current.getDate() !== value) {
-        picker.current.setDate(d.parse(value, dateFormat, new Date()), true);
+        picker.current.setDate(parse(value, dateFormat, new Date()), true);
       }
     }, [value, dateFormat]);
 
@@ -152,6 +166,23 @@ let DatePicker = forwardRef(
 function defaultShouldSaveFromKey(e) {
   return e.key === 'Enter';
 }
+
+type DateSelectProps = {
+  containerProps?: ViewProps;
+  inputProps?: InputProps;
+  tooltipStyle?: CSSProperties;
+  value: string;
+  isOpen?: boolean;
+  embedded?: boolean;
+  dateFormat: string;
+  focused?: boolean;
+  openOnFocus?: boolean;
+  inputRef?: MutableRefObject<HTMLInputElement>;
+  shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
+  tableBehavior?: boolean;
+  onUpdate?: (selectedDate: string) => void;
+  onSelect: (selectedDate: string) => void;
+};
 
 export default function DateSelect({
   containerProps,
@@ -168,12 +199,12 @@ export default function DateSelect({
   tableBehavior,
   onUpdate,
   onSelect,
-}) {
+}: DateSelectProps) {
   let parsedDefaultValue = useMemo(() => {
     if (defaultValue) {
-      let date = d.parseISO(defaultValue);
-      if (d.isValid(date)) {
-        return d.format(date, dateFormat);
+      let date = parseISO(defaultValue);
+      if (isValid(date)) {
+        return format(date, dateFormat);
       }
     }
     return '';
@@ -216,29 +247,29 @@ export default function DateSelect({
       // Support only entering the month and day (4/5). This is complex
       // because of the various date formats - we need to derive
       // the right day/month format from it
-      let test = d.parse(value, getDayMonthFormat(dateFormat), new Date());
-      if (d.isValid(test)) {
-        onUpdate?.(d.format(test, 'yyyy-MM-dd'));
-        setSelectedValue(d.format(test, dateFormat));
+      let test = parse(value, getDayMonthFormat(dateFormat), new Date());
+      if (isValid(test)) {
+        onUpdate?.(format(test, 'yyyy-MM-dd'));
+        setSelectedValue(format(test, dateFormat));
       }
     } else if (getShortYearRegex(dateFormat).test(value)) {
       // Support entering the year as only two digits (4/5/19)
-      let test = d.parse(value, getShortYearFormat(dateFormat), new Date());
-      if (d.isValid(test)) {
-        onUpdate?.(d.format(test, 'yyyy-MM-dd'));
-        setSelectedValue(d.format(test, dateFormat));
+      let test = parse(value, getShortYearFormat(dateFormat), new Date());
+      if (isValid(test)) {
+        onUpdate?.(format(test, 'yyyy-MM-dd'));
+        setSelectedValue(format(test, dateFormat));
       }
     } else {
-      let test = d.parse(value, dateFormat, new Date());
-      if (d.isValid(test)) {
-        let date = d.format(test, 'yyyy-MM-dd');
+      let test = parse(value, dateFormat, new Date());
+      if (isValid(test)) {
+        let date = format(test, 'yyyy-MM-dd');
         onUpdate?.(date);
         setSelectedValue(value);
       }
     }
   }, [value]);
 
-  function onKeyDown(e) {
+  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (
       ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) &&
       !e.shiftKey &&
@@ -267,8 +298,8 @@ export default function DateSelect({
       setValue(selectedValue);
       setOpen(false);
 
-      let date = d.parse(selectedValue, dateFormat, new Date());
-      onSelect(d.format(date, 'yyyy-MM-dd'));
+      let date = parse(selectedValue, dateFormat, new Date());
+      onSelect(format(date, 'yyyy-MM-dd'));
 
       if (open && e.key === 'Enter') {
         // This stops the event from propagating up
@@ -341,9 +372,9 @@ export default function DateSelect({
             } else {
               setValue(selectedValue || '');
 
-              let date = d.parse(selectedValue, dateFormat, new Date());
-              if (date instanceof Date && !isNaN(date)) {
-                onSelect(d.format(date, 'yyyy-MM-dd'));
+              let date = parse(selectedValue, dateFormat, new Date());
+              if (date instanceof Date) {
+                onSelect(format(date, 'yyyy-MM-dd'));
               }
             }
           }
@@ -357,12 +388,12 @@ export default function DateSelect({
             firstDayOfWeekIdx={firstDayOfWeekIdx}
             dateFormat={dateFormat}
             onUpdate={date => {
-              setSelectedValue(d.format(date, dateFormat));
-              onUpdate?.(d.format(date, 'yyyy-MM-dd'));
+              setSelectedValue(format(date, dateFormat));
+              onUpdate?.(format(date, 'yyyy-MM-dd'));
             }}
             onSelect={date => {
-              setValue(d.format(date, dateFormat));
-              onSelect(d.format(date, 'yyyy-MM-dd'));
+              setValue(format(date, dateFormat));
+              onSelect(format(date, 'yyyy-MM-dd'));
               setOpen(false);
             }}
           />,
