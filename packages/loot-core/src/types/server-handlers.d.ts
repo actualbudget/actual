@@ -233,7 +233,9 @@ export interface ServerHandlers {
 
   'sync-repair': () => Promise<unknown>;
 
-  'key-make': (arg: { password }) => Promise<unknown>;
+  'key-make': (arg: {
+    password;
+  }) => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
   'key-test': (arg: {
     fileId;
