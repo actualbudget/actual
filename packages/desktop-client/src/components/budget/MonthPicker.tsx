@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { type CSSProperties, useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -6,13 +6,21 @@ import useResizeObserver from '../../hooks/useResizeObserver';
 import { styles, theme } from '../../style';
 import View from '../common/View';
 
+type MonthPickerProps = {
+  startMonth: string;
+  numDisplayed: number;
+  monthBounds: { start: string; end: string };
+  style: CSSProperties;
+  onSelect: (month: string) => void;
+};
+
 export const MonthPicker = ({
   startMonth,
   numDisplayed,
   monthBounds,
   style,
   onSelect,
-}) => {
+}: MonthPickerProps) => {
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
@@ -40,11 +48,14 @@ export const MonthPicker = ({
   const lastSelectedIndex = firstSelectedIndex + numDisplayed - 1;
 
   const [size, setSize] = useState('small');
+
   const containerRef = useResizeObserver(rect => {
-    setSize(rect.width <= 400 ? 'small' : 'big');
-    setTargetMonthCount(
-      Math.min(Math.max(Math.floor(rect.width / 50), 12), 24),
-    );
+    return new ResizeObserver(() => {
+      setSize(rect.width <= 400 ? 'small' : 'big');
+      setTargetMonthCount(
+        Math.min(Math.max(Math.floor(rect.width / 50), 12), 24),
+      );
+    });
   });
 
   let yearHeadersShown = [];

@@ -1,6 +1,16 @@
 import { styles, theme } from '../../style';
 
-export function addToBeBudgetedGroup(groups) {
+type BudgetGroupArgs = {
+  categories: object[];
+  hidden: number;
+  id: string;
+  is_income: number;
+  name: string;
+  sort_order: number;
+  tombstone: number;
+};
+
+export function addToBeBudgetedGroup(groups: BudgetGroupArgs[]) {
   return [
     {
       id: 'to-be-budgeted',
@@ -11,20 +21,20 @@ export function addToBeBudgetedGroup(groups) {
   ];
 }
 
-export function separateGroups(categoryGroups) {
+export function separateGroups(categoryGroups: BudgetGroupArgs[]) {
   return [
     categoryGroups.filter(g => !g.is_income),
     categoryGroups.find(g => g.is_income),
   ];
 }
 
-export function makeAmountGrey(value) {
+export function makeAmountGrey(value: number | string) {
   return value === 0 || value === '0' || value === ''
     ? { color: theme.altMenuItemText }
     : null;
 }
 
-export function makeAmountStyle(value) {
+export function makeAmountStyle(value: number) {
   const greyed = makeAmountGrey(value);
   if (greyed) {
     return greyed;
@@ -35,7 +45,7 @@ export function makeAmountStyle(value) {
   }
 }
 
-export function makeAmountFullStyle(value) {
+export function makeAmountFullStyle(value: number) {
   return {
     color:
       value < 0
@@ -46,7 +56,21 @@ export function makeAmountFullStyle(value) {
   };
 }
 
-export function findSortDown(arr, pos, targetId) {
+type CatagroryGroupArrArgs = {
+  cat_group: string;
+  hidden: number;
+  id: string;
+  is_income: number;
+  name: string;
+  sort_order: number;
+  tombstone: number;
+};
+
+export function findSortDown(
+  arr: CatagroryGroupArrArgs[],
+  pos: string,
+  targetId: string,
+) {
   if (pos === 'top') {
     return { targetId };
   } else {
@@ -66,7 +90,11 @@ export function findSortDown(arr, pos, targetId) {
   }
 }
 
-export function findSortUp(arr, pos, targetId) {
+export function findSortUp(
+  arr: CatagroryGroupArrArgs[],
+  pos: string,
+  targetId: string,
+) {
   if (pos === 'bottom') {
     return { targetId };
   } else {
