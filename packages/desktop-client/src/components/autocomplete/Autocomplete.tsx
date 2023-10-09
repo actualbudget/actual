@@ -164,7 +164,7 @@ type SingleAutocompleteProps = {
   openOnFocus?: boolean;
   getHighlightedIndex?: (suggestions) => number | null;
   highlightFirst?: boolean;
-  onUpdate: (id: unknown, value: string) => void;
+  onUpdate?: (id: unknown, value: string) => void;
   strict?: boolean;
   onSelect: (id: unknown, value: string) => void;
   tableBehavior?: boolean;
