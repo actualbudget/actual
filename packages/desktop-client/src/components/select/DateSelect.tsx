@@ -373,7 +373,7 @@ export default function DateSelect({
               setValue(selectedValue || '');
 
               let date = parse(selectedValue, dateFormat, new Date());
-              if (date instanceof Date && !isNaN(date.getTime())) {
+              if (date instanceof Date && !isNaN(date.valueOf())) {
                 onSelect(format(date, 'yyyy-MM-dd'));
               }
             }
