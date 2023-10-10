@@ -296,17 +296,20 @@ async function processTemplate(
               );
             if (to_budget != null) {
               num_applied++;
-              if (
-                idealTemplate.filter(c => c.category === category.id).length > 0
-              ) {
-                idealTemplate.filter(
-                  c => c.category === category.id,
-                )[0].amount += to_budget;
-              } else {
-                idealTemplate.push({
-                  category: category.id,
-                  amount: to_budget,
-                });
+              //only store goals from non remainder templates
+              if (priority != remainder_priority){
+                if (
+                  idealTemplate.filter(c => c.category === category.id).length > 0
+                ) {
+                  idealTemplate.filter(
+                    c => c.category === category.id,
+                  )[0].amount += to_budget;
+                } else {
+                  idealTemplate.push({
+                    category: category.id,
+                    amount: to_budget,
+                  });
+                }
               }
               if (to_budget <= budgetAvailable || !priority) {
                 templateBudget.push({
