@@ -297,7 +297,7 @@ async function processTemplate(
             if (to_budget != null) {
               num_applied++;
               //only store goals from non remainder templates
-              if (priority != remainder_priority) {
+              if (priority !== remainder_priority) {
                 if (
                   idealTemplate.filter(c => c.category === category.id).length >
                   0
