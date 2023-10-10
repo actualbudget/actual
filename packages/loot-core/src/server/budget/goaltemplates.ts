@@ -652,7 +652,12 @@ async function applyCategoryTemplate(
             let conditions = rule.serialize().conditions;
             let { date: dateConditions, amount: amountCondition } =
               extractScheduleConds(conditions);
-            let target = -amountCondition.value;
+            let target =
+              amountCondition.op === 'isbetween'
+                ? -Math.round(
+                    amountCondition.value.num1 + amountCondition.value.num2,
+                  ) / 2
+                : -amountCondition.value;
             let next_date_string = getNextDate(
               dateConditions,
               monthUtils._parse(current_month),
@@ -689,7 +694,7 @@ async function applyCategoryTemplate(
                   monthUtils._parse(current_month),
                 );
                 while (next_date < next_month) {
-                  monthlyTarget += amountCondition.value;
+                  monthlyTarget += -target;
                   next_date = monthUtils.addDays(next_date, 1);
                   next_date = getNextDate(
                     dateConditions,
