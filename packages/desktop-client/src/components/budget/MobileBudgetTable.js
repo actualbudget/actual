@@ -6,7 +6,6 @@ import memoizeOne from 'memoize-one';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import Add from '../../icons/v1/Add';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import Close from '../../icons/v1/Close';
@@ -321,7 +320,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
                 <Button
                   type="bare"
                   style={{ padding: 10 }}
-                  onPointerUp={tooltip.close}
+                  onPointerUp={() => {
+                    setCategoryName(category.name);
+                    tooltip.close();
+                  }}
                 >
                   <Close width={9} height={9} />
                 </Button>
@@ -443,10 +445,14 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   let tooltip = useTooltip();
 
   let onTooltipClose = () => {
-    onSave?.({
-      ...group,
-      name: groupName,
-    });
+    if (groupName) {
+      onSave?.({
+        ...group,
+        name: groupName,
+      });
+    } else {
+      setGroupName(group.name);
+    }
     tooltip.close();
   };
 
@@ -454,7 +460,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
     tooltip.close();
     switch (type) {
       case 'add-category':
-        onAddCategory?.(group.id);
+        onAddCategory?.(group.id, group.is_income);
         break;
       case 'toggle-visibility':
         setIsHidden(!isHidden);
@@ -513,13 +519,16 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
                   }
                   placeholder="Category Group Name"
                   value={groupName}
-                  onUpdate={name => setGroupName(name ? name : group.name)}
+                  onUpdate={setGroupName}
                   onEnter={onTooltipClose}
                 />
                 <Button
                   type="bare"
                   style={{ padding: 10 }}
-                  onPointerUp={tooltip.close}
+                  onPointerUp={() => {
+                    setGroupName(group.name);
+                    tooltip.close();
+                  }}
                 >
                   <Close width={9} height={9} />
                 </Button>
@@ -589,16 +598,16 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         />
       </View>
 
-      {editMode && (
+      {/* {editMode && (
         <View>
           <Button
-            onClick={() => onAddCategory(group.id)}
+            onClick={() => onAddCategory(group.id, group.is_income)}
             style={{ padding: 10 }}
           >
             <Add width={15} height={15} />
           </Button>
         </View>
-      )}
+      )} */}
     </ListItem>
   );
 
@@ -637,10 +646,14 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   let tooltip = useTooltip();
 
   let onTooltipClose = () => {
-    onSave?.({
-      ...group,
-      name: groupName,
-    });
+    if (groupName) {
+      onSave?.({
+        ...group,
+        name: groupName,
+      });
+    } else {
+      setGroupName(group.name);
+    }
     tooltip.close();
   };
 
@@ -648,7 +661,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
     tooltip.close();
     switch (type) {
       case 'add-category':
-        onAddCategory?.(group.id);
+        onAddCategory?.(group.id, group.is_income);
         break;
       case 'toggle-visibility':
         setIsHidden(!isHidden);
@@ -701,13 +714,16 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
                   }
                   placeholder="Category Group Name"
                   value={groupName}
-                  onUpdate={name => setGroupName(name ? name : group.name)}
+                  onUpdate={setGroupName}
                   onEnter={onTooltipClose}
                 />
                 <Button
                   type="bare"
                   style={{ padding: 10 }}
-                  onPointerUp={tooltip.close}
+                  onPointerUp={() => {
+                    setGroupName(group.name);
+                    tooltip.close();
+                  }}
                 >
                   <Close width={9} height={9} />
                 </Button>
@@ -851,7 +867,10 @@ const IncomeCategory = memo(function IncomeCategory({
                 <Button
                   type="bare"
                   style={{ padding: 10 }}
-                  onPointerUp={tooltip.close}
+                  onPointerUp={() => {
+                    setCategoryName(category.name);
+                    tooltip.close();
+                  }}
                 >
                   <Close width={9} height={9} />
                 </Button>
@@ -1607,7 +1626,9 @@ function BudgetHeader({
               >
                 <Menu
                   onMenuSelect={onMenuSelect}
-                  items={[{ name: 'toggle-hidden', text: 'Toggle hidden' }]}
+                  items={[
+                    { name: 'toggle-hidden', text: 'Toggle hidden categories' },
+                  ]}
                 />
               </Tooltip>
             )}

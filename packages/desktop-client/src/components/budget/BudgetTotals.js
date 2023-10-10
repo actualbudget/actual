@@ -81,7 +81,7 @@ const BudgetTotals = memo(function BudgetTotals({
                 items={[
                   {
                     name: 'toggle-visibility',
-                    text: 'Toggle hidden',
+                    text: 'Toggle hidden categories',
                   },
                   {
                     name: 'expandAllCategories',

@@ -5,7 +5,6 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
 import { theme, styles } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
