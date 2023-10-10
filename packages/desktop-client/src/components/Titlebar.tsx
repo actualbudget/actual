@@ -177,7 +177,7 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     <>
       <KeyHandlers
         keys={{
-          'ctrl+s': () => {
+          'ctrl+s, cmd+s': () => {
             sync();
           },
         }}
