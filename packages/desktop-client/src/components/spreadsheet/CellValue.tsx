@@ -39,28 +39,27 @@ function CellValue({
   let format = useFormat();
 
   return (
-
-      <ConditionalPrivacyFilter
-        privacyFilter={
-          privacyFilter != null
-            ? privacyFilter
-            : type === 'financial'
-            ? true
-            : undefined
-        }
+    <ConditionalPrivacyFilter
+      privacyFilter={
+        privacyFilter != null
+          ? privacyFilter
+          : type === 'financial'
+          ? true
+          : undefined
+      }
+    >
+      <Text
+        style={{
+          ...(type === 'financial' && styles.tnum),
+          ...style,
+          ...(getStyle && getStyle(sheetValue, goalStatus)),
+        }}
+        data-testid={testId || fullSheetName}
+        data-cellname={fullSheetName}
       >
-        <Text
-          style={{
-            ...(type === 'financial' && styles.tnum),
-            ...style,
-            ...(getStyle && getStyle(sheetValue, goalStatus)),
-          }}
-          data-testid={testId || fullSheetName}
-          data-cellname={fullSheetName}
-        >
-          {formatter ? formatter(sheetValue) : format(sheetValue, type)}
-        </Text>
-      </ConditionalPrivacyFilter>
+        {formatter ? formatter(sheetValue) : format(sheetValue, type)}
+      </Text>
+    </ConditionalPrivacyFilter>
   );
 }
 
