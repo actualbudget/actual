@@ -108,7 +108,7 @@ function Notification({
       style={{
         marginTop: 10,
         color: positive
-          ? theme.alt4NoticeText
+          ? theme.noticeText
           : error
           ? theme.errorTextDark
           : theme.alt4WarningText,
@@ -121,13 +121,13 @@ function Notification({
           padding: '14px 14px',
           fontSize: 14,
           backgroundColor: positive
-            ? theme.alt2NoticeBackground
+            ? theme.noticeBackgroundLight
             : error
             ? theme.errorBackground
             : theme.alt2WarningBackground,
           borderTop: `3px solid ${
             positive
-              ? theme.altNoticeAccent
+              ? theme.noticeBorder
               : error
               ? theme.errorBorder
               : theme.altWarningAccent
@@ -173,7 +173,7 @@ function Notification({
                 backgroundColor: 'transparent',
                 border: `1px solid ${
                   positive
-                    ? theme.altNoticeAccent
+                    ? theme.noticeBorder
                     : error
                     ? theme.errorBorder
                     : theme.altWarningAccent

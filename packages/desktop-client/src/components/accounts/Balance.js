@@ -159,7 +159,7 @@ export function Balances({
               value < 0
                 ? theme.errorText
                 : value > 0
-                ? theme.noticeText
+                ? theme.noticeTextLight
                 : theme.pageTextSubdued,
           })}
           privacyFilter={{

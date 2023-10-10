@@ -1001,7 +1001,9 @@ class Transaction extends PureComponent {
                   style={{
                     width: 11,
                     height: 11,
-                    color: cleared ? theme.noticeText : theme.altButtonBareText,
+                    color: cleared
+                      ? theme.noticeTextLight
+                      : theme.altButtonBareText,
                     marginRight: 5,
                   }}
                 />

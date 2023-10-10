@@ -93,7 +93,7 @@ function CategoryList({
                   alignItems: 'center',
                   fontSize: 11,
                   fontWeight: 500,
-                  color: theme.noticeAccent,
+                  color: theme.noticeTextMenu,
                   padding: '6px 8px',
                   ':active': {
                     backgroundColor: 'rgba(100, 100, 100, .25)',
