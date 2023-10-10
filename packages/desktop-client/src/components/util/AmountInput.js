@@ -17,13 +17,16 @@ export function AmountInput({
   id,
   inputRef,
   initialValue = 0,
+  zeroSign = '-', // + or -
   onChange,
   onBlur,
   style,
   textStyle,
   focused,
 }) {
-  let [negative, setNegative] = useState(initialValue < 0);
+  let [negative, setNegative] = useState(
+    (initialValue === 0 && zeroSign === '-') || initialValue < 0,
+  );
   let initialValueAbsolute = integerToCurrency(Math.abs(initialValue || 0));
   let [value, setValue] = useState(initialValueAbsolute);
   let buttonRef = useRef();

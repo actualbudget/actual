@@ -143,6 +143,7 @@ function BudgetCell({
       {editing ? (
         <AmountInput
           initialValue={sheetValue}
+          zeroSign="+"
           style={{
             height: ROW_HEIGHT - 4,
             transform: 'translateX(6px)',
