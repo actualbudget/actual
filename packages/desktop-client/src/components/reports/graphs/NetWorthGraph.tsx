@@ -51,7 +51,23 @@ function NetWorthGraph({
 
   const off = gradientOffset();
 
-  const CustomTooltip = ({ active, payload, label }) => {
+  type PayloadItem = {
+    payload: {
+      date: string;
+      assets: number | string;
+      debt: number | string;
+      networth: number | string;
+      change: number | string;
+    };
+  };
+
+  type CustomTooltipProps = {
+    active?: boolean;
+    payload?: PayloadItem[];
+    label?: string;
+  };
+
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div
@@ -97,54 +113,57 @@ function NetWorthGraph({
       {(width, height, portalHost) =>
         graphData && (
           <ResponsiveContainer>
-            <AreaChart
-              width={width}
-              height={height}
-              data={graphData.data}
-              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-            >
-              {compact ? null : (
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              )}
-              {compact ? null : <XAxis dataKey="x" />}
-              {compact ? null : (
-                <YAxis
-                  dataKey="y"
-                  domain={['auto', 'auto']}
-                  tickFormatter={tickFormatter}
+            <div>
+              {!compact && <div style={{ marginTop: '15px' }} />}
+              <AreaChart
+                width={width}
+                height={height}
+                data={graphData.data}
+                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              >
+                {compact ? null : (
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                )}
+                {compact ? null : <XAxis dataKey="x" />}
+                {compact ? null : (
+                  <YAxis
+                    dataKey="y"
+                    domain={['auto', 'auto']}
+                    tickFormatter={tickFormatter}
+                  />
+                )}
+                <Tooltip
+                  content={<CustomTooltip />}
+                  formatter={value => Math.round(value as number)}
+                  isAnimationActive={false}
                 />
-              )}
-              <Tooltip
-                content={<CustomTooltip />}
-                formatter={value => Math.round(value)}
-                isAnimationActive={false}
-              />
-              <defs>
-                <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset={off}
-                    stopColor={theme.reportsBlue}
-                    stopOpacity={0.2}
-                  />
-                  <stop
-                    offset={off}
-                    stopColor={theme.reportsRed}
-                    stopOpacity={0.2}
-                  />
-                </linearGradient>
-              </defs>
+                <defs>
+                  <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsBlue}
+                      stopOpacity={0.2}
+                    />
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsRed}
+                      stopOpacity={0.2}
+                    />
+                  </linearGradient>
+                </defs>
 
-              <Area
-                type="linear"
-                dot={false}
-                activeDot={false}
-                animationDuration={0}
-                dataKey="y"
-                stroke={theme.reportsBlue}
-                fill="url(#splitColor)"
-                fillOpacity={1}
-              />
-            </AreaChart>
+                <Area
+                  type="linear"
+                  dot={false}
+                  activeDot={false}
+                  animationDuration={0}
+                  dataKey="y"
+                  stroke={theme.reportsBlue}
+                  fill="url(#splitColor)"
+                  fillOpacity={1}
+                />
+              </AreaChart>
+            </div>
           </ResponsiveContainer>
         )
       }
