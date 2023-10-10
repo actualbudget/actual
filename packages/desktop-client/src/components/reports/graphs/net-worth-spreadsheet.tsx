@@ -11,31 +11,6 @@ import {
 
 import { index } from '../util';
 
-function formatDate(date) {
-  // Array of month names
-  const monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  // Get the month and year from the date
-  const month = monthNames[date.getMonth()];
-  const year = date.getFullYear().toString().slice(-2); // Get the last 2 digits of the year
-
-  // Format and return the result
-  return `${month} ’${year}`;
-}
-
 export default function createSpreadsheet(
   start,
   end,
@@ -147,7 +122,7 @@ function recalculate(data, start, end) {
     endNetWorth = total;
 
     arr.push({
-      x: formatDate(x),
+      x: d.format(x, "MMM ''yy"),
       y: integerToAmount(total),
       assets: integerToCurrency(assets),
       debt: `-${integerToCurrency(debt)}`,
