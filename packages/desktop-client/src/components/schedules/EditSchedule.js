@@ -510,7 +510,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
           ) : (
             <AmountInput
               id="amount-field"
-              defaultValue={state.fields.amount}
+              initialValue={state.fields.amount}
               onChange={value =>
                 dispatch({
                   type: 'set-field',

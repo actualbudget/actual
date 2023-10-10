@@ -95,8 +95,8 @@ export default function PlaidExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: theme.alt3NoticeText,
-                borderColor: theme.alt3NoticeText,
+                backgroundColor: theme.noticeBackgroundDark,
+                borderColor: theme.noticeBorder,
               }}
               onClick={onContinue}
             >

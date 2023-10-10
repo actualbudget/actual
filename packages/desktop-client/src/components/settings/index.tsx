@@ -67,7 +67,7 @@ function About() {
             New version available: {latestVersion}
           </ExternalLink>
         ) : (
-          <Text style={{ color: theme.alt2NoticeText, fontWeight: 600 }}>
+          <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
             You’re up to date!
           </Text>
         )}

@@ -1,4 +1,4 @@
-import React, { useMemo, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 import { type CSSProperties, styles } from '../../style';
 import Text from '../common/Text';
@@ -38,8 +38,8 @@ function CellValue({
   let sheetValue = useSheetValue(binding);
   let format = useFormat();
 
-  return useMemo(
-    () => (
+  return (
+
       <ConditionalPrivacyFilter
         privacyFilter={
           privacyFilter != null
@@ -61,17 +61,6 @@ function CellValue({
           {formatter ? formatter(sheetValue) : format(sheetValue, type)}
         </Text>
       </ConditionalPrivacyFilter>
-    ),
-    [
-      privacyFilter,
-      type,
-      style,
-      getStyle,
-      fullSheetName,
-      formatter,
-      format,
-      sheetValue,
-    ],
   );
 }
 
