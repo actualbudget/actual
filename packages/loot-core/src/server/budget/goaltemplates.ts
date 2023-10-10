@@ -82,10 +82,7 @@ async function processTemplate(month, force, category_templates) {
     if (template) {
       for (let l = 0; l < template.length; l++) {
         //add each priority we need to a list.  Will sort later
-        if (
-          template[l].priority === null ||
-          template[l].priority === undefined
-        ) {
+        if (template[l].priority == null) {
           continue;
         }
         priority_list.push(template[l].priority);
