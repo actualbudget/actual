@@ -122,7 +122,7 @@ function recalculate(data, start, end) {
     endNetWorth = total;
 
     arr.push({
-      x: d.format(x, "MMM ''yy"),
+      x: d.format(x, 'MMM ’yy'),
       y: integerToAmount(total),
       assets: integerToCurrency(assets),
       debt: `-${integerToCurrency(debt)}`,
