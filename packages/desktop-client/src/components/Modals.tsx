@@ -12,6 +12,7 @@ import { type CommonModalProps } from '../types/modals';
 import BudgetSummary from './modals/BudgetSummary';
 import CloseAccount from './modals/CloseAccount';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
+import ConfirmTransactionEdit from './modals/ConfirmTransactionEdit';
 import CreateAccount from './modals/CreateAccount';
 import CreateEncryptionKey from './modals/CreateEncryptionKey';
 import CreateLocalAccount from './modals/CreateLocalAccount';
@@ -119,6 +120,14 @@ export default function Modals() {
               }
               categoryGroups={categoryGroups}
               onDelete={options.onDelete}
+            />
+          );
+
+        case 'confirm-transaction-edit':
+          return (
+            <ConfirmTransactionEdit
+              modalProps={modalProps}
+              onConfirm={options.onConfirm}
             />
           );
 

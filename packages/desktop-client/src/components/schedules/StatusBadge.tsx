@@ -6,6 +6,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 import AlertTriangle from '../../icons/v2/AlertTriangle';
 import CalendarIcon from '../../icons/v2/Calendar';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
+import Lock from '../../icons/v2/Lock';
 import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
 import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
@@ -66,6 +67,12 @@ export function getStatusProps(status: StatusTypes) {
         backgroundColor: theme.altTableBackground,
         Icon: CheckCircle1,
       };
+    case 'reconciled':
+      return {
+        color: theme.noticeTextLight,
+        backgroundColor: theme.altTableBackground,
+        Icon: Lock,
+      };
     default:
       return {
         color: theme.buttonNormalDisabledText,
@@ -75,8 +82,24 @@ export function getStatusProps(status: StatusTypes) {
   }
 }
 
-export function StatusBadge({ status }: { status: ScheduleStatusType }) {
-  const { color, backgroundColor, Icon } = getStatusProps(status);
+type Status =
+  | 'missed'
+  | 'due'
+  | 'upcoming'
+  | 'paid'
+  | 'completed'
+  | 'pending'
+  | 'scheduled'
+  | 'cleared'
+  | 'reconciled';
+
+type StatusBadgeProps = {
+  status: Status;
+  style?: CSSProperties;
+};
+
+export function StatusBadge({ status, style }: StatusBadgeProps) {
+  let { color, backgroundColor, Icon } = getStatusProps(status);
   return (
     <View
       style={{
