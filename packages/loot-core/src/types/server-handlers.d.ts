@@ -5,7 +5,7 @@ import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Message } from '../server/sync';
 
-import { AccountEntity } from './models';
+import { AccountEntity, PayeeEntity } from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -95,15 +95,7 @@ export interface ServerHandlers {
 
   'payee-create': (arg: { name }) => Promise<unknown>;
 
-  'payees-get': () => Promise<
-    {
-      id: string;
-      name: string;
-      category?: string | null;
-      tombstone?: number;
-      transfer_acc?: string | null;
-    }[]
-  >;
+  'payees-get': () => Promise<PayeeEntity[]>;
 
   'payees-get-rule-counts': () => Promise<unknown>;
 
