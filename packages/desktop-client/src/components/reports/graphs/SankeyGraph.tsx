@@ -35,8 +35,7 @@ function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
         textAnchor={isOut ? 'end' : 'start'}
         x={isOut ? x - 6 : x + width + 6}
         y={y + height / 2}
-        fontSize="14"
-        stroke="#333"
+        fontSize="13"
       >
         {payload.name}
       </text>
@@ -45,7 +44,6 @@ function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
         x={isOut ? x - 6 : x + width + 6}
         y={y + height / 2 + 13}
         fontSize="9"
-        stroke="#333"
         strokeOpacity="0.5"
       >
         {payloadValue}

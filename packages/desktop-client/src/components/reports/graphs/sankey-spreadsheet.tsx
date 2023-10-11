@@ -104,7 +104,9 @@ export default function createSpreadsheet(
         const result = await runQuery(
           q('payees').filter({ id: id }).select(['name']),
         );
-        payeeNames[result.data[0].name] = payeesDict[id];
+        if (result.data.length > 0 && result.data[0].name) {
+          payeeNames[result.data[0].name] = payeesDict[id];
+        }
       }
       return payeeNames;
     }
