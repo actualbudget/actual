@@ -338,7 +338,7 @@ function SankeyCard({ categories }) {
   const data = useReport('sankey', params);
 
   return (
-    <Card flex={2} to="/reports/sankey">
+    <Card flex={1} to="/reports/sankey">
       <View>
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
@@ -387,28 +387,21 @@ export default function Overview() {
         <CashFlowCard />
       </View>
 
-      {sankeyFeatureFlag && (
+      {(sankeyFeatureFlag || categorySpendingReportFeatureFlag) && (
         <View
           style={{
             flex: '0 0 auto',
             flexDirection: 'row',
           }}
         >
-          <SankeyCard categories={categories} />
-          <div style={{ flex: 1 }} />
-          <div style={{ flex: 1 }} />
-        </View>
-      )}
-      {categorySpendingReportFeatureFlag && (
-        <View
-          style={{
-            flex: '0 0 auto',
-            flexDirection: 'row',
-          }}
-        >
-          <CategorySpendingCard />
-          <div style={{ flex: 1 }} />
-          <div style={{ flex: 1 }} />
+          {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
+          {sankeyFeatureFlag && <SankeyCard categories={categories} />}
+          {(!categorySpendingReportFeatureFlag || !sankeyFeatureFlag) && (
+            <>
+              <div style={{ flex: 1 }} />
+              <div style={{ flex: 1 }} />
+            </>
+          )}
         </View>
       )}
     </View>
