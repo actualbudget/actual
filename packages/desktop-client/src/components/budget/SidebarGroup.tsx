@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { type CSSProperties, useState } from 'react';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
@@ -10,6 +10,30 @@ import View from '../common/View';
 import NotesButton from '../NotesButton';
 import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
+
+type SidebarGroupProps = {
+  group: {
+    id: string;
+    hidden: number;
+    categories: object[];
+    is_income: number;
+    name: string;
+    sort_order: number;
+    tombstone: number;
+  };
+  editing?: boolean;
+  collapsed: boolean;
+  dragPreview?: () => void;
+  innerRef?: () => void;
+  borderColor?: string;
+  style?: CSSProperties;
+  onEdit?: (id: string) => void;
+  onSave?: (group: object) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
+  onShowNewCategory?: (groupId: string) => void;
+  onHideNewGroup?: () => void;
+  onToggleCollapse?: (id: string) => void;
+};
 
 function SidebarGroup({
   group,
@@ -25,7 +49,7 @@ function SidebarGroup({
   onShowNewCategory,
   onHideNewGroup,
   onToggleCollapse,
-}) {
+}: SidebarGroupProps) {
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -93,7 +117,7 @@ function SidebarGroup({
                       onShowNewCategory(group.id);
                     } else if (type === 'delete') {
                       onDelete(group.id);
-                    } else if (type === 'toggleVisibility') {
+                    } else if (type === 'toggle-visibility') {
                       onSave({ ...group, hidden: !group.hidden });
                     }
                     setMenuOpen(false);
@@ -101,7 +125,7 @@ function SidebarGroup({
                   items={[
                     { name: 'add-category', text: 'Add category' },
                     {
-                      name: 'toggleVisibility',
+                      name: 'toggle-visibility',
                       text: group.hidden ? 'Show' : 'Hide',
                     },
                     { name: 'rename', text: 'Rename' },
@@ -160,6 +184,7 @@ function SidebarGroup({
         onBlur={() => onEdit(null)}
         style={{ fontWeight: 600 }}
         inputProps={{
+          value: undefined,
           style: { marginLeft: 20 },
           placeholder: temporary ? 'New Group Name' : '',
         }}

@@ -154,6 +154,10 @@ export async function onDelete(transaction) {
 export async function onUpdate(transaction) {
   const transferredAccount = await getTransferredAccount(transaction);
 
+  if (transaction.is_parent) {
+    return removeTransfer(transaction);
+  }
+
   if (transferredAccount && !transaction.transfer_id) {
     return addTransfer(transaction, transferredAccount);
   }
