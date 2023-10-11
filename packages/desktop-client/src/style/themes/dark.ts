@@ -13,7 +13,7 @@ export const pageTextSubdued = colorPalette.navy500;
 export const altpageTextSubdued = pageTextSubdued;
 export const pageTextDark = colorPalette.navy800;
 export const pageTextPositive = colorPalette.purple200;
-export const pageTextLink = colorPalette.purple700;
+export const pageTextLink = colorPalette.purple200;
 export const altPageTextLink = pageTextLink;
 
 export const modalBackground = colorPalette.gray800;
