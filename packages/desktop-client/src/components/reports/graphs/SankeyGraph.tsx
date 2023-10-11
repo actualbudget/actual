@@ -12,6 +12,14 @@ type SankeyProps = {
   data;
   compact: boolean;
 };
+type PotentialNumber = number | string | undefined | null;
+
+const numberFormatterTooltip = (value: PotentialNumber): number | null => {
+  if (typeof value === 'number') {
+    return Math.round(value);
+  }
+  return null; // or some default value for other cases
+};
 
 function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
   const isOut = x + width + 6 > containerWidth;
@@ -78,7 +86,10 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
                 bottom: 25,
               }}
             >
-              <Tooltip formatter={value => Math.round(value as number)} />
+              <Tooltip
+                formatter={numberFormatterTooltip}
+                isAnimationActive={false}
+              />
             </Sankey>
           </ResponsiveContainer>
         )
