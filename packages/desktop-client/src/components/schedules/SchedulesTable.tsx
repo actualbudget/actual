@@ -168,7 +168,7 @@ export function ScheduleAmountCell({
       <Text
         style={{
           flex: 1,
-          color: num > 0 ? theme.noticeText : theme.tableText,
+          color: num > 0 ? theme.noticeTextLight : theme.tableText,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',

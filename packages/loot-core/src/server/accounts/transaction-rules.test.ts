@@ -402,6 +402,22 @@ describe('Transaction rules', () => {
       notes: 'FooO',
       amount: -322,
     });
+    await db.insertTransaction({
+      id: '4',
+      date: '2020-10-16',
+      account,
+      payee: lowesId,
+      notes: null,
+      amount: 101,
+    });
+    await db.insertTransaction({
+      id: '5',
+      date: '2020-10-16',
+      account,
+      payee: lowesId,
+      notes: '',
+      amount: 124,
+    });
 
     let transactions = await getMatchingTransactions([
       { field: 'date', op: 'is', value: '2020-10-15' },
@@ -411,7 +427,7 @@ describe('Transaction rules', () => {
     transactions = await getMatchingTransactions([
       { field: 'payee', op: 'is', value: lowesId },
     ]);
-    expect(transactions.map(t => t.id)).toEqual(['3']);
+    expect(transactions.map(t => t.id)).toEqual(['4', '5', '3']);
 
     transactions = await getMatchingTransactions([
       { field: 'amount', op: 'is', value: 353 },
@@ -434,6 +450,11 @@ describe('Transaction rules', () => {
     expect(transactions.map(t => t.id)).toEqual(['2', '3', '1']);
 
     transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'is', value: '' },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['4', '5']);
+
+    transactions = await getMatchingTransactions([
       { field: 'amount', op: 'gt', value: 300 },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['2', '1']);
@@ -454,7 +475,7 @@ describe('Transaction rules', () => {
     transactions = await getMatchingTransactions([
       { field: 'amount', op: 'gt', value: -1000, options: { inflow: true } },
     ]);
-    expect(transactions.map(t => t.id)).toEqual(['2', '1']);
+    expect(transactions.map(t => t.id)).toEqual(['4', '5', '2', '1']);
 
     // Same thing for `outflow`: never return `inflow` transactions
     transactions = await getMatchingTransactions([
@@ -465,7 +486,7 @@ describe('Transaction rules', () => {
     transactions = await getMatchingTransactions([
       { field: 'date', op: 'gt', value: '2020-10-10' },
     ]);
-    expect(transactions.map(t => t.id)).toEqual(['2', '3']);
+    expect(transactions.map(t => t.id)).toEqual(['4', '5', '2', '3']);
 
     // todo: isapprox
   });

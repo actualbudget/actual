@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import {
-  integerToCurrency,
   currencyToInteger,
+  integerToCurrency,
 } from 'loot-core/src/shared/util';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 import Add from '../../icons/v1/Add';
 import Subtract from '../../icons/v1/Subtract';
 import { theme } from '../../style';
@@ -12,27 +13,66 @@ import Button from '../common/Button';
 import InputWithContent from '../common/InputWithContent';
 import View from '../common/View';
 
-export function AmountInput({ id, defaultValue = 0, onChange, style }) {
-  let [negative, setNegative] = useState(defaultValue <= 0);
-  let [value, setValue] = useState(integerToCurrency(Math.abs(defaultValue)));
+export function AmountInput({
+  id,
+  inputRef,
+  initialValue = 0,
+  zeroSign = '-', // + or -
+  onChange,
+  onBlur,
+  style,
+  textStyle,
+  focused,
+}) {
+  let [negative, setNegative] = useState(
+    (initialValue === 0 && zeroSign === '-') || initialValue < 0,
+  );
+  let initialValueAbsolute = integerToCurrency(Math.abs(initialValue || 0));
+  let [value, setValue] = useState(initialValueAbsolute);
+  let buttonRef = useRef();
 
   function onSwitch() {
     setNegative(!negative);
-    fireChange(!negative);
+    fireChange(value, !negative);
   }
 
-  function fireChange(neg = negative) {
-    let v = currencyToInteger(value);
-    let amount = neg ? (v < 0 ? v : -v) : v > 0 ? v : -v;
+  function fireChange(val, neg) {
+    let valueOrInitial = Math.abs(
+      currencyToInteger(val ? val : initialValueAbsolute),
+    );
+    let amount = neg ? valueOrInitial * -1 : valueOrInitial;
 
-    onChange(amount);
+    onChange?.(amount);
+  }
+
+  function onInputAmountChange(value) {
+    setValue(value ? value : '');
+  }
+
+  let ref = useRef();
+  let mergedRef = useMergedRefs(inputRef, ref);
+
+  function onInputAmountBlur(e) {
+    fireChange(value, negative);
+    if (!ref.current?.contains(e.relatedTarget)) {
+      onBlur?.();
+    }
   }
 
   return (
     <InputWithContent
       id={id}
+      inputRef={mergedRef}
+      inputMode="decimal"
       leftContent={
-        <Button type="bare" style={{ padding: '0 7px' }} onClick={onSwitch}>
+        <Button
+          type="bare"
+          style={{ padding: '0 7px' }}
+          disabled={!focused}
+          onPointerUp={onSwitch}
+          onPointerDown={e => e.preventDefault()}
+          ref={buttonRef}
+        >
           {negative ? (
             <Subtract style={{ width: 8, height: 8, color: 'inherit' }} />
           ) : (
@@ -41,10 +81,17 @@ export function AmountInput({ id, defaultValue = 0, onChange, style }) {
         </Button>
       }
       value={value}
+      focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
-      inputStyle={{ paddingLeft: 0 }}
-      onChange={e => setValue(e.target.value)}
-      onBlur={e => fireChange()}
+      inputStyle={{ paddingLeft: 0, ...textStyle }}
+      onKeyUp={e => {
+        if (e.key === 'Enter') {
+          fireChange(value, negative);
+          onBlur?.();
+        }
+      }}
+      onUpdate={onInputAmountChange}
+      onBlur={onInputAmountBlur}
     />
   );
 }
@@ -56,7 +103,7 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <AmountInput
-        defaultValue={num1}
+        initialValue={num1}
         onChange={value => {
           setNum1(value);
           onChange({ num1: value, num2 });
@@ -65,7 +112,7 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
       />
       <View style={{ margin: '0 5px' }}>and</View>
       <AmountInput
-        defaultValue={num2}
+        initialValue={num2}
         onChange={value => {
           setNum2(value);
           onChange({ num1, num2: value });

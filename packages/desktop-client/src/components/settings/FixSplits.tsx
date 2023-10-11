@@ -39,7 +39,7 @@ function renderResults(results: Results) {
   return (
     <Paragraph
       style={{
-        color: theme.alt3NoticeText,
+        color: theme.noticeTextLight,
         marginBottom: 0,
         marginLeft: '1em',
         textAlign: 'right',

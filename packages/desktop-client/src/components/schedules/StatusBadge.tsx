@@ -39,8 +39,8 @@ export function getStatusProps(status: StatusTypes) {
       };
     case 'paid':
       return {
-        color: theme.alt2NoticeText,
-        backgroundColor: theme.altNoticeBackground,
+        color: theme.noticeText,
+        backgroundColor: theme.noticeBackgroundLight,
         Icon: ValidationCheck,
       };
     case 'completed':
@@ -51,8 +51,8 @@ export function getStatusProps(status: StatusTypes) {
       };
     case 'pending':
       return {
-        color: theme.alt3NoticeText,
-        backgroundColor: theme.alt2NoticeBackground,
+        color: theme.noticeTextLight,
+        backgroundColor: theme.noticeBackgroundLight,
         Icon: CalendarIcon,
       };
     case 'scheduled':
@@ -62,15 +62,17 @@ export function getStatusProps(status: StatusTypes) {
         Icon: CalendarIcon,
       };
     case 'cleared':
-      color = theme.noticeText;
-      backgroundColor = theme.altTableBackground;
-      Icon = CheckCircle1;
-      break;
+      return {
+        color: theme.noticeTextLight,
+        backgroundColor: theme.altTableBackground,
+        Icon: CheckCircle1,
+      };
     case 'reconciled':
-      color = theme.noticeText;
-      backgroundColor = theme.altTableBackground;
-      Icon = Lock;
-      break;
+      return {
+        color: theme.noticeTextLight,
+        backgroundColor: theme.altTableBackground,
+        Icon: Lock,
+      };
     default:
       return {
         color: theme.buttonNormalDisabledText,

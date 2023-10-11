@@ -105,10 +105,7 @@ const RuleRow = memo(
               {rule.actions.map((action, i) => (
                 <ActionExpression
                   key={i}
-                  field={action.field}
-                  op={action.op}
-                  value={action.value}
-                  options={action.options}
+                  {...action}
                   style={i !== 0 && { marginTop: 3 }}
                 />
               ))}

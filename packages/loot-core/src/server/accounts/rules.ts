@@ -131,7 +131,7 @@ let CONDITION_TYPES = {
   },
   string: {
     ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
-    nullable: false,
+    nullable: true,
     parse(op, value, fieldName) {
       if (op === 'oneOf' || op === 'notOneOf') {
         assert(

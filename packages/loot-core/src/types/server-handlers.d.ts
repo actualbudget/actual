@@ -42,10 +42,24 @@ export interface ServerHandlers {
 
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
-  // incomplete
   'get-categories': () => Promise<{
-    grouped: { id: string }[];
-    list: { id: string }[];
+    grouped: {
+      id: string;
+      name: string;
+      is_income: number;
+      sort_order: number;
+      tombstone: number;
+      hidden: boolean;
+    }[];
+    list: {
+      id: string;
+      name: string;
+      is_income: number;
+      cat_group: string;
+      sort_order: number;
+      tombstone: number;
+      hidden: boolean;
+    }[];
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;
@@ -96,26 +110,6 @@ export interface ServerHandlers {
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
 
   'payees-get-rules': (arg: { id }) => Promise<unknown>;
-
-  'rule-validate': (rule) => Promise<{ error: unknown }>;
-
-  'rule-add': (rule) => Promise<{ error: unknown } | { id: string }>;
-
-  'rule-add': (rule) => Promise<{ error: unknown } | unknown>;
-
-  'rule-delete': (rule) => Promise<unknown>;
-
-  'rule-delete-all': (ids) => Promise<unknown>;
-
-  'rule-apply-actions': (arg: { transactionIds; actions }) => Promise<unknown>;
-
-  'rule-add-payee-rename': (arg: { fromNames; to }) => Promise<unknown>;
-
-  'rules-get': () => Promise<unknown>;
-
-  'rule-get': (arg: { id }) => Promise<unknown>;
-
-  'rules-run': (arg: { transaction }) => Promise<unknown>;
 
   'make-filters-from-conditions': (arg: {
     conditions;
@@ -253,7 +247,9 @@ export interface ServerHandlers {
 
   'sync-repair': () => Promise<unknown>;
 
-  'key-make': (arg: { password }) => Promise<unknown>;
+  'key-make': (arg: {
+    password;
+  }) => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
   'key-test': (arg: {
     fileId;

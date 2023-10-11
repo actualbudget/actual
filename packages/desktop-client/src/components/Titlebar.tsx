@@ -27,11 +27,12 @@ import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import Button, { ButtonWithLoading } from './common/Button';
-import ButtonLink from './common/ButtonLink';
 import ExternalLink from './common/ExternalLink';
+import Link from './common/Link';
 import Paragraph from './common/Paragraph';
 import Text from './common/Text';
 import View from './common/View';
+import { KeyHandlers } from './KeyHandlers';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar';
@@ -69,7 +70,8 @@ function UncategorizedButton() {
   let count = useSheetValue(queries.uncategorizedCount());
   return (
     count !== 0 && (
-      <ButtonLink
+      <Link
+        variant="button"
         type="bare"
         to="/accounts/uncategorized"
         style={{
@@ -77,7 +79,7 @@ function UncategorizedButton() {
         }}
       >
         {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
-      </ButtonLink>
+      </Link>
     )
   );
 }
@@ -172,30 +174,40 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     : {};
 
   return (
-    <Button
-      type="bare"
-      style={{
-        ...style,
-        WebkitAppRegion: 'none',
-        color: isMobile ? mobileColor : desktopColor,
-      }}
-      hoveredStyle={activeStyle}
-      activeStyle={activeStyle}
-      onClick={sync}
-    >
-      {syncState === 'error' ? (
-        <AlertTriangle width={13} />
-      ) : (
-        <AnimatedRefresh animating={syncing} />
-      )}
-      <Text style={{ marginLeft: 3 }}>
-        {syncState === 'disabled'
-          ? 'Disabled'
-          : syncState === 'offline'
-          ? 'Offline'
-          : 'Sync'}
-      </Text>
-    </Button>
+    <>
+      <KeyHandlers
+        keys={{
+          'ctrl+s, cmd+s': () => {
+            sync();
+          },
+        }}
+      />
+
+      <Button
+        type="bare"
+        style={{
+          ...style,
+          WebkitAppRegion: 'none',
+          color: isMobile ? mobileColor : desktopColor,
+        }}
+        hoveredStyle={activeStyle}
+        activeStyle={activeStyle}
+        onClick={sync}
+      >
+        {syncState === 'error' ? (
+          <AlertTriangle width={13} />
+        ) : (
+          <AnimatedRefresh animating={syncing} />
+        )}
+        <Text style={{ marginLeft: 3 }}>
+          {syncState === 'disabled'
+            ? 'Disabled'
+            : syncState === 'offline'
+            ? 'Offline'
+            : 'Sync'}
+        </Text>
+      </Button>
+    </>
   );
 }
 

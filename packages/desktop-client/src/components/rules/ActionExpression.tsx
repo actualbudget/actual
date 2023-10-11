@@ -1,7 +1,11 @@
 import React from 'react';
 
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
-import { type ScheduleEntity } from 'loot-core/src/types/models';
+import {
+  type LinkScheduleRuleActionEntity,
+  type RuleActionEntity,
+  type SetRuleActionEntity,
+} from 'loot-core/src/types/models';
 
 import { type CSSProperties, theme } from '../../style';
 import Text from '../common/Text';
@@ -14,20 +18,13 @@ let valueStyle = {
   color: theme.pageTextPositive,
 };
 
-type ActionExpressionProps = {
-  field: unknown;
-  op: unknown;
-  value: unknown;
-  options: unknown;
+type ActionExpressionProps = RuleActionEntity & {
   style?: CSSProperties;
 };
 
 export default function ActionExpression({
-  field,
-  op,
-  value,
-  options,
   style,
+  ...props
 }: ActionExpressionProps) {
   return (
     <View
@@ -44,19 +41,38 @@ export default function ActionExpression({
         ...style,
       }}
     >
-      {op === 'set' ? (
-        <>
-          <Text>{friendlyOp(op)}</Text>{' '}
-          <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
-          <Text>to </Text>
-          <Value value={value} field={field} />
-        </>
-      ) : op === 'link-schedule' ? (
-        <>
-          <Text>{friendlyOp(op)}</Text>{' '}
-          <ScheduleValue value={value as ScheduleEntity} />
-        </>
+      {props.op === 'set' ? (
+        <SetActionExpression {...props} />
+      ) : props.op === 'link-schedule' ? (
+        <LinkScheduleActionExpression {...props} />
       ) : null}
     </View>
+  );
+}
+
+function SetActionExpression({
+  op,
+  field,
+  value,
+  options,
+}: SetRuleActionEntity) {
+  return (
+    <>
+      <Text>{friendlyOp(op)}</Text>{' '}
+      <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
+      <Text>to </Text>
+      <Value value={value} field={field} />
+    </>
+  );
+}
+
+function LinkScheduleActionExpression({
+  op,
+  value,
+}: LinkScheduleRuleActionEntity) {
+  return (
+    <>
+      <Text>{friendlyOp(op)}</Text> <ScheduleValue value={value} />
+    </>
   );
 }
