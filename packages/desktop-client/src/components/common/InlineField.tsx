@@ -8,7 +8,7 @@ type InlineFieldProps = {
   label: ReactNode;
   labelWidth?: number;
   children?: ReactNode;
-  width: number;
+  width: number | string;
   style?: CSSProperties;
 };
 

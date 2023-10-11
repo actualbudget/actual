@@ -26,7 +26,7 @@ export default function EncryptionSettings() {
       primaryAction={<Button onClick={onChangeKey}>Generate new key</Button>}
     >
       <Text>
-        <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
+        <Text style={{ color: theme.noticeTextLight, fontWeight: 600 }}>
           End-to-end Encryption is turned on.
         </Text>{' '}
         Your data is encrypted with a key that only you have before sending it
