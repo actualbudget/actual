@@ -95,7 +95,15 @@ export interface ServerHandlers {
 
   'payee-create': (arg: { name }) => Promise<unknown>;
 
-  'payees-get': () => Promise<unknown[]>;
+  'payees-get': () => Promise<
+    {
+      id: string;
+      name: string;
+      category?: string | null;
+      tombstone?: number;
+      transfer_acc?: string | null;
+    }[]
+  >;
 
   'payees-get-rule-counts': () => Promise<unknown>;
 
