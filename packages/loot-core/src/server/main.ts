@@ -427,7 +427,7 @@ handlers['must-category-transfer'] = async function ({ id }) {
     const sheetName = monthUtils.sheetForMonth(month);
     const value = sheet.get().getCellValue(sheetName, 'budget-' + id);
 
-    return value !== 0;
+    return value != null && value !== 0;
   });
 };
 

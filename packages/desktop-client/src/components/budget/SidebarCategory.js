@@ -77,14 +77,14 @@ function SidebarCategory({
                   onEditName(category.id);
                 } else if (type === 'delete') {
                   onDelete(category.id);
-                } else if (type === 'toggleVisibility') {
+                } else if (type === 'toggle-visibility') {
                   onSave({ ...category, hidden: !category.hidden });
                 }
                 setMenuOpen(false);
               }}
               items={[
                 {
-                  name: 'toggleVisibility',
+                  name: 'toggle-visibility',
                   text: category.hidden ? 'Show' : 'Hide',
                 },
                 { name: 'rename', text: 'Rename' },

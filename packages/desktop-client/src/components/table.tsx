@@ -131,7 +131,7 @@ export function UnexposedCellContent({
 }
 
 type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
-  formatter?: (value: string, type?: unknown) => string;
+  formatter?: (value: string, type?: unknown) => string | JSX.Element;
   focused?: boolean;
   textAlign?: CSSProperties['textAlign'];
   alignItems?: CSSProperties['alignItems'];

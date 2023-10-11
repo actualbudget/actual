@@ -42,10 +42,24 @@ export interface ServerHandlers {
 
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
-  // incomplete
   'get-categories': () => Promise<{
-    grouped: { id: string }[];
-    list: { id: string }[];
+    grouped: {
+      id: string;
+      name: string;
+      is_income: number;
+      sort_order: number;
+      tombstone: number;
+      hidden: boolean;
+    }[];
+    list: {
+      id: string;
+      name: string;
+      is_income: number;
+      cat_group: string;
+      sort_order: number;
+      tombstone: number;
+      hidden: boolean;
+    }[];
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;
@@ -233,7 +247,9 @@ export interface ServerHandlers {
 
   'sync-repair': () => Promise<unknown>;
 
-  'key-make': (arg: { password }) => Promise<unknown>;
+  'key-make': (arg: {
+    password;
+  }) => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
   'key-test': (arg: {
     fileId;
