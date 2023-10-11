@@ -1474,13 +1474,8 @@ const BUDGET_HEADER_HEIGHT = 50;
 function BudgetHeader({
   currentMonth,
   monthBounds,
-  editMode,
-  onDone,
   onPrevMonth,
   onNextMonth,
-  toggleDisplay,
-  showBudgetedCol,
-  show3Cols,
   showHiddenCategories,
   savePrefs,
 }) {
@@ -1517,24 +1512,46 @@ function BudgetHeader({
   return (
     <View
       style={{
-        alignItems: 'center',
         flexDirection: 'row',
         flexShrink: 0,
         height: BUDGET_HEADER_HEIGHT,
-        justifyContent: 'center',
         backgroundColor: theme.buttonPrimaryBackground,
       }}
     >
-      {!editMode && (
+      <View
+        style={{
+          flexBasis: '25%',
+          justifyContent: 'flex-start',
+          flexDirection: 'row',
+        }}
+      >
+        {serverURL && (
+          <SyncButton
+            isMobile
+            style={{
+              color: 'white',
+              backgroundColor: 'transparent',
+              paddingLeft: 12,
+              paddingRight: 12,
+            }}
+          />
+        )}
+      </View>
+      <View
+        style={{
+          flexBasis: '50%',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'row',
+        }}
+      >
         <Button
           type="bare"
           // hitSlop={{ top: 5, bottom: 5, left: 0, right: 30 }}
           onClick={prevEnabled && onPrevMonth}
           style={{
             ...buttonStyle,
-            left: 0,
             opacity: prevEnabled ? 1 : 0.6,
-            padding: '5px 30px 5px 0',
           }}
         >
           <ArrowThinLeft
@@ -1543,104 +1560,68 @@ function BudgetHeader({
             height="15"
           />
         </Button>
-      )}
-      <Text
-        style={{
-          ...styles.mediumText,
-          marginTop: 12,
-          marginBottom: 12,
-          color: theme.formInputTextSelected,
-          textAlign: 'center',
-          // zIndex: -1
-        }}
-      >
-        {/* eslint-disable-next-line rulesdir/typography */}
-        {monthUtils.format(currentMonth, "MMMM ''yy")}
-      </Text>
-      {editMode ? (
-        <Button
-          type="bare"
-          onClick={onDone}
+        <Text
           style={{
-            ...buttonStyle,
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            right: 0,
-          }}
-          textStyle={{
-            color: theme.formInputTextReadOnlySelection,
-            fontSize: 15,
-            fontWeight: '500',
+            ...styles.mediumText,
+            color: theme.formInputTextSelected,
+            textAlign: 'center',
+            // zIndex: -1
           }}
         >
-          Done
+          {/* eslint-disable-next-line rulesdir/typography */}
+          {monthUtils.format(currentMonth, "MMMM ''yy")}
+        </Text>
+        <Button
+          type="bare"
+          onClick={nextEnabled && onNextMonth}
+          // hitSlop={{ top: 5, bottom: 5, left: 30, right: 5 }}
+          style={{ ...buttonStyle, opacity: nextEnabled ? 1 : 0.6 }}
+        >
+          <ArrowThinRight
+            style={{ color: theme.formInputTextReadOnlySelection }}
+            width="15"
+            height="15"
+          />
         </Button>
-      ) : (
-        <>
-          <Button
-            type="bare"
-            onClick={nextEnabled && onNextMonth}
-            // hitSlop={{ top: 5, bottom: 5, left: 30, right: 5 }}
-            style={{ ...buttonStyle, opacity: nextEnabled ? 1 : 0.6 }}
-          >
-            <ArrowThinRight
-              style={{ color: theme.formInputTextReadOnlySelection }}
-              width="15"
-              height="15"
-            />
-          </Button>
-          {serverURL && (
-            <SyncButton
-              isMobile
-              style={{
-                color: 'white',
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                right: 0,
-                backgroundColor: 'transparent',
-                paddingLeft: 12,
-                paddingRight: 12,
-              }}
-            />
+      </View>
+      <View
+        style={{
+          flexBasis: '25%',
+          justifyContent: 'flex-end',
+          flexDirection: 'row',
+        }}
+      >
+        <Button
+          type="bare"
+          style={{
+            backgroundColor: 'transparent',
+            paddingLeft: 12,
+            paddingRight: 12,
+          }}
+          {...tooltip.getOpenEvents()}
+        >
+          {tooltip.isOpen && (
+            <Tooltip
+              position="bottom-right"
+              width={200}
+              style={{ padding: 0 }}
+              onClose={tooltip.close}
+            >
+              <Menu
+                onMenuSelect={onMenuSelect}
+                items={[
+                  { name: 'toggle-hidden', text: 'Toggle hidden categories' },
+                ]}
+              />
+            </Tooltip>
           )}
-          <Button
-            type="bare"
-            style={{
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              right: 0,
-              backgroundColor: 'transparent',
-              paddingLeft: 12,
-              paddingRight: 12,
-            }}
-            {...tooltip.getOpenEvents()}
-          >
-            {tooltip.isOpen && (
-              <Tooltip
-                position="bottom-right"
-                width={200}
-                style={{ padding: 0 }}
-                onClose={tooltip.close}
-              >
-                <Menu
-                  onMenuSelect={onMenuSelect}
-                  items={[
-                    { name: 'toggle-hidden', text: 'Toggle hidden categories' },
-                  ]}
-                />
-              </Tooltip>
-            )}
-            <DotsHorizontalTriple
-              width="20"
-              height="20"
-              style={{ color: 'white' }}
-            />
-          </Button>
-        </>
-      )}
+          <DotsHorizontalTriple
+            width="20"
+            height="20"
+            style={{ color: 'white' }}
+          />
+        </Button>
+      </View>
     </View>
   );
 }
