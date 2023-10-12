@@ -355,11 +355,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              userSelect: 'none',
             }}
             data-testid="category-name"
-            {...getLongPressEvents({
-              onPointerDown: e => e.preventDefault(),
-            })}
+            {...getLongPressEvents()}
           >
             {category.name}
           </Text>
@@ -583,11 +582,10 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              userSelect: 'none',
             }}
             data-testid="name"
-            {...getLongPressEvents({
-              onPointerDown: e => e.preventDefault(),
-            })}
+            {...getLongPressEvents()}
           >
             {group.name}
           </Text>
@@ -800,11 +798,10 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             style={{
               ...styles.smallText,
               ...nameTextStyle,
+              userSelect: 'none',
             }}
             data-testid="name"
-            {...getLongPressEvents({
-              onPointerDown: e => e.preventDefault(),
-            })}
+            {...getLongPressEvents()}
           >
             {group.name}
           </Text>
@@ -962,11 +959,10 @@ const IncomeCategory = memo(function IncomeCategory({
               ...styles.smallText,
               ...nameTextStyle,
               ...styles.underlinedText,
+              userSelect: 'none',
             }}
             data-testid="name"
-            {...getLongPressEvents({
-              onPointerDown: e => e.preventDefault(),
-            })}
+            {...getLongPressEvents()}
           >
             {category.name}
           </Text>
