@@ -348,6 +348,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         <View style={{ flex: 1 }}>
           <Text
             role="button"
+            tabIndex={-1}
             style={{
               ...styles.smallText,
               ...styles.underlinedText,
@@ -574,6 +575,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         <View style={{ flex: 1 }}>
           <Text
             role="button"
+            tabIndex={-1}
             style={{
               ...styles.smallText,
               ...styles.underlinedText,
@@ -794,6 +796,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         <View>
           <Text
             role="button"
+            tabIndex={-1}
             style={{
               ...styles.smallText,
               ...nameTextStyle,
@@ -954,6 +957,7 @@ const IncomeCategory = memo(function IncomeCategory({
         <View>
           <Text
             role="button"
+            tabIndex={-1}
             style={{
               ...styles.smallText,
               ...nameTextStyle,
