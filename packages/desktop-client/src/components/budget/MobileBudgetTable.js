@@ -347,6 +347,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       ) : (
         <View role="button" style={{ flex: 1 }} {...getLongPressEvents()}>
           <Text
+            role="button"
             style={{
               ...styles.smallText,
               ...styles.underlinedText,
@@ -569,6 +570,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       ) : (
         <View role="button" style={{ flex: 1 }} {...getLongPressEvents()}>
           <Text
+            role="button"
             style={{
               ...styles.smallText,
               ...styles.underlinedText,
@@ -785,6 +787,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       ) : (
         <View role="button" {...getLongPressEvents()}>
           <Text
+            role="button"
             style={{
               ...styles.smallText,
               ...nameTextStyle,
@@ -941,6 +944,7 @@ const IncomeCategory = memo(function IncomeCategory({
       ) : (
         <View role="button" {...getLongPressEvents()}>
           <Text
+            role="button"
             style={{
               ...styles.smallText,
               ...nameTextStyle,
