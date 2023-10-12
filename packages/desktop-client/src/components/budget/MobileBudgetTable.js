@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import memoizeOne from 'memoize-one';
@@ -8,9 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import Close from '../../icons/v1/Close';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import Check from '../../icons/v2/Check';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
 import Button from '../common/Button';
@@ -113,13 +111,13 @@ function Saved({ projected }) {
 function BudgetCell({
   name,
   binding,
-  editing,
   style,
   textStyle,
   categoryId,
   month,
   onBudgetAction,
-  onEditing,
+  onEdit,
+  isEditing,
 }) {
   let sheetValue = useSheetValue(binding);
 
@@ -131,7 +129,7 @@ function BudgetCell({
   }
 
   function onAmountClick(e) {
-    onEditing?.(categoryId);
+    onEdit?.(categoryId);
   }
 
   return (
@@ -140,7 +138,7 @@ function BudgetCell({
       onPointerUp={onAmountClick}
       onPointerDown={e => e.preventDefault()}
     >
-      {editing ? (
+      {isEditing ? (
         <AmountInput
           initialValue={sheetValue}
           zeroSign="+"
@@ -148,11 +146,11 @@ function BudgetCell({
             height: ROW_HEIGHT - 4,
             transform: 'translateX(6px)',
           }}
-          focused={editing}
+          focused={isEditing}
           textStyle={{ ...styles.smallText, ...textStyle }}
           onChange={updateBudgetAmount}
-          onEdit={onEditing}
-          onBlur={() => onEditing?.(null)}
+          onEdit={onEdit}
+          onBlur={() => onEdit?.(null)}
         />
       ) : (
         <View
@@ -218,14 +216,16 @@ function ExpenseCategoryPreview({ name, pending, style }) {
 
 const ExpenseCategory = memo(function ExpenseCategory({
   category,
-  editing,
   index,
   // gestures,
-  editMode,
   blank,
   style,
   month,
-  onEditingBudget,
+  editMode,
+  isEditing,
+  onEdit,
+  isEditingBudget,
+  onEditBudget,
   onSave,
   onDelete,
   onBudgetAction,
@@ -236,7 +236,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   let [categoryName, setCategoryName] = useState(category.name);
   let [isHidden, setIsHidden] = useState(category.hidden);
-  let [isEditing, setIsEditing] = useState(false);
 
   let budgeted = rolloverBudget.catBudgeted(category.id);
   let balance = rolloverBudget.catBalance(category.id);
@@ -259,11 +258,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
     } else {
       setCategoryName(category.name);
     }
-    setIsEditing(false);
+    onEdit?.(null);
   };
 
   let onMenuSelect = type => {
-    setIsEditing(false);
+    onEdit?.(null);
     switch (type) {
       case 'toggle-visibility':
         setIsHidden(!isHidden);
@@ -280,16 +279,21 @@ const ExpenseCategory = memo(function ExpenseCategory({
     }
   };
 
+  let listItemRef = useRef();
+
   let content = (
     <ListItem
       style={{
-        backgroundColor: editing ? theme.altTableTextEditing : 'transparent',
+        backgroundColor: isEditingBudget
+          ? theme.altTableTextEditing
+          : 'transparent',
         borderBottomWidth: 0,
         borderTopWidth: index > 0 ? 1 : 0,
         opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}
       data-testid="row"
+      innerRef={listItemRef}
     >
       {isEditing ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
@@ -307,24 +311,13 @@ const ExpenseCategory = memo(function ExpenseCategory({
             placeholder="Category Name"
             value={categoryName}
             onUpdate={setCategoryName}
-            onEnter={() => {
-              onSubmit();
-              setIsEditing(false);
+            onEnter={onSubmit}
+            onBlur={e => {
+              if (!listItemRef.current?.contains(e.relatedTarget)) {
+                onSubmit();
+              }
             }}
           />
-          <Button type="bare" style={{ padding: 10 }} onPointerUp={onSubmit}>
-            <Check width={12} height={12} />
-          </Button>
-          <Button
-            type="bare"
-            style={{ padding: 10 }}
-            onPointerUp={() => {
-              setCategoryName(category.name);
-              setIsEditing(false);
-            }}
-          >
-            <Close width={12} height={12} />
-          </Button>
           {tooltip.isOpen && (
             <Tooltip
               position="bottom-stretch"
@@ -359,7 +352,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
               textOverflow: 'ellipsis',
             }}
             data-testid="category-name"
-            onPointerUp={() => setIsEditing(true)}
+            onPointerUp={() => onEdit?.(category.id)}
           >
             {category.name}
           </Text>
@@ -377,13 +370,13 @@ const ExpenseCategory = memo(function ExpenseCategory({
             <BudgetCell
               name="budgeted"
               binding={budgeted}
-              editing={editing}
               style={{ width: 90 }}
               textStyle={{ ...styles.smallText, textAlign: 'right' }}
               categoryId={category.id}
               month={month}
               onBudgetAction={onBudgetAction}
-              onEditing={onEditingBudget}
+              isEditing={isEditingBudget}
+              onEdit={onEditBudget}
             />
           ) : null}
           {show3Cols || !showBudgetedCol ? (
@@ -451,6 +444,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
 const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   group,
   editMode,
+  isEditing,
+  onEdit,
   blank,
   onAddCategory,
   onSave,
@@ -462,7 +457,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
 
   let [groupName, setGroupName] = useState(group.name);
   let [isHidden, setIsHidden] = useState(group.hidden);
-  let [isEditing, setIsEditing] = useState(false);
 
   let tooltip = useTooltip();
 
@@ -481,11 +475,11 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
     } else {
       setGroupName(group.name);
     }
-    setIsEditing(false);
+    onEdit?.(null);
   };
 
   let onMenuSelect = type => {
-    setIsEditing(false);
+    onEdit?.(null);
     switch (type) {
       case 'add-category':
         onAddCategory?.(group.id, group.is_income);
@@ -505,6 +499,8 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
     }
   };
 
+  let listItemRef = useRef();
+
   let content = (
     <ListItem
       style={{
@@ -514,6 +510,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         opacity: isHidden ? 0.5 : undefined,
       }}
       data-testid="totals"
+      innerRef={listItemRef}
     >
       {isEditing ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
@@ -531,24 +528,13 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
             placeholder="Category Name"
             value={groupName}
             onUpdate={setGroupName}
-            onEnter={() => {
-              onSubmit();
-              setIsEditing(false);
+            onEnter={onSubmit}
+            onBlur={e => {
+              if (!listItemRef.current?.contains(e.relatedTarget)) {
+                onSubmit();
+              }
             }}
           />
-          <Button type="bare" style={{ padding: 10 }} onPointerUp={onSubmit}>
-            <Check width={12} height={12} />
-          </Button>
-          <Button
-            type="bare"
-            style={{ padding: 10 }}
-            onPointerUp={() => {
-              setGroupName(group.name);
-              setIsEditing(false);
-            }}
-          >
-            <Close width={12} height={12} />
-          </Button>
           {tooltip.isOpen && (
             <Tooltip
               position="bottom-stretch"
@@ -588,7 +574,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               textOverflow: 'ellipsis',
             }}
             data-testid="name"
-            onPointerUp={() => setIsEditing(true)}
+            onPointerUp={() => onEdit?.(group.id)}
           >
             {group.name}
           </Text>
@@ -680,10 +666,11 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   onAddCategory,
   onSave,
   onDelete,
+  isEditing,
+  onEdit,
 }) {
   let [groupName, setGroupName] = useState(group.name);
   let [isHidden, setIsHidden] = useState(group.hidden);
-  let [isEditing, setIsEditing] = useState(false);
 
   let tooltip = useTooltip();
 
@@ -702,11 +689,11 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
     } else {
       setGroupName(group.name);
     }
-    setIsEditing(false);
+    onEdit?.(null);
   };
 
   let onMenuSelect = type => {
-    setIsEditing(false);
+    onEdit?.(null);
     switch (type) {
       case 'add-category':
         onAddCategory?.(group.id, group.is_income);
@@ -726,6 +713,8 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
     }
   };
 
+  let listItemRef = useRef();
+
   return (
     <ListItem
       style={{
@@ -736,6 +725,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}
+      innerRef={listItemRef}
     >
       {isEditing ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
@@ -753,24 +743,13 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             placeholder="Category Name"
             value={groupName}
             onUpdate={setGroupName}
-            onEnter={() => {
-              onSubmit();
-              setIsEditing(false);
+            onEnter={onSubmit}
+            onBlur={e => {
+              if (!listItemRef.current?.contains(e.relatedTarget)) {
+                onSubmit();
+              }
             }}
           />
-          <Button type="bare" style={{ padding: 10 }} onPointerUp={onSubmit}>
-            <Check width={12} height={12} />
-          </Button>
-          <Button
-            type="bare"
-            style={{ padding: 10 }}
-            onPointerUp={() => {
-              setGroupName(group.name);
-              setIsEditing(false);
-            }}
-          >
-            <Close width={12} height={12} />
-          </Button>
           {tooltip.isOpen && (
             <Tooltip
               position="bottom-stretch"
@@ -803,7 +782,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           <Text
             style={{ ...styles.smallText, ...nameTextStyle }}
             data-testid="name"
-            onPointerUp={() => setIsEditing(true)}
+            onPointerUp={() => onEdit?.(group.id)}
           >
             {group.name}
           </Text>
@@ -846,10 +825,11 @@ const IncomeCategory = memo(function IncomeCategory({
   amountTextStyle,
   onSave,
   onDelete,
+  isEditing,
+  onEdit,
 }) {
   let [categoryName, setCategoryName] = useState(category.name);
   let [isHidden, setIsHidden] = useState(category.hidden);
-  let [isEditing, setIsEditing] = useState(false);
 
   let tooltip = useTooltip();
 
@@ -868,11 +848,11 @@ const IncomeCategory = memo(function IncomeCategory({
     } else {
       setCategoryName(category.name);
     }
-    setIsEditing(false);
+    onEdit?.(null);
   };
 
   let onMenuSelect = type => {
-    setIsEditing(false);
+    onEdit?.(null);
     switch (type) {
       case 'toggle-visibility':
         setIsHidden(!isHidden);
@@ -889,6 +869,8 @@ const IncomeCategory = memo(function IncomeCategory({
     }
   };
 
+  let listItemRef = useRef();
+
   return (
     <ListItem
       style={{
@@ -899,6 +881,7 @@ const IncomeCategory = memo(function IncomeCategory({
         opacity: isHidden ? 0.5 : undefined,
         ...style,
       }}
+      innerRef={listItemRef}
     >
       {isEditing ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
@@ -916,24 +899,13 @@ const IncomeCategory = memo(function IncomeCategory({
             placeholder="Category Name"
             value={categoryName}
             onUpdate={setCategoryName}
-            onEnter={() => {
-              onSubmit();
-              setIsEditing(false);
+            onEnter={onSubmit}
+            onBlur={e => {
+              if (!listItemRef.current?.contains(e.relatedTarget)) {
+                onSubmit();
+              }
             }}
           />
-          <Button type="bare" style={{ padding: 10 }} onPointerUp={onSubmit}>
-            <Check width={12} height={12} />
-          </Button>
-          <Button
-            type="bare"
-            style={{ padding: 10 }}
-            onPointerUp={() => {
-              setCategoryName(category.name);
-              setIsEditing(false);
-            }}
-          >
-            <Close width={12} height={12} />
-          </Button>
           {tooltip.isOpen && (
             <Tooltip
               position="bottom-stretch"
@@ -966,7 +938,7 @@ const IncomeCategory = memo(function IncomeCategory({
               ...styles.underlinedText,
             }}
             data-testid="name"
-            onPointerUp={() => setIsEditing(true)}
+            onPointerUp={() => onEdit?.(category.id)}
           >
             {category.name}
           </Text>
@@ -1041,9 +1013,13 @@ const IncomeCategory = memo(function IncomeCategory({
 
 const ExpenseGroup = memo(function ExpenseGroup({
   group,
-  editingId,
-  onEditingCategoryBudget,
   editMode,
+  editingGroupId,
+  onEditGroup,
+  editingCategoryId,
+  onEditCategory,
+  editingBudgetCategoryId,
+  onEditCategoryBudget,
   // gestures,
   month,
   onSaveCategory,
@@ -1104,13 +1080,17 @@ const ExpenseGroup = memo(function ExpenseGroup({
         onAddCategory={onAddCategory}
         onSave={onSave}
         onDelete={onDelete}
+        isEditing={editingGroupId === group.id}
+        onEdit={onEditGroup}
         // onReorderCategory={onReorderCategory}
       />
 
       {group.categories
         .filter(category => !category.hidden || showHiddenCategories)
         .map((category, index) => {
-          const editing = editingId === category.id;
+          const isEditingCategory = editingCategoryId === category.id;
+          const isEditingCategoryBudget =
+            editingBudgetCategoryId === category.id;
           return (
             <ExpenseCategory
               show3Cols={show3Cols}
@@ -1118,9 +1098,11 @@ const ExpenseGroup = memo(function ExpenseGroup({
               index={index}
               category={category}
               showBudgetedCol={showBudgetedCol}
-              editing={editing}
-              onEditingBudget={onEditingCategoryBudget}
               editMode={editMode}
+              isEditing={isEditingCategory}
+              onEdit={onEditCategory}
+              isEditingBudget={isEditingCategoryBudget}
+              onEditBudget={onEditCategoryBudget}
               // gestures={gestures}
               month={month}
               onSave={onSaveCategory}
@@ -1143,6 +1125,10 @@ function IncomeGroup({
   onSaveCategory,
   onDeleteCategory,
   showHiddenCategories,
+  editingGroupId,
+  onEditGroup,
+  editingCategoryId,
+  onEditCategory,
 }) {
   return (
     <View>
@@ -1179,6 +1165,8 @@ function IncomeGroup({
           onAddCategory={onAddCategory}
           onSave={onSave}
           onDelete={onDelete}
+          isEditing={editingGroupId === group.id}
+          onEdit={onEditGroup}
         />
 
         {group.categories
@@ -1202,6 +1190,8 @@ function IncomeGroup({
                 index={index}
                 onSave={onSaveCategory}
                 onDelete={onDeleteCategory}
+                isEditing={editingCategoryId === category.id}
+                onEdit={onEditCategory}
               />
             );
           })}
@@ -1213,8 +1203,12 @@ function IncomeGroup({
 function BudgetGroups({
   type,
   categoryGroups,
-  editingId,
-  onEditingCategoryBudget,
+  editingGroupId,
+  onEditGroup,
+  editingCategoryId,
+  onEditCategory,
+  editingBudgetCategoryId,
+  onEditCategoryBudget,
   editMode,
   gestures,
   month,
@@ -1252,12 +1246,16 @@ function BudgetGroups({
             <ExpenseGroup
               key={group.id}
               group={group}
-              editingId={editingId}
               showBudgetedCol={showBudgetedCol}
-              editMode={editMode}
               gestures={gestures}
               month={month}
-              onEditingCategoryBudget={onEditingCategoryBudget}
+              editMode={editMode}
+              editingGroupId={editingGroupId}
+              onEditGroup={onEditGroup}
+              editingCategoryId={editingCategoryId}
+              onEditCategory={onEditCategory}
+              editingBudgetCategoryId={editingBudgetCategoryId}
+              onEditCategoryBudget={onEditCategoryBudget}
               onSaveCategory={onSaveCategory}
               onDeleteCategory={onDeleteCategory}
               onAddCategory={onAddCategory}
@@ -1293,6 +1291,10 @@ function BudgetGroups({
           onSaveCategory={onSaveCategory}
           onDeleteCategory={onDeleteCategory}
           showHiddenCategories={showHiddenCategories}
+          editingGroupId={editingGroupId}
+          onEditGroup={onEditGroup}
+          editingCategoryId={editingCategoryId}
+          onEditCategory={onEditCategory}
         />
       )}
     </View>
@@ -1300,12 +1302,6 @@ function BudgetGroups({
 }
 
 export function BudgetTable(props) {
-  const [editingCategoryBudgetId, setEditingCategoryBudget] = useState(null);
-  function onEditingCategoryBudget(id) {
-    setEditingCategoryBudget(id);
-  }
-  const { width } = useResponsive();
-  const show3Cols = width >= 360;
   const {
     type,
     categoryGroups,
@@ -1329,6 +1325,28 @@ export function BudgetTable(props) {
     onBudgetAction,
     savePrefs,
   } = props;
+
+  const [editingGroupId, setEditingGroupId] = useState(null);
+  function onEditGroup(id) {
+    onEdit('group', id);
+  }
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  function onEditCategory(id) {
+    onEdit('category', id);
+  }
+  const [editingBudgetCategoryId, setEditingBudgetCategoryId] = useState(null);
+  function onEditCategoryBudget(id) {
+    onEdit('category-budget', id);
+  }
+
+  function onEdit(type, id) {
+    setEditingGroupId(type === 'group' ? id : null);
+    setEditingCategoryId(type === 'category' ? id : null);
+    setEditingBudgetCategoryId(type === 'category-budget' ? id : null);
+  }
+
+  const { width } = useResponsive();
+  const show3Cols = width >= 360;
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
   let currentMonth = monthUtils.currentMonth();
@@ -1488,14 +1506,18 @@ export function BudgetTable(props) {
               <BudgetGroups
                 type={type}
                 categoryGroups={categoryGroups}
-                editingId={editingCategoryBudgetId}
-                editMode={editMode}
                 showBudgetedCol={showBudgetedCol}
                 show3Cols={show3Cols}
                 showHiddenCategories={showHiddenCategories}
                 // gestures={gestures}
                 month={month}
-                onEditingCategoryBudget={onEditingCategoryBudget}
+                editMode={editMode}
+                editingGroupId={editingGroupId}
+                onEditGroup={onEditGroup}
+                editingCategoryId={editingCategoryId}
+                onEditCategory={onEditCategory}
+                editingBudgetCategoryId={editingBudgetCategoryId}
+                onEditCategoryBudget={onEditCategoryBudget}
                 onSaveCategory={onSaveCategory}
                 onDeleteCategory={onDeleteCategory}
                 onAddCategory={onAddCategory}
@@ -1524,10 +1546,14 @@ export function BudgetTable(props) {
                 showBudgetedCol={showBudgetedCol}
                 show3Cols={show3Cols}
                 showHiddenCategories={showHiddenCategories}
-                editingId={editingCategoryBudgetId}
-                editMode={editMode}
                 // gestures={gestures}
-                onEditingCategoryBudget={onEditingCategoryBudget}
+                editMode={editMode}
+                editingGroupId={editingGroupId}
+                onEditGroup={onEditGroup}
+                editingCategoryId={editingCategoryId}
+                onEditCategory={onEditCategory}
+                editingBudgetCategoryId={editingBudgetCategoryId}
+                onEditCategoryBudget={onEditCategoryBudget}
                 onSaveCategory={onSaveCategory}
                 onDeleteCategory={onDeleteCategory}
                 onAddCategory={onAddCategory}
