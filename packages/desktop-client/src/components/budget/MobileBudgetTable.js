@@ -345,9 +345,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
           )}
         </View>
       ) : (
-        <View style={{ flex: 1 }}>
+        <View role="button" {...getLongPressEvents()} style={{ flex: 1 }}>
           <Text
-            role="button"
             tabIndex={-1}
             style={{
               ...styles.smallText,
@@ -358,7 +357,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
               userSelect: 'none',
             }}
             data-testid="category-name"
-            {...getLongPressEvents()}
           >
             {category.name}
           </Text>
@@ -571,9 +569,8 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           )}
         </View>
       ) : (
-        <View style={{ flex: 1 }}>
+        <View role="button" {...getLongPressEvents()} style={{ flex: 1 }}>
           <Text
-            role="button"
             tabIndex={-1}
             style={{
               ...styles.smallText,
@@ -585,7 +582,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               userSelect: 'none',
             }}
             data-testid="name"
-            {...getLongPressEvents()}
           >
             {group.name}
           </Text>
@@ -791,9 +787,8 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           )}
         </View>
       ) : (
-        <View>
+        <View role="button" {...getLongPressEvents()}>
           <Text
-            role="button"
             tabIndex={-1}
             style={{
               ...styles.smallText,
@@ -801,7 +796,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
               userSelect: 'none',
             }}
             data-testid="name"
-            {...getLongPressEvents()}
           >
             {group.name}
           </Text>
@@ -951,9 +945,8 @@ const IncomeCategory = memo(function IncomeCategory({
           )}
         </View>
       ) : (
-        <View>
+        <View role="button" {...getLongPressEvents()}>
           <Text
-            role="button"
             tabIndex={-1}
             style={{
               ...styles.smallText,
@@ -962,7 +955,6 @@ const IncomeCategory = memo(function IncomeCategory({
               userSelect: 'none',
             }}
             data-testid="name"
-            {...getLongPressEvents()}
           >
             {category.name}
           </Text>
