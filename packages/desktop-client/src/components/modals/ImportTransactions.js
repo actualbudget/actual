@@ -196,16 +196,19 @@ function getInitialMappings(transactions) {
   let inOutField = key(
     fields.find(
       ([name, value]) =>
-        name !== dateField && name !== amountField && name !== payeeField && name !== notesField,
+        name !== dateField &&
+        name !== amountField &&
+        name !== payeeField &&
+        name !== notesField,
     ),
-  )
+  );
 
   return {
     date: dateField,
     amount: amountField,
     payee: payeeField,
     notes: notesField,
-    inout: inOutField
+    inout: inOutField,
   };
 }
 
@@ -230,7 +233,14 @@ function parseAmount(amount, mapper) {
   return value;
 }
 
-function parseAmountFields(trans, splitMode, inOutMode, outText, flipAmount, multiplierAmount) {
+function parseAmountFields(
+  trans,
+  splitMode,
+  inOutMode,
+  outText,
+  flipAmount,
+  multiplierAmount,
+) {
   const multiplier = parseFloat(multiplierAmount) || 1.0;
 
   if (splitMode) {
@@ -250,13 +260,17 @@ function parseAmountFields(trans, splitMode, inOutMode, outText, flipAmount, mul
   }
   if (inOutMode) {
     return {
-        amount: parseAmount(trans.amount, n => (trans.inout === outText ? Math.abs(n) * -1 : Math.abs(n))) * multiplier,
-        outflow: null,
-        inflow: null,
-    }
+      amount:
+        parseAmount(trans.amount, n =>
+          trans.inout === outText ? Math.abs(n) * -1 : Math.abs(n),
+        ) * multiplier,
+      outflow: null,
+      inflow: null,
+    };
   }
   return {
-    amount: parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * multiplier,
+    amount:
+      parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * multiplier,
     outflow: null,
     inflow: null,
   };
@@ -340,13 +354,13 @@ function Transaction({
       ) : (
         <>
           {inOutMode && (
-              <Field
-                  width={90}
-                  contentStyle={{ textAlign: 'left', ...styles.tnum }}
-                  title={transaction.inout}
-              >
-                {transaction.inout}
-              </Field>
+            <Field
+              width={90}
+              contentStyle={{ textAlign: 'left', ...styles.tnum }}
+              title={transaction.inout}
+            >
+              {transaction.inout}
+            </Field>
           )}
           <Field
             width={90}
@@ -486,31 +500,27 @@ function MultiplierOption({
   );
 }
 
-function InOutOption({
-   inOutMode,
-   outText,
-   disabled,
-   onToggle,
-   onChangeText,
-}) {
+function InOutOption({ inOutMode, outText, disabled, onToggle, onChangeText }) {
   return (
-      <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
-        <CheckboxOption
-            id="form_inout"
-            checked={inOutMode}
-            disabled={disabled}
-            onChange={onToggle}
-        >
-          {inOutMode ? ("In/out column") : ("Select column to specify if amount goes in/out")}
-        </CheckboxOption>
-        <Input
-            type="text"
-            style={{ display: inOutMode ? 'inherit' : 'none' }}
-            value={outText}
-            placeholder="Out text"
-            onUpdate={onChangeText}
-        />
-      </View>
+    <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
+      <CheckboxOption
+        id="form_inout"
+        checked={inOutMode}
+        disabled={disabled}
+        onChange={onToggle}
+      >
+        {inOutMode
+          ? 'In/out column'
+          : 'Select column to specify if amount goes in/out'}
+      </CheckboxOption>
+      <Input
+        type="text"
+        style={{ display: inOutMode ? 'inherit' : 'none' }}
+        value={outText}
+        placeholder="Out text"
+        onUpdate={onChangeText}
+      />
+    </View>
   );
 }
 
@@ -597,16 +607,16 @@ function FieldMappings({
         ) : (
           <>
             {inOutMode && (
-                <View style={{ flex: 1 }}>
-                  <SubLabel title="In/Out" />
-                  <SelectField
-                      options={options}
-                      value={mappings.inout}
-                      onChange={name => onChange('inout', name)}
-                      hasHeaderRow={hasHeaderRow}
-                      firstTransaction={transactions[0]}
-                  />
-                </View>
+              <View style={{ flex: 1 }}>
+                <SubLabel title="In/Out" />
+                <SelectField
+                  options={options}
+                  value={mappings.inout}
+                  onChange={name => onChange('inout', name)}
+                  hasHeaderRow={hasHeaderRow}
+                  firstTransaction={transactions[0]}
+                />
+              </View>
             )}
             <View style={{ flex: 1 }}>
               <SubLabel title="Amount" />
@@ -891,7 +901,7 @@ export default function ImportTransactions({ modalProps, options }) {
   ];
 
   if (inOutMode) {
-    headers.push({ name: 'In/Out', width: 90, style: { textAlign: 'left' } })
+    headers.push({ name: 'In/Out', width: 90, style: { textAlign: 'left' } });
   }
   if (splitMode) {
     headers.push({ name: 'Outflow', width: 90, style: { textAlign: 'right' } });
