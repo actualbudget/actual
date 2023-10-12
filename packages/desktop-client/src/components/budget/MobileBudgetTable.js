@@ -345,7 +345,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
           )}
         </View>
       ) : (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }} {...getLongPressEvents()}>
           <Text
             style={{
               ...styles.smallText,
@@ -356,7 +356,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
               userSelect: 'none',
             }}
             data-testid="category-name"
-            {...getLongPressEvents()}
           >
             {category.name}
           </Text>
@@ -569,7 +568,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           )}
         </View>
       ) : (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }} {...getLongPressEvents()}>
           <Text
             style={{
               ...styles.smallText,
@@ -581,7 +580,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               userSelect: 'none',
             }}
             data-testid="name"
-            {...getLongPressEvents()}
           >
             {group.name}
           </Text>
@@ -787,7 +785,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           )}
         </View>
       ) : (
-        <View>
+        <View {...getLongPressEvents()}>
           <Text
             style={{
               ...styles.smallText,
@@ -795,7 +793,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
               userSelect: 'none',
             }}
             data-testid="name"
-            {...getLongPressEvents()}
           >
             {group.name}
           </Text>
@@ -945,7 +942,7 @@ const IncomeCategory = memo(function IncomeCategory({
           )}
         </View>
       ) : (
-        <View>
+        <View {...getLongPressEvents()}>
           <Text
             style={{
               ...styles.smallText,
@@ -954,7 +951,6 @@ const IncomeCategory = memo(function IncomeCategory({
               userSelect: 'none',
             }}
             data-testid="name"
-            {...getLongPressEvents()}
           >
             {category.name}
           </Text>
