@@ -260,7 +260,7 @@ class TransactionEditInner extends PureComponent {
         onConfirm: () => {
           onConfirmSave();
         },
-        confirmReason: 'batchEdit',
+        confirmReason: 'editReconciled',
       });
     } else {
       onConfirmSave();
@@ -336,7 +336,7 @@ class TransactionEditInner extends PureComponent {
         onConfirm: () => {
           onConfirmDelete();
         },
-        confirmReason: 'batchDelete',
+        confirmReason: 'deleteReconciled',
       });
     } else {
       onConfirmDelete();

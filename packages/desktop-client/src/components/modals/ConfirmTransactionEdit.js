@@ -17,21 +17,29 @@ export default function ConfirmTransactionEdit({
       {() => (
         <View style={{ lineHeight: 1.5 }}>
 
-          {confirmReason === 'batchDelete' ? (
+          {confirmReason === 'batchDeleteWithReconciled' ? (
             <Block>
               Deleting reconciled transactions may bring your reconciliation out of balance.
             </Block>
-          ) : confirmReason === 'batchEdit' ? (
+          ) : confirmReason === 'batchEditWithReconciled' ? (
             <Block>
               Editing reconciled transactions may bring your reconciliation out of balance.
             </Block>
-          ) : confirmReason === 'batchDuplicate' ? (
+          ) : confirmReason === 'batchDuplicateWithReconciled' ? (
             <Block>
               Duplicating reconciled transactions may bring your reconciliation out of balance.
             </Block>
-          ) : (
+          ) : confirmReason === 'editReconciled' ? (
             <Block>
               Saving your changes to this reconciled transaction may bring your reconciliation out of balance.
+            </Block>
+          ) : confirmReason === 'deleteReconciled' ? (
+            <Block>
+              Deleting this reconciled transaction may bring your reconciliation out of balance.
+            </Block>
+          ) : (
+            <Block>
+              Are you sure you want to edit this transaction?
             </Block>
           )}
 
@@ -59,7 +67,7 @@ export default function ConfirmTransactionEdit({
                   onConfirm();
                 }}
               >
-                Save
+                Confirm
               </Button>
             </View>
           </View>

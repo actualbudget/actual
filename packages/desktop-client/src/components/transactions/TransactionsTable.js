@@ -752,9 +752,9 @@ const Transaction = memo(function Transaction(props) {
           props.pushModal('confirm-transaction-edit', {
             onConfirm: () => {
               reconciledWarningShowing = false;
-              console.log('did confiiiem');
               onUpdateAfterConfirm(name, value);
             },
+            confirmReason: 'editReconciled',
           });
         }
       } else {

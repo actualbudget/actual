@@ -39,8 +39,6 @@ import {
 } from '../transactions/TransactionsTable';
 
 import { AccountHeader } from './Header';
-import useFormat from '../spreadsheet/useFormat';
-import useSheetValue from '../spreadsheet/useSheetValue';
 
 function EmptyMessage({ onAdd }) {
   return (
@@ -885,7 +883,7 @@ class AccountInternal extends PureComponent {
           onConfirm: () => {
             this.props.pushModal('edit-field', { name, onSubmit: onChange });
           },
-          confirmReason: 'batchEdit',
+          confirmReason: 'batchEditWithReconciled',
         });
         return
       }
@@ -939,7 +937,7 @@ class AccountInternal extends PureComponent {
         onConfirm: () => {
           onConfirmDuplicate(ids);
         },
-        confirmReason: 'batchDuplicate',
+        confirmReason: 'batchDuplicateWithReconciled',
       });
     } else {
       onConfirmDuplicate(ids);
@@ -1004,7 +1002,7 @@ class AccountInternal extends PureComponent {
         onConfirm: () => {
           onConfirmDelete(ids);
         },
-        confirmReason: 'batchDelete',
+        confirmReason: 'batchDeleteWithReconciled',
       });
     } else {
       onConfirmDelete(ids);
