@@ -128,6 +128,7 @@ export default function Modals() {
             <ConfirmTransactionEdit
               modalProps={modalProps}
               onConfirm={options.onConfirm}
+              confirmReason={options.confirmReason}
             />
           );
 

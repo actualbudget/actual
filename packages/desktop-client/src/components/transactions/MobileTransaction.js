@@ -51,6 +51,7 @@ import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SvgTrash from '../../icons/v1/Trash';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
+import Lock from '../../icons/v2/Lock';
 import SvgPencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
 import { styles, theme } from '../../style';
 import Button from '../common/Button';
@@ -935,6 +936,7 @@ class Transaction extends PureComponent {
       : categoryName;
 
     let isPreview = isPreviewId(id);
+    let isReconciled = transaction.reconciled;
     let textStyle = isPreview && {
       fontStyle: 'italic',
       color: theme.altpageTextSubdued,
@@ -997,16 +999,29 @@ class Transaction extends PureComponent {
                   marginTop: 3,
                 }}
               >
-                <CheckCircle1
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: cleared
-                      ? theme.noticeTextLight
-                      : theme.altButtonBareText,
-                    marginRight: 5,
-                  }}
-                />
+                {isReconciled ? (
+                  <Lock
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: cleared
+                        ? theme.noticeTextLight
+                        : theme.altButtonBareText,
+                      marginRight: 5,
+                    }}
+                  />
+                ) : (
+                  <CheckCircle1
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: cleared
+                        ? theme.noticeTextLight
+                        : theme.altButtonBareText,
+                      marginRight: 5,
+                    }}
+                  />
+                )}
                 {showCategory && (
                   <TextOneLine
                     style={{

@@ -39,6 +39,8 @@ import {
 } from '../transactions/TransactionsTable';
 
 import { AccountHeader } from './Header';
+import useFormat from '../spreadsheet/useFormat';
+import useSheetValue from '../spreadsheet/useSheetValue';
 
 function EmptyMessage({ onAdd }) {
   return (
@@ -693,12 +695,7 @@ class AccountInternal extends PureComponent {
     return null;
   };
 
-  onReconcile = balance => {
-    this.setState({ reconcileAmount: balance });
-  };
-
-  onDoneReconciling = async () => {
-    this.setState({ reconcileAmount: null });
+  lockTransactions = async () => {
     this.setState({ workingHard: true });
 
     let { data } = await runQuery(
@@ -711,16 +708,15 @@ class AccountInternal extends PureComponent {
 
     let changes = { updated: [] };
 
+    console.log('lock transactions');
+
     transactions.forEach(trans => {
+      console.log(trans.amount);
       let { diff } = updateTransaction(transactions, {
         ...trans,
-        notes: 'reconciled',
+        reconciled: true,
       });
 
-      // TODO: We need to keep an updated list of transactions so
-      // the logic in `updateTransaction`, particularly about
-      // updating split transactions, works. This isn't ideal and we
-      // should figure something else out
       transactions = applyChanges(diff, transactions);
 
       changes.updated = changes.updated
@@ -730,6 +726,53 @@ class AccountInternal extends PureComponent {
 
     await send('transactions-batch-update', changes);
     await this.refetchTransactions();
+  }
+
+  onReconcile = async balance => {
+    console.log('onReconcile');
+
+    let {
+      accounts,
+      accountId,
+    } = this.props;
+
+    let { data } = await runQuery(
+      q('transactions')
+        .filter({ cleared: true }) //scope to the current account as well here.
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+    let transactions = ungroupTransactions(data);
+    var cleared = 0;
+
+    transactions.forEach(trans => {
+      if (trans.is_parent) {
+        console.log('is parent');
+        console.log(trans.cleared);
+        console.log(trans.amount);
+      } else {
+        console.log('is child');
+        console.log(trans.cleared);
+        console.log(trans.amount);
+        cleared += trans.amount;
+      }
+    });
+
+    let targetDiff = balance - cleared;
+
+    console.log(balance);
+    console.log(cleared);
+    console.log(targetDiff);
+
+    if (targetDiff === 0) {
+      await this.lockTransactions();
+    }
+
+    this.setState({ reconcileAmount: balance });
+  };
+
+  onDoneReconciling = async () => {
+    this.setState({ reconcileAmount: null });
   };
 
   onCreateReconciliationTransaction = async diff => {
@@ -739,6 +782,7 @@ class AccountInternal extends PureComponent {
         id: 'temp',
         account: this.props.accountId,
         cleared: true,
+        reconciled: true,
         amount: diff,
         date: currentDay(),
         notes: 'Reconciliation balance adjustment',
@@ -747,14 +791,14 @@ class AccountInternal extends PureComponent {
 
     // Optimistic UI: update the transaction list before sending the data to the database
     this.setState({
-      transactions: [...this.state.transactions, ...reconciliationTransactions],
+      transactions: [...reconciliationTransactions, ...this.state.transactions],
     });
 
     // sync the reconciliation transaction
     await send('transactions-batch-update', {
       added: reconciliationTransactions,
     });
-    await this.refetchTransactions();
+    await this.lockTransactions();
   };
 
   onShowTransactions = async ids => {
@@ -764,7 +808,7 @@ class AccountInternal extends PureComponent {
     });
   };
 
-  onBatchEdit = async (name, ids) => {
+  onBatchEdit = async (name, ids) => {    
     let onChange = async (name, value) => {
       this.setState({ workingHard: true });
 
@@ -787,6 +831,10 @@ class AccountInternal extends PureComponent {
       const idSet = new Set(ids);
 
       transactions.forEach(trans => {
+        if (name === 'cleared' && trans.reconciled === true) {
+          return;
+        }
+
         if (!idSet.has(trans.id)) {
           // Skip transactions which aren't actually selected, since the query
           // above also retrieves the siblings & parent of any selected splits.
@@ -823,6 +871,26 @@ class AccountInternal extends PureComponent {
       }
     };
 
+    if (name === 'amount' || name === 'payee') {
+      let { data } = await runQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids }, reconciled: true })
+          .select('*')
+          .options({ splits: 'grouped' }),
+      );
+      let transactions = ungroupTransactions(data);
+
+      if (transactions.length > 0) {
+        this.props.pushModal('confirm-transaction-edit', {
+          onConfirm: () => {
+            this.props.pushModal('edit-field', { name, onSubmit: onChange });
+          },
+          confirmReason: 'batchEdit',
+        });
+        return
+      }
+    }
+
     if (name === 'cleared') {
       // Cleared just toggles it on/off and it depends on the data
       // loaded. Need to clean this up in the future.
@@ -833,72 +901,116 @@ class AccountInternal extends PureComponent {
   };
 
   onBatchDuplicate = async ids => {
-    this.setState({ workingHard: true });
+    let onConfirmDuplicate = async ids => {
+      this.setState({ workingHard: true });
+
+      let { data } = await runQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids } })
+          .select('*')
+          .options({ splits: 'grouped' }),
+      );
+
+      let changes = {
+        added: data
+          .reduce((newTransactions, trans) => {
+            return newTransactions.concat(
+              realizeTempTransactions(ungroupTransaction(trans)),
+            );
+          }, [])
+          .map(({ sort_order, ...trans }) => ({ ...trans })),
+      };
+
+      await send('transactions-batch-update', changes);
+
+      await this.refetchTransactions();
+    }
 
     let { data } = await runQuery(
       q('transactions')
-        .filter({ id: { $oneof: ids } })
-        .select('*')
-        .options({ splits: 'grouped' }),
-    );
-
-    let changes = {
-      added: data
-        .reduce((newTransactions, trans) => {
-          return newTransactions.concat(
-            realizeTempTransactions(ungroupTransaction(trans)),
-          );
-        }, [])
-        .map(({ sort_order, ...trans }) => ({ ...trans })),
-    };
-
-    await send('transactions-batch-update', changes);
-
-    await this.refetchTransactions();
-  };
-
-  onBatchDelete = async ids => {
-    this.setState({ workingHard: true });
-
-    let { data } = await runQuery(
-      q('transactions')
-        .filter({ id: { $oneof: ids } })
+        .filter({ id: { $oneof: ids }, reconciled: true }) // scope it to account, and others
         .select('*')
         .options({ splits: 'grouped' }),
     );
     let transactions = ungroupTransactions(data);
 
-    let idSet = new Set(ids);
-    let changes = { deleted: [], updated: [] };
+    if (transactions.length > 0) {
+      this.props.pushModal('confirm-transaction-edit', {
+        onConfirm: () => {
+          onConfirmDuplicate(ids);
+        },
+        confirmReason: 'batchDuplicate',
+      });
+      return
+    }
 
-    transactions.forEach(trans => {
-      let parentId = trans.parent_id;
+    onConfirmDuplicate(ids);
+  };
 
-      // First, check if we're actually deleting this transaction by
-      // checking `idSet`. Then, we don't need to do anything if it's
-      // a child transaction and the parent is already being deleted
-      if (!idSet.has(trans.id) || (parentId && idSet.has(parentId))) {
-        return;
-      }
+  onBatchDelete = async ids => {
+    let onConfirmDelete = async ids => {
+      this.setState({ workingHard: true });
 
-      let { diff } = deleteTransaction(transactions, trans.id);
+      let { data } = await runQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids } })
+          .select('*')
+          .options({ splits: 'grouped' }),
+      );
+      let transactions = ungroupTransactions(data);
 
-      // TODO: We need to keep an updated list of transactions so
-      // the logic in `updateTransaction`, particularly about
-      // updating split transactions, works. This isn't ideal and we
-      // should figure something else out
-      transactions = applyChanges(diff, transactions);
+      let idSet = new Set(ids);
+      let changes = { deleted: [], updated: [] };
 
-      changes.deleted = diff.deleted
-        ? changes.deleted.concat(diff.deleted)
-        : diff.deleted;
-      changes.updated = diff.updated
-        ? changes.updated.concat(diff.updated)
-        : diff.updated;
-    });
+      transactions.forEach(trans => {
+        let parentId = trans.parent_id;
 
-    await send('transactions-batch-update', changes);
-    await this.refetchTransactions();
+        // First, check if we're actually deleting this transaction by
+        // checking `idSet`. Then, we don't need to do anything if it's
+        // a child transaction and the parent is already being deleted
+        if (!idSet.has(trans.id) || (parentId && idSet.has(parentId))) {
+          return;
+        }
+
+        let { diff } = deleteTransaction(transactions, trans.id);
+
+        // TODO: We need to keep an updated list of transactions so
+        // the logic in `updateTransaction`, particularly about
+        // updating split transactions, works. This isn't ideal and we
+        // should figure something else out
+        transactions = applyChanges(diff, transactions);
+
+        changes.deleted = diff.deleted
+          ? changes.deleted.concat(diff.deleted)
+          : diff.deleted;
+        changes.updated = diff.updated
+          ? changes.updated.concat(diff.updated)
+          : diff.updated;
+      });
+
+      await send('transactions-batch-update', changes);
+      await this.refetchTransactions();
+    }
+
+    let { data } = await runQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids }, reconciled: true })
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+    let transactions = ungroupTransactions(data);
+
+    if (transactions.length > 0) {
+      this.props.pushModal('confirm-transaction-edit', {
+        onConfirm: () => {
+          onConfirmDelete(ids);
+        },
+        confirmReason: 'batchDelete',
+      });
+      return
+    }
+
+    onConfirmDelete(ids);
   };
 
   onBatchUnlink = async ids => {

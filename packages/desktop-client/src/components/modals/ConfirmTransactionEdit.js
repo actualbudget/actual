@@ -10,14 +10,30 @@ import View from '../common/View';
 export default function ConfirmTransactionEdit({
   modalProps,
   onConfirm,
+  confirmReason,
 }) {
   return (
     <Modal title="Reconciled Transaction" {...modalProps} style={{ flex: 0 }}>
       {() => (
         <View style={{ lineHeight: 1.5 }}>
-          <Block>
-            Saving your changes to this reconciled transaction may bring your reconciliation out of balance.
-          </Block>
+
+          {confirmReason === 'batchDelete' ? (
+            <Block>
+              Deleting reconciled transactions may bring your reconciliation out of balance.
+            </Block>
+          ) : confirmReason === 'batchEdit' ? (
+            <Block>
+              Editing reconciled transactions may bring your reconciliation out of balance.
+            </Block>
+          ) : confirmReason === 'batchDuplicate' ? (
+            <Block>
+              Duplicating reconciled transactions may bring your reconciliation out of balance.
+            </Block>
+          ) : (
+            <Block>
+              Saving your changes to this reconciled transaction may bring your reconciliation out of balance.
+            </Block>
+          )}
 
           <View
             style={{
@@ -39,8 +55,8 @@ export default function ConfirmTransactionEdit({
               <Button
                 type="primary"
                 onClick={() => {
-                  onConfirm();
                   modalProps.onClose();
+                  onConfirm();
                 }}
               >
                 Save

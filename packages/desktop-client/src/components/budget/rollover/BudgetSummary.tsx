@@ -165,7 +165,7 @@ function ToBudget({
 
   return (
     <View style={{ alignItems: 'center' }}>
-      <Block>{isNegative ? 'Overbudgeted:' : 'To Assign:'}</Block>
+      <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
       <View>
         <HoverTarget
           disabled={!collapsed || menuOpen}

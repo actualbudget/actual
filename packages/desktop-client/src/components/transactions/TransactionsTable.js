@@ -735,15 +735,28 @@ const Transaction = memo(function Transaction(props) {
     setPrevShowZero(showZeroInDeposit);
   }
 
-  function onUpdate(name, value) { // this is called twice which wasn't a prob but now is.
+  var reconciledWarningShowing = false;
+
+  function onUpdate(name, value) {
+    // Had some issues with this is called twice which is a problem now that we are showing a warning
+    // modal is the transaction is locked. I added a boolean to guard against showing the modal twice.
+    // I'm still not completely happy with how the cells update pre/post modal. Sometimes you have to
+    // click off of the cell manually after confirming your change post modal for example. The last
+    // row seems to have more issues than others but the combination of tab, return, and clicking out
+    // of the cell all have different implications as well.
+
     if (transaction[name] !== value) {
-      if (transaction.notes === 'reconciled') { // && (name === 'credit' || name === 'debit')
-        props.pushModal('confirm-transaction-edit', {
-          onConfirm: () => {
-            console.log('did confiiiem');
-            onUpdateAfterConfirm(name, value);
-          },
-        });
+      if (transaction.reconciled === true && (name === 'credit' || name === 'debit' || name === 'payee')) {
+        if (reconciledWarningShowing === false) {
+          reconciledWarningShowing = true;
+          props.pushModal('confirm-transaction-edit', {
+            onConfirm: () => {
+              reconciledWarningShowing = false;
+              console.log('did confiiiem');
+              onUpdateAfterConfirm(name, value);
+            },
+          });
+        }
       } else {
         onUpdateAfterConfirm(name, value);
       }
@@ -804,6 +817,7 @@ const Transaction = memo(function Transaction(props) {
     account: accountId,
     category: categoryId,
     cleared,
+    reconciled,
     is_parent: isParent,
     _unmatched = false,
     _inverse = false,
@@ -1300,7 +1314,7 @@ const Transaction = memo(function Transaction(props) {
           focused={focusedField === 'cleared'}
           selected={selected}
           isPreview={isPreview}
-          status={isPreview ? notes : notes === 'reconciled'? 'reconciled' : cleared ? 'cleared' : null}
+          status={isPreview ? notes : reconciled === true? 'reconciled' : cleared ? 'cleared' : null}
           isChild={isChild}
           onEdit={onEdit}
           onUpdate={onUpdate}
