@@ -354,7 +354,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              userSelect: 'none',
             }}
             data-testid="category-name"
           >
@@ -579,7 +578,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              userSelect: 'none',
             }}
             data-testid="name"
           >
@@ -793,7 +791,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             style={{
               ...styles.smallText,
               ...nameTextStyle,
-              userSelect: 'none',
             }}
             data-testid="name"
           >
@@ -952,7 +949,6 @@ const IncomeCategory = memo(function IncomeCategory({
               ...styles.smallText,
               ...nameTextStyle,
               ...styles.underlinedText,
-              userSelect: 'none',
             }}
             data-testid="name"
           >
