@@ -110,9 +110,10 @@ export function TapField({
   );
 }
 
-export function BooleanField({ checked, onUpdate, style }) {
+export function BooleanField({ checked, onUpdate, style, disabled = "false" }) {
   return (
     <input
+      disabled={disabled}
       type="checkbox"
       checked={checked}
       onChange={e => onUpdate(e.target.checked)}

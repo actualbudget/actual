@@ -941,10 +941,9 @@ class AccountInternal extends PureComponent {
         },
         confirmReason: 'batchDuplicate',
       });
-      return
+    } else {
+      onConfirmDuplicate(ids);
     }
-
-    onConfirmDuplicate(ids);
   };
 
   onBatchDelete = async ids => {
@@ -1007,10 +1006,9 @@ class AccountInternal extends PureComponent {
         },
         confirmReason: 'batchDelete',
       });
-      return
+    } else {
+      onConfirmDelete(ids);
     }
-
-    onConfirmDelete(ids);
   };
 
   onBatchUnlink = async ids => {

@@ -219,32 +219,52 @@ class TransactionEditInner extends PureComponent {
   };
 
   onSave = async () => {
-    let { transactions } = this.state;
+    let onConfirmSave = async () => {
+      let { transactions } = this.state;
+      const [transaction, ..._childTransactions] = transactions;
+      const { account: accountId } = transaction;
+      let account = getAccountsById(this.props.accounts)[accountId];
+
+      if (transactions.find(t => t.account == null)) {
+        // Ignore transactions if any of them don't have an account
+        // TODO: Should we display validation error?
+        return;
+      }
+
+      // Since we don't own the state, we have to handle the case where
+      // the user saves while editing an input. We won't have the
+      // updated value so we "apply" a queued change. Maybe there's a
+      // better way to do this (lift the state?)
+      if (this._queuedChange) {
+        let [transaction, name, value] = this._queuedChange;
+        transactions = await this.onEdit(transaction, name, value);
+      }
+
+      if (this.props.adding) {
+        transactions = realizeTempTransactions(transactions);
+      }
+
+      this.props.onSave(transactions);
+      this.props.navigate(`/accounts/${account.id}`, { replace: true });
+    }
+
+    const { transactions } = this.state;
     const [transaction, ..._childTransactions] = transactions;
-    const { account: accountId } = transaction;
-    let account = getAccountsById(this.props.accounts)[accountId];
 
-    if (transactions.find(t => t.account == null)) {
-      // Ignore transactions if any of them don't have an account
-      // TODO: Should we display validation error?
-      return;
+    if (transaction.reconciled) {
+      // On mobile any save gives the warning. 
+      // On the web only certain changes trigger a warning.
+      // Should we bring that here as well? Or does the nature of the editing form
+      // make this more appropriate?
+      this.props.pushModal('confirm-transaction-edit', {
+        onConfirm: () => {
+          onConfirmSave();
+        },
+        confirmReason: 'batchEdit',
+      });
+    } else {
+      onConfirmSave();
     }
-
-    // Since we don't own the state, we have to handle the case where
-    // the user saves while editing an input. We won't have the
-    // updated value so we "apply" a queued change. Maybe there's a
-    // better way to do this (lift the state?)
-    if (this._queuedChange) {
-      let [transaction, name, value] = this._queuedChange;
-      transactions = await this.onEdit(transaction, name, value);
-    }
-
-    if (this.props.adding) {
-      transactions = realizeTempTransactions(transactions);
-    }
-
-    this.props.onSave(transactions);
-    this.props.navigate(`/accounts/${account.id}`, { replace: true });
   };
 
   onSaveChild = childTransaction => {
@@ -295,15 +315,31 @@ class TransactionEditInner extends PureComponent {
   };
 
   onDelete = () => {
-    this.props.onDelete();
+    let onConfirmDelete = () => {
+      this.props.onDelete();
+
+      const { transactions } = this.state;
+      const [transaction, ..._childTransactions] = transactions;
+      const { account: accountId } = transaction;
+      if (accountId) {
+        this.props.navigate(`/accounts/${accountId}`, { replace: true });
+      } else {
+        this.props.navigate(-1);
+      }
+    }
 
     const { transactions } = this.state;
     const [transaction, ..._childTransactions] = transactions;
-    const { account: accountId } = transaction;
-    if (accountId) {
-      this.props.navigate(`/accounts/${accountId}`, { replace: true });
+
+    if (transaction.reconciled) {
+      this.props.pushModal('confirm-transaction-edit', {
+        onConfirm: () => {
+          onConfirmDelete();
+        },
+        confirmReason: 'batchDelete',
+      });
     } else {
-      this.props.navigate(-1);
+      onConfirmDelete();
     }
   };
 
@@ -566,17 +602,28 @@ class TransactionEditInner extends PureComponent {
                   }
                 />
               </View>
-
-              <View style={{ marginLeft: 35, marginRight: 35 }}>
-                <FieldLabel title="Cleared" />
-                <BooleanField
-                  checked={transaction.cleared}
-                  onUpdate={checked =>
-                    this.onEdit(transaction, 'cleared', checked)
-                  }
-                  style={{ marginTop: 4 }}
-                />
-              </View>
+              {transaction.reconciled ? (
+                <View style={{ marginLeft: 35, marginRight: 35 }}>
+                  <FieldLabel title="reconciled" />
+                  <BooleanField
+                    checked="true"
+                    style={{ marginTop: 4 }}
+                    disabled="true"
+                  />
+                </View>
+              ) : (
+                <View style={{ marginLeft: 35, marginRight: 35 }}>
+                  <FieldLabel title="Cleared" />
+                  <BooleanField
+                    checked={transaction.cleared}
+                    onUpdate={checked =>
+                      this.onEdit(transaction, 'cleared', checked)
+                    }
+                    style={{ marginTop: 4 }}
+                    disabled="false"
+                  />
+                </View>
+              )}
             </View>
 
             <View>
@@ -1004,9 +1051,7 @@ class Transaction extends PureComponent {
                     style={{
                       width: 11,
                       height: 11,
-                      color: cleared
-                        ? theme.noticeTextLight
-                        : theme.altButtonBareText,
+                      color: theme.noticeTextLight,
                       marginRight: 5,
                     }}
                   />
