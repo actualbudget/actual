@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import View from '../common/View';
 import { useDraggable, useDroppable, DropHighlight } from '../sort';
 import { Row, ROW_HEIGHT } from '../table';
@@ -56,7 +56,7 @@ function ExpenseGroup({
       style={{
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
-        backgroundColor: colors.n11,
+        backgroundColor: theme.altTableBackground,
       }}
     >
       {dragState && !dragState.preview && dragState.type === 'group' && (

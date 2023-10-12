@@ -22,7 +22,7 @@ export default function InputWithContent({
   getStyle,
   ...props
 }: InputWithContentProps) {
-  let [focused, setFocused] = useState(false);
+  let [focused, setFocused] = useState(props.focused);
 
   return (
     <View
@@ -42,6 +42,7 @@ export default function InputWithContent({
       {leftContent}
       <Input
         {...props}
+        focused={focused}
         style={{
           ...inputStyle,
           flex: 1,

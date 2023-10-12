@@ -3,9 +3,9 @@ import { useLocation } from 'react-router';
 
 import { css, media } from 'glamor';
 
-import { type CSSProperties, colors } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import tokens from '../../tokens';
-import LinkButton from '../common/LinkButton';
+import Button from '../common/Button';
 import View from '../common/View';
 
 type SettingProps = {
@@ -19,12 +19,12 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
     <View
       className={`${css([
         {
-          backgroundColor: colors.n9,
+          backgroundColor: theme.pillBackground,
           alignSelf: 'flex-start',
           alignItems: 'flex-start',
           padding: 15,
           borderRadius: 4,
-          border: '1px solid ' + colors.n8,
+          border: '1px solid ' + theme.altPillBorder,
           width: '100%',
         },
         style,
@@ -77,17 +77,18 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       {children}
     </View>
   ) : (
-    <LinkButton
+    <Button
       id="advanced"
+      type="link"
       onClick={() => setExpanded(true)}
       style={{
         flexShrink: 0,
         alignSelf: 'flex-start',
-        color: colors.p4,
+        color: theme.pageTextPositive,
         marginBottom: 25,
       }}
     >
       Show advanced settings
-    </LinkButton>
+    </Button>
   );
 };

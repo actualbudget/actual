@@ -2,7 +2,7 @@ import React, { type ComponentType, type ReactNode } from 'react';
 
 import ExclamationOutline from '../icons/v1/ExclamationOutline';
 import InformationOutline from '../icons/v1/InformationOutline';
-import { styles, colors, type CSSProperties } from '../style';
+import { styles, theme, type CSSProperties } from '../style';
 
 import Text from './common/Text';
 import View from './common/View';
@@ -33,7 +33,7 @@ const Alert = ({
         padding: 10,
         flexDirection: 'row',
         '& a, & a:active, & a:visited': {
-          color: colors.b3,
+          color: theme.altFormLabelText,
         },
         ...style,
       }}
@@ -63,7 +63,7 @@ export const Information = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={InformationOutline}
-      color={colors.n4}
+      color={theme.pageTextLight}
       backgroundColor="transparent"
       style={{
         ...style,
@@ -80,8 +80,8 @@ export const Warning = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={ExclamationOutline}
-      color={colors.y2}
-      backgroundColor={colors.y10}
+      color={theme.warningText}
+      backgroundColor={theme.warningBackground}
       style={style}
     >
       {children}
@@ -93,8 +93,8 @@ export const Error = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={ExclamationOutline}
-      color={colors.r2}
-      backgroundColor={colors.r10}
+      color={theme.altErrorText}
+      backgroundColor={theme.altErrorBackground}
       style={style}
     >
       {children}

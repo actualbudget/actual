@@ -21,17 +21,18 @@ import SvgEye from '../icons/v2/Eye';
 import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
-import { colors, type CSSProperties } from '../style';
+import { theme, type CSSProperties } from '../style';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import Button, { ButtonWithLoading } from './common/Button';
-import ButtonLink from './common/ButtonLink';
 import ExternalLink from './common/ExternalLink';
+import Link from './common/Link';
 import Paragraph from './common/Paragraph';
 import Text from './common/Text';
 import View from './common/View';
+import { KeyHandlers } from './KeyHandlers';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar';
@@ -69,13 +70,16 @@ function UncategorizedButton() {
   let count = useSheetValue(queries.uncategorizedCount());
   return (
     count !== 0 && (
-      <ButtonLink
+      <Link
+        variant="button"
         type="bare"
         to="/accounts/uncategorized"
-        style={{ color: colors.r5 }}
+        style={{
+          color: theme.errorText,
+        }}
       >
         {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
-      </ButtonLink>
+      </Link>
     )
   );
 }
@@ -148,19 +152,19 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 
   const mobileColor =
     syncState === 'error'
-      ? colors.r7
+      ? theme.alt4ErrorText
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'
-      ? colors.n9
+      ? theme.sidebarItemText
       : style.color;
   const desktopColor =
     syncState === 'error'
-      ? colors.r4
+      ? theme.alt2ErrorText
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'
-      ? colors.n6
+      ? theme.altTableText
       : null;
 
   const activeStyle = isMobile
@@ -170,30 +174,40 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     : {};
 
   return (
-    <Button
-      type="bare"
-      style={{
-        ...style,
-        WebkitAppRegion: 'none',
-        color: isMobile ? mobileColor : desktopColor,
-      }}
-      hoveredStyle={activeStyle}
-      activeStyle={activeStyle}
-      onClick={sync}
-    >
-      {syncState === 'error' ? (
-        <AlertTriangle width={13} />
-      ) : (
-        <AnimatedRefresh animating={syncing} />
-      )}
-      <Text style={{ marginLeft: 3 }}>
-        {syncState === 'disabled'
-          ? 'Disabled'
-          : syncState === 'offline'
-          ? 'Offline'
-          : 'Sync'}
-      </Text>
-    </Button>
+    <>
+      <KeyHandlers
+        keys={{
+          'ctrl+s, cmd+s': () => {
+            sync();
+          },
+        }}
+      />
+
+      <Button
+        type="bare"
+        style={{
+          ...style,
+          WebkitAppRegion: 'none',
+          color: isMobile ? mobileColor : desktopColor,
+        }}
+        hoveredStyle={activeStyle}
+        activeStyle={activeStyle}
+        onClick={sync}
+      >
+        {syncState === 'error' ? (
+          <AlertTriangle width={13} />
+        ) : (
+          <AnimatedRefresh animating={syncing} />
+        )}
+        <Text style={{ marginLeft: 3 }}>
+          {syncState === 'disabled'
+            ? 'Disabled'
+            : syncState === 'offline'
+            ? 'Offline'
+            : 'Sync'}
+        </Text>
+      </Button>
+    </>
   );
 }
 
@@ -296,7 +310,6 @@ export default function Titlebar({ style }) {
     state => state.prefs.global.floatingSidebar,
   );
 
-  let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let themesFlag = useFeatureFlag('themes');
 
   return isNarrowWidth ? null : (
@@ -338,7 +351,7 @@ export default function Titlebar({ style }) {
         >
           <NavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: colors.n5, left: 0 }}
+            style={{ width: 15, height: 15, color: theme.pageText, left: 0 }}
           />
         </Button>
       )}
@@ -369,7 +382,7 @@ export default function Titlebar({ style }) {
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
       {themesFlag && <ThemeSelector />}
-      {privacyModeFeatureFlag && <PrivacyButton />}
+      <PrivacyButton />
       {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>

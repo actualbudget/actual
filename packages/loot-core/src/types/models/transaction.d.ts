@@ -15,7 +15,6 @@ export interface TransactionEntity {
   notes?: string;
   date: string;
   imported_id?: string;
-  error?: unknown;
   imported_payee?: string;
   starting_balance_flag?: boolean;
   transfer_id?: string;
@@ -24,6 +23,4 @@ export interface TransactionEntity {
   tombstone?: boolean;
   schedule?: ScheduleEntity;
   subtransactions?: TransactionEntity[];
-  // TODO: remove once properly typed
-  [k: string]: unknown;
 }

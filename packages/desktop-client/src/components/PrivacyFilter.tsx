@@ -8,7 +8,6 @@ import React, {
 
 import usePrivacyMode from 'loot-core/src/client/privacy';
 
-import useFeatureFlag from '../hooks/useFeatureFlag';
 import { useResponsive } from '../ResponsiveProvider';
 
 import View from './common/View';
@@ -53,7 +52,6 @@ export default function PrivacyFilter({
   children,
   ...props
 }: PrivacyFilterProps) {
-  let privacyModeFeatureFlag = useFeatureFlag('privacyMode');
   let privacyMode = usePrivacyMode();
   // Limit mobile support for now.
   let { isNarrowWidth } = useResponsive();
@@ -67,7 +65,7 @@ export default function PrivacyFilter({
 
   let blurAmount = blurIntensity != null ? `${blurIntensity}px` : '3px';
 
-  return !privacyModeFeatureFlag || !activate ? (
+  return !activate ? (
     <>{Children.toArray(children)}</>
   ) : (
     <BlurredOverlay blurIntensity={blurAmount} {...props}>

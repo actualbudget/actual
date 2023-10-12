@@ -24,7 +24,7 @@ import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import Merge from '../../icons/v0/Merge';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
 import Search from '../common/Search';
@@ -61,9 +61,9 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
         style={{
           borderRadius: 4,
           padding: '3px 6px',
-          backgroundColor: colors.g9,
-          border: '1px solid ' + colors.g9,
-          color: colors.g1,
+          backgroundColor: theme.noticeBackground,
+          border: '1px solid ' + theme.noticeBackground,
+          color: theme.noticeTextDark,
           fontSize: 12,
         }}
         onEdit={onEdit}
@@ -102,7 +102,7 @@ let Payee = memo(
   }) => {
     let { id } = payee;
     let dispatchSelected = useSelectedDispatch();
-    let borderColor = selected ? colors.b8 : colors.border;
+    let borderColor = selected ? theme.tableBorderSelected : theme.tableBorder;
     let backgroundFocus = hovered || focusedField === 'select';
 
     return (
@@ -112,14 +112,14 @@ let Payee = memo(
           ...style,
           borderColor,
           backgroundColor: hovered
-            ? colors.hover
+            ? theme.tableRowBackgroundHover
             : selected
-            ? colors.b9
+            ? theme.tableRowBackgroundHighlight
             : backgroundFocus
-            ? colors.hover
-            : 'white',
+            ? theme.tableRowBackgroundHover
+            : theme.tableBackground,
           ...(selected && {
-            backgroundColor: colors.b9,
+            backgroundColor: theme.tableRowBackgroundHighlight,
             zIndex: 100,
           }),
         }}
@@ -138,7 +138,9 @@ let Payee = memo(
         />
         <InputCell
           value={(payee.transfer_acct ? 'Transfer: ' : '') + payee.name}
-          valueStyle={!selected && payee.transfer_acct && { color: colors.n7 }}
+          valueStyle={
+            !selected && payee.transfer_acct && { color: theme.pageTextSubdued }
+          }
           exposed={focusedField === 'name'}
           width="flex"
           onUpdate={value =>
@@ -220,7 +222,7 @@ const PayeeTable = forwardRef(
 );
 
 function PayeeTableHeader() {
-  let borderColor = colors.border;
+  let borderColor = theme.tableborder;
   let dispatchSelected = useSelectedDispatch();
   let selectedItems = useSelectedItems();
 
@@ -229,13 +231,12 @@ function PayeeTableHeader() {
       <TableHeader
         style={{
           borderColor,
-          backgroundColor: 'white',
-          color: colors.n4,
+          backgroundColor: theme.tableBackground,
+          color: theme.pageTextLight,
           zIndex: 200,
           userSelect: 'none',
         }}
         collapsed={true}
-        version="v2"
       >
         <SelectCell
           exposed={true}
@@ -254,7 +255,7 @@ function EmptyMessage({ text, style }) {
     <View
       style={{
         textAlign: 'center',
-        color: colors.n7,
+        color: theme.pageTextSubdued,
         fontStyle: 'italic',
         fontSize: 13,
         marginTop: 5,
@@ -298,7 +299,7 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
               padding: 3,
               fontSize: 11,
               fontStyle: 'italic',
-              color: colors.n7,
+              color: theme.pageTextSubdued,
             }}
           >
             {[...selectedPayees]
@@ -529,6 +530,7 @@ export const ManagePayees = forwardRef(
           </View>
           <View style={{ flex: 1 }} />
           <Search
+            id="filter-input"
             placeholder="Filter payees..."
             value={filter}
             onChange={applyFilter}
@@ -539,7 +541,7 @@ export const ManagePayees = forwardRef(
           <View
             style={{
               flex: 1,
-              border: '1px solid ' + colors.border,
+              border: '1px solid ' + theme.tableBorder,
               borderTopLeftRadius: 4,
               borderTopRightRadius: 4,
               overflow: 'hidden',

@@ -1,15 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, type CSSProperties } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
-import * as monthUtils from 'loot-core/src/shared/months';
+import {
+  type ScheduleStatusType,
+  type ScheduleStatuses,
+} from 'loot-core/src/client/data-hooks/schedules';
+import { format as monthUtilFormat } from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
@@ -21,10 +26,73 @@ import DisplayId from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
 
-export let ROW_HEIGHT = 43;
+type SchedulesTableProps = {
+  schedules: ScheduleEntity[];
+  statuses: ScheduleStatuses;
+  filter: string;
+  allowCompleted: boolean;
+  onSelect: (id: ScheduleEntity['id']) => void;
+  onAction: (actionName: ScheduleItemAction, id: ScheduleEntity['id']) => void;
+  style: CSSProperties;
+  minimal?: boolean;
+  tableStyle?: CSSProperties;
+};
 
-function OverflowMenu({ schedule, status, onAction }) {
-  let [open, setOpen] = useState(false);
+type CompletedScheduleItem = { id: 'show-completed' };
+type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
+
+export type ScheduleItemAction =
+  | 'post-transaction'
+  | 'skip'
+  | 'complete'
+  | 'restart'
+  | 'delete';
+
+export const ROW_HEIGHT = 43;
+
+function OverflowMenu({
+  schedule,
+  status,
+  onAction,
+}: {
+  schedule: ScheduleEntity;
+  status: ScheduleStatusType;
+  onAction: SchedulesTableProps['onAction'];
+}) {
+  const [open, setOpen] = useState(false);
+
+  const getMenuItems = () => {
+    const menuItems: { name: ScheduleItemAction; text: string }[] = [];
+
+    if (status === 'due') {
+      menuItems.push({
+        name: 'post-transaction',
+        text: 'Post transaction',
+      });
+    }
+
+    if (status === 'completed') {
+      menuItems.push({
+        name: 'restart',
+        text: 'Restart',
+      });
+    } else {
+      menuItems.push(
+        {
+          name: 'skip',
+          text: 'Skip next date',
+        },
+        {
+          name: 'complete',
+          text: 'Complete',
+        },
+      );
+    }
+
+    menuItems.push({ name: 'delete', text: 'Delete' });
+
+    return menuItems;
+  };
 
   return (
     <View>
@@ -49,23 +117,11 @@ function OverflowMenu({ schedule, status, onAction }) {
           onClose={() => setOpen(false)}
         >
           <Menu
-            onMenuSelect={name => {
+            onMenuSelect={(name: ScheduleItemAction) => {
               onAction(name, schedule.id);
               setOpen(false);
             }}
-            items={[
-              status === 'due' && {
-                name: 'post-transaction',
-                text: 'Post transaction',
-              },
-              ...(schedule.completed
-                ? [{ name: 'restart', text: 'Restart' }]
-                : [
-                    { name: 'skip', text: 'Skip next date' },
-                    { name: 'complete', text: 'Complete' },
-                  ]),
-              { name: 'delete', text: 'Delete' },
-            ]}
+            items={getMenuItems()}
           />
         </Tooltip>
       )}
@@ -73,10 +129,16 @@ function OverflowMenu({ schedule, status, onAction }) {
   );
 }
 
-export function ScheduleAmountCell({ amount, op }) {
-  let num = getScheduledAmount(amount);
-  let str = integerToCurrency(Math.abs(num || 0));
-  let isApprox = op === 'isapprox' || op === 'isbetween';
+export function ScheduleAmountCell({
+  amount,
+  op,
+}: {
+  amount: ScheduleEntity['_amount'];
+  op: ScheduleEntity['_amountOp'];
+}) {
+  const num = getScheduledAmount(amount);
+  const str = integerToCurrency(Math.abs(num || 0));
+  const isApprox = op === 'isapprox' || op === 'isbetween';
 
   return (
     <Cell
@@ -94,7 +156,7 @@ export function ScheduleAmountCell({ amount, op }) {
         <View
           style={{
             textAlign: 'left',
-            color: colors.n7,
+            color: theme.pageTextSubdued,
             lineHeight: '1em',
             marginRight: 10,
           }}
@@ -106,7 +168,7 @@ export function ScheduleAmountCell({ amount, op }) {
       <Text
         style={{
           flex: 1,
-          color: num > 0 ? colors.g5 : null,
+          color: num > 0 ? theme.noticeTextLight : theme.tableText,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -129,38 +191,38 @@ export function SchedulesTable({
   onSelect,
   onAction,
   tableStyle,
-}) {
-  let dateFormat = useSelector(state => {
+}: SchedulesTableProps) {
+  const dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
 
-  let [showCompleted, setShowCompleted] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
 
-  let payees = useCachedPayees();
-  let accounts = useCachedAccounts();
+  const payees = useCachedPayees();
+  const accounts = useCachedAccounts();
 
-  let filteredSchedules = useMemo(() => {
+  const filteredSchedules = useMemo(() => {
     if (!filter) {
       return schedules;
     }
-    const filterIncludes = str =>
+    const filterIncludes = (str: string) =>
       str
         ? str.toLowerCase().includes(filter.toLowerCase()) ||
           filter.toLowerCase().includes(str.toLowerCase())
         : false;
 
     return schedules.filter(schedule => {
-      let payee = payees.find(p => schedule._payee === p.id);
-      let account = accounts.find(a => schedule._account === a.id);
-      let amount = getScheduledAmount(schedule._amount);
-      let amountStr =
+      const payee = payees.find(p => schedule._payee === p.id);
+      const account = accounts.find(a => schedule._account === a.id);
+      const amount = getScheduledAmount(schedule._amount);
+      const amountStr =
         (schedule._amountOp === 'isapprox' || schedule._amountOp === 'isbetween'
           ? '~'
           : '') +
         (amount > 0 ? '+' : '') +
         integerToCurrency(Math.abs(amount || 0));
-      let dateStr = schedule.next_date
-        ? monthUtils.format(schedule.next_date, dateFormat)
+      const dateStr = schedule.next_date
+        ? monthUtilFormat(schedule.next_date, dateFormat)
         : null;
 
       return (
@@ -174,58 +236,66 @@ export function SchedulesTable({
     });
   }, [schedules, filter, statuses]);
 
-  let items = useMemo(() => {
+  const items: SchedulesTableItem[] = useMemo(() => {
+    const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);
+
     if (!allowCompleted) {
-      return filteredSchedules.filter(s => !s.completed);
+      return unCompletedSchedules;
     }
     if (showCompleted) {
       return filteredSchedules;
     }
-    let arr = filteredSchedules.filter(s => !s.completed);
-    if (filteredSchedules.find(s => s.completed)) {
-      arr.push({ type: 'show-completed' });
-    }
-    return arr;
+
+    const hasCompletedSchedule = filteredSchedules.find(s => s.completed);
+
+    if (!hasCompletedSchedule) return unCompletedSchedules;
+
+    return [...unCompletedSchedules, { id: 'show-completed' }];
   }, [filteredSchedules, showCompleted, allowCompleted]);
 
-  function renderSchedule({ item }) {
+  function renderSchedule({ schedule }: { schedule: ScheduleEntity }) {
     return (
       <Row
         height={ROW_HEIGHT}
         inset={15}
-        onClick={() => onSelect(item.id)}
+        onClick={() => onSelect(schedule.id)}
         style={{
           cursor: 'pointer',
-          backgroundColor: 'white',
-          ':hover': { backgroundColor: colors.hover },
+          backgroundColor: theme.tableBackground,
+          color: theme.tableText,
+          ':hover': { backgroundColor: theme.tableRowBackgroundHover },
         }}
       >
         <Field width="flex" name="name">
           <Text
-            style={item.name == null ? { color: colors.n8 } : null}
-            title={item.name ? item.name : ''}
+            style={
+              schedule.name == null
+                ? { color: theme.buttonNormalDisabledText }
+                : null
+            }
+            title={schedule.name ? schedule.name : ''}
           >
-            {item.name ? item.name : 'None'}
+            {schedule.name ? schedule.name : 'None'}
           </Text>
         </Field>
         <Field width="flex" name="payee">
-          <DisplayId type="payees" id={item._payee} />
+          <DisplayId type="payees" id={schedule._payee} />
         </Field>
         <Field width="flex" name="account">
-          <DisplayId type="accounts" id={item._account} />
+          <DisplayId type="accounts" id={schedule._account} />
         </Field>
         <Field width={110} name="date">
-          {item.next_date
-            ? monthUtils.format(item.next_date, dateFormat)
+          {schedule.next_date
+            ? monthUtilFormat(schedule.next_date, dateFormat)
             : null}
         </Field>
         <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
-          <StatusBadge status={statuses.get(item.id)} />
+          <StatusBadge status={statuses.get(schedule.id)} />
         </Field>
-        <ScheduleAmountCell amount={item._amount} op={item._amountOp} />
+        <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
-            {item._date && item._date.frequency && (
+            {schedule._date && schedule._date.frequency && (
               <Check style={{ width: 13, height: 13 }} />
             )}
           </Field>
@@ -233,8 +303,8 @@ export function SchedulesTable({
         {!minimal && (
           <Field width={40} name="actions">
             <OverflowMenu
-              schedule={item}
-              status={statuses.get(item.id)}
+              schedule={schedule}
+              status={statuses.get(schedule.id)}
               onAction={onAction}
             />
           </Field>
@@ -243,16 +313,16 @@ export function SchedulesTable({
     );
   }
 
-  function renderItem({ item }) {
-    if (item.type === 'show-completed') {
+  function renderItem({ item }: { item: SchedulesTableItem }) {
+    if (item.id === 'show-completed') {
       return (
         <Row
           height={ROW_HEIGHT}
           inset={15}
           style={{
             cursor: 'pointer',
-            backgroundColor: 'white',
-            ':hover': { backgroundColor: colors.hover },
+            backgroundColor: 'transparent',
+            ':hover': { backgroundColor: theme.tableRowBackgroundHover },
           }}
           onClick={() => setShowCompleted(true)}
         >
@@ -261,7 +331,7 @@ export function SchedulesTable({
             style={{
               fontStyle: 'italic',
               textAlign: 'center',
-              color: colors.n6,
+              color: theme.tableText,
             }}
           >
             Show completed schedules
@@ -269,7 +339,7 @@ export function SchedulesTable({
         </Row>
       );
     }
-    return renderSchedule({ item });
+    return renderSchedule({ schedule: item as ScheduleEntity });
   }
 
   return (
@@ -295,7 +365,7 @@ export function SchedulesTable({
         backgroundColor="transparent"
         version="v2"
         style={{ flex: 1, backgroundColor: 'transparent', ...style }}
-        items={items}
+        items={items as ScheduleEntity[]}
         renderItem={renderItem}
         renderEmpty={filter ? 'No matching schedules' : 'No schedules'}
         allowPopupsEscape={items.length < 6}

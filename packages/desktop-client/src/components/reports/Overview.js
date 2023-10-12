@@ -9,14 +9,14 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import useCategories from '../../hooks/useCategories';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { colors, styles } from '../../style';
+import { theme, styles } from '../../style';
 import AnchorLink from '../common/AnchorLink';
 import Block from '../common/Block';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
-import theme from './chart-theme';
+import { chartTheme } from './chart-theme';
 import Container from './Container';
 import DateRange from './DateRange';
 import CategorySpendingGraph from './graphs/CategorySpendingGraph';
@@ -33,11 +33,14 @@ function Card({ flex, to, style, children }) {
   const content = (
     <View
       style={{
-        backgroundColor: 'white',
+        backgroundColor: theme.tableBackground,
         borderRadius: 2,
         height: 200,
         boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
         transition: 'box-shadow .25s',
+        '& .recharts-surface:hover': {
+          cursor: 'pointer',
+        },
         ':hover': to && {
           boxShadow: '0 4px 6px rgba(0, 0, 0, .15)',
         },
@@ -122,7 +125,7 @@ function NetWorthCard({ accounts }) {
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
                   amount={data.totalChange}
-                  style={{ color: colors.n6, fontWeight: 300 }}
+                  style={{ color: theme.altTableText, fontWeight: 300 }}
                 />
               </PrivacyFilter>
             </View>
@@ -181,7 +184,7 @@ function CashFlowCard() {
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
                   amount={income - expense}
-                  style={{ color: colors.n6, fontWeight: 300 }}
+                  style={{ color: theme.altTableText, fontWeight: 300 }}
                 />
               </PrivacyFilter>
             </View>
@@ -192,10 +195,10 @@ function CashFlowCard() {
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height, portalHost) => (
               <VictoryGroup
-                colorScale={[theme.colors.blue, theme.colors.red]}
+                colorScale={[chartTheme.colors.blue, chartTheme.colors.red]}
                 width={100}
                 height={height}
-                theme={theme}
+                theme={chartTheme}
                 domain={{
                   x: [0, 100],
                   y: [0, Math.max(income, expense, 100)],
@@ -260,7 +263,6 @@ function CashFlowCard() {
                         </View>
                       ),
                       labelPosition: 'right',
-                      fill: theme.colors.red,
                     },
                   ]}
                   labels={d => d.premadeLabel}

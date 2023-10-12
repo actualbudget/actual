@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import PullToRefresh from 'react-simple-pull-to-refresh';
 
 import * as queries from 'loot-core/src/client/queries';
 
@@ -14,6 +13,7 @@ import Text from '../common/Text';
 import TextOneLine from '../common/TextOneLine';
 import View from '../common/View';
 import { Page } from '../Page';
+import PullToRefresh from '../responsive/PullToRefresh';
 import CellValue from '../spreadsheet/CellValue';
 
 function AccountHeader({ name, amount, style = {} }) {
@@ -100,7 +100,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
             {account.bankId && (
               <View
                 style={{
-                  backgroundColor: theme.noticeText,
+                  backgroundColor: theme.noticeBackgroundDark,
                   marginLeft: '-23px',
                   width: 8,
                   height: 8,

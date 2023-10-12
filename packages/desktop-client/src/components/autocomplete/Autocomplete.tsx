@@ -164,7 +164,7 @@ type SingleAutocompleteProps = {
   openOnFocus?: boolean;
   getHighlightedIndex?: (suggestions) => number | null;
   highlightFirst?: boolean;
-  onUpdate: (id: unknown, value: string) => void;
+  onUpdate?: (id: unknown, value: string) => void;
   strict?: boolean;
   onSelect: (id: unknown, value: string) => void;
   tableBehavior?: boolean;
@@ -398,7 +398,7 @@ function SingleAutocomplete({
               },
               onBlur: e => {
                 // Should this be e.nativeEvent
-                e.preventDownshiftDefault = true;
+                e['preventDownshiftDefault'] = true;
                 inputProps.onBlur?.(e);
 
                 if (!closeOnBlur) return;

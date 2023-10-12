@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../../style';
+import { theme } from '../../../style';
 import { useSetServerURL } from '../../ServerContext';
 
 // There are two URLs that dance with each other: `/login` and
@@ -78,7 +78,7 @@ export function Title({ text }: TitleProps) {
       style={{
         fontSize: 40,
         fontWeight: 700,
-        color: colors.p3,
+        color: theme.pageTextPositive,
         marginBottom: 20,
       }}
     >

@@ -179,7 +179,7 @@ export function fastSetMerge(set1, set2) {
   return finalSet;
 }
 
-export function titleFirst(str) {
+export function titleFirst(str: string) {
   return str[0].toUpperCase() + str.slice(1);
 }
 

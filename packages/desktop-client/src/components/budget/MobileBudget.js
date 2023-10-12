@@ -5,8 +5,13 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   addCategory,
+  addGroup,
+  deleteCategory,
+  deleteGroup,
   moveCategory,
   moveCategoryGroup,
+  updateCategory,
+  updateGroup,
 } from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -24,15 +29,13 @@ class Budget extends Component {
   constructor(props) {
     super(props);
 
-    this.summary = 0;
-
     const currentMonth = monthUtils.currentMonth();
     this.state = {
       bounds: { start: currentMonth, end: currentMonth },
       currentMonth: currentMonth,
       initialized: false,
       editMode: false,
-      categoryGroups: null,
+      categoryGroups: [],
     };
   }
 
@@ -72,7 +75,7 @@ class Budget extends Component {
   }
 
   componentWillUnmount() {
-    // this.cleanup();
+    this.cleanup?.();
   }
 
   prewarmMonth = async (month, type = null) => {
@@ -101,23 +104,110 @@ class Budget extends Component {
     this.props.applyBudgetAction(currentMonth, type, this.state.bounds);
   };
 
-  onAddCategory = groupId => {
-    this.props.navigation.navigate('AddCategoryModal', {
-      groupId,
-      onAdd: async name => {
-        let id = await this.props.createCategory(name, groupId);
-        let { categoryGroups } = this.state;
-
-        this.setState({
-          categoryGroups: addCategory(categoryGroups, {
-            name,
-            cat_group: groupId,
-            is_income: 0,
+  onAddGroup = () => {
+    this.props.pushModal('new-category-group', {
+      onValidate: name => (!name ? 'Name is required.' : null),
+      onSubmit: async name => {
+        const id = await this.props.createGroup(name);
+        this.setState(state => ({
+          categoryGroups: addGroup(state.categoryGroups, {
             id,
+            name,
+            categories: [],
+            is_income: 0,
           }),
-        });
+        }));
       },
     });
+  };
+
+  onAddCategory = (groupId, isIncome) => {
+    this.props.pushModal('new-category', {
+      onValidate: name => (!name ? 'Name is required.' : null),
+      onSubmit: async name => {
+        const id = await this.props.createCategory(name, groupId, isIncome);
+        this.setState(state => ({
+          categoryGroups: addCategory(state.categoryGroups, {
+            id,
+            name,
+            cat_group: groupId,
+            is_income: isIncome ? 1 : 0,
+          }),
+        }));
+      },
+    });
+  };
+
+  onSaveGroup = group => {
+    this.props.updateGroup(group);
+    this.setState(state => ({
+      categoryGroups: updateGroup(state.categoryGroups, group),
+    }));
+  };
+
+  onDeleteGroup = async groupId => {
+    let group = this.state.categoryGroups?.find(g => g.id === groupId);
+
+    if (!group) {
+      return;
+    }
+
+    let mustTransfer = false;
+    for (let category of group.categories) {
+      if (await send('must-category-transfer', { id: category.id })) {
+        mustTransfer = true;
+        break;
+      }
+    }
+
+    if (mustTransfer) {
+      this.props.pushModal('confirm-category-delete', {
+        group: groupId,
+        onDelete: transferCategory => {
+          this.props.deleteGroup(groupId, transferCategory);
+          this.setState(state => ({
+            categoryGroups: deleteGroup(state.categoryGroups, groupId),
+          }));
+        },
+      });
+    } else {
+      this.props.deleteGroup(groupId);
+      this.setState(state => ({
+        categoryGroups: deleteGroup(state.categoryGroups, groupId),
+      }));
+    }
+  };
+
+  onSaveCategory = category => {
+    this.props.updateCategory(category);
+    this.setState(state => ({
+      categoryGroups: updateCategory(state.categoryGroups, category),
+    }));
+  };
+
+  onDeleteCategory = async categoryId => {
+    const mustTransfer = await send('must-category-transfer', {
+      id: categoryId,
+    });
+
+    if (mustTransfer) {
+      this.props.pushModal('confirm-category-delete', {
+        category: categoryId,
+        onDelete: transferCategory => {
+          if (categoryId !== transferCategory) {
+            this.props.deleteCategory(categoryId, transferCategory);
+            this.setState(state => ({
+              categoryGroups: deleteCategory(state.categoryGroups, categoryId),
+            }));
+          }
+        },
+      });
+    } else {
+      this.props.deleteCategory(categoryId);
+      this.setState(state => ({
+        categoryGroups: deleteCategory(state.categoryGroups, categoryId),
+      }));
+    }
   };
 
   onReorderCategory = (id, { inGroup, aroundCategory }) => {
@@ -237,6 +327,7 @@ class Budget extends Component {
       categories,
       categoryGroups,
       prefs,
+      savePrefs,
       budgetType,
       navigation,
       applyBudgetAction,
@@ -249,7 +340,7 @@ class Budget extends Component {
         <View
           style={{
             flex: 1,
-            backgroundColor: 'white',
+            backgroundColor: theme.pageBackgroundLineTop,
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 25,
@@ -281,11 +372,17 @@ class Budget extends Component {
             onShowBudgetDetails={this.onShowBudgetDetails}
             onPrevMonth={this.onPrevMonth}
             onNextMonth={this.onNextMonth}
+            onSaveGroup={this.onSaveGroup}
+            onDeleteGroup={this.onDeleteGroup}
+            onAddGroup={this.onAddGroup}
             onAddCategory={this.onAddCategory}
+            onSaveCategory={this.onSaveCategory}
+            onDeleteCategory={this.onDeleteCategory}
             onReorderCategory={this.onReorderCategory}
             onReorderGroup={this.onReorderGroup}
             onOpenActionSheet={() => {}} //this.onOpenActionSheet}
             onBudgetAction={applyBudgetAction}
+            savePrefs={savePrefs}
           />
         )}
       </SyncRefresh>
@@ -302,7 +399,6 @@ export default function BudgetWrapper() {
 
   let actions = useActions();
   let spreadsheet = useSpreadsheet();
-
   useSetThemeColor(theme.mobileBudgetViewTheme);
   return (
     <Budget

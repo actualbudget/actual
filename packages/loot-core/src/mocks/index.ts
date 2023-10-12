@@ -53,9 +53,8 @@ export function generateCategoryGroups(definition) {
 }
 
 function _generateTransaction(data): TransactionEntity {
-  const id = data.id || uuidv4();
   return {
-    id: id,
+    id: data.id || uuidv4(),
     amount: data.amount || Math.floor(random() * 10000 - 7000),
     payee: data.payee || 'payed-to',
     notes: 'Notes',
@@ -64,7 +63,6 @@ function _generateTransaction(data): TransactionEntity {
     category: data.category,
     sort_order: data.sort_order != null ? data.sort_order : 1,
     cleared: false,
-    error: null,
   };
 }
 
@@ -76,7 +74,7 @@ export function generateTransaction(data, splitAmount?, showError = false) {
 
   if (splitAmount) {
     const parent = trans;
-    parent.isParent = true;
+    parent.is_parent = true;
 
     result.push(
       {
