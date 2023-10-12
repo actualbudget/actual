@@ -9,7 +9,6 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Brush,
 } from 'recharts';
 
 import { theme } from '../../../style';
@@ -171,7 +170,6 @@ function NetWorthGraph({
                   fill="url(#splitColor)"
                   fillOpacity={1}
                 />
-                <Brush />
               </AreaChart>
             </div>
           </ResponsiveContainer>
