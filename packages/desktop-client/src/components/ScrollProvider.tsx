@@ -6,8 +6,11 @@ import React, {
   useEffect,
 } from 'react';
 
+import debounce from 'debounce';
+
 type IScrollContext = {
   scrollY: number | undefined;
+  isBottomReached: boolean;
 };
 
 const ScrollContext = createContext<IScrollContext | undefined>(undefined);
@@ -18,17 +21,32 @@ type ScrollProviderProps = {
 
 export default function ScrollProvider({ children }: ScrollProviderProps) {
   const [scrollY, setScrollY] = useState(undefined);
+  const [isBottomReached, setIsBottomReached] = useState(false);
 
   useEffect(() => {
-    const listenToScroll = e => {
+    const listenToScroll = debounce(e => {
       setScrollY(e.target?.scrollTop || 0);
-    };
-    window.addEventListener('scroll', listenToScroll, { capture: true });
+      setIsBottomReached(
+        e.target?.scrollHeight - e.target?.scrollTop <= e.target?.clientHeight,
+      );
+    }, 20);
+
+    window.addEventListener('scroll', listenToScroll, {
+      capture: true,
+      passive: true,
+    });
     return () =>
-      window.removeEventListener('scroll', listenToScroll, { capture: true });
+      window.removeEventListener('scroll', listenToScroll, {
+        capture: true,
+      });
   }, []);
 
-  return <ScrollContext.Provider value={{ scrollY }} children={children} />;
+  return (
+    <ScrollContext.Provider
+      value={{ scrollY, isBottomReached }}
+      children={children}
+    />
+  );
 }
 
 export function useScroll(): IScrollContext {

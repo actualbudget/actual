@@ -1,6 +1,7 @@
-import React, { useRef, type ComponentType, useEffect, useState } from 'react';
+import React, { type ComponentType, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 
+import usePrevious from '../../hooks/usePrevious';
 import Add from '../../icons/v1/Add';
 import Cog from '../../icons/v1/Cog';
 import PiggyBank from '../../icons/v1/PiggyBank';
@@ -9,26 +10,20 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
 import { useScroll } from '../ScrollProvider';
 
+const height = 70;
+
 export default function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
-  const { scrollY } = useScroll();
-  const previousScrollY = useRef(null);
-  const [isVisible, setIsVisible] = useState(true);
+  const { scrollY, isBottomReached } = useScroll();
+  const previousScrollY = usePrevious(scrollY);
 
-  const height = 70;
-
-  useEffect(() => {
-    if (previousScrollY.current != null && scrollY > previousScrollY.current) {
-      if (isVisible) {
-        setIsVisible(false);
-      }
-    } else {
-      if (!isVisible) {
-        setIsVisible(true);
-      }
-    }
-    previousScrollY.current = scrollY;
-  }, [scrollY]);
+  const isVisible = useMemo(
+    () =>
+      previousScrollY === undefined ||
+      (!isBottomReached && previousScrollY > scrollY) ||
+      previousScrollY < 0,
+    [scrollY],
+  );
 
   return (
     <div
@@ -37,7 +32,7 @@ export default function MobileNavTabs() {
         borderTop: `1px solid ${theme.menuBorder}`,
         ...styles.shadow,
         display: isNarrowWidth ? 'flex' : 'none',
-        height: height,
+        height,
         justifyContent: 'space-around',
         paddingTop: 10,
         paddingBottom: 10,
