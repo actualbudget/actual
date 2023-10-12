@@ -82,22 +82,6 @@ export function getStatusProps(status: StatusTypes) {
   }
 }
 
-type Status =
-  | 'missed'
-  | 'due'
-  | 'upcoming'
-  | 'paid'
-  | 'completed'
-  | 'pending'
-  | 'scheduled'
-  | 'cleared'
-  | 'reconciled';
-
-type StatusBadgeProps = {
-  status: Status;
-  style?: CSSProperties;
-};
-
 export function StatusBadge({ status, style }: StatusBadgeProps) {
   let { color, backgroundColor, Icon } = getStatusProps(status);
   return (

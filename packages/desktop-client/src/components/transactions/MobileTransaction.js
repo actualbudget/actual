@@ -604,7 +604,7 @@ class TransactionEditInner extends PureComponent {
               </View>
               {transaction.reconciled ? (
                 <View style={{ marginLeft: 35, marginRight: 35 }}>
-                  <FieldLabel title="reconciled" />
+                  <FieldLabel title="Reconciled" />
                   <BooleanField
                     checked="true"
                     style={{ marginTop: 4 }}

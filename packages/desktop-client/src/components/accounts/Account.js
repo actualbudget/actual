@@ -757,7 +757,7 @@ class AccountInternal extends PureComponent {
     this.setState({ reconcileAmount: balance });
   };
 
-  onDoneReconciling = async () => {
+  onDoneReconciling = () => {
     this.setState({ reconcileAmount: null });
   };
 
@@ -794,7 +794,7 @@ class AccountInternal extends PureComponent {
     });
   };
 
-  onBatchEdit = async (name, ids) => {    
+  onBatchEdit = async (name, ids) => {
     let onChange = async (name, value) => {
       this.setState({ workingHard: true });
 
@@ -818,6 +818,8 @@ class AccountInternal extends PureComponent {
 
       transactions.forEach(trans => {
         if (name === 'cleared' && trans.reconciled === true) {
+          // Skip transactions that are reconciled. Don't want to set them as
+          // uncleared.
           return;
         }
 
@@ -914,7 +916,7 @@ class AccountInternal extends PureComponent {
 
     let { data } = await runQuery(
       q('transactions')
-        .filter({ id: { $oneof: ids }, reconciled: true }) // scope it to account, and others
+        .filter({ id: { $oneof: ids }, reconciled: true })
         .select('*')
         .options({ splits: 'grouped' }),
     );
