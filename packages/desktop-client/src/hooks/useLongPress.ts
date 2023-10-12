@@ -1,10 +1,10 @@
-import { useCallback, useRef } from 'react';
+import { type PointerEventHandler, useCallback, useRef } from 'react';
 
 type LongPressEvents = {
-  onPointerDown: () => void;
-  onPointerUp: () => void;
-  onPointerMove: () => void;
-  onPointerLeave: () => void;
+  onPointerDown: PointerEventHandler;
+  onPointerUp: PointerEventHandler;
+  onPointerMove: PointerEventHandler;
+  onPointerLeave: PointerEventHandler;
 };
 
 type UseLongPressResult = {
@@ -30,11 +30,23 @@ export default function useLongPress(
   }, []);
 
   return {
-    getLongPressEvents: () => ({
-      onPointerDown: start,
-      onPointerUp: stop,
-      onPointerMove: stop,
-      onPointerLeave: stop,
+    getLongPressEvents: (events?: LongPressEvents) => ({
+      onPointerDown: e => {
+        events?.onPointerDown?.(e);
+        start();
+      },
+      onPointerUp: e => {
+        events?.onPointerUp?.(e);
+        stop();
+      },
+      onPointerMove: e => {
+        events?.onPointerMove?.(e);
+        stop();
+      },
+      onPointerLeave: e => {
+        events?.onPointerLeave?.(e);
+        stop();
+      },
     }),
   };
 }

@@ -345,7 +345,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
           )}
         </View>
       ) : (
-        <View role="button" style={{ flex: 1 }} {...getLongPressEvents()}>
+        <View style={{ flex: 1 }}>
           <Text
             role="button"
             style={{
@@ -356,6 +356,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
               textOverflow: 'ellipsis',
             }}
             data-testid="category-name"
+            {...getLongPressEvents({
+              onPointerDown: e => e.preventDefault(),
+            })}
           >
             {category.name}
           </Text>
@@ -568,7 +571,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           )}
         </View>
       ) : (
-        <View role="button" style={{ flex: 1 }} {...getLongPressEvents()}>
+        <View style={{ flex: 1 }}>
           <Text
             role="button"
             style={{
@@ -580,6 +583,9 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               textOverflow: 'ellipsis',
             }}
             data-testid="name"
+            {...getLongPressEvents({
+              onPointerDown: e => e.preventDefault(),
+            })}
           >
             {group.name}
           </Text>
@@ -785,7 +791,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           )}
         </View>
       ) : (
-        <View role="button" {...getLongPressEvents()}>
+        <View>
           <Text
             role="button"
             style={{
@@ -793,6 +799,9 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
               ...nameTextStyle,
             }}
             data-testid="name"
+            {...getLongPressEvents({
+              onPointerDown: e => e.preventDefault(),
+            })}
           >
             {group.name}
           </Text>
@@ -942,7 +951,7 @@ const IncomeCategory = memo(function IncomeCategory({
           )}
         </View>
       ) : (
-        <View role="button" {...getLongPressEvents()}>
+        <View>
           <Text
             role="button"
             style={{
@@ -951,6 +960,9 @@ const IncomeCategory = memo(function IncomeCategory({
               ...styles.underlinedText,
             }}
             data-testid="name"
+            {...getLongPressEvents({
+              onPointerDown: e => e.preventDefault(),
+            })}
           >
             {category.name}
           </Text>
