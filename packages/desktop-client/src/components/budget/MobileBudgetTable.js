@@ -6,6 +6,7 @@ import memoizeOne from 'memoize-one';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import useLongPress from '../../hooks/useLongPress';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
@@ -280,6 +281,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   };
 
   let listItemRef = useRef();
+  let { getLongPressEvents } = useLongPress(() => onEdit?.(category.id));
 
   let content = (
     <ListItem
@@ -298,6 +300,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       {isEditing ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
+            focused={isEditing}
             rightContent={
               <Button
                 type="bare"
@@ -352,7 +355,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
               textOverflow: 'ellipsis',
             }}
             data-testid="category-name"
-            onPointerUp={() => onEdit?.(category.id)}
+            {...getLongPressEvents()}
           >
             {category.name}
           </Text>
@@ -500,6 +503,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   };
 
   let listItemRef = useRef();
+  let { getLongPressEvents } = useLongPress(() => onEdit?.(group.id));
 
   let content = (
     <ListItem
@@ -515,6 +519,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       {isEditing ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
+            focused={isEditing}
             rightContent={
               <Button
                 type="bare"
@@ -574,7 +579,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               textOverflow: 'ellipsis',
             }}
             data-testid="name"
-            onPointerUp={() => onEdit?.(group.id)}
+            {...getLongPressEvents()}
           >
             {group.name}
           </Text>
@@ -714,6 +719,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   };
 
   let listItemRef = useRef();
+  let { getLongPressEvents } = useLongPress(() => onEdit?.(group.id));
 
   return (
     <ListItem
@@ -730,6 +736,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       {isEditing ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
+            focused={isEditing}
             rightContent={
               <Button
                 type="bare"
@@ -782,7 +789,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           <Text
             style={{ ...styles.smallText, ...nameTextStyle }}
             data-testid="name"
-            onPointerUp={() => onEdit?.(group.id)}
+            {...getLongPressEvents()}
           >
             {group.name}
           </Text>
@@ -870,6 +877,7 @@ const IncomeCategory = memo(function IncomeCategory({
   };
 
   let listItemRef = useRef();
+  let { getLongPressEvents } = useLongPress(() => onEdit?.(category.id));
 
   return (
     <ListItem
@@ -886,6 +894,7 @@ const IncomeCategory = memo(function IncomeCategory({
       {isEditing ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
+            focused={isEditing}
             rightContent={
               <Button
                 type="bare"
@@ -938,7 +947,7 @@ const IncomeCategory = memo(function IncomeCategory({
               ...styles.underlinedText,
             }}
             data-testid="name"
-            onPointerUp={() => onEdit?.(category.id)}
+            {...getLongPressEvents()}
           >
             {category.name}
           </Text>
