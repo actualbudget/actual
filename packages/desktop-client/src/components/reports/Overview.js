@@ -339,25 +339,24 @@ function SankeyCard({ categories }) {
 
   return (
     <Card flex={1} to="/reports/sankey">
-      <View>
-        <View style={{ flexDirection: 'row', padding: 20 }}>
-          <View style={{ flex: 1 }}>
-            <Block
-              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
-              role="heading"
-            >
-              Sankey
-            </Block>
-            <DateRange start={start} end={end} />
-          </View>
+      <View style={{ flexDirection: 'row', padding: 20 }}>
+        <View style={{ flex: 1 }}>
+          <Block
+            style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
+            role="heading"
+          >
+            Sankey
+          </Block>
+          <DateRange start={start} end={end} />
         </View>
       </View>
-
-      {data ? (
-        <SankeyGraph data={data} compact={true} /> // passing in correct data doesn't format correctly
-      ) : (
-        <LoadingIndicator />
-      )}
+      <View style={{ flex: 1 }}>
+        {data ? (
+          <SankeyGraph data={data} compact={true} />
+        ) : (
+          <LoadingIndicator />
+        )}
+      </View>
     </Card>
   );
 }

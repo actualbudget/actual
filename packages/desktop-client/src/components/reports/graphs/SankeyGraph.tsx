@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {
   Sankey,
   Tooltip,
@@ -6,7 +8,6 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import Container from '../Container';
 type SankeyProps = {
   style;
   data;
@@ -60,41 +61,49 @@ function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
   );
 }
 
+function convertToCondensed(data) {
+  const budgetNodeIndex = data.nodes.findIndex(node => node.name === 'Budget');
+
+  // Calculate total income (links going into the "Budget" node)
+  const totalIncome = data.links.reduce((acc, link) => {
+    return link.target === budgetNodeIndex ? acc + link.value : acc;
+  }, 0);
+
+  // Calculate total expenses (links going out of the "Budget" node)
+  const totalExpenses = data.links.reduce((acc, link) => {
+    return link.source === budgetNodeIndex ? acc + link.value : acc;
+  }, 0);
+
+  return {
+    nodes: [{ name: 'Income' }, { name: 'Budget' }, { name: 'Expenses' }],
+    links: [
+      { source: 0, target: 1, value: totalIncome },
+      { source: 1, target: 2, value: totalExpenses },
+    ],
+  };
+}
+
 function SankeyGraph({ style, data, compact }: SankeyProps) {
+  let sankeyData = compact ? convertToCondensed(data) : data;
+
+  if (!data.links || data.links.length === 0) return null;
   return (
-    <Container
-      style={{
-        ...style,
-        ...(compact && { height: 'auto' }),
-      }}
-    >
-      {(width, height, portalHost) =>
-        data.links &&
-        data.links.length > 0 && (
-          <ResponsiveContainer>
-            <Sankey
-              width={width}
-              height={height}
-              data={data}
-              node={<SankeyNode containerWidth={width} />}
-              sort={false}
-              nodePadding={23}
-              margin={{
-                left: 0,
-                right: 0,
-                top: 10,
-                bottom: 25,
-              }}
-            >
-              <Tooltip
-                formatter={numberFormatterTooltip}
-                isAnimationActive={false}
-              />
-            </Sankey>
-          </ResponsiveContainer>
-        )
-      }
-    </Container>
+    <ResponsiveContainer>
+      <Sankey
+        data={sankeyData}
+        node={<SankeyNode />}
+        sort={false}
+        nodePadding={23}
+        margin={{
+          left: 0,
+          right: 0,
+          top: 10,
+          bottom: 25,
+        }}
+      >
+        <Tooltip formatter={numberFormatterTooltip} isAnimationActive={false} />
+      </Sankey>
+    </ResponsiveContainer>
   );
 }
 
