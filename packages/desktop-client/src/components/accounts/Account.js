@@ -696,17 +696,19 @@ class AccountInternal extends PureComponent {
   lockTransactions = async () => {
     this.setState({ workingHard: true });
 
+    let {
+      accountId,
+    } = this.props;
+
     let { data } = await runQuery(
       q('transactions')
-        .filter({ cleared: true }) //scope to the current account as well here.
+        .filter({ cleared: true, reconciled: false, account: accountId })
         .select('*')
         .options({ splits: 'grouped' }),
     );
     let transactions = ungroupTransactions(data);
 
     let changes = { updated: [] };
-
-    console.log('lock transactions');
 
     transactions.forEach(trans => {
       console.log(trans.amount);
@@ -727,16 +729,13 @@ class AccountInternal extends PureComponent {
   }
 
   onReconcile = async balance => {
-    console.log('onReconcile');
-
     let {
-      accounts,
       accountId,
     } = this.props;
 
     let { data } = await runQuery(
       q('transactions')
-        .filter({ cleared: true }) //scope to the current account as well here.
+        .filter({ cleared: true, account: accountId })
         .select('*')
         .options({ splits: 'grouped' }),
     );
@@ -744,23 +743,12 @@ class AccountInternal extends PureComponent {
     var cleared = 0;
 
     transactions.forEach(trans => {
-      if (trans.is_parent) {
-        console.log('is parent');
-        console.log(trans.cleared);
-        console.log(trans.amount);
-      } else {
-        console.log('is child');
-        console.log(trans.cleared);
-        console.log(trans.amount);
+      if (!trans.is_parent) {
         cleared += trans.amount;
       }
     });
 
     let targetDiff = balance - cleared;
-
-    console.log(balance);
-    console.log(cleared);
-    console.log(targetDiff);
 
     if (targetDiff === 0) {
       await this.lockTransactions();
