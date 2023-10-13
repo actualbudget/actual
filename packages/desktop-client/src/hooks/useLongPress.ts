@@ -11,6 +11,7 @@ type UseLongPressResult = {
   getLongPressEvents: () => LongPressEvents;
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export default function useLongPress(
   onLongPress: () => void,
   ms = 300,
