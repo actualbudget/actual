@@ -17,7 +17,6 @@ import Change from './Change';
 import AreaGraph from './graphs/AreaGraph';
 import BarGraph from './graphs/BarGraph';
 import BarLineGraph from './graphs/BarLineGraph';
-import CustomGraph from './graphs/CustomGraph';
 import DonutGraph from './graphs/DonutGraph';
 import LineGraph from './graphs/LineGraph';
 import StackedBarGraph from './graphs/StackedBarGraph';
@@ -27,7 +26,7 @@ import useReport from './useReport';
 import { fromDateRepr } from './util';
 
 export default function Custom() {
-  const [graphType, setGraphType] = useState('CustomGraph');
+  const [graphType, setGraphType] = useState('AreaGraph');
   const categories = useCategories();
   const [selectedCategories, setSelectedCategories] = useState(null);
   useEffect(() => {
@@ -175,16 +174,6 @@ export default function Custom() {
         />
       );
     }
-    if (graphType === 'CustomGraph') {
-      return (
-        <CustomGraph
-          style={{ flexGrow: 1 }}
-          start={start}
-          end={end}
-          graphData={data.graphData}
-        />
-      );
-    }
   }
 
   function onChangeDates(start, end) {
@@ -199,7 +188,7 @@ export default function Custom() {
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header
-        title="Custom"
+        title="Custom Reports"
         allMonths={allMonths}
         start={start}
         end={end}
