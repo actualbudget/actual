@@ -281,7 +281,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
   };
 
   let listItemRef = useRef();
-  let { getLongPressEvents } = useLongPress(() => onEdit?.(category.id));
 
   let content = (
     <ListItem
@@ -345,9 +344,12 @@ const ExpenseCategory = memo(function ExpenseCategory({
           )}
         </View>
       ) : (
-        <View role="button" {...getLongPressEvents()} style={{ flex: 1 }}>
+        <View
+          role="button"
+          onPointerUp={() => onEdit?.(category.id)}
+          style={{ flex: 1 }}
+        >
           <Text
-            tabIndex={-1}
             style={{
               ...styles.smallText,
               ...styles.underlinedText,
@@ -503,7 +505,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   };
 
   let listItemRef = useRef();
-  let { getLongPressEvents } = useLongPress(() => onEdit?.(group.id));
 
   let content = (
     <ListItem
@@ -568,7 +569,11 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           )}
         </View>
       ) : (
-        <View role="button" {...getLongPressEvents()} style={{ flex: 1 }}>
+        <View
+          role="button"
+          onPointerUp={() => onEdit?.(group.id)}
+          style={{ flex: 1 }}
+        >
           <Text
             tabIndex={-1}
             style={{
@@ -719,7 +724,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   };
 
   let listItemRef = useRef();
-  let { getLongPressEvents } = useLongPress(() => onEdit?.(group.id));
 
   return (
     <ListItem
@@ -785,7 +789,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           )}
         </View>
       ) : (
-        <View role="button" {...getLongPressEvents()}>
+        <View role="button" onPointerUp={() => onEdit?.(group.id)}>
           <Text
             tabIndex={-1}
             style={{
@@ -880,7 +884,6 @@ const IncomeCategory = memo(function IncomeCategory({
   };
 
   let listItemRef = useRef();
-  let { getLongPressEvents } = useLongPress(() => onEdit?.(category.id));
 
   return (
     <ListItem
@@ -942,7 +945,7 @@ const IncomeCategory = memo(function IncomeCategory({
           )}
         </View>
       ) : (
-        <View role="button" {...getLongPressEvents()}>
+        <View role="button" onPointerUp={() => onEdit?.(category.id)}>
           <Text
             tabIndex={-1}
             style={{
