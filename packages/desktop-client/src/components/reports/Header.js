@@ -8,6 +8,8 @@ import Select from '../common/Select';
 import View from '../common/View';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
+import { SavedGraphMenuButton } from './SavedGraphs';
+
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
   if (end < start) {
@@ -61,6 +63,7 @@ function Header({
   onDeleteFilter,
   onCondOpChange,
   headerPrefixItems,
+  selectGraph,
 }) {
   return (
     <View
@@ -142,6 +145,8 @@ function Header({
         >
           All Time
         </Button>
+        <View style={{ flex: 1 }} />
+        <SavedGraphMenuButton selectGraph={selectGraph} />
       </View>
       {filters && filters.length > 0 && (
         <View

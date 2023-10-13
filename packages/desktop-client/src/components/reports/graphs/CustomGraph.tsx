@@ -2,9 +2,10 @@ import React from 'react';
 
 import { css } from 'glamor';
 import {
-  ComposedChart,
+  AreaChart,
+  Area,
+  LineChart,
   Line,
-  Bar,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -17,7 +18,7 @@ import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import Container from '../Container';
 
-type BarLineGraphProps = {
+type CustomGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
@@ -34,15 +35,26 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function BarLineGraph({
-  style,
-  graphData,
-  compact,
-  domain,
-}: BarLineGraphProps) {
+function CustomGraph({ style, graphData, compact, domain }: CustomGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
+
+  const gradientOffset = () => {
+    const dataMax = Math.max(...graphData.data.map(i => i.y));
+    const dataMin = Math.min(...graphData.data.map(i => i.y));
+
+    if (dataMax <= 0) {
+      return 0;
+    }
+    if (dataMin >= 0) {
+      return 1;
+    }
+
+    return dataMax / (dataMax - dataMin);
+  };
+
+  const off = gradientOffset();
 
   type PayloadItem = {
     payload: {
@@ -85,9 +97,10 @@ function BarLineGraph({
               <AlignedText left="Assets:" right={payload[0].payload.assets} />
               <AlignedText left="Debt:" right={payload[0].payload.debt} />
               <AlignedText
-                left="Change:"
-                right={<strong>{payload[0].payload.change}</strong>}
+                left="Net worth:"
+                right={<strong>{payload[0].payload.networth}</strong>}
               />
+              <AlignedText left="Change:" right={payload[0].payload.change} />
             </div>
           </div>
         </div>
@@ -107,23 +120,65 @@ function BarLineGraph({
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
-              <ComposedChart
+              <AreaChart
                 width={width}
                 height={height}
                 data={graphData.data}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
+                {compact ? null : (
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                )}
+                {compact ? null : <XAxis dataKey="x" />}
+                {compact ? null : (
+                  <YAxis
+                    dataKey="y"
+                    domain={['auto', 'auto']}
+                    tickFormatter={tickFormatter}
+                  />
+                )}
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
+                <defs>
+                  <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsBlue}
+                      stopOpacity={0.2}
+                    />
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsRed}
+                      stopOpacity={0.2}
+                    />
+                  </linearGradient>
+                </defs>
+
+                <Area
+                  type="linear"
+                  dot={false}
+                  activeDot={false}
+                  animationDuration={0}
+                  dataKey="y"
+                  stroke={theme.reportsBlue}
+                  fill="url(#splitColor)"
+                  fillOpacity={1}
+                />
+              </AreaChart>
+              <LineChart
+                width={width}
+                height={height}
+                data={graphData.data}
+                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="x" />
-                <YAxis dataKey="y" tickFormatter={tickFormatter} />
-                <Bar type="monotone" dataKey="y" fill="#8884d8" />
+                <YAxis dataKey="y" />
                 <Line type="monotone" dataKey="y" stroke="#8884d8" />
-              </ComposedChart>
+              </LineChart>
             </div>
           </ResponsiveContainer>
         )
@@ -132,4 +187,4 @@ function BarLineGraph({
   );
 }
 
-export default BarLineGraph;
+export default CustomGraph;

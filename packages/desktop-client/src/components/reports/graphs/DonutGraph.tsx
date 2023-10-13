@@ -2,8 +2,7 @@ import React from 'react';
 
 import { css } from 'glamor';
 import {
-  ComposedChart,
-  Line,
+  BarChart,
   Bar,
   CartesianGrid,
   XAxis,
@@ -17,7 +16,7 @@ import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import Container from '../Container';
 
-type BarLineGraphProps = {
+type DonutGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
@@ -34,12 +33,7 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function BarLineGraph({
-  style,
-  graphData,
-  compact,
-  domain,
-}: BarLineGraphProps) {
+function DonutGraph({ style, graphData, compact, domain }: DonutGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -107,7 +101,7 @@ function BarLineGraph({
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
-              <ComposedChart
+              <BarChart
                 width={width}
                 height={height}
                 data={graphData.data}
@@ -122,8 +116,7 @@ function BarLineGraph({
                 <XAxis dataKey="x" />
                 <YAxis dataKey="y" tickFormatter={tickFormatter} />
                 <Bar type="monotone" dataKey="y" fill="#8884d8" />
-                <Line type="monotone" dataKey="y" stroke="#8884d8" />
-              </ComposedChart>
+              </BarChart>
             </div>
           </ResponsiveContainer>
         )
@@ -132,4 +125,4 @@ function BarLineGraph({
   );
 }
 
-export default BarLineGraph;
+export default DonutGraph;
