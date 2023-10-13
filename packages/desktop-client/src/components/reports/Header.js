@@ -67,7 +67,6 @@ function Header({
   headerPrefixItems,
   selectGraph,
 }) {
-
   let location = useLocation();
   let path = location.pathname;
 

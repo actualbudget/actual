@@ -30,7 +30,6 @@ export default function Custom() {
   const [graphType, setGraphType] = useState('CustomGraph');
   const categories = useCategories();
   const [selectedCategories, setSelectedCategories] = useState(null);
-  const [numberOfMonthsAverage, setNumberOfMonthsAverage] = useState(1);
   useEffect(() => {
     if (selectedCategories === null && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
@@ -61,7 +60,6 @@ export default function Custom() {
       accounts,
       filters,
       conditionsOp,
-      numberOfMonthsAverage,
       (categories.list || []).filter(
         category =>
           !category.is_income &&
@@ -78,7 +76,6 @@ export default function Custom() {
     accounts,
     filters,
     conditionsOp,
-    numberOfMonthsAverage,
     categories,
     selectedCategories,
   ]);

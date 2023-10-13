@@ -1,12 +1,7 @@
 import React from 'react';
 
 import { css } from 'glamor';
-import {
-  PieChart,
-  Pie,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { PieChart, Pie, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
@@ -31,7 +26,6 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
 };
 
 function DonutGraph({ style, graphData, compact, domain }: DonutGraphProps) {
-
   type PayloadItem = {
     payload: {
       date: string;
@@ -95,19 +89,20 @@ function DonutGraph({ style, graphData, compact, domain }: DonutGraphProps) {
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
-              <PieChart
-                width={width}
-                height={height}
-              >
-              <Pie
-                dataKey="y"
-                nameKey="x"
-                isAnimationActive={false}
-                data={graphData.data}
-                outerRadius={80}
-                fill="#8884d8"
-              />
-              <Tooltip/>
+              <PieChart width={width} height={height}>
+                <Pie
+                  dataKey="y"
+                  nameKey="x"
+                  isAnimationActive={false}
+                  data={graphData.data}
+                  outerRadius={80}
+                  fill="#8884d8"
+                />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  formatter={numberFormatterTooltip}
+                  isAnimationActive={false}
+                />
               </PieChart>
             </div>
           </ResponsiveContainer>
