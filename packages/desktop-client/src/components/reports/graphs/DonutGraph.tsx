@@ -2,11 +2,8 @@ import React from 'react';
 
 import { css } from 'glamor';
 import {
-  BarChart,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
+  PieChart,
+  Pie,
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
@@ -34,9 +31,6 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
 };
 
 function DonutGraph({ style, graphData, compact, domain }: DonutGraphProps) {
-  const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
-  };
 
   type PayloadItem = {
     payload: {
@@ -101,22 +95,20 @@ function DonutGraph({ style, graphData, compact, domain }: DonutGraphProps) {
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
-              <BarChart
+              <PieChart
                 width={width}
                 height={height}
-                data={graphData.data}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                <Tooltip
-                  content={<CustomTooltip />}
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis dataKey="y" tickFormatter={tickFormatter} />
-                <Bar type="monotone" dataKey="y" fill="#8884d8" />
-              </BarChart>
+              <Pie
+                dataKey="y"
+                nameKey="x"
+                isAnimationActive={false}
+                data={graphData.data}
+                outerRadius={80}
+                fill="#8884d8"
+              />
+              <Tooltip/>
+              </PieChart>
             </div>
           </ResponsiveContainer>
         )

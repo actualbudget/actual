@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
@@ -65,6 +67,10 @@ function Header({
   headerPrefixItems,
   selectGraph,
 }) {
+
+  let location = useLocation();
+  let path = location.pathname;
+
   return (
     <View
       style={{
@@ -146,7 +152,9 @@ function Header({
           All Time
         </Button>
         <View style={{ flex: 1 }} />
-        <SavedGraphMenuButton selectGraph={selectGraph} />
+        {path === '/reports/custom' && (
+          <SavedGraphMenuButton selectGraph={selectGraph} />
+        )}
       </View>
       {filters && filters.length > 0 && (
         <View
