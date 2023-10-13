@@ -232,7 +232,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
   show3Cols,
   showBudgetedCol,
 }) {
-  let opacity = editMode || blank ? 0 : 1;
+  let opacity = blank ? 0 : 1;
+  let showEditables = editMode || isEditing;
 
   let [categoryName, setCategoryName] = useState(category.name);
   let [isHidden, setIsHidden] = useState(category.hidden);
@@ -295,7 +296,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       data-testid="row"
       innerRef={listItemRef}
     >
-      {isEditing ? (
+      {showEditables ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
             focused={isEditing}
@@ -362,7 +363,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
           </Text>
         </View>
       )}
-      {!isEditing && (
+      {!showEditables && (
         <View
           style={{
             alignItems: 'center',
@@ -457,7 +458,8 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   show3Cols,
   showBudgetedCol,
 }) {
-  let opacity = editMode || blank ? 0 : 1;
+  let opacity = blank ? 0 : 1;
+  let showEditables = editMode || isEditing;
 
   let [groupName, setGroupName] = useState(group.name);
   let [isHidden, setIsHidden] = useState(group.hidden);
@@ -516,7 +518,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       data-testid="totals"
       innerRef={listItemRef}
     >
-      {isEditing ? (
+      {showEditables ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
             focused={isEditing}
@@ -530,7 +532,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               </Button>
             }
             style={{ width: '100%' }}
-            placeholder="Category Name"
+            placeholder="Category Group Name"
             value={groupName}
             onUpdate={setGroupName}
             onEnter={onSubmit}
@@ -589,7 +591,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           </Text>
         </View>
       )}
-      {!isEditing && (
+      {!showEditables && (
         <View
           style={{
             flexDirection: 'row',
@@ -675,11 +677,13 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   onAddCategory,
   onSave,
   onDelete,
+  editMode,
   isEditing,
   onEdit,
 }) {
   let [groupName, setGroupName] = useState(group.name);
   let [isHidden, setIsHidden] = useState(group.hidden);
+  let showEditables = editMode || isEditing;
 
   let tooltip = useTooltip();
 
@@ -736,7 +740,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       }}
       innerRef={listItemRef}
     >
-      {isEditing ? (
+      {showEditables ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
             focused={isEditing}
@@ -750,7 +754,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
               </Button>
             }
             style={{ width: '100%' }}
-            placeholder="Category Name"
+            placeholder="Category Group Name"
             value={groupName}
             onUpdate={setGroupName}
             onEnter={onSubmit}
@@ -801,7 +805,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           </Text>
         </View>
       )}
-      {!isEditing && budget && (
+      {!showEditables && budget && (
         <CellValue
           binding={budget}
           style={{
@@ -813,7 +817,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           type="financial"
         />
       )}
-      {!isEditing && (
+      {!showEditables && (
         <CellValue
           binding={balance}
           style={{
@@ -838,11 +842,13 @@ const IncomeCategory = memo(function IncomeCategory({
   amountTextStyle,
   onSave,
   onDelete,
+  editMode,
   isEditing,
   onEdit,
 }) {
   let [categoryName, setCategoryName] = useState(category.name);
   let [isHidden, setIsHidden] = useState(category.hidden);
+  let showEditables = editMode || isEditing;
 
   let tooltip = useTooltip();
 
@@ -896,7 +902,7 @@ const IncomeCategory = memo(function IncomeCategory({
       }}
       innerRef={listItemRef}
     >
-      {isEditing ? (
+      {showEditables ? (
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
             focused={isEditing}
@@ -958,7 +964,7 @@ const IncomeCategory = memo(function IncomeCategory({
           </Text>
         </View>
       )}
-      {!isEditing && budget && (
+      {!showEditables && budget && (
         <CellValue
           binding={budget}
           style={{
@@ -970,7 +976,7 @@ const IncomeCategory = memo(function IncomeCategory({
           type="financial"
         />
       )}
-      {!isEditing && (
+      {!showEditables && (
         <CellValue
           binding={balance}
           style={{
@@ -1139,6 +1145,7 @@ function IncomeGroup({
   onSaveCategory,
   onDeleteCategory,
   showHiddenCategories,
+  editMode,
   editingGroupId,
   onEditGroup,
   editingCategoryId,
@@ -1179,6 +1186,7 @@ function IncomeGroup({
           onAddCategory={onAddCategory}
           onSave={onSave}
           onDelete={onDelete}
+          editMode={editMode}
           isEditing={editingGroupId === group.id}
           onEdit={onEditGroup}
         />
@@ -1204,6 +1212,7 @@ function IncomeGroup({
                 index={index}
                 onSave={onSaveCategory}
                 onDelete={onDeleteCategory}
+                editMode={editMode}
                 isEditing={editingCategoryId === category.id}
                 onEdit={onEditCategory}
               />
@@ -1305,6 +1314,7 @@ function BudgetGroups({
           onSaveCategory={onSaveCategory}
           onDeleteCategory={onDeleteCategory}
           showHiddenCategories={showHiddenCategories}
+          editMode={editMode}
           editingGroupId={editingGroupId}
           onEditGroup={onEditGroup}
           editingCategoryId={editingCategoryId}
@@ -1335,7 +1345,7 @@ export function BudgetTable(props) {
     onReorderCategory,
     onReorderGroup,
     onShowBudgetDetails,
-    onOpenActionSheet,
+    // onOpenActionSheet,
     onBudgetAction,
     savePrefs,
   } = props;
@@ -1396,14 +1406,12 @@ export function BudgetTable(props) {
     <NamespaceContext.Provider value={monthUtils.sheetForMonth(month, type)}>
       <View style={{ flex: 1, overflowY: 'hidden' }} data-testid="budget-table">
         <BudgetHeader
-          show3Cols={show3Cols}
           currentMonth={month}
           toggleDisplay={toggleDisplay}
-          showBudgetedCol={showBudgetedCol}
           monthBounds={monthBounds}
           editMode={editMode}
-          onDone={() => onEditMode(false)}
-          onOpenActionSheet={onOpenActionSheet}
+          onEditMode={onEditMode}
+          // onOpenActionSheet={onOpenActionSheet}
           onPrevMonth={onPrevMonth}
           onNextMonth={onNextMonth}
           showHiddenCategories={showHiddenCategories}
@@ -1596,6 +1604,8 @@ function BudgetHeader({
   monthBounds,
   onPrevMonth,
   onNextMonth,
+  editMode,
+  onEditMode,
   showHiddenCategories,
   savePrefs,
 }) {
@@ -1621,6 +1631,9 @@ function BudgetHeader({
   let onMenuSelect = name => {
     tooltip.close();
     switch (name) {
+      case 'edit-mode':
+        onEditMode?.(true);
+        break;
       case 'toggle-hidden-categories':
         toggleHiddenCategories();
         break;
@@ -1711,36 +1724,56 @@ function BudgetHeader({
           flexDirection: 'row',
         }}
       >
-        <Button
-          type="bare"
-          style={{
-            backgroundColor: 'transparent',
-            paddingLeft: 12,
-            paddingRight: 12,
-          }}
-          {...tooltip.getOpenEvents()}
-        >
-          {tooltip.isOpen && (
-            <Tooltip
-              position="bottom-right"
-              width={200}
-              style={{ padding: 0 }}
-              onClose={tooltip.close}
-            >
-              <Menu
-                onMenuSelect={onMenuSelect}
-                items={[
-                  { name: 'toggle-hidden', text: 'Toggle hidden categories' },
-                ]}
-              />
-            </Tooltip>
-          )}
-          <DotsHorizontalTriple
-            width="20"
-            height="20"
-            style={{ color: 'white' }}
-          />
-        </Button>
+        {!editMode ? (
+          <Button
+            type="bare"
+            style={{
+              backgroundColor: 'transparent',
+              paddingLeft: 12,
+              paddingRight: 12,
+            }}
+            {...tooltip.getOpenEvents()}
+          >
+            {tooltip.isOpen && (
+              <Tooltip
+                position="bottom-right"
+                width={200}
+                style={{ padding: 0 }}
+                onClose={tooltip.close}
+              >
+                <Menu
+                  onMenuSelect={onMenuSelect}
+                  items={[
+                    { name: 'edit-mode', text: 'Edit mode' },
+                    {
+                      name: 'toggle-hidden-categories',
+                      text: 'Toggle hidden categories',
+                    },
+                  ]}
+                />
+              </Tooltip>
+            )}
+            <DotsHorizontalTriple
+              width="20"
+              height="20"
+              style={{ color: 'white' }}
+            />
+          </Button>
+        ) : (
+          <Button
+            type="bare"
+            style={{
+              backgroundColor: 'transparent',
+              paddingLeft: 12,
+              paddingRight: 12,
+              ...styles.mediumText,
+              color: 'white',
+            }}
+            onClick={() => onEditMode?.(false)}
+          >
+            Done
+          </Button>
+        )}
       </View>
     </View>
   );
