@@ -284,23 +284,11 @@ export function SavedGraphMenuButton({ selectGraph }) {
             ...[
               {
                 name: 'NetWorth',
-                text: 'Net Worth',
+                text: 'Save new report',
               },
               {
                 name: 'CashFlow',
-                text: 'Cash Flow',
-              },
-              {
-                name: 'Income',
-                text: 'Income',
-              },
-              {
-                name: 'Expense',
-                text: 'Expense',
-              },
-              {
-                name: 'All',
-                text: 'All',
+                text: 'Clear all',
               },
             ],
           ]}
@@ -332,32 +320,11 @@ export function SavedGraphMenuButton({ selectGraph }) {
             flexShrink: 0,
           }}
         >
-          {'Data Select'}&nbsp;
+          {'Unsaved Report'}&nbsp;
         </Text>
         <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
       {dataMenuOpen && <DataMenu onClose={() => setDataMenuOpen(false)} />}
-      <Button
-        type="bare"
-        style={{ marginTop: 10 }}
-        onClick={() => {
-          setMenuOpen(true);
-        }}
-      >
-        <Text
-          style={{
-            maxWidth: 150,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            flexShrink: 0,
-          }}
-        >
-          {'Graph Select'}&nbsp;
-        </Text>
-        <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
-      </Button>
-      {menuOpen && <GraphMenu onClose={() => setMenuOpen(false)} />}
     </View>
   );
 }

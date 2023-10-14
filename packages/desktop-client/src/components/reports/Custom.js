@@ -463,6 +463,8 @@ export default function Custom() {
             <Button type="bare" onClick={() => {}} style={{ marginLeft: 15 }}>
               <Filter width={15} height={15} />
             </Button>
+            <View style={{ flex: 1 }} />
+            <SavedGraphMenuButton />
           </View>
           <View
             style={{
