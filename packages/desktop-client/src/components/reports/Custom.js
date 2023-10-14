@@ -9,7 +9,15 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useCategories from '../../hooks/useCategories';
 import useFilters from '../../hooks/useFilters';
+import Chart from '../../icons/v1/Chart';
+import ChartBar from '../../icons/v1/ChartBar';
+import ChartPie from '../../icons/v1/ChartPie';
+import Filter from '../../icons/v1/Filter';
+import ListBullet from '../../icons/v1/ListBullet';
 import { theme, styles } from '../../style';
+import Button from '../common/Button';
+import Select from '../common/Select';
+import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
@@ -21,6 +29,7 @@ import DonutGraph from './graphs/DonutGraph';
 import LineGraph from './graphs/LineGraph';
 import StackedBarGraph from './graphs/StackedBarGraph';
 import Header from './Header';
+import { SavedGraphMenuButton } from './SavedGraphs';
 import defaultSpreadsheet from './spreadsheets/default-spreadsheet';
 import useReport from './useReport';
 import { fromDateRepr } from './util';
@@ -51,6 +60,11 @@ export default function Custom() {
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentMonth());
+
+  const [split, setSplit] = useState(1);
+  const [type, setType] = useState(1);
+  const [dateRange, setDateRange] = useState(6);
+  const [mode, setMode] = useState('time');
 
   const getGraphData = useMemo(() => {
     return defaultSpreadsheet(
@@ -181,9 +195,64 @@ export default function Custom() {
     setEnd(end);
   }
 
+  function onChangeMode(cond) {
+    setMode(cond);
+  }
+
+  function ModeButton({ selected, children, style, onSelect }) {
+    return (
+      <Button
+        type="bare"
+        style={{
+          padding: '5px 10px',
+          backgroundColor: theme.menuBackground,
+          marginRight: 5,
+          fontSize: 'inherit',
+          ...(selected && {
+            backgroundColor: theme.buttonPrimaryBackground,
+            color: theme.buttonPrimaryText,
+            ':hover': {
+              backgroundColor: theme.buttonPrimaryBackgroundHover,
+              color: theme.buttonPrimaryTextHover,
+            },
+          }),
+          ...style,
+        }}
+        onClick={onSelect}
+      >
+        {children}
+      </Button>
+    );
+  }
+
   if (!allMonths || !data) {
     return null;
   }
+
+  const splitOptions = [
+    { value: 1, description: 'Category' },
+    { value: 2, description: 'Group' },
+    { value: 3, description: 'Payee' },
+    { value: 4, description: 'Account' },
+    { value: 5, description: 'Day' },
+    { value: 6, description: 'Month' },
+    { value: 7, description: 'Year' },
+  ];
+
+  const typeOptions = [
+    { value: 1, description: 'Expense' },
+    { value: 2, description: 'Income' },
+    { value: 3, description: 'All' },
+  ];
+
+  const dateRangeOptions = [
+    { value: 1, description: '1 month' },
+    { value: 3, description: '3 months' },
+    { value: 6, description: '6 months' },
+    { value: 12, description: '1 year' },
+    { value: -1, description: 'All time' },
+  ];
+  const dateRangeLine = dateRangeOptions.length - 1;
 
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
@@ -202,37 +271,235 @@ export default function Custom() {
         onCondOpChange={onCondOpChange}
         selectGraph={selectGraph}
       />
-
       <View
         style={{
-          backgroundColor: theme.tableBackground,
-          padding: 30,
+          display: 'flex',
+          flexDirection: 'row',
+          padding: 15,
           paddingTop: 0,
-          overflow: 'auto',
           flexGrow: 1,
         }}
       >
+        <View style={{ width: 200, padding: 10, paddingLeft: 0 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              marginBottom: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text>
+              <strong>Display</strong>
+            </Text>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              Mode:
+            </Text>
+            <ModeButton
+              selected={mode === 'total'}
+              onSelect={() => onChangeMode('total')}
+            >
+              Total
+            </ModeButton>
+            <ModeButton
+              selected={mode === 'time'}
+              onSelect={() => onChangeMode('time')}
+            >
+              Time
+            </ModeButton>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              Split:
+            </Text>
+            <Select
+              value={split}
+              onChange={setSplit}
+              options={splitOptions.map(option => [
+                option.value,
+                option.description,
+              ])}
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              Type:
+            </Text>
+            <Select
+              value={type}
+              onChange={setType}
+              options={typeOptions.map(option => [
+                option.value,
+                option.description,
+              ])}
+            />
+          </View>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: theme.altPillBorder,
+              marginTop: 10,
+              flexShrink: 0,
+            }}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              marginTop: 10,
+              marginBottom: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text>
+              <strong>Date filters</strong>
+            </Text>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              Range:
+            </Text>
+            <Select
+              value={dateRange}
+              onChange={setDateRange}
+              options={dateRangeOptions.map(option => [
+                option.value,
+                option.description,
+              ])}
+              line={dateRangeLine}
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              From:
+            </Text>
+            <Select
+              value={start}
+              defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
+              options={allMonths.map(({ name, pretty }) => [name, pretty])}
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+              To:
+            </Text>
+            <Select
+              value={end}
+              options={allMonths.map(({ name, pretty }) => [name, pretty])}
+            />
+          </View>
+        </View>
         <View
           style={{
-            textAlign: 'right',
-            paddingTop: 20,
-            paddingRight: 20,
-            flexShrink: 0,
+            flexGrow: 1,
+            padding: 10,
           }}
         >
           <View
-            style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: -20,
+              flexGrow: 1,
+            }}
           >
-            <PrivacyFilter blurIntensity={5}>
-              {integerToCurrency(data.netWorth)}
-            </PrivacyFilter>
+            <Button type="bare" onClick={() => {}}>
+              <Chart width={15} height={15} />
+            </Button>
+            <Button type="bare" onClick={() => {}} style={{ marginLeft: 15 }}>
+              <ChartBar width={15} height={15} />
+            </Button>
+            <Button type="bare" onClick={() => {}} style={{ marginLeft: 15 }}>
+              <ChartPie width={15} height={15} />
+            </Button>
+            <View
+              style={{
+                width: 1,
+                height: 30,
+                backgroundColor: theme.altPillBorder,
+                marginLeft: 20,
+                flexShrink: 0,
+              }}
+            />
+            <Button type="bare" onClick={() => {}} style={{ marginLeft: 15 }}>
+              <ListBullet width={15} height={15} />
+            </Button>
+            <Button type="bare" onClick={() => {}} style={{ marginLeft: 15 }}>
+              <Filter width={15} height={15} />
+            </Button>
           </View>
-          <PrivacyFilter>
-            <Change amount={data.totalChange} />
-          </PrivacyFilter>
-        </View>
+          <View
+            style={{
+              backgroundColor: theme.tableBackground,
+              padding: 20,
+              paddingTop: 0,
+              overflow: 'auto',
+              flexGrow: 1,
+            }}
+          >
+            <View
+              style={{
+                textAlign: 'right',
+                paddingTop: 20,
+                paddingRight: 20,
+                flexShrink: 0,
+              }}
+            >
+              <View
+                style={{
+                  ...styles.largeText,
+                  fontWeight: 400,
+                  marginBottom: 5,
+                }}
+              >
+                <PrivacyFilter blurIntensity={5}>
+                  {integerToCurrency(data.netWorth)}
+                </PrivacyFilter>
+              </View>
+              <PrivacyFilter>
+                <Change amount={data.totalChange} />
+              </PrivacyFilter>
+            </View>
 
-        <GraphType />
+            <GraphType />
+          </View>
+        </View>
       </View>
     </View>
   );
