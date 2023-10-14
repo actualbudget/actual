@@ -21,7 +21,7 @@ const BudgetTotals = memo(function BudgetTotals({
     <View
       data-testid="budget-totals"
       style={{
-        backgroundColor: 'white',
+        backgroundColor: theme.tableHeaderBackground,
         flexDirection: 'row',
         flexShrink: 0,
         boxShadow: styles.cardShadow,
