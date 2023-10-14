@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import ArrowLeft from '../../icons/v1/ArrowLeft';
@@ -7,6 +9,8 @@ import ButtonLink from '../common/ButtonLink';
 import Select from '../common/Select';
 import View from '../common/View';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
+
+import { SavedGraphMenuButton } from './SavedGraphs';
 
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
@@ -61,7 +65,11 @@ function Header({
   onDeleteFilter,
   onCondOpChange,
   headerPrefixItems,
+  selectGraph,
 }) {
+  let location = useLocation();
+  let path = location.pathname;
+
   return (
     <View
       style={{
@@ -79,70 +87,82 @@ function Header({
       </ButtonLink>
       <View style={styles.veryLargeText}>{title}</View>
 
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginTop: 15,
-          gap: 15,
-        }}
-      >
-        {headerPrefixItems}
-
+      {path !== '/reports/custom' && (
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 5,
+            marginTop: 15,
+            gap: 15,
           }}
         >
-          <Select
-            onChange={newValue =>
-              onChangeDates(...validateStart(allMonths, newValue, end))
-            }
-            value={start}
-            defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
-            options={allMonths.map(({ name, pretty }) => [name, pretty])}
-          />
-          <View>to</View>
-          <Select
-            onChange={newValue =>
-              onChangeDates(...validateEnd(allMonths, start, newValue))
-            }
-            value={end}
-            options={allMonths.map(({ name, pretty }) => [name, pretty])}
-          />
-        </View>
+          {headerPrefixItems}
 
-        {filters && <FilterButton onApply={onApply} />}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <Select
+              onChange={newValue =>
+                onChangeDates(...validateStart(allMonths, newValue, end))
+              }
+              value={start}
+              defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
+              options={allMonths.map(({ name, pretty }) => [name, pretty])}
+            />
+            <View>to</View>
+            <Select
+              onChange={newValue =>
+                onChangeDates(...validateEnd(allMonths, start, newValue))
+              }
+              value={end}
+              options={allMonths.map(({ name, pretty }) => [name, pretty])}
+            />
+          </View>
 
-        {show1Month && (
+          {filters && <FilterButton onApply={onApply} />}
+
+          {show1Month && (
+            <Button
+              type="bare"
+              onClick={() => onChangeDates(...getLatestRange(1))}
+            >
+              1 month
+            </Button>
+          )}
           <Button
             type="bare"
-            onClick={() => onChangeDates(...getLatestRange(1))}
+            onClick={() => onChangeDates(...getLatestRange(2))}
           >
-            1 month
+            3 months
           </Button>
-        )}
-        <Button type="bare" onClick={() => onChangeDates(...getLatestRange(2))}>
-          3 months
-        </Button>
-        <Button type="bare" onClick={() => onChangeDates(...getLatestRange(5))}>
-          6 months
-        </Button>
-        <Button
-          type="bare"
-          onClick={() => onChangeDates(...getLatestRange(11))}
-        >
-          1 Year
-        </Button>
-        <Button
-          type="bare"
-          onClick={() => onChangeDates(...getFullRange(allMonths))}
-        >
-          All Time
-        </Button>
-      </View>
+          <Button
+            type="bare"
+            onClick={() => onChangeDates(...getLatestRange(5))}
+          >
+            6 months
+          </Button>
+          <Button
+            type="bare"
+            onClick={() => onChangeDates(...getLatestRange(11))}
+          >
+            1 Year
+          </Button>
+          <Button
+            type="bare"
+            onClick={() => onChangeDates(...getFullRange(allMonths))}
+          >
+            All Time
+          </Button>
+          <View style={{ flex: 1 }} />
+          {path === '/reports/custom' && (
+            <SavedGraphMenuButton selectGraph={selectGraph} />
+          )}
+        </View>
+      )}
       {filters && filters.length > 0 && (
         <View
           style={{ marginTop: 5 }}

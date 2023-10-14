@@ -4,6 +4,10 @@ export function fromDateRepr(date) {
   return date.slice(0, 7);
 }
 
+export function fromDateReprToDay(date) {
+  return date;
+}
+
 export async function runAll(queries, cb) {
   let data = await Promise.all(
     queries.map(q => {
