@@ -146,10 +146,10 @@ async function processTemplate(
 ): Promise<Notification> {
   let num_applied = 0;
   let errors = [];
-  let lowestPriority = 0;
   let originalCategoryBalance = [];
   let idealTemplate = [];
   let setToZero = [];
+  let priority_list = [];
 
   let categories = await getCategories();
 
@@ -163,10 +163,11 @@ async function processTemplate(
     let template = category_templates[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
-        lowestPriority =
-          template[l].priority > lowestPriority
-            ? template[l].priority
-            : lowestPriority;
+        //add each priority we need to a list.  Will sort later
+        if (template[l].priority == null) {
+          continue;
+        }
+        priority_list.push(template[l].priority);
       }
     }
     if (budgeted) {
@@ -189,10 +190,15 @@ async function processTemplate(
     templateBudget: setToZero.filter(f => f.isTemplate === true),
   });
 
-  // find all remainder templates, place them after all other templates
+  // sort and filter down to just the requested priorities
+  priority_list = priority_list
+    .sort()
+    .filter((item, index, curr) => curr.indexOf(item) === index);
+
+  // find all remainder templates, place them at highest priority
   let remainder_found;
-  let remainder_priority = lowestPriority + 1;
   let remainder_weight_total = 0;
+  let remainder_priority = priority_list[priority_list.length - 1] + 1;
   for (let c = 0; c < categories.length; c++) {
     let category = categories[c];
     let templates = category_templates[category.id];
@@ -206,19 +212,20 @@ async function processTemplate(
       }
     }
   }
-  // so the remainders don't get skipped
-  if (remainder_found) lowestPriority = remainder_priority;
+  if (remainder_found) priority_list.push(remainder_priority);
 
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
   let budgetAvailable = isReflectBudget()
     ? await getSheetValue(sheetName, `total-saved`)
     : await getSheetValue(sheetName, `to-budget`);
-  for (let priority = 0; priority <= lowestPriority; priority++) {
+  for (let ii = 0; ii < priority_list.length; ii++) {
+    let priority = priority_list[ii];
     let templateBudget = [];
+
     // setup scaling for remainder
     let remainder_scale = 1;
-    if (priority === lowestPriority) {
+    if (priority === remainder_priority && remainder_found) {
       let available_now = await getSheetValue(sheetName, `to-budget`);
       remainder_scale = available_now / remainder_weight_total;
     }

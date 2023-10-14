@@ -5,7 +5,6 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
 import { theme, styles } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -20,7 +19,7 @@ function ToBudget({ toBudget }) {
   return (
     <View style={{ alignItems: 'center', marginBottom: 15 }}>
       <Text style={styles.text}>
-        {budgetAmount < 0 ? 'Overbudget:' : 'To budget:'}
+        {budgetAmount < 0 ? 'Overbudget:' : 'To Budget:'}
       </Text>
       <Text
         style={{
@@ -97,18 +96,6 @@ function BudgetSummary({ month, modalProps }: BudgetSummaryProps) {
             </View>
           </View>
           <ToBudget toBudget={rolloverBudget.toBudget} />
-
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              paddingBottom: 15,
-            }}
-          >
-            <Button style={{ marginRight: 10 }} onClick={modalProps.onClose}>
-              Close
-            </Button>
-          </View>
         </NamespaceContext.Provider>
       )}
     </Modal>

@@ -8,7 +8,7 @@ import { css } from 'glamor';
 
 import { type CSSProperties } from '../../style';
 
-type ViewProps = HTMLProps<HTMLDivElement> & {
+export type ViewProps = HTMLProps<HTMLDivElement> & {
   className?: string;
   style?: CSSProperties;
   nativeStyle?: StyleHTMLAttributes<HTMLDivElement>;
