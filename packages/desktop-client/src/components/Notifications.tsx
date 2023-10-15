@@ -124,7 +124,7 @@ function Notification({
             ? theme.noticeBackgroundLight
             : error
             ? theme.errorBackground
-            : theme.alt2WarningBackground,
+            : theme.warningBackground,
           borderTop: `3px solid ${
             positive
               ? theme.noticeBorder
@@ -186,7 +186,7 @@ function Notification({
                     ? theme.noticeBackground
                     : error
                     ? theme.altErrorBackground
-                    : theme.altWarningBackground,
+                    : theme.warningBackground,
                 },
               }}
             >

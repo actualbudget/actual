@@ -150,7 +150,6 @@ export const noticeTextDark = noticeText;
 export const noticeTextMenu = colorPalette.green500;
 export const noticeBorder = colorPalette.green500;
 export const warningBackground = colorPalette.orange800;
-export const altWarningBackground = warningBackground;
 export const warningText = colorPalette.orange200;
 export const altWarningText = warningText;
 export const alt2WarningText = warningText;

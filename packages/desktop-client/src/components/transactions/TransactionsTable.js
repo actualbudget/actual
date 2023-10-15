@@ -1053,7 +1053,7 @@ const Transaction = memo(function Transaction(props) {
                   notes === 'missed'
                     ? theme.altErrorBackground
                     : notes === 'due'
-                    ? theme.altWarningBackground
+                    ? theme.warningBackground
                     : selected
                     ? theme.formLabelBackground
                     : theme.alt2TableBackground,
