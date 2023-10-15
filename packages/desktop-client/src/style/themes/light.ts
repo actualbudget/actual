@@ -8,17 +8,12 @@ export const pageBackgroundLineTop = colorPalette.white;
 export const pageBackgroundLineMid = colorPalette.navy100;
 export const pageBackgroundLineBottom = colorPalette.blue150;
 export const pageText = '#272630';
-export const pageTextLight = colorPalette.navy600;
+export const pageTextLight = colorPalette.navy500;
 export const pageTextSubdued = colorPalette.navy300;
-export const altpageTextSubdued = colorPalette.navy500;
 export const pageTextDark = colorPalette.navy800;
 export const pageTextPositive = colorPalette.purple600;
-export const altPageTextPositive = colorPalette.purple400;
 export const pageTextLink = colorPalette.blue600;
-export const altPageTextLink = colorPalette.blue300;
-
-export const modalBackground = colorPalette.white;
-export const modalBorder = colorPalette.white;
+export const pageTextLinkLight = colorPalette.blue300;
 
 export const cardBackground = colorPalette.white;
 export const cardBorder = colorPalette.purple700;
@@ -61,9 +56,6 @@ export const sidebarItemText = colorPalette.navy150;
 export const sidebarItemTextSelected = colorPalette.purple200;
 export const sidebarItemTextHover = colorPalette.navy50;
 
-export const tooltipBackground = colorPalette.navy50;
-export const tooltipBorder = colorPalette.navy50;
-
 export const menuBackground = colorPalette.white;
 export const menuItemBackground = colorPalette.navy50;
 export const menuItemBackgroundHover = colorPalette.navy100;
@@ -88,6 +80,8 @@ export const alt2MenuItemTextHeader = colorPalette.orange150;
 export const altMenuBorder = colorPalette.blue700;
 export const altMenuBorderHover = colorPalette.purple300;
 
+export const modalBackground = colorPalette.white;
+export const modalBorder = colorPalette.white;
 export const mobileNavBackground = colorPalette.white;
 export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;

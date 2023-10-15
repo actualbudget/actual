@@ -48,7 +48,7 @@ export default function WelcomeScreen() {
           to help you get your bearings, and check out the rest of the
           documentation while you’re there to learn more about advanced topics.
         </Paragraph>
-        <Paragraph style={{ color: theme.altpageTextSubdued }}>
+        <Paragraph style={{ color: theme.pageTextLight }}>
           Get started by importing an existing budget file from Actual or
           another budgeting app, or start fresh with an empty budget. You can
           always create or import another budget later.

@@ -56,7 +56,7 @@ const BudgetTotals = memo(function BudgetTotals({
           <DotsHorizontalTriple
             width={15}
             height={15}
-            style={{ color: theme.altpageTextSubdued }}
+            style={{ color: theme.pageTextLight }}
           />
           {menuOpen && (
             <Tooltip
