@@ -26,7 +26,7 @@ export function getStatusProps(status: StatusTypes) {
       };
     case 'due':
       return {
-        color: theme.altWarningText,
+        color: theme.warningTextDark,
         backgroundColor: theme.warningBackground,
         Icon: AlertTriangle,
       };

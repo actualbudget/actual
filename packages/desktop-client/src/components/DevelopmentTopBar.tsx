@@ -13,7 +13,7 @@ export default function DevelopmentTopBar() {
         justifyContent: 'space-between',
         color: theme.warningText,
         backgroundColor: theme.warningBackground,
-        borderBottom: `1px solid ${theme.warningAccent}`,
+        borderBottom: `1px solid ${theme.warningBorder}`,
         zIndex: 1,
         flexShrink: 0,
       }}

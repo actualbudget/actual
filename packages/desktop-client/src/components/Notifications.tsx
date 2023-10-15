@@ -111,7 +111,7 @@ function Notification({
           ? theme.noticeText
           : error
           ? theme.alt3ErrorText
-          : theme.alt4WarningText,
+          : theme.warningText,
       }}
     >
       <Stack
@@ -130,7 +130,7 @@ function Notification({
               ? theme.noticeBorder
               : error
               ? theme.altErrorAccent
-              : theme.altWarningAccent
+              : theme.warningBorder
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
@@ -176,7 +176,7 @@ function Notification({
                     ? theme.noticeBorder
                     : error
                     ? theme.altErrorAccent
-                    : theme.altWarningAccent
+                    : theme.warningBorder
                 }`,
                 color: 'currentColor',
                 fontSize: 14,

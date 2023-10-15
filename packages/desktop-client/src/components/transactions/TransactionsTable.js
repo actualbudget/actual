@@ -420,7 +420,7 @@ function StatusCell({
       : status === 'missed'
       ? theme.alt5ErrorText
       : status === 'due'
-      ? theme.alt3WarningText
+      ? theme.warningTextLight
       : selected
       ? theme.altPageTextLink
       : theme.pageTextSubdued;
@@ -1045,7 +1045,7 @@ const Transaction = memo(function Transaction(props) {
                   notes === 'missed'
                     ? theme.alt5ErrorText
                     : notes === 'due'
-                    ? theme.alt5WarningText
+                    ? theme.warningTextLight
                     : selected
                     ? theme.formLabelText
                     : theme.altTableText,

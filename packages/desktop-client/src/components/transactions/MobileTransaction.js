@@ -159,7 +159,7 @@ function Status({ status }) {
       color = theme.alt3ErrorText;
       break;
     case 'due':
-      color = theme.alt2WarningText;
+      color = theme.warningText;
       break;
     case 'upcoming':
       color = theme.alt2TableText;
