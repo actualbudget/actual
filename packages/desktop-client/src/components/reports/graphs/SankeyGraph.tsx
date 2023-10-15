@@ -22,8 +22,8 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
-  const isOut = x + width + 6 > containerWidth;
+function SankeyNode({ x, y, width, height, index, payload }) {
+  const isOut = x + width + 6 > width;
   let payloadValue = Math.round(payload.value / 1000).toString();
   if (payload.value < 1000) {
     payloadValue = '<1k';
@@ -91,8 +91,9 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
     <ResponsiveContainer>
       <Sankey
         data={sankeyData}
-        node={<SankeyNode />}
+        node={props => <SankeyNode {...props} />}
         sort={false}
+        iterations={1000}
         nodePadding={23}
         margin={{
           left: 0,
