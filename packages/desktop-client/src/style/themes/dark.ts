@@ -78,7 +78,7 @@ export const altMenuBackground = colorPalette.navy700;
 export const alt2MenuBackground = altMenuBackground;
 export const altMenuItemBackground = colorPalette.navy700;
 export const altMenuItemBackgroundHover = colorPalette.navy600;
-export const alt2MenuItemBackgroundHover = altMenuItemBackgroundHover;
+export const alt2MenuItemBackgroundHover = colorPalette.navy300;
 export const altMenuItemText = colorPalette.navy150;
 export const alt2MenuItemText = altMenuItemText;
 export const altMenuItemTextHover = colorPalette.navy150;
@@ -87,6 +87,8 @@ export const altMenuItemTextHeader = colorPalette.purple500;
 export const alt2MenuItemTextHeader = altMenuItemTextHeader;
 export const altMenuBorder = colorPalette.navy200;
 export const altMenuBorderHover = colorPalette.purple400;
+export const menuAutoCompleteBackground = colorPalette.navy400;
+export const menuAutoCompleteText = colorPalette.navy900;
 
 export const mobileNavBackground = colorPalette.navy800;
 export const mobileNavItem = colorPalette.navy150;
