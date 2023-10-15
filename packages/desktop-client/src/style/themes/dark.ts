@@ -174,8 +174,8 @@ export const errorText = colorPalette.red200;
 export const altErrorText = errorText;
 export const alt2ErrorText = errorText;
 export const errorAccent = colorPalette.red500;
-export const upcomingBackground = tableBackground;
-export const upcomingText = tableTextInactive;
+export const upcomingBackground = colorPalette.purple700;
+export const upcomingText = colorPalette.purple100;
 export const altUpcomingText = upcomingText;
 export const upcomingAccent = tableBorder;
 
