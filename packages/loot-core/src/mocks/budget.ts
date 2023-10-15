@@ -610,7 +610,7 @@ export async function createTestBudget(handlers) {
   );
 
   let categoryGroups: Array<
-    CategoryGroupEntity & { categories: Omit<CategoryEntity, 'group'>[] }
+    CategoryGroupEntity & { categories: CategoryEntity[] }
   > = [
     {
       name: 'Usual Expenses',

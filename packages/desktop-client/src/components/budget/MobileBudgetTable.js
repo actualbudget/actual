@@ -32,7 +32,9 @@ import { AmountInput } from '../util/AmountInput';
 // } from '../mobile/AmountInput';
 
 // import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
+import BalanceWithCarryover from './BalanceWithCarryover';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
+import BalanceTooltip from './rollover/BalanceTooltip';
 import { makeAmountGrey } from './util';
 
 function ToBudget({ toBudget, onClick }) {
@@ -238,10 +240,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
   let [isHidden, setIsHidden] = useState(category.hidden);
 
   let budgeted = rolloverBudget.catBudgeted(category.id);
-  let balance = rolloverBudget.catBalance(category.id);
   let spent = rolloverBudget.catSumAmount(category.id);
 
   let tooltip = useTooltip();
+  let balanceTooltip = useTooltip();
 
   useEffect(() => {
     if (!isEditing && tooltip.isOpen) {
@@ -404,19 +406,30 @@ const ExpenseCategory = memo(function ExpenseCategory({
           getStyle={makeAmountGrey}
           type="financial"
         />
-        <CellValue
-          name="balance"
-          binding={balance}
-          style={{
-            ...styles.smallText,
-            width: 90,
-            textAlign: 'right',
-          }}
-          getStyle={value =>
-            value < 0 ? { color: theme.errorText } : makeAmountGrey(value)
-          }
-          type="financial"
-        />
+        <span {...balanceTooltip.getOpenEvents()}>
+          <BalanceWithCarryover
+            carryover={rolloverBudget.catCarryover(category.id)}
+            balance={rolloverBudget.catBalance(category.id)}
+            style={{ ...styles.smallText, ...styles.underlinedText, width: 90 }}
+          />
+        </span>
+        {balanceTooltip.isOpen && (
+          <BalanceTooltip
+            categoryId={category.id}
+            tooltip={balanceTooltip}
+            monthIndex={monthUtils.getMonthIndex(month)}
+            onBudgetAction={(monthIndex, action, arg) => {
+              onBudgetAction?.(
+                monthUtils.getMonthFromIndex(
+                  monthUtils.getYear(month),
+                  monthIndex,
+                ),
+                action,
+                arg,
+              );
+            }}
+          />
+        )}
       </View>
     </ListItem>
   );
