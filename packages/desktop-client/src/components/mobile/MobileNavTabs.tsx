@@ -67,6 +67,7 @@ function NavTab({ icon: TabIcon, name, path }: NavTabProps) {
     <NavLink
       to={path}
       style={({ isActive }) => ({
+        ...styles.noTapHighlight,
         alignItems: 'center',
         color: isActive ? theme.mobileNavItemSelected : theme.mobileNavItem,
         display: 'flex',
