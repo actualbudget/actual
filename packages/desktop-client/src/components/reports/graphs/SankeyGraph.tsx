@@ -24,7 +24,7 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
 
 function SankeyNode({ x, y, width, height, index, payload }) {
   // const isOut = x + width + 6 > containerWidth;
-  const isOut = false // not configured yet
+  const isOut = false; // not configured yet
   let payloadValue = Math.round(payload.value / 1000).toString();
   if (payload.value < 1000) {
     payloadValue = '<1k';
