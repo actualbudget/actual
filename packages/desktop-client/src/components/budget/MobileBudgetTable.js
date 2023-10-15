@@ -406,30 +406,38 @@ const ExpenseCategory = memo(function ExpenseCategory({
           getStyle={makeAmountGrey}
           type="financial"
         />
-        <span {...balanceTooltip.getOpenEvents()}>
+        <View
+          role="button"
+          style={{ ...styles.noTapHighlight, width: 90 }}
+          {...balanceTooltip.getOpenEvents()}
+        >
           <BalanceWithCarryover
             carryover={rolloverBudget.catCarryover(category.id)}
             balance={rolloverBudget.catBalance(category.id)}
-            style={{ ...styles.smallText, ...styles.underlinedText, width: 90 }}
-          />
-        </span>
-        {balanceTooltip.isOpen && (
-          <BalanceTooltip
-            categoryId={category.id}
-            tooltip={balanceTooltip}
-            monthIndex={monthUtils.getMonthIndex(month)}
-            onBudgetAction={(monthIndex, action, arg) => {
-              onBudgetAction?.(
-                monthUtils.getMonthFromIndex(
-                  monthUtils.getYear(month),
-                  monthIndex,
-                ),
-                action,
-                arg,
-              );
+            balanceStyle={{
+              ...styles.smallText,
+              ...styles.underlinedText,
             }}
           />
-        )}
+          {balanceTooltip.isOpen && (
+            <BalanceTooltip
+              offset={5}
+              categoryId={category.id}
+              tooltip={balanceTooltip}
+              monthIndex={monthUtils.getMonthIndex(month)}
+              onBudgetAction={(monthIndex, action, arg) => {
+                onBudgetAction?.(
+                  monthUtils.getMonthFromIndex(
+                    monthUtils.getYear(month),
+                    monthIndex,
+                  ),
+                  action,
+                  arg,
+                );
+              }}
+            />
+          )}
+        </View>
       </View>
     </ListItem>
   );

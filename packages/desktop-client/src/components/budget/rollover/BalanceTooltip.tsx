@@ -20,6 +20,7 @@ export default function BalanceTooltip({
   tooltip,
   monthIndex,
   onBudgetAction,
+  ...tooltipProps
 }: BalanceTooltipProps) {
   let carryover = useSheetValue(rolloverBudget.catCarryover(categoryId));
   let balance = useSheetValue(rolloverBudget.catBalance(categoryId));
@@ -33,6 +34,7 @@ export default function BalanceTooltip({
           width={200}
           style={{ padding: 0 }}
           onClose={tooltip.close}
+          {...tooltipProps}
         >
           <Menu
             onMenuSelect={type => {

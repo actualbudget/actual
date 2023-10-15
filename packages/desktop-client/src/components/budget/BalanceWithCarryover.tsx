@@ -13,6 +13,7 @@ type BalanceWithCarryoverProps = {
   balance: ComponentProps<typeof CellValue>['binding'];
   disabled?: boolean;
   style?: CSSProperties;
+  balanceStyle?: CSSProperties;
   carryoverStyle?: CSSProperties;
 };
 export default function BalanceWithCarryover({
@@ -20,6 +21,7 @@ export default function BalanceWithCarryover({
   balance,
   disabled,
   style,
+  balanceStyle,
   carryoverStyle,
 }: BalanceWithCarryoverProps) {
   let carryoverValue = useSheetValue(carryover);
@@ -37,7 +39,7 @@ export default function BalanceWithCarryover({
             cursor: 'pointer',
             ':hover': { textDecoration: 'underline' },
           }),
-          ...style,
+          ...balanceStyle,
         }}
       />
       {carryoverValue && (
