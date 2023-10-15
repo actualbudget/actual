@@ -149,14 +149,12 @@ function CategoryList({
 }
 
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
-  categoryGroups: CategoryGroupEntity[];
-  categories: CategoryEntity[];
+  categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
   groupHeaderStyle?: object;
 };
 export default function CategoryAutocomplete({
   categoryGroups,
-  categories,
   showSplitOption,
   embedded,
   closeOnBlur,
@@ -170,7 +168,7 @@ export default function CategoryAutocomplete({
       categoryGroups.reduce(
         (list, group) =>
           list.concat(
-            categories
+            group.categories
               .filter(category => category.cat_group === group.id)
               .map(category => ({
                 ...category,
@@ -179,7 +177,7 @@ export default function CategoryAutocomplete({
           ),
         showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
       ),
-    [showSplitOption, categoryGroups, categories],
+    [showSplitOption, categoryGroups],
   );
 
   return (

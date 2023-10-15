@@ -5,5 +5,5 @@ export interface CategoryGroupEntity {
   sort_order?: number;
   tombstone?: boolean;
   hidden?: boolean;
-  // categories?: CategoryEntity[];
+  categories?: CategoryEntity[];
 }

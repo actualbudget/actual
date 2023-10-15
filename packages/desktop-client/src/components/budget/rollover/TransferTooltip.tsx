@@ -37,7 +37,7 @@ export default function TransferTooltip({
 }: TransferTooltipProps) {
   let spreadsheet = useSpreadsheet();
   let sheetName = useContext(NamespaceContext);
-  let { grouped: categoryGroups, list: categories } = useCategories();
+  let { grouped: categoryGroups } = useCategories();
 
   categoryGroups = categoryGroups.filter(g => !g.is_income);
   if (showToBeBudgeted) {
@@ -96,7 +96,6 @@ export default function TransferTooltip({
 
       <CategoryAutocomplete
         categoryGroups={categoryGroups}
-        categories={categories}
         value={null}
         openOnFocus={true}
         onUpdate={id => {}}

@@ -43,8 +43,8 @@ export interface ServerHandlers {
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
   'get-categories': () => Promise<{
-    grouped: CategoryGroupEntity[];
-    list: CategoryEntity[];
+    grouped: Array<CategoryGroupEntity>;
+    list: Array<CategoryEntity>;
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;

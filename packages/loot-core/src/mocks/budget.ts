@@ -10,7 +10,6 @@ import { batchMessages, setSyncingMode } from '../server/sync';
 import * as monthUtils from '../shared/months';
 import q from '../shared/query';
 import type {
-  CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
@@ -609,9 +608,7 @@ export async function createTestBudget(handlers) {
     }),
   );
 
-  let categoryGroups: Array<
-    CategoryGroupEntity & { categories: CategoryEntity[] }
-  > = [
+  let categoryGroups: Array<CategoryGroupEntity> = [
     {
       name: 'Usual Expenses',
       categories: [

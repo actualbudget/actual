@@ -18,7 +18,7 @@ export default function CoverTooltip({
   onSubmit,
   onClose,
 }: CoverTooltipProps) {
-  let { grouped: categoryGroups, list: categories } = useCategories();
+  let { grouped: categoryGroups } = useCategories();
   categoryGroups = addToBeBudgetedGroup(
     categoryGroups.filter(g => !g.is_income),
   );
@@ -45,7 +45,6 @@ export default function CoverTooltip({
         {node => (
           <CategoryAutocomplete
             categoryGroups={categoryGroups}
-            categories={categories}
             value={null}
             openOnFocus={true}
             onUpdate={id => {}}

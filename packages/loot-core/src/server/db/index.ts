@@ -279,7 +279,9 @@ export async function getCategories(): Promise<CategoryEntity[]> {
   `);
 }
 
-export async function getCategoriesGrouped(): Promise<CategoryGroupEntity[]> {
+export async function getCategoriesGrouped(): Promise<
+  Array<CategoryGroupEntity>
+> {
   const groups = await all(`
     SELECT cg.* FROM category_groups cg WHERE cg.tombstone = 0 ORDER BY cg.is_income, cg.sort_order, cg.id
   `);
