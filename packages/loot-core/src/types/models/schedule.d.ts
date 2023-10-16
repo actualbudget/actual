@@ -3,9 +3,9 @@ import type { PayeeEntity } from './payee';
 import type { RuleEntity } from './rule';
 
 export interface ScheduleEntity {
-  id?: string;
+  id: string;
   name?: string;
-  rule: RuleEntity;
+  rule: RuleEntity['id'];
   next_date: string;
   completed: boolean;
   posts_transaction: boolean;
@@ -13,11 +13,21 @@ export interface ScheduleEntity {
 
   // These are special fields that are actually pulled from the
   // underlying rule
-  _payee: PayeeEntity;
-  _account: AccountEntity;
+  _payee: PayeeEntity['id'];
+  _account: AccountEntity['id'];
   _amount: unknown;
   _amountOp: string;
-  _date: unknown;
+  _date: {
+    interval: number;
+    patterns: {
+      value: number;
+      type: 'SU' | 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'day';
+    }[];
+    skipWeekend: boolean;
+    start: string;
+    weekendSolveMode: 'before' | 'after';
+    frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  };
   _conditions: unknown;
   _actions: unknown;
 }

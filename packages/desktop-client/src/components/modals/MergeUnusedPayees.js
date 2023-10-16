@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { replaceModal } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import { Information } from '../alerts';
 import Button from '../common/Button';
 import Modal, { ModalButtons } from '../common/Modal';
@@ -12,7 +12,7 @@ import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
 
-let highlightStyle = { color: colors.p5 };
+let highlightStyle = { color: theme.pageTextPositive };
 
 export default function MergeUnusedPayees({
   modalProps,
@@ -141,7 +141,7 @@ export default function MergeUnusedPayees({
                 style={{
                   fontSize: 13,
                   marginTop: 10,
-                  color: colors.n4,
+                  color: theme.pageTextLight,
                   userSelect: 'none',
                   display: 'flex',
                   alignItems: 'center',

@@ -5,12 +5,13 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import { useActions } from '../../hooks/useActions';
+import { theme } from '../../style';
 import Button from '../common/Button';
 import Search from '../common/Search';
 import View from '../common/View';
 import { Page } from '../Page';
 
-import { SchedulesTable, ROW_HEIGHT } from './SchedulesTable';
+import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
 
 export default function Schedules() {
   const { pushModal } = useActions();
@@ -36,8 +37,7 @@ export default function Schedules() {
     pushModal('schedules-discover');
   }
 
-  // @todo: replace name: string with enum
-  async function onAction(name: string, id: ScheduleEntity['id']) {
+  async function onAction(name: ScheduleItemAction, id: ScheduleEntity['id']) {
     switch (name) {
       case 'post-transaction':
         await send('schedule/post-transaction', { id });
@@ -65,33 +65,37 @@ export default function Schedules() {
 
   return (
     <Page title="Schedules">
-      <View style={{ alignItems: 'flex-end' }}>
-        <Search
-          placeholder="Filter schedules…"
-          value={filter}
-          onChange={setFilter}
-        />
-      </View>
-
       <View
         style={{
-          flexBasis: (ROW_HEIGHT - 1) * (Math.max(schedules.length, 1) + 1),
-          marginTop: 15,
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: '0 0 15px',
         }}
       >
-        <SchedulesTable
-          schedules={schedules}
-          filter={filter}
-          statuses={statuses}
-          allowCompleted={true}
-          onSelect={onEdit}
-          onAction={onAction}
-          style={{ backgroundColor: 'white' }}
-          // @todo: Remove following props after typing SchedulesTable
-          minimal={undefined}
-          tableStyle={undefined}
-        />
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <Search
+            placeholder="Filter schedules…"
+            value={filter}
+            onChange={setFilter}
+          />
+        </View>
       </View>
+
+      <SchedulesTable
+        schedules={schedules}
+        filter={filter}
+        statuses={statuses}
+        allowCompleted={true}
+        onSelect={onEdit}
+        onAction={onAction}
+        style={{ backgroundColor: theme.tableBackground }}
+      />
 
       <View
         style={{

@@ -4,6 +4,7 @@ import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from '../tokens';
 
+import { theme } from './theme';
 import { type CSSProperties } from './types';
 
 export const styles = {
@@ -11,6 +12,7 @@ export const styles = {
   cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
   monthRightPadding: 5,
   menuBorderRadius: 4,
+  mobileEditingPadding: 12,
   altMenuMaxHeight: 250,
   altMenuText: {
     fontSize: 13,
@@ -90,6 +92,11 @@ export const styles = {
     animationDuration: '1s',
     animationFillMode: 'both',
     animationDelay: '0.5s',
+  },
+  underlinedText: {
+    textDecoration: 'underline',
+    textDecorationThickness: 2,
+    textDecorationColor: theme.pillBorder,
   },
   // Dynamically set
   lightScrollbar: null as CSSProperties | null,

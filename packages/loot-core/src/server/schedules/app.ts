@@ -212,7 +212,7 @@ export async function createSchedule({
   schedule = null,
   conditions = [],
 } = {}) {
-  let scheduleId = (schedule && schedule.id) || uuidv4();
+  let scheduleId = schedule?.id || uuidv4();
 
   let { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {
@@ -235,8 +235,7 @@ export async function createSchedule({
   }
 
   // Create the rule here based on the info
-  let ruleId;
-  ruleId = await insertRule({
+  let ruleId = await insertRule({
     stage: null,
     conditionsOp: 'and',
     conditions,
@@ -275,15 +274,6 @@ export async function updateSchedule({
   if (schedule.rule) {
     throw new Error('You cannot change the rule of a schedule');
   }
-
-  if (schedule.name) {
-    if (await checkIfScheduleExists(schedule.name, schedule.id)) {
-      throw new Error('There is already a schedule with this name');
-    }
-  } else {
-    schedule.name = null;
-  }
-  // We need the rule if there are conditions
   let rule;
 
   // This must be outside the `batchMessages` call because we change

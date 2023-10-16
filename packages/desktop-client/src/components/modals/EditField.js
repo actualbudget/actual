@@ -9,7 +9,7 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useResponsive } from '../../ResponsiveProvider';
-import { colors } from '../../style';
+import { theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
@@ -86,7 +86,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           groupHeaderStyle={
             isNarrowWidth
               ? {
-                  color: colors.n6,
+                  color: theme.altTableText,
                 }
               : undefined
           }
@@ -118,7 +118,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           groupHeaderStyle={
             isNarrowWidth
               ? {
-                  color: colors.n6,
+                  color: theme.altTableText,
                 }
               : undefined
           }
@@ -155,7 +155,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           groupHeaderStyle={
             isNarrowWidth
               ? {
-                  color: colors.n6,
+                  color: theme.altTableText,
                 }
               : undefined
           }
@@ -192,7 +192,10 @@ export default function EditField({ modalProps, name, onSubmit }) {
         padding: '15px 10px',
         borderRadius: '6px',
         ...(minWidth && { minWidth }),
-        ...(!isNarrowWidth && { backgroundColor: colors.n1, color: 'white' }),
+        ...(!isNarrowWidth && {
+          backgroundColor: theme.mobileModalBackground,
+          color: theme.mobileModalText,
+        }),
       }}
     >
       {() => (
@@ -202,7 +205,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
               title={label}
               style={{
                 alignSelf: 'center',
-                color: colors.b10,
+                color: theme.altMobileModalText,
                 marginBottom: 10,
               }}
             />

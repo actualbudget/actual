@@ -61,12 +61,11 @@ async function setGoalBudget({ month, templateBudget }) {
 }
 
 async function processTemplate(month, force, category_templates) {
-  let templateBudget = [];
   let num_applied = 0;
   let errors = [];
-  let lowestPriority = 0;
   let originalCategoryBalance = [];
   let setToZero = [];
+  let priority_list = [];
 
   let categories = await db.all(
     'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
@@ -82,10 +81,11 @@ async function processTemplate(month, force, category_templates) {
     let template = category_templates[category.id];
     if (template) {
       for (let l = 0; l < template.length; l++) {
-        lowestPriority =
-          template[l].priority > lowestPriority
-            ? template[l].priority
-            : lowestPriority;
+        //add each priority we need to a list.  Will sort later
+        if (template[l].priority == null) {
+          continue;
+        }
+        priority_list.push(template[l].priority);
       }
     }
     if (budgeted) {
@@ -105,15 +105,18 @@ async function processTemplate(month, force, category_templates) {
   }
   await setGoalBudget({
     month,
-    templateBudget: setToZero.filter(
-      f => f.isTemplate === true && f.isIncome === 0,
-    ),
+    templateBudget: setToZero.filter(f => f.isTemplate === true),
   });
 
-  // find all remainder templates, place them after all other templates
+  // sort and filter down to just the requested priorities
+  priority_list = priority_list
+    .sort()
+    .filter((item, index, curr) => curr.indexOf(item) === index);
+
+  // find all remainder templates, place them at highest priority
   let remainder_found;
-  let remainder_priority = lowestPriority + 1;
   let remainder_weight_total = 0;
+  let remainder_priority = priority_list[priority_list.length - 1] + 1;
   for (let c = 0; c < categories.length; c++) {
     let category = categories[c];
     let templates = category_templates[category.id];
@@ -127,18 +130,20 @@ async function processTemplate(month, force, category_templates) {
       }
     }
   }
-  // so the remainders don't get skipped
-  if (remainder_found) lowestPriority = remainder_priority;
+  if (remainder_found) priority_list.push(remainder_priority);
 
   let sheetName = monthUtils.sheetForMonth(month);
   let available_start = await getSheetValue(sheetName, `to-budget`);
   let available_remaining = isReflectBudget()
     ? await getSheetValue(sheetName, `total-saved`)
     : await getSheetValue(sheetName, `to-budget`);
-  for (let priority = 0; priority <= lowestPriority; priority++) {
+  for (let ii = 0; ii < priority_list.length; ii++) {
+    let priority = priority_list[ii];
+    let templateBudget = [];
+
     // setup scaling for remainder
     let remainder_scale = 1;
-    if (priority === lowestPriority) {
+    if (priority === remainder_priority && remainder_found) {
       let available_now = await getSheetValue(sheetName, `to-budget`);
       remainder_scale = available_now / remainder_weight_total;
     }
@@ -215,6 +220,9 @@ async function processTemplate(month, force, category_templates) {
               );
             if (to_budget != null) {
               num_applied++;
+              if (to_budget > available_remaining && priority > 0) {
+                to_budget = available_remaining;
+              }
               templateBudget.push({
                 category: category.id,
                 amount: to_budget + prev_budgeted,
@@ -644,7 +652,12 @@ async function applyCategoryTemplate(
             let conditions = rule.serialize().conditions;
             let { date: dateConditions, amount: amountCondition } =
               extractScheduleConds(conditions);
-            let target = -amountCondition.value;
+            let target =
+              amountCondition.op === 'isbetween'
+                ? -Math.round(
+                    amountCondition.value.num1 + amountCondition.value.num2,
+                  ) / 2
+                : -amountCondition.value;
             let next_date_string = getNextDate(
               dateConditions,
               monthUtils._parse(current_month),
@@ -681,7 +694,7 @@ async function applyCategoryTemplate(
                   monthUtils._parse(current_month),
                 );
                 while (next_date < next_month) {
-                  monthlyTarget += amountCondition.value;
+                  monthlyTarget += -target;
                   next_date = monthUtils.addDays(next_date, 1);
                   next_date = getNextDate(
                     dateConditions,

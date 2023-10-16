@@ -11,6 +11,7 @@ import {
   getApproxNumberThreshold,
 } from '../../shared/rules';
 import { partitionByField, fastSetMerge } from '../../shared/util';
+import { type RuleActionEntity, type RuleEntity } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
 import { getMappings } from '../db/mappings';
@@ -27,6 +28,7 @@ import {
   migrateIds,
   iterateIds,
 } from './rules';
+import { batchUpdateTransactions } from './transactions';
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead
@@ -202,7 +204,9 @@ export function getRules() {
   return [...allRules.values()];
 }
 
-export async function insertRule(rule) {
+export async function insertRule(
+  rule: Omit<RuleEntity, 'id'> & { id?: string },
+) {
   rule = ruleModel.validate(rule);
   return db.insertWithUUID('rules', ruleModel.fromJS(rule));
 }
@@ -212,7 +216,7 @@ export async function updateRule(rule) {
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
-export async function deleteRule(rule) {
+export async function deleteRule<T extends { id: string }>(rule: T) {
   let schedule = await db.first('SELECT id FROM schedules WHERE rule = ?', [
     rule.id,
   ]);
@@ -415,6 +419,12 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
             };
           }
           return apply(field, '$eq', number);
+        } else if (type === 'string') {
+          if (value === '') {
+            return {
+              $or: [apply(field, '$eq', null), apply(field, '$eq', '')],
+            };
+          }
         }
         return apply(field, '$eq', value);
       case 'isNot':
@@ -477,7 +487,10 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
   return { filters, errors };
 }
 
-export function applyActions(transactionIds, actions, handlers) {
+export function applyActions(
+  transactionIds: string[],
+  actions: Array<Action | RuleActionEntity>,
+) {
   let parsedActions = actions
     .map(action => {
       if (action instanceof Action) {
@@ -485,6 +498,10 @@ export function applyActions(transactionIds, actions, handlers) {
       }
 
       try {
+        if (action.op === 'link-schedule') {
+          return new Action(action.op, null, action.value, null, FIELD_TYPES);
+        }
+
         return new Action(
           action.op,
           action.field,
@@ -512,7 +529,7 @@ export function applyActions(transactionIds, actions, handlers) {
     return update;
   });
 
-  return handlers['transactions-batch-update']({ updated });
+  return batchUpdateTransactions({ updated });
 }
 
 export function getRulesForPayee(payeeId) {
@@ -583,7 +600,7 @@ function* getOneOfSetterRules(
   return null;
 }
 
-export async function updatePayeeRenameRule(fromNames, to) {
+export async function updatePayeeRenameRule(fromNames: string[], to: string) {
   let renameRule = getOneOfSetterRules('pre', 'imported_payee', 'payee', {
     actionValue: to,
   }).next().value;

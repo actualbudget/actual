@@ -80,3 +80,4 @@ export const purple800 = oldColors.p2;
 export const purple900 = oldColors.p1;
 export const white = '#ffffff';
 export const black = '#000000';
+export const hover = oldColors.hover;

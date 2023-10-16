@@ -1,5 +1,3 @@
-import React from 'react';
-
 import * as d from 'date-fns';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
@@ -11,7 +9,6 @@ import {
   amountToInteger,
 } from 'loot-core/src/shared/util';
 
-import AlignedText from '../../common/AlignedText';
 import { index } from '../util';
 
 export default function createSpreadsheet(
@@ -93,6 +90,8 @@ function recalculate(data, start, end) {
   let hasNegative = false;
   let startNetWorth = 0;
   let endNetWorth = 0;
+  let lowestNetWorth = null;
+  let highestNetWorth = null;
 
   const graphData = months.reduce((arr, month, idx) => {
     let debt = 0;
@@ -117,29 +116,29 @@ function recalculate(data, start, end) {
     const x = d.parseISO(month + '-01');
     const change = last ? total - amountToInteger(last.y) : 0;
 
-    const label = (
-      <div>
-        <div style={{ marginBottom: 10 }}>
-          <strong>{d.format(x, 'MMMM yyyy')}</strong>
-        </div>
-        <div style={{ lineHeight: 1.5 }}>
-          <AlignedText left="Assets:" right={integerToCurrency(assets)} />
-          <AlignedText left="Debt:" right={`-${integerToCurrency(debt)}`} />
-          <AlignedText
-            left="Net worth:"
-            right={<strong>{integerToCurrency(total)}</strong>}
-          />
-          <AlignedText left="Change:" right={integerToCurrency(change)} />
-        </div>
-      </div>
-    );
-
     if (arr.length === 0) {
       startNetWorth = total;
     }
     endNetWorth = total;
 
-    arr.push({ x, y: integerToAmount(total), premadeLabel: label });
+    arr.push({
+      x: d.format(x, 'MMM ’yy'),
+      y: integerToAmount(total),
+      assets: integerToCurrency(assets),
+      debt: `-${integerToCurrency(debt)}`,
+      change: integerToCurrency(change),
+      networth: integerToCurrency(total),
+      date: d.format(x, 'MMMM yyyy'),
+    });
+
+    arr.forEach(item => {
+      if (item.y < lowestNetWorth || lowestNetWorth === null) {
+        lowestNetWorth = item.y;
+      }
+      if (item.y > highestNetWorth || highestNetWorth === null) {
+        highestNetWorth = item.y;
+      }
+    });
     return arr;
   }, []);
 
@@ -152,5 +151,7 @@ function recalculate(data, start, end) {
     },
     netWorth: endNetWorth,
     totalChange: endNetWorth - startNetWorth,
+    lowestNetWorth,
+    highestNetWorth,
   };
 }
