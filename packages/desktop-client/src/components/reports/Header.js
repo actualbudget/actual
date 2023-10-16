@@ -158,9 +158,6 @@ function Header({
             All Time
           </Button>
           <View style={{ flex: 1 }} />
-          {path === '/reports/custom' && (
-            <SavedGraphMenuButton selectGraph={selectGraph} />
-          )}
         </View>
       )}
       {filters && filters.length > 0 && (

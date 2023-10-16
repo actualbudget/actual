@@ -14,6 +14,7 @@ import {
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
+import PrivacyFilter from '../../PrivacyFilter';
 import Container from '../Container';
 
 type AreaGraphProps = {
@@ -92,13 +93,15 @@ function AreaGraph({ style, graphData, compact }: AreaGraphProps) {
               <strong>{payload[0].payload.date}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
-              <AlignedText left="Assets:" right={payload[0].payload.assets} />
-              <AlignedText left="Debt:" right={payload[0].payload.debt} />
-              <AlignedText
-                left="Net worth:"
-                right={<strong>{payload[0].payload.networth}</strong>}
-              />
-              <AlignedText left="Change:" right={payload[0].payload.change} />
+              <PrivacyFilter>
+                <AlignedText left="Assets:" right={payload[0].payload.assets} />
+                <AlignedText left="Debt:" right={payload[0].payload.debt} />
+                <AlignedText
+                  left="Net worth:"
+                  right={<strong>{payload[0].payload.networth}</strong>}
+                />
+                <AlignedText left="Change:" right={payload[0].payload.change} />
+              </PrivacyFilter>
             </div>
           </div>
         </div>

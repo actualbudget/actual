@@ -32,13 +32,13 @@ import LineGraph from './graphs/LineGraph';
 import StackedBarGraph from './graphs/StackedBarGraph';
 import Header from './Header';
 import ReportsTable from './ReportsTable';
+import { ReportSplit, ReportSummary } from './ReportSummary';
 import { SavedGraphMenuButton } from './SavedGraphs';
 import defaultSpreadsheet from './spreadsheets/default-spreadsheet';
 import useReport from './useReport';
 import { fromDateRepr } from './util';
 
 export default function Custom() {
-  const [graphType, setGraphType] = useState('AreaGraph');
   const categories = useCategories();
   const [selectedCategories, setSelectedCategories] = useState(null);
   useEffect(() => {
@@ -68,6 +68,9 @@ export default function Custom() {
   const [type, setType] = useState(1);
   const [dateRange, setDateRange] = useState(6);
   const [mode, setMode] = useState('time');
+  const [graphType, setGraphType] = useState('AreaGraph');
+  const [viewSplit, setViewSplit] = useState(false);
+  const [viewSummary, setViewSummary] = useState(false);
 
   const getGraphData = useMemo(() => {
     return defaultSpreadsheet(
@@ -125,10 +128,6 @@ export default function Custom() {
     }
     run();
   }, []);
-
-  function selectGraph(graph) {
-    setGraphType(graph);
-  }
 
   function GraphType() {
     if (graphType === 'AreaGraph') {
@@ -210,6 +209,28 @@ export default function Custom() {
     setMode(cond);
   }
 
+  function onChangeGraph(cond) {
+    setGraphType(cond);
+  }
+
+  function GraphButton({ selected, children, style, onSelect, title }) {
+    return (
+      <Button
+        type="bare"
+        style={{
+          ...(selected && {
+            backgroundColor: theme.buttonBareBackgroundHover,
+          }),
+          ...style,
+        }}
+        onClick={onSelect}
+        title={title}
+      >
+        {children}
+      </Button>
+    );
+  }
+
   function ModeButton({ selected, children, style, onSelect }) {
     return (
       <Button
@@ -280,7 +301,6 @@ export default function Custom() {
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
         onCondOpChange={onCondOpChange}
-        selectGraph={selectGraph}
       />
       <View
         style={{
@@ -449,41 +469,34 @@ export default function Custom() {
               paddingTop: 0,
             }}
           >
-            <Button
-              type="bare"
-              onClick={() => {
-                selectGraph('TableGraph');
-              }}
+            <GraphButton
+              selected={graphType === 'TableGraph'}
+              onSelect={() => onChangeGraph('TableGraph')}
+              style={{ marginLeft: 15 }}
             >
               <InboxFull width={15} height={15} />
-            </Button>
-            <Button
-              type="bare"
-              onClick={() => {
-                selectGraph('AreaGraph');
-              }}
+            </GraphButton>
+            <GraphButton
+              selected={graphType === 'AreaGraph'}
+              onSelect={() => onChangeGraph('AreaGraph')}
               style={{ marginLeft: 15 }}
             >
               <Chart width={15} height={15} />
-            </Button>
-            <Button
-              type="bare"
-              onClick={() => {
-                selectGraph('BarGraph');
-              }}
+            </GraphButton>
+            <GraphButton
+              selected={graphType === 'BarGraph'}
+              onSelect={() => onChangeGraph('BarGraph')}
               style={{ marginLeft: 15 }}
             >
               <ChartBar width={15} height={15} />
-            </Button>
-            <Button
-              type="bare"
-              onClick={() => {
-                selectGraph(DonutGraph);
-              }}
+            </GraphButton>
+            <GraphButton
+              selected={graphType === 'DonutGraph'}
+              onSelect={() => onChangeGraph('DonutGraph')}
               style={{ marginLeft: 15 }}
             >
               <ChartPie width={15} height={15} />
-            </Button>
+            </GraphButton>
             <View
               style={{
                 width: 1,
@@ -493,22 +506,26 @@ export default function Custom() {
                 flexShrink: 0,
               }}
             />
-            <Button
-              type="bare"
-              onClick={() => {}}
+            <GraphButton
+              selected={viewSplit}
+              onSelect={() => {
+                setViewSplit(!viewSplit);
+              }}
               style={{ marginLeft: 15 }}
               title="Show Legend"
             >
               <ListBullet width={15} height={15} />
-            </Button>
-            <Button
-              type="bare"
-              onClick={() => {}}
+            </GraphButton>
+            <GraphButton
+              selected={viewSummary}
+              onSelect={() => {
+                setViewSummary(!viewSummary);
+              }}
               style={{ marginLeft: 15 }}
               title="Show Summary"
             >
               <Calculator width={15} height={15} />
-            </Button>
+            </GraphButton>
             <View
               style={{
                 width: 1,
@@ -532,16 +549,13 @@ export default function Custom() {
           <View
             style={{
               backgroundColor: theme.tableBackground,
-              padding: 20,
-              paddingTop: 0,
-              overflow: 'auto',
               flexGrow: 1,
             }}
           >
             <View
               style={{
                 textAlign: 'right',
-                paddingTop: 20,
+                paddingTop: 10,
                 paddingRight: 20,
                 flexShrink: 0,
               }}
@@ -561,8 +575,49 @@ export default function Custom() {
                 <Change amount={data.totalChange} />
               </PrivacyFilter>
             </View>
-
-            <GraphType />
+            <View
+              style={{
+                flexDirection: 'row',
+                flexGrow: 1,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: 'column',
+                  flexGrow: 1,
+                  padding: 10,
+                  paddingTop: 0,
+                }}
+              >
+                <GraphType />
+              </View>
+              {(viewSplit || viewSummary) && (
+                <View>
+                  <View
+                    style={{
+                      padding: 10,
+                      flexDirection: 'column',
+                      minWidth: 300,
+                      marginTop: 15,
+                      marginRight: 10,
+                      textAlign: 'center',
+                      flexGrow: 1,
+                    }}
+                  >
+                    {viewSummary && (
+                      <ReportSummary
+                        start={start}
+                        end={end}
+                        totalExpenses={10000}
+                        totalIncome={5000}
+                        selectType={'NET'}
+                      />
+                    )}
+                    {viewSplit && <ReportSplit />}
+                  </View>
+                </View>
+              )}
+            </View>
           </View>
         </View>
       </View>
