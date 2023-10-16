@@ -1,5 +1,5 @@
 import { useLayoutEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import useNavigate from '../hooks/useNavigate';
 
 export function ExposeNavigate() {
   let navigate = useNavigate();

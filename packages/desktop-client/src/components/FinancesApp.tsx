@@ -6,7 +6,6 @@ import {
   Routes,
   Navigate,
   NavLink,
-  useNavigate,
   BrowserRouter,
   useLocation,
   useHref,
@@ -21,6 +20,7 @@ import checkForUpdateNotification from 'loot-core/src/client/update-notification
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useActions } from '../hooks/useActions';
+import useNavigate from '../hooks/useNavigate';
 import Add from '../icons/v1/Add';
 import Cog from '../icons/v1/Cog';
 import PiggyBank from '../icons/v1/PiggyBank';
