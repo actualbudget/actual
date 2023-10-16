@@ -182,14 +182,24 @@ function getInitialMappings(transactions) {
       fields.find(([name, value]) => value.match(/^-?[.,\d]+$/)),
   );
 
+  let categoryField = key(
+    fields.find(([name, value]) => name.toLowerCase().includes('category')),
+  );
+
   let payeeField = key(
-    fields.find(([name, value]) => name !== dateField && name !== amountField),
+    fields.find(
+      ([name, value]) =>
+        name !== dateField && name !== amountField && name !== categoryField,
+    ),
   );
 
   let notesField = key(
     fields.find(
       ([name, value]) =>
-        name !== dateField && name !== amountField && name !== payeeField,
+        name !== dateField &&
+        name !== amountField &&
+        name !== categoryField &&
+        name !== payeeField,
     ),
   );
 
@@ -198,6 +208,7 @@ function getInitialMappings(transactions) {
     amount: amountField,
     payee: payeeField,
     notes: notesField,
+    category: categoryField,
   };
 }
 
@@ -246,6 +257,19 @@ function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
     outflow: null,
     inflow: null,
   };
+}
+
+function parseCategoryFields(trans, categories) {
+  let match = null;
+  for (let category of categories) {
+    if (category.id === trans.category) {
+      return null;
+    }
+    if (category.name === trans.category) {
+      match = category.id;
+    }
+  }
+  return match;
 }
 
 function Transaction({
@@ -301,6 +325,9 @@ function Transaction({
       </Field>
       <Field width="flex" title={transaction.notes}>
         {transaction.notes}
+      </Field>
+      <Field width="flex" title={transaction.category}>
+        {transaction.category}
       </Field>
       {splitMode ? (
         <>
@@ -513,6 +540,17 @@ function FieldMappings({
             firstTransaction={transactions[0]}
           />
         </View>
+        <View style={{ flex: 1 }}>
+          <SubLabel title="Category" />
+          <SelectField
+            options={options}
+            value={mappings.category}
+            style={{ marginRight: 5 }}
+            onChange={name => onChange('category', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
+          />
+        </View>
         {splitMode ? (
           <>
             <View style={{ flex: 0.5 }}>
@@ -571,7 +609,7 @@ export default function ImportTransactions({ modalProps, options }) {
   let [splitMode, setSplitMode] = useState(false);
   let [flipAmount, setFlipAmount] = useState(false);
   let [multiplierEnabled, setMultiplierEnabled] = useState(false);
-  let { accountId, onImported } = options;
+  let { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -757,6 +795,11 @@ export default function ImportTransactions({ modalProps, options }) {
         break;
       }
 
+      const category_id = parseCategoryFields(trans, categories.list);
+      if (category_id != null) {
+        trans.category = category_id;
+      }
+
       let { inflow, outflow, ...finalTransaction } = trans;
       finalTransactions.push({
         ...finalTransaction,
@@ -810,6 +853,7 @@ export default function ImportTransactions({ modalProps, options }) {
     { name: 'Date', width: 200 },
     { name: 'Payee', width: 'flex' },
     { name: 'Notes', width: 'flex' },
+    { name: 'Category', width: 'flex' },
   ];
 
   if (splitMode) {
@@ -847,7 +891,7 @@ export default function ImportTransactions({ modalProps, options }) {
 
           <TableWithNavigator
             items={transactions}
-            fields={['payee', 'amount']}
+            fields={['payee', 'catgory', 'amount']}
             style={{ backgroundColor: theme.tableHeaderBackground }}
             getItemKey={index => index}
             renderEmpty={() => {
