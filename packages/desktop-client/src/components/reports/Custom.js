@@ -9,10 +9,12 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useCategories from '../../hooks/useCategories';
 import useFilters from '../../hooks/useFilters';
+import Calculator from '../../icons/v1/Calculator';
 import Chart from '../../icons/v1/Chart';
 import ChartBar from '../../icons/v1/ChartBar';
 import ChartPie from '../../icons/v1/ChartPie';
 import Filter from '../../icons/v1/Filter';
+import InboxFull from '../../icons/v1/InboxFull';
 import ListBullet from '../../icons/v1/ListBullet';
 import { theme, styles } from '../../style';
 import Button from '../common/Button';
@@ -29,6 +31,7 @@ import DonutGraph from './graphs/DonutGraph';
 import LineGraph from './graphs/LineGraph';
 import StackedBarGraph from './graphs/StackedBarGraph';
 import Header from './Header';
+import ReportsTable from './ReportsTable';
 import { SavedGraphMenuButton } from './SavedGraphs';
 import defaultSpreadsheet from './spreadsheets/default-spreadsheet';
 import useReport from './useReport';
@@ -185,6 +188,14 @@ export default function Custom() {
           start={start}
           end={end}
           graphData={data.graphData}
+        />
+      );
+    }
+    if (graphType === 'TableGraph') {
+      return (
+        <ReportsTable
+          data={data.graphData}
+          style={{ border: '1px solid ' + theme.tableBorder }}
         />
       );
     }
@@ -428,24 +439,49 @@ export default function Custom() {
         <View
           style={{
             flexGrow: 1,
-            padding: 10,
           }}
         >
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              marginTop: -20,
-              flexGrow: 1,
+              padding: 10,
+              paddingTop: 0,
             }}
           >
-            <Button type="bare" onClick={() => {}}>
+            <Button
+              type="bare"
+              onClick={() => {
+                selectGraph('TableGraph');
+              }}
+            >
+              <InboxFull width={15} height={15} />
+            </Button>
+            <Button
+              type="bare"
+              onClick={() => {
+                selectGraph('AreaGraph');
+              }}
+              style={{ marginLeft: 15 }}
+            >
               <Chart width={15} height={15} />
             </Button>
-            <Button type="bare" onClick={() => {}} style={{ marginLeft: 15 }}>
+            <Button
+              type="bare"
+              onClick={() => {
+                selectGraph('BarGraph');
+              }}
+              style={{ marginLeft: 15 }}
+            >
               <ChartBar width={15} height={15} />
             </Button>
-            <Button type="bare" onClick={() => {}} style={{ marginLeft: 15 }}>
+            <Button
+              type="bare"
+              onClick={() => {
+                selectGraph(DonutGraph);
+              }}
+              style={{ marginLeft: 15 }}
+            >
               <ChartPie width={15} height={15} />
             </Button>
             <View
@@ -457,10 +493,37 @@ export default function Custom() {
                 flexShrink: 0,
               }}
             />
-            <Button type="bare" onClick={() => {}} style={{ marginLeft: 15 }}>
+            <Button
+              type="bare"
+              onClick={() => {}}
+              style={{ marginLeft: 15 }}
+              title="Show Legend"
+            >
               <ListBullet width={15} height={15} />
             </Button>
-            <Button type="bare" onClick={() => {}} style={{ marginLeft: 15 }}>
+            <Button
+              type="bare"
+              onClick={() => {}}
+              style={{ marginLeft: 15 }}
+              title="Show Summary"
+            >
+              <Calculator width={15} height={15} />
+            </Button>
+            <View
+              style={{
+                width: 1,
+                height: 30,
+                backgroundColor: theme.altPillBorder,
+                marginLeft: 20,
+                flexShrink: 0,
+              }}
+            />
+            <Button
+              type="bare"
+              onClick={() => {}}
+              style={{ marginLeft: 15 }}
+              title="Filters"
+            >
               <Filter width={15} height={15} />
             </Button>
             <View style={{ flex: 1 }} />
