@@ -261,7 +261,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         q('transactions')
           .filter({ schedule: state.schedule.id })
           .select('*')
-          .options({ splits: 'all' }),
+          .options({ splits: 'none' }),
         data => dispatch({ type: 'set-transactions', transactions: data }),
       );
       return live.unsubscribe;
@@ -303,7 +303,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
             q('transactions')
               .filter({ $and: filters })
               .select('*')
-              .options({ splits: 'all' }),
+              .options({ splits: 'none' }),
             data => dispatch({ type: 'set-transactions', transactions: data }),
           );
           unsubscribe = live.unsubscribe;
