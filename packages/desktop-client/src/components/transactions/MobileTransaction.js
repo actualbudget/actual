@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useState,
   useRef,
+  memo,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
@@ -162,46 +163,50 @@ function Status({ status }) {
 }
 
 const LEFT_RIGHT_FLEX_WIDTH = 70;
-class TransactionEditInner extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      transactions: props.transactions,
-      editingChild: null,
-    };
-  }
+const TransactionEditInner = memo(function TransactionEditInner(props) {
+  const [transactions, setTransactions] = useState(props.transactions);
+  const [editingChild, setEditingChild] = useState(null);
+  const amountRef = useRef();
+  const _queuedChange = useRef();
 
-  serializeTransactions = memoizeOne(transactions => {
-    return transactions.map(t =>
-      serializeTransaction(t, this.props.dateFormat),
-    );
+  useEffect(() => {
+    amountRef.current?.focus();
+    return () => {
+      document
+        .querySelector('meta[name="theme-color"]')
+        .setAttribute('content', '#ffffff');
+    };
+  }, []);
+
+  const serializeTransactions = memoizeOne(transactions => {
+    return transactions.map(t => serializeTransaction(t, props.dateFormat));
   });
 
-  componentDidMount() {
-    if (this.props.adding) {
-      this.amount.focus();
+  // const openChildEdit = child => {
+  //   setEditingChild(child.id);
+  // };
+
+  const onEdit = async (transaction, name, value) => {
+    let newTransaction = { ...transaction, [name]: value };
+    if (props.onEdit) {
+      newTransaction = await props.onEdit(newTransaction);
     }
-  }
 
-  componentWillUnmount() {
-    document
-      .querySelector('meta[name="theme-color"]')
-      .setAttribute('content', '#ffffff');
-  }
+    let { data: newTransactions } = updateTransaction(
+      transactions,
+      deserializeTransaction(newTransaction, null, props.dateFormat),
+    );
 
-  openChildEdit = child => {
-    this.setState({ editingChild: child.id });
+    _queuedChange.current = null;
+    setTransactions(newTransactions);
+    return newTransactions;
   };
 
-  onAdd = () => {
-    this.onSave();
-  };
-
-  onSave = async () => {
-    let { transactions } = this.state;
-    const [transaction, ..._childTransactions] = transactions;
+  const onSave = async () => {
+    let transactionsToSave = transactions;
+    const [transaction, ..._childTransactions] = transactionsToSave;
     const { account: accountId } = transaction;
-    let account = getAccountsById(this.props.accounts)[accountId];
+    let account = getAccountsById(props.accounts)[accountId];
 
     if (transactions.find(t => t.account == null)) {
       // Ignore transactions if any of them don't have an account
@@ -213,202 +218,182 @@ class TransactionEditInner extends PureComponent {
     // the user saves while editing an input. We won't have the
     // updated value so we "apply" a queued change. Maybe there's a
     // better way to do this (lift the state?)
-    if (this._queuedChange) {
-      let [transaction, name, value] = this._queuedChange;
-      transactions = await this.onEdit(transaction, name, value);
+    if (_queuedChange.current) {
+      let [transaction, name, value] = _queuedChange.current;
+      transactionsToSave = await onEdit(transaction, name, value);
     }
 
-    if (this.props.adding) {
-      transactions = realizeTempTransactions(transactions);
+    if (props.adding) {
+      transactionsToSave = realizeTempTransactions(transactions);
     }
 
-    this.props.onSave(transactions);
-    this.props.navigate(`/accounts/${account.id}`, { replace: true });
+    props.onSave(transactionsToSave);
+    props.navigate(`/accounts/${account.id}`, { replace: true });
   };
 
-  onSaveChild = childTransaction => {
-    this.setState({ editingChild: null });
+  const onAdd = () => {
+    onSave();
   };
 
-  onEdit = async (transaction, name, value) => {
-    let { transactions } = this.state;
-
-    let newTransaction = { ...transaction, [name]: value };
-    if (this.props.onEdit) {
-      newTransaction = await this.props.onEdit(newTransaction);
-    }
-
-    let { data: newTransactions } = updateTransaction(
-      transactions,
-      deserializeTransaction(newTransaction, null, this.props.dateFormat),
-    );
-
-    this._queuedChange = null;
-    this.setState({ transactions: newTransactions });
-    return newTransactions;
+  const onSaveChild = childTransaction => {
+    setEditingChild(null);
   };
 
-  onQueueChange = (transaction, name, value) => {
+  const onQueueChange = (transaction, name, value) => {
     // This is an ugly hack to solve the problem that input's blur
     // events are not fired when unmounting. If the user has focused
     // an input and swipes back, it should still save, but because the
     // blur event is not fired we need to manually track the latest
     // change and apply it ourselves when unmounting
-    this._queuedChange = [transaction, name, value];
+    _queuedChange.current = [transaction, name, value];
   };
 
-  onClick = (transactionId, name) => {
-    let { dateFormat } = this.props;
+  const onClick = (transactionId, name) => {
+    let { dateFormat } = props;
 
-    this.props.pushModal('edit-field', {
+    props.pushModal('edit-field', {
       name,
       onSubmit: (name, value) => {
-        let { transactions } = this.state;
         let transaction = transactions.find(t => t.id === transactionId);
         // This is a deficiency of this API, need to fix. It
         // assumes that it receives a serialized transaction,
         // but we only have access to the raw transaction
-        this.onEdit(serializeTransaction(transaction, dateFormat), name, value);
+        onEdit(serializeTransaction(transaction, dateFormat), name, value);
       },
     });
   };
 
-  onDelete = () => {
-    this.props.onDelete();
+  const onDelete = () => {
+    props.onDelete();
 
-    const { transactions } = this.state;
     const [transaction, ..._childTransactions] = transactions;
     const { account: accountId } = transaction;
     if (accountId) {
-      this.props.navigate(`/accounts/${accountId}`, { replace: true });
+      props.navigate(`/accounts/${accountId}`, { replace: true });
     } else {
-      this.props.navigate(-1);
+      props.navigate(-1);
     }
   };
 
-  render() {
-    const { adding, categories, accounts, payees, renderChildEdit, navigate } =
-      this.props;
-    const { editingChild } = this.state;
-    const transactions = this.serializeTransactions(
-      this.state.transactions || [],
-    );
-    const [transaction, ..._childTransactions] = transactions;
-    const { payee: payeeId, category, account: accountId } = transaction;
+  const { adding, categories, accounts, payees, renderChildEdit, navigate } =
+    props;
+  const serializedTransactions = serializeTransactions(transactions || []);
+  const [transaction, ..._childTransactions] = serializedTransactions;
+  const { payee: payeeId, category, account: accountId } = transaction;
 
-    // Child transactions should always default to the signage
-    // of the parent transaction
-    let forcedSign = transaction.amount < 0 ? 'negative' : 'positive';
+  // Child transactions should always default to the signage
+  // of the parent transaction
+  let forcedSign = transaction.amount < 0 ? 'negative' : 'positive';
 
-    let account = getAccountsById(accounts)[accountId];
-    let payee = payees && payeeId && getPayeesById(payees)[payeeId];
-    let transferAcct =
-      payee &&
-      payee.transfer_acct &&
-      getAccountsById(accounts)[payee.transfer_acct];
+  let account = getAccountsById(accounts)[accountId];
+  let payee = payees && payeeId && getPayeesById(payees)[payeeId];
+  let transferAcct =
+    payee &&
+    payee.transfer_acct &&
+    getAccountsById(accounts)[payee.transfer_acct];
 
-    let descriptionPretty = getDescriptionPretty(
-      transaction,
-      payee,
-      transferAcct,
-    );
+  let descriptionPretty = getDescriptionPretty(
+    transaction,
+    payee,
+    transferAcct,
+  );
 
-    const transactionDate = parseDate(
-      transaction.date,
-      this.props.dateFormat,
-      new Date(),
-    );
-    const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
+  const transactionDate = parseDate(
+    transaction.date,
+    props.dateFormat,
+    new Date(),
+  );
+  const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
 
-    return (
-      // <KeyboardAvoidingView>
+  return (
+    // <KeyboardAvoidingView>
+    <View
+      style={{
+        margin: 10,
+        marginTop: 3,
+        backgroundColor: theme.tableHeaderBackground,
+        flex: 1,
+        borderRadius: 4,
+
+        // This shadow make the card "pop" off of the screen below
+        // it
+        shadowColor: theme.cardShadow,
+        shadowOffset: { width: 0, height: 0 },
+        shadowRadius: 4,
+        shadowOpacity: 1,
+      }}
+    >
       <View
         style={{
-          margin: 10,
-          marginTop: 3,
-          backgroundColor: theme.tableHeaderBackground,
-          flex: 1,
           borderRadius: 4,
-
-          // This shadow make the card "pop" off of the screen below
-          // it
-          shadowColor: theme.cardShadow,
-          shadowOffset: { width: 0, height: 0 },
-          shadowRadius: 4,
-          shadowOpacity: 1,
+          overflow: 'hidden',
+          display: 'flex',
+          flex: 'auto',
         }}
       >
         <View
           style={{
-            borderRadius: 4,
-            overflow: 'hidden',
-            display: 'flex',
-            flex: 'auto',
+            borderBottomWidth: 1,
+            borderColor: theme.tableBorder,
+            backgroundColor: theme.tableBackground,
+            alignItems: 'center',
+            flexDirection: 'row',
+            flexShrink: 0,
+            justifyContent: 'space-between',
+            width: '100%',
+            padding: 10,
           }}
         >
-          <View
+          <Link
+            to={-1}
             style={{
-              borderBottomWidth: 1,
-              borderColor: theme.tableBorder,
-              backgroundColor: theme.tableBackground,
               alignItems: 'center',
-              flexDirection: 'row',
-              flexShrink: 0,
-              justifyContent: 'space-between',
-              width: '100%',
-              padding: 10,
+              display: 'flex',
+              textDecoration: 'none',
+              width: LEFT_RIGHT_FLEX_WIDTH,
             }}
           >
-            <Link
-              to={-1}
+            <CheveronLeft
               style={{
-                alignItems: 'center',
-                display: 'flex',
-                textDecoration: 'none',
-                width: LEFT_RIGHT_FLEX_WIDTH,
-              }}
-            >
-              <CheveronLeft
-                style={{
-                  color: theme.formLabelText,
-                  width: 32,
-                  height: 32,
-                }}
-              />
-              <Text
-                style={{
-                  ...styles.text,
-                  color: theme.formLabelText,
-                  fontWeight: 500,
-                }}
-              >
-                Back
-              </Text>
-            </Link>
-            <TextOneLine
-              style={{
-                color: theme.formInputText,
-                fontSize: 15,
-                fontWeight: 600,
-                userSelect: 'none',
-              }}
-              role="heading"
-            >
-              {payeeId == null
-                ? adding
-                  ? 'New Transaction'
-                  : 'Transaction'
-                : descriptionPretty}
-            </TextOneLine>
-            {/* For centering the transaction title */}
-            <View
-              style={{
-                width: LEFT_RIGHT_FLEX_WIDTH,
+                color: theme.formLabelText,
+                width: 32,
+                height: 32,
               }}
             />
-          </View>
+            <Text
+              style={{
+                ...styles.text,
+                color: theme.formLabelText,
+                fontWeight: 500,
+              }}
+            >
+              Back
+            </Text>
+          </Link>
+          <TextOneLine
+            style={{
+              color: theme.formInputText,
+              fontSize: 15,
+              fontWeight: 600,
+              userSelect: 'none',
+            }}
+            role="heading"
+          >
+            {payeeId == null
+              ? adding
+                ? 'New Transaction'
+                : 'Transaction'
+              : descriptionPretty}
+          </TextOneLine>
+          {/* For centering the transaction title */}
+          <View
+            style={{
+              width: LEFT_RIGHT_FLEX_WIDTH,
+            }}
+          />
+        </View>
 
-          {/* <ScrollView
+        {/* <ScrollView
             ref={el => (this.scrollView = el)}
             automaticallyAdjustContentInsets={false}
             keyboardShouldPersistTaps="always"
@@ -418,56 +403,53 @@ class TransactionEditInner extends PureComponent {
             }}
             contentContainerStyle={{ flexGrow: 1 }}
           > */}
+        <View
+          style={{
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            display: 'block',
+          }}
+        >
           <View
             style={{
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              display: 'block',
+              alignItems: 'center',
+              marginTop: 20,
             }}
           >
-            <View
-              style={{
-                alignItems: 'center',
-                marginTop: 20,
+            <FieldLabel
+              title="Amount"
+              flush
+              style={{ marginBottom: 0, paddingLeft: 0 }}
+            />
+            <FocusableAmountInput
+              ref={amountRef}
+              value={transaction.amount}
+              zeroIsNegative={true}
+              onBlur={value => onEdit(transaction, 'amount', value.toString())}
+              onChange={value => onQueueChange(transaction, 'amount', value)}
+              style={{ transform: [] }}
+              focusedStyle={{
+                width: 'auto',
+                padding: '5px',
+                paddingLeft: '20px',
+                paddingRight: '20px',
+                minWidth: 120,
+                transform: [{ translateY: -0.5 }],
               }}
-            >
-              <FieldLabel
-                title="Amount"
-                flush
-                style={{ marginBottom: 0, paddingLeft: 0 }}
-              />
-              <FocusableAmountInput
-                ref={el => (this.amount = el)}
-                value={transaction.amount}
-                zeroIsNegative={true}
-                onBlur={value =>
-                  this.onEdit(transaction, 'amount', value.toString())
-                }
-                onChange={value =>
-                  this.onQueueChange(transaction, 'amount', value)
-                }
-                style={{ transform: [] }}
-                focusedStyle={{
-                  width: 'auto',
-                  padding: '5px',
-                  paddingLeft: '20px',
-                  paddingRight: '20px',
-                  minWidth: 120,
-                  transform: [{ translateY: -0.5 }],
-                }}
-                textStyle={{ fontSize: 30, textAlign: 'center' }}
-              />
-            </View>
+              textStyle={{ fontSize: 30, textAlign: 'center' }}
+            />
+          </View>
 
-            <View>
-              <FieldLabel title="Payee" />
-              <TapField
-                value={descriptionPretty}
-                onClick={() => this.onClick(transaction.id, 'payee')}
-                data-testid="payee-field"
-              />
-            </View>
+          <View>
+            <FieldLabel title="Payee" />
+            <TapField
+              value={descriptionPretty}
+              onClick={() => onClick(transaction.id, 'payee')}
+              data-testid="payee-field"
+            />
+          </View>
 
+          <View>
             <View>
               <FieldLabel
                 title={
@@ -610,22 +592,78 @@ class TransactionEditInner extends PureComponent {
             )}
           </View>
 
-          <View
-            style={{
-              paddingLeft: styles.mobileEditingPadding,
-              paddingRight: styles.mobileEditingPadding,
-              paddingTop: 15,
-              paddingBottom: 15,
-              backgroundColor: theme.tableHeaderBackground,
-              borderTopWidth: 1,
-              borderColor: theme.tableBorder,
-              marginTop: 'auto',
-              flexShrink: 0,
-            }}
-          >
-            {adding ? (
-              <Button onClick={() => this.onAdd()}>
-                <SvgAdd
+          <View>
+            <FieldLabel title="Account" />
+            <TapField
+              disabled={!adding}
+              value={account ? account.name : null}
+              onClick={() => onClick(transaction.id, 'account')}
+              data-testid="account-field"
+            />
+          </View>
+
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ flex: 1 }}>
+              <FieldLabel title="Date" />
+              <InputField
+                type="date"
+                required
+                style={{ color: 'canvastext', minWidth: '150px' }}
+                defaultValue={dateDefaultValue}
+                onUpdate={value =>
+                  onEdit(
+                    transaction,
+                    'date',
+                    formatDate(parseISO(value), props.dateFormat),
+                  )
+                }
+                onChange={e =>
+                  onQueueChange(
+                    transaction,
+                    'date',
+                    formatDate(parseISO(e.target.value), props.dateFormat),
+                  )
+                }
+              />
+            </View>
+
+            <View style={{ marginLeft: 35, marginRight: 35 }}>
+              <FieldLabel title="Cleared" />
+              <BooleanField
+                checked={transaction.cleared}
+                onUpdate={checked => onEdit(transaction, 'cleared', checked)}
+                style={{ marginTop: 4 }}
+              />
+            </View>
+          </View>
+
+          <View>
+            <FieldLabel title="Notes" />
+            <InputField
+              defaultValue={transaction.notes}
+              onUpdate={value => onEdit(transaction, 'notes', value)}
+              onChange={e =>
+                onQueueChange(transaction, 'notes', e.target.value)
+              }
+            />
+          </View>
+
+          {!adding && (
+            <View style={{ alignItems: 'center' }}>
+              <Button
+                onClick={() => onDelete()}
+                style={{
+                  borderWidth: 0,
+                  paddingVertical: 5,
+                  marginLeft: styles.mobileEditingPadding,
+                  marginRight: styles.mobileEditingPadding,
+                  marginTop: 20,
+                  marginBottom: 15,
+                  backgroundColor: 'transparent',
+                }}
+                type="bare"
+              >
+                <SvgTrash
                   width={17}
                   height={17}
                   style={{ color: theme.formLabelText }}
@@ -635,52 +673,86 @@ class TransactionEditInner extends PureComponent {
                     ...styles.text,
                     color: theme.formLabelText,
                     marginLeft: 5,
+                    userSelect: 'none',
                   }}
                 >
-                  Add transaction
+                  Delete transaction
                 </Text>
               </Button>
-            ) : (
-              <Button onClick={() => this.onSave()}>
-                <SvgPencilWriteAlternate
-                  style={{ width: 16, height: 16, color: theme.formInputText }}
-                />
-                <Text
-                  style={{
-                    ...styles.text,
-                    marginLeft: 6,
-                    color: theme.formInputText,
-                  }}
-                >
-                  Save changes
-                </Text>
-              </Button>
-            )}
-          </View>
+            </View>
+          )}
+        </View>
 
-          {/* <ExitTransition
+        <View
+          style={{
+            paddingLeft: styles.mobileEditingPadding,
+            paddingRight: styles.mobileEditingPadding,
+            paddingTop: 15,
+            paddingBottom: 15,
+            backgroundColor: theme.tableHeaderBackground,
+            borderTopWidth: 1,
+            borderColor: theme.tableBorder,
+            marginTop: 'auto',
+            flexShrink: 0,
+          }}
+        >
+          {adding ? (
+            <Button onClick={() => onAdd()}>
+              <SvgAdd
+                width={17}
+                height={17}
+                style={{ color: theme.altFormLabelText }}
+              />
+              <Text
+                style={{
+                  ...styles.text,
+                  color: theme.altFormLabelText,
+                  marginLeft: 5,
+                }}
+              >
+                Add transaction
+              </Text>
+            </Button>
+          ) : (
+            <Button onClick={() => onSave()}>
+              <SvgPencilWriteAlternate
+                style={{ width: 16, height: 16, color: theme.formInputText }}
+              />
+              <Text
+                style={{
+                  ...styles.text,
+                  marginLeft: 6,
+                  color: theme.formInputText,
+                }}
+              >
+                Save changes
+              </Text>
+            </Button>
+          )}
+        </View>
+
+        {/* <ExitTransition
             alive={editingChild}
             withProps={{
               transaction:
                 editingChild && transactions.find(t => t.id === editingChild),
             }}
           > */}
-          {renderChildEdit({
-            transaction:
-              editingChild && transactions.find(t => t.id === editingChild),
-            amountSign: forcedSign,
-            getCategoryName: id => (id ? lookupName(categories, id) : null),
-            navigate: navigate,
-            onEdit: this.onEdit,
-            onStartClose: this.onSaveChild,
-          })}
-          {/* </ExitTransition> */}
-        </View>
+        {renderChildEdit({
+          transaction:
+            editingChild && transactions.find(t => t.id === editingChild),
+          amountSign: forcedSign,
+          getCategoryName: id => (id ? lookupName(categories, id) : null),
+          navigate: navigate,
+          onEdit: onEdit,
+          onStartClose: onSaveChild,
+        })}
+        {/* </ExitTransition> */}
       </View>
-      // </KeyboardAvoidingView>
-    );
-  }
-}
+    </View>
+    // </KeyboardAvoidingView>
+  );
+});
 
 function isTemporary(transaction) {
   return transaction.id.indexOf('temp') === 0;
