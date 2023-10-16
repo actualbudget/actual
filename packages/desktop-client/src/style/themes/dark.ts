@@ -24,7 +24,7 @@ export const cardBorder = colorPalette.purple400;
 export const cardShadow = colorPalette.navy700;
 
 export const tableBackground = colorPalette.navy800;
-export const altTableBackground = tableBackground;
+export const altTableBackground = colorPalette.navy700;
 export const alt2TableBackground = tableBackground;
 export const tableRowBackgroundHover = colorPalette.navy700;
 export const tableText = colorPalette.navy150;
