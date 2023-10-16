@@ -170,7 +170,12 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
   const _queuedChange = useRef();
 
   useEffect(() => {
-    amountRef.current?.focus();
+    if (props.adding) {
+      amountRef.current?.focus();
+    }
+  }, [props.adding]);
+
+  useEffect(() => {
     return () => {
       document
         .querySelector('meta[name="theme-color"]')
