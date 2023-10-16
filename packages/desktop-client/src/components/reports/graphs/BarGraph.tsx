@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import React from 'react';
 
 import { css } from 'glamor';
@@ -14,6 +15,7 @@ import {
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
+import PrivacyFilter from '../../PrivacyFilter';
 import Container from '../Container';
 
 type BarGraphProps = {
@@ -76,12 +78,14 @@ function BarGraph({ style, graphData, compact, domain }: BarGraphProps) {
               <strong>{payload[0].payload.date}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
-              <AlignedText left="Assets:" right={payload[0].payload.assets} />
-              <AlignedText left="Debt:" right={payload[0].payload.debt} />
-              <AlignedText
-                left="Change:"
-                right={<strong>{payload[0].payload.change}</strong>}
-              />
+              <PrivacyFilter>
+                <AlignedText left="Assets:" right={payload[0].payload.assets} />
+                <AlignedText left="Debt:" right={payload[0].payload.debt} />
+                <AlignedText
+                  left="Change:"
+                  right={<strong>{payload[0].payload.change}</strong>}
+                />
+              </PrivacyFilter>
             </div>
           </div>
         </div>
