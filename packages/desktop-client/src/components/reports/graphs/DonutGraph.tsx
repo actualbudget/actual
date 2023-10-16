@@ -1,23 +1,14 @@
 import React from 'react';
 
 import { css } from 'glamor';
-import {
-  ComposedChart,
-  Line,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { PieChart, Pie, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import Container from '../Container';
 
-type BarLineGraphProps = {
+type DonutGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
@@ -34,16 +25,7 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function BarLineGraph({
-  style,
-  graphData,
-  compact,
-  domain,
-}: BarLineGraphProps) {
-  const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
-  };
-
+function DonutGraph({ style, graphData, compact, domain }: DonutGraphProps) {
   type PayloadItem = {
     payload: {
       date: string;
@@ -107,23 +89,21 @@ function BarLineGraph({
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
-              <ComposedChart
-                width={width}
-                height={height}
-                data={graphData.data}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-              >
+              <PieChart width={width} height={height}>
+                <Pie
+                  dataKey="y"
+                  nameKey="x"
+                  isAnimationActive={false}
+                  data={graphData.data}
+                  outerRadius={80}
+                  fill="#8884d8"
+                />
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis dataKey="y" tickFormatter={tickFormatter} />
-                <Bar type="monotone" dataKey="y" fill="#8884d8" />
-                <Line type="monotone" dataKey="y" stroke="#8884d8" />
-              </ComposedChart>
+              </PieChart>
             </div>
           </ResponsiveContainer>
         )
@@ -132,4 +112,4 @@ function BarLineGraph({
   );
 }
 
-export default BarLineGraph;
+export default DonutGraph;
