@@ -216,13 +216,8 @@ function Budget(props) {
         }),
       );
     } else {
-      const cat = {
-        ...category,
-        hidden: category.hidden ? 1 : 0,
-      };
-
-      props.updateCategory(cat);
-      setCategoryGroups(state => updateCategory(state, cat));
+      props.updateCategory(category);
+      setCategoryGroups(state => updateCategory(state, category));
     }
   };
 
@@ -260,13 +255,8 @@ function Budget(props) {
         }),
       );
     } else {
-      const grp = {
-        ...group,
-        hidden: group.hidden ? 1 : 0,
-      };
-
-      props.updateGroup(grp);
-      setCategoryGroups(state => updateGroup(state, grp));
+      props.updateGroup(group);
+      setCategoryGroups(state => updateGroup(state, group));
     }
   };
 
