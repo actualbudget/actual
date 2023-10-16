@@ -696,9 +696,7 @@ class AccountInternal extends PureComponent {
   lockTransactions = async () => {
     this.setState({ workingHard: true });
 
-    let {
-      accountId,
-    } = this.props;
+    let { accountId } = this.props;
 
     let { data } = await runQuery(
       q('transactions')
@@ -726,12 +724,10 @@ class AccountInternal extends PureComponent {
 
     await send('transactions-batch-update', changes);
     await this.refetchTransactions();
-  }
+  };
 
   onReconcile = async balance => {
-    let {
-      accountId,
-    } = this.props;
+    let { accountId } = this.props;
 
     let { data } = await runQuery(
       q('transactions')
@@ -875,7 +871,7 @@ class AccountInternal extends PureComponent {
           },
           confirmReason: 'batchEditWithReconciled',
         });
-        return
+        return;
       }
     }
 
@@ -912,7 +908,7 @@ class AccountInternal extends PureComponent {
       await send('transactions-batch-update', changes);
 
       await this.refetchTransactions();
-    }
+    };
 
     let { data } = await runQuery(
       q('transactions')
@@ -977,7 +973,7 @@ class AccountInternal extends PureComponent {
 
       await send('transactions-batch-update', changes);
       await this.refetchTransactions();
-    }
+    };
 
     let { data } = await runQuery(
       q('transactions')

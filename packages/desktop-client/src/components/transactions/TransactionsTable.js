@@ -411,7 +411,8 @@ function StatusCell({
   onEdit,
   onUpdate,
 }) {
-  let isClearedField = status === 'cleared' || status === 'reconciled' || status == null;
+  let isClearedField =
+    status === 'cleared' || status === 'reconciled' || status == null;
   let statusProps = getStatusProps(status);
 
   let statusColor =
@@ -712,7 +713,6 @@ const Transaction = memo(function Transaction(props) {
     onToggleSplit,
     onNavigateToTransferAccount,
     onNavigateToSchedule,
-    pushModal,
   } = props;
 
   let dispatchSelected = useSelectedDispatch();
@@ -746,7 +746,10 @@ const Transaction = memo(function Transaction(props) {
     // of the cell all have different implications as well.
 
     if (transaction[name] !== value) {
-      if (transaction.reconciled === true && (name === 'credit' || name === 'debit' || name === 'payee')) {
+      if (
+        transaction.reconciled === true &&
+        (name === 'credit' || name === 'debit' || name === 'payee')
+      ) {
         if (reconciledWarningShowing === false) {
           reconciledWarningShowing = true;
           props.pushModal('confirm-transaction-edit', {
@@ -1314,7 +1317,15 @@ const Transaction = memo(function Transaction(props) {
           focused={focusedField === 'cleared'}
           selected={selected}
           isPreview={isPreview}
-          status={isPreview ? notes : reconciled === true? 'reconciled' : cleared ? 'cleared' : null}
+          status={
+            isPreview
+              ? notes
+              : reconciled === true
+              ? 'reconciled'
+              : cleared
+              ? 'cleared'
+              : null
+          }
           isChild={isChild}
           onEdit={onEdit}
           onUpdate={onUpdate}
@@ -1625,7 +1636,6 @@ function TransactionTableInner({
           onToggleSplit={props.onToggleSplit}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
-          pushModal={props.pushModal}
         />
       </>
     );

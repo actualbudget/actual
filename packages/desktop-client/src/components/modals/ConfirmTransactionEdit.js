@@ -1,10 +1,6 @@
-import React, { useState } from 'react';
-
-import { colors } from '../../style';
 import Block from '../common/Block';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
-import Text from '../common/Text';
 import View from '../common/View';
 
 export default function ConfirmTransactionEdit({
@@ -16,31 +12,33 @@ export default function ConfirmTransactionEdit({
     <Modal title="Reconciled Transaction" {...modalProps} style={{ flex: 0 }}>
       {() => (
         <View style={{ lineHeight: 1.5 }}>
-
           {confirmReason === 'batchDeleteWithReconciled' ? (
             <Block>
-              Deleting reconciled transactions may bring your reconciliation out of balance.
+              Deleting reconciled transactions may bring your reconciliation out
+              of balance.
             </Block>
           ) : confirmReason === 'batchEditWithReconciled' ? (
             <Block>
-              Editing reconciled transactions may bring your reconciliation out of balance.
+              Editing reconciled transactions may bring your reconciliation out
+              of balance.
             </Block>
           ) : confirmReason === 'batchDuplicateWithReconciled' ? (
             <Block>
-              Duplicating reconciled transactions may bring your reconciliation out of balance.
+              Duplicating reconciled transactions may bring your reconciliation
+              out of balance.
             </Block>
           ) : confirmReason === 'editReconciled' ? (
             <Block>
-              Saving your changes to this reconciled transaction may bring your reconciliation out of balance.
+              Saving your changes to this reconciled transaction may bring your
+              reconciliation out of balance.
             </Block>
           ) : confirmReason === 'deleteReconciled' ? (
             <Block>
-              Deleting this reconciled transaction may bring your reconciliation out of balance.
+              Deleting this reconciled transaction may bring your reconciliation
+              out of balance.
             </Block>
           ) : (
-            <Block>
-              Are you sure you want to edit this transaction?
-            </Block>
+            <Block>Are you sure you want to edit this transaction?</Block>
           )}
 
           <View

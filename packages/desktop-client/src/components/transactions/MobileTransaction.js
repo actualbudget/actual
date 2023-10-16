@@ -246,13 +246,13 @@ class TransactionEditInner extends PureComponent {
 
       this.props.onSave(transactions);
       this.props.navigate(`/accounts/${account.id}`, { replace: true });
-    }
+    };
 
     const { transactions } = this.state;
     const [transaction, ..._childTransactions] = transactions;
 
     if (transaction.reconciled) {
-      // On mobile any save gives the warning. 
+      // On mobile any save gives the warning.
       // On the web only certain changes trigger a warning.
       // Should we bring that here as well? Or does the nature of the editing form
       // make this more appropriate?
@@ -326,7 +326,7 @@ class TransactionEditInner extends PureComponent {
       } else {
         this.props.navigate(-1);
       }
-    }
+    };
 
     const { transactions } = this.state;
     const [transaction, ..._childTransactions] = transactions;
