@@ -5,7 +5,6 @@ import React, {
   useEffect,
   useState,
   useRef,
-  memo,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
