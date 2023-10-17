@@ -281,6 +281,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   };
 
   let listItemRef = useRef();
+  let inputRef = useRef();
 
   let content = (
     <ListItem
@@ -300,6 +301,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
             focused={isEditing}
+            inputRef={inputRef}
             rightContent={
               <Button
                 type="bare"
@@ -325,7 +327,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
               position="bottom-stretch"
               offset={1}
               style={{ padding: 0 }}
-              onClose={tooltip.close}
+              onClose={() => {
+                tooltip.close();
+                inputRef.current?.focus();
+              }}
             >
               <Menu
                 onMenuSelect={onMenuSelect}
@@ -506,6 +511,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   };
 
   let listItemRef = useRef();
+  let inputRef = useRef();
 
   let content = (
     <ListItem
@@ -522,6 +528,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
             focused={isEditing}
+            inputRef={inputRef}
             rightContent={
               <Button
                 type="bare"
@@ -547,7 +554,10 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
               position="bottom-stretch"
               offset={1}
               style={{ padding: 0 }}
-              onClose={tooltip.close}
+              onClose={() => {
+                tooltip.close();
+                inputRef.current?.focus();
+              }}
             >
               <Menu
                 onMenuSelect={onMenuSelect}
@@ -727,6 +737,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   };
 
   let listItemRef = useRef();
+  let inputRef = useRef();
 
   return (
     <ListItem
@@ -744,6 +755,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
             focused={isEditing}
+            inputRef={inputRef}
             rightContent={
               <Button
                 type="bare"
@@ -769,7 +781,10 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
               position="bottom-stretch"
               offset={1}
               style={{ padding: 0 }}
-              onClose={tooltip.close}
+              onClose={() => {
+                tooltip.close();
+                inputRef.current?.focus();
+              }}
             >
               <Menu
                 onMenuSelect={onMenuSelect}
@@ -889,6 +904,7 @@ const IncomeCategory = memo(function IncomeCategory({
   };
 
   let listItemRef = useRef();
+  let inputRef = useRef();
 
   return (
     <ListItem
@@ -906,6 +922,7 @@ const IncomeCategory = memo(function IncomeCategory({
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <InputWithContent
             focused={isEditing}
+            inputRef={inputRef}
             rightContent={
               <Button
                 type="bare"
@@ -931,7 +948,10 @@ const IncomeCategory = memo(function IncomeCategory({
               position="bottom-stretch"
               offset={1}
               style={{ padding: 0 }}
-              onClose={tooltip.close}
+              onClose={() => {
+                tooltip.close();
+                inputRef.current?.focus();
+              }}
             >
               <Menu
                 onMenuSelect={onMenuSelect}
@@ -1364,9 +1384,15 @@ export function BudgetTable(props) {
   }
 
   function onEdit(type, id) {
-    setEditingGroupId(type === 'group' ? id : null);
-    setEditingCategoryId(type === 'category' ? id : null);
-    setEditingBudgetCategoryId(type === 'category-budget' ? id : null);
+    // Do not allow editing if another field is currently being edited.
+    // Cancel the currently editing field in that case.
+    const editingId =
+      editingGroupId || editingCategoryId || editingBudgetCategoryId
+        ? null
+        : id;
+    setEditingGroupId(type === 'group' ? editingId : null);
+    setEditingCategoryId(type === 'category' ? editingId : null);
+    setEditingBudgetCategoryId(type === 'category-budget' ? editingId : null);
   }
 
   const { width } = useResponsive();
