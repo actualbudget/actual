@@ -13,7 +13,6 @@ export function ReportSummary({
   end,
   totalExpenses,
   totalIncome,
-  onSelectSummary,
   selectType,
 }) {
   let amt =
@@ -97,7 +96,7 @@ export function ReportSummary({
   );
 }
 
-export function ReportSplit({ onSelectSplit }) {
+export function ReportSplit() {
   return (
     <View
       style={{

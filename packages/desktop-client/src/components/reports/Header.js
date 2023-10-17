@@ -10,8 +10,6 @@ import Select from '../common/Select';
 import View from '../common/View';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
-import { SavedGraphMenuButton } from './SavedGraphs';
-
 function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
   if (end < start) {
@@ -123,7 +121,7 @@ function Header({
             />
           </View>
 
-          {filters && <FilterButton onApply={onApply} />}
+          {filters && <FilterButton onApply={onApply} type="accounts" />}
 
           {show1Month && (
             <Button

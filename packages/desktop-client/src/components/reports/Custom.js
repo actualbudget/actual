@@ -13,7 +13,6 @@ import Calculator from '../../icons/v1/Calculator';
 import Chart from '../../icons/v1/Chart';
 import ChartBar from '../../icons/v1/ChartBar';
 import ChartPie from '../../icons/v1/ChartPie';
-import Filter from '../../icons/v1/Filter';
 import InboxFull from '../../icons/v1/InboxFull';
 import ListBullet from '../../icons/v1/ListBullet';
 import { theme, styles } from '../../style';
@@ -21,6 +20,7 @@ import Button from '../common/Button';
 import Select from '../common/Select';
 import Text from '../common/Text';
 import View from '../common/View';
+import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
@@ -38,6 +38,45 @@ import defaultSpreadsheet from './spreadsheets/default-spreadsheet';
 import useReport from './useReport';
 import { fromDateRepr } from './util';
 
+function validateStart(allMonths, start, end) {
+  const earliest = allMonths[allMonths.length - 1].name;
+  if (end < start) {
+    end = monthUtils.addMonths(start, 6);
+  }
+  return boundedRange(earliest, start, end);
+}
+
+function validateEnd(allMonths, start, end) {
+  const earliest = allMonths[allMonths.length - 1].name;
+  if (start > end) {
+    start = monthUtils.subMonths(end, 6);
+  }
+  return boundedRange(earliest, start, end);
+}
+
+function boundedRange(earliest, start, end) {
+  const latest = monthUtils.currentMonth();
+  if (end > latest) {
+    end = latest;
+  }
+  if (start < earliest) {
+    start = earliest;
+  }
+  return [start, end];
+}
+
+function getLatestRange(offset) {
+  const end = monthUtils.currentMonth();
+  const start = monthUtils.subMonths(end, offset);
+  return [start, end];
+}
+
+function getFullRange(allMonths) {
+  const start = allMonths[allMonths.length - 1].name;
+  const end = monthUtils.currentMonth();
+  return [start, end];
+}
+
 export default function Custom() {
   const categories = useCategories();
   const [selectedCategories, setSelectedCategories] = useState(null);
@@ -50,7 +89,6 @@ export default function Custom() {
   let accounts = useSelector(state => state.queries.accounts);
   const {
     filters,
-    saved,
     conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
@@ -66,7 +104,7 @@ export default function Custom() {
 
   const [split, setSplit] = useState(1);
   const [type, setType] = useState(1);
-  const [dateRange, setDateRange] = useState(6);
+  const [dateRange, setDateRange] = useState(2);
   const [mode, setMode] = useState('time');
   const [graphType, setGraphType] = useState('AreaGraph');
   const [viewSplit, setViewSplit] = useState(false);
@@ -278,11 +316,11 @@ export default function Custom() {
   ];
 
   const dateRangeOptions = [
-    { value: 1, description: '1 month' },
-    { value: 3, description: '3 months' },
-    { value: 6, description: '6 months' },
-    { value: 12, description: '1 year' },
-    { value: -1, description: 'All time' },
+    { value: 0, description: '1 month', name: 1 },
+    { value: 1, description: '3 months', name: 2 },
+    { value: 2, description: '6 months', name: 5 },
+    { value: 3, description: '1 year', name: 11 },
+    { value: 4, description: 'All time', name: allMonths },
   ];
   const dateRangeLine = dateRangeOptions.length - 1;
 
@@ -293,14 +331,6 @@ export default function Custom() {
         allMonths={allMonths}
         start={start}
         end={end}
-        onChangeDates={onChangeDates}
-        filters={filters}
-        saved={saved}
-        onApply={onApplyFilter}
-        onUpdateFilter={onUpdateFilter}
-        onDeleteFilter={onDeleteFilter}
-        conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
       />
       <View
         style={{
@@ -330,7 +360,7 @@ export default function Custom() {
               alignItems: 'center',
             }}
           >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
               Mode:
             </Text>
             <ModeButton
@@ -353,7 +383,7 @@ export default function Custom() {
               alignItems: 'center',
             }}
           >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
               Split:
             </Text>
             <Select
@@ -372,7 +402,7 @@ export default function Custom() {
               alignItems: 'center',
             }}
           >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
               Type:
             </Text>
             <Select
@@ -411,12 +441,19 @@ export default function Custom() {
               alignItems: 'center',
             }}
           >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
               Range:
             </Text>
             <Select
               value={dateRange}
-              onChange={setDateRange}
+              onChange={e => {
+                setDateRange(dateRangeOptions[e].value);
+                if (e === 4) {
+                  onChangeDates(...getFullRange(allMonths));
+                } else {
+                  onChangeDates(...getLatestRange(dateRangeOptions[e].name));
+                }
+              }}
               options={dateRangeOptions.map(option => [
                 option.value,
                 option.description,
@@ -431,10 +468,13 @@ export default function Custom() {
               alignItems: 'center',
             }}
           >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
               From:
             </Text>
             <Select
+              onChange={newValue =>
+                onChangeDates(...validateStart(allMonths, newValue, end))
+              }
               value={start}
               defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
@@ -447,10 +487,13 @@ export default function Custom() {
               alignItems: 'center',
             }}
           >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
               To:
             </Text>
             <Select
+              onChange={newValue =>
+                onChangeDates(...validateEnd(allMonths, start, newValue))
+              }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
             />
@@ -465,14 +508,12 @@ export default function Custom() {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              padding: 10,
-              paddingTop: 0,
+              marginBottom: 10,
             }}
           >
             <GraphButton
               selected={graphType === 'TableGraph'}
               onSelect={() => onChangeGraph('TableGraph')}
-              style={{ marginLeft: 15 }}
             >
               <InboxFull width={15} height={15} />
             </GraphButton>
@@ -535,17 +576,27 @@ export default function Custom() {
                 flexShrink: 0,
               }}
             />
-            <Button
-              type="bare"
-              onClick={() => {}}
-              style={{ marginLeft: 15 }}
-              title="Filters"
-            >
-              <Filter width={15} height={15} />
-            </Button>
+            <FilterButton onApply={onApplyFilter} type="reports" />
             <View style={{ flex: 1 }} />
             <SavedGraphMenuButton />
           </View>
+          {filters && filters.length > 0 && (
+            <View
+              style={{ marginBottom: 10, marginLeft: 5 }}
+              spacing={2}
+              direction="row"
+              justify="flex-start"
+              align="flex-start"
+            >
+              <AppliedFilters
+                filters={filters}
+                onUpdate={onUpdateFilter}
+                onDelete={onDeleteFilter}
+                conditionsOp={conditionsOp}
+                onCondOpChange={onCondOpChange}
+              />
+            </View>
+          )}
           <View
             style={{
               backgroundColor: theme.tableBackground,

@@ -306,7 +306,6 @@ export function SavedGraphMenuButton({ selectGraph }) {
     >
       <Button
         type="bare"
-        style={{ marginTop: 10 }}
         onClick={() => {
           setDataMenuOpen(true);
         }}

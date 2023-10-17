@@ -10,7 +10,8 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import useCategories from '../../hooks/useCategories';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import { theme, styles } from '../../style';
-import { Table, Row, Field, Cell } from '../table';
+import View from '../common/View';
+import { Row, Field, Cell } from '../table';
 import DisplayId from '../util/DisplayId';
 
 const ReportRow = memo(function ReportRow({
@@ -117,81 +118,39 @@ export default function ReportsTable({
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
-  let memoFields = useMemo(() => fields, [JSON.stringify(fields)]);
-
-  let renderItem = useCallback(
-    ({ item }) => {
-      return (
-        <ReportRow
-          transaction={item}
-          payees={payees}
-          categories={categories}
-          accounts={accounts}
-          fields={memoFields}
-        />
-      );
-    },
-    [payees, categories, memoFields],
-  );
 
   return (
-    <Table
-      style={style}
-      items={data}
-      /*renderEmpty={renderEmpty}*/
-      headers={
-        <>
-          {fields.map((field, i) => {
-            switch (field) {
-              case 'date':
-                return (
-                  <Field key={i} width={100}>
-                    Date
-                  </Field>
-                );
-              case 'imported_payee':
-                return (
-                  <Field key={i} width="flex">
-                    Imported payee
-                  </Field>
-                );
-              case 'payee':
-                return (
-                  <Field key={i} width="flex">
-                    Payee
-                  </Field>
-                );
-              case 'category':
-                return (
-                  <Field key={i} width="flex">
-                    Category
-                  </Field>
-                );
-              case 'account':
-                return (
-                  <Field key={i} width="flex">
-                    Account
-                  </Field>
-                );
-              case 'notes':
-                return (
-                  <Field key={i} width="flex">
-                    Notes
-                  </Field>
-                );
-              case 'amount':
-                return (
-                  <Field key={i} width={75} style={{ textAlign: 'right' }}>
-                    Amount
-                  </Field>
-                );
-              default:
-                return null;
-            }
-          })}
-        </>
-      }
-      renderItem={renderItem}
-    />
+    <View
+      style={{
+        borderRadius: '6px 6px 0 0',
+        overflow: 'hidden',
+        flexShrink: 0,
+      }}
+    >
+      <Row
+        collapsed={true}
+        style={{
+          color: theme.tableHeaderText,
+          backgroundColor: theme.tableHeaderBackground,
+          zIndex: 200,
+          fontWeight: 500,
+        }}
+      >
+        {data.data.map(header => {
+          return <Cell key={header.x} value={header.x} width="flex" />;
+        })}
+      </Row>
+      <Row
+        collapsed={true}
+        style={{
+          color: theme.tableText,
+          backgroundColor: theme.tableBackground,
+        }}
+      >
+        {data.data.map(field => {
+          return <Cell key={field.y} value={field.y} width="flex" />;
+        })}
+      </Row>
+    </View>
   );
 }
