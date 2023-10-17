@@ -51,6 +51,7 @@ function ToBudget({ toBudget, onClick }) {
           ...styles.underlinedText,
           color: theme.formInputText,
           flexShrink: 0,
+          textAlign: 'left',
         }}
       />
       <CellValue
@@ -79,18 +80,17 @@ function Saved({ projected }) {
       style={{
         flexDirection: 'column',
         alignItems: 'flex-start',
-        flexBasis: '80px',
       }}
     >
       {projected ? (
         <Label
           title="PROJECTED SAVINGS"
-          style={{ color: theme.formInputText }}
+          style={{ color: theme.formInputText, textAlign: 'left' }}
         />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: theme.formInputText }}
+          style={{ color: theme.formInputText, textAlign: 'left' }}
         />
       )}
 
@@ -142,7 +142,7 @@ function BudgetCell({
           initialValue={sheetValue}
           zeroSign="+"
           style={{
-            height: ROW_HEIGHT - 4,
+            height: ROW_HEIGHT,
             transform: 'translateX(6px)',
           }}
           focused={isEditing}
@@ -155,7 +155,8 @@ function BudgetCell({
           role="button"
           style={{
             justifyContent: 'center',
-            height: ROW_HEIGHT - 4,
+            alignItems: 'flex-end',
+            height: ROW_HEIGHT,
           }}
           onPointerUp={onAmountClick}
         >
@@ -303,6 +304,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
           ...(!showEditables && { display: 'none' }),
           flexDirection: 'row',
           flex: 1,
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: ROW_HEIGHT,
         }}
       >
         <InputWithContent
@@ -363,9 +367,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
           style={{
             ...styles.smallText,
             ...styles.underlinedText,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            ...styles.lineClamp(2),
           }}
           data-testid="category-name"
         >
@@ -375,6 +377,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       <View
         style={{
           ...(showEditables && { display: 'none' }),
+          justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'row',
           opacity,
@@ -394,49 +397,63 @@ const ExpenseCategory = memo(function ExpenseCategory({
           isEditing={isEditingBudget}
           onEdit={onEditBudget}
         />
-        <CellValue
-          name="spent"
-          binding={spent}
+        <View
           style={{
             ...(!show3Cols && showBudgetedCol && { display: 'none' }),
-            ...styles.smallText,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
             width: 90,
-            textAlign: 'right',
+            height: ROW_HEIGHT,
           }}
-          getStyle={makeAmountGrey}
-          type="financial"
-        />
-        <View
-          role="button"
-          style={{ ...styles.noTapHighlight, width: 90 }}
-          {...balanceTooltip.getOpenEvents()}
         >
-          <BalanceWithCarryover
-            carryover={rolloverBudget.catCarryover(category.id)}
-            balance={rolloverBudget.catBalance(category.id)}
-            balanceStyle={{
+          <CellValue
+            name="spent"
+            binding={spent}
+            style={{
               ...styles.smallText,
-              ...styles.underlinedText,
+              textAlign: 'right',
             }}
+            getStyle={makeAmountGrey}
+            type="financial"
           />
-          {balanceTooltip.isOpen && (
-            <BalanceTooltip
-              offset={5}
-              categoryId={category.id}
-              tooltip={balanceTooltip}
-              monthIndex={monthUtils.getMonthIndex(month)}
-              onBudgetAction={(monthIndex, action, arg) => {
-                onBudgetAction?.(
-                  monthUtils.getMonthFromIndex(
-                    monthUtils.getYear(month),
-                    monthIndex,
-                  ),
-                  action,
-                  arg,
-                );
+        </View>
+        <View
+          style={{
+            ...styles.noTapHighlight,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            width: 90,
+            height: ROW_HEIGHT,
+          }}
+        >
+          <span role="button" {...balanceTooltip.getOpenEvents()}>
+            <BalanceWithCarryover
+              carryover={rolloverBudget.catCarryover(category.id)}
+              balance={rolloverBudget.catBalance(category.id)}
+              balanceStyle={{
+                ...styles.smallText,
+                ...styles.underlinedText,
               }}
             />
-          )}
+            {balanceTooltip.isOpen && (
+              <BalanceTooltip
+                offset={5}
+                categoryId={category.id}
+                tooltip={balanceTooltip}
+                monthIndex={monthUtils.getMonthIndex(month)}
+                onBudgetAction={(monthIndex, action, arg) => {
+                  onBudgetAction?.(
+                    monthUtils.getMonthFromIndex(
+                      monthUtils.getYear(month),
+                      monthIndex,
+                    ),
+                    action,
+                    arg,
+                  );
+                }}
+              />
+            )}
+          </span>
         </View>
       </View>
     </ListItem>
@@ -554,6 +571,9 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           ...(!showEditables && { display: 'none' }),
           flexDirection: 'row',
           flex: 1,
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: ROW_HEIGHT,
         }}
       >
         <InputWithContent
@@ -619,10 +639,8 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           style={{
             ...styles.smallText,
             ...styles.underlinedText,
+            ...styles.lineClamp(2),
             fontWeight: '500',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
           }}
           data-testid="name"
         >
@@ -633,42 +651,68 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         style={{
           ...(showEditables && { display: 'none' }),
           flexDirection: 'row',
+          justifyContent: 'center',
           alignItems: 'center',
+          height: ROW_HEIGHT,
           opacity,
         }}
       >
-        <CellValue
-          binding={rolloverBudget.groupBudgeted(group.id)}
+        <View
           style={{
             ...(!show3Cols && !showBudgetedCol && { display: 'none' }),
-            ...styles.smallText,
             width: 90,
-            fontWeight: '500',
-            textAlign: 'right',
+            height: ROW_HEIGHT,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
           }}
-          type="financial"
-        />
-        <CellValue
-          binding={rolloverBudget.groupSumAmount(group.id)}
+        >
+          <CellValue
+            binding={rolloverBudget.groupBudgeted(group.id)}
+            style={{
+              ...styles.smallText,
+              fontWeight: '500',
+              textAlign: 'right',
+            }}
+            type="financial"
+          />
+        </View>
+        <View
           style={{
             ...(!show3Cols && showBudgetedCol && { display: 'none' }),
-            ...styles.smallText,
             width: 90,
-            fontWeight: '500',
-            textAlign: 'right',
+            height: ROW_HEIGHT,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
           }}
-          type="financial"
-        />
-        <CellValue
-          binding={rolloverBudget.groupBalance(group.id)}
+        >
+          <CellValue
+            binding={rolloverBudget.groupSumAmount(group.id)}
+            style={{
+              ...styles.smallText,
+              fontWeight: '500',
+              textAlign: 'right',
+            }}
+            type="financial"
+          />
+        </View>
+        <View
           style={{
-            ...styles.smallText,
             width: 90,
-            fontWeight: '500',
-            textAlign: 'right',
+            height: ROW_HEIGHT,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
           }}
-          type="financial"
-        />
+        >
+          <CellValue
+            binding={rolloverBudget.groupBalance(group.id)}
+            style={{
+              ...styles.smallText,
+              fontWeight: '500',
+              textAlign: 'right',
+            }}
+            type="financial"
+          />
+        </View>
       </View>
 
       {/* {editMode && (
@@ -707,8 +751,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   budget,
   balance,
   style,
-  nameTextStyle,
-  amountTextStyle,
   onAddCategory,
   onSave,
   onDelete,
@@ -781,6 +823,9 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           ...(!showEditables && { display: 'none' }),
           flexDirection: 'row',
           flex: 1,
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: ROW_HEIGHT,
         }}
       >
         <InputWithContent
@@ -842,10 +887,11 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         onPointerUp={() => onEdit?.(group.id)}
       >
         <Text
-          tabIndex={-1}
           style={{
             ...styles.smallText,
-            ...nameTextStyle,
+            ...styles.underlinedText,
+            ...styles.lineClamp(2),
+            fontWeight: '500',
           }}
           data-testid="name"
         >
@@ -853,29 +899,44 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         </Text>
       </View>
       {budget && (
+        <View
+          tyle={{
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            width: 90,
+            height: ROW_HEIGHT,
+          }}
+        >
+          <CellValue
+            binding={budget}
+            style={{
+              ...styles.smallText,
+              textAlign: 'right',
+              fontWeight: '500',
+            }}
+            type="financial"
+          />
+        </View>
+      )}
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          width: 90,
+          height: ROW_HEIGHT,
+        }}
+      >
         <CellValue
-          binding={budget}
+          binding={balance}
           style={{
             ...(showEditables && { display: 'none' }),
             ...styles.smallText,
             textAlign: 'right',
-            ...amountTextStyle,
-            flex: 1,
+            fontWeight: '500',
           }}
           type="financial"
         />
-      )}
-      <CellValue
-        binding={balance}
-        style={{
-          ...(showEditables && { display: 'none' }),
-          ...styles.smallText,
-          textAlign: 'right',
-          ...amountTextStyle,
-          flex: 1,
-        }}
-        type="financial"
-      />
+      </View>
     </ListItem>
   );
 });
@@ -885,8 +946,6 @@ const IncomeCategory = memo(function IncomeCategory({
   budget,
   balance,
   style,
-  nameTextStyle,
-  amountTextStyle,
   onSave,
   onDelete,
   editMode,
@@ -955,6 +1014,9 @@ const IncomeCategory = memo(function IncomeCategory({
           ...(!showEditables && { display: 'none' }),
           flexDirection: 'row',
           flex: 1,
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: ROW_HEIGHT,
         }}
       >
         <InputWithContent
@@ -1015,8 +1077,8 @@ const IncomeCategory = memo(function IncomeCategory({
           tabIndex={-1}
           style={{
             ...styles.smallText,
-            ...nameTextStyle,
             ...styles.underlinedText,
+            ...styles.lineClamp(2),
           }}
           data-testid="name"
         >
@@ -1024,29 +1086,42 @@ const IncomeCategory = memo(function IncomeCategory({
         </Text>
       </View>
       {budget && (
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            width: 90,
+            height: ROW_HEIGHT,
+          }}
+        >
+          <CellValue
+            binding={budget}
+            style={{
+              ...styles.smallText,
+              textAlign: 'right',
+            }}
+            type="financial"
+          />
+        </View>
+      )}
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          width: 90,
+          height: ROW_HEIGHT,
+        }}
+      >
         <CellValue
-          binding={budget}
+          binding={balance}
           style={{
             ...(showEditables && { display: 'none' }),
             ...styles.smallText,
             textAlign: 'right',
-            ...amountTextStyle,
-            flex: 1,
           }}
           type="financial"
         />
-      )}
-      <CellValue
-        binding={balance}
-        style={{
-          ...(showEditables && { display: 'none' }),
-          ...styles.smallText,
-          textAlign: 'right',
-          ...amountTextStyle,
-          flex: 1,
-        }}
-        type="financial"
-      />
+      </View>
     </ListItem>
   );
 });
@@ -1237,8 +1312,6 @@ function IncomeGroup({
               ? reportBudget.groupSumAmount(group.id)
               : rolloverBudget.groupSumAmount(group.id)
           }
-          nameTextStyle={{ fontWeight: '500', ...styles.underlinedText }}
-          amountTextStyle={{ fontWeight: '500' }}
           style={{
             backgroundColor: theme.altTableBackground,
           }}
@@ -1510,25 +1583,29 @@ export function BudgetTable(props) {
             />
           )}
           <View style={{ flex: 1 }} />
-          <Button
-            type="bare"
-            disabled={show3Cols}
-            onClick={toggleDisplay}
-            style={{
-              ...buttonStyle,
-              padding: '0 8px',
-              margin: '0 -8px',
-              background:
-                showBudgetedCol && !show3Cols
-                  ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
-                  : !show3Cols
-                  ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
-                  : null,
-              // 45deg to flip it to the lower left corner
-            }}
-          >
-            {show3Cols || showBudgetedCol ? (
-              <View style={{ width: 90, justifyContent: 'center' }}>
+          {(show3Cols || showBudgetedCol) && (
+            <Button
+              type="bare"
+              disabled={show3Cols}
+              onClick={toggleDisplay}
+              style={{
+                ...buttonStyle,
+                padding: '0 8px',
+                margin: '0 -8px',
+                background:
+                  showBudgetedCol && !show3Cols
+                    ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
+                    : null,
+              }}
+            >
+              <View
+                style={{
+                  flexBasis: 90,
+                  width: 90,
+                  justifyContent: 'center',
+                  alignItems: 'flex-end',
+                }}
+              >
                 <Label
                   title="BUDGETED"
                   style={{ color: theme.buttonNormalText }}
@@ -1547,12 +1624,26 @@ export function BudgetTable(props) {
                   }}
                 />
               </View>
-            ) : null}
-            {show3Cols || !showBudgetedCol ? (
+            </Button>
+          )}
+          {(show3Cols || !showBudgetedCol) && (
+            <Button
+              type="bare"
+              disabled={show3Cols}
+              onClick={toggleDisplay}
+              style={{
+                ...buttonStyle,
+                background:
+                  !showBudgetedCol && !show3Cols
+                    ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
+                    : null,
+              }}
+            >
               <View
                 style={{
                   width: 90,
                   justifyContent: 'center',
+                  alignItems: 'flex-end',
                 }}
               >
                 <Label title="SPENT" style={{ color: theme.formInputText }} />
@@ -1567,12 +1658,13 @@ export function BudgetTable(props) {
                   }}
                 />
               </View>
-            ) : null}
-          </Button>
+            </Button>
+          )}
           <View
             style={{
               width: 90,
               justifyContent: 'center',
+              alignItems: 'flex-end',
             }}
           >
             <Label title="BALANCE" style={{ color: theme.formInputText }} />
