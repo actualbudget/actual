@@ -111,18 +111,33 @@ export function TapField({
 }
 
 export function BooleanField({ checked, onUpdate, style, disabled = 'false' }) {
-  return (
-    <input
-      disabled={disabled}
-      type="checkbox"
-      checked={checked}
-      onChange={e => onUpdate(e.target.checked)}
-      className={`${css([
-        {
-          marginInline: styles.mobileEditingPadding,
-        },
-        style,
-      ])}`}
-    />
-  );
+  if (disabled === 'true') {
+    return (
+      <input
+        disabled="disabled"
+        type="checkbox"
+        checked={checked}
+        className={`${css([
+          {
+            marginInline: styles.mobileEditingPadding,
+          },
+          style,
+        ])}`}
+      />
+    );
+  } else {
+    return (
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={e => onUpdate(e.target.checked)}
+        className={`${css([
+          {
+            marginInline: styles.mobileEditingPadding,
+          },
+          style,
+        ])}`}
+      />
+    );
+  }
 }
