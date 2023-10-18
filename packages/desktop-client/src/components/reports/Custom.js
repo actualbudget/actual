@@ -652,12 +652,24 @@ export default function Custom() {
                       <ReportSummary
                         start={start}
                         end={end}
-                        totalExpenses={10000}
-                        totalIncome={5000}
-                        selectType={'NET'}
+                        totalExpenses={data.totalDebts}
+                        totalIncome={data.totalAssets}
+                        totalNet={data.totalTotals}
+                        selectType={
+                          typeOptions.find(opt => opt.value === type)
+                            .description
+                        }
                       />
                     )}
-                    {viewSplit && <ReportSplit />}
+                    {viewSplit && (
+                      <ReportSplit
+                        data={data}
+                        splitType={
+                          splitOptions.find(opt => opt.value === split)
+                            .description
+                        }
+                      />
+                    )}
                   </View>
                 </View>
               )}

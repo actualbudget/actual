@@ -13,6 +13,7 @@ export function ReportSummary({
   end,
   totalExpenses,
   totalIncome,
+  totalNet,
   selectType,
 }) {
   let amt =
@@ -20,7 +21,7 @@ export function ReportSummary({
       ? totalExpenses
       : selectType === 'Income'
       ? totalIncome
-      : totalExpenses + totalIncome;
+      : totalNet;
   let net = totalExpenses > totalIncome ? 'EXPENSE' : 'INCOME';
   return (
     <View
@@ -86,9 +87,7 @@ export function ReportSummary({
             },
           ]}
         >
-          <PrivacyFilter blurIntensity={7}>
-            {integerToCurrency(amt)}
-          </PrivacyFilter>
+          <PrivacyFilter blurIntensity={7}>{amt}</PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>For this time period</Text>
       </View>
@@ -96,17 +95,18 @@ export function ReportSummary({
   );
 }
 
-export function ReportSplit() {
+export function ReportSplit({ data, splitType }) {
   return (
     <View
       style={{
         backgroundColor: theme.pageBackground,
         paddingTop: 10,
+        paddingBottom: 10,
         alignItems: 'center',
         marginTop: 10,
       }}
     >
-      <Text //thinking of using this space for a VictoryLegend if needed
+      <Text
         style={[
           styles.largeText,
           {
@@ -116,8 +116,11 @@ export function ReportSplit() {
           },
         ]}
       >
-        Categories
+        {splitType}
       </Text>
+      {data.data.map(item => {
+        return <Text>{item.name}</Text>;
+      })}
     </View>
   );
 }

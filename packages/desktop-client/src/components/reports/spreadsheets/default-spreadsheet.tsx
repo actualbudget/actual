@@ -105,6 +105,9 @@ export default function createSpreadsheet(
     );
 
     const months = monthUtils.rangeInclusive(start, end);
+    let totalAssets = 0;
+    let totalDebts = 0;
+    let totalTotals = 0;
     const monthData = await Promise.all(
       months.map(async month => {
         let perMonthAssets = 0;
@@ -120,6 +123,10 @@ export default function createSpreadsheet(
             perMonthTotals = perMonthAssets - perMonthDebts;
           }
         });
+        totalAssets += perMonthAssets;
+        totalDebts += perMonthDebts;
+        totalTotals += perMonthTotals;
+
         return {
           totalDebts: `-${integerToCurrency(perMonthDebts)}`,
           totalAssets: integerToCurrency(perMonthAssets),
@@ -135,6 +142,12 @@ export default function createSpreadsheet(
       [split]: splitItem,
       data,
       monthData,
+      totalDebts: `-${integerToCurrency(totalDebts)}`,
+      totalAssets: integerToCurrency(totalAssets),
+      totalTotals:
+        totalAssets >= totalDebts
+          ? integerToCurrency(totalTotals)
+          : `-${integerToCurrency(totalTotals)}`,
     });
   };
 }
