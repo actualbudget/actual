@@ -79,14 +79,15 @@ function getFullRange(allMonths) {
 
 export default function Custom() {
   const categories = useCategories();
-  const [selectedCategories, setSelectedCategories] = useState(null);
-  useEffect(() => {
-    if (selectedCategories === null && categories.list.length !== 0) {
-      setSelectedCategories(categories.list);
-    }
-  }, [categories, selectedCategories]);
 
-  let accounts = useSelector(state => state.queries.accounts);
+  let { payees, accounts, dateFormat } = useSelector(state => {
+    return {
+      payees: state.queries.payees,
+      accounts: state.queries.accounts,
+      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
+    };
+  });
+
   const {
     filters,
     conditionsOp,
@@ -106,36 +107,23 @@ export default function Custom() {
   const [type, setType] = useState(1);
   const [dateRange, setDateRange] = useState(2);
   const [mode, setMode] = useState('time');
-  const [graphType, setGraphType] = useState('AreaGraph');
+  const [graphType, setGraphType] = useState('TableGraph');
   const [viewSplit, setViewSplit] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
 
+  const months = monthUtils.rangeInclusive(start, end);
   const getGraphData = useMemo(() => {
     return defaultSpreadsheet(
       start,
       end,
+      categories,
+      payees,
       accounts,
       filters,
       conditionsOp,
-      (categories.list || []).filter(
-        category =>
-          !category.is_income &&
-          !category.hidden &&
-          selectedCategories &&
-          selectedCategories.some(
-            selectedCategory => selectedCategory.id === category.id,
-          ),
-      ),
+      split,
     );
-  }, [
-    start,
-    end,
-    accounts,
-    filters,
-    conditionsOp,
-    categories,
-    selectedCategories,
-  ]);
+  }, [start, end, categories, payees, accounts, filters, conditionsOp, split]);
   const data = useReport('default', getGraphData);
 
   useEffect(() => {
@@ -174,7 +162,7 @@ export default function Custom() {
           style={{ flexGrow: 1 }}
           start={start}
           end={end}
-          graphData={data.graphData}
+          graphData={data}
         />
       );
     }
@@ -224,15 +212,18 @@ export default function Custom() {
           style={{ flexGrow: 1 }}
           start={start}
           end={end}
-          graphData={data.graphData}
+          graphData={data}
         />
       );
     }
     if (graphType === 'TableGraph') {
       return (
         <ReportsTable
-          data={data.graphData}
+          data={data}
           style={{ border: '1px solid ' + theme.tableBorder }}
+          months={months}
+          type={type}
+          split={splitOptions.find(opt => opt.value === split).description}
         />
       );
     }
@@ -603,29 +594,31 @@ export default function Custom() {
               flexGrow: 1,
             }}
           >
-            <View
-              style={{
-                textAlign: 'right',
-                paddingTop: 10,
-                paddingRight: 20,
-                flexShrink: 0,
-              }}
-            >
+            {graphType !== 'TableGraph' && (
               <View
                 style={{
-                  ...styles.largeText,
-                  fontWeight: 400,
-                  marginBottom: 5,
+                  textAlign: 'right',
+                  paddingTop: 10,
+                  paddingRight: 20,
+                  flexShrink: 0,
                 }}
               >
-                <PrivacyFilter blurIntensity={5}>
-                  {integerToCurrency(data.netWorth)}
+                <View
+                  style={{
+                    ...styles.largeText,
+                    fontWeight: 400,
+                    marginBottom: 5,
+                  }}
+                >
+                  <PrivacyFilter blurIntensity={5}>
+                    {integerToCurrency(0)}
+                  </PrivacyFilter>
+                </View>
+                <PrivacyFilter>
+                  <Change amount={0} />
                 </PrivacyFilter>
               </View>
-              <PrivacyFilter>
-                <Change amount={data.totalChange} />
-              </PrivacyFilter>
-            </View>
+            )}
             <View
               style={{
                 flexDirection: 'row',

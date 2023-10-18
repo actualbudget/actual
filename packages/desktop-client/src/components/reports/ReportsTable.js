@@ -1,116 +1,11 @@
-import React, { memo, useMemo, useCallback } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 
-import {
-  getAccountsById,
-  getCategoriesById,
-} from 'loot-core/src/client/reducers/queries';
-import { integerToCurrency } from 'loot-core/src/shared/util';
-
-import useCategories from '../../hooks/useCategories';
-import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
-import { theme, styles } from '../../style';
+import { theme } from '../../style';
 import View from '../common/View';
 import { Row, Field, Cell } from '../table';
-import DisplayId from '../util/DisplayId';
 
-const ReportRow = memo(function ReportRow({
-  transaction,
-  fields,
-  payees,
-  categories,
-  accounts,
-}) {
-  // TODO: Convert these to use fetched queries
-  let c = getCategoriesById(categories)[transaction.category];
-  let a = getAccountsById(accounts)[transaction.account];
-
-  return (
-    <Row style={{ color: theme.tableText }}>
-      {fields.map((field, i) => {
-        switch (field) {
-          case 'date':
-            return (
-              <Field key={i} width={100}>
-                {transaction.date}
-              </Field>
-            );
-          case 'imported_payee':
-            return (
-              <Field key={i} width="flex">
-                {transaction.imported_payee}
-              </Field>
-            );
-          case 'payee':
-            return (
-              <Cell
-                key={i}
-                width="flex"
-                exposed={true}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                }}
-              >
-                {() => (
-                  <>
-                    {transaction.schedule && (
-                      <ArrowsSynchronize
-                        style={{
-                          width: 13,
-                          height: 13,
-                          margin: '0 5px',
-                        }}
-                      />
-                    )}
-                    <DisplayId type="payees" id={transaction.payee} />
-                  </>
-                )}
-              </Cell>
-            );
-          case 'category':
-            return (
-              <Field key={i} width="flex" title={c && c.name}>
-                {c ? c.name : ''}
-              </Field>
-            );
-          case 'account':
-            return (
-              <Field key={i} width="flex" title={a.name}>
-                {a.name}
-              </Field>
-            );
-          case 'notes':
-            return (
-              <Field key={i} width="flex" title={transaction.notes}>
-                {transaction.notes}
-              </Field>
-            );
-          case 'amount':
-            return (
-              <Field
-                key={i}
-                width={75}
-                style={{ textAlign: 'right', ...styles.tnum }}
-              >
-                {integerToCurrency(transaction.amount)}
-              </Field>
-            );
-          default:
-            return null;
-        }
-      })}
-    </Row>
-  );
-});
-
-export default function ReportsTable({
-  data,
-  fields = ['date', 'payee', 'amount'],
-  style,
-}) {
-  let { grouped: categories } = useCategories();
+export default function ReportsTable({ data, months, style, type, split }) {
   let { payees, accounts, dateFormat } = useSelector(state => {
     return {
       payees: state.queries.payees,
@@ -118,6 +13,25 @@ export default function ReportsTable({
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
+
+  let typeItem;
+  let totalItem;
+
+  switch (type) {
+    case 1:
+      typeItem = 'debts';
+      totalItem = 'totalDebts';
+      break;
+    case 2:
+      typeItem = 'assets';
+      totalItem = 'totalAssets';
+      break;
+    case 3:
+      typeItem = 'y';
+      totalItem = 'totalTotals';
+      break;
+    default:
+  }
 
   return (
     <View
@@ -136,20 +50,55 @@ export default function ReportsTable({
           fontWeight: 500,
         }}
       >
-        {data.data.map(header => {
-          return <Cell key={header.x} value={header.x} width="flex" />;
+        <Cell value={split} width="flex" />
+        {months.map(header => {
+          return <Cell key={header} value={header} width="flex" />;
         })}
+        <Cell value={'Totals'} width="flex" />
       </Row>
+      {data.data.map(item => {
+        return (
+          <Row
+            collapsed={true}
+            style={{
+              color: theme.tableText,
+              backgroundColor: theme.tableBackground,
+            }}
+          >
+            <Cell value={item.name} width="flex" />
+            {item.graphData.data.map(field => {
+              return (
+                <Cell
+                  key={field[typeItem]}
+                  value={field[typeItem]}
+                  width="flex"
+                />
+              );
+            })}
+            <Cell value={item[totalItem]} width="flex" />
+          </Row>
+        );
+      })}
       <Row
         collapsed={true}
         style={{
           color: theme.tableText,
           backgroundColor: theme.tableBackground,
+          zIndex: 200,
+          fontWeight: 500,
         }}
       >
-        {data.data.map(field => {
-          return <Cell key={field.y} value={field.y} width="flex" />;
+        <Cell value={'Totals'} width="flex" />
+        {data.monthData.map(header => {
+          return (
+            <Cell
+              key={header[totalItem]}
+              value={header[totalItem]}
+              width="flex"
+            />
+          );
         })}
+        <Cell width="flex" />
       </Row>
     </View>
   );

@@ -24,6 +24,7 @@ export function masterDataSpreadsheet(
 ) {
   return async (spreadsheet, setData) => {
     function makeCategoryQuery(where) {
+      //Totals
       let query = q('transactions').filter({
         $and: [
           { date: { $transform: '$month', $gte: start } },
@@ -42,11 +43,14 @@ export function masterDataSpreadsheet(
         ],
       });
 
+      //add filter
       if (filt.length > 0) {
         query = query.filter({
           $and: [...filt],
         });
       }
+
+      //return totals grouped by category
       return query
         .groupBy('category.name')
         .select([
@@ -55,7 +59,9 @@ export function masterDataSpreadsheet(
         ]);
     }
 
+    //Group by Date
     function makeDateQuery(where) {
+      //Totals
       let query = q('transactions').filter({
         $and: [
           { date: { $transform: '$month', $gte: start } },
@@ -74,12 +80,14 @@ export function masterDataSpreadsheet(
         ],
       });
 
+      //add filter
       if (filt.length > 0) {
         query = query.filter({
           $and: [...filt],
         });
       }
 
+      //isConcise
       if (isConcise) {
         return query
           .groupBy({ $month: '$date' })
@@ -89,6 +97,7 @@ export function masterDataSpreadsheet(
           ]);
       }
 
+      //return total grouped by date
       return query
         .groupBy('date')
         .select(['date', { amount: { $sum: '$amount' } }]);
@@ -103,9 +112,9 @@ export function masterDataSpreadsheet(
               reportPage !== 'NetWorth' && { 'account.offbudget': false },
             ],
           })
-          .calculate({ $sum: '$amount' }),
-        makeDateQuery('amount > 0').filter({ amount: { $gt: 0 } }),
-        makeDateQuery('amount < 0').filter({ amount: { $lt: 0 } }),
+          .calculate({ $sum: '$amount' }), //Date Balance
+        makeDateQuery('amount > 0').filter({ amount: { $gt: 0 } }), //incomeDate
+        makeDateQuery('amount < 0').filter({ amount: { $lt: 0 } }), //expenseDate
         q('transactions')
           .filter({
             $and: [
@@ -114,7 +123,7 @@ export function masterDataSpreadsheet(
               reportPage !== 'NetWorth' && { 'account.offbudget': false },
             ],
           })
-          .calculate({ $sum: '$amount' }),
+          .calculate({ $sum: '$amount' }), //Starting Assets
         q('transactions')
           .filter({
             $and: [
@@ -123,9 +132,9 @@ export function masterDataSpreadsheet(
               reportPage !== 'NetWorth' && { 'account.offbudget': false },
             ],
           })
-          .calculate({ $sum: '$amount' }),
-        makeCategoryQuery('amount > 0').filter({ amount: { $gt: 0 } }),
-        makeCategoryQuery('amount < 0').filter({ amount: { $lt: 0 } }),
+          .calculate({ $sum: '$amount' }), //Starting Debts
+        makeCategoryQuery('amount > 0').filter({ amount: { $gt: 0 } }), //incomeCategory
+        makeCategoryQuery('amount < 0').filter({ amount: { $lt: 0 } }), //expenseCategory
       ],
       data => {
         setData(
