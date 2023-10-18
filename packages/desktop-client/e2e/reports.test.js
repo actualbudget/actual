@@ -34,7 +34,7 @@ test.describe('Reports', () => {
     expect(reports).toEqual(['Net Worth', 'Cash Flow']);
     await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
-  
+
   test('loads net worth graph and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
     await expect(page).toHaveScreenshot(screenshotConfig(page));
