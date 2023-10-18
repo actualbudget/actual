@@ -32,6 +32,7 @@ import Link from './common/Link';
 import Paragraph from './common/Paragraph';
 import Text from './common/Text';
 import View from './common/View';
+import { KeyHandlers } from './KeyHandlers';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar';
@@ -164,7 +165,7 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         syncState === 'offline' ||
         syncState === 'local'
       ? theme.altTableText
-      : null;
+      : 'inherit';
 
   const activeStyle = isMobile
     ? {
@@ -173,30 +174,40 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     : {};
 
   return (
-    <Button
-      type="bare"
-      style={{
-        ...style,
-        WebkitAppRegion: 'none',
-        color: isMobile ? mobileColor : desktopColor,
-      }}
-      hoveredStyle={activeStyle}
-      activeStyle={activeStyle}
-      onClick={sync}
-    >
-      {syncState === 'error' ? (
-        <AlertTriangle width={13} />
-      ) : (
-        <AnimatedRefresh animating={syncing} />
-      )}
-      <Text style={{ marginLeft: 3 }}>
-        {syncState === 'disabled'
-          ? 'Disabled'
-          : syncState === 'offline'
-          ? 'Offline'
-          : 'Sync'}
-      </Text>
-    </Button>
+    <>
+      <KeyHandlers
+        keys={{
+          'ctrl+s, cmd+s': () => {
+            sync();
+          },
+        }}
+      />
+
+      <Button
+        type="bare"
+        style={{
+          ...style,
+          WebkitAppRegion: 'none',
+          color: isMobile ? mobileColor : desktopColor,
+        }}
+        hoveredStyle={activeStyle}
+        activeStyle={activeStyle}
+        onClick={sync}
+      >
+        {syncState === 'error' ? (
+          <AlertTriangle width={13} />
+        ) : (
+          <AnimatedRefresh animating={syncing} />
+        )}
+        <Text style={{ marginLeft: 3 }}>
+          {syncState === 'disabled'
+            ? 'Disabled'
+            : syncState === 'offline'
+            ? 'Offline'
+            : 'Sync'}
+        </Text>
+      </Button>
+    </>
   );
 }
 

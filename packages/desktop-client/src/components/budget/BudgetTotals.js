@@ -21,7 +21,7 @@ const BudgetTotals = memo(function BudgetTotals({
     <View
       data-testid="budget-totals"
       style={{
-        backgroundColor: 'white',
+        backgroundColor: theme.tableBackground,
         flexDirection: 'row',
         flexShrink: 0,
         boxShadow: styles.cardShadow,
@@ -69,7 +69,7 @@ const BudgetTotals = memo(function BudgetTotals({
             >
               <Menu
                 onMenuSelect={type => {
-                  if (type === 'toggleVisibility') {
+                  if (type === 'toggle-visibility') {
                     toggleHiddenCategories();
                   } else if (type === 'expandAllCategories') {
                     expandAllCategories();
@@ -80,8 +80,8 @@ const BudgetTotals = memo(function BudgetTotals({
                 }}
                 items={[
                   {
-                    name: 'toggleVisibility',
-                    text: 'Toggle hidden',
+                    name: 'toggle-visibility',
+                    text: 'Toggle hidden categories',
                   },
                   {
                     name: 'expandAllCategories',
