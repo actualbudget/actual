@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { type SVGProps } from 'react';
 
-import { css } from 'glamor';
+import { css, keyframes } from 'glamor';
 
 import Loading from './Loading';
 
-const rotation = css.keyframes({
+const rotation = keyframes({
   '0%': { transform: 'rotate(-90deg)' },
   '100%': { transform: 'rotate(666deg)' },
 });
 
-function AnimatedLoading(props) {
+function AnimatedLoading(props: SVGProps<SVGSVGElement>) {
   return (
     <span
       className={`${css({
