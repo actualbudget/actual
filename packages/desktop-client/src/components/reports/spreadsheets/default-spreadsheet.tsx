@@ -29,7 +29,7 @@ export default function createSpreadsheet(
       splitLabel = 'category';
       break;
     case 2:
-      splitItem = categories.grouped;
+      splitItem = categories.list;
       splitLabel = 'category';
       break;
     case 3:
@@ -97,14 +97,38 @@ export default function createSpreadsheet(
       }),
     );
 
-    const data = await Promise.all(
-      graphData.map(async graph => {
-        const calc = recalculate(graph, start, end);
-        return { ...calc };
+    const months = monthUtils.rangeInclusive(start, end);
+    const groupData = await Promise.all(
+      categories.grouped.map(async group => {
+        let groupedStarting = 0;
+        const mon = await Promise.all(
+          months.map(async month => {
+            let groupedAmount = 0;
+            graphData.map(async graph => {
+              if (graph.balances[month]) {
+                if (group.categories.map(v => v.id).includes(graph.id)) {
+                  groupedAmount += graph.balances[month].amount;
+                }
+              }
+
+              groupedStarting += graph.starting;
+            });
+            return {
+              date: month,
+              amount: groupedAmount,
+            };
+          }),
+        );
+
+        return {
+          starting: groupedStarting,
+          name: group.name,
+          id: group.id,
+          balances: index(mon, 'date'),
+        };
       }),
     );
 
-    const months = monthUtils.rangeInclusive(start, end);
     let totalAssets = 0;
     let totalDebts = 0;
     let totalTotals = 0;
@@ -113,28 +137,47 @@ export default function createSpreadsheet(
         let perMonthAssets = 0;
         let perMonthDebts = 0;
         let perMonthTotals = 0;
-        graphData.map(async graph => {
-          if (graph.balances[month]) {
-            if (graph.balances[month].amount < 0) {
-              perMonthDebts += -graph.balances[month].amount;
-            } else {
-              perMonthAssets += graph.balances[month].amount;
+        const stacked = await Promise.all(
+          graphData.map(async graph => {
+            let stack = 0;
+            if (graph.balances[month]) {
+              stack += graph.balances[month].amount;
+
+              if (graph.balances[month].amount < 0) {
+                perMonthDebts += -graph.balances[month].amount;
+              } else {
+                perMonthAssets += graph.balances[month].amount;
+              }
+              perMonthTotals = perMonthAssets - perMonthDebts;
             }
-            perMonthTotals = perMonthAssets - perMonthDebts;
-          }
-        });
+            return {
+              name: graph.name,
+              amount: stack,
+            };
+          }),
+        );
         totalAssets += perMonthAssets;
         totalDebts += perMonthDebts;
         totalTotals += perMonthTotals;
 
         return {
-          totalDebts: `-${integerToCurrency(perMonthDebts)}`,
-          totalAssets: integerToCurrency(perMonthAssets),
+          date: month,
+          split: stacked,
+          totalDebts: -1 * integerToAmount(perMonthDebts),
+          totalAssets: integerToAmount(perMonthAssets),
           totalTotals:
             perMonthAssets >= perMonthDebts
-              ? integerToCurrency(perMonthTotals)
-              : `-${integerToCurrency(perMonthTotals)}`,
+              ? integerToAmount(perMonthTotals)
+              : integerToAmount(perMonthTotals),
         };
+      }),
+    );
+
+    const splitData = split === 2 ? groupData : graphData;
+    const data = await Promise.all(
+      splitData.map(async graph => {
+        const calc = recalculate(graph, start, end);
+        return { ...calc };
       }),
     );
 
@@ -142,12 +185,12 @@ export default function createSpreadsheet(
       [split]: splitItem,
       data,
       monthData,
-      totalDebts: `-${integerToCurrency(totalDebts)}`,
-      totalAssets: integerToCurrency(totalAssets),
+      totalDebts: -1 * integerToAmount(totalDebts),
+      totalAssets: integerToAmount(totalAssets),
       totalTotals:
         totalAssets >= totalDebts
-          ? integerToCurrency(totalTotals)
-          : `-${integerToCurrency(totalTotals)}`,
+          ? integerToAmount(totalTotals)
+          : `-${integerToAmount(totalTotals)}`,
     });
   };
 }
@@ -158,8 +201,8 @@ function recalculate(data, start, end) {
   let totalDebts = 0;
   let totalAssets = 0;
   let totalTotals = 0;
-  let startingDebts = 0;
-  let startingAssets = 0;
+  //let startingDebts = 0;
+  //let startingAssets = 0;
   let hasNegative = false;
   let startNetWorth = 0;
   let endNetWorth = 0;
@@ -176,11 +219,11 @@ function recalculate(data, start, end) {
     if (data.balances[month]) {
       if (data.balances[month].amount < 0) {
         debts += -data.balances[month].amount;
-        startingDebts += -data.balances[month].amount;
+        //startingDebts += -data.balances[month].amount;
         totalDebts += -data.balances[month].amount;
       } else {
         assets += data.balances[month].amount;
-        startingAssets += data.balances[month].amount;
+        //startingAssets += data.balances[month].amount;
         totalAssets += data.balances[month].amount;
       }
       total = assets - debts;
@@ -208,8 +251,8 @@ function recalculate(data, start, end) {
     arr.push({
       x,
       y,
-      assets: integerToCurrency(assets),
-      debts: `-${integerToCurrency(debts)}`,
+      assets: integerToAmount(assets),
+      debts: integerToAmount(debts),
       change: integerToCurrency(change),
       networth: integerToCurrency(total),
       date: d.format(x, 'MMMM yyyy'),
@@ -233,8 +276,8 @@ function recalculate(data, start, end) {
       start,
       end,
     },
-    totalAssets: integerToCurrency(totalAssets),
-    totalDebts: `-${integerToCurrency(totalDebts)}`,
+    totalAssets: integerToAmount(totalAssets),
+    totalDebts: -1 * integerToAmount(totalDebts),
     totalTotals: yTotal,
     netWorth: endNetWorth,
     totalChange: endNetWorth - startNetWorth,

@@ -1,11 +1,21 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+//import { useSelector } from 'react-redux';
+
+import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../style';
 import View from '../common/View';
-import { Row, Field, Cell } from '../table';
+import { Row, Cell } from '../table';
 
-export default function ReportsTable({ data, months, style, type, split }) {
+export default function ReportsTable({
+  data,
+  months,
+  style,
+  type,
+  mode,
+  split,
+}) {
+  /*
   let { payees, accounts, dateFormat } = useSelector(state => {
     return {
       payees: state.queries.payees,
@@ -13,6 +23,7 @@ export default function ReportsTable({ data, months, style, type, split }) {
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
+  */
 
   let typeItem;
   let totalItem;
@@ -33,73 +44,133 @@ export default function ReportsTable({ data, months, style, type, split }) {
     default:
   }
 
-  return (
-    <View
-      style={{
-        borderRadius: '6px 6px 0 0',
-        overflow: 'hidden',
-        flexShrink: 0,
-      }}
-    >
-      <Row
-        collapsed={true}
+  function TimeTable() {
+    return (
+      <View
         style={{
-          color: theme.tableHeaderText,
-          backgroundColor: theme.tableHeaderBackground,
-          zIndex: 200,
-          fontWeight: 500,
+          borderRadius: '6px 6px 0 0',
+          overflow: 'hidden',
+          flexShrink: 0,
         }}
       >
-        <Cell value={split} width="flex" />
-        {months.map(header => {
-          return <Cell key={header} value={header} width="flex" />;
-        })}
-        <Cell value={'Totals'} width="flex" />
-      </Row>
-      {data.data.map(item => {
-        return (
-          <Row
-            collapsed={true}
-            style={{
-              color: theme.tableText,
-              backgroundColor: theme.tableBackground,
-            }}
-          >
-            <Cell value={item.name} width="flex" />
-            {item.graphData.data.map(field => {
-              return (
-                <Cell
-                  key={field[typeItem]}
-                  value={field[typeItem]}
-                  width="flex"
-                />
-              );
-            })}
-            <Cell value={item[totalItem]} width="flex" />
-          </Row>
-        );
-      })}
-      <Row
-        collapsed={true}
-        style={{
-          color: theme.tableText,
-          backgroundColor: theme.tableBackground,
-          zIndex: 200,
-          fontWeight: 500,
-        }}
-      >
-        <Cell value={'Totals'} width="flex" />
-        {data.monthData.map(header => {
+        <Row
+          collapsed={true}
+          style={{
+            color: theme.tableHeaderText,
+            backgroundColor: theme.tableHeaderBackground,
+            zIndex: 200,
+            fontWeight: 500,
+          }}
+        >
+          <Cell value={split} width="flex" />
+          {months.map(header => {
+            return <Cell key={header} value={header} width="flex" />;
+          })}
+          <Cell value={'Totals'} width="flex" />
+        </Row>
+        {data.data.map(item => {
           return (
-            <Cell
-              key={header[totalItem]}
-              value={header[totalItem]}
-              width="flex"
-            />
+            <Row
+              key={item.id}
+              collapsed={true}
+              style={{
+                color: theme.tableText,
+                backgroundColor: theme.tableBackground,
+              }}
+            >
+              <Cell value={item.name} width="flex" />
+              {item.graphData.data.map(field => {
+                return (
+                  <Cell
+                    key={amountToCurrency(field[typeItem])}
+                    value={amountToCurrency(field[typeItem])}
+                    width="flex"
+                  />
+                );
+              })}
+              <Cell value={amountToCurrency(item[totalItem])} width="flex" />
+            </Row>
           );
         })}
-        <Cell width="flex" />
-      </Row>
-    </View>
-  );
+        <Row
+          collapsed={true}
+          style={{
+            color: theme.tableText,
+            backgroundColor: theme.tableBackground,
+            zIndex: 200,
+            fontWeight: 500,
+          }}
+        >
+          <Cell value={'Totals'} width="flex" />
+          {data.monthData.map(header => {
+            return (
+              <Cell
+                key={amountToCurrency(header[totalItem])}
+                value={amountToCurrency(header[totalItem])}
+                width="flex"
+              />
+            );
+          })}
+          <Cell width="flex" />
+        </Row>
+      </View>
+    );
+  }
+
+  function TotalTable() {
+    return (
+      <View
+        style={{
+          borderRadius: '6px 6px 0 0',
+          overflow: 'hidden',
+          flexShrink: 0,
+        }}
+      >
+        <Row
+          collapsed={true}
+          style={{
+            color: theme.tableHeaderText,
+            backgroundColor: theme.tableHeaderBackground,
+            zIndex: 200,
+            fontWeight: 500,
+          }}
+        >
+          <Cell value={split} width="flex" />
+          <Cell value={'Totals'} width="flex" />
+        </Row>
+        {data.data.map(item => {
+          return (
+            <Row
+              key={item.id}
+              collapsed={true}
+              style={{
+                color: theme.tableText,
+                backgroundColor: theme.tableBackground,
+              }}
+            >
+              <Cell value={item.name} width="flex" />
+              <Cell value={amountToCurrency(item[totalItem])} width="flex" />
+            </Row>
+          );
+        })}
+        <Row
+          collapsed={true}
+          style={{
+            color: theme.tableText,
+            backgroundColor: theme.tableBackground,
+            zIndex: 200,
+            fontWeight: 500,
+          }}
+        >
+          <Cell value={'Totals'} width="flex" />
+          <Cell
+            key={data[totalItem]}
+            value={amountToCurrency(data[totalItem])}
+            width="flex"
+          />
+        </Row>
+      </View>
+    );
+  }
+  return mode === 'total' ? <TotalTable /> : <TimeTable />;
 }

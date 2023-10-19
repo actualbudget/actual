@@ -1,7 +1,7 @@
 import React from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme, styles } from '../../style';
 import Text from '../common/Text';
@@ -87,7 +87,9 @@ export function ReportSummary({
             },
           ]}
         >
-          <PrivacyFilter blurIntensity={7}>{amt}</PrivacyFilter>
+          <PrivacyFilter blurIntensity={7}>
+            {amountToCurrency(amt)}
+          </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>For this time period</Text>
       </View>
@@ -119,7 +121,7 @@ export function ReportSplit({ data, splitType }) {
         {splitType}
       </Text>
       {data.data.map(item => {
-        return <Text>{item.name}</Text>;
+        return <Text key={item.name}>{item.name}</Text>;
       })}
     </View>
   );

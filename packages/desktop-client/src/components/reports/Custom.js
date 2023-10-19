@@ -80,11 +80,11 @@ function getFullRange(allMonths) {
 export default function Custom() {
   const categories = useCategories();
 
-  let { payees, accounts, dateFormat } = useSelector(state => {
+  let { payees, accounts } = useSelector(state => {
     return {
       payees: state.queries.payees,
       accounts: state.queries.accounts,
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
+      //dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
 
@@ -107,7 +107,7 @@ export default function Custom() {
   const [type, setType] = useState(1);
   const [dateRange, setDateRange] = useState(2);
   const [mode, setMode] = useState('time');
-  const [graphType, setGraphType] = useState('TableGraph');
+  const [graphType, setGraphType] = useState('BarGraph');
   const [viewSplit, setViewSplit] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
 
@@ -162,7 +162,7 @@ export default function Custom() {
           style={{ flexGrow: 1 }}
           start={start}
           end={end}
-          graphData={data}
+          data={data}
         />
       );
     }
@@ -172,7 +172,8 @@ export default function Custom() {
           style={{ flexGrow: 1 }}
           start={start}
           end={end}
-          graphData={data.graphData}
+          data={data}
+          typeOp={typeOptions.find(opt => opt.value === type).format}
         />
       );
     }
@@ -223,6 +224,7 @@ export default function Custom() {
           style={{ border: '1px solid ' + theme.tableBorder }}
           months={months}
           type={type}
+          mode={mode}
           split={splitOptions.find(opt => opt.value === split).description}
         />
       );
@@ -242,7 +244,14 @@ export default function Custom() {
     setGraphType(cond);
   }
 
-  function GraphButton({ selected, children, style, onSelect, title }) {
+  function GraphButton({
+    selected,
+    children,
+    style,
+    onSelect,
+    title,
+    disabled,
+  }) {
     return (
       <Button
         type="bare"
@@ -254,6 +263,7 @@ export default function Custom() {
         }}
         onClick={onSelect}
         title={title}
+        disabled={disabled}
       >
         {children}
       </Button>
@@ -295,15 +305,14 @@ export default function Custom() {
     { value: 2, description: 'Group' },
     { value: 3, description: 'Payee' },
     { value: 4, description: 'Account' },
-    { value: 5, description: 'Day' },
-    { value: 6, description: 'Month' },
-    { value: 7, description: 'Year' },
+    { value: 5, description: 'Month' },
+    { value: 6, description: 'Year' },
   ];
 
   const typeOptions = [
-    { value: 1, description: 'Expense' },
-    { value: 2, description: 'Income' },
-    { value: 3, description: 'All' },
+    { value: 1, description: 'Expense', format: 'totalDebts' },
+    { value: 2, description: 'Income', format: 'totalAssets' },
+    { value: 3, description: 'All', format: 'totalTotals' },
   ];
 
   const dateRangeOptions = [
@@ -384,6 +393,13 @@ export default function Custom() {
                 option.value,
                 option.description,
               ])}
+              disabledKeys={
+                mode === 'time'
+                  ? [5, 6]
+                  : graphType === 'AreaGraph'
+                  ? [1, 2, 3, 4]
+                  : [0]
+              }
             />
           </View>
           <View
@@ -509,23 +525,36 @@ export default function Custom() {
               <InboxFull width={15} height={15} />
             </GraphButton>
             <GraphButton
-              selected={graphType === 'AreaGraph'}
-              onSelect={() => onChangeGraph('AreaGraph')}
-              style={{ marginLeft: 15 }}
-            >
-              <Chart width={15} height={15} />
-            </GraphButton>
-            <GraphButton
-              selected={graphType === 'BarGraph'}
-              onSelect={() => onChangeGraph('BarGraph')}
+              selected={
+                graphType === 'BarGraph' || graphType === 'StackedBarGraph'
+              }
+              onSelect={() => {
+                if (mode === 'total') {
+                  onChangeGraph('BarGraph');
+                } else {
+                  onChangeGraph('StackedBarGraph');
+                }
+              }}
               style={{ marginLeft: 15 }}
             >
               <ChartBar width={15} height={15} />
             </GraphButton>
             <GraphButton
+              selected={graphType === 'AreaGraph'}
+              onSelect={() => {
+                onChangeGraph('AreaGraph');
+                setSplit(5);
+              }}
+              style={{ marginLeft: 15 }}
+              disabled={mode === 'total' ? false : true}
+            >
+              <Chart width={15} height={15} />
+            </GraphButton>
+            <GraphButton
               selected={graphType === 'DonutGraph'}
               onSelect={() => onChangeGraph('DonutGraph')}
               style={{ marginLeft: 15 }}
+              disabled={mode === 'total' ? false : true}
             >
               <ChartPie width={15} height={15} />
             </GraphButton>

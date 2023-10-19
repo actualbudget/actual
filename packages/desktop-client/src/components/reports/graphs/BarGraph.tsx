@@ -5,21 +5,26 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
+  Cell,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
 
+import { amountToCurrency } from 'loot-core/src/shared/util';
+
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
+import { getColorScale } from '../chart-theme';
 import Container from '../Container';
 
 type BarGraphProps = {
   style?: CSSProperties;
-  graphData;
+  typeOp;
+  data;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -34,18 +39,17 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function BarGraph({ style, graphData, compact, domain }: BarGraphProps) {
-  const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
-  };
+function BarGraph({ style, typeOp, data, compact, domain }: BarGraphProps) {
+  const colorScale = getColorScale('qualitative');
 
   type PayloadItem = {
     payload: {
-      date: string;
-      assets: number | string;
-      debt: number | string;
+      name: string;
+      totalAssets: number | string;
+      totalDebts: number | string;
+      totalTotals: number | string;
       networth: number | string;
-      change: number | string;
+      totalChange: number | string;
     };
   };
 
@@ -74,15 +78,29 @@ function BarGraph({ style, graphData, compact, domain }: BarGraphProps) {
         >
           <div>
             <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.date}</strong>
+              <strong>{payload[0].payload.name}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <PrivacyFilter>
-                <AlignedText left="Assets:" right={payload[0].payload.assets} />
-                <AlignedText left="Debt:" right={payload[0].payload.debt} />
+                <AlignedText
+                  left="Assets:"
+                  right={amountToCurrency(payload[0].payload.totalAssets)}
+                />
+                <AlignedText
+                  left="Debt:"
+                  right={amountToCurrency(payload[0].payload.totalDebts)}
+                />
+                <AlignedText
+                  left="All:"
+                  right={amountToCurrency(payload[0].payload.totalTotals)}
+                />
                 <AlignedText
                   left="Change:"
-                  right={<strong>{payload[0].payload.change}</strong>}
+                  right={
+                    <strong>
+                      {amountToCurrency(payload[0].payload.totalChange)}
+                    </strong>
+                  }
                 />
               </PrivacyFilter>
             </div>
@@ -100,14 +118,14 @@ function BarGraph({ style, graphData, compact, domain }: BarGraphProps) {
       }}
     >
       {(width, height, portalHost) =>
-        graphData && (
+        data && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <BarChart
                 width={width}
                 height={height}
-                data={graphData.data}
+                data={data.data}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 <Tooltip
@@ -116,9 +134,16 @@ function BarGraph({ style, graphData, compact, domain }: BarGraphProps) {
                   isAnimationActive={false}
                 />
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis dataKey="y" tickFormatter={tickFormatter} />
-                <Bar type="monotone" dataKey="y" fill="#8884d8" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Bar dataKey={...typeOp}>
+                  {data.data.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={colorScale[index % colorScale.length]}
+                    />
+                  ))}
+                </Bar>
               </BarChart>
             </div>
           </ResponsiveContainer>
