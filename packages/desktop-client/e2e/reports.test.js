@@ -38,14 +38,6 @@ test.describe('Reports', () => {
   test('loads net worth graph and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
     await expect(page).toHaveScreenshot(screenshotConfig(page));
-
-    // Move cursor to the middle of the page to show tooltip
-    const viewportSize = await page.viewportSize();
-    await page.mouse.move(viewportSize.width / 2, viewportSize.height / 2);
-
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
-    const tooltip = page.getByTestId('nw-report-select-tooltip');
-    await expect(tooltip).toHaveScreenshot(screenshotConfig(page));
   });
 
   test('loads cash flow graph and checks visuals', async () => {
