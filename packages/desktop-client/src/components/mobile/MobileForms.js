@@ -116,6 +116,11 @@ export function BooleanField({ checked, onUpdate, style }) {
       type="checkbox"
       checked={checked}
       onChange={e => onUpdate(e.target.checked)}
+      style={{
+        width: 22,
+        height: 22,
+        margin: 'auto',
+      }}
       className={`${css([
         {
           marginInline: styles.mobileEditingPadding,
