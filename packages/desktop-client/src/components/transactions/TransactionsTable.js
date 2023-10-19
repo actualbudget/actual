@@ -713,6 +713,7 @@ const Transaction = memo(function Transaction(props) {
     onToggleSplit,
     onNavigateToTransferAccount,
     onNavigateToSchedule,
+    pushModal,
   } = props;
 
   let dispatchSelected = useSelectedDispatch();
@@ -1636,6 +1637,7 @@ function TransactionTableInner({
           onToggleSplit={props.onToggleSplit}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
+          pushModal={props.pushModal}
         />
       </>
     );
