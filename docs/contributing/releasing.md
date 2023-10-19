@@ -56,7 +56,5 @@ This automation will also delete all the outdated release note files from the `u
 Once you’ve merged and tagged the release, go to the releases page and publish a new release. Use this as the body of the release note:
 
 ```markdown
-:link: [View release notes](https://actualbudget.github.io/docs/Release-Notes#2330)
+:link: [View release notes](https://actualbudget.org/blog/release-23.10.0)
 ```
-
-Replace `2330` with the version number of the release you’re releasing, with all the periods removed.

@@ -81,18 +81,20 @@ jobs:
         use_magic_file: 1
         experimental_apply_changes_via_bot: 1
         use_sarif: 1
-        extra_dictionary_limit: 10
+        extra_dictionary_limit: 12
+        check_extra_dictionaries: ''
         extra_dictionaries:
           cspell:cpp/src/cpp.txt
           cspell:software-terms/src/software-terms.txt
           cspell:python/src/python/python-lib.txt
-          cspell:php/php.txt
           cspell:node/node.txt
-          cspell:npm/npm.txt
-          cspell:typescript/typescript.txt
           cspell:filetypes/filetypes.txt
-          cspell:html/html.txt
           cspell:aws/aws.txt
+          cspell:typescript/dict/typescript.txt
+          cspell:npm/dict/npm.txt
+          cspell:fullstack/dict/fullstack.txt
+          cspell:html/dict/html.txt
+          cspell:css/dict/css.txt
 
   comment-push:
     name: Report (Push)
