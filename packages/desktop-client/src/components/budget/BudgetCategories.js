@@ -149,7 +149,7 @@ const BudgetCategories = memo(
       <View
         style={{
           marginBottom: 10,
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           overflow: 'hidden',
           boxShadow: styles.cardShadow,
           borderRadius: '0 0 4px 4px',
@@ -235,7 +235,7 @@ const BudgetCategories = memo(
                 <View
                   style={{
                     height: styles.incomeHeaderHeight,
-                    backgroundColor: 'white',
+                    backgroundColor: theme.tableBackground,
                   }}
                 >
                   <IncomeHeader
