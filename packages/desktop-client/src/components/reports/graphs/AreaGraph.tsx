@@ -19,10 +19,11 @@ import Container from '../Container';
 
 type AreaGraphProps = {
   style?: CSSProperties;
-  graphData;
+  data;
+  typeOp;
   compact: boolean;
   domain?: {
-    y?: [number, number];
+    totalTotals?: [number, number];
   };
 };
 type PotentialNumber = number | string | undefined | null;
@@ -34,14 +35,14 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function AreaGraph({ style, graphData, compact }: AreaGraphProps) {
+function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
 
   const gradientOffset = () => {
-    const dataMax = Math.max(...graphData.data.map(i => i.y));
-    const dataMin = Math.min(...graphData.data.map(i => i.y));
+    const dataMax = Math.max(...data.monthData.map(i => i[typeOp]));
+    const dataMin = Math.min(...data.monthData.map(i => i[typeOp]));
 
     if (dataMax <= 0) {
       return 0;
@@ -58,10 +59,9 @@ function AreaGraph({ style, graphData, compact }: AreaGraphProps) {
   type PayloadItem = {
     payload: {
       date: string;
-      assets: number | string;
-      debt: number | string;
-      networth: number | string;
-      change: number | string;
+      totalAssets: number | string;
+      totalDebts: number | string;
+      totalTotals: number | string;
     };
   };
 
@@ -94,13 +94,18 @@ function AreaGraph({ style, graphData, compact }: AreaGraphProps) {
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <PrivacyFilter>
-                <AlignedText left="Assets:" right={payload[0].payload.assets} />
-                <AlignedText left="Debt:" right={payload[0].payload.debt} />
                 <AlignedText
-                  left="Net worth:"
-                  right={<strong>{payload[0].payload.networth}</strong>}
+                  left="Assets:"
+                  right={payload[0].payload.totalAssets}
                 />
-                <AlignedText left="Change:" right={payload[0].payload.change} />
+                <AlignedText
+                  left="Debt:"
+                  right={payload[0].payload.totalDebts}
+                />
+                <AlignedText
+                  left="All:"
+                  right={<strong>payload[0].payload.totalTotals</strong>}
+                />
               </PrivacyFilter>
             </div>
           </div>
@@ -117,23 +122,23 @@ function AreaGraph({ style, graphData, compact }: AreaGraphProps) {
       }}
     >
       {(width, height, portalHost) =>
-        graphData && (
+        data.monthData && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <AreaChart
                 width={width}
                 height={height}
-                data={graphData.data}
+                data={data.monthData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 )}
-                {compact ? null : <XAxis dataKey="x" />}
+                {compact ? null : <XAxis dataKey="date" />}
                 {compact ? null : (
                   <YAxis
-                    dataKey="y"
+                    dataKey={...typeOp}
                     domain={['auto', 'auto']}
                     tickFormatter={tickFormatter}
                   />
@@ -163,7 +168,7 @@ function AreaGraph({ style, graphData, compact }: AreaGraphProps) {
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
-                  dataKey="y"
+                  dataKey={...typeOp}
                   stroke={theme.reportsBlue}
                   fill="url(#splitColor)"
                   fillOpacity={1}

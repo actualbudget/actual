@@ -106,7 +106,7 @@ export default function Custom() {
   const [split, setSplit] = useState(1);
   const [type, setType] = useState(1);
   const [dateRange, setDateRange] = useState(2);
-  const [mode, setMode] = useState('time');
+  const [mode, setMode] = useState('total');
   const [graphType, setGraphType] = useState('BarGraph');
   const [viewSplit, setViewSplit] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
@@ -163,6 +163,7 @@ export default function Custom() {
           start={start}
           end={end}
           data={data}
+          typeOp={typeOptions.find(opt => opt.value === type).format}
         />
       );
     }
@@ -173,6 +174,7 @@ export default function Custom() {
           start={start}
           end={end}
           data={data}
+          split={split}
           typeOp={typeOptions.find(opt => opt.value === type).format}
         />
       );
@@ -193,7 +195,9 @@ export default function Custom() {
           style={{ flexGrow: 1 }}
           start={start}
           end={end}
-          graphData={data.graphData}
+          data={data}
+          split={split}
+          typeOp={typeOptions.find(opt => opt.value === type).format}
         />
       );
     }
@@ -213,7 +217,8 @@ export default function Custom() {
           style={{ flexGrow: 1 }}
           start={start}
           end={end}
-          graphData={data}
+          data={data}
+          typeOp={typeOptions.find(opt => opt.value === type).format}
         />
       );
     }
@@ -238,6 +243,18 @@ export default function Custom() {
 
   function onChangeMode(cond) {
     setMode(cond);
+    if (graphType === 'StackedBarGraph' && cond === 'total') {
+      setGraphType('BarGraph');
+    }
+    if (graphType === 'BarGraph' && cond === 'time') {
+      setGraphType('StackedBarGraph');
+    }
+    if (
+      cond === 'time' &&
+      (graphType === 'AreaGraph' || graphType === 'DonutGraph')
+    ) {
+      setGraphType('TableGraph');
+    }
   }
 
   function onChangeGraph(cond) {
@@ -419,6 +436,9 @@ export default function Custom() {
                 option.value,
                 option.description,
               ])}
+              disabledKeys={
+                mode === 'total' && graphType === 'DonutGraph' ? [3] : [0]
+              }
             />
           </View>
           <View
@@ -552,7 +572,10 @@ export default function Custom() {
             </GraphButton>
             <GraphButton
               selected={graphType === 'DonutGraph'}
-              onSelect={() => onChangeGraph('DonutGraph')}
+              onSelect={() => {
+                onChangeGraph('DonutGraph');
+                setType(1);
+              }}
               style={{ marginLeft: 15 }}
               disabled={mode === 'total' ? false : true}
             >

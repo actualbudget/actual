@@ -22,23 +22,38 @@ export default function createSpreadsheet(
   split,
 ) {
   let splitItem;
+  let splitList;
   let splitLabel;
   switch (split) {
     case 1:
       splitItem = categories.list;
+      splitList = splitItem;
       splitLabel = 'category';
       break;
     case 2:
       splitItem = categories.list;
+      splitList = categories.grouped;
       splitLabel = 'category';
       break;
     case 3:
       splitItem = payees;
+      splitList = splitItem;
       splitLabel = 'payee';
       break;
     case 4:
       splitItem = accounts;
+      splitList = splitItem;
       splitLabel = 'account';
+      break;
+    case 5:
+      splitItem = categories.list;
+      splitList = splitItem;
+      splitLabel = 'category';
+      break;
+    case 6:
+      splitItem = categories.list;
+      splitList = splitItem;
+      splitLabel = 'category';
       break;
     default:
   }
@@ -129,30 +144,38 @@ export default function createSpreadsheet(
       }),
     );
 
+    const splitData = split === 2 ? groupData : graphData;
+
     let totalAssets = 0;
     let totalDebts = 0;
     let totalTotals = 0;
+
     const monthData = await Promise.all(
       months.map(async month => {
         let perMonthAssets = 0;
         let perMonthDebts = 0;
         let perMonthTotals = 0;
         const stacked = await Promise.all(
-          graphData.map(async graph => {
-            let stack = 0;
+          splitData.map(async graph => {
+            let stackDebts = 0;
+            let stackAssets = 0;
+            let stackTotals = 0;
             if (graph.balances[month]) {
-              stack += graph.balances[month].amount;
-
               if (graph.balances[month].amount < 0) {
                 perMonthDebts += -graph.balances[month].amount;
+                stackDebts += -graph.balances[month].amount;
               } else {
                 perMonthAssets += graph.balances[month].amount;
+                stackAssets += graph.balances[month].amount;
               }
               perMonthTotals = perMonthAssets - perMonthDebts;
+              stackTotals += stackAssets - stackDebts;
             }
             return {
               name: graph.name,
-              amount: stack,
+              totalAssets: integerToAmount(stackAssets),
+              totalDebts: -1 * integerToAmount(stackDebts),
+              totalTotals: integerToAmount(stackTotals),
             };
           }),
         );
@@ -160,9 +183,10 @@ export default function createSpreadsheet(
         totalDebts += perMonthDebts;
         totalTotals += perMonthTotals;
 
+        const test = index(stacked, 'name');
         return {
           date: month,
-          split: stacked,
+          ...test,
           totalDebts: -1 * integerToAmount(perMonthDebts),
           totalAssets: integerToAmount(perMonthAssets),
           totalTotals:
@@ -173,7 +197,6 @@ export default function createSpreadsheet(
       }),
     );
 
-    const splitData = split === 2 ? groupData : graphData;
     const data = await Promise.all(
       splitData.map(async graph => {
         const calc = recalculate(graph, start, end);
@@ -182,7 +205,7 @@ export default function createSpreadsheet(
     );
 
     setData({
-      [split]: splitItem,
+      split: splitList,
       data,
       monthData,
       totalDebts: -1 * integerToAmount(totalDebts),
@@ -208,7 +231,6 @@ function recalculate(data, start, end) {
   let endNetWorth = 0;
   let lowestNetWorth = null;
   let highestNetWorth = null;
-  let yTotal = null;
 
   const graphData = months.reduce((arr, month) => {
     let debts = 0;
@@ -237,10 +259,6 @@ function recalculate(data, start, end) {
     const x = d.parseISO(`${month}-01`);
     const y =
       assets >= debts ? integerToAmount(total) : `-${integerToAmount(-total)}`;
-    yTotal =
-      totalAssets > totalDebts
-        ? integerToAmount(totalTotals)
-        : `-${integerToAmount(-totalTotals)}`;
     const change = last ? total - amountToInteger(last.y) : 0;
 
     if (arr.length === 0) {
@@ -268,6 +286,11 @@ function recalculate(data, start, end) {
     });
     return arr;
   }, []);
+
+  const yTotal =
+    totalAssets > totalDebts
+      ? integerToAmount(totalTotals)
+      : `-${integerToAmount(-totalTotals)}`;
 
   return {
     graphData: {

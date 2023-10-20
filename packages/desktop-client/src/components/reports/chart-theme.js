@@ -116,16 +116,15 @@ export function getColorScale(name) {
   const scales = {
     grayscale: ['#cccccc', '#969696', '#636363', '#252525'],
     qualitative: [
-      '#334D5C',
-      '#45B29D',
-      '#EFC94C',
-      '#E27A3F',
-      '#DF5A49',
-      '#4F7DA1',
-      '#55DBC1',
-      '#EFDA97',
-      '#E2A37F',
-      '#DF948A',
+      '#45B29D', //Dark Teal
+      '#EFC94C', //Yellow
+      '#E27A3F', //Orange
+      '#DF5A49', //Light Red
+      '#5F91B8', //Blue
+      '#E2A37F', //Peach
+      '#55DBC1', //Light Teal
+      '#EFDA97', //Light Yellow
+      '#DF948A', //Light Red
     ],
     heatmap: ['#428517', '#77D200', '#D6D305', '#EC8E19', '#C92B05'],
     warm: ['#940031', '#C43343', '#DC5429', '#FF821D', '#FFAF55'],

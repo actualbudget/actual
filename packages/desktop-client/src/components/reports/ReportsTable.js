@@ -85,10 +85,15 @@ export default function ReportsTable({
                     key={amountToCurrency(field[typeItem])}
                     value={amountToCurrency(field[typeItem])}
                     width="flex"
+                    privacyFilter
                   />
                 );
               })}
-              <Cell value={amountToCurrency(item[totalItem])} width="flex" />
+              <Cell
+                value={amountToCurrency(item[totalItem])}
+                width="flex"
+                privacyFilter
+              />
             </Row>
           );
         })}
@@ -108,6 +113,7 @@ export default function ReportsTable({
                 key={amountToCurrency(header[totalItem])}
                 value={amountToCurrency(header[totalItem])}
                 width="flex"
+                privacyFilter
               />
             );
           })}
@@ -118,6 +124,67 @@ export default function ReportsTable({
   }
 
   function TotalTable() {
+    return (
+      <View
+        style={{
+          borderRadius: '6px 6px 0 0',
+          overflow: 'hidden',
+          flexShrink: 0,
+        }}
+      >
+        <Row
+          collapsed={true}
+          style={{
+            color: theme.tableHeaderText,
+            backgroundColor: theme.tableHeaderBackground,
+            zIndex: 200,
+            fontWeight: 500,
+          }}
+        >
+          <Cell value={split} width="flex" />
+          <Cell value={'Totals'} width="flex" />
+        </Row>
+        {data.monthData.map(item => {
+          return (
+            <Row
+              key={item.date}
+              collapsed={true}
+              style={{
+                color: theme.tableText,
+                backgroundColor: theme.tableBackground,
+              }}
+            >
+              <Cell value={item.date} width="flex" />
+              <Cell
+                value={amountToCurrency(item[totalItem])}
+                width="flex"
+                privacyFilter
+              />
+            </Row>
+          );
+        })}
+        <Row
+          collapsed={true}
+          style={{
+            color: theme.tableText,
+            backgroundColor: theme.tableBackground,
+            zIndex: 200,
+            fontWeight: 500,
+          }}
+        >
+          <Cell value={'Totals'} width="flex" />
+          <Cell
+            key={data[totalItem]}
+            value={amountToCurrency(data[totalItem])}
+            width="flex"
+            privacyFilter
+          />
+        </Row>
+      </View>
+    );
+  }
+
+  function SplitTotalTable() {
     return (
       <View
         style={{
@@ -149,7 +216,11 @@ export default function ReportsTable({
               }}
             >
               <Cell value={item.name} width="flex" />
-              <Cell value={amountToCurrency(item[totalItem])} width="flex" />
+              <Cell
+                value={amountToCurrency(item[totalItem])}
+                width="flex"
+                privacyFilter
+              />
             </Row>
           );
         })}
@@ -167,10 +238,20 @@ export default function ReportsTable({
             key={data[totalItem]}
             value={amountToCurrency(data[totalItem])}
             width="flex"
+            privacyFilter
           />
         </Row>
       </View>
     );
   }
-  return mode === 'total' ? <TotalTable /> : <TimeTable />;
+
+  return mode === 'total' ? (
+    ['Month', 'Year'].includes(split) ? (
+      <TotalTable />
+    ) : (
+      <SplitTotalTable />
+    )
+  ) : (
+    <TimeTable />
+  );
 }

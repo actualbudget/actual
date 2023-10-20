@@ -23,8 +23,9 @@ import Container from '../Container';
 
 type BarGraphProps = {
   style?: CSSProperties;
-  typeOp;
   data;
+  split;
+  typeOp;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -39,8 +40,16 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function BarGraph({ style, typeOp, data, compact, domain }: BarGraphProps) {
+function BarGraph({
+  style,
+  data,
+  split,
+  typeOp,
+  compact,
+  domain,
+}: BarGraphProps) {
   const colorScale = getColorScale('qualitative');
+  const yAxis = [5, 6].includes(split) ? 'date' : 'name';
 
   type PayloadItem = {
     payload: {
@@ -78,7 +87,7 @@ function BarGraph({ style, typeOp, data, compact, domain }: BarGraphProps) {
         >
           <div>
             <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.name}</strong>
+              <strong>{payload[0].payload[yAxis]}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <PrivacyFilter>
@@ -118,14 +127,14 @@ function BarGraph({ style, typeOp, data, compact, domain }: BarGraphProps) {
       }}
     >
       {(width, height, portalHost) =>
-        data && (
+        data.data && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <BarChart
                 width={width}
                 height={height}
-                data={data.data}
+                data={yAxis === 'date' ? data.monthData : data.data}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 <Tooltip
@@ -134,7 +143,7 @@ function BarGraph({ style, typeOp, data, compact, domain }: BarGraphProps) {
                   isAnimationActive={false}
                 />
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey={yAxis} />
                 <YAxis />
                 <Bar dataKey={...typeOp}>
                   {data.data.map((entry, index) => (

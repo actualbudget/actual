@@ -17,13 +17,13 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
-//import { getColorScale } from '../chart-theme';
+import { getColorScale } from '../chart-theme';
 import Container from '../Container';
 
 type StackedBarGraphProps = {
   style?: CSSProperties;
-  typeOp;
   data;
+  typeOp;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -40,22 +40,17 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
 
 function StackedBarGraph({
   style,
-  typeOp,
   data,
+  typeOp,
   compact,
   domain,
 }: StackedBarGraphProps) {
-  //const colorScale = getColorScale('qualitative');
+  const colorScale = getColorScale('qualitative');
 
   type PayloadItem = {
-    payload: {
-      name: string;
-      totalAssets: number | string;
-      totalDebts: number | string;
-      totalTotals: number | string;
-      networth: number | string;
-      totalChange: number | string;
-    };
+    name: string;
+    value: number;
+    color: string;
   };
 
   type CustomTooltipProps = {
@@ -83,30 +78,24 @@ function StackedBarGraph({
         >
           <div>
             <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.name}</strong>
+              <strong>{label}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <PrivacyFilter>
-                <AlignedText
-                  left="Assets:"
-                  right={amountToCurrency(payload[0].payload.totalAssets)}
-                />
-                <AlignedText
-                  left="Debt:"
-                  right={amountToCurrency(payload[0].payload.totalDebts)}
-                />
-                <AlignedText
-                  left="All:"
-                  right={amountToCurrency(payload[0].payload.totalTotals)}
-                />
-                <AlignedText
-                  left="Change:"
-                  right={
-                    <strong>
-                      {amountToCurrency(payload[0].payload.totalChange)}
-                    </strong>
-                  }
-                />
+                {payload
+                  .slice(0)
+                  .reverse()
+                  .map(
+                    pay =>
+                      pay.value !== 0 && (
+                        <AlignedText
+                          key={pay.name}
+                          left={pay.name}
+                          right={amountToCurrency(pay.value)}
+                          style={{ color: pay.color }}
+                        />
+                      ),
+                  )}
               </PrivacyFilter>
             </div>
           </div>
@@ -115,8 +104,12 @@ function StackedBarGraph({
     }
   };
 
-  const getMonths = (obj, key) => {
-    return obj[key].data;
+  const getVal = (obj, key) => {
+    if (typeOp === 'totalDebts') {
+      return -1 * obj[key][typeOp];
+    } else {
+      return obj[key][typeOp];
+    }
   };
 
   return (
@@ -127,14 +120,14 @@ function StackedBarGraph({
       }}
     >
       {(width, height, portalHost) =>
-        data && (
+        data.monthData && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <BarChart
                 width={width}
                 height={height}
-                data={data.data}
+                data={data.monthData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 <Tooltip
@@ -143,9 +136,17 @@ function StackedBarGraph({
                   isAnimationActive={false}
                 />
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="date" />
                 <YAxis />
-                <Bar dataKey={val => getMonths(val, 'graphData')} />
+                {data.split.map((c, index) => (
+                  <Bar
+                    key={c.id}
+                    dataKey={val => getVal(val, c.name)}
+                    name={c.name}
+                    stackId="a"
+                    fill={colorScale[index % colorScale.length]}
+                  />
+                ))}
               </BarChart>
             </div>
           </ResponsiveContainer>

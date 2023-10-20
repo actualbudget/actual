@@ -1,17 +1,22 @@
 import React from 'react';
 
 import { css } from 'glamor';
-import { PieChart, Pie, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+
+import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
-import AlignedText from '../../common/AlignedText';
+import Text from '../../common/Text';
 import PrivacyFilter from '../../PrivacyFilter';
+import { getColorScale } from '../chart-theme';
 import Container from '../Container';
 
 type DonutGraphProps = {
   style?: CSSProperties;
-  graphData;
+  data;
+  split;
+  typeOp;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -26,14 +31,27 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function DonutGraph({ style, graphData, compact, domain }: DonutGraphProps) {
+function DonutGraph({
+  style,
+  data,
+  split,
+  typeOp,
+  compact,
+  domain,
+}: DonutGraphProps) {
+  const colorScale = getColorScale('qualitative');
+  const yAxis = [5, 6].includes(split) ? 'date' : 'name';
+
   type PayloadItem = {
+    name: string;
+    value: number;
     payload: {
       date: string;
       assets: number | string;
       debt: number | string;
       networth: number | string;
       change: number | string;
+      fill: string;
     };
   };
 
@@ -62,21 +80,26 @@ function DonutGraph({ style, graphData, compact, domain }: DonutGraphProps) {
         >
           <div>
             <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.date}</strong>
+              <strong>{payload[0].name}</strong>
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <PrivacyFilter>
-                <AlignedText left="Assets:" right={payload[0].payload.assets} />
-                <AlignedText left="Debt:" right={payload[0].payload.debt} />
-                <AlignedText
-                  left="Change:"
-                  right={<strong>{payload[0].payload.change}</strong>}
-                />
+                <Text style={{ color: payload[0].payload.fill }}>
+                  {amountToCurrency(payload[0].value)}
+                </Text>
               </PrivacyFilter>
             </div>
           </div>
         </div>
       );
+    }
+  };
+
+  const getVal = obj => {
+    if (typeOp === 'totalDebts') {
+      return -1 * obj[typeOp];
+    } else {
+      return obj[typeOp];
     }
   };
 
@@ -88,24 +111,32 @@ function DonutGraph({ style, graphData, compact, domain }: DonutGraphProps) {
       }}
     >
       {(width, height, portalHost) =>
-        graphData && (
+        data.data && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <PieChart width={width} height={height}>
-                <Pie
-                  dataKey="y"
-                  nameKey="x"
-                  isAnimationActive={false}
-                  data={graphData.data}
-                  outerRadius={80}
-                  fill="#8884d8"
-                />
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
+                <Pie
+                  dataKey={val => getVal(val)}
+                  nameKey={yAxis}
+                  isAnimationActive={false}
+                  data={yAxis === 'date' ? data.monthData : data.data}
+                  outerRadius={200}
+                  innerRadius={100}
+                  fill="#8884d8"
+                >
+                  {data.data.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={colorScale[index % colorScale.length]}
+                    />
+                  ))}
+                </Pie>
               </PieChart>
             </div>
           </ResponsiveContainer>
