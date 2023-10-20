@@ -21,6 +21,7 @@ import Select from '../common/Select';
 import Text from '../common/Text';
 import View from '../common/View';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
+import { Checkbox } from '../forms';
 import PrivacyFilter from '../PrivacyFilter';
 
 import Change from './Change';
@@ -77,6 +78,14 @@ function getFullRange(allMonths) {
   return [start, end];
 }
 
+let legend = [];
+
+function OnChangeLegend(leg) {
+  useEffect(() => {
+    legend = leg;
+  }, []);
+}
+
 export default function Custom() {
   const categories = useCategories();
 
@@ -97,16 +106,19 @@ export default function Custom() {
     onCondOpChange,
   } = useFilters();
 
+  //const [legend, setLegend] = useState([]);
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
+  const [mode, setMode] = useState('total');
   const [split, setSplit] = useState(1);
   const [type, setType] = useState(1);
+  const [empty, setEmpty] = useState(false);
   const [dateRange, setDateRange] = useState(2);
-  const [mode, setMode] = useState('total');
+
   const [graphType, setGraphType] = useState('BarGraph');
   const [viewSplit, setViewSplit] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
@@ -175,6 +187,7 @@ export default function Custom() {
           end={end}
           data={data}
           split={split}
+          OnChangeLegend={OnChangeLegend}
           typeOp={typeOptions.find(opt => opt.value === type).format}
         />
       );
@@ -197,6 +210,7 @@ export default function Custom() {
           end={end}
           data={data}
           split={split}
+          OnChangeLegend={OnChangeLegend}
           typeOp={typeOptions.find(opt => opt.value === type).format}
         />
       );
@@ -219,6 +233,7 @@ export default function Custom() {
           end={end}
           data={data}
           typeOp={typeOptions.find(opt => opt.value === type).format}
+          OnChangeLegend={OnChangeLegend}
         />
       );
     }
@@ -230,6 +245,7 @@ export default function Custom() {
           months={months}
           type={type}
           mode={mode}
+          empty={empty}
           split={splitOptions.find(opt => opt.value === split).description}
         />
       );
@@ -254,6 +270,7 @@ export default function Custom() {
       (graphType === 'AreaGraph' || graphType === 'DonutGraph')
     ) {
       setGraphType('TableGraph');
+      setViewSplit(false);
     }
   }
 
@@ -443,6 +460,25 @@ export default function Custom() {
           </View>
           <View
             style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+
+            <Checkbox
+              id="hide-empty-columns"
+              checked={empty}
+              value={empty}
+              onChange={() => setEmpty(!empty)}
+            />
+            <label htmlFor="hide-empty-columns" style={{ fontSize: 12 }}>
+              Hide Empty Rows
+            </label>
+          </View>
+          <View
+            style={{
               height: 1,
               backgroundColor: theme.altPillBorder,
               marginTop: 10,
@@ -540,7 +576,10 @@ export default function Custom() {
           >
             <GraphButton
               selected={graphType === 'TableGraph'}
-              onSelect={() => onChangeGraph('TableGraph')}
+              onSelect={() => {
+                onChangeGraph('TableGraph');
+                setViewSplit(false);
+              }}
             >
               <InboxFull width={15} height={15} />
             </GraphButton>
@@ -564,6 +603,7 @@ export default function Custom() {
               onSelect={() => {
                 onChangeGraph('AreaGraph');
                 setSplit(5);
+                setViewSplit(false);
               }}
               style={{ marginLeft: 15 }}
               disabled={mode === 'total' ? false : true}
@@ -597,6 +637,11 @@ export default function Custom() {
               }}
               style={{ marginLeft: 15 }}
               title="Show Legend"
+              disabled={
+                graphType === 'TableGraph' || graphType === 'AreaGraph'
+                  ? true
+                  : false
+              }
             >
               <ListBullet width={15} height={15} />
             </GraphButton>
@@ -716,6 +761,7 @@ export default function Custom() {
                     {viewSplit && (
                       <ReportSplit
                         data={data}
+                        legend={legend}
                         splitType={
                           splitOptions.find(opt => opt.value === split)
                             .description

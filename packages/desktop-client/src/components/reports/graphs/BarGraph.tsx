@@ -5,6 +5,7 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
+  Legend,
   Cell,
   XAxis,
   YAxis,
@@ -26,6 +27,7 @@ type BarGraphProps = {
   data;
   split;
   typeOp;
+  OnChangeLegend;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -45,6 +47,7 @@ function BarGraph({
   data,
   split,
   typeOp,
+  OnChangeLegend,
   compact,
   domain,
 }: BarGraphProps) {
@@ -52,6 +55,7 @@ function BarGraph({
   const yAxis = [5, 6].includes(split) ? 'date' : 'name';
 
   type PayloadItem = {
+    value: string;
     payload: {
       name: string;
       totalAssets: number | string;
@@ -66,6 +70,25 @@ function BarGraph({
     active?: boolean;
     payload?: PayloadItem[];
     label?: string;
+  };
+
+  type CustomLegendProps = {
+    active?: boolean;
+    payload?: PayloadItem[];
+    label?: string;
+  };
+
+  const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
+    const agg = payload.map(leg => {
+      return {
+        name: leg.value,
+        //color: leg.color,
+      };
+    });
+
+    OnChangeLegend(agg);
+
+    return <div />;
   };
 
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
@@ -137,6 +160,7 @@ function BarGraph({
                 data={yAxis === 'date' ? data.monthData : data.data}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
+                <Legend content={<CustomLegend />} />
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}

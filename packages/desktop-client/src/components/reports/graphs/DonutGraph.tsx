@@ -1,7 +1,14 @@
 import React from 'react';
 
 import { css } from 'glamor';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
@@ -17,6 +24,7 @@ type DonutGraphProps = {
   data;
   split;
   typeOp;
+  OnChangeLegend;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -36,6 +44,7 @@ function DonutGraph({
   data,
   split,
   typeOp,
+  OnChangeLegend,
   compact,
   domain,
 }: DonutGraphProps) {
@@ -44,7 +53,8 @@ function DonutGraph({
 
   type PayloadItem = {
     name: string;
-    value: number;
+    value: string;
+    color: string;
     payload: {
       date: string;
       assets: number | string;
@@ -59,6 +69,25 @@ function DonutGraph({
     active?: boolean;
     payload?: PayloadItem[];
     label?: string;
+  };
+
+  type CustomLegendProps = {
+    active?: boolean;
+    payload?: PayloadItem[];
+    label?: string;
+  };
+
+  const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
+    const agg = payload.map(leg => {
+      return {
+        name: leg.value,
+        color: leg.color,
+      };
+    });
+
+    OnChangeLegend(agg);
+
+    return <div />;
   };
 
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
@@ -116,6 +145,7 @@ function DonutGraph({
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <PieChart width={width} height={height}>
+                <Legend content={<CustomLegend />} />
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}

@@ -213,7 +213,7 @@ export default function createSpreadsheet(
       totalTotals:
         totalAssets >= totalDebts
           ? integerToAmount(totalTotals)
-          : `-${integerToAmount(totalTotals)}`,
+          : -1 * integerToAmount(totalTotals),
     });
   };
 }
@@ -258,7 +258,7 @@ function recalculate(data, start, end) {
 
     const x = d.parseISO(`${month}-01`);
     const y =
-      assets >= debts ? integerToAmount(total) : `-${integerToAmount(-total)}`;
+      assets >= debts ? integerToAmount(total) : -1 * integerToAmount(total);
     const change = last ? total - amountToInteger(last.y) : 0;
 
     if (arr.length === 0) {
@@ -290,7 +290,7 @@ function recalculate(data, start, end) {
   const yTotal =
     totalAssets > totalDebts
       ? integerToAmount(totalTotals)
-      : `-${integerToAmount(-totalTotals)}`;
+      : -1 * integerToAmount(totalTotals);
 
   return {
     graphData: {

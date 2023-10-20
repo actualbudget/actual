@@ -3,6 +3,7 @@ import React from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
+import YinYang from '../../icons/v1/YinYang';
 import { theme, styles } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -26,14 +27,13 @@ export function ReportSummary({
   return (
     <View
       style={{
-        overflow: 'auto',
         flexDirection: 'column',
       }}
     >
       <View
         style={{
           backgroundColor: theme.pageBackground,
-          height: 100,
+          padding: 15,
           alignItems: 'center',
           justifyContent: 'center',
         }}
@@ -55,7 +55,7 @@ export function ReportSummary({
       <View
         style={{
           backgroundColor: theme.pageBackground,
-          height: 100,
+          padding: 15,
           justifyContent: 'center',
           alignItems: 'center',
           marginTop: 10,
@@ -97,15 +97,15 @@ export function ReportSummary({
   );
 }
 
-export function ReportSplit({ data, splitType }) {
+export function ReportSplit({ data, legend, splitType }) {
   return (
     <View
       style={{
         backgroundColor: theme.pageBackground,
-        paddingTop: 10,
-        paddingBottom: 10,
         alignItems: 'center',
         marginTop: 10,
+        flex: 1,
+        overflowY: 'auto',
       }}
     >
       <Text
@@ -115,14 +115,44 @@ export function ReportSplit({ data, splitType }) {
             alignItems: 'center',
             marginBottom: 2,
             fontWeight: 400,
+            paddingTop: 10,
           },
         ]}
       >
         {splitType}
       </Text>
-      {data.data.map(item => {
-        return <Text key={item.name}>{item.name}</Text>;
-      })}
+      <View>
+        {legend
+          .slice(0)
+          .reverse()
+          .map(item => {
+            return (
+              <View
+                key={item.name}
+                style={{
+                  padding: 10,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
+                <YinYang
+                  style={{ marginRight: 5, color: item.color }}
+                  width={14}
+                  height={14}
+                />
+                <Text
+                  style={{
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    flexShrink: 0,
+                  }}
+                >
+                  {item.name}
+                </Text>
+              </View>
+            );
+          })}
+      </View>
     </View>
   );
 }

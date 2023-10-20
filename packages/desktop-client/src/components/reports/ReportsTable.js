@@ -13,6 +13,7 @@ export default function ReportsTable({
   style,
   type,
   mode,
+  empty,
   split,
 }) {
   /*
@@ -68,35 +69,37 @@ export default function ReportsTable({
           })}
           <Cell value={'Totals'} width="flex" />
         </Row>
-        {data.data.map(item => {
-          return (
-            <Row
-              key={item.id}
-              collapsed={true}
-              style={{
-                color: theme.tableText,
-                backgroundColor: theme.tableBackground,
-              }}
-            >
-              <Cell value={item.name} width="flex" />
-              {item.graphData.data.map(field => {
-                return (
-                  <Cell
-                    key={amountToCurrency(field[typeItem])}
-                    value={amountToCurrency(field[typeItem])}
-                    width="flex"
-                    privacyFilter
-                  />
-                );
-              })}
-              <Cell
-                value={amountToCurrency(item[totalItem])}
-                width="flex"
-                privacyFilter
-              />
-            </Row>
-          );
-        })}
+        {data.data
+          .filter(i => (empty ? i[totalItem] !== 0 : true))
+          .map(item => {
+            return (
+              <Row
+                key={item.id}
+                collapsed={true}
+                style={{
+                  color: theme.tableText,
+                  backgroundColor: theme.tableBackground,
+                }}
+              >
+                <Cell value={item.name} width="flex" />
+                {item.graphData.data.map(field => {
+                  return (
+                    <Cell
+                      key={amountToCurrency(field[typeItem])}
+                      value={amountToCurrency(field[typeItem])}
+                      width="flex"
+                      privacyFilter
+                    />
+                  );
+                })}
+                <Cell
+                  value={amountToCurrency(item[totalItem])}
+                  width="flex"
+                  privacyFilter
+                />
+              </Row>
+            );
+          })}
         <Row
           collapsed={true}
           style={{
@@ -144,25 +147,27 @@ export default function ReportsTable({
           <Cell value={split} width="flex" />
           <Cell value={'Totals'} width="flex" />
         </Row>
-        {data.monthData.map(item => {
-          return (
-            <Row
-              key={item.date}
-              collapsed={true}
-              style={{
-                color: theme.tableText,
-                backgroundColor: theme.tableBackground,
-              }}
-            >
-              <Cell value={item.date} width="flex" />
-              <Cell
-                value={amountToCurrency(item[totalItem])}
-                width="flex"
-                privacyFilter
-              />
-            </Row>
-          );
-        })}
+        {data.monthData
+          .filter(i => (empty ? i[totalItem] !== 0 : true))
+          .map(item => {
+            return (
+              <Row
+                key={item.date}
+                collapsed={true}
+                style={{
+                  color: theme.tableText,
+                  backgroundColor: theme.tableBackground,
+                }}
+              >
+                <Cell value={item.date} width="flex" />
+                <Cell
+                  value={amountToCurrency(item[totalItem])}
+                  width="flex"
+                  privacyFilter
+                />
+              </Row>
+            );
+          })}
         <Row
           collapsed={true}
           style={{
@@ -205,25 +210,27 @@ export default function ReportsTable({
           <Cell value={split} width="flex" />
           <Cell value={'Totals'} width="flex" />
         </Row>
-        {data.data.map(item => {
-          return (
-            <Row
-              key={item.id}
-              collapsed={true}
-              style={{
-                color: theme.tableText,
-                backgroundColor: theme.tableBackground,
-              }}
-            >
-              <Cell value={item.name} width="flex" />
-              <Cell
-                value={amountToCurrency(item[totalItem])}
-                width="flex"
-                privacyFilter
-              />
-            </Row>
-          );
-        })}
+        {data.data
+          .filter(i => (empty ? i[totalItem] !== 0 : true))
+          .map(item => {
+            return (
+              <Row
+                key={item.id}
+                collapsed={true}
+                style={{
+                  color: theme.tableText,
+                  backgroundColor: theme.tableBackground,
+                }}
+              >
+                <Cell value={item.name} width="flex" />
+                <Cell
+                  value={amountToCurrency(item[totalItem])}
+                  width="flex"
+                  privacyFilter
+                />
+              </Row>
+            );
+          })}
         <Row
           collapsed={true}
           style={{
