@@ -91,7 +91,11 @@ export default function LoggedInUser({
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
-      <Button type="bare" onClick={() => setMenuOpen(true)} style={{ color }}>
+      <Button
+        type="bare"
+        onClick={() => setMenuOpen(true)}
+        style={color && { color }}
+      >
         {serverMessage()}
       </Button>
 

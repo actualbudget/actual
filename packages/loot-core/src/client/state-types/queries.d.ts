@@ -8,7 +8,7 @@ export type QueriesState = {
   updatedAccounts: string[];
   accounts: AccountEntity[];
   categories: Awaited<ReturnType<Handlers['get-categories']>>;
-  payees: unknown[];
+  payees: Awaited<ReturnType<Handlers['payees-get']>>;
   earliestTransaction: unknown | null;
 };
 
@@ -51,7 +51,7 @@ type LoadCategoriesAction = {
 
 type LoadPayeesAction = {
   type: typeof constants.LOAD_PAYEES;
-  payees: unknown[];
+  payees: State['payees'];
 };
 
 export type QueriesActions =

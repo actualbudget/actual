@@ -18,7 +18,7 @@ import Text from './Text';
 import View from './View';
 
 export type ModalProps = {
-  title: string;
+  title?: string;
   isCurrent?: boolean;
   isHidden?: boolean;
   children: ReactNode | (() => ReactNode);
