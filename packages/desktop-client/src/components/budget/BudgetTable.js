@@ -2,7 +2,7 @@ import React, { createRef, Component } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { styles } from '../../style';
+import { theme, styles } from '../../style';
 import View from '../common/View';
 import { IntersectionBoundary } from '../tooltips';
 
@@ -189,7 +189,7 @@ class BudgetTable extends Component {
               backgroundColor: 'transparent',
             },
             '& ::-webkit-scrollbar-thumb:vertical': {
-              backgroundColor: 'white',
+              backgroundColor: theme.tableHeaderBackground,
             },
           }),
         }}
