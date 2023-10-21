@@ -8,6 +8,7 @@ import Modal, { ModalButtons } from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
+import { type CommonModalProps } from '../../types/modals';
 
 function renderError(error) {
   return (
@@ -19,12 +20,19 @@ function renderError(error) {
   );
 }
 
+type PlainExternalMsgProps = {
+  modalProps: CommonModalProps;
+  onMoveExternal: () => Promise<{ error: any; data: any; }>;
+  onSuccess: (data: unknown) => Promise<void>;
+  onClose?: () => void;
+}
+
 export default function PlaidExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,
   onClose: originalOnClose,
-}) {
+}: PlainExternalMsgProps) {
   let [waiting, setWaiting] = useState(null);
   let [success, setSuccess] = useState(false);
   let [error, setError] = useState(null);
