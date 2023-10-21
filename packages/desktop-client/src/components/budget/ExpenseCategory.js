@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { theme } from '../../style';
 import View from '../common/View';
 import { useDraggable, useDroppable, DropHighlight } from '../sort';
 import { Row } from '../table';
@@ -46,7 +47,7 @@ function ExpenseCategory({
       innerRef={dropRef}
       collapsed={true}
       style={{
-        backgroundColor: 'transparent',
+        backgroundColor: theme.tableBackground,
         opacity: cat.hidden ? 0.5 : undefined,
       }}
     >

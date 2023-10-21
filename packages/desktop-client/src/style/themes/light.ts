@@ -87,6 +87,8 @@ export const altMenuItemTextHeader = colorPalette.navy400;
 export const alt2MenuItemTextHeader = colorPalette.orange150;
 export const altMenuBorder = colorPalette.blue700;
 export const altMenuBorderHover = colorPalette.purple300;
+export const menuAutoCompleteBackground = colorPalette.navy900;
+export const menuAutoCompleteText = colorPalette.white;
 
 export const mobileNavBackground = colorPalette.white;
 export const mobileNavItem = colorPalette.gray300;
