@@ -152,7 +152,7 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 
   const mobileColor =
     syncState === 'error'
-      ? theme.alt4ErrorText
+      ? theme.errorText
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'
@@ -160,7 +160,7 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       : style.color;
   const desktopColor =
     syncState === 'error'
-      ? theme.alt2ErrorText
+      ? theme.errorTextDark
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'

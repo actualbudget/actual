@@ -156,7 +156,7 @@ function Status({ status }) {
 
   switch (status) {
     case 'missed':
-      color = theme.alt3ErrorText;
+      color = theme.errorText;
       break;
     case 'due':
       color = theme.alt2WarningText;
