@@ -70,7 +70,8 @@ export default function ReportsTable({
             return (
               <Cell
                 key={header}
-                value={d.format(d.parseISO(`${header}-01`), 'MMMM yyyy')}
+                // eslint-disable-next-line rulesdir/typography
+                value={d.format(d.parseISO(`${header}-01`), "MMM ''yy")}
                 width="flex"
               />
             );

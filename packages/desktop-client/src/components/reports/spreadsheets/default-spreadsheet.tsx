@@ -147,7 +147,8 @@ export default function createSpreadsheet(
             });
             return {
               date: month,
-              dateFormatted: d.format(d.parseISO(`${month}-01`), 'MMMM yyyy'),
+              // eslint-disable-next-line rulesdir/typography
+              dateFormatted: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
               amount: groupedAmount,
             };
           }),
@@ -203,7 +204,8 @@ export default function createSpreadsheet(
 
         const indexedSplit = index(stacked, 'name');
         return {
-          date: d.format(d.parseISO(`${month}-01`), 'MMMM yyyy'),
+          // eslint-disable-next-line rulesdir/typography
+          date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
           ...indexedSplit,
           totalDebts: -1 * integerToAmount(perMonthDebts),
           totalAssets: integerToAmount(perMonthAssets),
@@ -291,7 +293,8 @@ function recalculate(data, start, end) {
       debts: integerToAmount(debts),
       change: integerToCurrency(change),
       networth: integerToCurrency(total),
-      date: d.format(x, 'MMMM yyyy'),
+      // eslint-disable-next-line rulesdir/typography
+      date: d.format(x, "MMM ''yy"),
     });
 
     arr.forEach(item => {
