@@ -407,7 +407,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: theme.altpageTextSubdued }}
+                  style={{ color: theme.pageTextLight }}
                 />
               </Button>
               {menuOpen && (

@@ -937,7 +937,7 @@ class Transaction extends PureComponent {
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
-      color: theme.altpageTextSubdued,
+      color: theme.pageTextLight,
     };
 
     return (

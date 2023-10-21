@@ -422,7 +422,7 @@ function StatusCell({
       : status === 'due'
       ? theme.alt3WarningText
       : selected
-      ? theme.altPageTextLink
+      ? theme.pageTextLinkLight
       : theme.pageTextSubdued;
 
   function onSelect() {
