@@ -156,7 +156,7 @@ function Status({ status }) {
 
   switch (status) {
     case 'missed':
-      color = theme.alt3ErrorText;
+      color = theme.errorText;
       break;
     case 'due':
       color = theme.warningText;
@@ -937,7 +937,7 @@ class Transaction extends PureComponent {
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
-      color: theme.altpageTextSubdued,
+      color: theme.pageTextLight,
     };
 
     return (

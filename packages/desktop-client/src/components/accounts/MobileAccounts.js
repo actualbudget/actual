@@ -23,7 +23,7 @@ function AccountHeader({ name, amount, style = {} }) {
         flex: '1 0 auto',
         flexDirection: 'row',
         marginTop: 10,
-        color: theme.altpageTextSubdued,
+        color: theme.pageTextLight,
         ...style,
       }}
     >
@@ -143,7 +143,7 @@ function EmptyMessage({ onAdd }) {
         Add Account
       </Button>
 
-      <Text style={{ marginTop: 20, color: theme.altpageTextSubdued }}>
+      <Text style={{ marginTop: 20, color: theme.pageTextLight }}>
         In the future, you can add accounts using the add button in the header.
       </Text>
     </View>
