@@ -187,6 +187,7 @@ export default function Custom() {
           end={end}
           data={data}
           split={split}
+          empty={empty}
           OnChangeLegend={OnChangeLegend}
           typeOp={typeOptions.find(opt => opt.value === type).format}
         />
@@ -210,6 +211,7 @@ export default function Custom() {
           end={end}
           data={data}
           split={split}
+          empty={empty}
           OnChangeLegend={OnChangeLegend}
           typeOp={typeOptions.find(opt => opt.value === type).format}
         />
@@ -259,18 +261,21 @@ export default function Custom() {
 
   function onChangeMode(cond) {
     setMode(cond);
-    if (graphType === 'StackedBarGraph' && cond === 'total') {
-      setGraphType('BarGraph');
-    }
-    if (graphType === 'BarGraph' && cond === 'time') {
-      setGraphType('StackedBarGraph');
-    }
-    if (
-      cond === 'time' &&
-      (graphType === 'AreaGraph' || graphType === 'DonutGraph')
-    ) {
-      setGraphType('TableGraph');
-      setViewSplit(false);
+    if (cond === 'time') {
+      if (graphType === 'BarGraph') {
+        setGraphType('StackedBarGraph');
+      }
+      if (['AreaGraph', 'DonutGraph'].includes(graphType)) {
+        setGraphType('TableGraph');
+        setViewSplit(false);
+      }
+      if ([5, 6].includes(split)) {
+        setSplit(1);
+      }
+    } else {
+      if (graphType === 'StackedBarGraph') {
+        setGraphType('BarGraph');
+      }
     }
   }
 

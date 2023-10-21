@@ -24,6 +24,7 @@ type DonutGraphProps = {
   data;
   split;
   typeOp;
+  empty;
   OnChangeLegend;
   compact: boolean;
   domain?: {
@@ -43,6 +44,7 @@ function DonutGraph({
   style,
   data,
   split,
+  empty,
   typeOp,
   OnChangeLegend,
   compact,
@@ -85,7 +87,7 @@ function DonutGraph({
       };
     });
 
-    OnChangeLegend(agg);
+    OnChangeLegend(agg.slice(0).reverse());
 
     return <div />;
   };
@@ -155,7 +157,13 @@ function DonutGraph({
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   isAnimationActive={false}
-                  data={yAxis === 'date' ? data.monthData : data.data}
+                  data={
+                    yAxis === 'date'
+                      ? data.monthData.filter(i =>
+                          empty ? i[typeOp] !== 0 : true,
+                        )
+                      : data.data.filter(i => (empty ? i[typeOp] !== 0 : true))
+                  }
                   outerRadius={200}
                   innerRadius={100}
                   fill="#8884d8"

@@ -27,6 +27,7 @@ type BarGraphProps = {
   data;
   split;
   typeOp;
+  empty;
   OnChangeLegend;
   compact: boolean;
   domain?: {
@@ -46,6 +47,7 @@ function BarGraph({
   style,
   data,
   split,
+  empty,
   typeOp,
   OnChangeLegend,
   compact,
@@ -63,6 +65,10 @@ function BarGraph({
       totalTotals: number | string;
       networth: number | string;
       totalChange: number | string;
+      children: {
+        fill: string;
+        name: string;
+      };
     };
   };
 
@@ -79,14 +85,14 @@ function BarGraph({
   };
 
   const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
-    const agg = payload.map(leg => {
+    const agg = payload[0].payload.children.map(leg => {
       return {
-        name: leg.value,
-        //color: leg.color,
+        name: leg.props.name,
+        color: leg.props.fill,
       };
     });
 
-    OnChangeLegend(agg);
+    OnChangeLegend(agg.slice(0).reverse());
 
     return <div />;
   };
@@ -157,7 +163,13 @@ function BarGraph({
               <BarChart
                 width={width}
                 height={height}
-                data={yAxis === 'date' ? data.monthData : data.data}
+                data={
+                  yAxis === 'date'
+                    ? data.monthData.filter(i =>
+                        empty ? i[typeOp] !== 0 : true,
+                      )
+                    : data.data.filter(i => (empty ? i[typeOp] !== 0 : true))
+                }
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 <Legend content={<CustomLegend />} />
@@ -170,12 +182,15 @@ function BarGraph({
                 <XAxis dataKey={yAxis} />
                 <YAxis />
                 <Bar dataKey={...typeOp}>
-                  {data.data.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={colorScale[index % colorScale.length]}
-                    />
-                  ))}
+                  {data.data
+                    .filter(i => (empty ? i[typeOp] !== 0 : true))
+                    .map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={colorScale[index % colorScale.length]}
+                        name={entry.name}
+                      />
+                    ))}
                 </Bar>
               </BarChart>
             </div>
