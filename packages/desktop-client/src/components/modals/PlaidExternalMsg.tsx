@@ -2,13 +2,13 @@ import React, { useState, useRef } from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
+import { type CommonModalProps } from '../../types/modals';
 import { Error } from '../alerts';
 import Button from '../common/Button';
 import Modal, { ModalButtons } from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
-import { type CommonModalProps } from '../../types/modals';
 
 function renderError(error) {
   return (
@@ -22,10 +22,10 @@ function renderError(error) {
 
 type PlainExternalMsgProps = {
   modalProps: CommonModalProps;
-  onMoveExternal: () => Promise<{ error: any; data: any; }>;
+  onMoveExternal: () => Promise<{ error; data }>;
   onSuccess: (data: unknown) => Promise<void>;
   onClose?: () => void;
-}
+};
 
 export default function PlaidExternalMsg({
   modalProps,
