@@ -110,7 +110,7 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
                   style={{
                     textAlign: 'right',
                     fontSize: '0.7em',
-                    color: theme.altpageTextSubdued,
+                    color: theme.pageTextLight,
                     marginTop: 3,
                   }}
                 >
