@@ -148,6 +148,14 @@ function BarGraph({
     }
   };
 
+  const getVal = obj => {
+    if (typeOp === 'totalDebts') {
+      return -1 * obj[typeOp];
+    } else {
+      return obj[typeOp];
+    }
+  };
+
   return (
     <Container
       style={{
@@ -181,7 +189,7 @@ function BarGraph({
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey={yAxis} />
                 <YAxis />
-                <Bar dataKey={...typeOp}>
+                <Bar dataKey={val => getVal(val)}>
                   {data.data
                     .filter(i => (empty ? i[typeOp] !== 0 : true))
                     .map((entry, index) => (

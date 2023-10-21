@@ -77,7 +77,14 @@ export default function createSpreadsheet(
                 [conditionsOpKey]: filters,
                 [splitLabel]: splt.id,
                 'account.offbudget': false,
+                'category.hidden': false,
                 date: { $lt: start + '-01' },
+                $or: [
+                  {
+                    'payee.transfer_acct.offbudget': true,
+                    'payee.transfer_acct': null,
+                  },
+                ],
               })
               .calculate({ $sum: '$amount' }),
           ).then(({ data }) => data),
@@ -90,9 +97,16 @@ export default function createSpreadsheet(
               .filter({
                 [splitLabel]: splt.id,
                 'account.offbudget': false,
+                'category.hidden': false,
                 $and: [
                   { date: { $gte: start + '-01' } },
                   { date: { $lte: end + '-31' } },
+                ],
+                $or: [
+                  {
+                    'payee.transfer_acct.offbudget': true,
+                    'payee.transfer_acct': null,
+                  },
                 ],
               })
               .groupBy({ $month: '$date' })
@@ -106,6 +120,7 @@ export default function createSpreadsheet(
         return {
           id: splt.id,
           name: splt.name,
+          hidden: splt.hidden,
           balances: index(balances, 'date'),
           starting,
         };
@@ -120,9 +135,11 @@ export default function createSpreadsheet(
           months.map(async month => {
             let groupedAmount = 0;
             graphData.map(async graph => {
-              if (graph.balances[month]) {
-                if (group.categories.map(v => v.id).includes(graph.id)) {
-                  groupedAmount += graph.balances[month].amount;
+              if (graph.hidden === 0 && group.hidden === 0) {
+                if (graph.balances[month]) {
+                  if (group.categories.map(v => v.id).includes(graph.id)) {
+                    groupedAmount += graph.balances[month].amount;
+                  }
                 }
               }
 
@@ -130,6 +147,7 @@ export default function createSpreadsheet(
             });
             return {
               date: month,
+              dateFormatted: d.format(d.parseISO(`${month}-01`), 'MMMM yyyy'),
               amount: groupedAmount,
             };
           }),
@@ -183,10 +201,10 @@ export default function createSpreadsheet(
         totalDebts += perMonthDebts;
         totalTotals += perMonthTotals;
 
-        const test = index(stacked, 'name');
+        const indexedSplit = index(stacked, 'name');
         return {
-          date: month,
-          ...test,
+          date: d.format(d.parseISO(`${month}-01`), 'MMMM yyyy'),
+          ...indexedSplit,
           totalDebts: -1 * integerToAmount(perMonthDebts),
           totalAssets: integerToAmount(perMonthAssets),
           totalTotals:

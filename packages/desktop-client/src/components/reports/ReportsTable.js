@@ -1,4 +1,6 @@
 import React from 'react';
+
+import * as d from 'date-fns';
 //import { useSelector } from 'react-redux';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -65,7 +67,13 @@ export default function ReportsTable({
         >
           <Cell value={split} width="flex" />
           {months.map(header => {
-            return <Cell key={header} value={header} width="flex" />;
+            return (
+              <Cell
+                key={header}
+                value={d.format(d.parseISO(`${header}-01`), 'MMMM yyyy')}
+                width="flex"
+              />
+            );
           })}
           <Cell value={'Totals'} width="flex" />
         </Row>
