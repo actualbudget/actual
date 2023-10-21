@@ -1,6 +1,9 @@
-import { styles, theme } from '../../style';
+import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
-export function addToBeBudgetedGroup(groups) {
+import { styles, theme } from '../../style';
+import { type DropPosition } from '../sort';
+
+export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
     {
       id: 'to-be-budgeted',
@@ -11,20 +14,20 @@ export function addToBeBudgetedGroup(groups) {
   ];
 }
 
-export function separateGroups(categoryGroups) {
+export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
   return [
     categoryGroups.filter(g => !g.is_income),
     categoryGroups.find(g => g.is_income),
   ];
 }
 
-export function makeAmountGrey(value) {
+export function makeAmountGrey(value: number | string) {
   return value === 0 || value === '0' || value === ''
     ? { color: theme.altMenuItemText }
     : null;
 }
 
-export function makeAmountStyle(value) {
+export function makeAmountStyle(value: number) {
   const greyed = makeAmountGrey(value);
   if (greyed) {
     return greyed;
@@ -35,7 +38,7 @@ export function makeAmountStyle(value) {
   }
 }
 
-export function makeAmountFullStyle(value) {
+export function makeAmountFullStyle(value: number) {
   return {
     color:
       value < 0
@@ -46,7 +49,11 @@ export function makeAmountFullStyle(value) {
   };
 }
 
-export function findSortDown(arr, pos, targetId) {
+export function findSortDown(
+  arr: CategoryGroupEntity[],
+  pos: DropPosition,
+  targetId: string,
+) {
   if (pos === 'top') {
     return { targetId };
   } else {
@@ -66,7 +73,11 @@ export function findSortDown(arr, pos, targetId) {
   }
 }
 
-export function findSortUp(arr, pos, targetId) {
+export function findSortUp(
+  arr: CategoryGroupEntity[],
+  pos: DropPosition,
+  targetId: string,
+) {
   if (pos === 'bottom') {
     return { targetId };
   } else {

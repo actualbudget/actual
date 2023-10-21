@@ -20,6 +20,8 @@ type DragState = {
   item?: unknown;
 };
 
+export type DropPosition = 'top' | 'bottom';
+
 export type OnDragChangeCallback = (drag: DragState) => Promise<void> | void;
 type UseDraggableArgs = {
   item: unknown;
@@ -64,7 +66,6 @@ export function useDraggable({
 
   return { dragRef };
 }
-type DropPosition = 'top' | 'bottom';
 
 export type OnDropCallback = (
   id: unknown,
@@ -129,7 +130,7 @@ export const DropHighlightPosContext: Context<ItemPosition> =
   createContext(null);
 
 type DropHighlightProps = {
-  pos: 'top' | 'bottom';
+  pos: DropPosition;
   offset?: {
     top?: number;
     bottom?: number;
