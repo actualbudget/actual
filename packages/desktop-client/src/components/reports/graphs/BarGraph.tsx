@@ -65,10 +65,14 @@ function BarGraph({
       totalTotals: number | string;
       networth: number | string;
       totalChange: number | string;
-      children: {
-        fill: string;
-        name: string;
-      };
+      children: [tester];
+    };
+  };
+
+  type tester = {
+    props: {
+      name: string;
+      fill: string;
     };
   };
 
