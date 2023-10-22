@@ -165,15 +165,18 @@ function StackedBarGraph({
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
-                {data.split.slice(0).reverse().map((c, index) => (
-                  <Bar
-                    key={c.id}
-                    dataKey={val => getVal(val, c.name)}
-                    name={c.name}
-                    stackId="a"
-                    fill={colorScale[index % colorScale.length]}
-                  />
-                ))}
+                {data.split
+                  .slice(0)
+                  .reverse()
+                  .map((c, index) => (
+                    <Bar
+                      key={c.id}
+                      dataKey={val => getVal(val, c.name)}
+                      name={c.name}
+                      stackId="a"
+                      fill={colorScale[index % colorScale.length]}
+                    />
+                  ))}
               </BarChart>
             </div>
           </ResponsiveContainer>
