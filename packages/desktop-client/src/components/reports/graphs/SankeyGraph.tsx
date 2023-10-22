@@ -103,7 +103,7 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
           bottom: 25,
         }}
       >
-        <Tooltip formatter={numberFormatterTooltip} isAnimationActive={false} />
+        <Tooltip formatter={numberFormatterTooltip} isAnimationActive={false} separator=': '/>
       </Sankey>
     </ResponsiveContainer>
   );
