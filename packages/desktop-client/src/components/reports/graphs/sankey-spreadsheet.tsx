@@ -98,16 +98,22 @@ export default function createSpreadsheet(
         });
       });
 
-      // Fetching names based on payee ID
+      // First, collect all unique IDs from payeesDict
+      let payeeIds = Object.keys(payeesDict);
+
+      const results = await runQuery(
+        q('payees')
+          .filter({ id: { $oneof: payeeIds } })
+          .select(['id', 'name']),
+      );
+
+      // Convert the resulting array to a payee-name-map
       let payeeNames = {};
-      for (let id in payeesDict) {
-        const result = await runQuery(
-          q('payees').filter({ id: id }).select(['name']),
-        );
-        if (result.data.length > 0 && result.data[0].name) {
-          payeeNames[result.data[0].name] = payeesDict[id];
+      results.data.forEach(item => {
+        if (item.name && payeesDict[item.id]) {
+          payeeNames[item.name] = payeesDict[item.id];
         }
-      }
+      });
       return payeeNames;
     }
     const categoryData = await fetchCategoryData(categories);

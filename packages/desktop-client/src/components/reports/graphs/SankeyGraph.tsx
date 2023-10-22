@@ -97,22 +97,26 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
         iterations={1000}
         nodePadding={23}
         margin={
-          compact 
-          ? {
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-            }
-          : {
-              left: 0,
-              right: 0,
-              top: 10,
-              bottom: 25,
-            }
+          compact
+            ? {
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+              }
+            : {
+                left: 0,
+                right: 0,
+                top: 10,
+                bottom: 25,
+              }
         }
       >
-        <Tooltip formatter={numberFormatterTooltip} isAnimationActive={false} separator=': '/>
+        <Tooltip
+          formatter={numberFormatterTooltip}
+          isAnimationActive={false}
+          separator=": "
+        />
       </Sankey>
     </ResponsiveContainer>
   );
