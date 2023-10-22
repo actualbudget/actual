@@ -237,7 +237,7 @@ function parseAmountFields(
   trans,
   splitMode,
   inOutMode,
-  outText,
+  outValue,
   flipAmount,
   multiplierAmount,
 ) {
@@ -262,7 +262,7 @@ function parseAmountFields(
     return {
       amount:
         parseAmount(trans.amount, n =>
-          trans.inout === outText ? Math.abs(n) * -1 : Math.abs(n),
+          trans.inout === outValue ? Math.abs(n) * -1 : Math.abs(n),
         ) * multiplier,
       outflow: null,
       inflow: null,
@@ -284,7 +284,7 @@ function Transaction({
   dateFormat,
   splitMode,
   inOutMode,
-  outText,
+  outValue,
   flipAmount,
   multiplierAmount,
 }) {
@@ -300,7 +300,7 @@ function Transaction({
     transaction,
     splitMode,
     inOutMode,
-    outText,
+    outValue,
     flipAmount,
     multiplierAmount,
   );
@@ -500,7 +500,13 @@ function MultiplierOption({
   );
 }
 
-function InOutOption({ inOutMode, outText, disabled, onToggle, onChangeText }) {
+function InOutOption({
+  inOutMode,
+  outValue,
+  disabled,
+  onToggle,
+  onChangeText,
+}) {
   return (
     <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
       <CheckboxOption
@@ -510,16 +516,17 @@ function InOutOption({ inOutMode, outText, disabled, onToggle, onChangeText }) {
         onChange={onToggle}
       >
         {inOutMode
-          ? 'In/out column'
+          ? 'in/out field'
           : 'Select column to specify if amount goes in/out'}
       </CheckboxOption>
-      <Input
-        type="text"
-        style={{ display: inOutMode ? 'inherit' : 'none' }}
-        value={outText}
-        placeholder="Out text"
-        onUpdate={onChangeText}
-      />
+      {inOutMode && (
+        <Input
+          type="text"
+          value={outValue}
+          onUpdate={onChangeText}
+          placeholder="Out value"
+        />
+      )}
     </View>
   );
 }
@@ -652,7 +659,7 @@ export default function ImportTransactions({ modalProps, options }) {
   let [fieldMappings, setFieldMappings] = useState(null);
   let [splitMode, setSplitMode] = useState(false);
   let [inOutMode, setInOutMode] = useState(false);
-  let [outText, setOutText] = useState('Debit');
+  let [outValue, setOutValue] = useState('');
   let [flipAmount, setFlipAmount] = useState(false);
   let [multiplierEnabled, setMultiplierEnabled] = useState(false);
   let { accountId, onImported } = options;
@@ -836,7 +843,7 @@ export default function ImportTransactions({ modalProps, options }) {
         trans,
         splitMode,
         inOutMode,
-        outText,
+        outValue,
         flipAmount,
         multiplierAmount,
       );
@@ -965,7 +972,7 @@ export default function ImportTransactions({ modalProps, options }) {
                   fieldMappings={fieldMappings}
                   splitMode={splitMode}
                   inOutMode={inOutMode}
-                  outText={outText}
+                  outValue={outValue}
                   flipAmount={flipAmount}
                   multiplierAmount={multiplierAmount}
                 />
@@ -1129,10 +1136,10 @@ export default function ImportTransactions({ modalProps, options }) {
                   </CheckboxOption>
                   <InOutOption
                     inOutMode={inOutMode}
-                    outText={outText}
+                    outValue={outValue}
                     disabled={splitMode || flipAmount}
                     onToggle={() => setInOutMode(!inOutMode)}
-                    onChangeText={setOutText}
+                    onChangeText={setOutValue}
                   />
                 </>
               )}
