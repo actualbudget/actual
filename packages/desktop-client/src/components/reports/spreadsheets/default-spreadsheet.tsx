@@ -14,12 +14,12 @@ import { index } from '../util';
 export default function createSpreadsheet(
   start,
   end,
+  split,
   categories,
   payees,
   accounts,
   conditions = [],
   conditionsOp,
-  split,
 ) {
   let splitItem;
   let splitList;
@@ -59,7 +59,7 @@ export default function createSpreadsheet(
   }
 
   return async (spreadsheet, setData) => {
-    if (accounts.length === 0) {
+    if (splitItem.length === 0) {
       return null;
     }
 

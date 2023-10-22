@@ -129,14 +129,14 @@ export default function Custom() {
     return defaultSpreadsheet(
       start,
       end,
+      split,
       categories,
       payees,
       accounts,
       filters,
       conditionsOp,
-      split,
     );
-  }, [start, end, categories, payees, accounts, filters, conditionsOp, split]);
+  }, [start, end, split, categories, payees, accounts, filters, conditionsOp]);
   const data = useReport('default', getGraphData);
 
   useEffect(() => {

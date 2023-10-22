@@ -102,6 +102,8 @@ export default function ExperimentalFeatures() {
               Category spending report
             </FeatureToggle>
 
+            <FeatureToggle flag="customReports">Custom reports</FeatureToggle>
+
             <ReportBudgetFeature />
 
             <FeatureToggle flag="goalTemplatesEnabled">

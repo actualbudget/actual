@@ -19,10 +19,12 @@ import Change from './Change';
 import { chartTheme } from './chart-theme';
 import Container from './Container';
 import DateRange from './DateRange';
+import BarGraph from './graphs/BarGraph';
 import CategorySpendingGraph from './graphs/CategorySpendingGraph';
 import NetWorthGraph from './graphs/NetWorthGraph';
 import { simpleCashFlow } from './spreadsheets/cash-flow-spreadsheet';
 import categorySpendingSpreadsheet from './spreadsheets/category-spending-spreadsheet';
+import defaultSpreadsheet from './spreadsheets/default-spreadsheet';
 import netWorthSpreadsheet from './spreadsheets/net-worth-spreadsheet';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
@@ -325,10 +327,57 @@ function CategorySpendingCard() {
   );
 }
 
+function CustomReportsCard() {
+  const categories = useCategories();
+
+  const end = monthUtils.currentMonth();
+  const start = monthUtils.subMonths(end, 3);
+  const split = 1;
+
+  const getGraphData = useMemo(() => {
+    return defaultSpreadsheet(start, end, split, categories);
+  }, [start, end, categories]);
+  const data = useReport('default', getGraphData);
+
+  return (
+    <Card flex={1} to="/reports/custom">
+      <View>
+        <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
+          <View style={{ flex: 1 }}>
+            <Block
+              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
+              role="heading"
+            >
+              Custom
+            </Block>
+            <DateRange start={start} end={end} />
+          </View>
+        </View>
+      </View>
+
+      {data ? (
+        <BarGraph
+          start={start}
+          end={end}
+          graphData={data}
+          compact={true}
+          split={1}
+          empty={true}
+          typeOp={'totalDebts'}
+        />
+      ) : (
+        <LoadingIndicator />
+      )}
+    </Card>
+  );
+}
+
 export default function Overview() {
   let categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );
+
+  let customReportsFeatureFlag = useFeatureFlag('customReports');
 
   let accounts = useSelector(state => state.queries.accounts);
   return (
@@ -356,6 +405,19 @@ export default function Overview() {
           }}
         >
           <CategorySpendingCard />
+          <div style={{ flex: 1 }} />
+          <div style={{ flex: 1 }} />
+        </View>
+      )}
+
+      {customReportsFeatureFlag && (
+        <View
+          style={{
+            flex: '0 0 auto',
+            flexDirection: 'row',
+          }}
+        >
+          <CustomReportsCard />
           <div style={{ flex: 1 }} />
           <div style={{ flex: 1 }} />
         </View>

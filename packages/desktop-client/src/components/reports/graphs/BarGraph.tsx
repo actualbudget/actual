@@ -190,9 +190,9 @@ function BarGraph({
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey={yAxis} />
-                <YAxis />
+                {compact ? null : <CartesianGrid strokeDasharray="3 3" />}
+                {compact ? null : <XAxis dataKey={yAxis} />}
+                {compact ? null : <YAxis />}
                 <Bar dataKey={val => getVal(val)}>
                   {data.data
                     .filter(i => (empty ? i[typeOp] !== 0 : true))
