@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  type SetStateAction,
+  type Dispatch,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
@@ -7,6 +14,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
+import { type RuleEntity } from 'loot-core/src/types/models';
 
 import useCategories from '../hooks/useCategories';
 import useSelected, { SelectedProvider } from '../hooks/useSelected';
@@ -76,7 +84,17 @@ function ruleToString(rule, data) {
   );
 }
 
-function ManageRulesContent({ isModal, payeeId, setLoading }) {
+type ManageRulesContentProps = {
+  isModal: boolean;
+  payeeId: string | null;
+  setLoading?: Dispatch<SetStateAction<boolean>>;
+};
+
+function ManageRulesContent({
+  isModal,
+  payeeId,
+  setLoading,
+}: ManageRulesContentProps) {
   let [allRules, setAllRules] = useState(null);
   let [rules, setRules] = useState(null);
   let [filter, setFilter] = useState('');
@@ -191,7 +209,7 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
   }, []);
 
   function onCreateRule() {
-    let rule = {
+    let rule: RuleEntity = {
       stage: null,
       conditionsOp: 'and',
       conditions: [
@@ -314,11 +332,17 @@ function ManageRulesContent({ isModal, payeeId, setLoading }) {
   );
 }
 
+type ManageRulesProps = {
+  isModal: boolean;
+  payeeId: string | null;
+  setLoading?: Dispatch<SetStateAction<boolean>>;
+};
+
 export default function ManageRules({
   isModal,
   payeeId,
   setLoading = () => {},
-}) {
+}: ManageRulesProps) {
   return (
     <SchedulesQuery.Provider>
       <ManageRulesContent
