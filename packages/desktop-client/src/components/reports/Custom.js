@@ -106,7 +106,6 @@ export default function Custom() {
     onCondOpChange,
   } = useFilters();
 
-  //const [legend, setLegend] = useState([]);
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
@@ -116,7 +115,9 @@ export default function Custom() {
   const [mode, setMode] = useState('total');
   const [split, setSplit] = useState(1);
   const [type, setType] = useState(1);
+  //const [interval, setInterval] = useState(4);
   const [empty, setEmpty] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [dateRange, setDateRange] = useState(2);
 
   const [graphType, setGraphType] = useState('BarGraph');
@@ -187,7 +188,7 @@ export default function Custom() {
           end={end}
           data={data}
           split={split}
-          empty={empty}
+          empty={!empty}
           OnChangeLegend={OnChangeLegend}
           typeOp={typeOptions.find(opt => opt.value === type).format}
         />
@@ -211,7 +212,7 @@ export default function Custom() {
           end={end}
           data={data}
           split={split}
-          empty={empty}
+          empty={!empty}
           OnChangeLegend={OnChangeLegend}
           typeOp={typeOptions.find(opt => opt.value === type).format}
         />
@@ -247,7 +248,7 @@ export default function Custom() {
           months={months}
           type={type}
           mode={mode}
-          empty={empty}
+          empty={!empty}
           split={splitOptions.find(opt => opt.value === split).description}
         />
       );
@@ -353,6 +354,16 @@ export default function Custom() {
     { value: 2, description: 'Income', format: 'totalAssets' },
     { value: 3, description: 'All', format: 'totalTotals' },
   ];
+
+  /*
+  const intervalOptions = [
+    { value: 1, description: 'Daily', name: 1 },
+    { value: 2, description: 'Weekly', name: 2 },
+    { value: 3, description: 'Fortnightly', name: 3 },
+    { value: 4, description: 'Monthly', name: 4 },
+    { value: 5, description: 'Yearly', name: 5 },
+  ];
+  */
 
   const dateRangeOptions = [
     { value: 0, description: '1 month', name: 1 },
@@ -463,6 +474,30 @@ export default function Custom() {
               }
             />
           </View>
+          {/*
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5, paddingLeft: -10 }}>
+              Interval:
+            </Text>
+            <Select
+              value={interval}
+              onChange={setInterval}
+              options={intervalOptions.map(option => [
+                option.value,
+                option.description,
+              ])}
+              disabledKeys={
+                [1,2,3,4,5]
+              }
+            />
+          </View>
+          */}
           <View
             style={{
               flexDirection: 'row',
@@ -478,8 +513,35 @@ export default function Custom() {
               value={empty}
               onChange={() => setEmpty(!empty)}
             />
-            <label htmlFor="hide-empty-columns" style={{ fontSize: 12 }}>
-              Hide Empty Rows
+            <label
+              htmlFor="hide-empty-columns"
+              title="Rows that are zero or blank"
+              style={{ fontSize: 12 }}
+            >
+              Show Empty Rows
+            </label>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+
+            <Checkbox
+              id="hide-hidden-columns"
+              checked={hidden}
+              value={hidden}
+              onChange={() => setHidden(!hidden)}
+            />
+            <label
+              htmlFor="hide-hidden-columns"
+              title="Off budget accounts or hidden categories"
+              style={{ fontSize: 12 }}
+            >
+              Off Budget Items
             </label>
           </View>
           <View

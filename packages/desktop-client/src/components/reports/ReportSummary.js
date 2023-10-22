@@ -122,36 +122,33 @@ export function ReportSplit({ data, legend, splitType }) {
         {splitType}
       </Text>
       <View>
-        {legend
-          .slice(0)
-          .reverse()
-          .map(item => {
-            return (
-              <View
-                key={item.name}
+        {legend.map(item => {
+          return (
+            <View
+              key={item.name}
+              style={{
+                padding: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <YinYang
+                style={{ marginRight: 5, color: item.color }}
+                width={14}
+                height={14}
+              />
+              <Text
                 style={{
-                  padding: 10,
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  flexShrink: 0,
                 }}
               >
-                <YinYang
-                  style={{ marginRight: 5, color: item.color }}
-                  width={14}
-                  height={14}
-                />
-                <Text
-                  style={{
-                    whiteSpace: 'nowrap',
-                    textOverflow: 'ellipsis',
-                    flexShrink: 0,
-                  }}
-                >
-                  {item.name}
-                </Text>
-              </View>
-            );
-          })}
+                {item.name}
+              </Text>
+            </View>
+          );
+        })}
       </View>
     </View>
   );

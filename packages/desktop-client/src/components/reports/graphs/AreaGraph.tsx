@@ -11,6 +11,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { amountToCurrency } from 'loot-core/src/shared/util';
+
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
@@ -96,15 +98,19 @@ function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
               <PrivacyFilter>
                 <AlignedText
                   left="Assets:"
-                  right={payload[0].payload.totalAssets}
+                  right={amountToCurrency(payload[0].payload.totalAssets)}
                 />
                 <AlignedText
                   left="Debt:"
-                  right={payload[0].payload.totalDebts}
+                  right={amountToCurrency(payload[0].payload.totalDebts)}
                 />
                 <AlignedText
                   left="All:"
-                  right={<strong>payload[0].payload.totalTotals</strong>}
+                  right={
+                    <strong>
+                      {amountToCurrency(payload[0].payload.totalTotals)}
+                    </strong>
+                  }
                 />
               </PrivacyFilter>
             </div>

@@ -87,7 +87,7 @@ function DonutGraph({
       };
     });
 
-    OnChangeLegend(agg.slice(0).reverse());
+    OnChangeLegend(agg);
 
     return <div />;
   };

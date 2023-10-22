@@ -80,7 +80,7 @@ function StackedBarGraph({
       };
     });
 
-    OnChangeLegend(agg);
+    OnChangeLegend(agg.slice(0).reverse());
 
     return <div />;
   };
@@ -165,7 +165,7 @@ function StackedBarGraph({
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
-                {data.split.map((c, index) => (
+                {data.split.slice(0).reverse().map((c, index) => (
                   <Bar
                     key={c.id}
                     dataKey={val => getVal(val, c.name)}
