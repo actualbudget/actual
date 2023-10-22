@@ -643,6 +643,7 @@ export default function Custom() {
           >
             <GraphButton
               selected={graphType === 'TableGraph'}
+              title="Data Table"
               onSelect={() => {
                 onChangeGraph('TableGraph');
                 setViewSplit(false);
@@ -651,6 +652,7 @@ export default function Custom() {
               <InboxFull width={15} height={15} />
             </GraphButton>
             <GraphButton
+              title={mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'}
               selected={
                 graphType === 'BarGraph' || graphType === 'StackedBarGraph'
               }
@@ -666,6 +668,7 @@ export default function Custom() {
               <ChartBar width={15} height={15} />
             </GraphButton>
             <GraphButton
+              title="Area Graph"
               selected={graphType === 'AreaGraph'}
               onSelect={() => {
                 onChangeGraph('AreaGraph');
@@ -678,6 +681,7 @@ export default function Custom() {
               <Chart width={15} height={15} />
             </GraphButton>
             <GraphButton
+              title="Donut Graph"
               selected={graphType === 'DonutGraph'}
               onSelect={() => {
                 onChangeGraph('DonutGraph');
