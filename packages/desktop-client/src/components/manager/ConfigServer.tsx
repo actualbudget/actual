@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import {
   isNonProductionEnvironment,
@@ -7,6 +6,7 @@ import {
 } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
+import useNavigate from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
 import Button, { ButtonWithLoading } from '../common/Button';
