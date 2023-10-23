@@ -1,9 +1,7 @@
 import React, { useRef, useState } from 'react';
 
-import {
-  currencyToInteger,
-  integerToCurrency,
-} from 'loot-core/src/shared/util';
+import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import Add from '../../icons/v1/Add';
@@ -12,11 +10,12 @@ import { theme } from '../../style';
 import Button from '../common/Button';
 import InputWithContent from '../common/InputWithContent';
 import View from '../common/View';
+import useFormat from '../spreadsheet/useFormat';
 
 export function AmountInput({
   id,
   inputRef,
-  initialValue = 0,
+  initialValue,
   zeroSign = '-', // + or -
   onChange,
   onBlur,
@@ -24,10 +23,13 @@ export function AmountInput({
   textStyle,
   focused,
 }) {
+  initialValue = initialValue ?? 0;
+
+  let format = useFormat();
   let [negative, setNegative] = useState(
     (initialValue === 0 && zeroSign === '-') || initialValue < 0,
   );
-  let initialValueAbsolute = integerToCurrency(Math.abs(initialValue || 0));
+  let initialValueAbsolute = format(Math.abs(initialValue), 'financial');
   let [value, setValue] = useState(initialValueAbsolute);
   let buttonRef = useRef();
 
@@ -38,11 +40,12 @@ export function AmountInput({
 
   function fireChange(val, neg) {
     let valueOrInitial = Math.abs(
-      currencyToInteger(val ? val : initialValueAbsolute),
+      amountToInteger(evalArithmetic(val, initialValueAbsolute)),
     );
     let amount = neg ? valueOrInitial * -1 : valueOrInitial;
 
     onChange?.(amount);
+    setValue(format(amount, 'financial'));
   }
 
   function onInputAmountChange(value) {
