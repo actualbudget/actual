@@ -401,6 +401,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             width: 90,
             textAlign: 'right',
           }}
+          getStyle={value => makeAmountGrey(value || '')}
           type="financial"
         />
         <CellValue
@@ -411,7 +412,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
             width: 90,
             textAlign: 'right',
           }}
-          getStyle={value => value < 0 && { color: theme.errorText }}
+          getStyle={value =>
+            value < 0 ? { color: theme.errorText } : makeAmountGrey(value || '')
+          }
           type="financial"
         />
       </View>
