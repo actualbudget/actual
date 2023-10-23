@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
+import useNavigate from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import Button from '../../common/Button';
 import Text from '../../common/Text';

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 
 import * as queries from 'loot-core/src/client/queries';
 
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
+import useNavigate from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme, styles } from '../../style';
 import Button from '../common/Button';
