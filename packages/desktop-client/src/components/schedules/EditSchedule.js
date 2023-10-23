@@ -488,7 +488,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               }}
               style={{
                 padding: '0 10px',
-                color: theme.altpageTextSubdued,
+                color: theme.pageTextLight,
                 fontSize: 12,
               }}
               onChange={(_, op) =>
@@ -634,7 +634,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               {state.isCustom && (
                 <Text
                   style={{
-                    color: theme.altpageTextSubdued,
+                    color: theme.pageTextLight,
                     fontSize: 13,
                     textAlign: 'right',
                     width: 350,

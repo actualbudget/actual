@@ -35,7 +35,10 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
             }
           >
             <VictoryGroup>
-              <VictoryBar data={graphData.expenses} />
+              <VictoryBar
+                data={graphData.expenses}
+                style={{ data: { fill: chartTheme.colors.red } }}
+              />
               <VictoryBar data={graphData.income} />
             </VictoryGroup>
             <VictoryLine
@@ -43,7 +46,7 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
               labelComponent={<Tooltip portalHost={portalHost} />}
               labels={x => x.premadeLabel}
               style={{
-                data: { stroke: theme.altpageTextSubdued },
+                data: { stroke: theme.pageTextLight },
               }}
             />
             <VictoryAxis

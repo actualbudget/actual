@@ -186,7 +186,7 @@ function PayeeList({
                   style={{
                     fontSize: isNarrowWidth ? 'inherit' : 11,
                     padding: 5,
-                    color: theme.altpageTextSubdued,
+                    color: theme.pageTextLight,
                     textAlign: 'center',
                   }}
                 >
