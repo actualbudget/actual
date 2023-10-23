@@ -151,10 +151,24 @@ function transformToSankeyData(categoryData, incomeData) {
       let mainCategorySum = 0;
       for (let subCategory of mainCategory.balances) {
         if (!nodeNames.has(subCategory.subcategory) && subCategory.value > 0) {
+          mainCategorySum += subCategory.value;
+        }
+      }
+      if (mainCategorySum === 0) {
+        continue;
+      }
+      data.nodes.push({ name: mainCategory.name });
+      nodeNames.add(mainCategory.name);
+      data.links.push({
+        source: 'Budget',
+        target: mainCategory.name,
+        value: integerToAmount(mainCategorySum),
+      });
+
+      for (let subCategory of mainCategory.balances) {
+        if (!nodeNames.has(subCategory.subcategory) && subCategory.value > 0) {
           data.nodes.push({ name: subCategory.subcategory });
           nodeNames.add(subCategory.subcategory);
-
-          mainCategorySum += subCategory.value;
 
           data.links.push({
             source: mainCategory.name,
@@ -162,15 +176,6 @@ function transformToSankeyData(categoryData, incomeData) {
             value: integerToAmount(subCategory.value),
           });
         }
-      }
-      if (mainCategorySum > 0) {
-        data.nodes.push({ name: mainCategory.name });
-        nodeNames.add(mainCategory.name);
-        data.links.push({
-          source: 'Budget',
-          target: mainCategory.name,
-          value: integerToAmount(mainCategorySum),
-        });
       }
     }
   }
