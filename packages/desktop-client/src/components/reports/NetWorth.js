@@ -13,12 +13,10 @@ import Paragraph from '../common/Paragraph';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
-import Change from './Change';
 import NetWorthGraph from './graphs/NetWorthGraph';
 import Header from './Header';
 import netWorthSpreadsheet from './spreadsheets/net-worth-spreadsheet';
-import useReport from './useReport';
-import { fromDateRepr } from './util';
+import { Change, fromDateRepr, useReport } from './util';
 
 export default function NetWorth() {
   let accounts = useSelector(state => state.queries.accounts);

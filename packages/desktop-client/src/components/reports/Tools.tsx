@@ -1,14 +1,40 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useRef, useState, type ReactNode } from 'react';
+import AutoSizer from 'react-virtualized-auto-sizer';
 
 import Eye from '../../icons/v2/Eye';
 import EyeSlashed from '../../icons/v2/EyeSlashed';
+import { type CSSProperties } from '../../style';
 import {
   type Category,
   type CategoryGroup,
   type CategoryListProps,
 } from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
+import View from '../common/View';
 import { Checkbox } from '../forms';
+
+type ContainerProps = {
+  style?: CSSProperties;
+  children: (width: number, height: number, host: HTMLDivElement) => ReactNode;
+};
+export function Container({ style, children }: ContainerProps) {
+  const portalHost = useRef<HTMLDivElement>(null);
+
+  return (
+    <View
+      style={{ height: 300, position: 'relative', flexShrink: 0, ...style }}
+    >
+      <div ref={portalHost} />
+      <AutoSizer>
+        {({ width, height }) => (
+          <div style={{ width, height }}>
+            {children(width, height, portalHost.current)}
+          </div>
+        )}
+      </AutoSizer>
+    </View>
+  );
+}
 
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroup>;
@@ -16,7 +42,7 @@ type CategorySelectorProps = {
   setSelectedCategories: (selectedCategories: Category[]) => null;
 };
 
-export default function CategorySelector({
+export function CategorySelector({
   categoryGroups,
   selectedCategories,
   setSelectedCategories,

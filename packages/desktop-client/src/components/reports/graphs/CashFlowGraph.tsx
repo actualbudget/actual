@@ -12,8 +12,8 @@ import {
 
 import { theme } from '../../../style';
 import { chartTheme } from '../chart-theme';
-import Container from '../Container';
-import Tooltip from '../Tooltip';
+import { Container } from '../Tools';
+import { Tooltip } from '../util';
 
 type CashFlowGraphProps = {
   graphData: { expenses; income; balances };

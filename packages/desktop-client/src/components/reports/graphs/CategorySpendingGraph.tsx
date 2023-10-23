@@ -4,9 +4,9 @@ import * as d from 'date-fns';
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryStack } from 'victory';
 
 import { chartTheme } from '../chart-theme';
-import Container from '../Container';
 import { type CategorySpendingGraphData } from '../spreadsheets/category-spending-spreadsheet';
-import Tooltip from '../Tooltip';
+import { Container } from '../Tools';
+import { Tooltip } from '../util';
 
 import { Area } from './common';
 

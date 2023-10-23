@@ -15,11 +15,10 @@ import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
-import Change from './Change';
 import CashFlowGraph from './graphs/CashFlowGraph';
 import Header from './Header';
 import { cashFlowByDate } from './spreadsheets/cash-flow-spreadsheet';
-import useReport from './useReport';
+import { Change, useReport } from './util';
 
 function CashFlow() {
   const {

@@ -10,12 +10,11 @@ import { styles } from '../../style';
 import Select from '../common/Select';
 import View from '../common/View';
 
-import CategorySelector from './CategorySelector';
 import CategorySpendingGraph from './graphs/CategorySpendingGraph';
 import Header from './Header';
 import categorySpendingSpreadsheet from './spreadsheets/category-spending-spreadsheet';
-import useReport from './useReport';
-import { fromDateRepr } from './util';
+import { CategorySelector } from './Tools';
+import { fromDateRepr, useReport } from './util';
 
 function CategoryAverage() {
   const categories = useCategories();

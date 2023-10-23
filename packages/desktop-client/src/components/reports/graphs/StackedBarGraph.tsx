@@ -16,7 +16,7 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
-import Container from '../Container';
+import { Container } from '../Tools';
 
 type StackedBarGraphProps = {
   style?: CSSProperties;
