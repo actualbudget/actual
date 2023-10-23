@@ -8,7 +8,10 @@ import usePrevious from '../../hooks/usePrevious';
 import Add from '../../icons/v1/Add';
 import Cog from '../../icons/v1/Cog';
 import PiggyBank from '../../icons/v1/PiggyBank';
+import StoreFront from '../../icons/v1/StoreFront';
+import Tuning from '../../icons/v1/Tuning';
 import Wallet from '../../icons/v1/Wallet';
+import Calendar from '../../icons/v2/Calendar';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles, type CSSProperties } from '../../style';
 import View from '../common/View';
@@ -18,11 +21,69 @@ export default function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
   const { scrollY } = useScroll();
 
-  const totalRowCount = 2;
+  const columnCount = 3;
+  const totalRowCount = 3;
   const rowHeight = 70;
+
+  const navTabStyle = {
+    flex: `1 1 ${100 / columnCount}%`,
+    height: rowHeight,
+    padding: 10,
+  };
+
+  const navTabs = [
+    {
+      name: 'Budget',
+      path: '/budget',
+      style: navTabStyle,
+      icon: Wallet,
+    },
+    {
+      name: 'Accounts',
+      path: '/accounts',
+      style: navTabStyle,
+      icon: PiggyBank,
+    },
+    {
+      name: 'Transaction',
+      path: '/transactions/new',
+      style: navTabStyle,
+      icon: Add,
+    },
+    {
+      name: 'Schedules (Soon)',
+      path: '/schedules/soon',
+      style: navTabStyle,
+      icon: Calendar,
+    },
+    {
+      name: 'Payees (Soon)',
+      path: '/payees/soon',
+      style: navTabStyle,
+      icon: StoreFront,
+    },
+    {
+      name: 'Rules (Soon)',
+      path: '/rules/soon',
+      style: navTabStyle,
+      icon: Tuning,
+    },
+    {
+      name: 'Settings',
+      path: '/settings',
+      style: navTabStyle,
+      icon: Cog,
+    },
+  ].map(tab => <NavTab key={tab.path} {...tab} />);
+
+  const bufferTabsCount = columnCount - (navTabs.length % columnCount);
+  const bufferTabs = Array.from({ length: bufferTabsCount }).map((_, idx) => (
+    <div key={idx} style={navTabStyle} />
+  ));
+
   const totalHeight = rowHeight * totalRowCount;
   const openY = 0;
-  const closeY = rowHeight;
+  const closeY = totalHeight - rowHeight;
   const hiddenY = totalHeight;
 
   const [{ y }, api] = useSpring(() => ({ y: totalHeight }));
@@ -101,12 +162,6 @@ export default function MobileNavTabs() {
     },
   );
 
-  const navTabStyle = {
-    flex: '1 1 33%',
-    height: rowHeight,
-    padding: 10,
-  };
-
   return (
     <animated.div
       {...bind()}
@@ -132,32 +187,7 @@ export default function MobileNavTabs() {
           width: '100%',
         }}
       >
-        <NavTab
-          style={navTabStyle}
-          name="Budget"
-          path="/budget"
-          icon={Wallet}
-        />
-        <NavTab
-          style={navTabStyle}
-          name="Accounts"
-          path="/accounts"
-          icon={PiggyBank}
-        />
-        <NavTab
-          style={navTabStyle}
-          name="Transaction"
-          path="/transactions/new"
-          icon={Add}
-        />
-        <NavTab
-          style={navTabStyle}
-          name="Settings"
-          path="/settings"
-          icon={Cog}
-        />
-        <div style={navTabStyle} />
-        <div style={navTabStyle} />
+        {[navTabs, bufferTabs]}
       </View>
     </animated.div>
   );
@@ -186,6 +216,7 @@ function NavTab({ icon: TabIcon, name, path, style }: NavTabProps) {
         display: 'flex',
         flexDirection: 'column',
         textDecoration: 'none',
+        textAlign: 'center',
         ...style,
       })}
     >
