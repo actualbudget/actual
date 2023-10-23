@@ -504,8 +504,8 @@ function SingleAutocomplete({
                 offset={2}
                 style={{
                   padding: 0,
-                  backgroundColor: theme.menuItemText,
-                  color: theme.tableBackground,
+                  backgroundColor: theme.menuAutoCompleteBackground,
+                  color: theme.menuAutoCompleteText,
                   minWidth: 200,
                   ...tooltipStyle,
                 }}

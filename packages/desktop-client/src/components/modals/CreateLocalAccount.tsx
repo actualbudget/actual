@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import { type BoundActions } from '../../hooks/useActions';
+import useNavigate from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import Button from '../common/Button';
@@ -110,7 +110,7 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
                   style={{
                     textAlign: 'right',
                     fontSize: '0.7em',
-                    color: theme.altpageTextSubdued,
+                    color: theme.pageTextLight,
                     marginTop: 3,
                   }}
                 >

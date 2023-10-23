@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useActions } from '../../hooks/useActions';
-import { themeNames, useTheme } from '../../style';
+import { themeOptions, useTheme } from '../../style';
 import Button from '../common/Button';
 import Select from '../common/Select';
 import Text from '../common/Text';
@@ -21,7 +21,7 @@ export default function ThemeSettings() {
               saveGlobalPrefs({ theme: value });
             }}
             value={theme}
-            options={themeNames.map(name => [name, name])}
+            options={themeOptions}
           />
         </Button>
       }

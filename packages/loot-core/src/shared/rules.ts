@@ -45,7 +45,7 @@ export const FIELD_TYPES = new Map(
   }),
 );
 
-export function mapField(field, opts) {
+export function mapField(field, opts?) {
   opts = opts || {};
 
   switch (field) {
