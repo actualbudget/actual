@@ -9,8 +9,63 @@ import { runQuery } from 'loot-core/src/client/query-helpers';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
+import AnchorLink from '../common/AnchorLink';
 import Block from '../common/Block';
+import View from '../common/View';
+
+export function Card({ flex, to, style, children }) {
+  const containerProps = { flex, margin: 15 };
+
+  const content = (
+    <View
+      style={{
+        backgroundColor: theme.tableBackground,
+        borderRadius: 2,
+        height: 200,
+        boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
+        transition: 'box-shadow .25s',
+        '& .recharts-surface:hover': {
+          cursor: 'pointer',
+        },
+        ':hover': to && {
+          boxShadow: '0 4px 6px rgba(0, 0, 0, .15)',
+        },
+        ...(to ? null : containerProps),
+        ...style,
+      }}
+    >
+      {children}
+    </View>
+  );
+
+  if (to) {
+    return (
+      <AnchorLink
+        to={to}
+        style={{ textDecoration: 'none', flex, ...containerProps }}
+      >
+        {content}
+      </AnchorLink>
+    );
+  }
+  return content;
+}
+
+export function LoadingIndicator() {
+  return (
+    <View
+      style={{
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <AnimatedLoading style={{ width: 25, height: 25 }} />
+    </View>
+  );
+}
 
 export function DateRange({ start, end }) {
   start = d.parseISO(start);
