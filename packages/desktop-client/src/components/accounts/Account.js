@@ -730,7 +730,7 @@ class AccountInternal extends PureComponent {
     this.setState({ reconcileAmount: balance });
   };
 
-  onDoneReconciling = async() => {
+  onDoneReconciling = async () => {
     let { accountId } = this.props;
     let { reconcileAmount } = this.state;
 
