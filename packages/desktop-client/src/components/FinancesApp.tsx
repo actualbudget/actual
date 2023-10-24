@@ -5,7 +5,6 @@ import {
   Route,
   Routes,
   Navigate,
-  NavLink,
   useNavigate,
   BrowserRouter,
   useLocation,
@@ -21,12 +20,8 @@ import checkForUpdateNotification from 'loot-core/src/client/update-notification
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useActions } from '../hooks/useActions';
-import Add from '../icons/v1/Add';
-import Cog from '../icons/v1/Cog';
-import PiggyBank from '../icons/v1/PiggyBank';
-import Wallet from '../icons/v1/Wallet';
 import { useResponsive } from '../ResponsiveProvider';
-import { theme, styles } from '../style';
+import { theme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
@@ -35,11 +30,13 @@ import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import View from './common/View';
 import GlobalKeys from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
+import MobileNavTabs from './mobile/MobileNavTabs';
 import Modals from './Modals';
 import Notifications from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
+import ScrollProvider from './ScrollProvider';
 import Settings from './settings';
 import FloatableSidebar, { SidebarProvider } from './sidebar';
 import Titlebar, { TitlebarProvider } from './Titlebar';
@@ -71,48 +68,6 @@ function WideNotSupported({ children, redirectTo = '/budget' }) {
     }
   }, [isNarrowWidth, navigate, redirectTo]);
   return isNarrowWidth ? children : null;
-}
-
-function NavTab({ icon: TabIcon, name, path }) {
-  return (
-    <NavLink
-      to={path}
-      style={({ isActive }) => ({
-        alignItems: 'center',
-        color: isActive ? theme.mobileNavItemSelected : theme.mobileNavItem,
-        display: 'flex',
-        flexDirection: 'column',
-        textDecoration: 'none',
-      })}
-    >
-      <TabIcon width={22} height={22} style={{ marginBottom: '5px' }} />
-      {name}
-    </NavLink>
-  );
-}
-
-function MobileNavTabs() {
-  const { isNarrowWidth } = useResponsive();
-  return (
-    <div
-      style={{
-        backgroundColor: theme.mobileNavBackground,
-        borderTop: `1px solid ${theme.menuBorder}`,
-        bottom: 0,
-        ...styles.shadow,
-        display: isNarrowWidth ? 'flex' : 'none',
-        height: '80px',
-        justifyContent: 'space-around',
-        paddingTop: 10,
-        width: '100%',
-      }}
-    >
-      <NavTab name="Budget" path="/budget" icon={Wallet} />
-      <NavTab name="Accounts" path="/accounts" icon={PiggyBank} />
-      <NavTab name="Transaction" path="/transactions/new" icon={Add} />
-      <NavTab name="Settings" path="/settings" icon={Cog} />
-    </div>
-  );
 }
 
 function RouterBehaviors({ getAccounts }) {
@@ -305,7 +260,9 @@ export default function FinancesAppWithContext() {
           <BudgetMonthCountProvider>
             <PayeesProvider>
               <AccountsProvider>
-                <DndProvider backend={Backend}>{app}</DndProvider>
+                <DndProvider backend={Backend}>
+                  <ScrollProvider>{app}</ScrollProvider>
+                </DndProvider>
               </AccountsProvider>
             </PayeesProvider>
           </BudgetMonthCountProvider>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router';
 
 import { closeBudget } from 'loot-core/src/client/actions/budgets';
 import * as Platform from 'loot-core/src/client/platform';
@@ -9,6 +8,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
+import useNavigate from '../../hooks/useNavigate';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { styles, theme } from '../../style';
 import Button from '../common/Button';
