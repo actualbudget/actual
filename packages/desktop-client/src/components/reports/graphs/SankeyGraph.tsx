@@ -8,6 +8,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import Container from '../Container';
+
 type SankeyProps = {
   style;
   data;
@@ -22,9 +24,8 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function SankeyNode({ x, y, width, height, index, payload }) {
-  // const isOut = x + width + 6 > containerWidth;
-  const isOut = false; // not configured yet
+function SankeyNode({ x, y, width, height, index, payload, containerWidth }) {
+  const isOut = x + width + 6 > containerWidth;
   let payloadValue = Math.round(payload.value / 1000).toString();
   if (payload.value < 1000) {
     payloadValue = '<1k';
@@ -89,36 +90,45 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
 
   if (!data.links || data.links.length === 0) return null;
   return (
-    <ResponsiveContainer>
-      <Sankey
-        data={sankeyData}
-        node={props => <SankeyNode {...props} />}
-        sort={false}
-        iterations={1000}
-        nodePadding={23}
-        margin={
-          compact
-            ? {
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-              }
-            : {
-                left: 0,
-                right: 0,
-                top: 10,
-                bottom: 25,
-              }
-        }
-      >
-        <Tooltip
-          formatter={numberFormatterTooltip}
-          isAnimationActive={false}
-          separator=": "
-        />
-      </Sankey>
-    </ResponsiveContainer>
+    <Container
+      style={{
+        ...style,
+        ...(compact && { height: 'auto' }),
+      }}
+    >
+      {(width, height, portalHost) => (
+        <ResponsiveContainer>
+          <Sankey
+            data={sankeyData}
+            node={props => <SankeyNode {...props} containerWidth={width} />}
+            sort={true}
+            iterations={1000}
+            nodePadding={23}
+            margin={
+              compact
+                ? {
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                  }
+                : {
+                    left: 0,
+                    right: 0,
+                    top: 10,
+                    bottom: 25,
+                  }
+            }
+          >
+            <Tooltip
+              formatter={numberFormatterTooltip}
+              isAnimationActive={false}
+              separator=": "
+            />
+          </Sankey>
+        </ResponsiveContainer>
+      )}
+    </Container>
   );
 }
 

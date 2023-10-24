@@ -165,6 +165,7 @@ function transformToSankeyData(categoryData, incomeData) {
         value: integerToAmount(mainCategorySum),
       });
 
+      // add the subcategories of the main category
       for (let subCategory of mainCategory.balances) {
         if (!nodeNames.has(subCategory.subcategory) && subCategory.value > 0) {
           data.nodes.push({ name: subCategory.subcategory });
