@@ -7,7 +7,7 @@ import React, {
   useRef,
 } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { useLocation, useMatch } from 'react-router-dom';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -26,6 +26,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
+import useNavigate from '../../hooks/useNavigate';
 import { styles } from '../../style';
 import View from '../common/View';
 import { TitlebarContext } from '../Titlebar';

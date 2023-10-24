@@ -23,7 +23,7 @@ export interface RulesHandlers {
     rule: Partial<RuleEntity>,
   ) => Promise<{ error: ValidationError } | object>;
 
-  'rule-delete': (rule: RuleEntity) => Promise<false | void>;
+  'rule-delete': (rule: Required<RuleEntity>) => Promise<false | void>;
 
   'rule-delete-all': (
     ids: string[],
