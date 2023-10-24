@@ -5,7 +5,7 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
+import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import useCategories from '../../hooks/useCategories';
 import useFilters from '../../hooks/useFilters';
@@ -16,6 +16,8 @@ import ChartPie from '../../icons/v1/ChartPie';
 import InboxFull from '../../icons/v1/InboxFull';
 import ListBullet from '../../icons/v1/ListBullet';
 import { theme, styles } from '../../style';
+import AlignedText from '../common/AlignedText';
+import Block from '../common/Block';
 import Button from '../common/Button';
 import Select from '../common/Select';
 import Text from '../common/Text';
@@ -24,7 +26,6 @@ import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 import { Checkbox } from '../forms';
 import PrivacyFilter from '../PrivacyFilter';
 
-import Change from './Change';
 import AreaGraph from './graphs/AreaGraph';
 import BarGraph from './graphs/BarGraph';
 import BarLineGraph from './graphs/BarLineGraph';
@@ -108,7 +109,7 @@ export default function Custom() {
 
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 5),
+    monthUtils.subMonths(monthUtils.currentMonth(), 1),
   );
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
@@ -135,8 +136,19 @@ export default function Custom() {
       accounts,
       filters,
       conditionsOp,
+      hidden,
     );
-  }, [start, end, split, categories, payees, accounts, filters, conditionsOp]);
+  }, [
+    start,
+    end,
+    split,
+    categories,
+    payees,
+    accounts,
+    filters,
+    conditionsOp,
+    hidden,
+  ]);
   const data = useReport('default', getGraphData);
 
   useEffect(() => {
@@ -762,31 +774,6 @@ export default function Custom() {
               flexGrow: 1,
             }}
           >
-            {graphType !== 'TableGraph' && (
-              <View
-                style={{
-                  textAlign: 'right',
-                  paddingTop: 10,
-                  paddingRight: 20,
-                  flexShrink: 0,
-                }}
-              >
-                <View
-                  style={{
-                    ...styles.largeText,
-                    fontWeight: 400,
-                    marginBottom: 5,
-                  }}
-                >
-                  <PrivacyFilter blurIntensity={5}>
-                    {integerToCurrency(0)}
-                  </PrivacyFilter>
-                </View>
-                <PrivacyFilter>
-                  <Change amount={0} />
-                </PrivacyFilter>
-              </View>
-            )}
             <View
               style={{
                 flexDirection: 'row',
@@ -801,6 +788,48 @@ export default function Custom() {
                   paddingTop: 0,
                 }}
               >
+                {graphType !== 'TableGraph' && (
+                  <View
+                    style={{
+                      alignItems: 'flex-end',
+                      paddingTop: 10,
+                    }}
+                  >
+                    <View
+                      style={{
+                        ...styles.mediumText,
+                        fontWeight: 500,
+                        marginBottom: 5,
+                      }}
+                    >
+                      <AlignedText
+                        left={
+                          <Block>
+                            {
+                              typeOptions.find(opt => opt.value === type)
+                                .description
+                            }
+                            :
+                          </Block>
+                        }
+                        right={
+                          <Text>
+                            <PrivacyFilter blurIntensity={5}>
+                              {amountToCurrency(
+                                Math.abs(
+                                  data[
+                                    typeOptions.find(opt => opt.value === type)
+                                      .format
+                                  ],
+                                ),
+                              )}
+                            </PrivacyFilter>
+                          </Text>
+                        }
+                      />
+                    </View>
+                  </View>
+                )}
                 <GraphType />
               </View>
               {(viewSplit || viewSummary) && (

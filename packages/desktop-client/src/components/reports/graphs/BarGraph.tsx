@@ -184,7 +184,7 @@ function BarGraph({
                 }
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                <Legend content={<CustomLegend />} />
+                {compact ? null : <Legend content={<CustomLegend />} />}
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
@@ -199,7 +199,11 @@ function BarGraph({
                     .map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={colorScale[index % colorScale.length]}
+                        fill={
+                          yAxis === 'date'
+                            ? theme.reportsBlue
+                            : colorScale[index % colorScale.length]
+                        }
                         name={entry.name}
                       />
                     ))}

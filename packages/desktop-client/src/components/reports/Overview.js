@@ -156,6 +156,7 @@ function CashFlowCard() {
 
   const params = useMemo(() => simpleCashFlow(start, end), [start, end]);
   const data = useReport('cash_flow_simple', params);
+
   const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true));
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
@@ -359,11 +360,12 @@ function CustomReportsCard() {
         <BarGraph
           start={start}
           end={end}
-          graphData={data}
+          data={data}
           compact={true}
           split={1}
           empty={true}
           typeOp={'totalDebts'}
+          style={{ height: 'auto', flex: 1 }}
         />
       ) : (
         <LoadingIndicator />
@@ -396,32 +398,16 @@ export default function Overview() {
         <NetWorthCard accounts={accounts} />
         <CashFlowCard />
       </View>
-
-      {categorySpendingReportFeatureFlag && (
-        <View
-          style={{
-            flex: '0 0 auto',
-            flexDirection: 'row',
-          }}
-        >
-          <CategorySpendingCard />
-          <div style={{ flex: 1 }} />
-          <div style={{ flex: 1 }} />
-        </View>
-      )}
-
-      {customReportsFeatureFlag && (
-        <View
-          style={{
-            flex: '0 0 auto',
-            flexDirection: 'row',
-          }}
-        >
-          <CustomReportsCard />
-          <div style={{ flex: 1 }} />
-          <div style={{ flex: 1 }} />
-        </View>
-      )}
+      <View
+        style={{
+          flex: '0 0 auto',
+          flexDirection: 'row',
+        }}
+      >
+        {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
+        {customReportsFeatureFlag && <CustomReportsCard />}
+        <div style={{ flex: 1 }} />
+      </View>
     </View>
   );
 }

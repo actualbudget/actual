@@ -20,6 +20,7 @@ export default function createSpreadsheet(
   accounts,
   conditions = [],
   conditionsOp,
+  hidden,
 ) {
   let splitItem;
   let splitList;
@@ -73,17 +74,27 @@ export default function createSpreadsheet(
         let [starting, balances] = await Promise.all([
           runQuery(
             q('transactions')
+              .filter(
+                !hidden && {
+                  $and: [
+                    {
+                      'account.offbudget': false,
+                      'category.hidden': false,
+                    },
+                  ],
+                  $or: [
+                    {
+                      'payee.transfer_acct.offbudget': true,
+                      'payee.transfer_acct': null,
+                    },
+                  ],
+                },
+              )
               .filter({
-                [conditionsOpKey]: filters,
                 [splitLabel]: splt.id,
-                'account.offbudget': false,
-                'category.hidden': false,
-                date: { $lt: start + '-01' },
-                $or: [
-                  {
-                    'payee.transfer_acct.offbudget': true,
-                    'payee.transfer_acct': null,
-                  },
+                $and: [
+                  { [conditionsOpKey]: filters },
+                  { date: { $lt: start + '-01' } },
                 ],
               })
               .calculate({ $sum: '$amount' }),
@@ -91,22 +102,28 @@ export default function createSpreadsheet(
 
           runQuery(
             q('transactions')
-              .filter({
-                [conditionsOpKey]: [...filters],
-              })
+              .filter(
+                !hidden && {
+                  $and: [
+                    {
+                      'account.offbudget': false,
+                      'category.hidden': false,
+                    },
+                  ],
+                  $or: [
+                    {
+                      'payee.transfer_acct.offbudget': true,
+                      'payee.transfer_acct': null,
+                    },
+                  ],
+                },
+              )
               .filter({
                 [splitLabel]: splt.id,
-                'account.offbudget': false,
-                'category.hidden': false,
                 $and: [
+                  { [conditionsOpKey]: filters },
                   { date: { $gte: start + '-01' } },
                   { date: { $lte: end + '-31' } },
-                ],
-                $or: [
-                  {
-                    'payee.transfer_acct.offbudget': true,
-                    'payee.transfer_acct': null,
-                  },
                 ],
               })
               .groupBy({ $month: '$date' })
