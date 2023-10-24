@@ -765,7 +765,7 @@ class AccountInternal extends PureComponent {
         id: 'temp',
         account: this.props.accountId,
         cleared: true,
-        reconciled: true,
+        reconciled: false,
         amount: diff,
         date: currentDay(),
         notes: 'Reconciliation balance adjustment',
@@ -781,7 +781,6 @@ class AccountInternal extends PureComponent {
     await send('transactions-batch-update', {
       added: reconciliationTransactions,
     });
-    await this.lockTransactions();
   };
 
   onShowTransactions = async ids => {
