@@ -190,7 +190,7 @@ function ToBudget({
                   borderBottom: '1px solid transparent',
                   ':hover': {
                     borderColor: isNegative
-                      ? theme.errorText
+                      ? theme.errorBorder
                       : theme.pageTextPositive,
                   },
                 },

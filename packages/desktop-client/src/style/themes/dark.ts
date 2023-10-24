@@ -10,14 +10,10 @@ export const pageBackgroundLineBottom = colorPalette.navy150;
 export const pageText = colorPalette.navy150;
 export const pageTextLight = colorPalette.navy300;
 export const pageTextSubdued = colorPalette.navy500;
-export const altpageTextSubdued = pageTextSubdued;
-export const pageTextDark = colorPalette.navy100;
+export const pageTextDark = colorPalette.navy800;
 export const pageTextPositive = colorPalette.purple200;
 export const pageTextLink = colorPalette.purple400;
-export const altPageTextLink = pageTextLink;
-
-export const modalBackground = colorPalette.gray800;
-export const modalBorder = colorPalette.navy600;
+export const pageTextLinkLight = colorPalette.purple200;
 
 export const cardBackground = colorPalette.gray800;
 export const cardBorder = colorPalette.purple400;
@@ -61,9 +57,6 @@ export const sidebarItemText = colorPalette.navy150;
 export const sidebarItemTextSelected = colorPalette.purple400;
 export const sidebarItemTextHover = colorPalette.navy150;
 
-export const tooltipBackground = colorPalette.navy600;
-export const tooltipBorder = colorPalette.navy500;
-
 export const menuBackground = colorPalette.navy600;
 export const menuItemBackground = colorPalette.navy600;
 export const menuItemBackgroundHover = colorPalette.navy500;
@@ -90,6 +83,8 @@ export const altMenuBorderHover = colorPalette.purple400;
 export const menuAutoCompleteBackground = colorPalette.navy400;
 export const menuAutoCompleteText = colorPalette.navy900;
 
+export const modalBackground = colorPalette.gray800;
+export const modalBorder = colorPalette.navy600;
 export const mobileNavBackground = colorPalette.navy800;
 export const mobileNavItem = colorPalette.navy150;
 export const mobileNavItemSelected = colorPalette.purple400;
@@ -171,11 +166,11 @@ export const alt2WarningText = warningText;
 export const alt3WarningText = warningText;
 export const warningAccent = colorPalette.orange500;
 export const errorBackground = colorPalette.red800;
-export const altErrorBackground = errorBackground;
-export const errorText = colorPalette.red200;
-export const altErrorText = errorText;
-export const alt2ErrorText = errorText;
-export const errorAccent = colorPalette.red500;
+export const errorText = colorPalette.red300;
+export const errorTextDark = colorPalette.red150;
+export const errorTextDarker = errorTextDark;
+export const errorTextMenu = colorPalette.red500;
+export const errorBorder = colorPalette.red500;
 export const upcomingBackground = colorPalette.purple700;
 export const upcomingText = colorPalette.purple100;
 export const altUpcomingText = upcomingText;

@@ -282,7 +282,7 @@ function Saved({ projected, style }: SavedProps) {
               color: projected
                 ? theme.alt2WarningText
                 : isNegative
-                ? theme.alt2ErrorText
+                ? theme.errorTextDark
                 : theme.altUpcomingText,
             },
           ])}`}
@@ -407,7 +407,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: theme.altpageTextSubdued }}
+                  style={{ color: theme.pageTextLight }}
                 />
               </Button>
               {menuOpen && (

@@ -1,8 +1,9 @@
 import React, { type ReactNode, type ComponentProps } from 'react';
-import { NavLink, useMatch, useNavigate } from 'react-router-dom';
+import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from 'glamor';
 
+import useNavigate from '../../hooks/useNavigate';
 import { type CSSProperties, styles } from '../../style';
 
 import Button from './Button';

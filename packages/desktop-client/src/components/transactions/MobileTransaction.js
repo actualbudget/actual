@@ -7,7 +7,7 @@ import React, {
   useRef,
 } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
 import { useFocusRing } from '@react-aria/focus';
 import { useListBox, useListBoxSection, useOption } from '@react-aria/listbox';
@@ -45,6 +45,7 @@ import {
 
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
+import useNavigate from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import SvgAdd from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
@@ -156,7 +157,7 @@ function Status({ status }) {
 
   switch (status) {
     case 'missed':
-      color = theme.alt3ErrorText;
+      color = theme.errorText;
       break;
     case 'due':
       color = theme.alt2WarningText;
@@ -937,7 +938,7 @@ class Transaction extends PureComponent {
     let isPreview = isPreviewId(id);
     let textStyle = isPreview && {
       fontStyle: 'italic',
-      color: theme.altpageTextSubdued,
+      color: theme.pageTextLight,
     };
 
     return (
