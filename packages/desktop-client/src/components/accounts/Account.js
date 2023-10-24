@@ -727,7 +727,12 @@ class AccountInternal extends PureComponent {
   };
 
   onReconcile = async balance => {
+    this.setState({ reconcileAmount: balance });
+  };
+
+  onDoneReconciling = async() => {
     let { accountId } = this.props;
+    let { reconcileAmount } = this.state;
 
     let { data } = await runQuery(
       q('transactions')
@@ -744,16 +749,12 @@ class AccountInternal extends PureComponent {
       }
     });
 
-    let targetDiff = balance - cleared;
+    let targetDiff = reconcileAmount - cleared;
 
     if (targetDiff === 0) {
       await this.lockTransactions();
     }
 
-    this.setState({ reconcileAmount: balance });
-  };
-
-  onDoneReconciling = () => {
     this.setState({ reconcileAmount: null });
   };
 

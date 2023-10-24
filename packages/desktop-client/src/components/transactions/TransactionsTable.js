@@ -713,7 +713,6 @@ const Transaction = memo(function Transaction(props) {
     onToggleSplit,
     onNavigateToTransferAccount,
     onNavigateToSchedule,
-    pushModal,
   } = props;
 
   let dispatchSelected = useSelectedDispatch();
