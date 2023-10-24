@@ -283,7 +283,7 @@ function ScheduleDescription({ id }) {
           <DisplayId
             type="payees"
             id={schedule._payee}
-            noneColor={theme.altpageTextSubdued}
+            noneColor={theme.pageTextLight}
           />
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>

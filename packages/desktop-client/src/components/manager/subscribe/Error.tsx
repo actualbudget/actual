@@ -1,6 +1,7 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
+import useNavigate from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import Button from '../../common/Button';
 import Text from '../../common/Text';

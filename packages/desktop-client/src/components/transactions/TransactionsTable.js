@@ -421,11 +421,11 @@ function StatusCell({
       : status === 'reconciled'
       ? theme.noticeTextLight
       : status === 'missed'
-      ? theme.alt5ErrorText
+      ? theme.errorText
       : status === 'due'
       ? theme.alt3WarningText
       : selected
-      ? theme.altPageTextLink
+      ? theme.pageTextLinkLight
       : theme.pageTextSubdued;
 
   function onSelect() {
@@ -1076,7 +1076,7 @@ const Transaction = memo(function Transaction(props) {
               style={{
                 color:
                   notes === 'missed'
-                    ? theme.alt5ErrorText
+                    ? theme.errorText
                     : notes === 'due'
                     ? theme.alt5WarningText
                     : selected
@@ -1084,7 +1084,7 @@ const Transaction = memo(function Transaction(props) {
                     : theme.altTableText,
                 backgroundColor:
                   notes === 'missed'
-                    ? theme.altErrorBackground
+                    ? theme.errorBackground
                     : notes === 'due'
                     ? theme.altWarningBackground
                     : selected

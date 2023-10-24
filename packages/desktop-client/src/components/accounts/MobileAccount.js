@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import debounce from 'debounce';
 import memoizeOne from 'memoize-one';
@@ -20,6 +20,7 @@ import {
 } from 'loot-core/src/shared/transactions';
 
 import useCategories from '../../hooks/useCategories';
+import useNavigate from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
 
