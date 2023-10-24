@@ -9,7 +9,7 @@ import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
 import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
-import Lock from '../../icons/v2/Lock';
+import Lock from '../../icons/v2/LockClosed';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
 import { theme } from '../../style';
 import Text from '../common/Text';

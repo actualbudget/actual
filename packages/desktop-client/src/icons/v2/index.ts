@@ -24,6 +24,7 @@ export { default as Hyperlink2 } from './Hyperlink2';
 export { default as Hyperlink3 } from './Hyperlink3';
 export { default as InformationCircle } from './InformationCircle';
 export { default as Key } from './Key';
+export { default as LockClosed } from './LockClosed';
 export { default as MoonStars } from './MoonStars';
 export { default as NavigationMenu } from './NavigationMenu';
 export { default as NotesPaperText } from './NotesPaperText';

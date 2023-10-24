@@ -52,7 +52,7 @@ import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SvgTrash from '../../icons/v1/Trash';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import Lock from '../../icons/v2/Lock';
+import Lock from '../../icons/v2/LockClosed';
 import SvgPencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
 import { styles, theme } from '../../style';
 import Button from '../common/Button';
