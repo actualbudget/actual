@@ -57,6 +57,10 @@ async function processCleanup(month: string): Promise<Notification> {
       [db_month, categoryId],
     );
 
+    if (carryover === null) {
+      carryover = { carryover: 0 };
+    }
+
     if (
       balance < 0 &&
       Math.abs(balance) <= budgetAvailable &&

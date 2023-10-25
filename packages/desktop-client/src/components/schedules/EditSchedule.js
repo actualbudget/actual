@@ -261,7 +261,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         q('transactions')
           .filter({ schedule: state.schedule.id })
           .select('*')
-          .options({ splits: 'none' }),
+          .options({ splits: 'all' }),
         data => dispatch({ type: 'set-transactions', transactions: data }),
       );
       return live.unsubscribe;
@@ -303,7 +303,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
             q('transactions')
               .filter({ $and: filters })
               .select('*')
-              .options({ splits: 'none' }),
+              .options({ splits: 'all' }),
             data => dispatch({ type: 'set-transactions', transactions: data }),
           );
           unsubscribe = live.unsubscribe;
@@ -488,7 +488,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               }}
               style={{
                 padding: '0 10px',
-                color: theme.altpageTextSubdued,
+                color: theme.pageTextLight,
                 fontSize: 12,
               }}
               onChange={(_, op) =>
@@ -634,7 +634,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
               {state.isCustom && (
                 <Text
                   style={{
-                    color: theme.altpageTextSubdued,
+                    color: theme.pageTextLight,
                     fontSize: 13,
                     textAlign: 'right',
                     width: 350,

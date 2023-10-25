@@ -7,7 +7,7 @@ import React, {
   useRef,
 } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { useLocation, useMatch } from 'react-router-dom';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -26,6 +26,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
+import useNavigate from '../../hooks/useNavigate';
 import { styles } from '../../style';
 import View from '../common/View';
 import { TitlebarContext } from '../Titlebar';
@@ -45,6 +46,7 @@ function Budget(props) {
   const [prewarmStartMonth, setPrewarmStartMonth] = useState(
     props.startMonth || currentMonth,
   );
+
   const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [collapsed, setCollapsed] = useState(props.collapsedPrefs || []);
@@ -215,13 +217,8 @@ function Budget(props) {
         }),
       );
     } else {
-      const cat = {
-        ...category,
-        hidden: category.hidden ? 1 : 0,
-      };
-
-      props.updateCategory(cat);
-      setCategoryGroups(state => updateCategory(state, cat));
+      props.updateCategory(category);
+      setCategoryGroups(state => updateCategory(state, category));
     }
   };
 
@@ -259,13 +256,8 @@ function Budget(props) {
         }),
       );
     } else {
-      const grp = {
-        ...group,
-        hidden: group.hidden ? 1 : 0,
-      };
-
-      props.updateGroup(grp);
-      setCategoryGroups(state => updateGroup(state, grp));
+      props.updateGroup(group);
+      setCategoryGroups(state => updateGroup(state, group));
     }
   };
 

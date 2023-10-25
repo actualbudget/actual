@@ -58,7 +58,7 @@ export const categoryModel = {
     );
 
     let { sort_order, ...rest } = category;
-    return rest;
+    return { ...rest, hidden: rest.hidden ? 1 : 0 };
   },
 };
 
@@ -72,7 +72,7 @@ export const categoryGroupModel = {
     );
 
     let { sort_order, ...rest } = categoryGroup;
-    return rest;
+    return { ...rest, hidden: rest.hidden ? 1 : 0 };
   },
 };
 

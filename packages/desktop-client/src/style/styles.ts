@@ -4,6 +4,7 @@ import * as Platform from 'loot-core/src/client/platform';
 
 import tokens from '../tokens';
 
+import { theme } from './theme';
 import { type CSSProperties } from './types';
 
 export const styles = {
@@ -82,7 +83,6 @@ export const styles = {
     fontSize: 16,
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
   },
-
   delayedFadeIn: {
     animationName: keyframes({
       '0%': { opacity: 0 },
@@ -91,6 +91,17 @@ export const styles = {
     animationDuration: '1s',
     animationFillMode: 'both',
     animationDelay: '0.5s',
+  },
+  underlinedText: {
+    textDecoration: 'underline',
+    textDecorationThickness: 2,
+    textDecorationColor: theme.pillBorder,
+  },
+  noTapHighlight: {
+    WebkitTapHighlightColor: 'transparent',
+    ':focus': {
+      outline: 'none',
+    },
   },
   // Dynamically set
   lightScrollbar: null as CSSProperties | null,

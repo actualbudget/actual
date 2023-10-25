@@ -164,7 +164,7 @@ type SingleAutocompleteProps = {
   openOnFocus?: boolean;
   getHighlightedIndex?: (suggestions) => number | null;
   highlightFirst?: boolean;
-  onUpdate: (id: unknown, value: string) => void;
+  onUpdate?: (id: unknown, value: string) => void;
   strict?: boolean;
   onSelect: (id: unknown, value: string) => void;
   tableBehavior?: boolean;
@@ -504,8 +504,8 @@ function SingleAutocomplete({
                 offset={2}
                 style={{
                   padding: 0,
-                  backgroundColor: theme.menuItemText,
-                  color: theme.tableBackground,
+                  backgroundColor: theme.menuAutoCompleteBackground,
+                  color: theme.menuAutoCompleteText,
                   minWidth: 200,
                   ...tooltipStyle,
                 }}

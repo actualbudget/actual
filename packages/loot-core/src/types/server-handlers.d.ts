@@ -5,7 +5,7 @@ import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Message } from '../server/sync';
 
-import { AccountEntity } from './models';
+import { AccountEntity, PayeeEntity } from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -42,10 +42,24 @@ export interface ServerHandlers {
 
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
-  // incomplete
   'get-categories': () => Promise<{
-    grouped: { id: string }[];
-    list: { id: string }[];
+    grouped: {
+      id: string;
+      name: string;
+      is_income: number;
+      sort_order: number;
+      tombstone: number;
+      hidden: boolean;
+    }[];
+    list: {
+      id: string;
+      name: string;
+      is_income: number;
+      cat_group: string;
+      sort_order: number;
+      tombstone: number;
+      hidden: boolean;
+    }[];
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;
@@ -81,7 +95,7 @@ export interface ServerHandlers {
 
   'payee-create': (arg: { name }) => Promise<unknown>;
 
-  'payees-get': () => Promise<unknown[]>;
+  'payees-get': () => Promise<PayeeEntity[]>;
 
   'payees-get-rule-counts': () => Promise<unknown>;
 

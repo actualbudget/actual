@@ -20,8 +20,8 @@ export function getStatusProps(status: StatusTypes) {
   switch (status) {
     case 'missed':
       return {
-        color: theme.altErrorText,
-        backgroundColor: theme.altErrorBackground,
+        color: theme.errorTextDarker,
+        backgroundColor: theme.errorBackground,
         Icon: EditSkull1,
       };
     case 'due':

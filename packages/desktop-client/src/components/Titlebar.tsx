@@ -7,7 +7,7 @@ import React, {
   type ReactNode,
 } from 'react';
 import { useSelector } from 'react-redux';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
@@ -15,6 +15,7 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
 import useFeatureFlag from '../hooks/useFeatureFlag';
+import useNavigate from '../hooks/useNavigate';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
 import SvgEye from '../icons/v2/Eye';
@@ -32,6 +33,7 @@ import Link from './common/Link';
 import Paragraph from './common/Paragraph';
 import Text from './common/Text';
 import View from './common/View';
+import { KeyHandlers } from './KeyHandlers';
 import LoggedInUser from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar';
@@ -151,7 +153,7 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 
   const mobileColor =
     syncState === 'error'
-      ? theme.alt4ErrorText
+      ? theme.errorText
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'
@@ -159,12 +161,12 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       : style.color;
   const desktopColor =
     syncState === 'error'
-      ? theme.alt2ErrorText
+      ? theme.errorTextDark
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'
       ? theme.altTableText
-      : null;
+      : 'inherit';
 
   const activeStyle = isMobile
     ? {
@@ -173,30 +175,40 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     : {};
 
   return (
-    <Button
-      type="bare"
-      style={{
-        ...style,
-        WebkitAppRegion: 'none',
-        color: isMobile ? mobileColor : desktopColor,
-      }}
-      hoveredStyle={activeStyle}
-      activeStyle={activeStyle}
-      onClick={sync}
-    >
-      {syncState === 'error' ? (
-        <AlertTriangle width={13} />
-      ) : (
-        <AnimatedRefresh animating={syncing} />
-      )}
-      <Text style={{ marginLeft: 3 }}>
-        {syncState === 'disabled'
-          ? 'Disabled'
-          : syncState === 'offline'
-          ? 'Offline'
-          : 'Sync'}
-      </Text>
-    </Button>
+    <>
+      <KeyHandlers
+        keys={{
+          'ctrl+s, cmd+s': () => {
+            sync();
+          },
+        }}
+      />
+
+      <Button
+        type="bare"
+        style={{
+          ...style,
+          WebkitAppRegion: 'none',
+          color: isMobile ? mobileColor : desktopColor,
+        }}
+        hoveredStyle={activeStyle}
+        activeStyle={activeStyle}
+        onClick={sync}
+      >
+        {syncState === 'error' ? (
+          <AlertTriangle width={13} />
+        ) : (
+          <AnimatedRefresh animating={syncing} />
+        )}
+        <Text style={{ marginLeft: 3 }}>
+          {syncState === 'disabled'
+            ? 'Disabled'
+            : syncState === 'offline'
+            ? 'Offline'
+            : 'Sync'}
+        </Text>
+      </Button>
+    </>
   );
 }
 
