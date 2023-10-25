@@ -33,8 +33,12 @@ import DonutGraph from './graphs/DonutGraph';
 import LineGraph from './graphs/LineGraph';
 import StackedBarGraph from './graphs/StackedBarGraph';
 import Header from './Header';
-import ReportsTable from './ReportsTable';
 import { ReportSplit, ReportSummary } from './ReportSummary';
+import SimpleTable, {
+  TableHeader,
+  TotalTableList,
+  TableTotals,
+} from './ReportTable';
 import { SavedGraphMenuButton } from './SavedGraphs';
 import defaultSpreadsheet from './spreadsheets/default-spreadsheet';
 import useReport from './useReport';
@@ -109,7 +113,7 @@ export default function Custom() {
 
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 1),
+    monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
@@ -179,6 +183,14 @@ export default function Custom() {
     }
     run();
   }, []);
+
+  let [scrollWidth, setScrollWidth] = useState(0);
+
+  function saveScrollWidth(parent, child) {
+    let width = parent > 0 && child > 0 && parent - child;
+
+    setScrollWidth(!width ? 0 : width);
+  }
 
   function GraphType() {
     if (graphType === 'AreaGraph') {
@@ -254,15 +266,29 @@ export default function Custom() {
     }
     if (graphType === 'TableGraph') {
       return (
-        <ReportsTable
-          data={data}
-          style={{ border: '1px solid ' + theme.tableBorder }}
-          months={months}
-          type={type}
-          mode={mode}
-          empty={!empty}
-          split={splitOptions.find(opt => opt.value === split).description}
-        />
+        <>
+          <TableHeader
+            interval={mode === 'time' && months}
+            scrollWidth={scrollWidth}
+            split={splitOptions.find(opt => opt.value === split).description}
+          />
+          <SimpleTable saveScrollWidth={saveScrollWidth}>
+            <TotalTableList
+              data={data}
+              empty={!empty}
+              months={months}
+              type={type}
+              mode={mode}
+              split={splitOptions.find(opt => opt.value === split).description}
+            />
+          </SimpleTable>
+          <TableTotals
+            scrollWidth={scrollWidth}
+            data={data}
+            mode={mode}
+            totalItem={typeOptions.find(opt => opt.value === type).format}
+          />
+        </>
       );
     }
   }
@@ -785,7 +811,7 @@ export default function Custom() {
                   flexDirection: 'column',
                   flexGrow: 1,
                   padding: 10,
-                  paddingTop: 0,
+                  paddingTop: 10,
                 }}
               >
                 {graphType !== 'TableGraph' && (
