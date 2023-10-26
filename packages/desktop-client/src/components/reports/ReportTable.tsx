@@ -47,6 +47,9 @@ const TableRow = memo(
           })}
         <Cell
           value={amountToCurrency(item[totalItem])}
+          style={{
+            fontWeight: 600,
+          }}
           width="flex"
           privacyFilter
         />
@@ -94,28 +97,24 @@ export function TableTotals({ data, scrollWidth, totalItem, mode }) {
       }}
     >
       <Cell value={'Totals'} width="flex" />
-      {mode === 'time' ? (
-        <>
-          {data.monthData.map(item => {
-            return (
-              <Cell
-                key={amountToCurrency(item[totalItem])}
-                value={amountToCurrency(item[totalItem])}
-                width="flex"
-                privacyFilter
-              />
-            );
-          })}
-          <Cell width="flex" />
-        </>
-      ) : (
-        <Cell
-          key={data[totalItem]}
-          value={amountToCurrency(data[totalItem])}
-          width="flex"
-          privacyFilter
-        />
-      )}
+      {mode === 'time' &&
+        data.monthData.map(item => {
+          return (
+            <Cell
+              key={amountToCurrency(item[totalItem])}
+              value={amountToCurrency(item[totalItem])}
+              width="flex"
+              privacyFilter
+            />
+          );
+        })}
+      <Cell
+        key={data[totalItem]}
+        value={amountToCurrency(data[totalItem])}
+        width="flex"
+        privacyFilter
+      />
+
       {scrollWidth > 0 && <Cell width={scrollWidth} />}
     </Row>
   );

@@ -60,12 +60,6 @@ function StackedBarGraph({
     };
   };
 
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
   type CustomLegendProps = {
     active?: boolean;
     payload?: PayloadItem[];
@@ -85,8 +79,15 @@ function StackedBarGraph({
     return <div />;
   };
 
+  type CustomTooltipProps = {
+    active?: boolean;
+    payload?: PayloadItem[];
+    label?: string;
+  };
+
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
+      let sumTotals = 0;
       return (
         <div
           className={`${css(
@@ -111,8 +112,9 @@ function StackedBarGraph({
                 {payload
                   .slice(0)
                   .reverse()
-                  .map(
-                    pay =>
+                  .map(pay => {
+                    sumTotals += pay.value;
+                    return (
                       pay.value !== 0 && (
                         <AlignedText
                           key={pay.name}
@@ -120,8 +122,16 @@ function StackedBarGraph({
                           right={amountToCurrency(pay.value)}
                           style={{ color: pay.color }}
                         />
-                      ),
-                  )}
+                      )
+                    );
+                  })}
+                <AlignedText
+                  left={'Total'}
+                  right={amountToCurrency(sumTotals)}
+                  style={{
+                    fontWeight: 600,
+                  }}
+                />
               </PrivacyFilter>
             </div>
           </div>
