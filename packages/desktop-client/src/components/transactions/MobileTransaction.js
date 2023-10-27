@@ -498,7 +498,10 @@ class TransactionEditInner extends PureComponent {
               {!transaction.is_parent ? (
                 <TapField
                   value={category ? lookupName(categories, category) : null}
-                  disabled={(account && !!account.offbudget) || transferAcct}
+                  disabled={
+                    (account && !!account.offbudget) ||
+                    (transferAcct && !transferAcct.offbudget)
+                  }
                   // TODO: the button to turn this transaction into a split
                   // transaction was on top of the category button in the native
                   // app, on the right-hand side
