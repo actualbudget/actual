@@ -23,8 +23,6 @@ export function AmountInput({
   textStyle,
   focused,
 }) {
-  initialValue = initialValue ?? 0;
-
   let format = useFormat();
   let [negative, setNegative] = useState(
     (initialValue === 0 && zeroSign === '-') || initialValue < 0,
@@ -45,7 +43,6 @@ export function AmountInput({
     let amount = neg ? valueOrInitial * -1 : valueOrInitial;
 
     onChange?.(amount);
-    setValue(format(amount, 'financial'));
   }
 
   function onInputAmountChange(value) {

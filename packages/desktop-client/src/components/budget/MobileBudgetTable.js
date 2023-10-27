@@ -135,41 +135,41 @@ function BudgetCell({
 
   return (
     <View style={style}>
-      <AmountInput
-        initialValue={sheetValue}
-        zeroSign="+"
-        style={{
-          ...(!isEditing && { display: 'none' }),
-          height: ROW_HEIGHT - 4,
-          transform: 'translateX(6px)',
-        }}
-        focused={isEditing}
-        textStyle={{ ...styles.smallText, ...textStyle }}
-        onChange={updateBudgetAmount}
-        onEdit={onEdit}
-        onBlur={() => onEdit?.(null)}
-      />
-      <View
-        role="button"
-        style={{
-          ...(isEditing && { display: 'none' }),
-          justifyContent: 'center',
-          height: ROW_HEIGHT - 4,
-        }}
-        onPointerUp={onAmountClick}
-      >
-        <CellValue
-          binding={binding}
-          type="financial"
+      {isEditing ? (
+        <AmountInput
+          initialValue={sheetValue}
+          zeroSign="+"
           style={{
-            ...styles.smallText,
-            ...textStyle,
-            ...styles.underlinedText,
-            ...makeAmountGrey(sheetValue || ''),
+            height: ROW_HEIGHT - 4,
+            transform: 'translateX(6px)',
           }}
-          data-testid={name}
+          focused={isEditing}
+          textStyle={{ ...styles.smallText, ...textStyle }}
+          onChange={updateBudgetAmount}
+          onBlur={() => onEdit?.(null)}
         />
-      </View>
+      ) : (
+        <View
+          role="button"
+          style={{
+            justifyContent: 'center',
+            height: ROW_HEIGHT - 4,
+          }}
+          onPointerUp={onAmountClick}
+        >
+          <CellValue
+            binding={binding}
+            type="financial"
+            style={{
+              ...styles.smallText,
+              ...textStyle,
+              ...styles.underlinedText,
+            }}
+            getStyle={makeAmountGrey}
+            data-testid={name}
+          />
+        </View>
+      )}
     </View>
   );
 }
@@ -401,7 +401,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             width: 90,
             textAlign: 'right',
           }}
-          getStyle={value => makeAmountGrey(value || '')}
+          getStyle={makeAmountGrey}
           type="financial"
         />
         <CellValue
@@ -413,7 +413,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             textAlign: 'right',
           }}
           getStyle={value =>
-            value < 0 ? { color: theme.errorText } : makeAmountGrey(value || '')
+            value < 0 ? { color: theme.errorText } : makeAmountGrey(value)
           }
           type="financial"
         />
