@@ -8,45 +8,38 @@ import Text from '../common/Text';
 import View from '../common/View';
 
 export function SavedGraphMenuButton({ selectGraph }) {
-  let [dataMenuOpen, setDataMenuOpen] = useState(false);
+  let [menuOpen, setMenuOpen] = useState(false);
 
-  const onDataMenuSelect = async item => {
+  const onGraphMenuSelect = async item => {
     switch (item) {
-      case 'NetWorth':
-        setDataMenuOpen(false);
+      case 'save':
+        setMenuOpen(false);
         break;
-      case 'CashFlow':
-        setDataMenuOpen(false);
-        break;
-      case 'Income':
-        setDataMenuOpen(false);
-        break;
-      case 'Expense':
-        setDataMenuOpen(false);
-        break;
-      case 'All':
-        setDataMenuOpen(false);
+      case 'clear':
+        setMenuOpen(false);
         break;
       default:
     }
   };
 
-  function DataMenu({ onClose }) {
+  function SavedGraphMenu({ onClose }) {
     return (
       <MenuTooltip width={150} onClose={onClose}>
         <Menu
           onMenuSelect={item => {
-            onDataMenuSelect(item);
+            onGraphMenuSelect(item);
           }}
           items={[
             ...[
               {
-                name: 'NetWorth',
+                name: 'save',
                 text: 'Save new report',
+                disabled: true,
               },
               {
-                name: 'CashFlow',
+                name: 'clear',
                 text: 'Clear all',
+                disabled: true,
               },
             ],
           ]}
@@ -65,7 +58,7 @@ export function SavedGraphMenuButton({ selectGraph }) {
       <Button
         type="bare"
         onClick={() => {
-          setDataMenuOpen(true);
+          setMenuOpen(true);
         }}
       >
         <Text
@@ -81,7 +74,7 @@ export function SavedGraphMenuButton({ selectGraph }) {
         </Text>
         <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
-      {dataMenuOpen && <DataMenu onClose={() => setDataMenuOpen(false)} />}
+      {menuOpen && <SavedGraphMenu onClose={() => setMenuOpen(false)} />}
     </View>
   );
 }

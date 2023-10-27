@@ -13,16 +13,16 @@ type TableRowProps = {
   item: {
     date: string;
     name: string;
+    monthData: [];
   };
-  totalItem: string;
   typeItem?: string | null;
   splitItem: string;
   mode: string;
-  data?: [] | null;
+  style?: object | null;
 };
 
 const TableRow = memo(
-  ({ item, totalItem, typeItem, splitItem, mode, data }: TableRowProps) => {
+  ({ item, typeItem, splitItem, mode, style }: TableRowProps) => {
     return (
       <Row
         key={item[splitItem]}
@@ -30,12 +30,13 @@ const TableRow = memo(
         style={{
           color: theme.tableText,
           backgroundColor: theme.tableBackground,
+          ...style,
         }}
       >
         <Cell value={item[splitItem]} width="flex" />
-        {data &&
+        {item.monthData &&
           mode === 'time' &&
-          data.map(item => {
+          item.monthData.map(item => {
             return (
               <Cell
                 key={amountToCurrency(item[typeItem])}
@@ -46,7 +47,7 @@ const TableRow = memo(
             );
           })}
         <Cell
-          value={amountToCurrency(item[totalItem])}
+          value={amountToCurrency(item[typeItem])}
           style={{
             fontWeight: 600,
           }}
@@ -57,6 +58,41 @@ const TableRow = memo(
     );
   },
 );
+
+function GroupedTableRow({ item, typeItem, splitItem, mode, empty }) {
+  return (
+    <>
+      <TableRow
+        key={item.id}
+        item={item}
+        typeItem={typeItem}
+        splitItem={splitItem}
+        mode={mode}
+        style={{
+          color: theme.tableRowHeaderText,
+          backgroundColor: theme.tableRowHeaderBackground,
+          fontWeight: 600,
+        }}
+      />
+      <View>
+        {item.categories
+          .filter(i => (empty ? i[typeItem] !== 0 : true))
+          .map(item => {
+            return (
+              <TableRow
+                key={item.id}
+                item={item}
+                typeItem={typeItem}
+                splitItem={splitItem}
+                mode={mode}
+              />
+            );
+          })}
+      </View>
+      <Row height={20} />
+    </>
+  );
+}
 
 export function TableHeader({ scrollWidth, split, interval }) {
   return (
@@ -86,7 +122,7 @@ export function TableHeader({ scrollWidth, split, interval }) {
   );
 }
 
-export function TableTotals({ data, scrollWidth, totalItem, mode }) {
+export function TableTotals({ data, scrollWidth, typeItem, mode }) {
   return (
     <Row
       collapsed={true}
@@ -101,16 +137,16 @@ export function TableTotals({ data, scrollWidth, totalItem, mode }) {
         data.monthData.map(item => {
           return (
             <Cell
-              key={amountToCurrency(item[totalItem])}
-              value={amountToCurrency(item[totalItem])}
+              key={amountToCurrency(item[typeItem])}
+              value={amountToCurrency(item[typeItem])}
               width="flex"
               privacyFilter
             />
           );
         })}
       <Cell
-        key={data[totalItem]}
-        value={amountToCurrency(data[totalItem])}
+        key={data[typeItem]}
+        value={amountToCurrency(data[typeItem])}
         width="flex"
         privacyFilter
       />
@@ -120,45 +156,42 @@ export function TableTotals({ data, scrollWidth, totalItem, mode }) {
   );
 }
 
-export function TotalTableList({ data, empty, months, type, mode, split }) {
+export function TotalTableList({ data, empty, months, typeItem, mode, split }) {
   const splitItem = ['Month', 'Year'].includes(split) ? 'date' : 'name';
-  const splitData = ['Month', 'Year'].includes(split) ? 'monthData' : 'data';
-
-  let typeItem;
-  let totalItem;
-
-  switch (type) {
-    case 1:
-      typeItem = 'debts';
-      totalItem = 'totalDebts';
-      break;
-    case 2:
-      typeItem = 'assets';
-      totalItem = 'totalAssets';
-      break;
-    case 3:
-      typeItem = 'y';
-      totalItem = 'totalTotals';
-      break;
-    default:
-  }
+  const splitData =
+    split === 'Category'
+      ? 'gData'
+      : ['Month', 'Year'].includes(split)
+      ? 'monthData'
+      : 'data';
 
   return (
     <View>
       {data[splitData]
-        .filter(i => (empty ? i[totalItem] !== 0 : true))
+        .filter(i => (empty ? i[typeItem] !== 0 : true))
         .map(item => {
-          return (
-            <TableRow
-              key={item.id}
-              item={item}
-              totalItem={totalItem}
-              typeItem={mode === 'time' && typeItem}
-              splitItem={splitItem}
-              mode={mode}
-              data={mode === 'time' && item.graphData.data}
-            />
-          );
+          if (split === 'Category') {
+            return (
+              <GroupedTableRow
+                key={item.id}
+                item={item}
+                typeItem={typeItem}
+                splitItem={splitItem}
+                mode={mode}
+                empty={empty}
+              />
+            );
+          } else {
+            return (
+              <TableRow
+                key={item.id}
+                item={item}
+                typeItem={typeItem}
+                splitItem={splitItem}
+                mode={mode}
+              />
+            );
+          }
         })}
     </View>
   );

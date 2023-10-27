@@ -3,11 +3,7 @@ import * as d from 'date-fns';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
-import {
-  integerToCurrency,
-  integerToAmount,
-  amountToInteger,
-} from 'loot-core/src/shared/util';
+import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
 
 import { index } from '../util';
 
@@ -15,6 +11,7 @@ export default function createSpreadsheet(
   start,
   end,
   split,
+  typeItem,
   categories,
   payees,
   accounts,
@@ -137,9 +134,9 @@ export default function createSpreadsheet(
         return {
           id: splt.id,
           name: splt.name,
+          starting,
           hidden: splt.hidden,
           balances: index(balances, 'date'),
-          starting,
         };
       }),
     );
@@ -164,23 +161,59 @@ export default function createSpreadsheet(
             });
             return {
               date: month,
-              // eslint-disable-next-line rulesdir/typography
-              dateFormatted: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
               amount: groupedAmount,
             };
           }),
         );
 
         return {
-          starting: groupedStarting,
-          name: group.name,
           id: group.id,
+          name: group.name,
+          starting: groupedStarting,
+          hidden: group.hidden,
           balances: index(mon, 'date'),
         };
       }),
     );
 
     const splitData = split === 2 ? groupData : graphData;
+
+    const data = await Promise.all(
+      splitData.map(async graph => {
+        const calc = recalculate(graph, start, end);
+        return { ...calc };
+      }),
+    );
+
+    const gData =
+      [1].includes(split) &&
+      (await Promise.all(
+        categories.grouped.map(async group => {
+          const catData = await Promise.all(
+            group.categories.map(async graph => {
+              let catMatch = null;
+              graphData.map(async cat => {
+                if (cat.id === graph.id) {
+                  catMatch = cat;
+                }
+              });
+              const calcCat = recalculate(catMatch, start, end);
+              return { ...calcCat };
+            }),
+          );
+          let groupMatch = null;
+          groupData.map(async split => {
+            if (split.id === group.id) {
+              groupMatch = split;
+            }
+          });
+          const calcGroup = recalculate(groupMatch, start, end);
+          return {
+            ...calcGroup,
+            categories: catData,
+          };
+        }),
+      ));
 
     let totalAssets = 0;
     let totalDebts = 0;
@@ -191,129 +224,148 @@ export default function createSpreadsheet(
         let perMonthAssets = 0;
         let perMonthDebts = 0;
         let perMonthTotals = 0;
-        const stacked = await Promise.all(
-          splitData.map(async graph => {
-            let stackDebts = 0;
-            let stackAssets = 0;
-            let stackTotals = 0;
-            if (graph.balances[month]) {
-              if (graph.balances[month].amount < 0) {
-                perMonthDebts += -graph.balances[month].amount;
-                stackDebts += -graph.balances[month].amount;
-              } else {
-                perMonthAssets += graph.balances[month].amount;
-                stackAssets += graph.balances[month].amount;
-              }
-              perMonthTotals = perMonthAssets - perMonthDebts;
-              stackTotals += stackAssets - stackDebts;
+        graphData.map(async graph => {
+          if (graph.balances[month]) {
+            if (graph.balances[month].amount < 0) {
+              perMonthDebts += graph.balances[month].amount;
+            } else {
+              perMonthAssets += graph.balances[month].amount;
             }
-            return {
-              name: graph.name,
-              totalAssets: integerToAmount(stackAssets),
-              totalDebts: -1 * integerToAmount(stackDebts),
-              totalTotals: integerToAmount(stackTotals),
-            };
-          }),
-        );
+            perMonthTotals = perMonthAssets + perMonthDebts;
+          }
+        });
         totalAssets += perMonthAssets;
         totalDebts += perMonthDebts;
         totalTotals += perMonthTotals;
+
+        return {
+          // eslint-disable-next-line rulesdir/typography
+          date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
+          totalDebts: integerToAmount(perMonthDebts),
+          totalAssets: integerToAmount(perMonthAssets),
+          totalTotals: integerToAmount(perMonthTotals),
+        };
+      }),
+    );
+
+    const sData = await Promise.all(
+      months.map(async month => {
+        let perMonthAmounts = 0;
+        const stacked = await Promise.all(
+          data.map(async graph => {
+            let stackAmounts = 0;
+            if (graph.indexedMonthData[month]) {
+              perMonthAmounts += graph.indexedMonthData[month][typeItem];
+              stackAmounts += graph.indexedMonthData[month][typeItem];
+            }
+            /*const nested = await Promise.all(
+              graph.categories.map(async cat => {
+                let catAmounts = 0;
+                if (cat.monthData[month]) {
+                  catAmounts += cat.monthData[month][type];
+                }
+                return {
+                  name: cat.name,
+                  id: cat.id,
+                  amount: catAmounts,
+                };
+              }),
+            );*/
+            return {
+              name: graph.name,
+              id: graph.id,
+              amount: stackAmounts,
+            };
+          }),
+        );
 
         const indexedSplit = index(stacked, 'name');
         return {
           // eslint-disable-next-line rulesdir/typography
           date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
           ...indexedSplit,
-          totalDebts: -1 * integerToAmount(perMonthDebts),
-          totalAssets: integerToAmount(perMonthAssets),
-          totalTotals:
-            perMonthAssets >= perMonthDebts
-              ? integerToAmount(perMonthTotals)
-              : integerToAmount(perMonthTotals),
+          totalTotals: perMonthAmounts,
         };
       }),
     );
 
-    const data = await Promise.all(
-      splitData.map(async graph => {
-        const calc = recalculate(graph, start, end);
-        return { ...calc };
-      }),
-    );
-
     setData({
+      stackedData: sData,
       split: splitList,
       data,
+      gData: gData,
       monthData,
-      totalDebts: -1 * integerToAmount(totalDebts),
+      start,
+      end,
+      totalDebts: integerToAmount(totalDebts),
       totalAssets: integerToAmount(totalAssets),
-      totalTotals:
-        totalAssets >= totalDebts
-          ? integerToAmount(totalTotals)
-          : -1 * integerToAmount(totalTotals),
+      totalTotals: integerToAmount(totalTotals),
     });
   };
 }
 
-function recalculate(data, start, end) {
+function recalculate(item, start, end) {
   const months = monthUtils.rangeInclusive(start, end);
 
   let totalDebts = 0;
   let totalAssets = 0;
   let totalTotals = 0;
-  //let startingDebts = 0;
-  //let startingAssets = 0;
+  let exists = false;
+  /*
+  let startingDebts = 0;
+  let startingAssets = 0;
   let hasNegative = false;
   let startNetWorth = 0;
   let endNetWorth = 0;
   let lowestNetWorth = null;
   let highestNetWorth = null;
+  */
 
-  const graphData = months.reduce((arr, month) => {
+  const monthData = months.reduce((arr, month) => {
     let debts = 0;
     let assets = 0;
     let total = 0;
     const last = arr.length === 0 ? null : arr[arr.length - 1];
 
-    if (data.balances[month]) {
-      if (data.balances[month].amount < 0) {
-        debts += -data.balances[month].amount;
-        //startingDebts += -data.balances[month].amount;
-        totalDebts += -data.balances[month].amount;
+    if (item.balances[month]) {
+      exists = true;
+      if (item.balances[month].amount < 0) {
+        debts += item.balances[month].amount;
+        //startingDebts += data.balances[month].amount;
+        totalDebts += item.balances[month].amount;
       } else {
-        assets += data.balances[month].amount;
+        assets += item.balances[month].amount;
         //startingAssets += data.balances[month].amount;
-        totalAssets += data.balances[month].amount;
+        totalAssets += item.balances[month].amount;
       }
-      total = assets - debts;
-      totalTotals = totalAssets - totalDebts;
+      total = assets + debts;
+      totalTotals = totalAssets + totalDebts;
     }
 
-    if (total < 0) {
+    /*if (total < 0) {
       hasNegative = true;
-    }
+    }*/
 
-    const x = d.parseISO(`${month}-01`);
-    const y =
-      assets >= debts ? integerToAmount(total) : -1 * integerToAmount(total);
-    const change = last ? total - amountToInteger(last.y) : 0;
+    const dateParse = d.parseISO(`${month}-01`);
+    const change = last ? total - amountToInteger(last.totalTotals) : 0;
 
-    if (arr.length === 0) {
+    /*if (arr.length === 0) {
       startNetWorth = total;
     }
-    endNetWorth = total;
+    endNetWorth = total;*/
 
     arr.push({
-      x,
-      y,
-      assets: integerToAmount(assets),
-      debts: integerToAmount(debts),
-      change: integerToCurrency(change),
-      networth: integerToCurrency(total),
+      dateParse,
+      totalTotals: integerToAmount(total),
+      totalAssets: integerToAmount(assets),
+      totalDebts: integerToAmount(debts),
+      totalChange: integerToAmount(change),
       // eslint-disable-next-line rulesdir/typography
-      date: d.format(x, "MMM ''yy"),
+      date: d.format(dateParse, "MMM ''yy"),
+      dateLookup: month,
     });
 
+    /*
     arr.forEach(item => {
       if (item.y < lowestNetWorth || lowestNetWorth === null) {
         lowestNetWorth = item.y;
@@ -322,29 +374,20 @@ function recalculate(data, start, end) {
         highestNetWorth = item.y;
       }
     });
+    */
+
     return arr;
   }, []);
 
-  const yTotal =
-    totalAssets > totalDebts
-      ? integerToAmount(totalTotals)
-      : -1 * integerToAmount(totalTotals);
+  const indexedSplit = exists ? index(monthData, 'dateLookup') : monthData;
 
   return {
-    graphData: {
-      data: graphData,
-      hasNegative,
-      start,
-      end,
-    },
+    indexedMonthData: indexedSplit,
+    monthData: monthData,
     totalAssets: integerToAmount(totalAssets),
-    totalDebts: -1 * integerToAmount(totalDebts),
-    totalTotals: yTotal,
-    netWorth: endNetWorth,
-    totalChange: endNetWorth - startNetWorth,
-    lowestNetWorth,
-    highestNetWorth,
-    id: data.id,
-    name: data.name,
+    totalDebts: integerToAmount(totalDebts),
+    totalTotals: integerToAmount(totalTotals),
+    id: item.id,
+    name: item.name,
   };
 }

@@ -142,9 +142,9 @@ function StackedBarGraph({
 
   const getVal = (obj, key) => {
     if (typeOp === 'totalDebts') {
-      return -1 * obj[key][typeOp];
+      return -1 * obj[key].amount;
     } else {
-      return obj[key][typeOp];
+      return obj[key].amount;
     }
   };
 
@@ -156,14 +156,14 @@ function StackedBarGraph({
       }}
     >
       {(width, height, portalHost) =>
-        data.monthData && (
+        data.stackedData && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <BarChart
                 width={width}
                 height={height}
-                data={data.monthData}
+                data={data.stackedData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 <Legend content={<CustomLegend />} />

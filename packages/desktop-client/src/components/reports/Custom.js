@@ -111,6 +111,12 @@ export default function Custom() {
     onCondOpChange,
   } = useFilters();
 
+  const typeOptions = [
+    { value: 1, description: 'Expense', format: 'totalDebts' },
+    { value: 2, description: 'Income', format: 'totalAssets' },
+    { value: 3, description: 'All', format: 'totalTotals' },
+  ];
+
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
@@ -135,6 +141,7 @@ export default function Custom() {
       start,
       end,
       split,
+      typeOptions.find(opt => opt.value === type).format,
       categories,
       payees,
       accounts,
@@ -146,6 +153,7 @@ export default function Custom() {
     start,
     end,
     split,
+    type,
     categories,
     payees,
     accounts,
@@ -277,7 +285,7 @@ export default function Custom() {
               data={data}
               empty={!empty}
               months={months}
-              type={type}
+              typeItem={typeOptions.find(opt => opt.value === type).format}
               mode={mode}
               split={splitOptions.find(opt => opt.value === split).description}
             />
@@ -286,7 +294,7 @@ export default function Custom() {
             scrollWidth={scrollWidth}
             data={data}
             mode={mode}
-            totalItem={typeOptions.find(opt => opt.value === type).format}
+            typeItem={typeOptions.find(opt => opt.value === type).format}
           />
         </>
       );
@@ -387,12 +395,6 @@ export default function Custom() {
     { value: 6, description: 'Year' },
   ];
 
-  const typeOptions = [
-    { value: 1, description: 'Expense', format: 'totalDebts' },
-    { value: 2, description: 'Income', format: 'totalAssets' },
-    { value: 3, description: 'All', format: 'totalTotals' },
-  ];
-
   /*
   const intervalOptions = [
     { value: 1, description: 'Daily', name: 1 },
@@ -485,8 +487,8 @@ export default function Custom() {
                 mode === 'time'
                   ? [5, 6]
                   : graphType === 'AreaGraph'
-                  ? [1, 2, 3, 4]
-                  : [0]
+                  ? [1, 2, 3, 4, 6]
+                  : [6]
               }
             />
           </View>
@@ -507,9 +509,7 @@ export default function Custom() {
                 option.value,
                 option.description,
               ])}
-              disabledKeys={
-                mode === 'total' && graphType === 'DonutGraph' ? [3] : [0]
-              }
+              disabledKeys={[3]}
             />
           </View>
           {/*
