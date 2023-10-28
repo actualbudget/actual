@@ -61,6 +61,7 @@ export namespace YNAB5 {
     category_id: string;
     memo: string;
     amount: number;
+    transfer_account_id: string;
   }
 
   interface Month {

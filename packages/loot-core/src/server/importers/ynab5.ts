@@ -178,11 +178,21 @@ async function importTransactions(
               entityIdMap.get(transaction.transfer_transaction_id) || null,
             subtransactions: subtransactions
               ? subtransactions.map(subtrans => {
+                  let payee = null;
+                  if (subtrans.transfer_account_id) {
+                    payee = payees.find(
+                      p =>
+                        p.transfer_acct ===
+                        entityIdMap.get(subtrans.transfer_account_id),
+                    ).id;
+                  }
+
                   return {
                     id: entityIdMap.get(subtrans.id),
                     amount: amountFromYnab(subtrans.amount),
                     category: entityIdMap.get(subtrans.category_id) || null,
                     notes: subtrans.memo,
+                    payee: payee,
                   };
                 })
               : null,
