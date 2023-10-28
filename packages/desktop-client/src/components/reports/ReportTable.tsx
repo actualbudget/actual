@@ -191,7 +191,14 @@ export function TableTotals({
   );
 }
 
-export function TotalTableList({ data, empty, monthsCount, typeItem, mode, split }) {
+export function TotalTableList({
+  data,
+  empty,
+  monthsCount,
+  typeItem,
+  mode,
+  split,
+}) {
   const splitItem = ['Month', 'Year'].includes(split) ? 'date' : 'name';
   const splitData =
     split === 'Category'

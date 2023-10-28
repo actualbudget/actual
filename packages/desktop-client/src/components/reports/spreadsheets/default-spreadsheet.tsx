@@ -209,35 +209,33 @@ export default function createSpreadsheet(
       }),
     );
 
-    const gData =
-      [1].includes(split) &&
-      (await Promise.all(
-        categories.grouped.map(async group => {
-          const catData = await Promise.all(
-            group.categories.map(async graph => {
-              let catMatch = null;
-              graphData.map(async cat => {
-                if (cat.id === graph.id) {
-                  catMatch = cat;
-                }
-              });
-              const calcCat = recalculate(catMatch, start, end);
-              return { ...calcCat };
-            }),
-          );
-          let groupMatch = null;
-          groupData.map(async split => {
-            if (split.id === group.id) {
-              groupMatch = split;
-            }
-          });
-          const calcGroup = recalculate(groupMatch, start, end);
-          return {
-            ...calcGroup,
-            categories: catData,
-          };
-        }),
-      ));
+    const gData = await Promise.all(
+      categories.grouped.map(async group => {
+        const catData = await Promise.all(
+          group.categories.map(async graph => {
+            let catMatch = null;
+            graphData.map(async cat => {
+              if (cat.id === graph.id) {
+                catMatch = cat;
+              }
+            });
+            const calcCat = catMatch && recalculate(catMatch, start, end);
+            return { ...calcCat };
+          }),
+        );
+        let groupMatch = null;
+        groupData.map(async split => {
+          if (split.id === group.id) {
+            groupMatch = split;
+          }
+        });
+        const calcGroup = groupMatch && recalculate(groupMatch, start, end);
+        return {
+          ...calcGroup,
+          categories: catData,
+        };
+      }),
+    );
 
     let totalAssets = 0;
     let totalDebts = 0;
