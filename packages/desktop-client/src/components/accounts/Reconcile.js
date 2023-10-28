@@ -4,10 +4,15 @@ import * as queries from 'loot-core/src/client/queries';
 import { currencyToInteger } from 'loot-core/src/shared/util';
 
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import { styles, colors } from '../../style';
-import { View, Text, Button, Input, InitialFocus, Tooltip } from '../common';
-import format from '../spreadsheet/format';
+import { styles, theme } from '../../style';
+import Button from '../common/Button';
+import InitialFocus from '../common/InitialFocus';
+import Input from '../common/Input';
+import Text from '../common/Text';
+import View from '../common/View';
+import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
+import { Tooltip } from '../tooltips';
 
 export function ReconcilingMessage({
   balanceQuery,
@@ -20,6 +25,7 @@ export function ReconcilingMessage({
     value: 0,
     query: balanceQuery.query.filter({ cleared: true }),
   });
+  let format = useFormat();
   let targetDiff = targetBalance - cleared;
 
   return (
@@ -27,7 +33,7 @@ export function ReconcilingMessage({
       style={{
         flexDirection: 'row',
         alignSelf: 'center',
-        backgroundColor: 'white',
+        backgroundColor: theme.tableBackground,
         ...styles.shadow,
         borderRadius: 4,
         marginTop: 5,
@@ -39,7 +45,7 @@ export function ReconcilingMessage({
         {targetDiff === 0 ? (
           <View
             style={{
-              color: colors.g4,
+              color: theme.noticeTextLight,
               flex: 1,
               flexDirection: 'row',
               alignItems: 'center',
@@ -50,14 +56,14 @@ export function ReconcilingMessage({
               style={{
                 width: 13,
                 height: 13,
-                color: colors.g5,
+                color: 'inherit',
                 marginRight: 3,
               }}
             />
             All reconciled!
           </View>
         ) : (
-          <View style={{ color: colors.n3 }}>
+          <View style={{ color: theme.tableText }}>
             <Text style={{ fontStyle: 'italic', textAlign: 'center' }}>
               Your cleared balance{' '}
               <strong>{format(cleared, 'financial')}</strong> needs{' '}
@@ -73,7 +79,7 @@ export function ReconcilingMessage({
           </View>
         )}
         <View style={{ marginLeft: 15 }}>
-          <Button primary onClick={onDone}>
+          <Button type="primary" onClick={onDone}>
             Done Reconciling
           </Button>
         </View>
@@ -90,14 +96,20 @@ export function ReconcilingMessage({
 }
 
 export function ReconcileTooltip({ account, onReconcile, onClose }) {
-  let balance = useSheetValue(queries.accountBalance(account));
+  let balanceQuery = queries.accountBalance(account);
+  let clearedBalance = useSheetValue({
+    name: balanceQuery.name + '-cleared',
+    value: null,
+    query: balanceQuery.query.filter({ cleared: true }),
+  });
+  let format = useFormat();
 
   function onSubmit(e) {
     e.preventDefault();
     let input = e.target.elements[0];
     let amount = currencyToInteger(input.value);
     if (amount != null) {
-      onReconcile(amount == null ? balance : amount);
+      onReconcile(amount == null ? clearedBalance : amount);
       onClose();
     } else {
       input.select();
@@ -112,15 +124,15 @@ export function ReconcileTooltip({ account, onReconcile, onClose }) {
           reconcile with:
         </Text>
         <form onSubmit={onSubmit}>
-          {balance != null && (
+          {clearedBalance != null && (
             <InitialFocus>
               <Input
-                defaultValue={format(balance, 'financial')}
+                defaultValue={format(clearedBalance, 'financial')}
                 style={{ margin: '7px 0' }}
               />
             </InitialFocus>
           )}
-          <Button primary>Reconcile</Button>
+          <Button type="primary">Reconcile</Button>
         </form>
       </View>
     </Tooltip>

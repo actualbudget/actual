@@ -21,10 +21,6 @@ beforeEach(async () => {
 });
 
 describe('schedule app', () => {
-  beforeEach(() => {
-    MockDate.set(new Date(2021, 4, 16));
-  });
-
   describe('utility', () => {
     it('conditions are updated when they exist', () => {
       let conds = [
@@ -79,7 +75,7 @@ describe('schedule app', () => {
             ],
           },
         }),
-      ).toBe('2021-05-30');
+      ).toBe('2020-12-30');
     });
   });
 
@@ -108,7 +104,7 @@ describe('schedule app', () => {
 
       expect(row).toBeTruthy();
       expect(row.rule).toBeTruthy();
-      expect(row.next_date).toBe('2021-05-30');
+      expect(row.next_date).toBe('2020-12-30');
 
       await expect(
         createSchedule({
@@ -143,7 +139,7 @@ describe('schedule app', () => {
       );
       let row = res.data[0];
 
-      expect(row.next_date).toBe('2021-05-30');
+      expect(row.next_date).toBe('2020-12-30');
       expect(row.posts_transaction).toBe(false);
 
       MockDate.set(new Date(2021, 4, 17));
@@ -250,9 +246,8 @@ describe('schedule app', () => {
       );
       let row = res.data[0];
 
-      expect(row.next_date).toBe('2021-05-30');
+      expect(row.next_date).toBe('2020-12-30');
 
-      MockDate.set(new Date(2021, 4, 17));
       await setNextDate({ id });
 
       res = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));

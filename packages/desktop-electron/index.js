@@ -38,6 +38,7 @@ require('./security');
 
 const { fork } = require('child_process');
 const path = require('path');
+const http = require('http');
 
 require('./setRequireHook');
 
@@ -55,10 +56,8 @@ const WindowState = require('./window-state.js');
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin;
-let serverWin; // eslint-disable-line @typescript-eslint/no-unused-vars
 let serverProcess;
 let serverSocket;
-let IS_QUITTING = false;
 
 updater.onEvent((type, data) => {
   // Notify both the app and the about window
@@ -76,11 +75,11 @@ if (isDev) {
 }
 
 function createBackgroundProcess(socketName) {
-  serverProcess = fork(__dirname + '/server.js', [
-    '--subprocess',
-    app.getVersion(),
-    socketName,
-  ]);
+  serverProcess = fork(
+    __dirname + '/server.js',
+    ['--subprocess', app.getVersion(), socketName],
+    isDev ? { execArgv: ['--inspect'] } : undefined,
+  );
 
   serverProcess.on('message', msg => {
     switch (msg.type) {
@@ -98,9 +97,48 @@ function createBackgroundProcess(socketName) {
         console.log('Unknown server message: ' + msg.type);
     }
   });
+
+  return serverProcess;
+}
+
+const isPortFree = port =>
+  new Promise(resolve => {
+    const server = http
+      .createServer()
+      .listen(port, () => {
+        server.close();
+        resolve(true);
+      })
+      .on('error', () => {
+        resolve(false);
+      });
+  });
+
+async function createSocketConnection() {
+  if (!serverSocket) serverSocket = await getRandomPort();
+
+  // Spawn the child process if it is not already running
+  // (sometimes long child processes die, so we need to set them
+  // up again)
+  const isFree = await isPortFree(serverSocket);
+  if (isFree) {
+    await createBackgroundProcess(serverSocket);
+  }
+
+  if (!clientWin) {
+    return;
+  }
+
+  // Send a heartbeat to the client whenever we attempt to create a new
+  // sockets connection
+  clientWin.webContents.executeJavaScript(
+    `window.__actionsForMenu && window.__actionsForMenu.reconnect(${serverSocket})`,
+  );
 }
 
 async function createWindow() {
+  await createSocketConnection();
+
   const windowState = await WindowState.get();
 
   // Create the browser window.
@@ -110,7 +148,6 @@ async function createWindow() {
     width: windowState.width,
     height: windowState.height,
     title: 'Actual',
-    titleBarStyle: 'hiddenInset',
     webPreferences: {
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
@@ -121,6 +158,10 @@ async function createWindow() {
     },
   });
   win.setBackgroundColor('#E8ECF0');
+
+  if (isDev) {
+    win.webContents.openDevTools();
+  }
 
   const unlistenToState = WindowState.listen(win, windowState);
 
@@ -133,15 +174,6 @@ async function createWindow() {
   } else {
     win.loadURL(`app://actual/`);
   }
-
-  win.on('close', () => {
-    // We don't want to close the budget on exit because that will
-    // clear the state which re-opens the last budget automatically on
-    // startup
-    if (!IS_QUITTING) {
-      clientWin.webContents.executeJavaScript('__actionsForMenu.closeBudget()');
-    }
-  });
 
   win.on('closed', () => {
     clientWin = null;
@@ -230,8 +262,6 @@ function updateMenu(isBudgetOpen) {
 app.setAppUserModelId('com.shiftreset.actual');
 
 app.on('ready', async () => {
-  serverSocket = await getRandomPort();
-
   // Install an `app://` protocol that always returns the base HTML
   // file no matter what URL it is. This allows us to use react-router
   // on the frontend
@@ -274,8 +304,6 @@ app.on('ready', async () => {
   require('electron').powerMonitor.on('suspend', () => {
     console.log('Suspending', new Date());
   });
-
-  createBackgroundProcess(serverSocket);
 });
 
 app.on('window-all-closed', () => {
@@ -286,7 +314,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-  IS_QUITTING = true;
   if (serverProcess) {
     serverProcess.kill();
     serverProcess = null;
@@ -297,6 +324,14 @@ app.on('activate', () => {
   if (clientWin === null) {
     createWindow();
   }
+});
+
+app.on('did-become-active', () => {
+  // Reconnect whenever the window becomes active;
+  // We don't know what might have happened in-between, so it's better
+  // to be safe than sorry; the client can then decide if it wants to
+  // reconnect or not.
+  createSocketConnection();
 });
 
 ipcMain.on('get-bootstrap-data', event => {

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 import Autocomplete from '../autocomplete/Autocomplete';
-import { View, Modal, Button, Text } from '../common';
+import Button from '../common/Button';
+import Modal from '../common/Modal';
+import Text from '../common/Text';
+import View from '../common/View';
 import { TableHeader, Table, Row, Field } from '../table';
 
 const addAccountOption = { id: 'new', name: 'Create new account' };
@@ -88,7 +91,7 @@ export default function SelectLinkedAccounts({
             style={{
               flex: 'unset',
               height: 300,
-              border: '1px solid ' + colors.border,
+              border: '1px solid ' + theme.tableBorder,
             }}
           >
             <TableHeader
@@ -101,7 +104,7 @@ export default function SelectLinkedAccounts({
 
             <Table
               items={externalAccounts}
-              style={{ backgroundColor: colors.n11 }}
+              style={{ backgroundColor: theme.tableHeaderBackground }}
               getItemKey={index => index}
               renderItem={({ key, item }) => (
                 <View key={key}>
@@ -130,7 +133,7 @@ export default function SelectLinkedAccounts({
             }}
           >
             <Button
-              primary
+              type="primary"
               onClick={onNext}
               disabled={!Object.keys(chosenAccounts).length}
             >
@@ -158,7 +161,7 @@ function TableRow({
   ].filter(Boolean);
 
   return (
-    <Row style={{ backgroundColor: 'white' }}>
+    <Row style={{ backgroundColor: theme.tableBackground }}>
       <Field width={200}>{externalAccount.name}</Field>
       <Field
         width="flex"
@@ -195,7 +198,7 @@ function TableRow({
           </Button>
         ) : (
           <Button
-            primary
+            type="primary"
             onClick={() => {
               setFocusedField('account');
             }}

@@ -11,6 +11,6 @@ export interface ServerEvents {
   'show-budgets': unknown;
   'start-import': unknown;
   'start-load': unknown;
-  'sync-event': { type; subtype; meta; tables };
+  'sync-event': { type; subtype; meta; tables; syncDisabled };
   'undo-event': unknown;
 }

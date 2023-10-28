@@ -13,9 +13,10 @@ import {
 } from 'loot-core/src/client/reducers/queries';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import useCategories from '../../hooks/useCategories';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
-import { styles } from '../../style';
+import { theme, styles } from '../../style';
 import { Table, Row, Field, Cell, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 
@@ -47,7 +48,7 @@ const TransactionRow = memo(function TransactionRow({
   let dispatchSelected = useSelectedDispatch();
 
   return (
-    <Row>
+    <Row style={{ color: theme.tableText }}>
       <SelectCell
         exposed={true}
         focused={false}
@@ -121,7 +122,7 @@ const TransactionRow = memo(function TransactionRow({
               <Field
                 key={i}
                 width={75}
-                style={[{ textAlign: 'right' }, styles.tnum]}
+                style={{ textAlign: 'right', ...styles.tnum }}
               >
                 {integerToCurrency(transaction.amount)}
               </Field>
@@ -141,11 +142,11 @@ export default function SimpleTransactionsTable({
   fields = ['date', 'payee', 'amount'],
   style,
 }) {
-  let { payees, categories, accounts, dateFormat } = useSelector(state => {
+  let { grouped: categories } = useCategories();
+  let { payees, accounts, dateFormat } = useSelector(state => {
     return {
       payees: state.queries.payees,
       accounts: state.queries.accounts,
-      categories: state.queries.categories.grouped,
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });

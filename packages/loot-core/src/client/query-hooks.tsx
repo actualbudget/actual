@@ -65,7 +65,7 @@ function makeContext(queryState, opts, QueryClass) {
   };
 }
 
-export function liveQueryContext(query, opts) {
+export function liveQueryContext(query, opts?) {
   return makeContext(query, opts, LiveQuery);
 }
 

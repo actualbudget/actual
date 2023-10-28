@@ -5,6 +5,7 @@ import { test, expect } from '@playwright/test';
 import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import screenshotConfig from './screenshot.config';
 
 test.describe('Onboarding', () => {
   let page;
@@ -21,6 +22,14 @@ test.describe('Onboarding', () => {
 
   test.afterEach(async () => {
     await page.close();
+  });
+
+  test('checks the page visuals', async () => {
+    await expect(configurationPage.heading).toHaveText('Where’s the server?');
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
+
+    await configurationPage.clickOnNoServer();
+    await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
   test('creates a new budget file by importing YNAB4 budget', async () => {
@@ -41,8 +50,21 @@ test.describe('Onboarding', () => {
     await expect(accountPage.accountBalance).toHaveText('2,607.00');
   });
 
-  // TODO: implement this test once we have an example nYNAB file
-  // test('creates a new budget file by importing nYNAB budget');
+  test('creates a new budget file by importing nYNAB budget', async () => {
+    await configurationPage.clickOnNoServer();
+    const budgetPage = await configurationPage.importBudget(
+      'nYNAB',
+      path.resolve(__dirname, 'data/ynab5-demo-budget.json'),
+    );
+
+    await expect(budgetPage.budgetTable).toBeVisible({ timeout: 30000 });
+
+    const accountPage = await navigation.goToAccountPage('Checking');
+    await expect(accountPage.accountBalance).toHaveText('700.00');
+
+    await navigation.goToAccountPage('Saving');
+    await expect(accountPage.accountBalance).toHaveText('200.00');
+  });
 
   test('creates a new budget file by importing Actual budget', async () => {
     await configurationPage.clickOnNoServer();
@@ -51,7 +73,7 @@ test.describe('Onboarding', () => {
       path.resolve(__dirname, 'data/actual-demo-budget.zip'),
     );
 
-    await expect(budgetPage.budgetTable).toBeVisible();
+    await expect(budgetPage.budgetTable).toBeVisible({ timeout: 20_000 });
 
     const accountPage = await navigation.goToAccountPage('Ally Savings');
     await expect(accountPage.accountBalance).toHaveText('1,772.80');

@@ -1,167 +1,178 @@
-import React, { createElement } from 'react';
+import React from 'react';
 
-import * as d from 'date-fns';
-import { type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 import {
-  VictoryChart,
-  VictoryBar,
-  VictoryArea,
-  VictoryAxis,
-  VictoryVoronoiContainer,
-  VictoryGroup,
-} from 'victory';
+  AreaChart,
+  Area,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
-import theme from '../chart-theme';
+import { theme } from '../../../style';
+import { type CSSProperties } from '../../../style';
+import AlignedText from '../../common/AlignedText';
 import Container from '../Container';
-import Tooltip from '../Tooltip';
-
-type AreaProps = {
-  start: string;
-  end: string;
-  scale?;
-  range?;
-};
-function Area({ start, end, scale, range }: AreaProps) {
-  const zero = scale.y(0);
-
-  const startX = scale.x(d.parseISO(start + '-01'));
-  const endX = scale.x(d.parseISO(end + '-01'));
-
-  if (startX < 0 || endX < 0) {
-    return null;
-  }
-
-  return (
-    <svg>
-      <defs>
-        <clipPath id="positive">
-          <rect
-            x={startX}
-            y={range.y[1]}
-            width={endX - startX}
-            height={zero - range.y[1] + 1}
-            fill="#ffffff"
-          />
-        </clipPath>
-        <clipPath id="negative">
-          <rect
-            x={startX}
-            y={zero + 1}
-            width={endX - startX}
-            height={Math.max(range.y[0] - zero - 1, 0)}
-            fill="#ffffff"
-          />
-        </clipPath>
-        <linearGradient
-          id="positive-gradient"
-          gradientUnits="userSpaceOnUse"
-          x1={0}
-          y1={range.y[1]}
-          x2={0}
-          y2={zero}
-        >
-          <stop offset="0%" stopColor={theme.colors.blueFadeStart} />
-          <stop offset="100%" stopColor={theme.colors.blueFadeEnd} />
-        </linearGradient>
-        <linearGradient
-          id="negative-gradient"
-          gradientUnits="userSpaceOnUse"
-          x1={0}
-          y1={zero}
-          x2={0}
-          y2={range.y[0]}
-        >
-          <stop offset="0%" stopColor={theme.colors.redFadeEnd} />
-          <stop offset="100%" stopColor={theme.colors.redFadeStart} />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
+  domain?: {
+    y?: [number, number];
+  };
 };
-function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
-  const Chart = compact ? VictoryGroup : VictoryChart;
+type PotentialNumber = number | string | undefined | null;
+
+const numberFormatterTooltip = (value: PotentialNumber): number | null => {
+  if (typeof value === 'number') {
+    return Math.round(value);
+  }
+  return null; // or some default value for other cases
+};
+
+function NetWorthGraph({
+  style,
+  graphData,
+  compact,
+  domain,
+}: NetWorthGraphProps) {
+  const tickFormatter = tick => {
+    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+  };
+
+  const gradientOffset = () => {
+    const dataMax = Math.max(...graphData.data.map(i => i.y));
+    const dataMin = Math.min(...graphData.data.map(i => i.y));
+
+    if (dataMax <= 0) {
+      return 0;
+    }
+    if (dataMin >= 0) {
+      return 1;
+    }
+
+    return dataMax / (dataMax - dataMin);
+  };
+
+  const off = gradientOffset();
+
+  type PayloadItem = {
+    payload: {
+      date: string;
+      assets: number | string;
+      debt: number | string;
+      networth: number | string;
+      change: number | string;
+    };
+  };
+
+  type CustomTooltipProps = {
+    active?: boolean;
+    payload?: PayloadItem[];
+    label?: string;
+  };
+
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+    if (active && payload && payload.length) {
+      return (
+        <div
+          className={`${css(
+            {
+              zIndex: 1000,
+              pointerEvents: 'none',
+              borderRadius: 2,
+              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+              backgroundColor: theme.alt2MenuBackground,
+              color: theme.alt2MenuItemText,
+              padding: 10,
+            },
+            style,
+          )}`}
+        >
+          <div>
+            <div style={{ marginBottom: 10 }}>
+              <strong>{payload[0].payload.date}</strong>
+            </div>
+            <div style={{ lineHeight: 1.5 }}>
+              <AlignedText left="Assets:" right={payload[0].payload.assets} />
+              <AlignedText left="Debt:" right={payload[0].payload.debt} />
+              <AlignedText
+                left="Net worth:"
+                right={<strong>{payload[0].payload.networth}</strong>}
+              />
+              <AlignedText left="Change:" right={payload[0].payload.change} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
 
   return (
-    <Container style={[style, compact && { height: 'auto' }]}>
+    <Container
+      style={{
+        ...style,
+        ...(compact && { height: 'auto' }),
+      }}
+    >
       {(width, height, portalHost) =>
         graphData && (
-          <Chart
-            scale={{ x: 'time', y: 'linear' }}
-            theme={theme}
-            domainPadding={{ x: 0, y: 10 }}
-            width={width}
-            height={height}
-            containerComponent={
-              <VictoryVoronoiContainer voronoiDimension="x" />
-            }
-            padding={
-              compact && {
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-              }
-            }
-          >
-            <Area start={graphData.start} end={graphData.end} />
-            {createElement(
-              // @ts-expect-error defaultProps mismatch causing issue
-              graphData.data.length === 1 ? VictoryBar : VictoryArea,
-              {
-                data: graphData.data,
-                labelComponent: <Tooltip portalHost={portalHost} />,
-                labels: x => x.premadeLabel,
-                style: {
-                  data:
-                    graphData.data.length === 1
-                      ? { width: 50 }
-                      : {
-                          clipPath: 'url(#positive)',
-                          fill: 'url(#positive-gradient)',
-                        },
-                },
-              },
-            )}
-            {graphData.data.length > 1 && (
-              <VictoryArea
+          <ResponsiveContainer>
+            <div>
+              {!compact && <div style={{ marginTop: '15px' }} />}
+              <AreaChart
+                width={width}
+                height={height}
                 data={graphData.data}
-                style={{
-                  data: {
-                    clipPath: 'url(#negative)',
-                    fill: 'url(#negative-gradient)',
-                    stroke: theme.colors.red,
-                    strokeLinejoin: 'round',
-                  },
-                }}
-              />
-            )}
-            {/* Somehow the path `d` attributes are stripped from second
-             `<VictoryArea />` above if this is removed. I’m just as
-              confused as you are! */}
-            <VictoryArea
-              data={graphData.data}
-              style={{ data: { fill: 'none', stroke: 'none' } }}
-            />
-            {!compact && (
-              <VictoryAxis
-                style={{ ticks: { stroke: 'red' } }}
-                // eslint-disable-next-line rulesdir/typography
-                tickFormat={x => d.format(x, "MMM ''yy")}
-                tickValues={graphData.data.map(item => item.x)}
-                tickCount={Math.min(5, graphData.data.length)}
-                offsetY={50}
-              />
-            )}
-            {!compact && (
-              <VictoryAxis dependentAxis crossAxis={!graphData.hasNegative} />
-            )}
-          </Chart>
+                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              >
+                {compact ? null : (
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                )}
+                {compact ? null : <XAxis dataKey="x" />}
+                {compact ? null : (
+                  <YAxis
+                    dataKey="y"
+                    domain={['auto', 'auto']}
+                    tickFormatter={tickFormatter}
+                  />
+                )}
+                <Tooltip
+                  content={<CustomTooltip />}
+                  formatter={numberFormatterTooltip}
+                  isAnimationActive={false}
+                />
+                <defs>
+                  <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsBlue}
+                      stopOpacity={0.2}
+                    />
+                    <stop
+                      offset={off}
+                      stopColor={theme.reportsRed}
+                      stopOpacity={0.2}
+                    />
+                  </linearGradient>
+                </defs>
+
+                <Area
+                  type="linear"
+                  dot={false}
+                  activeDot={false}
+                  animationDuration={0}
+                  dataKey="y"
+                  stroke={theme.reportsBlue}
+                  fill="url(#splitColor)"
+                  fillOpacity={1}
+                />
+              </AreaChart>
+            </div>
+          </ResponsiveContainer>
         )
       }
     </Container>

@@ -47,15 +47,19 @@ import usePrevious from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import LeftArrow2 from '../../icons/v0/LeftArrow2';
 import RightArrow2 from '../../icons/v0/RightArrow2';
+import ArrowDown from '../../icons/v1/ArrowDown';
+import ArrowUp from '../../icons/v1/ArrowUp';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CalendarIcon from '../../icons/v2/Calendar';
 import Hyperlink2 from '../../icons/v2/Hyperlink2';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { View, Text, Tooltip, Button } from '../common';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
 import DateSelect from '../select/DateSelect';
 import {
@@ -71,6 +75,7 @@ import {
   Table,
   UnexposedCellContent,
 } from '../table';
+import { Tooltip } from '../tooltips';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -237,18 +242,35 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   );
 }
 
+function selectAscDesc(field, ascDesc, clicked, defaultAscDesc = 'asc') {
+  return field === clicked
+    ? ascDesc === 'asc'
+      ? 'desc'
+      : 'asc'
+    : defaultAscDesc;
+}
+
 const TransactionHeader = memo(
-  ({ hasSelected, showAccount, showCategory, showBalance, showCleared }) => {
+  ({
+    hasSelected,
+    showAccount,
+    showCategory,
+    showBalance,
+    showCleared,
+    scrollWidth,
+    onSort,
+    ascDesc,
+    field,
+  }) => {
     let dispatchSelected = useSelectedDispatch();
 
     return (
       <Row
-        borderColor={colors.n9}
-        backgroundColor="white"
         style={{
-          color: colors.n4,
           fontWeight: 300,
           zIndex: 200,
+          color: theme.tableHeaderText,
+          backgroundColor: theme.tableBackground,
         }}
       >
         <SelectCell
@@ -258,16 +280,93 @@ const TransactionHeader = memo(
           width={20}
           onSelect={e => dispatchSelected({ type: 'select-all', event: e })}
         />
-        <Cell value="Date" width={110} />
-        {showAccount && <Cell value="Account" width="flex" />}
-        <Cell value="Payee" width="flex" />
-        <Cell value="Notes" width="flex" />
-        {showCategory && <Cell value="Category" width="flex" />}
-        <Cell value="Payment" width={80} textAlign="right" />
-        <Cell value="Deposit" width={80} textAlign="right" />
+        <HeaderCell
+          value="Date"
+          width={110}
+          alignItems="flex"
+          marginLeft={-5}
+          id="date"
+          icon={field === 'date' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
+          }
+        />
+        {showAccount && (
+          <HeaderCell
+            value="Account"
+            width="flex"
+            alignItems="flex"
+            marginLeft={-5}
+            id="account"
+            icon={field === 'account' ? ascDesc : 'clickable'}
+            onClick={() =>
+              onSort('account', selectAscDesc(field, ascDesc, 'account', 'asc'))
+            }
+          />
+        )}
+        <HeaderCell
+          value="Payee"
+          width="flex"
+          alignItems="flex"
+          marginLeft={-5}
+          id="payee"
+          icon={field === 'payee' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc'))
+          }
+        />
+        <HeaderCell
+          value="Notes"
+          width="flex"
+          alignItems="flex"
+          marginLeft={-5}
+          id="notes"
+          icon={field === 'notes' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
+          }
+        />
+        {showCategory && (
+          <HeaderCell
+            value="Category"
+            width="flex"
+            alignItems="flex"
+            marginLeft={-5}
+            id="category"
+            icon={field === 'category' ? ascDesc : 'clickable'}
+            onClick={() =>
+              onSort(
+                'category',
+                selectAscDesc(field, ascDesc, 'category', 'asc'),
+              )
+            }
+          />
+        )}
+        <HeaderCell
+          value="Payment"
+          width={90}
+          alignItems="flex-end"
+          marginRight={-5}
+          id="payment"
+          icon={field === 'payment' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('payment', selectAscDesc(field, ascDesc, 'payment', 'asc'))
+          }
+        />
+        <HeaderCell
+          value="Deposit"
+          width={85}
+          alignItems="flex-end"
+          marginRight={-5}
+          id="deposit"
+          icon={field === 'deposit' ? ascDesc : 'clickable'}
+          onClick={() =>
+            onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
+          }
+        />
         {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
-        {showCleared && <Field width={21} truncate={false} />}
-        <Cell value="" width={15 + styles.scrollbarWidth} />
+        {showCleared && <Field width={23} truncate={false} />}
+        <Cell value="" width={5 + scrollWidth ?? 0} />
       </Row>
     );
   },
@@ -294,10 +393,7 @@ function getPayeePretty(transaction, payee, transferAcct) {
         </div>
       </View>
     );
-  } else if (payee && !payee.transfer_acct) {
-    // Check to make sure this isn't a transfer because in the rare
-    // occasion that the account has been deleted but the payee is
-    // still there, we don't want to show the name.
+  } else if (payee) {
     return payee.name;
   } else if (payeeId && payeeId.startsWith('new:')) {
     return payeeId.slice('new:'.length);
@@ -318,18 +414,16 @@ function StatusCell({
   let isClearedField = status === 'cleared' || status == null;
   let statusProps = getStatusProps(status);
 
-  let props = {
-    color:
-      status === 'cleared'
-        ? colors.g5
-        : status === 'missed'
-        ? colors.r6
-        : status === 'due'
-        ? colors.y5
-        : selected
-        ? colors.b7
-        : colors.n7,
-  };
+  let statusColor =
+    status === 'cleared'
+      ? theme.noticeTextLight
+      : status === 'missed'
+      ? theme.errorText
+      : status === 'due'
+      ? theme.alt3WarningText
+      : selected
+      ? theme.pageTextLinkLight
+      : theme.pageTextSubdued;
 
   function onSelect() {
     if (isClearedField) {
@@ -340,26 +434,24 @@ function StatusCell({
   return (
     <Cell
       name="cleared"
-      width="auto"
+      width={23}
       focused={focused}
       style={{ padding: 1 }}
       plain
     >
       <CellButton
-        style={[
-          {
-            padding: 3,
-            border: '1px solid transparent',
-            borderRadius: 50,
-            ':focus': {
-              border: '1px solid ' + props.color,
-              boxShadow: `0 1px 2px ${props.color}`,
-            },
-            cursor: isClearedField ? 'pointer' : 'default',
+        style={{
+          padding: 3,
+          backgroundColor: 'transparent',
+          border: '1px solid transparent',
+          borderRadius: 50,
+          ':focus': {
+            border: '1px solid ' + theme.formInputBorderSelected,
+            boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
           },
-
-          isChild && { visibility: 'hidden' },
-        ]}
+          cursor: isClearedField ? 'pointer' : 'default',
+          ...(isChild && { visibility: 'hidden' }),
+        }}
         onEdit={() => onEdit(id, 'cleared')}
         onSelect={onSelect}
       >
@@ -367,12 +459,54 @@ function StatusCell({
           style: {
             width: 13,
             height: 13,
-            color: props.color,
+            color: statusColor,
             marginTop: status === 'due' ? -1 : 0,
           },
         })}
       </CellButton>
     </Cell>
+  );
+}
+
+function HeaderCell({
+  value,
+  id,
+  width,
+  alignItems,
+  marginLeft,
+  marginRight,
+  icon,
+  onClick,
+}) {
+  return (
+    <CustomCell
+      width={width}
+      name={id}
+      alignItems={alignItems}
+      unexposedContent={
+        <Button
+          type="bare"
+          onClick={onClick}
+          style={{
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            color: theme.tableHeaderText,
+            fontWeight: 300,
+            marginLeft: marginLeft,
+            marginRight: marginRight,
+          }}
+        >
+          <UnexposedCellContent value={value} />
+          {icon === 'asc' && (
+            <ArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
+          )}
+          {icon === 'desc' && (
+            <ArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
+          )}
+        </Button>
+      }
+    />
   );
 }
 
@@ -406,10 +540,14 @@ function PayeeCell({
     <CustomCell
       width="flex"
       name="payee"
+      textAlign="flex"
       value={payeeId}
-      valueStyle={[valueStyle, inherited && { color: colors.n8 }]}
+      valueStyle={{
+        ...valueStyle,
+        ...(inherited && { color: theme.tableTextInactive }),
+      }}
       exposed={focused}
-      onExpose={!isPreview && (name => onEdit(id, name))}
+      onExpose={name => !isPreview && onEdit(id, name)}
       onUpdate={async value => {
         onUpdate('payee', value);
 
@@ -456,7 +594,6 @@ function PayeeCell({
             }}
             showManagePayees={true}
             tableBehavior={true}
-            defaultFocusTransferPayees={transaction.is_child}
             focused={true}
             onUpdate={onUpdate}
             onSelect={onSave}
@@ -496,66 +633,61 @@ function PayeeIcons({
     color: 'inherit',
   };
 
-  let scheduleIconStyle = {
-    width: 13,
-    height: 13,
-    color: 'inherit',
-  };
+  let scheduleIconStyle = { width: 13, height: 13 };
 
-  let transferIconStyle = {
-    width: 10,
-    height: 10,
-    color: 'inherit',
-  };
+  let transferIconStyle = { width: 10, height: 10 };
 
   let recurring = schedule && schedule._date && !!schedule._date.frequency;
 
-  return schedule ? (
-    <Button
-      bare
-      style={buttonStyle}
-      onClick={e => {
-        e.stopPropagation();
-        onNavigateToSchedule(scheduleId);
-      }}
-    >
-      {recurring ? (
-        <ArrowsSynchronize style={scheduleIconStyle} />
-      ) : (
-        <CalendarIcon style={scheduleIconStyle} />
+  return (
+    <>
+      {schedule && (
+        <Button
+          type="bare"
+          style={buttonStyle}
+          onClick={e => {
+            e.stopPropagation();
+            onNavigateToSchedule(scheduleId);
+          }}
+        >
+          {recurring ? (
+            <ArrowsSynchronize style={scheduleIconStyle} />
+          ) : (
+            <CalendarIcon style={scheduleIconStyle} />
+          )}
+        </Button>
       )}
-    </Button>
-  ) : transferAccount ? (
-    <Button
-      bare
-      style={buttonStyle}
-      onClick={e => {
-        e.stopPropagation();
-        if (!isTemporaryId(transaction.id)) {
-          onNavigateToTransferAccount(transferAccount.id);
-        }
-      }}
-    >
-      {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
-        <LeftArrow2 style={transferIconStyle} />
-      ) : (
-        <RightArrow2 style={transferIconStyle} />
+      {transferAccount && (
+        <Button
+          type="bare"
+          style={buttonStyle}
+          onClick={e => {
+            e.stopPropagation();
+            if (!isTemporaryId(transaction.id)) {
+              onNavigateToTransferAccount(transferAccount.id);
+            }
+          }}
+        >
+          {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
+            <LeftArrow2 style={transferIconStyle} />
+          ) : (
+            <RightArrow2 style={transferIconStyle} />
+          )}
+        </Button>
       )}
-    </Button>
-  ) : null;
+    </>
+  );
 }
 
 const Transaction = memo(function Transaction(props) {
   let {
     transaction: originalTransaction,
     editing,
-    backgroundColor = 'white',
     showAccount,
     showBalance,
     showCleared,
     showZeroInDeposit,
     style,
-    hovered,
     selected,
     highlighted,
     added,
@@ -571,7 +703,6 @@ const Transaction = memo(function Transaction(props) {
     hideFraction,
     onSave,
     onEdit,
-    onHover,
     onDelete,
     onSplit,
     onManagePayees,
@@ -647,6 +778,7 @@ const Transaction = memo(function Transaction(props) {
 
   let {
     id,
+    amount,
     debit,
     credit,
     payee: payeeId,
@@ -677,95 +809,115 @@ const Transaction = memo(function Transaction(props) {
   }
 
   let isChild = transaction.is_child;
-  let borderColor = selected ? colors.b8 : colors.border;
   let isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   let isOffBudget = account && account.offbudget === 1;
 
   let valueStyle = added ? { fontWeight: 600 } : null;
-  let backgroundFocus = hovered || focusedField === 'select';
+  let backgroundFocus = focusedField === 'select';
   let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
+
+  let runningBalance = !isTemporaryId(id)
+    ? balance
+    : balance + (_inverse ? -1 : 1) * amount;
 
   return (
     <Row
-      borderColor={borderColor}
-      backgroundColor={
-        selected
-          ? colors.selected
+      style={{
+        backgroundColor: selected
+          ? theme.tableRowBackgroundHighlight
           : backgroundFocus
-          ? colors.hover
-          : isPreview
-          ? '#fcfcfc'
-          : backgroundColor
-      }
-      highlighted={highlighted}
-      style={[
-        style,
-        isPreview && { color: colors.n5, fontStyle: 'italic' },
-        _unmatched && { opacity: 0.5 },
-      ]}
-      onMouseEnter={() => onHover && onHover(transaction.id)}
+          ? theme.tableRowBackgroundHover
+          : theme.tableBackground,
+        ':hover': !(backgroundFocus || selected) && {
+          backgroundColor: theme.tableRowBackgroundHover,
+        },
+        '& .hover-visible': {
+          opacity: 0,
+        },
+        ':hover .hover-visible': {
+          opacity: 1,
+        },
+        ...(highlighted || selected
+          ? { color: theme.tableRowBackgroundHighlightText }
+          : { color: theme.tableText }),
+        ...style,
+        ...(isPreview && {
+          color: theme.tableTextInactive,
+          backgroundColor: !selected ? '#fcfcfc' : undefined,
+          fontStyle: 'italic',
+        }),
+        ...(_unmatched && { opacity: 0.5 }),
+      }}
     >
       {isChild && (
         <Field
-          borderColor="transparent"
+          /* Checkmark blank placeholder for Child transaction */
           width={110}
           style={{
             width: 110,
-            backgroundColor: colors.n11,
-            borderBottomWidth: 0,
-          }}
-        />
-      )}
-      {isChild && showAccount && (
-        <Field
-          borderColor="transparent"
-          style={{
-            flex: 1,
-            backgroundColor: colors.n11,
-            opacity: 0,
+            backgroundColor: theme.tableRowBackgroundHover,
+            border: 0, // known z-order issue, bottom border for parent transaction hidden
           }}
         />
       )}
 
+      {isChild && showAccount && (
+        <Field
+          /* Account blank placeholder for Child transaction */
+          style={{
+            flex: 1,
+            backgroundColor: theme.tableRowBackgroundHover,
+            border: 0,
+          }}
+        />
+      )}
+
+      {/* Checkmark - for Child transaction
+      between normal Date and Payee or Account and Payee if needed */}
       {isTemporaryId(transaction.id) ? (
         isChild ? (
           <DeleteCell
             onDelete={() => onDelete && onDelete(transaction.id)}
-            exposed={hovered || editing}
-            style={[isChild && { borderLeftWidth: 1 }, { lineHeight: 0 }]}
+            exposed={editing}
+            style={{ ...(isChild && { borderLeftWidth: 1 }), lineHeight: 0 }}
           />
         ) : (
           <Cell width={20} />
         )
       ) : (
         <SelectCell
-          exposed={hovered || selected || editing}
+          /* Checkmark field for non-child transaction */
+          exposed
+          buttonProps={{
+            className: selected || editing ? null : 'hover-visible',
+          }}
           focused={focusedField === 'select'}
           onSelect={e => {
             dispatchSelected({ type: 'select', id: transaction.id, event: e });
           }}
           onEdit={() => onEdit(id, 'select')}
           selected={selected}
-          style={[isChild && { borderLeftWidth: 1 }]}
+          style={{ ...(isChild && { borderLeftWidth: 1 }) }}
           value={
             matched && (
-              <Hyperlink2 style={{ width: 13, height: 13, color: colors.n7 }} />
+              <Hyperlink2 style={{ width: 13, height: 13, color: 'inherit' }} />
             )
           }
         />
       )}
-
       {!isChild && (
         <CustomCell
+          /* Date field for non-child transaction */
           name="date"
           width={110}
+          textAlign="flex"
           exposed={focusedField === 'date'}
           value={date}
           valueStyle={valueStyle}
           formatter={date =>
             date ? formatDate(parseISO(date), dateFormat) : ''
           }
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           onUpdate={value => {
             onUpdate('date', value);
           }}
@@ -793,8 +945,10 @@ const Transaction = memo(function Transaction(props) {
 
       {!isChild && showAccount && (
         <CustomCell
+          /* Account field for non-child transaction */
           name="account"
           width="flex"
+          textAlign="flex"
           value={accountId}
           formatter={acctId => {
             let acct = acctId && getAccountsById(accounts)[acctId];
@@ -805,7 +959,7 @@ const Transaction = memo(function Transaction(props) {
           }}
           valueStyle={valueStyle}
           exposed={focusedField === 'account'}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           onUpdate={async value => {
             // Only ever allow non-null values
             if (value) {
@@ -838,6 +992,7 @@ const Transaction = memo(function Transaction(props) {
       )}
       {(() => (
         <PayeeCell
+          /* Payee field for all transactions */
           id={id}
           payeeId={payeeId}
           accountId={accountId}
@@ -861,16 +1016,18 @@ const Transaction = memo(function Transaction(props) {
       ))()}
 
       {isPreview ? (
+        /* Notes field for all transactions */
         <Cell name="notes" width="flex" />
       ) : (
         <InputCell
           width="flex"
           name="notes"
+          textAlign="flex"
           exposed={focusedField === 'notes'}
           focused={focusedField === 'notes'}
           value={notes || ''}
           valueStyle={valueStyle}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           inputProps={{
             value: notes || '',
             onUpdate: onUpdate.bind(null, 'notes'),
@@ -879,26 +1036,27 @@ const Transaction = memo(function Transaction(props) {
       )}
 
       {isPreview ? (
+        // Category field for preview transactions
         <Cell width="flex" style={{ alignItems: 'flex-start' }} exposed={true}>
           {() => (
             <View
               style={{
                 color:
                   notes === 'missed'
-                    ? colors.r6
+                    ? theme.errorText
                     : notes === 'due'
-                    ? colors.y4
+                    ? theme.alt5WarningText
                     : selected
-                    ? colors.b5
-                    : colors.n6,
+                    ? theme.formLabelText
+                    : theme.altTableText,
                 backgroundColor:
                   notes === 'missed'
-                    ? colors.r10
+                    ? theme.errorBackground
                     : notes === 'due'
-                    ? colors.y9
+                    ? theme.altWarningBackground
                     : selected
-                    ? colors.b8
-                    : colors.n10,
+                    ? theme.formLabelBackground
+                    : theme.alt2TableBackground,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
@@ -910,6 +1068,7 @@ const Transaction = memo(function Transaction(props) {
         </Cell>
       ) : isParent ? (
         <Cell
+          /* Category field (Split button) for parent transactions */
           name="category"
           width="flex"
           focused={focusedField === 'category'}
@@ -917,14 +1076,13 @@ const Transaction = memo(function Transaction(props) {
           plain
         >
           <CellButton
+            bare
             style={{
               alignSelf: 'flex-start',
-              color: colors.n6,
               borderRadius: 4,
-              transition: 'none',
-              '&:hover': {
-                backgroundColor: 'rgba(100, 100, 100, .15)',
-                color: colors.n5,
+              border: '1px solid transparent', // so it doesn't shift on hover
+              ':hover': {
+                border: '1px solid ' + theme.buttonNormalBorder,
               },
             }}
             disabled={isTemporaryId(transaction.id)}
@@ -944,9 +1102,9 @@ const Transaction = memo(function Transaction(props) {
               {isParent && (
                 <CheveronDown
                   style={{
+                    color: 'inherit',
                     width: 14,
                     height: 14,
-                    color: 'currentColor',
                     transition: 'transform .08s',
                     transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
                   }}
@@ -960,11 +1118,13 @@ const Transaction = memo(function Transaction(props) {
         </Cell>
       ) : isBudgetTransfer || isOffBudget || isPreview ? (
         <InputCell
+          /* Category field for transfer and off-budget transactions
+     (NOT preview, it is covered first) */
           name="category"
           width="flex"
           exposed={focusedField === 'category'}
           focused={focusedField === 'category'}
-          onExpose={!isPreview && (name => onEdit(id, name))}
+          onExpose={name => !isPreview && onEdit(id, name)}
           value={
             isParent
               ? 'Split'
@@ -975,7 +1135,11 @@ const Transaction = memo(function Transaction(props) {
               : ''
           }
           valueStyle={valueStyle}
-          style={{ fontStyle: 'italic', color: '#c0c0c0', fontWeight: 300 }}
+          style={{
+            fontStyle: 'italic',
+            color: '#c0c0c0',
+            fontWeight: 300,
+          }}
           inputProps={{
             readOnly: true,
             style: { fontStyle: 'italic' },
@@ -983,8 +1147,10 @@ const Transaction = memo(function Transaction(props) {
         />
       ) : (
         <CustomCell
+          /* Category field for normal and child transactions */
           name="category"
           width="flex"
+          textAlign="flex"
           value={categoryId}
           formatter={value =>
             value
@@ -1001,9 +1167,10 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={
             !categoryId
               ? {
+                  // uncategorized transaction
                   fontStyle: 'italic',
                   fontWeight: 300,
-                  color: colors.p8,
+                  color: theme.formInputTextHighlight,
                 }
               : valueStyle
           }
@@ -1040,8 +1207,9 @@ const Transaction = memo(function Transaction(props) {
       )}
 
       <InputCell
+        /* Debit field for all transactions */
         type="input"
-        width={80}
+        width={90}
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
@@ -1049,17 +1217,25 @@ const Transaction = memo(function Transaction(props) {
         valueStyle={valueStyle}
         textAlign="right"
         title={debit}
-        onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
+        onExpose={name => !isPreview && onEdit(id, name)}
+        style={{
+          ...(isParent && { fontStyle: 'italic' }),
+          ...styles.tnum,
+          ...amountStyle,
+        }}
         inputProps={{
           value: debit === '' && credit === '' ? '0.00' : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
         }}
+        privacyFilter={{
+          activationFilters: [!isTemporaryId(transaction.id)],
+        }}
       />
 
       <InputCell
+        /* Credit field for all transactions */
         type="input"
-        width={80}
+        width={85}
         name="credit"
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}
@@ -1067,31 +1243,43 @@ const Transaction = memo(function Transaction(props) {
         valueStyle={valueStyle}
         textAlign="right"
         title={credit}
-        onExpose={!isPreview && (name => onEdit(id, name))}
-        style={[isParent && { fontStyle: 'italic' }, styles.tnum, amountStyle]}
+        onExpose={name => !isPreview && onEdit(id, name)}
+        style={{
+          ...(isParent && { fontStyle: 'italic' }),
+          ...styles.tnum,
+          ...amountStyle,
+        }}
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
+        }}
+        privacyFilter={{
+          activationFilters: [!isTemporaryId(transaction.id)],
         }}
       />
 
       {showBalance && (
         <Cell
+          /* Balance field for all transactions */
           name="balance"
           value={
-            balance == null || isChild || isPreview
+            runningBalance == null || isChild
               ? ''
-              : integerToCurrency(balance)
+              : integerToCurrency(runningBalance)
           }
-          valueStyle={{ color: balance < 0 ? colors.r4 : colors.g4 }}
-          style={[styles.tnum, amountStyle]}
+          valueStyle={{
+            color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
+          }}
+          style={{ ...styles.tnum, ...amountStyle }}
           width={88}
           textAlign="right"
+          privacyFilter
         />
       )}
 
       {showCleared && (
         <StatusCell
+          /* Icon field for all transactions */
           id={id}
           focused={focusedField === 'cleared'}
           selected={selected}
@@ -1103,7 +1291,7 @@ const Transaction = memo(function Transaction(props) {
         />
       )}
 
-      <Cell width={15} />
+      <Cell width={5} />
     </Row>
   );
 });
@@ -1114,14 +1302,12 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
       if (error.version === 1) {
         return (
           <View
-            style={[
-              {
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: '0 5px',
-              },
-              style,
-            ]}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: '0 5px',
+              ...style,
+            }}
             data-testid="transaction-error"
           >
             <Text>
@@ -1134,8 +1320,8 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
             </Text>
             <View style={{ flex: 1 }} />
             <Button
+              type="primary"
               style={{ marginLeft: 15, padding: '4px 10px' }}
-              primary
               onClick={onAddSplit}
             >
               Add Split
@@ -1180,7 +1366,6 @@ function NewTransaction({
   categoryGroups,
   payees,
   editingTransaction,
-  hoveredTransaction,
   focusedField,
   showAccount,
   showCategory,
@@ -1188,7 +1373,6 @@ function NewTransaction({
   showCleared,
   dateFormat,
   hideFraction,
-  onHover,
   onClose,
   onSplit,
   onEdit,
@@ -1200,6 +1384,7 @@ function NewTransaction({
   onCreatePayee,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
+  balance,
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1207,9 +1392,9 @@ function NewTransaction({
   return (
     <View
       style={{
-        borderBottom: '1px solid #ebebeb',
+        borderBottom: '1px solid ' + theme.tableBorderHover,
         paddingBottom: 6,
-        backgroundColor: 'white',
+        backgroundColor: theme.tableBackground,
       }}
       data-testid="new-transaction"
       onKeyDown={e => {
@@ -1217,13 +1402,12 @@ function NewTransaction({
           onClose();
         }
       }}
-      onMouseLeave={() => onHover(null)}
     >
-      {transactions.map((transaction, idx) => (
+      {transactions.map(transaction => (
         <Transaction
+          isNew
           key={transaction.id}
           editing={editingTransaction === transaction.id}
-          hovered={hoveredTransaction === transaction.id}
           transaction={transaction}
           showAccount={showAccount}
           showCategory={showCategory}
@@ -1237,7 +1421,6 @@ function NewTransaction({
           dateFormat={dateFormat}
           hideFraction={hideFraction}
           expanded={true}
-          onHover={onHover}
           onEdit={onEdit}
           onSave={onSave}
           onSplit={onSplit}
@@ -1248,6 +1431,7 @@ function NewTransaction({
           style={{ marginTop: -1 }}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
+          balance={balance}
         />
       ))}
       <View
@@ -1274,8 +1458,8 @@ function NewTransaction({
           />
         ) : (
           <Button
+            type="primary"
             style={{ padding: '4px 10px' }}
-            primary
             onClick={onAdd}
             data-testid="add-button"
           >
@@ -1293,12 +1477,18 @@ function TransactionTableInner({
   dateFormat = 'MM/dd/yyyy',
   newNavigator,
   renderEmpty,
-  onHover,
   onScroll,
   ...props
 }) {
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
+  let [scrollWidth, setScrollWidth] = useState(0);
+
+  function saveScrollWidth(parent, child) {
+    let width = parent > 0 && child > 0 && parent - child;
+
+    setScrollWidth(!width ? 0 : width);
+  }
 
   let onNavigateToTransferAccount = useCallback(
     accountId => {
@@ -1326,13 +1516,13 @@ function TransactionTableInner({
     const {
       transactions,
       selectedItems,
-      hoveredTransaction,
       accounts,
       categoryGroups,
       payees,
       showCleared,
       showAccount,
       showCategory,
+      showBalances,
       balances,
       hideFraction,
       isNew,
@@ -1341,7 +1531,6 @@ function TransactionTableInner({
     } = props;
 
     let trans = item;
-    let hovered = hoveredTransaction === trans.id;
     let selected = selectedItems.has(trans.id);
 
     let parent = props.transactionMap.get(trans.parent_id);
@@ -1379,28 +1568,24 @@ function TransactionTableInner({
           transaction={trans}
           showAccount={showAccount}
           showCategory={showCategory}
-          showBalance={!!balances}
+          showBalance={showBalances}
           showCleared={showCleared}
-          hovered={hovered}
           selected={selected}
           highlighted={false}
-          added={isNew && isNew(trans.id)}
-          expanded={isExpanded && isExpanded(trans.id)}
-          matched={isMatched && isMatched(trans.id)}
+          added={isNew?.(trans.id)}
+          expanded={isExpanded?.(trans.id)}
+          matched={isMatched?.(trans.id)}
           showZeroInDeposit={isChildDeposit}
-          balance={balances && balances[trans.id] && balances[trans.id].balance}
+          balance={balances?.[trans.id]?.balance}
           focusedField={editing && tableNavigator.focusedField}
           accounts={accounts}
           categoryGroups={categoryGroups}
           payees={payees}
           inheritedFields={
-            parent && parent.payee === trans.payee
-              ? new Set(['payee'])
-              : new Set()
+            parent?.payee === trans.payee ? new Set(['payee']) : new Set()
           }
           dateFormat={dateFormat}
           hideFraction={hideFraction}
-          onHover={onHover}
           onEdit={tableNavigator.onEdit}
           onSave={props.onSave}
           onDelete={props.onDelete}
@@ -1418,15 +1603,23 @@ function TransactionTableInner({
   return (
     <View
       innerRef={containerRef}
-      style={[{ flex: 1, cursor: 'default' }, props.style]}
+      style={{
+        flex: 1,
+        cursor: 'default',
+        ...props.style,
+      }}
     >
       <View>
         <TransactionHeader
           hasSelected={props.selectedItems.size > 0}
           showAccount={props.showAccount}
           showCategory={props.showCategory}
-          showBalance={!!props.balances}
+          showBalance={props.showBalances}
           showCleared={props.showCleared}
+          scrollWidth={scrollWidth}
+          onSort={props.onSort}
+          ascDesc={props.ascDesc}
+          field={props.sortField}
         />
 
         {props.isAdding && (
@@ -1438,14 +1631,13 @@ function TransactionTableInner({
             <NewTransaction
               transactions={props.newTransactions}
               editingTransaction={newNavigator.editingId}
-              hoveredTransaction={props.hoveredTransaction}
               focusedField={newNavigator.focusedField}
               accounts={props.accounts}
               categoryGroups={props.categoryGroups}
               payees={props.payees || []}
               showAccount={props.showAccount}
               showCategory={props.showCategory}
-              showBalance={!!props.balances}
+              showBalance={props.showBalances}
               showCleared={props.showCleared}
               dateFormat={dateFormat}
               hideFraction={props.hideFraction}
@@ -1456,11 +1648,15 @@ function TransactionTableInner({
               onEdit={newNavigator.onEdit}
               onSave={props.onSave}
               onDelete={props.onDelete}
-              onHover={onHover}
               onManagePayees={props.onManagePayees}
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
-              onNavigateToSchedule={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToSchedule}
+              balance={
+                props.transactions?.length > 0
+                  ? props.balances?.[props.transactions[0]?.id]?.balance
+                  : 0
+              }
             />
           </View>
         )}
@@ -1469,9 +1665,8 @@ function TransactionTableInner({
          //   the full height of the container ??? */}
 
       <View
-        style={[{ flex: 1, overflow: 'hidden' }]}
+        style={{ flex: 1, overflow: 'hidden' }}
         data-testid="transaction-table"
-        onMouseLeave={() => onHover(null)}
       >
         <Table
           navigator={tableNavigator}
@@ -1483,6 +1678,7 @@ function TransactionTableInner({
           isSelected={id => props.selectedItems.has(id)}
           onKeyDown={e => props.onCheckEnter(e)}
           onScroll={onScroll}
+          saveScrollWidth={saveScrollWidth}
         />
 
         {props.isAdding && (
@@ -1494,7 +1690,7 @@ function TransactionTableInner({
               left: 0,
               right: 0,
               height: 20,
-              backgroundColor: 'red',
+              backgroundColor: theme.errorText,
               boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
             }}
           />
@@ -1506,9 +1702,6 @@ function TransactionTableInner({
 
 export let TransactionTable = forwardRef((props, ref) => {
   let [newTransactions, setNewTransactions] = useState(null);
-  let [hoveredTransaction, setHoveredTransaction] = useState(
-    props.hoveredTransaction,
-  );
   let [prevIsAdding, setPrevIsAdding] = useState(false);
   let splitsExpanded = useSplitsExpanded();
   let prevSplitsExpanded = useRef(null);
@@ -1574,7 +1767,6 @@ export let TransactionTable = forwardRef((props, ref) => {
   let savePending = useRef(false);
   let afterSaveFunc = useRef(false);
   let [_, forceRerender] = useState({});
-
   let selectedItems = useSelectedItems();
 
   useLayoutEffect(() => {
@@ -1763,10 +1955,6 @@ export let TransactionTable = forwardRef((props, ref) => {
     [props.onSave],
   );
 
-  let onHover = useCallback(id => {
-    setHoveredTransaction(id);
-  }, []);
-
   let onDelete = useCallback(id => {
     let temporary = isTemporaryId(id);
 
@@ -1860,9 +2048,7 @@ export let TransactionTable = forwardRef((props, ref) => {
       transactions={transactions}
       transactionMap={transactionMap}
       selectedItems={selectedItems}
-      hoveredTransaction={hoveredTransaction}
       isExpanded={splitsExpanded.expanded}
-      onHover={onHover}
       onSave={onSave}
       onDelete={onDelete}
       onSplit={onSplit}

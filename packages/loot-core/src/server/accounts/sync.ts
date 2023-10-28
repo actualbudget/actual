@@ -22,7 +22,7 @@ import { batchUpdateTransactions } from './transactions';
 // Plaid article about API options:
 // https://support.plaid.com/customer/en/portal/articles/2612155-transactions-returned-per-request
 
-function BankSyncError(type, code) {
+function BankSyncError(type: string, code: string) {
   return { type: 'BankSyncError', category: type, code };
 }
 
@@ -75,12 +75,12 @@ export async function getAccounts(userId, userKey, id) {
   return accounts;
 }
 
-export async function getNordigenAccounts(userId, userKey, id) {
+export async function getGoCardlessAccounts(userId, userKey, id) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
   let res = await post(
-    getServer().NORDIGEN_SERVER + '/accounts',
+    getServer().GOCARDLESS_SERVER + '/accounts',
     {
       userId,
       key: userKey,
@@ -174,7 +174,7 @@ async function downloadTransactions(
   };
 }
 
-async function downloadNordigenTransactions(
+async function downloadGoCardlessTransactions(
   userId,
   userKey,
   acctId,
@@ -184,17 +184,14 @@ async function downloadNordigenTransactions(
   let userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
-  const endDate = new Date().toISOString().split('T')[0];
-
   const res = await post(
-    getServer().NORDIGEN_SERVER + '/transactions',
+    getServer().GOCARDLESS_SERVER + '/transactions',
     {
       userId: userId,
       key: userKey,
       requisitionId: bankId,
       accountId: acctId,
       startDate: since,
-      endDate,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -289,15 +286,11 @@ async function normalizeTransactions(
   return { normalized, payeesToCreate };
 }
 
-async function normalizeNordigenTransactions(transactions, acctId) {
+async function normalizeGoCardlessTransactions(transactions, acctId) {
   let payeesToCreate = new Map();
 
   let normalized = [];
   for (let trans of transactions) {
-    if (!trans.date) {
-      trans.date = trans.valueDate || trans.bookingDate;
-    }
-
     if (!trans.amount) {
       trans.amount = trans.transactionAmount.amount;
     }
@@ -398,12 +391,12 @@ async function createNewPayees(payeesToCreate, addsAndUpdates) {
   });
 }
 
-export async function reconcileNordigenTransactions(acctId, transactions) {
+export async function reconcileGoCardlessTransactions(acctId, transactions) {
   const hasMatched = new Set();
   const updated = [];
   const added = [];
 
-  let { normalized, payeesToCreate } = await normalizeNordigenTransactions(
+  let { normalized, payeesToCreate } = await normalizeGoCardlessTransactions(
     transactions,
     acctId,
   );
@@ -438,7 +431,7 @@ export async function reconcileNordigenTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -505,7 +498,6 @@ export async function reconcileNordigenTransactions(acctId, transactions) {
 
       // Update the transaction
       const updates = {
-        date: trans.date,
         imported_id: trans.imported_id || null,
         payee: existing.payee || trans.payee || null,
         category: existing.category || trans.category || null,
@@ -516,6 +508,16 @@ export async function reconcileNordigenTransactions(acctId, transactions) {
 
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
         updated.push({ id: existing.id, ...updates });
+      }
+
+      if (existing.is_parent && existing.cleared !== updates.cleared) {
+        const children = await db.all(
+          'SELECT id FROM v_transactions WHERE parent_id = ?',
+          [existing.id],
+        );
+        for (const child of children) {
+          updated.push({ id: child.id, cleared: updates.cleared });
+        }
       }
     } else {
       // Insert a new transaction
@@ -583,7 +585,7 @@ export async function reconcileTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -661,6 +663,16 @@ export async function reconcileTransactions(acctId, transactions) {
 
       if (hasFieldsChanged(existing, updates, Object.keys(updates))) {
         updated.push({ id: existing.id, ...updates });
+      }
+
+      if (existing.is_parent && existing.cleared !== updates.cleared) {
+        const children = await db.all(
+          'SELECT id FROM v_transactions WHERE parent_id = ?',
+          [existing.id],
+        );
+        for (const child of children) {
+          updated.push({ id: child.id, cleared: updates.cleared });
+        }
       }
     } else {
       // Insert a new transaction
@@ -738,7 +750,13 @@ export async function addTransactions(
   return newTransactions;
 }
 
-export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
+export async function syncGoCardlessAccount(
+  userId,
+  userKey,
+  id,
+  acctId,
+  bankId,
+) {
   // TODO: Handle the case where transactions exist in the future
   // (that will make start date after end date)
   const latestTransaction = await db.first(
@@ -753,29 +771,27 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
       'SELECT date FROM v_transactions WHERE account = ? ORDER BY date ASC LIMIT 1',
       [id],
     );
-    const startingDate = db.fromDateRepr(startingTransaction.date);
-    // assert(startingTransaction)
+    const startingDate = monthUtils.parseDate(
+      db.fromDateRepr(startingTransaction.date),
+    );
 
-    // Get all transactions since the latest transaction, plus any 5
-    // days before the latest transaction. This gives us a chance to
-    // resolve any transactions that were entered manually.
-    //
-    // TODO: What this really should do is query the last imported_id
-    // and since then
-    let date = monthUtils.subDays(db.fromDateRepr(latestTransaction.date), 31);
+    const startDate = monthUtils.dayFromDate(
+      dateFns.max([
+        // Many GoCardless integrations do not support getting more than 90 days
+        // worth of data, so make that the earliest possible limit.
+        monthUtils.parseDate(monthUtils.subDays(monthUtils.currentDay(), 90)),
 
-    // Never download transactions before the starting date. This was
-    // when the account was added to the system.
-    if (date < startingDate) {
-      date = startingDate;
-    }
+        // Never download transactions before the starting date.
+        startingDate,
+      ]),
+    );
 
-    let { transactions, accountBalance } = await downloadNordigenTransactions(
+    let { transactions, accountBalance } = await downloadGoCardlessTransactions(
       userId,
       userKey,
       acctId,
       bankId,
-      date,
+      startDate,
     );
 
     if (transactions.length === 0) {
@@ -785,21 +801,21 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
     transactions = transactions.map(trans => ({ ...trans, account: id }));
 
     return runMutator(async () => {
-      const result = await reconcileNordigenTransactions(id, transactions);
+      const result = await reconcileGoCardlessTransactions(id, transactions);
       await updateAccountBalance(id, accountBalance);
       return result;
     });
   } else {
-    // Otherwise, download transaction for the past 30 days
-    const startingDay = monthUtils.subDays(monthUtils.currentDay(), 30);
+    // Otherwise, download transaction for the past 90 days
+    const startingDay = monthUtils.subDays(monthUtils.currentDay(), 90);
 
     const { transactions, startingBalance } =
-      await downloadNordigenTransactions(
+      await downloadGoCardlessTransactions(
         userId,
         userKey,
         acctId,
         bankId,
-        dateFns.format(dateFns.parseISO(startingDay), 'yyyy-MM-dd'),
+        startingDay,
       );
 
     // We need to add a transaction that represents the starting
@@ -812,7 +828,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
 
     const oldestDate =
       transactions.length > 0
-        ? oldestTransaction.valueDate || oldestTransaction.bookingDate
+        ? oldestTransaction.date
         : monthUtils.currentDay();
 
     const payee = await getStartingBalancePayee();
@@ -828,7 +844,7 @@ export async function syncNordigenAccount(userId, userKey, id, acctId, bankId) {
         starting_balance_flag: true,
       });
 
-      let result = await reconcileNordigenTransactions(id, transactions);
+      let result = await reconcileGoCardlessTransactions(id, transactions);
       return {
         ...result,
         added: [initialId, ...result.added],

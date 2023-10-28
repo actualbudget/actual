@@ -10,8 +10,8 @@ import {
   VictoryGroup,
 } from 'victory';
 
-import { colors } from '../../../style';
-import theme from '../chart-theme';
+import { theme } from '../../../style';
+import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
@@ -26,7 +26,7 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
         graphData && (
           <VictoryChart
             scale={{ x: 'time', y: 'linear' }}
-            theme={theme}
+            theme={chartTheme}
             domainPadding={10}
             width={width}
             height={height}
@@ -37,7 +37,7 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
             <VictoryGroup>
               <VictoryBar
                 data={graphData.expenses}
-                style={{ data: { fill: theme.colors.red } }}
+                style={{ data: { fill: chartTheme.colors.red } }}
               />
               <VictoryBar data={graphData.income} />
             </VictoryGroup>
@@ -46,7 +46,7 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
               labelComponent={<Tooltip portalHost={portalHost} />}
               labels={x => x.premadeLabel}
               style={{
-                data: { stroke: colors.n5 },
+                data: { stroke: theme.pageTextLight },
               }}
             />
             <VictoryAxis

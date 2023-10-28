@@ -1,27 +1,23 @@
 import React, { useState, useRef } from 'react';
 
 import useSyncServerStatus from '../../hooks/useSyncServerStatus';
-import Loading from '../../icons/AnimatedLoading';
+import AnimatedLoading from '../../icons/AnimatedLoading';
 import Add from '../../icons/v1/Add';
 import ArrowsExpand3 from '../../icons/v2/ArrowsExpand3';
 import ArrowsShrink3 from '../../icons/v2/ArrowsShrink3';
 import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
 import Pencil1 from '../../icons/v2/Pencil1';
-import SvgRemove from '../../icons/v2/Remove';
-import SearchAlternate from '../../icons/v2/SearchAlternate';
-import { styles, colors } from '../../style';
+import { theme, styles } from '../../style';
 import AnimatedRefresh from '../AnimatedRefresh';
-import {
-  View,
-  Button,
-  MenuButton,
-  MenuTooltip,
-  Input,
-  InputWithContent,
-  InitialFocus,
-  Menu,
-  Stack,
-} from '../common';
+import Button from '../common/Button';
+import InitialFocus from '../common/InitialFocus';
+import Input from '../common/Input';
+import Menu from '../common/Menu';
+import MenuButton from '../common/MenuButton';
+import MenuTooltip from '../common/MenuTooltip';
+import Search from '../common/Search';
+import Stack from '../common/Stack';
+import View from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/SavedFilters';
 import { KeyHandlers } from '../KeyHandlers';
@@ -51,10 +47,12 @@ export function AccountHeader({
   balanceQuery,
   reconcileAmount,
   canCalculateBalance,
+  isSorted,
   search,
   filters,
   conditionsOp,
   savePrefs,
+  pushModal,
   onSearch,
   onAddTransaction,
   onShowTransactions,
@@ -115,7 +113,7 @@ export function AccountHeader({
         }}
       />
 
-      <View style={[styles.pageContent, { paddingBottom: 10, flexShrink: 0 }]}>
+      <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View style={{ marginTop: 2, alignItems: 'flex-start' }}>
           <View>
             {editingName ? (
@@ -164,7 +162,7 @@ export function AccountHeader({
 
                 {account && <NotesButton id={`account-${account.id}`} />}
                 <Button
-                  bare
+                  type="bare"
                   className="hover-visible"
                   onClick={() => onExposeName(true)}
                 >
@@ -172,7 +170,7 @@ export function AccountHeader({
                     style={{
                       width: 11,
                       height: 11,
-                      color: colors.n8,
+                      color: theme.altButtonBareText,
                     }}
                   />
                 </Button>
@@ -204,7 +202,7 @@ export function AccountHeader({
           style={{ marginTop: 12 }}
         >
           {((account && !account.closed) || canSync) && (
-            <Button bare onClick={canSync ? onSync : onImport}>
+            <Button type="bare" onClick={canSync ? onSync : onImport}>
               {canSync ? (
                 <>
                   <AnimatedRefresh
@@ -214,7 +212,7 @@ export function AccountHeader({
                       (account && accountsSyncing === account.name) ||
                       accountsSyncing === '__all'
                     }
-                    style={{ color: 'currentColor', marginRight: 4 }}
+                    style={{ marginRight: 4 }}
                   />{' '}
                   Sync
                 </>
@@ -223,7 +221,7 @@ export function AccountHeader({
                   <DownloadThickBottom
                     width={13}
                     height={13}
-                    style={{ color: 'currentColor', marginRight: 4 }}
+                    style={{ marginRight: 4 }}
                   />{' '}
                   Import
                 </>
@@ -231,74 +229,23 @@ export function AccountHeader({
             </Button>
           )}
           {!showEmptyMessage && (
-            <Button bare onClick={onAddTransaction}>
-              <Add
-                width={10}
-                height={10}
-                style={{ color: 'inherit', marginRight: 3 }}
-              />{' '}
-              Add New
+            <Button type="bare" onClick={onAddTransaction}>
+              <Add width={10} height={10} style={{ marginRight: 3 }} /> Add New
             </Button>
           )}
-          <View>
+          <View style={{ flexShrink: 0 }}>
             <FilterButton onApply={onApplyFilter} />
           </View>
-          <InputWithContent
-            leftContent={
-              <SearchAlternate
-                style={{
-                  width: 13,
-                  height: 13,
-                  flexShrink: 0,
-                  color: search ? colors.p7 : 'inherit',
-                  margin: 5,
-                  marginRight: 0,
-                }}
-              />
-            }
-            rightContent={
-              search && (
-                <Button
-                  bare
-                  style={{ padding: 8 }}
-                  onClick={() => onSearch('')}
-                  title="Clear search term"
-                >
-                  <SvgRemove
-                    style={{
-                      width: 8,
-                      height: 8,
-                      color: 'inherit',
-                    }}
-                  />
-                </Button>
-              )
-            }
-            inputRef={searchInput}
-            value={search}
+          <View style={{ flex: 1 }} />
+          <Search
             placeholder="Search"
-            onKeyDown={e => {
-              if (e.key === 'Escape') onSearch('');
-            }}
-            getStyle={focused => [
-              {
-                backgroundColor: 'transparent',
-                borderWidth: 0,
-                boxShadow: 'none',
-                transition: 'color .15s',
-                '& input::placeholder': {
-                  color: colors.n1,
-                  transition: 'color .25s',
-                },
-              },
-              focused && { boxShadow: '0 0 0 2px ' + colors.b5 },
-              !focused && search !== '' && { color: colors.p4 },
-            ]}
-            onChange={e => onSearch(e.target.value)}
+            value={search}
+            onChange={onSearch}
+            inputRef={searchInput}
           />
           {workingHard ? (
             <View>
-              <Loading color={colors.n1} style={{ width: 16, height: 16 }} />
+              <AnimatedLoading style={{ width: 16, height: 16 }} />
             </View>
           ) : (
             <SelectedTransactionsButton
@@ -310,12 +257,13 @@ export function AccountHeader({
               onUnlink={onBatchUnlink}
               onCreateRule={onCreateRule}
               onScheduleAction={onScheduleAction}
+              pushModal={pushModal}
             />
           )}
           <Button
-            bare
+            type="bare"
             disabled={search !== '' || filters.length > 0}
-            style={{ padding: 6 }}
+            style={{ padding: 6, marginLeft: 10 }}
             onClick={onToggleSplits}
             title={
               splitsExpanded.state.mode === 'collapse'
@@ -324,21 +272,9 @@ export function AccountHeader({
             }
           >
             {splitsExpanded.state.mode === 'collapse' ? (
-              <ArrowsShrink3
-                style={{
-                  width: 14,
-                  height: 14,
-                  color: 'inherit',
-                }}
-              />
+              <ArrowsShrink3 style={{ width: 14, height: 14 }} />
             ) : (
-              <ArrowsExpand3
-                style={{
-                  width: 14,
-                  height: 14,
-                  color: 'inherit',
-                }}
-              />
+              <ArrowsExpand3 style={{ width: 14, height: 14 }} />
             )}
           </Button>
           {account ? (
@@ -350,6 +286,7 @@ export function AccountHeader({
                   account={account}
                   canSync={canSync}
                   canShowBalances={canCalculateBalance()}
+                  isSorted={isSorted}
                   showBalances={showBalances}
                   showCleared={showCleared}
                   onMenuSelect={item => {
@@ -372,6 +309,7 @@ export function AccountHeader({
                     onMenuSelect(item);
                   }}
                   onClose={() => setMenuOpen(false)}
+                  isSorted={isSorted}
                 />
               )}
             </View>
@@ -411,6 +349,7 @@ function AccountMenu({
   canShowBalances,
   showCleared,
   onClose,
+  isSorted,
   onReconcile,
   onMenuSelect,
 }) {
@@ -434,13 +373,17 @@ function AccountMenu({
           }
         }}
         items={[
+          isSorted && {
+            name: 'remove-sorting',
+            text: 'Remove all sorting',
+          },
           canShowBalances && {
             name: 'toggle-balance',
-            text: (showBalances ? 'Hide' : 'Show') + ' Running Balance',
+            text: (showBalances ? 'Hide' : 'Show') + ' running balance',
           },
           {
             name: 'toggle-cleared',
-            text: (showCleared ? 'Hide' : 'Show') + ' “Cleared” Checkboxes',
+            text: (showCleared ? 'Hide' : 'Show') + ' “cleared” checkboxes',
           },
           { name: 'export', text: 'Export' },
           { name: 'reconcile', text: 'Reconcile' },
@@ -449,29 +392,35 @@ function AccountMenu({
             (canSync
               ? {
                   name: 'unlink',
-                  text: 'Unlink Account',
+                  text: 'Unlink account',
                 }
               : syncServerStatus === 'online' && {
                   name: 'link',
-                  text: 'Link Account',
+                  text: 'Link account',
                 }),
           account.closed
-            ? { name: 'reopen', text: 'Reopen Account' }
-            : { name: 'close', text: 'Close Account' },
+            ? { name: 'reopen', text: 'Reopen account' }
+            : { name: 'close', text: 'Close account' },
         ].filter(x => x)}
       />
     </MenuTooltip>
   );
 }
 
-function CategoryMenu({ onClose, onMenuSelect }) {
+function CategoryMenu({ onClose, onMenuSelect, isSorted }) {
   return (
     <MenuTooltip width={200} onClose={onClose}>
       <Menu
         onMenuSelect={item => {
           onMenuSelect(item);
         }}
-        items={[{ name: 'export', text: 'Export' }]}
+        items={[
+          isSorted && {
+            name: 'remove-sorting',
+            text: 'Remove all sorting',
+          },
+          { name: 'export', text: 'Export' },
+        ]}
       />
     </MenuTooltip>
   );

@@ -1,12 +1,17 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
+import { useActions } from '../../hooks/useActions';
 import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
-import { colors, styles } from '../../style';
-import { Button, InputWithContent, Label, View } from '../common';
+import { theme, styles } from '../../style';
+import ButtonLink from '../common/ButtonLink';
+import InputWithContent from '../common/InputWithContent';
+import Label from '../common/Label';
 import Text from '../common/Text';
+import View from '../common/View';
+import PullToRefresh from '../responsive/PullToRefresh';
 import CellValue from '../spreadsheet/CellValue';
 import { TransactionList } from '../transactions/MobileTransaction';
 
@@ -18,7 +23,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.n11,
+        backgroundColor: theme.tableHeaderBackground,
         margin: '11px auto 4px',
         borderRadius: 4,
         padding: 10,
@@ -32,7 +37,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
               width: 13,
               height: 13,
               flexShrink: 0,
-              color: text ? colors.p7 : 'inherit',
+              color: text ? theme.formInputTextHighlight : 'inherit',
               margin: 5,
               marginRight: 0,
             }}
@@ -45,8 +50,8 @@ function TransactionSearchInput({ accountName, onSearch }) {
         }}
         placeholder={`Search ${accountName}`}
         style={{
-          backgroundColor: colors.n11,
-          border: `1px solid ${colors.n9}`,
+          backgroundColor: theme.formInputBackground,
+          border: `1px solid ${theme.formInputBorder}`,
           fontSize: 15,
           flex: 1,
           height: 32,
@@ -71,17 +76,22 @@ export default function AccountDetails({
   onLoadMore,
   onSearch,
   onSelectTransaction,
-  // refreshControl
+  pushModal,
 }) {
   let allTransactions = useMemo(() => {
     return prependTransactions.concat(transactions);
   }, [prependTransactions, transactions]);
 
+  const { syncAndDownload } = useActions();
+  const onRefresh = async () => {
+    await syncAndDownload(account.id);
+  };
+
   return (
     <View
       style={{
         flex: 1,
-        backgroundColor: colors.n11,
+        backgroundColor: theme.tableHeaderBackground,
         overflowY: 'hidden',
         width: '100%',
       }}
@@ -89,10 +99,9 @@ export default function AccountDetails({
       <View
         style={{
           alignItems: 'center',
-          backgroundColor: colors.n11,
           flexShrink: 0,
           overflowY: 'hidden',
-          paddingTop: 20,
+          paddingTop: 10,
           top: 0,
           width: '100%',
         }}
@@ -106,45 +115,38 @@ export default function AccountDetails({
           }}
         >
           <Link
-            to="/accounts"
+            to={-1}
             style={{
+              color: theme.formLabelText,
               alignItems: 'center',
               display: 'flex',
               textDecoration: 'none',
               width: LEFT_RIGHT_FLEX_WIDTH,
             }}
           >
-            <CheveronLeft
-              style={{
-                color: colors.b5,
-                width: 32,
-                height: 32,
-              }}
-            />
-            <Text style={{ ...styles.text, color: colors.b5, fontWeight: 500 }}>
-              Back
-            </Text>
+            <CheveronLeft style={{ width: 32, height: 32 }} />
+            <Text style={{ ...styles.text, fontWeight: 500 }}>Back</Text>
           </Link>
           <View
             style={{
               fontSize: 16,
               fontWeight: 500,
             }}
+            role="heading"
           >
             {account.name}
           </View>
-          {/*
-              TODO: connect to an add transaction modal
-              Only left here but hidden for flex centering of the account name.
-          */}
-          <Link to="transaction/new" style={{ visibility: 'hidden' }}>
-            <Button
-              bare
-              style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
-            >
-              <Add width={20} height={20} />
-            </Button>
-          </Link>
+
+          <ButtonLink
+            to="transactions/new"
+            type="bare"
+            aria-label="Add Transaction"
+            style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
+            hoveredStyle={{ background: 'transparent' }}
+            activeStyle={{ background: 'transparent' }}
+          >
+            <Add width={20} height={20} />
+          </ButtonLink>
         </View>
         <Label title="BALANCE" style={{ marginTop: 10 }} />
         <CellValue
@@ -156,25 +158,29 @@ export default function AccountDetails({
             fontWeight: '500',
           }}
           getStyle={value => ({
-            color: value < 0 ? colors.r4 : colors.p5,
+            color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
           })}
+          data-testid="account-balance"
         />
         <TransactionSearchInput
           accountName={account.name}
           onSearch={onSearch}
         />
       </View>
-      <TransactionList
-        transactions={allTransactions}
-        categories={categories}
-        accounts={accounts}
-        payees={payees}
-        showCategory={!account.offbudget}
-        isNew={isNewTransaction}
-        // refreshControl={refreshControl}
-        onLoadMore={onLoadMore}
-        onSelect={onSelectTransaction}
-      />
+
+      <PullToRefresh onRefresh={onRefresh}>
+        <TransactionList
+          transactions={allTransactions}
+          categories={categories}
+          accounts={accounts}
+          payees={payees}
+          showCategory={!account.offbudget}
+          isNew={isNewTransaction}
+          onLoadMore={onLoadMore}
+          onSelect={onSelectTransaction}
+          pushModal={pushModal}
+        />
+      </PullToRefresh>
     </View>
   );
 }

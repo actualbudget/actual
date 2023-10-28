@@ -1,15 +1,15 @@
-import React, { type ReactNode, useState } from 'react';
-import { useLocation } from 'react-router';
+import React, { useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { css, media } from 'glamor';
-import type { CSSProperties } from 'glamor';
 
-import { colors } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import tokens from '../../tokens';
-import { View, LinkButton } from '../common';
+import Button from '../common/Button';
+import View from '../common/View';
 
 type SettingProps = {
-  primaryAction: ReactNode;
+  primaryAction?: ReactNode;
   style?: CSSProperties;
   children: ReactNode;
 };
@@ -17,18 +17,18 @@ type SettingProps = {
 export const Setting = ({ primaryAction, style, children }: SettingProps) => {
   return (
     <View
-      {...css([
+      className={`${css([
         {
-          backgroundColor: colors.n9,
+          backgroundColor: theme.pillBackground,
           alignSelf: 'flex-start',
           alignItems: 'flex-start',
           padding: 15,
           borderRadius: 4,
-          border: '1px solid ' + colors.n8,
+          border: '1px solid ' + theme.altPillBorder,
           width: '100%',
         },
         style,
-      ])}
+      ])}`}
     >
       <View
         style={{
@@ -56,17 +56,15 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
   return expanded ? (
     <View
       id="advanced"
-      style={[
-        {
-          gap: 20,
-          alignItems: 'flex-start',
-          marginBottom: 25,
-          width: '100%',
-        },
-        media(`(min-width: ${tokens.breakpoint_small})`, {
-          width: 'auto',
-        }),
-      ]}
+      style={{
+        gap: 20,
+        alignItems: 'flex-start',
+        marginBottom: 25,
+        width: '100%',
+      }}
+      className={`${media(`(min-width: ${tokens.breakpoint_small})`, {
+        width: 'auto',
+      })}`}
       innerRef={el => {
         if (el && location.hash === '#advanced') {
           el.scrollIntoView(true);
@@ -79,17 +77,18 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
       {children}
     </View>
   ) : (
-    <LinkButton
+    <Button
       id="advanced"
+      type="link"
       onClick={() => setExpanded(true)}
       style={{
         flexShrink: 0,
         alignSelf: 'flex-start',
-        color: colors.p4,
+        color: theme.pageTextPositive,
         marginBottom: 25,
       }}
     >
       Show advanced settings
-    </LinkButton>
+    </Button>
   );
 };

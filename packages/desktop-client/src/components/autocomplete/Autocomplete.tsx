@@ -11,11 +11,14 @@ import React, {
 } from 'react';
 
 import Downshift from 'downshift';
-import { type CSSProperties, css } from 'glamor';
+import { css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
-import { colors } from '../../style';
-import { View, Input, Tooltip, Button } from '../common';
+import { theme, type CSSProperties } from '../../style';
+import Button from '../common/Button';
+import Input from '../common/Input';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 const inst: { lastChangeType? } = {};
 
@@ -76,7 +79,7 @@ function fireUpdate(onUpdate, strict, suggestions, index, value) {
     }
   }
 
-  onUpdate && onUpdate(selected, value);
+  onUpdate?.(selected, value);
 }
 
 function defaultRenderInput(props) {
@@ -91,12 +94,37 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
         return (
           <div
             {...getItemProps({ item })}
+            // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
+            // event handler they set on this element. When this code runs
+            // in WebKit on touch-enabled devices, taps on this element end
+            // up not triggering the `onClick` event (and therefore delaying
+            // response to user input) until after the `setTimeout` callback
+            // finishes executing. This is caused by content observation code
+            // that implements various strategies to prevent the user from
+            // accidentally clicking content that changed as a result of code
+            // run in the `onMouseMove` event.
+            //
+            // Long story short, we don't want any delay here between the user
+            // tapping and the resulting action being performed. It turns out
+            // there's some "fast path" logic that can be triggered in various
+            // ways to force WebKit to bail on the content observation process.
+            // One of those ways is setting `role="button"` (or a number of
+            // other aria roles) on the element, which is what we're doing here.
+            //
+            // ref:
+            // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
+            // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
+            // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+            role="button"
             key={name}
-            {...css({
+            className={`${css({
               padding: 5,
               cursor: 'default',
-              backgroundColor: highlightedIndex === index ? colors.n4 : null,
-            })}
+              backgroundColor:
+                highlightedIndex === index
+                  ? theme.alt2MenuItemBackgroundHover
+                  : null,
+            })}`}
           >
             {name}
           </div>
@@ -126,7 +154,7 @@ type SingleAutocompleteProps = {
   renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
   renderItems?: (
     items,
-    getItemProps: (arg: { item: unknown }) => HTMLProps<HTMLDivElement>,
+    getItemProps: (arg: { item: unknown }) => ComponentProps<typeof View>,
     idx: number,
     value?: unknown,
   ) => ReactNode;
@@ -136,10 +164,11 @@ type SingleAutocompleteProps = {
   openOnFocus?: boolean;
   getHighlightedIndex?: (suggestions) => number | null;
   highlightFirst?: boolean;
-  onUpdate: (id: unknown, value: string) => void;
+  onUpdate?: (id: unknown, value: string) => void;
   strict?: boolean;
   onSelect: (id: unknown, value: string) => void;
   tableBehavior?: boolean;
+  closeOnBlur?: boolean;
   value: unknown[];
   isMulti?: boolean;
 };
@@ -164,6 +193,7 @@ function SingleAutocomplete({
   strict,
   onSelect,
   tableBehavior,
+  closeOnBlur = true,
   value: initialValue,
   isMulti = false,
 }: SingleAutocompleteProps) {
@@ -354,29 +384,28 @@ function SingleAutocomplete({
         // Super annoying but it works best to return a div so we
         // can't use a View here, but we can fake it be using the
         // className
-        <div
-          className={'view ' + css({ display: 'flex' }).toString()}
-          {...containerProps}
-        >
+        <div className={`view ${css({ display: 'flex' })}`} {...containerProps}>
           {renderInput(
             getInputProps({
               focused,
               ...inputProps,
               onFocus: e => {
-                inputProps.onFocus && inputProps.onFocus(e);
+                inputProps.onFocus?.(e);
 
                 if (openOnFocus) {
                   setIsOpen(true);
                 }
               },
               onBlur: e => {
-                // @ts-expect-error Should this be e.nativeEvent
-                e.preventDownshiftDefault = true;
-                inputProps.onBlur && inputProps.onBlur(e);
+                // Should this be e.nativeEvent
+                e['preventDownshiftDefault'] = true;
+                inputProps.onBlur?.(e);
+
+                if (!closeOnBlur) return;
 
                 if (!tableBehavior) {
                   if (e.target.value === '') {
-                    onSelect && onSelect(null, e.target.value);
+                    onSelect?.(null, e.target.value);
                     setSelectedItem(null);
                     setIsOpen(false);
                     return;
@@ -421,11 +450,11 @@ function SingleAutocomplete({
                       // No highlighted item, still allow the table to save the item
                       // as `null`, even though we're allowing the table to move
                       e.preventDefault();
-                      onKeyDown && onKeyDown(e);
+                      onKeyDown?.(e);
                     }
                   } else if (shouldSaveFromKey(e)) {
                     e.preventDefault();
-                    onKeyDown && onKeyDown(e);
+                    onKeyDown?.(e);
                   }
                 }
 
@@ -454,7 +483,7 @@ function SingleAutocomplete({
               onChange: (e: ChangeEvent<HTMLInputElement>) => {
                 const { onChange } = inputProps || {};
                 // @ts-expect-error unsure if onChange needs an event or a string
-                onChange && onChange(e.target.value);
+                onChange?.(e.target.value);
               },
             }),
           )}
@@ -475,8 +504,8 @@ function SingleAutocomplete({
                 offset={2}
                 style={{
                   padding: 0,
-                  backgroundColor: colors.n1,
-                  color: 'white',
+                  backgroundColor: theme.menuAutoCompleteBackground,
+                  color: theme.menuAutoCompleteText,
                   minWidth: 200,
                   ...tooltipStyle,
                 }}
@@ -503,14 +532,14 @@ function MultiItem({ name, onRemove }) {
       style={{
         alignItems: 'center',
         flexDirection: 'row',
-        backgroundColor: colors.b9,
+        backgroundColor: theme.pillBackgroundSelected,
         padding: '2px 4px',
         margin: '2px',
         borderRadius: 4,
       }}
     >
       {name}
-      <Button type="button" bare style={{ marginLeft: 1 }} onClick={onRemove}>
+      <Button type="bare" style={{ marginLeft: 1 }} onClick={onRemove}>
         <Remove style={{ width: 8, height: 8 }} />
       </Button>
     </View>
@@ -555,7 +584,7 @@ function MultiAutocomplete({
       onRemoveItem(selectedItems[selectedItems.length - 1]);
     }
 
-    prevOnKeyDown && prevOnKeyDown(e);
+    prevOnKeyDown?.(e);
   }
 
   return (
@@ -572,23 +601,21 @@ function MultiAutocomplete({
       tooltipProps={{
         forceLayout: lastSelectedItems.current !== selectedItems,
       }}
-      renderInput={props => (
+      renderInput={inputProps => (
         <View
-          style={[
-            {
-              display: 'flex',
-              flexWrap: 'wrap',
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: 'white',
-              borderRadius: 4,
-              border: '1px solid #d0d0d0',
-            },
-            focused && {
-              border: '1px solid ' + colors.b5,
-              boxShadow: '0 1px 1px ' + colors.b7,
-            },
-          ]}
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.tableBackground,
+            borderRadius: 4,
+            border: '1px solid ' + theme.formInputBorder,
+            ...(focused && {
+              border: '1px solid ' + theme.formInputBorderSelected,
+              boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
+            }),
+          }}
         >
           {selectedItems.map((item, idx) => {
             item = findItem(strict, suggestions, item);
@@ -603,57 +630,27 @@ function MultiAutocomplete({
             );
           })}
           <Input
-            {...props}
-            onKeyDown={e => onKeyDown(e, props.onKeyDown)}
+            {...inputProps}
+            onKeyDown={e => onKeyDown(e, inputProps.onKeyDown)}
             onFocus={e => {
               setFocused(true);
-              props.onFocus(e);
+              inputProps.onFocus(e);
             }}
             onBlur={e => {
               setFocused(false);
-              props.onBlur(e);
+              inputProps.onBlur(e);
             }}
-            style={[
-              {
-                flex: 1,
-                minWidth: 30,
-                border: 0,
-                ':focus': { border: 0, boxShadow: 'none' },
-              },
-              props.style,
-            ]}
+            style={{
+              flex: 1,
+              minWidth: 30,
+              border: 0,
+              ':focus': { border: 0, boxShadow: 'none' },
+              ...inputProps.style,
+            }}
           />
         </View>
       )}
     />
-  );
-}
-
-export function AutocompleteFooterButton({
-  title,
-  style,
-  hoveredStyle,
-  onClick,
-}) {
-  return (
-    <Button
-      style={[
-        {
-          fontSize: 12,
-          color: colors.n10,
-          backgroundColor: 'transparent',
-          borderColor: colors.n5,
-        },
-        style,
-      ]}
-      hoveredStyle={[
-        { backgroundColor: 'rgba(200, 200, 200, .25)' },
-        hoveredStyle,
-      ]}
-      onClick={onClick}
-    >
-      {title}
-    </Button>
   );
 }
 
@@ -670,10 +667,10 @@ export function AutocompleteFooter({
   return (
     show && (
       <View
-        style={[
-          { flexShrink: 0 },
-          embedded ? { paddingTop: 5 } : { padding: 5 },
-        ]}
+        style={{
+          flexShrink: 0,
+          ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
+        }}
         onMouseDown={e => e.preventDefault()}
       >
         {children}

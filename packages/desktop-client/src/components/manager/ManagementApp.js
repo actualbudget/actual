@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import * as actions from 'loot-core/src/client/actions';
-
-import { colors } from '../../style';
+import { useActions } from '../../hooks/useActions';
+import { theme } from '../../style';
 import tokens from '../../tokens';
 import { ExposeNavigate } from '../../util/router-tools';
-import { View, Text } from '../common';
+import Text from '../common/Text';
+import View from '../common/View';
 import LoggedInUser from '../LoggedInUser';
 import Notifications from '../Notifications';
 import { useServerVersion } from '../ServerContext';
@@ -28,8 +28,8 @@ function Version() {
   return (
     <Text
       style={{
-        color: colors.n7,
-        ':hover': { color: colors.n2 },
+        color: theme.pageTextSubdued,
+        ':hover': { color: theme.pageText },
         margin: 15,
         marginLeft: 17,
         [`@media (min-width: ${tokens.breakpoint_small})`]: {
@@ -47,15 +47,15 @@ function Version() {
   );
 }
 
-function ManagementApp({
-  isLoading,
-  files,
-  userData,
-  managerHasInitialized,
-  setAppState,
-  getUserData,
-  loadAllFiles,
-}) {
+export default function ManagementApp({ isLoading }) {
+  let files = useSelector(state => state.budgets.allFiles);
+  let userData = useSelector(state => state.user.data);
+  let managerHasInitialized = useSelector(
+    state => state.app.managerHasInitialized,
+  );
+
+  let { setAppState, getUserData, loadAllFiles } = useActions();
+
   // runs on mount only
   useEffect(() => {
     // An action may have been triggered from outside, and we don't
@@ -104,7 +104,7 @@ function ManagementApp({
   return (
     <BrowserRouter>
       <ExposeNavigate />
-      <View style={{ height: '100%' }}>
+      <View style={{ height: '100%', color: theme.pageText }}>
         <View
           style={{
             position: 'absolute',
@@ -208,14 +208,3 @@ function ManagementApp({
     </BrowserRouter>
   );
 }
-
-export default connect(state => {
-  let { modalStack } = state.modals;
-
-  return {
-    files: state.budgets.allFiles,
-    userData: state.user.data,
-    managerHasInitialized: state.app.managerHasInitialized,
-    currentModals: modalStack.map(modal => modal.name),
-  };
-}, actions)(ManagementApp);

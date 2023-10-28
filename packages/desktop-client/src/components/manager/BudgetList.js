@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
+import { useActions } from '../../hooks/useActions';
 import Loading from '../../icons/AnimatedLoading';
 import CloudCheck from '../../icons/v1/CloudCheck';
 import CloudDownload from '../../icons/v1/CloudDownload';
@@ -12,9 +13,13 @@ import FileDouble from '../../icons/v1/FileDouble';
 import CloudUnknown from '../../icons/v2/CloudUnknown';
 import Key from '../../icons/v2/Key';
 import RefreshArrow from '../../icons/v2/RefreshArrow';
-import { styles, colors } from '../../style';
+import { styles, theme } from '../../style';
 import tokens from '../../tokens';
-import { View, Text, Button, Tooltip, Menu } from '../common';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Text from '../common/Text';
+import View from '../common/View';
+import { Tooltip } from '../tooltips';
 
 function getFileDescription(file) {
   if (file.state === 'unknown') {
@@ -57,7 +62,7 @@ function DetailButton({ state, onDelete }) {
   return (
     <View>
       <Button
-        bare
+        type="bare"
         onClick={e => {
           e.stopPropagation();
           setMenuOpen(true);
@@ -91,7 +96,7 @@ function FileState({ file }) {
     case 'unknown':
       Icon = CloudUnknown;
       status = 'Network unavailable';
-      color = colors.n7;
+      color = theme.buttonNormalDisabledText;
       break;
     case 'remote':
       Icon = CloudDownload;
@@ -118,7 +123,6 @@ function FileState({ file }) {
       }}
     >
       <Icon
-        color={color}
         style={{
           width: 18,
           height: 18,
@@ -148,26 +152,24 @@ function File({ file, onSelect, onDelete }) {
     <View
       onClick={() => _onSelect(file)}
       title={getFileDescription(file)}
-      style={[
-        {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          ...styles.shadow,
-          margin: 10,
-          padding: '12px 15px',
-          backgroundColor: 'white',
-          borderRadius: 6,
-          flexShrink: 0,
-          cursor: 'pointer',
-          ':hover': {
-            backgroundColor: colors.hover,
-          },
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        ...styles.shadow,
+        margin: 10,
+        padding: '12px 15px',
+        backgroundColor: theme.buttonNormalBackground,
+        borderRadius: 6,
+        flexShrink: 0,
+        cursor: 'pointer',
+        ':hover': {
+          backgroundColor: theme.hover,
         },
-      ]}
+      }}
     >
       <View style={{ alignItems: 'flex-start' }}>
-        <Text style={[{ fontSize: 16, fontWeight: 700 }]}>{file.name}</Text>
+        <Text style={{ fontSize: 16, fontWeight: 700 }}>{file.name}</Text>
 
         <FileState file={file} />
       </View>
@@ -181,7 +183,9 @@ function File({ file, onSelect, onDelete }) {
               width: 13,
               height: 13,
               marginRight: 8,
-              color: file.hasKey ? colors.b5 : colors.n8,
+              color: file.hasKey
+                ? theme.formLabelText
+                : theme.buttonNormalDisabledText,
             }}
           />
         )}
@@ -229,24 +233,28 @@ function RefreshButton({ onRefresh }) {
   let Icon = loading ? Loading : RefreshArrow;
 
   return (
-    <Button bare style={{ padding: 10, marginRight: 5 }} onClick={_onRefresh}>
-      <Icon
-        color={colors.n1}
-        style={{ width: 18, height: 18, color: colors.n1 }}
-      />
+    <Button
+      type="bare"
+      style={{ padding: 10, marginRight: 5 }}
+      onClick={_onRefresh}
+    >
+      <Icon style={{ width: 18, height: 18 }} />
     </Button>
   );
 }
 
-function BudgetList({
-  files = [],
-  getUserData,
-  loadAllFiles,
-  pushModal,
-  loadBudget,
-  createBudget,
-  downloadBudget,
-}) {
+export default function BudgetList() {
+  let files = useSelector(state => state.budgets.allFiles || []);
+
+  let {
+    getUserData,
+    loadAllFiles,
+    pushModal,
+    loadBudget,
+    createBudget,
+    downloadBudget,
+  } = useActions();
+
   const [creating, setCreating] = useState(false);
 
   const onCreate = ({ testMode } = {}) => {
@@ -271,7 +279,7 @@ function BudgetList({
       }}
     >
       <View>
-        <Text style={[styles.veryLargeText, { margin: 20 }]}>Files</Text>
+        <Text style={{ ...styles.veryLargeText, margin: 20 }}>Files</Text>
         <View
           style={{
             position: 'absolute',
@@ -311,10 +319,10 @@ function BudgetList({
         }}
       >
         <Button
-          bare
+          type="bare"
           style={{
             marginLeft: 10,
-            color: colors.n4,
+            color: theme.pageTextLight,
           }}
           onClick={e => {
             e.preventDefault();
@@ -324,13 +332,14 @@ function BudgetList({
           Import file
         </Button>
 
-        <Button primary onClick={onCreate} style={{ marginLeft: 15 }}>
+        <Button type="primary" onClick={onCreate} style={{ marginLeft: 15 }}>
           Create new file
         </Button>
 
         {isNonProductionEnvironment() && (
           <Button
-            primary
+            type="primary"
+            isSubmit={false}
             onClick={() => onCreate({ testMode: true })}
             style={{ marginLeft: 15 }}
           >
@@ -341,11 +350,3 @@ function BudgetList({
     </View>
   );
 }
-
-export default connect(
-  state => ({
-    files: state.budgets.allFiles,
-    isLoggedIn: !!state.user.data,
-  }),
-  actions,
-)(BudgetList);

@@ -1,31 +1,34 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
-import * as actions from 'loot-core/src/client/actions';
 import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
-import { colors } from '../../style';
+import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
+import { useResponsive } from '../../ResponsiveProvider';
+import { theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategorySelect';
+import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import { View, Modal, Input } from '../common';
+import Input from '../common/Input';
+import Modal from '../common/Modal';
+import View from '../common/View';
 import { SectionLabel } from '../forms';
 import DateSelect from '../select/DateSelect';
 
-function EditField({
-  actions,
-  modalProps,
-  name,
-  accounts,
-  categoryGroups,
-  payees,
-  onSubmit,
-  dateFormat,
-  createPayee,
-}) {
+export default function EditField({ modalProps, name, onSubmit }) {
+  let dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
+  let { grouped: categoryGroups } = useCategories();
+  let accounts = useSelector(state => state.queries.accounts);
+  let payees = useSelector(state => state.queries.payees);
+
+  let { createPayee } = useActions();
+
   function onSelect(value) {
     if (value != null) {
       // Process the value if needed
@@ -38,11 +41,12 @@ function EditField({
     modalProps.onClose();
   }
 
+  const { isNarrowWidth } = useResponsive();
   let label, editor, minWidth;
   let inputStyle = { ':focus': { boxShadow: 0 } };
   let autocompleteProps = {
     inputProps: { style: inputStyle },
-    containerProps: { style: { height: 275 } },
+    containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
   switch (name) {
@@ -73,11 +77,19 @@ function EditField({
           accounts={accounts}
           focused={true}
           embedded={true}
+          closeOnBlur={false}
           onSelect={value => {
             if (value) {
               onSelect(value);
             }
           }}
+          groupHeaderStyle={
+            isNarrowWidth
+              ? {
+                  color: theme.altTableText,
+                }
+              : undefined
+          }
           {...autocompleteProps}
         />
       );
@@ -92,7 +104,9 @@ function EditField({
           value={null}
           focused={true}
           embedded={true}
+          closeOnBlur={false}
           showManagePayees={false}
+          showMakeTransfer={!isNarrowWidth}
           onSelect={async value => {
             if (value && value.startsWith('new:')) {
               value = await createPayee(value.slice('new:'.length));
@@ -101,6 +115,13 @@ function EditField({
             onSelect(value);
           }}
           isCreatable
+          groupHeaderStyle={
+            isNarrowWidth
+              ? {
+                  color: theme.altTableText,
+                }
+              : undefined
+          }
           {...autocompleteProps}
         />
       );
@@ -125,11 +146,19 @@ function EditField({
           value={null}
           focused={true}
           embedded={true}
+          closeOnBlur={false}
           showSplitOption={false}
           onUpdate={() => {}}
           onSelect={value => {
             onSelect(value);
           }}
+          groupHeaderStyle={
+            isNarrowWidth
+              ? {
+                  color: theme.altTableText,
+                }
+              : undefined
+          }
           {...autocompleteProps}
         />
       );
@@ -151,44 +180,39 @@ function EditField({
 
   return (
     <Modal
-      noAnimation={true}
-      showHeader={false}
+      title={label}
+      noAnimation={!isNarrowWidth}
+      showHeader={isNarrowWidth}
       focusAfterClose={false}
       {...modalProps}
       padding={0}
-      style={[
-        {
-          flex: 0,
-          padding: '15px 10px',
-          backgroundColor: colors.n1,
-          color: 'white',
-        },
-        minWidth && { minWidth },
-      ]}
+      style={{
+        flex: 0,
+        height: isNarrowWidth ? '85vh' : 275,
+        padding: '15px 10px',
+        borderRadius: '6px',
+        ...(minWidth && { minWidth }),
+        ...(!isNarrowWidth && {
+          backgroundColor: theme.mobileModalBackground,
+          color: theme.mobileModalText,
+        }),
+      }}
     >
       {() => (
         <View>
-          <SectionLabel
-            title={label}
-            style={{
-              alignSelf: 'center',
-              color: colors.b10,
-              marginBottom: 10,
-            }}
-          />
+          {!isNarrowWidth && (
+            <SectionLabel
+              title={label}
+              style={{
+                alignSelf: 'center',
+                color: theme.altMobileModalText,
+                marginBottom: 10,
+              }}
+            />
+          )}
           <View style={{ flex: 1 }}>{editor}</View>
         </View>
       )}
     </Modal>
   );
 }
-
-export default connect(
-  state => ({
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    categoryGroups: state.queries.categories.grouped,
-    accounts: state.queries.accounts,
-    payees: state.queries.payees,
-  }),
-  actions,
-)(EditField);

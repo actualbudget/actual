@@ -1,9 +1,11 @@
+import { GlobalPrefs, LocalPrefs } from '../client/state-types/prefs';
 import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Message } from '../server/sync';
 
+import { AccountEntity, PayeeEntity } from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -41,8 +43,23 @@ export interface ServerHandlers {
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
   'get-categories': () => Promise<{
-    grouped: unknown[];
-    list: unknown[];
+    grouped: {
+      id: string;
+      name: string;
+      is_income: number;
+      sort_order: number;
+      tombstone: number;
+      hidden: boolean;
+    }[];
+    list: {
+      id: string;
+      name: string;
+      is_income: number;
+      cat_group: string;
+      sort_order: number;
+      tombstone: number;
+      hidden: boolean;
+    }[];
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;
@@ -78,7 +95,7 @@ export interface ServerHandlers {
 
   'payee-create': (arg: { name }) => Promise<unknown>;
 
-  'payees-get': () => Promise<unknown[]>;
+  'payees-get': () => Promise<PayeeEntity[]>;
 
   'payees-get-rule-counts': () => Promise<unknown>;
 
@@ -93,26 +110,6 @@ export interface ServerHandlers {
   'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
 
   'payees-get-rules': (arg: { id }) => Promise<unknown>;
-
-  'rule-validate': (rule) => Promise<{ error: unknown }>;
-
-  'rule-add': (rule) => Promise<{ error: unknown } | { id: string }>;
-
-  'rule-add': (rule) => Promise<{ error: unknown } | unknown>;
-
-  'rule-delete': (rule) => Promise<unknown>;
-
-  'rule-delete-all': (ids) => Promise<unknown>;
-
-  'rule-apply-actions': (arg: { transactionIds; actions }) => Promise<unknown>;
-
-  'rule-add-payee-rename': (arg: { fromNames; to }) => Promise<unknown>;
-
-  'rules-get': () => Promise<unknown>;
-
-  'rule-get': (arg: { id }) => Promise<unknown>;
-
-  'rules-run': (arg: { transaction }) => Promise<unknown>;
 
   'make-filters-from-conditions': (arg: {
     conditions;
@@ -134,7 +131,7 @@ export interface ServerHandlers {
 
   'account-update': (arg: { id; name }) => Promise<unknown>;
 
-  'accounts-get': () => Promise<unknown>;
+  'accounts-get': () => Promise<AccountEntity[]>;
 
   'account-properties': (arg: {
     id;
@@ -147,7 +144,7 @@ export interface ServerHandlers {
     upgradingId;
   }) => Promise<'ok'>;
 
-  'nordigen-accounts-link': (arg: {
+  'gocardless-accounts-link': (arg: {
     requisitionId;
     account;
     upgradingId;
@@ -160,7 +157,7 @@ export interface ServerHandlers {
     offbudgetIds;
   }) => Promise<unknown>;
 
-  'nordigen-accounts-connect': (arg: {
+  'gocardless-accounts-connect': (arg: {
     institution;
     publicToken;
     accountIds;
@@ -168,10 +165,10 @@ export interface ServerHandlers {
   }) => Promise<unknown>;
 
   'account-create': (arg: {
-    name;
-    balance;
-    offBudget;
-    closed?;
+    name: string;
+    balance: number;
+    offBudget?: boolean;
+    closed?: 0 | 1;
   }) => Promise<string>;
 
   'account-close': (arg: {
@@ -199,24 +196,24 @@ export interface ServerHandlers {
   'secret-set': (arg: { name: string; value: string }) => Promise<null>;
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
-  'nordigen-poll-web-token': (arg: {
+  'gocardless-poll-web-token': (arg: {
     upgradingAccountId;
     requisitionId;
   }) => Promise<{ error } | { data }>;
 
-  'nordigen-status': () => Promise<{ configured: boolean }>;
+  'gocardless-status': () => Promise<{ configured: boolean }>;
 
-  'nordigen-get-banks': (country) => Promise<unknown>;
+  'gocardless-get-banks': (country) => Promise<unknown>;
 
-  'nordigen-poll-web-token-stop': () => Promise<'ok'>;
+  'gocardless-poll-web-token-stop': () => Promise<'ok'>;
 
-  'nordigen-create-web-token': (arg: {
+  'gocardless-create-web-token': (arg: {
     upgradingAccountId;
     institutionId;
     accessValidForDays;
   }) => Promise<unknown>;
 
-  'nordigen-accounts-sync': (arg: { id }) => Promise<{
+  'gocardless-accounts-sync': (arg: { id }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;
@@ -240,23 +237,19 @@ export interface ServerHandlers {
 
   'save-global-prefs': (prefs) => Promise<'ok'>;
 
-  'load-global-prefs': () => Promise<{
-    floatingSidebar: boolean;
-    maxMonths: number;
-    autoUpdate: boolean;
-    documentDir: string;
-    keyId: string;
-  }>;
+  'load-global-prefs': () => Promise<GlobalPrefs>;
 
   'save-prefs': (prefsToSet) => Promise<'ok'>;
 
-  'load-prefs': () => Promise<Record<string, unknown> | null>;
+  'load-prefs': () => Promise<LocalPrefs | null>;
 
   'sync-reset': () => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
   'sync-repair': () => Promise<unknown>;
 
-  'key-make': (arg: { password }) => Promise<unknown>;
+  'key-make': (arg: {
+    password;
+  }) => Promise<{ error?: { reason: string; meta?: unknown } }>;
 
   'key-test': (arg: {
     fileId;
@@ -285,23 +278,19 @@ export interface ServerHandlers {
 
   'get-server-version': () => Promise<{ error?: string } | { version: string }>;
 
-  'get-server-url': () => Promise<unknown>;
+  'get-server-url': () => Promise<string | null>;
 
-  'set-server-url': (arg: { url; validate }) => Promise<unknown>;
+  'set-server-url': (arg: {
+    url: string;
+    validate?: boolean;
+  }) => Promise<{ error?: string }>;
 
   sync: () => Promise<
     | { error: { message: string; reason: string; meta: unknown } }
     | { messages: Message[] }
   >;
 
-  'get-budgets': () => Promise<
-    {
-      id: string;
-      cloudFileId: string;
-      groupId: string;
-      name: string;
-    }[]
-  >;
+  'get-budgets': () => Promise<Budget[]>;
 
   'get-remote-files': () => Promise<RemoteFile[]>;
 
@@ -311,7 +300,9 @@ export interface ServerHandlers {
 
   'download-budget': (arg: { fileId; replace? }) => Promise<{ error; id }>;
 
-  'sync-budget': () => Promise<EmptyObject>;
+  'sync-budget': () => Promise<{
+    error?: { message: string; reason: string; meta: unknown };
+  }>;
 
   'load-budget': (arg: { id }) => Promise<{ error }>;
 
@@ -333,7 +324,7 @@ export interface ServerHandlers {
     type: 'ynab4' | 'ynab5' | 'actual';
   }) => Promise<{ error?: string }>;
 
-  'export-budget': () => Promise<Buffer | null>;
+  'export-budget': () => Promise<{ data: Buffer } | { error: string }>;
 
   'upload-file-web': (arg: {
     filename: string;

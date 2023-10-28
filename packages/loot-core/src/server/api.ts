@@ -204,6 +204,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 
     let result = await handlers['download-budget']({ fileId: file.fileId });
     if (result.error) {
+      console.log('Full error details', result.error);
       throw new Error(getDownloadError(result.error));
     }
     await handlers['load-budget']({ id: result.id });
@@ -298,16 +299,16 @@ handlers['api/budget-month'] = async function ({ month }) {
   // different (for now)
   return {
     month,
-    incomeAvailable: value('available-funds'),
-    lastMonthOverspent: value('last-month-overspent'),
-    forNextMonth: value('buffered'),
-    totalBudgeted: value('total-budgeted'),
-    toBudget: value('to-budget'),
+    incomeAvailable: value('available-funds') as number,
+    lastMonthOverspent: value('last-month-overspent') as number,
+    forNextMonth: value('buffered') as number,
+    totalBudgeted: value('total-budgeted') as number,
+    toBudget: value('to-budget') as number,
 
-    fromLastMonth: value('from-last-month'),
-    totalIncome: value('total-income'),
-    totalSpent: value('total-spent'),
-    totalBalance: value('total-leftover'),
+    fromLastMonth: value('from-last-month') as number,
+    totalIncome: value('total-income') as number,
+    totalSpent: value('total-spent') as number,
+    totalBalance: value('total-leftover') as number,
 
     categoryGroups: groups.map(group => {
       if (group.is_income) {

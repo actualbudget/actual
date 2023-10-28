@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import { colors } from '../../style';
+import { theme } from '../../style';
 
 import Text from './Text';
 import View from './View';
@@ -16,7 +16,11 @@ type KeybindingProps = {
 };
 
 function Keybinding({ keyName }: KeybindingProps) {
-  return <Text style={{ fontSize: 10, color: colors.n6 }}>{keyName}</Text>;
+  return (
+    <Text style={{ fontSize: 10, color: theme.menuKeybindingText }}>
+      {keyName}
+    </Text>
+  );
 }
 
 type MenuItem = {
@@ -33,7 +37,7 @@ type MenuProps = {
   header?: ReactNode;
   footer?: ReactNode;
   items: Array<MenuItem | typeof Menu.line>;
-  onMenuSelect;
+  onMenuSelect: (itemName: MenuItem['name']) => void;
 };
 
 export default function Menu({
@@ -81,7 +85,7 @@ export default function Menu({
           e.preventDefault();
           const item = items[hoveredIndex];
           if (hoveredIndex !== null && item !== Menu.line) {
-            onMenuSelect && onMenuSelect(item.name);
+            onMenuSelect?.(item.name);
           }
           break;
         default:
@@ -106,7 +110,7 @@ export default function Menu({
         if (item === Menu.line) {
           return (
             <View key={idx} style={{ margin: '3px 0px' }}>
-              <View style={{ borderTop: '1px solid ' + colors.n10 }} />
+              <View style={{ borderTop: '1px solid ' + theme.menuBorder }} />
             </View>
           );
         } else if (item.type === Menu.label) {
@@ -114,7 +118,7 @@ export default function Menu({
             <Text
               key={item.name}
               style={{
-                color: colors.n6,
+                color: theme.altMenuItemTextHeader,
                 fontSize: 11,
                 lineHeight: '1em',
                 textTransform: 'uppercase',
@@ -133,23 +137,25 @@ export default function Menu({
           <View
             role="button"
             key={item.name}
-            style={[
-              {
-                cursor: 'default',
-                padding: '9px 10px',
-                marginTop:
-                  idx === 0 ||
-                  lastItem === Menu.line ||
-                  lastItem.type === Menu.label
-                    ? 0
-                    : -3,
-                flexDirection: 'row',
-                alignItems: 'center',
-              },
-              item.disabled && { color: colors.n7 },
-              !item.disabled &&
-                hoveredIndex === idx && { backgroundColor: colors.n10 },
-            ]}
+            style={{
+              cursor: 'default',
+              padding: '9px 10px',
+              marginTop:
+                idx === 0 ||
+                lastItem === Menu.line ||
+                lastItem.type === Menu.label
+                  ? 0
+                  : -3,
+              flexDirection: 'row',
+              alignItems: 'center',
+              color: theme.menuItemText,
+              ...(item.disabled && { color: theme.buttonBareDisabledText }),
+              ...(!item.disabled &&
+                hoveredIndex === idx && {
+                  backgroundColor: theme.menuItemBackgroundHover,
+                  color: theme.menuItemTextHover,
+                }),
+            }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
             onClick={e =>

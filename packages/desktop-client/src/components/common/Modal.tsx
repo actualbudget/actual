@@ -1,17 +1,16 @@
 import React, {
-  type ReactNode,
   useEffect,
   useRef,
   useLayoutEffect,
+  type ReactNode,
 } from 'react';
 import ReactModal from 'react-modal';
 
-import type { CSSProperties } from 'glamor';
 import hotkeys from 'hotkeys-js';
 
-import Loading from '../../icons/AnimatedLoading';
+import AnimatedLoading from '../../icons/AnimatedLoading';
 import Delete from '../../icons/v0/Delete';
-import { styles, colors } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 import tokens from '../../tokens';
 
 import Button from './Button';
@@ -19,7 +18,7 @@ import Text from './Text';
 import View from './View';
 
 export type ModalProps = {
-  title: string;
+  title?: string;
   isCurrent?: boolean;
   isHidden?: boolean;
   children: ReactNode | (() => ReactNode);
@@ -118,22 +117,22 @@ const Modal = ({
         noAnimation={noAnimation}
         isCurrent={isCurrent}
         size={size}
-        style={[
-          {
-            willChange: 'opacity, transform',
-            minWidth: '100%',
-            minHeight: 0,
-            borderRadius: 4,
-            backgroundColor: 'white',
-            opacity: isHidden ? 0 : 1,
-            [`@media (min-width: ${tokens.breakpoint_small})`]: {
-              minWidth: tokens.breakpoint_small,
-            },
+        style={{
+          willChange: 'opacity, transform',
+          minWidth: '100%',
+          minHeight: 0,
+          borderRadius: 4,
+          //border: '1px solid ' + theme.modalBorder,
+          color: theme.pageText,
+          backgroundColor: theme.modalBackground,
+          opacity: isHidden ? 0 : 1,
+          [`@media (min-width: ${tokens.breakpoint_small})`]: {
+            minWidth: tokens.breakpoint_small,
           },
-          styles.shadowLarge,
-          style,
-          styles.lightScrollbar,
-        ]}
+          ...styles.shadowLarge,
+          ...style,
+          ...styles.lightScrollbar,
+        }}
       >
         {showHeader && (
           <View
@@ -146,7 +145,6 @@ const Modal = ({
             {showTitle && (
               <View
                 style={{
-                  color: colors.n2,
                   flex: 1,
                   alignSelf: 'center',
                   textAlign: 'center',
@@ -188,12 +186,12 @@ const Modal = ({
               >
                 {showClose && (
                   <Button
-                    bare
+                    type="bare"
                     onClick={onClose}
                     style={{ padding: '10px 10px' }}
                     aria-label="Close"
                   >
-                    <Delete width={10} />
+                    <Delete width={10} style={{ color: 'inherit' }} />
                   </Button>
                 )}
               </View>
@@ -211,13 +209,16 @@ const Modal = ({
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: 'rgba(255, 255, 255, .6)',
+              backgroundColor: theme.pageBackground,
               alignItems: 'center',
               justifyContent: 'center',
               zIndex: 1000,
             }}
           >
-            <Loading style={{ width: 20, height: 20 }} color={colors.n1} />
+            <AnimatedLoading
+              style={{ width: 20, height: 20 }}
+              color={theme.pageText}
+            />
           </View>
         )}
       </ModalContent>
@@ -294,11 +295,11 @@ const ModalContent = ({
   return (
     <View
       innerRef={contentRef}
-      style={[
-        style,
-        size && { width: size.width, height: size.height },
-        noAnimation && !isCurrent && { display: 'none' },
-      ]}
+      style={{
+        ...style,
+        ...(size && { width: size.width, height: size.height }),
+        ...(noAnimation && !isCurrent && { display: 'none' }),
+      }}
     >
       {children}
     </View>
@@ -335,13 +336,11 @@ export const ModalButtons = ({
   return (
     <View
       innerRef={containerRef}
-      style={[
-        {
-          flexDirection: 'row',
-          marginTop: 30,
-        },
-        style,
-      ]}
+      style={{
+        flexDirection: 'row',
+        marginTop: 30,
+        ...style,
+      }}
     >
       {leftContent}
       <View style={{ flex: 1 }} />

@@ -1,9 +1,14 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 
+import { type Query } from '../../shared/query';
 import { getStatus, getHasTransactionsQuery } from '../../shared/schedules';
+import { type ScheduleEntity } from '../../types/models';
 import q, { liveQuery } from '../query-helpers';
 
-function loadStatuses(schedules, onData) {
+export type ScheduleStatusType = ReturnType<typeof getStatus>;
+export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
+
+function loadStatuses(schedules: ScheduleEntity[], onData) {
   return liveQuery(getHasTransactionsQuery(schedules), onData, {
     mapper: data => {
       let hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
@@ -18,23 +23,29 @@ function loadStatuses(schedules, onData) {
   });
 }
 
-type UseSchedulesArgs = { transform?: <T>(v: T) => T };
-export function useSchedules({ transform }: UseSchedulesArgs = {}) {
-  let [data, setData] = useState(null);
+type UseSchedulesArgs = { transform?: (q: Query) => Query };
+type UseSchedulesReturnType = {
+  schedules: ScheduleEntity[];
+  statuses: ScheduleStatuses;
+} | null;
+export function useSchedules({
+  transform,
+}: UseSchedulesArgs = {}): UseSchedulesReturnType {
+  const [data, setData] = useState<UseSchedulesReturnType>(null);
 
   useEffect(() => {
-    let query = q('schedules').select('*');
+    const query = q('schedules').select('*');
     let scheduleQuery, statusQuery;
 
     scheduleQuery = liveQuery(
       transform ? transform(query) : query,
-      async schedules => {
+      async (schedules: ScheduleEntity[]) => {
         if (scheduleQuery) {
           if (statusQuery) {
             statusQuery.unsubscribe();
           }
 
-          statusQuery = loadStatuses(schedules, statuses =>
+          statusQuery = loadStatuses(schedules, (statuses: ScheduleStatuses) =>
             setData({ schedules, statuses }),
           );
         }
@@ -57,7 +68,7 @@ export function useSchedules({ transform }: UseSchedulesArgs = {}) {
 let SchedulesContext = createContext(null);
 
 export function SchedulesProvider({ transform, children }) {
-  let data = useSchedules({ transform });
+  const data = useSchedules({ transform });
   return <SchedulesContext.Provider value={data} children={children} />;
 }
 

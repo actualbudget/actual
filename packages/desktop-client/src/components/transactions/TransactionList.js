@@ -11,7 +11,7 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { getChangedValues, applyChanges } from 'loot-core/src/shared/util';
 
-import { usePushModal } from '../../util/router-tools';
+import { theme } from '../../style';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -65,10 +65,10 @@ export default function TransactionList({
   categoryGroups,
   payees,
   balances,
+  showBalances,
   showCleared,
   showAccount,
   headerContent,
-  animated,
   isAdding,
   isNew,
   isMatched,
@@ -76,7 +76,11 @@ export default function TransactionList({
   dateFormat,
   hideFraction,
   addNotification,
+  pushModal,
   renderEmpty,
+  onSort,
+  sortField,
+  ascDesc,
   onChange,
   onRefetch,
   onCloseAddTransaction,
@@ -84,7 +88,6 @@ export default function TransactionList({
 }) {
   let transactionsLatest = useRef();
   let navigate = useNavigate();
-  let pushModal = usePushModal();
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -158,7 +161,7 @@ export default function TransactionList({
   });
 
   let onNavigateToSchedule = useCallback(scheduleId => {
-    pushModal(`/schedule/edit/${scheduleId}`);
+    pushModal('schedule-edit', { id: scheduleId });
   });
 
   return (
@@ -169,11 +172,11 @@ export default function TransactionList({
       accounts={accounts}
       categoryGroups={categoryGroups}
       payees={payees}
+      showBalances={showBalances}
       balances={balances}
       showCleared={showCleared}
       showAccount={showAccount}
       showCategory={true}
-      animated={animated}
       currentAccountId={account && account.id}
       currentCategoryId={category && category.id}
       isAdding={isAdding}
@@ -193,9 +196,12 @@ export default function TransactionList({
       onAddSplit={onAddSplit}
       onManagePayees={onManagePayees}
       onCreatePayee={onCreatePayee}
-      style={{ backgroundColor: 'white' }}
+      style={{ backgroundColor: theme.tableBackground }}
       onNavigateToTransferAccount={onNavigateToTransferAccount}
       onNavigateToSchedule={onNavigateToSchedule}
+      onSort={onSort}
+      sortField={sortField}
+      ascDesc={ascDesc}
     />
   );
 }

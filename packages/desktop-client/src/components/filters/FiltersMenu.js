@@ -25,17 +25,15 @@ import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
-import { colors } from '../../style';
-import {
-  View,
-  Text,
-  Tooltip,
-  Stack,
-  Button,
-  Menu,
-  CustomSelect,
-} from '../common';
-import { Value } from '../ManageRules';
+import { theme } from '../../style';
+import Button from '../common/Button';
+import Menu from '../common/Menu';
+import Select from '../common/Select';
+import Stack from '../common/Stack';
+import Text from '../common/Text';
+import View from '../common/View';
+import Value from '../rules/Value';
+import { Tooltip } from '../tooltips';
 import GenericInput from '../util/GenericInput';
 
 import { CondOpMenu } from './SavedFilters';
@@ -96,15 +94,19 @@ function subfieldToOptions(field, subfield) {
 function OpButton({ op, selected, style, onClick }) {
   return (
     <Button
-      bare
-      style={[
-        { backgroundColor: colors.n10, marginBottom: 5 },
-        style,
-        selected && {
-          color: 'white',
-          '&,:hover,:active': { backgroundColor: colors.b4 },
-        },
-      ]}
+      type="bare"
+      style={{
+        backgroundColor: theme.altbuttonMenuBackground,
+        marginBottom: 5,
+        ...style,
+        ...(selected && {
+          color: theme.buttonNormalSelectedText,
+          '&,:hover,:active': {
+            backgroundColor: theme.buttonNormalSelectedBackground,
+            color: theme.buttonNormalSelectedText,
+          },
+        }),
+      }}
       onClick={onClick}
     >
       {friendlyOp(op)}
@@ -117,9 +119,15 @@ function updateFilterReducer(state, action) {
     case 'set-op': {
       let type = FIELD_TYPES.get(state.field);
       let value = state.value;
-      if (type === 'id' && action.op === 'contains') {
-        // Clear out the value if switching between contains for
-        // the id type
+      if (
+        (type === 'id' || type === 'string') &&
+        (action.op === 'contains' ||
+          action.op === 'is' ||
+          action.op === 'doesNotContain' ||
+          action.op === 'isNot')
+      ) {
+        // Clear out the value if switching between contains or
+        // is/oneof for the id or string type
         value = null;
       }
       return { ...state, op: action.op, value };
@@ -155,7 +163,7 @@ function ConfigureField({
   }, [op]);
 
   let type = FIELD_TYPES.get(field);
-  let ops = TYPE_INFO[type].ops;
+  let ops = TYPE_INFO[type].ops.filter(op => op !== 'isbetween');
 
   // Month and year fields are quite hacky right now! Figure out how
   // to clean this up later
@@ -166,47 +174,52 @@ function ConfigureField({
   return (
     <Tooltip
       position="bottom-left"
-      style={{ padding: 15 }}
-      width={250}
+      style={{ padding: 15, color: theme.altmenuItemTextHeader }}
+      width={275}
       onClose={() => dispatch({ type: 'close' })}
+      data-testid="filters-menu-tooltip"
     >
       <FocusScope>
         <View style={{ marginBottom: 10 }}>
-          {field === 'amount' || field === 'date' ? (
-            <CustomSelect
-              options={
-                field === 'amount'
-                  ? [
-                      ['amount', 'Amount'],
-                      ['amount-inflow', 'Amount (inflow)'],
-                      ['amount-outflow', 'Amount (outflow)'],
-                    ]
-                  : field === 'date'
-                  ? [
-                      ['date', 'Date'],
-                      ['month', 'Month'],
-                      ['year', 'Year'],
-                    ]
-                  : null
-              }
-              value={subfield}
-              onChange={sub => {
-                setSubfield(sub);
-
-                if (sub === 'month' || sub === 'year') {
-                  dispatch({ type: 'set-op', op: 'is' });
+          <Stack direction="row" align="flex-start">
+            {field === 'amount' || field === 'date' ? (
+              <Select
+                bare
+                options={
+                  field === 'amount'
+                    ? [
+                        ['amount', 'Amount'],
+                        ['amount-inflow', 'Amount (inflow)'],
+                        ['amount-outflow', 'Amount (outflow)'],
+                      ]
+                    : field === 'date'
+                    ? [
+                        ['date', 'Date'],
+                        ['month', 'Month'],
+                        ['year', 'Year'],
+                      ]
+                    : null
                 }
-              }}
-              style={{ borderWidth: 1 }}
-            />
-          ) : (
-            titleFirst(mapField(field))
-          )}
+                value={subfield}
+                onChange={sub => {
+                  setSubfield(sub);
+
+                  if (sub === 'month' || sub === 'year') {
+                    dispatch({ type: 'set-op', op: 'is' });
+                  }
+                }}
+                style={{ borderWidth: 1 }}
+              />
+            ) : (
+              titleFirst(mapField(field))
+            )}
+            <View style={{ flex: 1 }} />
+          </Stack>
         </View>
 
         <View
           style={{
-            color: colors.n4,
+            color: theme.pageTextLight,
             marginBottom: 10,
           }}
         >
@@ -219,35 +232,61 @@ function ConfigureField({
           spacing={1}
           style={{ flexWrap: 'wrap' }}
         >
-          {type === 'boolean'
-            ? [
-                <OpButton
-                  key="true"
-                  op="true"
-                  selected={value === true}
-                  onClick={() => {
-                    dispatch({ type: 'set-op', op: 'is' });
-                    dispatch({ type: 'set-value', value: true });
-                  }}
-                />,
-                <OpButton
-                  key="false"
-                  op="false"
-                  selected={value === false}
-                  onClick={() => {
-                    dispatch({ type: 'set-op', op: 'is' });
-                    dispatch({ type: 'set-value', value: false });
-                  }}
-                />,
-              ]
-            : ops.map(currOp => (
-                <OpButton
-                  key={currOp}
-                  op={currOp}
-                  selected={currOp === op}
-                  onClick={() => dispatch({ type: 'set-op', op: currOp })}
-                />
-              ))}
+          {type === 'boolean' ? (
+            <>
+              <OpButton
+                key="true"
+                op="true"
+                selected={value === true}
+                onClick={() => {
+                  dispatch({ type: 'set-op', op: 'is' });
+                  dispatch({ type: 'set-value', value: true });
+                }}
+              />
+              <OpButton
+                key="false"
+                op="false"
+                selected={value === false}
+                onClick={() => {
+                  dispatch({ type: 'set-op', op: 'is' });
+                  dispatch({ type: 'set-value', value: false });
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Stack
+                direction="row"
+                align="flex-start"
+                spacing={1}
+                style={{ flexWrap: 'wrap' }}
+              >
+                {ops.slice(0, 3).map(currOp => (
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
+                ))}
+              </Stack>
+              <Stack
+                direction="row"
+                align="flex-start"
+                spacing={1}
+                style={{ flexWrap: 'wrap' }}
+              >
+                {ops.slice(3, ops.length).map(currOp => (
+                  <OpButton
+                    key={currOp}
+                    op={currOp}
+                    selected={currOp === op}
+                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                  />
+                ))}
+              </Stack>
+            </>
+          )}
         </Stack>
 
         <form action="#">
@@ -256,19 +295,27 @@ function ConfigureField({
               inputRef={inputRef}
               field={field}
               subfield={subfield}
-              type={type === 'id' && op === 'contains' ? 'string' : type}
+              type={
+                type === 'id' && (op === 'contains' || op === 'doesNotContain')
+                  ? 'string'
+                  : type
+              }
               value={value}
-              multi={op === 'oneOf'}
+              multi={op === 'oneOf' || op === 'notOneOf'}
               style={{ marginTop: 10 }}
               onChange={v => dispatch({ type: 'set-value', value: v })}
             />
           )}
 
-          <Stack direction="row" justify="flex-end" align="center">
+          <Stack
+            direction="row"
+            justify="flex-end"
+            align="center"
+            style={{ marginTop: 15 }}
+          >
             <View style={{ flex: 1 }} />
             <Button
-              primary
-              style={{ marginTop: 15 }}
+              type="primary"
               onClick={e => {
                 e.preventDefault();
                 onApply({
@@ -371,14 +418,9 @@ export function FilterButton({ onApply }) {
 
   return (
     <View>
-      <Button bare onClick={() => dispatch({ type: 'select-field' })}>
+      <Button type="bare" onClick={() => dispatch({ type: 'select-field' })}>
         <SettingsSliderAlternate
-          style={{
-            width: 16,
-            height: 16,
-            color: 'inherit',
-            marginRight: 5,
-          }}
+          style={{ width: 16, height: 16, marginRight: 5 }}
         />{' '}
         Filter
       </Button>
@@ -387,6 +429,7 @@ export function FilterButton({ onApply }) {
           position="bottom-left"
           style={{ padding: 0 }}
           onClose={() => dispatch({ type: 'close' })}
+          data-testid="filters-select-tooltip"
         >
           <Menu
             onMenuSelect={name => {
@@ -459,49 +502,46 @@ function FilterExpression({
 
   return (
     <View
-      style={[
-        {
-          backgroundColor: colors.n9,
-          borderRadius: 4,
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginRight: 10,
-          marginTop: 10,
-        },
-        style,
-      ]}
+      style={{
+        backgroundColor: theme.pillBackground,
+        borderRadius: 4,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 10,
+        marginTop: 10,
+        ...style,
+      }}
     >
       <Button
-        bare
+        type="bare"
         disabled={customName != null}
         onClick={() => setEditing(true)}
         style={{ marginRight: -7 }}
       >
         <div style={{ paddingBlock: 1, paddingLeft: 5, paddingRight: 2 }}>
           {customName ? (
-            <Text style={{ color: colors.p4 }}>{customName}</Text>
+            <Text style={{ color: theme.pageTextPositive }}>{customName}</Text>
           ) : (
             <>
-              <Text style={{ color: colors.p4 }}>
+              <Text style={{ color: theme.pageTextPositive }}>
                 {mapField(field, options)}
               </Text>{' '}
-              <Text style={{ color: colors.n3 }}>{friendlyOp(op)}</Text>{' '}
+              <Text>{friendlyOp(op, null)}</Text>{' '}
               <Value
                 value={value}
                 field={field}
                 inline={true}
-                valueIsRaw={op === 'contains'}
+                valueIsRaw={op === 'contains' || op === 'doesNotContain'}
               />
             </>
           )}
         </div>
       </Button>
-      <Button bare onClick={onDelete}>
+      <Button type="bare" onClick={onDelete} aria-label="Delete filter">
         <DeleteIcon
           style={{
             width: 8,
             height: 8,
-            color: colors.n4,
             margin: 5,
             marginLeft: 3,
           }}

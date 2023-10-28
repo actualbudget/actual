@@ -78,13 +78,13 @@ export function partitionByField(data, field) {
   return res;
 }
 
-export function groupBy(data, field, mapper?: (v: unknown) => unknown) {
-  let res = new Map();
+export function groupBy<T, K extends keyof T>(data: T[], field: K) {
+  let res = new Map<T[K], T[]>();
   for (let i = 0; i < data.length; i++) {
     let item = data[i];
     let key = item[field];
     let existing = res.get(key) || [];
-    res.set(key, existing.concat([mapper ? mapper(item) : data[i]]));
+    res.set(key, existing.concat([item]));
   }
   return res;
 }
@@ -179,29 +179,42 @@ export function fastSetMerge(set1, set2) {
   return finalSet;
 }
 
-export function titleFirst(str) {
+export function titleFirst(str: string) {
   return str[0].toUpperCase() + str.slice(1);
 }
 
-export let numberFormats = [
+type NumberFormats =
+  | 'comma-dot'
+  | 'dot-comma'
+  | 'space-comma'
+  | 'space-dot'
+  | 'comma-dot-in';
+
+export const numberFormats: Array<{
+  value: NumberFormats;
+  label: string;
+  labelNoFraction: string;
+}> = [
   { value: 'comma-dot', label: '1,000.33', labelNoFraction: '1,000' },
   { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
   { value: 'space-comma', label: '1 000,33', labelNoFraction: '1 000' },
   { value: 'space-dot', label: '1 000.33', labelNoFraction: '1 000' },
+  { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
 ];
 
-let numberFormat: {
-  value: string | null;
-  formatter: Intl.NumberFormat | null;
-  regex: RegExp | null;
-  separator?: string;
+let numberFormatConfig: {
+  format: NumberFormats;
+  hideFraction: boolean;
 } = {
-  value: null,
-  formatter: null,
-  regex: null,
+  format: 'comma-dot',
+  hideFraction: false,
 };
 
-export function setNumberFormat({ format, hideFraction }) {
+export function setNumberFormat(config: typeof numberFormatConfig) {
+  numberFormatConfig = config;
+}
+
+export function getNumberFormat({ format, hideFraction } = numberFormatConfig) {
   let locale, regex, separator;
 
   switch (format) {
@@ -220,6 +233,11 @@ export function setNumberFormat({ format, hideFraction }) {
       regex = /[^-0-9.]/g;
       separator = '.';
       break;
+    case 'comma-dot-in':
+      locale = 'en-IN';
+      regex = /[^-0-9.]/g;
+      separator = '.';
+      break;
     case 'comma-dot':
     default:
       locale = 'en-US';
@@ -227,7 +245,7 @@ export function setNumberFormat({ format, hideFraction }) {
       separator = '.';
   }
 
-  numberFormat = {
+  return {
     value: format,
     separator,
     formatter: new Intl.NumberFormat(locale, {
@@ -237,12 +255,6 @@ export function setNumberFormat({ format, hideFraction }) {
     regex,
   };
 }
-
-export function getNumberFormat() {
-  return numberFormat;
-}
-
-setNumberFormat({ format: 'comma-dot', hideFraction: false });
 
 // Number utilities
 
@@ -256,7 +268,7 @@ setNumberFormat({ format: 'comma-dot', hideFraction: false });
 const MAX_SAFE_NUMBER = 2 ** 51 - 1;
 const MIN_SAFE_NUMBER = -MAX_SAFE_NUMBER;
 
-export function safeNumber(value) {
+export function safeNumber(value: number) {
   if (!Number.isInteger(value)) {
     throw new Error(
       'safeNumber: number is not an integer: ' + JSON.stringify(value),
@@ -274,17 +286,19 @@ export function toRelaxedNumber(value) {
   return integerToAmount(currencyToInteger(value) || 0);
 }
 
-export function integerToCurrency(n) {
-  return numberFormat.formatter.format(safeNumber(n) / 100);
+export function integerToCurrency(n, formatter = getNumberFormat().formatter) {
+  return formatter.format(safeNumber(n) / 100);
 }
 
 export function amountToCurrency(n) {
-  return numberFormat.formatter.format(n);
+  return getNumberFormat().formatter.format(n);
 }
 
 export function currencyToAmount(str) {
   let amount = parseFloat(
-    str.replace(numberFormat.regex, '').replace(numberFormat.separator, '.'),
+    str
+      .replace(getNumberFormat().regex, '')
+      .replace(getNumberFormat().separator, '.'),
   );
   return isNaN(amount) ? null : amount;
 }
@@ -336,4 +350,15 @@ export function looselyParseAmount(amount) {
   let right = extractNumbers(amount.slice(m.index + 1));
 
   return safeNumber(parseFloat(left + '.' + right));
+}
+
+export function sortByKey<T>(arr: T[], key: keyof T): T[] {
+  return [...arr].sort((item1, item2) => {
+    if (item1[key] < item2[key]) {
+      return -1;
+    } else if (item1[key] > item2[key]) {
+      return 1;
+    }
+    return 0;
+  });
 }

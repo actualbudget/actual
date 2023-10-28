@@ -1,19 +1,22 @@
 import React, { Fragment, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { css } from 'glamor';
+
 import { createPayee } from 'loot-core/src/client/actions/queries';
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
 
 import Add from '../../icons/v1/Add';
-import { colors } from '../../style';
-import { View } from '../common';
+import { useResponsive } from '../../ResponsiveProvider';
+import { theme } from '../../style';
+import Button from '../common/Button';
+import View from '../common/View';
 
 import Autocomplete, {
   defaultFilterSuggestion,
   AutocompleteFooter,
-  AutocompleteFooterButton,
 } from './Autocomplete';
 
 function getPayeeSuggestions(payees, focusTransferPayees, accounts) {
@@ -48,8 +51,10 @@ function PayeeList({
   highlightedIndex,
   embedded,
   inputValue,
+  groupHeaderStyle,
   footer,
 }) {
+  const { isNarrowWidth } = useResponsive();
   let isFiltered = items.filtered;
   let createNew = null;
   items = [...items];
@@ -69,10 +74,11 @@ function PayeeList({
   return (
     <View>
       <View
-        style={[
-          { overflow: 'auto', padding: '5px 0' },
-          !embedded && { maxHeight: 175 },
-        ]}
+        style={{
+          overflow: 'auto',
+          padding: '5px 0',
+          ...(!embedded && { maxHeight: 175 }),
+        }}
       >
         {createNew && (
           <View
@@ -81,27 +87,28 @@ function PayeeList({
               flexShrink: 0,
               padding: '6px 9px',
               backgroundColor:
-                highlightedIndex === 0 ? colors.n4 : 'transparent',
+                highlightedIndex === 0
+                  ? theme.alt2MenuItemBackgroundHover
+                  : 'transparent',
               borderRadius: embedded ? 4 : 0,
+              ':active': {
+                backgroundColor: 'rgba(100, 100, 100, .25)',
+              },
             }}
           >
             <View
               style={{
                 display: 'block',
-                color: colors.g8,
+                color: theme.noticeTextMenu,
                 borderRadius: 4,
-                fontSize: 11,
+                fontSize: isNarrowWidth ? 'inherit' : 11,
                 fontWeight: 500,
               }}
             >
               <Add
                 width={8}
                 height={8}
-                style={{
-                  color: colors.g8,
-                  marginRight: 5,
-                  display: 'inline-block',
-                }}
+                style={{ marginRight: 5, display: 'inline-block' }}
               />
               Create Payee “{inputValue}”
             </View>
@@ -125,8 +132,9 @@ function PayeeList({
                 <div
                   key={'title-' + idx}
                   style={{
-                    color: colors.y9,
+                    color: theme.alt2MenuItemTextHeader,
                     padding: '4px 9px',
+                    ...groupHeaderStyle,
                   }}
                 >
                   {title}
@@ -135,16 +143,40 @@ function PayeeList({
 
               <div
                 {...(getItemProps ? getItemProps({ item }) : null)}
+                // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
+                // event handler they set on this element. When this code runs
+                // in WebKit on touch-enabled devices, taps on this element end
+                // up not triggering the `onClick` event (and therefore delaying
+                // response to user input) until after the `setTimeout` callback
+                // finishes executing. This is caused by content observation code
+                // that implements various strategies to prevent the user from
+                // accidentally clicking content that changed as a result of code
+                // run in the `onMouseMove` event.
+                //
+                // Long story short, we don't want any delay here between the user
+                // tapping and the resulting action being performed. It turns out
+                // there's some "fast path" logic that can be triggered in various
+                // ways to force WebKit to bail on the content observation process.
+                // One of those ways is setting `role="button"` (or a number of
+                // other aria roles) on the element, which is what we're doing here.
+                //
+                // ref:
+                // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
+                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
+                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+                role="button"
                 key={item.id}
-                style={{
-                  backgroundColor:
-                    highlightedIndex === idx + offset
-                      ? colors.n4
-                      : 'transparent',
-                  borderRadius: embedded ? 4 : 0,
-                  padding: 4,
-                  paddingLeft: 20,
-                }}
+                className={`${css([
+                  {
+                    backgroundColor:
+                      highlightedIndex === idx + offset
+                        ? theme.alt2MenuItemBackgroundHover
+                        : 'transparent',
+                    borderRadius: embedded ? 4 : 0,
+                    padding: 4,
+                    paddingLeft: 20,
+                  },
+                ])}`}
               >
                 {item.name}
               </div>
@@ -152,9 +184,9 @@ function PayeeList({
               {showMoreMessage && (
                 <div
                   style={{
-                    fontSize: 11,
+                    fontSize: isNarrowWidth ? 'inherit' : 11,
                     padding: 5,
-                    color: colors.n5,
+                    color: theme.pageTextLight,
                     textAlign: 'center',
                   }}
                 >
@@ -175,12 +207,13 @@ export default function PayeeAutocomplete({
   inputProps,
   showMakeTransfer = true,
   showManagePayees = false,
-  defaultFocusTransferPayees = false,
   tableBehavior,
   embedded,
+  closeOnBlur,
   onUpdate,
   onSelect,
   onManagePayees,
+  groupHeaderStyle,
   accounts,
   payees,
   ...props
@@ -195,9 +228,7 @@ export default function PayeeAutocomplete({
     accounts = cachedAccounts;
   }
 
-  let [focusTransferPayees, setFocusTransferPayees] = useState(
-    defaultFocusTransferPayees,
-  );
+  let [focusTransferPayees, setFocusTransferPayees] = useState(false);
   let [rawPayee, setRawPayee] = useState('');
   let hasPayeeInput = !!rawPayee;
   let payeeSuggestions = useMemo(() => {
@@ -217,7 +248,7 @@ export default function PayeeAutocomplete({
 
   async function handleSelect(value, rawInputValue) {
     if (tableBehavior) {
-      onSelect && onSelect(makeNew(value, rawInputValue));
+      onSelect?.(makeNew(value, rawInputValue));
     } else {
       let create = () => dispatch(createPayee(rawInputValue));
 
@@ -228,7 +259,7 @@ export default function PayeeAutocomplete({
           value = await create();
         }
       }
-      onSelect && onSelect(value);
+      onSelect?.(value);
     }
   }
 
@@ -242,6 +273,7 @@ export default function PayeeAutocomplete({
       value={stripNew(value)}
       suggestions={payeeSuggestions}
       tableBehavior={tableBehavior}
+      closeOnBlur={closeOnBlur}
       itemToString={item => {
         if (!item) {
           return '';
@@ -328,36 +360,25 @@ export default function PayeeAutocomplete({
           highlightedIndex={highlightedIndex}
           inputValue={inputValue}
           embedded={embedded}
+          groupHeaderStyle={groupHeaderStyle}
           footer={
             <AutocompleteFooter embedded={embedded}>
               {showMakeTransfer && (
-                <AutocompleteFooterButton
-                  title="Make Transfer"
-                  style={[
-                    showManagePayees && { marginBottom: 5 },
-                    focusTransferPayees && {
-                      backgroundColor: colors.y8,
-                      color: colors.g2,
-                      borderColor: colors.y8,
-                    },
-                  ]}
-                  hoveredStyle={
-                    focusTransferPayees && {
-                      backgroundColor: colors.y8,
-                      colors: colors.y2,
-                    }
-                  }
+                <Button
+                  type={focusTransferPayees ? 'menuSelected' : 'menu'}
+                  style={showManagePayees && { marginBottom: 5 }}
                   onClick={() => {
-                    onUpdate && onUpdate(null);
+                    onUpdate?.(null);
                     setFocusTransferPayees(!focusTransferPayees);
                   }}
-                />
+                >
+                  Make Transfer
+                </Button>
               )}
               {showManagePayees && (
-                <AutocompleteFooterButton
-                  title="Manage Payees"
-                  onClick={() => onManagePayees()}
-                />
+                <Button type="menu" onClick={() => onManagePayees()}>
+                  Manage Payees
+                </Button>
               )}
             </AutocompleteFooter>
           }

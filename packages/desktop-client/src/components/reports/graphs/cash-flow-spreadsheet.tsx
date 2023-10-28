@@ -7,8 +7,8 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
 
-import { AlignedText } from '../../common';
-import { fromDateRepr, fromDateReprToDay, runAll, index } from '../util';
+import AlignedText from '../../common/AlignedText';
+import { runAll, indexCashFlow } from '../util';
 
 export function simpleCashFlow(start, end) {
   return async (spreadsheet, setData) => {
@@ -68,26 +68,25 @@ export function cashFlowByDate(
             { date: { $transform: '$month', $lte: end } },
           ],
           'account.offbudget': false,
-          $or: [
-            {
-              'payee.transfer_acct.offbudget': true,
-              'payee.transfer_acct': null,
-            },
-          ],
         });
 
       if (isConcise) {
         return query
-          .groupBy({ $month: '$date' })
+          .groupBy([{ $month: '$date' }, 'payee.transfer_acct'])
           .select([
             { date: { $month: '$date' } },
+            { isTransfer: 'payee.transfer_acct' },
             { amount: { $sum: '$amount' } },
           ]);
       }
 
       return query
-        .groupBy('date')
-        .select(['date', { amount: { $sum: '$amount' } }]);
+        .groupBy(['date', 'payee.transfer_acct'])
+        .select([
+          'date',
+          { isTransfer: 'payee.transfer_acct' },
+          { amount: { $sum: '$amount' } },
+        ]);
     }
 
     return runAll(
@@ -111,41 +110,46 @@ export function cashFlowByDate(
 
 function recalculate(data, start, end, isConcise) {
   let [startingBalance, income, expense] = data;
+  let convIncome = income.map(t => {
+    return { ...t, isTransfer: t.isTransfer !== null };
+  });
+  let convExpense = expense.map(t => {
+    return { ...t, isTransfer: t.isTransfer !== null };
+  });
   const dates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(start),
         monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
-  const incomes = index(
-    income,
-    'date',
-    isConcise ? fromDateRepr : fromDateReprToDay,
-  );
-  const expenses = index(
-    expense,
-    'date',
-    isConcise ? fromDateRepr : fromDateReprToDay,
-  );
+  const incomes = indexCashFlow(convIncome, 'date', 'isTransfer');
+  const expenses = indexCashFlow(convExpense, 'date', 'isTransfer');
 
   let balance = startingBalance;
   let totalExpenses = 0;
   let totalIncome = 0;
+  let totalTransfers = 0;
+
   const graphData = dates.reduce(
     (res, date) => {
       let income = 0;
       let expense = 0;
+      let creditTransfers = 0;
+      let debitTransfers = 0;
 
       if (incomes[date]) {
-        income = incomes[date].amount;
+        income = !incomes[date].false ? 0 : incomes[date].false;
+        creditTransfers = !incomes[date].true ? 0 : incomes[date].true;
       }
       if (expenses[date]) {
-        expense = expenses[date].amount;
+        expense = !expenses[date].false ? 0 : expenses[date].false;
+        debitTransfers = !expenses[date].true ? 0 : expenses[date].true;
       }
 
       totalExpenses += expense;
       totalIncome += income;
-      balance += income + expense;
+      balance += income + expense + creditTransfers + debitTransfers;
+      totalTransfers += creditTransfers + debitTransfers;
       const x = d.parseISO(date);
 
       const label = (
@@ -162,6 +166,12 @@ function recalculate(data, start, end, isConcise) {
               left="Change:"
               right={<strong>{integerToCurrency(income + expense)}</strong>}
             />
+            {creditTransfers + debitTransfers !== 0 && (
+              <AlignedText
+                left="Transfers:"
+                right={integerToCurrency(creditTransfers + debitTransfers)}
+              />
+            )}
             <AlignedText left="Balance:" right={integerToCurrency(balance)} />
           </div>
         </div>
@@ -187,6 +197,7 @@ function recalculate(data, start, end, isConcise) {
     balance: balances[balances.length - 1].amount,
     totalExpenses,
     totalIncome,
+    totalTransfers,
     totalChange: balances[balances.length - 1].amount - balances[0].amount,
   };
 }

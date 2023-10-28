@@ -15,6 +15,7 @@ import * as queries from 'loot-core/src/client/queries';
 import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
+import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   deleteTransaction,
   updateTransaction,
@@ -24,11 +25,13 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
+import { authorizeBank } from '../../gocardless';
+import useCategories from '../../hooks/useCategories';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
-import { authorizeBank } from '../../nordigen';
-import { styles, colors } from '../../style';
-import { useActiveLocation } from '../ActiveLocation';
-import { View, Text, Button } from '../common';
+import { styles, theme } from '../../style';
+import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import TransactionList from '../transactions/TransactionList';
 import {
   SplitsExpandedProvider,
@@ -41,11 +44,12 @@ function EmptyMessage({ onAdd }) {
   return (
     <View
       style={{
-        backgroundColor: 'white',
+        color: theme.tableText,
+        backgroundColor: theme.tableBackground,
         flex: 1,
         alignItems: 'center',
         borderTopWidth: 1,
-        borderColor: colors.n9,
+        borderColor: theme.tableBorder,
       }}
     >
       <View
@@ -62,11 +66,13 @@ function EmptyMessage({ onAdd }) {
           manage it locally yourself.
         </Text>
 
-        <Button primary style={{ marginTop: 20 }} onClick={onAdd}>
+        <Button type="primary" style={{ marginTop: 20 }} onClick={onAdd}>
           Add account
         </Button>
 
-        <View style={{ marginTop: 20, fontSize: 13, color: colors.n5 }}>
+        <View
+          style={{ marginTop: 20, fontSize: 13, color: theme.alttableText }}
+        >
           In the future, you can add accounts from the sidebar.
         </View>
       </View>
@@ -74,9 +80,18 @@ function EmptyMessage({ onAdd }) {
   );
 }
 
-function AllTransactions({ account = {}, transactions, filtered, children }) {
+function AllTransactions({
+  account = {},
+  transactions,
+  balances,
+  showBalances,
+  filtered,
+  children,
+}) {
   const { id: accountId } = account;
   let scheduleData = useCachedSchedules();
+
+  transactions ??= [];
 
   let schedules = useMemo(
     () =>
@@ -94,16 +109,46 @@ function AllTransactions({ account = {}, transactions, filtered, children }) {
 
   let prependTransactions = useMemo(() => {
     return schedules.map(schedule => ({
-      id: 'preview/' + schedule.id,
+      id: `preview/${schedule.id}`,
       payee: schedule._payee,
       account: schedule._account,
       amount: schedule._amount,
       date: schedule.next_date,
       notes: scheduleData.statuses.get(schedule.id),
       schedule: schedule.id,
-      _inverse: accountId !== schedule._account,
+      _inverse: accountId ? accountId !== schedule._account : false,
     }));
   }, [schedules, accountId]);
+
+  let runningBalance = useMemo(() => {
+    if (!showBalances) {
+      return 0;
+    }
+
+    return balances && transactions?.length > 0
+      ? balances[transactions[0].id]?.balance ?? 0
+      : 0;
+  }, [showBalances, balances, transactions]);
+
+  let prependBalances = useMemo(() => {
+    if (!showBalances) {
+      return null;
+    }
+
+    // Reverse so we can calculate from earliest upcoming schedule.
+    let scheduledBalances = [...prependTransactions]
+      .reverse()
+      .map(scheduledTransaction => {
+        let amount =
+          (scheduledTransaction._inverse ? -1 : 1) *
+          getScheduledAmount(scheduledTransaction.amount);
+        return {
+          balance: (runningBalance += amount),
+          id: scheduledTransaction.id,
+        };
+      });
+    return groupById(scheduledBalances);
+  }, [showBalances, prependTransactions, runningBalance]);
 
   let allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
@@ -113,10 +158,35 @@ function AllTransactions({ account = {}, transactions, filtered, children }) {
     return transactions;
   }, [filtered, prependTransactions, transactions]);
 
+  let allBalances = useMemo(() => {
+    // Don't prepend scheduled transactions if we are filtering
+    if (!filtered && prependBalances && balances) {
+      return { ...prependBalances, ...balances };
+    }
+    return balances;
+  }, [filtered, prependBalances, balances]);
+
   if (scheduleData == null) {
-    return children(null);
+    return children(transactions, balances);
   }
-  return children(allTransactions);
+  return children(allTransactions, allBalances);
+}
+
+function getField(field) {
+  switch (field) {
+    case 'account':
+      return 'account.name';
+    case 'payee':
+      return 'payee.name';
+    case 'category':
+      return 'category.name';
+    case 'payment':
+      return 'amount';
+    case 'deposit':
+      return 'amount';
+    default:
+      return field;
+  }
 }
 
 class AccountInternal extends PureComponent {
@@ -135,13 +205,14 @@ class AccountInternal extends PureComponent {
       transactions: [],
       transactionsCount: 0,
       showBalances: props.showBalances,
-      balances: [],
+      balances: null,
       showCleared: props.showCleared,
       editingName: false,
       isAdding: false,
       latestDate: null,
       filterId: [],
       conditionsOp: 'and',
+      sort: [],
     };
   }
 
@@ -202,9 +273,6 @@ class AccountInternal extends PureComponent {
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    if (this.props.categoryGroups.length === 0) {
-      await this.props.getCategories();
-    }
     await this.props.initiallyLoadPayees();
     await this.fetchTransactions();
 
@@ -216,6 +284,11 @@ class AccountInternal extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
+    // If the active account changes - close the transaction entry mode
+    if (this.state.isAdding && this.props.accountId !== prevProps.accountId) {
+      this.setState({ isAdding: false });
+    }
+
     // If the user was on a different screen and is now coming back to
     // the transactions, automatically refresh the transaction to make
     // sure we have updated state
@@ -226,6 +299,11 @@ class AccountInternal extends PureComponent {
       setTimeout(() => {
         this.refetchTransactions();
       }, 100);
+    }
+
+    //Resest sort/filter/search on account change
+    if (this.props.accountId !== prevProps.accountId) {
+      this.setState({ sort: [], search: '', filters: [] });
     }
   }
 
@@ -250,7 +328,7 @@ class AccountInternal extends PureComponent {
   };
 
   refetchTransactions = async () => {
-    this.paged && this.paged.run();
+    this.paged?.run();
   };
 
   fetchTransactions = () => {
@@ -290,7 +368,7 @@ class AccountInternal extends PureComponent {
         const firstLoad = prevData == null;
 
         if (firstLoad) {
-          this.table.current && this.table.current.setRowAnimation(false);
+          this.table.current?.setRowAnimation(false);
 
           if (isFiltered) {
             this.props.splitsExpandedDispatch({
@@ -312,18 +390,17 @@ class AccountInternal extends PureComponent {
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
+            balances: this.state.showBalances
+              ? await this.calculateBalances()
+              : null,
           },
           () => {
-            if (this.state.showBalances) {
-              this.calculateBalances();
-            }
-
             if (firstLoad) {
-              this.table.current && this.table.current.scrollToTop();
+              this.table.current?.scrollToTop();
             }
 
             setTimeout(() => {
-              this.table.current && this.table.current.setRowAnimation(true);
+              this.table.current?.setRowAnimation(true);
             }, 0);
           },
         );
@@ -336,7 +413,7 @@ class AccountInternal extends PureComponent {
     );
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
@@ -344,8 +421,9 @@ class AccountInternal extends PureComponent {
           loading: true,
           search: '',
           showBalances: nextProps.showBalances,
-          balances: [],
+          balances: null,
           showCleared: nextProps.showCleared,
+          reconcileAmount: null,
         },
         () => {
           this.fetchTransactions();
@@ -388,7 +466,10 @@ class AccountInternal extends PureComponent {
     if (account) {
       const res = await window.Actual.openFileDialog({
         filters: [
-          { name: 'Financial Files', extensions: ['qif', 'ofx', 'qfx', 'csv'] },
+          {
+            name: 'Financial Files',
+            extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv'],
+          },
         ],
       });
 
@@ -445,13 +526,18 @@ class AccountInternal extends PureComponent {
     let accountId = this.props.accountId;
     let account = this.props.accounts.find(account => account.id === accountId);
     return (
-      account && this.state.search === '' && this.state.filters.length === 0
+      account &&
+      this.state.search === '' &&
+      this.state.filters.length === 0 &&
+      (this.state.sort.length === 0 ||
+        (this.state.sort.field === 'date' &&
+          this.state.sort.ascDesc === 'desc'))
     );
   };
 
   async calculateBalances() {
     if (!this.canCalculateBalance()) {
-      return;
+      return null;
     }
 
     let { data } = await runQuery(
@@ -461,7 +547,7 @@ class AccountInternal extends PureComponent {
         .select([{ balance: { $sumOver: '$amount' } }]),
     );
 
-    this.setState({ balances: groupById(data) });
+    return groupById(data);
   }
 
   onAddTransaction = () => {
@@ -516,13 +602,38 @@ class AccountInternal extends PureComponent {
       case 'toggle-balance':
         if (this.state.showBalances) {
           this.props.savePrefs({ ['show-balances-' + accountId]: false });
-          this.setState({ showBalances: false, balances: [] });
+          this.setState({ showBalances: false, balances: null });
         } else {
           this.props.savePrefs({ ['show-balances-' + accountId]: true });
-          this.setState({ showBalances: true });
-          this.calculateBalances();
+          this.setState(
+            {
+              transactions: [],
+              transactionCount: 0,
+              filters: [],
+              search: '',
+              sort: [],
+              showBalances: true,
+            },
+            () => {
+              this.fetchTransactions();
+            },
+          );
         }
         break;
+      case 'remove-sorting': {
+        this.setState({ sort: [] }, () => {
+          let filters = this.state.filters;
+          if (filters.length > 0) {
+            this.applyFilters([...filters]);
+          } else {
+            this.fetchTransactions();
+          }
+          if (this.state.search !== '') {
+            this.onSearch(this.state.search);
+          }
+        });
+        break;
+      }
       case 'toggle-cleared':
         if (this.state.showCleared) {
           this.props.savePrefs({ ['hide-cleared-' + accountId]: true });
@@ -810,6 +921,9 @@ class AccountInternal extends PureComponent {
     this.setState({ conditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
     this.applyFilters([...filters]);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onReloadSavedFilter = (savedFilter, item) => {
@@ -820,9 +934,10 @@ class AccountInternal extends PureComponent {
       this.setState({ conditionsOp: getFilter.conditionsOp });
       this.applyFilters([...getFilter.conditions]);
     } else {
-      savedFilter.status &&
-        this.setState({ conditionsOp: savedFilter.conditionsOp }) &&
+      if (savedFilter.status) {
+        this.setState({ conditionsOp: savedFilter.conditionsOp });
         this.applyFilters([...savedFilter.conditions]);
+      }
     }
     this.setState({ filterId: { ...this.state.filterId, ...savedFilter } });
   };
@@ -831,6 +946,9 @@ class AccountInternal extends PureComponent {
     this.setState({ conditionsOp: 'and' });
     this.setState({ filterId: [] });
     this.applyFilters([]);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onUpdateFilter = (oldFilter, updatedFilter) => {
@@ -843,19 +961,27 @@ class AccountInternal extends PureComponent {
         status: this.state.filterId && 'changed',
       },
     });
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onDeleteFilter = filter => {
     this.applyFilters(this.state.filters.filter(f => f !== filter));
-    this.state.filters.length === 1
-      ? this.setState({ filterId: [] }) &&
-        this.setState({ conditionsOp: 'and' })
-      : this.setState({
-          filterId: {
-            ...this.state.filterId,
-            status: this.state.filterId && 'changed',
-          },
-        });
+    if (this.state.filters.length === 1) {
+      this.setState({ filterId: [] });
+      this.setState({ conditionsOp: 'and' });
+    } else {
+      this.setState({
+        filterId: {
+          ...this.state.filterId,
+          status: this.state.filterId && 'changed',
+        },
+      });
+    }
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
+    }
   };
 
   onApplyFilter = async cond => {
@@ -875,6 +1001,9 @@ class AccountInternal extends PureComponent {
         },
       });
       this.applyFilters([...filters, cond]);
+    }
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
     }
   };
 
@@ -909,12 +1038,101 @@ class AccountInternal extends PureComponent {
       this.currentQuery = this.rootQuery.filter({
         [conditionsOpKey]: [...filters, ...customFilters],
       });
-      this.updateQuery(this.currentQuery, true);
-      this.setState({ filters: conditions, search: '' });
+
+      this.setState({ filters: conditions }, () => {
+        this.updateQuery(this.currentQuery, true);
+      });
     } else {
-      this.setState({ transactions: [], transactionCount: 0 });
-      this.fetchTransactions();
-      this.setState({ filters: conditions, search: '' });
+      this.setState(
+        {
+          transactions: [],
+          transactionCount: 0,
+          filters: conditions,
+        },
+        () => {
+          this.fetchTransactions();
+        },
+      );
+    }
+
+    if (this.state.sort.length !== 0) {
+      this.applySort();
+    }
+  };
+
+  applySort = (field, ascDesc, prevField, prevAscDesc) => {
+    let filters = this.state.filters;
+    let sortField = getField(!field ? this.state.sort.field : field);
+    let sortAscDesc = !ascDesc ? this.state.sort.ascDesc : ascDesc;
+    let sortPrevField = getField(
+      !prevField ? this.state.sort.prevField : prevField,
+    );
+    let sortPrevAscDesc = !prevField
+      ? this.state.sort.prevAscDesc
+      : prevAscDesc;
+
+    if (!field) {
+      //no sort was made (called by applyFilters)
+      this.currentQuery = this.currentQuery.orderBy({
+        [sortField]: sortAscDesc,
+      });
+    } else {
+      //sort called directly
+      if (filters.length > 0) {
+        //if filters already exist then apply them
+        this.applyFilters([...filters]);
+        this.currentQuery = this.currentQuery.orderBy({
+          [sortField]: sortAscDesc,
+        });
+      } else {
+        //no filters exist make new rootquery
+        this.currentQuery = this.rootQuery.orderBy({
+          [sortField]: sortAscDesc,
+        });
+      }
+    }
+    if (sortPrevField) {
+      //apply previos sort if it exists
+      this.currentQuery = this.currentQuery.orderBy({
+        [sortPrevField]: sortPrevAscDesc,
+      });
+    }
+
+    this.updateQuery(this.currentQuery, this.state.filters.length > 0);
+  };
+
+  onSort = (headerClicked, ascDesc) => {
+    let prevField;
+    let prevAscDesc;
+    //if staying on same column but switching asc/desc
+    //then keep prev the same
+    if (headerClicked === this.state.sort.field) {
+      prevField = this.state.sort.prevField;
+      prevAscDesc = this.state.sort.prevAscDesc;
+      this.setState({
+        sort: {
+          ...this.state.sort,
+          ascDesc: ascDesc,
+        },
+      });
+    } else {
+      //if switching to new column then capture state
+      //of current sort column as prev
+      prevField = this.state.sort.field;
+      prevAscDesc = this.state.sort.ascDesc;
+      this.setState({
+        sort: {
+          field: headerClicked,
+          ascDesc: ascDesc,
+          prevField: this.state.sort.field,
+          prevAscDesc: this.state.sort.ascDesc,
+        },
+      });
+    }
+
+    this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
+    if (this.state.search !== '') {
+      this.onSearch(this.state.search);
     }
   };
 
@@ -927,6 +1145,7 @@ class AccountInternal extends PureComponent {
       hideFraction,
       addNotification,
       accountsSyncing,
+      pushModal,
       replaceModal,
       showExtraBalances,
       accountId,
@@ -972,139 +1191,141 @@ class AccountInternal extends PureComponent {
       <AllTransactions
         account={account}
         transactions={transactions}
+        balances={balances}
+        showBalances={showBalances}
         filtered={transactionsFiltered}
       >
-        {allTransactions =>
-          allTransactions == null ? null : (
-            <SelectedProviderWithItems
-              name="transactions"
-              items={allTransactions}
-              fetchAllIds={this.fetchAllIds}
-              registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
-            >
-              <View style={[styles.page]}>
-                <AccountHeader
-                  tableRef={this.table}
-                  editingName={editingName}
-                  isNameEditable={isNameEditable}
-                  workingHard={workingHard}
-                  account={account}
-                  filterId={filterId}
-                  filtersList={this.props.filtersList}
-                  location={this.props.location}
-                  accountName={accountName}
-                  accountsSyncing={accountsSyncing}
-                  accounts={accounts}
-                  transactions={transactions}
-                  showBalances={showBalances}
-                  showExtraBalances={showExtraBalances}
-                  showCleared={showCleared}
-                  showEmptyMessage={showEmptyMessage}
-                  balanceQuery={balanceQuery}
-                  canCalculateBalance={this.canCalculateBalance}
-                  reconcileAmount={reconcileAmount}
-                  search={this.state.search}
-                  filters={this.state.filters}
-                  conditionsOp={this.state.conditionsOp}
-                  savePrefs={this.props.savePrefs}
-                  onSearch={this.onSearch}
-                  onShowTransactions={this.onShowTransactions}
-                  onMenuSelect={this.onMenuSelect}
-                  onAddTransaction={this.onAddTransaction}
-                  onToggleExtraBalances={this.onToggleExtraBalances}
-                  onSaveName={this.onSaveName}
-                  onExposeName={this.onExposeName}
-                  onReconcile={this.onReconcile}
-                  onDoneReconciling={this.onDoneReconciling}
-                  onCreateReconciliationTransaction={
-                    this.onCreateReconciliationTransaction
-                  }
-                  onSync={this.onSync}
-                  onImport={this.onImport}
-                  onBatchDelete={this.onBatchDelete}
-                  onBatchDuplicate={this.onBatchDuplicate}
-                  onBatchEdit={this.onBatchEdit}
-                  onBatchUnlink={this.onBatchUnlink}
-                  onCreateRule={this.onCreateRule}
-                  onUpdateFilter={this.onUpdateFilter}
-                  onClearFilters={this.onClearFilters}
-                  onReloadSavedFilter={this.onReloadSavedFilter}
-                  onCondOpChange={this.onCondOpChange}
-                  onDeleteFilter={this.onDeleteFilter}
-                  onApplyFilter={this.onApplyFilter}
-                  onScheduleAction={this.onScheduleAction}
-                />
+        {(allTransactions, allBalances) => (
+          <SelectedProviderWithItems
+            name="transactions"
+            items={allTransactions}
+            fetchAllIds={this.fetchAllIds}
+            registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
+          >
+            <View style={styles.page}>
+              <AccountHeader
+                tableRef={this.table}
+                editingName={editingName}
+                isNameEditable={isNameEditable}
+                workingHard={workingHard}
+                account={account}
+                filterId={filterId}
+                filtersList={this.props.filtersList}
+                location={this.props.location}
+                accountName={accountName}
+                accountsSyncing={accountsSyncing}
+                accounts={accounts}
+                transactions={transactions}
+                showBalances={showBalances}
+                showExtraBalances={showExtraBalances}
+                showCleared={showCleared}
+                showEmptyMessage={showEmptyMessage}
+                balanceQuery={balanceQuery}
+                canCalculateBalance={this.canCalculateBalance}
+                isSorted={this.state.sort.length !== 0}
+                reconcileAmount={reconcileAmount}
+                search={this.state.search}
+                filters={this.state.filters}
+                conditionsOp={this.state.conditionsOp}
+                savePrefs={this.props.savePrefs}
+                pushModal={this.props.pushModal}
+                onSearch={this.onSearch}
+                onShowTransactions={this.onShowTransactions}
+                onMenuSelect={this.onMenuSelect}
+                onAddTransaction={this.onAddTransaction}
+                onToggleExtraBalances={this.onToggleExtraBalances}
+                onSaveName={this.onSaveName}
+                onExposeName={this.onExposeName}
+                onReconcile={this.onReconcile}
+                onDoneReconciling={this.onDoneReconciling}
+                onCreateReconciliationTransaction={
+                  this.onCreateReconciliationTransaction
+                }
+                onSync={this.onSync}
+                onImport={this.onImport}
+                onBatchDelete={this.onBatchDelete}
+                onBatchDuplicate={this.onBatchDuplicate}
+                onBatchEdit={this.onBatchEdit}
+                onBatchUnlink={this.onBatchUnlink}
+                onCreateRule={this.onCreateRule}
+                onUpdateFilter={this.onUpdateFilter}
+                onClearFilters={this.onClearFilters}
+                onReloadSavedFilter={this.onReloadSavedFilter}
+                onCondOpChange={this.onCondOpChange}
+                onDeleteFilter={this.onDeleteFilter}
+                onApplyFilter={this.onApplyFilter}
+                onScheduleAction={this.onScheduleAction}
+              />
 
-                <View style={{ flex: 1 }}>
-                  <TransactionList
-                    tableRef={this.table}
-                    account={account}
-                    transactions={transactions}
-                    allTransactions={allTransactions}
-                    animated={this.animated}
-                    loadMoreTransactions={() =>
-                      this.paged && this.paged.fetchNext()
-                    }
-                    accounts={accounts}
-                    category={category}
-                    categoryGroups={categoryGroups}
-                    payees={payees}
-                    balances={
-                      showBalances && this.canCalculateBalance()
-                        ? balances
-                        : null
-                    }
-                    showCleared={showCleared}
-                    showAccount={
-                      !accountId ||
-                      accountId === 'offbudget' ||
-                      accountId === 'budgeted' ||
-                      accountId === 'uncategorized'
-                    }
-                    isAdding={this.state.isAdding}
-                    isNew={this.isNew}
-                    isMatched={this.isMatched}
-                    isFiltered={
-                      this.state.search !== '' || this.state.filters.length > 0
-                    }
-                    dateFormat={dateFormat}
-                    hideFraction={hideFraction}
-                    addNotification={addNotification}
-                    renderEmpty={() =>
-                      showEmptyMessage ? (
-                        <EmptyMessage
-                          onAdd={() => replaceModal('add-account')}
-                        />
-                      ) : !loading ? (
-                        <View
-                          style={{
-                            marginTop: 20,
-                            textAlign: 'center',
-                            fontStyle: 'italic',
-                          }}
-                        >
-                          No transactions
-                        </View>
-                      ) : null
-                    }
-                    onChange={this.onTransactionsChange}
-                    onRefetch={this.refetchTransactions}
-                    onRefetchUpToRow={row =>
-                      this.paged.refetchUpToRow(row, {
-                        field: 'date',
-                        order: 'desc',
-                      })
-                    }
-                    onCloseAddTransaction={() =>
-                      this.setState({ isAdding: false })
-                    }
-                    onCreatePayee={this.onCreatePayee}
-                  />
-                </View>
+              <View style={{ flex: 1 }}>
+                <TransactionList
+                  tableRef={this.table}
+                  account={account}
+                  transactions={transactions}
+                  allTransactions={allTransactions}
+                  animated={this.animated}
+                  loadMoreTransactions={() =>
+                    this.paged && this.paged.fetchNext()
+                  }
+                  accounts={accounts}
+                  category={category}
+                  categoryGroups={categoryGroups}
+                  payees={payees}
+                  balances={allBalances}
+                  showBalances={!!allBalances}
+                  showCleared={showCleared}
+                  showAccount={
+                    !accountId ||
+                    accountId === 'offbudget' ||
+                    accountId === 'budgeted' ||
+                    accountId === 'uncategorized'
+                  }
+                  isAdding={this.state.isAdding}
+                  isNew={this.isNew}
+                  isMatched={this.isMatched}
+                  isFiltered={
+                    this.state.search !== '' || this.state.filters.length > 0
+                  }
+                  dateFormat={dateFormat}
+                  hideFraction={hideFraction}
+                  addNotification={addNotification}
+                  renderEmpty={() =>
+                    showEmptyMessage ? (
+                      <EmptyMessage onAdd={() => replaceModal('add-account')} />
+                    ) : !loading ? (
+                      <View
+                        style={{
+                          color: theme.tableText,
+                          marginTop: 20,
+                          textAlign: 'center',
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        No transactions
+                      </View>
+                    ) : null
+                  }
+                  pushModal={pushModal}
+                  onSort={this.onSort}
+                  sortField={this.state.sort.field}
+                  ascDesc={this.state.sort.ascDesc}
+                  onChange={this.onTransactionsChange}
+                  onRefetch={this.refetchTransactions}
+                  onRefetchUpToRow={row =>
+                    this.paged.refetchUpToRow(row, {
+                      field: 'date',
+                      order: 'desc',
+                    })
+                  }
+                  onCloseAddTransaction={() =>
+                    this.setState({ isAdding: false })
+                  }
+                  onCreatePayee={this.onCreatePayee}
+                />
               </View>
-            </SelectedProviderWithItems>
-          )
-        }
+            </View>
+          </SelectedProviderWithItems>
+        )}
       </AllTransactions>
     );
   }
@@ -1126,14 +1347,13 @@ function AccountHack(props) {
 export default function Account() {
   let params = useParams();
   let location = useLocation();
-  let activeLocation = useActiveLocation();
 
+  let { grouped: categoryGroups } = useCategories();
   let state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
     matchedTransactions: state.queries.matchedTransactions,
     accounts: state.queries.accounts,
     failedAccounts: state.account.failedAccounts,
-    categoryGroups: state.queries.categories.grouped,
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     hideFraction: state.prefs.local.hideFraction || false,
     expandSplits: state.prefs.local['expand-splits'],
@@ -1186,13 +1406,11 @@ export default function Account() {
       >
         <AccountHack
           {...state}
+          categoryGroups={categoryGroups}
           {...actionCreators}
-          modalShowing={
-            state.modalShowing ||
-            !!(activeLocation.state && activeLocation.state.parent)
-          }
+          modalShowing={state.modalShowing}
           accountId={params.id}
-          categoryId={activeLocation?.state?.filter?.category}
+          categoryId={location?.state?.filter?.category}
           location={location}
           filtersList={filtersList}
         />

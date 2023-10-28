@@ -1,17 +1,34 @@
 import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
+import type {
+  AccountSyncFailuresAction,
+  AccountSyncStatusAction,
+  SetAccountsSyncingAction,
+} from '../state-types/account';
+import type {
+  MarkAccountReadAction,
+  SetLastTransactionAction,
+  UpdateNewTransactionsAction,
+} from '../state-types/queries';
 
 import { addNotification } from './notifications';
 import { getPayees, getAccounts } from './queries';
+import type { Dispatch, GetState } from './types';
 
-export function setAccountsSyncing(name) {
+export function setAccountsSyncing(
+  name: SetAccountsSyncingAction['name'],
+): SetAccountsSyncingAction {
   return {
     type: constants.SET_ACCOUNTS_SYNCING,
     name,
   };
 }
 
-export function markAccountFailed(id, errorType, errorCode) {
+export function markAccountFailed(
+  id: AccountSyncStatusAction['id'],
+  errorType?: string,
+  errorCode?: string,
+): AccountSyncStatusAction {
   return {
     type: 'ACCOUNT_SYNC_STATUS',
     id,
@@ -20,22 +37,26 @@ export function markAccountFailed(id, errorType, errorCode) {
     errorCode,
   };
 }
-export function markAccountSuccess(id) {
+export function markAccountSuccess(
+  id: AccountSyncStatusAction['id'],
+): AccountSyncStatusAction {
   return {
     type: 'ACCOUNT_SYNC_STATUS',
     id,
     failed: false,
   };
 }
-export function setFailedAccounts(syncErrors) {
+export function setFailedAccounts(
+  syncErrors: AccountSyncFailuresAction['syncErrors'],
+): AccountSyncFailuresAction {
   return {
-    type: 'ACCOUNT_SYNC_FAILURES',
+    type: constants.ACCOUNT_SYNC_FAILURES,
     syncErrors,
   };
 }
 
-export function unlinkAccount(id) {
-  return async dispatch => {
+export function unlinkAccount(id: string) {
+  return async (dispatch: Dispatch) => {
     await send('account-unlink', { id });
     dispatch(markAccountSuccess(id));
     dispatch(getAccounts());
@@ -43,8 +64,8 @@ export function unlinkAccount(id) {
 }
 
 export function linkAccount(requisitionId, account, upgradingId) {
-  return async dispatch => {
-    await send('nordigen-accounts-link', {
+  return async (dispatch: Dispatch) => {
+    await send('gocardless-accounts-link', {
       requisitionId,
       account,
       upgradingId,
@@ -54,13 +75,14 @@ export function linkAccount(requisitionId, account, upgradingId) {
   };
 }
 
+// TODO: type correctly or remove (unused)
 export function connectAccounts(
   institution,
   publicToken,
   accountIds,
   offbudgetIds,
 ) {
-  return async dispatch => {
+  return async (dispatch: Dispatch) => {
     let ids = await send('accounts-connect', {
       institution,
       publicToken,
@@ -73,14 +95,15 @@ export function connectAccounts(
   };
 }
 
-export function connectNordigenAccounts(
+// TODO: type correctly or remove (unused)
+export function connectGoCardlessAccounts(
   institution,
   publicToken,
   accountIds,
   offbudgetIds,
 ) {
-  return async dispatch => {
-    let ids = await send('nordigen-accounts-connect', {
+  return async (dispatch: Dispatch) => {
+    let ids = await send('gocardless-accounts-connect', {
       institution,
       publicToken,
       accountIds,
@@ -92,8 +115,8 @@ export function connectNordigenAccounts(
   };
 }
 
-export function syncAccounts(id) {
-  return async (dispatch, getState) => {
+export function syncAccounts(id: string) {
+  return async (dispatch: Dispatch, getState: GetState) => {
     if (getState().account.accountsSyncing) {
       return false;
     }
@@ -106,7 +129,7 @@ export function syncAccounts(id) {
     }
 
     const { errors, newTransactions, matchedTransactions, updatedAccounts } =
-      await send('nordigen-accounts-sync', { id });
+      await send('gocardless-accounts-sync', { id });
     dispatch(setAccountsSyncing(null));
 
     if (id) {
@@ -166,7 +189,9 @@ export function syncAccounts(id) {
 }
 
 // Remember the last transaction manually added to the system
-export function setLastTransaction(transaction) {
+export function setLastTransaction(
+  transaction: SetLastTransactionAction['transaction'],
+): SetLastTransactionAction {
   return {
     type: constants.SET_LAST_TRANSACTION,
     transaction,
@@ -174,7 +199,7 @@ export function setLastTransaction(transaction) {
 }
 
 export function parseTransactions(filepath, options) {
-  return async dispatch => {
+  return async (dispatch: Dispatch) => {
     return await send('transactions-parse-file', {
       filepath,
       options,
@@ -183,7 +208,7 @@ export function parseTransactions(filepath, options) {
 }
 
 export function importTransactions(id, transactions) {
-  return async dispatch => {
+  return async (dispatch: Dispatch) => {
     let {
       errors = [],
       added,
@@ -213,14 +238,14 @@ export function importTransactions(id, transactions) {
   };
 }
 
-export function updateNewTransactions(changedId) {
+export function updateNewTransactions(changedId): UpdateNewTransactionsAction {
   return {
     type: constants.UPDATE_NEW_TRANSACTIONS,
     changedId,
   };
 }
 
-export function markAccountRead(accountId) {
+export function markAccountRead(accountId): MarkAccountReadAction {
   return {
     type: constants.MARK_ACCOUNT_READ,
     accountId: accountId,

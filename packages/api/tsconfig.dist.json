@@ -5,6 +5,7 @@
     // the latest Node 16.x release supports all of the features
     "target": "es2021",
     "module": "CommonJS",
+    "moduleResolution": "Node16",
     "noEmit": false,
     "declaration": true,
     "outDir": "dist"

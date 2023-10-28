@@ -1,37 +1,35 @@
 import React, {
   type ComponentProps,
   type ComponentType,
-  memo,
   type ReactNode,
   useState,
   type SVGProps,
 } from 'react';
 
-import { css, type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
 import { reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import DotsHorizontalTriple from '../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../icons/v2/ArrowButtonUp1';
-import { colors, styles } from '../../../style';
-import {
-  View,
-  Text,
-  Button,
-  Tooltip,
-  Menu,
-  Stack,
-  HoverTarget,
-  AlignedText,
-} from '../../common';
+import { theme, type CSSProperties, styles } from '../../../style';
+import AlignedText from '../../common/AlignedText';
+import Button from '../../common/Button';
+import HoverTarget from '../../common/HoverTarget';
+import Menu from '../../common/Menu';
+import Stack from '../../common/Stack';
+import Text from '../../common/Text';
+import View from '../../common/View';
 import NotesButton from '../../NotesButton';
+import PrivacyFilter from '../../PrivacyFilter';
 import CellValue from '../../spreadsheet/CellValue';
-import format from '../../spreadsheet/format';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import useFormat from '../../spreadsheet/useFormat';
 import useSheetValue from '../../spreadsheet/useSheetValue';
-import { MONTH_BOX_SHADOW } from '../constants';
+import { Tooltip } from '../../tooltips';
 import { makeAmountFullStyle } from '../util';
 
 import { useReport } from './ReportContext';
@@ -101,8 +99,8 @@ function IncomeProgress({ current, target }: IncomeProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? colors.r7 : colors.g5}
-      backgroundColor={over ? colors.r10 : colors.n10}
+      color={over ? theme.errorText : theme.noticeTextLight}
+      backgroundColor={over ? theme.errorBackground : theme.pageBackground}
       style={{ width: 20, height: 20 }}
     />
   );
@@ -134,8 +132,8 @@ function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? colors.r7 : colors.g5}
-      backgroundColor={over ? colors.r10 : colors.n10}
+      color={over ? theme.errorText : theme.noticeTextLight}
+      backgroundColor={over ? theme.errorBackground : theme.pageBackground}
       style={{ width: 20, height: 20 }}
     />
   );
@@ -157,26 +155,24 @@ function BudgetTotal({
 }: BudgetTotalProps) {
   return (
     <View
-      style={[
-        {
-          lineHeight: 1.5,
-          flexDirection: 'row',
-          alignItems: 'center',
-          fontSize: 14,
-        },
-        style,
-      ]}
+      style={{
+        lineHeight: 1.5,
+        flexDirection: 'row',
+        alignItems: 'center',
+        fontSize: 14,
+        ...style,
+      }}
     >
       <ProgressComponent current={current} target={target} />
 
       <View style={{ marginLeft: 10 }}>
         <View>
-          <Text style={{ color: colors.n4 }}>{title}</Text>
+          <Text style={{ color: theme.pageTextLight }}>{title}</Text>
         </View>
 
         <Text>
           <CellValue binding={current} type="financial" />
-          <Text style={{ color: colors.n6, fontStyle: 'italic' }}>
+          <Text style={{ color: theme.pageTextSubdued, fontStyle: 'italic' }}>
             {' of '}
             <CellValue
               binding={target}
@@ -227,15 +223,16 @@ type SavedProps = {
 function Saved({ projected, style }: SavedProps) {
   let budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
   let totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
+  let format = useFormat();
   let saved = projected ? budgetedSaved : totalSaved;
   let isNegative = saved < 0;
 
   return (
-    <View style={[{ alignItems: 'center', fontSize: 14 }, style]}>
+    <View style={{ alignItems: 'center', fontSize: 14, ...style }}>
       {projected ? (
-        <Text style={{ color: colors.n4 }}>Projected Savings:</Text>
+        <Text style={{ color: theme.pageTextLight }}>Projected Savings:</Text>
       ) : (
-        <View style={{ color: colors.n4 }}>
+        <View style={{ color: theme.pageTextLight }}>
           {isNegative ? 'Overspent:' : 'Saved:'}
         </View>
       )}
@@ -253,7 +250,10 @@ function Saved({ projected, style }: SavedProps) {
                   left="Projected Savings:"
                   right={
                     <Text
-                      style={[makeAmountFullStyle(budgetedSaved), styles.tnum]}
+                      style={{
+                        ...makeAmountFullStyle(budgetedSaved),
+                        ...styles.tnum,
+                      }}
                     >
                       {format(budgetedSaved, 'financial-with-sign')}
                     </Text>
@@ -262,7 +262,9 @@ function Saved({ projected, style }: SavedProps) {
                 <AlignedText
                   left="Difference:"
                   right={
-                    <Text style={[makeAmountFullStyle(diff), styles.tnum]}>
+                    <Text
+                      style={{ ...makeAmountFullStyle(diff), ...styles.tnum }}
+                    >
                       {format(diff, 'financial-with-sign')}
                     </Text>
                   }
@@ -274,14 +276,20 @@ function Saved({ projected, style }: SavedProps) {
         }}
       >
         <View
-          {...css([
+          className={`${css([
             {
               fontSize: 25,
-              color: projected ? colors.y3 : isNegative ? colors.r4 : colors.p5,
+              color: projected
+                ? theme.alt2WarningText
+                : isNegative
+                ? theme.errorTextDark
+                : theme.altUpcomingText,
             },
-          ])}
+          ])}`}
         >
-          {format(saved, 'financial')}
+          <PrivacyFilter blurIntensity={7}>
+            {format(saved, 'financial')}
+          </PrivacyFilter>
         </View>
       </HoverTarget>
     </View>
@@ -291,15 +299,15 @@ function Saved({ projected, style }: SavedProps) {
 type BudgetSummaryProps = {
   month?: string;
 };
-export const BudgetSummary = memo(function BudgetSummary({
-  month,
-}: BudgetSummaryProps) {
+export function BudgetSummary({ month }: BudgetSummaryProps) {
   let {
     currentMonth,
     summaryCollapsed: collapsed,
     onBudgetAction,
     onToggleSummaryCollapse,
   } = useReport();
+
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   let [menuOpen, setMenuOpen] = useState(false);
   function onMenuOpen() {
@@ -315,8 +323,8 @@ export const BudgetSummary = memo(function BudgetSummary({
   return (
     <View
       style={{
-        backgroundColor: 'white',
-        boxShadow: MONTH_BOX_SHADOW,
+        backgroundColor: theme.tableBackground,
+        boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
         marginRight: 0,
@@ -336,10 +344,10 @@ export const BudgetSummary = memo(function BudgetSummary({
     >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
-          style={[
-            { padding: '0 13px' },
-            collapsed ? { margin: '10px 0' } : { marginTop: 16 },
-          ]}
+          style={{
+            padding: '0 13px',
+            ...(collapsed ? { margin: '10px 0' } : { marginTop: 16 }),
+          }}
         >
           <View
             style={{
@@ -349,21 +357,21 @@ export const BudgetSummary = memo(function BudgetSummary({
             }}
           >
             <Button
+              type="bare"
               className="hover-visible"
-              bare
               onClick={onToggleSummaryCollapse}
             >
               <ExpandOrCollapseIcon
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: colors.n6, margin: 1 }}
+                style={{ color: theme.pageTextSubdued, margin: 1 }}
               />
             </Button>
           </View>
 
           <div
-            {...css([
+            className={`${css([
               {
                 textAlign: 'center',
                 marginTop: 3,
@@ -371,8 +379,7 @@ export const BudgetSummary = memo(function BudgetSummary({
                 fontWeight: 500,
                 textDecorationSkip: 'ink',
               },
-              currentMonth === month && { textDecoration: 'underline' },
-            ])}
+            ])}`}
           >
             {monthUtils.format(month, 'MMMM')}
           </div>
@@ -392,15 +399,15 @@ export const BudgetSummary = memo(function BudgetSummary({
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={colors.n6}
+                defaultColor={theme.pageTextSubdued} // notes page color
               />
             </View>
             <View style={{ userSelect: 'none' }}>
-              <Button bare onClick={onMenuOpen}>
+              <Button type="bare" onClick={onMenuOpen}>
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: colors.n5 }}
+                  style={{ color: theme.pageTextLight }}
                 />
               </Button>
               {menuOpen && (
@@ -420,7 +427,19 @@ export const BudgetSummary = memo(function BudgetSummary({
                       { name: 'set-zero', text: 'Set budgets to zero' },
                       {
                         name: 'set-3-avg',
-                        text: 'Set budgets to 3 month avg',
+                        text: 'Set budgets to 3 month average',
+                      },
+                      isGoalTemplatesEnabled && {
+                        name: 'check-templates',
+                        text: 'Check templates',
+                      },
+                      isGoalTemplatesEnabled && {
+                        name: 'apply-goal-template',
+                        text: 'Apply budget template',
+                      },
+                      isGoalTemplatesEnabled && {
+                        name: 'overwrite-goal-template',
+                        text: 'Overwrite with budget template',
                       },
                     ]}
                   />
@@ -435,7 +454,7 @@ export const BudgetSummary = memo(function BudgetSummary({
             spacing={2}
             style={{
               alignSelf: 'center',
-              backgroundColor: colors.n11,
+              backgroundColor: theme.tableRowHeaderBackground,
               borderRadius: 4,
               padding: '10px 15px',
               marginTop: 13,
@@ -452,8 +471,8 @@ export const BudgetSummary = memo(function BudgetSummary({
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: colors.n11,
-              borderTop: '1px solid ' + colors.n10,
+              backgroundColor: theme.tableRowHeaderBackground,
+              borderTop: '1px solid ' + theme.tableBorder,
             }}
           >
             <Saved projected={month >= currentMonth} />
@@ -467,4 +486,4 @@ export const BudgetSummary = memo(function BudgetSummary({
       </NamespaceContext.Provider>
     </View>
   );
-});
+}

@@ -1,24 +1,127 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
-import { css, type CSSProperties } from 'glamor';
+import { css } from 'glamor';
 
-import Loading from '../../icons/AnimatedLoading';
-import { styles, colors } from '../../style';
-import { type HTMLPropsWithStyle } from '../../types/utils';
+import AnimatedLoading from '../../icons/AnimatedLoading';
+import { type CSSProperties, styles, theme } from '../../style';
 
 import View from './View';
 
-type ButtonProps = HTMLPropsWithStyle<HTMLButtonElement> & {
+type ButtonProps = HTMLProps<HTMLButtonElement> & {
   pressed?: boolean;
-  primary?: boolean;
   hover?: boolean;
-  bare?: boolean;
+  type?: ButtonType;
+  isSubmit?: boolean;
   disabled?: boolean;
+  color?: string;
+  style?: CSSProperties;
   hoveredStyle?: CSSProperties;
   activeStyle?: CSSProperties;
   textStyle?: CSSProperties;
   bounce?: boolean;
-  as?: 'button';
+  as?: ElementType;
+};
+
+type ButtonType = 'normal' | 'primary' | 'bare' | 'link';
+
+const backgroundColor = {
+  normal: theme.buttonNormalBackground,
+  normalDisabled: theme.buttonNormalDisabledBackground,
+  primary: theme.buttonPrimaryBackground,
+  primaryDisabled: theme.buttonPrimaryDisabledBackground,
+  bare: theme.buttonBareBackground,
+  bareDisabled: theme.buttonBareDisabledBackground,
+  menu: theme.buttonMenuBackground,
+  menuSelected: theme.buttonMenuSelectedBackground,
+  link: theme.buttonBareBackground,
+};
+
+const backgroundColorHover = {
+  normal: theme.buttonNormalBackgroundHover,
+  primary: theme.buttonPrimaryBackgroundHover,
+  bare: theme.buttonBareBackgroundHover,
+  menu: theme.buttonMenuBackgroundHover,
+  menuSelected: theme.buttonMenuSelectedBackgroundHover,
+  link: theme.buttonBareBackground,
+};
+
+const borderColor = {
+  normal: theme.buttonNormalBorder,
+  normalDisabled: theme.buttonNormalDisabledBorder,
+  primary: theme.buttonPrimaryBorder,
+  primaryDisabled: theme.buttonPrimaryDisabledBorder,
+  menu: theme.buttonMenuBorder,
+  menuSelected: theme.buttonMenuSelectedBorder,
+  link: theme.buttonBareBackground,
+};
+
+const textColor = {
+  normal: theme.buttonNormalText,
+  normalDisabled: theme.buttonNormalDisabledText,
+  primary: theme.buttonPrimaryText,
+  primaryDisabled: theme.buttonPrimaryDisabledText,
+  bare: theme.buttonBareText,
+  bareDisabled: theme.buttonBareDisabledText,
+  menu: theme.buttonMenuText,
+  menuSelected: theme.buttonMenuSelectedText,
+  link: theme.pageTextLink,
+};
+
+const textColorHover = {
+  normal: theme.buttonNormalTextHover,
+  primary: theme.buttonPrimaryTextHover,
+  bare: theme.buttonBareTextHover,
+  menu: theme.buttonMenuTextHover,
+  menuSelected: theme.buttonMenuSelectedTextHover,
+};
+
+const linkButtonHoverStyles = {
+  textDecoration: 'underline',
+  boxShadow: 'none',
+};
+
+const _getBorder = (type, typeWithDisabled) => {
+  switch (type) {
+    case 'bare':
+    case 'link':
+      return 'none';
+
+    default:
+      return '1px solid ' + borderColor[typeWithDisabled];
+  }
+};
+
+const _getPadding = type => {
+  switch (type) {
+    case 'bare':
+      return '5px';
+    case 'link':
+      return '0';
+    default:
+      return '5px 10px';
+  }
+};
+
+const _getActiveStyles = (type, bounce) => {
+  switch (type) {
+    case 'bare':
+      return { backgroundColor: theme.buttonBareBackgroundActive };
+    case 'link':
+      return {
+        transform: 'none',
+        boxShadow: 'none',
+      };
+    default:
+      return {
+        transform: bounce && 'translateY(1px)',
+        boxShadow: `0 1px 4px 0 ${
+          type === 'primary'
+            ? theme.buttonPrimaryShadow
+            : theme.buttonNormalShadow
+        }`,
+        transition: 'none',
+      };
+  }
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -26,9 +129,10 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     {
       children,
       pressed,
-      primary,
       hover,
-      bare,
+      type = 'normal',
+      isSubmit = type === 'primary',
+      color,
       style,
       disabled,
       hoveredStyle,
@@ -39,60 +143,42 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    hoveredStyle = [
-      bare
-        ? { backgroundColor: 'rgba(100, 100, 100, .15)' }
-        : { ...styles.shadow },
-      hoveredStyle,
-    ];
-    activeStyle = [
-      bare
-        ? { backgroundColor: 'rgba(100, 100, 100, .25)' }
-        : {
-            transform: bounce && 'translateY(1px)',
-            boxShadow:
-              !bare &&
-              (primary
-                ? '0 1px 4px 0 rgba(0,0,0,0.3)'
-                : '0 1px 4px 0 rgba(0,0,0,0.2)'),
-            transition: 'none',
-          },
-      activeStyle,
-    ];
+    let typeWithDisabled = disabled ? type + 'Disabled' : type;
+
+    hoveredStyle = {
+      ...(type !== 'bare' && styles.shadow),
+      ...(type === 'link' && linkButtonHoverStyles),
+      backgroundColor: backgroundColorHover[type],
+      color: color || textColorHover[type],
+      ...hoveredStyle,
+    };
+    activeStyle = {
+      ..._getActiveStyles(type, bounce),
+      ...activeStyle,
+    };
 
     let Component = as;
-    let buttonStyle = [
-      {
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-        padding: bare ? '5px' : '5px 10px',
-        margin: 0,
-        overflow: 'hidden',
-        display: 'flex',
-        borderRadius: 4,
-        backgroundColor: bare
-          ? 'transparent'
-          : primary
-          ? disabled
-            ? colors.n7
-            : colors.p5
-          : 'white',
-        border: bare
-          ? 'none'
-          : '1px solid ' +
-            (primary ? (disabled ? colors.n7 : colors.p5) : colors.n9),
-        color: primary ? 'white' : disabled ? colors.n6 : colors.n1,
-        transition: 'box-shadow .25s',
-        WebkitAppRegion: 'no-drag',
-        ...styles.smallText,
-      },
-      { ':hover': !disabled && hoveredStyle },
-      { ':active': !disabled && activeStyle },
-      hover && hoveredStyle,
-      pressed && activeStyle,
-      style,
-    ];
+    let buttonStyle = {
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      padding: _getPadding(type),
+      margin: 0,
+      overflow: 'hidden',
+      display: type === 'link' ? 'inline' : 'flex',
+      borderRadius: 4,
+      backgroundColor: backgroundColor[typeWithDisabled],
+      border: _getBorder(type, typeWithDisabled),
+      color: color || textColor[typeWithDisabled],
+      transition: 'box-shadow .25s',
+      WebkitAppRegion: 'no-drag',
+      ...styles.smallText,
+      ':hover': !disabled && hoveredStyle,
+      ':active': !disabled && activeStyle,
+      ...(hover && hoveredStyle),
+      ...(pressed && activeStyle),
+      ...style,
+    };
 
     return (
       <Component
@@ -102,6 +188,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             (css(buttonStyle) as any)
           : { style: buttonStyle })}
         disabled={disabled}
+        type={isSubmit ? 'submit' : 'button'}
         {...nativeProps}
       >
         {children}
@@ -123,7 +210,7 @@ export const ButtonWithLoading = forwardRef<
     <Button
       {...buttonProps}
       ref={ref}
-      style={[{ position: 'relative' }, buttonProps.style]}
+      style={{ position: 'relative', ...buttonProps.style }}
     >
       {loading && (
         <View
@@ -137,10 +224,7 @@ export const ButtonWithLoading = forwardRef<
             justifyContent: 'center',
           }}
         >
-          <Loading
-            color="currentColor"
-            style={{ width: 20, height: 20, color: 'currentColor' }}
-          />
+          <AnimatedLoading style={{ width: 20, height: 20 }} />
         </View>
       )}
       <View

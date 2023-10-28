@@ -14,8 +14,13 @@ app.method(
   'budget/copy-previous-month',
   mutator(undoable(actions.copyPreviousMonth)),
 );
+app.method(
+  'budget/copy-single-month',
+  mutator(undoable(actions.copySinglePreviousMonth)),
+);
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
 app.method('budget/set-3month-avg', mutator(undoable(actions.set3MonthAvg)));
+app.method('budget/set-n-month-avg', mutator(undoable(actions.setNMonthAvg)));
 app.method(
   'budget/check-templates',
   mutator(undoable(goalActions.runCheckTemplates)),
@@ -27,6 +32,10 @@ app.method(
 app.method(
   'budget/overwrite-goal-template',
   mutator(undoable(goalActions.overwriteTemplate)),
+);
+app.method(
+  'budget/apply-single-template',
+  mutator(undoable(goalActions.applySingleCategoryTemplate)),
 );
 app.method(
   'budget/cleanup-goal-template',
