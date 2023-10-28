@@ -296,7 +296,7 @@ export default function Custom() {
             <TotalTableList
               data={data}
               empty={!empty}
-              months={months}
+              monthsCount={months.length}
               typeItem={typeOptions.find(opt => opt.value === type).format}
               mode={mode}
               split={splitOptions.find(opt => opt.value === split).description}
@@ -307,6 +307,7 @@ export default function Custom() {
             data={data}
             mode={mode}
             typeItem={typeOptions.find(opt => opt.value === type).format}
+            monthsCount={months.length}
           />
         </>
       );

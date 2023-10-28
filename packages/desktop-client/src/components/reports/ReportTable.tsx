@@ -3,7 +3,11 @@ import React, { useLayoutEffect, useRef, memo } from 'react';
 import * as d from 'date-fns';
 //import { useSelector } from 'react-redux';
 
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import {
+  amountToCurrency,
+  amountToInteger,
+  integerToCurrency,
+} from 'loot-core/src/shared/util';
 
 import { theme } from '../../style';
 import View from '../common/View';
@@ -18,11 +22,13 @@ type TableRowProps = {
   typeItem?: string | null;
   splitItem: string;
   mode: string;
+  monthsCount: number;
   style?: object | null;
 };
 
 const TableRow = memo(
-  ({ item, typeItem, splitItem, mode, style }: TableRowProps) => {
+  ({ item, typeItem, splitItem, mode, monthsCount, style }: TableRowProps) => {
+    const average = amountToInteger(item[typeItem]) / monthsCount;
     return (
       <Row
         key={item[splitItem]}
@@ -54,12 +60,27 @@ const TableRow = memo(
           width="flex"
           privacyFilter
         />
+        <Cell
+          value={integerToCurrency(Math.round(average))}
+          style={{
+            fontWeight: 600,
+          }}
+          width="flex"
+          privacyFilter
+        />
       </Row>
     );
   },
 );
 
-function GroupedTableRow({ item, typeItem, splitItem, mode, empty }) {
+function GroupedTableRow({
+  item,
+  typeItem,
+  splitItem,
+  mode,
+  monthsCount,
+  empty,
+}) {
   return (
     <>
       <TableRow
@@ -68,6 +89,7 @@ function GroupedTableRow({ item, typeItem, splitItem, mode, empty }) {
         typeItem={typeItem}
         splitItem={splitItem}
         mode={mode}
+        monthsCount={monthsCount}
         style={{
           color: theme.tableRowHeaderText,
           backgroundColor: theme.tableRowHeaderBackground,
@@ -85,6 +107,7 @@ function GroupedTableRow({ item, typeItem, splitItem, mode, empty }) {
                 typeItem={typeItem}
                 splitItem={splitItem}
                 mode={mode}
+                monthsCount={monthsCount}
               />
             );
           })}
@@ -117,12 +140,20 @@ export function TableHeader({ scrollWidth, split, interval }) {
           );
         })}
       <Cell value={'Totals'} width="flex" />
+      <Cell value={'Average'} width="flex" />
       {scrollWidth > 0 && <Cell width={scrollWidth} />}
     </Row>
   );
 }
 
-export function TableTotals({ data, scrollWidth, typeItem, mode }) {
+export function TableTotals({
+  data,
+  scrollWidth,
+  typeItem,
+  mode,
+  monthsCount,
+}) {
+  const average = amountToInteger(data[typeItem]) / monthsCount;
   return (
     <Row
       collapsed={true}
@@ -145,8 +176,12 @@ export function TableTotals({ data, scrollWidth, typeItem, mode }) {
           );
         })}
       <Cell
-        key={data[typeItem]}
         value={amountToCurrency(data[typeItem])}
+        width="flex"
+        privacyFilter
+      />
+      <Cell
+        value={integerToCurrency(Math.round(average))}
         width="flex"
         privacyFilter
       />
@@ -156,7 +191,7 @@ export function TableTotals({ data, scrollWidth, typeItem, mode }) {
   );
 }
 
-export function TotalTableList({ data, empty, months, typeItem, mode, split }) {
+export function TotalTableList({ data, empty, monthsCount, typeItem, mode, split }) {
   const splitItem = ['Month', 'Year'].includes(split) ? 'date' : 'name';
   const splitData =
     split === 'Category'
@@ -178,6 +213,7 @@ export function TotalTableList({ data, empty, months, typeItem, mode, split }) {
                 typeItem={typeItem}
                 splitItem={splitItem}
                 mode={mode}
+                monthsCount={monthsCount}
                 empty={empty}
               />
             );
@@ -189,6 +225,7 @@ export function TotalTableList({ data, empty, months, typeItem, mode, split }) {
                 typeItem={typeItem}
                 splitItem={splitItem}
                 mode={mode}
+                monthsCount={monthsCount}
               />
             );
           }
