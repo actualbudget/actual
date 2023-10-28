@@ -22,7 +22,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
 }
 
 export function makeAmountGrey(value: number | string) {
-  return value === 0 || value === '0' || value === ''
+  return value === 0 || value === '0' || value === '' || value == null
     ? { color: theme.altMenuItemText }
     : null;
 }
