@@ -13,8 +13,9 @@ import Calculator from '../../icons/v1/Calculator';
 import Chart from '../../icons/v1/Chart';
 import ChartBar from '../../icons/v1/ChartBar';
 import ChartPie from '../../icons/v1/ChartPie';
-import InboxFull from '../../icons/v1/InboxFull';
 import ListBullet from '../../icons/v1/ListBullet';
+import Queue from '../../icons/v1/Queue';
+import Tag from '../../icons/v1/Tag';
 import { theme, styles } from '../../style';
 import AlignedText from '../common/AlignedText';
 import Block from '../common/Block';
@@ -136,6 +137,7 @@ export default function Custom() {
   const [graphType, setGraphType] = useState('BarGraph');
   const [viewSplit, setViewSplit] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
+  const [showLabels, seteShowLabels] = useState(false);
 
   const months = monthUtils.rangeInclusive(start, end);
   const getGraphData = useMemo(() => {
@@ -716,7 +718,7 @@ export default function Custom() {
                 setViewSplit(false);
               }}
             >
-              <InboxFull width={15} height={15} />
+              <Queue width={15} height={15} />
             </GraphButton>
             <GraphButton
               title={mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'}
@@ -764,7 +766,7 @@ export default function Custom() {
                 width: 1,
                 height: 30,
                 backgroundColor: theme.altPillBorder,
-                marginLeft: 20,
+                marginLeft: 15,
                 flexShrink: 0,
               }}
             />
@@ -793,12 +795,23 @@ export default function Custom() {
             >
               <Calculator width={15} height={15} />
             </GraphButton>
+            <GraphButton
+              selected={showLabels}
+              onSelect={() => {
+                seteShowLabels(!showLabels);
+              }}
+              style={{ marginLeft: 15 }}
+              title="Show labels"
+              disabled={true}
+            >
+              <Tag width={15} height={15} />
+            </GraphButton>
             <View
               style={{
                 width: 1,
                 height: 30,
                 backgroundColor: theme.altPillBorder,
-                marginLeft: 20,
+                marginLeft: 15,
                 flexShrink: 0,
               }}
             />
