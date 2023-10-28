@@ -51,7 +51,7 @@ export default function TransferTooltip({
     (async () => {
       if (initialAmountName) {
         const node = await spreadsheet.get(sheetName, initialAmountName);
-        setAmount(integerToCurrency(Math.max(node.value, 0)));
+        setAmount(integerToCurrency(Math.max(node.value as number, 0)));
       } else {
         setAmount(integerToCurrency(Math.max(initialAmount, 0)));
       }
