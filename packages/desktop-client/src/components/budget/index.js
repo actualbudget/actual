@@ -201,6 +201,22 @@ function Budget(props) {
   };
 
   const onSaveCategory = async category => {
+    let categories = await props.getCategories();
+    let alreadyExists =
+      categories.grouped
+        .filter(g => g.id === category.cat_group)[0]
+        .categories.filter(
+          c => c.name === category.name && c.id !== category.id,
+        ).length > 0;
+
+    if (alreadyExists) {
+      props.addNotification({
+        type: 'error',
+        message: 'Category already exists in group (May be Hidden)',
+      });
+      return;
+    }
+
     if (category.id === 'new') {
       let id = await props.createCategory(
         category.name,
