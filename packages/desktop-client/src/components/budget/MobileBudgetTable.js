@@ -305,7 +305,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
           flexDirection: 'row',
           flex: 1,
           justifyContent: 'center',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           height: ROW_HEIGHT,
         }}
       >
@@ -313,13 +313,40 @@ const ExpenseCategory = memo(function ExpenseCategory({
           focused={isEditing}
           inputRef={inputRef}
           rightContent={
-            <Button
-              type="bare"
-              style={{ padding: 10 }}
-              {...tooltip.getOpenEvents()}
-            >
-              <DotsHorizontalTriple width={12} height={12} />
-            </Button>
+            <>
+              <Button
+                type="bare"
+                style={{ padding: 10 }}
+                {...tooltip.getOpenEvents()}
+              >
+                <DotsHorizontalTriple width={12} height={12} />
+              </Button>
+              {tooltip.isOpen && (
+                <Tooltip
+                  position="bottom-stretch"
+                  offset={1}
+                  style={{ padding: 0 }}
+                  onClose={() => {
+                    tooltip.close();
+                    inputRef.current?.focus();
+                  }}
+                >
+                  <Menu
+                    onMenuSelect={onMenuSelect}
+                    items={[
+                      {
+                        name: 'toggle-visibility',
+                        text: isHidden ? 'Show' : 'Hide',
+                      },
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                      },
+                    ]}
+                  />
+                </Tooltip>
+              )}
+            </>
           }
           style={{ width: '100%' }}
           placeholder="Category Name"
@@ -332,31 +359,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
             }
           }}
         />
-        {tooltip.isOpen && (
-          <Tooltip
-            position="bottom-stretch"
-            offset={1}
-            style={{ padding: 0 }}
-            onClose={() => {
-              tooltip.close();
-              inputRef.current?.focus();
-            }}
-          >
-            <Menu
-              onMenuSelect={onMenuSelect}
-              items={[
-                {
-                  name: 'toggle-visibility',
-                  text: isHidden ? 'Show' : 'Hide',
-                },
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
-            />
-          </Tooltip>
-        )}
       </View>
       <View
         role="button"
@@ -572,7 +574,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           flexDirection: 'row',
           flex: 1,
           justifyContent: 'center',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           height: ROW_HEIGHT,
         }}
       >
@@ -580,13 +582,44 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           focused={isEditing}
           inputRef={inputRef}
           rightContent={
-            <Button
-              type="bare"
-              style={{ padding: 10 }}
-              {...tooltip.getOpenEvents()}
-            >
-              <DotsHorizontalTriple width={12} height={12} />
-            </Button>
+            <>
+              <Button
+                type="bare"
+                style={{ padding: 10 }}
+                {...tooltip.getOpenEvents()}
+              >
+                <DotsHorizontalTriple width={12} height={12} />
+              </Button>
+              {tooltip.isOpen && (
+                <Tooltip
+                  position="bottom-stretch"
+                  offset={1}
+                  style={{ padding: 0 }}
+                  onClose={() => {
+                    tooltip.close();
+                    inputRef.current?.focus();
+                  }}
+                >
+                  <Menu
+                    onMenuSelect={onMenuSelect}
+                    items={[
+                      {
+                        name: 'add-category',
+                        text: 'Add category',
+                      },
+                      {
+                        name: 'toggle-visibility',
+                        text: isHidden ? 'Show' : 'Hide',
+                      },
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                      },
+                    ]}
+                  />
+                </Tooltip>
+              )}
+            </>
           }
           style={{ width: '100%' }}
           placeholder="Category Group Name"
@@ -599,35 +632,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
             }
           }}
         />
-        {tooltip.isOpen && (
-          <Tooltip
-            position="bottom-stretch"
-            offset={1}
-            style={{ padding: 0 }}
-            onClose={() => {
-              tooltip.close();
-              inputRef.current?.focus();
-            }}
-          >
-            <Menu
-              onMenuSelect={onMenuSelect}
-              items={[
-                {
-                  name: 'add-category',
-                  text: 'Add category',
-                },
-                {
-                  name: 'toggle-visibility',
-                  text: isHidden ? 'Show' : 'Hide',
-                },
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
-            />
-          </Tooltip>
-        )}
       </View>
       <View
         role="button"
@@ -824,7 +828,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           flexDirection: 'row',
           flex: 1,
           justifyContent: 'center',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           height: ROW_HEIGHT,
         }}
       >
@@ -832,13 +836,44 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           focused={isEditing}
           inputRef={inputRef}
           rightContent={
-            <Button
-              type="bare"
-              style={{ padding: 10 }}
-              {...tooltip.getOpenEvents()}
-            >
-              <DotsHorizontalTriple width={12} height={12} />
-            </Button>
+            <>
+              <Button
+                type="bare"
+                style={{ padding: 10 }}
+                {...tooltip.getOpenEvents()}
+              >
+                <DotsHorizontalTriple width={12} height={12} />
+              </Button>
+              {tooltip.isOpen && (
+                <Tooltip
+                  position="bottom-stretch"
+                  offset={1}
+                  style={{ padding: 0 }}
+                  onClose={() => {
+                    tooltip.close();
+                    inputRef.current?.focus();
+                  }}
+                >
+                  <Menu
+                    onMenuSelect={onMenuSelect}
+                    items={[
+                      {
+                        name: 'add-category',
+                        text: 'Add category',
+                      },
+                      {
+                        name: 'toggle-visibility',
+                        text: isHidden ? 'Show' : 'Hide',
+                      },
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                      },
+                    ]}
+                  />
+                </Tooltip>
+              )}
+            </>
           }
           style={{ width: '100%' }}
           placeholder="Category Group Name"
@@ -851,39 +886,16 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             }
           }}
         />
-        {tooltip.isOpen && (
-          <Tooltip
-            position="bottom-stretch"
-            offset={1}
-            style={{ padding: 0 }}
-            onClose={() => {
-              tooltip.close();
-              inputRef.current?.focus();
-            }}
-          >
-            <Menu
-              onMenuSelect={onMenuSelect}
-              items={[
-                {
-                  name: 'add-category',
-                  text: 'Add category',
-                },
-                {
-                  name: 'toggle-visibility',
-                  text: isHidden ? 'Show' : 'Hide',
-                },
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
-            />
-          </Tooltip>
-        )}
       </View>
       <View
         role="button"
-        style={{ ...(showEditables && { display: 'none' }) }}
+        style={{
+          ...(showEditables && { display: 'none' }),
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: ROW_HEIGHT,
+        }}
         onPointerUp={() => onEdit?.(group.id)}
       >
         <Text
@@ -900,7 +912,8 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       </View>
       {budget && (
         <View
-          tyle={{
+          style={{
+            ...(showEditables && { display: 'none' }),
             justifyContent: 'center',
             alignItems: 'flex-end',
             width: 90,
@@ -920,6 +933,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       )}
       <View
         style={{
+          ...(showEditables && { display: 'none' }),
           justifyContent: 'center',
           alignItems: 'flex-end',
           width: 90,
@@ -929,7 +943,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         <CellValue
           binding={balance}
           style={{
-            ...(showEditables && { display: 'none' }),
             ...styles.smallText,
             textAlign: 'right',
             fontWeight: '500',
@@ -1015,7 +1028,7 @@ const IncomeCategory = memo(function IncomeCategory({
           flexDirection: 'row',
           flex: 1,
           justifyContent: 'center',
-          alignItems: 'flex-start',
+          alignItems: 'center',
           height: ROW_HEIGHT,
         }}
       >
@@ -1023,13 +1036,40 @@ const IncomeCategory = memo(function IncomeCategory({
           focused={isEditing}
           inputRef={inputRef}
           rightContent={
-            <Button
-              type="bare"
-              style={{ padding: 10 }}
-              {...tooltip.getOpenEvents()}
-            >
-              <DotsHorizontalTriple width={12} height={12} />
-            </Button>
+            <>
+              <Button
+                type="bare"
+                style={{ padding: 10 }}
+                {...tooltip.getOpenEvents()}
+              >
+                <DotsHorizontalTriple width={12} height={12} />
+              </Button>
+              {tooltip.isOpen && (
+                <Tooltip
+                  position="bottom-stretch"
+                  offset={1}
+                  style={{ padding: 0 }}
+                  onClose={() => {
+                    tooltip.close();
+                    inputRef.current?.focus();
+                  }}
+                >
+                  <Menu
+                    onMenuSelect={onMenuSelect}
+                    items={[
+                      {
+                        name: 'toggle-visibility',
+                        text: isHidden ? 'Show' : 'Hide',
+                      },
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                      },
+                    ]}
+                  />
+                </Tooltip>
+              )}
+            </>
           }
           style={{ width: '100%' }}
           placeholder="Category Name"
@@ -1042,35 +1082,16 @@ const IncomeCategory = memo(function IncomeCategory({
             }
           }}
         />
-        {tooltip.isOpen && (
-          <Tooltip
-            position="bottom-stretch"
-            offset={1}
-            style={{ padding: 0 }}
-            onClose={() => {
-              tooltip.close();
-              inputRef.current?.focus();
-            }}
-          >
-            <Menu
-              onMenuSelect={onMenuSelect}
-              items={[
-                {
-                  name: 'toggle-visibility',
-                  text: isHidden ? 'Show' : 'Hide',
-                },
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
-            />
-          </Tooltip>
-        )}
       </View>
       <View
         role="button"
-        style={{ ...(showEditables && { display: 'none' }) }}
+        style={{
+          ...(showEditables && { display: 'none' }),
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: ROW_HEIGHT,
+        }}
         onPointerUp={() => onEdit?.(category.id)}
       >
         <Text
@@ -1088,6 +1109,7 @@ const IncomeCategory = memo(function IncomeCategory({
       {budget && (
         <View
           style={{
+            ...(showEditables && { display: 'none' }),
             justifyContent: 'center',
             alignItems: 'flex-end',
             width: 90,
@@ -1106,6 +1128,7 @@ const IncomeCategory = memo(function IncomeCategory({
       )}
       <View
         style={{
+          ...(showEditables && { display: 'none' }),
           justifyContent: 'center',
           alignItems: 'flex-end',
           width: 90,
@@ -1115,7 +1138,6 @@ const IncomeCategory = memo(function IncomeCategory({
         <CellValue
           binding={balance}
           style={{
-            ...(showEditables && { display: 'none' }),
             ...styles.smallText,
             textAlign: 'right',
           }}
@@ -1890,15 +1912,22 @@ function BudgetHeader({
         }}
       >
         {!editMode ? (
-          <Button
-            type="bare"
-            style={{
-              backgroundColor: 'transparent',
-              paddingLeft: 12,
-              paddingRight: 12,
-            }}
-            {...tooltip.getOpenEvents()}
-          >
+          <>
+            <Button
+              type="bare"
+              style={{
+                backgroundColor: 'transparent',
+                paddingLeft: 12,
+                paddingRight: 12,
+              }}
+              {...tooltip.getOpenEvents()}
+            >
+              <DotsHorizontalTriple
+                width="20"
+                height="20"
+                style={{ color: 'white' }}
+              />
+            </Button>
             {tooltip.isOpen && (
               <Tooltip
                 position="bottom-right"
@@ -1918,12 +1947,7 @@ function BudgetHeader({
                 />
               </Tooltip>
             )}
-            <DotsHorizontalTriple
-              width="20"
-              height="20"
-              style={{ color: 'white' }}
-            />
-          </Button>
+          </>
         ) : (
           <Button
             type="bare"
