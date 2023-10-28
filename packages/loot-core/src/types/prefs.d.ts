@@ -26,7 +26,7 @@ export type LocalPrefs = Partial<
     'expand-splits': boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;
-    'budget.collapsed': any[];
+    'budget.collapsed': string[];
     'budget.summaryCollapsed': boolean;
     'budget.showHiddenCategories': boolean;
     'budget.startMonth': string;
