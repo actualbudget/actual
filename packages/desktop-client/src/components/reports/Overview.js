@@ -336,7 +336,7 @@ function CustomReportsCard() {
   const split = 1;
 
   const getGraphData = useMemo(() => {
-    return defaultSpreadsheet(start, end, split, categories);
+    return defaultSpreadsheet(start, end, split, 'totalDebts', categories);
   }, [start, end, categories]);
   const data = useReport('default', getGraphData);
 

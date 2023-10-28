@@ -26,6 +26,7 @@ import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 import { Checkbox } from '../forms';
 import PrivacyFilter from '../PrivacyFilter';
 
+import CategorySelector from './CategorySelector';
 import AreaGraph from './graphs/AreaGraph';
 import BarGraph from './graphs/BarGraph';
 import BarLineGraph from './graphs/BarLineGraph';
@@ -117,6 +118,7 @@ export default function Custom() {
     { value: 3, description: 'All', format: 'totalTotals' },
   ];
 
+  const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
@@ -143,6 +145,7 @@ export default function Custom() {
       split,
       typeOptions.find(opt => opt.value === type).format,
       categories,
+      selectedCategories,
       payees,
       accounts,
       filters,
@@ -155,6 +158,7 @@ export default function Custom() {
     split,
     type,
     categories,
+    selectedCategories,
     payees,
     accounts,
     filters,
@@ -162,6 +166,12 @@ export default function Custom() {
     hidden,
   ]);
   const data = useReport('default', getGraphData);
+
+  useEffect(() => {
+    if (selectedCategories === null && categories.list.length !== 0) {
+      setSelectedCategories(categories.list);
+    }
+  }, [categories, selectedCategories]);
 
   useEffect(() => {
     async function run() {
@@ -664,6 +674,25 @@ export default function Custom() {
               }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
+            />
+          </View>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: theme.altPillBorder,
+              marginTop: 10,
+              flexShrink: 0,
+            }}
+          />
+          <View
+            style={{
+              marginTop: 10,
+            }}
+          >
+            <CategorySelector
+              categoryGroups={categories.grouped}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
             />
           </View>
         </View>

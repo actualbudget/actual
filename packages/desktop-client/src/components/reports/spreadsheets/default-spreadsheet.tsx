@@ -13,12 +13,22 @@ export default function createSpreadsheet(
   split,
   typeItem,
   categories,
+  selectedCategories,
   payees,
   accounts,
   conditions = [],
   conditionsOp,
   hidden,
 ) {
+  let categoryFilter = (categories.list || []).filter(
+    category =>
+      !category.hidden &&
+      selectedCategories &&
+      selectedCategories.some(
+        selectedCategory => selectedCategory.id === category.id,
+      ),
+  );
+
   let splitItem;
   let splitList;
   let splitLabel;
@@ -87,6 +97,13 @@ export default function createSpreadsheet(
                   ],
                 },
               )
+              .filter(
+                selectedCategories && {
+                  $or: categoryFilter.map(category => ({
+                    category: category.id,
+                  })),
+                },
+              )
               .filter({
                 [splitLabel]: splt.id,
                 $and: [
@@ -113,6 +130,13 @@ export default function createSpreadsheet(
                       'payee.transfer_acct': null,
                     },
                   ],
+                },
+              )
+              .filter(
+                selectedCategories && {
+                  $or: categoryFilter.map(category => ({
+                    category: category.id,
+                  })),
                 },
               )
               .filter({
