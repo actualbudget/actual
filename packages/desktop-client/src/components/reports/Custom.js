@@ -443,7 +443,14 @@ export default function Custom() {
           flexGrow: 1,
         }}
       >
-        <View style={{ width: 200, padding: 10, paddingLeft: 0 }}>
+        <View
+          style={{
+            width: 200,
+            paddingTop: 10,
+            paddingRight: 10,
+            flexShrink: 0,
+          }}
+        >
           <View
             style={{
               flexDirection: 'row',
@@ -708,6 +715,7 @@ export default function Custom() {
               flexDirection: 'row',
               alignItems: 'center',
               marginBottom: 10,
+              flexShrink: 0,
             }}
           >
             <GraphButton
@@ -821,7 +829,7 @@ export default function Custom() {
           </View>
           {filters && filters.length > 0 && (
             <View
-              style={{ marginBottom: 10, marginLeft: 5 }}
+              style={{ marginBottom: 10, marginLeft: 5, flexShrink: 0 }}
               spacing={2}
               direction="row"
               justify="flex-start"
@@ -907,7 +915,6 @@ export default function Custom() {
                       padding: 10,
                       flexDirection: 'column',
                       minWidth: 300,
-                      marginTop: 15,
                       marginRight: 10,
                       textAlign: 'center',
                       flexGrow: 1,

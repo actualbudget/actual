@@ -28,6 +28,7 @@ export function ReportSummary({
     <View
       style={{
         flexDirection: 'column',
+        marginBottom: 10,
       }}
     >
       <View
@@ -103,7 +104,6 @@ export function ReportSplit({ data, legend, splitType }) {
       style={{
         backgroundColor: theme.pageBackground,
         alignItems: 'center',
-        marginTop: 10,
         flex: 1,
         overflowY: 'auto',
       }}
