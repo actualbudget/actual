@@ -363,11 +363,11 @@ class Budget extends Component {
             type={budgetType}
             month={currentMonth}
             monthBounds={bounds}
-            editMode={editMode}
             navigation={navigation}
             //   refreshControl={
             //     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             //   }
+            editMode={editMode}
             onEditMode={flag => this.setState({ editMode: flag })}
             onShowBudgetDetails={this.onShowBudgetDetails}
             onPrevMonth={this.onPrevMonth}
