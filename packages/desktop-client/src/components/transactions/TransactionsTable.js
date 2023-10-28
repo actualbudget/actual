@@ -2059,30 +2059,45 @@ export let TransactionTable = forwardRef((props, ref) => {
     [splitsExpanded.dispatch],
   );
 
-  let onBalanceLastSplit = useCallback(() => {
-    let newTrans = latestState.current.newTransactions;
-    // If there is an empty split row at the end
-    if (newTrans.length > 1 && newTrans[0].error) {
-      if (newTrans[newTrans.length - 1].amount === 0) {
-        // Copy last transaction and set the difference
-        let lastTransaction = newTrans[newTrans.length - 1];
-        let copy = { ...lastTransaction };
-        copy.amount = newTrans[0].error.difference;
+  let onBalanceLastSplit = useCallback(async () => {
+    const { tableNavigator, newTransactions } = latestState.current;
+    const parentTransaction = newTransactions[0];
 
-        // Update the transaction group
-        let { diff, data } = updateTransaction(newTrans, copy);
-        setNewTransactions(data);
+    const allSubTransactions = newTransactions.filter(
+      t => t.parent_id === parentTransaction.id,
+    );
 
-        // This is needed to reflect the change in the editor
-        latestState.current.newTransactions[newTrans.length - 1] =
-          data[data.length - 1];
-        newNavigator.onEdit(
-          diff.updated[diff.updated.length - 1].id,
-          latestState.current.newNavigator.focusedField,
-        );
-      }
+    const emptyTransactions = allSubTransactions.filter(t => t.amount === 0);
+    const remainingAmount =
+      parentTransaction.amount -
+      allSubTransactions.reduce((acc, t) => acc + t.amount, 0);
+
+    const amountPerTransaction = Math.floor(
+      remainingAmount / emptyTransactions.length,
+    );
+    let remainingCents =
+      remainingAmount - amountPerTransaction * emptyTransactions.length;
+
+    let amounts = new Array(emptyTransactions.length).fill(
+      amountPerTransaction,
+    );
+    for (let amountIndex in amounts) {
+      if (remainingCents === 0) break;
+
+      amounts[amountIndex] += 1;
+      remainingCents--;
     }
-  }, []);
+
+    for (const transactionIndex in emptyTransactions) {
+      await onSave({
+        ...emptyTransactions[transactionIndex],
+        amount: amounts[transactionIndex],
+      });
+    }
+
+    // cancel focused field
+    tableNavigator.onEdit(null, null);
+  }, [latestState]);
 
   return (
     <TransactionTableInner
