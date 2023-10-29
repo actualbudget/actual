@@ -3,7 +3,6 @@ import React from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
-import YinYang from '../../icons/v1/YinYang';
 import { theme, styles } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -132,10 +131,14 @@ export function ReportSplit({ data, legend, splitType }) {
                 alignItems: 'center',
               }}
             >
-              <YinYang
-                style={{ marginRight: 5, color: item.color }}
-                width={14}
-                height={14}
+              <View
+                style={{
+                  marginRight: 5,
+                  borderRadius: 1000,
+                  width: 14,
+                  height: 14,
+                  backgroundColor: item.color,
+                }}
               />
               <Text
                 style={{

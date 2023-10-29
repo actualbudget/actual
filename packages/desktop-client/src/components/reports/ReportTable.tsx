@@ -190,8 +190,8 @@ export function TableTotals({
           })
         : typeItem === 'totalTotals' && (
             <>
-              <Cell value={data.totalAssets} width="flex" />
-              <Cell value={data.totalDebts} width="flex" />
+              <Cell value={amountToCurrency(data.totalAssets)} width="flex" />
+              <Cell value={amountToCurrency(data.totalDebts)} width="flex" />
             </>
           )}
       <Cell
