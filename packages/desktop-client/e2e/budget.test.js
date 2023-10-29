@@ -3,11 +3,13 @@ import { test, expect } from '@playwright/test';
 import { ConfigurationPage } from './page-models/configuration-page';
 import screenshotConfig from './screenshot.config';
 
+// Test Suite Description
 test.describe('Budget', () => {
   let page;
   let configurationPage;
   let budgetPage;
 
+  // Test Suite Setup
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
     configurationPage = new ConfigurationPage(page);
@@ -15,17 +17,17 @@ test.describe('Budget', () => {
     await page.goto('/');
     budgetPage = await configurationPage.createTestFile();
 
-    // Move mouse to corner of the screen;
-    // sometimes the mouse hovers on a budget element thus rendering an input box
-    // and this breaks screenshot tests
+    // Moving the mouse to the corner of the screen to prevent unwanted interactions.
     await page.mouse.move(0, 0);
   });
 
+  // Test Suite Teardown
   test.afterAll(async () => {
     await page.close();
   });
 
-  test('renders the summary information: available funds, overspent, budgeted and for next month', async () => {
+  // Test Case 1: Verify Rendering of Budget Summary
+  test('renders the summary information: available funds, overspent, budgeted, and for next month', async () => {
     const summary = budgetPage.budgetSummary.first();
 
     await expect(summary.getByText('Available Funds')).toBeVisible({
@@ -37,6 +39,7 @@ test.describe('Budget', () => {
     await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
+  // Test Case 2: Verify Funds Transfer Between Categories
   test('transfer funds to another category', async () => {
     const currentFundsA = await budgetPage.getBalanceForRow(1);
     const currentFundsB = await budgetPage.getBalanceForRow(2);
@@ -50,6 +53,7 @@ test.describe('Budget', () => {
     await expect(page).toHaveScreenshot(screenshotConfig(page));
   });
 
+  // Test Case 3: Verify Budget Table Rendering
   test('budget table is rendered', async () => {
     await expect(budgetPage.budgetTable).toBeVisible();
     expect(await budgetPage.getTableTotals()).toEqual({
@@ -59,6 +63,7 @@ test.describe('Budget', () => {
     });
   });
 
+  // Test Case 4: Verify Transaction Page Opens on Click
   test('clicking on spent amounts opens a transaction page', async () => {
     let categoryName = await budgetPage.getCategoryNameForRow(1);
     let accountPage = await budgetPage.clickOnSpentAmountForRow(1);
