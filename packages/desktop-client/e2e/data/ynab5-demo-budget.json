@@ -1691,6 +1691,26 @@
         "import_payee_name_original": null,
         "debt_transaction_type": null,
         "deleted": false
+      },
+      {
+        "id": "024494a1-f1e0-4667-9fc0-91e4a4262193",
+        "date": "2023-09-04",
+        "amount": 50000,
+        "memo": "split bart b",
+        "cleared": "cleared",
+        "approved": true,
+        "flag_color": null,
+        "account_id": "125f339b-2a63-481e-84c0-f04d898905d2",
+        "payee_id": "",
+        "category_id": null,
+        "transfer_account_id": "bc1d862f-bab0-41c3-bd1e-6cee8c688e32",
+        "transfer_transaction_id": "213526fc-ba49-4790-8a96-cc2a50182728",
+        "matched_transaction_id": "",
+        "import_id": null,
+        "import_payee_name": null,
+        "import_payee_name_original": null,
+        "debt_transaction_type": null,
+        "deleted": false
       }
     ],
     "subtransactions": [
