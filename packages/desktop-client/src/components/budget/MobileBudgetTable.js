@@ -251,8 +251,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
   useEffect(() => {
     if (isBudgetActionMenuOpen) {
       balanceTooltip.open();
-    } else {
-      balanceTooltip.close();
     }
   }, [isBudgetActionMenuOpen, balanceTooltip]);
 
