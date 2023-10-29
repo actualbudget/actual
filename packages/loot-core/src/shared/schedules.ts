@@ -66,7 +66,9 @@ function prettyDayName(day) {
 export function getRecurringDescription(config) {
   let interval = config.interval || 1;
 
-  let weekendSolveSuffix = config.skipWeekend ? ` (${config.weekendSolveMode} weekend) ` : '';
+  let weekendSolveSuffix = config.skipWeekend
+    ? ` (${config.weekendSolveMode} weekend) `
+    : '';
 
   switch (config.frequency) {
     case 'daily': {
