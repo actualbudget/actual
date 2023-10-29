@@ -14,17 +14,24 @@ type BalanceTooltipProps = {
   tooltip: { close: () => void };
   monthIndex: number;
   onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
+  onClose?: () => void;
 };
 export default function BalanceTooltip({
   categoryId,
   tooltip,
   monthIndex,
   onBudgetAction,
+  onClose,
   ...tooltipProps
 }: BalanceTooltipProps) {
   let carryover = useSheetValue(rolloverBudget.catCarryover(categoryId));
   let balance = useSheetValue(rolloverBudget.catBalance(categoryId));
   let [menu, setMenu] = useState('menu');
+
+  let _onClose = () => {
+    tooltip.close();
+    onClose?.();
+  };
 
   return (
     <>
@@ -33,7 +40,7 @@ export default function BalanceTooltip({
           position="bottom-right"
           width={200}
           style={{ padding: 0 }}
-          onClose={tooltip.close}
+          onClose={_onClose}
           {...tooltipProps}
         >
           <Menu
@@ -43,7 +50,7 @@ export default function BalanceTooltip({
                   category: categoryId,
                   flag: !carryover,
                 });
-                tooltip.close();
+                _onClose();
               } else {
                 setMenu(type);
               }
@@ -72,7 +79,7 @@ export default function BalanceTooltip({
         <TransferTooltip
           initialAmountName={rolloverBudget.catBalance(categoryId)}
           showToBeBudgeted={true}
-          onClose={tooltip.close}
+          onClose={_onClose}
           onSubmit={(amount, toCategory) => {
             onBudgetAction(monthIndex, 'transfer-category', {
               amount,
@@ -85,7 +92,7 @@ export default function BalanceTooltip({
 
       {menu === 'cover' && (
         <CoverTooltip
-          onClose={tooltip.close}
+          onClose={_onClose}
           onSubmit={fromCategory => {
             onBudgetAction(monthIndex, 'cover', {
               to: categoryId,

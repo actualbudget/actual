@@ -230,6 +230,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
   onEditBudget,
   onSave,
   onDelete,
+  isBudgetActionMenuOpen,
+  onOpenBudgetActionMenu,
   onBudgetAction,
   show3Cols,
   showBudgetedCol,
@@ -247,10 +249,18 @@ const ExpenseCategory = memo(function ExpenseCategory({
   let balanceTooltip = useTooltip();
 
   useEffect(() => {
+    if (isBudgetActionMenuOpen) {
+      balanceTooltip.open();
+    } else {
+      balanceTooltip.close();
+    }
+  }, [isBudgetActionMenuOpen, balanceTooltip]);
+
+  useEffect(() => {
     if (!isEditing && tooltip.isOpen) {
       tooltip.close();
     }
-  }, [isEditing]);
+  }, [isEditing, tooltip]);
 
   let onSubmit = () => {
     if (categoryName) {
@@ -428,7 +438,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
             height: ROW_HEIGHT,
           }}
         >
-          <span role="button" {...balanceTooltip.getOpenEvents()}>
+          <span
+            role="button"
+            onPointerUp={() => onOpenBudgetActionMenu?.(category.id)}
+          >
             <BalanceWithCarryover
               carryover={rolloverBudget.catCarryover(category.id)}
               balance={rolloverBudget.catBalance(category.id)}
@@ -452,6 +465,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
                     action,
                     arg,
                   );
+                }}
+                onClose={() => {
+                  onOpenBudgetActionMenu?.(null);
                 }}
               />
             )}
@@ -1196,6 +1212,8 @@ const ExpenseGroup = memo(function ExpenseGroup({
   onEditCategory,
   editingBudgetCategoryId,
   onEditCategoryBudget,
+  openBudgetActionMenuId,
+  onOpenBudgetActionMenu,
   // gestures,
   month,
   onSaveCategory,
@@ -1267,6 +1285,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
           const isEditingCategory = editingCategoryId === category.id;
           const isEditingCategoryBudget =
             editingBudgetCategoryId === category.id;
+          const isBudgetActionMenuOpen = openBudgetActionMenuId === category.id;
           return (
             <ExpenseCategory
               show3Cols={show3Cols}
@@ -1279,6 +1298,8 @@ const ExpenseGroup = memo(function ExpenseGroup({
               onEdit={onEditCategory}
               isEditingBudget={isEditingCategoryBudget}
               onEditBudget={onEditCategoryBudget}
+              isBudgetActionMenuOpen={isBudgetActionMenuOpen}
+              onOpenBudgetActionMenu={onOpenBudgetActionMenu}
               // gestures={gestures}
               month={month}
               onSave={onSaveCategory}
@@ -1386,6 +1407,8 @@ function BudgetGroups({
   onEditCategory,
   editingBudgetCategoryId,
   onEditCategoryBudget,
+  openBudgetActionMenuId,
+  onOpenBudgetActionMenu,
   editMode,
   gestures,
   month,
@@ -1433,6 +1456,8 @@ function BudgetGroups({
               onEditCategory={onEditCategory}
               editingBudgetCategoryId={editingBudgetCategoryId}
               onEditCategoryBudget={onEditCategoryBudget}
+              openBudgetActionMenuId={openBudgetActionMenuId}
+              onOpenBudgetActionMenu={onOpenBudgetActionMenu}
               onSaveCategory={onSaveCategory}
               onDeleteCategory={onDeleteCategory}
               onAddCategory={onAddCategory}
@@ -1504,36 +1529,50 @@ export function BudgetTable(props) {
     savePrefs,
   } = props;
 
-  const GROUP_TYPE = 'group';
+  const GROUP_EDIT_ACTION = 'group';
   const [editingGroupId, setEditingGroupId] = useState(null);
   function onEditGroup(id) {
-    onEdit(GROUP_TYPE, id);
+    onEdit(GROUP_EDIT_ACTION, id);
   }
 
-  const CATEGORY_TYPE = 'category';
+  const CATEGORY_EDIT_ACTION = 'category';
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   function onEditCategory(id) {
-    onEdit(CATEGORY_TYPE, id);
+    onEdit(CATEGORY_EDIT_ACTION, id);
   }
 
-  const CATEGORY_BUDGET_TYPE = 'category-budget';
+  const CATEGORY_BUDGET_EDIT_ACTION = 'category-budget';
   const [editingBudgetCategoryId, setEditingBudgetCategoryId] = useState(null);
   function onEditCategoryBudget(id) {
-    onEdit(CATEGORY_BUDGET_TYPE, id);
+    onEdit(CATEGORY_BUDGET_EDIT_ACTION, id);
   }
 
-  function onEdit(type, id) {
+  const BUDGET_MENU_OPEN_ACTION = 'budget-menu';
+  const [openBudgetActionMenuId, setOpenBudgetActionMenuId] = useState(null);
+  function onOpenBudgetActionMenu(id) {
+    onEdit(BUDGET_MENU_OPEN_ACTION, id);
+  }
+
+  function onEdit(action, id) {
     // Do not allow editing if another field is currently being edited.
     // Cancel the currently editing field in that case.
     const currentlyEditing =
-      editingGroupId || editingCategoryId || editingBudgetCategoryId;
+      editingGroupId ||
+      editingCategoryId ||
+      editingBudgetCategoryId ||
+      openBudgetActionMenuId;
 
-    setEditingGroupId(type === GROUP_TYPE && !currentlyEditing ? id : null);
+    setEditingGroupId(
+      action === GROUP_EDIT_ACTION && !currentlyEditing ? id : null,
+    );
     setEditingCategoryId(
-      type === CATEGORY_TYPE && !currentlyEditing ? id : null,
+      action === CATEGORY_EDIT_ACTION && !currentlyEditing ? id : null,
     );
     setEditingBudgetCategoryId(
-      type === CATEGORY_BUDGET_TYPE && !currentlyEditing ? id : null,
+      action === CATEGORY_BUDGET_EDIT_ACTION && !currentlyEditing ? id : null,
+    );
+    setOpenBudgetActionMenuId(
+      action === BUDGET_MENU_OPEN_ACTION && !currentlyEditing ? id : null,
     );
   }
 
@@ -1727,6 +1766,8 @@ export function BudgetTable(props) {
                 onEditCategory={onEditCategory}
                 editingBudgetCategoryId={editingBudgetCategoryId}
                 onEditCategoryBudget={onEditCategoryBudget}
+                openBudgetActionMenuId={openBudgetActionMenuId}
+                onOpenBudgetActionMenu={onOpenBudgetActionMenu}
                 onSaveCategory={onSaveCategory}
                 onDeleteCategory={onDeleteCategory}
                 onAddCategory={onAddCategory}
