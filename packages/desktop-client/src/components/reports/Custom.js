@@ -291,6 +291,7 @@ export default function Custom() {
             interval={mode === 'time' && months}
             scrollWidth={scrollWidth}
             split={splitOptions.find(opt => opt.value === split).description}
+            type={type}
           />
           <SimpleTable saveScrollWidth={saveScrollWidth}>
             <TotalTableList
@@ -308,6 +309,7 @@ export default function Custom() {
             mode={mode}
             typeItem={typeOptions.find(opt => opt.value === type).format}
             monthsCount={months.length}
+            type={type}
           />
         </>
       );
@@ -331,6 +333,9 @@ export default function Custom() {
       }
       if ([5, 6].includes(split)) {
         setSplit(1);
+      }
+      if ([3].includes(type)) {
+        setType(1);
       }
     } else {
       if (graphType === 'StackedBarGraph') {
@@ -529,7 +534,13 @@ export default function Custom() {
                 option.value,
                 option.description,
               ])}
-              disabledKeys={[3]}
+              disabledKeys={
+                mode === 'time'
+                  ? [3]
+                  : graphType === 'BarGraph' && [1, 2, 3, 4].includes(split)
+                  ? [3]
+                  : [0]
+              }
             />
           </View>
           {/*
@@ -737,6 +748,7 @@ export default function Custom() {
               onSelect={() => {
                 if (mode === 'total') {
                   onChangeGraph('BarGraph');
+                  [3].includes(type) && setType(1);
                 } else {
                   onChangeGraph('StackedBarGraph');
                 }
@@ -763,7 +775,7 @@ export default function Custom() {
               selected={graphType === 'DonutGraph'}
               onSelect={() => {
                 onChangeGraph('DonutGraph');
-                setType(1);
+                //setType(1);
               }}
               style={{ marginLeft: 15 }}
               disabled={mode === 'total' ? false : true}

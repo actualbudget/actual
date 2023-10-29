@@ -18,6 +18,8 @@ type TableRowProps = {
     date: string;
     name: string;
     monthData: [];
+    totalAssets: string;
+    totalDebts: string;
   };
   typeItem?: string | null;
   splitItem: string;
@@ -40,18 +42,23 @@ const TableRow = memo(
         }}
       >
         <Cell value={item[splitItem]} width="flex" />
-        {item.monthData &&
-          mode === 'time' &&
-          item.monthData.map(item => {
-            return (
-              <Cell
-                key={amountToCurrency(item[typeItem])}
-                value={amountToCurrency(item[typeItem])}
-                width="flex"
-                privacyFilter
-              />
-            );
-          })}
+        {item.monthData && mode === 'time'
+          ? item.monthData.map(item => {
+              return (
+                <Cell
+                  key={amountToCurrency(item[typeItem])}
+                  value={amountToCurrency(item[typeItem])}
+                  width="flex"
+                  privacyFilter
+                />
+              );
+            })
+          : typeItem === 'totalTotals' && (
+              <>
+                <Cell value={amountToCurrency(item.totalAssets)} width="flex" />
+                <Cell value={amountToCurrency(item.totalDebts)} width="flex" />
+              </>
+            )}
         <Cell
           value={amountToCurrency(item[typeItem])}
           style={{
@@ -117,7 +124,7 @@ function GroupedTableRow({
   );
 }
 
-export function TableHeader({ scrollWidth, split, interval }) {
+export function TableHeader({ scrollWidth, split, interval, type }) {
   return (
     <Row
       collapsed={true}
@@ -128,17 +135,23 @@ export function TableHeader({ scrollWidth, split, interval }) {
       }}
     >
       <Cell value={split} width="flex" />
-      {interval &&
-        interval.map(header => {
-          return (
-            <Cell
-              key={header}
-              // eslint-disable-next-line rulesdir/typography
-              value={d.format(d.parseISO(`${header}-01`), "MMM ''yy")}
-              width="flex"
-            />
-          );
-        })}
+      {interval
+        ? interval.map(header => {
+            return (
+              <Cell
+                key={header}
+                // eslint-disable-next-line rulesdir/typography
+                value={d.format(d.parseISO(`${header}-01`), "MMM ''yy")}
+                width="flex"
+              />
+            );
+          })
+        : type === 3 && (
+            <>
+              <Cell value={'Assets'} width="flex" />
+              <Cell value={'Debts'} width="flex" />
+            </>
+          )}
       <Cell value={'Totals'} width="flex" />
       <Cell value={'Average'} width="flex" />
       {scrollWidth > 0 && <Cell width={scrollWidth} />}
@@ -164,17 +177,23 @@ export function TableTotals({
       }}
     >
       <Cell value={'Totals'} width="flex" />
-      {mode === 'time' &&
-        data.monthData.map(item => {
-          return (
-            <Cell
-              key={amountToCurrency(item[typeItem])}
-              value={amountToCurrency(item[typeItem])}
-              width="flex"
-              privacyFilter
-            />
-          );
-        })}
+      {mode === 'time'
+        ? data.monthData.map(item => {
+            return (
+              <Cell
+                key={amountToCurrency(item[typeItem])}
+                value={amountToCurrency(item[typeItem])}
+                width="flex"
+                privacyFilter
+              />
+            );
+          })
+        : typeItem === 'totalTotals' && (
+            <>
+              <Cell value={data.totalAssets} width="flex" />
+              <Cell value={data.totalDebts} width="flex" />
+            </>
+          )}
       <Cell
         value={amountToCurrency(data[typeItem])}
         width="flex"

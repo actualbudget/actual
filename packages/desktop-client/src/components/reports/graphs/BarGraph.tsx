@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   Legend,
   Cell,
+  ReferenceLine,
   XAxis,
   YAxis,
   Tooltip,
@@ -55,6 +56,7 @@ function BarGraph({
 }: BarGraphProps) {
   const colorScale = getColorScale('qualitative');
   const yAxis = [5, 6].includes(split) ? 'date' : 'name';
+  const splitData = [5, 6].includes(split) ? 'monthData' : 'data';
 
   type PayloadItem = {
     value: string;
@@ -154,9 +156,9 @@ function BarGraph({
 
   const getVal = obj => {
     if (typeOp === 'totalDebts') {
-      return -1 * obj[typeOp];
+      return -1 * obj.totalDebts;
     } else {
-      return obj[typeOp];
+      return obj.totalAssets;
     }
   };
 
@@ -168,46 +170,59 @@ function BarGraph({
       }}
     >
       {(width, height, portalHost) =>
-        data.data && (
+        data[splitData] && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <BarChart
                 width={width}
                 height={height}
-                data={
-                  yAxis === 'date'
-                    ? data.monthData.filter(i =>
-                        empty ? i[typeOp] !== 0 : true,
-                      )
-                    : data.data.filter(i => (empty ? i[typeOp] !== 0 : true))
-                }
+                stackOffset="sign"
+                data={data[splitData].filter(i =>
+                  empty ? i[typeOp] !== 0 : true,
+                )}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {compact ? null : <Legend content={<CustomLegend />} />}
+                {!compact && <Legend content={<CustomLegend />} />}
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                {compact ? null : <CartesianGrid strokeDasharray="3 3" />}
-                {compact ? null : <XAxis dataKey={yAxis} />}
-                {compact ? null : <YAxis />}
-                <Bar dataKey={val => getVal(val)}>
-                  {data.data
+                {!compact && <CartesianGrid strokeDasharray="3 3" />}
+                {!compact && <XAxis dataKey={yAxis} />}
+                {!compact && <YAxis />}
+                {!compact && <ReferenceLine y={0} stroke="#000" />}
+                <Bar dataKey={val => getVal(val)} stackId="a">
+                  {data[splitData]
                     .filter(i => (empty ? i[typeOp] !== 0 : true))
                     .map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={
                           yAxis === 'date'
-                            ? theme.reportsBlue
+                            ? typeOp === 'totalDebts'
+                              ? theme.reportsRed
+                              : theme.reportsBlue
                             : colorScale[index % colorScale.length]
                         }
                         name={entry.name}
                       />
                     ))}
                 </Bar>
+                {yAxis === 'date' && typeOp === 'totalTotals' && (
+                  <Bar dataKey={'totalDebts'} stackId="a">
+                    {data[splitData]
+                      .filter(i => (empty ? i[typeOp] !== 0 : true))
+                      .map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={theme.reportsRed}
+                          name={entry.name}
+                        />
+                      ))}
+                  </Bar>
+                )}
               </BarChart>
             </div>
           </ResponsiveContainer>
