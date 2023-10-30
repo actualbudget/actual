@@ -1,19 +1,20 @@
 import React, { Fragment, useState } from 'react';
 
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
+
 import Eye from '../../icons/v2/Eye';
 import EyeSlashed from '../../icons/v2/EyeSlashed';
-import {
-  type Category,
-  type CategoryGroup,
-  type CategoryListProps,
-} from '../autocomplete/CategoryAutocomplete';
+import { type CategoryListProps } from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
 import { Checkbox } from '../forms';
 
 type CategorySelectorProps = {
-  categoryGroups: Array<CategoryGroup>;
+  categoryGroups: Array<CategoryGroupEntity>;
   selectedCategories: CategoryListProps['items'];
-  setSelectedCategories: (selectedCategories: Category[]) => null;
+  setSelectedCategories: (selectedCategories: CategoryEntity[]) => null;
 };
 
 export default function CategorySelector({
