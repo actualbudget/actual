@@ -5,7 +5,7 @@ import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Message } from '../server/sync';
 
-import { AccountEntity, PayeeEntity } from './models';
+import { AccountEntity, CategoryEntity, CategoryGroupEntity } from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -43,23 +43,8 @@ export interface ServerHandlers {
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
   'get-categories': () => Promise<{
-    grouped: {
-      id: string;
-      name: string;
-      is_income: number;
-      sort_order: number;
-      tombstone: number;
-      hidden: boolean;
-    }[];
-    list: {
-      id: string;
-      name: string;
-      is_income: number;
-      cat_group: string;
-      sort_order: number;
-      tombstone: number;
-      hidden: boolean;
-    }[];
+    grouped: Array<CategoryGroupEntity>;
+    list: Array<CategoryEntity>;
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;

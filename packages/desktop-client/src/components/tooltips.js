@@ -19,6 +19,7 @@ export function useTooltip() {
       },
     }),
     isOpen,
+    open: () => setIsOpen(true),
     close: () => setIsOpen(false),
   };
 }

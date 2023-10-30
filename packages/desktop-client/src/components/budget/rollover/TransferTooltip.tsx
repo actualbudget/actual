@@ -9,6 +9,7 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
+import useCategories from '../../../hooks/useCategories';
 import CategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
 import Button from '../../common/Button';
 import InitialFocus from '../../common/InitialFocus';
@@ -16,7 +17,6 @@ import Input from '../../common/Input';
 import View from '../../common/View';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../tooltips';
-import { CategoryGroupsContext } from '../CategoryGroupsContext';
 import { addToBeBudgetedGroup } from '../util';
 
 type TransferTooltipProps = {
@@ -37,7 +37,7 @@ export default function TransferTooltip({
 }: TransferTooltipProps) {
   let spreadsheet = useSpreadsheet();
   let sheetName = useContext(NamespaceContext);
-  let categoryGroups = useContext(CategoryGroupsContext);
+  let { grouped: categoryGroups } = useCategories();
 
   categoryGroups = categoryGroups.filter(g => !g.is_income);
   if (showToBeBudgeted) {
