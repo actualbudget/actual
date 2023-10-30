@@ -8,7 +8,17 @@ export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
     {
       id: 'to-be-budgeted',
       name: 'To Be Budgeted',
-      categories: [{ id: 'to-be-budgeted', name: 'To Be Budgeted' }],
+      categories: [
+        {
+          id: 'to-be-budgeted',
+          name: 'To Be Budgeted',
+          cat_group: 'to-be-budgeted',
+          group: {
+            id: 'to-be-budgeted',
+            name: 'To Be Budgeted',
+          },
+        },
+      ],
     },
     ...groups,
   ];

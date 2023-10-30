@@ -7,6 +7,11 @@ import React, {
 
 import { css } from 'glamor';
 
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
+
 import Split from '../../icons/v0/Split';
 import { theme } from '../../style';
 import Text from '../common/Text';
@@ -14,21 +19,8 @@ import View from '../common/View';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
-export type Category = {
-  id: string;
-  cat_group: unknown;
-  groupName: string;
-  name: string;
-};
-
-export type CategoryGroup = {
-  id: string;
-  name: string;
-  categories: Array<Category>;
-};
-
 export type CategoryListProps = {
-  items: Array<Category>;
+  items: Array<CategoryEntity & { group?: CategoryGroupEntity }>;
   getItemProps?: (arg: { item }) => Partial<ComponentProps<typeof View>>;
   highlightedIndex: number;
   embedded: boolean;
@@ -122,7 +114,7 @@ function CategoryList({
                   }}
                   data-testid="category-item-group"
                 >
-                  {item.groupName}
+                  {`${item.group?.name}`}
                 </div>
               )}
               <div
@@ -157,7 +149,7 @@ function CategoryList({
 }
 
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
-  categoryGroups: CategoryGroup[];
+  categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
   groupHeaderStyle?: object;
 };
@@ -169,19 +161,23 @@ export default function CategoryAutocomplete({
   groupHeaderStyle,
   ...props
 }: CategoryAutocompleteProps) {
-  let categorySuggestions = useMemo(
+  let categorySuggestions: Array<
+    CategoryEntity & { group?: CategoryGroupEntity }
+  > = useMemo(
     () =>
       categoryGroups.reduce(
         (list, group) =>
           list.concat(
-            group.categories.map(category => ({
-              ...category,
-              groupName: group.name,
-            })),
+            group.categories
+              .filter(category => category.cat_group === group.id)
+              .map(category => ({
+                ...category,
+                group: group,
+              })),
           ),
-        showSplitOption ? [{ id: 'split', name: '' }] : [],
+        showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
       ),
-    [categoryGroups],
+    [showSplitOption, categoryGroups],
   );
 
   return (
