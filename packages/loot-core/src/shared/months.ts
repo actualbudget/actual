@@ -220,6 +220,11 @@ export function dayRangeInclusive(start: DateLike, end: DateLike) {
   return _dayRange(start, end, true);
 }
 
+export function getMonthFromIndex(year: string, monthIndex: number) {
+  const formatMonth = `${monthIndex + 1}`.padStart(2, '0');
+  return `${year}-${formatMonth}`;
+}
+
 export function getMonthIndex(month: string): number {
   return parseInt(month.slice(5, 7)) - 1;
 }

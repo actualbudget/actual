@@ -103,6 +103,16 @@ export const styles = {
       outline: 'none',
     },
   },
+  lineClamp: (lines: number) => {
+    return {
+      display: '-webkit-box',
+      WebkitLineClamp: lines,
+      WebkitBoxOrient: 'vertical',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      wordBreak: 'break-word',
+    };
+  },
   // Dynamically set
   lightScrollbar: null as CSSProperties | null,
   darkScrollbar: null as CSSProperties | null,

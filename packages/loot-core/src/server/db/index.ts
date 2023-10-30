@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import { groupById } from '../../shared/util';
+import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import {
   schema,
   schemaConfig,
@@ -271,28 +272,28 @@ export function updateWithSchema(table, fields) {
 // Data-specific functions. Ideally this would be split up into
 // different files
 
-export async function getCategories() {
-  return all(`
-    SELECT c.* FROM categories c
-      LEFT JOIN category_groups cg ON c.cat_group = cg.id
-      WHERE c.tombstone = 0
-      ORDER BY cg.sort_order, cg.id, c.sort_order, c.id
+export async function getCategories(): Promise<CategoryEntity[]> {
+  return await all(`
+    SELECT c.* FROM categories c WHERE c.tombstone = 0
+      ORDER BY c.sort_order, c.id
   `);
 }
 
-export async function getCategoriesGrouped() {
-  const groups = await all(
-    'SELECT * FROM category_groups WHERE tombstone = 0 ORDER BY is_income, sort_order, id',
-  );
-  const rows = await all(`
-    SELECT * FROM categories WHERE tombstone = 0
-      ORDER BY sort_order, id
+export async function getCategoriesGrouped(): Promise<
+  Array<CategoryGroupEntity>
+> {
+  const groups = await all(`
+    SELECT cg.* FROM category_groups cg WHERE cg.tombstone = 0 ORDER BY cg.is_income, cg.sort_order, cg.id
+  `);
+  const categories = await all(`
+    SELECT c.* FROM categories c WHERE c.tombstone = 0
+      ORDER BY c.sort_order, c.id
   `);
 
   return groups.map(group => {
     return {
       ...group,
-      categories: rows.filter(row => row.cat_group === group.id),
+      categories: categories.filter(c => c.cat_group === group.id),
     };
   });
 }
