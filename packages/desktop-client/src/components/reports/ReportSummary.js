@@ -1,28 +1,20 @@
 import React from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import {
+  amountToCurrency,
+  integerToCurrency,
+  amountToInteger,
+} from 'loot-core/src/shared/util';
 
 import { theme, styles } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
-export function ReportSummary({
-  start,
-  end,
-  totalExpenses,
-  totalIncome,
-  totalNet,
-  selectType,
-}) {
-  let amt =
-    selectType === 'Expense'
-      ? totalExpenses
-      : selectType === 'Income'
-      ? totalIncome
-      : totalNet;
-  let net = totalExpenses > totalIncome ? 'EXPENSE' : 'INCOME';
+export function ReportSummary({ start, end, data, typeOp, monthsCount }) {
+  let net = data.totalDebts > data.totalAssets ? 'EXPENSE' : 'INCOME';
+  const average = amountToInteger(data[typeOp]) / monthsCount;
   return (
     <View
       style={{
@@ -71,9 +63,9 @@ export function ReportSummary({
             },
           ]}
         >
-          {selectType === 'Expense'
+          {typeOp === 'totalDebts'
             ? 'TOTAL SPENDING'
-            : selectType === 'Income'
+            : typeOp === 'totalAssets'
             ? 'TOTAL INCOME'
             : 'NET ' + net}
         </Text>
@@ -88,10 +80,51 @@ export function ReportSummary({
           ]}
         >
           <PrivacyFilter blurIntensity={7}>
-            {amountToCurrency(amt)}
+            {amountToCurrency(data[typeOp])}
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>For this time period</Text>
+      </View>
+      <View
+        style={{
+          backgroundColor: theme.pageBackground,
+          padding: 15,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 10,
+        }}
+      >
+        <Text
+          style={[
+            styles.mediumText,
+            {
+              alignItems: 'center',
+              marginBottom: 2,
+              fontWeight: 400,
+            },
+          ]}
+        >
+          {typeOp === 'totalDebts'
+            ? 'AVERAGE SPENDING'
+            : typeOp === 'totalAssets'
+            ? 'AVERAGE INCOME'
+            : 'AVERAGE NET'}
+        </Text>
+        <Text
+          style={[
+            styles.veryLargeText,
+            {
+              alignItems: 'center',
+              marginBottom: 2,
+              fontWeight: 800,
+            },
+          ]}
+        >
+          <PrivacyFilter blurIntensity={7}>
+            {integerToCurrency(average)}
+          </PrivacyFilter>
+        </Text>
+        <Text style={{ fontWeight: 600 }}>Per month</Text>
       </View>
     </View>
   );

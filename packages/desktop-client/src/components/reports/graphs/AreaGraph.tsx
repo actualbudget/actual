@@ -105,7 +105,7 @@ function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
                   right={amountToCurrency(payload[0].payload.totalDebts)}
                 />
                 <AlignedText
-                  left="All:"
+                  left="Net:"
                   right={
                     <strong>
                       {amountToCurrency(payload[0].payload.totalTotals)}

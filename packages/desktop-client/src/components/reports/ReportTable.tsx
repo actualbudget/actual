@@ -21,7 +21,7 @@ type TableRowProps = {
     totalAssets: string;
     totalDebts: string;
   };
-  typeItem?: string | null;
+  typeOp?: string | null;
   splitItem: string;
   mode: string;
   monthsCount: number;
@@ -29,8 +29,8 @@ type TableRowProps = {
 };
 
 const TableRow = memo(
-  ({ item, typeItem, splitItem, mode, monthsCount, style }: TableRowProps) => {
-    const average = amountToInteger(item[typeItem]) / monthsCount;
+  ({ item, typeOp, splitItem, mode, monthsCount, style }: TableRowProps) => {
+    const average = amountToInteger(item[typeOp]) / monthsCount;
     return (
       <Row
         key={item[splitItem]}
@@ -46,21 +46,21 @@ const TableRow = memo(
           ? item.monthData.map(item => {
               return (
                 <Cell
-                  key={amountToCurrency(item[typeItem])}
-                  value={amountToCurrency(item[typeItem])}
+                  key={amountToCurrency(item[typeOp])}
+                  value={amountToCurrency(item[typeOp])}
                   width="flex"
                   privacyFilter
                 />
               );
             })
-          : typeItem === 'totalTotals' && (
+          : typeOp === 'totalTotals' && (
               <>
                 <Cell value={amountToCurrency(item.totalAssets)} width="flex" />
                 <Cell value={amountToCurrency(item.totalDebts)} width="flex" />
               </>
             )}
         <Cell
-          value={amountToCurrency(item[typeItem])}
+          value={amountToCurrency(item[typeOp])}
           style={{
             fontWeight: 600,
           }}
@@ -82,7 +82,7 @@ const TableRow = memo(
 
 function GroupedTableRow({
   item,
-  typeItem,
+  typeOp,
   splitItem,
   mode,
   monthsCount,
@@ -93,7 +93,7 @@ function GroupedTableRow({
       <TableRow
         key={item.id}
         item={item}
-        typeItem={typeItem}
+        typeOp={typeOp}
         splitItem={splitItem}
         mode={mode}
         monthsCount={monthsCount}
@@ -105,13 +105,21 @@ function GroupedTableRow({
       />
       <View>
         {item.categories
-          .filter(i => (empty ? i[typeItem] !== 0 : true))
+          .filter(i =>
+            !empty
+              ? typeOp === 'totalTotals'
+                ? i.totalAssets !== 0 ||
+                  i.totalDebts !== 0 ||
+                  i.totalTotals !== 0
+                : i[typeOp] !== 0
+              : true,
+          )
           .map(item => {
             return (
               <TableRow
                 key={item.id}
                 item={item}
-                typeItem={typeItem}
+                typeOp={typeOp}
                 splitItem={splitItem}
                 mode={mode}
                 monthsCount={monthsCount}
@@ -159,14 +167,8 @@ export function TableHeader({ scrollWidth, split, interval, type }) {
   );
 }
 
-export function TableTotals({
-  data,
-  scrollWidth,
-  typeItem,
-  mode,
-  monthsCount,
-}) {
-  const average = amountToInteger(data[typeItem]) / monthsCount;
+export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
+  const average = amountToInteger(data[typeOp]) / monthsCount;
   return (
     <Row
       collapsed={true}
@@ -181,24 +183,20 @@ export function TableTotals({
         ? data.monthData.map(item => {
             return (
               <Cell
-                key={amountToCurrency(item[typeItem])}
-                value={amountToCurrency(item[typeItem])}
+                key={amountToCurrency(item[typeOp])}
+                value={amountToCurrency(item[typeOp])}
                 width="flex"
                 privacyFilter
               />
             );
           })
-        : typeItem === 'totalTotals' && (
+        : typeOp === 'totalTotals' && (
             <>
               <Cell value={amountToCurrency(data.totalAssets)} width="flex" />
               <Cell value={amountToCurrency(data.totalDebts)} width="flex" />
             </>
           )}
-      <Cell
-        value={amountToCurrency(data[typeItem])}
-        width="flex"
-        privacyFilter
-      />
+      <Cell value={amountToCurrency(data[typeOp])} width="flex" privacyFilter />
       <Cell
         value={integerToCurrency(Math.round(average))}
         width="flex"
@@ -214,7 +212,7 @@ export function TotalTableList({
   data,
   empty,
   monthsCount,
-  typeItem,
+  typeOp,
   mode,
   split,
 }) {
@@ -229,14 +227,20 @@ export function TotalTableList({
   return (
     <View>
       {data[splitData]
-        .filter(i => (empty ? i[typeItem] !== 0 : true))
+        .filter(i =>
+          !empty
+            ? typeOp === 'totalTotals'
+              ? i.totalAssets !== 0 || i.totalDebts !== 0 || i.totalTotals !== 0
+              : i[typeOp] !== 0
+            : true,
+        )
         .map(item => {
           if (split === 'Category') {
             return (
               <GroupedTableRow
                 key={item.id}
                 item={item}
-                typeItem={typeItem}
+                typeOp={typeOp}
                 splitItem={splitItem}
                 mode={mode}
                 monthsCount={monthsCount}
@@ -248,7 +252,7 @@ export function TotalTableList({
               <TableRow
                 key={item.id}
                 item={item}
-                typeItem={typeItem}
+                typeOp={typeOp}
                 splitItem={splitItem}
                 mode={mode}
                 monthsCount={monthsCount}

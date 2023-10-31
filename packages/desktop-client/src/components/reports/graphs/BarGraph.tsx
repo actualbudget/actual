@@ -135,7 +135,7 @@ function BarGraph({
                   right={amountToCurrency(payload[0].payload.totalDebts)}
                 />
                 <AlignedText
-                  left="All:"
+                  left="Net:"
                   right={amountToCurrency(payload[0].payload.totalTotals)}
                 />
                 <AlignedText
@@ -179,7 +179,7 @@ function BarGraph({
                 height={height}
                 stackOffset="sign"
                 data={data[splitData].filter(i =>
-                  empty ? i[typeOp] !== 0 : true,
+                  !empty ? i[typeOp] !== 0 : true,
                 )}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
@@ -195,7 +195,7 @@ function BarGraph({
                 {!compact && <ReferenceLine y={0} stroke="#000" />}
                 <Bar dataKey={val => getVal(val)} stackId="a">
                   {data[splitData]
-                    .filter(i => (empty ? i[typeOp] !== 0 : true))
+                    .filter(i => (!empty ? i[typeOp] !== 0 : true))
                     .map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
@@ -213,7 +213,7 @@ function BarGraph({
                 {yAxis === 'date' && typeOp === 'totalTotals' && (
                   <Bar dataKey={'totalDebts'} stackId="a">
                     {data[splitData]
-                      .filter(i => (empty ? i[typeOp] !== 0 : true))
+                      .filter(i => (!empty ? i[typeOp] !== 0 : true))
                       .map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}

@@ -114,9 +114,9 @@ export default function Custom() {
   } = useFilters();
 
   const typeOptions = [
-    { value: 1, description: 'Expense', format: 'totalDebts' },
-    { value: 2, description: 'Income', format: 'totalAssets' },
-    { value: 3, description: 'All', format: 'totalTotals' },
+    { value: 1, description: 'Debts', format: 'totalDebts' },
+    { value: 2, description: 'Assets', format: 'totalAssets' },
+    { value: 3, description: 'Net', format: 'totalTotals' },
   ];
 
   const [selectedCategories, setSelectedCategories] = useState(null);
@@ -132,6 +132,7 @@ export default function Custom() {
   //const [interval, setInterval] = useState(4);
   const [empty, setEmpty] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [uncat, setUncat] = useState(false);
   const [dateRange, setDateRange] = useState(2);
 
   const [graphType, setGraphType] = useState('BarGraph');
@@ -153,6 +154,7 @@ export default function Custom() {
       filters,
       conditionsOp,
       hidden,
+      uncat,
     );
   }, [
     start,
@@ -166,6 +168,7 @@ export default function Custom() {
     filters,
     conditionsOp,
     hidden,
+    uncat,
   ]);
   const data = useReport('default', getGraphData);
 
@@ -232,7 +235,7 @@ export default function Custom() {
           end={end}
           data={data}
           split={split}
-          empty={!empty}
+          empty={empty}
           OnChangeLegend={OnChangeLegend}
           typeOp={typeOptions.find(opt => opt.value === type).format}
         />
@@ -256,7 +259,7 @@ export default function Custom() {
           end={end}
           data={data}
           split={split}
-          empty={!empty}
+          empty={empty}
           OnChangeLegend={OnChangeLegend}
           typeOp={typeOptions.find(opt => opt.value === type).format}
         />
@@ -296,9 +299,9 @@ export default function Custom() {
           <SimpleTable saveScrollWidth={saveScrollWidth}>
             <TotalTableList
               data={data}
-              empty={!empty}
+              empty={empty}
               monthsCount={months.length}
-              typeItem={typeOptions.find(opt => opt.value === type).format}
+              typeOp={typeOptions.find(opt => opt.value === type).format}
               mode={mode}
               split={splitOptions.find(opt => opt.value === split).description}
             />
@@ -307,7 +310,7 @@ export default function Custom() {
             scrollWidth={scrollWidth}
             data={data}
             mode={mode}
-            typeItem={typeOptions.find(opt => opt.value === type).format}
+            typeOp={typeOptions.find(opt => opt.value === type).format}
             monthsCount={months.length}
             type={type}
           />
@@ -577,14 +580,14 @@ export default function Custom() {
             <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
 
             <Checkbox
-              id="hide-empty-columns"
+              id="show-empty-columns"
               checked={empty}
               value={empty}
               onChange={() => setEmpty(!empty)}
             />
             <label
-              htmlFor="hide-empty-columns"
-              title="Rows that are zero or blank"
+              htmlFor="show-empty-columns"
+              title="Show rows that are zero or blank"
               style={{ fontSize: 12 }}
             >
               Show Empty Rows
@@ -600,17 +603,40 @@ export default function Custom() {
             <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
 
             <Checkbox
-              id="hide-hidden-columns"
+              id="show-hidden-columns"
               checked={hidden}
               value={hidden}
               onChange={() => setHidden(!hidden)}
             />
             <label
-              htmlFor="hide-hidden-columns"
-              title="Off budget accounts or hidden categories"
+              htmlFor="show-hidden-columns"
+              title="Show off budget accounts and hidden categories"
               style={{ fontSize: 12 }}
             >
               Off Budget Items
+            </label>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+
+            <Checkbox
+              id="show-uncategorized"
+              checked={uncat}
+              value={uncat}
+              onChange={() => setUncat(!uncat)}
+            />
+            <label
+              htmlFor="show-uncategorized"
+              title="Show uncategorized transactions"
+              style={{ fontSize: 12 }}
+            >
+              Uncategorized
             </label>
           </View>
           <View
@@ -748,6 +774,7 @@ export default function Custom() {
               onSelect={() => {
                 if (mode === 'total') {
                   onChangeGraph('BarGraph');
+                  // eslint-disable-next-line rulesdir/prefer-if-statement
                   [3].includes(type) && setType(1);
                 } else {
                   onChangeGraph('StackedBarGraph');
@@ -937,13 +964,11 @@ export default function Custom() {
                       <ReportSummary
                         start={start}
                         end={end}
-                        totalExpenses={data.totalDebts}
-                        totalIncome={data.totalAssets}
-                        totalNet={data.totalTotals}
-                        selectType={
-                          typeOptions.find(opt => opt.value === type)
-                            .description
+                        typeOp={
+                          typeOptions.find(opt => opt.value === type).format
                         }
+                        data={data}
+                        monthsCount={months.length}
                       />
                     )}
                     {viewSplit && (

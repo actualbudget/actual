@@ -160,9 +160,9 @@ function DonutGraph({
                   data={
                     yAxis === 'date'
                       ? data.monthData.filter(i =>
-                          empty ? i[typeOp] !== 0 : true,
+                          !empty ? i[typeOp] !== 0 : true,
                         )
-                      : data.data.filter(i => (empty ? i[typeOp] !== 0 : true))
+                      : data.data.filter(i => (!empty ? i[typeOp] !== 0 : true))
                   }
                   outerRadius={200}
                   innerRadius={100}

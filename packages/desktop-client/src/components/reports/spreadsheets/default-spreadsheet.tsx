@@ -19,8 +19,44 @@ export default function createSpreadsheet(
   conditions = [],
   conditionsOp,
   hidden,
+  uncat,
 ) {
-  let categoryFilter = (categories.list || []).filter(
+  let uncatCat = {
+    name: 'Uncategorized',
+    id: null,
+    uncat_id: '1',
+    hidden: 0,
+    offBudget: false,
+  };
+  let uncatTransfer = {
+    name: 'Transfers',
+    id: null,
+    uncat_id: '2',
+    hidden: 0,
+    transfer: false,
+  };
+  let uncatOff = {
+    name: 'OffBudget',
+    id: null,
+    uncat_id: '3',
+    hidden: 0,
+    offBudget: true,
+  };
+
+  let uncatGroup = {
+    name: 'Uncategorized',
+    id: null,
+    hidden: 0,
+    categories: [uncatCat, uncatTransfer, uncatOff],
+  };
+  let catList = uncat
+    ? [...categories.list, uncatCat, uncatTransfer, uncatOff]
+    : categories.list;
+  let catGroup = uncat
+    ? [...categories.grouped, uncatGroup]
+    : categories.grouped;
+
+  let categoryFilter = (catList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -34,13 +70,13 @@ export default function createSpreadsheet(
   let splitLabel;
   switch (split) {
     case 1:
-      splitItem = categories.list;
+      splitItem = catList;
       splitList = splitItem;
       splitLabel = 'category';
       break;
     case 2:
-      splitItem = categories.list;
-      splitList = categories.grouped;
+      splitItem = catList;
+      splitList = catGroup;
       splitLabel = 'category';
       break;
     case 3:
@@ -54,12 +90,12 @@ export default function createSpreadsheet(
       splitLabel = 'account';
       break;
     case 5:
-      splitItem = categories.list;
+      splitItem = catList;
       splitList = splitItem;
       splitLabel = 'category';
       break;
     case 6:
-      splitItem = categories.list;
+      splitItem = catList;
       splitList = splitItem;
       splitLabel = 'category';
       break;
@@ -76,9 +112,82 @@ export default function createSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
+    function makeQuery(splt, name) {
+      let query = q('transactions')
+        .filter(
+          //Show Offbudget and hidden categories
+          !hidden && {
+            $and: [
+              {
+                'account.offbudget': false,
+                $or: [
+                  {
+                    'category.hidden': false,
+                    category: null,
+                  },
+                ],
+              },
+            ],
+            $or: [
+              {
+                'payee.transfer_acct.offbudget': true,
+                'payee.transfer_acct': null,
+              },
+            ],
+          },
+        )
+        //Apply Category_Selector
+        .filter(
+          selectedCategories && {
+            $or: [
+              {
+                category: null,
+                $or: categoryFilter.map(category => ({
+                  category: category.id,
+                })),
+              },
+            ],
+          },
+        )
+        //Calculate uncategorized transactions when box checked
+        .filter(
+          splt.uncat_id === '2'
+            ? {
+                'payee.transfer_acct.closed': false,
+              }
+            : {
+                'payee.transfer_acct': null,
+                'account.offbudget': splt.offBudget ? splt.offBudget : false,
+              },
+        )
+        //Apply filters and split by "Group By"
+        .filter({
+          [conditionsOpKey]: [...filters],
+          [splitLabel]: splt.id,
+        })
+        //Apply month range filters
+        .filter({
+          $and: [
+            { date: { $transform: '$month', $gte: start } },
+            { date: { $transform: '$month', $lte: end } },
+          ],
+        })
+        //Show assets or debts
+        .filter(
+          name === 'assets' ? { amount: { $gt: 0 } } : { amount: { $lt: 0 } },
+        );
+
+      return query
+        .groupBy({ $month: '$date' })
+        .select([
+          { date: { $month: '$date' } },
+          { [name]: { $sum: '$amount' } },
+        ]);
+    }
+
     const graphData = await Promise.all(
       splitItem.map(async splt => {
-        let [starting, balances] = await Promise.all([
+        let [starting, assets, debts] = await Promise.all([
           runQuery(
             q('transactions')
               .filter(
@@ -86,7 +195,12 @@ export default function createSpreadsheet(
                   $and: [
                     {
                       'account.offbudget': false,
-                      'category.hidden': false,
+                      $or: [
+                        {
+                          'category.hidden': false,
+                          category: null,
+                        },
+                      ],
                     },
                   ],
                   $or: [
@@ -98,6 +212,18 @@ export default function createSpreadsheet(
                 },
               )
               .filter(
+                splt.uncat_id === '2'
+                  ? {
+                      'payee.transfer_acct.closed': false,
+                    }
+                  : {
+                      'payee.transfer_acct': null,
+                      'account.offbudget': splt.offBudget
+                        ? splt.offBudget
+                        : false,
+                    },
+              )
+              .filter(
                 selectedCategories && {
                   $or: categoryFilter.map(category => ({
                     category: category.id,
@@ -105,102 +231,110 @@ export default function createSpreadsheet(
                 },
               )
               .filter({
+                [conditionsOpKey]: [...filters],
                 [splitLabel]: splt.id,
-                $and: [
-                  { [conditionsOpKey]: filters },
-                  { date: { $lt: start + '-01' } },
-                ],
+              })
+              .filter({
+                $and: [{ date: { $lt: start + '-01' } }],
               })
               .calculate({ $sum: '$amount' }),
           ).then(({ data }) => data),
 
-          runQuery(
-            q('transactions')
-              .filter(
-                !hidden && {
-                  $and: [
-                    {
-                      'account.offbudget': false,
-                      'category.hidden': false,
-                    },
-                  ],
-                  $or: [
-                    {
-                      'payee.transfer_acct.offbudget': true,
-                      'payee.transfer_acct': null,
-                    },
-                  ],
-                },
-              )
-              .filter(
-                selectedCategories && {
-                  $or: categoryFilter.map(category => ({
-                    category: category.id,
-                  })),
-                },
-              )
-              .filter({
-                [splitLabel]: splt.id,
-                $and: [
-                  { [conditionsOpKey]: filters },
-                  { date: { $gte: start + '-01' } },
-                  { date: { $lte: end + '-31' } },
-                ],
-              })
-              .groupBy({ $month: '$date' })
-              .select([
-                { date: { $month: '$date' } },
-                { amount: { $sum: '$amount' } },
-              ]),
-          ).then(({ data }) => data),
+          runQuery(makeQuery(splt, 'assets')).then(({ data }) => data),
+          runQuery(makeQuery(splt, 'debts')).then(({ data }) => data),
         ]);
 
         return {
           id: splt.id,
+          uncat_id: splt.uncat_id,
           name: splt.name,
           starting,
           hidden: splt.hidden,
-          balances: index(balances, 'date'),
+          assets: index(assets, 'date'),
+          debts: index(debts, 'date'),
         };
       }),
     );
 
     const months = monthUtils.rangeInclusive(start, end);
-    const groupData = await Promise.all(
-      categories.grouped.map(async group => {
-        let groupedStarting = 0;
+    const calcData = await Promise.all(
+      graphData.map(async graph => {
+        let graphStarting = 0;
         const mon = await Promise.all(
           months.map(async month => {
-            let groupedAmount = 0;
-            graphData.map(async graph => {
-              if (graph.hidden === 0 && group.hidden === 0) {
-                if (graph.balances[month]) {
-                  if (group.categories.map(v => v.id).includes(graph.id)) {
-                    groupedAmount += graph.balances[month].amount;
-                  }
-                }
+            let graphAssets = 0;
+            let graphDebts = 0;
+            if (graph.assets[month] || graph.debts[month]) {
+              if (graph.assets[month]) {
+                graphAssets += graph.assets[month].assets;
               }
+              if (graph.debts[month]) {
+                graphDebts += graph.debts[month].debts;
+              }
+            }
 
-              groupedStarting += graph.starting;
-            });
+            graphStarting += graph.starting;
             return {
               date: month,
-              amount: groupedAmount,
+              assets: graphAssets,
+              debts: graphDebts,
             };
           }),
         );
 
         return {
-          id: group.id,
-          name: group.name,
-          starting: groupedStarting,
-          hidden: group.hidden,
+          id: graph.id,
+          uncat_id: graph.uncat_id,
+          name: graph.name,
+          starting: graphStarting,
+          hidden: graph.hidden,
           balances: index(mon, 'date'),
         };
       }),
     );
 
-    const splitData = split === 2 ? groupData : graphData;
+    const groupData = await Promise.all(
+      catGroup.map(async group => {
+        if (hidden || group.hidden === 0) {
+          let groupedStarting = 0;
+          const mon = await Promise.all(
+            months.map(async month => {
+              let groupedAssets = 0;
+              let groupedDebts = 0;
+              graphData.map(async graph => {
+                if (graph.assets[month] || graph.debts[month]) {
+                  if (group.categories.map(v => v.id).includes(graph.id)) {
+                    if (graph.assets[month]) {
+                      groupedAssets += graph.assets[month].assets;
+                    }
+                    if (graph.debts[month]) {
+                      groupedDebts += graph.debts[month].debts;
+                    }
+                  }
+                }
+
+                groupedStarting += graph.starting;
+              });
+              return {
+                date: month,
+                assets: groupedAssets,
+                debts: groupedDebts,
+              };
+            }),
+          );
+
+          return {
+            id: group.id,
+            name: group.name,
+            starting: groupedStarting,
+            hidden: group.hidden,
+            balances: index(mon, 'date'),
+          };
+        }
+      }),
+    );
+
+    const splitData = split === 2 ? groupData : calcData;
 
     const data = await Promise.all(
       splitData.map(async graph => {
@@ -209,13 +343,17 @@ export default function createSpreadsheet(
       }),
     );
 
-    const gData = await Promise.all(
-      categories.grouped.map(async group => {
+    const groupedData = await Promise.all(
+      catGroup.map(async group => {
         const catData = await Promise.all(
           group.categories.map(async graph => {
             let catMatch = null;
-            graphData.map(async cat => {
-              if (cat.id === graph.id) {
+            calcData.map(async cat => {
+              if (
+                cat.id === null
+                  ? cat.uncat_id === graph.uncat_id
+                  : cat.id === graph.id
+              ) {
                 catMatch = cat;
               }
             });
@@ -247,11 +385,12 @@ export default function createSpreadsheet(
         let perMonthDebts = 0;
         let perMonthTotals = 0;
         graphData.map(async graph => {
-          if (graph.balances[month]) {
-            if (graph.balances[month].amount < 0) {
-              perMonthDebts += graph.balances[month].amount;
-            } else {
-              perMonthAssets += graph.balances[month].amount;
+          if (graph.assets[month] || graph.debts[month]) {
+            if (graph.assets[month]) {
+              perMonthAssets += graph.assets[month].assets;
+            }
+            if (graph.debts[month]) {
+              perMonthDebts += graph.debts[month].debts;
             }
             perMonthTotals = perMonthAssets + perMonthDebts;
           }
@@ -270,7 +409,7 @@ export default function createSpreadsheet(
       }),
     );
 
-    const sData = await Promise.all(
+    const stackedData = await Promise.all(
       months.map(async month => {
         let perMonthAmounts = 0;
         const stacked = await Promise.all(
@@ -312,10 +451,10 @@ export default function createSpreadsheet(
     );
 
     setData({
-      stackedData: sData,
+      stackedData: stackedData,
       split: splitList,
       data,
-      gData: gData,
+      gData: groupedData,
       monthData,
       start,
       end,
@@ -351,14 +490,15 @@ function recalculate(item, start, end) {
 
     if (item.balances[month]) {
       exists = true;
-      if (item.balances[month].amount < 0) {
-        debts += item.balances[month].amount;
+      if (item.balances[month].debts) {
+        debts += item.balances[month].debts;
         //startingDebts += data.balances[month].amount;
-        totalDebts += item.balances[month].amount;
-      } else {
-        assets += item.balances[month].amount;
+        totalDebts += item.balances[month].debts;
+      }
+      if (item.balances[month].assets) {
+        assets += item.balances[month].assets;
         //startingAssets += data.balances[month].amount;
-        totalAssets += item.balances[month].amount;
+        totalAssets += item.balances[month].assets;
       }
       total = assets + debts;
       totalTotals = totalAssets + totalDebts;
