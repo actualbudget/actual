@@ -8,7 +8,6 @@ import View from '../common/View';
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import BudgetPageHeader from './BudgetPageHeader';
 import BudgetTable from './BudgetTable';
-import { CategoryGroupsContext } from './CategoryGroupsContext';
 
 function getNumPossibleMonths(width) {
   let estimatedTableWidth = width - 200;
@@ -61,36 +60,34 @@ const DynamicBudgetTableInner = forwardRef(
     }
 
     return (
-      <CategoryGroupsContext.Provider value={categoryGroups}>
-        <View
-          style={{
-            width,
-            height,
-            alignItems: 'center',
-            opacity: width <= 0 || height <= 0 ? 0 : 1,
-          }}
-        >
-          <View style={{ width: '100%', maxWidth }}>
-            <BudgetPageHeader
-              startMonth={prewarmStartMonth}
-              numMonths={numMonths}
-              monthBounds={monthBounds}
-              onMonthSelect={onMonthSelect}
-            />
-            <BudgetTable
-              ref={ref}
-              categoryGroups={categoryGroups}
-              prewarmStartMonth={prewarmStartMonth}
-              startMonth={startMonth}
-              numMonths={numMonths}
-              monthBounds={monthBounds}
-              prefs={prefs}
-              {...actions}
-              {...props}
-            />
-          </View>
+      <View
+        style={{
+          width,
+          height,
+          alignItems: 'center',
+          opacity: width <= 0 || height <= 0 ? 0 : 1,
+        }}
+      >
+        <View style={{ width: '100%', maxWidth }}>
+          <BudgetPageHeader
+            startMonth={prewarmStartMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            onMonthSelect={onMonthSelect}
+          />
+          <BudgetTable
+            ref={ref}
+            categoryGroups={categoryGroups}
+            prewarmStartMonth={prewarmStartMonth}
+            startMonth={startMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            prefs={prefs}
+            {...actions}
+            {...props}
+          />
         </View>
-      </CategoryGroupsContext.Provider>
+      </View>
     );
   },
 );
