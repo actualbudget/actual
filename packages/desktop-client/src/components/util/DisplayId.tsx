@@ -6,11 +6,17 @@ import { CachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { theme } from '../../style';
 import Text from '../common/Text';
 
+type DisplayIdProps = {
+  type: 'accounts' | 'payees';
+  id: string;
+  noneColor?: string;
+};
+
 export default function DisplayId({
   type,
   id,
   noneColor = theme.pageTextSubdued,
-}) {
+}: DisplayIdProps) {
   let DataComponent;
 
   switch (type) {

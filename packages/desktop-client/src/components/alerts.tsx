@@ -93,8 +93,8 @@ export const Error = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
       icon={ExclamationOutline}
-      color={theme.altErrorText}
-      backgroundColor={theme.altErrorBackground}
+      color={theme.errorTextDarker}
+      backgroundColor={theme.errorBackground}
       style={style}
     >
       {children}

@@ -33,6 +33,7 @@ function CellValue({
   getStyle,
   privacyFilter,
   'data-testid': testId,
+  ...props
 }: CellValueProps) {
   let { fullSheetName } = useSheetName(binding);
   let sheetValue = useSheetValue(binding);
@@ -56,6 +57,7 @@ function CellValue({
         }}
         data-testid={testId || fullSheetName}
         data-cellname={fullSheetName}
+        {...props}
       >
         {formatter ? formatter(sheetValue) : format(sheetValue, type)}
       </Text>

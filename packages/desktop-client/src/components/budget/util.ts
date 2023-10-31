@@ -1,30 +1,43 @@
-import { styles, theme } from '../../style';
+import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
-export function addToBeBudgetedGroup(groups) {
+import { styles, theme } from '../../style';
+import { type DropPosition } from '../sort';
+
+export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
     {
       id: 'to-be-budgeted',
       name: 'To Be Budgeted',
-      categories: [{ id: 'to-be-budgeted', name: 'To Be Budgeted' }],
+      categories: [
+        {
+          id: 'to-be-budgeted',
+          name: 'To Be Budgeted',
+          cat_group: 'to-be-budgeted',
+          group: {
+            id: 'to-be-budgeted',
+            name: 'To Be Budgeted',
+          },
+        },
+      ],
     },
     ...groups,
   ];
 }
 
-export function separateGroups(categoryGroups) {
+export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
   return [
     categoryGroups.filter(g => !g.is_income),
     categoryGroups.find(g => g.is_income),
   ];
 }
 
-export function makeAmountGrey(value) {
-  return value === 0 || value === '0' || value === ''
+export function makeAmountGrey(value: number | string) {
+  return value === 0 || value === '0' || value === '' || value == null
     ? { color: theme.altMenuItemText }
     : null;
 }
 
-export function makeAmountStyle(value, status) {
+export function makeAmountStyle(value: number, status: boolean | string) {
   if (value < 0) {
     return { color: theme.errorText };
   }
@@ -42,7 +55,7 @@ export function makeAmountStyle(value, status) {
   }
 }
 
-export function makeAmountFullStyle(value) {
+export function makeAmountFullStyle(value: number) {
   return {
     color:
       value < 0
@@ -53,7 +66,11 @@ export function makeAmountFullStyle(value) {
   };
 }
 
-export function findSortDown(arr, pos, targetId) {
+export function findSortDown(
+  arr: CategoryGroupEntity[],
+  pos: DropPosition,
+  targetId: string,
+) {
   if (pos === 'top') {
     return { targetId };
   } else {
@@ -73,7 +90,11 @@ export function findSortDown(arr, pos, targetId) {
   }
 }
 
-export function findSortUp(arr, pos, targetId) {
+export function findSortUp(
+  arr: CategoryGroupEntity[],
+  pos: DropPosition,
+  targetId: string,
+) {
   if (pos === 'bottom') {
     return { targetId };
   } else {

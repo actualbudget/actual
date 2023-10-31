@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import * as Platform from 'loot-core/src/client/platform';
+
+import useNavigate from '../hooks/useNavigate';
 
 export default function GlobalKeys() {
   let navigate = useNavigate();

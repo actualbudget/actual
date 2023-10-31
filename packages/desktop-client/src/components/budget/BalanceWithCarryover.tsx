@@ -2,6 +2,7 @@ import React, { type ComponentProps } from 'react';
 
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
+import { type CSSProperties } from '../../style';
 import View from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
@@ -14,6 +15,9 @@ type BalanceWithCarryoverProps = {
   goal?: ComponentProps<typeof CellValue>['binding'];
   budgeted?: ComponentProps<typeof CellValue>['binding'];
   disabled?: boolean;
+  style?: CSSProperties;
+  balanceStyle?: CSSProperties;
+  carryoverStyle?: CSSProperties;
 };
 export default function BalanceWithCarryover({
   carryover,
@@ -21,6 +25,9 @@ export default function BalanceWithCarryover({
   goal,
   budgeted,
   disabled,
+  style,
+  balanceStyle,
+  carryoverStyle,
 }: BalanceWithCarryoverProps) {
   let carryoverValue = useSheetValue(carryover);
   let balanceValue = useSheetValue(balance);
@@ -30,7 +37,7 @@ export default function BalanceWithCarryover({
   // if a goal is passed in then check if that goal is met or not.
   let goalStatus = goalValue != null ? budgetedValue >= goalValue : null;
   return (
-    <>
+    <View style={style}>
       <CellValue
         binding={balance}
         goalStatus={isGoalTemplatesEnabled ? goalStatus : null}
@@ -42,9 +49,10 @@ export default function BalanceWithCarryover({
             cursor: 'pointer',
             ':hover': { textDecoration: 'underline' },
           }),
+          ...balanceStyle,
         }}
       />
-      {carryoverValue === true && (
+      {carryoverValue && (
         <View
           style={{
             alignSelf: 'center',
@@ -54,6 +62,7 @@ export default function BalanceWithCarryover({
             top: 0,
             bottom: 0,
             justifyContent: 'center',
+            ...carryoverStyle,
           }}
         >
           <ArrowThinRight
@@ -63,6 +72,6 @@ export default function BalanceWithCarryover({
           />
         </View>
       )}
-    </>
+    </View>
   );
 }

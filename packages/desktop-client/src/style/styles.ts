@@ -83,7 +83,6 @@ export const styles = {
     fontSize: 16,
     // lineHeight: 22.4 // TODO: This seems like trouble, but what's the right value?
   },
-
   delayedFadeIn: {
     animationName: keyframes({
       '0%': { opacity: 0 },
@@ -97,6 +96,22 @@ export const styles = {
     textDecoration: 'underline',
     textDecorationThickness: 2,
     textDecorationColor: theme.pillBorder,
+  },
+  noTapHighlight: {
+    WebkitTapHighlightColor: 'transparent',
+    ':focus': {
+      outline: 'none',
+    },
+  },
+  lineClamp: (lines: number) => {
+    return {
+      display: '-webkit-box',
+      WebkitLineClamp: lines,
+      WebkitBoxOrient: 'vertical',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      wordBreak: 'break-word',
+    };
   },
   // Dynamically set
   lightScrollbar: null as CSSProperties | null,

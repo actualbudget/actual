@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
+import { type CommonModalProps } from '../../types/modals';
 import { Error } from '../alerts';
 import Button from '../common/Button';
 import Modal, { ModalButtons } from '../common/Modal';
@@ -19,12 +20,19 @@ function renderError(error) {
   );
 }
 
+type PlainExternalMsgProps = {
+  modalProps: CommonModalProps;
+  onMoveExternal: () => Promise<{ error; data }>;
+  onSuccess: (data: unknown) => Promise<void>;
+  onClose?: () => void;
+};
+
 export default function PlaidExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,
   onClose: originalOnClose,
-}) {
+}: PlainExternalMsgProps) {
   let [waiting, setWaiting] = useState(null);
   let [success, setSuccess] = useState(false);
   let [error, setError] = useState(null);
