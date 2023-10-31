@@ -176,7 +176,7 @@ export default function Custom() {
     if (selectedCategories === null && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
-  }, [categories, selectedCategories]);
+  }, [categories, selectedCategories, split]);
 
   useEffect(() => {
     async function run() {
@@ -731,17 +731,19 @@ export default function Custom() {
               flexShrink: 0,
             }}
           />
-          <View
-            style={{
-              marginTop: 10,
-            }}
-          >
-            <CategorySelector
-              categoryGroups={categories.grouped}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-            />
-          </View>
+          {[1, 2].includes(split) && (
+            <View
+              style={{
+                marginTop: 10,
+              }}
+            >
+              <CategorySelector
+                categoryGroups={categories.grouped}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+              />
+            </View>
+          )}
         </View>
         <View
           style={{

@@ -52,6 +52,7 @@ function DonutGraph({
 }: DonutGraphProps) {
   const colorScale = getColorScale('qualitative');
   const yAxis = [5, 6].includes(split) ? 'date' : 'name';
+  const splitData = [5, 6].includes(split) ? 'monthData' : 'data';
 
   type PayloadItem = {
     name: string;
@@ -142,7 +143,7 @@ function DonutGraph({
       }}
     >
       {(width, height, portalHost) =>
-        data.data && (
+        data[splitData] && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
@@ -157,18 +158,13 @@ function DonutGraph({
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   isAnimationActive={false}
-                  data={
-                    yAxis === 'date'
-                      ? data.monthData.filter(i =>
-                          !empty ? i[typeOp] !== 0 : true,
-                        )
-                      : data.data.filter(i => (!empty ? i[typeOp] !== 0 : true))
-                  }
-                  outerRadius={200}
-                  innerRadius={100}
+                  data={data[splitData].filter(i =>
+                    !empty ? i[typeOp] !== 0 : true,
+                  )}
+                  innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                 >
-                  {data.data.map((entry, index) => (
+                  {data[splitData].map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={colorScale[index % colorScale.length]}

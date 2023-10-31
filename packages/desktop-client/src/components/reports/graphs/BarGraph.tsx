@@ -206,7 +206,7 @@ function BarGraph({
                               : theme.reportsBlue
                             : colorScale[index % colorScale.length]
                         }
-                        name={entry.name}
+                        name={entry[yAxis]}
                       />
                     ))}
                 </Bar>

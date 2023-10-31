@@ -121,7 +121,7 @@ export function ReportSummary({ start, end, data, typeOp, monthsCount }) {
           ]}
         >
           <PrivacyFilter blurIntensity={7}>
-            {integerToCurrency(average)}
+            {integerToCurrency(Math.round(average))}
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>Per month</Text>
