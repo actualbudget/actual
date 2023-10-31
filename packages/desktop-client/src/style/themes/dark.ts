@@ -104,8 +104,8 @@ export const mobileSettingsViewTheme = colorPalette.navy50;
 export const mobileTransactionViewTheme = colorPalette.purple500;
 
 // Button
-export const buttonMenuText = colorPalette.navy100;
-export const buttonMenuTextHover = colorPalette.navy50;
+export const buttonMenuText = colorPalette.navy900;
+export const buttonMenuTextHover = buttonMenuText;
 export const buttonMenuBackground = 'transparent';
 export const buttonMenuBackgroundHover = 'rgba(200, 200, 200, .25)';
 export const buttonMenuBorder = colorPalette.navy500;
@@ -156,12 +156,12 @@ export const noticeBackgroundDark = colorPalette.green500;
 export const noticeText = colorPalette.green300;
 export const noticeTextLight = colorPalette.green500;
 export const noticeTextDark = colorPalette.green150;
-export const noticeTextMenu = colorPalette.green500;
+export const noticeTextMenu = colorPalette.green800;
 export const noticeBorder = colorPalette.green800;
 export const warningBackground = colorPalette.orange800;
 export const warningText = colorPalette.orange300;
 export const warningTextLight = colorPalette.orange500;
-export const warningTextDark = colorPalette.orange150;
+export const warningTextDark = colorPalette.orange100;
 export const warningBorder = colorPalette.orange500;
 export const errorBackground = colorPalette.red800;
 export const errorText = colorPalette.red300;

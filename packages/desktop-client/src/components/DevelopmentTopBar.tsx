@@ -21,7 +21,7 @@ export default function DevelopmentTopBar() {
       <View>This is a demo build of Actual.</View>
       <View>
         <ExternalLink
-          linkColor="blue"
+          linkColor="purple"
           to={`https://github.com/actualbudget/actual/pull/${process.env.REACT_APP_REVIEW_ID}`}
         >
           Open the PR: #{process.env.REACT_APP_REVIEW_ID}

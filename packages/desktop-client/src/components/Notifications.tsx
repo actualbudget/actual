@@ -58,7 +58,7 @@ function compileMessage(
                 }
 
                 return (
-                  <ExternalLink key={idx} to={match[2]}>
+                  <ExternalLink linkColor="purple" key={idx} to={match[2]}>
                     {match[1]}
                   </ExternalLink>
                 );
@@ -111,7 +111,7 @@ function Notification({
           ? theme.noticeText
           : error
           ? theme.errorTextDark
-          : theme.warningText,
+          : theme.warningTextDark,
       }}
     >
       <Stack
