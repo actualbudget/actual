@@ -289,7 +289,11 @@ export default function Custom() {
     }
     if (graphType === 'TableGraph') {
       return (
-        <>
+        <View
+          style={{
+            overflow: 'auto',
+          }}
+        >
           <TableHeader
             interval={mode === 'time' && months}
             scrollWidth={scrollWidth}
@@ -305,16 +309,16 @@ export default function Custom() {
               mode={mode}
               split={splitOptions.find(opt => opt.value === split).description}
             />
+            <TableTotals
+              scrollWidth={scrollWidth}
+              data={data}
+              mode={mode}
+              typeOp={typeOptions.find(opt => opt.value === type).format}
+              monthsCount={months.length}
+              type={type}
+            />
           </SimpleTable>
-          <TableTotals
-            scrollWidth={scrollWidth}
-            data={data}
-            mode={mode}
-            typeOp={typeOptions.find(opt => opt.value === type).format}
-            monthsCount={months.length}
-            type={type}
-          />
-        </>
+        </View>
       );
     }
   }
@@ -951,39 +955,37 @@ export default function Custom() {
                 <GraphType />
               </View>
               {(viewSplit || viewSummary) && (
-                <View>
-                  <View
-                    style={{
-                      padding: 10,
-                      flexDirection: 'column',
-                      minWidth: 300,
-                      marginRight: 10,
-                      textAlign: 'center',
-                      flexGrow: 1,
-                    }}
-                  >
-                    {viewSummary && (
-                      <ReportSummary
-                        start={start}
-                        end={end}
-                        typeOp={
-                          typeOptions.find(opt => opt.value === type).format
-                        }
-                        data={data}
-                        monthsCount={months.length}
-                      />
-                    )}
-                    {viewSplit && (
-                      <ReportSplit
-                        data={data}
-                        legend={legend}
-                        splitType={
-                          splitOptions.find(opt => opt.value === split)
-                            .description
-                        }
-                      />
-                    )}
-                  </View>
+                <View
+                  style={{
+                    padding: 10,
+                    flexDirection: 'column',
+                    minWidth: 300,
+                    marginRight: 10,
+                    textAlign: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {viewSummary && (
+                    <ReportSummary
+                      start={start}
+                      end={end}
+                      typeOp={
+                        typeOptions.find(opt => opt.value === type).format
+                      }
+                      data={data}
+                      monthsCount={months.length}
+                    />
+                  )}
+                  {viewSplit && (
+                    <ReportSplit
+                      data={data}
+                      legend={legend}
+                      splitType={
+                        splitOptions.find(opt => opt.value === split)
+                          .description
+                      }
+                    />
+                  )}
                 </View>
               )}
             </View>

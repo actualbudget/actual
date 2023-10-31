@@ -41,11 +41,20 @@ const TableRow = memo(
           ...style,
         }}
       >
-        <Cell value={item[splitItem]} width="flex" />
+        <Cell
+          value={item[splitItem]}
+          width="flex"
+          style={{
+            minWidth: 125,
+          }}
+        />
         {item.monthData && mode === 'time'
           ? item.monthData.map(item => {
               return (
                 <Cell
+                  style={{
+                    minWidth: 75,
+                  }}
                   key={amountToCurrency(item[typeOp])}
                   value={amountToCurrency(item[typeOp])}
                   width="flex"
@@ -55,14 +64,27 @@ const TableRow = memo(
             })
           : typeOp === 'totalTotals' && (
               <>
-                <Cell value={amountToCurrency(item.totalAssets)} width="flex" />
-                <Cell value={amountToCurrency(item.totalDebts)} width="flex" />
+                <Cell
+                  value={amountToCurrency(item.totalAssets)}
+                  width="flex"
+                  style={{
+                    minWidth: 75,
+                  }}
+                />
+                <Cell
+                  value={amountToCurrency(item.totalDebts)}
+                  width="flex"
+                  style={{
+                    minWidth: 75,
+                  }}
+                />
               </>
             )}
         <Cell
           value={amountToCurrency(item[typeOp])}
           style={{
             fontWeight: 600,
+            minWidth: 75,
           }}
           width="flex"
           privacyFilter
@@ -71,6 +93,7 @@ const TableRow = memo(
           value={integerToCurrency(Math.round(average))}
           style={{
             fontWeight: 600,
+            minWidth: 75,
           }}
           width="flex"
           privacyFilter
@@ -142,11 +165,20 @@ export function TableHeader({ scrollWidth, split, interval, type }) {
         fontWeight: 600,
       }}
     >
-      <Cell value={split} width="flex" />
+      <Cell
+        style={{
+          minWidth: 125,
+        }}
+        value={split}
+        width="flex"
+      />
       {interval
         ? interval.map(header => {
             return (
               <Cell
+                style={{
+                  minWidth: 75,
+                }}
                 key={header}
                 // eslint-disable-next-line rulesdir/typography
                 value={d.format(d.parseISO(`${header}-01`), "MMM ''yy")}
@@ -156,12 +188,36 @@ export function TableHeader({ scrollWidth, split, interval, type }) {
           })
         : type === 3 && (
             <>
-              <Cell value={'Assets'} width="flex" />
-              <Cell value={'Debts'} width="flex" />
+              <Cell
+                style={{
+                  minWidth: 75,
+                }}
+                value={'Assets'}
+                width="flex"
+              />
+              <Cell
+                style={{
+                  minWidth: 75,
+                }}
+                value={'Debts'}
+                width="flex"
+              />
             </>
           )}
-      <Cell value={'Totals'} width="flex" />
-      <Cell value={'Average'} width="flex" />
+      <Cell
+        style={{
+          minWidth: 75,
+        }}
+        value={'Totals'}
+        width="flex"
+      />
+      <Cell
+        style={{
+          minWidth: 75,
+        }}
+        value={'Average'}
+        width="flex"
+      />
       {scrollWidth > 0 && <Cell width={scrollWidth} />}
     </Row>
   );
@@ -178,11 +234,20 @@ export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
         fontWeight: 600,
       }}
     >
-      <Cell value={'Totals'} width="flex" />
+      <Cell
+        style={{
+          minWidth: 125,
+        }}
+        value={'Totals'}
+        width="flex"
+      />
       {mode === 'time'
         ? data.monthData.map(item => {
             return (
               <Cell
+                style={{
+                  minWidth: 75,
+                }}
                 key={amountToCurrency(item[typeOp])}
                 value={amountToCurrency(item[typeOp])}
                 width="flex"
@@ -192,12 +257,34 @@ export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
           })
         : typeOp === 'totalTotals' && (
             <>
-              <Cell value={amountToCurrency(data.totalAssets)} width="flex" />
-              <Cell value={amountToCurrency(data.totalDebts)} width="flex" />
+              <Cell
+                style={{
+                  minWidth: 75,
+                }}
+                value={amountToCurrency(data.totalAssets)}
+                width="flex"
+              />
+              <Cell
+                style={{
+                  minWidth: 75,
+                }}
+                value={amountToCurrency(data.totalDebts)}
+                width="flex"
+              />
             </>
           )}
-      <Cell value={amountToCurrency(data[typeOp])} width="flex" privacyFilter />
       <Cell
+        style={{
+          minWidth: 75,
+        }}
+        value={amountToCurrency(data[typeOp])}
+        width="flex"
+        privacyFilter
+      />
+      <Cell
+        style={{
+          minWidth: 75,
+        }}
         value={integerToCurrency(Math.round(average))}
         width="flex"
         privacyFilter
@@ -292,7 +379,7 @@ export default function SimpleTable({ saveScrollWidth, style, children }) {
       tabIndex={1}
       data-testid="table"
     >
-      <View style={{ maxWidth: '100%', overflow: 'auto' }}>
+      <View>
         <div ref={contentRef}>{children}</div>
       </View>
     </View>
