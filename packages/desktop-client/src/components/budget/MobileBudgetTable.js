@@ -158,7 +158,6 @@ function BudgetCell({
             alignItems: 'flex-end',
             height: ROW_HEIGHT,
           }}
-          onPointerDown={onAmountClick}
         >
           <CellValue
             binding={binding}
@@ -170,6 +169,8 @@ function BudgetCell({
             }}
             getStyle={makeAmountGrey}
             data-testid={name}
+            onPointerUp={onAmountClick}
+            onPointerDown={e => e.preventDefault()}
           />
         </View>
       )}
@@ -370,7 +371,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
       </View>
       <View
         role="button"
-        onPointerDown={() => onEdit?.(category.id)}
         style={{ ...(showEditables && { display: 'none' }), flex: 1 }}
       >
         <Text
@@ -379,6 +379,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             ...styles.underlinedText,
             ...styles.lineClamp(2),
           }}
+          onPointerUp={() => onEdit?.(category.id)}
           data-testid="category-name"
         >
           {category.name}
@@ -438,7 +439,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
         >
           <span
             role="button"
-            onPointerDown={() => onOpenBudgetActionMenu?.(category.id)}
+            onPointerUp={() => onOpenBudgetActionMenu?.(category.id)}
+            onPointerDown={e => e.preventDefault()}
           >
             <BalanceWithCarryover
               carryover={rolloverBudget.catCarryover(category.id)}
@@ -649,7 +651,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       </View>
       <View
         role="button"
-        onPointerDown={() => onEdit?.(group.id)}
         style={{ ...(showEditables && { display: 'none' }), flex: 1 }}
       >
         <Text
@@ -660,6 +661,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
             ...styles.lineClamp(2),
             fontWeight: '500',
           }}
+          onPointerUp={() => onEdit?.(group.id)}
           data-testid="name"
         >
           {group.name}
@@ -910,7 +912,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           alignItems: 'flex-start',
           height: ROW_HEIGHT,
         }}
-        onPointerDown={() => onEdit?.(group.id)}
       >
         <Text
           style={{
@@ -919,6 +920,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             ...styles.lineClamp(2),
             fontWeight: '500',
           }}
+          onPointerUp={() => onEdit?.(group.id)}
           data-testid="name"
         >
           {group.name}
@@ -1106,7 +1108,6 @@ const IncomeCategory = memo(function IncomeCategory({
           alignItems: 'flex-start',
           height: ROW_HEIGHT,
         }}
-        onPointerDown={() => onEdit?.(category.id)}
       >
         <Text
           tabIndex={-1}
@@ -1115,6 +1116,7 @@ const IncomeCategory = memo(function IncomeCategory({
             ...styles.underlinedText,
             ...styles.lineClamp(2),
           }}
+          onPointerUp={() => onEdit?.(category.id)}
           data-testid="name"
         >
           {category.name}
