@@ -18,8 +18,8 @@ type TableRowProps = {
     date: string;
     name: string;
     monthData: [];
-    totalAssets: string;
-    totalDebts: string;
+    totalAssets: number;
+    totalDebts: number;
   };
   typeOp?: string | null;
   splitItem: string;
@@ -44,6 +44,7 @@ const TableRow = memo(
         <Cell
           value={item[splitItem]}
           width="flex"
+          title={item[splitItem].length > 12 && item[splitItem]}
           style={{
             minWidth: 125,
           }}
@@ -53,10 +54,14 @@ const TableRow = memo(
               return (
                 <Cell
                   style={{
-                    minWidth: 75,
+                    minWidth: 85,
                   }}
                   key={amountToCurrency(item[typeOp])}
                   value={amountToCurrency(item[typeOp])}
+                  title={
+                    Math.abs(item[typeOp]) > 100000 &&
+                    amountToCurrency(item[typeOp])
+                  }
                   width="flex"
                   privacyFilter
                 />
@@ -66,34 +71,49 @@ const TableRow = memo(
               <>
                 <Cell
                   value={amountToCurrency(item.totalAssets)}
+                  title={
+                    Math.abs(item.totalAssets) > 100000 &&
+                    amountToCurrency(item.totalAssets)
+                  }
                   width="flex"
                   style={{
-                    minWidth: 75,
+                    minWidth: 85,
                   }}
                 />
                 <Cell
                   value={amountToCurrency(item.totalDebts)}
+                  title={
+                    Math.abs(item.totalDebts) > 100000 &&
+                    amountToCurrency(item.totalDebts)
+                  }
                   width="flex"
                   style={{
-                    minWidth: 75,
+                    minWidth: 85,
                   }}
                 />
               </>
             )}
         <Cell
           value={amountToCurrency(item[typeOp])}
+          title={
+            Math.abs(item[typeOp]) > 100000 && amountToCurrency(item[typeOp])
+          }
           style={{
             fontWeight: 600,
-            minWidth: 75,
+            minWidth: 85,
           }}
           width="flex"
           privacyFilter
         />
         <Cell
           value={integerToCurrency(Math.round(average))}
+          title={
+            Math.abs(Math.round(average / 100)) > 100000 &&
+            integerToCurrency(Math.round(average))
+          }
           style={{
             fontWeight: 600,
-            minWidth: 75,
+            minWidth: 85,
           }}
           width="flex"
           privacyFilter
@@ -177,7 +197,7 @@ export function TableHeader({ scrollWidth, split, interval, type }) {
             return (
               <Cell
                 style={{
-                  minWidth: 75,
+                  minWidth: 85,
                 }}
                 key={header}
                 // eslint-disable-next-line rulesdir/typography
@@ -190,14 +210,14 @@ export function TableHeader({ scrollWidth, split, interval, type }) {
             <>
               <Cell
                 style={{
-                  minWidth: 75,
+                  minWidth: 85,
                 }}
                 value={'Assets'}
                 width="flex"
               />
               <Cell
                 style={{
-                  minWidth: 75,
+                  minWidth: 85,
                 }}
                 value={'Debts'}
                 width="flex"
@@ -206,14 +226,14 @@ export function TableHeader({ scrollWidth, split, interval, type }) {
           )}
       <Cell
         style={{
-          minWidth: 75,
+          minWidth: 85,
         }}
         value={'Totals'}
         width="flex"
       />
       <Cell
         style={{
-          minWidth: 75,
+          minWidth: 85,
         }}
         value={'Average'}
         width="flex"
@@ -246,10 +266,14 @@ export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
             return (
               <Cell
                 style={{
-                  minWidth: 75,
+                  minWidth: 85,
                 }}
                 key={amountToCurrency(item[typeOp])}
                 value={amountToCurrency(item[typeOp])}
+                title={
+                  Math.abs(item[typeOp]) > 100000 &&
+                  amountToCurrency(item[typeOp])
+                }
                 width="flex"
                 privacyFilter
               />
@@ -259,33 +283,48 @@ export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
             <>
               <Cell
                 style={{
-                  minWidth: 75,
+                  minWidth: 85,
                 }}
                 value={amountToCurrency(data.totalAssets)}
+                title={
+                  Math.abs(data.totalAssets) > 100000 &&
+                  amountToCurrency(data.totalAssets)
+                }
                 width="flex"
               />
               <Cell
                 style={{
-                  minWidth: 75,
+                  minWidth: 85,
                 }}
                 value={amountToCurrency(data.totalDebts)}
+                title={
+                  Math.abs(data.totalDebts) > 100000 &&
+                  amountToCurrency(data.totalDebts)
+                }
                 width="flex"
               />
             </>
           )}
       <Cell
         style={{
-          minWidth: 75,
+          minWidth: 85,
         }}
         value={amountToCurrency(data[typeOp])}
+        title={
+          Math.abs(data[typeOp]) > 100000 && amountToCurrency(data[typeOp])
+        }
         width="flex"
         privacyFilter
       />
       <Cell
         style={{
-          minWidth: 75,
+          minWidth: 85,
         }}
         value={integerToCurrency(Math.round(average))}
+        title={
+          Math.abs(Math.round(average / 100)) > 100000 &&
+          integerToCurrency(Math.round(average))
+        }
         width="flex"
         privacyFilter
       />
