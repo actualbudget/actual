@@ -57,6 +57,9 @@
     "source-map-support": "^0.5.21",
     "typescript": "^5.0.2"
   },
+  "resolutions": {
+    "node-gyp": "9.4.1"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
