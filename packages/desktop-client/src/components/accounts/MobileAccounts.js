@@ -166,6 +166,10 @@ function AccountList({
 
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
+  const noBackgroundColorStyle = {
+    backgroundColor: 'transparent',
+    color: 'white',
+  };
 
   // If there are no accounts, show a helpful message
   if (accounts.length === 0) {
@@ -185,17 +189,12 @@ function AccountList({
           <Button
             type="bare"
             style={{
-              backgroundColor: 'transparent',
               paddingLeft: 12,
               paddingRight: 12,
-              color: 'white',
+              ...noBackgroundColorStyle,
             }}
-            activeStyle={{
-              color: 'white',
-            }}
-            hoveredStyle={{
-              color: 'white',
-            }}
+            activeStyle={noBackgroundColorStyle}
+            hoveredStyle={noBackgroundColorStyle}
             onClick={onAddAccount}
           >
             <Add width={20} height={20} />
