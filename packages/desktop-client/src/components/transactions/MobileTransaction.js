@@ -577,7 +577,11 @@ class TransactionEditInner extends PureComponent {
                   onUpdate={checked =>
                     this.onEdit(transaction, 'cleared', checked)
                   }
-                  style={{ marginTop: 4 }}
+                  style={{
+                    margin: 'auto',
+                    width: 22,
+                    height: 22,
+                  }}
                 />
               </View>
             </View>
