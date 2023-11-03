@@ -172,6 +172,7 @@ export default function AccountDetails({
               alignItems: 'center',
               justifyContent: 'center',
               color: theme.mobileHeaderText,
+              textAlign: 'center',
             }}
             role="heading"
           >
