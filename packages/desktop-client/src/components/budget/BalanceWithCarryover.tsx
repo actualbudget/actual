@@ -48,7 +48,7 @@ export default function BalanceWithCarryover({
             alignSelf: 'center',
             marginLeft: 2,
             position: 'absolute',
-            right: -4,
+            right: -8,
             top: 0,
             bottom: 0,
             justifyContent: 'center',

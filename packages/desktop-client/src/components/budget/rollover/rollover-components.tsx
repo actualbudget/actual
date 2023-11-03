@@ -312,6 +312,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       </Field>
       <Field
         name="balance"
+        truncate={false}
         width="flex"
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
