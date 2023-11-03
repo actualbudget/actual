@@ -111,6 +111,7 @@ export function Page({
         rightContent={headerRightContent}
         style={{
           ...titleStyle,
+          ...(!isNarrowWidth && { paddingInline: HORIZONTAL_PADDING }),
         }}
       />
       <View

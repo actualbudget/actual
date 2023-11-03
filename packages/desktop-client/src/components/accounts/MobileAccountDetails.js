@@ -178,6 +178,7 @@ function AccountDetailsHeader({ account }) {
           <Link
             to={-1}
             style={{
+              ...styles.noTapHighlight,
               alignItems: 'center',
               display: 'flex',
               textDecoration: 'none',
