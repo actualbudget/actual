@@ -16,7 +16,7 @@
     "build": "rm -rf dist && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db"
   },
   "dependencies": {
-    "better-sqlite3": "^8.6.0",
+    "better-sqlite3": "^9.0.0",
     "node-fetch": "^3.3.2",
     "uuid": "^9.0.0"
   },

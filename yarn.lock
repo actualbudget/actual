@@ -24,7 +24,7 @@ __metadata:
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
     "@types/uuid": ^9.0.2
-    better-sqlite3: ^8.6.0
+    better-sqlite3: ^9.0.0
     node-fetch: ^3.3.2
     typescript: ^5.0.2
     uuid: ^9.0.0
@@ -4165,12 +4165,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/better-sqlite3@npm:^7.6.4":
-  version: 7.6.4
-  resolution: "@types/better-sqlite3@npm:7.6.4"
+"@types/better-sqlite3@npm:^7.6.6":
+  version: 7.6.6
+  resolution: "@types/better-sqlite3@npm:7.6.6"
   dependencies:
     "@types/node": "*"
-  checksum: 75ab00d31b56437cc65fe15ff673cf8d1609edca52628083921bcbab1cbd828d135a2859fb4e68af8ef5a4801705ba99d54b96499f997bce65dd306ade3dbe58
+  checksum: 7f48e5121ae36c0d13857b1fcd5bf5d23df91fec02db58878a6942c455b8dbff3f1b24cacbe809944b67313f15378ed9fe23a57688d25f5da53d2150b7689390
   languageName: node
   linkType: hard
 
@@ -6072,14 +6072,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^8.6.0":
-  version: 8.6.0
-  resolution: "better-sqlite3@npm:8.6.0"
+"better-sqlite3@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "better-sqlite3@npm:9.0.0"
   dependencies:
     bindings: ^1.5.0
     node-gyp: latest
     prebuild-install: ^7.1.1
-  checksum: 9ebdfd675352347cda1ba30d620a3c512d9db827a1eba66460fd48203a7ad8138b0195893bbf47d40f704bcdd598710041271d4ed69779979b6f784c0d3579a1
+  checksum: 53cf439f50768bbcb7adb4894adf6c5134f3479f04084e3009dbe92a00a84e7dd850e4b69262337d807578f3d76e26a40ccebc465e8574e807e27033fab0381a
   languageName: node
   linkType: hard
 
@@ -13225,7 +13225,7 @@ __metadata:
     "@swc/helpers": ^0.5.1
     "@swc/jest": ^0.2.29
     "@types/adm-zip": ^0.5.0
-    "@types/better-sqlite3": ^7.6.4
+    "@types/better-sqlite3": ^7.6.6
     "@types/jest": ^27.5.0
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/pegjs": ^0.10.3
@@ -13236,7 +13236,7 @@ __metadata:
     absurd-sql: 0.0.54
     adm-zip: ^0.5.9
     assert: ^2.0.0
-    better-sqlite3: ^8.6.0
+    better-sqlite3: ^9.0.0
     browserify-zlib: ^0.2.0
     buffer: ^6.0.3
     core-js: ^3.8.3
