@@ -78,12 +78,6 @@ function BarGraph({
     };
   };
 
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
   type CustomLegendProps = {
     active?: boolean;
     payload?: PayloadItem[];
@@ -101,6 +95,12 @@ function BarGraph({
     OnChangeLegend(agg);
 
     return <div />;
+  };
+
+  type CustomTooltipProps = {
+    active?: boolean;
+    payload?: PayloadItem[];
+    label?: string;
   };
 
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
@@ -126,26 +126,28 @@ function BarGraph({
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <PrivacyFilter>
-                <AlignedText
-                  left="Assets:"
-                  right={amountToCurrency(payload[0].payload.totalAssets)}
-                />
-                <AlignedText
-                  left="Debt:"
-                  right={amountToCurrency(payload[0].payload.totalDebts)}
-                />
-                <AlignedText
-                  left="Net:"
-                  right={amountToCurrency(payload[0].payload.totalTotals)}
-                />
-                <AlignedText
-                  left="Change:"
-                  right={
-                    <strong>
-                      {amountToCurrency(payload[0].payload.totalChange)}
-                    </strong>
-                  }
-                />
+                {['totalAssets', 'totalTotals'].includes(typeOp) && (
+                  <AlignedText
+                    left="Assets:"
+                    right={amountToCurrency(payload[0].payload.totalAssets)}
+                  />
+                )}
+                {['totalDebts', 'totalTotals'].includes(typeOp) && (
+                  <AlignedText
+                    left="Debt:"
+                    right={amountToCurrency(payload[0].payload.totalDebts)}
+                  />
+                )}
+                {['totalTotals'].includes(typeOp) && (
+                  <AlignedText
+                    left="Net:"
+                    right={
+                      <strong>
+                        {amountToCurrency(payload[0].payload.totalTotals)}
+                      </strong>
+                    }
+                  />
+                )}
               </PrivacyFilter>
             </div>
           </div>
@@ -161,6 +163,10 @@ function BarGraph({
       return obj.totalAssets;
     }
   };
+
+  const longestLabelLength = data[splitData]
+    .map(c => c[yAxis])
+    .reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
 
   return (
     <Container
@@ -190,7 +196,14 @@ function BarGraph({
                   isAnimationActive={false}
                 />
                 {!compact && <CartesianGrid strokeDasharray="3 3" />}
-                {!compact && <XAxis dataKey={yAxis} />}
+                {!compact && (
+                  <XAxis
+                    dataKey={yAxis}
+                    angle={-35}
+                    textAnchor="end"
+                    height={Math.sqrt(longestLabelLength) * 25}
+                  />
+                )}
                 {!compact && <YAxis />}
                 {!compact && <ReferenceLine y={0} stroke="#000" />}
                 <Bar dataKey={val => getVal(val)} stackId="a">

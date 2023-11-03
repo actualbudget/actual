@@ -96,22 +96,28 @@ function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <PrivacyFilter>
-                <AlignedText
-                  left="Assets:"
-                  right={amountToCurrency(payload[0].payload.totalAssets)}
-                />
-                <AlignedText
-                  left="Debt:"
-                  right={amountToCurrency(payload[0].payload.totalDebts)}
-                />
-                <AlignedText
-                  left="Net:"
-                  right={
-                    <strong>
-                      {amountToCurrency(payload[0].payload.totalTotals)}
-                    </strong>
-                  }
-                />
+                {['totalAssets', 'totalTotals'].includes(typeOp) && (
+                  <AlignedText
+                    left="Assets:"
+                    right={amountToCurrency(payload[0].payload.totalAssets)}
+                  />
+                )}
+                {['totalDebts', 'totalTotals'].includes(typeOp) && (
+                  <AlignedText
+                    left="Debt:"
+                    right={amountToCurrency(payload[0].payload.totalDebts)}
+                  />
+                )}
+                {['totalTotals'].includes(typeOp) && (
+                  <AlignedText
+                    left="Net:"
+                    right={
+                      <strong>
+                        {amountToCurrency(payload[0].payload.totalTotals)}
+                      </strong>
+                    }
+                  />
+                )}
               </PrivacyFilter>
             </div>
           </div>

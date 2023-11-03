@@ -114,13 +114,14 @@ export default function Custom() {
   } = useFilters();
 
   const typeOptions = [
-    { value: 1, description: 'Debts', format: 'totalDebts' },
-    { value: 2, description: 'Assets', format: 'totalAssets' },
+    { value: 1, description: 'Expense', format: 'totalDebts' },
+    { value: 2, description: 'Income', format: 'totalAssets' },
     { value: 3, description: 'Net', format: 'totalTotals' },
   ];
 
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
+  const [typeDisabled, setTypeDisabled] = useState([3]);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
@@ -331,6 +332,14 @@ export default function Custom() {
   function onChangeMode(cond) {
     setMode(cond);
     if (cond === 'time') {
+      if (graphType === 'TableGraph') {
+        setTypeDisabled([0]);
+      } else {
+        setTypeDisabled([3]);
+        if ([3].includes(type)) {
+          setType(1);
+        }
+      }
       if (graphType === 'BarGraph') {
         setGraphType('StackedBarGraph');
       }
@@ -341,18 +350,25 @@ export default function Custom() {
       if ([5, 6].includes(split)) {
         setSplit(1);
       }
-      if ([3].includes(type)) {
-        setType(1);
-      }
     } else {
       if (graphType === 'StackedBarGraph') {
         setGraphType('BarGraph');
+      } else {
+        setTypeDisabled([0]);
       }
     }
   }
 
-  function onChangeGraph(cond) {
-    setGraphType(cond);
+  function onChangeSplit(cond) {
+    setSplit(cond);
+    if (mode === 'total') {
+      if (graphType !== 'TableGraph') {
+        setTypeDisabled(![5, 6].includes(split) ? [0] : [3]);
+      }
+    }
+    if ([3].includes(type) && graphType !== 'TableGraph') {
+      setType(1);
+    }
   }
 
   function GraphButton({
@@ -464,277 +480,273 @@ export default function Custom() {
             flexShrink: 0,
           }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              marginBottom: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text>
-              <strong>Display</strong>
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-              Mode:
-            </Text>
-            <ModeButton
-              selected={mode === 'total'}
-              onSelect={() => onChangeMode('total')}
-            >
-              Total
-            </ModeButton>
-            <ModeButton
-              selected={mode === 'time'}
-              onSelect={() => onChangeMode('time')}
-            >
-              Time
-            </ModeButton>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-              Split:
-            </Text>
-            <Select
-              value={split}
-              onChange={setSplit}
-              options={splitOptions.map(option => [
-                option.value,
-                option.description,
-              ])}
-              disabledKeys={
-                mode === 'time'
-                  ? [5, 6]
-                  : graphType === 'AreaGraph'
-                  ? [1, 2, 3, 4, 6]
-                  : [6]
-              }
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-              Type:
-            </Text>
-            <Select
-              value={type}
-              onChange={setType}
-              options={typeOptions.map(option => [
-                option.value,
-                option.description,
-              ])}
-              disabledKeys={
-                mode === 'time'
-                  ? [3]
-                  : graphType === 'BarGraph' && [1, 2, 3, 4].includes(split)
-                  ? [3]
-                  : [0]
-              }
-            />
-          </View>
-          {/*
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5, paddingLeft: -10 }}>
-              Interval:
-            </Text>
-            <Select
-              value={interval}
-              onChange={setInterval}
-              options={intervalOptions.map(option => [
-                option.value,
-                option.description,
-              ])}
-              disabledKeys={
-                [1,2,3,4,5]
-              }
-            />
-          </View>
-          */}
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-            <Checkbox
-              id="show-empty-columns"
-              checked={empty}
-              value={empty}
-              onChange={() => setEmpty(!empty)}
-            />
-            <label
-              htmlFor="show-empty-columns"
-              title="Show rows that are zero or blank"
-              style={{ fontSize: 12 }}
-            >
-              Show Empty Rows
-            </label>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-            <Checkbox
-              id="show-hidden-columns"
-              checked={hidden}
-              value={hidden}
-              onChange={() => setHidden(!hidden)}
-            />
-            <label
-              htmlFor="show-hidden-columns"
-              title="Show off budget accounts and hidden categories"
-              style={{ fontSize: 12 }}
-            >
-              Off Budget Items
-            </label>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-            <Checkbox
-              id="show-uncategorized"
-              checked={uncat}
-              value={uncat}
-              onChange={() => setUncat(!uncat)}
-            />
-            <label
-              htmlFor="show-uncategorized"
-              title="Show uncategorized transactions"
-              style={{ fontSize: 12 }}
-            >
-              Uncategorized
-            </label>
-          </View>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: theme.altPillBorder,
-              marginTop: 10,
-              flexShrink: 0,
-            }}
-          />
-          <View
-            style={{
-              flexDirection: 'row',
-              marginTop: 10,
-              marginBottom: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text>
-              <strong>Date filters</strong>
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-              Range:
-            </Text>
-            <Select
-              value={dateRange}
-              onChange={e => {
-                setDateRange(dateRangeOptions[e].value);
-                if (e === 4) {
-                  onChangeDates(...getFullRange(allMonths));
-                } else {
-                  onChangeDates(...getLatestRange(dateRangeOptions[e].name));
-                }
+          <View style={{ flexShrink: 0 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                marginBottom: 5,
+                alignItems: 'center',
               }}
-              options={dateRangeOptions.map(option => [
-                option.value,
-                option.description,
-              ])}
-              line={dateRangeLine}
+            >
+              <Text>
+                <strong>Display</strong>
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                Mode:
+              </Text>
+              <ModeButton
+                selected={mode === 'total'}
+                onSelect={() => onChangeMode('total')}
+              >
+                Total
+              </ModeButton>
+              <ModeButton
+                selected={mode === 'time'}
+                onSelect={() => onChangeMode('time')}
+              >
+                Time
+              </ModeButton>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                Split:
+              </Text>
+              <Select
+                value={split}
+                onChange={e => onChangeSplit(e)}
+                options={splitOptions.map(option => [
+                  option.value,
+                  option.description,
+                ])}
+                disabledKeys={
+                  mode === 'time'
+                    ? [5, 6]
+                    : graphType === 'AreaGraph'
+                    ? [1, 2, 3, 4, 6]
+                    : [6]
+                }
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                Type:
+              </Text>
+              <Select
+                value={type}
+                onChange={setType}
+                options={typeOptions.map(option => [
+                  option.value,
+                  option.description,
+                ])}
+                disabledKeys={typeDisabled}
+              />
+            </View>
+            {/*
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5, paddingLeft: -10 }}>
+                Interval:
+              </Text>
+              <Select
+                value={interval}
+                onChange={setInterval}
+                options={intervalOptions.map(option => [
+                  option.value,
+                  option.description,
+                ])}
+                disabledKeys={
+                  [1,2,3,4,5]
+                }
+              />
+            </View>
+            */}
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+
+              <Checkbox
+                id="show-empty-columns"
+                checked={empty}
+                value={empty}
+                onChange={() => setEmpty(!empty)}
+              />
+              <label
+                htmlFor="show-empty-columns"
+                title="Show rows that are zero or blank"
+                style={{ fontSize: 12 }}
+              >
+                Show Empty Rows
+              </label>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+
+              <Checkbox
+                id="show-hidden-columns"
+                checked={hidden}
+                value={hidden}
+                onChange={() => setHidden(!hidden)}
+              />
+              <label
+                htmlFor="show-hidden-columns"
+                title="Show off budget accounts and hidden categories"
+                style={{ fontSize: 12 }}
+              >
+                Off Budget Items
+              </label>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+
+              <Checkbox
+                id="show-uncategorized"
+                checked={uncat}
+                value={uncat}
+                onChange={() => setUncat(!uncat)}
+              />
+              <label
+                htmlFor="show-uncategorized"
+                title="Show uncategorized transactions"
+                style={{ fontSize: 12 }}
+              >
+                Uncategorized
+              </label>
+            </View>
+            <View
+              style={{
+                height: 1,
+                backgroundColor: theme.altPillBorder,
+                marginTop: 10,
+                flexShrink: 0,
+              }}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                marginTop: 10,
+                marginBottom: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text>
+                <strong>Date filters</strong>
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                Range:
+              </Text>
+              <Select
+                value={dateRange}
+                onChange={e => {
+                  setDateRange(dateRangeOptions[e].value);
+                  if (e === 4) {
+                    onChangeDates(...getFullRange(allMonths));
+                  } else {
+                    onChangeDates(...getLatestRange(dateRangeOptions[e].name));
+                  }
+                }}
+                options={dateRangeOptions.map(option => [
+                  option.value,
+                  option.description,
+                ])}
+                line={dateRangeLine}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                From:
+              </Text>
+              <Select
+                onChange={newValue =>
+                  onChangeDates(...validateStart(allMonths, newValue, end))
+                }
+                value={start}
+                defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
+                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                To:
+              </Text>
+              <Select
+                onChange={newValue =>
+                  onChangeDates(...validateEnd(allMonths, start, newValue))
+                }
+                value={end}
+                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+              />
+            </View>
+            <View
+              style={{
+                height: 1,
+                backgroundColor: theme.altPillBorder,
+                marginTop: 10,
+                flexShrink: 0,
+              }}
             />
           </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-              From:
-            </Text>
-            <Select
-              onChange={newValue =>
-                onChangeDates(...validateStart(allMonths, newValue, end))
-              }
-              value={start}
-              defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
-              options={allMonths.map(({ name, pretty }) => [name, pretty])}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-              To:
-            </Text>
-            <Select
-              onChange={newValue =>
-                onChangeDates(...validateEnd(allMonths, start, newValue))
-              }
-              value={end}
-              options={allMonths.map(({ name, pretty }) => [name, pretty])}
-            />
-          </View>
-          <View
-            style={{
-              height: 1,
-              backgroundColor: theme.altPillBorder,
-              marginTop: 10,
-              flexShrink: 0,
-            }}
-          />
           {[1, 2].includes(split) && (
             <View
               style={{
@@ -766,8 +778,9 @@ export default function Custom() {
               selected={graphType === 'TableGraph'}
               title="Data Table"
               onSelect={() => {
-                onChangeGraph('TableGraph');
+                setGraphType('TableGraph');
                 setViewSplit(false);
+                setTypeDisabled([0]);
               }}
             >
               <Queue width={15} height={15} />
@@ -779,11 +792,14 @@ export default function Custom() {
               }
               onSelect={() => {
                 if (mode === 'total') {
-                  onChangeGraph('BarGraph');
+                  setGraphType('BarGraph');
                   // eslint-disable-next-line rulesdir/prefer-if-statement
                   [3].includes(type) && setType(1);
+                  setTypeDisabled([5, 6].includes(split) ? [0] : [3]);
                 } else {
-                  onChangeGraph('StackedBarGraph');
+                  setGraphType('StackedBarGraph');
+                  setTypeDisabled([3]);
+                  setType(1);
                 }
               }}
               style={{ marginLeft: 15 }}
@@ -794,9 +810,10 @@ export default function Custom() {
               title="Area Graph"
               selected={graphType === 'AreaGraph'}
               onSelect={() => {
-                onChangeGraph('AreaGraph');
+                setGraphType('AreaGraph');
                 setSplit(5);
                 setViewSplit(false);
+                setTypeDisabled([0]);
               }}
               style={{ marginLeft: 15 }}
               disabled={mode === 'total' ? false : true}
@@ -807,8 +824,9 @@ export default function Custom() {
               title="Donut Graph"
               selected={graphType === 'DonutGraph'}
               onSelect={() => {
-                onChangeGraph('DonutGraph');
-                //setType(1);
+                setGraphType('DonutGraph');
+                setTypeDisabled([3]);
+                setType(1);
               }}
               style={{ marginLeft: 15 }}
               disabled={mode === 'total' ? false : true}
