@@ -7,6 +7,7 @@ import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import useNavigate from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
+import Add from '../../icons/v1/Add';
 import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
@@ -180,6 +181,26 @@ function AccountList({
           color: theme.mobileHeaderText,
           fontSize: 16,
         }}
+        headerRightContent={
+          <Button
+            type="bare"
+            style={{
+              backgroundColor: 'transparent',
+              paddingLeft: 12,
+              paddingRight: 12,
+              color: 'white',
+            }}
+            activeStyle={{
+              color: 'white',
+            }}
+            hoveredStyle={{
+              color: 'white',
+            }}
+            onClick={onAddAccount}
+          >
+            <Add width={20} height={20} />
+          </Button>
+        }
       >
         <PullToRefresh onRefresh={syncAndDownload}>
           <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
@@ -225,7 +246,7 @@ export default function Accounts() {
   );
 
   const { list: categories } = useCategories();
-  let { getAccounts } = useActions();
+  let { getAccounts, replaceModal } = useActions();
 
   const transactions = useState({});
   const navigate = useNavigate();
@@ -258,7 +279,7 @@ export default function Accounts() {
         getBalanceQuery={queries.accountBalance}
         getOnBudgetBalance={queries.budgetedAccountBalance}
         getOffBudgetBalance={queries.offbudgetAccountBalance}
-        onAddAccount={() => {}} // () => navigate('AddAccountModal')
+        onAddAccount={() => replaceModal('add-account')}
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
       />
