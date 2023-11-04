@@ -192,7 +192,7 @@ async function importTransactions(
                     amount: amountFromYnab(subtrans.amount),
                     category: entityIdMap.get(subtrans.category_id) || null,
                     notes: subtrans.memo,
-                    payee: payee,
+                    payee,
                   };
                 })
               : null,
