@@ -208,7 +208,7 @@ function getInitialMappings(transactions) {
     amount: amountField,
     payee: payeeField,
     notes: notesField,
-    inout: inOutField,
+    inOut: inOutField,
   };
 }
 
@@ -262,7 +262,7 @@ function parseAmountFields(
     return {
       amount:
         parseAmount(trans.amount, n =>
-          trans.inout === outValue ? Math.abs(n) * -1 : Math.abs(n),
+          trans.inOut === outValue ? Math.abs(n) * -1 : Math.abs(n),
         ) * multiplier,
       outflow: null,
       inflow: null,
@@ -357,9 +357,9 @@ function Transaction({
             <Field
               width={90}
               contentStyle={{ textAlign: 'left', ...styles.tnum }}
-              title={transaction.inout}
+              title={transaction.inOut}
             >
-              {transaction.inout}
+              {transaction.inOut}
             </Field>
           )}
           <Field
@@ -510,13 +510,13 @@ function InOutOption({
   return (
     <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
       <CheckboxOption
-        id="form_inout"
+        id="form_inOut"
         checked={inOutMode}
         disabled={disabled}
         onChange={onToggle}
       >
         {inOutMode
-          ? 'in/out field'
+          ? 'in/out identifier'
           : 'Select column to specify if amount goes in/out'}
       </CheckboxOption>
       {inOutMode && (
@@ -524,7 +524,7 @@ function InOutOption({
           type="text"
           value={outValue}
           onUpdate={onChangeText}
-          placeholder="Out value"
+          placeholder="Value for out rows, i.e. Credit"
         />
       )}
     </View>
@@ -618,8 +618,8 @@ function FieldMappings({
                 <SubLabel title="In/Out" />
                 <SelectField
                   options={options}
-                  value={mappings.inout}
-                  onChange={name => onChange('inout', name)}
+                  value={mappings.inOut}
+                  onChange={name => onChange('inOut', name)}
                   hasHeaderRow={hasHeaderRow}
                   firstTransaction={transactions[0]}
                 />
@@ -852,7 +852,7 @@ export default function ImportTransactions({ modalProps, options }) {
         break;
       }
 
-      let { inflow, outflow, inout, ...finalTransaction } = trans;
+      let { inflow, outflow, inOut, ...finalTransaction } = trans;
       finalTransactions.push({
         ...finalTransaction,
         date,
