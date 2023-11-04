@@ -9,6 +9,7 @@ import * as monthUtils from '../../shared/months';
 import { sortByKey, groupBy } from '../../shared/util';
 
 import { YNAB5 } from './ynab5-types';
+import Payee = YNAB5.Payee;
 
 function amountFromYnab(amount: number) {
   // ynabs multiplies amount by 1000 and actual by 100
@@ -143,6 +144,10 @@ async function importTransactions(
   let transactionsGrouped = groupBy(data.transactions, 'account_id');
   let subtransactionsGrouped = groupBy(data.subtransactions, 'transaction_id');
 
+  const payeesByTransferAcct = payees.filter((payee: Payee) => payee?.transfer_acct)
+    .map((payee: Payee) => [payee.transfer_acct, payee])
+  const payeeTransferAcctHashMap = new Map<string, Payee>(payeesByTransferAcct);
+
   // Go ahead and generate ids for all of the transactions so we can
   // reliably resolve transfers
   for (let transaction of data.transactions) {
@@ -180,11 +185,8 @@ async function importTransactions(
               ? subtransactions.map(subtrans => {
                   let payee = null;
                   if (subtrans.transfer_account_id) {
-                    payee = payees.find(
-                      p =>
-                        p.transfer_acct ===
-                        entityIdMap.get(subtrans.transfer_account_id),
-                    ).id;
+                    const mappedTransferAccountId = entityIdMap.get(subtrans.transfer_account_id);
+                    payee = payeeTransferAcctHashMap.get(mappedTransferAccountId)?.id;
                   }
 
                   return {
