@@ -3,9 +3,10 @@ import { ParseFileResult } from '../server/accounts/parse-file';
 import { batchUpdateTransactions } from '../server/accounts/transactions';
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
+import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
 import { Message } from '../server/sync';
 
-import { AccountEntity, PayeeEntity } from './models';
+import { AccountEntity, CategoryEntity, CategoryGroupEntity } from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -43,32 +44,27 @@ export interface ServerHandlers {
   'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
 
   'get-categories': () => Promise<{
-    grouped: {
-      id: string;
-      name: string;
-      is_income: number;
-      sort_order: number;
-      tombstone: number;
-      hidden: boolean;
-    }[];
-    list: {
-      id: string;
-      name: string;
-      is_income: number;
-      cat_group: string;
-      sort_order: number;
-      tombstone: number;
-      hidden: boolean;
-    }[];
+    grouped: Array<CategoryGroupEntity>;
+    list: Array<CategoryEntity>;
   }>;
 
   'get-earliest-transaction': () => Promise<unknown>;
 
   'get-budget-bounds': () => Promise<{ start: string; end: string }>;
 
-  'rollover-budget-month': (arg: { month }) => Promise<unknown>;
+  'rollover-budget-month': (arg: { month }) => Promise<
+    {
+      value: string | number | boolean;
+      name: string;
+    }[]
+  >;
 
-  'report-budget-month': (arg: { month }) => Promise<unknown>;
+  'report-budget-month': (arg: { month }) => Promise<
+    {
+      value: string | number | boolean;
+      name: string;
+    }[]
+  >;
 
   'budget-set-type': (arg: { type }) => Promise<unknown>;
 
@@ -115,7 +111,10 @@ export interface ServerHandlers {
     conditions;
   }) => Promise<{ filters: unknown[] }>;
 
-  getCell: (arg: { sheetName; name }) => Promise<unknown>;
+  getCell: (arg: {
+    sheetName;
+    name;
+  }) => Promise<SpreadsheetNode | { value?: SpreadsheetNode['value'] }>;
 
   getCells: (arg: { names }) => Promise<unknown>;
 

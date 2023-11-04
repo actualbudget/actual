@@ -498,7 +498,10 @@ class TransactionEditInner extends PureComponent {
               {!transaction.is_parent ? (
                 <TapField
                   value={category ? lookupName(categories, category) : null}
-                  disabled={(account && !!account.offbudget) || transferAcct}
+                  disabled={
+                    (account && !!account.offbudget) ||
+                    (transferAcct && !transferAcct.offbudget)
+                  }
                   // TODO: the button to turn this transaction into a split
                   // transaction was on top of the category button in the native
                   // app, on the right-hand side
@@ -567,14 +570,18 @@ class TransactionEditInner extends PureComponent {
                 />
               </View>
 
-              <View style={{ marginLeft: 35, marginRight: 35 }}>
+              <View style={{ marginLeft: 0, marginRight: 8 }}>
                 <FieldLabel title="Cleared" />
                 <BooleanField
                   checked={transaction.cleared}
                   onUpdate={checked =>
                     this.onEdit(transaction, 'cleared', checked)
                   }
-                  style={{ marginTop: 4 }}
+                  style={{
+                    margin: 'auto',
+                    width: 22,
+                    height: 22,
+                  }}
                 />
               </View>
             </View>

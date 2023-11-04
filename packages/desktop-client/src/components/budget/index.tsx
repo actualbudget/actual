@@ -7,29 +7,37 @@ import React, {
   useRef,
 } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useMatch } from 'react-router-dom';
+import {
+  type NavigateFunction,
+  type PathMatch,
+  useLocation,
+  useMatch,
+} from 'react-router-dom';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
+import { type QueriesState } from 'loot-core/src/client/state-types/queries';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   addCategory,
-  updateCategory,
   moveCategory,
   moveCategoryGroup,
+  updateCategory,
   deleteCategory,
   addGroup,
   updateGroup,
   deleteGroup,
 } from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { type Handlers } from 'loot-core/src/types/handlers';
+import { type GlobalPrefs, type LocalPrefs } from 'loot-core/src/types/prefs';
 
-import { useActions } from '../../hooks/useActions';
+import { type BoundActions, useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useNavigate from '../../hooks/useNavigate';
 import { styles } from '../../style';
 import View from '../common/View';
-import { TitlebarContext } from '../Titlebar';
+import { TitlebarContext, type TitlebarContextValue } from '../Titlebar';
 
 import DynamicBudgetTable from './DynamicBudgetTable';
 import { getValidMonthBounds } from './MonthsContext';
@@ -38,7 +46,56 @@ import { ReportProvider } from './report/ReportContext';
 import * as rollover from './rollover/rollover-components';
 import { RolloverContext } from './rollover/RolloverContext';
 
-function Budget(props) {
+type ReportComponents = {
+  SummaryComponent: typeof report.BudgetSummary;
+  ExpenseCategoryComponent: typeof report.ExpenseCategoryMonth;
+  ExpenseGroupComponent: typeof report.ExpenseGroupMonth;
+  IncomeCategoryComponent: typeof report.IncomeCategoryMonth;
+  IncomeGroupComponent: typeof report.IncomeGroupMonth;
+  BudgetTotalsComponent: typeof report.BudgetTotalsMonth;
+  IncomeHeaderComponent: typeof report.IncomeHeaderMonth;
+};
+
+type RolloverComponents = {
+  SummaryComponent: typeof RolloverBudgetSummary;
+  ExpenseCategoryComponent: typeof rollover.ExpenseCategoryMonth;
+  ExpenseGroupComponent: typeof rollover.ExpenseGroupMonth;
+  IncomeCategoryComponent: typeof rollover.IncomeCategoryMonth;
+  IncomeGroupComponent: typeof rollover.IncomeGroupMonth;
+  BudgetTotalsComponent: typeof rollover.BudgetTotalsMonth;
+  IncomeHeaderComponent: typeof rollover.IncomeHeaderMonth;
+};
+
+type BudgetProps = {
+  accountId?: string;
+  startMonth: LocalPrefs['budget.startMonth'];
+  collapsedPrefs: LocalPrefs['budget.collapsed'];
+  summaryCollapsed: LocalPrefs['budget.summaryCollapsed'];
+  budgetType: LocalPrefs['budgetType'];
+  maxMonths: GlobalPrefs['maxMonths'];
+  categoryGroups: QueriesState['categories']['grouped'];
+  reportComponents: ReportComponents;
+  rolloverComponents: RolloverComponents;
+  titlebar: TitlebarContextValue;
+  match: PathMatch<string>;
+  spreadsheet: ReturnType<typeof useSpreadsheet>;
+  navigate: NavigateFunction;
+  getCategories: BoundActions['getCategories'];
+  savePrefs: BoundActions['savePrefs'];
+  createCategory: BoundActions['createCategory'];
+  updateCategory: BoundActions['updateCategory'];
+  pushModal: BoundActions['pushModal'];
+  deleteCategory: BoundActions['deleteCategory'];
+  createGroup: BoundActions['createGroup'];
+  updateGroup: BoundActions['updateGroup'];
+  deleteGroup: BoundActions['deleteGroup'];
+  applyBudgetAction: BoundActions['applyBudgetAction'];
+  moveCategory: BoundActions['moveCategory'];
+  moveCategoryGroup: BoundActions['moveCategoryGroup'];
+  loadPrefs: BoundActions['loadPrefs'];
+};
+
+function Budget(props: BudgetProps) {
   const currentMonth = monthUtils.currentMonth();
   const tableRef = useRef(null);
 
@@ -130,7 +187,7 @@ function Budget(props) {
   const prewarmMonth = async (month, type = null) => {
     type = type || props.budgetType;
 
-    let method =
+    let method: keyof Handlers =
       type === 'report' ? 'report-budget-month' : 'rollover-budget-month';
 
     let values = await send(method, { month });
@@ -439,7 +496,7 @@ function Budget(props) {
   return <View style={{ flex: 1 }}>{table}</View>;
 }
 
-const RolloverBudgetSummary = memo(props => {
+const RolloverBudgetSummary = memo<{ month: string }>(props => {
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   return (
     <rollover.BudgetSummary
@@ -470,7 +527,7 @@ export default function BudgetWrapper(props) {
   let match = useMatch(location.pathname);
   let navigate = useNavigate();
 
-  let reportComponents = useMemo(
+  let reportComponents = useMemo<ReportComponents>(
     () => ({
       SummaryComponent: report.BudgetSummary,
       ExpenseCategoryComponent: report.ExpenseCategoryMonth,
@@ -483,7 +540,7 @@ export default function BudgetWrapper(props) {
     [report],
   );
 
-  let rolloverComponents = useMemo(
+  let rolloverComponents = useMemo<RolloverComponents>(
     () => ({
       SummaryComponent: RolloverBudgetSummary,
       ExpenseCategoryComponent: rollover.ExpenseCategoryMonth,
