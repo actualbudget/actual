@@ -5,7 +5,6 @@ import { test, expect } from '@playwright/test';
 import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
-import screenshotConfig from './screenshot.config';
 
 test.describe('Onboarding', () => {
   let page;
@@ -26,10 +25,10 @@ test.describe('Onboarding', () => {
 
   test('checks the page visuals', async () => {
     await expect(configurationPage.heading).toHaveText('Where’s the server?');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
 
     await configurationPage.clickOnNoServer();
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates a new budget file by importing YNAB4 budget', async () => {
