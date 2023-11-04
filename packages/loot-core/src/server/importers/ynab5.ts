@@ -9,7 +9,6 @@ import * as monthUtils from '../../shared/months';
 import { sortByKey, groupBy } from '../../shared/util';
 
 import { YNAB5 } from './ynab5-types';
-import Payee = YNAB5.Payee;
 
 function amountFromYnab(amount: number) {
   // ynabs multiplies amount by 1000 and actual by 100
@@ -144,9 +143,12 @@ async function importTransactions(
   let transactionsGrouped = groupBy(data.transactions, 'account_id');
   let subtransactionsGrouped = groupBy(data.subtransactions, 'transaction_id');
 
-  const payeesByTransferAcct = payees.filter((payee: Payee) => payee?.transfer_acct)
-    .map((payee: Payee) => [payee.transfer_acct, payee])
-  const payeeTransferAcctHashMap = new Map<string, Payee>(payeesByTransferAcct);
+  const payeesByTransferAcct = payees
+    .filter((payee: YNAB5.Payee) => payee?.transfer_acct)
+    .map((payee: YNAB5.Payee) => [payee.transfer_acct, payee]);
+  const payeeTransferAcctHashMap = new Map<string, YNAB5.Payee>(
+    payeesByTransferAcct,
+  );
 
   // Go ahead and generate ids for all of the transactions so we can
   // reliably resolve transfers
@@ -185,8 +187,12 @@ async function importTransactions(
               ? subtransactions.map(subtrans => {
                   let payee = null;
                   if (subtrans.transfer_account_id) {
-                    const mappedTransferAccountId = entityIdMap.get(subtrans.transfer_account_id);
-                    payee = payeeTransferAcctHashMap.get(mappedTransferAccountId)?.id;
+                    const mappedTransferAccountId = entityIdMap.get(
+                      subtrans.transfer_account_id,
+                    );
+                    payee = payeeTransferAcctHashMap.get(
+                      mappedTransferAccountId,
+                    )?.id;
                   }
 
                   return {
