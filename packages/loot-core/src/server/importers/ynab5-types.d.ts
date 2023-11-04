@@ -25,7 +25,7 @@ export namespace YNAB5 {
     id: string;
     name: string;
     deleted: boolean;
-    transfer_acct: string | null
+    transfer_acct?: string
   }
 
   interface CategoryGroup {
