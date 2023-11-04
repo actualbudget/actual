@@ -26,9 +26,10 @@ export type LocalPrefs = Partial<
     'expand-splits': boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;
-    'budget.collapsed': boolean;
+    'budget.collapsed': string[];
     'budget.summaryCollapsed': boolean;
     'budget.showHiddenCategories': boolean;
+    'budget.startMonth': string;
     // TODO: pull from src/components/modals/ImportTransactions.js
     [key: `parse-date-${string}-${'csv' | 'qif'}`]: string;
     [key: `csv-mappings-${string}`]: string;
