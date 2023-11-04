@@ -1696,7 +1696,7 @@
         "id": "024494a1-f1e0-4667-9fc0-91e4a4262193",
         "date": "2023-09-04",
         "amount": 50000,
-        "memo": "split bart b",
+        "memo": "split part b",
         "cleared": "cleared",
         "approved": true,
         "flag_color": null,
