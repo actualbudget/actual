@@ -41,15 +41,21 @@ import useSheetValue from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 import { Tooltip } from './tooltips';
 
-export let TitlebarContext = createContext(null);
+export type TitlebarContextValue = {
+  sendEvent: (msg: string) => void;
+  subscribe: (listener) => () => void;
+};
+
+export let TitlebarContext = createContext<TitlebarContextValue>(null);
 
 type TitlebarProviderProps = {
   children?: ReactNode;
 };
+
 export function TitlebarProvider({ children }: TitlebarProviderProps) {
   let listeners = useRef([]);
 
-  function sendEvent(msg) {
+  function sendEvent(msg: string) {
     listeners.current.forEach(func => func(msg));
   }
 
