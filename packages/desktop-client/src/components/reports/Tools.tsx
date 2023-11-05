@@ -9,11 +9,7 @@ import {
 import Eye from '../../icons/v2/Eye';
 import EyeSlashed from '../../icons/v2/EyeSlashed';
 import { type CSSProperties } from '../../style';
-import {
-  type Category,
-  type CategoryGroup,
-  type CategoryListProps,
-} from '../autocomplete/CategoryAutocomplete';
+import { type CategoryListProps } from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
 import View from '../common/View';
 import { Checkbox } from '../forms';
