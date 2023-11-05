@@ -8,7 +8,17 @@ export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
     {
       id: 'to-be-budgeted',
       name: 'To Be Budgeted',
-      categories: [{ id: 'to-be-budgeted', name: 'To Be Budgeted' }],
+      categories: [
+        {
+          id: 'to-be-budgeted',
+          name: 'To Be Budgeted',
+          cat_group: 'to-be-budgeted',
+          group: {
+            id: 'to-be-budgeted',
+            name: 'To Be Budgeted',
+          },
+        },
+      ],
     },
     ...groups,
   ];
@@ -22,7 +32,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
 }
 
 export function makeAmountGrey(value: number | string) {
-  return value === 0 || value === '0' || value === ''
+  return value === 0 || value === '0' || value === '' || value == null
     ? { color: theme.altMenuItemText }
     : null;
 }
