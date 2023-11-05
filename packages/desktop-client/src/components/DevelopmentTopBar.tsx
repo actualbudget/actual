@@ -13,7 +13,7 @@ export default function DevelopmentTopBar() {
         justifyContent: 'space-between',
         color: theme.warningText,
         backgroundColor: theme.warningBackground,
-        borderBottom: `1px solid ${theme.warningAccent}`,
+        borderBottom: `1px solid ${theme.warningBorder}`,
         zIndex: 1,
         flexShrink: 0,
       }}
@@ -21,7 +21,7 @@ export default function DevelopmentTopBar() {
       <View>This is a demo build of Actual.</View>
       <View>
         <ExternalLink
-          linkColor="blue"
+          linkColor="purple"
           to={`https://github.com/actualbudget/actual/pull/${process.env.REACT_APP_REVIEW_ID}`}
         >
           Open the PR: #{process.env.REACT_APP_REVIEW_ID}
