@@ -195,7 +195,7 @@ export const formInputShadowSelected = colorPalette.purple200;
 export const altFormInputShadowSelected = formInputShadowSelected;
 export const formInputTextHighlight = colorPalette.purple400;
 
-export const pillBackground = colorPalette.navy600;
+export const pillBackground = colorPalette.navy800;
 export const pillText = colorPalette.navy200;
 export const pillTextHighlighted = colorPalette.purple500;
 export const pillBorder = colorPalette.navy700;
