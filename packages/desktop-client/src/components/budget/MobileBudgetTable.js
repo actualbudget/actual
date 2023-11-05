@@ -446,6 +446,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
             <BalanceWithCarryover
               carryover={rolloverBudget.catCarryover(category.id)}
               balance={rolloverBudget.catBalance(category.id)}
+              goal={reportBudget.catGoal(category.id)}
+              budgeted={reportBudget.catBudgeted(category.id)}
               balanceStyle={{
                 ...styles.smallText,
                 ...styles.underlinedText,
