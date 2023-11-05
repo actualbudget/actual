@@ -4,7 +4,8 @@ import LRU from 'lru-cache';
 
 import { listen, send } from '../platform/client/fetch';
 
-const SpreadsheetContext = createContext(undefined);
+type SpreadsheetContextValue = ReturnType<typeof makeSpreadsheet>;
+const SpreadsheetContext = createContext<SpreadsheetContextValue>(undefined);
 
 export function useSpreadsheet() {
   return useContext(SpreadsheetContext);

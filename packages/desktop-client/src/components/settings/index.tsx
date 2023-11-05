@@ -72,7 +72,10 @@ function About() {
           </Text>
         )}
         <Text>
-          <ExternalLink to="https://actualbudget.org/docs/releases">
+          <ExternalLink
+            to="https://actualbudget.org/docs/releases"
+            linkColor="purple"
+          >
             Release Notes
           </ExternalLink>
         </Text>

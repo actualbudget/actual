@@ -1,6 +1,11 @@
 import React, { Fragment, useRef, useState, type ReactNode } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
+
 import Eye from '../../icons/v2/Eye';
 import EyeSlashed from '../../icons/v2/EyeSlashed';
 import { type CSSProperties } from '../../style';
@@ -37,9 +42,9 @@ export function Container({ style, children }: ContainerProps) {
 }
 
 type CategorySelectorProps = {
-  categoryGroups: Array<CategoryGroup>;
+  categoryGroups: Array<CategoryGroupEntity>;
   selectedCategories: CategoryListProps['items'];
-  setSelectedCategories: (selectedCategories: Category[]) => null;
+  setSelectedCategories: (selectedCategories: CategoryEntity[]) => null;
 };
 
 export function CategorySelector({

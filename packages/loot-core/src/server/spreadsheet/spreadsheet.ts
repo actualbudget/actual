@@ -5,7 +5,7 @@ import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
 import Graph from './graph-data-structure';
 import { unresolveName, resolveName } from './util';
 
-type Node = {
+export type Node = {
   name: string;
   expr: string | number | boolean;
   value: string | number | boolean;
