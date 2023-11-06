@@ -49,7 +49,10 @@ export default function BalanceWithCarryover({
             ':hover': { textDecoration: 'underline' },
           }),
           ...balanceStyle,
-          ...makeAmountStyle(useSheetValue(balance),goalStatus)
+          ...makeAmountStyle(
+            useSheetValue(balance),
+            isGoalTemplatesEnabled ? goalStatus : null,
+          ),
         }}
       />
       {carryoverValue && (
