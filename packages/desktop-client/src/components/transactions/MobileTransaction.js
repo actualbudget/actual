@@ -1011,7 +1011,7 @@ class Transaction extends PureComponent {
                     height: 11,
                     color: cleared
                       ? theme.noticeTextLight
-                      : theme.altButtonBareText,
+                      : theme.pageTextSubdued,
                     marginRight: 5,
                   }}
                 />
