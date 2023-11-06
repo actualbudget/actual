@@ -81,7 +81,7 @@ function Import({ modalProps, actions }) {
           <Button style={itemStyle} onClick={() => onSelectType('wallet')}>
             <span style={{ fontWeight: 700 }}>Wallet</span>
             <View style={{ color: theme.alt2PillText }}>
-              <div>CSV Wallet file</div>
+              <div>A Budgetbakers Wallet App</div>
             </View>
           </Button>
         </View>
