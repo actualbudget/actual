@@ -30,6 +30,9 @@ function Import({ modalProps, actions }) {
       case 'actual':
         actions.pushModal('import-actual');
         break;
+      case 'wallet':
+        actions.pushModal('import-wallet');
+        break;
       default:
     }
   }
@@ -73,6 +76,12 @@ function Import({ modalProps, actions }) {
             <span style={{ fontWeight: 700 }}>Actual</span>
             <View style={{ color: theme.alt2PillText }}>
               <div>Import a file exported from Actual</div>
+            </View>
+          </Button>
+          <Button style={itemStyle} onClick={() => onSelectType('wallet')}>
+            <span style={{ fontWeight: 700 }}>Wallet</span>
+            <View style={{ color: theme.alt2PillText }}>
+              <div>CSV Wallet file</div>
             </View>
           </Button>
         </View>

@@ -10,6 +10,7 @@ import LoadBackup from '../modals/LoadBackup';
 import DeleteFile from './DeleteFile';
 import Import from './Import';
 import ImportActual from './ImportActual';
+import ImportWallet from './ImportWallet';
 import ImportYNAB4 from './ImportYNAB4';
 import ImportYNAB5 from './ImportYNAB5';
 
@@ -51,6 +52,10 @@ export default function Modals() {
       case 'import-actual':
         return (
           <ImportActual key={name} modalProps={modalProps} actions={actions} />
+        );
+      case 'import-wallet':
+        return (
+          <ImportWallet key={name} modalProps={modalProps} actions={actions} />
         );
       case 'load-backup': {
         return (

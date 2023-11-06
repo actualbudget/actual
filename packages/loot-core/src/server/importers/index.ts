@@ -3,8 +3,9 @@ import { handlers } from '../main';
 import importActual from './actual';
 import * as YNAB4 from './ynab4';
 import * as YNAB5 from './ynab5';
+import * as Wallet from './wallet';
 
-type ImportableBudgetType = 'ynab4' | 'ynab5' | 'actual';
+type ImportableBudgetType = 'ynab4' | 'ynab5' | 'actual' | 'wallet';
 
 type Importer = {
   parseFile(buffer: Buffer): unknown;
@@ -15,6 +16,7 @@ type Importer = {
 let importers: Record<Exclude<ImportableBudgetType, 'actual'>, Importer> = {
   ynab4: YNAB4,
   ynab5: YNAB5,
+  wallet: Wallet,
 };
 
 export async function handleBudgetImport(

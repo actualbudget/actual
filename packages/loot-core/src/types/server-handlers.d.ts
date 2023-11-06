@@ -320,7 +320,7 @@ export interface ServerHandlers {
 
   'import-budget': (arg: {
     filepath: string;
-    type: 'ynab4' | 'ynab5' | 'actual';
+    type: 'ynab4' | 'ynab5' | 'actual' | 'wallet';
   }) => Promise<{ error?: string }>;
 
   'export-budget': () => Promise<{ data: Buffer } | { error: string }>;
