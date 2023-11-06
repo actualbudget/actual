@@ -89,7 +89,31 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
   let sankeyData = compact ? convertToCondensed(data) : data;
 
   if (!data.links || data.links.length === 0) return null;
-  return (
+  const margin = {
+    left: 0,
+    right: 0,
+    top: compact ? 0 : 10,
+    bottom: compact ? 0 : 25,
+  };
+
+  return compact ? (
+    <ResponsiveContainer>
+      <Sankey
+        data={sankeyData}
+        node={props => <SankeyNode {...props} />}
+        sort={true}
+        iterations={1000}
+        nodePadding={23}
+        margin={margin}
+      >
+        <Tooltip
+          formatter={numberFormatterTooltip}
+          isAnimationActive={false}
+          separator=": "
+        />
+      </Sankey>
+    </ResponsiveContainer>
+  ) : (
     <Container
       style={{
         ...style,
@@ -104,21 +128,7 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
             sort={true}
             iterations={1000}
             nodePadding={23}
-            margin={
-              compact
-                ? {
-                    left: 0,
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                  }
-                : {
-                    left: 0,
-                    right: 0,
-                    top: 10,
-                    bottom: 25,
-                  }
-            }
+            margin={margin}
           >
             <Tooltip
               formatter={numberFormatterTooltip}
