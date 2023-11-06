@@ -40,9 +40,8 @@ export default function BalanceWithCarryover({
     <View style={style}>
       <CellValue
         binding={balance}
-        goalStatus={isGoalTemplatesEnabled ? goalStatus : null}
         type="financial"
-        getStyle={makeAmountStyle}
+        getStyle={null}
         style={{
           textAlign: 'right',
           ...(!disabled && {
@@ -50,6 +49,7 @@ export default function BalanceWithCarryover({
             ':hover': { textDecoration: 'underline' },
           }),
           ...balanceStyle,
+          ...makeAmountStyle(useSheetValue(balance),goalStatus)
         }}
       />
       {carryoverValue && (

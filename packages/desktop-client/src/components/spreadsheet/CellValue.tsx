@@ -15,18 +15,16 @@ import { type Binding } from '.';
 
 type CellValueProps = {
   binding: string | Binding;
-  goalStatus?: boolean;
   type?: string;
   formatter?: (value) => ReactNode;
   style?: CSSProperties;
-  getStyle?: (value, status) => CSSProperties;
+  getStyle?: (value) => CSSProperties;
   privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
   ['data-testid']?: string;
 };
 
 function CellValue({
   binding,
-  goalStatus,
   type,
   formatter,
   style,
@@ -53,7 +51,7 @@ function CellValue({
         style={{
           ...(type === 'financial' && styles.tnum),
           ...style,
-          ...(getStyle && getStyle(sheetValue, goalStatus)),
+          ...(getStyle && getStyle(sheetValue)),
         }}
         data-testid={testId || fullSheetName}
         data-cellname={fullSheetName}
