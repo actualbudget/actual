@@ -40,7 +40,11 @@ export default function BalanceWithCarryover({
         binding={balance}
         type="financial"
         getStyle={value =>
-          makeAmountStyle(value, isGoalTemplatesEnabled ? goalValue : null, budgetedValue)
+          makeAmountStyle(
+            value,
+            isGoalTemplatesEnabled ? goalValue : null,
+            budgetedValue,
+          )
         }
         style={{
           textAlign: 'right',

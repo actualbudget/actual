@@ -37,7 +37,11 @@ export function makeAmountGrey(value: number | string) {
     : null;
 }
 
-export function makeAmountStyle(value: number, goalValue: number, budgetedValue: number) {
+export function makeAmountStyle(
+  value: number,
+  goalValue: number,
+  budgetedValue: number,
+) {
   let goalStatus = goalValue != null ? budgetedValue >= goalValue : null;
   if (value < 0) {
     return { color: theme.errorText };
