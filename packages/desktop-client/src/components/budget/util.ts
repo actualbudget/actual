@@ -37,18 +37,19 @@ export function makeAmountGrey(value: number | string) {
     : null;
 }
 
-export function makeAmountStyle(value: number, status: boolean | string) {
+export function makeAmountStyle(value: number, goalValue: number, budgetedValue: number) {
+  let goalStatus = goalValue != null ? budgetedValue >= goalValue : null;
   if (value < 0) {
     return { color: theme.errorText };
   }
 
-  if (status === null || status === '') {
+  if (goalStatus === null) {
     const greyed = makeAmountGrey(value);
     if (greyed) {
       return greyed;
     }
   } else {
-    if (!status) {
+    if (!goalStatus) {
       return { color: theme.warningText };
     }
     return { color: theme.noticeText };

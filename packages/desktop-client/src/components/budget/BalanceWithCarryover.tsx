@@ -34,15 +34,13 @@ export default function BalanceWithCarryover({
   let goalValue = useSheetValue(goal);
   let budgetedValue = useSheetValue(budgeted);
   let isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  // if a goal is passed in then check if that goal is met or not.
-  let goalStatus = goalValue != null ? budgetedValue >= goalValue : null;
   return (
     <View style={style}>
       <CellValue
         binding={balance}
         type="financial"
         getStyle={value =>
-          makeAmountStyle(value, isGoalTemplatesEnabled ? goalStatus : null)
+          makeAmountStyle(value, isGoalTemplatesEnabled ? goalValue : null, budgetedValue)
         }
         style={{
           textAlign: 'right',
@@ -69,7 +67,7 @@ export default function BalanceWithCarryover({
           <ArrowThinRight
             width={7}
             height={7}
-            style={makeAmountStyle(balanceValue, goalStatus)}
+            style={makeAmountStyle(balanceValue, goalValue, budgetedValue)}
           />
         </View>
       )}
