@@ -10,7 +10,7 @@ import Select from '../common/Select';
 import View from '../common/View';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
-function validateStart(allMonths, start, end) {
+export function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
   if (end < start) {
     end = monthUtils.addMonths(start, 6);
@@ -18,7 +18,7 @@ function validateStart(allMonths, start, end) {
   return boundedRange(earliest, start, end);
 }
 
-function validateEnd(allMonths, start, end) {
+export function validateEnd(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
   if (start > end) {
     start = monthUtils.subMonths(end, 6);
@@ -37,13 +37,13 @@ function boundedRange(earliest, start, end) {
   return [start, end];
 }
 
-function getLatestRange(offset) {
+export function getLatestRange(offset) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, offset);
   return [start, end];
 }
 
-function getFullRange(allMonths) {
+export function getFullRange(allMonths) {
   const start = allMonths[allMonths.length - 1].name;
   const end = monthUtils.currentMonth();
   return [start, end];

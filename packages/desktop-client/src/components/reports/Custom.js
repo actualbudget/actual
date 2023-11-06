@@ -9,80 +9,71 @@ import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import useCategories from '../../hooks/useCategories';
 import useFilters from '../../hooks/useFilters';
-import Calculator from '../../icons/v1/Calculator';
-import Chart from '../../icons/v1/Chart';
-import ChartBar from '../../icons/v1/ChartBar';
-import ChartPie from '../../icons/v1/ChartPie';
-import ListBullet from '../../icons/v1/ListBullet';
-import Queue from '../../icons/v1/Queue';
-import Tag from '../../icons/v1/Tag';
 import { theme, styles } from '../../style';
 import AlignedText from '../common/AlignedText';
 import Block from '../common/Block';
-import Button from '../common/Button';
-import Select from '../common/Select';
 import Text from '../common/Text';
 import View from '../common/View';
-import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
-import { Checkbox } from '../forms';
+import { AppliedFilters } from '../filters/FiltersMenu';
 import PrivacyFilter from '../PrivacyFilter';
 
-import CategorySelector from './CategorySelector';
-import AreaGraph from './graphs/AreaGraph';
+import Card from './Card';
+import { ChooseGraph } from './ChooseGraph';
+import { CustomSidebar } from './CustomSidebar';
+import { CustomTopbar } from './CustomTopbar';
+import DateRange from './DateRange';
 import BarGraph from './graphs/BarGraph';
-import BarLineGraph from './graphs/BarLineGraph';
-import DonutGraph from './graphs/DonutGraph';
-import LineGraph from './graphs/LineGraph';
-import StackedBarGraph from './graphs/StackedBarGraph';
 import Header from './Header';
+import { LoadingIndicator } from './Overview';
 import { ReportSplit, ReportSummary } from './ReportSummary';
-import SimpleTable, {
-  TableHeader,
-  TotalTableList,
-  TableTotals,
-} from './ReportTable';
-import { SavedGraphMenuButton } from './SavedGraphs';
 import defaultSpreadsheet from './spreadsheets/default-spreadsheet';
 import useReport from './useReport';
 import { fromDateRepr } from './util';
 
-function validateStart(allMonths, start, end) {
-  const earliest = allMonths[allMonths.length - 1].name;
-  if (end < start) {
-    end = monthUtils.addMonths(start, 6);
-  }
-  return boundedRange(earliest, start, end);
-}
+export function CustomReportsCard() {
+  const categories = useCategories();
 
-function validateEnd(allMonths, start, end) {
-  const earliest = allMonths[allMonths.length - 1].name;
-  if (start > end) {
-    start = monthUtils.subMonths(end, 6);
-  }
-  return boundedRange(earliest, start, end);
-}
-
-function boundedRange(earliest, start, end) {
-  const latest = monthUtils.currentMonth();
-  if (end > latest) {
-    end = latest;
-  }
-  if (start < earliest) {
-    start = earliest;
-  }
-  return [start, end];
-}
-
-function getLatestRange(offset) {
   const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, offset);
-  return [start, end];
-}
+  const start = monthUtils.subMonths(end, 3);
+  const split = 1;
 
-function getFullRange(allMonths) {
-  const start = allMonths[allMonths.length - 1].name;
-  const end = monthUtils.currentMonth();
-  return [start, end];
+  const getGraphData = useMemo(() => {
+    return defaultSpreadsheet(start, end, split, 'totalDebts', categories);
+  }, [start, end, categories]);
+  const data = useReport('default', getGraphData);
+
+  return (
+    <Card flex={1} to="/reports/custom">
+      <View>
+        <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
+          <View style={{ flex: 1 }}>
+            <Block
+              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
+              role="heading"
+            >
+              Custom
+            </Block>
+            <DateRange start={start} end={end} />
+          </View>
+        </View>
+      </View>
+
+      {data ? (
+        <BarGraph
+          start={start}
+          end={end}
+          data={data}
+          compact={true}
+          split={1}
+          empty={true}
+          typeOp={'totalDebts'}
+          style={{ height: 'auto', flex: 1 }}
+        />
+      ) : (
+        <LoadingIndicator />
+      )}
+    </Card>
+  );
 }
 
 let legend = [];
@@ -100,7 +91,6 @@ export default function Custom() {
     return {
       payees: state.queries.payees,
       accounts: state.queries.accounts,
-      //dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
 
@@ -112,12 +102,6 @@ export default function Custom() {
     onUpdate: onUpdateFilter,
     onCondOpChange,
   } = useFilters();
-
-  const typeOptions = [
-    { value: 1, description: 'Expense', format: 'totalDebts' },
-    { value: 2, description: 'Income', format: 'totalAssets' },
-    { value: 3, description: 'Net', format: 'totalTotals' },
-  ];
 
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
@@ -139,7 +123,41 @@ export default function Custom() {
   const [graphType, setGraphType] = useState('BarGraph');
   const [viewSplit, setViewSplit] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
-  const [showLabels, seteShowLabels] = useState(false);
+  const [showLabels, setShowLabels] = useState(false);
+
+  const typeOptions = [
+    { value: 1, description: 'Expense', format: 'totalDebts' },
+    { value: 2, description: 'Income', format: 'totalAssets' },
+    { value: 3, description: 'Net', format: 'totalTotals' },
+  ];
+
+  const splitOptions = [
+    { value: 1, description: 'Category' },
+    { value: 2, description: 'Group' },
+    { value: 3, description: 'Payee' },
+    { value: 4, description: 'Account' },
+    { value: 5, description: 'Month' },
+    { value: 6, description: 'Year' },
+  ];
+
+  const dateRangeOptions = [
+    { value: 0, description: '1 month', name: 1 },
+    { value: 1, description: '3 months', name: 2 },
+    { value: 2, description: '6 months', name: 5 },
+    { value: 3, description: '1 year', name: 11 },
+    { value: 4, description: 'All time', name: allMonths },
+  ];
+  const dateRangeLine = dateRangeOptions.length - 1;
+
+  /*
+  const intervalOptions = [
+    { value: 1, description: 'Daily', name: 1 },
+    { value: 2, description: 'Weekly', name: 2 },
+    { value: 3, description: 'Fortnightly', name: 3 },
+    { value: 4, description: 'Monthly', name: 4 },
+    { value: 5, description: 'Yearly', name: 5 },
+  ];
+  */
 
   const months = monthUtils.rangeInclusive(start, end);
   const getGraphData = useMemo(() => {
@@ -210,250 +228,9 @@ export default function Custom() {
 
   let [scrollWidth, setScrollWidth] = useState(0);
 
-  function saveScrollWidth(parent, child) {
-    let width = parent > 0 && child > 0 && parent - child;
-
-    setScrollWidth(!width ? 0 : width);
-  }
-
-  function GraphType() {
-    if (graphType === 'AreaGraph') {
-      return (
-        <AreaGraph
-          style={{ flexGrow: 1 }}
-          start={start}
-          end={end}
-          data={data}
-          typeOp={typeOptions.find(opt => opt.value === type).format}
-        />
-      );
-    }
-    if (graphType === 'BarGraph') {
-      return (
-        <BarGraph
-          style={{ flexGrow: 1 }}
-          start={start}
-          end={end}
-          data={data}
-          split={split}
-          empty={empty}
-          OnChangeLegend={OnChangeLegend}
-          typeOp={typeOptions.find(opt => opt.value === type).format}
-        />
-      );
-    }
-    if (graphType === 'BarLineGraph') {
-      return (
-        <BarLineGraph
-          style={{ flexGrow: 1 }}
-          start={start}
-          end={end}
-          graphData={data.graphData}
-        />
-      );
-    }
-    if (graphType === 'DonutGraph') {
-      return (
-        <DonutGraph
-          style={{ flexGrow: 1 }}
-          start={start}
-          end={end}
-          data={data}
-          split={split}
-          empty={empty}
-          OnChangeLegend={OnChangeLegend}
-          typeOp={typeOptions.find(opt => opt.value === type).format}
-        />
-      );
-    }
-    if (graphType === 'LineGraph') {
-      return (
-        <LineGraph
-          style={{ flexGrow: 1 }}
-          start={start}
-          end={end}
-          graphData={data.graphData}
-        />
-      );
-    }
-    if (graphType === 'StackedBarGraph') {
-      return (
-        <StackedBarGraph
-          style={{ flexGrow: 1 }}
-          start={start}
-          end={end}
-          data={data}
-          typeOp={typeOptions.find(opt => opt.value === type).format}
-          OnChangeLegend={OnChangeLegend}
-        />
-      );
-    }
-    if (graphType === 'TableGraph') {
-      return (
-        <View
-          style={{
-            overflow: 'auto',
-          }}
-        >
-          <TableHeader
-            interval={mode === 'time' && months}
-            scrollWidth={scrollWidth}
-            split={splitOptions.find(opt => opt.value === split).description}
-            type={type}
-          />
-          <SimpleTable saveScrollWidth={saveScrollWidth}>
-            <TotalTableList
-              data={data}
-              empty={empty}
-              monthsCount={months.length}
-              typeOp={typeOptions.find(opt => opt.value === type).format}
-              mode={mode}
-              split={splitOptions.find(opt => opt.value === split).description}
-            />
-            <TableTotals
-              scrollWidth={scrollWidth}
-              data={data}
-              mode={mode}
-              typeOp={typeOptions.find(opt => opt.value === type).format}
-              monthsCount={months.length}
-              type={type}
-            />
-          </SimpleTable>
-        </View>
-      );
-    }
-  }
-
-  function onChangeDates(start, end) {
-    setStart(start);
-    setEnd(end);
-  }
-
-  function onChangeMode(cond) {
-    setMode(cond);
-    if (cond === 'time') {
-      if (graphType === 'TableGraph') {
-        setTypeDisabled([0]);
-      } else {
-        setTypeDisabled([3]);
-        if ([3].includes(type)) {
-          setType(1);
-        }
-      }
-      if (graphType === 'BarGraph') {
-        setGraphType('StackedBarGraph');
-      }
-      if (['AreaGraph', 'DonutGraph'].includes(graphType)) {
-        setGraphType('TableGraph');
-        setViewSplit(false);
-      }
-      if ([5, 6].includes(split)) {
-        setSplit(1);
-      }
-    } else {
-      if (graphType === 'StackedBarGraph') {
-        setGraphType('BarGraph');
-      } else {
-        setTypeDisabled([0]);
-      }
-    }
-  }
-
-  function onChangeSplit(cond) {
-    setSplit(cond);
-    if (mode === 'total') {
-      if (graphType !== 'TableGraph') {
-        setTypeDisabled(![5, 6].includes(split) ? [0] : [3]);
-      }
-    }
-    if ([3].includes(type) && graphType !== 'TableGraph') {
-      setType(1);
-    }
-  }
-
-  function GraphButton({
-    selected,
-    children,
-    style,
-    onSelect,
-    title,
-    disabled,
-  }) {
-    return (
-      <Button
-        type="bare"
-        style={{
-          ...(selected && {
-            backgroundColor: theme.buttonBareBackgroundHover,
-          }),
-          ...style,
-        }}
-        onClick={onSelect}
-        title={title}
-        disabled={disabled}
-      >
-        {children}
-      </Button>
-    );
-  }
-
-  function ModeButton({ selected, children, style, onSelect }) {
-    return (
-      <Button
-        type="bare"
-        style={{
-          padding: '5px 10px',
-          backgroundColor: theme.menuBackground,
-          marginRight: 5,
-          fontSize: 'inherit',
-          ...(selected && {
-            backgroundColor: theme.buttonPrimaryBackground,
-            color: theme.buttonPrimaryText,
-            ':hover': {
-              backgroundColor: theme.buttonPrimaryBackgroundHover,
-              color: theme.buttonPrimaryTextHover,
-            },
-          }),
-          ...style,
-        }}
-        onClick={onSelect}
-      >
-        {children}
-      </Button>
-    );
-  }
-
   if (!allMonths || !data) {
     return null;
   }
-
-  const splitOptions = [
-    { value: 1, description: 'Category' },
-    { value: 2, description: 'Group' },
-    { value: 3, description: 'Payee' },
-    { value: 4, description: 'Account' },
-    { value: 5, description: 'Month' },
-    { value: 6, description: 'Year' },
-  ];
-
-  /*
-  const intervalOptions = [
-    { value: 1, description: 'Daily', name: 1 },
-    { value: 2, description: 'Weekly', name: 2 },
-    { value: 3, description: 'Fortnightly', name: 3 },
-    { value: 4, description: 'Monthly', name: 4 },
-    { value: 5, description: 'Yearly', name: 5 },
-  ];
-  */
-
-  const dateRangeOptions = [
-    { value: 0, description: '1 month', name: 1 },
-    { value: 1, description: '3 months', name: 2 },
-    { value: 2, description: '6 months', name: 5 },
-    { value: 3, description: '1 year', name: 11 },
-    { value: 4, description: 'All time', name: allMonths },
-  ];
-  const dateRangeLine = dateRangeOptions.length - 1;
 
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
@@ -472,425 +249,61 @@ export default function Custom() {
           flexGrow: 1,
         }}
       >
-        <View
-          style={{
-            width: 200,
-            paddingTop: 10,
-            paddingRight: 10,
-            flexShrink: 0,
-          }}
-        >
-          <View style={{ flexShrink: 0 }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                marginBottom: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text>
-                <strong>Display</strong>
-              </Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-                Mode:
-              </Text>
-              <ModeButton
-                selected={mode === 'total'}
-                onSelect={() => onChangeMode('total')}
-              >
-                Total
-              </ModeButton>
-              <ModeButton
-                selected={mode === 'time'}
-                onSelect={() => onChangeMode('time')}
-              >
-                Time
-              </ModeButton>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-                Split:
-              </Text>
-              <Select
-                value={split}
-                onChange={e => onChangeSplit(e)}
-                options={splitOptions.map(option => [
-                  option.value,
-                  option.description,
-                ])}
-                disabledKeys={
-                  mode === 'time'
-                    ? [5, 6]
-                    : graphType === 'AreaGraph'
-                    ? [1, 2, 3, 4, 6]
-                    : [6]
-                }
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-                Type:
-              </Text>
-              <Select
-                value={type}
-                onChange={setType}
-                options={typeOptions.map(option => [
-                  option.value,
-                  option.description,
-                ])}
-                disabledKeys={typeDisabled}
-              />
-            </View>
-            {/*
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5, paddingLeft: -10 }}>
-                Interval:
-              </Text>
-              <Select
-                value={interval}
-                onChange={setInterval}
-                options={intervalOptions.map(option => [
-                  option.value,
-                  option.description,
-                ])}
-                disabledKeys={
-                  [1,2,3,4,5]
-                }
-              />
-            </View>
-            */}
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-              <Checkbox
-                id="show-empty-columns"
-                checked={empty}
-                value={empty}
-                onChange={() => setEmpty(!empty)}
-              />
-              <label
-                htmlFor="show-empty-columns"
-                title="Show rows that are zero or blank"
-                style={{ fontSize: 12 }}
-              >
-                Show Empty Rows
-              </label>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-              <Checkbox
-                id="show-hidden-columns"
-                checked={hidden}
-                value={hidden}
-                onChange={() => setHidden(!hidden)}
-              />
-              <label
-                htmlFor="show-hidden-columns"
-                title="Show off budget accounts and hidden categories"
-                style={{ fontSize: 12 }}
-              >
-                Off Budget Items
-              </label>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-              <Checkbox
-                id="show-uncategorized"
-                checked={uncat}
-                value={uncat}
-                onChange={() => setUncat(!uncat)}
-              />
-              <label
-                htmlFor="show-uncategorized"
-                title="Show uncategorized transactions"
-                style={{ fontSize: 12 }}
-              >
-                Uncategorized
-              </label>
-            </View>
-            <View
-              style={{
-                height: 1,
-                backgroundColor: theme.altPillBorder,
-                marginTop: 10,
-                flexShrink: 0,
-              }}
-            />
-            <View
-              style={{
-                flexDirection: 'row',
-                marginTop: 10,
-                marginBottom: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text>
-                <strong>Date filters</strong>
-              </Text>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-                Range:
-              </Text>
-              <Select
-                value={dateRange}
-                onChange={e => {
-                  setDateRange(dateRangeOptions[e].value);
-                  if (e === 4) {
-                    onChangeDates(...getFullRange(allMonths));
-                  } else {
-                    onChangeDates(...getLatestRange(dateRangeOptions[e].name));
-                  }
-                }}
-                options={dateRangeOptions.map(option => [
-                  option.value,
-                  option.description,
-                ])}
-                line={dateRangeLine}
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-                From:
-              </Text>
-              <Select
-                onChange={newValue =>
-                  onChangeDates(...validateStart(allMonths, newValue, end))
-                }
-                value={start}
-                defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-                To:
-              </Text>
-              <Select
-                onChange={newValue =>
-                  onChangeDates(...validateEnd(allMonths, start, newValue))
-                }
-                value={end}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
-              />
-            </View>
-            <View
-              style={{
-                height: 1,
-                backgroundColor: theme.altPillBorder,
-                marginTop: 10,
-                flexShrink: 0,
-              }}
-            />
-          </View>
-          {[1, 2].includes(split) && (
-            <View
-              style={{
-                marginTop: 10,
-              }}
-            >
-              <CategorySelector
-                categoryGroups={categories.grouped}
-                selectedCategories={selectedCategories}
-                setSelectedCategories={setSelectedCategories}
-              />
-            </View>
-          )}
-        </View>
+        <CustomSidebar
+          start={start}
+          setStart={setStart}
+          end={end}
+          setEnd={setEnd}
+          dateRange={dateRange}
+          setDateRange={setDateRange}
+          dateRangeOptions={dateRangeOptions}
+          dateRangeLine={dateRangeLine}
+          allMonths={allMonths}
+          graphType={graphType}
+          setGraphType={setGraphType}
+          setViewSplit={setViewSplit}
+          typeDisabled={typeDisabled}
+          setTypeDisabled={setTypeDisabled}
+          split={split}
+          setSplit={setSplit}
+          splitOptions={splitOptions}
+          type={type}
+          setType={setType}
+          typeOptions={typeOptions}
+          mode={mode}
+          setMode={setMode}
+          empty={empty}
+          setEmpty={setEmpty}
+          hidden={hidden}
+          setHidden={setHidden}
+          uncat={uncat}
+          setUncat={setUncat}
+          categories={categories}
+          selectedCategories={selectedCategories}
+          setSelectedCategories={setSelectedCategories}
+        />
         <View
           style={{
             flexGrow: 1,
           }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 10,
-              flexShrink: 0,
-            }}
-          >
-            <GraphButton
-              selected={graphType === 'TableGraph'}
-              title="Data Table"
-              onSelect={() => {
-                setGraphType('TableGraph');
-                setViewSplit(false);
-                setTypeDisabled([0]);
-              }}
-            >
-              <Queue width={15} height={15} />
-            </GraphButton>
-            <GraphButton
-              title={mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'}
-              selected={
-                graphType === 'BarGraph' || graphType === 'StackedBarGraph'
-              }
-              onSelect={() => {
-                if (mode === 'total') {
-                  setGraphType('BarGraph');
-                  // eslint-disable-next-line rulesdir/prefer-if-statement
-                  [3].includes(type) && setType(1);
-                  setTypeDisabled([5, 6].includes(split) ? [0] : [3]);
-                } else {
-                  setGraphType('StackedBarGraph');
-                  setTypeDisabled([3]);
-                  setType(1);
-                }
-              }}
-              style={{ marginLeft: 15 }}
-            >
-              <ChartBar width={15} height={15} />
-            </GraphButton>
-            <GraphButton
-              title="Area Graph"
-              selected={graphType === 'AreaGraph'}
-              onSelect={() => {
-                setGraphType('AreaGraph');
-                setSplit(5);
-                setViewSplit(false);
-                setTypeDisabled([0]);
-              }}
-              style={{ marginLeft: 15 }}
-              disabled={mode === 'total' ? false : true}
-            >
-              <Chart width={15} height={15} />
-            </GraphButton>
-            <GraphButton
-              title="Donut Graph"
-              selected={graphType === 'DonutGraph'}
-              onSelect={() => {
-                setGraphType('DonutGraph');
-                setTypeDisabled([3]);
-                setType(1);
-              }}
-              style={{ marginLeft: 15 }}
-              disabled={mode === 'total' ? false : true}
-            >
-              <ChartPie width={15} height={15} />
-            </GraphButton>
-            <View
-              style={{
-                width: 1,
-                height: 30,
-                backgroundColor: theme.altPillBorder,
-                marginLeft: 15,
-                flexShrink: 0,
-              }}
-            />
-            <GraphButton
-              selected={viewSplit}
-              onSelect={() => {
-                setViewSplit(!viewSplit);
-              }}
-              style={{ marginLeft: 15 }}
-              title="Show Legend"
-              disabled={
-                graphType === 'TableGraph' || graphType === 'AreaGraph'
-                  ? true
-                  : false
-              }
-            >
-              <ListBullet width={15} height={15} />
-            </GraphButton>
-            <GraphButton
-              selected={viewSummary}
-              onSelect={() => {
-                setViewSummary(!viewSummary);
-              }}
-              style={{ marginLeft: 15 }}
-              title="Show Summary"
-            >
-              <Calculator width={15} height={15} />
-            </GraphButton>
-            <GraphButton
-              selected={showLabels}
-              onSelect={() => {
-                seteShowLabels(!showLabels);
-              }}
-              style={{ marginLeft: 15 }}
-              title="Show labels"
-              disabled={true}
-            >
-              <Tag width={15} height={15} />
-            </GraphButton>
-            <View
-              style={{
-                width: 1,
-                height: 30,
-                backgroundColor: theme.altPillBorder,
-                marginLeft: 15,
-                flexShrink: 0,
-              }}
-            />
-            <FilterButton onApply={onApplyFilter} type="reports" />
-            <View style={{ flex: 1 }} />
-            <SavedGraphMenuButton />
-          </View>
+          <CustomTopbar
+            graphType={graphType}
+            setGraphType={setGraphType}
+            mode={mode}
+            viewSplit={viewSplit}
+            setViewSplit={setViewSplit}
+            setTypeDisabled={setTypeDisabled}
+            type={type}
+            setType={setType}
+            split={split}
+            setSplit={setSplit}
+            viewSummary={viewSummary}
+            setViewSummary={setViewSummary}
+            showLabels={showLabels}
+            setShowLabels={setShowLabels}
+            onApplyFilter={onApplyFilter}
+          />
           {filters && filters.length > 0 && (
             <View
               style={{ marginBottom: 10, marginLeft: 5, flexShrink: 0 }}
@@ -970,7 +383,22 @@ export default function Custom() {
                     </View>
                   </View>
                 )}
-                <GraphType />
+                <ChooseGraph
+                  start={start}
+                  end={end}
+                  data={data}
+                  mode={mode}
+                  graphType={graphType}
+                  type={type}
+                  typeOptions={typeOptions}
+                  split={split}
+                  splitOptions={splitOptions}
+                  empty={empty}
+                  scrollWidth={scrollWidth}
+                  setScrollWidth={setScrollWidth}
+                  months={months}
+                  OnChangeLegend={OnChangeLegend}
+                />
               </View>
               {(viewSplit || viewSummary) && (
                 <View

@@ -7,10 +7,10 @@ import MenuTooltip from '../common/MenuTooltip';
 import Text from '../common/Text';
 import View from '../common/View';
 
-export function SavedGraphMenuButton({ selectGraph }) {
+export function SaveReportMenuButton() {
   let [menuOpen, setMenuOpen] = useState(false);
 
-  const onGraphMenuSelect = async item => {
+  const onMenuSelect = async item => {
     switch (item) {
       case 'save':
         setMenuOpen(false);
@@ -22,12 +22,12 @@ export function SavedGraphMenuButton({ selectGraph }) {
     }
   };
 
-  function SavedGraphMenu({ onClose }) {
+  function SaveReportMenu({ onClose }) {
     return (
       <MenuTooltip width={150} onClose={onClose}>
         <Menu
           onMenuSelect={item => {
-            onGraphMenuSelect(item);
+            onMenuSelect(item);
           }}
           items={[
             ...[
@@ -74,7 +74,7 @@ export function SavedGraphMenuButton({ selectGraph }) {
         </Text>
         <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
-      {menuOpen && <SavedGraphMenu onClose={() => setMenuOpen(false)} />}
+      {menuOpen && <SaveReportMenu onClose={() => setMenuOpen(false)} />}
     </View>
   );
 }

@@ -50,17 +50,17 @@ const TableRow = memo(
           }}
         />
         {item.monthData && mode === 'time'
-          ? item.monthData.map(item => {
+          ? item.monthData.map(month => {
               return (
                 <Cell
                   style={{
                     minWidth: 85,
                   }}
-                  key={amountToCurrency(item[typeOp])}
-                  value={amountToCurrency(item[typeOp])}
+                  key={amountToCurrency(month[typeOp])}
+                  value={amountToCurrency(month[typeOp])}
                   title={
-                    Math.abs(item[typeOp]) > 100000 &&
-                    amountToCurrency(item[typeOp])
+                    Math.abs(month[typeOp]) > 100000 &&
+                    amountToCurrency(month[typeOp])
                   }
                   width="flex"
                   privacyFilter
@@ -157,11 +157,11 @@ function GroupedTableRow({
                 : i[typeOp] !== 0
               : true,
           )
-          .map(item => {
+          .map(cat => {
             return (
               <TableRow
-                key={item.id}
-                item={item}
+                key={cat.id}
+                item={cat}
                 typeOp={typeOp}
                 splitItem={splitItem}
                 mode={mode}
@@ -334,14 +334,7 @@ export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
   );
 }
 
-export function TotalTableList({
-  data,
-  empty,
-  monthsCount,
-  typeOp,
-  mode,
-  split,
-}) {
+export function TableList({ data, empty, monthsCount, typeOp, mode, split }) {
   const splitItem = ['Month', 'Year'].includes(split) ? 'date' : 'name';
   const splitData =
     split === 'Category'
@@ -394,9 +387,6 @@ export default function SimpleTable({ saveScrollWidth, style, children }) {
   let contentRef = useRef<HTMLDivElement>();
 
   useLayoutEffect(() => {
-    // We wait for the list to mount because AutoSizer needs to run
-    // before it's mounted
-
     if (contentRef.current && saveScrollWidth) {
       saveScrollWidth(
         contentRef.current.offsetParent
