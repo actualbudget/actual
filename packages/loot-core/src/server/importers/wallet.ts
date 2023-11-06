@@ -10,7 +10,7 @@ import { Wallet } from './wallet-types';
 function buildTransfers(
   data: Wallet.Transactions,
   entityIdMap: Map<string, string>,
-  payees: any[],
+  payees: { transfer_acct: string; id: string }[],
 ) {
   const transfers = data.filter(t => t.category === 'TRANSFER');
 
@@ -59,8 +59,8 @@ function importAccounts(
 ) {
   const accounts = new Set<string>();
 
-  data.forEach(transation => {
-    accounts.add(transation.account);
+  data.forEach(transaction => {
+    accounts.add(transaction.account);
   });
 
   return Promise.all(
