@@ -39,15 +39,15 @@ export function makeAmountGrey(value: number | string) {
 
 export function makeAmountStyle(
   value: number,
-  goalValue: number,
-  budgetedValue: number,
+  goalValue?: number,
+  budgetedValue?: number,
 ) {
-  let goalStatus = goalValue != null ? budgetedValue >= goalValue : null;
+  let goalStatus = goalValue != null ? budgetedValue >= goalValue : false;
   if (value < 0) {
     return { color: theme.errorText };
   }
 
-  if (goalStatus === null) {
+  if (goalValue == null) {
     const greyed = makeAmountGrey(value);
     if (greyed) {
       return greyed;
