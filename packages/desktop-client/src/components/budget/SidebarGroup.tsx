@@ -148,7 +148,7 @@ function SidebarGroup({
       style={{
         ...style,
         width: 200,
-        backgroundColor: theme.altTableBackground,
+        backgroundColor: theme.tableRowHeaderBackground,
         '& button': { display: 'none' },
         '&:hover button': { display: 'flex', color: theme.tableTextHover },
         ...(dragPreview && {

@@ -33,7 +33,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
 
 export function makeAmountGrey(value: number | string) {
   return value === 0 || value === '0' || value === '' || value == null
-    ? { color: theme.altMenuItemText }
+    ? { color: theme.tableTextSubdued }
     : null;
 }
 
@@ -54,7 +54,7 @@ export function makeAmountFullStyle(value: number) {
       value < 0
         ? theme.errorText
         : value === 0
-        ? theme.altMenuItemText
+        ? theme.tableTextSubdued
         : theme.noticeText,
   };
 }

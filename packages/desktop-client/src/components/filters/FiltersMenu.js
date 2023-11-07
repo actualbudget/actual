@@ -174,7 +174,7 @@ function ConfigureField({
   return (
     <Tooltip
       position="bottom-left"
-      style={{ padding: 15, color: theme.altmenuItemTextHeader }}
+      style={{ padding: 15, color: theme.menuItemTextHeader }}
       width={275}
       onClose={() => dispatch({ type: 'close' })}
       data-testid="filters-menu-tooltip"
