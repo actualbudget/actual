@@ -27,8 +27,8 @@ export function CustomTopbar({
   setSplit,
   viewSummary,
   setViewSummary,
-  showLabels,
-  setShowLabels,
+  viewLabels,
+  setViewLabels,
   onApplyFilter,
 }) {
   function GraphButton({
@@ -156,9 +156,9 @@ export function CustomTopbar({
         <Calculator width={15} height={15} />
       </GraphButton>
       <GraphButton
-        selected={showLabels}
+        selected={viewLabels}
         onSelect={() => {
-          setShowLabels(!showLabels);
+          setViewLabels(!viewLabels);
         }}
         style={{ marginLeft: 15 }}
         title="Show labels"

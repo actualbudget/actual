@@ -123,7 +123,7 @@ export default function Custom() {
   const [graphType, setGraphType] = useState('BarGraph');
   const [viewSplit, setViewSplit] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
-  const [showLabels, setShowLabels] = useState(false);
+  const [viewLabels, setViewLabels] = useState(false);
 
   const typeOptions = [
     { value: 1, description: 'Expense', format: 'totalDebts' },
@@ -300,8 +300,8 @@ export default function Custom() {
             setSplit={setSplit}
             viewSummary={viewSummary}
             setViewSummary={setViewSummary}
-            showLabels={showLabels}
-            setShowLabels={setShowLabels}
+            viewLabels={viewLabels}
+            setViewLabels={setViewLabels}
             onApplyFilter={onApplyFilter}
           />
           {filters && filters.length > 0 && (
