@@ -71,17 +71,6 @@ function parseHTTPSConfig(value) {
 }
 
 export default async function run() {
-  if (!fs.existsSync(config.serverFiles)) {
-    fs.mkdirSync(config.serverFiles);
-  }
-
-  if (!fs.existsSync(config.userFiles)) {
-    fs.mkdirSync(config.userFiles);
-  }
-
-  await accountApp.init();
-  await syncApp.init();
-
   if (config.https) {
     const https = await import('node:https');
     const httpsOptions = {

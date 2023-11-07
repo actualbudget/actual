@@ -27,7 +27,7 @@ class WrappedDatabase {
    * @param {string} sql
    */
   exec(sql) {
-    this.db.exec(sql);
+    return this.db.exec(sql);
   }
 
   /**

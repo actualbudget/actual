@@ -13,10 +13,6 @@ app.use(errorMiddleware);
 
 export { app as handlers };
 
-export function init() {
-  // eslint-disable-previous-line @typescript-eslint/no-empty-function
-}
-
 // Non-authenticated endpoints:
 //
 // /needs-bootstrap

@@ -1,5 +1,6 @@
 {
-  "setupFiles": ["./jest.setup.js"],
+  "globalSetup": "./jest.global-setup.js",
+  "globalTeardown": "./jest.global-teardown.js",
   "testPathIgnorePatterns": ["dist", "/node_modules/", "/build/"],
   "roots": ["<rootDir>"],
   "moduleFileExtensions": ["ts", "js", "json"],

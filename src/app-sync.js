@@ -15,9 +15,6 @@ const app = express();
 app.use(errorMiddleware);
 export { app as handlers };
 
-// eslint-disable-next-line
-export async function init() {}
-
 // This is a version representing the internal format of sync
 // messages. When this changes, all sync files need to be reset. We
 // will check this version when syncing and notify the user if they
