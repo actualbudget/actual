@@ -7,6 +7,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   reportBudget: false,
   goalTemplatesEnabled: false,
   themes: false,
+  customReports: false,
   experimentalOfxParser: true,
 };
 

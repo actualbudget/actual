@@ -24,6 +24,7 @@ import {
 import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
+import Filter from '../../icons/v1/Filter';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
 import { theme } from '../../style';
 import Button from '../common/Button';
@@ -335,7 +336,7 @@ function ConfigureField({
   );
 }
 
-export function FilterButton({ onApply }) {
+export function FilterButton({ onApply, type }) {
   let filters = useFilters();
 
   let { dateFormat } = useSelector(state => {
@@ -370,6 +371,31 @@ export function FilterButton({ onApply }) {
     },
     { fieldsOpen: false, condOpen: false, field: null, value: null },
   );
+
+  function ButtonType() {
+    if (type === 'accounts') {
+      return (
+        <Button type="bare" onClick={() => dispatch({ type: 'select-field' })}>
+          <SettingsSliderAlternate
+            style={{ width: 16, height: 16, marginRight: 5 }}
+          />{' '}
+          Filter
+        </Button>
+      );
+    }
+    if (type === 'reports') {
+      return (
+        <Button
+          type="bare"
+          onClick={() => dispatch({ type: 'select-field' })}
+          style={{ marginLeft: 15 }}
+          title="Filters"
+        >
+          <Filter width={15} height={15} />
+        </Button>
+      );
+    }
+  }
 
   async function onValidateAndApply(cond) {
     cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
@@ -418,12 +444,7 @@ export function FilterButton({ onApply }) {
 
   return (
     <View>
-      <Button type="bare" onClick={() => dispatch({ type: 'select-field' })}>
-        <SettingsSliderAlternate
-          style={{ width: 16, height: 16, marginRight: 5 }}
-        />{' '}
-        Filter
-      </Button>
+      <ButtonType />
       {state.fieldsOpen && (
         <Tooltip
           position="bottom-left"
