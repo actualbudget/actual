@@ -37,14 +37,25 @@ export function makeAmountGrey(value: number | string) {
     : null;
 }
 
-export function makeAmountStyle(value: number) {
-  const greyed = makeAmountGrey(value);
-  if (greyed) {
-    return greyed;
-  }
-
+export function makeAmountStyle(
+  value: number,
+  goalValue?: number,
+  budgetedValue?: number,
+) {
   if (value < 0) {
     return { color: theme.errorText };
+  }
+
+  if (goalValue == null) {
+    const greyed = makeAmountGrey(value);
+    if (greyed) {
+      return greyed;
+    }
+  } else {
+    if (budgetedValue < goalValue) {
+      return { color: theme.warningText };
+    }
+    return { color: theme.noticeText };
   }
 }
 
