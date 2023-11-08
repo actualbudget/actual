@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { amountToInteger } from 'loot-core/src/shared/util';
@@ -58,6 +58,15 @@ export function AmountInput({
       onBlur?.();
     }
   }
+
+  // Save changes when the component unmounts.
+  useEffect(() => {
+    return () => {
+      if (value !== initialValue) {
+        fireChange(value, negative);
+      }
+    };
+  }, [initialValue, value, negative]);
 
   return (
     <InputWithContent
