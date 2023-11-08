@@ -6,6 +6,7 @@ import memoizeOne from 'memoize-one';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
@@ -86,7 +87,7 @@ function Saved({ projected }) {
       {projected ? (
         <Label
           title="PROJECTED SAVINGS"
-          style={{ color: theme.formInputText, textAlign: 'left' }}
+          style={{ color: theme.formInputText, textAlign: 'left', fontSize: 9 }}
         />
       ) : (
         <Label
@@ -976,6 +977,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
 const IncomeCategory = memo(function IncomeCategory({
   category,
   budget,
+  month,
   balance,
   style,
   onSave,
@@ -983,6 +985,9 @@ const IncomeCategory = memo(function IncomeCategory({
   editMode,
   isEditing,
   onEdit,
+  onBudgetAction,
+  isEditingBudget,
+  onEditBudget,
 }) {
   let [categoryName, setCategoryName] = useState(category.name);
   let [isHidden, setIsHidden] = useState(category.hidden);
@@ -1135,14 +1140,27 @@ const IncomeCategory = memo(function IncomeCategory({
             height: ROW_HEIGHT,
           }}
         >
-          <CellValue
+          <BudgetCell
+            name="budgeted"
+            binding={budget}
+            style={{
+              width: 90,
+            }}
+            textStyle={{ ...styles.smallText, textAlign: 'right' }}
+            categoryId={category.id}
+            month={month}
+            onBudgetAction={onBudgetAction}
+            isEditing={isEditingBudget}
+            onEdit={onEditBudget}
+          />
+          {/* <CellValue
             binding={budget}
             style={{
               ...styles.smallText,
               textAlign: 'right',
             }}
             type="financial"
-          />
+          /> */}
         </View>
       )}
       <View
@@ -1319,6 +1337,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
 function IncomeGroup({
   type,
   group,
+  month,
   onSave,
   onDelete,
   onAddCategory,
@@ -1330,6 +1349,9 @@ function IncomeGroup({
   onEditGroup,
   editingCategoryId,
   onEditCategory,
+  editingBudgetCategoryId,
+  onEditCategoryBudget,
+  onBudgetAction,
 }) {
   return (
     <View>
@@ -1376,6 +1398,7 @@ function IncomeGroup({
               <IncomeCategory
                 key={category.id}
                 category={category}
+                month={month}
                 type={type}
                 budget={
                   type === 'report'
@@ -1393,6 +1416,9 @@ function IncomeGroup({
                 editMode={editMode}
                 isEditing={editingCategoryId === category.id}
                 onEdit={onEditCategory}
+                onBudgetAction={onBudgetAction}
+                isEditingBudget={editingBudgetCategoryId === category.id}
+                onEditBudget={onEditCategoryBudget}
               />
             );
           })}
@@ -1490,6 +1516,7 @@ function BudgetGroups({
         <IncomeGroup
           type={type}
           group={incomeGroup}
+          month={month}
           onSave={onSaveGroup}
           onDelete={onDeleteGroup}
           onAddCategory={onAddCategory}
@@ -1501,6 +1528,9 @@ function BudgetGroups({
           onEditGroup={onEditGroup}
           editingCategoryId={editingCategoryId}
           onEditCategory={onEditCategory}
+          editingBudgetCategoryId={editingBudgetCategoryId}
+          onEditCategoryBudget={onEditCategoryBudget}
+          onBudgetAction={onBudgetAction}
         />
       )}
     </View>
@@ -1530,7 +1560,9 @@ export function BudgetTable(props) {
     // onOpenActionSheet,
     onBudgetAction,
     onRefresh,
+    onSwitchBudgetType,
     savePrefs,
+    pushModal,
   } = props;
 
   const GROUP_EDIT_ACTION = 'group';
@@ -1627,6 +1659,8 @@ export function BudgetTable(props) {
           onNextMonth={onNextMonth}
           showHiddenCategories={showHiddenCategories}
           savePrefs={savePrefs}
+          pushModal={pushModal}
+          onSwitchBudgetType={onSwitchBudgetType}
         />
         <View
           style={{
@@ -1843,6 +1877,8 @@ function BudgetHeader({
   onEditMode,
   showHiddenCategories,
   savePrefs,
+  pushModal,
+  onSwitchBudgetType,
 }) {
   let serverURL = useServerURL();
 
@@ -1861,6 +1897,7 @@ function BudgetHeader({
   };
 
   let tooltip = useTooltip();
+  let isReportBudgetEnabled = useFeatureFlag('reportBudget');
 
   let onMenuSelect = name => {
     tooltip.close();
@@ -1870,6 +1907,11 @@ function BudgetHeader({
         break;
       case 'toggle-hidden-categories':
         toggleHiddenCategories();
+        break;
+      case 'switch-budget-type':
+        pushModal('switch-budget-type', {
+          onSwitch: onSwitchBudgetType,
+        });
         break;
       default:
         throw new Error(`Unrecognized menu option: ${name}`);
@@ -2006,6 +2048,10 @@ function BudgetHeader({
                     {
                       name: 'toggle-hidden-categories',
                       text: 'Toggle hidden categories',
+                    },
+                    isReportBudgetEnabled && {
+                      name: 'switch-budget-type',
+                      text: 'Switch budget type',
                     },
                   ]}
                 />

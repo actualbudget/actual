@@ -27,6 +27,7 @@ import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 import SingleInput from './modals/SingleInput';
+import SwitchBudgetType from './modals/SwitchBudgetType';
 import DiscoverSchedules from './schedules/DiscoverSchedules';
 import ScheduleDetails from './schedules/EditSchedule';
 import ScheduleLink from './schedules/LinkSchedule';
@@ -291,6 +292,15 @@ export default function Modals() {
               key={name}
               modalProps={modalProps}
               actions={actions}
+            />
+          );
+
+        case 'switch-budget-type':
+          return (
+            <SwitchBudgetType
+              key={name}
+              modalProps={modalProps}
+              onSwitch={options?.onSwitch}
             />
           );
 
