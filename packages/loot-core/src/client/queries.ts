@@ -14,13 +14,17 @@ export function getAccountFilter(accountId, field = 'account') {
   if (accountId) {
     if (accountId === 'budgeted') {
       return {
-        [`${field}.offbudget`]: false,
-        [`${field}.closed`]: false,
+        $and: [
+          { [`${field}.offbudget`]: false },
+          { [`${field}.closed`]: false },
+        ],
       };
     } else if (accountId === 'offbudget') {
       return {
-        [`${field}.offbudget`]: true,
-        [`${field}.closed`]: false,
+        $and: [
+          { [`${field}.offbudget`]: true },
+          { [`${field}.closed`]: false },
+        ],
       };
     } else if (accountId === 'uncategorized') {
       return {
