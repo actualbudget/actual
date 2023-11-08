@@ -27,17 +27,22 @@ Here are some initial guidelines for how contributions will be treated:
 
 (sorted alphabetically)
 
-- @albertogasparin
+- @carkom
 - @j-f1
 - @jlongster
+- @joel-jeremy
 - @Kidglove57
 - @MatissJanis
+- @shaankhosla
+- @shall0pass
 - @trevdor
+- @youngcw
 
 ### Alumni
 
 (sorted alphabetically)
 
+- @albertogasparin
 - @rich-howell
 
 ### The Project Layout
