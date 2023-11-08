@@ -112,6 +112,7 @@ export default function Custom() {
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const [mode, setMode] = useState('total');
+  const [reportId, setReportId] = useState([]);
   const [split, setSplit] = useState(1);
   const [type, setType] = useState(1);
   //const [interval, setInterval] = useState(4);
@@ -303,6 +304,9 @@ export default function Custom() {
             viewLabels={viewLabels}
             setViewLabels={setViewLabels}
             onApplyFilter={onApplyFilter}
+            filters={filters}
+            conditionsOp={conditionsOp}
+            reportId={reportId}
           />
           {filters && filters.length > 0 && (
             <View

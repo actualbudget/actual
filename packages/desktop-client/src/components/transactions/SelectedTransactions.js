@@ -91,7 +91,7 @@ export function SelectedTransactionsButton({
                       text: 'Create rule',
                     },
                   ]),
-              Menu.line,
+              { name: 'menu-line', type: Menu.line },
               { type: Menu.label, name: 'Edit field' },
               { name: 'date', text: 'Date' },
               { name: 'account', text: 'Account', key: 'A' },

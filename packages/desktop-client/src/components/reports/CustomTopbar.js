@@ -30,6 +30,9 @@ export function CustomTopbar({
   viewLabels,
   setViewLabels,
   onApplyFilter,
+  filters,
+  conditionsOp,
+  reportId,
 }) {
   function GraphButton({
     selected,
@@ -177,7 +180,11 @@ export function CustomTopbar({
       />
       <FilterButton onApply={onApplyFilter} type="reports" />
       <View style={{ flex: 1 }} />
-      <SaveReportMenuButton />
+      <SaveReportMenuButton
+        reportId={reportId}
+        filters={filters}
+        conditionsOp={conditionsOp}
+      />
     </View>
   );
 }

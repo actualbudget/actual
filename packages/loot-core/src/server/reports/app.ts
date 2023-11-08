@@ -9,17 +9,17 @@ import { undoable } from '../undo';
 
 import { ReportsHandlers } from './types/handlers';
 
-const filterModel = {
-  validate(filter, { update }: { update?: boolean } = {}) {
-    requiredFields('reports', filter, ['conditions'], update);
+const reportModel = {
+  validate(report, { update }: { update?: boolean } = {}) {
+    requiredFields('reports', report, ['conditions'], update);
 
-    if (!update || 'conditionsOp' in filter) {
-      if (!['and', 'or'].includes(filter.conditionsOp)) {
-        throw new Error('Invalid filter conditionsOp: ' + filter.conditionsOp);
+    if (!update || 'conditionsOp' in report) {
+      if (!['and', 'or'].includes(report.conditionsOp)) {
+        throw new Error('Invalid filter conditionsOp: ' + report.conditionsOp);
       }
     }
 
-    return filter;
+    return report;
   },
 
   toJS(row) {
@@ -31,8 +31,8 @@ const filterModel = {
     };
   },
 
-  fromJS(filter) {
-    let { conditionsOp, ...row } = filter;
+  fromJS(report) {
+    let { conditionsOp, ...row } = report;
     if (conditionsOp) {
       row.conditions_op = conditionsOp;
     }
@@ -40,7 +40,7 @@ const filterModel = {
   },
 };
 
-async function filterNameExists(name, filterId, newItem) {
+async function reportNameExists(name, reportId, newItem) {
   let idForName = await db.first(
     'SELECT id from reports WHERE tombstone = 0 AND name = ?',
     [name],
@@ -50,7 +50,7 @@ async function filterNameExists(name, filterId, newItem) {
     return false;
   }
   if (!newItem) {
-    return idForName.id !== filterId;
+    return idForName.id !== reportId;
   }
   return true;
 }
@@ -101,69 +101,45 @@ function conditionExists(item, filters, newItem) {
   return fCondFound ? fCondFound.name : false;
 }
 
-async function createReport(filter) {
-  let filterId = uuidv4();
+async function createReport(report) {
+  let reportId = uuidv4();
   let item = {
-    id: filterId,
-    conditions: filter.state.conditions,
-    conditionsOp: filter.state.conditionsOp,
-    name: filter.state.name,
+    id: reportId,
+    conditions: report.state.conditions,
+    conditionsOp: report.state.conditionsOp,
+    name: report.state.name,
   };
 
   if (item.name) {
-    if (await filterNameExists(item.name, item.id, true)) {
-      throw new Error('There is already a filter named ' + item.name);
+    if (await reportNameExists(item.name, item.id, true)) {
+      throw new Error('There is already a report named ' + item.name);
     }
   } else {
-    throw new Error('Filter name is required');
+    throw new Error('Report name is required');
   }
 
-  if (item.conditions.length > 0) {
-    let condExists = conditionExists(item, filter.filters, true);
-    if (condExists) {
-      throw new Error(
-        'Duplicate filter warning: conditions already exist. Filter name: ' +
-          condExists,
-      );
-    }
-  } else {
-    throw new Error('Conditions are required');
-  }
+  // Create the report here based on the info
+  await db.insertWithSchema('reports', reportModel.fromJS(item));
 
-  // Create the filter here based on the info
-  await db.insertWithSchema('reports', filterModel.fromJS(item));
-
-  return filterId;
+  return reportId;
 }
 
-async function updateReport(filter) {
+async function updateReport(report) {
   let item = {
-    id: filter.state.id,
-    conditions: filter.state.conditions,
-    conditionsOp: filter.state.conditionsOp,
-    name: filter.state.name,
+    id: report.state.id,
+    conditions: report.state.conditions,
+    conditionsOp: report.state.conditionsOp,
+    name: report.state.name,
   };
   if (item.name) {
-    if (await filterNameExists(item.name, item.id, false)) {
-      throw new Error('There is already a filter named ' + item.name);
+    if (await reportNameExists(item.name, item.id, false)) {
+      throw new Error('There is already a report named ' + item.name);
     }
   } else {
-    throw new Error('Filter name is required');
+    throw new Error('Report name is required');
   }
 
-  if (item.conditions.length > 0) {
-    let condExists = conditionExists(item, filter.filters, false);
-    if (condExists) {
-      throw new Error(
-        'Duplicate filter warning: conditions already exist. Filter name: ' +
-          condExists,
-      );
-    }
-  } else {
-    throw new Error('Conditions are required');
-  }
-
-  await db.updateWithSchema('reports', filterModel.fromJS(item));
+  await db.insertWithSchema('reports', reportModel.fromJS(item));
 }
 
 async function deleteReport(id) {

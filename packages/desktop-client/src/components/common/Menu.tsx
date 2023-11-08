@@ -29,14 +29,14 @@ type MenuItem = {
   disabled?: boolean;
   icon?;
   iconSize?: number;
-  text: string;
+  text?: string;
   key?: string;
 };
 
 type MenuProps = {
   header?: ReactNode;
   footer?: ReactNode;
-  items: Array<MenuItem | typeof Menu.line>;
+  items: Array<MenuItem>;
   onMenuSelect: (itemName: MenuItem['name']) => void;
 };
 
@@ -56,7 +56,7 @@ export default function Menu({
 
     let onKeyDown = e => {
       let filteredItems = items.filter(
-        item => item && item !== Menu.line && item.type !== Menu.label,
+        item => item && item.type !== Menu.line && item.type !== Menu.label,
       );
       let currentIndex = filteredItems.indexOf(items[hoveredIndex]);
 
@@ -84,7 +84,7 @@ export default function Menu({
         case 'Enter':
           e.preventDefault();
           const item = items[hoveredIndex];
-          if (hoveredIndex !== null && item !== Menu.line) {
+          if (hoveredIndex !== null && item.type !== Menu.line) {
             onMenuSelect?.(item.name);
           }
           break;
@@ -107,7 +107,7 @@ export default function Menu({
     >
       {header}
       {items.map((item, idx) => {
-        if (item === Menu.line) {
+        if (item.type === Menu.line) {
           return (
             <View key={idx} style={{ margin: '3px 0px' }}>
               <View style={{ borderTop: '1px solid ' + theme.menuBorder }} />
@@ -142,7 +142,7 @@ export default function Menu({
               padding: '9px 10px',
               marginTop:
                 idx === 0 ||
-                lastItem === Menu.line ||
+                lastItem.type === Menu.line ||
                 lastItem.type === Menu.label
                   ? 0
                   : -3,
@@ -182,6 +182,5 @@ export default function Menu({
   );
 }
 
-const MenuLine: unique symbol = Symbol('menu-line');
-Menu.line = MenuLine;
+Menu.line = Symbol('menu-line');
 Menu.label = Symbol('menu-label');

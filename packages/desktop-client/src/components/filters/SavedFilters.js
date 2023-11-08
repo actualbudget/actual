@@ -116,7 +116,7 @@ function SavedFilterMenuButton({
                     ? [
                         { name: 'rename-filter', text: 'Rename' },
                         { name: 'delete-filter', text: 'Delete' },
-                        Menu.line,
+                        { name: 'menu-line', type: Menu.line },
                         {
                           name: 'save-filter',
                           text: 'Save new filter',
@@ -129,7 +129,7 @@ function SavedFilterMenuButton({
                         { name: 'update-filter', text: 'Update condtions' },
                         { name: 'reload-filter', text: 'Revert changes' },
                         { name: 'delete-filter', text: 'Delete' },
-                        Menu.line,
+                        { name: 'menu-line', type: Menu.line },
                         { name: 'save-filter', text: 'Save new filter' },
                         { name: 'clear-filter', text: 'Clear all conditions' },
                       ]),

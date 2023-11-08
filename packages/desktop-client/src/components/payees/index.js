@@ -322,7 +322,7 @@ function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
             text: 'Merge',
             disabled: isDisabled || selectedPayees.size < 2,
           },
-          Menu.line,
+          { name: 'menu-line', type: Menu.line },
         ]}
       />
     </Tooltip>
