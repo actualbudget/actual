@@ -264,7 +264,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             borderRadius: 4,
             ':hover': {
               boxShadow: 'inset 0 0 0 1px ' + theme.mobileAccountShadow,
-              backgroundColor: 'white',
+              backgroundColor: theme.tableBackground,
             },
           }}
           valueProps={{
@@ -283,7 +283,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               onEdit(null);
             },
             style: {
-              backgroundColor: 'white',
+              backgroundColor: theme.tableBackground,
             },
           }}
           onSave={amount => {

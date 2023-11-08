@@ -298,7 +298,7 @@ const BudgetCategories = memo(
               <View
                 style={
                   !dragState && {
-                    ':hover': { backgroundColor: '#fcfcfc' },
+                    ':hover': { backgroundColor: theme.tableBackground },
                   }
                 }
               >

@@ -1137,7 +1137,7 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={valueStyle}
           style={{
             fontStyle: 'italic',
-            color: '#c0c0c0',
+            color: theme.pageTextSubdued,
             fontWeight: 300,
           }}
           inputProps={{
