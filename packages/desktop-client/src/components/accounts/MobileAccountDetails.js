@@ -213,7 +213,6 @@ export default function AccountDetails({
         <CellValue
           binding={balance}
           type="financial"
-          debug={true}
           style={{
             fontSize: 18,
             fontWeight: '500',
