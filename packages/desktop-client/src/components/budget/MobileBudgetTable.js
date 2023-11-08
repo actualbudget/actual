@@ -1894,7 +1894,7 @@ function BudgetHeader({
           <SyncButton
             isMobile
             style={{
-              color: 'white',
+              color: theme.formInputText,
               backgroundColor: 'transparent',
               paddingLeft: 12,
               paddingRight: 12,
