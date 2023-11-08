@@ -121,6 +121,27 @@ export const schema = {
     conditions: f('json'),
     tombstone: f('boolean'),
   },
+  reports: {
+    id: f('id'),
+    name: f('string'),
+    start: f('string'),
+    end: f('string'),
+    mode: f('string', { default: 'total', required: true }),
+    split: f('integer', { default: 1, required: true }),
+    type: f('integer', { default: 1, required: true }),
+    empty: f('integer', { default: 0, required: true }),
+    hidden: f('integer', { default: 0, required: true }),
+    uncat: f('integer', { default: 0, required: true }),
+    selectedCategories: f('json'),
+    graphType: f('string', { default: 'BarGraph', required: true }),
+    viewSplit: f('integer', { default: 0, required: true }),
+    viewSummary: f('integer', { default: 0, required: true }),
+    viewLabels: f('integer', { default: 0, required: true }),
+    conditions: f('json'),
+    conditions_op: f('string'),
+    sort_order: f('float'),
+    tombstone: f('boolean'),
+  },
 };
 
 export const schemaConfig = {
