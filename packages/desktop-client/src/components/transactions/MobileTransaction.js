@@ -1083,6 +1083,7 @@ export class TransactionList extends Component {
                     display: 'flex',
                     justifyContent: 'center',
                     width: '100%',
+                    backgroundColor: theme.mobilePageBackground,
                   }}
                 >
                   <Text style={{ fontSize: 15 }}>No transactions</Text>
@@ -1191,7 +1192,7 @@ function ListBoxSection({ section, state }) {
         <div
           {...headingProps}
           className={`${css(styles.smallText, {
-            backgroundColor: theme.tableRowHeaderBackground,
+            backgroundColor: theme.pageBackground,
             borderBottom: `1px solid ${theme.tableBorder}`,
             borderTop: `1px solid ${theme.tableBorder}`,
             color: theme.alt2TableText,

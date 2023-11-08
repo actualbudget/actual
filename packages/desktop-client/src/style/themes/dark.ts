@@ -95,7 +95,6 @@ export const mobileAccountText = colorPalette.blue800;
 export const mobileModalBackground = colorPalette.navy900;
 export const mobileModalText = colorPalette.white;
 export const altMobileModalText = colorPalette.blue100;
-export const mobileDateBackground = colorPalette.navy100;
 
 // Mobile view themes (for the top bar)
 export const mobileViewTheme = mobileHeaderBackground;
