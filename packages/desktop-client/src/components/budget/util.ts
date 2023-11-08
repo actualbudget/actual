@@ -42,7 +42,6 @@ export function makeAmountStyle(
   goalValue?: number,
   budgetedValue?: number,
 ) {
-  let goalStatus = goalValue != null ? budgetedValue >= goalValue : false;
   if (value < 0) {
     return { color: theme.errorText };
   }
@@ -53,7 +52,7 @@ export function makeAmountStyle(
       return greyed;
     }
   } else {
-    if (!goalStatus) {
+    if (budgetedValue < goalValue) {
       return { color: theme.warningText };
     }
     return { color: theme.noticeText };
