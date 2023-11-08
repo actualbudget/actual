@@ -85,6 +85,8 @@ export const menuAutoCompleteText = colorPalette.navy900;
 
 export const modalBackground = colorPalette.gray800;
 export const modalBorder = colorPalette.navy600;
+export const mobileHeaderBackground = colorPalette.navy800;
+export const mobilePageBackground = colorPalette.navy700;
 export const mobileNavBackground = colorPalette.navy800;
 export const mobileNavItem = colorPalette.navy150;
 export const mobileNavItemSelected = colorPalette.purple400;
@@ -96,12 +98,8 @@ export const altMobileModalText = colorPalette.blue100;
 export const mobileDateBackground = colorPalette.navy100;
 
 // Mobile view themes (for the top bar)
-export const mobileAccountViewTheme = colorPalette.navy50;
-export const mobileAccountsViewTheme = colorPalette.blue800;
-export const mobileBudgetViewTheme = colorPalette.purple500;
+export const mobileViewTheme = mobileHeaderBackground;
 export const mobileConfigServerViewTheme = colorPalette.purple500;
-export const mobileSettingsViewTheme = colorPalette.navy50;
-export const mobileTransactionViewTheme = colorPalette.purple500;
 
 // Button
 export const buttonMenuText = colorPalette.navy900;
@@ -194,7 +192,7 @@ export const formInputTextHighlight = colorPalette.purple400;
 
 export const pillBackground = colorPalette.navy800;
 export const pillText = colorPalette.navy200;
-export const pillTextHighlighted = colorPalette.purple500;
+export const pillTextHighlighted = colorPalette.purple300;
 export const pillBorder = colorPalette.navy700;
 export const altPillBorder = pillBorder;
 export const pillBackgroundSelected = colorPalette.purple600;

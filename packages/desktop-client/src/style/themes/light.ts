@@ -84,6 +84,8 @@ export const menuAutoCompleteText = colorPalette.white;
 
 export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;
+export const mobileHeaderBackground = colorPalette.navy150;
+export const mobilePageBackground = colorPalette.navy50;
 export const mobileNavBackground = colorPalette.white;
 export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
@@ -92,15 +94,10 @@ export const mobileAccountText = colorPalette.blue800;
 export const mobileModalBackground = colorPalette.navy900;
 export const mobileModalText = colorPalette.white;
 export const altMobileModalText = colorPalette.blue100;
-export const mobileDateBackground = colorPalette.navy100;
 
 // Mobile view themes (for the top bar)
-export const mobileAccountViewTheme = colorPalette.navy50;
-export const mobileAccountsViewTheme = colorPalette.blue800;
-export const mobileBudgetViewTheme = colorPalette.purple500;
+export const mobileViewTheme = mobileHeaderBackground;
 export const mobileConfigServerViewTheme = colorPalette.purple500;
-export const mobileSettingsViewTheme = colorPalette.navy50;
-export const mobileTransactionViewTheme = colorPalette.purple500;
 
 export const markdownNormal = colorPalette.purple150;
 export const markdownDark = colorPalette.purple400;

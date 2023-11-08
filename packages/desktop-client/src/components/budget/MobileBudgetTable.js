@@ -1357,7 +1357,7 @@ function IncomeGroup({
               : rolloverBudget.groupSumAmount(group.id)
           }
           style={{
-            backgroundColor: theme.altTableBackground,
+            backgroundColor: theme.tableRowHeaderBackground,
           }}
           onAddCategory={onAddCategory}
           onSave={onSave}
@@ -1632,7 +1632,7 @@ export function BudgetTable(props) {
             flex: '0 0 auto',
             padding: 10,
             paddingRight: 14,
-            backgroundColor: 'white',
+            backgroundColor: theme.tableRowHeaderBackground,
             borderBottomWidth: 1,
             borderColor: theme.tableBorder,
           }}
@@ -1880,7 +1880,7 @@ function BudgetHeader({
         flexDirection: 'row',
         flexShrink: 0,
         height: BUDGET_HEADER_HEIGHT,
-        backgroundColor: theme.buttonPrimaryBackground,
+        backgroundColor: theme.mobileHeaderBackground,
       }}
     >
       <View
@@ -1920,16 +1920,17 @@ function BudgetHeader({
           }}
         >
           <ArrowThinLeft
-            style={{ color: theme.formInputTextReadOnlySelection }}
+            style={{ color: theme.formInputText }}
             width="15"
             height="15"
           />
         </Button>
         <Text
           style={{
-            ...styles.mediumText,
-            color: theme.formInputTextSelected,
+            color: theme.formInputText,
             textAlign: 'center',
+            fontSize: 18,
+            fontWeight: 500,
             // zIndex: -1
           }}
         >
@@ -1943,7 +1944,7 @@ function BudgetHeader({
           style={{ ...buttonStyle, opacity: nextEnabled ? 1 : 0.6 }}
         >
           <ArrowThinRight
-            style={{ color: theme.formInputTextReadOnlySelection }}
+            style={{ color: theme.formInputText }}
             width="15"
             height="15"
           />
@@ -1970,7 +1971,7 @@ function BudgetHeader({
               <DotsHorizontalTriple
                 width="20"
                 height="20"
-                style={{ color: 'white' }}
+                style={{ color: theme.formInputText }}
               />
             </Button>
             {tooltip.isOpen && (
@@ -2001,7 +2002,7 @@ function BudgetHeader({
               paddingLeft: 12,
               paddingRight: 12,
               ...styles.mediumText,
-              color: 'white',
+              color: theme.formInputText,
             }}
             onClick={() => onEditMode?.(false)}
           >

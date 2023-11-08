@@ -137,10 +137,11 @@ export default function Settings() {
   const { isNarrowWidth } = useResponsive();
   const themesFlag = useFeatureFlag('themes');
 
-  useSetThemeColor(theme.mobileSettingsViewTheme);
+  useSetThemeColor(theme.mobileViewTheme);
   return (
     <View
       style={{
+        backgroundColor: isNarrowWidth && theme.mobilePageBackground,
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
@@ -149,8 +150,10 @@ export default function Settings() {
         titleStyle={
           isNarrowWidth
             ? {
-                backgroundColor: theme.menuItemBackground,
-                color: theme.menuItemText,
+                backgroundColor: theme.mobileHeaderBackground,
+                color: theme.formInputText,
+                fontSize: 18,
+                fontWeight: 500,
               }
             : undefined
         }

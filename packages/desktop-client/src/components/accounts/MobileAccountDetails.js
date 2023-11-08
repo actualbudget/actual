@@ -23,7 +23,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.tableHeaderBackground,
+        backgroundColor: theme.mobilePageBackground,
         margin: '11px auto 4px',
         borderRadius: 4,
         padding: 10,
@@ -50,7 +50,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
         }}
         placeholder={`Search ${accountName}`}
         style={{
-          backgroundColor: theme.formInputBackground,
+          backgroundColor: theme.tableBackground,
           border: `1px solid ${theme.formInputBorder}`,
           fontSize: 15,
           flex: 1,
@@ -91,7 +91,7 @@ export default function AccountDetails({
     <View
       style={{
         flex: 1,
-        backgroundColor: theme.tableHeaderBackground,
+        backgroundColor: theme.mobilePageBackground,
         overflowY: 'hidden',
         width: '100%',
       }}
@@ -101,7 +101,6 @@ export default function AccountDetails({
           alignItems: 'center',
           flexShrink: 0,
           overflowY: 'hidden',
-          paddingTop: 10,
           top: 0,
           width: '100%',
         }}
@@ -112,6 +111,8 @@ export default function AccountDetails({
             flexDirection: 'row',
             justifyContent: 'space-between',
             width: '100%',
+            backgroundColor: theme.mobileHeaderBackground,
+            padding: 10,
           }}
         >
           <Link
@@ -129,8 +130,9 @@ export default function AccountDetails({
           </Link>
           <View
             style={{
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: 500,
+              justifyContent: 'center',
             }}
             role="heading"
           >

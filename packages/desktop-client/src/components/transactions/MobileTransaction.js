@@ -131,27 +131,6 @@ function lookupName(items, id) {
   return items.find(item => item.id === id).name;
 }
 
-// TODO: delete if not needed
-/* eslint-disable-next-line import/no-unused-modules */
-export function DateHeader({ date }) {
-  return (
-    <ListItem
-      style={{
-        height: 25,
-        backgroundColor: theme.mobileDateBackground,
-        borderColor: theme.tableBorder,
-        justifyContent: 'center',
-      }}
-    >
-      <Text
-        style={{ ...styles.text, fontSize: 13, color: theme.alt2TableText }}
-      >
-        {monthUtils.format(date, 'MMMM dd, yyyy')}
-      </Text>
-    </ListItem>
-  );
-}
-
 function Status({ status }) {
   let color;
 
@@ -345,11 +324,8 @@ class TransactionEditInner extends PureComponent {
       // <KeyboardAvoidingView>
       <View
         style={{
-          margin: 10,
-          marginTop: 3,
-          backgroundColor: theme.tableHeaderBackground,
+          backgroundColor: theme.mobilePageBackground,
           flex: 1,
-          borderRadius: 4,
 
           // This shadow make the card "pop" off of the screen below
           // it
@@ -369,9 +345,8 @@ class TransactionEditInner extends PureComponent {
         >
           <View
             style={{
-              borderBottomWidth: 1,
               borderColor: theme.tableBorder,
-              backgroundColor: theme.tableBackground,
+              backgroundColor: theme.mobileHeaderBackground,
               alignItems: 'center',
               flexDirection: 'row',
               flexShrink: 0,
@@ -409,8 +384,8 @@ class TransactionEditInner extends PureComponent {
             <TextOneLine
               style={{
                 color: theme.formInputText,
-                fontSize: 15,
-                fontWeight: 600,
+                fontSize: 18,
+                fontWeight: 500,
                 userSelect: 'none',
               }}
               role="heading"
@@ -548,7 +523,7 @@ class TransactionEditInner extends PureComponent {
                 <InputField
                   type="date"
                   required
-                  style={{ color: 'canvastext', minWidth: '150px' }}
+                  style={{ color: theme.tableText, minWidth: '150px' }}
                   defaultValue={dateDefaultValue}
                   onUpdate={value =>
                     this.onEdit(
@@ -594,6 +569,7 @@ class TransactionEditInner extends PureComponent {
                 onChange={e =>
                   this.onQueueChange(transaction, 'notes', e.target.value)
                 }
+                style={{ marginBottom: 10 }}
               />
             </View>
 
@@ -606,7 +582,7 @@ class TransactionEditInner extends PureComponent {
                     paddingVertical: 5,
                     marginLeft: styles.mobileEditingPadding,
                     marginRight: styles.mobileEditingPadding,
-                    marginTop: 20,
+                    marginTop: 10,
                     marginBottom: 15,
                     backgroundColor: 'transparent',
                   }}
@@ -727,7 +703,7 @@ function TransactionEditUnconnected(props) {
   let transactions = [];
   let adding = false;
   let deleted = false;
-  useSetThemeColor(theme.mobileTransactionViewTheme);
+  useSetThemeColor(theme.mobileViewTheme);
 
   useEffect(() => {
     // May as well update categories / accounts when transaction ID changes
@@ -848,7 +824,7 @@ function TransactionEditUnconnected(props) {
     <View
       style={{
         flex: 1,
-        backgroundColor: theme.buttonPrimaryBackground,
+        backgroundColor: theme.pageBackground,
       }}
     >
       <TransactionEditInner
@@ -952,7 +928,7 @@ class Transaction extends PureComponent {
       <Button
         onClick={() => onSelect(transaction)}
         style={{
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           border: 'none',
           width: '100%',
         }}
@@ -1215,7 +1191,7 @@ function ListBoxSection({ section, state }) {
         <div
           {...headingProps}
           className={`${css(styles.smallText, {
-            backgroundColor: theme.mobileDateBackground,
+            backgroundColor: theme.tableRowHeaderBackground,
             borderBottom: `1px solid ${theme.tableBorder}`,
             borderTop: `1px solid ${theme.tableBorder}`,
             color: theme.alt2TableText,
