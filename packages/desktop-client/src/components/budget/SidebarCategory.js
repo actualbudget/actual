@@ -116,7 +116,7 @@ function SidebarCategory({
         // The zIndex here forces the the view on top of a row below
         // it that may be "collapsed" and show a border on top
         ...(dragPreview && {
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           zIndex: 10000,
           borderRadius: 6,
           overflow: 'hidden',
