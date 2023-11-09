@@ -347,9 +347,14 @@ export async function insertCategory(
   let id_;
   await batchMessages(async () => {
     // Dont allow duplicated names in groups
-    const existingCatInGroup = await first( `SELECT id FROM categories WHERE cat_group = ? and name = ? LIMIT 1`, [category.cat_group, category.name]);
+    const existingCatInGroup = await first(
+      `SELECT id FROM categories WHERE cat_group = ? and name = ? LIMIT 1`,
+      [category.cat_group, category.name],
+    );
     if (existingCatInGroup) {
-      throw new Error(`Category '${category.name}' already exists in group '${category.cat_group}'`);
+      throw new Error(
+        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’`,
+      );
     }
 
     if (atEnd) {
