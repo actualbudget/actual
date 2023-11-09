@@ -1896,7 +1896,7 @@ function BudgetHeader({
           <SyncButton
             isMobile
             style={{
-              color: theme.formInputText,
+              color: theme.mobileHeaderText,
               backgroundColor: 'transparent',
               paddingLeft: 12,
               paddingRight: 12,
@@ -1922,14 +1922,14 @@ function BudgetHeader({
           }}
         >
           <ArrowThinLeft
-            style={{ color: theme.formInputText }}
+            style={{ color: theme.mobileHeaderText }}
             width="15"
             height="15"
           />
         </Button>
         <Text
           style={{
-            color: theme.formInputText,
+            color: theme.mobileHeaderText,
             textAlign: 'center',
             fontSize: 16,
             fontWeight: 500,
@@ -1946,7 +1946,7 @@ function BudgetHeader({
           style={{ ...buttonStyle, opacity: nextEnabled ? 1 : 0.6 }}
         >
           <ArrowThinRight
-            style={{ color: theme.formInputText }}
+            style={{ color: theme.mobileHeaderText }}
             width="15"
             height="15"
           />
@@ -1973,7 +1973,7 @@ function BudgetHeader({
               <DotsHorizontalTriple
                 width="20"
                 height="20"
-                style={{ color: theme.formInputText }}
+                style={{ color: theme.mobileHeaderText }}
               />
             </Button>
             {tooltip.isOpen && (
@@ -2004,7 +2004,8 @@ function BudgetHeader({
               paddingLeft: 12,
               paddingRight: 12,
               ...styles.mediumText,
-              color: theme.formInputText,
+              color: theme.mobileHeaderText,
+              ':hover': theme.mobileHeaderText,
             }}
             onClick={() => onEditMode?.(false)}
           >

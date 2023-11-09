@@ -85,7 +85,8 @@ export const menuAutoCompleteText = colorPalette.white;
 
 export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;
-export const mobileHeaderBackground = colorPalette.navy150;
+export const mobileHeaderBackground = colorPalette.purple400;
+export const mobileHeaderText = colorPalette.navy150;
 export const mobilePageBackground = colorPalette.navy50;
 export const mobileNavBackground = colorPalette.white;
 export const mobileNavItem = colorPalette.gray300;

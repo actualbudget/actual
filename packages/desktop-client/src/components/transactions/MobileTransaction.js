@@ -366,7 +366,7 @@ class TransactionEditInner extends PureComponent {
             >
               <CheveronLeft
                 style={{
-                  color: theme.formLabelText,
+                  color: theme.mobileHeaderText,
                   width: 32,
                   height: 32,
                 }}
@@ -374,7 +374,7 @@ class TransactionEditInner extends PureComponent {
               <Text
                 style={{
                   ...styles.text,
-                  color: theme.formLabelText,
+                  color: theme.mobileHeaderText,
                   fontWeight: 500,
                 }}
               >
@@ -383,7 +383,7 @@ class TransactionEditInner extends PureComponent {
             </Link>
             <TextOneLine
               style={{
-                color: theme.formInputText,
+                color: theme.mobileHeaderText,
                 fontSize: 16,
                 fontWeight: 500,
                 userSelect: 'none',

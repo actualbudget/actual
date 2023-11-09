@@ -177,7 +177,7 @@ function AccountList({
         title="Accounts"
         titleStyle={{
           backgroundColor: theme.mobileHeaderBackground,
-          color: theme.tableText,
+          color: theme.mobileHeaderText,
           fontSize: 16,
         }}
       >

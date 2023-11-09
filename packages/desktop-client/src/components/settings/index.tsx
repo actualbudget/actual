@@ -151,7 +151,7 @@ export default function Settings() {
           isNarrowWidth
             ? {
                 backgroundColor: theme.mobileHeaderBackground,
-                color: theme.formInputText,
+                color: theme.mobileHeaderText,
                 fontSize: 16,
                 fontWeight: 500,
               }

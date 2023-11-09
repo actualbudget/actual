@@ -25,7 +25,6 @@ function TransactionSearchInput({ accountName, onSearch }) {
         alignItems: 'center',
         backgroundColor: theme.mobilePageBackground,
         margin: '11px auto 4px',
-        borderRadius: 4,
         padding: 10,
         width: '100%',
       }}
@@ -118,21 +117,32 @@ export default function AccountDetails({
           <Link
             to={-1}
             style={{
-              color: theme.formLabelText,
+              color: theme.mobileHeaderText,
               alignItems: 'center',
               display: 'flex',
               textDecoration: 'none',
               width: LEFT_RIGHT_FLEX_WIDTH,
             }}
           >
-            <CheveronLeft style={{ width: 32, height: 32 }} />
-            <Text style={{ ...styles.text, fontWeight: 500 }}>Back</Text>
+            <CheveronLeft
+              style={{ width: 32, height: 32, color: theme.mobileHeaderText }}
+            />
+            <Text
+              style={{
+                ...styles.text,
+                fontWeight: 500,
+                color: theme.mobileHeaderText,
+              }}
+            >
+              Back
+            </Text>
           </Link>
           <View
             style={{
               fontSize: 16,
               fontWeight: 500,
               justifyContent: 'center',
+              color: theme.mobileHeaderText,
             }}
             role="heading"
           >
@@ -143,7 +153,12 @@ export default function AccountDetails({
             to="transactions/new"
             type="bare"
             aria-label="Add Transaction"
-            style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
+            style={{
+              justifyContent: 'center',
+              width: LEFT_RIGHT_FLEX_WIDTH,
+              color: theme.mobileHeaderText,
+              ':hover': theme.mobileHeaderText,
+            }}
             hoveredStyle={{ background: 'transparent' }}
             activeStyle={{ background: 'transparent' }}
           >
