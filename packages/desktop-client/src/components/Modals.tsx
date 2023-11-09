@@ -137,7 +137,7 @@ export default function Modals() {
           return (
             <ManageRulesModal
               modalProps={modalProps}
-              payeeId={options.payeeId}
+              payeeId={options?.payeeId}
             />
           );
 
