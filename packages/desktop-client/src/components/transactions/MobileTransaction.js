@@ -250,7 +250,7 @@ class TransactionEditInner extends PureComponent {
     };
 
     const { transactions } = this.state;
-    const [transaction, ..._childTransactions] = transactions;
+    const [transaction] = transactions;
 
     if (transaction.reconciled) {
       // On mobile any save gives the warning.
@@ -258,9 +258,7 @@ class TransactionEditInner extends PureComponent {
       // Should we bring that here as well? Or does the nature of the editing form
       // make this more appropriate?
       this.props.pushModal('confirm-transaction-edit', {
-        onConfirm: () => {
-          onConfirmSave();
-        },
+        onConfirm: onConfirmSave,
         confirmReason: 'editReconciled',
       });
     } else {
@@ -330,13 +328,11 @@ class TransactionEditInner extends PureComponent {
     };
 
     const { transactions } = this.state;
-    const [transaction, ..._childTransactions] = transactions;
+    const [transaction] = transactions;
 
     if (transaction.reconciled) {
       this.props.pushModal('confirm-transaction-edit', {
-        onConfirm: () => {
-          onConfirmDelete();
-        },
+        onConfirm: onConfirmDelete,
         confirmReason: 'deleteReconciled',
       });
     } else {
@@ -610,9 +606,9 @@ class TransactionEditInner extends PureComponent {
                 <View style={{ marginLeft: 35, marginRight: 35 }}>
                   <FieldLabel title="Reconciled" />
                   <BooleanField
-                    checked="true"
+                    checked
                     style={{ marginTop: 4 }}
-                    disabled="true"
+                    disabled
                   />
                 </View>
               ) : (
