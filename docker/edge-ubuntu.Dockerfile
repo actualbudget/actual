@@ -20,6 +20,7 @@ COPY --from=base /app/node_modules /app/node_modules
 COPY --from=base /public /public
 ADD package.json app.js ./
 ADD src ./src
+ADD migrations ./migrations
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 ENV ACTUAL_WEB_ROOT=/public
 EXPOSE 5006
