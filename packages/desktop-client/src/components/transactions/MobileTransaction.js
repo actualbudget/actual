@@ -620,7 +620,7 @@ class TransactionEditInner extends PureComponent {
                       this.onEdit(transaction, 'cleared', checked)
                     }
                     style={{ marginTop: 4 }}
-                    disabled=false
+                    disabled
                   />
                 </View>
               )}

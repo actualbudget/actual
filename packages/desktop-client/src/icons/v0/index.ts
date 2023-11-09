@@ -5,5 +5,3 @@ export { default as LeftArrow2 } from './LeftArrow2';
 export { default as Math } from './Math';
 export { default as RightArrow2 } from './RightArrow2';
 export { default as Subtract } from './Subtract';
-export { default as Merge } from './Merge';
-export { default as Split } from './Split';

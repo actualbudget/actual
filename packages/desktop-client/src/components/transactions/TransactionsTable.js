@@ -750,11 +750,11 @@ const Transaction = memo(function Transaction(props) {
         transaction.reconciled === true &&
         (name === 'credit' || name === 'debit' || name === 'payee')
       ) {
-        if (reconciledWarningShowing === false) {
-          reconciledWarningShowing = true;
+        if (showReconciliationWarning === false) {
+          setShowReconciliationWarning(true);
           props.pushModal('confirm-transaction-edit', {
             onConfirm: () => {
-              reconciledWarningShowing = false;
+              setShowReconciliationWarning(false);
               onUpdateAfterConfirm(name, value);
             },
             confirmReason: 'editReconciled',
