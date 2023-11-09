@@ -709,7 +709,6 @@ class AccountInternal extends PureComponent {
     let changes = { updated: [] };
 
     transactions.forEach(trans => {
-      console.log(trans.amount);
       let { diff } = updateTransaction(transactions, {
         ...trans,
         reconciled: true,
@@ -814,7 +813,7 @@ class AccountInternal extends PureComponent {
       const idSet = new Set(ids);
 
       transactions.forEach(trans => {
-        if (name === 'cleared' && trans.reconciled === true) {
+        if (name === 'cleared' && trans.reconciled) {
           // Skip transactions that are reconciled. Don't want to set them as
           // uncleared.
           return;
