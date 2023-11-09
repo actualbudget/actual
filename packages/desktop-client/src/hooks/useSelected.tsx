@@ -53,6 +53,7 @@ export default function useSelected<T extends Item>(
   name: string,
   items: T[],
   initialSelectedIds: string[],
+  selectAllFilter?: (T) => boolean,
 ) {
   let [state, dispatch] = useReducer(
     (state: State, action: Actions) => {
@@ -128,9 +129,20 @@ export default function useSelected<T extends Item>(
           return { ...state, selectedItems: new Set<string>() };
 
         case 'select-all':
+          let selectedItems: string[] = [];
+          if (action.ids && items && selectAllFilter) {
+            const idsToInclude = new Set(
+              items.filter(selectAllFilter).map(item => item.id),
+            );
+            selectedItems = action.ids.filter(id => idsToInclude.has(id));
+          } else if (items && selectAllFilter) {
+            selectedItems = items.filter(selectAllFilter).map(item => item.id);
+          } else {
+            selectedItems = action.ids || items.map(item => item.id);
+          }
           return {
             ...state,
-            selectedItems: new Set(action.ids || items.map(item => item.id)),
+            selectedItems: new Set(selectedItems),
             selectedRange:
               action.ids && action.ids.length === 1
                 ? { start: action.ids[0], end: null }
@@ -300,6 +312,7 @@ type SelectedProviderWithItemsProps<T extends Item> = {
   initialSelectedIds: string[];
   fetchAllIds: () => Promise<string[]>;
   registerDispatch?: (dispatch: Dispatch<Actions>) => void;
+  selectAllFilter?: (T) => boolean;
   children: ReactElement;
 };
 
@@ -311,9 +324,15 @@ export function SelectedProviderWithItems<T extends Item>({
   initialSelectedIds,
   fetchAllIds,
   registerDispatch,
+  selectAllFilter,
   children,
 }: SelectedProviderWithItemsProps<T>) {
-  let selected = useSelected<T>(name, items, initialSelectedIds);
+  let selected = useSelected<T>(
+    name,
+    items,
+    initialSelectedIds,
+    selectAllFilter,
+  );
 
   useEffect(() => {
     registerDispatch?.(selected.dispatch);

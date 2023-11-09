@@ -216,7 +216,7 @@ export function updateGroup(group) {
   };
 }
 
-export function deleteGroup(id, transferId) {
+export function deleteGroup(id, transferId?) {
   return async function (dispatch, getState) {
     await send('category-group-delete', { id, transferId });
     await dispatch(getCategories());

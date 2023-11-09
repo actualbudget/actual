@@ -306,8 +306,9 @@ const readonlyInputStyle = {
 };
 
 type InputValueProps = ComponentProps<typeof Input> & {
-  value: string;
+  value?: string;
 };
+
 function InputValue({
   value: defaultValue,
   onUpdate,
