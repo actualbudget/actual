@@ -14,13 +14,17 @@ export function getAccountFilter(accountId, field = 'account') {
   if (accountId) {
     if (accountId === 'budgeted') {
       return {
-        [`${field}.offbudget`]: false,
-        [`${field}.closed`]: false,
+        $and: [
+          { [`${field}.offbudget`]: false },
+          { [`${field}.closed`]: false },
+        ],
       };
     } else if (accountId === 'offbudget') {
       return {
-        [`${field}.offbudget`]: true,
-        [`${field}.closed`]: false,
+        $and: [
+          { [`${field}.offbudget`]: true },
+          { [`${field}.closed`]: false },
+        ],
       };
     } else if (accountId === 'uncategorized') {
       return {
@@ -173,6 +177,7 @@ export const rolloverBudget = {
   catSumAmount: id => `sum-amount-${id}`,
   catBalance: id => `leftover-${id}`,
   catCarryover: id => `carryover-${id}`,
+  catGoal: id => `goal-${id}`,
 };
 
 export const reportBudget = {
@@ -195,4 +200,5 @@ export const reportBudget = {
   catSumAmount: id => `sum-amount-${id}`,
   catBalance: id => `leftover-${id}`,
   catCarryover: id => `carryover-${id}`,
+  catGoal: id => `goal-${id}`,
 };
