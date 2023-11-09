@@ -44,17 +44,12 @@ export const tableRowBackgroundHighlightText = colorPalette.navy700;
 export const tableRowHeaderBackground = colorPalette.navy50;
 export const tableRowHeaderText = colorPalette.navy800;
 export const sidebarBackground = colorPalette.navy900;
-export const sidebarItemBackground = colorPalette.blue800;
 export const sidebarItemBackgroundPositive = colorPalette.green500;
 export const sidebarItemBackgroundFailed = colorPalette.red300;
-export const sidebarItemBackgroundSelected = colorPalette.purple200;
 export const sidebarItemBackgroundHover = colorPalette.navy800;
-export const sidebarItemAccent = colorPalette.blue800;
 export const sidebarItemAccentSelected = colorPalette.purple200;
-export const sidebarItemAccentHover = colorPalette.blue700;
 export const sidebarItemText = colorPalette.navy150;
 export const sidebarItemTextSelected = colorPalette.purple200;
-export const sidebarItemTextHover = colorPalette.navy50;
 
 export const menuBackground = colorPalette.white;
 export const menuItemBackground = colorPalette.navy50;

@@ -35,8 +35,8 @@ import DateSelectRight from './DateSelect.right.png';
 
 let pickerStyles = {
   '& .pika-single.actual-date-picker': {
-    color: theme.sidebarItemTextHover,
-    background: theme.sidebarBackground,
+    color: theme.menuAutoCompleteText,
+    background: theme.menuAutoCompleteBackground,
     border: 'none',
     boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
     borderRadius: 4,
