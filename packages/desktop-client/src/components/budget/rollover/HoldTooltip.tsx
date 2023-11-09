@@ -29,7 +29,7 @@ export default function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
   useEffect(() => {
     (async () => {
       const node = await spreadsheet.get(sheetName, 'to-budget');
-      setAmount(integerToCurrency(Math.max(node.value, 0)));
+      setAmount(integerToCurrency(Math.max(node.value as number, 0)));
     })();
   }, []);
 
