@@ -130,9 +130,9 @@ export function getScrollbarWidth() {
 }
 
 export async function prewarmMonth(
+  budgetType: LocalPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   month: string,
-  budgetType: LocalPrefs['budgetType'],
 ) {
   let method: keyof Handlers =
     budgetType === 'report' ? 'report-budget-month' : 'rollover-budget-month';
@@ -145,10 +145,10 @@ export async function prewarmMonth(
 }
 
 export async function prewarmAllMonths(
+  budgetType: LocalPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   bounds: { start: string; end: string },
   startMonth: string,
-  budgetType: LocalPrefs['budgetType'],
 ) {
   let numMonths = 3;
 
@@ -160,7 +160,7 @@ export async function prewarmAllMonths(
   let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
   await Promise.all(
-    months.map(month => prewarmMonth(spreadsheet, month, budgetType)),
+    months.map(month => prewarmMonth(budgetType, spreadsheet, month)),
   );
 }
 
@@ -176,7 +176,7 @@ export async function switchBudgetType(
 
   spreadsheet.disableObservers();
   await send('budget-set-type', { type: newType });
-  await prewarmAllMonths(spreadsheet, bounds, startMonth, newType);
+  await prewarmAllMonths(newType, spreadsheet, bounds, startMonth);
   spreadsheet.enableObservers();
   await onSuccess?.();
 }

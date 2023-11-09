@@ -130,10 +130,10 @@ function Budget(props: BudgetProps) {
       setBounds({ start, end });
 
       await prewarmAllMonths(
+        budgetType,
         props.spreadsheet,
         { start, end },
         prewarmStartMonth,
-        budgetType,
       );
 
       setInitialized(true);
@@ -206,16 +206,16 @@ function Budget(props: BudgetProps) {
     if (month < startMonth) {
       // pre-warm prev month
       await prewarmMonth(
+        props.budgetType,
         props.spreadsheet,
         monthUtils.subMonths(month, 1),
-        props.budgetType,
       );
     } else if (month > startMonth) {
       // pre-warm next month
       await prewarmMonth(
+        props.budgetType,
         props.spreadsheet,
         monthUtils.addMonths(month, numDisplayed),
-        props.budgetType,
       );
     }
 

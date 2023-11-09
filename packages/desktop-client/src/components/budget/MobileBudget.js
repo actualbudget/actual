@@ -56,9 +56,9 @@ class Budget extends Component {
     this.setState({ bounds: { start, end } });
 
     await prewarmMonth(
+      this.props.budgetType,
       this.props.spreadsheet,
       this.state.currentMonth,
-      this.props.budgetType,
     );
 
     this.setState({ initialized: true });
@@ -259,14 +259,14 @@ class Budget extends Component {
   onPrevMonth = async () => {
     let { spreadsheet, budgetType } = this.props;
     let month = monthUtils.subMonths(this.state.currentMonth, 1);
-    await prewarmMonth(spreadsheet, month, budgetType);
+    await prewarmMonth(budgetType, spreadsheet, month);
     this.setState({ currentMonth: month, initialized: true });
   };
 
   onNextMonth = async () => {
     let { spreadsheet, budgetType } = this.props;
     let month = monthUtils.addMonths(this.state.currentMonth, 1);
-    await prewarmMonth(spreadsheet, month, budgetType);
+    await prewarmMonth(budgetType, spreadsheet, month);
     this.setState({ currentMonth: month, initialized: true });
   };
 
