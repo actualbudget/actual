@@ -119,7 +119,7 @@ function LoadBackup({
             )}
           </View>
           {previousBackups.length === 0 ? (
-            <Block style={{ color: theme.altTableText, marginLeft: 20 }}>
+            <Block style={{ color: theme.tableTextLight, marginLeft: 20 }}>
               No backups available
             </Block>
           ) : (

@@ -161,7 +161,9 @@ const BudgetCategories = memo(
           switch (item.type) {
             case 'new-group':
               content = (
-                <Row style={{ backgroundColor: theme.altTableBackground }}>
+                <Row
+                  style={{ backgroundColor: theme.tableRowHeaderBackground }}
+                >
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
                     editing={true}
