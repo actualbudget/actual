@@ -781,6 +781,7 @@ class AccountInternal extends PureComponent {
     await send('transactions-batch-update', {
       added: reconciliationTransactions,
     });
+    await this.refetchTransactions();
   };
 
   onShowTransactions = async ids => {

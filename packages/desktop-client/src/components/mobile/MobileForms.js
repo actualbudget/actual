@@ -110,8 +110,8 @@ export function TapField({
   );
 }
 
-export function BooleanField({ checked, onUpdate, style, disabled = 'false' }) {
-  if (disabled === 'true') {
+export function BooleanField({ checked, onUpdate, style, disabled = false }) {
+  if (disabled === true) {
     return (
       <input
         disabled="disabled"
