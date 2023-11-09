@@ -615,7 +615,7 @@ class TransactionEditInner extends PureComponent {
                     disabled
                   />
                 </View>
-              ) : (                
+              ) : (
                 <View style={{ marginLeft: 0, marginRight: 8 }}>
                   <FieldLabel title="Cleared" />
                   <BooleanField

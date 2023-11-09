@@ -910,7 +910,11 @@ class AccountInternal extends PureComponent {
       await this.refetchTransactions();
     };
 
-    await this.checkForReconciledTransactions(ids, 'batchDuplicateWithReconciled', onConfirmDuplicate);
+    await this.checkForReconciledTransactions(
+      ids,
+      'batchDuplicateWithReconciled',
+      onConfirmDuplicate,
+    );
   };
 
   onBatchDelete = async ids => {
@@ -958,7 +962,11 @@ class AccountInternal extends PureComponent {
       await this.refetchTransactions();
     };
 
-    await this.checkForReconciledTransactions(ids, 'batchDeleteWithReconciled', onConfirmDelete);
+    await this.checkForReconciledTransactions(
+      ids,
+      'batchDeleteWithReconciled',
+      onConfirmDelete,
+    );
   };
 
   checkForReconciledTransactions = async (ids, confirmReason, onConfirm) => {
@@ -979,7 +987,7 @@ class AccountInternal extends PureComponent {
     } else {
       onConfirm(ids);
     }
-  }
+  };
 
   onBatchUnlink = async ids => {
     await send('transactions-batch-update', {

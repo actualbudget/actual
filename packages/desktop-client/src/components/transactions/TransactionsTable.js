@@ -735,7 +735,8 @@ const Transaction = memo(function Transaction(props) {
     setPrevShowZero(showZeroInDeposit);
   }
 
-  let [showReconciliationWarning, setShowReconciliationWarning] = useState(false);
+  let [showReconciliationWarning, setShowReconciliationWarning] =
+    useState(false);
 
   function onUpdate(name, value) {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
