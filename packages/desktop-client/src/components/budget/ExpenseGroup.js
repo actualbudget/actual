@@ -56,7 +56,7 @@ function ExpenseGroup({
       style={{
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
-        backgroundColor: theme.altTableBackground,
+        backgroundColor: theme.tableRowHeaderBackground,
       }}
     >
       {dragState && !dragState.preview && dragState.type === 'group' && (
