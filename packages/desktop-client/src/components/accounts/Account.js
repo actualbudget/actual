@@ -910,24 +910,7 @@ class AccountInternal extends PureComponent {
       await this.refetchTransactions();
     };
 
-    let { data } = await runQuery(
-      q('transactions')
-        .filter({ id: { $oneof: ids }, reconciled: true })
-        .select('*')
-        .options({ splits: 'grouped' }),
-    );
-    let transactions = ungroupTransactions(data);
-
-    if (transactions.length > 0) {
-      this.props.pushModal('confirm-transaction-edit', {
-        onConfirm: () => {
-          onConfirmDuplicate(ids);
-        },
-        confirmReason: 'batchDuplicateWithReconciled',
-      });
-    } else {
-      onConfirmDuplicate(ids);
-    }
+    await this.checkForReconciledTransactions(ids, 'batchDuplicateWithReconciled', onConfirmDuplicate);
   };
 
   onBatchDelete = async ids => {
@@ -975,6 +958,10 @@ class AccountInternal extends PureComponent {
       await this.refetchTransactions();
     };
 
+    await this.checkForReconciledTransactions(ids, 'batchDeleteWithReconciled', onConfirmDelete);
+  };
+
+  checkForReconciledTransactions = async (ids, confirmReason, onConfirm) => {
     let { data } = await runQuery(
       q('transactions')
         .filter({ id: { $oneof: ids }, reconciled: true })
@@ -982,18 +969,17 @@ class AccountInternal extends PureComponent {
         .options({ splits: 'grouped' }),
     );
     let transactions = ungroupTransactions(data);
-
     if (transactions.length > 0) {
       this.props.pushModal('confirm-transaction-edit', {
         onConfirm: () => {
-          onConfirmDelete(ids);
+          onConfirm(ids);
         },
-        confirmReason: 'batchDeleteWithReconciled',
+        confirmReason: confirmReason,
       });
     } else {
-      onConfirmDelete(ids);
+      onConfirm(ids);
     }
-  };
+  }
 
   onBatchUnlink = async ids => {
     await send('transactions-batch-update', {
