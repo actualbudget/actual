@@ -14,9 +14,9 @@ export async function goalsWeek(
   let amount = amountToInteger(template.amount);
   let weeks = template.weeks != null ? Math.round(template.weeks) : 1;
   if (template.limit != null) {
-    if (limit != null) {
+    if (limit > 0) {
       errors.push(`More than one “up to” limit found.`);
-      return { errors };
+      return { to_budget, errors, limit, limitCheck, hold };
     } else {
       limitCheck = true;
       limit = amountToInteger(template.limit.amount);
@@ -32,5 +32,5 @@ export async function goalsWeek(
     }
     w = monthUtils.addWeeks(w, weeks);
   }
-  return { to_budget, errors };
+  return { to_budget, errors, limit, limitCheck, hold };
 }

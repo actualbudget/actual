@@ -4,7 +4,7 @@ import * as db from '../../db';
 import { getRuleForSchedule, getNextDate } from '../../schedules/app';
 import { isReflectBudget } from '../actions';
 
-export async function goalsSchededule(
+export async function goalsSchedule(
   scheduleFlag,
   template_lines,
   current_month,
@@ -165,5 +165,5 @@ export async function goalsSchededule(
     increment = Math.round(increment);
     to_budget += increment;
   }
-  return { to_budget, errors };
+  return { to_budget, errors, remainder };
 }

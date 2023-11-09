@@ -43,5 +43,5 @@ export async function goalsBy(
   } else {
     errors.push(`by templates are not supported in Report budgets`);
   }
-  return { to_budget, errors };
+  return { to_budget, errors, remainder };
 }

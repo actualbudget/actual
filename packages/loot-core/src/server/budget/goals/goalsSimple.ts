@@ -12,7 +12,7 @@ export async function goalsSimple(
   if (template.limit != null) {
     if (limitCheck) {
       errors.push(`More than one “up to” limit found.`);
-      return { errors };
+      return { to_budget, errors, limit, limitCheck, hold };
     } else {
       limitCheck = true;
       limit = amountToInteger(template.limit.amount);
@@ -27,5 +27,5 @@ export async function goalsSimple(
     increment = limit;
   }
   to_budget += increment;
-  return { to_budget, errors };
+  return { to_budget, errors, limit, limitCheck, hold };
 }

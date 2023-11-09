@@ -41,7 +41,7 @@ export async function goalsSpend(
   let increment = 0;
   if (num_months < 0) {
     errors.push(`${template.month} is in the past.`);
-    return { errors };
+    return { to_budget, errors };
   } else if (num_months === 0) {
     increment = target - already_budgeted;
   } else {

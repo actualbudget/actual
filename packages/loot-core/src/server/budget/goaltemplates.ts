@@ -8,8 +8,8 @@ import { setBudget, getSheetValue, isReflectBudget, setGoal } from './actions';
 import { parse } from './goal-template.pegjs';
 import { goalsBy } from './goals/goalsBy';
 import { goalsPercentage } from './goals/goalsPercentage';
-import { goalsRemainder } from './goals/goalsRemainder';
-import { goalsSchededule } from './goals/goalsSchedule';
+import { findRemainder, goalsRemainder } from './goals/goalsRemainder';
+import { goalsSchedule } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
@@ -200,23 +200,8 @@ async function processTemplate(
     .sort()
     .filter((item, index, curr) => curr.indexOf(item) === index);
 
-  // find all remainder templates, place them at highest priority
-  let remainder_found;
-  let remainder_weight_total = 0;
-  let remainder_priority = priority_list[priority_list.length - 1] + 1;
-  for (let c = 0; c < categories.length; c++) {
-    let category = categories[c];
-    let templates = category_templates[category.id];
-    if (templates) {
-      for (let i = 0; i < templates.length; i++) {
-        if (templates[i].type === 'remainder') {
-          templates[i].priority = remainder_priority;
-          remainder_weight_total += templates[i].weight;
-          remainder_found = true;
-        }
-      }
-    }
-  }
+  let { remainder_found, remainder_priority, remainder_weight_total } =
+    findRemainder(priority_list, categories, category_templates);
   if (remainder_found) priority_list.push(remainder_priority);
 
   let sheetName = monthUtils.sheetForMonth(month);
@@ -304,7 +289,6 @@ async function processTemplate(
                 available_start,
                 budgetAvailable,
                 prev_budgeted,
-                force,
               );
             if (to_budget != null) {
               num_applied++;
@@ -444,7 +428,6 @@ async function applyCategoryTemplate(
   available_start,
   budgetAvailable,
   prev_budgeted,
-  force,
 ) {
   let current_month = `${month}-01`;
   let errors = [];
@@ -517,15 +500,17 @@ async function applyCategoryTemplate(
       }
     });
   }
-  let sheetName = monthUtils.sheetForMonth(month);
-  let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
-  let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
+
+  const sheetName = monthUtils.sheetForMonth(month);
+  const spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
+  const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
+  const last_month_balance = balance - spent - prev_budgeted;
   let to_budget = 0;
   let limit = 0;
   let hold = false;
   let limitCheck = false;
-  let last_month_balance = balance - spent - prev_budgeted;
   let remainder = 0;
+
   for (let l = 0; l < template_lines.length; l++) {
     let template = template_lines[l];
     switch (template.type) {
@@ -540,6 +525,9 @@ async function applyCategoryTemplate(
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
+        limit = goalsReturn.limit;
+        limitCheck = goalsReturn.limitCheck;
+        hold = goalsReturn.hold;
         break;
       }
       case 'by': {
@@ -555,6 +543,7 @@ async function applyCategoryTemplate(
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
+        remainder = goalsReturn.remainder;
         break;
       }
       case 'week': {
@@ -569,6 +558,9 @@ async function applyCategoryTemplate(
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
+        limit = goalsReturn.limit;
+        limitCheck = goalsReturn.limitCheck;
+        hold = goalsReturn.hold;
         break;
       }
       case 'spend': {
@@ -598,7 +590,7 @@ async function applyCategoryTemplate(
         break;
       }
       case 'schedule': {
-        let goalsReturn = await goalsSchededule(
+        let goalsReturn = await goalsSchedule(
           scheduleFlag,
           template_lines,
           current_month,
@@ -610,6 +602,7 @@ async function applyCategoryTemplate(
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
+        remainder = goalsReturn.remainder;
         break;
       }
       case 'remainder': {

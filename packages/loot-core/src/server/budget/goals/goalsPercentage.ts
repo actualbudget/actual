@@ -31,7 +31,7 @@ export async function goalsPercentage(
     );
     if (!income_category) {
       errors.push(`Could not find category “${template.category}”`);
-      return { errors };
+      return { to_budget, errors };
     }
     if (template.previous) {
       let sheetName_lastmonth = monthUtils.sheetForMonth(
