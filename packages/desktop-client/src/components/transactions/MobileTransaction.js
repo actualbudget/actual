@@ -384,7 +384,7 @@ class TransactionEditInner extends PureComponent {
             <TextOneLine
               style={{
                 color: theme.formInputText,
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: 500,
                 userSelect: 'none',
               }}

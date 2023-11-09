@@ -130,7 +130,7 @@ export default function AccountDetails({
           </Link>
           <View
             style={{
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: 500,
               justifyContent: 'center',
             }}

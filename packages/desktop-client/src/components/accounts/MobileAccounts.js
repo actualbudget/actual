@@ -178,6 +178,7 @@ function AccountList({
         titleStyle={{
           backgroundColor: theme.mobileHeaderBackground,
           color: theme.tableText,
+          fontSize: 16,
         }}
       >
         <PullToRefresh onRefresh={syncAndDownload}>

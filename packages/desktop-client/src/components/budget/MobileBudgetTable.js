@@ -1931,7 +1931,7 @@ function BudgetHeader({
           style={{
             color: theme.formInputText,
             textAlign: 'center',
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: 500,
             // zIndex: -1
           }}

@@ -152,7 +152,7 @@ export default function Settings() {
             ? {
                 backgroundColor: theme.mobileHeaderBackground,
                 color: theme.formInputText,
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: 500,
               }
             : undefined
