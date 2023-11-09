@@ -27,8 +27,8 @@ export function getStatusProps(status: StatusTypes) {
       };
     case 'due':
       return {
-        color: theme.altWarningText,
-        backgroundColor: theme.altWarningBackground,
+        color: theme.warningTextDark,
+        backgroundColor: theme.warningBackground,
         Icon: AlertTriangle,
       };
     case 'upcoming':

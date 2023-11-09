@@ -143,6 +143,13 @@ async function importTransactions(
   let transactionsGrouped = groupBy(data.transactions, 'account_id');
   let subtransactionsGrouped = groupBy(data.subtransactions, 'transaction_id');
 
+  const payeesByTransferAcct = payees
+    .filter((payee: YNAB5.Payee) => payee?.transfer_acct)
+    .map((payee: YNAB5.Payee) => [payee.transfer_acct, payee]);
+  const payeeTransferAcctHashMap = new Map<string, YNAB5.Payee>(
+    payeesByTransferAcct,
+  );
+
   // Go ahead and generate ids for all of the transactions so we can
   // reliably resolve transfers
   for (let transaction of data.transactions) {
@@ -178,11 +185,22 @@ async function importTransactions(
               entityIdMap.get(transaction.transfer_transaction_id) || null,
             subtransactions: subtransactions
               ? subtransactions.map(subtrans => {
+                  let payee = null;
+                  if (subtrans.transfer_account_id) {
+                    const mappedTransferAccountId = entityIdMap.get(
+                      subtrans.transfer_account_id,
+                    );
+                    payee = payeeTransferAcctHashMap.get(
+                      mappedTransferAccountId,
+                    )?.id;
+                  }
+
                   return {
                     id: entityIdMap.get(subtrans.id),
                     amount: amountFromYnab(subtrans.amount),
                     category: entityIdMap.get(subtrans.category_id) || null,
                     notes: subtrans.memo,
+                    payee,
                   };
                 })
               : null,

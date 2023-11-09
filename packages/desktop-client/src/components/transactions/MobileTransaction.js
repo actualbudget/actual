@@ -161,7 +161,7 @@ function Status({ status }) {
       color = theme.errorText;
       break;
     case 'due':
-      color = theme.alt2WarningText;
+      color = theme.warningText;
       break;
     case 'upcoming':
       color = theme.alt2TableText;
@@ -603,23 +603,31 @@ class TransactionEditInner extends PureComponent {
                 />
               </View>
               {transaction.reconciled ? (
-                <View style={{ marginLeft: 35, marginRight: 35 }}>
+                <View style={{ marginLeft: 0, marginRight: 8 }}>
                   <FieldLabel title="Reconciled" />
                   <BooleanField
                     checked
-                    style={{ marginTop: 4 }}
+                    style={{
+                      margin: 'auto',
+                      width: 22,
+                      height: 22,
+                    }}
                     disabled
                   />
                 </View>
-              ) : (
-                <View style={{ marginLeft: 35, marginRight: 35 }}>
+              ) : (                
+                <View style={{ marginLeft: 0, marginRight: 8 }}>
                   <FieldLabel title="Cleared" />
                   <BooleanField
                     checked={transaction.cleared}
                     onUpdate={checked =>
                       this.onEdit(transaction, 'cleared', checked)
                     }
-                    style={{ marginTop: 4 }}
+                    style={{
+                      margin: 'auto',
+                      width: 22,
+                      height: 22,
+                    }}
                   />
                 </View>
               )}

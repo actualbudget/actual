@@ -43,6 +43,18 @@ export function parseDate(str, order) {
 
   const dateGroups = (a, b) => str => {
     const parts = str
+      .replace(/\bjan(\.|uary)?\b/i, '01')
+      .replace(/\bfeb(\.|ruary)?\b/i, '02')
+      .replace(/\bmar(\.|ch)?\b/i, '03')
+      .replace(/\bapr(\.|il)?\b/i, '04')
+      .replace(/\bmay\.?\b/i, '05')
+      .replace(/\bjun(\.|e)?\b/i, '06')
+      .replace(/\bjul(\.|y)?\b/i, '07')
+      .replace(/\baug(\.|ust)?\b/i, '08')
+      .replace(/\bsep(\.|tember)?\b/i, '09')
+      .replace(/\boct(\.|ober)?\b/i, '10')
+      .replace(/\bnov(\.|ember)?\b/i, '11')
+      .replace(/\bdec(\.|ember)?\b/i, '12')
       .replace(/^[^\d]+/, '')
       .replace(/[^\d]+$/, '')
       .split(/[^\d]+/);
@@ -193,11 +205,22 @@ function getInitialMappings(transactions) {
     ),
   );
 
+  let inOutField = key(
+    fields.find(
+      ([name, value]) =>
+        name !== dateField &&
+        name !== amountField &&
+        name !== payeeField &&
+        name !== notesField,
+    ),
+  );
+
   return {
     date: dateField,
     amount: amountField,
     payee: payeeField,
     notes: notesField,
+    inOut: inOutField,
   };
 }
 
@@ -222,7 +245,14 @@ function parseAmount(amount, mapper) {
   return value;
 }
 
-function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
+function parseAmountFields(
+  trans,
+  splitMode,
+  inOutMode,
+  outValue,
+  flipAmount,
+  multiplierAmount,
+) {
   const multiplier = parseFloat(multiplierAmount) || 1.0;
 
   if (splitMode) {
@@ -240,6 +270,16 @@ function parseAmountFields(trans, splitMode, flipAmount, multiplierAmount) {
       inflow,
     };
   }
+  if (inOutMode) {
+    return {
+      amount:
+        parseAmount(trans.amount, n =>
+          trans.inOut === outValue ? Math.abs(n) * -1 : Math.abs(n),
+        ) * multiplier,
+      outflow: null,
+      inflow: null,
+    };
+  }
   return {
     amount:
       parseAmount(trans.amount, n => (flipAmount ? n * -1 : n)) * multiplier,
@@ -255,6 +295,8 @@ function Transaction({
   parseDateFormat,
   dateFormat,
   splitMode,
+  inOutMode,
+  outValue,
   flipAmount,
   multiplierAmount,
 }) {
@@ -269,6 +311,8 @@ function Transaction({
   let { amount, outflow, inflow } = parseAmountFields(
     transaction,
     splitMode,
+    inOutMode,
+    outValue,
     flipAmount,
     multiplierAmount,
   );
@@ -320,13 +364,24 @@ function Transaction({
           </Field>
         </>
       ) : (
-        <Field
-          width={90}
-          contentStyle={{ textAlign: 'right', ...styles.tnum }}
-          title={amount}
-        >
-          {amount}
-        </Field>
+        <>
+          {inOutMode && (
+            <Field
+              width={90}
+              contentStyle={{ textAlign: 'left', ...styles.tnum }}
+              title={transaction.inOut}
+            >
+              {transaction.inOut}
+            </Field>
+          )}
+          <Field
+            width={90}
+            contentStyle={{ textAlign: 'right', ...styles.tnum }}
+            title={amount}
+          >
+            {amount}
+          </Field>
+        </>
       )}
     </Row>
   );
@@ -457,11 +512,43 @@ function MultiplierOption({
   );
 }
 
+function InOutOption({
+  inOutMode,
+  outValue,
+  disabled,
+  onToggle,
+  onChangeText,
+}) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
+      <CheckboxOption
+        id="form_inOut"
+        checked={inOutMode}
+        disabled={disabled}
+        onChange={onToggle}
+      >
+        {inOutMode
+          ? 'in/out identifier'
+          : 'Select column to specify if amount goes in/out'}
+      </CheckboxOption>
+      {inOutMode && (
+        <Input
+          type="text"
+          value={outValue}
+          onUpdate={onChangeText}
+          placeholder="Value for out rows, i.e. Credit"
+        />
+      )}
+    </View>
+  );
+}
+
 function FieldMappings({
   transactions,
   mappings,
   onChange,
   splitMode,
+  inOutMode,
   hasHeaderRow,
 }) {
   if (transactions.length === 0) {
@@ -537,16 +624,30 @@ function FieldMappings({
             </View>
           </>
         ) : (
-          <View style={{ flex: 1 }}>
-            <SubLabel title="Amount" />
-            <SelectField
-              options={options}
-              value={mappings.amount}
-              onChange={name => onChange('amount', name)}
-              hasHeaderRow={hasHeaderRow}
-              firstTransaction={transactions[0]}
-            />
-          </View>
+          <>
+            {inOutMode && (
+              <View style={{ flex: 1 }}>
+                <SubLabel title="In/Out" />
+                <SelectField
+                  options={options}
+                  value={mappings.inOut}
+                  onChange={name => onChange('inOut', name)}
+                  hasHeaderRow={hasHeaderRow}
+                  firstTransaction={transactions[0]}
+                />
+              </View>
+            )}
+            <View style={{ flex: 1 }}>
+              <SubLabel title="Amount" />
+              <SelectField
+                options={options}
+                value={mappings.amount}
+                onChange={name => onChange('amount', name)}
+                hasHeaderRow={hasHeaderRow}
+                firstTransaction={transactions[0]}
+              />
+            </View>
+          </>
         )}
       </Stack>
     </View>
@@ -569,6 +670,8 @@ export default function ImportTransactions({ modalProps, options }) {
   let [filetype, setFileType] = useState(null);
   let [fieldMappings, setFieldMappings] = useState(null);
   let [splitMode, setSplitMode] = useState(false);
+  let [inOutMode, setInOutMode] = useState(false);
+  let [outValue, setOutValue] = useState('');
   let [flipAmount, setFlipAmount] = useState(false);
   let [multiplierEnabled, setMultiplierEnabled] = useState(false);
   let { accountId, onImported } = options;
@@ -684,6 +787,8 @@ export default function ImportTransactions({ modalProps, options }) {
 
     let isSplit = !splitMode;
     setSplitMode(isSplit);
+    setInOutMode(false);
+    setFlipAmount(false);
 
     // Run auto-detection on the fields to try to detect the fields
     // automatically
@@ -749,6 +854,8 @@ export default function ImportTransactions({ modalProps, options }) {
       let { amount } = parseAmountFields(
         trans,
         splitMode,
+        inOutMode,
+        outValue,
         flipAmount,
         multiplierAmount,
       );
@@ -757,7 +864,7 @@ export default function ImportTransactions({ modalProps, options }) {
         break;
       }
 
-      let { inflow, outflow, ...finalTransaction } = trans;
+      let { inflow, outflow, inOut, ...finalTransaction } = trans;
       finalTransactions.push({
         ...finalTransaction,
         date,
@@ -812,6 +919,9 @@ export default function ImportTransactions({ modalProps, options }) {
     { name: 'Notes', width: 'flex' },
   ];
 
+  if (inOutMode) {
+    headers.push({ name: 'In/Out', width: 90, style: { textAlign: 'left' } });
+  }
   if (splitMode) {
     headers.push({ name: 'Outflow', width: 90, style: { textAlign: 'right' } });
     headers.push({ name: 'Inflow', width: 90, style: { textAlign: 'right' } });
@@ -873,6 +983,8 @@ export default function ImportTransactions({ modalProps, options }) {
                   dateFormat={dateFormat}
                   fieldMappings={fieldMappings}
                   splitMode={splitMode}
+                  inOutMode={inOutMode}
+                  outValue={outValue}
                   flipAmount={flipAmount}
                   multiplierAmount={multiplierAmount}
                 />
@@ -905,6 +1017,7 @@ export default function ImportTransactions({ modalProps, options }) {
             onChange={onUpdateFields}
             mappings={fieldMappings}
             splitMode={splitMode}
+            inOutMode={inOutMode}
             hasHeaderRow={hasHeaderRow}
           />
         </View>
@@ -1018,19 +1131,29 @@ export default function ImportTransactions({ modalProps, options }) {
               <CheckboxOption
                 id="form_flip"
                 checked={flipAmount}
-                disabled={splitMode}
+                disabled={splitMode || inOutMode}
                 onChange={() => setFlipAmount(!flipAmount)}
               >
                 Flip amount
               </CheckboxOption>
               {filetype === 'csv' && (
-                <CheckboxOption
-                  id="form_split"
-                  checked={splitMode}
-                  onChange={onSplitMode}
-                >
-                  Split amount into separate inflow/outflow columns
-                </CheckboxOption>
+                <>
+                  <CheckboxOption
+                    id="form_split"
+                    checked={splitMode}
+                    disabled={inOutMode || flipAmount}
+                    onChange={onSplitMode}
+                  >
+                    Split amount into separate inflow/outflow columns
+                  </CheckboxOption>
+                  <InOutOption
+                    inOutMode={inOutMode}
+                    outValue={outValue}
+                    disabled={splitMode || flipAmount}
+                    onToggle={() => setInOutMode(!inOutMode)}
+                    onChangeText={setOutValue}
+                  />
+                </>
               )}
               <MultiplierOption
                 multiplierEnabled={multiplierEnabled}

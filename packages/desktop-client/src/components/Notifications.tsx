@@ -58,7 +58,7 @@ function compileMessage(
                 }
 
                 return (
-                  <ExternalLink key={idx} to={match[2]}>
+                  <ExternalLink linkColor="purple" key={idx} to={match[2]}>
                     {match[1]}
                   </ExternalLink>
                 );
@@ -111,7 +111,7 @@ function Notification({
           ? theme.noticeText
           : error
           ? theme.errorTextDark
-          : theme.alt4WarningText,
+          : theme.warningTextDark,
       }}
     >
       <Stack
@@ -124,13 +124,13 @@ function Notification({
             ? theme.noticeBackgroundLight
             : error
             ? theme.errorBackground
-            : theme.alt2WarningBackground,
+            : theme.warningBackground,
           borderTop: `3px solid ${
             positive
               ? theme.noticeBorder
               : error
               ? theme.errorBorder
-              : theme.altWarningAccent
+              : theme.warningBorder
           }`,
           ...styles.shadowLarge,
           maxWidth: 550,
@@ -176,7 +176,7 @@ function Notification({
                     ? theme.noticeBorder
                     : error
                     ? theme.errorBorder
-                    : theme.altWarningAccent
+                    : theme.warningBorder
                 }`,
                 color: 'currentColor',
                 fontSize: 14,
@@ -186,7 +186,7 @@ function Notification({
                     ? theme.noticeBackground
                     : error
                     ? theme.errorBackground
-                    : theme.altWarningBackground,
+                    : theme.warningBackground,
                 },
               }}
             >
