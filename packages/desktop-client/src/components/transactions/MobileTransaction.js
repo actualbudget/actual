@@ -161,7 +161,6 @@ function Status({ status }) {
   );
 }
 
-const LEFT_RIGHT_FLEX_WIDTH = 70;
 class TransactionEditInner extends PureComponent {
   constructor(props) {
     super(props);
@@ -325,7 +324,7 @@ class TransactionEditInner extends PureComponent {
       <View
         style={{
           backgroundColor: theme.mobilePageBackground,
-          flex: 1,
+          flexGrow: 1,
 
           // This shadow make the card "pop" off of the screen below
           // it
@@ -337,55 +336,78 @@ class TransactionEditInner extends PureComponent {
       >
         <View
           style={{
-            borderRadius: 4,
             overflow: 'hidden',
             display: 'flex',
-            flex: 'auto',
+            flexGrow: 1,
           }}
         >
           <View
             style={{
-              borderColor: theme.tableBorder,
               backgroundColor: theme.mobileHeaderBackground,
               alignItems: 'center',
               flexDirection: 'row',
-              flexShrink: 0,
-              justifyContent: 'space-between',
               width: '100%',
-              padding: 10,
             }}
           >
-            <Link
-              to={-1}
+            <View
               style={{
-                alignItems: 'center',
-                display: 'flex',
-                textDecoration: 'none',
-                width: LEFT_RIGHT_FLEX_WIDTH,
+                flex: 1,
+                flexDirection: 'row',
               }}
             >
-              <CheveronLeft
+              <Button
+                type="bare"
                 style={{
                   color: theme.mobileHeaderText,
-                  width: 32,
-                  height: 32,
-                }}
-              />
-              <Text
-                style={{
-                  ...styles.text,
-                  color: theme.mobileHeaderText,
-                  fontWeight: 500,
+                  justifyContent: 'center',
+                  margin: 13,
+                  paddingLeft: 5,
+                  paddingRight: 3,
+                  marginLeft: 10,
+                  ':hover': { backgroundColor: theme.mobileHeaderTextHover },
                 }}
               >
-                Back
-              </Text>
-            </Link>
+                <Link
+                  to={-1}
+                  style={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <CheveronLeft
+                    style={{
+                      width: 25,
+                      height: 25,
+                      margin: -10,
+                      marginLeft: -5,
+                    }}
+                  />
+                  <Text
+                    style={{
+                      ...styles.text,
+                      fontWeight: 500,
+                      marginLeft: 8,
+                      marginRight: 5,
+                    }}
+                  >
+                    Back
+                  </Text>
+                </Link>
+              </Button>
+              <View
+                style={{
+                  flex: 1,
+                }}
+              />
+            </View>
             <TextOneLine
               style={{
-                color: theme.mobileHeaderText,
+                flex: 1,
                 fontSize: 16,
                 fontWeight: 500,
+                alignItems: 'center',
+                color: theme.mobileHeaderText,
                 userSelect: 'none',
               }}
               role="heading"
@@ -399,7 +421,7 @@ class TransactionEditInner extends PureComponent {
             {/* For centering the transaction title */}
             <View
               style={{
-                width: LEFT_RIGHT_FLEX_WIDTH,
+                flex: 1,
               }}
             />
           </View>

@@ -1919,13 +1919,11 @@ function BudgetHeader({
           style={{
             ...buttonStyle,
             opacity: prevEnabled ? 1 : 0.6,
+            color: theme.mobileHeaderText,
+            ':hover': { backgroundColor: theme.mobileHeaderTextHover },
           }}
         >
-          <ArrowThinLeft
-            style={{ color: theme.mobileHeaderText }}
-            width="15"
-            height="15"
-          />
+          <ArrowThinLeft width="15" height="15" />
         </Button>
         <Text
           style={{
@@ -1943,13 +1941,14 @@ function BudgetHeader({
           type="bare"
           onClick={nextEnabled && onNextMonth}
           // hitSlop={{ top: 5, bottom: 5, left: 30, right: 5 }}
-          style={{ ...buttonStyle, opacity: nextEnabled ? 1 : 0.6 }}
+          style={{
+            ...buttonStyle,
+            opacity: nextEnabled ? 1 : 0.6,
+            color: theme.mobileHeaderText,
+            ':hover': { backgroundColor: theme.mobileHeaderTextHover },
+          }}
         >
-          <ArrowThinRight
-            style={{ color: theme.mobileHeaderText }}
-            width="15"
-            height="15"
-          />
+          <ArrowThinRight width="15" height="15" />
         </Button>
       </View>
       <View
@@ -1965,6 +1964,7 @@ function BudgetHeader({
               type="bare"
               style={{
                 backgroundColor: 'transparent',
+                ':hover': { backgroundColor: theme.mobileHeaderTextHover },
                 paddingLeft: 12,
                 paddingRight: 12,
               }}
@@ -2005,7 +2005,10 @@ function BudgetHeader({
               paddingRight: 12,
               ...styles.mediumText,
               color: theme.mobileHeaderText,
-              ':hover': theme.mobileHeaderText,
+              ':hover': {
+                color: theme.mobileHeaderText,
+                backgroundColor: theme.mobileHeaderTextHover,
+              },
             }}
             onClick={() => onEditMode?.(false)}
           >
