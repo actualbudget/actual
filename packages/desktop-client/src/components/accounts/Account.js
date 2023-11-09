@@ -1201,6 +1201,7 @@ class AccountInternal extends PureComponent {
             items={allTransactions}
             fetchAllIds={this.fetchAllIds}
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
+            selectAllFilter={item => !item._unmatched && !item.is_parent}
           >
             <View style={styles.page}>
               <AccountHeader
