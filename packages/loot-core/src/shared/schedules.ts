@@ -66,17 +66,21 @@ function prettyDayName(day) {
 export function getRecurringDescription(config) {
   let interval = config.interval || 1;
 
+  let weekendSolveSuffix = config.skipWeekend
+    ? ` (${config.weekendSolveMode} weekend) `
+    : '';
+
   switch (config.frequency) {
     case 'daily': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} days` : 'day';
-      return desc;
+      return desc + weekendSolveSuffix;
     }
     case 'weekly': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} weeks` : 'week';
       desc += ' on ' + monthUtils.format(config.start, 'EEEE');
-      return desc;
+      return desc + weekendSolveSuffix;
     }
     case 'monthly': {
       let desc = 'Every ';
@@ -145,13 +149,13 @@ export function getRecurringDescription(config) {
         desc += ' on the ' + monthUtils.format(config.start, 'do');
       }
 
-      return desc;
+      return desc + weekendSolveSuffix;
     }
     case 'yearly': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} years` : 'year';
       desc += ' on ' + monthUtils.format(config.start, 'LLL do');
-      return desc;
+      return desc + weekendSolveSuffix;
     }
     default:
       return 'Recurring error';

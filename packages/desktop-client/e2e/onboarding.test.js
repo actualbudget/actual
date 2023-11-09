@@ -60,10 +60,10 @@ test.describe('Onboarding', () => {
     await expect(budgetPage.budgetTable).toBeVisible({ timeout: 30000 });
 
     const accountPage = await navigation.goToAccountPage('Checking');
-    await expect(accountPage.accountBalance).toHaveText('700.00');
+    await expect(accountPage.accountBalance).toHaveText('600.00');
 
     await navigation.goToAccountPage('Saving');
-    await expect(accountPage.accountBalance).toHaveText('200.00');
+    await expect(accountPage.accountBalance).toHaveText('250.00');
   });
 
   test('creates a new budget file by importing Actual budget', async () => {

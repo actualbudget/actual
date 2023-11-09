@@ -1,4 +1,4 @@
-import React, { type ComponentProps, memo, useContext, useState } from 'react';
+import React, { memo, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
@@ -7,181 +7,21 @@ import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
 import { styles, theme, type CSSProperties } from '../../../style';
-import CategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
 import Button from '../../common/Button';
-import InitialFocus from '../../common/InitialFocus';
 import Menu from '../../common/Menu';
 import Text from '../../common/Text';
 import View from '../../common/View';
 import CellValue from '../../spreadsheet/CellValue';
 import useFormat from '../../spreadsheet/useFormat';
-import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell } from '../../table';
 import { Tooltip, useTooltip } from '../../tooltips';
 import BalanceWithCarryover from '../BalanceWithCarryover';
-import { CategoryGroupsContext } from '../CategoryGroupsContext';
-import { makeAmountGrey, addToBeBudgetedGroup } from '../util';
+import { makeAmountGrey } from '../util';
 
-import TransferTooltip from './TransferTooltip';
+import BalanceTooltip from './BalanceTooltip';
 
 export { BudgetSummary } from './BudgetSummary';
 
-type CoverTooltipProps = {
-  tooltipProps?: ComponentProps<typeof Tooltip>;
-  onSubmit: (category: unknown) => void;
-  onClose: () => void;
-};
-function CoverTooltip({ tooltipProps, onSubmit, onClose }: CoverTooltipProps) {
-  let categoryGroups = useContext(CategoryGroupsContext);
-  categoryGroups = addToBeBudgetedGroup(
-    categoryGroups.filter(g => !g.is_income),
-  );
-  let [category, setCategory] = useState(null);
-
-  function submit() {
-    if (category) {
-      onSubmit(category);
-      onClose();
-    }
-  }
-
-  return (
-    <Tooltip
-      position="bottom-right"
-      width={200}
-      style={{ padding: 10 }}
-      {...tooltipProps}
-      onClose={onClose}
-    >
-      <View style={{ marginBottom: 5 }}>Cover from category:</View>
-
-      <InitialFocus>
-        {node => (
-          <CategoryAutocomplete
-            categoryGroups={categoryGroups}
-            value={null}
-            openOnFocus={true}
-            onUpdate={id => {}}
-            onSelect={id => setCategory(id)}
-            inputProps={{
-              inputRef: node,
-              onKeyDown: e => {
-                if (e.key === 'Enter') {
-                  submit();
-                }
-              },
-            }}
-          />
-        )}
-      </InitialFocus>
-
-      <View
-        style={{
-          alignItems: 'flex-end',
-          marginTop: 10,
-        }}
-      >
-        <Button
-          type="primary"
-          style={{
-            fontSize: 12,
-            paddingTop: 3,
-          }}
-          onClick={submit}
-        >
-          Transfer
-        </Button>
-      </View>
-    </Tooltip>
-  );
-}
-
-type BalanceTooltipProps = {
-  categoryId: string;
-  tooltip: { close: () => void };
-  monthIndex: number;
-  onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
-};
-function BalanceTooltip({
-  categoryId,
-  tooltip,
-  monthIndex,
-  onBudgetAction,
-}: BalanceTooltipProps) {
-  let carryover = useSheetValue(rolloverBudget.catCarryover(categoryId));
-  let balance = useSheetValue(rolloverBudget.catBalance(categoryId));
-  let [menu, setMenu] = useState('menu');
-
-  return (
-    <>
-      {menu === 'menu' && (
-        <Tooltip
-          position="bottom-right"
-          width={200}
-          style={{ padding: 0 }}
-          onClose={tooltip.close}
-        >
-          <Menu
-            onMenuSelect={type => {
-              if (type === 'carryover') {
-                onBudgetAction(monthIndex, 'carryover', {
-                  category: categoryId,
-                  flag: !carryover,
-                });
-                tooltip.close();
-              } else {
-                setMenu(type);
-              }
-            }}
-            items={[
-              {
-                name: 'transfer',
-                text: 'Transfer to another category',
-              },
-              {
-                name: 'carryover',
-                text: carryover
-                  ? 'Remove overspending rollover'
-                  : 'Rollover overspending',
-              },
-              balance < 0 && {
-                name: 'cover',
-                text: 'Cover overspending',
-              },
-            ].filter(x => x)}
-          />
-        </Tooltip>
-      )}
-
-      {menu === 'transfer' && (
-        <TransferTooltip
-          initialAmountName={rolloverBudget.catBalance(categoryId)}
-          showToBeBudgeted={true}
-          onClose={tooltip.close}
-          onSubmit={(amount, toCategory) => {
-            onBudgetAction(monthIndex, 'transfer-category', {
-              amount,
-              from: categoryId,
-              to: toCategory,
-            });
-          }}
-        />
-      )}
-
-      {menu === 'cover' && (
-        <CoverTooltip
-          onClose={tooltip.close}
-          onSubmit={fromCategory => {
-            onBudgetAction(monthIndex, 'cover', {
-              to: categoryId,
-              from: fromCategory,
-            });
-          }}
-        />
-      )}
-    </>
-  );
-}
 let headerLabelStyle: CSSProperties = {
   flex: 1,
   padding: '0 5px',
@@ -347,9 +187,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           <View
             style={{
               flexShrink: 1,
-              marginRight: 0,
-              marginLeft: 3,
+              paddingLeft: 3,
               justifyContent: 'center',
+              borderTopWidth: 1,
+              borderColor: theme.tableBorder,
             }}
           >
             <Button
@@ -471,6 +312,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       </Field>
       <Field
         name="balance"
+        truncate={false}
         width="flex"
         style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
       >
@@ -478,6 +320,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           <BalanceWithCarryover
             carryover={rolloverBudget.catCarryover(category.id)}
             balance={rolloverBudget.catBalance(category.id)}
+            goal={rolloverBudget.catGoal(category.id)}
+            budgeted={rolloverBudget.catBudgeted(category.id)}
           />
         </span>
         {balanceTooltip.isOpen && (

@@ -382,6 +382,7 @@ class Budget extends Component {
             onReorderGroup={this.onReorderGroup}
             onOpenActionSheet={() => {}} //this.onOpenActionSheet}
             onBudgetAction={applyBudgetAction}
+            onRefresh={onRefresh}
             savePrefs={savePrefs}
           />
         )}

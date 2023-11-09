@@ -18,6 +18,7 @@ import Label from '../common/Label';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
+import PullToRefresh from '../responsive/PullToRefresh';
 import { useServerURL } from '../ServerContext';
 import CellValue from '../spreadsheet/CellValue';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
@@ -32,7 +33,9 @@ import { AmountInput } from '../util/AmountInput';
 // } from '../mobile/AmountInput';
 
 // import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
+import BalanceWithCarryover from './BalanceWithCarryover';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
+import BalanceTooltip from './rollover/BalanceTooltip';
 import { makeAmountGrey } from './util';
 
 function ToBudget({ toBudget, onClick }) {
@@ -49,6 +52,7 @@ function ToBudget({ toBudget, onClick }) {
           ...styles.underlinedText,
           color: theme.formInputText,
           flexShrink: 0,
+          textAlign: 'left',
         }}
       />
       <CellValue
@@ -77,18 +81,17 @@ function Saved({ projected }) {
       style={{
         flexDirection: 'column',
         alignItems: 'flex-start',
-        flexBasis: '80px',
       }}
     >
       {projected ? (
         <Label
           title="PROJECTED SAVINGS"
-          style={{ color: theme.formInputText }}
+          style={{ color: theme.formInputText, textAlign: 'left' }}
         />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: theme.formInputText }}
+          style={{ color: theme.formInputText, textAlign: 'left' }}
         />
       )}
 
@@ -99,7 +102,7 @@ function Saved({ projected }) {
           ...styles.smallText,
           fontWeight: '500',
           color: projected
-            ? theme.alt2WarningText
+            ? theme.warningText
             : isNegative
             ? theme.errorTextDark
             : theme.formInputText,
@@ -140,7 +143,7 @@ function BudgetCell({
           initialValue={sheetValue}
           zeroSign="+"
           style={{
-            height: ROW_HEIGHT - 4,
+            height: ROW_HEIGHT,
             transform: 'translateX(6px)',
           }}
           focused={isEditing}
@@ -153,9 +156,9 @@ function BudgetCell({
           role="button"
           style={{
             justifyContent: 'center',
-            height: ROW_HEIGHT - 4,
+            alignItems: 'flex-end',
+            height: ROW_HEIGHT,
           }}
-          onPointerUp={onAmountClick}
         >
           <CellValue
             binding={binding}
@@ -167,6 +170,8 @@ function BudgetCell({
             }}
             getStyle={makeAmountGrey}
             data-testid={name}
+            onPointerUp={onAmountClick}
+            onPointerDown={e => e.preventDefault()}
           />
         </View>
       )}
@@ -227,6 +232,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
   onEditBudget,
   onSave,
   onDelete,
+  isBudgetActionMenuOpen,
+  onOpenBudgetActionMenu,
   onBudgetAction,
   show3Cols,
   showBudgetedCol,
@@ -238,16 +245,22 @@ const ExpenseCategory = memo(function ExpenseCategory({
   let [isHidden, setIsHidden] = useState(category.hidden);
 
   let budgeted = rolloverBudget.catBudgeted(category.id);
-  let balance = rolloverBudget.catBalance(category.id);
   let spent = rolloverBudget.catSumAmount(category.id);
 
   let tooltip = useTooltip();
+  let balanceTooltip = useTooltip();
+
+  useEffect(() => {
+    if (isBudgetActionMenuOpen) {
+      balanceTooltip.open();
+    }
+  }, [isBudgetActionMenuOpen, balanceTooltip]);
 
   useEffect(() => {
     if (!isEditing && tooltip.isOpen) {
       tooltip.close();
     }
-  }, [isEditing]);
+  }, [isEditing, tooltip]);
 
   let onSubmit = () => {
     if (categoryName) {
@@ -301,19 +314,49 @@ const ExpenseCategory = memo(function ExpenseCategory({
           ...(!showEditables && { display: 'none' }),
           flexDirection: 'row',
           flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: ROW_HEIGHT,
         }}
       >
         <InputWithContent
           focused={isEditing}
           inputRef={inputRef}
           rightContent={
-            <Button
-              type="bare"
-              style={{ padding: 10 }}
-              {...tooltip.getOpenEvents()}
-            >
-              <DotsHorizontalTriple width={12} height={12} />
-            </Button>
+            <>
+              <Button
+                type="bare"
+                style={{ padding: 10 }}
+                {...tooltip.getOpenEvents()}
+              >
+                <DotsHorizontalTriple width={12} height={12} />
+              </Button>
+              {tooltip.isOpen && (
+                <Tooltip
+                  position="bottom-stretch"
+                  offset={1}
+                  style={{ padding: 0 }}
+                  onClose={() => {
+                    tooltip.close();
+                    inputRef.current?.focus();
+                  }}
+                >
+                  <Menu
+                    onMenuSelect={onMenuSelect}
+                    items={[
+                      {
+                        name: 'toggle-visibility',
+                        text: isHidden ? 'Show' : 'Hide',
+                      },
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                      },
+                    ]}
+                  />
+                </Tooltip>
+              )}
+            </>
           }
           style={{ width: '100%' }}
           placeholder="Category Name"
@@ -326,45 +369,18 @@ const ExpenseCategory = memo(function ExpenseCategory({
             }
           }}
         />
-        {tooltip.isOpen && (
-          <Tooltip
-            position="bottom-stretch"
-            offset={1}
-            style={{ padding: 0 }}
-            onClose={() => {
-              tooltip.close();
-              inputRef.current?.focus();
-            }}
-          >
-            <Menu
-              onMenuSelect={onMenuSelect}
-              items={[
-                {
-                  name: 'toggle-visibility',
-                  text: isHidden ? 'Show' : 'Hide',
-                },
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
-            />
-          </Tooltip>
-        )}
       </View>
       <View
         role="button"
-        onPointerUp={() => onEdit?.(category.id)}
         style={{ ...(showEditables && { display: 'none' }), flex: 1 }}
       >
         <Text
           style={{
             ...styles.smallText,
             ...styles.underlinedText,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            ...styles.lineClamp(2),
           }}
+          onPointerUp={() => onEdit?.(category.id)}
           data-testid="category-name"
         >
           {category.name}
@@ -373,6 +389,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
       <View
         style={{
           ...(showEditables && { display: 'none' }),
+          justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'row',
           opacity,
@@ -392,31 +409,73 @@ const ExpenseCategory = memo(function ExpenseCategory({
           isEditing={isEditingBudget}
           onEdit={onEditBudget}
         />
-        <CellValue
-          name="spent"
-          binding={spent}
+        <View
           style={{
             ...(!show3Cols && showBudgetedCol && { display: 'none' }),
-            ...styles.smallText,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
             width: 90,
-            textAlign: 'right',
+            height: ROW_HEIGHT,
           }}
-          getStyle={makeAmountGrey}
-          type="financial"
-        />
-        <CellValue
-          name="balance"
-          binding={balance}
+        >
+          <CellValue
+            name="spent"
+            binding={spent}
+            style={{
+              ...styles.smallText,
+              textAlign: 'right',
+            }}
+            getStyle={makeAmountGrey}
+            type="financial"
+          />
+        </View>
+        <View
           style={{
-            ...styles.smallText,
+            ...styles.noTapHighlight,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
             width: 90,
-            textAlign: 'right',
+            height: ROW_HEIGHT,
           }}
-          getStyle={value =>
-            value < 0 ? { color: theme.errorText } : makeAmountGrey(value)
-          }
-          type="financial"
-        />
+        >
+          <span
+            role="button"
+            onPointerUp={() => onOpenBudgetActionMenu?.(category.id)}
+            onPointerDown={e => e.preventDefault()}
+          >
+            <BalanceWithCarryover
+              carryover={rolloverBudget.catCarryover(category.id)}
+              balance={rolloverBudget.catBalance(category.id)}
+              goal={reportBudget.catGoal(category.id)}
+              budgeted={reportBudget.catBudgeted(category.id)}
+              balanceStyle={{
+                ...styles.smallText,
+                ...styles.underlinedText,
+              }}
+            />
+            {balanceTooltip.isOpen && (
+              <BalanceTooltip
+                offset={5}
+                categoryId={category.id}
+                tooltip={balanceTooltip}
+                monthIndex={monthUtils.getMonthIndex(month)}
+                onBudgetAction={(monthIndex, action, arg) => {
+                  onBudgetAction?.(
+                    monthUtils.getMonthFromIndex(
+                      monthUtils.getYear(month),
+                      monthIndex,
+                    ),
+                    action,
+                    arg,
+                  );
+                }}
+                onClose={() => {
+                  onOpenBudgetActionMenu?.(null);
+                }}
+              />
+            )}
+          </span>
+        </View>
       </View>
     </ListItem>
   );
@@ -533,19 +592,53 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           ...(!showEditables && { display: 'none' }),
           flexDirection: 'row',
           flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: ROW_HEIGHT,
         }}
       >
         <InputWithContent
           focused={isEditing}
           inputRef={inputRef}
           rightContent={
-            <Button
-              type="bare"
-              style={{ padding: 10 }}
-              {...tooltip.getOpenEvents()}
-            >
-              <DotsHorizontalTriple width={12} height={12} />
-            </Button>
+            <>
+              <Button
+                type="bare"
+                style={{ padding: 10 }}
+                {...tooltip.getOpenEvents()}
+              >
+                <DotsHorizontalTriple width={12} height={12} />
+              </Button>
+              {tooltip.isOpen && (
+                <Tooltip
+                  position="bottom-stretch"
+                  offset={1}
+                  style={{ padding: 0 }}
+                  onClose={() => {
+                    tooltip.close();
+                    inputRef.current?.focus();
+                  }}
+                >
+                  <Menu
+                    onMenuSelect={onMenuSelect}
+                    items={[
+                      {
+                        name: 'add-category',
+                        text: 'Add category',
+                      },
+                      {
+                        name: 'toggle-visibility',
+                        text: isHidden ? 'Show' : 'Hide',
+                      },
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                      },
+                    ]}
+                  />
+                </Tooltip>
+              )}
+            </>
           }
           style={{ width: '100%' }}
           placeholder="Category Group Name"
@@ -558,39 +651,9 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
             }
           }}
         />
-        {tooltip.isOpen && (
-          <Tooltip
-            position="bottom-stretch"
-            offset={1}
-            style={{ padding: 0 }}
-            onClose={() => {
-              tooltip.close();
-              inputRef.current?.focus();
-            }}
-          >
-            <Menu
-              onMenuSelect={onMenuSelect}
-              items={[
-                {
-                  name: 'add-category',
-                  text: 'Add category',
-                },
-                {
-                  name: 'toggle-visibility',
-                  text: isHidden ? 'Show' : 'Hide',
-                },
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
-            />
-          </Tooltip>
-        )}
       </View>
       <View
         role="button"
-        onPointerUp={() => onEdit?.(group.id)}
         style={{ ...(showEditables && { display: 'none' }), flex: 1 }}
       >
         <Text
@@ -598,11 +661,10 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           style={{
             ...styles.smallText,
             ...styles.underlinedText,
+            ...styles.lineClamp(2),
             fontWeight: '500',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
           }}
+          onPointerUp={() => onEdit?.(group.id)}
           data-testid="name"
         >
           {group.name}
@@ -612,42 +674,68 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         style={{
           ...(showEditables && { display: 'none' }),
           flexDirection: 'row',
+          justifyContent: 'center',
           alignItems: 'center',
+          height: ROW_HEIGHT,
           opacity,
         }}
       >
-        <CellValue
-          binding={rolloverBudget.groupBudgeted(group.id)}
+        <View
           style={{
             ...(!show3Cols && !showBudgetedCol && { display: 'none' }),
-            ...styles.smallText,
             width: 90,
-            fontWeight: '500',
-            textAlign: 'right',
+            height: ROW_HEIGHT,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
           }}
-          type="financial"
-        />
-        <CellValue
-          binding={rolloverBudget.groupSumAmount(group.id)}
+        >
+          <CellValue
+            binding={rolloverBudget.groupBudgeted(group.id)}
+            style={{
+              ...styles.smallText,
+              fontWeight: '500',
+              textAlign: 'right',
+            }}
+            type="financial"
+          />
+        </View>
+        <View
           style={{
             ...(!show3Cols && showBudgetedCol && { display: 'none' }),
-            ...styles.smallText,
             width: 90,
-            fontWeight: '500',
-            textAlign: 'right',
+            height: ROW_HEIGHT,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
           }}
-          type="financial"
-        />
-        <CellValue
-          binding={rolloverBudget.groupBalance(group.id)}
+        >
+          <CellValue
+            binding={rolloverBudget.groupSumAmount(group.id)}
+            style={{
+              ...styles.smallText,
+              fontWeight: '500',
+              textAlign: 'right',
+            }}
+            type="financial"
+          />
+        </View>
+        <View
           style={{
-            ...styles.smallText,
             width: 90,
-            fontWeight: '500',
-            textAlign: 'right',
+            height: ROW_HEIGHT,
+            justifyContent: 'center',
+            alignItems: 'flex-end',
           }}
-          type="financial"
-        />
+        >
+          <CellValue
+            binding={rolloverBudget.groupBalance(group.id)}
+            style={{
+              ...styles.smallText,
+              fontWeight: '500',
+              textAlign: 'right',
+            }}
+            type="financial"
+          />
+        </View>
       </View>
 
       {/* {editMode && (
@@ -686,8 +774,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   budget,
   balance,
   style,
-  nameTextStyle,
-  amountTextStyle,
   onAddCategory,
   onSave,
   onDelete,
@@ -760,19 +846,53 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           ...(!showEditables && { display: 'none' }),
           flexDirection: 'row',
           flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: ROW_HEIGHT,
         }}
       >
         <InputWithContent
           focused={isEditing}
           inputRef={inputRef}
           rightContent={
-            <Button
-              type="bare"
-              style={{ padding: 10 }}
-              {...tooltip.getOpenEvents()}
-            >
-              <DotsHorizontalTriple width={12} height={12} />
-            </Button>
+            <>
+              <Button
+                type="bare"
+                style={{ padding: 10 }}
+                {...tooltip.getOpenEvents()}
+              >
+                <DotsHorizontalTriple width={12} height={12} />
+              </Button>
+              {tooltip.isOpen && (
+                <Tooltip
+                  position="bottom-stretch"
+                  offset={1}
+                  style={{ padding: 0 }}
+                  onClose={() => {
+                    tooltip.close();
+                    inputRef.current?.focus();
+                  }}
+                >
+                  <Menu
+                    onMenuSelect={onMenuSelect}
+                    items={[
+                      {
+                        name: 'add-category',
+                        text: 'Add category',
+                      },
+                      {
+                        name: 'toggle-visibility',
+                        text: isHidden ? 'Show' : 'Hide',
+                      },
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                      },
+                    ]}
+                  />
+                </Tooltip>
+              )}
+            </>
           }
           style={{ width: '100%' }}
           placeholder="Category Group Name"
@@ -785,76 +905,70 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             }
           }}
         />
-        {tooltip.isOpen && (
-          <Tooltip
-            position="bottom-stretch"
-            offset={1}
-            style={{ padding: 0 }}
-            onClose={() => {
-              tooltip.close();
-              inputRef.current?.focus();
-            }}
-          >
-            <Menu
-              onMenuSelect={onMenuSelect}
-              items={[
-                {
-                  name: 'add-category',
-                  text: 'Add category',
-                },
-                {
-                  name: 'toggle-visibility',
-                  text: isHidden ? 'Show' : 'Hide',
-                },
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
-            />
-          </Tooltip>
-        )}
       </View>
       <View
         role="button"
-        style={{ ...(showEditables && { display: 'none' }) }}
-        onPointerUp={() => onEdit?.(group.id)}
+        style={{
+          ...(showEditables && { display: 'none' }),
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: ROW_HEIGHT,
+        }}
       >
         <Text
-          tabIndex={-1}
           style={{
             ...styles.smallText,
-            ...nameTextStyle,
+            ...styles.underlinedText,
+            ...styles.lineClamp(2),
+            fontWeight: '500',
           }}
+          onPointerUp={() => onEdit?.(group.id)}
           data-testid="name"
         >
           {group.name}
         </Text>
       </View>
       {budget && (
-        <CellValue
-          binding={budget}
+        <View
           style={{
             ...(showEditables && { display: 'none' }),
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            width: 90,
+            height: ROW_HEIGHT,
+          }}
+        >
+          <CellValue
+            binding={budget}
+            style={{
+              ...styles.smallText,
+              textAlign: 'right',
+              fontWeight: '500',
+            }}
+            type="financial"
+          />
+        </View>
+      )}
+      <View
+        style={{
+          ...(showEditables && { display: 'none' }),
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          width: 90,
+          height: ROW_HEIGHT,
+        }}
+      >
+        <CellValue
+          binding={balance}
+          style={{
             ...styles.smallText,
             textAlign: 'right',
-            ...amountTextStyle,
-            flex: 1,
+            fontWeight: '500',
           }}
           type="financial"
         />
-      )}
-      <CellValue
-        binding={balance}
-        style={{
-          ...(showEditables && { display: 'none' }),
-          ...styles.smallText,
-          textAlign: 'right',
-          ...amountTextStyle,
-          flex: 1,
-        }}
-        type="financial"
-      />
+      </View>
     </ListItem>
   );
 });
@@ -864,8 +978,6 @@ const IncomeCategory = memo(function IncomeCategory({
   budget,
   balance,
   style,
-  nameTextStyle,
-  amountTextStyle,
   onSave,
   onDelete,
   editMode,
@@ -934,19 +1046,49 @@ const IncomeCategory = memo(function IncomeCategory({
           ...(!showEditables && { display: 'none' }),
           flexDirection: 'row',
           flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: ROW_HEIGHT,
         }}
       >
         <InputWithContent
           focused={isEditing}
           inputRef={inputRef}
           rightContent={
-            <Button
-              type="bare"
-              style={{ padding: 10 }}
-              {...tooltip.getOpenEvents()}
-            >
-              <DotsHorizontalTriple width={12} height={12} />
-            </Button>
+            <>
+              <Button
+                type="bare"
+                style={{ padding: 10 }}
+                {...tooltip.getOpenEvents()}
+              >
+                <DotsHorizontalTriple width={12} height={12} />
+              </Button>
+              {tooltip.isOpen && (
+                <Tooltip
+                  position="bottom-stretch"
+                  offset={1}
+                  style={{ padding: 0 }}
+                  onClose={() => {
+                    tooltip.close();
+                    inputRef.current?.focus();
+                  }}
+                >
+                  <Menu
+                    onMenuSelect={onMenuSelect}
+                    items={[
+                      {
+                        name: 'toggle-visibility',
+                        text: isHidden ? 'Show' : 'Hide',
+                      },
+                      {
+                        name: 'delete',
+                        text: 'Delete',
+                      },
+                    ]}
+                  />
+                </Tooltip>
+              )}
+            </>
           }
           style={{ width: '100%' }}
           placeholder="Category Name"
@@ -959,73 +1101,68 @@ const IncomeCategory = memo(function IncomeCategory({
             }
           }}
         />
-        {tooltip.isOpen && (
-          <Tooltip
-            position="bottom-stretch"
-            offset={1}
-            style={{ padding: 0 }}
-            onClose={() => {
-              tooltip.close();
-              inputRef.current?.focus();
-            }}
-          >
-            <Menu
-              onMenuSelect={onMenuSelect}
-              items={[
-                {
-                  name: 'toggle-visibility',
-                  text: isHidden ? 'Show' : 'Hide',
-                },
-                {
-                  name: 'delete',
-                  text: 'Delete',
-                },
-              ]}
-            />
-          </Tooltip>
-        )}
       </View>
       <View
         role="button"
-        style={{ ...(showEditables && { display: 'none' }) }}
-        onPointerUp={() => onEdit?.(category.id)}
+        style={{
+          ...(showEditables && { display: 'none' }),
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          height: ROW_HEIGHT,
+        }}
       >
         <Text
           tabIndex={-1}
           style={{
             ...styles.smallText,
-            ...nameTextStyle,
             ...styles.underlinedText,
+            ...styles.lineClamp(2),
           }}
+          onPointerUp={() => onEdit?.(category.id)}
           data-testid="name"
         >
           {category.name}
         </Text>
       </View>
       {budget && (
-        <CellValue
-          binding={budget}
+        <View
           style={{
             ...(showEditables && { display: 'none' }),
+            justifyContent: 'center',
+            alignItems: 'flex-end',
+            width: 90,
+            height: ROW_HEIGHT,
+          }}
+        >
+          <CellValue
+            binding={budget}
+            style={{
+              ...styles.smallText,
+              textAlign: 'right',
+            }}
+            type="financial"
+          />
+        </View>
+      )}
+      <View
+        style={{
+          ...(showEditables && { display: 'none' }),
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          width: 90,
+          height: ROW_HEIGHT,
+        }}
+      >
+        <CellValue
+          binding={balance}
+          style={{
             ...styles.smallText,
             textAlign: 'right',
-            ...amountTextStyle,
-            flex: 1,
           }}
           type="financial"
         />
-      )}
-      <CellValue
-        binding={balance}
-        style={{
-          ...(showEditables && { display: 'none' }),
-          ...styles.smallText,
-          textAlign: 'right',
-          ...amountTextStyle,
-          flex: 1,
-        }}
-        type="financial"
-      />
+      </View>
     </ListItem>
   );
 });
@@ -1078,6 +1215,8 @@ const ExpenseGroup = memo(function ExpenseGroup({
   onEditCategory,
   editingBudgetCategoryId,
   onEditCategoryBudget,
+  openBudgetActionMenuId,
+  onOpenBudgetActionMenu,
   // gestures,
   month,
   onSaveCategory,
@@ -1149,6 +1288,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
           const isEditingCategory = editingCategoryId === category.id;
           const isEditingCategoryBudget =
             editingBudgetCategoryId === category.id;
+          const isBudgetActionMenuOpen = openBudgetActionMenuId === category.id;
           return (
             <ExpenseCategory
               show3Cols={show3Cols}
@@ -1161,6 +1301,8 @@ const ExpenseGroup = memo(function ExpenseGroup({
               onEdit={onEditCategory}
               isEditingBudget={isEditingCategoryBudget}
               onEditBudget={onEditCategoryBudget}
+              isBudgetActionMenuOpen={isBudgetActionMenuOpen}
+              onOpenBudgetActionMenu={onOpenBudgetActionMenu}
               // gestures={gestures}
               month={month}
               onSave={onSaveCategory}
@@ -1216,8 +1358,6 @@ function IncomeGroup({
               ? reportBudget.groupSumAmount(group.id)
               : rolloverBudget.groupSumAmount(group.id)
           }
-          nameTextStyle={{ fontWeight: '500', ...styles.underlinedText }}
-          amountTextStyle={{ fontWeight: '500' }}
           style={{
             backgroundColor: theme.altTableBackground,
           }}
@@ -1270,6 +1410,8 @@ function BudgetGroups({
   onEditCategory,
   editingBudgetCategoryId,
   onEditCategoryBudget,
+  openBudgetActionMenuId,
+  onOpenBudgetActionMenu,
   editMode,
   gestures,
   month,
@@ -1317,6 +1459,8 @@ function BudgetGroups({
               onEditCategory={onEditCategory}
               editingBudgetCategoryId={editingBudgetCategoryId}
               onEditCategoryBudget={onEditCategoryBudget}
+              openBudgetActionMenuId={openBudgetActionMenuId}
+              onOpenBudgetActionMenu={onOpenBudgetActionMenu}
               onSaveCategory={onSaveCategory}
               onDeleteCategory={onDeleteCategory}
               onAddCategory={onAddCategory}
@@ -1385,39 +1529,54 @@ export function BudgetTable(props) {
     onShowBudgetDetails,
     // onOpenActionSheet,
     onBudgetAction,
+    onRefresh,
     savePrefs,
   } = props;
 
-  const GROUP_TYPE = 'group';
+  const GROUP_EDIT_ACTION = 'group';
   const [editingGroupId, setEditingGroupId] = useState(null);
   function onEditGroup(id) {
-    onEdit(GROUP_TYPE, id);
+    onEdit(GROUP_EDIT_ACTION, id);
   }
 
-  const CATEGORY_TYPE = 'category';
+  const CATEGORY_EDIT_ACTION = 'category';
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   function onEditCategory(id) {
-    onEdit(CATEGORY_TYPE, id);
+    onEdit(CATEGORY_EDIT_ACTION, id);
   }
 
-  const CATEGORY_BUDGET_TYPE = 'category-budget';
+  const CATEGORY_BUDGET_EDIT_ACTION = 'category-budget';
   const [editingBudgetCategoryId, setEditingBudgetCategoryId] = useState(null);
   function onEditCategoryBudget(id) {
-    onEdit(CATEGORY_BUDGET_TYPE, id);
+    onEdit(CATEGORY_BUDGET_EDIT_ACTION, id);
   }
 
-  function onEdit(type, id) {
+  const BUDGET_MENU_OPEN_ACTION = 'budget-menu';
+  const [openBudgetActionMenuId, setOpenBudgetActionMenuId] = useState(null);
+  function onOpenBudgetActionMenu(id) {
+    onEdit(BUDGET_MENU_OPEN_ACTION, id);
+  }
+
+  function onEdit(action, id) {
     // Do not allow editing if another field is currently being edited.
     // Cancel the currently editing field in that case.
     const currentlyEditing =
-      editingGroupId || editingCategoryId || editingBudgetCategoryId;
+      editingGroupId ||
+      editingCategoryId ||
+      editingBudgetCategoryId ||
+      openBudgetActionMenuId;
 
-    setEditingGroupId(type === GROUP_TYPE && !currentlyEditing ? id : null);
+    setEditingGroupId(
+      action === GROUP_EDIT_ACTION && !currentlyEditing ? id : null,
+    );
     setEditingCategoryId(
-      type === CATEGORY_TYPE && !currentlyEditing ? id : null,
+      action === CATEGORY_EDIT_ACTION && !currentlyEditing ? id : null,
     );
     setEditingBudgetCategoryId(
-      type === CATEGORY_BUDGET_TYPE && !currentlyEditing ? id : null,
+      action === CATEGORY_BUDGET_EDIT_ACTION && !currentlyEditing ? id : null,
+    );
+    setOpenBudgetActionMenuId(
+      action === BUDGET_MENU_OPEN_ACTION && !currentlyEditing ? id : null,
     );
   }
 
@@ -1489,25 +1648,29 @@ export function BudgetTable(props) {
             />
           )}
           <View style={{ flex: 1 }} />
-          <Button
-            type="bare"
-            disabled={show3Cols}
-            onClick={toggleDisplay}
-            style={{
-              ...buttonStyle,
-              padding: '0 8px',
-              margin: '0 -8px',
-              background:
-                showBudgetedCol && !show3Cols
-                  ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
-                  : !show3Cols
-                  ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
-                  : null,
-              // 45deg to flip it to the lower left corner
-            }}
-          >
-            {show3Cols || showBudgetedCol ? (
-              <View style={{ width: 90, justifyContent: 'center' }}>
+          {(show3Cols || showBudgetedCol) && (
+            <Button
+              type="bare"
+              disabled={show3Cols}
+              onClick={toggleDisplay}
+              style={{
+                ...buttonStyle,
+                padding: '0 8px',
+                margin: '0 -8px',
+                background:
+                  showBudgetedCol && !show3Cols
+                    ? `linear-gradient(-45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
+                    : null,
+              }}
+            >
+              <View
+                style={{
+                  flexBasis: 90,
+                  width: 90,
+                  justifyContent: 'center',
+                  alignItems: 'flex-end',
+                }}
+              >
                 <Label
                   title="BUDGETED"
                   style={{ color: theme.buttonNormalText }}
@@ -1526,12 +1689,26 @@ export function BudgetTable(props) {
                   }}
                 />
               </View>
-            ) : null}
-            {show3Cols || !showBudgetedCol ? (
+            </Button>
+          )}
+          {(show3Cols || !showBudgetedCol) && (
+            <Button
+              type="bare"
+              disabled={show3Cols}
+              onClick={toggleDisplay}
+              style={{
+                ...buttonStyle,
+                background:
+                  !showBudgetedCol && !show3Cols
+                    ? `linear-gradient(45deg, ${theme.formInputBackgroundSelection} 8px, transparent 0)`
+                    : null,
+              }}
+            >
               <View
                 style={{
                   width: 90,
                   justifyContent: 'center',
+                  alignItems: 'flex-end',
                 }}
               >
                 <Label title="SPENT" style={{ color: theme.formInputText }} />
@@ -1546,12 +1723,13 @@ export function BudgetTable(props) {
                   }}
                 />
               </View>
-            ) : null}
-          </Button>
+            </Button>
+          )}
           <View
             style={{
               width: 90,
               justifyContent: 'center',
+              alignItems: 'flex-end',
             }}
           >
             <Label title="BALANCE" style={{ color: theme.formInputText }} />
@@ -1568,81 +1746,85 @@ export function BudgetTable(props) {
           </View>
         </View>
         <View style={{ overflowY: 'auto' }}>
-          {!editMode ? (
-            // <ScrollView
-            //   ref={el => (this.list = el)}
-            //   keyboardShouldPersistTaps="always"
-            //   refreshControl={refreshControl}
-            //   style={{ backgroundColor: colors.n10 }}
-            //   automaticallyAdjustContentInsets={false}
-            // >
-            <View>
-              <BudgetGroups
-                type={type}
-                categoryGroups={categoryGroups}
-                showBudgetedCol={showBudgetedCol}
-                show3Cols={show3Cols}
-                showHiddenCategories={showHiddenCategories}
-                // gestures={gestures}
-                month={month}
-                editMode={editMode}
-                editingGroupId={editingGroupId}
-                onEditGroup={onEditGroup}
-                editingCategoryId={editingCategoryId}
-                onEditCategory={onEditCategory}
-                editingBudgetCategoryId={editingBudgetCategoryId}
-                onEditCategoryBudget={onEditCategoryBudget}
-                onSaveCategory={onSaveCategory}
-                onDeleteCategory={onDeleteCategory}
-                onAddCategory={onAddCategory}
-                onAddGroup={onAddGroup}
-                onSaveGroup={onSaveGroup}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={onReorderCategory}
-                onReorderGroup={onReorderGroup}
-                onBudgetAction={onBudgetAction}
-              />
-            </View>
-          ) : (
-            // </ScrollView>
-            // <DragDrop>
-            //   {({
-            //     dragging,
-            //     onGestureEvent,
-            //     onHandlerStateChange,
-            //     scrollRef,
-            //     onScroll
-            //   }) => (
-            <View>
-              <BudgetGroups
-                type={type}
-                categoryGroups={categoryGroups}
-                showBudgetedCol={showBudgetedCol}
-                show3Cols={show3Cols}
-                showHiddenCategories={showHiddenCategories}
-                // gestures={gestures}
-                editMode={editMode}
-                editingGroupId={editingGroupId}
-                onEditGroup={onEditGroup}
-                editingCategoryId={editingCategoryId}
-                onEditCategory={onEditCategory}
-                editingBudgetCategoryId={editingBudgetCategoryId}
-                onEditCategoryBudget={onEditCategoryBudget}
-                onSaveCategory={onSaveCategory}
-                onDeleteCategory={onDeleteCategory}
-                onAddCategory={onAddCategory}
-                onAddGroup={onAddGroup}
-                onSaveGroup={onSaveGroup}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={onReorderCategory}
-                onReorderGroup={onReorderGroup}
-                onBudgetAction={onBudgetAction}
-              />
-            </View>
+          <PullToRefresh onRefresh={onRefresh}>
+            {!editMode ? (
+              // <ScrollView
+              //   ref={el => (this.list = el)}
+              //   keyboardShouldPersistTaps="always"
+              //   refreshControl={refreshControl}
+              //   style={{ backgroundColor: colors.n10 }}
+              //   automaticallyAdjustContentInsets={false}
+              // >
+              <View>
+                <BudgetGroups
+                  type={type}
+                  categoryGroups={categoryGroups}
+                  showBudgetedCol={showBudgetedCol}
+                  show3Cols={show3Cols}
+                  showHiddenCategories={showHiddenCategories}
+                  // gestures={gestures}
+                  month={month}
+                  editMode={editMode}
+                  editingGroupId={editingGroupId}
+                  onEditGroup={onEditGroup}
+                  editingCategoryId={editingCategoryId}
+                  onEditCategory={onEditCategory}
+                  editingBudgetCategoryId={editingBudgetCategoryId}
+                  onEditCategoryBudget={onEditCategoryBudget}
+                  openBudgetActionMenuId={openBudgetActionMenuId}
+                  onOpenBudgetActionMenu={onOpenBudgetActionMenu}
+                  onSaveCategory={onSaveCategory}
+                  onDeleteCategory={onDeleteCategory}
+                  onAddCategory={onAddCategory}
+                  onAddGroup={onAddGroup}
+                  onSaveGroup={onSaveGroup}
+                  onDeleteGroup={onDeleteGroup}
+                  onReorderCategory={onReorderCategory}
+                  onReorderGroup={onReorderGroup}
+                  onBudgetAction={onBudgetAction}
+                />
+              </View>
+            ) : (
+              // </ScrollView>
+              // <DragDrop>
+              //   {({
+              //     dragging,
+              //     onGestureEvent,
+              //     onHandlerStateChange,
+              //     scrollRef,
+              //     onScroll
+              //   }) => (
+              <View>
+                <BudgetGroups
+                  type={type}
+                  categoryGroups={categoryGroups}
+                  showBudgetedCol={showBudgetedCol}
+                  show3Cols={show3Cols}
+                  showHiddenCategories={showHiddenCategories}
+                  // gestures={gestures}
+                  editMode={editMode}
+                  editingGroupId={editingGroupId}
+                  onEditGroup={onEditGroup}
+                  editingCategoryId={editingCategoryId}
+                  onEditCategory={onEditCategory}
+                  editingBudgetCategoryId={editingBudgetCategoryId}
+                  onEditCategoryBudget={onEditCategoryBudget}
+                  onSaveCategory={onSaveCategory}
+                  onDeleteCategory={onDeleteCategory}
+                  onAddCategory={onAddCategory}
+                  onAddGroup={onAddGroup}
+                  onSaveGroup={onSaveGroup}
+                  onDeleteGroup={onDeleteGroup}
+                  onReorderCategory={onReorderCategory}
+                  onReorderGroup={onReorderGroup}
+                  onBudgetAction={onBudgetAction}
+                />
+              </View>
 
-            // <DragDropHighlight />
-            // </DragDrop>
-          )}
+              // <DragDropHighlight />
+              // </DragDrop>
+            )}
+          </PullToRefresh>
         </View>
       </View>
     </NamespaceContext.Provider>
@@ -1777,15 +1959,22 @@ function BudgetHeader({
         }}
       >
         {!editMode ? (
-          <Button
-            type="bare"
-            style={{
-              backgroundColor: 'transparent',
-              paddingLeft: 12,
-              paddingRight: 12,
-            }}
-            {...tooltip.getOpenEvents()}
-          >
+          <>
+            <Button
+              type="bare"
+              style={{
+                backgroundColor: 'transparent',
+                paddingLeft: 12,
+                paddingRight: 12,
+              }}
+              {...tooltip.getOpenEvents()}
+            >
+              <DotsHorizontalTriple
+                width="20"
+                height="20"
+                style={{ color: 'white' }}
+              />
+            </Button>
             {tooltip.isOpen && (
               <Tooltip
                 position="bottom-right"
@@ -1805,12 +1994,7 @@ function BudgetHeader({
                 />
               </Tooltip>
             )}
-            <DotsHorizontalTriple
-              width="20"
-              height="20"
-              style={{ color: 'white' }}
-            />
-          </Button>
+          </>
         ) : (
           <Button
             type="bare"

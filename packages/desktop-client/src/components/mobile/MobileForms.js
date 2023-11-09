@@ -32,8 +32,8 @@ export function FieldLabel({ title, flush, style }) {
 const valueStyle = {
   borderWidth: 1,
   borderColor: theme.formInputBorder,
-  marginLeft: -1,
-  marginRight: -1,
+  marginLeft: 8,
+  marginRight: 8,
   height: FIELD_HEIGHT,
   paddingHorizontal: styles.mobileEditingPadding,
 };

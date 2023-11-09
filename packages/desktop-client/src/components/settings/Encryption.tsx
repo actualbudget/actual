@@ -74,7 +74,10 @@ export default function EncryptionSettings() {
         <strong>End-to-end encryption</strong> is not available when running
         without a server. Budget files are always kept unencrypted locally, and
         encryption is only applied when sending data to a server.{' '}
-        <ExternalLink to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption">
+        <ExternalLink
+          to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
+          linkColor="purple"
+        >
           Learn more…
         </ExternalLink>
       </Text>
