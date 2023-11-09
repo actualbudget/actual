@@ -93,6 +93,7 @@ type BudgetProps = {
   moveCategory: BoundActions['moveCategory'];
   moveCategoryGroup: BoundActions['moveCategoryGroup'];
   loadPrefs: BoundActions['loadPrefs'];
+  addNotification: BoundActions['addNotification'];
 };
 
 function Budget(props: BudgetProps) {
