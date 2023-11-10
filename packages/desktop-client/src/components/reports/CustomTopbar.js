@@ -15,6 +15,8 @@ import { FilterButton } from '../filters/FiltersMenu';
 import { SaveReportMenuButton } from './SaveReport';
 
 export function CustomTopbar({
+  start,
+  end,
   graphType,
   setGraphType,
   mode,
@@ -182,6 +184,8 @@ export function CustomTopbar({
       <View style={{ flex: 1 }} />
       <SaveReportMenuButton
         reportId={reportId}
+        start={start}
+        end={end}
         filters={filters}
         conditionsOp={conditionsOp}
       />

@@ -289,6 +289,8 @@ export default function Custom() {
           }}
         >
           <CustomTopbar
+            start={start}
+            end={end}
             graphType={graphType}
             setGraphType={setGraphType}
             mode={mode}

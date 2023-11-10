@@ -3,12 +3,13 @@ import { useSelector } from 'react-redux';
 
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import AnimatedLoading from '../../icons/AnimatedLoading';
-import { styles } from '../../style';
+import { theme, styles } from '../../style';
 import View from '../common/View';
 
 import { CashFlowCard } from './CashFlow';
 import { CategorySpendingCard } from './CategorySpending';
 import { CustomReportsCard } from './Custom';
+import { CustomReportsCardList } from './ListCards';
 import { NetWorthCard } from './NetWorth';
 
 export function LoadingIndicator() {
@@ -59,6 +60,20 @@ export default function Overview() {
         {customReportsFeatureFlag && <CustomReportsCard />}
         <div style={{ flex: 1 }} />
       </View>
+
+      {customReportsFeatureFlag && (
+        <>
+          <View
+            style={{
+              height: 1,
+              backgroundColor: theme.sidebarBackground,
+              marginTop: 10,
+              flexShrink: 0,
+            }}
+          />
+          <CustomReportsCardList />
+        </>
+      )}
     </View>
   );
 }

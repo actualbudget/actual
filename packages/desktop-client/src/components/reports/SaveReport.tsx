@@ -13,7 +13,13 @@ import Text from '../common/Text';
 import View from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
-export function SaveReportMenuButton({ reportId, filters, conditionsOp }) {
+export function SaveReportMenuButton({
+  reportId,
+  start,
+  end,
+  filters,
+  conditionsOp,
+}) {
   let [nameOpen, setNameOpen] = useState(false);
   let [menuOpen, setMenuOpen] = useState(false);
   let [menuItem, setMenuItem] = useState(null);
@@ -136,6 +142,8 @@ export function SaveReportMenuButton({ reportId, filters, conditionsOp }) {
         conditions: filters,
         conditionsOp: conditionsOp,
         name: name,
+        start: start,
+        end: end,
         status: 'saved',
       };
       res = await sendCatch('report-create', {

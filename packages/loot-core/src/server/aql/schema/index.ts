@@ -124,8 +124,8 @@ export const schema = {
   reports: {
     id: f('id'),
     name: f('string'),
-    start: f('string'),
-    end: f('string'),
+    start: f('string', { default: '2023-06' }),
+    end: f('string', { default: '2023-09' }),
     mode: f('string', { default: 'total' }),
     split: f('integer', { default: 1 }),
     type: f('integer', { default: 1 }),

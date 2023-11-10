@@ -108,6 +108,8 @@ async function createReport(report) {
     conditions: report.state.conditions,
     conditionsOp: report.state.conditionsOp,
     name: report.state.name,
+    start: report.state.start,
+    end: report.state.end,
   };
 
   if (item.name) {
