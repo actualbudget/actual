@@ -161,6 +161,9 @@ function Status({ status }) {
   );
 }
 
+const LEFT_RIGHT_FLEX_WIDTH = 70;
+const BUDGET_HEADER_HEIGHT = 50;
+
 class TransactionEditInner extends PureComponent {
   constructor(props) {
     super(props);
@@ -343,15 +346,16 @@ class TransactionEditInner extends PureComponent {
         >
           <View
             style={{
-              backgroundColor: theme.mobileHeaderBackground,
-              alignItems: 'center',
+              flexShrink: 0,
+              height: BUDGET_HEADER_HEIGHT,
               flexDirection: 'row',
               width: '100%',
+              backgroundColor: theme.mobileHeaderBackground,
             }}
           >
             <View
               style={{
-                flex: 1,
+                width: LEFT_RIGHT_FLEX_WIDTH,
                 flexDirection: 'row',
               }}
             >
@@ -360,11 +364,13 @@ class TransactionEditInner extends PureComponent {
                 style={{
                   color: theme.mobileHeaderText,
                   justifyContent: 'center',
-                  margin: 13,
+                  margin: 10,
                   paddingLeft: 5,
                   paddingRight: 3,
-                  marginLeft: 10,
-                  ':hover': { backgroundColor: theme.mobileHeaderTextHover },
+                }}
+                hoveredStyle={{
+                  color: theme.mobileHeaderText,
+                  background: theme.mobileHeaderTextHover,
                 }}
               >
                 <Link
@@ -387,7 +393,7 @@ class TransactionEditInner extends PureComponent {
                     style={{
                       ...styles.text,
                       fontWeight: 500,
-                      marginLeft: 8,
+                      marginLeft: 5,
                       marginRight: 5,
                     }}
                   >
@@ -401,27 +407,33 @@ class TransactionEditInner extends PureComponent {
                 }}
               />
             </View>
-            <TextOneLine
-              style={{
-                flex: 1,
-                fontSize: 16,
-                fontWeight: 500,
-                alignItems: 'center',
-                color: theme.mobileHeaderText,
-                userSelect: 'none',
-              }}
-              role="heading"
-            >
-              {payeeId == null
-                ? adding
-                  ? 'New Transaction'
-                  : 'Transaction'
-                : descriptionPretty}
-            </TextOneLine>
-            {/* For centering the transaction title */}
             <View
               style={{
                 flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                color: theme.mobileHeaderText,
+              }}
+            >
+              <TextOneLine
+                style={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                  userSelect: 'none',
+                }}
+                role="heading"
+              >
+                {payeeId == null
+                  ? adding
+                    ? 'New Transaction'
+                    : 'Transaction'
+                  : descriptionPretty}
+              </TextOneLine>
+            </View>
+            {/* For centering the transaction title */}
+            <View
+              style={{
+                width: LEFT_RIGHT_FLEX_WIDTH,
               }}
             />
           </View>

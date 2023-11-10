@@ -1831,6 +1831,7 @@ export function BudgetTable(props) {
   );
 }
 
+const LEFT_RIGHT_FLEX_WIDTH = 70;
 const BUDGET_HEADER_HEIGHT = 50;
 
 function BudgetHeader({
@@ -1849,9 +1850,8 @@ function BudgetHeader({
   let nextEnabled = currentMonth < monthUtils.subMonths(monthBounds.end, 1);
 
   let buttonStyle = {
-    paddingLeft: 15,
-    paddingRight: 15,
-    backgroundColor: 'transparent',
+    padding: 10,
+    margin: 2,
   };
 
   let toggleHiddenCategories = () => {
@@ -1887,8 +1887,7 @@ function BudgetHeader({
     >
       <View
         style={{
-          flexBasis: '25%',
-          justifyContent: 'flex-start',
+          width: LEFT_RIGHT_FLEX_WIDTH,
           flexDirection: 'row',
         }}
       >
@@ -1897,16 +1896,20 @@ function BudgetHeader({
             isMobile
             style={{
               color: theme.mobileHeaderText,
-              backgroundColor: 'transparent',
               paddingLeft: 12,
               paddingRight: 12,
             }}
           />
         )}
+        <View
+          style={{
+            flex: 1,
+          }}
+        />
       </View>
       <View
         style={{
-          flexBasis: '50%',
+          flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'row',
@@ -1920,10 +1923,13 @@ function BudgetHeader({
             ...buttonStyle,
             opacity: prevEnabled ? 1 : 0.6,
             color: theme.mobileHeaderText,
-            ':hover': { backgroundColor: theme.mobileHeaderTextHover },
+          }}
+          hoveredStyle={{
+            color: theme.mobileHeaderText,
+            background: theme.mobileHeaderTextHover,
           }}
         >
-          <ArrowThinLeft width="15" height="15" />
+          <ArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
         </Button>
         <Text
           style={{
@@ -1945,28 +1951,38 @@ function BudgetHeader({
             ...buttonStyle,
             opacity: nextEnabled ? 1 : 0.6,
             color: theme.mobileHeaderText,
-            ':hover': { backgroundColor: theme.mobileHeaderTextHover },
+          }}
+          hoveredStyle={{
+            color: theme.mobileHeaderText,
+            background: theme.mobileHeaderTextHover,
           }}
         >
-          <ArrowThinRight width="15" height="15" />
+          <ArrowThinRight width="15" height="15" style={{ margin: -5 }} />
         </Button>
       </View>
       <View
         style={{
-          flexBasis: '25%',
-          justifyContent: 'flex-end',
+          width: LEFT_RIGHT_FLEX_WIDTH,
           flexDirection: 'row',
         }}
       >
+        <View
+          style={{
+            flex: 1,
+          }}
+        />
         {!editMode ? (
           <>
             <Button
               type="bare"
+              hoveredStyle={{
+                color: theme.mobileHeaderText,
+                background: theme.mobileHeaderTextHover,
+              }}
               style={{
-                backgroundColor: 'transparent',
-                ':hover': { backgroundColor: theme.mobileHeaderTextHover },
-                paddingLeft: 12,
-                paddingRight: 12,
+                paddingTop: 15,
+                paddingBottom: 15,
+                margin: 10,
               }}
               {...tooltip.getOpenEvents()}
             >
@@ -1999,16 +2015,18 @@ function BudgetHeader({
         ) : (
           <Button
             type="bare"
+            hoveredStyle={{
+              color: theme.mobileHeaderText,
+              background: theme.mobileHeaderTextHover,
+            }}
             style={{
               backgroundColor: 'transparent',
-              paddingLeft: 12,
-              paddingRight: 12,
-              ...styles.mediumText,
+              padding: 10,
+              paddingTop: 15,
+              paddingBottom: 15,
+              margin: 10,
+              ...styles.text,
               color: theme.mobileHeaderText,
-              ':hover': {
-                color: theme.mobileHeaderText,
-                backgroundColor: theme.mobileHeaderTextHover,
-              },
             }}
             onClick={() => onEditMode?.(false)}
           >

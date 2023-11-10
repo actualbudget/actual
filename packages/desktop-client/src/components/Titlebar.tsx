@@ -22,7 +22,7 @@ import SvgEye from '../icons/v2/Eye';
 import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
 import { useResponsive } from '../ResponsiveProvider';
-import { theme, type CSSProperties } from '../style';
+import { theme, type CSSProperties, styles } from '../style';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import AnimatedRefresh from './AnimatedRefresh';
@@ -163,8 +163,8 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'
-      ? theme.sidebarItemText
-      : style.color;
+      ? theme.mobileHeaderTextSubdued
+      : theme.mobileHeaderText;
   const desktopColor =
     syncState === 'error'
       ? theme.errorTextDark
@@ -180,6 +180,42 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       }
     : {};
 
+  const hoveredStyle = isMobile
+    ? {
+        color: mobileColor,
+        background: theme.mobileHeaderTextHover,
+      }
+    : {};
+
+  const mobileIconStyle = {
+    color: mobileColor,
+    justifyContent: 'center',
+    margin: 10,
+    paddingLeft: 5,
+    paddingRight: 3,
+  };
+
+  const mobileTextStyle = {
+    ...styles.text,
+    fontWeight: 500,
+    marginLeft: 2,
+    marginRight: 5,
+  };
+
+  function MobileIcon() {
+    return isMobile ? (
+      syncState === 'error' ? (
+        <AlertTriangle width={14} height={14} />
+      ) : (
+        <AnimatedRefresh width={18} height={18} animating={syncing} />
+      )
+    ) : syncState === 'error' ? (
+      <AlertTriangle width={13} />
+    ) : (
+      <AnimatedRefresh animating={syncing} />
+    );
+  }
+
   return (
     <>
       <KeyHandlers
@@ -192,21 +228,25 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 
       <Button
         type="bare"
-        style={{
-          ...style,
-          WebkitAppRegion: 'none',
-          color: isMobile ? mobileColor : desktopColor,
-        }}
-        hoveredStyle={activeStyle}
+        style={
+          isMobile
+            ? {
+                ...style,
+                WebkitAppRegion: 'none',
+                ...mobileIconStyle,
+              }
+            : {
+                ...style,
+                WebkitAppRegion: 'none',
+                color: desktopColor,
+              }
+        }
+        hoveredStyle={hoveredStyle}
         activeStyle={activeStyle}
         onClick={sync}
       >
-        {syncState === 'error' ? (
-          <AlertTriangle width={13} />
-        ) : (
-          <AnimatedRefresh animating={syncing} />
-        )}
-        <Text style={{ marginLeft: 3 }}>
+        <MobileIcon />
+        <Text style={isMobile ? { ...mobileTextStyle } : { marginLeft: 3 }}>
           {syncState === 'disabled'
             ? 'Disabled'
             : syncState === 'offline'

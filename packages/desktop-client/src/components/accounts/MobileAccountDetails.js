@@ -63,6 +63,9 @@ function TransactionSearchInput({ accountName, onSearch }) {
   );
 }
 
+const LEFT_RIGHT_FLEX_WIDTH = 70;
+const BUDGET_HEADER_HEIGHT = 50;
+
 export default function AccountDetails({
   account,
   prependTransactions,
@@ -106,13 +109,15 @@ export default function AccountDetails({
         <View
           style={{
             flexDirection: 'row',
+            flexShrink: 0,
+            height: BUDGET_HEADER_HEIGHT,
             width: '100%',
             backgroundColor: theme.mobileHeaderBackground,
           }}
         >
           <View
             style={{
-              flex: 1,
+              width: LEFT_RIGHT_FLEX_WIDTH,
               flexDirection: 'row',
             }}
           >
@@ -124,8 +129,10 @@ export default function AccountDetails({
                 margin: 10,
                 paddingLeft: 5,
                 paddingRight: 3,
-                marginLeft: 10,
-                ':hover': { backgroundColor: theme.mobileHeaderTextHover },
+              }}
+              hoveredStyle={{
+                color: theme.mobileHeaderText,
+                background: theme.mobileHeaderTextHover,
               }}
             >
               <Link
@@ -143,7 +150,7 @@ export default function AccountDetails({
                   style={{
                     ...styles.text,
                     fontWeight: 500,
-                    marginLeft: 8,
+                    marginLeft: 5,
                     marginRight: 5,
                   }}
                 >
@@ -173,7 +180,7 @@ export default function AccountDetails({
 
           <View
             style={{
-              flex: 1,
+              width: LEFT_RIGHT_FLEX_WIDTH,
               flexDirection: 'row',
             }}
           >
