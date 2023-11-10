@@ -258,10 +258,10 @@ function Budget(props: BudgetProps) {
     setIsAddingGroup(false);
   };
 
-  const categoryNameAlreadyExistsNotification = () => {
+  const categoryNameAlreadyExistsNotification = name => {
     props.addNotification({
       type: 'error',
-      message: 'Category already exists in group (May be Hidden)',
+      message: `Category ‘${name}’ already exists in group (May be Hidden)`,
     });
   };
 
@@ -274,7 +274,7 @@ function Budget(props: BudgetProps) {
         .length > 0;
 
     if (exists) {
-      categoryNameAlreadyExistsNotification();
+      categoryNameAlreadyExistsNotification(category.name);
       return;
     }
 
