@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { type CSSProperties, useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -6,13 +6,23 @@ import useResizeObserver from '../../hooks/useResizeObserver';
 import { styles, theme } from '../../style';
 import View from '../common/View';
 
+import { type BoundsProps } from './MonthsContext';
+
+type MonthPickerProps = {
+  startMonth: string;
+  numDisplayed: number;
+  monthBounds: BoundsProps;
+  style: CSSProperties;
+  onSelect: (month: string) => void;
+};
+
 export const MonthPicker = ({
   startMonth,
   numDisplayed,
   monthBounds,
   style,
   onSelect,
-}) => {
+}: MonthPickerProps) => {
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
