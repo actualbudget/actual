@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { type CSSProperties, type Ref, useState } from 'react';
+
+import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import CheveronDown from '../../icons/v1/CheveronDown';
 import { theme } from '../../style';
@@ -6,8 +8,25 @@ import Button from '../common/Button';
 import Menu from '../common/Menu';
 import View from '../common/View';
 import NotesButton from '../NotesButton';
+import { type OnDragChangeCallback } from '../sort';
 import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
+
+type SidebarCategoryProps = {
+  innerRef: Ref<HTMLDivElement>;
+  category: CategoryEntity;
+  dragPreview?: boolean;
+  dragging?: boolean;
+  editing: boolean;
+  style: CSSProperties;
+  borderColor: string;
+  isLast?: boolean;
+  onDragChange?: OnDragChangeCallback;
+  onEditName: (id: string) => void;
+  onSave: (group) => void;
+  onDelete: (id: string) => Promise<void>;
+  onHideNewCategory: () => void;
+};
 
 function SidebarCategory({
   innerRef,
@@ -16,15 +35,13 @@ function SidebarCategory({
   dragging,
   editing,
   style,
-  borderColor = theme.tableBorder,
   isLast,
   onDragChange,
-  onEditMonth,
   onEditName,
   onSave,
   onDelete,
   onHideNewCategory,
-}) {
+}: SidebarCategoryProps) {
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
 
