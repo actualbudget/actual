@@ -393,9 +393,14 @@ handlers['api/transactions-import'] = withMutation(async function ({
 handlers['api/transactions-add'] = withMutation(async function ({
   accountId,
   transactions,
+  runTransfers = false,
+  learnCategories = false,
 }) {
   checkFileOpen();
-  await addTransactions(accountId, transactions, { runTransfers: false });
+  await addTransactions(accountId, transactions, {
+    runTransfers: runTransfers,
+    learnCategories: learnCategories,
+  });
   return 'ok';
 });
 

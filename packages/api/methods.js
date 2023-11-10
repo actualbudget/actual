@@ -58,8 +58,17 @@ export function setBudgetCarryover(month, categoryId, flag) {
   return send('api/budget-set-carryover', { month, categoryId, flag });
 }
 
-export function addTransactions(accountId, transactions) {
-  return send('api/transactions-add', { accountId, transactions });
+export function addTransactions(
+  accountId,
+  transactions,
+  { learnCategories = false, runTransfers = false } = {},
+) {
+  return send('api/transactions-add', {
+    accountId,
+    transactions,
+    learnCategories: learnCategories,
+    runTransfers: runTransfers,
+  });
 }
 
 export function importTransactions(accountId, transactions) {
