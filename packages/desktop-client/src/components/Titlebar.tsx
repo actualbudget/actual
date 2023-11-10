@@ -171,7 +171,7 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       : syncState === 'disabled' ||
         syncState === 'offline' ||
         syncState === 'local'
-      ? theme.altTableText
+      ? theme.tableTextLight
       : 'inherit';
 
   const activeStyle = isMobile
