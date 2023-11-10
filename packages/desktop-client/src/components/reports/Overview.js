@@ -125,7 +125,7 @@ function NetWorthCard({ accounts }) {
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
                   amount={data.totalChange}
-                  style={{ color: theme.altTableText, fontWeight: 300 }}
+                  style={{ color: theme.tableTextLight, fontWeight: 300 }}
                 />
               </PrivacyFilter>
             </View>
@@ -184,7 +184,7 @@ function CashFlowCard() {
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
                   amount={income - expense}
-                  style={{ color: theme.altTableText, fontWeight: 300 }}
+                  style={{ color: theme.tableTextLight, fontWeight: 300 }}
                 />
               </PrivacyFilter>
             </View>

@@ -1,4 +1,5 @@
 import React, { type CSSProperties, useState } from 'react';
+import { type ConnectDragSource } from 'react-dnd';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
@@ -24,7 +25,7 @@ type SidebarGroupProps = {
   editing?: boolean;
   collapsed: boolean;
   dragPreview?: () => void;
-  innerRef?: () => void;
+  innerRef?: ConnectDragSource;
   borderColor?: string;
   style?: CSSProperties;
   onEdit?: (id: string) => void;
@@ -148,7 +149,7 @@ function SidebarGroup({
       style={{
         ...style,
         width: 200,
-        backgroundColor: theme.altTableBackground,
+        backgroundColor: theme.tableRowHeaderBackground,
         '& button': { display: 'none' },
         '&:hover button': { display: 'flex', color: theme.tableTextHover },
         ...(dragPreview && {

@@ -57,8 +57,10 @@ class Tooltip extends Component {
             borderRadius: 2,
             boxShadow: light ? 'none' : '0 1px 6px rgba(0, 0, 0, .20)',
             // TODO: Transparent background
-            backgroundColor: light ? 'transparent' : theme.alt2MenuBackground,
-            color: light ? 'inherit' : theme.alt2MenuItemText,
+            backgroundColor: light
+              ? 'transparent'
+              : theme.menuAutoCompleteBackground,
+            color: light ? 'inherit' : theme.menuAutoCompleteText,
             padding: 10,
           },
           !light &&
@@ -68,7 +70,7 @@ class Tooltip extends Component {
               borderTop: '7px solid transparent',
               borderBottom: '7px solid transparent',
               [position === 'right' ? 'borderRight' : 'borderLeft']:
-                '7px solid ' + theme.alt2MenuBackground,
+                '7px solid ' + theme.menuAutoCompleteBackground,
               [position === 'right' ? 'left' : 'right']: -6,
               top: 'calc(50% - 7px)',
               // eslint-disable-next-line rulesdir/typography

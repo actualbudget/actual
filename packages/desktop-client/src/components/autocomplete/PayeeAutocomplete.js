@@ -88,7 +88,7 @@ function PayeeList({
               padding: '6px 9px',
               backgroundColor:
                 highlightedIndex === 0
-                  ? theme.alt2MenuItemBackgroundHover
+                  ? theme.menuAutoCompleteBackgroundHover
                   : 'transparent',
               borderRadius: embedded ? 4 : 0,
               ':active': {
@@ -132,7 +132,7 @@ function PayeeList({
                 <div
                   key={'title-' + idx}
                   style={{
-                    color: theme.alt2MenuItemTextHeader,
+                    color: theme.menuAutoCompleteTextHeader,
                     padding: '4px 9px',
                     ...groupHeaderStyle,
                   }}
@@ -170,7 +170,7 @@ function PayeeList({
                   {
                     backgroundColor:
                       highlightedIndex === idx + offset
-                        ? theme.alt2MenuItemBackgroundHover
+                        ? theme.menuAutoCompleteBackgroundHover
                         : 'transparent',
                     borderRadius: embedded ? 4 : 0,
                     padding: 4,
