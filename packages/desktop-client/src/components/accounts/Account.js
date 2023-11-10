@@ -71,7 +71,7 @@ function EmptyMessage({ onAdd }) {
         </Button>
 
         <View
-          style={{ marginTop: 20, fontSize: 13, color: theme.alttableText }}
+          style={{ marginTop: 20, fontSize: 13, color: theme.tableTextLight }}
         >
           In the future, you can add accounts from the sidebar.
         </View>
@@ -1201,6 +1201,7 @@ class AccountInternal extends PureComponent {
             items={allTransactions}
             fetchAllIds={this.fetchAllIds}
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
+            selectAllFilter={item => !item._unmatched && !item.is_parent}
           >
             <View style={styles.page}>
               <AccountHeader
