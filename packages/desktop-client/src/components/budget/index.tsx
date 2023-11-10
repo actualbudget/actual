@@ -395,7 +395,7 @@ function Budget(props: BudgetProps) {
         .filter(c => c.id !== moveCandidate.id).length > 0;
 
     if (exists) {
-      categoryNameAlreadyExistsNotification();
+      categoryNameAlreadyExistsNotification(moveCandidate.name);
       return;
     }
 
