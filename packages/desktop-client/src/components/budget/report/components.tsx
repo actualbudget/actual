@@ -327,7 +327,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               onEdit(null);
             },
             style: {
-              backgroundColor: 'white',
+              backgroundColor: theme.tableBackground,
             },
           }}
           onSave={amount => {

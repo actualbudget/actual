@@ -40,9 +40,7 @@ function DiscoverSchedulesTable({ schedules, loading }) {
           dispatchSelected({ type: 'select', id: item.id, event: e });
         }}
         style={{
-          borderColor: selected
-            ? theme.alttableBorderSelected
-            : theme.tableBorder,
+          borderColor: selected ? theme.tableBorderSelected : theme.tableBorder,
           cursor: 'pointer',
           color: selected
             ? theme.tableRowBackgroundHighlightText
