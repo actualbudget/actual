@@ -125,29 +125,13 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
   );
 }
 
-function EmptyMessage({ onAdd }) {
+function EmptyMessage() {
   return (
     <View style={{ flex: 1, padding: 30 }}>
       <Text style={styles.text}>
         For Actual to be useful, you need to add an account. You can link an
         account to automatically download transactions, or manage it locally
         yourself.
-      </Text>
-
-      <Button
-        type="primary"
-        style={{ marginTop: 20, alignSelf: 'center' }}
-        onClick={() =>
-          alert(
-            'Account creation is not supported on mobile on the self-hosted service yet',
-          )
-        }
-      >
-        Add Account
-      </Button>
-
-      <Text style={{ marginTop: 20, color: theme.pageTextLight }}>
-        In the future, you can add accounts using the add button in the header.
       </Text>
     </View>
   );
@@ -161,20 +145,14 @@ function AccountList({
   getOffBudgetBalance,
   onAddAccount,
   onSelectAccount,
+  onSync,
 }) {
-  const { syncAndDownload } = useActions();
-
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
   const noBackgroundColorStyle = {
     backgroundColor: 'transparent',
     color: 'white',
   };
-
-  // If there are no accounts, show a helpful message
-  if (accounts.length === 0) {
-    return <EmptyMessage onAdd={onAddAccount} />;
-  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}>
@@ -201,8 +179,11 @@ function AccountList({
           </Button>
         }
       >
-        <PullToRefresh onRefresh={syncAndDownload}>
-          <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
+        {accounts.length === 0 && <EmptyMessage />}
+        <PullToRefresh onRefresh={onSync}>
+          {budgetedAccounts.length > 0 && (
+            <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
+          )}
           {budgetedAccounts.map(acct => (
             <AccountCard
               account={acct}
@@ -213,11 +194,13 @@ function AccountList({
             />
           ))}
 
-          <AccountHeader
-            name="Off budget"
-            amount={getOffBudgetBalance()}
-            style={{ marginTop: 30 }}
-          />
+          {offbudgetAccounts.length > 0 && (
+            <AccountHeader
+              name="Off budget"
+              amount={getOffBudgetBalance()}
+              style={{ marginTop: 30 }}
+            />
+          )}
           {offbudgetAccounts.map(acct => (
             <AccountCard
               account={acct}
@@ -245,7 +228,7 @@ export default function Accounts() {
   );
 
   const { list: categories } = useCategories();
-  let { getAccounts, replaceModal } = useActions();
+  let { getAccounts, replaceModal, syncAndDownload } = useActions();
 
   const transactions = useState({});
   const navigate = useNavigate();
@@ -281,6 +264,7 @@ export default function Accounts() {
         onAddAccount={() => replaceModal('add-account')}
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
+        onSync={syncAndDownload}
       />
     </View>
   );
