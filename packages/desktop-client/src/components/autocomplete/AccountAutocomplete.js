@@ -48,7 +48,7 @@ function AccountList({
               <div
                 key={group}
                 style={{
-                  color: theme.alt2MenuItemTextHeader,
+                  color: theme.menuAutoCompleteTextHeader,
                   padding: '4px 9px',
                   ...groupHeaderStyle,
                 }}
@@ -87,7 +87,7 @@ function AccountList({
                 {
                   backgroundColor:
                     highlightedIndex === idx
-                      ? theme.alt2MenuItemBackgroundHover
+                      ? theme.menuAutoCompleteBackgroundHover
                       : 'transparent',
                   padding: 4,
                   paddingLeft: 20,

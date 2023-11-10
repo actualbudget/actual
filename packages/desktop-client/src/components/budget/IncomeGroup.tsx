@@ -38,7 +38,10 @@ function IncomeGroup({
   return (
     <Row
       collapsed={true}
-      style={{ fontWeight: 600, backgroundColor: theme.altTableBackground }}
+      style={{
+        fontWeight: 600,
+        backgroundColor: theme.tableRowHeaderBackground,
+      }}
     >
       <SidebarGroup
         group={group}
