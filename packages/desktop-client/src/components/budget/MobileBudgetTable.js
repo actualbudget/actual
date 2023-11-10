@@ -18,6 +18,7 @@ import Label from '../common/Label';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
+import PullToRefresh from '../responsive/PullToRefresh';
 import { useServerURL } from '../ServerContext';
 import CellValue from '../spreadsheet/CellValue';
 import NamespaceContext from '../spreadsheet/NamespaceContext';
@@ -101,7 +102,7 @@ function Saved({ projected }) {
           ...styles.smallText,
           fontWeight: '500',
           color: projected
-            ? theme.alt2WarningText
+            ? theme.warningText
             : isNegative
             ? theme.errorTextDark
             : theme.formInputText,
@@ -298,7 +299,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
     <ListItem
       style={{
         backgroundColor: isEditingBudget
-          ? theme.altTableTextEditing
+          ? theme.tableTextEditing
           : 'transparent',
         borderBottomWidth: 0,
         borderTopWidth: index > 0 ? 1 : 0,
@@ -445,6 +446,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
             <BalanceWithCarryover
               carryover={rolloverBudget.catCarryover(category.id)}
               balance={rolloverBudget.catBalance(category.id)}
+              goal={reportBudget.catGoal(category.id)}
+              budgeted={reportBudget.catBudgeted(category.id)}
               balanceStyle={{
                 ...styles.smallText,
                 ...styles.underlinedText,
@@ -1356,7 +1359,7 @@ function IncomeGroup({
               : rolloverBudget.groupSumAmount(group.id)
           }
           style={{
-            backgroundColor: theme.altTableBackground,
+            backgroundColor: theme.tableRowHeaderBackground,
           }}
           onAddCategory={onAddCategory}
           onSave={onSave}
@@ -1526,6 +1529,7 @@ export function BudgetTable(props) {
     onShowBudgetDetails,
     // onOpenActionSheet,
     onBudgetAction,
+    onRefresh,
     savePrefs,
   } = props;
 
@@ -1742,83 +1746,85 @@ export function BudgetTable(props) {
           </View>
         </View>
         <View style={{ overflowY: 'auto' }}>
-          {!editMode ? (
-            // <ScrollView
-            //   ref={el => (this.list = el)}
-            //   keyboardShouldPersistTaps="always"
-            //   refreshControl={refreshControl}
-            //   style={{ backgroundColor: colors.n10 }}
-            //   automaticallyAdjustContentInsets={false}
-            // >
-            <View>
-              <BudgetGroups
-                type={type}
-                categoryGroups={categoryGroups}
-                showBudgetedCol={showBudgetedCol}
-                show3Cols={show3Cols}
-                showHiddenCategories={showHiddenCategories}
-                // gestures={gestures}
-                month={month}
-                editMode={editMode}
-                editingGroupId={editingGroupId}
-                onEditGroup={onEditGroup}
-                editingCategoryId={editingCategoryId}
-                onEditCategory={onEditCategory}
-                editingBudgetCategoryId={editingBudgetCategoryId}
-                onEditCategoryBudget={onEditCategoryBudget}
-                openBudgetActionMenuId={openBudgetActionMenuId}
-                onOpenBudgetActionMenu={onOpenBudgetActionMenu}
-                onSaveCategory={onSaveCategory}
-                onDeleteCategory={onDeleteCategory}
-                onAddCategory={onAddCategory}
-                onAddGroup={onAddGroup}
-                onSaveGroup={onSaveGroup}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={onReorderCategory}
-                onReorderGroup={onReorderGroup}
-                onBudgetAction={onBudgetAction}
-              />
-            </View>
-          ) : (
-            // </ScrollView>
-            // <DragDrop>
-            //   {({
-            //     dragging,
-            //     onGestureEvent,
-            //     onHandlerStateChange,
-            //     scrollRef,
-            //     onScroll
-            //   }) => (
-            <View>
-              <BudgetGroups
-                type={type}
-                categoryGroups={categoryGroups}
-                showBudgetedCol={showBudgetedCol}
-                show3Cols={show3Cols}
-                showHiddenCategories={showHiddenCategories}
-                // gestures={gestures}
-                editMode={editMode}
-                editingGroupId={editingGroupId}
-                onEditGroup={onEditGroup}
-                editingCategoryId={editingCategoryId}
-                onEditCategory={onEditCategory}
-                editingBudgetCategoryId={editingBudgetCategoryId}
-                onEditCategoryBudget={onEditCategoryBudget}
-                onSaveCategory={onSaveCategory}
-                onDeleteCategory={onDeleteCategory}
-                onAddCategory={onAddCategory}
-                onAddGroup={onAddGroup}
-                onSaveGroup={onSaveGroup}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={onReorderCategory}
-                onReorderGroup={onReorderGroup}
-                onBudgetAction={onBudgetAction}
-              />
-            </View>
+          <PullToRefresh onRefresh={onRefresh}>
+            {!editMode ? (
+              // <ScrollView
+              //   ref={el => (this.list = el)}
+              //   keyboardShouldPersistTaps="always"
+              //   refreshControl={refreshControl}
+              //   style={{ backgroundColor: colors.n10 }}
+              //   automaticallyAdjustContentInsets={false}
+              // >
+              <View>
+                <BudgetGroups
+                  type={type}
+                  categoryGroups={categoryGroups}
+                  showBudgetedCol={showBudgetedCol}
+                  show3Cols={show3Cols}
+                  showHiddenCategories={showHiddenCategories}
+                  // gestures={gestures}
+                  month={month}
+                  editMode={editMode}
+                  editingGroupId={editingGroupId}
+                  onEditGroup={onEditGroup}
+                  editingCategoryId={editingCategoryId}
+                  onEditCategory={onEditCategory}
+                  editingBudgetCategoryId={editingBudgetCategoryId}
+                  onEditCategoryBudget={onEditCategoryBudget}
+                  openBudgetActionMenuId={openBudgetActionMenuId}
+                  onOpenBudgetActionMenu={onOpenBudgetActionMenu}
+                  onSaveCategory={onSaveCategory}
+                  onDeleteCategory={onDeleteCategory}
+                  onAddCategory={onAddCategory}
+                  onAddGroup={onAddGroup}
+                  onSaveGroup={onSaveGroup}
+                  onDeleteGroup={onDeleteGroup}
+                  onReorderCategory={onReorderCategory}
+                  onReorderGroup={onReorderGroup}
+                  onBudgetAction={onBudgetAction}
+                />
+              </View>
+            ) : (
+              // </ScrollView>
+              // <DragDrop>
+              //   {({
+              //     dragging,
+              //     onGestureEvent,
+              //     onHandlerStateChange,
+              //     scrollRef,
+              //     onScroll
+              //   }) => (
+              <View>
+                <BudgetGroups
+                  type={type}
+                  categoryGroups={categoryGroups}
+                  showBudgetedCol={showBudgetedCol}
+                  show3Cols={show3Cols}
+                  showHiddenCategories={showHiddenCategories}
+                  // gestures={gestures}
+                  editMode={editMode}
+                  editingGroupId={editingGroupId}
+                  onEditGroup={onEditGroup}
+                  editingCategoryId={editingCategoryId}
+                  onEditCategory={onEditCategory}
+                  editingBudgetCategoryId={editingBudgetCategoryId}
+                  onEditCategoryBudget={onEditCategoryBudget}
+                  onSaveCategory={onSaveCategory}
+                  onDeleteCategory={onDeleteCategory}
+                  onAddCategory={onAddCategory}
+                  onAddGroup={onAddGroup}
+                  onSaveGroup={onSaveGroup}
+                  onDeleteGroup={onDeleteGroup}
+                  onReorderCategory={onReorderCategory}
+                  onReorderGroup={onReorderGroup}
+                  onBudgetAction={onBudgetAction}
+                />
+              </View>
 
-            // <DragDropHighlight />
-            // </DragDrop>
-          )}
+              // <DragDropHighlight />
+              // </DragDrop>
+            )}
+          </PullToRefresh>
         </View>
       </View>
     </NamespaceContext.Provider>

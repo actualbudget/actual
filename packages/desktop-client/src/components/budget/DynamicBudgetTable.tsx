@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect } from 'react';
+import React, { forwardRef, useEffect, type ComponentProps } from 'react';
 import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -9,7 +9,7 @@ import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import BudgetPageHeader from './BudgetPageHeader';
 import BudgetTable from './BudgetTable';
 
-function getNumPossibleMonths(width) {
+function getNumPossibleMonths(width: number) {
   let estimatedTableWidth = width - 200;
 
   if (estimatedTableWidth < 500) {
@@ -27,7 +27,15 @@ function getNumPossibleMonths(width) {
   return 6;
 }
 
-const DynamicBudgetTableInner = forwardRef(
+type DynamicBudgetTableInnerProps = {
+  width: number;
+  height: number;
+} & ComponentProps<typeof BudgetTable>;
+
+const DynamicBudgetTableInner = forwardRef<
+  BudgetTable,
+  DynamicBudgetTableInnerProps
+>(
   (
     {
       width,
@@ -92,17 +100,19 @@ const DynamicBudgetTableInner = forwardRef(
   },
 );
 
-export default forwardRef((props, ref) => {
-  return (
-    <AutoSizer>
-      {({ width, height }) => (
-        <DynamicBudgetTableInner
-          ref={ref}
-          width={width}
-          height={height}
-          {...props}
-        />
-      )}
-    </AutoSizer>
-  );
-});
+export default forwardRef<BudgetTable, DynamicBudgetTableInnerProps>(
+  (props, ref) => {
+    return (
+      <AutoSizer>
+        {({ width, height }) => (
+          <DynamicBudgetTableInner
+            ref={ref}
+            width={width}
+            height={height}
+            {...props}
+          />
+        )}
+      </AutoSizer>
+    );
+  },
+);

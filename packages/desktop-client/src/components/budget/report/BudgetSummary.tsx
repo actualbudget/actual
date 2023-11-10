@@ -280,10 +280,10 @@ function Saved({ projected, style }: SavedProps) {
             {
               fontSize: 25,
               color: projected
-                ? theme.alt2WarningText
+                ? theme.warningText
                 : isNegative
                 ? theme.errorTextDark
-                : theme.altUpcomingText,
+                : theme.upcomingText,
             },
           ])}`}
         >

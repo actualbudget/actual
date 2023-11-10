@@ -420,7 +420,7 @@ function StatusCell({
       : status === 'missed'
       ? theme.errorText
       : status === 'due'
-      ? theme.alt3WarningText
+      ? theme.warningText
       : selected
       ? theme.pageTextLinkLight
       : theme.pageTextSubdued;
@@ -843,7 +843,7 @@ const Transaction = memo(function Transaction(props) {
         ...style,
         ...(isPreview && {
           color: theme.tableTextInactive,
-          backgroundColor: !selected ? '#fcfcfc' : undefined,
+          backgroundColor: !selected ? theme.tableBackground : undefined,
           fontStyle: 'italic',
         }),
         ...(_unmatched && { opacity: 0.5 }),
@@ -1045,18 +1045,18 @@ const Transaction = memo(function Transaction(props) {
                   notes === 'missed'
                     ? theme.errorText
                     : notes === 'due'
-                    ? theme.alt5WarningText
+                    ? theme.warningText
                     : selected
                     ? theme.formLabelText
-                    : theme.altTableText,
+                    : theme.tableTextLight,
                 backgroundColor:
                   notes === 'missed'
                     ? theme.errorBackground
                     : notes === 'due'
-                    ? theme.altWarningBackground
+                    ? theme.warningBackground
                     : selected
                     ? theme.formLabelBackground
-                    : theme.alt2TableBackground,
+                    : theme.pageBackground,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
@@ -1137,7 +1137,7 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={valueStyle}
           style={{
             fontStyle: 'italic',
-            color: '#c0c0c0',
+            color: theme.pageTextSubdued,
             fontWeight: 300,
           }}
           inputProps={{
