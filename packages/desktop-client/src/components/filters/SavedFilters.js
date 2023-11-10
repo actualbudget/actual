@@ -58,7 +58,15 @@ function FilterMenu({ onClose, filterId, onFilterMenuSelect }) {
   );
 }
 
-function NameFilter({ onClose, menuItem, name, adding, onAddUpdate, err }) {
+function NameFilter({
+  onClose,
+  menuItem,
+  name,
+  setName,
+  adding,
+  onAddUpdate,
+  err,
+}) {
   let inputRef = useRef();
 
   useEffect(() => {
@@ -89,7 +97,7 @@ function NameFilter({ onClose, menuItem, name, adding, onAddUpdate, err }) {
                 field="string"
                 type="string"
                 value={name}
-                onChange={e => (name = e)}
+                onChange={setName}
               />
             </FormField>
             <Button
@@ -127,7 +135,7 @@ function SavedFilterMenuButton({
   let [menuOpen, setMenuOpen] = useState(false);
   let [err, setErr] = useState(null);
   let [menuItem, setMenuItem] = useState(null);
-  let name = filterId.name;
+  let [name, setName] = useState(filterId.name);
   let id = filterId.id;
   let res;
   let savedFilter;
@@ -266,6 +274,7 @@ function SavedFilterMenuButton({
           onClose={() => setNameOpen(false)}
           menuItem={menuItem}
           name={name}
+          setName={setName}
           adding={adding}
           onAddUpdate={onAddUpdate}
           err={err}
