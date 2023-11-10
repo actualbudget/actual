@@ -2,7 +2,7 @@ import React, { createContext, type ReactNode } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-type BoundsProps = {
+export type BoundsProps = {
   start: string;
   end: string;
 };

@@ -13,7 +13,6 @@ function ExpenseGroup({
   collapsed,
   editingCell,
   dragState,
-  itemPos,
   MonthComponent,
   onEditName,
   onSave,
