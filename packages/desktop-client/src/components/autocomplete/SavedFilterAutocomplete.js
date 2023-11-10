@@ -25,7 +25,7 @@ function FilterList({ items, getItemProps, highlightedIndex, embedded }) {
               style={{
                 backgroundColor:
                   highlightedIndex === idx
-                    ? theme.alt2MenuItemBackgroundHover
+                    ? theme.menuAutoCompleteBackgroundHover
                     : 'transparent',
                 padding: 4,
                 paddingLeft: 20,
