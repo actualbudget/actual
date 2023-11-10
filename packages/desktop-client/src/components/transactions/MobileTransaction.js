@@ -144,7 +144,7 @@ export function DateHeader({ date }) {
       }}
     >
       <Text
-        style={{ ...styles.text, fontSize: 13, color: theme.alt2TableText }}
+        style={{ ...styles.text, fontSize: 13, color: theme.tableHeaderText }}
       >
         {monthUtils.format(date, 'MMMM dd, yyyy')}
       </Text>
@@ -163,7 +163,7 @@ function Status({ status }) {
       color = theme.warningText;
       break;
     case 'upcoming':
-      color = theme.alt2TableText;
+      color = theme.tableHeaderText;
       break;
     default:
   }
@@ -987,7 +987,7 @@ class Transaction extends PureComponent {
                   fontSize: 14,
                   fontWeight: added ? '600' : '400',
                   ...(prettyDescription === '' && {
-                    color: theme.altTableText,
+                    color: theme.tableTextLight,
                     fontStyle: 'italic',
                   }),
                 }}
@@ -1023,7 +1023,7 @@ class Transaction extends PureComponent {
                       fontWeight: '400',
                       color: prettyCategory
                         ? theme.tableTextSelected
-                        : theme.altMenuItemTextSelected,
+                        : theme.menuItemTextSelected,
                       fontStyle: prettyCategory ? null : 'italic',
                       textAlign: 'left',
                     }}
@@ -1218,7 +1218,7 @@ function ListBoxSection({ section, state }) {
             backgroundColor: theme.mobileDateBackground,
             borderBottom: `1px solid ${theme.tableBorder}`,
             borderTop: `1px solid ${theme.tableBorder}`,
-            color: theme.alt2TableText,
+            color: theme.tableHeaderText,
             display: 'flex',
             justifyContent: 'center',
             paddingBottom: 4,

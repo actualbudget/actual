@@ -299,7 +299,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
     <ListItem
       style={{
         backgroundColor: isEditingBudget
-          ? theme.altTableTextEditing
+          ? theme.tableTextEditing
           : 'transparent',
         borderBottomWidth: 0,
         borderTopWidth: index > 0 ? 1 : 0,
@@ -446,6 +446,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
             <BalanceWithCarryover
               carryover={rolloverBudget.catCarryover(category.id)}
               balance={rolloverBudget.catBalance(category.id)}
+              goal={reportBudget.catGoal(category.id)}
+              budgeted={reportBudget.catBudgeted(category.id)}
               balanceStyle={{
                 ...styles.smallText,
                 ...styles.underlinedText,
@@ -1357,7 +1359,7 @@ function IncomeGroup({
               : rolloverBudget.groupSumAmount(group.id)
           }
           style={{
-            backgroundColor: theme.altTableBackground,
+            backgroundColor: theme.tableRowHeaderBackground,
           }}
           onAddCategory={onAddCategory}
           onSave={onSave}

@@ -86,7 +86,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           groupHeaderStyle={
             isNarrowWidth
               ? {
-                  color: theme.altTableText,
+                  color: theme.tableTextLight,
                 }
               : undefined
           }
@@ -118,7 +118,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           groupHeaderStyle={
             isNarrowWidth
               ? {
-                  color: theme.altTableText,
+                  color: theme.tableTextLight,
                 }
               : undefined
           }
@@ -155,7 +155,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           groupHeaderStyle={
             isNarrowWidth
               ? {
-                  color: theme.altTableText,
+                  color: theme.tableTextLight,
                 }
               : undefined
           }
