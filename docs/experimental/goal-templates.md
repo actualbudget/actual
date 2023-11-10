@@ -158,3 +158,8 @@ To apply the goal templates you create, enable the feature in the Settings exper
 **Apply budget template** will only fill empty cells using the templates.
 
 **Overwrite with budget template** will fill in all budget cells using the templates.
+
+### Goal Indicators
+After having run the templates in a given month the status of a respective category goal will be indicated as a text color of the category balance.  The image below shows an example of categories in the following states: normal (no goal set), zero (no goal set), goal met, goal not met, and a negative balance.
+
+![](/img/goal-template/templates-colors.png)
