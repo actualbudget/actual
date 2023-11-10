@@ -260,7 +260,7 @@ function ToBudget({
 
 type BudgetSummaryProps = {
   month: string;
-  isGoalTemplatesEnabled: boolean;
+  isGoalTemplatesEnabled?: boolean;
 };
 export function BudgetSummary({
   month,
