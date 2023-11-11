@@ -8,7 +8,6 @@ import Button from '../common/Button';
 import Menu from '../common/Menu';
 import View from '../common/View';
 import NotesButton from '../NotesButton';
-import { type OnDragChangeCallback } from '../sort';
 import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
 
@@ -18,14 +17,13 @@ type SidebarCategoryProps = {
   dragPreview?: boolean;
   dragging?: boolean;
   editing: boolean;
-  style: CSSProperties;
-  borderColor: string;
+  style?: CSSProperties;
+  borderColor?: string;
   isLast?: boolean;
-  onDragChange?: OnDragChangeCallback;
   onEditName: (id: string) => void;
   onSave: (group) => void;
   onDelete: (id: string) => Promise<void>;
-  onHideNewCategory: () => void;
+  onHideNewCategory?: () => void;
 };
 
 function SidebarCategory({
@@ -36,7 +34,6 @@ function SidebarCategory({
   editing,
   style,
   isLast,
-  onDragChange,
   onEditName,
   onSave,
   onDelete,
