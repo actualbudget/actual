@@ -127,7 +127,7 @@ export const schema = {
     category: f('string'),
     amount: f('integer'),
     carryover: f('integer'),
-    goal: f('integer')
+    goal: f('integer'),
   },
   zero_budgets: {
     id: f('id'),
@@ -135,8 +135,8 @@ export const schema = {
     category: f('string'),
     amount: f('integer'),
     carryover: f('integer'),
-    goal: f('integer')
-  }
+    goal: f('integer'),
+  },
 };
 
 export const schemaConfig = {
