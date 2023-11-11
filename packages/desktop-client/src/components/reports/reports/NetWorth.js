@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
@@ -7,93 +7,19 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import useFilters from '../../hooks/useFilters';
-import { theme, styles } from '../../style';
-import Block from '../common/Block';
-import Paragraph from '../common/Paragraph';
-import View from '../common/View';
-import PrivacyFilter from '../PrivacyFilter';
+import useFilters from '../../../hooks/useFilters';
+import { theme, styles } from '../../../style';
+import Paragraph from '../../common/Paragraph';
+import View from '../../common/View';
+import PrivacyFilter from '../../PrivacyFilter';
+import Change from '../Change';
+import NetWorthGraph from '../graphs/NetWorthGraph';
+import Header from '../Header';
+import netWorthSpreadsheet from '../spreadsheets/net-worth-spreadsheet';
+import useReport from '../useReport';
+import { fromDateRepr } from '../util';
 
-import Card from './Card';
-import Change from './Change';
-import DateRange from './DateRange';
-import NetWorthGraph from './graphs/NetWorthGraph';
-import Header from './Header';
-import { LoadingIndicator } from './Overview';
-import netWorthSpreadsheet from './spreadsheets/net-worth-spreadsheet';
-import useReport from './useReport';
-import { fromDateRepr } from './util';
-
-export function NetWorthCard({ accounts }) {
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, 5);
-  const [isCardHovered, setIsCardHovered] = useState(false);
-  const onCardHover = useCallback(() => setIsCardHovered(true));
-  const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
-
-  const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts),
-    [start, end, accounts],
-  );
-  const data = useReport('net_worth', params);
-
-  return (
-    <Card flex={2} to="/reports/net-worth">
-      <View
-        style={{ flex: 1 }}
-        onPointerEnter={onCardHover}
-        onPointerLeave={onCardHoverEnd}
-      >
-        <View style={{ flexDirection: 'row', padding: 20 }}>
-          <View style={{ flex: 1 }}>
-            <Block
-              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
-              role="heading"
-            >
-              Net Worth
-            </Block>
-            <DateRange start={start} end={end} />
-          </View>
-          {data && (
-            <View style={{ textAlign: 'right' }}>
-              <Block
-                style={{
-                  ...styles.mediumText,
-                  fontWeight: 500,
-                  marginBottom: 5,
-                }}
-              >
-                <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {integerToCurrency(data.netWorth)}
-                </PrivacyFilter>
-              </Block>
-              <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <Change
-                  amount={data.totalChange}
-                  style={{ color: theme.altTableText, fontWeight: 300 }}
-                />
-              </PrivacyFilter>
-            </View>
-          )}
-        </View>
-
-        {data ? (
-          <NetWorthGraph
-            start={start}
-            end={end}
-            graphData={data.graphData}
-            compact={true}
-            style={{ height: 'auto', flex: 1 }}
-          />
-        ) : (
-          <LoadingIndicator />
-        )}
-      </View>
-    </Card>
-  );
-}
-
-export default function NetWorth() {
+function NetWorth() {
   let accounts = useSelector(state => state.queries.accounts);
   const {
     filters,
@@ -226,3 +152,5 @@ export default function NetWorth() {
     </View>
   );
 }
+
+export default NetWorth;

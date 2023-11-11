@@ -1,11 +1,11 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import CashFlow from './CashFlow';
-import CategorySpending from './CategorySpending';
-import Custom from './Custom';
-import NetWorth from './NetWorth';
 import Overview from './Overview';
+import CashFlow from './reports/CashFlow';
+import CategorySpending from './reports/CategorySpending';
+import Custom from './reports/Custom';
+import NetWorth from './reports/NetWorth';
 
 export function ReportRouter() {
   return (

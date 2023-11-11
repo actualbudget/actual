@@ -7,74 +7,23 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
-import useCategories from '../../hooks/useCategories';
-import useFilters from '../../hooks/useFilters';
-import { theme, styles } from '../../style';
-import AlignedText from '../common/AlignedText';
-import Block from '../common/Block';
-import Text from '../common/Text';
-import View from '../common/View';
-import { AppliedFilters } from '../filters/FiltersMenu';
-import PrivacyFilter from '../PrivacyFilter';
-
-import Card from './Card';
-import { ChooseGraph } from './ChooseGraph';
-import { CustomSidebar } from './CustomSidebar';
-import { CustomTopbar } from './CustomTopbar';
-import DateRange from './DateRange';
-import BarGraph from './graphs/BarGraph';
-import Header from './Header';
-import { LoadingIndicator } from './Overview';
-import { ReportSplit, ReportSummary } from './ReportSummary';
-import defaultSpreadsheet from './spreadsheets/default-spreadsheet';
-import useReport from './useReport';
-import { fromDateRepr } from './util';
-
-export function CustomReportsCard() {
-  const categories = useCategories();
-
-  const end = monthUtils.currentMonth();
-  const start = monthUtils.subMonths(end, 3);
-  const split = 1;
-
-  const getGraphData = useMemo(() => {
-    return defaultSpreadsheet(start, end, split, 'totalDebts', categories);
-  }, [start, end, categories]);
-  const data = useReport('default', getGraphData);
-
-  return (
-    <Card flex={1} to="/reports/custom">
-      <View>
-        <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
-          <View style={{ flex: 1 }}>
-            <Block
-              style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
-              role="heading"
-            >
-              Custom
-            </Block>
-            <DateRange start={start} end={end} />
-          </View>
-        </View>
-      </View>
-
-      {data ? (
-        <BarGraph
-          start={start}
-          end={end}
-          data={data}
-          compact={true}
-          split={1}
-          empty={true}
-          typeOp={'totalDebts'}
-          style={{ height: 'auto', flex: 1 }}
-        />
-      ) : (
-        <LoadingIndicator />
-      )}
-    </Card>
-  );
-}
+import useCategories from '../../../hooks/useCategories';
+import useFilters from '../../../hooks/useFilters';
+import { theme, styles } from '../../../style';
+import AlignedText from '../../common/AlignedText';
+import Block from '../../common/Block';
+import Text from '../../common/Text';
+import View from '../../common/View';
+import { AppliedFilters } from '../../filters/FiltersMenu';
+import PrivacyFilter from '../../PrivacyFilter';
+import { ChooseGraph } from '../ChooseGraph';
+import Header from '../Header';
+import { CustomSidebar } from '../ReportSidebar';
+import { ReportSplit, ReportSummary } from '../ReportSummary';
+import { CustomTopbar } from '../ReportTopbar';
+import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
+import useReport from '../useReport';
+import { fromDateRepr } from '../util';
 
 let legend = [];
 

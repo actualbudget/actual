@@ -6,10 +6,10 @@ import AnimatedLoading from '../../icons/AnimatedLoading';
 import { styles } from '../../style';
 import View from '../common/View';
 
-import { CashFlowCard } from './CashFlow';
-import { CategorySpendingCard } from './CategorySpending';
-import { CustomReportsCard } from './Custom';
-import { NetWorthCard } from './NetWorth';
+import CashFlowCard from './reports/CashFlowCard';
+import CategorySpendingCard from './reports/CategorySpendingCard';
+import CustomReportsCard from './reports/CustomCard';
+import NetWorthCard from './reports/NetWorthCard';
 
 export function LoadingIndicator() {
   return (
