@@ -70,7 +70,7 @@ export default function Value<T>({
         case 'date':
           if (value) {
             if (value.frequency) {
-              return getRecurringDescription(value);
+              return getRecurringDescription(value, dateFormat);
             }
             return formatDate(parseISO(value), dateFormat);
           }

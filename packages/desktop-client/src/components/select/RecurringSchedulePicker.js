@@ -484,6 +484,9 @@ export default function RecurringSchedulePicker({
   onChange,
 }) {
   const { isOpen, close, getOpenEvents } = useTooltip();
+  const dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
 
   function onSave(config) {
     onChange(config);
@@ -496,7 +499,9 @@ export default function RecurringSchedulePicker({
         {...getOpenEvents()}
         style={{ textAlign: 'left', ...buttonStyle }}
       >
-        {value ? getRecurringDescription(value) : 'No recurring date'}
+        {value
+          ? getRecurringDescription(value, dateFormat)
+          : 'No recurring date'}
       </Button>
       {isOpen && (
         <RecurringScheduleTooltip

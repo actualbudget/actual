@@ -63,24 +63,43 @@ function prettyDayName(day) {
   return days[day];
 }
 
-export function getRecurringDescription(config) {
+export function getRecurringDescription(config, dateFormat) {
   const interval = config.interval || 1;
+
+  let endModeSuffix = '';
+  switch (config.endMode) {
+    case 'after_n_occurrences':
+      if (config.endOccurrences === 1) {
+        endModeSuffix = `, once`;
+      } else {
+        endModeSuffix = `, ${config.endOccurrences} times`;
+      }
+      break;
+    case 'on_date':
+      endModeSuffix = `, until ${monthUtils.format(
+        config.endDate,
+        dateFormat,
+      )}`;
+      break;
+    default:
+  }
 
   const weekendSolveSuffix = config.skipWeekend
     ? ` (${config.weekendSolveMode} weekend) `
     : '';
+  const suffix = endModeSuffix + weekendSolveSuffix;
 
   switch (config.frequency) {
     case 'daily': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} days` : 'day';
-      return desc + weekendSolveSuffix;
+      return desc + suffix;
     }
     case 'weekly': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} weeks` : 'week';
       desc += ' on ' + monthUtils.format(config.start, 'EEEE');
-      return desc + weekendSolveSuffix;
+      return desc + suffix;
     }
     case 'monthly': {
       let desc = 'Every ';
@@ -149,13 +168,13 @@ export function getRecurringDescription(config) {
         desc += ' on the ' + monthUtils.format(config.start, 'do');
       }
 
-      return desc + weekendSolveSuffix;
+      return desc + suffix;
     }
     case 'yearly': {
       let desc = 'Every ';
       desc += interval !== 1 ? `${interval} years` : 'year';
       desc += ' on ' + monthUtils.format(config.start, 'LLL do');
-      return desc + weekendSolveSuffix;
+      return desc + suffix;
     }
     default:
       return 'Recurring error';
