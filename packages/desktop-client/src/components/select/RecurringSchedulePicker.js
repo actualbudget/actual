@@ -334,7 +334,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           id="repeat_end_dropdown"
           bare
           options={[
-            ['never', 'forever'],
+            ['never', 'indefinitely'],
             ['after_n_occurrences', 'for'],
             ['on_date', 'until'],
           ]}
