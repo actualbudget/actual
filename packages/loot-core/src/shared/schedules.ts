@@ -173,6 +173,16 @@ export function recurConfigToRSchedule(config) {
     base.interval = config.interval;
   }
 
+  switch (config.endMode) {
+    case 'after_n_occurrences':
+      base.count = config.endOccurrences;
+      break;
+    case 'on_date':
+      base.end = monthUtils.parseDate(config.endDate);
+      break;
+    default:
+  }
+
   const abbrevDay = name => name.slice(0, 2).toUpperCase();
 
   switch (config.frequency) {

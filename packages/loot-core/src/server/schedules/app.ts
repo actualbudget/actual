@@ -82,6 +82,12 @@ export function getNextDate(dateCond, start = new Date(currentDay())) {
   } else if (value.type === 'recur') {
     const dates = value.schedule.occurrences({ start, take: 1 }).toArray();
 
+    if (dates.length === 0) {
+      // Could be a schedule with limited occurrences, so we try to
+      // find the last occurrence
+      dates = value.schedule.occurrences({ take: 1, reverse: true }).toArray();
+    }
+
     if (dates.length > 0) {
       let date = dates[0].date;
       if (value.schedule.data.skipWeekend) {
