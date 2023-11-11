@@ -75,6 +75,7 @@ function NetWorthGraph({
     label?: string;
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (

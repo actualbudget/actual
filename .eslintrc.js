@@ -45,6 +45,8 @@ module.exports = {
   reportUnusedDisableDirectives: true,
   rules: {
     'prettier/prettier': 'warn',
+
+    // Note: base rule explicitly disabled in favor of the TS one
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [
       'warn',
@@ -63,6 +65,10 @@ module.exports = {
 
     'react/jsx-no-useless-fragment': 'warn',
     'react/self-closing-comp': 'warn',
+    'react/no-unstable-nested-components': [
+      'warn',
+      { allowAsProps: true, customValidators: ['formatter'] },
+    ],
 
     'rulesdir/typography': 'warn',
     'rulesdir/prefer-if-statement': 'warn',
