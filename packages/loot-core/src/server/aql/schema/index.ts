@@ -121,6 +121,22 @@ export const schema = {
     conditions: f('json'),
     tombstone: f('boolean'),
   },
+  reflect_budgets: {
+    id: f('id'),
+    month: f('integer'),
+    category: f('string'),
+    amount: f('integer'),
+    carryover: f('integer'),
+    goal: f('integer')
+  },
+  zero_budgets: {
+    id: f('id'),
+    month: f('integer'),
+    category: f('string'),
+    amount: f('integer'),
+    carryover: f('integer'),
+    goal: f('integer')
+  }
 };
 
 export const schemaConfig = {
