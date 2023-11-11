@@ -57,6 +57,9 @@ function parseConfig(config) {
       patterns: [createMonthlyRecurrence(monthUtils.currentDay())],
       skipWeekend: false,
       weekendSolveMode: 'before',
+      endMode: 'never',
+      endOccurrences: '1',
+      endDate: monthUtils.currentDay(),
     }
   );
 }
@@ -65,6 +68,7 @@ function unparseConfig(parsed) {
   return {
     ...parsed,
     interval: validInterval(parsed.interval),
+    endOccurrences: validInterval(parsed.endOccurrences),
   };
 }
 
@@ -316,10 +320,8 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
       position="bottom-left"
       onClose={onClose}
     >
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <label htmlFor="start" style={{ marginRight: 5 }}>
-          Starts:
-        </label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+        <label htmlFor="start">From</label>
         <DateSelect
           id="start"
           inputProps={{ placeholder: 'Start Date' }}
@@ -328,21 +330,59 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           containerProps={{ style: { width: 100 } }}
           dateFormat={dateFormat}
         />
+        <Select
+          id="repeat_end_dropdown"
+          bare
+          options={[
+            ['never', 'forever'],
+            ['after_n_occurrences', 'for'],
+            ['on_date', 'until'],
+          ]}
+          value={config.endMode}
+          onChange={value => updateField('endMode', value)}
+          style={{
+            border: '1px solid ' + theme.formInputBorder,
+            height: 27.5,
+          }}
+        />
+        {config.endMode === 'after_n_occurrences' && (
+          <>
+            <Input
+              id="end_occurrences"
+              style={{ width: 40 }}
+              type="number"
+              min={1}
+              onChange={e => updateField('endOccurrences', e.target.value)}
+              defaultValue={config.endOccurrences || 1}
+            />
+            <Text>occurrence{config.endOccurrences === '1' ? '' : 's'}</Text>
+          </>
+        )}
+        {config.endMode === 'on_date' && (
+          <DateSelect
+            id="end_date"
+            inputProps={{ placeholder: 'End Date' }}
+            value={config.endDate}
+            onSelect={value => updateField('endDate', value)}
+            containerProps={{ style: { width: 100 } }}
+            dateFormat={dateFormat}
+          />
+        )}
       </div>
       <Stack
         direction="row"
         align="center"
         justify="flex-start"
         style={{ marginTop: 10 }}
-        spacing={2}
+        spacing={1}
       >
         <Text style={{ whiteSpace: 'nowrap' }}>Repeat every</Text>
         <Input
           id="interval"
           style={{ width: 40 }}
-          type="text"
-          onBlur={e => updateField('interval', e.target.value)}
-          onEnter={e => updateField('interval', e.target.value)}
+          type="number"
+          min={1}
+          onChange={e => updateField('interval', e.target.value)}
           defaultValue={config.interval || 1}
         />
         <Select
@@ -392,7 +432,10 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
           />
           <label
             htmlFor="form_skipwe"
-            style={{ userSelect: 'none', marginRight: 5 }}
+            style={{
+              userSelect: 'none',
+              marginRight: 5,
+            }}
           >
             Move schedule{' '}
           </label>
