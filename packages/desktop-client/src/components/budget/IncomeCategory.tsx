@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { ComponentProps } from 'react';
 
-import { useDraggable, useDroppable, DropHighlight } from '../sort';
+import { useDraggable, useDroppable, DropHighlight, OnDragChangeCallback, OnDropCallback } from '../sort';
 import { Row } from '../table';
 
 import RenderMonths from './RenderMonths';
 import SidebarCategory from './SidebarCategory';
+import { CategoryEntity } from 'loot-core/src/types/models';
+
+type IncomeCategoryProps = {
+  cat: CategoryEntity;
+  isLast?: boolean;
+  editingCell: { id: string; cell: string } | null;
+  MonthComponent: ComponentProps<typeof RenderMonths>["component"];
+  onEditName: ComponentProps<typeof SidebarCategory>["onEditName"];
+  onEditMonth?: (id: string, monthIndex: number) => void;
+  onSave: ComponentProps<typeof SidebarCategory>["onSave"];
+  onDelete: ComponentProps<typeof SidebarCategory>["onDelete"];
+  onDragChange: OnDragChangeCallback<CategoryEntity>;
+  onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+  onReorder: OnDropCallback;
+  onShowActivity: (name: string, id: string, idx: number) => void;
+};
 
 function IncomeCategory({
   cat,
@@ -19,7 +35,7 @@ function IncomeCategory({
   onBudgetAction,
   onReorder,
   onShowActivity,
-}) {
+}: IncomeCategoryProps) {
   let { dragRef } = useDraggable({
     type: 'income-category',
     onDragChange,
