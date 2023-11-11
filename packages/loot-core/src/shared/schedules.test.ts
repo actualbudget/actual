@@ -202,4 +202,86 @@ describe('recurring date description', () => {
       ),
     ).toBe('Every 2 years on May 17th');
   });
+
+  it('describes intervals with limited occurrences', () => {
+    expect(
+      getRecurringDescription(
+        {
+          start: '2021-05-17',
+          frequency: 'weekly',
+          interval: 2,
+          endMode: 'after_n_occurrences',
+          endOccurrences: 2,
+        },
+        'MM/dd/yyyy',
+      ),
+    ).toBe('Every 2 weeks on Monday, 2 times');
+
+    expect(
+      getRecurringDescription(
+        {
+          start: '2021-05-17',
+          frequency: 'weekly',
+          interval: 2,
+          endMode: 'after_n_occurrences',
+          endOccurrences: 1,
+        },
+        'MM/dd/yyyy',
+      ),
+    ).toBe('Every 2 weeks on Monday, once');
+
+    expect(
+      getRecurringDescription(
+        {
+          start: '2021-05-17',
+          frequency: 'monthly',
+          interval: 2,
+          endMode: 'after_n_occurrences',
+          endOccurrences: 2,
+        },
+        'MM/dd/yyyy',
+      ),
+    ).toBe('Every 2 months on the 17th, 2 times');
+
+    expect(
+      getRecurringDescription(
+        {
+          start: '2021-05-17',
+          frequency: 'yearly',
+          interval: 2,
+          endMode: 'after_n_occurrences',
+          endOccurrences: 2,
+        },
+        'MM/dd/yyyy',
+      ),
+    ).toBe('Every 2 years on May 17th, 2 times');
+  });
+
+  it('describes intervals with an end date', () => {
+    expect(
+      getRecurringDescription(
+        {
+          start: '2021-05-17',
+          frequency: 'weekly',
+          interval: 2,
+          endMode: 'on_date',
+          endDate: '2021-06-01',
+        },
+        'MM/dd/yyyy',
+      ),
+    ).toBe('Every 2 weeks on Monday, until 06/01/2021');
+
+    expect(
+      getRecurringDescription(
+        {
+          start: '2021-05-17',
+          frequency: 'monthly',
+          interval: 2,
+          endMode: 'on_date',
+          endDate: '2021-06-01',
+        },
+        'yyyy-MM-dd',
+      ),
+    ).toBe('Every 2 months on the 17th, until 2021-06-01');
+  });
 });
