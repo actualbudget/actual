@@ -447,6 +447,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
             ]}
             value={state.config.weekendSolveMode}
             onChange={value => dispatch({ type: 'set-weekend-solve', value })}
+            disabled={!skipWeekend}
             style={{
               minHeight: '1px',
               width: '5rem',
