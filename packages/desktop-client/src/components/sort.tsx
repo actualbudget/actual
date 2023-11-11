@@ -55,8 +55,8 @@ export function useDraggable<T>({
     },
     collect: monitor => ({ isDragging: monitor.isDragging() }),
 
-    end(item) {
-      _onDragChange.current({ state: 'end', type, item: item as T });
+    end(dragState) {
+      _onDragChange.current({ state: 'end', type, item: dragState.item });
     },
 
     canDrag() {
