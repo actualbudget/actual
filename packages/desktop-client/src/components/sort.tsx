@@ -14,29 +14,32 @@ import { theme } from '../style';
 
 import View from './common/View';
 
-export type DragState = {
+export type DragState<T> = {
   state: 'start-preview' | 'start' | 'end';
   type?: string;
-  item?: unknown;
+  item?: T;
   preview?: boolean;
 };
 
 export type DropPosition = 'top' | 'bottom';
 
-export type OnDragChangeCallback = (drag: DragState) => Promise<void> | void;
-type UseDraggableArgs = {
-  item: unknown;
+export type OnDragChangeCallback<T> = (
+  drag: DragState<T>,
+) => Promise<void> | void;
+
+type UseDraggableArgs<T> = {
+  item?: T;
   type: string;
   canDrag: boolean;
-  onDragChange: OnDragChangeCallback;
+  onDragChange: OnDragChangeCallback<T>;
 };
 
-export function useDraggable({
+export function useDraggable<T>({
   item,
   type,
   canDrag,
   onDragChange,
-}: UseDraggableArgs) {
+}: UseDraggableArgs<T>) {
   let _onDragChange = useRef(onDragChange);
 
   const [, dragRef] = useDrag({
@@ -53,7 +56,7 @@ export function useDraggable({
     collect: monitor => ({ isDragging: monitor.isDragging() }),
 
     end(item) {
-      _onDragChange.current({ state: 'end', type, item });
+      _onDragChange.current({ state: 'end', type, item: item as T });
     },
 
     canDrag() {

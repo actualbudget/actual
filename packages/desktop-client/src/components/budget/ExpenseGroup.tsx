@@ -19,12 +19,14 @@ type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];
   collapsed: boolean;
   editingCell: { id: string; cell: string } | null;
-  dragState: DragState;
+  dragState: DragState<ComponentProps<typeof SidebarGroup>['group']>;
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
   onEditName?: ComponentProps<typeof SidebarGroup>['onEdit'];
   onSave?: ComponentProps<typeof SidebarGroup>['onSave'];
   onDelete?: ComponentProps<typeof SidebarGroup>['onDelete'];
-  onDragChange: OnDragChangeCallback;
+  onDragChange: OnDragChangeCallback<
+    ComponentProps<typeof SidebarGroup>['group']
+  >;
   onReorderGroup: OnDropCallback;
   onReorderCategory: OnDropCallback;
   onToggleCollapse?: ComponentProps<typeof SidebarGroup>['onToggleCollapse'];
