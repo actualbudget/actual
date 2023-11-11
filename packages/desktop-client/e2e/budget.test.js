@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
-import screenshotConfig from './screenshot.config';
 
 test.describe('Budget', () => {
   let page;
@@ -34,7 +33,7 @@ test.describe('Budget', () => {
     await expect(summary.getByText(/^Overspent in /)).toBeVisible();
     await expect(summary.getByText('Budgeted')).toBeVisible();
     await expect(summary.getByText('For Next Month')).toBeVisible();
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('transfer funds to another category', async () => {
@@ -47,7 +46,7 @@ test.describe('Budget', () => {
     expect(await budgetPage.getBalanceForRow(2)).toEqual(
       currentFundsA + currentFundsB,
     );
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('budget table is rendered', async () => {
