@@ -260,7 +260,7 @@ function ToBudget({
 
 type BudgetSummaryProps = {
   month: string;
-  isGoalTemplatesEnabled: boolean;
+  isGoalTemplatesEnabled?: boolean;
 };
 export function BudgetSummary({
   month,
@@ -332,7 +332,7 @@ export function BudgetSummary({
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: theme.altTableText, margin: 1 }}
+                style={{ color: theme.tableTextLight, margin: 1 }}
               />
             </Button>
           </View>
@@ -367,7 +367,7 @@ export function BudgetSummary({
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={theme.altTableText}
+                defaultColor={theme.tableTextLight}
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>

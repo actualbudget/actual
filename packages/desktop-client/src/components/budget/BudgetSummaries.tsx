@@ -9,14 +9,22 @@ import { useSpring, animated } from 'react-spring';
 
 import { css } from 'glamor';
 
-import * as monthUtils from 'loot-core/src/shared/months';
+import { addMonths, subMonths } from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
 import View from '../common/View';
 
 import { MonthsContext } from './MonthsContext';
+import { type BudgetSummary as ReportBudgetSummary } from './report/BudgetSummary';
+import { type BudgetSummary as RolloverBudgetSummary } from './rollover/BudgetSummary';
 
-export default function BudgetSummaries({ SummaryComponent }) {
+type BudgetSummariesProps = {
+  SummaryComponent: typeof ReportBudgetSummary | typeof RolloverBudgetSummary;
+};
+
+export default function BudgetSummaries({
+  SummaryComponent,
+}: BudgetSummariesProps) {
   let { months } = useContext(MonthsContext);
 
   let [widthState, setWidthState] = useState(0);
@@ -32,10 +40,9 @@ export default function BudgetSummaries({ SummaryComponent }) {
   );
 
   let prevMonth0 = useRef(months[0]);
-
   let allMonths = [...months];
-  allMonths.unshift(monthUtils.subMonths(months[0], 1));
-  allMonths.push(monthUtils.addMonths(months[months.length - 1], 1));
+  allMonths.unshift(subMonths(months[0], 1));
+  allMonths.push(addMonths(months[months.length - 1], 1));
   let monthWidth = widthState / months.length;
 
   useLayoutEffect(() => {
@@ -43,9 +50,11 @@ export default function BudgetSummaries({ SummaryComponent }) {
     let reversed = prevMonth > months[0];
     let offsetX = monthWidth;
     let from = reversed ? -offsetX * 2 : 0;
+
     if (prevMonth !== allMonths[0] && prevMonth !== allMonths[2]) {
       from = -offsetX;
     }
+
     let to = -offsetX;
     spring.start({ from: { x: from }, x: to });
   }, [months[0]]);
