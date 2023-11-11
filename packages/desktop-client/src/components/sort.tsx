@@ -14,10 +14,11 @@ import { theme } from '../style';
 
 import View from './common/View';
 
-type DragState = {
+export type DragState = {
   state: 'start-preview' | 'start' | 'end';
   type?: string;
   item?: unknown;
+  preview?: boolean;
 };
 
 export type DropPosition = 'top' | 'bottom';
