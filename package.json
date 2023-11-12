@@ -60,7 +60,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "packageManager": "yarn@3.5.1",
+  "packageManager": "yarn@4.0.1",
   "browserslist": [
     "electron 24.0",
     "defaults"
