@@ -299,7 +299,7 @@ export function CategoryItem({
         },
       ])}`}
       data-testid={`${item.name}-category-item`}
-      data-highlighted={highlighted}
+      data-highlighted={`${highlighted}`}
       {...props}
     >
       {item.name}

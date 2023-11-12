@@ -503,7 +503,7 @@ describe('Transactions', () => {
     let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
     // Make sure none of the items are highlighted
-    let items = tooltip.querySelectorAll('[data-testid="category-item"]');
+    let items = tooltip.querySelectorAll('[data-testid*="category-item"]');
     let highlighted = tooltip.querySelector('[data-highlighted="true"]');
     expect(highlighted).toBe(null);
 
@@ -538,7 +538,7 @@ describe('Transactions', () => {
     let oldCategory = getTransactions()[2].category;
     let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
-    let items = tooltip.querySelectorAll('[data-testid="category-item"]');
+    let items = tooltip.querySelectorAll('[data-testid*="category-item"]');
 
     // Hover over a few of the items to highlight them
     await userEvent.hover(items[2]);

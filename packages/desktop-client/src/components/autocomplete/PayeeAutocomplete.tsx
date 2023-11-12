@@ -460,7 +460,7 @@ export function PayeeItem({
         },
       ])}`}
       data-testid={`${item.name}-payee-item`}
-      data-highlighted={highlighted}
+      data-highlighted={`${highlighted}`}
       {...props}
     >
       {item.name}
