@@ -84,7 +84,7 @@ export const Checkbox = (props: CheckboxProps) => {
             height: 15,
             appearance: 'none',
             outline: 0,
-            border: '1px solid ' + theme.checkboxBorderSelected,
+            border: '1px solid ' + theme.formInputBorder,
             borderRadius: 4,
             display: 'flex',
             alignItems: 'center',
