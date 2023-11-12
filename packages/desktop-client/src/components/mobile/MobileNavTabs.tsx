@@ -17,17 +17,16 @@ import { theme, styles, type CSSProperties } from '../../style';
 import View from '../common/View';
 import { useScroll } from '../ScrollProvider';
 
+const ROW_HEIGHT = 70;
+const COLUMN_COUNT = 3;
+
 export default function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
   const { scrollY } = useScroll();
 
-  const columnCount = 3;
-  const totalRowCount = 3;
-  const rowHeight = 70;
-
   const navTabStyle = {
-    flex: `1 1 ${100 / columnCount}%`,
-    height: rowHeight,
+    flex: `1 1 ${100 / COLUMN_COUNT}%`,
+    height: ROW_HEIGHT,
     padding: 10,
   };
 
@@ -39,16 +38,16 @@ export default function MobileNavTabs() {
       icon: Wallet,
     },
     {
-      name: 'Accounts',
-      path: '/accounts',
-      style: navTabStyle,
-      icon: PiggyBank,
-    },
-    {
       name: 'Transaction',
       path: '/transactions/new',
       style: navTabStyle,
       icon: Add,
+    },
+    {
+      name: 'Accounts',
+      path: '/accounts',
+      style: navTabStyle,
+      icon: PiggyBank,
     },
     {
       name: 'Schedules (Soon)',
@@ -76,14 +75,14 @@ export default function MobileNavTabs() {
     },
   ].map(tab => <NavTab key={tab.path} {...tab} />);
 
-  const bufferTabsCount = columnCount - (navTabs.length % columnCount);
+  const bufferTabsCount = COLUMN_COUNT - (navTabs.length % COLUMN_COUNT);
   const bufferTabs = Array.from({ length: bufferTabsCount }).map((_, idx) => (
     <div key={idx} style={navTabStyle} />
   ));
 
-  const totalHeight = rowHeight * totalRowCount;
+  const totalHeight = ROW_HEIGHT * COLUMN_COUNT;
   const openY = 0;
-  const closeY = totalHeight - rowHeight;
+  const closeY = totalHeight - ROW_HEIGHT;
   const hiddenY = totalHeight;
 
   const [{ y }, api] = useSpring(() => ({ y: totalHeight }));
@@ -117,7 +116,12 @@ export default function MobileNavTabs() {
   const previousScrollY = usePrevious(scrollY);
 
   useEffect(() => {
-    if (scrollY > previousScrollY && previousScrollY !== 0) {
+    if (
+      scrollY &&
+      previousScrollY &&
+      scrollY > previousScrollY &&
+      previousScrollY !== 0
+    ) {
       hide();
     } else {
       close();
@@ -135,14 +139,14 @@ export default function MobileNavTabs() {
     }) => {
       // if the user drags up passed a threshold, then we cancel
       // the drag so that the sheet resets to its open position
-      if (oy < -rowHeight) {
+      if (oy < 0) {
         cancel();
       }
 
       // when the user releases the sheet, we check whether it passed
       // the threshold for it to close, or if we reset it to its open position
       if (last) {
-        if (oy > rowHeight * 0.5 || (vy > 0.5 && dy > 0)) {
+        if (oy > ROW_HEIGHT * 0.5 || (vy > 0.5 && dy > 0)) {
           close(vy);
         } else {
           open({ canceled });
@@ -156,7 +160,7 @@ export default function MobileNavTabs() {
     {
       from: () => [0, y.get()],
       filterTaps: true,
-      bounds: { top: rowHeight * 0.5, bottom: totalHeight * 0.5 },
+      bounds: { top: -totalHeight, bottom: totalHeight - ROW_HEIGHT },
       axis: 'y',
       rubberband: true,
     },
@@ -177,7 +181,7 @@ export default function MobileNavTabs() {
         position: 'fixed',
         zIndex: 100,
         bottom: 0,
-        display: isNarrowWidth ? 'flex' : 'none',
+        ...(!isNarrowWidth && { display: 'none' }),
       }}
     >
       <View

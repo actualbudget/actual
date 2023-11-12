@@ -40,7 +40,7 @@ export class MobileNavigation {
 
   async dragNavbarUp() {
     await this.page
-      .locator('[role="navigation"]')
-      .dragTo(this.page.locator('[data-testid="budget-table"]'));
+      .getByRole('navigation')
+      .dragTo(this.page.getByTestId('budget-table'));
   }
 }
