@@ -126,6 +126,12 @@ export const buttonNormalDisabledText = colorPalette.navy300;
 export const buttonNormalDisabledBackground = buttonNormalBackground;
 export const buttonNormalDisabledBorder = buttonNormalBorder;
 
+export const calendarText = colorPalette.navy50;
+export const calendarBackground = colorPalette.navy900;
+export const calendarItemText = colorPalette.navy150;
+export const calendarItemBackground = colorPalette.navy800;
+export const calendarSelectedBackground = colorPalette.navy500;
+
 export const buttonBareText = buttonNormalText;
 export const altButtonBareText = colorPalette.navy200;
 export const buttonBareTextHover = buttonNormalText;
