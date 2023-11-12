@@ -24,7 +24,7 @@ __metadata:
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
     "@types/uuid": "npm:^9.0.2"
-    better-sqlite3: "npm:^8.6.0"
+    better-sqlite3: "npm:^9.1.1"
     node-fetch: "npm:^3.3.2"
     typescript: "npm:^5.0.2"
     uuid: "npm:^9.0.0"
@@ -4294,12 +4294,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/better-sqlite3@npm:^7.6.4":
-  version: 7.6.4
-  resolution: "@types/better-sqlite3@npm:7.6.4"
+"@types/better-sqlite3@npm:^7.6.7":
+  version: 7.6.7
+  resolution: "@types/better-sqlite3@npm:7.6.7"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 4d4a465859a602c6dcb811140107d640aa7891ca7b76b8184c8dd14634325eeaab1269b6b808f76d7c5b8563bf13e1be7d671554e7a21b0e86d7980cc6b8a8fd
+  checksum: 5021c1bae4a494408c1a77d84bc31dc15e373b8a1cf8880acba6517f63bc5c2dbf032c81938641346fb967600dbebc1475033c2458b5a5b93eb8f2c53bdbcbf8
   languageName: node
   linkType: hard
 
@@ -6201,14 +6201,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^8.6.0":
-  version: 8.6.0
-  resolution: "better-sqlite3@npm:8.6.0"
+"better-sqlite3@npm:^9.1.1":
+  version: 9.1.1
+  resolution: "better-sqlite3@npm:9.1.1"
   dependencies:
     bindings: "npm:^1.5.0"
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
-  checksum: 18b2ed6d7a7b5b3bfbad791f644ec48e6129a2a910fb379f916cd77f3304106a1be5f121566b86dfaeee58798939122831954e8db89972f8c8f839d26f7ccbdc
+  checksum: 0e9dc50ebb449f1e2177a8960dcb0d87ef8cca85046920577de396955dd8783cf6b361c615e4f22a18227f5d66a9085500e9f4d840d92f970e51f84f7dea30f3
   languageName: node
   linkType: hard
 
@@ -13354,7 +13354,7 @@ __metadata:
     "@swc/helpers": "npm:^0.5.1"
     "@swc/jest": "npm:^0.2.29"
     "@types/adm-zip": "npm:^0.5.0"
-    "@types/better-sqlite3": "npm:^7.6.4"
+    "@types/better-sqlite3": "npm:^7.6.7"
     "@types/jest": "npm:^27.5.0"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/pegjs": "npm:^0.10.3"
@@ -13365,7 +13365,7 @@ __metadata:
     absurd-sql: "npm:0.0.54"
     adm-zip: "npm:^0.5.9"
     assert: "npm:^2.0.0"
-    better-sqlite3: "npm:^8.6.0"
+    better-sqlite3: "npm:^9.1.1"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
     core-js: "npm:^3.8.3"
