@@ -137,7 +137,7 @@ export function AccountGroupHeader({
         padding: '4px 9px',
         ...style,
       }}
-      data-testid="account-item-group"
+      data-testid={`${title}-account-item-group`}
       {...props}
     >
       {title}
@@ -198,7 +198,8 @@ export function AccountItem({
           borderRadius: embedded ? 4 : 0,
         },
       ])}`}
-      data-testid={'account-item' + (highlighted ? '-highlighted' : '')}
+      data-testid={`${item.name}-account-item`}
+      data-highlighted={highlighted}
       {...props}
     >
       {item.name}

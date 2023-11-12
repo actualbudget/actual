@@ -125,19 +125,14 @@ function PayeeList({
 
           return (
             <Fragment key={item.id}>
-              {title && (
-                <Fragment key={'title-' + idx}>
-                  {renderGroupHeader({ title })}
-                </Fragment>
-              )}
-              <Fragment key={item.id}>
-                {renderPayeeItem({
-                  ...(getItemProps ? getItemProps({ item }) : null),
-                  item: item,
-                  highlighted: highlightedIndex === idx + offset,
-                  embedded: embedded,
-                })}
-              </Fragment>
+              {title && renderGroupHeader({ key: 'title-' + idx, title })}
+              {renderPayeeItem({
+                key: item.id,
+                ...(getItemProps ? getItemProps({ item }) : null),
+                item: item,
+                highlighted: highlightedIndex === idx + offset,
+                embedded: embedded,
+              })}
 
               {showMoreMessage && (
                 <div
@@ -385,6 +380,7 @@ export function CreatePayeeButton({
         fontWeight: 500,
         ...style,
       }}
+      data-testid="create-payee-button"
       {...props}
     >
       <Add
@@ -410,6 +406,7 @@ export function PayeeGroupHeader({ title, style, ...props }) {
         padding: '4px 9px',
         ...style,
       }}
+      data-testid={`${title}-payee-item-group`}
       {...props}
     >
       {title}
@@ -462,6 +459,8 @@ export function PayeeItem({
           paddingLeft: 20,
         },
       ])}`}
+      data-testid={`${item.name}-payee-item`}
+      data-highlighted={highlighted}
       {...props}
     >
       {item.name}
