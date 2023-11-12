@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import useCategories from '../../hooks/useCategories';
 import useFilters from '../../hooks/useFilters';
 import { theme, styles } from '../../style';
 import Paragraph from '../common/Paragraph';
@@ -18,7 +18,7 @@ import useReport from './useReport';
 import { fromDateRepr } from './util';
 
 export default function Sankey() {
-  let categories = useSelector(state => state.queries.categories.grouped);
+  const { grouped: categoryGroups } = useCategories();
   const {
     filters,
     saved,
@@ -36,8 +36,8 @@ export default function Sankey() {
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const params = useMemo(
-    () => sankeySpreadsheet(start, end, categories, filters, conditionsOp),
-    [start, end, categories, filters, conditionsOp],
+    () => sankeySpreadsheet(start, end, categoryGroups, filters, conditionsOp),
+    [start, end, categoryGroups, filters, conditionsOp],
   );
   const data = useReport('sankey', params);
   useEffect(() => {

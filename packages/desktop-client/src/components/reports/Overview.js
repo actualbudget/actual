@@ -327,13 +327,14 @@ function CategorySpendingCard() {
   );
 }
 
-function SankeyCard({ categories }) {
+function SankeyCard() {
+  const { grouped: categoryGroups } = useCategories();
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
 
   const params = useMemo(
-    () => sankeySpreadsheet(start, end, categories),
-    [start, end, categories],
+    () => sankeySpreadsheet(start, end, categoryGroups),
+    [start, end, categoryGroups],
   );
   const data = useReport('sankey', params);
 
@@ -368,7 +369,6 @@ export default function Overview() {
   let sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   let accounts = useSelector(state => state.queries.accounts);
-  let categories = useSelector(state => state.queries.categories.grouped);
   return (
     <View
       style={{
@@ -394,7 +394,7 @@ export default function Overview() {
           }}
         >
           {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
-          {sankeyFeatureFlag && <SankeyCard categories={categories} />}
+          {sankeyFeatureFlag && <SankeyCard />}
           {(!categorySpendingReportFeatureFlag || !sankeyFeatureFlag) && (
             <>
               <div style={{ flex: 1 }} />
