@@ -202,20 +202,6 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     marginRight: 5,
   };
 
-  function MobileIcon() {
-    return isMobile ? (
-      syncState === 'error' ? (
-        <AlertTriangle width={14} height={14} />
-      ) : (
-        <AnimatedRefresh width={18} height={18} animating={syncing} />
-      )
-    ) : syncState === 'error' ? (
-      <AlertTriangle width={13} />
-    ) : (
-      <AnimatedRefresh animating={syncing} />
-    );
-  }
-
   return (
     <>
       <KeyHandlers
@@ -245,7 +231,17 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         activeStyle={activeStyle}
         onClick={sync}
       >
-        <MobileIcon />
+        {isMobile ? (
+          syncState === 'error' ? (
+            <AlertTriangle width={14} height={14} />
+          ) : (
+            <AnimatedRefresh width={18} height={18} animating={syncing} />
+          )
+        ) : syncState === 'error' ? (
+          <AlertTriangle width={13} />
+        ) : (
+          <AnimatedRefresh animating={syncing} />
+        )}
         <Text style={isMobile ? { ...mobileTextStyle } : { marginLeft: 3 }}>
           {syncState === 'disabled'
             ? 'Disabled'
