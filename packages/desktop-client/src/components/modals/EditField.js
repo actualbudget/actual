@@ -10,9 +10,19 @@ import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
-import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
-import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import AccountAutocomplete, {
+  AccountGroupHeader,
+  AccountItem,
+} from '../autocomplete/AccountAutocomplete';
+import CategoryAutocomplete, {
+  CategoryGroupHeader,
+  CategoryItem,
+} from '../autocomplete/CategoryAutocomplete';
+import PayeeAutocomplete, {
+  CreatePayeeButton,
+  PayeeGroupHeader,
+  PayeeItem,
+} from '../autocomplete/PayeeAutocomplete';
 import Input from '../common/Input';
 import Modal from '../common/Modal';
 import View from '../common/View';
@@ -43,7 +53,10 @@ export default function EditField({ modalProps, name, onSubmit }) {
 
   const { isNarrowWidth } = useResponsive();
   let label, editor, minWidth;
-  let inputStyle = { ':focus': { boxShadow: 0 } };
+  let inputStyle = {
+    ':focus': { boxShadow: 0 },
+    ...(isNarrowWidth && { fontSize: 20 }),
+  };
   let autocompleteProps = {
     inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
@@ -83,13 +96,27 @@ export default function EditField({ modalProps, name, onSubmit }) {
               onSelect(value);
             }
           }}
-          groupHeaderStyle={
-            isNarrowWidth
-              ? {
-                  color: theme.tableTextLight,
-                }
-              : undefined
-          }
+          renderGroupHeader={props => (
+            <AccountGroupHeader
+              {...props}
+              style={{
+                color: theme.tableTextLight,
+                fontSize: 20,
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+            />
+          )}
+          renderAccountItem={props => (
+            <AccountItem
+              {...props}
+              style={{
+                fontSize: 17,
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+            />
+          )}
           {...autocompleteProps}
         />
       );
@@ -115,13 +142,37 @@ export default function EditField({ modalProps, name, onSubmit }) {
             onSelect(value);
           }}
           isCreatable
-          groupHeaderStyle={
-            isNarrowWidth
-              ? {
-                  color: theme.tableTextLight,
-                }
-              : undefined
-          }
+          renderGroupHeader={props => (
+            <PayeeGroupHeader
+              {...props}
+              style={{
+                color: theme.tableTextLight,
+                fontSize: 20,
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+            />
+          )}
+          renderCreatePayeeButton={props => (
+            <CreatePayeeButton
+              {...props}
+              iconProps={{
+                width: 12,
+                height: 12,
+              }}
+              style={{ fontSize: 17, paddingTop: 5, paddingBottom: 5 }}
+            />
+          )}
+          renderPayeeItem={props => (
+            <PayeeItem
+              {...props}
+              style={{
+                fontSize: 17,
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+            />
+          )}
           {...autocompleteProps}
         />
       );
@@ -152,13 +203,27 @@ export default function EditField({ modalProps, name, onSubmit }) {
           onSelect={value => {
             onSelect(value);
           }}
-          groupHeaderStyle={
-            isNarrowWidth
-              ? {
-                  color: theme.tableTextLight,
-                }
-              : undefined
-          }
+          renderGroupHeader={props => (
+            <CategoryGroupHeader
+              {...props}
+              style={{
+                color: theme.tableTextLight,
+                fontSize: 20,
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+            />
+          )}
+          renderCategoryItem={props => (
+            <CategoryItem
+              {...props}
+              style={{
+                fontSize: 17,
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+            />
+          )}
           {...autocompleteProps}
         />
       );

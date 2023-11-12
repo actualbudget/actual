@@ -61,7 +61,9 @@ function PayeeList({
   highlightedIndex,
   embedded,
   inputValue,
-  groupHeaderStyle,
+  renderCreatePayeeButton = defaultRenderPayeeButton,
+  renderGroupHeader = defaultRenderGroupHeader,
+  renderPayeeItem = defaultRenderPayeeItem,
   footer,
 }) {
   const { isNarrowWidth } = useResponsive();
@@ -106,22 +108,7 @@ function PayeeList({
               },
             }}
           >
-            <View
-              style={{
-                display: 'block',
-                color: theme.noticeTextMenu,
-                borderRadius: 4,
-                fontSize: isNarrowWidth ? 'inherit' : 11,
-                fontWeight: 500,
-              }}
-            >
-              <Add
-                width={8}
-                height={8}
-                style={{ marginRight: 5, display: 'inline-block' }}
-              />
-              Create Payee “{inputValue}”
-            </View>
+            {renderCreatePayeeButton({ payeeName: inputValue })}
           </View>
         )}
 
@@ -139,57 +126,18 @@ function PayeeList({
           return (
             <Fragment key={item.id}>
               {title && (
-                <div
-                  key={'title-' + idx}
-                  style={{
-                    color: theme.menuAutoCompleteTextHeader,
-                    padding: '4px 9px',
-                    ...groupHeaderStyle,
-                  }}
-                >
-                  {title}
-                </div>
+                <Fragment key={'title-' + idx}>
+                  {renderGroupHeader({ title })}
+                </Fragment>
               )}
-
-              <div
-                {...(getItemProps ? getItemProps({ item }) : null)}
-                // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
-                // event handler they set on this element. When this code runs
-                // in WebKit on touch-enabled devices, taps on this element end
-                // up not triggering the `onClick` event (and therefore delaying
-                // response to user input) until after the `setTimeout` callback
-                // finishes executing. This is caused by content observation code
-                // that implements various strategies to prevent the user from
-                // accidentally clicking content that changed as a result of code
-                // run in the `onMouseMove` event.
-                //
-                // Long story short, we don't want any delay here between the user
-                // tapping and the resulting action being performed. It turns out
-                // there's some "fast path" logic that can be triggered in various
-                // ways to force WebKit to bail on the content observation process.
-                // One of those ways is setting `role="button"` (or a number of
-                // other aria roles) on the element, which is what we're doing here.
-                //
-                // ref:
-                // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
-                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
-                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
-                role="button"
-                key={item.id}
-                className={`${css([
-                  {
-                    backgroundColor:
-                      highlightedIndex === idx + offset
-                        ? theme.menuAutoCompleteBackgroundHover
-                        : 'transparent',
-                    borderRadius: embedded ? 4 : 0,
-                    padding: 4,
-                    paddingLeft: 20,
-                  },
-                ])}`}
-              >
-                {item.name}
-              </div>
+              <Fragment key={item.id}>
+                {renderPayeeItem({
+                  ...(getItemProps ? getItemProps({ item }) : null),
+                  item: item,
+                  highlighted: highlightedIndex === idx + offset,
+                  embedded: embedded,
+                })}
+              </Fragment>
 
               {showMoreMessage && (
                 <div
@@ -239,7 +187,9 @@ export default function PayeeAutocomplete({
   onUpdate,
   onSelect,
   onManagePayees,
-  groupHeaderStyle,
+  renderCreatePayeeButton,
+  renderGroupHeader,
+  renderPayeeItem,
   accounts,
   payees,
   ...props
@@ -386,7 +336,9 @@ export default function PayeeAutocomplete({
           highlightedIndex={highlightedIndex}
           inputValue={inputValue}
           embedded={embedded}
-          groupHeaderStyle={groupHeaderStyle}
+          renderGroupHeader={renderGroupHeader}
+          renderCreatePayeeButton={renderCreatePayeeButton}
+          renderPayeeItem={renderPayeeItem}
           footer={
             <AutocompleteFooter embedded={embedded}>
               {showMakeTransfer && (
@@ -413,4 +365,110 @@ export default function PayeeAutocomplete({
       {...props}
     />
   );
+}
+
+export function CreatePayeeButton({
+  iconProps = {},
+  style,
+  payeeName,
+  ...props
+}) {
+  const isNarrowWidth = useResponsive();
+  const { style: iconStyle, ...restIconProps } = iconProps;
+  return (
+    <View
+      style={{
+        display: 'block',
+        color: theme.noticeTextMenu,
+        borderRadius: 4,
+        fontSize: isNarrowWidth ? 'inherit' : 11,
+        fontWeight: 500,
+        ...style,
+      }}
+      {...props}
+    >
+      <Add
+        width={8}
+        height={8}
+        style={{ marginRight: 5, display: 'inline-block', ...iconStyle }}
+        {...restIconProps}
+      />
+      Create Payee “{payeeName}”
+    </View>
+  );
+}
+
+function defaultRenderPayeeButton(props) {
+  return <CreatePayeeButton {...props} />;
+}
+
+export function PayeeGroupHeader({ title, style, ...props }) {
+  return (
+    <div
+      style={{
+        color: theme.menuAutoCompleteTextHeader,
+        padding: '4px 9px',
+        ...style,
+      }}
+      {...props}
+    >
+      {title}
+    </div>
+  );
+}
+
+function defaultRenderGroupHeader(props) {
+  return <PayeeGroupHeader {...props} />;
+}
+
+export function PayeeItem({
+  item,
+  className,
+  highlighted,
+  embedded,
+  ...props
+}) {
+  return (
+    <div
+      // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
+      // event handler they set on this element. When this code runs
+      // in WebKit on touch-enabled devices, taps on this element end
+      // up not triggering the `onClick` event (and therefore delaying
+      // response to user input) until after the `setTimeout` callback
+      // finishes executing. This is caused by content observation code
+      // that implements various strategies to prevent the user from
+      // accidentally clicking content that changed as a result of code
+      // run in the `onMouseMove` event.
+      //
+      // Long story short, we don't want any delay here between the user
+      // tapping and the resulting action being performed. It turns out
+      // there's some "fast path" logic that can be triggered in various
+      // ways to force WebKit to bail on the content observation process.
+      // One of those ways is setting `role="button"` (or a number of
+      // other aria roles) on the element, which is what we're doing here.
+      //
+      // ref:
+      // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
+      // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
+      // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+      role="button"
+      className={`${className} ${css([
+        {
+          backgroundColor: highlighted
+            ? theme.menuAutoCompleteBackgroundHover
+            : 'transparent',
+          borderRadius: embedded ? 4 : 0,
+          padding: 4,
+          paddingLeft: 20,
+        },
+      ])}`}
+      {...props}
+    >
+      {item.name}
+    </div>
+  );
+}
+
+function defaultRenderPayeeItem(props) {
+  return <PayeeItem {...props} />;
 }

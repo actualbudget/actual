@@ -3,7 +3,6 @@ import React, {
   Fragment,
   useMemo,
   type ReactNode,
-  type CSSProperties,
 } from 'react';
 
 import { css } from 'glamor';
@@ -14,7 +13,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import Split from '../../icons/v0/Split';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
@@ -26,7 +25,8 @@ export type CategoryListProps = {
   highlightedIndex: number;
   embedded: boolean;
   footer?: ReactNode;
-  groupHeaderStyle?: object;
+  renderGroupHeader?: (props: CategoryGroupHeaderProps) => ReactNode;
+  renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
 function CategoryList({
   items,
@@ -34,7 +34,8 @@ function CategoryList({
   highlightedIndex,
   embedded,
   footer,
-  groupHeaderStyle,
+  renderGroupHeader = defaultRenderGroupHeader,
+  renderCategoryItem = defaultRenderCategoryItem,
 }: CategoryListProps) {
   let lastGroup = null;
 
@@ -106,40 +107,13 @@ function CategoryList({
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
-              {showGroup && (
-                <div
-                  style={{
-                    color: theme.menuAutoCompleteTextHeader,
-                    padding: '4px 9px',
-                    ...groupHeaderStyle,
-                  }}
-                  data-testid="category-item-group"
-                >
-                  {`${item.group?.name}`}
-                </div>
-              )}
-              <div
-                {...(getItemProps ? getItemProps({ item }) : null)}
-                // See comment above.
-                role="button"
-                className={`${css([
-                  {
-                    backgroundColor:
-                      highlightedIndex === idx
-                        ? theme.menuAutoCompleteBackgroundHover
-                        : 'transparent',
-                    padding: 4,
-                    paddingLeft: 20,
-                    borderRadius: embedded ? 4 : 0,
-                  },
-                ])}`}
-                data-testid={
-                  'category-item' +
-                  (highlightedIndex === idx ? '-highlighted' : '')
-                }
-              >
-                {item.name}
-              </div>
+              {showGroup && renderGroupHeader({ title: item.group?.name })}
+              {renderCategoryItem({
+                ...(getItemProps ? getItemProps({ item }) : null),
+                item: item,
+                highlighted: highlightedIndex === idx,
+                embedded: embedded,
+              })}
             </Fragment>
           );
         })}
@@ -152,7 +126,8 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
-  groupHeaderStyle?: CSSProperties;
+  renderGroupHeader?: (props: CategoryGroupHeaderProps) => ReactNode;
+  renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
 
 export default function CategoryAutocomplete({
@@ -160,7 +135,8 @@ export default function CategoryAutocomplete({
   showSplitOption,
   embedded,
   closeOnBlur,
-  groupHeaderStyle,
+  renderGroupHeader,
+  renderCategoryItem,
   ...props
 }: CategoryAutocompleteProps) {
   let categorySuggestions: Array<
@@ -211,10 +187,80 @@ export default function CategoryAutocomplete({
           embedded={embedded}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
-          groupHeaderStyle={groupHeaderStyle}
+          renderGroupHeader={renderGroupHeader}
+          renderCategoryItem={renderCategoryItem}
         />
       )}
       {...props}
     />
   );
+}
+
+type CategoryGroupHeaderProps = {
+  title: string;
+  style?: CSSProperties;
+};
+
+export function CategoryGroupHeader({
+  title,
+  style,
+  ...props
+}: CategoryGroupHeaderProps) {
+  return (
+    <div
+      style={{
+        color: theme.menuAutoCompleteTextHeader,
+        padding: '4px 9px',
+        ...style,
+      }}
+      data-testid="category-item-group"
+      {...props}
+    >
+      {title}
+    </div>
+  );
+}
+
+function defaultRenderGroupHeader(props) {
+  return <CategoryGroupHeader {...props} />;
+}
+
+type CategoryItemProps = {
+  item: CategoryEntity & { group?: CategoryGroupEntity };
+  className?: string;
+  highlighted?: boolean;
+  embedded?: boolean;
+};
+
+export function CategoryItem({
+  item,
+  className,
+  highlighted,
+  embedded,
+  ...props
+}: CategoryItemProps) {
+  return (
+    <div
+      // See comment above.
+      role="button"
+      className={`${className} ${css([
+        {
+          backgroundColor: highlighted
+            ? theme.menuAutoCompleteBackgroundHover
+            : 'transparent',
+          padding: 4,
+          paddingLeft: 20,
+          borderRadius: embedded ? 4 : 0,
+        },
+      ])}`}
+      data-testid={'category-item' + (highlighted ? '-highlighted' : '')}
+      {...props}
+    >
+      {item.name}
+    </div>
+  );
+}
+
+function defaultRenderCategoryItem(props) {
+  return <CategoryItem {...props} />;
 }
