@@ -1831,7 +1831,7 @@ export function BudgetTable(props) {
   );
 }
 
-const LEFT_RIGHT_FLEX_WIDTH = 70;
+const LEFT_RIGHT_FLEX_WIDTH = 80;
 const BUDGET_HEADER_HEIGHT = 50;
 
 function BudgetHeader({
