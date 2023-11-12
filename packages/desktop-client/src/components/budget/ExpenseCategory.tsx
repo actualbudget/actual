@@ -1,16 +1,39 @@
-import React from 'react';
+import React, { type ComponentProps } from 'react';
+
+import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
 import View from '../common/View';
-import { useDraggable, useDroppable, DropHighlight } from '../sort';
+import {
+  useDraggable,
+  useDroppable,
+  DropHighlight,
+  type DragState,
+  type OnDragChangeCallback,
+  type OnDropCallback,
+} from '../sort';
 import { Row } from '../table';
 
 import RenderMonths from './RenderMonths';
 import SidebarCategory from './SidebarCategory';
 
+type ExpenseCategoryProps = {
+  cat: CategoryEntity;
+  editingCell: { id: string; cell: string } | null;
+  dragState: DragState<CategoryEntity>;
+  MonthComponent: ComponentProps<typeof RenderMonths>['component'];
+  onEditName?: ComponentProps<typeof SidebarCategory>['onEditName'];
+  onEditMonth?: (id: string, monthIndex: number) => void;
+  onSave?: ComponentProps<typeof SidebarCategory>['onSave'];
+  onDelete?: ComponentProps<typeof SidebarCategory>['onDelete'];
+  onDragChange: OnDragChangeCallback<CategoryEntity>;
+  onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+  onShowActivity: (name: string, id: string, idx: number) => void;
+  onReorder: OnDropCallback;
+};
+
 function ExpenseCategory({
   cat,
-  budgetArray,
   editingCell,
   dragState,
   MonthComponent,
@@ -22,7 +45,7 @@ function ExpenseCategory({
   onShowActivity,
   onDragChange,
   onReorder,
-}) {
+}: ExpenseCategoryProps) {
   let dragging = dragState && dragState.item === cat;
 
   if (dragState && dragState.item.id === cat.cat_group) {
@@ -67,7 +90,6 @@ function ExpenseCategory({
           onEditName={onEditName}
           onSave={onSave}
           onDelete={onDelete}
-          onDragChange={onDragChange}
         />
 
         <RenderMonths

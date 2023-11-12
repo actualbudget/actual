@@ -131,27 +131,6 @@ function lookupName(items, id) {
   return items.find(item => item.id === id).name;
 }
 
-// TODO: delete if not needed
-/* eslint-disable-next-line import/no-unused-modules */
-export function DateHeader({ date }) {
-  return (
-    <ListItem
-      style={{
-        height: 25,
-        backgroundColor: theme.mobileDateBackground,
-        borderColor: theme.tableBorder,
-        justifyContent: 'center',
-      }}
-    >
-      <Text
-        style={{ ...styles.text, fontSize: 13, color: theme.tableHeaderText }}
-      >
-        {monthUtils.format(date, 'MMMM dd, yyyy')}
-      </Text>
-    </ListItem>
-  );
-}
-
 function Status({ status }) {
   let color;
 
