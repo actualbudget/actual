@@ -327,7 +327,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               onEdit(null);
             },
             style: {
-              backgroundColor: 'white',
+              backgroundColor: theme.tableBackground,
             },
           }}
           onSave={amount => {
@@ -369,6 +369,8 @@ export const CategoryMonth = memo(function CategoryMonth({
               disabled={category.is_income}
               carryover={reportBudget.catCarryover(category.id)}
               balance={reportBudget.catBalance(category.id)}
+              goal={reportBudget.catGoal(category.id)}
+              budgeted={reportBudget.catBudgeted(category.id)}
             />
           </span>
           {balanceTooltip.isOpen && (

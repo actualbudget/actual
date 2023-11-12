@@ -43,6 +43,18 @@ export function parseDate(str, order) {
 
   const dateGroups = (a, b) => str => {
     const parts = str
+      .replace(/\bjan(\.|uary)?\b/i, '01')
+      .replace(/\bfeb(\.|ruary)?\b/i, '02')
+      .replace(/\bmar(\.|ch)?\b/i, '03')
+      .replace(/\bapr(\.|il)?\b/i, '04')
+      .replace(/\bmay\.?\b/i, '05')
+      .replace(/\bjun(\.|e)?\b/i, '06')
+      .replace(/\bjul(\.|y)?\b/i, '07')
+      .replace(/\baug(\.|ust)?\b/i, '08')
+      .replace(/\bsep(\.|tember)?\b/i, '09')
+      .replace(/\boct(\.|ober)?\b/i, '10')
+      .replace(/\bnov(\.|ember)?\b/i, '11')
+      .replace(/\bdec(\.|ember)?\b/i, '12')
       .replace(/^[^\d]+/, '')
       .replace(/[^\d]+$/, '')
       .split(/[^\d]+/);
@@ -755,11 +767,11 @@ export default function ImportTransactions({ modalProps, options }) {
 
   useEffect(() => {
     const fileType = getFileType(options.filename);
-    const parseOptions = getParseOptions(
-      fileType,
-      { delimiter, hasHeaderRow },
-      { fallbackMissingPayeeToMemo },
-    );
+    const parseOptions = getParseOptions(fileType, {
+      delimiter,
+      hasHeaderRow,
+      fallbackMissingPayeeToMemo,
+    });
 
     parse(options.filename, parseOptions);
   }, [parseTransactions, options.filename]);
@@ -807,11 +819,11 @@ export default function ImportTransactions({ modalProps, options }) {
     });
 
     const fileType = getFileType(res[0]);
-    const parseOptions = getParseOptions(
-      fileType,
-      { delimiter, hasHeaderRow },
-      { fallbackMissingPayeeToMemo },
-    );
+    const parseOptions = getParseOptions(fileType, {
+      delimiter,
+      hasHeaderRow,
+      fallbackMissingPayeeToMemo,
+    });
 
     parse(res[0], parseOptions);
   }
@@ -1180,12 +1192,12 @@ export default function ImportTransactions({ modalProps, options }) {
   );
 }
 
-function getParseOptions(fileType, csvOptions, ofxOptions) {
+function getParseOptions(fileType, options = {}) {
   if (fileType === 'csv') {
-    const { delimiter, hasHeaderRow } = csvOptions;
+    const { delimiter, hasHeaderRow } = options;
     return { delimiter, hasHeaderRow };
   } else if (isOfxFile(fileType)) {
-    const { fallbackMissingPayeeToMemo } = ofxOptions;
+    const { fallbackMissingPayeeToMemo } = options;
     return { fallbackMissingPayeeToMemo };
   }
   return {};

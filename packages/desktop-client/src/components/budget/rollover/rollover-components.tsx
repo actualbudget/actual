@@ -41,30 +41,30 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.alt2TableText }}>Budgeted</Text>
+        <Text style={{ color: theme.tableHeaderText }}>Budgeted</Text>
         <CellValue
           binding={rolloverBudget.totalBudgeted}
           type="financial"
-          style={{ color: theme.alt2TableText, fontWeight: 600 }}
+          style={{ color: theme.tableHeaderText, fontWeight: 600 }}
           formatter={value => {
             return format(-parseFloat(value || '0'), 'financial');
           }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.alt2TableText }}>Spent</Text>
+        <Text style={{ color: theme.tableHeaderText }}>Spent</Text>
         <CellValue
           binding={rolloverBudget.totalSpent}
           type="financial"
-          style={{ color: theme.alt2TableText, fontWeight: 600 }}
+          style={{ color: theme.tableHeaderText, fontWeight: 600 }}
         />
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.alt2TableText }}>Balance</Text>
+        <Text style={{ color: theme.tableHeaderText }}>Balance</Text>
         <CellValue
           binding={rolloverBudget.totalBalance}
           type="financial"
-          style={{ color: theme.alt2TableText, fontWeight: 600 }}
+          style={{ color: theme.tableHeaderText, fontWeight: 600 }}
         />
       </View>
     </View>
@@ -75,7 +75,7 @@ export function IncomeHeaderMonth() {
   return (
     <Row
       style={{
-        color: theme.alt2TableText,
+        color: theme.tableHeaderText,
         alignItems: 'center',
         paddingRight: 10,
       }}
@@ -264,7 +264,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             borderRadius: 4,
             ':hover': {
               boxShadow: 'inset 0 0 0 1px ' + theme.mobileAccountShadow,
-              backgroundColor: 'white',
+              backgroundColor: theme.tableBackground,
             },
           }}
           valueProps={{
@@ -283,7 +283,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               onEdit(null);
             },
             style: {
-              backgroundColor: 'white',
+              backgroundColor: theme.tableBackground,
             },
           }}
           onSave={amount => {
@@ -320,6 +320,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           <BalanceWithCarryover
             carryover={rolloverBudget.catCarryover(category.id)}
             balance={rolloverBudget.catBalance(category.id)}
+            goal={rolloverBudget.catGoal(category.id)}
+            budgeted={rolloverBudget.catBudgeted(category.id)}
           />
         </span>
         {balanceTooltip.isOpen && (

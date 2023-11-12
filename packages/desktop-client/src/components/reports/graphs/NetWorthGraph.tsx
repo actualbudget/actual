@@ -75,6 +75,7 @@ function NetWorthGraph({
     label?: string;
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
@@ -85,8 +86,8 @@ function NetWorthGraph({
               pointerEvents: 'none',
               borderRadius: 2,
               boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.alt2MenuBackground,
-              color: theme.alt2MenuItemText,
+              backgroundColor: theme.menuAutoCompleteBackground,
+              color: theme.menuAutoCompleteText,
               padding: 10,
             },
             style,
