@@ -66,7 +66,7 @@ function CategoryList({
           const showGroup = item.cat_group !== lastGroup;
           lastGroup = item.cat_group;
           return (
-            <>
+            <Fragment key={item.id}>
               {showGroup &&
                 renderGroupHeader({
                   ...{ key: item.group?.name },
@@ -79,7 +79,7 @@ function CategoryList({
                 highlighted: highlightedIndex === idx,
                 embedded: embedded,
               })}
-            </>
+            </Fragment>
           );
         })}
       </View>

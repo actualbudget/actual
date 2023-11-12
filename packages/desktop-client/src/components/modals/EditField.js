@@ -9,7 +9,7 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import { useResponsive } from '../../ResponsiveProvider';
-import { theme } from '../../style';
+import { styles, theme } from '../../style';
 import AccountAutocomplete, {
   AccountGroupHeader,
   AccountItem,
@@ -100,8 +100,8 @@ export default function EditField({ modalProps, name, onSubmit }) {
             <AccountGroupHeader
               {...props}
               style={{
+                ...styles.largeText,
                 color: theme.tableTextLight,
-                fontSize: 20,
                 paddingTop: 10,
                 paddingBottom: 10,
               }}
@@ -111,7 +111,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
             <AccountItem
               {...props}
               style={{
-                fontSize: 17,
+                ...styles.mediumText,
                 paddingTop: 10,
                 paddingBottom: 10,
               }}
@@ -146,8 +146,8 @@ export default function EditField({ modalProps, name, onSubmit }) {
             <PayeeGroupHeader
               {...props}
               style={{
+                ...styles.largeText,
                 color: theme.tableTextLight,
-                fontSize: 20,
                 paddingTop: 10,
                 paddingBottom: 10,
               }}
@@ -160,14 +160,18 @@ export default function EditField({ modalProps, name, onSubmit }) {
                 width: 12,
                 height: 12,
               }}
-              style={{ fontSize: 17, paddingTop: 5, paddingBottom: 5 }}
+              style={{
+                ...styles.mediumText,
+                paddingTop: 5,
+                paddingBottom: 5,
+              }}
             />
           )}
           renderPayeeItem={props => (
             <PayeeItem
               {...props}
               style={{
-                fontSize: 17,
+                ...styles.mediumText,
                 paddingTop: 10,
                 paddingBottom: 10,
               }}
@@ -207,8 +211,8 @@ export default function EditField({ modalProps, name, onSubmit }) {
             <CategoryGroupHeader
               {...props}
               style={{
+                ...styles.largeText,
                 color: theme.tableTextLight,
-                fontSize: 20,
                 paddingTop: 10,
                 paddingBottom: 10,
               }}
@@ -218,7 +222,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
             <CategoryItem
               {...props}
               style={{
-                fontSize: 17,
+                ...styles.mediumText,
                 paddingTop: 10,
                 paddingBottom: 10,
               }}
