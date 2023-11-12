@@ -1,19 +1,43 @@
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 
 import { theme } from '../../style';
 import View from '../common/View';
-import { useDraggable, useDroppable, DropHighlight } from '../sort';
+import {
+  useDraggable,
+  useDroppable,
+  DropHighlight,
+  type OnDragChangeCallback,
+  type OnDropCallback,
+  type DragState,
+} from '../sort';
 import { Row, ROW_HEIGHT } from '../table';
 
 import RenderMonths from './RenderMonths';
 import SidebarGroup from './SidebarGroup';
+
+type ExpenseGroupProps = {
+  group: ComponentProps<typeof SidebarGroup>['group'];
+  collapsed: boolean;
+  editingCell: { id: string; cell: string } | null;
+  dragState: DragState<ComponentProps<typeof SidebarGroup>['group']>;
+  MonthComponent: ComponentProps<typeof RenderMonths>['component'];
+  onEditName?: ComponentProps<typeof SidebarGroup>['onEdit'];
+  onSave?: ComponentProps<typeof SidebarGroup>['onSave'];
+  onDelete?: ComponentProps<typeof SidebarGroup>['onDelete'];
+  onDragChange: OnDragChangeCallback<
+    ComponentProps<typeof SidebarGroup>['group']
+  >;
+  onReorderGroup: OnDropCallback;
+  onReorderCategory: OnDropCallback;
+  onToggleCollapse?: ComponentProps<typeof SidebarGroup>['onToggleCollapse'];
+  onShowNewCategory?: ComponentProps<typeof SidebarGroup>['onShowNewCategory'];
+};
 
 function ExpenseGroup({
   group,
   collapsed,
   editingCell,
   dragState,
-  itemPos,
   MonthComponent,
   onEditName,
   onSave,
@@ -23,7 +47,7 @@ function ExpenseGroup({
   onReorderCategory,
   onToggleCollapse,
   onShowNewCategory,
-}) {
+}: ExpenseGroupProps) {
   let dragging = dragState && dragState.item === group;
 
   let { dragRef } = useDraggable({

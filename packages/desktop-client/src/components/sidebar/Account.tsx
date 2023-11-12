@@ -41,7 +41,7 @@ type AccountProps = {
   updated?: boolean;
   style?: CSSProperties;
   outerStyle?: CSSProperties;
-  onDragChange?: OnDragChangeCallback;
+  onDragChange?: OnDragChangeCallback<{ id: string }>;
   onDrop?: OnDropCallback;
 };
 

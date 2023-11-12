@@ -767,11 +767,11 @@ export default function ImportTransactions({ modalProps, options }) {
 
   useEffect(() => {
     const fileType = getFileType(options.filename);
-    const parseOptions = getParseOptions(
-      fileType,
-      { delimiter, hasHeaderRow },
-      { fallbackMissingPayeeToMemo },
-    );
+    const parseOptions = getParseOptions(fileType, {
+      delimiter,
+      hasHeaderRow,
+      fallbackMissingPayeeToMemo,
+    });
 
     parse(options.filename, parseOptions);
   }, [parseTransactions, options.filename]);
@@ -819,11 +819,11 @@ export default function ImportTransactions({ modalProps, options }) {
     });
 
     const fileType = getFileType(res[0]);
-    const parseOptions = getParseOptions(
-      fileType,
-      { delimiter, hasHeaderRow },
-      { fallbackMissingPayeeToMemo },
-    );
+    const parseOptions = getParseOptions(fileType, {
+      delimiter,
+      hasHeaderRow,
+      fallbackMissingPayeeToMemo,
+    });
 
     parse(res[0], parseOptions);
   }
@@ -1192,12 +1192,12 @@ export default function ImportTransactions({ modalProps, options }) {
   );
 }
 
-function getParseOptions(fileType, csvOptions, ofxOptions) {
+function getParseOptions(fileType, options = {}) {
   if (fileType === 'csv') {
-    const { delimiter, hasHeaderRow } = csvOptions;
+    const { delimiter, hasHeaderRow } = options;
     return { delimiter, hasHeaderRow };
   } else if (isOfxFile(fileType)) {
-    const { fallbackMissingPayeeToMemo } = ofxOptions;
+    const { fallbackMissingPayeeToMemo } = options;
     return { fallbackMissingPayeeToMemo };
   }
   return {};

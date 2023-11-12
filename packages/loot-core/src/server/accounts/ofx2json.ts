@@ -34,14 +34,54 @@ async function parseXml(content) {
 
 function getStmtTrn(data) {
   const ofx = data?.['OFX'];
-  const isCc = ofx?.['CREDITCARDMSGSRSV1'] != null;
-  const msg = isCc ? ofx?.['CREDITCARDMSGSRSV1'] : ofx?.['BANKMSGSRSV1'];
-  const stmtTrnRs = msg?.[`${isCc ? 'CC' : ''}STMTTRNRS`];
-  const stmtRs = stmtTrnRs?.[`${isCc ? 'CC' : ''}STMTRS`];
-  const bankTranList = stmtRs?.['BANKTRANLIST'];
+  if (ofx?.['CREDITCARDMSGSRSV1'] != null) {
+    return getCcStmtTrn(ofx);
+  } else if (ofx?.['INVSTMTMSGSRSV1'] != null) {
+    return getInvStmtTrn(ofx);
+  } else {
+    return getBankStmtTrn(ofx);
+  }
+}
+
+function getBankStmtTrn(ofx) {
+  const msg = ofx?.['BANKMSGSRSV1'];
+  const stmtTrnRs = msg?.['STMTTRNRS'];
+  const stmtRs = stmtTrnRs?.['STMTRS'];
+  const tranList = stmtRs?.['BANKTRANLIST'];
   // Could be an array or a single object.
   // xml2js serializes single item to an object and multiple to an array.
-  const stmtTrn = bankTranList?.['STMTTRN'];
+  const stmtTrn = tranList?.['STMTTRN'];
+
+  if (!Array.isArray(stmtTrn)) {
+    return [stmtTrn];
+  }
+  return stmtTrn;
+}
+
+function getCcStmtTrn(ofx) {
+  const msg = ofx?.['CREDITCARDMSGSRSV1'];
+  const stmtTrnRs = msg?.['CCSTMTTRNRS'];
+  const stmtRs = stmtTrnRs?.['CCSTMTRS'];
+  const tranList = stmtRs?.['BANKTRANLIST'];
+  // Could be an array or a single object.
+  // xml2js serializes single item to an object and multiple to an array.
+  const stmtTrn = tranList?.['STMTTRN'];
+
+  if (!Array.isArray(stmtTrn)) {
+    return [stmtTrn];
+  }
+  return stmtTrn;
+}
+
+function getInvStmtTrn(ofx) {
+  const msg = ofx?.['INVSTMTMSGSRSV1'];
+  const stmtTrnRs = msg?.['INVSTMTTRNRS'];
+  const stmtRs = stmtTrnRs?.['INVSTMTRS'];
+  const tranList = stmtRs?.['INVTRANLIST'];
+  // Could be an array or a single object.
+  // xml2js serializes single item to an object and multiple to an array.
+  const stmtTrn = tranList?.['INVBANKTRAN']?.flatMap(t => t?.['STMTTRN']);
+
   if (!Array.isArray(stmtTrn)) {
     return [stmtTrn];
   }

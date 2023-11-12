@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
-import screenshotConfig from './screenshot.config';
 
 test.describe('Accounts', () => {
   let page;
@@ -35,7 +34,7 @@ test.describe('Accounts', () => {
     await expect(transaction.category).toHaveText('Starting Balances');
     await expect(transaction.debit).toHaveText('');
     await expect(transaction.credit).toHaveText('100.00');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('closes an account', async () => {
@@ -45,10 +44,10 @@ test.describe('Accounts', () => {
 
     const modal = await accountPage.clickCloseAccount();
     await modal.selectTransferAccount('Vanguard 401k');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
     await modal.closeAccount();
 
     await expect(accountPage.accountName).toHaveText('Closed: Roth IRA');
-    await expect(page).toHaveScreenshot(screenshotConfig(page));
+    await expect(page).toMatchThemeScreenshots();
   });
 });
