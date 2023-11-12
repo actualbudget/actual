@@ -144,7 +144,7 @@ export default function AccountDetails({
                 }}
               >
                 <CheveronLeft
-                  style={{ width: 25, height: 25, margin: -10, marginLeft: -5 }}
+                  style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}
                 />
                 <Text
                   style={{

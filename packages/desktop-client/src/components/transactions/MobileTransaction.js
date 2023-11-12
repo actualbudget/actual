@@ -383,8 +383,8 @@ class TransactionEditInner extends PureComponent {
                 >
                   <CheveronLeft
                     style={{
-                      width: 25,
-                      height: 25,
+                      width: 30,
+                      height: 30,
                       margin: -10,
                       marginLeft: -5,
                     }}
