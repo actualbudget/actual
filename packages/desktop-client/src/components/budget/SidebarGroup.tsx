@@ -24,7 +24,7 @@ type SidebarGroupProps = {
   };
   editing?: boolean;
   collapsed: boolean;
-  dragPreview?: () => void;
+  dragPreview?: boolean;
   innerRef?: ConnectDragSource;
   borderColor?: string;
   style?: CSSProperties;
