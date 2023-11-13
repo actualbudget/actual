@@ -19,7 +19,7 @@ export namespace Wallet {
     gps_longitude: string;
     gps_accuracy_in_meters: string;
     warranty_in_month: string;
-    transfer: string;
+    transfer: boolean;
     payee: string;
     labels: string;
     envelope_id: string;

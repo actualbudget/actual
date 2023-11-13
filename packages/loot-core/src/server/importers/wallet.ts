@@ -91,7 +91,7 @@ async function importCategories(
       return;
     }
 
-    if (transaction.transfer === 'false' && transaction.amount > 0) {
+    if (transaction.transfer === false && transaction.amount > 0) {
       incomeCategories.add(transaction.category);
       return;
     }
@@ -150,7 +150,7 @@ async function importTransactions(
   let transactionsGrouped = groupBy(data, 'account');
 
   for (let transaction of data) {
-    if (transaction.category === 'TRANSFER') continue;
+    if (transaction.transfer) continue;
     entityIdMap.set(transaction.id, uuidv4());
   }
 
@@ -230,6 +230,7 @@ export function parseFile(buffer: Buffer): Wallet.Transactions {
     }).map(row => ({
       ...row,
       amount: Number(row.amount.replace(',', '.')),
+      transfer: row.transfer === 'true',
       id: uuidv4(),
     }));
   } catch (err) {
@@ -239,6 +240,6 @@ export function parseFile(buffer: Buffer): Wallet.Transactions {
   return data;
 }
 
-export function getBudgetName(_filepath: string, data: any) {
-  return 'MY WALLET BDGT';
+export function getBudgetName() {
+  return 'My Wallet budget';
 }
