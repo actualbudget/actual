@@ -164,6 +164,7 @@ export default function MobileNavTabs() {
 
   return (
     <animated.div
+      role="navigation"
       {...bind()}
       style={{
         y,
