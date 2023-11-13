@@ -26,14 +26,6 @@ import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
 import useReport from '../useReport';
 import { fromDateRepr } from '../util';
 
-let legend = [];
-
-function OnChangeLegend(leg) {
-  useEffect(() => {
-    legend = leg;
-  }, []);
-}
-
 export default function Custom() {
   const categories = useCategories();
 
@@ -64,7 +56,6 @@ export default function Custom() {
   const [mode, setMode] = useState('total');
   const [split, setSplit] = useState('Category');
   const [type, setType] = useState('Expense');
-  //const [interval, setInterval] = useState(4);
   const [empty, setEmpty] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [uncat, setUncat] = useState(false);
@@ -74,6 +65,8 @@ export default function Custom() {
   const [viewSplit, setViewSplit] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
   const [viewLabels, setViewLabels] = useState(false);
+  //const [legend, setLegend] = useState([]);
+  let legend = [];
   const dateRangeLine = ReportOptions.dateRange.length - 1;
 
   const months = monthUtils.rangeInclusive(start, end);
@@ -302,7 +295,6 @@ export default function Custom() {
                   scrollWidth={scrollWidth}
                   setScrollWidth={setScrollWidth}
                   months={months}
-                  OnChangeLegend={OnChangeLegend}
                 />
               </View>
               {(viewSplit || viewSummary) && (

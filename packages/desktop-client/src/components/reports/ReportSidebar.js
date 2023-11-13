@@ -69,7 +69,7 @@ export function CustomSidebar({
       }
       if (['AreaGraph', 'DonutGraph'].includes(graphType)) {
         setGraphType('TableGraph');
-        setViewSplit(false);
+        //setViewSplit(false);
       }
       if ([5, 6].includes(split)) {
         setSplit('Category');

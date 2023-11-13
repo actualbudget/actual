@@ -27,7 +27,6 @@ export function ChooseGraph({
   scrollWidth,
   setScrollWidth,
   months,
-  OnChangeLegend,
 }) {
   function saveScrollWidth(parent, child) {
     let width = parent > 0 && child > 0 && parent - child;
@@ -55,7 +54,6 @@ export function ChooseGraph({
         data={data}
         split={split}
         empty={empty}
-        OnChangeLegend={OnChangeLegend}
         typeOp={ReportOptions.type.find(opt => opt.description === type).format}
       />
     );
@@ -79,7 +77,6 @@ export function ChooseGraph({
         data={data}
         split={split}
         empty={empty}
-        OnChangeLegend={OnChangeLegend}
         typeOp={ReportOptions.type.find(opt => opt.description === type).format}
       />
     );
@@ -102,7 +99,6 @@ export function ChooseGraph({
         end={end}
         data={data}
         typeOp={ReportOptions.type.find(opt => opt.description === type).format}
-        OnChangeLegend={OnChangeLegend}
       />
     );
   }

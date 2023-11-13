@@ -71,7 +71,7 @@ export function CustomTopbar({
         title="Data Table"
         onSelect={() => {
           setGraphType('TableGraph');
-          setViewSplit(false);
+          //setViewSplit(false);
           setTypeDisabled([0]);
         }}
       >
@@ -102,7 +102,7 @@ export function CustomTopbar({
         onSelect={() => {
           setGraphType('AreaGraph');
           setSplit('Month');
-          setViewSplit(false);
+          //setViewSplit(false);
           setTypeDisabled([0]);
         }}
         style={{ marginLeft: 15 }}
@@ -140,7 +140,8 @@ export function CustomTopbar({
         style={{ marginLeft: 15 }}
         title="Show Legend"
         disabled={
-          graphType === 'TableGraph' || graphType === 'AreaGraph' ? true : false
+          true //descoping for future PR
+          //graphType === 'TableGraph' || graphType === 'AreaGraph' ? true : false
         }
       >
         <ListBullet width={15} height={15} />

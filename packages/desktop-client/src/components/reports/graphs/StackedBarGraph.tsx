@@ -25,7 +25,6 @@ type StackedBarGraphProps = {
   style?: CSSProperties;
   data;
   typeOp;
-  OnChangeLegend;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -44,7 +43,6 @@ function StackedBarGraph({
   style,
   data,
   typeOp,
-  OnChangeLegend,
   compact,
   domain,
 }: StackedBarGraphProps) {
@@ -74,7 +72,7 @@ function StackedBarGraph({
       };
     });
 
-    OnChangeLegend(agg.slice(0).reverse());
+    //OnChangeLegend(agg.slice(0).reverse());
 
     return <div />;
   };

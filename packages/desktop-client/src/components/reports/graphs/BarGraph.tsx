@@ -29,7 +29,6 @@ type BarGraphProps = {
   split;
   typeOp;
   empty;
-  OnChangeLegend;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -50,7 +49,6 @@ function BarGraph({
   split,
   empty,
   typeOp,
-  OnChangeLegend,
   compact,
   domain,
 }: BarGraphProps) {
@@ -92,7 +90,7 @@ function BarGraph({
       };
     });
 
-    OnChangeLegend(agg);
+    //OnChangeLegend(agg);
 
     return <div />;
   };

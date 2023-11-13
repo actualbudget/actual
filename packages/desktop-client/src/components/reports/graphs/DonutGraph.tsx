@@ -25,7 +25,6 @@ type DonutGraphProps = {
   split;
   typeOp;
   empty;
-  OnChangeLegend;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -46,7 +45,6 @@ function DonutGraph({
   split,
   empty,
   typeOp,
-  OnChangeLegend,
   compact,
   domain,
 }: DonutGraphProps) {
@@ -88,7 +86,7 @@ function DonutGraph({
       };
     });
 
-    OnChangeLegend(agg);
+    //OnChangeLegend(agg);
 
     return <div />;
   };
