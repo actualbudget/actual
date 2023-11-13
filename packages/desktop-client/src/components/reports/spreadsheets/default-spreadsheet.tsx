@@ -69,32 +69,32 @@ export default function createSpreadsheet(
   let splitList;
   let splitLabel;
   switch (split) {
-    case 1:
+    case 'Category':
       splitItem = catList;
       splitList = splitItem;
       splitLabel = 'category';
       break;
-    case 2:
+    case 'Group':
       splitItem = catList;
       splitList = catGroup;
       splitLabel = 'category';
       break;
-    case 3:
+    case 'Payee':
       splitItem = payees;
       splitList = splitItem;
       splitLabel = 'payee';
       break;
-    case 4:
+    case 'Account':
       splitItem = accounts;
       splitList = splitItem;
       splitLabel = 'account';
       break;
-    case 5:
+    case 'Month':
       splitItem = catList;
       splitList = splitItem;
       splitLabel = 'category';
       break;
-    case 6:
+    case 'Year':
       splitItem = catList;
       splitList = splitItem;
       splitLabel = 'category';

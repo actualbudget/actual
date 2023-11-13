@@ -16,6 +16,7 @@ import {
   getLatestRange,
   getFullRange,
 } from './Header';
+import { ReportOptions } from './ReportOptions';
 
 export function CustomSidebar({
   start,
@@ -24,7 +25,6 @@ export function CustomSidebar({
   setEnd,
   dateRange,
   setDateRange,
-  dateRangeOptions,
   dateRangeLine,
   allMonths,
   graphType,
@@ -34,10 +34,8 @@ export function CustomSidebar({
   setTypeDisabled,
   split,
   setSplit,
-  splitOptions,
   type,
   setType,
-  typeOptions,
   mode,
   setMode,
   empty,
@@ -63,7 +61,7 @@ export function CustomSidebar({
       } else {
         setTypeDisabled([3]);
         if ([3].includes(type)) {
-          setType(1);
+          setType('Expense');
         }
       }
       if (graphType === 'BarGraph') {
@@ -74,7 +72,7 @@ export function CustomSidebar({
         setViewSplit(false);
       }
       if ([5, 6].includes(split)) {
-        setSplit(1);
+        setSplit('Category');
       }
     } else {
       if (graphType === 'StackedBarGraph') {
@@ -93,7 +91,7 @@ export function CustomSidebar({
       }
     }
     if ([3].includes(type) && graphType !== 'TableGraph') {
-      setType(1);
+      setType('Expense');
     }
   }
 
@@ -180,8 +178,8 @@ export function CustomSidebar({
           <Select
             value={split}
             onChange={e => onChangeSplit(e)}
-            options={splitOptions.map(option => [
-              option.value,
+            options={ReportOptions.split.map(option => [
+              option.description,
               option.description,
             ])}
             disabledKeys={
@@ -206,8 +204,8 @@ export function CustomSidebar({
           <Select
             value={type}
             onChange={setType}
-            options={typeOptions.map(option => [
-              option.value,
+            options={ReportOptions.type.map(option => [
+              option.description,
               option.description,
             ])}
             disabledKeys={typeDisabled}
@@ -339,15 +337,17 @@ export function CustomSidebar({
           <Select
             value={dateRange}
             onChange={e => {
-              setDateRange(dateRangeOptions[e].value);
-              if (e === 4) {
+              setDateRange(ReportOptions.dateRange[e].name);
+              if (e === 'allMonths') {
                 onChangeDates(...getFullRange(allMonths));
               } else {
-                onChangeDates(...getLatestRange(dateRangeOptions[e].name));
+                onChangeDates(
+                  ...getLatestRange(ReportOptions.dateRange[e].name),
+                );
               }
             }}
-            options={dateRangeOptions.map(option => [
-              option.value,
+            options={ReportOptions.dateRange.map(option => [
+              option.description,
               option.description,
             ])}
             line={dateRangeLine}

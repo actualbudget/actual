@@ -8,6 +8,7 @@ import BarLineGraph from './graphs/BarLineGraph';
 import DonutGraph from './graphs/DonutGraph';
 import LineGraph from './graphs/LineGraph';
 import StackedBarGraph from './graphs/StackedBarGraph';
+import { ReportOptions } from './ReportOptions';
 import SimpleTable, {
   TableHeader,
   TableList,
@@ -21,9 +22,7 @@ export function ChooseGraph({
   mode,
   graphType,
   type,
-  typeOptions,
   split,
-  splitOptions,
   empty,
   scrollWidth,
   setScrollWidth,
@@ -43,7 +42,7 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        typeOp={typeOptions.find(opt => opt.value === type).format}
+        typeOp={ReportOptions.type.find(opt => opt.description === type).format}
       />
     );
   }
@@ -57,7 +56,7 @@ export function ChooseGraph({
         split={split}
         empty={empty}
         OnChangeLegend={OnChangeLegend}
-        typeOp={typeOptions.find(opt => opt.value === type).format}
+        typeOp={ReportOptions.type.find(opt => opt.description === type).format}
       />
     );
   }
@@ -81,7 +80,7 @@ export function ChooseGraph({
         split={split}
         empty={empty}
         OnChangeLegend={OnChangeLegend}
-        typeOp={typeOptions.find(opt => opt.value === type).format}
+        typeOp={ReportOptions.type.find(opt => opt.description === type).format}
       />
     );
   }
@@ -102,7 +101,7 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        typeOp={typeOptions.find(opt => opt.value === type).format}
+        typeOp={ReportOptions.type.find(opt => opt.description === type).format}
         OnChangeLegend={OnChangeLegend}
       />
     );
@@ -117,7 +116,7 @@ export function ChooseGraph({
         <TableHeader
           interval={mode === 'time' && months}
           scrollWidth={scrollWidth}
-          split={splitOptions.find(opt => opt.value === split).description}
+          split={split}
           type={type}
         />
         <SimpleTable saveScrollWidth={saveScrollWidth}>
@@ -125,15 +124,19 @@ export function ChooseGraph({
             data={data}
             empty={empty}
             monthsCount={months.length}
-            typeOp={typeOptions.find(opt => opt.value === type).format}
+            typeOp={
+              ReportOptions.type.find(opt => opt.description === type).format
+            }
             mode={mode}
-            split={splitOptions.find(opt => opt.value === split).description}
+            split={split}
           />
           <TableTotals
             scrollWidth={scrollWidth}
             data={data}
             mode={mode}
-            typeOp={typeOptions.find(opt => opt.value === type).format}
+            typeOp={
+              ReportOptions.type.find(opt => opt.description === type).format
+            }
             monthsCount={months.length}
             type={type}
           />

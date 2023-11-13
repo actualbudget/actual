@@ -1,7 +1,6 @@
 import React, { useLayoutEffect, useRef, memo } from 'react';
 
 import * as d from 'date-fns';
-//import { useSelector } from 'react-redux';
 
 import {
   amountToCurrency,
@@ -206,7 +205,7 @@ export function TableHeader({ scrollWidth, split, interval, type }) {
               />
             );
           })
-        : type === 3 && (
+        : type === 'Net' && (
             <>
               <Cell
                 style={{

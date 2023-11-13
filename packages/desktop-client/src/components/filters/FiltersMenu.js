@@ -336,6 +336,27 @@ function ConfigureField({
   );
 }
 
+function ButtonType({ type, dispatch }) {
+  return (
+    <Button
+      type="bare"
+      onClick={() => dispatch({ type: 'select-field' })}
+      title={type && 'Filters'}
+    >
+      {type === 'reports' ? (
+        <Filter width={15} height={15} />
+      ) : (
+        <>
+          <SettingsSliderAlternate
+            style={{ width: 16, height: 16, marginRight: 5 }}
+          />{' '}
+          Filter
+        </>
+      )}
+    </Button>
+  );
+}
+
 export function FilterButton({ onApply, type }) {
   let filters = useFilters();
 
@@ -371,31 +392,6 @@ export function FilterButton({ onApply, type }) {
     },
     { fieldsOpen: false, condOpen: false, field: null, value: null },
   );
-
-  function ButtonType() {
-    if (type === 'accounts') {
-      return (
-        <Button type="bare" onClick={() => dispatch({ type: 'select-field' })}>
-          <SettingsSliderAlternate
-            style={{ width: 16, height: 16, marginRight: 5 }}
-          />{' '}
-          Filter
-        </Button>
-      );
-    }
-    if (type === 'reports') {
-      return (
-        <Button
-          type="bare"
-          onClick={() => dispatch({ type: 'select-field' })}
-          style={{ marginLeft: 15 }}
-          title="Filters"
-        >
-          <Filter width={15} height={15} />
-        </Button>
-      );
-    }
-  }
 
   async function onValidateAndApply(cond) {
     cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
@@ -444,7 +440,7 @@ export function FilterButton({ onApply, type }) {
 
   return (
     <View>
-      <ButtonType />
+      <ButtonType type={type} dispatch={dispatch} />
       {state.fieldsOpen && (
         <Tooltip
           position="bottom-left"

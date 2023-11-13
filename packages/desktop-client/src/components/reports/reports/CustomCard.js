@@ -18,7 +18,7 @@ function CustomReportsCard() {
 
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 3);
-  const split = 1;
+  const split = 'Category';
 
   const getGraphData = useMemo(() => {
     return defaultSpreadsheet(start, end, split, 'totalDebts', categories);
@@ -47,7 +47,7 @@ function CustomReportsCard() {
           end={end}
           data={data}
           compact={true}
-          split={1}
+          split={split}
           empty={true}
           typeOp={'totalDebts'}
           style={{ height: 'auto', flex: 1 }}

@@ -84,12 +84,12 @@ export function CustomTopbar({
           if (mode === 'total') {
             setGraphType('BarGraph');
             // eslint-disable-next-line rulesdir/prefer-if-statement
-            [3].includes(type) && setType(1);
+            [3].includes(type) && setType('Expense');
             setTypeDisabled([5, 6].includes(split) ? [0] : [3]);
           } else {
             setGraphType('StackedBarGraph');
             setTypeDisabled([3]);
-            setType(1);
+            setType('Expense');
           }
         }}
         style={{ marginLeft: 15 }}
@@ -101,7 +101,7 @@ export function CustomTopbar({
         selected={graphType === 'AreaGraph'}
         onSelect={() => {
           setGraphType('AreaGraph');
-          setSplit(5);
+          setSplit('Month');
           setViewSplit(false);
           setTypeDisabled([0]);
         }}
@@ -116,7 +116,7 @@ export function CustomTopbar({
         onSelect={() => {
           setGraphType('DonutGraph');
           setTypeDisabled([3]);
-          setType(1);
+          setType('Expense');
         }}
         style={{ marginLeft: 15 }}
         disabled={mode === 'total' ? false : true}
@@ -171,6 +171,7 @@ export function CustomTopbar({
           width: 1,
           height: 30,
           backgroundColor: theme.altPillBorder,
+          marginRight: 15,
           marginLeft: 15,
           flexShrink: 0,
         }}
