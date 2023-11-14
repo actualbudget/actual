@@ -11,7 +11,7 @@ import * as lightTheme from './themes/light';
 const themes = {
   light: { name: 'Light', colors: lightTheme },
   dark: { name: 'Dark', colors: darkTheme },
-  auto: { name: 'Auto', colors: darkTheme },
+  auto: { name: 'System default', colors: darkTheme },
   ...(isNonProductionEnvironment() && {
     development: { name: 'Development', colors: developmentTheme },
   }),
