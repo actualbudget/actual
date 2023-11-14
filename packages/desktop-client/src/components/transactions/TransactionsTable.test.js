@@ -463,14 +463,14 @@ describe('Transactions', () => {
     let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
     // No item should be highlighted
-    let highlighted = tooltip.querySelector('[data-highlighted]') != null;
-    expect(highlighted).toBe(null);
+    let highlighted = tooltip.querySelectorAll('[data-highlighted]');
+    expect(highlighted).toHaveLength(0);
 
     await userEvent.keyboard('[ArrowDown][ArrowDown][ArrowDown][ArrowDown]');
 
     // The right item should be highlighted
-    highlighted = tooltip.querySelector('[data-highlighted]') != null;
-    expect(highlighted).toBeTruthy();
+    highlighted = tooltip.querySelector('[data-highlighted]');
+    expect(highlighted).toBeDefined();
     expect(highlighted.textContent).toBe('General');
 
     expect(getTransactions()[2].category).toBe(
@@ -504,15 +504,15 @@ describe('Transactions', () => {
 
     // Make sure none of the items are highlighted
     let items = tooltip.querySelectorAll('[data-testid*="category-item"]');
-    let highlighted = tooltip.querySelector('[data-highlighted]') != null;
-    expect(highlighted).toBe(null);
+    let highlighted = tooltip.querySelectorAll('[data-highlighted]');
+    expect(highlighted).toHaveLength(0);
 
     // Hover over an item
     await userEvent.hover(items[2]);
 
     // Make sure the expected category is highlighted
-    highlighted = tooltip.querySelector('[data-highlighted]') != null;
-    expect(highlighted).toBeTruthy();
+    highlighted = tooltip.querySelector('[data-highlighted]');
+    expect(highlighted).toBeDefined();
     expect(highlighted.textContent).toBe('General');
 
     // Click the item and check the before/after values
@@ -545,8 +545,8 @@ describe('Transactions', () => {
     await userEvent.hover(items[3]);
 
     // Make sure one of them is highlighted
-    let highlighted = tooltip.querySelector('[data-highlighted]') != null;
-    expect(highlighted).toBeTruthy();
+    let highlighted = tooltip.querySelector('[data-highlighted]');
+    expect(highlighted).toBeDefined();
 
     // Navigate away from the field with the keyboard
     await userEvent.type(input, '[Tab]');
