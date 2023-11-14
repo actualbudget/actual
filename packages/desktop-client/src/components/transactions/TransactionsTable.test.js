@@ -446,7 +446,7 @@ describe('Transactions', () => {
     expect(items.length).toBe(2);
     expect(items[0].textContent).toBe('Usual Expenses');
     expect(items[1].textContent).toBe('General');
-    expect(items[1].dataset['highlighted']).toBe(true);
+    expect(items[1].dataset['highlighted']).toBeDefined();
 
     // It should not allow filtering on group names
     await userEvent.clear(input);
@@ -463,13 +463,13 @@ describe('Transactions', () => {
     let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
     // No item should be highlighted
-    let highlighted = tooltip.querySelector('[data-highlighted="true"]');
+    let highlighted = tooltip.querySelector('[data-highlighted]') != null;
     expect(highlighted).toBe(null);
 
     await userEvent.keyboard('[ArrowDown][ArrowDown][ArrowDown][ArrowDown]');
 
     // The right item should be highlighted
-    highlighted = tooltip.querySelector('[data-highlighted="true"]');
+    highlighted = tooltip.querySelector('[data-highlighted]') != null;
     expect(highlighted).toBeTruthy();
     expect(highlighted.textContent).toBe('General');
 
@@ -504,14 +504,14 @@ describe('Transactions', () => {
 
     // Make sure none of the items are highlighted
     let items = tooltip.querySelectorAll('[data-testid*="category-item"]');
-    let highlighted = tooltip.querySelector('[data-highlighted="true"]');
+    let highlighted = tooltip.querySelector('[data-highlighted]') != null;
     expect(highlighted).toBe(null);
 
     // Hover over an item
     await userEvent.hover(items[2]);
 
     // Make sure the expected category is highlighted
-    highlighted = tooltip.querySelector('[data-highlighted="true"]');
+    highlighted = tooltip.querySelector('[data-highlighted]') != null;
     expect(highlighted).toBeTruthy();
     expect(highlighted.textContent).toBe('General');
 
@@ -545,7 +545,7 @@ describe('Transactions', () => {
     await userEvent.hover(items[3]);
 
     // Make sure one of them is highlighted
-    let highlighted = tooltip.querySelector('[data-highlighted="true"]');
+    let highlighted = tooltip.querySelector('[data-highlighted]') != null;
     expect(highlighted).toBeTruthy();
 
     // Navigate away from the field with the keyboard

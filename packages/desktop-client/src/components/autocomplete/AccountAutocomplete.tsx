@@ -199,7 +199,7 @@ export function AccountItem({
         },
       ])}`}
       data-testid={`${item.name}-account-item`}
-      data-highlighted={`${highlighted}`}
+      data-highlighted={highlighted}
       {...props}
     >
       {item.name}
