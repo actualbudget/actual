@@ -29,11 +29,11 @@ export function CustomSidebar({
   allMonths,
   graphType,
   setGraphType,
-  setViewSplit,
+  setViewLegend,
   typeDisabled,
   setTypeDisabled,
-  split,
-  setSplit,
+  groupBy,
+  setGroupBy,
   type,
   setType,
   mode,
@@ -60,7 +60,7 @@ export function CustomSidebar({
         setTypeDisabled([0]);
       } else {
         setTypeDisabled([3]);
-        if ([3].includes(type)) {
+        if (['Net'].includes(type)) {
           setType('Expense');
         }
       }
@@ -69,28 +69,28 @@ export function CustomSidebar({
       }
       if (['AreaGraph', 'DonutGraph'].includes(graphType)) {
         setGraphType('TableGraph');
-        //setViewSplit(false);
+        //setViewLegend(false);
       }
-      if ([5, 6].includes(split)) {
-        setSplit('Category');
+      if (['Month', 'Year'].includes(groupBy)) {
+        setGroupBy('Category');
       }
     } else {
       if (graphType === 'StackedBarGraph') {
         setGraphType('BarGraph');
       } else {
-        setTypeDisabled([0]);
+        setTypeDisabled([]);
       }
     }
   }
 
   function onChangeSplit(cond) {
-    setSplit(cond);
+    setGroupBy(cond);
     if (mode === 'total') {
       if (graphType !== 'TableGraph') {
-        setTypeDisabled(![5, 6].includes(split) ? [0] : [3]);
+        setTypeDisabled(!['Month', 'Year'].includes(groupBy) ? [] : ['Net']);
       }
     }
-    if ([3].includes(type) && graphType !== 'TableGraph') {
+    if (['Net'].includes(type) && graphType !== 'TableGraph') {
       setType('Expense');
     }
   }
@@ -176,9 +176,9 @@ export function CustomSidebar({
             Split:
           </Text>
           <Select
-            value={split}
+            value={groupBy}
             onChange={e => onChangeSplit(e)}
-            options={ReportOptions.split.map(option => [
+            options={ReportOptions.groupBy.map(option => [
               option.description,
               option.description,
             ])}
@@ -399,7 +399,7 @@ export function CustomSidebar({
           }}
         />
       </View>
-      {[1, 2].includes(split) && (
+      {['Category', 'Group'].includes(groupBy) && (
         <View
           style={{
             marginTop: 10,

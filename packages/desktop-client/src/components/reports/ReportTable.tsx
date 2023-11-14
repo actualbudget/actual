@@ -21,18 +21,18 @@ type TableRowProps = {
     totalDebts: number;
   };
   typeOp?: string | null;
-  splitItem: string;
+  groupByItem: string;
   mode: string;
   monthsCount: number;
   style?: object | null;
 };
 
 const TableRow = memo(
-  ({ item, typeOp, splitItem, mode, monthsCount, style }: TableRowProps) => {
+  ({ item, typeOp, groupByItem, mode, monthsCount, style }: TableRowProps) => {
     const average = amountToInteger(item[typeOp]) / monthsCount;
     return (
       <Row
-        key={item[splitItem]}
+        key={item[groupByItem]}
         collapsed={true}
         style={{
           color: theme.tableText,
@@ -41,9 +41,9 @@ const TableRow = memo(
         }}
       >
         <Cell
-          value={item[splitItem]}
+          value={item[groupByItem]}
           width="flex"
-          title={item[splitItem].length > 12 && item[splitItem]}
+          title={item[groupByItem].length > 12 && item[groupByItem]}
           style={{
             minWidth: 125,
           }}
@@ -125,7 +125,7 @@ const TableRow = memo(
 function GroupedTableRow({
   item,
   typeOp,
-  splitItem,
+  groupByItem,
   mode,
   monthsCount,
   empty,
@@ -136,7 +136,7 @@ function GroupedTableRow({
         key={item.id}
         item={item}
         typeOp={typeOp}
-        splitItem={splitItem}
+        groupByItem={groupByItem}
         mode={mode}
         monthsCount={monthsCount}
         style={{
@@ -162,7 +162,7 @@ function GroupedTableRow({
                 key={cat.id}
                 item={cat}
                 typeOp={typeOp}
-                splitItem={splitItem}
+                groupByItem={groupByItem}
                 mode={mode}
                 monthsCount={monthsCount}
               />
@@ -174,7 +174,7 @@ function GroupedTableRow({
   );
 }
 
-export function TableHeader({ scrollWidth, split, interval, type }) {
+export function TableHeader({ scrollWidth, groupBy, interval, type }) {
   return (
     <Row
       collapsed={true}
@@ -188,7 +188,7 @@ export function TableHeader({ scrollWidth, split, interval, type }) {
         style={{
           minWidth: 125,
         }}
-        value={split}
+        value={groupBy}
         width="flex"
       />
       {interval
@@ -333,18 +333,18 @@ export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
   );
 }
 
-export function TableList({ data, empty, monthsCount, typeOp, mode, split }) {
-  const splitItem = ['Month', 'Year'].includes(split) ? 'date' : 'name';
-  const splitData =
-    split === 'Category'
-      ? 'gData'
-      : ['Month', 'Year'].includes(split)
+export function TableList({ data, empty, monthsCount, typeOp, mode, groupBy }) {
+  const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
+  const groupByData =
+    groupBy === 'Category'
+      ? 'groupData'
+      : ['Month', 'Year'].includes(groupBy)
       ? 'monthData'
       : 'data';
 
   return (
     <View>
-      {data[splitData]
+      {data[groupByData]
         .filter(i =>
           !empty
             ? typeOp === 'totalTotals'
@@ -353,13 +353,13 @@ export function TableList({ data, empty, monthsCount, typeOp, mode, split }) {
             : true,
         )
         .map(item => {
-          if (split === 'Category') {
+          if (groupBy === 'Category') {
             return (
               <GroupedTableRow
                 key={item.id}
                 item={item}
                 typeOp={typeOp}
-                splitItem={splitItem}
+                groupByItem={groupByItem}
                 mode={mode}
                 monthsCount={monthsCount}
                 empty={empty}
@@ -371,7 +371,7 @@ export function TableList({ data, empty, monthsCount, typeOp, mode, split }) {
                 key={item.id}
                 item={item}
                 typeOp={typeOp}
-                splitItem={splitItem}
+                groupByItem={groupByItem}
                 mode={mode}
                 monthsCount={monthsCount}
               />

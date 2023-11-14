@@ -20,7 +20,7 @@ import { ChooseGraph } from '../ChooseGraph';
 import Header from '../Header';
 import { ReportOptions } from '../ReportOptions';
 import { CustomSidebar } from '../ReportSidebar';
-import { ReportSplit, ReportSummary } from '../ReportSummary';
+import { ReportLegend, ReportSummary } from '../ReportSummary';
 import { CustomTopbar } from '../ReportTopbar';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
 import useReport from '../useReport';
@@ -47,14 +47,14 @@ export default function Custom() {
 
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
-  const [typeDisabled, setTypeDisabled] = useState([3]);
+  const [typeDisabled, setTypeDisabled] = useState(['Net']);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const [mode, setMode] = useState('total');
-  const [split, setSplit] = useState('Category');
+  const [groupBy, setGroupBy] = useState('Category');
   const [type, setType] = useState('Expense');
   const [empty, setEmpty] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -62,7 +62,7 @@ export default function Custom() {
   const [dateRange, setDateRange] = useState('6 months');
 
   const [graphType, setGraphType] = useState('BarGraph');
-  const [viewSplit, setViewSplit] = useState(false);
+  const [viewLegend, setViewLegend] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
   const [viewLabels, setViewLabels] = useState(false);
   //const [legend, setLegend] = useState([]);
@@ -74,7 +74,7 @@ export default function Custom() {
     return defaultSpreadsheet(
       start,
       end,
-      split,
+      groupBy,
       ReportOptions.type.find(opt => opt.description === type).format,
       categories,
       selectedCategories,
@@ -88,7 +88,7 @@ export default function Custom() {
   }, [
     start,
     end,
-    split,
+    groupBy,
     type,
     categories,
     selectedCategories,
@@ -105,7 +105,7 @@ export default function Custom() {
     if (selectedCategories === null && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
-  }, [categories, selectedCategories, split]);
+  }, [categories, selectedCategories, groupBy]);
 
   useEffect(() => {
     async function run() {
@@ -170,11 +170,11 @@ export default function Custom() {
           allMonths={allMonths}
           graphType={graphType}
           setGraphType={setGraphType}
-          setViewSplit={setViewSplit}
+          setViewLegend={setViewLegend}
           typeDisabled={typeDisabled}
           setTypeDisabled={setTypeDisabled}
-          split={split}
-          setSplit={setSplit}
+          groupBy={groupBy}
+          setGroupBy={setGroupBy}
           type={type}
           setType={setType}
           mode={mode}
@@ -198,13 +198,13 @@ export default function Custom() {
             graphType={graphType}
             setGraphType={setGraphType}
             mode={mode}
-            viewSplit={viewSplit}
-            setViewSplit={setViewSplit}
+            viewLegend={viewLegend}
+            setViewLegend={setViewLegend}
             setTypeDisabled={setTypeDisabled}
             type={type}
             setType={setType}
-            split={split}
-            setSplit={setSplit}
+            groupBy={groupBy}
+            setGroupBy={setGroupBy}
             viewSummary={viewSummary}
             setViewSummary={setViewSummary}
             viewLabels={viewLabels}
@@ -290,14 +290,14 @@ export default function Custom() {
                   mode={mode}
                   graphType={graphType}
                   type={type}
-                  split={split}
+                  groupBy={groupBy}
                   empty={empty}
                   scrollWidth={scrollWidth}
                   setScrollWidth={setScrollWidth}
                   months={months}
                 />
               </View>
-              {(viewSplit || viewSummary) && (
+              {(viewLegend || viewSummary) && (
                 <View
                   style={{
                     padding: 10,
@@ -320,11 +320,11 @@ export default function Custom() {
                       monthsCount={months.length}
                     />
                   )}
-                  {viewSplit && (
-                    <ReportSplit
+                  {viewLegend && (
+                    <ReportLegend
                       data={data}
                       legend={legend}
-                      splitType={split}
+                      groupBy={groupBy}
                     />
                   )}
                 </View>

@@ -130,7 +130,7 @@ export function ReportSummary({ start, end, data, typeOp, monthsCount }) {
   );
 }
 
-export function ReportSplit({ data, legend, splitType }) {
+export function ReportLegend({ data, legend, groupBy }) {
   return (
     <View
       style={{
@@ -151,7 +151,7 @@ export function ReportSplit({ data, legend, splitType }) {
           },
         ]}
       >
-        {splitType}
+        {groupBy}
       </Text>
       <View>
         {legend.map(item => {

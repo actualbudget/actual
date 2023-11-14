@@ -5,7 +5,7 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-  Legend,
+  //Legend,
   XAxis,
   YAxis,
   Tooltip,
@@ -58,6 +58,7 @@ function StackedBarGraph({
     };
   };
 
+  /* Descoped for future PR
   type CustomLegendProps = {
     active?: boolean;
     payload?: PayloadItem[];
@@ -72,10 +73,11 @@ function StackedBarGraph({
       };
     });
 
-    //OnChangeLegend(agg.slice(0).reverse());
+    OnChangeLegend(agg.slice(0).reverse());
 
     return <div />;
   };
+  */
 
   type CustomTooltipProps = {
     active?: boolean;
@@ -164,7 +166,9 @@ function StackedBarGraph({
                 data={data.stackedData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                <Legend content={<CustomLegend />} />
+                {
+                  //<Legend content={<CustomLegend />} />
+                }
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
@@ -173,7 +177,7 @@ function StackedBarGraph({
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
-                {data.split
+                {data.groupBy
                   .slice(0)
                   .reverse()
                   .map((c, index) => (

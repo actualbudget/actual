@@ -10,7 +10,7 @@ import View from '../common/View';
 export function SaveReportMenuButton() {
   let [menuOpen, setMenuOpen] = useState(false);
 
-  const onMenuSelect = async item => {
+  const onMenuSelect = item => {
     switch (item) {
       case 'save':
         setMenuOpen(false);
@@ -30,18 +30,16 @@ export function SaveReportMenuButton() {
             onMenuSelect(item);
           }}
           items={[
-            ...[
-              {
-                name: 'save',
-                text: 'Save new report',
-                disabled: true,
-              },
-              {
-                name: 'clear',
-                text: 'Clear all',
-                disabled: true,
-              },
-            ],
+            {
+              name: 'save',
+              text: 'Save new report',
+              disabled: true,
+            },
+            {
+              name: 'clear',
+              text: 'Clear all',
+              disabled: true,
+            },
           ]}
         />
       </MenuTooltip>

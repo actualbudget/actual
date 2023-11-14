@@ -14,49 +14,42 @@ import { FilterButton } from '../filters/FiltersMenu';
 
 import { SaveReportMenuButton } from './SaveReport';
 
+function GraphButton({ selected, children, style, onSelect, title, disabled }) {
+  return (
+    <Button
+      type="bare"
+      style={{
+        ...(selected && {
+          backgroundColor: theme.buttonBareBackgroundHover,
+        }),
+        ...style,
+      }}
+      onClick={onSelect}
+      title={title}
+      disabled={disabled}
+    >
+      {children}
+    </Button>
+  );
+}
+
 export function CustomTopbar({
   graphType,
   setGraphType,
   mode,
-  viewSplit,
-  setViewSplit,
+  viewLegend,
+  setViewLegend,
   setTypeDisabled,
   type,
   setType,
-  split,
-  setSplit,
+  groupBy,
+  setGroupBy,
   viewSummary,
   setViewSummary,
   viewLabels,
   setViewLabels,
   onApplyFilter,
 }) {
-  function GraphButton({
-    selected,
-    children,
-    style,
-    onSelect,
-    title,
-    disabled,
-  }) {
-    return (
-      <Button
-        type="bare"
-        style={{
-          ...(selected && {
-            backgroundColor: theme.buttonBareBackgroundHover,
-          }),
-          ...style,
-        }}
-        onClick={onSelect}
-        title={title}
-        disabled={disabled}
-      >
-        {children}
-      </Button>
-    );
-  }
-
   return (
     <View
       style={{
@@ -71,8 +64,8 @@ export function CustomTopbar({
         title="Data Table"
         onSelect={() => {
           setGraphType('TableGraph');
-          //setViewSplit(false);
-          setTypeDisabled([0]);
+          //setViewLegend(false);
+          setTypeDisabled([]);
         }}
       >
         <Queue width={15} height={15} />
@@ -83,12 +76,13 @@ export function CustomTopbar({
         onSelect={() => {
           if (mode === 'total') {
             setGraphType('BarGraph');
-            // eslint-disable-next-line rulesdir/prefer-if-statement
-            [3].includes(type) && setType('Expense');
-            setTypeDisabled([5, 6].includes(split) ? [0] : [3]);
+            if (['Net'].includes(type)) {
+              setType('Expense');
+            }
+            setTypeDisabled(['Month', 'Year'].includes(groupBy) ? [] : ['Net']);
           } else {
             setGraphType('StackedBarGraph');
-            setTypeDisabled([3]);
+            setTypeDisabled(['Net']);
             setType('Expense');
           }
         }}
@@ -101,9 +95,9 @@ export function CustomTopbar({
         selected={graphType === 'AreaGraph'}
         onSelect={() => {
           setGraphType('AreaGraph');
-          setSplit('Month');
-          //setViewSplit(false);
-          setTypeDisabled([0]);
+          setGroupBy('Month');
+          //setViewLegend(false);
+          setTypeDisabled([]);
         }}
         style={{ marginLeft: 15 }}
         disabled={mode === 'total' ? false : true}
@@ -115,7 +109,7 @@ export function CustomTopbar({
         selected={graphType === 'DonutGraph'}
         onSelect={() => {
           setGraphType('DonutGraph');
-          setTypeDisabled([3]);
+          setTypeDisabled(['Net']);
           setType('Expense');
         }}
         style={{ marginLeft: 15 }}
@@ -133,9 +127,9 @@ export function CustomTopbar({
         }}
       />
       <GraphButton
-        selected={viewSplit}
+        selected={viewLegend}
         onSelect={() => {
-          setViewSplit(!viewSplit);
+          setViewLegend(!viewLegend);
         }}
         style={{ marginLeft: 15 }}
         title="Show Legend"

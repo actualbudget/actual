@@ -5,7 +5,7 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-  Legend,
+  //Legend,
   Cell,
   ReferenceLine,
   XAxis,
@@ -26,7 +26,7 @@ import Container from '../Container';
 type BarGraphProps = {
   style?: CSSProperties;
   data;
-  split;
+  groupBy;
   typeOp;
   empty;
   compact: boolean;
@@ -46,15 +46,15 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
 function BarGraph({
   style,
   data,
-  split,
+  groupBy,
   empty,
   typeOp,
   compact,
   domain,
 }: BarGraphProps) {
   const colorScale = getColorScale('qualitative');
-  const yAxis = [5, 6].includes(split) ? 'date' : 'name';
-  const splitData = [5, 6].includes(split) ? 'monthData' : 'data';
+  const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
+  const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
 
   type PayloadItem = {
     value: string;
@@ -76,6 +76,7 @@ function BarGraph({
     };
   };
 
+  /* Descoped for future PR
   type CustomLegendProps = {
     active?: boolean;
     payload?: PayloadItem[];
@@ -90,10 +91,11 @@ function BarGraph({
       };
     });
 
-    //OnChangeLegend(agg);
+    OnChangeLegend(agg);
 
     return <div />;
   };
+  */
 
   type CustomTooltipProps = {
     active?: boolean;
@@ -187,7 +189,9 @@ function BarGraph({
                 )}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {!compact && <Legend content={<CustomLegend />} />}
+                {
+                  //!compact && <Legend content={<CustomLegend />} />
+                }
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}

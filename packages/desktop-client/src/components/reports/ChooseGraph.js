@@ -22,7 +22,7 @@ export function ChooseGraph({
   mode,
   graphType,
   type,
-  split,
+  groupBy,
   empty,
   scrollWidth,
   setScrollWidth,
@@ -52,7 +52,7 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        split={split}
+        groupBy={groupBy}
         empty={empty}
         typeOp={ReportOptions.type.find(opt => opt.description === type).format}
       />
@@ -75,7 +75,7 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        split={split}
+        groupBy={groupBy}
         empty={empty}
         typeOp={ReportOptions.type.find(opt => opt.description === type).format}
       />
@@ -112,7 +112,7 @@ export function ChooseGraph({
         <TableHeader
           interval={mode === 'time' && months}
           scrollWidth={scrollWidth}
-          split={split}
+          groupBy={groupBy}
           type={type}
         />
         <SimpleTable saveScrollWidth={saveScrollWidth}>
@@ -124,7 +124,7 @@ export function ChooseGraph({
               ReportOptions.type.find(opt => opt.description === type).format
             }
             mode={mode}
-            split={split}
+            groupBy={groupBy}
           />
           <TableTotals
             scrollWidth={scrollWidth}

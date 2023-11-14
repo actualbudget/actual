@@ -4,7 +4,7 @@ const typeOptions = [
   { description: 'Net', format: 'totalTotals' },
 ];
 
-const splitOptions = [
+const groupByOptions = [
   { description: 'Category' },
   { description: 'Group' },
   { description: 'Payee' },
@@ -22,7 +22,7 @@ const dateRangeOptions = [
 ];
 
 export const ReportOptions = {
-  split: splitOptions,
+  groupBy: groupByOptions,
   type: typeOptions,
   dateRange: dateRangeOptions,
 };
