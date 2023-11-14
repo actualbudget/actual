@@ -53,7 +53,7 @@ export type LocalPrefs = Partial<
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'auto';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
