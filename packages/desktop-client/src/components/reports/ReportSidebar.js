@@ -34,8 +34,8 @@ export function CustomSidebar({
   setTypeDisabled,
   groupBy,
   setGroupBy,
-  type,
-  setType,
+  balanceType,
+  setBalanceType,
   mode,
   setMode,
   empty,
@@ -60,8 +60,8 @@ export function CustomSidebar({
         setTypeDisabled([0]);
       } else {
         setTypeDisabled([3]);
-        if (['Net'].includes(type)) {
-          setType('Expense');
+        if (['Net'].includes(balanceType)) {
+          setBalanceType('Expense');
         }
       }
       if (graphType === 'BarGraph') {
@@ -90,8 +90,8 @@ export function CustomSidebar({
         setTypeDisabled(!['Month', 'Year'].includes(groupBy) ? [] : ['Net']);
       }
     }
-    if (['Net'].includes(type) && graphType !== 'TableGraph') {
-      setType('Expense');
+    if (['Net'].includes(balanceType) && graphType !== 'TableGraph') {
+      setBalanceType('Expense');
     }
   }
 
@@ -202,9 +202,9 @@ export function CustomSidebar({
             Type:
           </Text>
           <Select
-            value={type}
-            onChange={setType}
-            options={ReportOptions.type.map(option => [
+            value={balanceType}
+            onChange={setBalanceType}
+            options={ReportOptions.balanceType.map(option => [
               option.description,
               option.description,
             ])}

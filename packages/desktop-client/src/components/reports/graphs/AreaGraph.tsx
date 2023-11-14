@@ -22,7 +22,7 @@ import Container from '../Container';
 type AreaGraphProps = {
   style?: CSSProperties;
   data;
-  typeOp;
+  balanceTypeOp;
   compact: boolean;
   domain?: {
     totalTotals?: [number, number];
@@ -37,14 +37,14 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
   return null; // or some default value for other cases
 };
 
-function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
+function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
 
   const gradientOffset = () => {
-    const dataMax = Math.max(...data.monthData.map(i => i[typeOp]));
-    const dataMin = Math.min(...data.monthData.map(i => i[typeOp]));
+    const dataMax = Math.max(...data.monthData.map(i => i[balanceTypeOp]));
+    const dataMin = Math.min(...data.monthData.map(i => i[balanceTypeOp]));
 
     if (dataMax <= 0) {
       return 0;
@@ -96,19 +96,19 @@ function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <PrivacyFilter>
-                {['totalAssets', 'totalTotals'].includes(typeOp) && (
+                {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
                   <AlignedText
                     left="Assets:"
                     right={amountToCurrency(payload[0].payload.totalAssets)}
                   />
                 )}
-                {['totalDebts', 'totalTotals'].includes(typeOp) && (
+                {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
                   <AlignedText
                     left="Debt:"
                     right={amountToCurrency(payload[0].payload.totalDebts)}
                   />
                 )}
-                {['totalTotals'].includes(typeOp) && (
+                {['totalTotals'].includes(balanceTypeOp) && (
                   <AlignedText
                     left="Net:"
                     right={
@@ -150,7 +150,7 @@ function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
                 {compact ? null : <XAxis dataKey="date" />}
                 {compact ? null : (
                   <YAxis
-                    dataKey={...typeOp}
+                    dataKey={...balanceTypeOp}
                     domain={['auto', 'auto']}
                     tickFormatter={tickFormatter}
                   />
@@ -180,7 +180,7 @@ function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
-                  dataKey={...typeOp}
+                  dataKey={...balanceTypeOp}
                   stroke={theme.reportsBlue}
                   fill="url(#splitColor)"
                   fillOpacity={1}

@@ -20,7 +20,7 @@ type TableRowProps = {
     totalAssets: number;
     totalDebts: number;
   };
-  typeOp?: string | null;
+  balanceTypeOp?: string | null;
   groupByItem: string;
   mode: string;
   monthsCount: number;
@@ -28,8 +28,15 @@ type TableRowProps = {
 };
 
 const TableRow = memo(
-  ({ item, typeOp, groupByItem, mode, monthsCount, style }: TableRowProps) => {
-    const average = amountToInteger(item[typeOp]) / monthsCount;
+  ({
+    item,
+    balanceTypeOp,
+    groupByItem,
+    mode,
+    monthsCount,
+    style,
+  }: TableRowProps) => {
+    const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
     return (
       <Row
         key={item[groupByItem]}
@@ -55,18 +62,18 @@ const TableRow = memo(
                   style={{
                     minWidth: 85,
                   }}
-                  key={amountToCurrency(month[typeOp])}
-                  value={amountToCurrency(month[typeOp])}
+                  key={amountToCurrency(month[balanceTypeOp])}
+                  value={amountToCurrency(month[balanceTypeOp])}
                   title={
-                    Math.abs(month[typeOp]) > 100000 &&
-                    amountToCurrency(month[typeOp])
+                    Math.abs(month[balanceTypeOp]) > 100000 &&
+                    amountToCurrency(month[balanceTypeOp])
                   }
                   width="flex"
                   privacyFilter
                 />
               );
             })
-          : typeOp === 'totalTotals' && (
+          : balanceTypeOp === 'totalTotals' && (
               <>
                 <Cell
                   value={amountToCurrency(item.totalAssets)}
@@ -93,9 +100,10 @@ const TableRow = memo(
               </>
             )}
         <Cell
-          value={amountToCurrency(item[typeOp])}
+          value={amountToCurrency(item[balanceTypeOp])}
           title={
-            Math.abs(item[typeOp]) > 100000 && amountToCurrency(item[typeOp])
+            Math.abs(item[balanceTypeOp]) > 100000 &&
+            amountToCurrency(item[balanceTypeOp])
           }
           style={{
             fontWeight: 600,
@@ -124,7 +132,7 @@ const TableRow = memo(
 
 function GroupedTableRow({
   item,
-  typeOp,
+  balanceTypeOp,
   groupByItem,
   mode,
   monthsCount,
@@ -135,7 +143,7 @@ function GroupedTableRow({
       <TableRow
         key={item.id}
         item={item}
-        typeOp={typeOp}
+        balanceTypeOp={balanceTypeOp}
         groupByItem={groupByItem}
         mode={mode}
         monthsCount={monthsCount}
@@ -149,11 +157,11 @@ function GroupedTableRow({
         {item.categories
           .filter(i =>
             !empty
-              ? typeOp === 'totalTotals'
+              ? balanceTypeOp === 'totalTotals'
                 ? i.totalAssets !== 0 ||
                   i.totalDebts !== 0 ||
                   i.totalTotals !== 0
-                : i[typeOp] !== 0
+                : i[balanceTypeOp] !== 0
               : true,
           )
           .map(cat => {
@@ -161,7 +169,7 @@ function GroupedTableRow({
               <TableRow
                 key={cat.id}
                 item={cat}
-                typeOp={typeOp}
+                balanceTypeOp={balanceTypeOp}
                 groupByItem={groupByItem}
                 mode={mode}
                 monthsCount={monthsCount}
@@ -174,7 +182,7 @@ function GroupedTableRow({
   );
 }
 
-export function TableHeader({ scrollWidth, groupBy, interval, type }) {
+export function TableHeader({ scrollWidth, groupBy, interval, balanceType }) {
   return (
     <Row
       collapsed={true}
@@ -205,7 +213,7 @@ export function TableHeader({ scrollWidth, groupBy, interval, type }) {
               />
             );
           })
-        : type === 'Net' && (
+        : balanceType === 'Net' && (
             <>
               <Cell
                 style={{
@@ -242,8 +250,14 @@ export function TableHeader({ scrollWidth, groupBy, interval, type }) {
   );
 }
 
-export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
-  const average = amountToInteger(data[typeOp]) / monthsCount;
+export function TableTotals({
+  data,
+  scrollWidth,
+  balanceTypeOp,
+  mode,
+  monthsCount,
+}) {
+  const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
   return (
     <Row
       collapsed={true}
@@ -267,18 +281,18 @@ export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
                 style={{
                   minWidth: 85,
                 }}
-                key={amountToCurrency(item[typeOp])}
-                value={amountToCurrency(item[typeOp])}
+                key={amountToCurrency(item[balanceTypeOp])}
+                value={amountToCurrency(item[balanceTypeOp])}
                 title={
-                  Math.abs(item[typeOp]) > 100000 &&
-                  amountToCurrency(item[typeOp])
+                  Math.abs(item[balanceTypeOp]) > 100000 &&
+                  amountToCurrency(item[balanceTypeOp])
                 }
                 width="flex"
                 privacyFilter
               />
             );
           })
-        : typeOp === 'totalTotals' && (
+        : balanceTypeOp === 'totalTotals' && (
             <>
               <Cell
                 style={{
@@ -308,9 +322,10 @@ export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
         style={{
           minWidth: 85,
         }}
-        value={amountToCurrency(data[typeOp])}
+        value={amountToCurrency(data[balanceTypeOp])}
         title={
-          Math.abs(data[typeOp]) > 100000 && amountToCurrency(data[typeOp])
+          Math.abs(data[balanceTypeOp]) > 100000 &&
+          amountToCurrency(data[balanceTypeOp])
         }
         width="flex"
         privacyFilter
@@ -333,7 +348,14 @@ export function TableTotals({ data, scrollWidth, typeOp, mode, monthsCount }) {
   );
 }
 
-export function TableList({ data, empty, monthsCount, typeOp, mode, groupBy }) {
+export function TableList({
+  data,
+  empty,
+  monthsCount,
+  balanceTypeOp,
+  mode,
+  groupBy,
+}) {
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const groupByData =
     groupBy === 'Category'
@@ -347,9 +369,9 @@ export function TableList({ data, empty, monthsCount, typeOp, mode, groupBy }) {
       {data[groupByData]
         .filter(i =>
           !empty
-            ? typeOp === 'totalTotals'
+            ? balanceTypeOp === 'totalTotals'
               ? i.totalAssets !== 0 || i.totalDebts !== 0 || i.totalTotals !== 0
-              : i[typeOp] !== 0
+              : i[balanceTypeOp] !== 0
             : true,
         )
         .map(item => {
@@ -358,7 +380,7 @@ export function TableList({ data, empty, monthsCount, typeOp, mode, groupBy }) {
               <GroupedTableRow
                 key={item.id}
                 item={item}
-                typeOp={typeOp}
+                balanceTypeOp={balanceTypeOp}
                 groupByItem={groupByItem}
                 mode={mode}
                 monthsCount={monthsCount}
@@ -370,7 +392,7 @@ export function TableList({ data, empty, monthsCount, typeOp, mode, groupBy }) {
               <TableRow
                 key={item.id}
                 item={item}
-                typeOp={typeOp}
+                balanceTypeOp={balanceTypeOp}
                 groupByItem={groupByItem}
                 mode={mode}
                 monthsCount={monthsCount}

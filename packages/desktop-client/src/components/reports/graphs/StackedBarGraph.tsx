@@ -24,7 +24,7 @@ import Container from '../Container';
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data;
-  typeOp;
+  balanceTypeOp;
   compact: boolean;
   domain?: {
     y?: [number, number];
@@ -42,7 +42,7 @@ const numberFormatterTooltip = (value: PotentialNumber): number | null => {
 function StackedBarGraph({
   style,
   data,
-  typeOp,
+  balanceTypeOp,
   compact,
   domain,
 }: StackedBarGraphProps) {
@@ -141,7 +141,7 @@ function StackedBarGraph({
   };
 
   const getVal = (obj, key) => {
-    if (typeOp === 'totalDebts') {
+    if (balanceTypeOp === 'totalDebts') {
       return -1 * obj[key].amount;
     } else {
       return obj[key].amount;

@@ -49,7 +49,7 @@ function CustomReportsCard() {
           compact={true}
           groupBy={groupBy}
           empty={true}
-          typeOp={'totalDebts'}
+          balanceTypeOp={'totalDebts'}
           style={{ height: 'auto', flex: 1 }}
         />
       ) : (

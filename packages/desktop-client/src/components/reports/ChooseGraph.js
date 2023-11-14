@@ -21,7 +21,7 @@ export function ChooseGraph({
   data,
   mode,
   graphType,
-  type,
+  balanceType,
   groupBy,
   empty,
   scrollWidth,
@@ -41,7 +41,10 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        typeOp={ReportOptions.type.find(opt => opt.description === type).format}
+        balanceTypeOp={
+          ReportOptions.balanceType.find(opt => opt.description === balanceType)
+            .format
+        }
       />
     );
   }
@@ -54,7 +57,10 @@ export function ChooseGraph({
         data={data}
         groupBy={groupBy}
         empty={empty}
-        typeOp={ReportOptions.type.find(opt => opt.description === type).format}
+        balanceTypeOp={
+          ReportOptions.balanceType.find(opt => opt.description === balanceType)
+            .format
+        }
       />
     );
   }
@@ -77,7 +83,10 @@ export function ChooseGraph({
         data={data}
         groupBy={groupBy}
         empty={empty}
-        typeOp={ReportOptions.type.find(opt => opt.description === type).format}
+        balanceTypeOp={
+          ReportOptions.balanceType.find(opt => opt.description === balanceType)
+            .format
+        }
       />
     );
   }
@@ -98,7 +107,10 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        typeOp={ReportOptions.type.find(opt => opt.description === type).format}
+        balanceTypeOp={
+          ReportOptions.balanceType.find(opt => opt.description === balanceType)
+            .format
+        }
       />
     );
   }
@@ -113,15 +125,17 @@ export function ChooseGraph({
           interval={mode === 'time' && months}
           scrollWidth={scrollWidth}
           groupBy={groupBy}
-          type={type}
+          balanceType={balanceType}
         />
         <SimpleTable saveScrollWidth={saveScrollWidth}>
           <TableList
             data={data}
             empty={empty}
             monthsCount={months.length}
-            typeOp={
-              ReportOptions.type.find(opt => opt.description === type).format
+            balanceTypeOp={
+              ReportOptions.balanceType.find(
+                opt => opt.description === balanceType,
+              ).format
             }
             mode={mode}
             groupBy={groupBy}
@@ -130,11 +144,13 @@ export function ChooseGraph({
             scrollWidth={scrollWidth}
             data={data}
             mode={mode}
-            typeOp={
-              ReportOptions.type.find(opt => opt.description === type).format
+            balanceTypeOp={
+              ReportOptions.balanceType.find(
+                opt => opt.description === balanceType,
+              ).format
             }
             monthsCount={months.length}
-            type={type}
+            balanceType={balanceType}
           />
         </SimpleTable>
       </View>

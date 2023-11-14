@@ -40,8 +40,8 @@ export function CustomTopbar({
   viewLegend,
   setViewLegend,
   setTypeDisabled,
-  type,
-  setType,
+  balanceType,
+  setBalanceType,
   groupBy,
   setGroupBy,
   viewSummary,
@@ -76,14 +76,14 @@ export function CustomTopbar({
         onSelect={() => {
           if (mode === 'total') {
             setGraphType('BarGraph');
-            if (['Net'].includes(type)) {
-              setType('Expense');
+            if (['Net'].includes(balanceType)) {
+              setBalanceType('Expense');
             }
             setTypeDisabled(['Month', 'Year'].includes(groupBy) ? [] : ['Net']);
           } else {
             setGraphType('StackedBarGraph');
             setTypeDisabled(['Net']);
-            setType('Expense');
+            setBalanceType('Expense');
           }
         }}
         style={{ marginLeft: 15 }}
@@ -110,7 +110,7 @@ export function CustomTopbar({
         onSelect={() => {
           setGraphType('DonutGraph');
           setTypeDisabled(['Net']);
-          setType('Expense');
+          setBalanceType('Expense');
         }}
         style={{ marginLeft: 15 }}
         disabled={mode === 'total' ? false : true}

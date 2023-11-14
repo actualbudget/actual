@@ -23,7 +23,7 @@ type DonutGraphProps = {
   style?: CSSProperties;
   data;
   groupBy;
-  typeOp;
+  balanceTypeOp;
   empty;
   compact: boolean;
   domain?: {
@@ -44,7 +44,7 @@ function DonutGraph({
   data,
   groupBy,
   empty,
-  typeOp,
+  balanceTypeOp,
   compact,
   domain,
 }: DonutGraphProps) {
@@ -128,10 +128,10 @@ function DonutGraph({
   };
 
   const getVal = obj => {
-    if (typeOp === 'totalDebts') {
-      return -1 * obj[typeOp];
+    if (balanceTypeOp === 'totalDebts') {
+      return -1 * obj[balanceTypeOp];
     } else {
-      return obj[typeOp];
+      return obj[balanceTypeOp];
     }
   };
 
@@ -161,7 +161,7 @@ function DonutGraph({
                   nameKey={yAxis}
                   isAnimationActive={false}
                   data={data[splitData].filter(i =>
-                    !empty ? i[typeOp] !== 0 : true,
+                    !empty ? i[balanceTypeOp] !== 0 : true,
                   )}
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"

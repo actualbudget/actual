@@ -55,7 +55,7 @@ export default function Custom() {
 
   const [mode, setMode] = useState('total');
   const [groupBy, setGroupBy] = useState('Category');
-  const [type, setType] = useState('Expense');
+  const [balanceType, setBalanceType] = useState('Expense');
   const [empty, setEmpty] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [uncat, setUncat] = useState(false);
@@ -75,7 +75,8 @@ export default function Custom() {
       start,
       end,
       groupBy,
-      ReportOptions.type.find(opt => opt.description === type).format,
+      ReportOptions.balanceType.find(opt => opt.description === balanceType)
+        .format,
       categories,
       selectedCategories,
       payees,
@@ -89,7 +90,7 @@ export default function Custom() {
     start,
     end,
     groupBy,
-    type,
+    balanceType,
     categories,
     selectedCategories,
     payees,
@@ -175,8 +176,8 @@ export default function Custom() {
           setTypeDisabled={setTypeDisabled}
           groupBy={groupBy}
           setGroupBy={setGroupBy}
-          type={type}
-          setType={setType}
+          balanceType={balanceType}
+          setBalanceType={setBalanceType}
           mode={mode}
           setMode={setMode}
           empty={empty}
@@ -201,8 +202,8 @@ export default function Custom() {
             viewLegend={viewLegend}
             setViewLegend={setViewLegend}
             setTypeDisabled={setTypeDisabled}
-            type={type}
-            setType={setType}
+            balanceType={balanceType}
+            setBalanceType={setBalanceType}
             groupBy={groupBy}
             setGroupBy={setGroupBy}
             viewSummary={viewSummary}
@@ -263,15 +264,15 @@ export default function Custom() {
                       }}
                     >
                       <AlignedText
-                        left={<Block>{type}:</Block>}
+                        left={<Block>{balanceType}:</Block>}
                         right={
                           <Text>
                             <PrivacyFilter blurIntensity={5}>
                               {amountToCurrency(
                                 Math.abs(
                                   data[
-                                    ReportOptions.type.find(
-                                      opt => opt.description === type,
+                                    ReportOptions.balanceType.find(
+                                      opt => opt.description === balanceType,
                                     ).format
                                   ],
                                 ),
@@ -289,7 +290,7 @@ export default function Custom() {
                   data={data}
                   mode={mode}
                   graphType={graphType}
-                  type={type}
+                  balanceType={balanceType}
                   groupBy={groupBy}
                   empty={empty}
                   scrollWidth={scrollWidth}
@@ -312,9 +313,10 @@ export default function Custom() {
                     <ReportSummary
                       start={start}
                       end={end}
-                      typeOp={
-                        ReportOptions.type.find(opt => opt.description === type)
-                          .format
+                      balanceTypeOp={
+                        ReportOptions.balanceType.find(
+                          opt => opt.description === balanceType,
+                        ).format
                       }
                       data={data}
                       monthsCount={months.length}

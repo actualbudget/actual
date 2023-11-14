@@ -1,4 +1,4 @@
-const typeOptions = [
+const balanceTypeOptions = [
   { description: 'Expense', format: 'totalDebts' },
   { description: 'Income', format: 'totalAssets' },
   { description: 'Net', format: 'totalTotals' },
@@ -23,7 +23,7 @@ const dateRangeOptions = [
 
 export const ReportOptions = {
   groupBy: groupByOptions,
-  type: typeOptions,
+  balanceType: balanceTypeOptions,
   dateRange: dateRangeOptions,
 };
 

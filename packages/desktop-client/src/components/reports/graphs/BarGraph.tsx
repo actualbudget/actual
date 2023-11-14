@@ -27,7 +27,7 @@ type BarGraphProps = {
   style?: CSSProperties;
   data;
   groupBy;
-  typeOp;
+  balanceTypeOp;
   empty;
   compact: boolean;
   domain?: {
@@ -48,7 +48,7 @@ function BarGraph({
   data,
   groupBy,
   empty,
-  typeOp,
+  balanceTypeOp,
   compact,
   domain,
 }: BarGraphProps) {
@@ -126,19 +126,19 @@ function BarGraph({
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <PrivacyFilter>
-                {['totalAssets', 'totalTotals'].includes(typeOp) && (
+                {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
                   <AlignedText
                     left="Assets:"
                     right={amountToCurrency(payload[0].payload.totalAssets)}
                   />
                 )}
-                {['totalDebts', 'totalTotals'].includes(typeOp) && (
+                {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
                   <AlignedText
                     left="Debt:"
                     right={amountToCurrency(payload[0].payload.totalDebts)}
                   />
                 )}
-                {['totalTotals'].includes(typeOp) && (
+                {['totalTotals'].includes(balanceTypeOp) && (
                   <AlignedText
                     left="Net:"
                     right={
@@ -157,7 +157,7 @@ function BarGraph({
   };
 
   const getVal = obj => {
-    if (typeOp === 'totalDebts') {
+    if (balanceTypeOp === 'totalDebts') {
       return -1 * obj.totalDebts;
     } else {
       return obj.totalAssets;
@@ -185,7 +185,7 @@ function BarGraph({
                 height={height}
                 stackOffset="sign"
                 data={data[splitData].filter(i =>
-                  !empty ? i[typeOp] !== 0 : true,
+                  !empty ? i[balanceTypeOp] !== 0 : true,
                 )}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
@@ -210,13 +210,13 @@ function BarGraph({
                 {!compact && <ReferenceLine y={0} stroke="#000" />}
                 <Bar dataKey={val => getVal(val)} stackId="a">
                   {data[splitData]
-                    .filter(i => (!empty ? i[typeOp] !== 0 : true))
+                    .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
                     .map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={
                           yAxis === 'date'
-                            ? typeOp === 'totalDebts'
+                            ? balanceTypeOp === 'totalDebts'
                               ? theme.reportsRed
                               : theme.reportsBlue
                             : colorScale[index % colorScale.length]
@@ -225,10 +225,10 @@ function BarGraph({
                       />
                     ))}
                 </Bar>
-                {yAxis === 'date' && typeOp === 'totalTotals' && (
+                {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
                   <Bar dataKey={'totalDebts'} stackId="a">
                     {data[splitData]
-                      .filter(i => (!empty ? i[typeOp] !== 0 : true))
+                      .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
                       .map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
