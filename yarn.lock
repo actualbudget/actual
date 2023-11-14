@@ -74,6 +74,7 @@ __metadata:
     "@types/react-router-dom": "npm:^5.3.3"
     "@types/uuid": "npm:^9.0.2"
     "@types/webpack-bundle-analyzer": "npm:^4.6.0"
+    "@use-gesture/react": "npm:^10.3.0"
     chokidar: "npm:^3.5.3"
     cross-env: "npm:^7.0.3"
     date-fns: "npm:^2.29.3"
@@ -5119,6 +5120,24 @@ __metadata:
     "@typescript-eslint/types": "npm:5.59.2"
     eslint-visitor-keys: "npm:^3.3.0"
   checksum: 4ce377f97865205eac01e9d12126b6d3bea8846ea696543d973e032a53668d0970e9a72b07638182858cffdd8b686bf856df257e402cb094347f0d3dccbd23d5
+  languageName: node
+  linkType: hard
+
+"@use-gesture/core@npm:10.3.0":
+  version: 10.3.0
+  resolution: "@use-gesture/core@npm:10.3.0"
+  checksum: 6659c5b1c78fd42d8b11023e6c54875ef6a3cacd5b9f7364a7437e04ac1a07ed57e31f05f04ab4b143ab5ffa59cbf0b9f2b464534b7015b9e080dcf66971e5fb
+  languageName: node
+  linkType: hard
+
+"@use-gesture/react@npm:^10.3.0":
+  version: 10.3.0
+  resolution: "@use-gesture/react@npm:10.3.0"
+  dependencies:
+    "@use-gesture/core": "npm:10.3.0"
+  peerDependencies:
+    react: ">= 16.8.0"
+  checksum: be14f8681ff71ae989f0055695355a4b677ead732a9d4acb6757b2d4d75514e5084a13634f8ff2e8f68894bcd3e01c3d88967d4dd164c7d94edb8c8e104d4a48
   languageName: node
   linkType: hard
 

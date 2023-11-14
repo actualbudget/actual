@@ -30,9 +30,17 @@ export class MobileNavigation {
   }
 
   async goToSettingsPage() {
+    await this.dragNavbarUp();
+
     const link = this.page.getByRole('link', { name: 'Settings' });
     await link.click();
 
     return new SettingsPage(this.page);
+  }
+
+  async dragNavbarUp() {
+    await this.page
+      .getByRole('navigation')
+      .dragTo(this.page.getByTestId('budget-table'));
   }
 }
