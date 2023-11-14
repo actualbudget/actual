@@ -143,6 +143,11 @@ export default function Custom() {
     return null;
   }
 
+  const onChangeDates = ({ start, end }) => {
+    setStart(start);
+    setEnd(end);
+  };
+
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header
@@ -162,9 +167,8 @@ export default function Custom() {
       >
         <CustomSidebar
           start={start}
-          setStart={setStart}
           end={end}
-          setEnd={setEnd}
+          onChangeDates={onChangeDates}
           dateRange={dateRange}
           setDateRange={setDateRange}
           dateRangeLine={dateRangeLine}

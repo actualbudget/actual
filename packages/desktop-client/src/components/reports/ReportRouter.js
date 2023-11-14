@@ -6,7 +6,7 @@ import CashFlow from './reports/CashFlow';
 import CategorySpending from './reports/CategorySpending';
 import Custom from './reports/Custom';
 import NetWorth from './reports/NetWorth';
-import Sankey from './Sankey';
+import Sankey from './reports/Sankey';
 
 export function ReportRouter() {
   return (

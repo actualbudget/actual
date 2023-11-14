@@ -19,6 +19,75 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import Container from '../Container';
 
+type PayloadItem = {
+  payload: {
+    date: string;
+    totalAssets: number | string;
+    totalDebts: number | string;
+    totalTotals: number | string;
+  };
+};
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  balanceTypeOp?: string;
+};
+
+const CustomTooltip = ({
+  active,
+  payload,
+  balanceTypeOp,
+}: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={`${css({
+          zIndex: 1000,
+          pointerEvents: 'none',
+          borderRadius: 2,
+          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+          backgroundColor: theme.menuAutoCompleteBackground,
+          color: theme.menuAutoCompleteText,
+          padding: 10,
+        })}`}
+      >
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{payload[0].payload.date}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <PrivacyFilter>
+              {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Assets:"
+                  right={amountToCurrency(payload[0].payload.totalAssets)}
+                />
+              )}
+              {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Debt:"
+                  right={amountToCurrency(payload[0].payload.totalDebts)}
+                />
+              )}
+              {['totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Net:"
+                  right={
+                    <strong>
+                      {amountToCurrency(payload[0].payload.totalTotals)}
+                    </strong>
+                  }
+                />
+              )}
+            </PrivacyFilter>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
+
 type AreaGraphProps = {
   style?: CSSProperties;
   data;
@@ -58,74 +127,6 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
 
   const off = gradientOffset();
 
-  type PayloadItem = {
-    payload: {
-      date: string;
-      totalAssets: number | string;
-      totalDebts: number | string;
-      totalTotals: number | string;
-    };
-  };
-
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className={`${css(
-            {
-              zIndex: 1000,
-              pointerEvents: 'none',
-              borderRadius: 2,
-              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.menuAutoCompleteBackground,
-              color: theme.menuAutoCompleteText,
-              padding: 10,
-            },
-            style,
-          )}`}
-        >
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.date}</strong>
-            </div>
-            <div style={{ lineHeight: 1.5 }}>
-              <PrivacyFilter>
-                {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
-                  <AlignedText
-                    left="Assets:"
-                    right={amountToCurrency(payload[0].payload.totalAssets)}
-                  />
-                )}
-                {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
-                  <AlignedText
-                    left="Debt:"
-                    right={amountToCurrency(payload[0].payload.totalDebts)}
-                  />
-                )}
-                {['totalTotals'].includes(balanceTypeOp) && (
-                  <AlignedText
-                    left="Net:"
-                    right={
-                      <strong>
-                        {amountToCurrency(payload[0].payload.totalTotals)}
-                      </strong>
-                    }
-                  />
-                )}
-              </PrivacyFilter>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  };
-
   return (
     <Container
       style={{
@@ -156,7 +157,7 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
                   />
                 )}
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={<CustomTooltip balanceTypeOp={balanceTypeOp} />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />

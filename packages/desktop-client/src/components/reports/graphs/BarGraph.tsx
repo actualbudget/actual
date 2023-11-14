@@ -23,6 +23,109 @@ import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
 
+type PayloadChild = {
+  props: {
+    name: string;
+    fill: string;
+  };
+};
+
+type PayloadItem = {
+  value: string;
+  payload: {
+    name: string;
+    totalAssets: number | string;
+    totalDebts: number | string;
+    totalTotals: number | string;
+    networth: number | string;
+    totalChange: number | string;
+    children: [PayloadChild];
+  };
+};
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  balanceTypeOp?: string;
+  yAxis?: string;
+};
+
+const CustomTooltip = ({
+  active,
+  payload,
+  balanceTypeOp,
+  yAxis,
+}: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={`${css({
+          zIndex: 1000,
+          pointerEvents: 'none',
+          borderRadius: 2,
+          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+          backgroundColor: theme.menuAutoCompleteBackground,
+          color: theme.menuAutoCompleteText,
+          padding: 10,
+        })}`}
+      >
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{payload[0].payload[yAxis]}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <PrivacyFilter>
+              {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Assets:"
+                  right={amountToCurrency(payload[0].payload.totalAssets)}
+                />
+              )}
+              {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Debt:"
+                  right={amountToCurrency(payload[0].payload.totalDebts)}
+                />
+              )}
+              {['totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Net:"
+                  right={
+                    <strong>
+                      {amountToCurrency(payload[0].payload.totalTotals)}
+                    </strong>
+                  }
+                />
+              )}
+            </PrivacyFilter>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
+
+/* Descoped for future PR
+type CustomLegendProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  label?: string;
+};
+
+const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
+  const agg = payload[0].payload.children.map(leg => {
+    return {
+      name: leg.props.name,
+      color: leg.props.fill,
+    };
+  });
+
+  OnChangeLegend(agg);
+
+  return <div />;
+};
+*/
+
 type BarGraphProps = {
   style?: CSSProperties;
   data;
@@ -55,106 +158,6 @@ function BarGraph({
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
-
-  type PayloadItem = {
-    value: string;
-    payload: {
-      name: string;
-      totalAssets: number | string;
-      totalDebts: number | string;
-      totalTotals: number | string;
-      networth: number | string;
-      totalChange: number | string;
-      children: [tester];
-    };
-  };
-
-  type tester = {
-    props: {
-      name: string;
-      fill: string;
-    };
-  };
-
-  /* Descoped for future PR
-  type CustomLegendProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
-  const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
-    const agg = payload[0].payload.children.map(leg => {
-      return {
-        name: leg.props.name,
-        color: leg.props.fill,
-      };
-    });
-
-    OnChangeLegend(agg);
-
-    return <div />;
-  };
-  */
-
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className={`${css(
-            {
-              zIndex: 1000,
-              pointerEvents: 'none',
-              borderRadius: 2,
-              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.menuAutoCompleteBackground,
-              color: theme.menuAutoCompleteText,
-              padding: 10,
-            },
-            style,
-          )}`}
-        >
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload[yAxis]}</strong>
-            </div>
-            <div style={{ lineHeight: 1.5 }}>
-              <PrivacyFilter>
-                {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
-                  <AlignedText
-                    left="Assets:"
-                    right={amountToCurrency(payload[0].payload.totalAssets)}
-                  />
-                )}
-                {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
-                  <AlignedText
-                    left="Debt:"
-                    right={amountToCurrency(payload[0].payload.totalDebts)}
-                  />
-                )}
-                {['totalTotals'].includes(balanceTypeOp) && (
-                  <AlignedText
-                    left="Net:"
-                    right={
-                      <strong>
-                        {amountToCurrency(payload[0].payload.totalTotals)}
-                      </strong>
-                    }
-                  />
-                )}
-              </PrivacyFilter>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  };
 
   const getVal = obj => {
     if (balanceTypeOp === 'totalDebts') {
@@ -193,7 +196,12 @@ function BarGraph({
                   //!compact && <Legend content={<CustomLegend />} />
                 }
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={
+                    <CustomTooltip
+                      balanceTypeOp={balanceTypeOp}
+                      yAxis={yAxis}
+                    />
+                  }
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />

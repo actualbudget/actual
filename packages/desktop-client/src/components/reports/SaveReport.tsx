@@ -7,44 +7,44 @@ import MenuTooltip from '../common/MenuTooltip';
 import Text from '../common/Text';
 import View from '../common/View';
 
+function onMenuSelect(item, setMenuOpen) {
+  switch (item) {
+    case 'save':
+      setMenuOpen(false);
+      break;
+    case 'clear':
+      setMenuOpen(false);
+      break;
+    default:
+  }
+}
+
+function SaveReportMenu({ setMenuOpen }) {
+  return (
+    <MenuTooltip width={150} onClose={() => setMenuOpen(false)}>
+      <Menu
+        onMenuSelect={item => {
+          onMenuSelect(item, setMenuOpen);
+        }}
+        items={[
+          {
+            name: 'save',
+            text: 'Save new report',
+            disabled: true,
+          },
+          {
+            name: 'clear',
+            text: 'Clear all',
+            disabled: true,
+          },
+        ]}
+      />
+    </MenuTooltip>
+  );
+}
+
 export function SaveReportMenuButton() {
   let [menuOpen, setMenuOpen] = useState(false);
-
-  const onMenuSelect = item => {
-    switch (item) {
-      case 'save':
-        setMenuOpen(false);
-        break;
-      case 'clear':
-        setMenuOpen(false);
-        break;
-      default:
-    }
-  };
-
-  function SaveReportMenu({ onClose }) {
-    return (
-      <MenuTooltip width={150} onClose={onClose}>
-        <Menu
-          onMenuSelect={item => {
-            onMenuSelect(item);
-          }}
-          items={[
-            {
-              name: 'save',
-              text: 'Save new report',
-              disabled: true,
-            },
-            {
-              name: 'clear',
-              text: 'Clear all',
-              disabled: true,
-            },
-          ]}
-        />
-      </MenuTooltip>
-    );
-  }
 
   return (
     <View
@@ -72,7 +72,7 @@ export function SaveReportMenuButton() {
         </Text>
         <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
-      {menuOpen && <SaveReportMenu onClose={() => setMenuOpen(false)} />}
+      {menuOpen && <SaveReportMenu setMenuOpen={setMenuOpen} />}
     </View>
   );
 }

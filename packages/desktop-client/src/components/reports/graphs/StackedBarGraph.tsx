@@ -21,6 +21,95 @@ import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
 
+type PayloadItem = {
+  name: string;
+  value: number;
+  color: string;
+  payload: {
+    name: string;
+    color: number | string;
+  };
+};
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  label?: string;
+};
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    let sumTotals = 0;
+    return (
+      <div
+        className={`${css({
+          zIndex: 1000,
+          pointerEvents: 'none',
+          borderRadius: 2,
+          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+          backgroundColor: theme.menuAutoCompleteBackground,
+          color: theme.menuAutoCompleteText,
+          padding: 10,
+        })}`}
+      >
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{label}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <PrivacyFilter>
+              {payload
+                .slice(0)
+                .reverse()
+                .map(pay => {
+                  sumTotals += pay.value;
+                  return (
+                    pay.value !== 0 && (
+                      <AlignedText
+                        key={pay.name}
+                        left={pay.name}
+                        right={amountToCurrency(pay.value)}
+                        style={{ color: pay.color }}
+                      />
+                    )
+                  );
+                })}
+              <AlignedText
+                left={'Total'}
+                right={amountToCurrency(sumTotals)}
+                style={{
+                  fontWeight: 600,
+                }}
+              />
+            </PrivacyFilter>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
+
+/* Descoped for future PR
+type CustomLegendProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  label?: string;
+};
+
+const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
+  const agg = payload.map(leg => {
+    return {
+      name: leg.value,
+      color: leg.color,
+    };
+  });
+
+  OnChangeLegend(agg.slice(0).reverse());
+
+  return <div />;
+};
+*/
+
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data;
@@ -47,98 +136,6 @@ function StackedBarGraph({
   domain,
 }: StackedBarGraphProps) {
   const colorScale = getColorScale('qualitative');
-
-  type PayloadItem = {
-    name: string;
-    value: number;
-    color: string;
-    payload: {
-      name: string;
-      color: number | string;
-    };
-  };
-
-  /* Descoped for future PR
-  type CustomLegendProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
-  const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
-    const agg = payload.map(leg => {
-      return {
-        name: leg.value,
-        color: leg.color,
-      };
-    });
-
-    OnChangeLegend(agg.slice(0).reverse());
-
-    return <div />;
-  };
-  */
-
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      let sumTotals = 0;
-      return (
-        <div
-          className={`${css(
-            {
-              zIndex: 1000,
-              pointerEvents: 'none',
-              borderRadius: 2,
-              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.menuAutoCompleteBackground,
-              color: theme.menuAutoCompleteText,
-              padding: 10,
-            },
-            style,
-          )}`}
-        >
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <strong>{label}</strong>
-            </div>
-            <div style={{ lineHeight: 1.5 }}>
-              <PrivacyFilter>
-                {payload
-                  .slice(0)
-                  .reverse()
-                  .map(pay => {
-                    sumTotals += pay.value;
-                    return (
-                      pay.value !== 0 && (
-                        <AlignedText
-                          key={pay.name}
-                          left={pay.name}
-                          right={amountToCurrency(pay.value)}
-                          style={{ color: pay.color }}
-                        />
-                      )
-                    );
-                  })}
-                <AlignedText
-                  left={'Total'}
-                  right={amountToCurrency(sumTotals)}
-                  style={{
-                    fontWeight: 600,
-                  }}
-                />
-              </PrivacyFilter>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  };
 
   const getVal = (obj, key) => {
     if (balanceTypeOp === 'totalDebts') {

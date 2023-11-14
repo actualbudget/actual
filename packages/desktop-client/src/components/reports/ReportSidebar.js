@@ -18,11 +18,36 @@ import {
 } from './Header';
 import { ReportOptions } from './ReportOptions';
 
+function ModeButton({ selected, children, style, onSelect }) {
+  return (
+    <Button
+      type="bare"
+      style={{
+        padding: '5px 10px',
+        backgroundColor: theme.menuBackground,
+        marginRight: 5,
+        fontSize: 'inherit',
+        ...(selected && {
+          backgroundColor: theme.buttonPrimaryBackground,
+          color: theme.buttonPrimaryText,
+          ':hover': {
+            backgroundColor: theme.buttonPrimaryBackgroundHover,
+            color: theme.buttonPrimaryTextHover,
+          },
+        }),
+        ...style,
+      }}
+      onClick={onSelect}
+    >
+      {children}
+    </Button>
+  );
+}
+
 export function CustomSidebar({
   start,
-  setStart,
   end,
-  setEnd,
+  onChangeDates,
   dateRange,
   setDateRange,
   dateRangeLine,
@@ -48,11 +73,6 @@ export function CustomSidebar({
   selectedCategories,
   setSelectedCategories,
 }) {
-  function onChangeDates(start, end) {
-    setStart(start);
-    setEnd(end);
-  }
-
   function onChangeMode(cond) {
     setMode(cond);
     if (cond === 'time') {
@@ -93,32 +113,6 @@ export function CustomSidebar({
     if (['Net'].includes(balanceType) && graphType !== 'TableGraph') {
       setBalanceType('Expense');
     }
-  }
-
-  function ModeButton({ selected, children, style, onSelect }) {
-    return (
-      <Button
-        type="bare"
-        style={{
-          padding: '5px 10px',
-          backgroundColor: theme.menuBackground,
-          marginRight: 5,
-          fontSize: 'inherit',
-          ...(selected && {
-            backgroundColor: theme.buttonPrimaryBackground,
-            color: theme.buttonPrimaryText,
-            ':hover': {
-              backgroundColor: theme.buttonPrimaryBackgroundHover,
-              color: theme.buttonPrimaryTextHover,
-            },
-          }),
-          ...style,
-        }}
-        onClick={onSelect}
-      >
-        {children}
-      </Button>
-    );
   }
 
   return (
