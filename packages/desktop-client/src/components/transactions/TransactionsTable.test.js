@@ -470,7 +470,7 @@ describe('Transactions', () => {
 
     // The right item should be highlighted
     let highlighted = tooltip.querySelector('[data-highlighted]');
-    expect(highlighted).toBeDefined();
+    expect(highlighted).not.toBeNull();
     expect(highlighted.textContent).toBe('General');
 
     expect(getTransactions()[2].category).toBe(
@@ -512,7 +512,7 @@ describe('Transactions', () => {
 
     // Make sure the expected category is highlighted
     let highlighted = tooltip.querySelector('[data-highlighted]');
-    expect(highlighted).toBeDefined();
+    expect(highlighted).not.toBeNull();
     expect(highlighted.textContent).toBe('General');
 
     // Click the item and check the before/after values
@@ -546,7 +546,7 @@ describe('Transactions', () => {
 
     // Make sure one of them is highlighted
     let highlighted = tooltip.querySelector('[data-highlighted]');
-    expect(highlighted).toBeDefined();
+    expect(highlighted).not.toBeNull();
 
     // Navigate away from the field with the keyboard
     await userEvent.type(input, '[Tab]');
