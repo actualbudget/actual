@@ -28,6 +28,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+      - if: ${{ startsWith(matrix.os, 'windows') }}
+        run: pip.exe install setuptools
+      - if: ${{ ! startsWith(matrix.os, 'windows') }}
+        run: python3 -m pip install setuptools
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron
