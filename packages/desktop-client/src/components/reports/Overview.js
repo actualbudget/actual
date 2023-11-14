@@ -24,6 +24,8 @@ import categorySpendingSpreadsheet from './graphs/category-spending-spreadsheet'
 import CategorySpendingGraph from './graphs/CategorySpendingGraph';
 import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
 import NetWorthGraph from './graphs/NetWorthGraph';
+import sankeySpreadsheet from './graphs/sankey-spreadsheet';
+import SankeyGraph from './graphs/SankeyGraph';
 import Tooltip from './Tooltip';
 import useReport from './useReport';
 
@@ -325,10 +327,46 @@ function CategorySpendingCard() {
   );
 }
 
+function SankeyCard() {
+  const { grouped: categoryGroups } = useCategories();
+  const end = monthUtils.currentMonth();
+  const start = monthUtils.subMonths(end, 5);
+
+  const params = useMemo(
+    () => sankeySpreadsheet(start, end, categoryGroups),
+    [start, end, categoryGroups],
+  );
+  const data = useReport('sankey', params);
+
+  return (
+    <Card flex={1} to="/reports/sankey">
+      <View style={{ flexDirection: 'row', padding: 20 }}>
+        <View style={{ flex: 1 }}>
+          <Block
+            style={{ ...styles.mediumText, fontWeight: 500, marginBottom: 5 }}
+            role="heading"
+          >
+            Sankey
+          </Block>
+          <DateRange start={start} end={end} />
+        </View>
+      </View>
+      <View style={{ flex: 1 }}>
+        {data ? (
+          <SankeyGraph data={data} compact={true} />
+        ) : (
+          <LoadingIndicator />
+        )}
+      </View>
+    </Card>
+  );
+}
+
 export default function Overview() {
   let categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );
+  let sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   let accounts = useSelector(state => state.queries.accounts);
   return (
@@ -348,16 +386,21 @@ export default function Overview() {
         <CashFlowCard />
       </View>
 
-      {categorySpendingReportFeatureFlag && (
+      {(sankeyFeatureFlag || categorySpendingReportFeatureFlag) && (
         <View
           style={{
             flex: '0 0 auto',
             flexDirection: 'row',
           }}
         >
-          <CategorySpendingCard />
-          <div style={{ flex: 1 }} />
-          <div style={{ flex: 1 }} />
+          {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
+          {sankeyFeatureFlag && <SankeyCard />}
+          {(!categorySpendingReportFeatureFlag || !sankeyFeatureFlag) && (
+            <>
+              <div style={{ flex: 1 }} />
+              <div style={{ flex: 1 }} />
+            </>
+          )}
         </View>
       )}
     </View>

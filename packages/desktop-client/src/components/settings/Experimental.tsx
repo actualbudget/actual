@@ -102,6 +102,8 @@ export default function ExperimentalFeatures() {
               Category spending report
             </FeatureToggle>
 
+            <FeatureToggle flag="sankeyReport">Sankey report</FeatureToggle>
+
             <ReportBudgetFeature />
 
             <FeatureToggle flag="goalTemplatesEnabled">
