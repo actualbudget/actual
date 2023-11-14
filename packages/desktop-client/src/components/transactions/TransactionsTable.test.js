@@ -463,13 +463,13 @@ describe('Transactions', () => {
     let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
     // No item should be highlighted
-    let highlighted = tooltip.querySelectorAll('[data-highlighted]');
-    expect(highlighted).toHaveLength(0);
+    let allHighlighted = tooltip.querySelectorAll('[data-highlighted]');
+    expect(allHighlighted).toHaveLength(0);
 
     await userEvent.keyboard('[ArrowDown][ArrowDown][ArrowDown][ArrowDown]');
 
     // The right item should be highlighted
-    highlighted = tooltip.querySelector('[data-highlighted]');
+    let highlighted = tooltip.querySelector('[data-highlighted]');
     expect(highlighted).toBeDefined();
     expect(highlighted.textContent).toBe('General');
 
@@ -504,14 +504,14 @@ describe('Transactions', () => {
 
     // Make sure none of the items are highlighted
     let items = tooltip.querySelectorAll('[data-testid*="category-item"]');
-    let highlighted = tooltip.querySelectorAll('[data-highlighted]');
-    expect(highlighted).toHaveLength(0);
+    let allHighlighted = tooltip.querySelectorAll('[data-highlighted]');
+    expect(allHighlighted).toHaveLength(0);
 
     // Hover over an item
     await userEvent.hover(items[2]);
 
     // Make sure the expected category is highlighted
-    highlighted = tooltip.querySelector('[data-highlighted]');
+    let highlighted = tooltip.querySelector('[data-highlighted]');
     expect(highlighted).toBeDefined();
     expect(highlighted.textContent).toBe('General');
 
