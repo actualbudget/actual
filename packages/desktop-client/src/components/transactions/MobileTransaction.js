@@ -605,12 +605,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
               <SvgAdd
                 width={17}
                 height={17}
-                style={{ color: theme.altFormLabelText }}
+                style={{ color: theme.formLabelText }}
               />
               <Text
                 style={{
                   ...styles.text,
-                  color: theme.altFormLabelText,
+                  color: theme.formLabelText,
                   marginLeft: 5,
                 }}
               >
