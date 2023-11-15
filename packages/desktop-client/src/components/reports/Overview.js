@@ -5,9 +5,11 @@ import useFeatureFlag from '../../hooks/useFeatureFlag';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
 import View from '../common/View';
+
 import CashFlowCard from './reports/CashFlowCard';
 import CategorySpendingCard from './reports/CategorySpendingCard';
 import CustomReportCard from './reports/CustomReportCard';
+import CustomReportsCardList from './reports/ListCards';
 import NetWorthCard from './reports/NetWorthCard';
 import SankeyCard from './reports/SankeyCard';
 

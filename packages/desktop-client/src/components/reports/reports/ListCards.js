@@ -3,19 +3,18 @@ import React, { useMemo } from 'react';
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useCategories from '../../hooks/useCategories';
-import { styles } from '../../style';
-import Block from '../common/Block';
-import View from '../common/View';
+import useCategories from '../../../hooks/useCategories';
+import { styles } from '../../../style';
+import Block from '../../common/Block';
+import View from '../../common/View';
+import DateRange from '../DateRange';
+import BarGraph from '../graphs/BarGraph';
+import { LoadingIndicator } from '../Overview';
+import ReportCard from '../ReportCard';
+import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
+import useReport from '../useReport';
 
-import Card from './Card';
-import DateRange from './DateRange';
-import BarGraph from './graphs/BarGraph';
-import { LoadingIndicator } from './Overview';
-import defaultSpreadsheet from './spreadsheets/default-spreadsheet';
-import useReport from './useReport';
-
-export function CustomReportsCardList() {
+export default function CustomReportsCardList() {
   let reports = useReports();
   const categories = useCategories();
   let firstMonth = monthUtils.subMonths(monthUtils.currentMonth(), 12);
@@ -25,7 +24,7 @@ export function CustomReportsCardList() {
     return defaultSpreadsheet(
       firstMonth,
       currentMonth,
-      1,
+      'Category',
       'totalDebts',
       categories,
     );
@@ -40,7 +39,7 @@ export function CustomReportsCardList() {
       }}
     >
       {reports.map(report => (
-        <Card flex={1} to="/reports/custom" key={report.id} >
+        <ReportCard flex={1} to="/reports/custom-report" key={report.id}>
           {!report.start ? (
             <View>Error</View>
           ) : (
@@ -69,9 +68,9 @@ export function CustomReportsCardList() {
                   end={report.end}
                   data={data}
                   compact={true}
-                  split={1}
+                  groupBy={'Category'}
                   empty={true}
-                  typeOp={'totalDebts'}
+                  balanceTypeOp={'totalDebts'}
                   style={{ height: 'auto', flex: 1 }}
                 />
               ) : (
@@ -79,7 +78,7 @@ export function CustomReportsCardList() {
               )}
             </>
           )}
-        </Card>
+        </ReportCard>
       ))}
     </View>
   );

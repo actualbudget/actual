@@ -13,32 +13,159 @@ import Text from '../common/Text';
 import View from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
-function SaveReportMenu({ setMenuOpen }) {
+function SaveReportMenu({ reportId, onClose, onMenuSelect }) {
   return (
-    <MenuTooltip width={150} onClose={() => setMenuOpen(false)}>
+    <MenuTooltip width={150} onClose={onClose}>
       <Menu
         onMenuSelect={item => {
-          switch (item) {
-            case 'save':
-            case 'clear':
-              setMenuOpen(false);
-              break;
-            default:
-          }
+          onMenuSelect(item);
         }}
         items={[
-          {
-            name: 'save',
-            text: 'Save new report',
-            disabled: true,
-          },
-          {
-            name: 'clear',
-            text: 'Clear all',
-            disabled: true,
-          },
+          ...(reportId.length === 0
+            ? [
+                { name: 'save-report', text: 'Save new report' },
+                { name: 'clear-report', text: 'Reset to default' },
+              ]
+            : [
+                ...(reportId.id !== null && reportId.status === 'saved'
+                  ? [
+                      { name: 'rename-report', text: 'Rename' },
+                      { name: 'delete-report', text: 'Delete' },
+                      { name: 'menu-line', type: Menu.line },
+                      {
+                        name: 'save-report',
+                        text: 'Save new report',
+                        disabled: true,
+                      },
+                      { name: 'clear-report', text: 'Reset to default' },
+                    ]
+                  : [
+                      { name: 'rename-report', text: 'Rename' },
+                      { name: 'update-report', text: 'Update report' },
+                      { name: 'reload-report', text: 'Revert changes' },
+                      { name: 'delete-report', text: 'Delete' },
+                      { name: 'menu-line', type: Menu.line },
+                      { name: 'save-report', text: 'Save new report' },
+                      { name: 'clear-report', text: 'Reset to default' },
+                    ]),
+              ]),
         ]}
       />
+    </MenuTooltip>
+  );
+}
+
+async function onAddUpdate(
+  adding,
+  filters,
+  conditionsOp,
+  name,
+  start,
+  end,
+  reportId,
+  onErr,
+  onNameChange,
+) {
+  let savedReport;
+  let res;
+  if (adding) {
+    //create new flow
+    savedReport = {
+      conditions: filters,
+      conditionsOp: conditionsOp,
+      name: name,
+      start: start,
+      end: end,
+      status: 'saved',
+    };
+    res = await sendCatch('report-create', {
+      state: savedReport,
+    });
+    savedReport = {
+      ...savedReport,
+      id: res.data,
+    };
+  } else {
+    //rename flow
+    savedReport = {
+      conditions: reportId.conditions,
+      conditionsOp: reportId.conditionsOp,
+      id: reportId.id,
+      name: name,
+    };
+    res = await sendCatch('report-update', {
+      state: savedReport,
+    });
+  }
+  if (res.error) {
+    onErr(res.error.message);
+  } else {
+    onNameChange(false);
+    //onReloadSavedFilter(savedReport);
+  }
+}
+
+function NameReport({
+  onClose,
+  adding,
+  filters,
+  conditionsOp,
+  name,
+  start,
+  end,
+  reportId,
+  onErr,
+  onNameChange,
+  menuItem,
+  inputRef,
+  err,
+}) {
+  return (
+    <MenuTooltip width={325} onClose={onClose}>
+      {menuItem !== 'update-report' && (
+        <form>
+          <Stack
+            direction="row"
+            justify="flex-end"
+            align="center"
+            style={{ padding: 10 }}
+          >
+            <FormField style={{ flex: 1 }}>
+              <FormLabel
+                title="Filter Name"
+                htmlFor="name-field"
+                style={{ userSelect: 'none' }}
+              />
+              <Input inputRef={inputRef} onUpdate={e => (name = e)} />
+            </FormField>
+            <Button
+              type="primary"
+              style={{ marginTop: 18 }}
+              onClick={e => {
+                e.preventDefault();
+                onAddUpdate(
+                  adding,
+                  filters,
+                  conditionsOp,
+                  name,
+                  start,
+                  end,
+                  reportId,
+                  onErr,
+                  onNameChange,
+                );
+              }}
+            >
+              {adding ? 'Add' : 'Update'}
+            </Button>
+          </Stack>
+        </form>
+      )}
+      {err && (
+        <Stack direction="row" align="center" style={{ padding: 10 }}>
+          <Text style={{ color: theme.errorText }}>{err}</Text>
+        </Stack>
+      )}
     </MenuTooltip>
   );
 }
@@ -60,6 +187,14 @@ export function SaveReportMenuButton({
   let id = reportId.id;
   let res;
   let savedReport;
+
+  const onErr = cond => {
+    setErr(cond);
+  };
+
+  const onNameChange = cond => {
+    setNameOpen(cond);
+  };
 
   useEffect(() => {
     if (inputRef.current) {
@@ -123,127 +258,6 @@ export function SaveReportMenuButton({
     }
   };
 
-  function SaveReportMenu({ onClose, reportId }) {
-    return (
-      <MenuTooltip width={150} onClose={onClose}>
-        <Menu
-          onMenuSelect={item => {
-            onMenuSelect(item);
-          }}
-          items={[
-            ...(reportId.length === 0
-              ? [
-                  { name: 'save-report', text: 'Save new report' },
-                  { name: 'clear-report', text: 'Reset to default' },
-                ]
-              : [
-                  ...(reportId.id !== null && reportId.status === 'saved'
-                    ? [
-                        { name: 'rename-report', text: 'Rename' },
-                        { name: 'delete-report', text: 'Delete' },
-                        { name: 'menu-line', type: Menu.line },
-                        {
-                          name: 'save-report',
-                          text: 'Save new report',
-                          disabled: true,
-                        },
-                        { name: 'clear-report', text: 'Reset to default' },
-                      ]
-                    : [
-                        { name: 'rename-report', text: 'Rename' },
-                        { name: 'update-report', text: 'Update report' },
-                        { name: 'reload-report', text: 'Revert changes' },
-                        { name: 'delete-report', text: 'Delete' },
-                        { name: 'menu-line', type: Menu.line },
-                        { name: 'save-report', text: 'Save new report' },
-                        { name: 'clear-report', text: 'Reset to default' },
-                      ]),
-                ]),
-          ]}
-        />
-      </MenuTooltip>
-    );
-  }
-
-  async function onAddUpdate() {
-    if (adding) {
-      //create new flow
-      savedReport = {
-        conditions: filters,
-        conditionsOp: conditionsOp,
-        name: name,
-        start: start,
-        end: end,
-        status: 'saved',
-      };
-      res = await sendCatch('report-create', {
-        state: savedReport,
-      });
-      savedReport = {
-        ...savedReport,
-        id: res.data,
-      };
-    } else {
-      //rename flow
-      savedReport = {
-        conditions: reportId.conditions,
-        conditionsOp: reportId.conditionsOp,
-        id: reportId.id,
-        name: name,
-      };
-      res = await sendCatch('report-update', {
-        state: savedReport,
-      });
-    }
-    if (res.error) {
-      setErr(res.error.message);
-    } else {
-      setNameOpen(false);
-      //onReloadSavedFilter(savedReport);
-    }
-  }
-
-  function NameReport({ onClose }) {
-    return (
-      <MenuTooltip width={325} onClose={onClose}>
-        {menuItem !== 'update-report' && (
-          <form>
-            <Stack
-              direction="row"
-              justify="flex-end"
-              align="center"
-              style={{ padding: 10 }}
-            >
-              <FormField style={{ flex: 1 }}>
-                <FormLabel
-                  title="Filter Name"
-                  htmlFor="name-field"
-                  style={{ userSelect: 'none' }}
-                />
-                <Input inputRef={inputRef} onUpdate={e => (name = e)} />
-              </FormField>
-              <Button
-                type="primary"
-                style={{ marginTop: 18 }}
-                onClick={e => {
-                  e.preventDefault();
-                  onAddUpdate();
-                }}
-              >
-                {adding ? 'Add' : 'Update'}
-              </Button>
-            </Stack>
-          </form>
-        )}
-        {err && (
-          <Stack direction="row" align="center" style={{ padding: 10 }}>
-            <Text style={{ color: theme.errorText }}>{err}</Text>
-          </Stack>
-        )}
-      </MenuTooltip>
-    );
-  }
-
   return (
     <View
       style={{
@@ -274,9 +288,26 @@ export function SaveReportMenuButton({
         <SaveReportMenu
           onClose={() => setMenuOpen(false)}
           reportId={reportId}
+          onMenuSelect={onMenuSelect}
         />
       )}
-      {nameOpen && <NameReport onClose={() => setNameOpen(false)} />}
+      {nameOpen && (
+        <NameReport
+          onClose={() => setNameOpen(false)}
+          adding={adding}
+          filters={filters}
+          conditionsOp={conditionsOp}
+          name={name}
+          start={start}
+          end={end}
+          reportId={reportId}
+          onErr={onErr}
+          onNameChange={onNameChange}
+          menuItem={menuItem}
+          inputRef={inputRef}
+          err={err}
+        />
+      )}
     </View>
   );
 }
