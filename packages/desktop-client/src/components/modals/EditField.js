@@ -205,7 +205,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
               title={label}
               style={{
                 alignSelf: 'center',
-                color: theme.altMobileModalText,
+                color: theme.mobileModalText,
                 marginBottom: 10,
               }}
             />
