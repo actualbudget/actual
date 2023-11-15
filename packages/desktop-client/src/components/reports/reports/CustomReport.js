@@ -19,14 +19,14 @@ import PrivacyFilter from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import Header from '../Header';
 import { ReportOptions } from '../ReportOptions';
-import { CustomSidebar } from '../ReportSidebar';
+import { ReportSidebar } from '../ReportSidebar';
 import { ReportLegend, ReportSummary } from '../ReportSummary';
-import { CustomTopbar } from '../ReportTopbar';
+import { ReportTopbar } from '../ReportTopbar';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
 import useReport from '../useReport';
 import { fromDateRepr } from '../util';
 
-export default function Custom() {
+export default function CustomReport() {
   const categories = useCategories();
 
   let { payees, accounts } = useSelector(state => {
@@ -75,8 +75,7 @@ export default function Custom() {
       start,
       end,
       groupBy,
-      ReportOptions.balanceType.find(opt => opt.description === balanceType)
-        .format,
+      ReportOptions.balanceTypeMap.get(balanceType),
       categories,
       selectedCategories,
       payees,
@@ -106,7 +105,7 @@ export default function Custom() {
     if (selectedCategories === null && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
-  }, [categories, selectedCategories, groupBy]);
+  }, [categories, selectedCategories]);
 
   useEffect(() => {
     async function run() {
@@ -165,7 +164,7 @@ export default function Custom() {
           flexGrow: 1,
         }}
       >
-        <CustomSidebar
+        <ReportSidebar
           start={start}
           end={end}
           onChangeDates={onChangeDates}
@@ -199,7 +198,7 @@ export default function Custom() {
             flexGrow: 1,
           }}
         >
-          <CustomTopbar
+          <ReportTopbar
             graphType={graphType}
             setGraphType={setGraphType}
             mode={mode}
@@ -275,9 +274,9 @@ export default function Custom() {
                               {amountToCurrency(
                                 Math.abs(
                                   data[
-                                    ReportOptions.balanceType.find(
-                                      opt => opt.description === balanceType,
-                                    ).format
+                                    ReportOptions.balanceTypeMap.get(
+                                      balanceType,
+                                    )
                                   ],
                                 ),
                               )}
@@ -317,11 +316,9 @@ export default function Custom() {
                     <ReportSummary
                       start={start}
                       end={end}
-                      balanceTypeOp={
-                        ReportOptions.balanceType.find(
-                          opt => opt.description === balanceType,
-                        ).format
-                      }
+                      balanceTypeOp={ReportOptions.balanceTypeMap.get(
+                        balanceType,
+                      )}
                       data={data}
                       monthsCount={months.length}
                     />

@@ -7,24 +7,18 @@ import MenuTooltip from '../common/MenuTooltip';
 import Text from '../common/Text';
 import View from '../common/View';
 
-function onMenuSelect(item, setMenuOpen) {
-  switch (item) {
-    case 'save':
-      setMenuOpen(false);
-      break;
-    case 'clear':
-      setMenuOpen(false);
-      break;
-    default:
-  }
-}
-
 function SaveReportMenu({ setMenuOpen }) {
   return (
     <MenuTooltip width={150} onClose={() => setMenuOpen(false)}>
       <Menu
         onMenuSelect={item => {
-          onMenuSelect(item, setMenuOpen);
+          switch (item) {
+            case 'save':
+            case 'clear':
+              setMenuOpen(false);
+              break;
+            default:
+          }
         }}
         items={[
           {

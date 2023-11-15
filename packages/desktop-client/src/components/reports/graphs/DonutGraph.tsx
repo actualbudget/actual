@@ -18,6 +18,7 @@ import Text from '../../common/Text';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadItem = {
   name: string;
@@ -101,14 +102,6 @@ type DonutGraphProps = {
   domain?: {
     y?: [number, number];
   };
-};
-type PotentialNumber = number | string | undefined | null;
-
-const numberFormatterTooltip = (value: PotentialNumber): number | null => {
-  if (typeof value === 'number') {
-    return Math.round(value);
-  }
-  return null; // or some default value for other cases
 };
 
 function DonutGraph({

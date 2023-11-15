@@ -4,7 +4,7 @@ import { theme } from '../../style';
 import AnchorLink from '../common/AnchorLink';
 import View from '../common/View';
 
-export default function Card({ flex, to, style, children }) {
+export default function ReportCard({ flex, to, style, children }) {
   const containerProps = { flex, margin: 15 };
 
   const content = (

@@ -33,7 +33,7 @@ function GraphButton({ selected, children, style, onSelect, title, disabled }) {
   );
 }
 
-export function CustomTopbar({
+export function ReportTopbar({
   graphType,
   setGraphType,
   mode,

@@ -44,7 +44,7 @@ function ModeButton({ selected, children, style, onSelect }) {
   );
 }
 
-export function CustomSidebar({
+export function ReportSidebar({
   start,
   end,
   onChangeDates,

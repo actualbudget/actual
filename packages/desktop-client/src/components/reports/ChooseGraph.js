@@ -9,11 +9,10 @@ import DonutGraph from './graphs/DonutGraph';
 import LineGraph from './graphs/LineGraph';
 import StackedBarGraph from './graphs/StackedBarGraph';
 import { ReportOptions } from './ReportOptions';
-import SimpleTable, {
-  TableHeader,
-  TableList,
-  TableTotals,
-} from './ReportTable';
+import ReportTable from './ReportTable';
+import ReportTableHeader from './ReportTableHeader';
+import ReportTableList from './ReportTableList';
+import ReportTableTotals from './ReportTableTotals';
 
 export function ChooseGraph({
   start,
@@ -41,10 +40,7 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        balanceTypeOp={
-          ReportOptions.balanceType.find(opt => opt.description === balanceType)
-            .format
-        }
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -57,10 +53,7 @@ export function ChooseGraph({
         data={data}
         groupBy={groupBy}
         empty={empty}
-        balanceTypeOp={
-          ReportOptions.balanceType.find(opt => opt.description === balanceType)
-            .format
-        }
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -83,10 +76,7 @@ export function ChooseGraph({
         data={data}
         groupBy={groupBy}
         empty={empty}
-        balanceTypeOp={
-          ReportOptions.balanceType.find(opt => opt.description === balanceType)
-            .format
-        }
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -107,10 +97,7 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        balanceTypeOp={
-          ReportOptions.balanceType.find(opt => opt.description === balanceType)
-            .format
-        }
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -121,38 +108,30 @@ export function ChooseGraph({
           overflow: 'auto',
         }}
       >
-        <TableHeader
+        <ReportTableHeader
           interval={mode === 'time' && months}
           scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
         />
-        <SimpleTable saveScrollWidth={saveScrollWidth}>
-          <TableList
+        <ReportTable saveScrollWidth={saveScrollWidth}>
+          <ReportTableList
             data={data}
             empty={empty}
             monthsCount={months.length}
-            balanceTypeOp={
-              ReportOptions.balanceType.find(
-                opt => opt.description === balanceType,
-              ).format
-            }
+            balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
             mode={mode}
             groupBy={groupBy}
           />
-          <TableTotals
+          <ReportTableTotals
             scrollWidth={scrollWidth}
             data={data}
             mode={mode}
-            balanceTypeOp={
-              ReportOptions.balanceType.find(
-                opt => opt.description === balanceType,
-              ).format
-            }
+            balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
             monthsCount={months.length}
             balanceType={balanceType}
           />
-        </SimpleTable>
+        </ReportTable>
       </View>
     );
   }

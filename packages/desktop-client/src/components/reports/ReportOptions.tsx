@@ -24,6 +24,9 @@ const dateRangeOptions = [
 export const ReportOptions = {
   groupBy: groupByOptions,
   balanceType: balanceTypeOptions,
+  balanceTypeMap: new Map(
+    balanceTypeOptions.map(item => [item.description, item.format]),
+  ),
   dateRange: dateRangeOptions,
 };
 

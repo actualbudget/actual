@@ -8,7 +8,7 @@ import View from '../common/View';
 
 import CashFlowCard from './reports/CashFlowCard';
 import CategorySpendingCard from './reports/CategorySpendingCard';
-import CustomReportsCard from './reports/CustomCard';
+import CustomReportCard from './reports/CustomReportCard';
 import NetWorthCard from './reports/NetWorthCard';
 import SankeyCard from './reports/SankeyCard';
 
@@ -60,7 +60,7 @@ export default function Overview() {
         {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
         {sankeyFeatureFlag && <SankeyCard />}
         {customReportsFeatureFlag ? (
-          <CustomReportsCard />
+          <CustomReportCard />
         ) : (
           <div style={{ flex: 1 }} />
         )}
