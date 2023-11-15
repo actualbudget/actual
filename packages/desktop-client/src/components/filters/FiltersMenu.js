@@ -96,7 +96,7 @@ function OpButton({ op, selected, style, onClick }) {
     <Button
       type="bare"
       style={{
-        backgroundColor: theme.altbuttonMenuBackground,
+        backgroundColor: theme.pillBackground,
         marginBottom: 5,
         ...style,
         ...(selected && {

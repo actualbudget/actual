@@ -375,7 +375,7 @@ export function BudgetSummary({
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: theme.alt2PillText }}
+                  style={{ color: theme.pageTextLight }}
                 />
               </Button>
               {menuOpen && (

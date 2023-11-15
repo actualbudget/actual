@@ -634,15 +634,15 @@ export function SelectCell({
             alignItems: 'center',
             borderRadius: 3,
             border: selected
-              ? '1px solid ' + theme.altFormInputBorderSelected
+              ? '1px solid ' + theme.checkboxBorderSelected
               : '1px solid ' + theme.formInputBorder,
-            color: theme.tableBackground,
+            color: theme.checkboxText,
             backgroundColor: selected
-              ? theme.tableTextEditingBackground
+              ? theme.checkboxBackgroundSelected
               : theme.tableBackground,
             ':focus': {
-              border: '1px solid ' + theme.altFormInputBorderSelected,
-              boxShadow: '0 1px 2px ' + theme.altFormInputShadowSelected,
+              border: '1px solid ' + theme.checkboxBorderSelected,
+              boxShadow: '0 1px 2px ' + theme.checkboxShadowSelected,
             },
           }}
           onEdit={onEdit}
