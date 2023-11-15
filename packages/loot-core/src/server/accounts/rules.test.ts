@@ -6,7 +6,6 @@ import {
   Action,
   Rule,
   RuleIndexer,
-  ActionOperator,
 } from './rules';
 
 let fieldTypes = new Map(
@@ -309,23 +308,17 @@ describe('Condition', () => {
 
 describe('Action', () => {
   test('`set` operator sets a field', () => {
-    let action = new Action(
-      ActionOperator.set,
-      'name',
-      'James',
-      null,
-      fieldTypes,
-    );
+    let action = new Action('set', 'name', 'James', null, fieldTypes);
     let item = { name: 'Sarah' };
     action.exec(item);
     expect(item.name).toBe('James');
 
     expect(() => {
-      new Action(ActionOperator.set, 'foo', 'James', null, new Map());
+      new Action('set', 'foo', 'James', null, new Map());
     }).toThrow(/invalid field/i);
 
     expect(() => {
-      new Action(null, 'name', 'James', null, fieldTypes);
+      new Action('noop', 'name', 'James', null, fieldTypes);
     }).toThrow(/invalid action operation/i);
   });
 });
@@ -335,7 +328,7 @@ describe('Rule', () => {
     let rule = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
 
@@ -353,8 +346,8 @@ describe('Rule', () => {
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
       actions: [
-        { op: ActionOperator.set, field: 'name', value: 'Sarah' },
-        { op: ActionOperator.set, field: 'category', value: 'Sarah' },
+        { op: 'set', field: 'name', value: 'Sarah' },
+        { op: 'set', field: 'category', value: 'Sarah' },
       ],
       fieldTypes,
     });
@@ -382,7 +375,7 @@ describe('Rule', () => {
           },
         },
       ],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
 
@@ -411,7 +404,7 @@ describe('Rule', () => {
           },
         },
       ],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
 
@@ -474,7 +467,7 @@ describe('Rule', () => {
       rule(
         'first',
         [{ op: 'is', field: 'description', value: 'id1' }],
-        [{ op: ActionOperator.set, field: 'name', value: 'sar' }],
+        [{ op: 'set', field: 'name', value: 'sar' }],
       ),
       rule('second', [
         { op: 'oneOf', field: 'description', value: ['id2', 'id3'] },
@@ -482,7 +475,7 @@ describe('Rule', () => {
       rule(
         'third',
         [{ op: 'is', field: 'name', value: 'James' }],
-        [{ op: ActionOperator.set, field: 'description', value: 'id3' }],
+        [{ op: 'set', field: 'description', value: 'id3' }],
       ),
       rule('fourth', [
         { op: 'is', field: 'name', value: 'James' },
@@ -510,7 +503,7 @@ describe('RuleIndexer', () => {
     let rule = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
     indexer.index(rule);
@@ -518,7 +511,7 @@ describe('RuleIndexer', () => {
     let rule2 = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'foo' }],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
     indexer.index(rule2);
@@ -545,7 +538,7 @@ describe('RuleIndexer', () => {
         { op: 'is', field: 'name', value: 'James' },
         { op: 'is', field: 'category', value: 'food' },
       ],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
     indexer.index(rule);
@@ -553,7 +546,7 @@ describe('RuleIndexer', () => {
     let rule2 = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'bars' }],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
     indexer.index(rule2);
@@ -561,7 +554,7 @@ describe('RuleIndexer', () => {
     let rule3 = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'date', value: '2020-01-20' }],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
     indexer.index(rule3);
@@ -595,7 +588,7 @@ describe('RuleIndexer', () => {
       id: 'id1',
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'food' }],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
     indexer.index(rule);
@@ -614,7 +607,7 @@ describe('RuleIndexer', () => {
     rule = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'alcohol' }],
-      actions: [{ op: ActionOperator.set, field: 'name', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
       fieldTypes,
     });
     indexer.index(rule);
@@ -633,7 +626,7 @@ describe('RuleIndexer', () => {
       conditions: [
         { op: 'oneOf', field: 'name', value: ['James', 'Sarah', 'Evy'] },
       ],
-      actions: [{ op: ActionOperator.set, field: 'category', value: 'Food' }],
+      actions: [{ op: 'set', field: 'category', value: 'Food' }],
       fieldTypes,
     });
     indexer.index(rule);
@@ -641,7 +634,7 @@ describe('RuleIndexer', () => {
     let rule2 = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'Georgia' }],
-      actions: [{ op: ActionOperator.set, field: 'category', value: 'Food' }],
+      actions: [{ op: 'set', field: 'category', value: 'Food' }],
       fieldTypes,
     });
     indexer.index(rule2);

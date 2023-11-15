@@ -7,7 +7,6 @@ import { post } from '../post';
 import { getServer } from '../server-config';
 import * as mockSyncServer from '../tests/mockSyncServer';
 
-import { ActionOperator } from './rules';
 import {
   syncAccount,
   reconcileTransactions,
@@ -405,7 +404,7 @@ describe('Account sync', () => {
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: payeeId }],
-      actions: [{ op: ActionOperator.set, field: 'category', value: catId }],
+      actions: [{ op: 'set', field: 'category', value: catId }],
     });
 
     await reconcileTransactions(acctId, [
@@ -456,7 +455,7 @@ describe('Account sync', () => {
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'Bakkerij' }],
-      actions: [{ op: ActionOperator.set, field: 'payee', value: payeeId }],
+      actions: [{ op: 'set', field: 'payee', value: payeeId }],
     });
 
     await reconcileTransactions(acctId, [
@@ -503,7 +502,7 @@ describe('Account sync', () => {
         stage: null,
         conditionsOp: 'and',
         conditions: [{ op: 'is', field: 'imported_payee', value: 'Bakkerij' }],
-        actions: [{ op: ActionOperator.set, field: 'payee', value: payeeId2 }],
+        actions: [{ op: 'set', field: 'payee', value: payeeId2 }],
       });
 
       if (version === 'v1') {
@@ -566,7 +565,7 @@ describe('Account sync', () => {
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'Bakkerij' }],
-      actions: [{ op: ActionOperator.set, field: 'payee', value: payeeId }],
+      actions: [{ op: 'set', field: 'payee', value: payeeId }],
     });
 
     let transactions = [

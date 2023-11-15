@@ -1,5 +1,3 @@
-import { ActionOperator } from '../../server/accounts/rules';
-
 import { type ScheduleEntity } from './schedule';
 
 export interface RuleEntity {
@@ -26,13 +24,13 @@ export type RuleActionEntity =
 
 export interface SetRuleActionEntity {
   field: string;
-  op: ActionOperator.set;
+  op: 'set';
   value: unknown;
   options?: unknown;
   type?: string;
 }
 
 export interface LinkScheduleRuleActionEntity {
-  op: ActionOperator.linkschedule;
+  op: 'link-schedule';
   value: ScheduleEntity;
 }

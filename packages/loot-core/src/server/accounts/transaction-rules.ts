@@ -27,7 +27,6 @@ import {
   rankRules,
   migrateIds,
   iterateIds,
-  ActionOperator,
 } from './rules';
 import { batchUpdateTransactions } from './transactions';
 
@@ -499,7 +498,7 @@ export function applyActions(
       }
 
       try {
-        if (action.op === ActionOperator.linkschedule) {
+        if (action.op === 'link-schedule') {
           return new Action(action.op, null, action.value, null, FIELD_TYPES);
         }
 

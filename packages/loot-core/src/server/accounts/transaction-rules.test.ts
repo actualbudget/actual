@@ -3,7 +3,6 @@ import { runQuery } from '../aql';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 
-import { ActionOperator } from './rules';
 import {
   getRules,
   loadRules,
@@ -54,8 +53,8 @@ describe('Transaction rules', () => {
           { op: 'noop', field: 'date', value: '2019-05' },
         ]),
         actions: JSON.stringify([
-          { op: ActionOperator.set, field: 'name', value: 'Sarah' },
-          { op: ActionOperator.set, field: 'category', value: 'Sarah' },
+          { op: 'set', field: 'name', value: 'Sarah' },
+          { op: 'set', field: 'category', value: 'Sarah' },
         ]),
       }),
     ).toBe(null);
@@ -67,8 +66,8 @@ describe('Transaction rules', () => {
           { op: 'is', field: 'date', value: '2019-05' },
         ]),
         actions: JSON.stringify([
-          { op: ActionOperator.set, field: 'notes', value: 'Sarah' },
-          { op: ActionOperator.set, field: 'invalid', value: 'Sarah' },
+          { op: 'set', field: 'notes', value: 'Sarah' },
+          { op: 'set', field: 'invalid', value: 'Sarah' },
         ]),
       }),
     ).toBe(null);
@@ -80,8 +79,8 @@ describe('Transaction rules', () => {
           { op: 'is', field: 'date', value: '2019-05' },
         ]),
         actions: JSON.stringify([
-          { op: ActionOperator.set, field: 'notes', value: 'Sarah' },
-          { op: ActionOperator.set, field: 'category', value: 'Sarah' },
+          { op: 'set', field: 'notes', value: 'Sarah' },
+          { op: 'set', field: 'category', value: 'Sarah' },
         ]),
       }),
     ).not.toBe(null);
@@ -106,8 +105,8 @@ describe('Transaction rules', () => {
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'date', value: '2019-05' }],
       actions: [
-        { op: ActionOperator.set, field: 'notes', value: 'Sarah' },
-        { op: ActionOperator.set, field: 'category', value: 'food' },
+        { op: 'set', field: 'notes', value: 'Sarah' },
+        { op: 'set', field: 'category', value: 'food' },
       ],
     });
     expect((await db.all('SELECT * FROM rules')).length).toBe(2);
@@ -143,8 +142,8 @@ describe('Transaction rules', () => {
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'kroger' }],
       actions: [
-        { op: ActionOperator.set, field: 'notes', value: 'Sarah' },
-        { op: ActionOperator.set, field: 'category', value: 'food' },
+        { op: 'set', field: 'notes', value: 'Sarah' },
+        { op: 'set', field: 'category', value: 'food' },
       ],
     });
     expect(getRules().length).toBe(1);
@@ -161,7 +160,7 @@ describe('Transaction rules', () => {
     // Change the action
     await updateRule({
       id,
-      actions: [{ op: ActionOperator.set, field: 'category', value: 'bars' }],
+      actions: [{ op: 'set', field: 'category', value: 'bars' }],
     });
     expect(getRules().length).toBe(1);
 
@@ -195,8 +194,8 @@ describe('Transaction rules', () => {
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'kroger' }],
       actions: [
-        { op: ActionOperator.set, field: 'notes', value: 'Sarah' },
-        { op: ActionOperator.set, field: 'category', value: 'food' },
+        { op: 'set', field: 'notes', value: 'Sarah' },
+        { op: 'set', field: 'category', value: 'food' },
       ],
     });
     expect(getRules().length).toBe(1);
@@ -226,14 +225,14 @@ describe('Transaction rules', () => {
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [{ op: 'contains', field: 'imported_payee', value: 'lowes' }],
-      actions: [{ op: ActionOperator.set, field: 'payee', value: 'lowes' }],
+      actions: [{ op: 'set', field: 'payee', value: 'lowes' }],
     });
 
     await insertRule({
       stage: 'post',
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'kroger' }],
-      actions: [{ op: ActionOperator.set, field: 'notes', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'notes', value: 'Sarah' }],
     });
 
     resetState();
@@ -278,7 +277,7 @@ describe('Transaction rules', () => {
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [{ op: 'contains', field: 'imported_payee', value: 'lowes' }],
-      actions: [{ op: ActionOperator.set, field: 'payee', value: 'lowes_id' }],
+      actions: [{ op: 'set', field: 'payee', value: 'lowes_id' }],
     });
 
     await insertRule({
@@ -289,7 +288,7 @@ describe('Transaction rules', () => {
         { op: 'is', field: 'payee', value: 'lowes_id' },
         { op: 'is', field: 'category', value: 'food_id' },
       ],
-      actions: [{ op: ActionOperator.set, field: 'notes', value: 'Sarah' }],
+      actions: [{ op: 'set', field: 'notes', value: 'Sarah' }],
     });
 
     let rule1 = getRules().find(r => r.id === 'one');
@@ -327,14 +326,14 @@ describe('Transaction rules', () => {
           value: ['kroger', 'kroger1', 'kroger2', 'kroger3', 'kroger4'],
         },
       ],
-      actions: [{ op: ActionOperator.set, field: 'notes', value: 'got it2' }],
+      actions: [{ op: 'set', field: 'notes', value: 'got it2' }],
     });
 
     await insertRule({
       stage: 'pre',
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: '123 kroger' }],
-      actions: [{ op: ActionOperator.set, field: 'payee', value: 'kroger3' }],
+      actions: [{ op: 'set', field: 'payee', value: 'kroger3' }],
     });
 
     await insertRule({
@@ -343,14 +342,14 @@ describe('Transaction rules', () => {
       conditions: [
         { op: 'contains', field: 'imported_payee', value: 'kroger' },
       ],
-      actions: [{ op: ActionOperator.set, field: 'payee', value: 'kroger4' }],
+      actions: [{ op: 'set', field: 'payee', value: 'kroger4' }],
     });
 
     await insertRule({
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'kroger4' }],
-      actions: [{ op: ActionOperator.set, field: 'notes', value: 'got it' }],
+      actions: [{ op: 'set', field: 'notes', value: 'got it' }],
     });
 
     expect(
@@ -500,7 +499,7 @@ describe('Learning categories', () => {
     expect(rule.conditions[0].field).toBe('payee');
     expect(rule.conditions[0].value).toBe(expectedPayee);
     expect(rule.actions.length).toBe(1);
-    expect(rule.actions[0].op).toBe(ActionOperator.set);
+    expect(rule.actions[0].op).toBe('set');
     expect(rule.actions[0].field).toBe('category');
     expect(rule.actions[0].value).toBe(category);
   }
@@ -648,7 +647,7 @@ describe('Learning categories', () => {
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [{ op: ActionOperator.set, field: 'category', value: 'fun' }],
+      actions: [{ op: 'set', field: 'category', value: 'fun' }],
     });
 
     // Even though the system couldn't figure out the category to set,
@@ -673,7 +672,7 @@ describe('Learning categories', () => {
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [{ op: ActionOperator.set, field: 'category', value: 'beer' }],
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
 
     await insertTransaction(
@@ -718,7 +717,7 @@ describe('Learning categories', () => {
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [{ op: ActionOperator.set, field: 'category', value: 'beer' }],
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
 
     // Use a new payee, so the category should be remembered
@@ -765,23 +764,19 @@ describe('Learning categories', () => {
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [
-        { op: ActionOperator.set, field: 'category', value: 'unknown1' },
-      ],
+      actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
     await insertRule({
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [
-        { op: ActionOperator.set, field: 'category', value: 'unknown2' },
-      ],
+      actions: [{ op: 'set', field: 'category', value: 'unknown2' }],
     });
     await insertRule({
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: null }],
-      actions: [{ op: ActionOperator.set, field: 'category', value: 'beer' }],
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
 
     let trans = {
@@ -848,17 +843,13 @@ describe('Learning categories', () => {
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'payee', value: 'foo' }],
-      actions: [
-        { op: ActionOperator.set, field: 'category', value: 'unknown1' },
-      ],
+      actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
     await insertRule({
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
-      actions: [
-        { op: ActionOperator.set, field: 'category', value: 'unknown1' },
-      ],
+      actions: [{ op: 'set', field: 'category', value: 'unknown1' }],
     });
 
     expect(getRules().length).toBe(2);
@@ -886,7 +877,7 @@ describe('Learning categories', () => {
       stage: null,
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'imported_payee', value: 'foo' }],
-      actions: [{ op: ActionOperator.set, field: 'payee', value: 'unknown1' }],
+      actions: [{ op: 'set', field: 'payee', value: 'unknown1' }],
     });
 
     // The rule that the system sees should use the new public names
@@ -918,9 +909,7 @@ describe('Learning categories', () => {
       conditions: JSON.stringify([
         { op: 'is', field: 'imported_payee', value: 'foo' },
       ]),
-      actions: JSON.stringify([
-        { op: ActionOperator.set, field: 'payee', value: 'payee1' },
-      ]),
+      actions: JSON.stringify([{ op: 'set', field: 'payee', value: 'payee1' }]),
     });
 
     await loadRules();
