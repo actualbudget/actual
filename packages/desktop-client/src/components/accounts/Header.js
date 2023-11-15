@@ -160,7 +160,12 @@ export function AccountHeader({
                     : accountName}
                 </View>
 
-                {account && <NotesButton id={`account-${account.id}`} />}
+                {account && (
+                  <NotesButton
+                    id={`account-${account.id}`}
+                    defaultColor={theme.pageTextSubdued}
+                  />
+                )}
                 <Button
                   type="bare"
                   className="hover-visible"
@@ -170,7 +175,7 @@ export function AccountHeader({
                     style={{
                       width: 11,
                       height: 11,
-                      color: theme.altButtonBareText,
+                      color: theme.pageTextSubdued,
                     }}
                   />
                 </Button>
