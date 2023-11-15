@@ -163,17 +163,30 @@ function Status({ status }) {
 }
 
 const LEFT_RIGHT_FLEX_WIDTH = 70;
-const TransactionEditInner = memo(function TransactionEditInner(props) {
-  const [transactions, setTransactions] = useState(props.transactions);
+const TransactionEditInner = memo(function TransactionEditInner({
+  transactions: originalTransactions,
+  accounts,
+  categories,
+  payees,
+  renderChildEdit,
+  adding,
+  dateFormat,
+  onEdit,
+  onSave,
+  onDelete,
+  navigate,
+  pushModal,
+}) {
+  const [transactions, setTransactions] = useState(originalTransactions);
   const [editingChild, setEditingChild] = useState(null);
   const amountRef = useRef();
   const _queuedChange = useRef();
 
   useEffect(() => {
-    if (props.adding) {
+    if (adding) {
       amountRef.current?.focus();
     }
-  }, [props.adding]);
+  }, [adding]);
 
   useEffect(() => {
     return () => {
@@ -184,22 +197,22 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
   }, []);
 
   const serializeTransactions = memoizeOne(transactions => {
-    return transactions.map(t => serializeTransaction(t, props.dateFormat));
+    return transactions.map(t => serializeTransaction(t, dateFormat));
   });
 
   // const openChildEdit = child => {
   //   setEditingChild(child.id);
   // };
 
-  const onEdit = async (transaction, name, value) => {
+  const _onEdit = async (transaction, name, value) => {
     let newTransaction = { ...transaction, [name]: value };
-    if (props.onEdit) {
-      newTransaction = await props.onEdit(newTransaction);
+    if (onEdit) {
+      newTransaction = await onEdit(newTransaction);
     }
 
     let { data: newTransactions } = updateTransaction(
       transactions,
-      deserializeTransaction(newTransaction, null, props.dateFormat),
+      deserializeTransaction(newTransaction, null, dateFormat),
     );
 
     _queuedChange.current = null;
@@ -207,11 +220,11 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
     return newTransactions;
   };
 
-  const onSave = async () => {
+  const _onSave = async () => {
     let transactionsToSave = transactions;
     const [transaction, ..._childTransactions] = transactionsToSave;
     const { account: accountId } = transaction;
-    let account = getAccountsById(props.accounts)[accountId];
+    let account = getAccountsById(accounts)[accountId];
 
     if (transactions.find(t => t.account == null)) {
       // Ignore transactions if any of them don't have an account
@@ -225,19 +238,19 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
     // better way to do this (lift the state?)
     if (_queuedChange.current) {
       let [transaction, name, value] = _queuedChange.current;
-      transactionsToSave = await onEdit(transaction, name, value);
+      transactionsToSave = await _onEdit(transaction, name, value);
     }
 
-    if (props.adding) {
+    if (adding) {
       transactionsToSave = realizeTempTransactions(transactions);
     }
 
-    props.onSave(transactionsToSave);
-    props.navigate(`/accounts/${account.id}`, { replace: true });
+    onSave(transactionsToSave);
+    navigate(`/accounts/${account.id}`, { replace: true });
   };
 
   const onAdd = () => {
-    onSave();
+    _onSave();
   };
 
   const onSaveChild = childTransaction => {
@@ -254,34 +267,30 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
   };
 
   const onClick = (transactionId, name) => {
-    let { dateFormat } = props;
-
-    props.pushModal('edit-field', {
+    pushModal('edit-field', {
       name,
       onSubmit: (name, value) => {
         let transaction = transactions.find(t => t.id === transactionId);
         // This is a deficiency of this API, need to fix. It
         // assumes that it receives a serialized transaction,
         // but we only have access to the raw transaction
-        onEdit(serializeTransaction(transaction, dateFormat), name, value);
+        _onEdit(serializeTransaction(transaction, dateFormat), name, value);
       },
     });
   };
 
-  const onDelete = () => {
-    props.onDelete();
+  const _onDelete = () => {
+    onDelete();
 
     const [transaction, ..._childTransactions] = transactions;
     const { account: accountId } = transaction;
     if (accountId) {
-      props.navigate(`/accounts/${accountId}`, { replace: true });
+      navigate(`/accounts/${accountId}`, { replace: true });
     } else {
-      props.navigate(-1);
+      navigate(-1);
     }
   };
 
-  const { adding, categories, accounts, payees, renderChildEdit, navigate } =
-    props;
   const serializedTransactions = serializeTransactions(transactions || []);
   const [transaction, ..._childTransactions] = serializedTransactions;
   const { payee: payeeId, category, account: accountId } = transaction;
@@ -303,15 +312,10 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
     transferAcct,
   );
 
-  const transactionDate = parseDate(
-    transaction.date,
-    props.dateFormat,
-    new Date(),
-  );
+  const transactionDate = parseDate(transaction.date, dateFormat, new Date());
   const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
 
   return (
-    // <KeyboardAvoidingView>
     <View
       style={{
         margin: 10,
@@ -398,16 +402,6 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
           />
         </View>
 
-        {/* <ScrollView
-            ref={el => (this.scrollView = el)}
-            automaticallyAdjustContentInsets={false}
-            keyboardShouldPersistTaps="always"
-            style={{
-              flexGrow: 1,
-              overflow: 'hidden',
-            }}
-            contentContainerStyle={{ flexGrow: 1 }}
-          > */}
         <View
           style={{
             overflowY: 'auto',
@@ -430,7 +424,7 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
               ref={amountRef}
               value={transaction.amount}
               zeroIsNegative={true}
-              onBlur={value => onEdit(transaction, 'amount', value.toString())}
+              onBlur={value => _onEdit(transaction, 'amount', value.toString())}
               onChange={value => onQueueChange(transaction, 'amount', value)}
               style={{ transform: [] }}
               focusedStyle={{
@@ -482,12 +476,12 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
                   //       paddingHorizontal: 15,
                   //       margin: 0,
                   //     }}
-                  //     onPress={this.onSplit}
+                  //     onPress={onSplit}
                   //   >
                   //     Split
                   //   </Button>
                   // }
-                  onClick={() => this.onClick(transaction.id, 'category')}
+                  onClick={() => onClick(transaction.id, 'category')}
                   data-testid="category-field"
                 />
               ) : (
@@ -503,7 +497,7 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
               <TapField
                 disabled={!adding}
                 value={account ? account.name : null}
-                onClick={() => this.onClick(transaction.id, 'account')}
+                onClick={() => onClick(transaction.id, 'account')}
                 data-testid="account-field"
               />
             </View>
@@ -517,20 +511,17 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
                   style={{ color: 'canvastext', minWidth: '150px' }}
                   defaultValue={dateDefaultValue}
                   onUpdate={value =>
-                    this.onEdit(
+                    _onEdit(
                       transaction,
                       'date',
-                      formatDate(parseISO(value), this.props.dateFormat),
+                      formatDate(parseISO(value), dateFormat),
                     )
                   }
                   onChange={e =>
-                    this.onQueueChange(
+                    onQueueChange(
                       transaction,
                       'date',
-                      formatDate(
-                        parseISO(e.target.value),
-                        this.props.dateFormat,
-                      ),
+                      formatDate(parseISO(e.target.value), dateFormat),
                     )
                   }
                 />
@@ -540,9 +531,7 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
                 <FieldLabel title="Cleared" />
                 <BooleanField
                   checked={transaction.cleared}
-                  onUpdate={checked =>
-                    this.onEdit(transaction, 'cleared', checked)
-                  }
+                  onUpdate={checked => _onEdit(transaction, 'cleared', checked)}
                   style={{
                     margin: 'auto',
                     width: 22,
@@ -556,9 +545,9 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
               <FieldLabel title="Notes" />
               <InputField
                 defaultValue={transaction.notes}
-                onUpdate={value => this.onEdit(transaction, 'notes', value)}
+                onUpdate={value => _onEdit(transaction, 'notes', value)}
                 onChange={e =>
-                  this.onQueueChange(transaction, 'notes', e.target.value)
+                  onQueueChange(transaction, 'notes', e.target.value)
                 }
               />
             </View>
@@ -566,7 +555,7 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
             {!adding && (
               <View style={{ alignItems: 'center' }}>
                 <Button
-                  onClick={() => this.onDelete()}
+                  onClick={() => _onDelete()}
                   style={{
                     borderWidth: 0,
                     paddingVertical: 5,
@@ -596,96 +585,6 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
               </View>
             )}
           </View>
-
-          <View>
-            <FieldLabel title="Account" />
-            <TapField
-              disabled={!adding}
-              value={account ? account.name : null}
-              onClick={() => onClick(transaction.id, 'account')}
-              data-testid="account-field"
-            />
-          </View>
-
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1 }}>
-              <FieldLabel title="Date" />
-              <InputField
-                type="date"
-                required
-                style={{ color: 'canvastext', minWidth: '150px' }}
-                defaultValue={dateDefaultValue}
-                onUpdate={value =>
-                  onEdit(
-                    transaction,
-                    'date',
-                    formatDate(parseISO(value), props.dateFormat),
-                  )
-                }
-                onChange={e =>
-                  onQueueChange(
-                    transaction,
-                    'date',
-                    formatDate(parseISO(e.target.value), props.dateFormat),
-                  )
-                }
-              />
-            </View>
-
-            <View style={{ marginLeft: 35, marginRight: 35 }}>
-              <FieldLabel title="Cleared" />
-              <BooleanField
-                checked={transaction.cleared}
-                onUpdate={checked => onEdit(transaction, 'cleared', checked)}
-                style={{ marginTop: 4 }}
-              />
-            </View>
-          </View>
-
-          <View>
-            <FieldLabel title="Notes" />
-            <InputField
-              defaultValue={transaction.notes}
-              onUpdate={value => onEdit(transaction, 'notes', value)}
-              onChange={e =>
-                onQueueChange(transaction, 'notes', e.target.value)
-              }
-            />
-          </View>
-
-          {!adding && (
-            <View style={{ alignItems: 'center' }}>
-              <Button
-                onClick={() => onDelete()}
-                style={{
-                  borderWidth: 0,
-                  paddingVertical: 5,
-                  marginLeft: styles.mobileEditingPadding,
-                  marginRight: styles.mobileEditingPadding,
-                  marginTop: 20,
-                  marginBottom: 15,
-                  backgroundColor: 'transparent',
-                }}
-                type="bare"
-              >
-                <SvgTrash
-                  width={17}
-                  height={17}
-                  style={{ color: theme.formLabelText }}
-                />
-                <Text
-                  style={{
-                    ...styles.text,
-                    color: theme.formLabelText,
-                    marginLeft: 5,
-                    userSelect: 'none',
-                  }}
-                >
-                  Delete transaction
-                </Text>
-              </Button>
-            </View>
-          )}
         </View>
 
         <View
@@ -719,7 +618,7 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
               </Text>
             </Button>
           ) : (
-            <Button onClick={() => onSave()}>
+            <Button onClick={() => _onSave()}>
               <SvgPencilWriteAlternate
                 style={{ width: 16, height: 16, color: theme.formInputText }}
               />
@@ -749,13 +648,12 @@ const TransactionEditInner = memo(function TransactionEditInner(props) {
           amountSign: forcedSign,
           getCategoryName: id => (id ? lookupName(categories, id) : null),
           navigate: navigate,
-          onEdit: onEdit,
+          onEdit: _onEdit,
           onStartClose: onSaveChild,
         })}
         {/* </ExitTransition> */}
       </View>
     </View>
-    // </KeyboardAvoidingView>
   );
 });
 
@@ -920,7 +818,7 @@ function TransactionEditUnconnected(props) {
         renderChildEdit={props => {}}
         dateFormat={dateFormat}
         // TODO: was this a mistake in the original code?
-        // onTapField={this.onTapField}
+        // onTapField={onTapField}
         onEdit={onEdit}
         onSave={onSave}
         onDelete={onDelete}
