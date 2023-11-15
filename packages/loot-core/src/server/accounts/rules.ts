@@ -416,29 +416,34 @@ export class Condition {
   }
 }
 
-let ACTION_OPS = ['set', 'link-schedule'];
+export enum ActionOperator {
+  set = 'set',
+  linkschedule = 'link-schedule',
+}
+
+let ACTION_OPS = [ActionOperator.set, ActionOperator.linkschedule];
 
 export class Action {
   field;
-  op;
+  op: ActionOperator;
   options;
   rawValue;
   type;
   value;
 
-  constructor(op, field, value, options, fieldTypes) {
+  constructor(op: ActionOperator, field, value, options, fieldTypes) {
     assert(
       ACTION_OPS.includes(op),
       'internal',
       `Invalid action operation: ${op}`,
     );
 
-    if (op === 'set') {
+    if (op === ActionOperator.set) {
       let typeName = fieldTypes.get(field);
       assert(typeName, 'internal', `Invalid field for action: ${field}`);
       this.field = field;
       this.type = typeName;
-    } else if (op === 'link-schedule') {
+    } else if (op === ActionOperator.linkschedule) {
       this.field = null;
       this.type = 'id';
     }
@@ -451,10 +456,10 @@ export class Action {
 
   exec(object) {
     switch (this.op) {
-      case 'set':
+      case ActionOperator.set:
         object[this.field] = this.value;
         break;
-      case 'link-schedule':
+      case ActionOperator.linkschedule:
         object.schedule = this.value;
         break;
       default:

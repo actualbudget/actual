@@ -1,6 +1,11 @@
 import { FIELD_TYPES as ruleFieldTypes } from '../../shared/rules';
 import { type RuleEntity } from '../../types/models';
-import { Condition, Action, rankRules } from '../accounts/rules';
+import {
+  Condition,
+  Action,
+  rankRules,
+  ActionOperator,
+} from '../accounts/rules';
 import * as rules from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import { RuleError } from '../errors';
@@ -45,7 +50,7 @@ function validateRule(rule: Partial<RuleEntity>) {
   );
 
   let actionErrors = runValidation(rule.actions, action =>
-    action.op === 'link-schedule'
+    action.op === ActionOperator.linkschedule
       ? new Action(action.op, null, action.value, null, ruleFieldTypes)
       : new Action(
           action.op,

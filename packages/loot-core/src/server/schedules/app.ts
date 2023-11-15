@@ -13,7 +13,7 @@ import {
   getStatus,
   getScheduledAmount,
 } from '../../shared/schedules';
-import { Rule, Condition } from '../accounts/rules';
+import { Rule, Condition, ActionOperator } from '../accounts/rules';
 import { addTransactions } from '../accounts/sync';
 import {
   insertRule,
@@ -125,7 +125,7 @@ async function fixRuleForSchedule(id) {
       { op: 'isapprox', field: 'date', value: currentDay() },
       { op: 'isapprox', field: 'amount', value: 0 },
     ],
-    actions: [{ op: 'link-schedule', value: id }],
+    actions: [{ op: ActionOperator.linkschedule, value: id }],
   });
 
   await db.updateWithSchema('schedules', { id, rule: newId });
@@ -239,7 +239,7 @@ export async function createSchedule({
     stage: null,
     conditionsOp: 'and',
     conditions,
-    actions: [{ op: 'link-schedule', value: scheduleId }],
+    actions: [{ op: ActionOperator.linkschedule, value: scheduleId }],
   });
 
   let now = Date.now();
@@ -386,8 +386,10 @@ function onRuleUpdate(rule) {
   let { actions, conditions } =
     rule instanceof Rule ? rule.serialize() : ruleModel.toJS(rule);
 
-  if (actions && actions.find(a => a.op === 'link-schedule')) {
-    let scheduleId = actions.find(a => a.op === 'link-schedule').value;
+  if (actions && actions.find(a => a.op === ActionOperator.linkschedule)) {
+    let scheduleId = actions.find(
+      a => a.op === ActionOperator.linkschedule,
+    ).value;
 
     if (scheduleId) {
       let conds = extractScheduleConds(conditions);

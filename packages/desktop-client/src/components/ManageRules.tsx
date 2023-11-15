@@ -12,6 +12,7 @@ import { pushModal } from 'loot-core/src/client/actions/modals';
 import { initiallyLoadPayees } from 'loot-core/src/client/actions/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
+import { ActionOperator } from 'loot-core/src/server/accounts/rules';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type RuleEntity } from 'loot-core/src/types/models';
@@ -59,14 +60,14 @@ function ruleToString(rule, data) {
       : mapValue(cond.field, cond.value, data),
   ]);
   let actions = rule.actions.flatMap(action => {
-    if (action.op === 'set') {
+    if (action.op === ActionOperator.set) {
       return [
         friendlyOp(action.op),
         mapField(action.field),
         'to',
         mapValue(action.field, action.value, data),
       ];
-    } else if (action.op === 'link-schedule') {
+    } else if (action.op === ActionOperator.linkschedule) {
       let schedule = data.schedules.find(s => s.id === action.value);
       return [
         friendlyOp(action.op),
@@ -222,7 +223,7 @@ function ManageRulesContent({
       ],
       actions: [
         {
-          op: 'set',
+          op: ActionOperator.set,
           field: 'category',
           value: null,
           type: 'id',
