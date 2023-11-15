@@ -118,7 +118,7 @@ export default function Menu({
             <Text
               key={item.name}
               style={{
-                color: theme.altMenuItemTextHeader,
+                color: theme.menuItemTextHeader,
                 fontSize: 11,
                 lineHeight: '1em',
                 textTransform: 'uppercase',

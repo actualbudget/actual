@@ -33,18 +33,29 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
 
 export function makeAmountGrey(value: number | string) {
   return value === 0 || value === '0' || value === '' || value == null
-    ? { color: theme.altMenuItemText }
+    ? { color: theme.tableTextSubdued }
     : null;
 }
 
-export function makeAmountStyle(value: number) {
-  const greyed = makeAmountGrey(value);
-  if (greyed) {
-    return greyed;
-  }
-
+export function makeAmountStyle(
+  value: number,
+  goalValue?: number,
+  budgetedValue?: number,
+) {
   if (value < 0) {
     return { color: theme.errorText };
+  }
+
+  if (goalValue == null) {
+    const greyed = makeAmountGrey(value);
+    if (greyed) {
+      return greyed;
+    }
+  } else {
+    if (budgetedValue < goalValue) {
+      return { color: theme.warningText };
+    }
+    return { color: theme.noticeText };
   }
 }
 
@@ -54,7 +65,7 @@ export function makeAmountFullStyle(value: number) {
       value < 0
         ? theme.errorText
         : value === 0
-        ? theme.altMenuItemText
+        ? theme.tableTextSubdued
         : theme.noticeText,
   };
 }

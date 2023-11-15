@@ -12,9 +12,15 @@ import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
-export function ReportSummary({ start, end, data, typeOp, monthsCount }) {
+export function ReportSummary({
+  start,
+  end,
+  data,
+  balanceTypeOp,
+  monthsCount,
+}) {
   let net = data.totalDebts > data.totalAssets ? 'EXPENSE' : 'INCOME';
-  const average = amountToInteger(data[typeOp]) / monthsCount;
+  const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
   return (
     <View
       style={{
@@ -63,9 +69,9 @@ export function ReportSummary({ start, end, data, typeOp, monthsCount }) {
             },
           ]}
         >
-          {typeOp === 'totalDebts'
+          {balanceTypeOp === 'totalDebts'
             ? 'TOTAL SPENDING'
-            : typeOp === 'totalAssets'
+            : balanceTypeOp === 'totalAssets'
             ? 'TOTAL INCOME'
             : 'NET ' + net}
         </Text>
@@ -80,7 +86,7 @@ export function ReportSummary({ start, end, data, typeOp, monthsCount }) {
           ]}
         >
           <PrivacyFilter blurIntensity={7}>
-            {amountToCurrency(data[typeOp])}
+            {amountToCurrency(data[balanceTypeOp])}
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>For this time period</Text>
@@ -104,9 +110,9 @@ export function ReportSummary({ start, end, data, typeOp, monthsCount }) {
             },
           ]}
         >
-          {typeOp === 'totalDebts'
+          {balanceTypeOp === 'totalDebts'
             ? 'AVERAGE SPENDING'
-            : typeOp === 'totalAssets'
+            : balanceTypeOp === 'totalAssets'
             ? 'AVERAGE INCOME'
             : 'AVERAGE NET'}
         </Text>
@@ -130,7 +136,7 @@ export function ReportSummary({ start, end, data, typeOp, monthsCount }) {
   );
 }
 
-export function ReportSplit({ data, legend, splitType }) {
+export function ReportLegend({ data, legend, groupBy }) {
   return (
     <View
       style={{
@@ -151,7 +157,7 @@ export function ReportSplit({ data, legend, splitType }) {
           },
         ]}
       >
-        {splitType}
+        {groupBy}
       </Text>
       <View>
         {legend.map(item => {

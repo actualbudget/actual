@@ -5,12 +5,11 @@ import useFeatureFlag from '../../hooks/useFeatureFlag';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
 import View from '../common/View';
-
-import { CashFlowCard } from './CashFlow';
-import { CategorySpendingCard } from './CategorySpending';
-import { CustomReportsCard } from './Custom';
-import { CustomReportsCardList } from './ListCards';
-import { NetWorthCard } from './NetWorth';
+import CashFlowCard from './reports/CashFlowCard';
+import CategorySpendingCard from './reports/CategorySpendingCard';
+import CustomReportCard from './reports/CustomReportCard';
+import NetWorthCard from './reports/NetWorthCard';
+import SankeyCard from './reports/SankeyCard';
 
 export function LoadingIndicator() {
   return (
@@ -30,6 +29,7 @@ export default function Overview() {
   let categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );
+  let sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   let customReportsFeatureFlag = useFeatureFlag('customReports');
 
@@ -57,8 +57,14 @@ export default function Overview() {
         }}
       >
         {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
-        {customReportsFeatureFlag && <CustomReportsCard />}
-        <div style={{ flex: 1 }} />
+        {sankeyFeatureFlag && <SankeyCard />}
+        {customReportsFeatureFlag ? (
+          <CustomReportCard />
+        ) : (
+          <div style={{ flex: 1 }} />
+        )}
+        {!categorySpendingReportFeatureFlag && <div style={{ flex: 1 }} />}
+        {!sankeyFeatureFlag && <div style={{ flex: 1 }} />}
       </View>
 
       {customReportsFeatureFlag && (

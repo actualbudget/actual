@@ -8,11 +8,11 @@ import BarLineGraph from './graphs/BarLineGraph';
 import DonutGraph from './graphs/DonutGraph';
 import LineGraph from './graphs/LineGraph';
 import StackedBarGraph from './graphs/StackedBarGraph';
-import SimpleTable, {
-  TableHeader,
-  TableList,
-  TableTotals,
-} from './ReportTable';
+import { ReportOptions } from './ReportOptions';
+import ReportTable from './ReportTable';
+import ReportTableHeader from './ReportTableHeader';
+import ReportTableList from './ReportTableList';
+import ReportTableTotals from './ReportTableTotals';
 
 export function ChooseGraph({
   start,
@@ -20,15 +20,12 @@ export function ChooseGraph({
   data,
   mode,
   graphType,
-  type,
-  typeOptions,
-  split,
-  splitOptions,
+  balanceType,
+  groupBy,
   empty,
   scrollWidth,
   setScrollWidth,
   months,
-  OnChangeLegend,
 }) {
   function saveScrollWidth(parent, child) {
     let width = parent > 0 && child > 0 && parent - child;
@@ -43,7 +40,7 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        typeOp={typeOptions.find(opt => opt.value === type).format}
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -54,10 +51,9 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        split={split}
+        groupBy={groupBy}
         empty={empty}
-        OnChangeLegend={OnChangeLegend}
-        typeOp={typeOptions.find(opt => opt.value === type).format}
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -78,10 +74,9 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        split={split}
+        groupBy={groupBy}
         empty={empty}
-        OnChangeLegend={OnChangeLegend}
-        typeOp={typeOptions.find(opt => opt.value === type).format}
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -102,8 +97,7 @@ export function ChooseGraph({
         start={start}
         end={end}
         data={data}
-        typeOp={typeOptions.find(opt => opt.value === type).format}
-        OnChangeLegend={OnChangeLegend}
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -114,30 +108,30 @@ export function ChooseGraph({
           overflow: 'auto',
         }}
       >
-        <TableHeader
+        <ReportTableHeader
           interval={mode === 'time' && months}
           scrollWidth={scrollWidth}
-          split={splitOptions.find(opt => opt.value === split).description}
-          type={type}
+          groupBy={groupBy}
+          balanceType={balanceType}
         />
-        <SimpleTable saveScrollWidth={saveScrollWidth}>
-          <TableList
+        <ReportTable saveScrollWidth={saveScrollWidth}>
+          <ReportTableList
             data={data}
             empty={empty}
             monthsCount={months.length}
-            typeOp={typeOptions.find(opt => opt.value === type).format}
+            balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
             mode={mode}
-            split={splitOptions.find(opt => opt.value === split).description}
+            groupBy={groupBy}
           />
-          <TableTotals
+          <ReportTableTotals
             scrollWidth={scrollWidth}
             data={data}
             mode={mode}
-            typeOp={typeOptions.find(opt => opt.value === type).format}
+            balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
             monthsCount={months.length}
-            type={type}
+            balanceType={balanceType}
           />
-        </SimpleTable>
+        </ReportTable>
       </View>
     );
   }

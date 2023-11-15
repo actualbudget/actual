@@ -122,7 +122,7 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
               cursor: 'default',
               backgroundColor:
                 highlightedIndex === index
-                  ? theme.alt2MenuItemBackgroundHover
+                  ? theme.menuAutoCompleteBackgroundHover
                   : null,
             })}`}
           >

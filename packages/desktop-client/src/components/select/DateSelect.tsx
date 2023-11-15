@@ -35,8 +35,8 @@ import DateSelectRight from './DateSelect.right.png';
 
 let pickerStyles = {
   '& .pika-single.actual-date-picker': {
-    color: theme.sidebarItemTextHover,
-    background: theme.sidebarBackground,
+    color: theme.calendarText,
+    background: theme.calendarBackground,
     border: 'none',
     boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
     borderRadius: 4,
@@ -49,7 +49,7 @@ let pickerStyles = {
     },
     // month/year
     '& .pika-label': {
-      backgroundColor: theme.sidebarBackground,
+      backgroundColor: theme.calendarBackground,
     },
     // Back/forward buttons
     '& .pika-prev': {
@@ -60,19 +60,19 @@ let pickerStyles = {
     },
     // Day of week
     '& .pika-table th': {
-      color: theme.sidebarItemText,
+      color: theme.calendarItemText,
       '& abbr': { textDecoration: 'none' },
     },
     // Numbered days
     '& .pika-button': {
-      backgroundColor: theme.sidebarItemBackgroundHover,
-      color: theme.sidebarItemText,
+      backgroundColor: theme.calendarItemBackground,
+      color: theme.calendarItemText,
     },
     '& .is-today .pika-button': {
       textDecoration: 'underline',
     },
     '& .is-selected .pika-button': {
-      backgroundColor: theme.altButtonNormalSelectedBackground,
+      backgroundColor: theme.calendarSelectedBackground,
       boxShadow: 'none',
     },
   },

@@ -5,7 +5,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
+  //Legend,
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
@@ -18,120 +18,110 @@ import Text from '../../common/Text';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import numberFormatterTooltip from '../numberFormatter';
+
+type PayloadItem = {
+  name: string;
+  value: string;
+  color: string;
+  payload: {
+    date: string;
+    assets: number | string;
+    debt: number | string;
+    networth: number | string;
+    change: number | string;
+    fill: string;
+  };
+};
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  label?: string;
+};
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={`${css({
+          zIndex: 1000,
+          pointerEvents: 'none',
+          borderRadius: 2,
+          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+          backgroundColor: theme.menuAutoCompleteBackground,
+          color: theme.menuAutoCompleteText,
+          padding: 10,
+        })}`}
+      >
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{payload[0].name}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <PrivacyFilter>
+              <Text style={{ color: payload[0].payload.fill }}>
+                {amountToCurrency(payload[0].value)}
+              </Text>
+            </PrivacyFilter>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
+
+/* Descoped for future PR
+type CustomLegendProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  label?: string;
+};
+
+const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
+  const agg = payload.map(leg => {
+    return {
+      name: leg.value,
+      color: leg.color,
+    };
+  });
+
+  OnChangeLegend(agg);
+
+  return <div />;
+};
+*/
 
 type DonutGraphProps = {
   style?: CSSProperties;
   data;
-  split;
-  typeOp;
+  groupBy;
+  balanceTypeOp;
   empty;
-  OnChangeLegend;
   compact: boolean;
   domain?: {
     y?: [number, number];
   };
 };
-type PotentialNumber = number | string | undefined | null;
-
-const numberFormatterTooltip = (value: PotentialNumber): number | null => {
-  if (typeof value === 'number') {
-    return Math.round(value);
-  }
-  return null; // or some default value for other cases
-};
 
 function DonutGraph({
   style,
   data,
-  split,
+  groupBy,
   empty,
-  typeOp,
-  OnChangeLegend,
+  balanceTypeOp,
   compact,
   domain,
 }: DonutGraphProps) {
   const colorScale = getColorScale('qualitative');
-  const yAxis = [5, 6].includes(split) ? 'date' : 'name';
-  const splitData = [5, 6].includes(split) ? 'monthData' : 'data';
-
-  type PayloadItem = {
-    name: string;
-    value: string;
-    color: string;
-    payload: {
-      date: string;
-      assets: number | string;
-      debt: number | string;
-      networth: number | string;
-      change: number | string;
-      fill: string;
-    };
-  };
-
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
-  type CustomLegendProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
-  const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
-    const agg = payload.map(leg => {
-      return {
-        name: leg.value,
-        color: leg.color,
-      };
-    });
-
-    OnChangeLegend(agg);
-
-    return <div />;
-  };
-
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className={`${css(
-            {
-              zIndex: 1000,
-              pointerEvents: 'none',
-              borderRadius: 2,
-              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.alt2MenuBackground,
-              color: theme.alt2MenuItemText,
-              padding: 10,
-            },
-            style,
-          )}`}
-        >
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].name}</strong>
-            </div>
-            <div style={{ lineHeight: 1.5 }}>
-              <PrivacyFilter>
-                <Text style={{ color: payload[0].payload.fill }}>
-                  {amountToCurrency(payload[0].value)}
-                </Text>
-              </PrivacyFilter>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  };
+  const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
+  const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
 
   const getVal = obj => {
-    if (typeOp === 'totalDebts') {
-      return -1 * obj[typeOp];
+    if (balanceTypeOp === 'totalDebts') {
+      return -1 * obj[balanceTypeOp];
     } else {
-      return obj[typeOp];
+      return obj[balanceTypeOp];
     }
   };
 
@@ -148,7 +138,9 @@ function DonutGraph({
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <PieChart width={width} height={height}>
-                <Legend content={<CustomLegend />} />
+                {
+                  //<Legend content={<CustomLegend />} />
+                }
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
@@ -159,7 +151,7 @@ function DonutGraph({
                   nameKey={yAxis}
                   isAnimationActive={false}
                   data={data[splitData].filter(i =>
-                    !empty ? i[typeOp] !== 0 : true,
+                    !empty ? i[balanceTypeOp] !== 0 : true,
                   )}
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"

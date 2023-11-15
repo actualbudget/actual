@@ -16,6 +16,112 @@ import GenericInput from '../util/GenericInput';
 
 import { AppliedFilters } from './FiltersMenu';
 
+function FilterMenu({ onClose, filterId, onFilterMenuSelect }) {
+  return (
+    <MenuTooltip width={200} onClose={onClose}>
+      <Menu
+        onMenuSelect={item => {
+          onFilterMenuSelect(item);
+        }}
+        items={[
+          ...(!filterId.id
+            ? [
+                { name: 'save-filter', text: 'Save new filter' },
+                { name: 'clear-filter', text: 'Clear all conditions' },
+              ]
+            : [
+                ...(filterId.id !== null && filterId.status === 'saved'
+                  ? [
+                      { name: 'rename-filter', text: 'Rename' },
+                      { name: 'delete-filter', text: 'Delete' },
+                      Menu.line,
+                      {
+                        name: 'save-filter',
+                        text: 'Save new filter',
+                        disabled: true,
+                      },
+                      { name: 'clear-filter', text: 'Clear all conditions' },
+                    ]
+                  : [
+                      { name: 'rename-filter', text: 'Rename' },
+                      { name: 'update-filter', text: 'Update condtions' },
+                      { name: 'reload-filter', text: 'Revert changes' },
+                      { name: 'delete-filter', text: 'Delete' },
+                      Menu.line,
+                      { name: 'save-filter', text: 'Save new filter' },
+                      { name: 'clear-filter', text: 'Clear all conditions' },
+                    ]),
+              ]),
+        ]}
+      />
+    </MenuTooltip>
+  );
+}
+
+function NameFilter({
+  onClose,
+  menuItem,
+  name,
+  setName,
+  adding,
+  onAddUpdate,
+  err,
+}) {
+  let inputRef = useRef();
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  return (
+    <MenuTooltip width={325} onClose={onClose}>
+      {menuItem !== 'update-filter' && (
+        <form>
+          <Stack
+            direction="row"
+            justify="flex-end"
+            align="center"
+            style={{ padding: 10 }}
+          >
+            <FormField style={{ flex: 1 }}>
+              <FormLabel
+                title="Filter Name"
+                htmlFor="name-field"
+                style={{ userSelect: 'none' }}
+              />
+              <GenericInput
+                inputRef={inputRef}
+                id="name-field"
+                field="string"
+                type="string"
+                value={name}
+                onChange={setName}
+              />
+            </FormField>
+            <Button
+              type="primary"
+              style={{ marginTop: 18 }}
+              onClick={e => {
+                e.preventDefault();
+                onAddUpdate();
+              }}
+            >
+              {adding ? 'Add' : 'Update'}
+            </Button>
+          </Stack>
+        </form>
+      )}
+      {err && (
+        <Stack direction="row" align="center" style={{ padding: 10 }}>
+          <Text style={{ color: theme.errorText }}>{err}</Text>
+        </Stack>
+      )}
+    </MenuTooltip>
+  );
+}
+
 function SavedFilterMenuButton({
   filters,
   conditionsOp,
@@ -29,17 +135,10 @@ function SavedFilterMenuButton({
   let [menuOpen, setMenuOpen] = useState(false);
   let [err, setErr] = useState(null);
   let [menuItem, setMenuItem] = useState(null);
-  let inputRef = useRef();
-  let name = filterId.name;
+  let [name, setName] = useState(filterId.name);
   let id = filterId.id;
   let res;
   let savedFilter;
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [NameFilter]);
 
   const onFilterMenuSelect = async item => {
     setMenuItem(item);
@@ -178,54 +277,6 @@ function SavedFilterMenuButton({
     }
   }
 
-  function NameFilter({ onClose }) {
-    return (
-      <MenuTooltip width={325} onClose={onClose}>
-        {menuItem !== 'update-filter' && (
-          <form>
-            <Stack
-              direction="row"
-              justify="flex-end"
-              align="center"
-              style={{ padding: 10 }}
-            >
-              <FormField style={{ flex: 1 }}>
-                <FormLabel
-                  title="Filter Name"
-                  htmlFor="name-field"
-                  style={{ userSelect: 'none' }}
-                />
-                <GenericInput
-                  inputRef={inputRef}
-                  id="name-field"
-                  field="string"
-                  type="string"
-                  value={name}
-                  onChange={e => (name = e)}
-                />
-              </FormField>
-              <Button
-                type="primary"
-                style={{ marginTop: 18 }}
-                onClick={e => {
-                  e.preventDefault();
-                  onAddUpdate();
-                }}
-              >
-                {adding ? 'Add' : 'Update'}
-              </Button>
-            </Stack>
-          </form>
-        )}
-        {err && (
-          <Stack direction="row" align="center" style={{ padding: 10 }}>
-            <Text style={{ color: theme.errorText }}>{err}</Text>
-          </Stack>
-        )}
-      </MenuTooltip>
-    );
-  }
-
   return (
     <View>
       {filters.length > 0 && (
@@ -254,9 +305,23 @@ function SavedFilterMenuButton({
         </Button>
       )}
       {menuOpen && (
-        <FilterMenu onClose={() => setMenuOpen(false)} filterId={filterId} />
+        <FilterMenu
+          onClose={() => setMenuOpen(false)}
+          filterId={filterId}
+          onFilterMenuSelect={onFilterMenuSelect}
+        />
       )}
-      {nameOpen && <NameFilter onClose={() => setNameOpen(false)} />}
+      {nameOpen && (
+        <NameFilter
+          onClose={() => setNameOpen(false)}
+          menuItem={menuItem}
+          name={name}
+          setName={setName}
+          adding={adding}
+          onAddUpdate={onAddUpdate}
+          err={err}
+        />
+      )}
     </View>
   );
 }

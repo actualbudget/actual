@@ -47,7 +47,7 @@ export default function Search({
             width: 13,
             height: 13,
             flexShrink: 0,
-            color: value ? theme.altMenuItemTextSelected : 'inherit',
+            color: value ? theme.menuItemTextSelected : 'inherit',
             margin: 5,
             marginRight: 0,
           }}

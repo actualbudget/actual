@@ -141,6 +141,21 @@ export const schema = {
     conditions_op: f('string'),
     sort_order: f('float'),
     tombstone: f('boolean'),
+  reflect_budgets: {
+    id: f('id'),
+    month: f('integer'),
+    category: f('string'),
+    amount: f('integer'),
+    carryover: f('integer'),
+    goal: f('integer'),
+  },
+  zero_budgets: {
+    id: f('id'),
+    month: f('integer'),
+    category: f('string'),
+    amount: f('integer'),
+    carryover: f('integer'),
+    goal: f('integer'),
   },
 };
 

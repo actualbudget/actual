@@ -18,33 +18,95 @@ import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import Container from '../Container';
+import numberFormatterTooltip from '../numberFormatter';
+
+type PayloadItem = {
+  payload: {
+    date: string;
+    totalAssets: number | string;
+    totalDebts: number | string;
+    totalTotals: number | string;
+  };
+};
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  balanceTypeOp?: string;
+};
+
+const CustomTooltip = ({
+  active,
+  payload,
+  balanceTypeOp,
+}: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={`${css({
+          zIndex: 1000,
+          pointerEvents: 'none',
+          borderRadius: 2,
+          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+          backgroundColor: theme.menuAutoCompleteBackground,
+          color: theme.menuAutoCompleteText,
+          padding: 10,
+        })}`}
+      >
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{payload[0].payload.date}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <PrivacyFilter>
+              {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Assets:"
+                  right={amountToCurrency(payload[0].payload.totalAssets)}
+                />
+              )}
+              {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Debt:"
+                  right={amountToCurrency(payload[0].payload.totalDebts)}
+                />
+              )}
+              {['totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Net:"
+                  right={
+                    <strong>
+                      {amountToCurrency(payload[0].payload.totalTotals)}
+                    </strong>
+                  }
+                />
+              )}
+            </PrivacyFilter>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
 
 type AreaGraphProps = {
   style?: CSSProperties;
   data;
-  typeOp;
+  balanceTypeOp;
   compact: boolean;
   domain?: {
     totalTotals?: [number, number];
   };
 };
-type PotentialNumber = number | string | undefined | null;
 
-const numberFormatterTooltip = (value: PotentialNumber): number | null => {
-  if (typeof value === 'number') {
-    return Math.round(value);
-  }
-  return null; // or some default value for other cases
-};
-
-function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
+function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
 
   const gradientOffset = () => {
-    const dataMax = Math.max(...data.monthData.map(i => i[typeOp]));
-    const dataMin = Math.min(...data.monthData.map(i => i[typeOp]));
+    const dataMax = Math.max(...data.monthData.map(i => i[balanceTypeOp]));
+    const dataMin = Math.min(...data.monthData.map(i => i[balanceTypeOp]));
 
     if (dataMax <= 0) {
       return 0;
@@ -57,74 +119,6 @@ function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
   };
 
   const off = gradientOffset();
-
-  type PayloadItem = {
-    payload: {
-      date: string;
-      totalAssets: number | string;
-      totalDebts: number | string;
-      totalTotals: number | string;
-    };
-  };
-
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className={`${css(
-            {
-              zIndex: 1000,
-              pointerEvents: 'none',
-              borderRadius: 2,
-              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.alt2MenuBackground,
-              color: theme.alt2MenuItemText,
-              padding: 10,
-            },
-            style,
-          )}`}
-        >
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.date}</strong>
-            </div>
-            <div style={{ lineHeight: 1.5 }}>
-              <PrivacyFilter>
-                {['totalAssets', 'totalTotals'].includes(typeOp) && (
-                  <AlignedText
-                    left="Assets:"
-                    right={amountToCurrency(payload[0].payload.totalAssets)}
-                  />
-                )}
-                {['totalDebts', 'totalTotals'].includes(typeOp) && (
-                  <AlignedText
-                    left="Debt:"
-                    right={amountToCurrency(payload[0].payload.totalDebts)}
-                  />
-                )}
-                {['totalTotals'].includes(typeOp) && (
-                  <AlignedText
-                    left="Net:"
-                    right={
-                      <strong>
-                        {amountToCurrency(payload[0].payload.totalTotals)}
-                      </strong>
-                    }
-                  />
-                )}
-              </PrivacyFilter>
-            </div>
-          </div>
-        </div>
-      );
-    }
-  };
 
   return (
     <Container
@@ -150,13 +144,13 @@ function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
                 {compact ? null : <XAxis dataKey="date" />}
                 {compact ? null : (
                   <YAxis
-                    dataKey={...typeOp}
+                    dataKey={...balanceTypeOp}
                     domain={['auto', 'auto']}
                     tickFormatter={tickFormatter}
                   />
                 )}
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={<CustomTooltip balanceTypeOp={balanceTypeOp} />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
@@ -180,7 +174,7 @@ function AreaGraph({ style, data, typeOp, compact }: AreaGraphProps) {
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
-                  dataKey={...typeOp}
+                  dataKey={...balanceTypeOp}
                   stroke={theme.reportsBlue}
                   fill="url(#splitColor)"
                   fillOpacity={1}

@@ -54,4 +54,6 @@ contextBridge.exposeInMainWorld('Actual', {
   getServerSocket: () => {
     return socketPromise;
   },
+
+  setTheme: () => {},
 });

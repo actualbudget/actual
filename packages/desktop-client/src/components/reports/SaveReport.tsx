@@ -13,6 +13,36 @@ import Text from '../common/Text';
 import View from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
+function SaveReportMenu({ setMenuOpen }) {
+  return (
+    <MenuTooltip width={150} onClose={() => setMenuOpen(false)}>
+      <Menu
+        onMenuSelect={item => {
+          switch (item) {
+            case 'save':
+            case 'clear':
+              setMenuOpen(false);
+              break;
+            default:
+          }
+        }}
+        items={[
+          {
+            name: 'save',
+            text: 'Save new report',
+            disabled: true,
+          },
+          {
+            name: 'clear',
+            text: 'Clear all',
+            disabled: true,
+          },
+        ]}
+      />
+    </MenuTooltip>
+  );
+}
+
 export function SaveReportMenuButton({
   reportId,
   start,

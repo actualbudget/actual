@@ -14,6 +14,10 @@ export function handleGlobalEvents(actions, store) {
     // to update.
   });
 
+  global.Actual.setTheme = theme => {
+    actions.saveGlobalPrefs({ theme });
+  };
+
   listen('server-error', info => {
     actions.addGenericErrorNotification();
   });

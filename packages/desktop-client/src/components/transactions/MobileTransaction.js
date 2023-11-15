@@ -131,27 +131,6 @@ function lookupName(items, id) {
   return items.find(item => item.id === id).name;
 }
 
-// TODO: delete if not needed
-/* eslint-disable-next-line import/no-unused-modules */
-export function DateHeader({ date }) {
-  return (
-    <ListItem
-      style={{
-        height: 25,
-        backgroundColor: theme.mobileDateBackground,
-        borderColor: theme.tableBorder,
-        justifyContent: 'center',
-      }}
-    >
-      <Text
-        style={{ ...styles.text, fontSize: 13, color: theme.alt2TableText }}
-      >
-        {monthUtils.format(date, 'MMMM dd, yyyy')}
-      </Text>
-    </ListItem>
-  );
-}
-
 function Status({ status }) {
   let color;
 
@@ -163,7 +142,7 @@ function Status({ status }) {
       color = theme.warningText;
       break;
     case 'upcoming':
-      color = theme.alt2TableText;
+      color = theme.tableHeaderText;
       break;
     default:
   }
@@ -649,12 +628,12 @@ class TransactionEditInner extends PureComponent {
                 <SvgAdd
                   width={17}
                   height={17}
-                  style={{ color: theme.altFormLabelText }}
+                  style={{ color: theme.formLabelText }}
                 />
                 <Text
                   style={{
                     ...styles.text,
-                    color: theme.altFormLabelText,
+                    color: theme.formLabelText,
                     marginLeft: 5,
                   }}
                 >
@@ -987,7 +966,7 @@ class Transaction extends PureComponent {
                   fontSize: 14,
                   fontWeight: added ? '600' : '400',
                   ...(prettyDescription === '' && {
-                    color: theme.altTableText,
+                    color: theme.tableTextLight,
                     fontStyle: 'italic',
                   }),
                 }}
@@ -1011,7 +990,7 @@ class Transaction extends PureComponent {
                     height: 11,
                     color: cleared
                       ? theme.noticeTextLight
-                      : theme.altButtonBareText,
+                      : theme.pageTextSubdued,
                     marginRight: 5,
                   }}
                 />
@@ -1023,7 +1002,7 @@ class Transaction extends PureComponent {
                       fontWeight: '400',
                       color: prettyCategory
                         ? theme.tableTextSelected
-                        : theme.altMenuItemTextSelected,
+                        : theme.menuItemTextSelected,
                       fontStyle: prettyCategory ? null : 'italic',
                       textAlign: 'left',
                     }}
@@ -1218,7 +1197,7 @@ function ListBoxSection({ section, state }) {
             backgroundColor: theme.mobileDateBackground,
             borderBottom: `1px solid ${theme.tableBorder}`,
             borderTop: `1px solid ${theme.tableBorder}`,
-            color: theme.alt2TableText,
+            color: theme.tableHeaderText,
             display: 'flex',
             justifyContent: 'center',
             paddingBottom: 4,

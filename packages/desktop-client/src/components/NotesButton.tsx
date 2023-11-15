@@ -115,6 +115,8 @@ function NotesTooltip({
             minWidth: 350,
             minHeight: 120,
             outline: 'none',
+            backgroundColor: theme.tableBackground,
+            color: theme.tableText,
           })}`}
           value={notes || ''}
           onChange={e => setNotes(e.target.value)}

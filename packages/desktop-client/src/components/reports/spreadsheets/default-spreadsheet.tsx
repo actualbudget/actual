@@ -10,7 +10,7 @@ import { index } from '../util';
 export default function createSpreadsheet(
   start,
   end,
-  split,
+  groupBy,
   typeItem,
   categories,
   selectedCategories,
@@ -65,45 +65,38 @@ export default function createSpreadsheet(
       ),
   );
 
-  let splitItem;
-  let splitList;
-  let splitLabel;
-  switch (split) {
-    case 1:
-      splitItem = catList;
-      splitList = splitItem;
-      splitLabel = 'category';
+  let groupByList;
+  let groupByLabel;
+  switch (groupBy) {
+    case 'Category':
+      groupByList = catList;
+      groupByLabel = 'category';
       break;
-    case 2:
-      splitItem = catList;
-      splitList = catGroup;
-      splitLabel = 'category';
+    case 'Group':
+      groupByList = catList;
+      groupByLabel = 'category';
       break;
-    case 3:
-      splitItem = payees;
-      splitList = splitItem;
-      splitLabel = 'payee';
+    case 'Payee':
+      groupByList = payees;
+      groupByLabel = 'payee';
       break;
-    case 4:
-      splitItem = accounts;
-      splitList = splitItem;
-      splitLabel = 'account';
+    case 'Account':
+      groupByList = accounts;
+      groupByLabel = 'account';
       break;
-    case 5:
-      splitItem = catList;
-      splitList = splitItem;
-      splitLabel = 'category';
+    case 'Month':
+      groupByList = catList;
+      groupByLabel = 'category';
       break;
-    case 6:
-      splitItem = catList;
-      splitList = splitItem;
-      splitLabel = 'category';
+    case 'Year':
+      groupByList = catList;
+      groupByLabel = 'category';
       break;
     default:
   }
 
   return async (spreadsheet, setData) => {
-    if (splitItem.length === 0) {
+    if (groupByList.length === 0) {
       return null;
     }
 
@@ -163,7 +156,7 @@ export default function createSpreadsheet(
         //Apply filters and split by "Group By"
         .filter({
           [conditionsOpKey]: [...filters],
-          [splitLabel]: splt.id,
+          [groupByLabel]: splt.id,
         })
         //Apply month range filters
         .filter({
@@ -186,7 +179,7 @@ export default function createSpreadsheet(
     }
 
     const graphData = await Promise.all(
-      splitItem.map(async splt => {
+      groupByList.map(async splt => {
         let [starting, assets, debts] = await Promise.all([
           runQuery(
             q('transactions')
@@ -232,7 +225,7 @@ export default function createSpreadsheet(
               )
               .filter({
                 [conditionsOpKey]: [...filters],
-                [splitLabel]: splt.id,
+                [groupByLabel]: splt.id,
               })
               .filter({
                 $and: [{ date: { $lt: start + '-01' } }],
@@ -257,204 +250,177 @@ export default function createSpreadsheet(
     );
 
     const months = monthUtils.rangeInclusive(start, end);
-    const calcData = await Promise.all(
-      graphData.map(async graph => {
-        let graphStarting = 0;
-        const mon = await Promise.all(
-          months.map(async month => {
-            let graphAssets = 0;
-            let graphDebts = 0;
+    const calcData = graphData.map(graph => {
+      let graphStarting = 0;
+      const mon = months.map(month => {
+        let graphAssets = 0;
+        let graphDebts = 0;
+        if (graph.assets[month] || graph.debts[month]) {
+          if (graph.assets[month]) {
+            graphAssets += graph.assets[month].assets;
+          }
+          if (graph.debts[month]) {
+            graphDebts += graph.debts[month].debts;
+          }
+        }
+
+        graphStarting += graph.starting;
+        return {
+          date: month,
+          assets: graphAssets,
+          debts: graphDebts,
+        };
+      });
+
+      return {
+        id: graph.id,
+        uncat_id: graph.uncat_id,
+        name: graph.name,
+        starting: graphStarting,
+        hidden: graph.hidden,
+        balances: index(mon, 'date'),
+      };
+    });
+
+    const categoryGroupCalcData = catGroup.map(group => {
+      if (hidden || group.hidden === 0) {
+        let groupedStarting = 0;
+        const mon = months.map(month => {
+          let groupedAssets = 0;
+          let groupedDebts = 0;
+          graphData.map(graph => {
             if (graph.assets[month] || graph.debts[month]) {
-              if (graph.assets[month]) {
-                graphAssets += graph.assets[month].assets;
-              }
-              if (graph.debts[month]) {
-                graphDebts += graph.debts[month].debts;
+              if (group.categories.map(v => v.id).includes(graph.id)) {
+                if (graph.assets[month]) {
+                  groupedAssets += graph.assets[month].assets;
+                }
+                if (graph.debts[month]) {
+                  groupedDebts += graph.debts[month].debts;
+                }
               }
             }
 
-            graphStarting += graph.starting;
-            return {
-              date: month,
-              assets: graphAssets,
-              debts: graphDebts,
-            };
-          }),
-        );
+            groupedStarting += graph.starting;
+            return null;
+          });
+          return {
+            date: month,
+            assets: groupedAssets,
+            debts: groupedDebts,
+          };
+        });
 
         return {
-          id: graph.id,
-          uncat_id: graph.uncat_id,
-          name: graph.name,
-          starting: graphStarting,
-          hidden: graph.hidden,
+          id: group.id,
+          name: group.name,
+          starting: groupedStarting,
+          hidden: group.hidden,
           balances: index(mon, 'date'),
         };
-      }),
-    );
+      } else {
+        return null;
+      }
+    });
 
-    const groupData = await Promise.all(
-      catGroup.map(async group => {
-        if (hidden || group.hidden === 0) {
-          let groupedStarting = 0;
-          const mon = await Promise.all(
-            months.map(async month => {
-              let groupedAssets = 0;
-              let groupedDebts = 0;
-              graphData.map(async graph => {
-                if (graph.assets[month] || graph.debts[month]) {
-                  if (group.categories.map(v => v.id).includes(graph.id)) {
-                    if (graph.assets[month]) {
-                      groupedAssets += graph.assets[month].assets;
-                    }
-                    if (graph.debts[month]) {
-                      groupedDebts += graph.debts[month].debts;
-                    }
-                  }
-                }
+    const groupByData = groupBy === 'Group' ? categoryGroupCalcData : calcData;
 
-                groupedStarting += graph.starting;
-              });
-              return {
-                date: month,
-                assets: groupedAssets,
-                debts: groupedDebts,
-              };
-            }),
-          );
+    const data = groupByData.map(graph => {
+      const calc = recalculate(graph, start, end);
+      return { ...calc };
+    });
 
-          return {
-            id: group.id,
-            name: group.name,
-            starting: groupedStarting,
-            hidden: group.hidden,
-            balances: index(mon, 'date'),
-          };
-        }
-      }),
-    );
-
-    const splitData = split === 2 ? groupData : calcData;
-
-    const data = await Promise.all(
-      splitData.map(async graph => {
-        const calc = recalculate(graph, start, end);
-        return { ...calc };
-      }),
-    );
-
-    const groupedData = await Promise.all(
-      catGroup.map(async group => {
-        const catData = await Promise.all(
-          group.categories.map(async graph => {
-            let catMatch = null;
-            calcData.map(async cat => {
-              if (
-                cat.id === null
-                  ? cat.uncat_id === graph.uncat_id
-                  : cat.id === graph.id
-              ) {
-                catMatch = cat;
-              }
-            });
-            const calcCat = catMatch && recalculate(catMatch, start, end);
-            return { ...calcCat };
-          }),
-        );
-        let groupMatch = null;
-        groupData.map(async split => {
-          if (split.id === group.id) {
-            groupMatch = split;
+    const categoryGroupData = catGroup.map(group => {
+      const catData = group.categories.map(graph => {
+        let catMatch = null;
+        calcData.map(cat => {
+          if (
+            cat.id === null
+              ? cat.uncat_id === graph.uncat_id
+              : cat.id === graph.id
+          ) {
+            catMatch = cat;
           }
+          return null;
         });
-        const calcGroup = groupMatch && recalculate(groupMatch, start, end);
-        return {
-          ...calcGroup,
-          categories: catData,
-        };
-      }),
-    );
+        const calcCat = catMatch && recalculate(catMatch, start, end);
+        return { ...calcCat };
+      });
+      let groupMatch = null;
+      categoryGroupCalcData.map(split => {
+        if (split.id === group.id) {
+          groupMatch = split;
+        }
+        return null;
+      });
+      const calcGroup = groupMatch && recalculate(groupMatch, start, end);
+      return {
+        ...calcGroup,
+        categories: catData,
+      };
+    });
 
     let totalAssets = 0;
     let totalDebts = 0;
     let totalTotals = 0;
 
-    const monthData = await Promise.all(
-      months.map(async month => {
-        let perMonthAssets = 0;
-        let perMonthDebts = 0;
-        let perMonthTotals = 0;
-        graphData.map(async graph => {
-          if (graph.assets[month] || graph.debts[month]) {
-            if (graph.assets[month]) {
-              perMonthAssets += graph.assets[month].assets;
-            }
-            if (graph.debts[month]) {
-              perMonthDebts += graph.debts[month].debts;
-            }
-            perMonthTotals = perMonthAssets + perMonthDebts;
+    const monthData = months.map(month => {
+      let perMonthAssets = 0;
+      let perMonthDebts = 0;
+      let perMonthTotals = 0;
+      graphData.map(graph => {
+        if (graph.assets[month] || graph.debts[month]) {
+          if (graph.assets[month]) {
+            perMonthAssets += graph.assets[month].assets;
           }
-        });
-        totalAssets += perMonthAssets;
-        totalDebts += perMonthDebts;
-        totalTotals += perMonthTotals;
+          if (graph.debts[month]) {
+            perMonthDebts += graph.debts[month].debts;
+          }
+          perMonthTotals = perMonthAssets + perMonthDebts;
+        }
+        return null;
+      });
+      totalAssets += perMonthAssets;
+      totalDebts += perMonthDebts;
+      totalTotals += perMonthTotals;
 
+      return {
+        // eslint-disable-next-line rulesdir/typography
+        date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
+        totalDebts: integerToAmount(perMonthDebts),
+        totalAssets: integerToAmount(perMonthAssets),
+        totalTotals: integerToAmount(perMonthTotals),
+      };
+    });
+
+    const stackedData = months.map(month => {
+      let perMonthAmounts = 0;
+      const stacked = data.map(graph => {
+        let stackAmounts = 0;
+        if (graph.indexedMonthData[month]) {
+          perMonthAmounts += graph.indexedMonthData[month][typeItem];
+          stackAmounts += graph.indexedMonthData[month][typeItem];
+        }
         return {
-          // eslint-disable-next-line rulesdir/typography
-          date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
-          totalDebts: integerToAmount(perMonthDebts),
-          totalAssets: integerToAmount(perMonthAssets),
-          totalTotals: integerToAmount(perMonthTotals),
+          name: graph.name,
+          id: graph.id,
+          amount: stackAmounts,
         };
-      }),
-    );
+      });
 
-    const stackedData = await Promise.all(
-      months.map(async month => {
-        let perMonthAmounts = 0;
-        const stacked = await Promise.all(
-          data.map(async graph => {
-            let stackAmounts = 0;
-            if (graph.indexedMonthData[month]) {
-              perMonthAmounts += graph.indexedMonthData[month][typeItem];
-              stackAmounts += graph.indexedMonthData[month][typeItem];
-            }
-            /*const nested = await Promise.all(
-              graph.categories.map(async cat => {
-                let catAmounts = 0;
-                if (cat.monthData[month]) {
-                  catAmounts += cat.monthData[month][type];
-                }
-                return {
-                  name: cat.name,
-                  id: cat.id,
-                  amount: catAmounts,
-                };
-              }),
-            );*/
-            return {
-              name: graph.name,
-              id: graph.id,
-              amount: stackAmounts,
-            };
-          }),
-        );
-
-        const indexedSplit = index(stacked, 'name');
-        return {
-          // eslint-disable-next-line rulesdir/typography
-          date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
-          ...indexedSplit,
-          totalTotals: perMonthAmounts,
-        };
-      }),
-    );
+      const indexedStack = index(stacked, 'name');
+      return {
+        // eslint-disable-next-line rulesdir/typography
+        date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
+        ...indexedStack,
+        totalTotals: perMonthAmounts,
+      };
+    });
 
     setData({
       stackedData: stackedData,
-      split: splitList,
+      groupBy: groupBy === 'Group' ? catGroup : groupByList,
       data,
-      gData: groupedData,
+      groupData: categoryGroupData,
       monthData,
       start,
       end,
@@ -472,15 +438,6 @@ function recalculate(item, start, end) {
   let totalAssets = 0;
   let totalTotals = 0;
   let exists = false;
-  /*
-  let startingDebts = 0;
-  let startingAssets = 0;
-  let hasNegative = false;
-  let startNetWorth = 0;
-  let endNetWorth = 0;
-  let lowestNetWorth = null;
-  let highestNetWorth = null;
-  */
 
   const monthData = months.reduce((arr, month) => {
     let debts = 0;
@@ -492,29 +449,18 @@ function recalculate(item, start, end) {
       exists = true;
       if (item.balances[month].debts) {
         debts += item.balances[month].debts;
-        //startingDebts += data.balances[month].amount;
         totalDebts += item.balances[month].debts;
       }
       if (item.balances[month].assets) {
         assets += item.balances[month].assets;
-        //startingAssets += data.balances[month].amount;
         totalAssets += item.balances[month].assets;
       }
       total = assets + debts;
       totalTotals = totalAssets + totalDebts;
     }
 
-    /*if (total < 0) {
-      hasNegative = true;
-    }*/
-
     const dateParse = d.parseISO(`${month}-01`);
     const change = last ? total - amountToInteger(last.totalTotals) : 0;
-
-    /*if (arr.length === 0) {
-      startNetWorth = total;
-    }
-    endNetWorth = total;*/
 
     arr.push({
       dateParse,
@@ -527,24 +473,13 @@ function recalculate(item, start, end) {
       dateLookup: month,
     });
 
-    /*
-    arr.forEach(item => {
-      if (item.y < lowestNetWorth || lowestNetWorth === null) {
-        lowestNetWorth = item.y;
-      }
-      if (item.y > highestNetWorth || highestNetWorth === null) {
-        highestNetWorth = item.y;
-      }
-    });
-    */
-
     return arr;
   }, []);
 
-  const indexedSplit = exists ? index(monthData, 'dateLookup') : monthData;
+  const indexedMonthData = exists ? index(monthData, 'dateLookup') : monthData;
 
   return {
-    indexedMonthData: indexedSplit,
+    indexedMonthData: indexedMonthData,
     monthData: monthData,
     totalAssets: integerToAmount(totalAssets),
     totalDebts: integerToAmount(totalDebts),
