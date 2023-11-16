@@ -18,11 +18,22 @@ import { SecretName, secretsService } from '../../services/secrets-service.js';
 
 const GoCardlessClient = nordigenNode.default;
 
-const getGocardlessClient = () =>
-  new GoCardlessClient({
+const clients = new Map();
+
+const getGocardlessClient = () => {
+  const secrets = {
     secretId: secretsService.get(SecretName.nordigen_secretId),
     secretKey: secretsService.get(SecretName.nordigen_secretKey),
-  });
+  };
+
+  const hash = JSON.stringify(secrets);
+
+  if (!clients.has(hash)) {
+    clients.set(hash, new GoCardlessClient(secrets));
+  }
+
+  return clients.get(hash);
+};
 
 export const handleGoCardlessError = (response) => {
   switch (response.status_code) {
