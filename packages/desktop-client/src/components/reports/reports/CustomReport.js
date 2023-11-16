@@ -142,7 +142,7 @@ export default function CustomReport() {
     return null;
   }
 
-  const onChangeDates = ({ start, end }) => {
+  const onChangeDates = (start, end) => {
     setStart(start);
     setEnd(end);
   };

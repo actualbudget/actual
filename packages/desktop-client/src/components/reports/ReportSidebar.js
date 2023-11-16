@@ -331,12 +331,12 @@ export function ReportSidebar({
           <Select
             value={dateRange}
             onChange={e => {
-              setDateRange(ReportOptions.dateRange[e].name);
+              setDateRange(e);
               if (e === 'allMonths') {
                 onChangeDates(...getFullRange(allMonths));
               } else {
                 onChangeDates(
-                  ...getLatestRange(ReportOptions.dateRange[e].name),
+                  ...getLatestRange(ReportOptions.dateRangeMap.get(e)),
                 );
               }
             }}
