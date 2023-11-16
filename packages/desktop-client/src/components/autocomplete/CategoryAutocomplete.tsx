@@ -26,6 +26,7 @@ type CategoryListProps = {
   embedded: boolean;
   footer?: ReactNode;
   groupHeaderStyle?: object;
+  showHiddenItems?: boolean;
 };
 function CategoryList({
   items,
@@ -34,6 +35,7 @@ function CategoryList({
   embedded,
   footer,
   groupHeaderStyle,
+  showHiddenItems
 }: CategoryListProps) {
   let lastGroup = null;
 
@@ -101,6 +103,10 @@ function CategoryList({
             );
           }
 
+          if(item.hidden && !showHiddenItems) {
+            return;
+          }
+
           const showGroup = item.cat_group !== lastGroup;
           lastGroup = item.cat_group;
           return (
@@ -152,6 +158,7 @@ type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
   groupHeaderStyle?: object;
+  showHiddenItems?: boolean;
 };
 export default function CategoryAutocomplete({
   categoryGroups,
@@ -159,6 +166,7 @@ export default function CategoryAutocomplete({
   embedded,
   closeOnBlur,
   groupHeaderStyle,
+  showHiddenItems=false,
   ...props
 }: CategoryAutocompleteProps) {
   let categorySuggestions: Array<
@@ -210,6 +218,7 @@ export default function CategoryAutocomplete({
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
           groupHeaderStyle={groupHeaderStyle}
+          showHiddenItems={showHiddenItems}
         />
       )}
       {...props}
