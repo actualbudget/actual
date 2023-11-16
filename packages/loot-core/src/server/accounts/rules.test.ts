@@ -318,7 +318,7 @@ describe('Action', () => {
     }).toThrow(/invalid field/i);
 
     expect(() => {
-      new Action('noop', 'name', 'James', null, fieldTypes);
+      new Action(null, 'name', 'James', null, fieldTypes);
     }).toThrow(/invalid action operation/i);
   });
 });

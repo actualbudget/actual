@@ -14,7 +14,7 @@ import { MonthsContext } from './MonthsContext';
 
 type RenderMonthsProps = {
   component?: ComponentType<{ monthIndex: number; editing: boolean }>;
-  editingIndex?: undefined;
+  editingIndex?: string | number;
   args?: object;
   style?: CSSProperties;
 };

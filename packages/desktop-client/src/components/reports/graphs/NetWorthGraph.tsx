@@ -15,6 +15,7 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import Container from '../Container';
+import numberFormatterTooltip from '../numberFormatter';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -23,14 +24,6 @@ type NetWorthGraphProps = {
   domain?: {
     y?: [number, number];
   };
-};
-type PotentialNumber = number | string | undefined | null;
-
-const numberFormatterTooltip = (value: PotentialNumber): number | null => {
-  if (typeof value === 'number') {
-    return Math.round(value);
-  }
-  return null; // or some default value for other cases
 };
 
 function NetWorthGraph({
@@ -75,6 +68,7 @@ function NetWorthGraph({
     label?: string;
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (

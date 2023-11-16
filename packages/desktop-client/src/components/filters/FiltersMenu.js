@@ -24,6 +24,7 @@ import {
 import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
+import Filter from '../../icons/v1/Filter';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
 import { theme } from '../../style';
 import Button from '../common/Button';
@@ -96,7 +97,7 @@ function OpButton({ op, selected, style, onClick }) {
     <Button
       type="bare"
       style={{
-        backgroundColor: theme.altbuttonMenuBackground,
+        backgroundColor: theme.pillBackground,
         marginBottom: 5,
         ...style,
         ...(selected && {
@@ -335,7 +336,28 @@ function ConfigureField({
   );
 }
 
-export function FilterButton({ onApply }) {
+function ButtonType({ type, dispatch }) {
+  return (
+    <Button
+      type="bare"
+      onClick={() => dispatch({ type: 'select-field' })}
+      title={type && 'Filters'}
+    >
+      {type === 'reports' ? (
+        <Filter width={15} height={15} />
+      ) : (
+        <>
+          <SettingsSliderAlternate
+            style={{ width: 16, height: 16, marginRight: 5 }}
+          />{' '}
+          Filter
+        </>
+      )}
+    </Button>
+  );
+}
+
+export function FilterButton({ onApply, type }) {
   let filters = useFilters();
 
   let { dateFormat } = useSelector(state => {
@@ -418,12 +440,7 @@ export function FilterButton({ onApply }) {
 
   return (
     <View>
-      <Button type="bare" onClick={() => dispatch({ type: 'select-field' })}>
-        <SettingsSliderAlternate
-          style={{ width: 16, height: 16, marginRight: 5 }}
-        />{' '}
-        Filter
-      </Button>
+      <ButtonType type={type} dispatch={dispatch} />
       {state.fieldsOpen && (
         <Tooltip
           position="bottom-left"

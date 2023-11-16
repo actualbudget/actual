@@ -755,8 +755,8 @@ export default function EditRule({
   }
 
   let editorStyle = {
-    color: theme.altPillText,
-    backgroundColor: theme.altPillBackground,
+    color: theme.pillText,
+    backgroundColor: theme.pillBackground,
     borderRadius: 4,
   };
 

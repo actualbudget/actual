@@ -26,8 +26,6 @@ export const tableTextLight = colorPalette.navy400;
 export const tableTextSubdued = colorPalette.navy100;
 export const tableTextSelected = colorPalette.navy700;
 export const tableTextHover = colorPalette.navy900;
-export const tableTextEditing = colorPalette.navy50;
-export const tableTextEditingBackground = colorPalette.blue500;
 export const tableTextInactive = colorPalette.navy500;
 export const tableHeaderText = colorPalette.navy600;
 export const tableHeaderBackground = colorPalette.white;
@@ -41,17 +39,12 @@ export const tableRowHeaderBackground = colorPalette.navy50;
 export const tableRowHeaderText = colorPalette.navy800;
 
 export const sidebarBackground = colorPalette.navy900;
-export const sidebarItemBackground = colorPalette.blue800;
 export const sidebarItemBackgroundPositive = colorPalette.green500;
 export const sidebarItemBackgroundFailed = colorPalette.red300;
-export const sidebarItemBackgroundSelected = colorPalette.purple200;
 export const sidebarItemBackgroundHover = colorPalette.navy800;
-export const sidebarItemAccent = colorPalette.blue800;
 export const sidebarItemAccentSelected = colorPalette.purple200;
-export const sidebarItemAccentHover = colorPalette.blue700;
 export const sidebarItemText = colorPalette.navy150;
 export const sidebarItemTextSelected = colorPalette.purple200;
-export const sidebarItemTextHover = colorPalette.navy50;
 
 export const menuBackground = colorPalette.white;
 export const menuItemBackground = colorPalette.navy50;
@@ -70,6 +63,11 @@ export const menuAutoCompleteTextHeader = colorPalette.orange150;
 
 export const modalBackground = colorPalette.white;
 export const modalBorder = colorPalette.white;
+export const mobileHeaderBackground = colorPalette.purple400;
+export const mobileHeaderText = colorPalette.navy50;
+export const mobileHeaderTextSubdued = colorPalette.gray200;
+export const mobileHeaderTextHover = 'rgba(200, 200, 200, .15)';
+export const mobilePageBackground = colorPalette.navy50;
 export const mobileNavBackground = colorPalette.white;
 export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
@@ -77,16 +75,10 @@ export const mobileAccountShadow = colorPalette.navy300;
 export const mobileAccountText = colorPalette.blue800;
 export const mobileModalBackground = colorPalette.navy900;
 export const mobileModalText = colorPalette.white;
-export const altMobileModalText = colorPalette.blue100;
-export const mobileDateBackground = colorPalette.navy100;
 
 // Mobile view themes (for the top bar)
-export const mobileAccountViewTheme = colorPalette.navy50;
-export const mobileAccountsViewTheme = colorPalette.blue800;
-export const mobileBudgetViewTheme = colorPalette.purple500;
+export const mobileViewTheme = mobileHeaderBackground;
 export const mobileConfigServerViewTheme = colorPalette.purple500;
-export const mobileSettingsViewTheme = colorPalette.navy50;
-export const mobileTransactionViewTheme = colorPalette.purple500;
 
 export const markdownNormal = colorPalette.purple150;
 export const markdownDark = colorPalette.purple400;
@@ -120,18 +112,19 @@ export const buttonNormalBackground = colorPalette.white;
 export const buttonNormalBackgroundHover = buttonNormalBackground;
 export const buttonNormalBorder = colorPalette.navy150;
 export const buttonNormalShadow = 'rgba(0, 0, 0, 0.2)';
-
-export const altbuttonMenuBackground = colorPalette.navy100;
 export const buttonNormalSelectedText = colorPalette.white;
 export const buttonNormalSelectedBackground = colorPalette.blue600;
-export const altButtonNormalSelectedBackground = colorPalette.navy500;
-
 export const buttonNormalDisabledText = colorPalette.navy300;
 export const buttonNormalDisabledBackground = buttonNormalBackground;
 export const buttonNormalDisabledBorder = buttonNormalBorder;
 
+export const calendarText = colorPalette.navy50;
+export const calendarBackground = colorPalette.navy900;
+export const calendarItemText = colorPalette.navy150;
+export const calendarItemBackground = colorPalette.navy800;
+export const calendarSelectedBackground = colorPalette.navy500;
+
 export const buttonBareText = buttonNormalText;
-export const altButtonBareText = colorPalette.navy200;
 export const buttonBareTextHover = buttonNormalText;
 export const buttonBareBackground = 'transparent';
 export const buttonBareBackgroundHover = 'rgba(100, 100, 100, .15)';
@@ -162,8 +155,7 @@ export const upcomingBackground = colorPalette.purple100;
 export const upcomingText = colorPalette.purple700;
 export const upcomingBorder = colorPalette.purple500;
 
-export const formLabelText = colorPalette.blue500;
-export const altFormLabelText = colorPalette.blue700;
+export const formLabelText = colorPalette.blue600;
 export const formLabelBackground = colorPalette.blue200;
 export const formInputBackground = colorPalette.navy50;
 export const formInputBackgroundSelected = colorPalette.white;
@@ -171,27 +163,26 @@ export const formInputBackgroundSelection = colorPalette.purple500;
 export const formInputBorder = colorPalette.navy150;
 export const formInputTextReadOnlySelection = colorPalette.navy50;
 export const formInputBorderSelected = colorPalette.purple500;
-export const altFormInputBorderSelected = colorPalette.blue500;
 export const formInputText = colorPalette.navy900;
 export const formInputTextSelected = colorPalette.navy50;
 export const formInputTextPlaceholder = colorPalette.navy300;
 export const formInputTextPlaceholderSelected = colorPalette.navy200;
 export const formInputTextSelection = colorPalette.navy100;
 export const formInputShadowSelected = colorPalette.purple300;
-export const altFormInputShadowSelected = colorPalette.blue300;
 export const formInputTextHighlight = colorPalette.purple200;
+export const checkboxText = tableBackground;
+export const checkboxBackgroundSelected = colorPalette.blue500;
+export const checkboxBorderSelected = colorPalette.blue500;
+export const checkboxShadowSelected = colorPalette.blue300;
 
 export const pillBackground = colorPalette.navy150;
 export const pillText = colorPalette.navy800;
 export const pillTextHighlighted = colorPalette.purple600;
 export const pillBorder = colorPalette.navy150;
-export const altPillBorder = colorPalette.navy200;
+export const pillBorderDark = colorPalette.navy300;
 export const pillBackgroundSelected = colorPalette.blue150;
 export const pillTextSelected = colorPalette.blue900;
 export const pillBorderSelected = colorPalette.purple500;
-export const altPillBackground = colorPalette.navy100;
-export const altPillText = colorPalette.navy900;
-export const alt2PillText = colorPalette.navy500;
 
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
