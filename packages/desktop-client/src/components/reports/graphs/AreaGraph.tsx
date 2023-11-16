@@ -11,34 +11,102 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import { amountToCurrency } from 'loot-core/src/shared/util';
+
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
+import PrivacyFilter from '../../PrivacyFilter';
 import Container from '../Container';
 import numberFormatterTooltip from '../numberFormatter';
 
-type NetWorthGraphProps = {
-  style?: CSSProperties;
-  graphData;
-  compact: boolean;
-  domain?: {
-    y?: [number, number];
+type PayloadItem = {
+  payload: {
+    date: string;
+    totalAssets: number | string;
+    totalDebts: number | string;
+    totalTotals: number | string;
   };
 };
 
-function NetWorthGraph({
-  style,
-  graphData,
-  compact,
-  domain,
-}: NetWorthGraphProps) {
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
+  balanceTypeOp?: string;
+};
+
+const CustomTooltip = ({
+  active,
+  payload,
+  balanceTypeOp,
+}: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className={`${css({
+          zIndex: 1000,
+          pointerEvents: 'none',
+          borderRadius: 2,
+          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+          backgroundColor: theme.menuAutoCompleteBackground,
+          color: theme.menuAutoCompleteText,
+          padding: 10,
+        })}`}
+      >
+        <div>
+          <div style={{ marginBottom: 10 }}>
+            <strong>{payload[0].payload.date}</strong>
+          </div>
+          <div style={{ lineHeight: 1.5 }}>
+            <PrivacyFilter>
+              {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Assets:"
+                  right={amountToCurrency(payload[0].payload.totalAssets)}
+                />
+              )}
+              {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Debt:"
+                  right={amountToCurrency(payload[0].payload.totalDebts)}
+                />
+              )}
+              {['totalTotals'].includes(balanceTypeOp) && (
+                <AlignedText
+                  left="Net:"
+                  right={
+                    <strong>
+                      {amountToCurrency(payload[0].payload.totalTotals)}
+                    </strong>
+                  }
+                />
+              )}
+            </PrivacyFilter>
+          </div>
+        </div>
+      </div>
+    );
+  }
+};
+
+type AreaGraphProps = {
+  style?: CSSProperties;
+  data;
+  balanceTypeOp;
+  compact: boolean;
+  domain?: {
+    totalTotals?: [number, number];
+  };
+};
+
+function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
 
   const gradientOffset = () => {
-    const dataMax = Math.max(...graphData.data.map(i => i.y));
-    const dataMin = Math.min(...graphData.data.map(i => i.y));
+    const dataMax = Math.max(...data.monthData.map(i => i[balanceTypeOp]));
+    const dataMin = Math.min(...data.monthData.map(i => i[balanceTypeOp]));
 
     if (dataMax <= 0) {
       return 0;
@@ -52,59 +120,6 @@ function NetWorthGraph({
 
   const off = gradientOffset();
 
-  type PayloadItem = {
-    payload: {
-      date: string;
-      assets: number | string;
-      debt: number | string;
-      networth: number | string;
-      change: number | string;
-    };
-  };
-
-  type CustomTooltipProps = {
-    active?: boolean;
-    payload?: PayloadItem[];
-    label?: string;
-  };
-
-  // eslint-disable-next-line react/no-unstable-nested-components
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className={`${css(
-            {
-              zIndex: 1000,
-              pointerEvents: 'none',
-              borderRadius: 2,
-              boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-              backgroundColor: theme.menuAutoCompleteBackground,
-              color: theme.menuAutoCompleteText,
-              padding: 10,
-            },
-            style,
-          )}`}
-        >
-          <div>
-            <div style={{ marginBottom: 10 }}>
-              <strong>{payload[0].payload.date}</strong>
-            </div>
-            <div style={{ lineHeight: 1.5 }}>
-              <AlignedText left="Assets:" right={payload[0].payload.assets} />
-              <AlignedText left="Debt:" right={payload[0].payload.debt} />
-              <AlignedText
-                left="Net worth:"
-                right={<strong>{payload[0].payload.networth}</strong>}
-              />
-              <AlignedText left="Change:" right={payload[0].payload.change} />
-            </div>
-          </div>
-        </div>
-      );
-    }
-  };
-
   return (
     <Container
       style={{
@@ -113,29 +128,29 @@ function NetWorthGraph({
       }}
     >
       {(width, height, portalHost) =>
-        graphData && (
+        data.monthData && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <AreaChart
                 width={width}
                 height={height}
-                data={graphData.data}
+                data={data.monthData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 )}
-                {compact ? null : <XAxis dataKey="x" />}
+                {compact ? null : <XAxis dataKey="date" />}
                 {compact ? null : (
                   <YAxis
-                    dataKey="y"
+                    dataKey={...balanceTypeOp}
                     domain={['auto', 'auto']}
                     tickFormatter={tickFormatter}
                   />
                 )}
                 <Tooltip
-                  content={<CustomTooltip />}
+                  content={<CustomTooltip balanceTypeOp={balanceTypeOp} />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
@@ -159,7 +174,7 @@ function NetWorthGraph({
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
-                  dataKey="y"
+                  dataKey={...balanceTypeOp}
                   stroke={theme.reportsBlue}
                   fill="url(#splitColor)"
                   fillOpacity={1}
@@ -173,4 +188,4 @@ function NetWorthGraph({
   );
 }
 
-export default NetWorthGraph;
+export default AreaGraph;

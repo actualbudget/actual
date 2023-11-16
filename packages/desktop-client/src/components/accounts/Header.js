@@ -239,7 +239,7 @@ export function AccountHeader({
             </Button>
           )}
           <View style={{ flexShrink: 0 }}>
-            <FilterButton onApply={onApplyFilter} />
+            <FilterButton onApply={onApplyFilter} type="accounts" />
           </View>
           <View style={{ flex: 1 }} />
           <Search
