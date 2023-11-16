@@ -91,7 +91,6 @@ export async function goalsSchedule(
                 monthUtils._parse(next_date),
               );
             }
-            console.log(diffDays);
           }
           t[ll].target = -monthlyTarget;
           totalScheduledGoal += target;
