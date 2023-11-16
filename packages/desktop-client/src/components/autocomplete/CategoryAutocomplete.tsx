@@ -35,7 +35,7 @@ function CategoryList({
   embedded,
   footer,
   groupHeaderStyle,
-  showHiddenItems
+  showHiddenItems,
 }: CategoryListProps) {
   let lastGroup = null;
 
@@ -103,8 +103,8 @@ function CategoryList({
             );
           }
 
-          if(item.hidden && !showHiddenItems) {
-            return;
+          if (item.hidden && !showHiddenItems) {
+            return <Fragment key={item.id} />;
           }
 
           const showGroup = item.cat_group !== lastGroup;
@@ -166,7 +166,7 @@ export default function CategoryAutocomplete({
   embedded,
   closeOnBlur,
   groupHeaderStyle,
-  showHiddenItems=false,
+  showHiddenItems = false,
   ...props
 }: CategoryAutocompleteProps) {
   let categorySuggestions: Array<
