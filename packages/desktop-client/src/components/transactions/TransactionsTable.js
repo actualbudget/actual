@@ -1577,6 +1577,7 @@ function TransactionTableInner({
                 error={error}
                 isDeposit={isChildDeposit}
                 onAddSplit={() => props.onAddSplit(trans.id)}
+                onBalanceLastSplit={onBalanceLastSplit}
               />
             </Tooltip>
           )}
