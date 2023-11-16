@@ -2102,11 +2102,12 @@ export let TransactionTable = forwardRef((props, ref) => {
       await onSave({
         ...emptyTransactions[transactionIndex],
         amount: amounts[transactionIndex],
+        error: null
       });
     }
 
     // cancel focused field
-    tableNavigator.onEdit(null, null);
+    // tableNavigator.onEdit(null, null);
   }, [latestState]);
 
   return (
