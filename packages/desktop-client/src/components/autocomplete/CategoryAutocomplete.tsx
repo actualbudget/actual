@@ -46,7 +46,7 @@ function CategoryList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {items.map((item, idx) => {
+        {items.filter(item => !item.hidden).map((item, idx) => {
           if (item.id === 'split') {
             return (
               <View
