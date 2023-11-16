@@ -65,6 +65,7 @@ async function onAddUpdate(
   reportId,
   onErr,
   onNameChange,
+  onReportChange,
 ) {
   let savedReport;
   let res;
@@ -101,6 +102,7 @@ async function onAddUpdate(
     onErr(res.error.message);
   } else {
     onNameChange(false);
+    onReportChange(savedReport);
     //onReloadSavedFilter(savedReport);
   }
 }
@@ -119,6 +121,7 @@ function NameReport({
   menuItem,
   inputRef,
   err,
+  onReportChange,
 }) {
   return (
     <MenuTooltip width={325} onClose={onClose}>
@@ -153,6 +156,7 @@ function NameReport({
                   reportId,
                   onErr,
                   onNameChange,
+                  onReportChange,
                 );
               }}
             >
@@ -176,6 +180,7 @@ export function SaveReportMenuButton({
   end,
   filters,
   conditionsOp,
+  onReportChange,
 }) {
   let [nameOpen, setNameOpen] = useState(false);
   let [menuOpen, setMenuOpen] = useState(false);
@@ -280,7 +285,7 @@ export function SaveReportMenuButton({
             flexShrink: 0,
           }}
         >
-          {'Unsaved Report'}&nbsp;
+          {!reportId.id ? 'Unsaved filter' : reportId.name}&nbsp;
         </Text>
         <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
@@ -306,6 +311,7 @@ export function SaveReportMenuButton({
           menuItem={menuItem}
           inputRef={inputRef}
           err={err}
+          onReportChange={onReportChange}
         />
       )}
     </View>

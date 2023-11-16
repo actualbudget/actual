@@ -39,7 +39,12 @@ export default function CustomReportsCardList() {
       }}
     >
       {reports.map(report => (
-        <ReportCard flex={1} to="/reports/custom-report" key={report.id}>
+        <ReportCard
+          flex={1}
+          to="/reports/custom-report"
+          key={report.id}
+          report={report}
+        >
           {!report.start ? (
             <View>Error</View>
           ) : (

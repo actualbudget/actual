@@ -4,7 +4,7 @@ import { theme } from '../../style';
 import AnchorLink from '../common/AnchorLink';
 import View from '../common/View';
 
-export default function ReportCard({ flex, to, style, children }) {
+export default function ReportCard({ flex, to, style, report, children }) {
   const containerProps = { flex, margin: 15 };
 
   const content = (
@@ -34,6 +34,7 @@ export default function ReportCard({ flex, to, style, children }) {
       <AnchorLink
         to={to}
         style={{ textDecoration: 'none', flex, ...containerProps }}
+        report={report}
       >
         {content}
       </AnchorLink>

@@ -10,6 +10,7 @@ type AnchorLinkProps = {
   style?: CSSProperties;
   activeStyle?: CSSProperties;
   children?: ReactNode;
+  report?: [];
 };
 
 export default function AnchorLink({
@@ -17,12 +18,14 @@ export default function AnchorLink({
   style,
   activeStyle,
   children,
+  report,
 }: AnchorLinkProps) {
   let match = useMatch({ path: to });
 
   return (
     <NavLink
       to={to}
+      state={{ report: report }}
       className={`${css([
         styles.smallText,
         style,

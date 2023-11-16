@@ -54,6 +54,7 @@ export function ReportTopbar({
   filters,
   conditionsOp,
   reportId,
+  onReportChange,
 }) {
   return (
     <View
@@ -184,6 +185,7 @@ export function ReportTopbar({
         end={end}
         filters={filters}
         conditionsOp={conditionsOp}
+        onReportChange={onReportChange}
       />
     </View>
   );

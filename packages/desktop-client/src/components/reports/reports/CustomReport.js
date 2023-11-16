@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
@@ -45,6 +46,7 @@ export default function CustomReport() {
     onCondOpChange,
   } = useFilters();
 
+  const location = useLocation();
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);
@@ -54,7 +56,9 @@ export default function CustomReport() {
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const [mode, setMode] = useState('total');
-  const [reportId, setReportId] = useState([]);
+  const [reportId, setReportId] = useState(
+    location.state ? location.state.report : [],
+  );
   const [groupBy, setGroupBy] = useState('Category');
   const [balanceType, setBalanceType] = useState('Expense');
   const [empty, setEmpty] = useState(false);
@@ -148,6 +152,10 @@ export default function CustomReport() {
     setEnd(end);
   };
 
+  const onReportChange = cond => {
+    setReportId(cond);
+  };
+
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header
@@ -220,6 +228,7 @@ export default function CustomReport() {
             filters={filters}
             conditionsOp={conditionsOp}
             reportId={reportId}
+            onReportChange={onReportChange}
           />
           {filters && filters.length > 0 && (
             <View
