@@ -340,7 +340,7 @@ class Budget extends Component {
         <View
           style={{
             flex: 1,
-            backgroundColor: theme.mobilePageBackground,
+            backgroundColor: theme.pageBackgroundLineTop,
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 25,
@@ -400,7 +400,7 @@ export default function BudgetWrapper() {
 
   let actions = useActions();
   let spreadsheet = useSpreadsheet();
-  useSetThemeColor(theme.mobileViewTheme);
+  useSetThemeColor(theme.mobileBudgetViewTheme);
   return (
     <Budget
       categoryGroups={categoryGroups}

@@ -1634,7 +1634,7 @@ export function BudgetTable(props) {
             flex: '0 0 auto',
             padding: 10,
             paddingRight: 14,
-            backgroundColor: theme.tableRowHeaderBackground,
+            backgroundColor: 'white',
             borderBottomWidth: 1,
             borderColor: theme.tableBorder,
           }}
@@ -1831,7 +1831,6 @@ export function BudgetTable(props) {
   );
 }
 
-const LEFT_RIGHT_FLEX_WIDTH = 80;
 const BUDGET_HEADER_HEIGHT = 50;
 
 function BudgetHeader({
@@ -1850,8 +1849,9 @@ function BudgetHeader({
   let nextEnabled = currentMonth < monthUtils.subMonths(monthBounds.end, 1);
 
   let buttonStyle = {
-    padding: 10,
-    margin: 2,
+    paddingLeft: 15,
+    paddingRight: 15,
+    backgroundColor: 'transparent',
   };
 
   let toggleHiddenCategories = () => {
@@ -1882,12 +1882,13 @@ function BudgetHeader({
         flexDirection: 'row',
         flexShrink: 0,
         height: BUDGET_HEADER_HEIGHT,
-        backgroundColor: theme.mobileHeaderBackground,
+        backgroundColor: theme.buttonPrimaryBackground,
       }}
     >
       <View
         style={{
-          width: LEFT_RIGHT_FLEX_WIDTH,
+          flexBasis: '25%',
+          justifyContent: 'flex-start',
           flexDirection: 'row',
         }}
       >
@@ -1895,21 +1896,17 @@ function BudgetHeader({
           <SyncButton
             isMobile
             style={{
-              color: theme.mobileHeaderText,
+              color: 'white',
+              backgroundColor: 'transparent',
               paddingLeft: 12,
               paddingRight: 12,
             }}
           />
         )}
-        <View
-          style={{
-            flex: 1,
-          }}
-        />
       </View>
       <View
         style={{
-          flex: 1,
+          flexBasis: '50%',
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'row',
@@ -1922,21 +1919,19 @@ function BudgetHeader({
           style={{
             ...buttonStyle,
             opacity: prevEnabled ? 1 : 0.6,
-            color: theme.mobileHeaderText,
-          }}
-          hoveredStyle={{
-            color: theme.mobileHeaderText,
-            background: theme.mobileHeaderTextHover,
           }}
         >
-          <ArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
+          <ArrowThinLeft
+            style={{ color: theme.formInputTextReadOnlySelection }}
+            width="15"
+            height="15"
+          />
         </Button>
         <Text
           style={{
-            color: theme.mobileHeaderText,
+            ...styles.mediumText,
+            color: theme.formInputTextSelected,
             textAlign: 'center',
-            fontSize: 16,
-            fontWeight: 500,
             // zIndex: -1
           }}
         >
@@ -1947,49 +1942,37 @@ function BudgetHeader({
           type="bare"
           onClick={nextEnabled && onNextMonth}
           // hitSlop={{ top: 5, bottom: 5, left: 30, right: 5 }}
-          style={{
-            ...buttonStyle,
-            opacity: nextEnabled ? 1 : 0.6,
-            color: theme.mobileHeaderText,
-          }}
-          hoveredStyle={{
-            color: theme.mobileHeaderText,
-            background: theme.mobileHeaderTextHover,
-          }}
+          style={{ ...buttonStyle, opacity: nextEnabled ? 1 : 0.6 }}
         >
-          <ArrowThinRight width="15" height="15" style={{ margin: -5 }} />
+          <ArrowThinRight
+            style={{ color: theme.formInputTextReadOnlySelection }}
+            width="15"
+            height="15"
+          />
         </Button>
       </View>
       <View
         style={{
-          width: LEFT_RIGHT_FLEX_WIDTH,
+          flexBasis: '25%',
+          justifyContent: 'flex-end',
           flexDirection: 'row',
         }}
       >
-        <View
-          style={{
-            flex: 1,
-          }}
-        />
         {!editMode ? (
           <>
             <Button
               type="bare"
-              hoveredStyle={{
-                color: theme.mobileHeaderText,
-                background: theme.mobileHeaderTextHover,
-              }}
               style={{
-                paddingTop: 15,
-                paddingBottom: 15,
-                margin: 10,
+                backgroundColor: 'transparent',
+                paddingLeft: 12,
+                paddingRight: 12,
               }}
               {...tooltip.getOpenEvents()}
             >
               <DotsHorizontalTriple
                 width="20"
                 height="20"
-                style={{ color: theme.mobileHeaderText }}
+                style={{ color: 'white' }}
               />
             </Button>
             {tooltip.isOpen && (
@@ -2015,18 +1998,12 @@ function BudgetHeader({
         ) : (
           <Button
             type="bare"
-            hoveredStyle={{
-              color: theme.mobileHeaderText,
-              background: theme.mobileHeaderTextHover,
-            }}
             style={{
               backgroundColor: 'transparent',
-              padding: 10,
-              paddingTop: 15,
-              paddingBottom: 15,
-              margin: 10,
-              ...styles.text,
-              color: theme.mobileHeaderText,
+              paddingLeft: 12,
+              paddingRight: 12,
+              ...styles.mediumText,
+              color: 'white',
             }}
             onClick={() => onEditMode?.(false)}
           >

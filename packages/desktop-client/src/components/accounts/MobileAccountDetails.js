@@ -6,7 +6,6 @@ import Add from '../../icons/v1/Add';
 import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { theme, styles } from '../../style';
-import Button from '../common/Button';
 import ButtonLink from '../common/ButtonLink';
 import InputWithContent from '../common/InputWithContent';
 import Label from '../common/Label';
@@ -24,8 +23,9 @@ function TransactionSearchInput({ accountName, onSearch }) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.mobilePageBackground,
+        backgroundColor: theme.tableHeaderBackground,
         margin: '11px auto 4px',
+        borderRadius: 4,
         padding: 10,
         width: '100%',
       }}
@@ -50,7 +50,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
         }}
         placeholder={`Search ${accountName}`}
         style={{
-          backgroundColor: theme.tableBackground,
+          backgroundColor: theme.formInputBackground,
           border: `1px solid ${theme.formInputBorder}`,
           fontSize: 15,
           flex: 1,
@@ -64,8 +64,6 @@ function TransactionSearchInput({ accountName, onSearch }) {
 }
 
 const LEFT_RIGHT_FLEX_WIDTH = 70;
-const BUDGET_HEADER_HEIGHT = 50;
-
 export default function AccountDetails({
   account,
   prependTransactions,
@@ -93,9 +91,9 @@ export default function AccountDetails({
     <View
       style={{
         flex: 1,
-        backgroundColor: theme.mobilePageBackground,
+        backgroundColor: theme.tableHeaderBackground,
         overflowY: 'hidden',
-        flexGrow: 1,
+        width: '100%',
       }}
     >
       <View
@@ -103,111 +101,52 @@ export default function AccountDetails({
           alignItems: 'center',
           flexShrink: 0,
           overflowY: 'hidden',
+          paddingTop: 10,
           top: 0,
+          width: '100%',
         }}
       >
         <View
           style={{
+            alignItems: 'center',
             flexDirection: 'row',
-            flexShrink: 0,
-            height: BUDGET_HEADER_HEIGHT,
+            justifyContent: 'space-between',
             width: '100%',
-            backgroundColor: theme.mobileHeaderBackground,
           }}
         >
-          <View
+          <Link
+            to={-1}
             style={{
+              color: theme.formLabelText,
+              alignItems: 'center',
+              display: 'flex',
+              textDecoration: 'none',
               width: LEFT_RIGHT_FLEX_WIDTH,
-              flexDirection: 'row',
             }}
           >
-            <Button
-              type="bare"
-              style={{
-                color: theme.mobileHeaderText,
-                justifyContent: 'center',
-                margin: 10,
-                paddingLeft: 5,
-                paddingRight: 3,
-              }}
-              hoveredStyle={{
-                color: theme.mobileHeaderText,
-                background: theme.mobileHeaderTextHover,
-              }}
-            >
-              <Link
-                to={-1}
-                style={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  textDecoration: 'none',
-                }}
-              >
-                <CheveronLeft
-                  style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}
-                />
-                <Text
-                  style={{
-                    ...styles.text,
-                    fontWeight: 500,
-                    marginLeft: 5,
-                    marginRight: 5,
-                  }}
-                >
-                  Back
-                </Text>
-              </Link>
-            </Button>
-            <View
-              style={{
-                flex: 1,
-              }}
-            />
-          </View>
+            <CheveronLeft style={{ width: 32, height: 32 }} />
+            <Text style={{ ...styles.text, fontWeight: 500 }}>Back</Text>
+          </Link>
           <View
             style={{
-              flex: 1,
               fontSize: 16,
               fontWeight: 500,
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: theme.mobileHeaderText,
             }}
             role="heading"
           >
             {account.name}
           </View>
 
-          <View
-            style={{
-              width: LEFT_RIGHT_FLEX_WIDTH,
-              flexDirection: 'row',
-            }}
+          <ButtonLink
+            to="transactions/new"
+            type="bare"
+            aria-label="Add Transaction"
+            style={{ justifyContent: 'center', width: LEFT_RIGHT_FLEX_WIDTH }}
+            hoveredStyle={{ background: 'transparent' }}
+            activeStyle={{ background: 'transparent' }}
           >
-            <View
-              style={{
-                flex: 1,
-              }}
-            />
-            <ButtonLink
-              to="transactions/new"
-              type="bare"
-              aria-label="Add Transaction"
-              style={{
-                justifyContent: 'center',
-                padding: 10,
-                margin: 10,
-                color: theme.mobileHeaderText,
-              }}
-              hoveredStyle={{
-                color: theme.mobileHeaderText,
-                background: theme.mobileHeaderTextHover,
-              }}
-              activeStyle={{ background: 'transparent' }}
-            >
-              <Add width={20} height={20} style={{ margin: -5 }} />
-            </ButtonLink>
-          </View>
+            <Add width={20} height={20} />
+          </ButtonLink>
         </View>
         <Label title="BALANCE" style={{ marginTop: 10 }} />
         <CellValue

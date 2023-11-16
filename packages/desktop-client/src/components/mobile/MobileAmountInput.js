@@ -165,7 +165,7 @@ class AmountInput extends PureComponent {
           borderColor: theme.pillBorderSelected,
           borderRadius: 4,
           padding: 5,
-          backgroundColor: theme.tableBackground,
+          backgroundColor: 'white',
           ...style,
         }}
       >

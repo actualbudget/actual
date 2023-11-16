@@ -162,8 +162,6 @@ function Status({ status }) {
 }
 
 const LEFT_RIGHT_FLEX_WIDTH = 70;
-const BUDGET_HEADER_HEIGHT = 50;
-
 class TransactionEditInner extends PureComponent {
   constructor(props) {
     super(props);
@@ -326,8 +324,11 @@ class TransactionEditInner extends PureComponent {
       // <KeyboardAvoidingView>
       <View
         style={{
-          backgroundColor: theme.mobilePageBackground,
-          flexGrow: 1,
+          margin: 10,
+          marginTop: 3,
+          backgroundColor: theme.tableHeaderBackground,
+          flex: 1,
+          borderRadius: 4,
 
           // This shadow make the card "pop" off of the screen below
           // it
@@ -339,97 +340,66 @@ class TransactionEditInner extends PureComponent {
       >
         <View
           style={{
+            borderRadius: 4,
             overflow: 'hidden',
             display: 'flex',
-            flexGrow: 1,
+            flex: 'auto',
           }}
         >
           <View
             style={{
-              flexShrink: 0,
-              height: BUDGET_HEADER_HEIGHT,
+              borderBottomWidth: 1,
+              borderColor: theme.tableBorder,
+              backgroundColor: theme.tableBackground,
+              alignItems: 'center',
               flexDirection: 'row',
+              flexShrink: 0,
+              justifyContent: 'space-between',
               width: '100%',
-              backgroundColor: theme.mobileHeaderBackground,
+              padding: 10,
             }}
           >
-            <View
+            <Link
+              to={-1}
               style={{
+                alignItems: 'center',
+                display: 'flex',
+                textDecoration: 'none',
                 width: LEFT_RIGHT_FLEX_WIDTH,
-                flexDirection: 'row',
               }}
             >
-              <Button
-                type="bare"
+              <CheveronLeft
                 style={{
-                  color: theme.mobileHeaderText,
-                  justifyContent: 'center',
-                  margin: 10,
-                  paddingLeft: 5,
-                  paddingRight: 3,
-                }}
-                hoveredStyle={{
-                  color: theme.mobileHeaderText,
-                  background: theme.mobileHeaderTextHover,
-                }}
-              >
-                <Link
-                  to={-1}
-                  style={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    textDecoration: 'none',
-                  }}
-                >
-                  <CheveronLeft
-                    style={{
-                      width: 30,
-                      height: 30,
-                      margin: -10,
-                      marginLeft: -5,
-                    }}
-                  />
-                  <Text
-                    style={{
-                      ...styles.text,
-                      fontWeight: 500,
-                      marginLeft: 5,
-                      marginRight: 5,
-                    }}
-                  >
-                    Back
-                  </Text>
-                </Link>
-              </Button>
-              <View
-                style={{
-                  flex: 1,
+                  color: theme.formLabelText,
+                  width: 32,
+                  height: 32,
                 }}
               />
-            </View>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                color: theme.mobileHeaderText,
-              }}
-            >
-              <TextOneLine
+              <Text
                 style={{
-                  fontSize: 16,
+                  ...styles.text,
+                  color: theme.formLabelText,
                   fontWeight: 500,
-                  userSelect: 'none',
                 }}
-                role="heading"
               >
-                {payeeId == null
-                  ? adding
-                    ? 'New Transaction'
-                    : 'Transaction'
-                  : descriptionPretty}
-              </TextOneLine>
-            </View>
+                Back
+              </Text>
+            </Link>
+            <TextOneLine
+              style={{
+                color: theme.formInputText,
+                fontSize: 15,
+                fontWeight: 600,
+                userSelect: 'none',
+              }}
+              role="heading"
+            >
+              {payeeId == null
+                ? adding
+                  ? 'New Transaction'
+                  : 'Transaction'
+                : descriptionPretty}
+            </TextOneLine>
             {/* For centering the transaction title */}
             <View
               style={{
@@ -557,7 +527,7 @@ class TransactionEditInner extends PureComponent {
                 <InputField
                   type="date"
                   required
-                  style={{ color: theme.tableText, minWidth: '150px' }}
+                  style={{ color: 'canvastext', minWidth: '150px' }}
                   defaultValue={dateDefaultValue}
                   onUpdate={value =>
                     this.onEdit(
@@ -603,7 +573,6 @@ class TransactionEditInner extends PureComponent {
                 onChange={e =>
                   this.onQueueChange(transaction, 'notes', e.target.value)
                 }
-                style={{ marginBottom: 10 }}
               />
             </View>
 
@@ -616,7 +585,7 @@ class TransactionEditInner extends PureComponent {
                     paddingVertical: 5,
                     marginLeft: styles.mobileEditingPadding,
                     marginRight: styles.mobileEditingPadding,
-                    marginTop: 10,
+                    marginTop: 20,
                     marginBottom: 15,
                     backgroundColor: 'transparent',
                   }}
@@ -737,7 +706,7 @@ function TransactionEditUnconnected(props) {
   let transactions = [];
   let adding = false;
   let deleted = false;
-  useSetThemeColor(theme.mobileViewTheme);
+  useSetThemeColor(theme.mobileTransactionViewTheme);
 
   useEffect(() => {
     // May as well update categories / accounts when transaction ID changes
@@ -858,7 +827,7 @@ function TransactionEditUnconnected(props) {
     <View
       style={{
         flex: 1,
-        backgroundColor: theme.pageBackground,
+        backgroundColor: theme.buttonPrimaryBackground,
       }}
     >
       <TransactionEditInner
@@ -962,7 +931,7 @@ class Transaction extends PureComponent {
       <Button
         onClick={() => onSelect(transaction)}
         style={{
-          backgroundColor: theme.tableBackground,
+          backgroundColor: 'white',
           border: 'none',
           width: '100%',
         }}
@@ -1117,7 +1086,6 @@ export class TransactionList extends Component {
                     display: 'flex',
                     justifyContent: 'center',
                     width: '100%',
-                    backgroundColor: theme.mobilePageBackground,
                   }}
                 >
                   <Text style={{ fontSize: 15 }}>No transactions</Text>
@@ -1226,7 +1194,7 @@ function ListBoxSection({ section, state }) {
         <div
           {...headingProps}
           className={`${css(styles.smallText, {
-            backgroundColor: theme.pageBackground,
+            backgroundColor: theme.mobileDateBackground,
             borderBottom: `1px solid ${theme.tableBorder}`,
             borderTop: `1px solid ${theme.tableBorder}`,
             color: theme.tableHeaderText,
