@@ -38,18 +38,13 @@ export const tableRowBackgroundHighlightText = colorPalette.navy150;
 export const tableRowHeaderBackground = colorPalette.navy700;
 export const tableRowHeaderText = colorPalette.navy150;
 
-export const sidebarBackground = colorPalette.navy800;
-export const sidebarItemBackground = colorPalette.navy800;
+export const sidebarBackground = colorPalette.navy900;
 export const sidebarItemBackgroundPositive = colorPalette.green500;
 export const sidebarItemBackgroundFailed = colorPalette.red300;
-export const sidebarItemBackgroundSelected = colorPalette.navy800;
+export const sidebarItemAccnetSelected = colorPalette.purple200;
 export const sidebarItemBackgroundHover = colorPalette.navy700;
-export const sidebarItemAccent = colorPalette.navy800;
-export const sidebarItemAccentSelected = colorPalette.purple400;
-export const sidebarItemAccentHover = colorPalette.navy700;
 export const sidebarItemText = colorPalette.navy150;
-export const sidebarItemTextSelected = colorPalette.purple400;
-export const sidebarItemTextHover = colorPalette.navy150;
+export const sidebarItemTextSelected = colorPalette.purple200;
 
 export const menuBackground = colorPalette.navy600;
 export const menuItemBackground = colorPalette.navy600;
@@ -67,7 +62,13 @@ export const menuAutoCompleteText = colorPalette.navy900;
 export const menuAutoCompleteTextHeader = menuItemTextHeader;
 
 export const modalBackground = colorPalette.gray800;
+export const mobilePageBackground = colorPalette.navy800;
 export const modalBorder = colorPalette.navy600;
+export const mobileHeaderBackground = colorPalette.purple800;
+export const mobileHeaderText = colorPalette.navy150;
+export const mobileHeaderTextSubdued = colorPalette.gray200;
+export const mobileHeaderTextHover = 'rgba(200, 200, 200, .15)';
+export const mobilePageBackground = colorPalette.navy700;
 export const mobileNavBackground = colorPalette.navy800;
 export const mobileNavItem = colorPalette.navy150;
 export const mobileNavItemSelected = colorPalette.purple400;
@@ -75,15 +76,10 @@ export const mobileAccountShadow = cardShadow;
 export const mobileAccountText = colorPalette.blue800;
 export const mobileModalBackground = colorPalette.navy900;
 export const mobileModalText = colorPalette.white;
-export const mobileDateBackground = colorPalette.navy100;
 
 // Mobile view themes (for the top bar)
-export const mobileAccountViewTheme = colorPalette.navy50;
-export const mobileAccountsViewTheme = colorPalette.blue800;
-export const mobileBudgetViewTheme = colorPalette.purple500;
+export const mobileViewTheme = mobileHeaderBackground;
 export const mobileConfigServerViewTheme = colorPalette.purple500;
-export const mobileSettingsViewTheme = colorPalette.navy50;
-export const mobileTransactionViewTheme = colorPalette.purple500;
 
 export const markdownNormal = colorPalette.purple700;
 export const markdownDark = colorPalette.purple500;
@@ -182,7 +178,7 @@ export const checkboxShadowSelected = colorPalette.purple500;
 
 export const pillBackground = colorPalette.navy800;
 export const pillText = colorPalette.navy200;
-export const pillTextHighlighted = colorPalette.purple500;
+export const pillTextHighlighted = colorPalette.purple300;
 export const pillBorder = colorPalette.navy700;
 export const pillBorderDark = pillBorder;
 export const pillBackgroundSelected = colorPalette.purple600;

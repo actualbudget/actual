@@ -60,15 +60,14 @@ export default function Overview() {
       >
         {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
         {sankeyFeatureFlag && <SankeyCard />}
+        {!categorySpendingReportFeatureFlag && <div style={{ flex: 1 }} />}
+        {!sankeyFeatureFlag && <div style={{ flex: 1 }} />}
         {customReportsFeatureFlag ? (
           <CustomReportCard />
         ) : (
           <div style={{ flex: 1 }} />
         )}
-        {!categorySpendingReportFeatureFlag && <div style={{ flex: 1 }} />}
-        {!sankeyFeatureFlag && <div style={{ flex: 1 }} />}
       </View>
-
       {customReportsFeatureFlag && (
         <>
           <View

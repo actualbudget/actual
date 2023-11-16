@@ -146,8 +146,7 @@ export default function CustomReport() {
   if (!allMonths || !data) {
     return null;
   }
-
-  const onChangeDates = ({ start, end }) => {
+  const onChangeDates = (start, end) => {
     setStart(start);
     setEnd(end);
   };

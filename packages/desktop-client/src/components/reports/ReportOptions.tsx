@@ -17,7 +17,7 @@ const dateRangeOptions = [
   { description: '1 month', name: 1 },
   { description: '3 months', name: 2 },
   { description: '6 months', name: 5 },
-  { vdescription: '1 year', name: 11 },
+  { description: '1 year', name: 11 },
   { description: 'All time', name: 'allMonths' },
 ];
 
@@ -28,6 +28,9 @@ export const ReportOptions = {
     balanceTypeOptions.map(item => [item.description, item.format]),
   ),
   dateRange: dateRangeOptions,
+  dateRangeMap: new Map(
+    dateRangeOptions.map(item => [item.description, item.name]),
+  ),
 };
 
 /*

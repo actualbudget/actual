@@ -26,7 +26,7 @@ function CustomReportCard() {
   const data = useReport('default', getGraphData);
 
   return (
-    <ReportCard flex={1} to="/reports/custom-report">
+    <ReportCard flex={1} to="/reports/custom">
       <View>
         <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
           <View style={{ flex: 1 }}>
