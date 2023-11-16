@@ -5,17 +5,16 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useCategories from '../../hooks/useCategories';
-import useFilters from '../../hooks/useFilters';
-import { theme, styles } from '../../style';
-import Paragraph from '../common/Paragraph';
-import View from '../common/View';
-
-import sankeySpreadsheet from './graphs/sankey-spreadsheet';
-import SankeyGraph from './graphs/SankeyGraph';
-import Header from './Header';
-import useReport from './useReport';
-import { fromDateRepr } from './util';
+import useCategories from '../../../hooks/useCategories';
+import useFilters from '../../../hooks/useFilters';
+import { theme, styles } from '../../../style';
+import Paragraph from '../../common/Paragraph';
+import View from '../../common/View';
+import SankeyGraph from '../graphs/SankeyGraph';
+import Header from '../Header';
+import sankeySpreadsheet from '../spreadsheets/sankey-spreadsheet';
+import useReport from '../useReport';
+import { fromDateRepr } from '../util';
 
 export default function Sankey() {
   const { grouped: categoryGroups } = useCategories();

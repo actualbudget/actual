@@ -29,7 +29,7 @@ export default function ScrollProvider({ children }: ScrollProviderProps) {
       setIsBottomReached(
         e.target?.scrollHeight - e.target?.scrollTop <= e.target?.clientHeight,
       );
-    }, 20);
+    }, 10);
 
     window.addEventListener('scroll', listenToScroll, {
       capture: true,
