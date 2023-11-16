@@ -66,8 +66,9 @@ export const menuAutoCompleteBackgroundHover = colorPalette.navy600;
 export const menuAutoCompleteText = colorPalette.white;
 export const menuAutoCompleteTextHeader = colorPalette.orange150;
 
-export const modalBackground = colorPalette.white;
-export const modalBorder = colorPalette.white;
+export const modalBackground = colorPalette.navy900;
+export const mobilePageBackground = colorPalette.blue800;
+export const modalBorder = colorPalette.navy200;
 export const mobileNavBackground = colorPalette.white;
 export const mobileNavItem = colorPalette.gray300;
 export const mobileNavItemSelected = colorPalette.purple500;
@@ -119,9 +120,9 @@ export const buttonNormalBorder = colorPalette.navy150;
 export const buttonNormalShadow = 'rgba(0, 0, 0, 0.2)';
 export const buttonNormalSelectedText = colorPalette.white;
 export const buttonNormalSelectedBackground = colorPalette.blue600;
-export const buttonNormalDisabledText = colorPalette.navy300;
-export const buttonNormalDisabledBackground = buttonNormalBackground;
-export const buttonNormalDisabledBorder = buttonNormalBorder;
+export const buttonNormalDisabledText = colorPalette.navy500;
+export const buttonNormalDisabledBackground = colorPalette.navy800;
+export const buttonNormalDisabledBorder = colorPalette.navy500;
 
 export const calendarText = colorPalette.navy50;
 export const calendarBackground = colorPalette.navy900;
