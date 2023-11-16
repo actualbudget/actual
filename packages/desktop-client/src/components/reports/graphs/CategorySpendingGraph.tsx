@@ -5,9 +5,9 @@ import { VictoryAxis, VictoryBar, VictoryChart, VictoryStack } from 'victory';
 
 import { chartTheme } from '../chart-theme';
 import Container from '../Container';
+import { type CategorySpendingGraphData } from '../spreadsheets/category-spending-spreadsheet';
 import Tooltip from '../Tooltip';
 
-import { type CategorySpendingGraphData } from './category-spending-spreadsheet';
 import { Area } from './common';
 
 type CategorySpendingGraphProps = {
