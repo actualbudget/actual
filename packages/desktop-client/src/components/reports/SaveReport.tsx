@@ -13,6 +13,8 @@ import Text from '../common/Text';
 import View from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
+import Convert from './Convert';
+
 function SaveReportMenu({ reportId, onClose, onMenuSelect }) {
   return (
     <MenuTooltip width={150} onClose={onClose}>
@@ -55,73 +57,14 @@ function SaveReportMenu({ reportId, onClose, onMenuSelect }) {
   );
 }
 
-async function onAddUpdate(
-  adding,
-  filters,
-  conditionsOp,
-  name,
-  start,
-  end,
-  reportId,
-  onErr,
-  onNameChange,
-  onReportChange,
-) {
-  let savedReport;
-  let res;
-  if (adding) {
-    //create new flow
-    savedReport = {
-      conditions: filters,
-      conditionsOp: conditionsOp,
-      name: name,
-      start: start,
-      end: end,
-      status: 'saved',
-    };
-    res = await sendCatch('report-create', {
-      state: savedReport,
-    });
-    savedReport = {
-      ...savedReport,
-      id: res.data,
-    };
-  } else {
-    //rename flow
-    savedReport = {
-      conditions: reportId.conditions,
-      conditionsOp: reportId.conditionsOp,
-      id: reportId.id,
-      name: name,
-    };
-    res = await sendCatch('report-update', {
-      state: savedReport,
-    });
-  }
-  if (res.error) {
-    onErr(res.error.message);
-  } else {
-    onNameChange(false);
-    onReportChange(savedReport);
-    //onReloadSavedFilter(savedReport);
-  }
-}
-
 function NameReport({
   onClose,
-  adding,
-  filters,
-  conditionsOp,
-  name,
-  start,
-  end,
-  reportId,
-  onErr,
-  onNameChange,
   menuItem,
+  onName,
   inputRef,
+  onAddUpdate,
+  adding,
   err,
-  onReportChange,
 }) {
   return (
     <MenuTooltip width={325} onClose={onClose}>
@@ -139,25 +82,14 @@ function NameReport({
                 htmlFor="name-field"
                 style={{ userSelect: 'none' }}
               />
-              <Input inputRef={inputRef} onUpdate={e => (name = e)} />
+              <Input inputRef={inputRef} onUpdate={e => onName(e)} />
             </FormField>
             <Button
               type="primary"
               style={{ marginTop: 18 }}
               onClick={e => {
                 e.preventDefault();
-                onAddUpdate(
-                  adding,
-                  filters,
-                  conditionsOp,
-                  name,
-                  start,
-                  end,
-                  reportId,
-                  onErr,
-                  onNameChange,
-                  onReportChange,
-                );
+                onAddUpdate();
               }}
             >
               {adding ? 'Add' : 'Update'}
@@ -178,20 +110,86 @@ export function SaveReportMenuButton({
   reportId,
   start,
   end,
+  mode,
+  groupBy,
+  balanceType,
+  empty,
+  hidden,
+  uncat,
+  graphType,
+  viewLabels,
+  viewLegend,
+  viewSummary,
   filters,
   conditionsOp,
   onReportChange,
+  data,
 }) {
   let [nameOpen, setNameOpen] = useState(false);
   let [menuOpen, setMenuOpen] = useState(false);
   let [menuItem, setMenuItem] = useState(null);
   let [err, setErr] = useState(null);
+  let [name, setName] = useState(reportId.name);
   let [adding, setAdding] = useState(false);
   let inputRef = createRef<HTMLInputElement>();
-  let name = reportId.name;
   let id = reportId.id;
   let res;
   let savedReport;
+
+  const onAddUpdate = async () => {
+    let savedReport;
+    let res;
+    if (adding) {
+      //create new flow
+      savedReport = {
+        mode: mode,
+        groupBy: groupBy,
+        balanceType: balanceType,
+        empty: Convert(empty),
+        hidden: Convert(hidden),
+        uncat: Convert(uncat),
+        graphType: graphType,
+        viewLabels: Convert(viewLabels),
+        viewLegend: Convert(viewLegend),
+        viewSummary: Convert(viewSummary),
+        conditions: filters,
+        conditionsOp: conditionsOp,
+        name: name,
+        start: start,
+        end: end,
+        data: data,
+        status: 'saved',
+      };
+      const { status, ...sendSaved } = savedReport;
+      res = await sendCatch('report-create', {
+        state: sendSaved,
+      });
+      savedReport = {
+        ...savedReport,
+        id: res.data,
+      };
+    } else {
+      //rename flow
+      savedReport = {
+        ...reportId,
+        name: name,
+      };
+      res = await sendCatch('report-update', {
+        state: savedReport,
+      });
+    }
+    if (res.error) {
+      onErr(res.error.message);
+    } else {
+      onNameChange(false);
+      onReportChange(savedReport);
+      //onReloadSavedFilter(savedReport);
+    }
+  };
+
+  const onName = cond => {
+    setName(cond);
+  };
 
   const onErr = cond => {
     setErr(cond);
@@ -299,19 +297,12 @@ export function SaveReportMenuButton({
       {nameOpen && (
         <NameReport
           onClose={() => setNameOpen(false)}
-          adding={adding}
-          filters={filters}
-          conditionsOp={conditionsOp}
-          name={name}
-          start={start}
-          end={end}
-          reportId={reportId}
-          onErr={onErr}
-          onNameChange={onNameChange}
           menuItem={menuItem}
+          onName={onName}
           inputRef={inputRef}
+          onAddUpdate={onAddUpdate}
+          adding={adding}
           err={err}
-          onReportChange={onReportChange}
         />
       )}
     </View>

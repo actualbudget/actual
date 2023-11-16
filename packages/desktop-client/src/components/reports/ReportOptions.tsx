@@ -1,3 +1,24 @@
+import * as monthUtils from 'loot-core/src/shared/months';
+
+export function defaultState() {
+  const start = monthUtils.subMonths(monthUtils.currentMonth(), 5);
+  const end = monthUtils.currentMonth();
+  return {
+    mode: 'total',
+    groupBy: 'Category',
+    balanceType: 'Expense',
+    empty: false,
+    hidden: false,
+    uncat: false,
+    graphType: 'BarGraph',
+    viewLabels: false,
+    viewLegend: false,
+    viewSummary: false,
+    start: start,
+    end: end,
+  };
+}
+
 const balanceTypeOptions = [
   { description: 'Expense', format: 'totalDebts' },
   { description: 'Income', format: 'totalAssets' },

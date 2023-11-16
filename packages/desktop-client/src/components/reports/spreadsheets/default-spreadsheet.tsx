@@ -417,7 +417,7 @@ export default function createSpreadsheet(
     });
 
     setData({
-      stackedData: stackedData,
+      stackedData,
       groupBy: groupBy === 'Group' ? catGroup : groupByList,
       data,
       groupData: categoryGroupData,

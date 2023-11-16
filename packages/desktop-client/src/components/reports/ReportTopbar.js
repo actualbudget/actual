@@ -36,9 +36,13 @@ function GraphButton({ selected, children, style, onSelect, title, disabled }) {
 export function ReportTopbar({
   start,
   end,
+  name,
+  mode,
+  empty,
+  hidden,
+  uncat,
   graphType,
   setGraphType,
-  mode,
   viewLegend,
   setViewLegend,
   setTypeDisabled,
@@ -55,6 +59,7 @@ export function ReportTopbar({
   conditionsOp,
   reportId,
   onReportChange,
+  data,
 }) {
   return (
     <View
@@ -186,6 +191,17 @@ export function ReportTopbar({
         filters={filters}
         conditionsOp={conditionsOp}
         onReportChange={onReportChange}
+        mode={mode}
+        groupBy={groupBy}
+        balanceType={balanceType}
+        empty={empty}
+        hidden={hidden}
+        uncat={uncat}
+        graphType={graphType}
+        viewLabels={viewLabels}
+        viewLegend={viewLegend}
+        viewSummary={viewSummary}
+        data={data}
       />
     </View>
   );

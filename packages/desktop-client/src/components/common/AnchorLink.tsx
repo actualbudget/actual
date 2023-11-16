@@ -25,7 +25,7 @@ export default function AnchorLink({
   return (
     <NavLink
       to={to}
-      state={{ report: report }}
+      state={report ? { report: report } : {}}
       className={`${css([
         styles.smallText,
         style,

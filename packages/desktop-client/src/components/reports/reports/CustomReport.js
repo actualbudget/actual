@@ -18,8 +18,9 @@ import View from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
 import PrivacyFilter from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
+import Convert from '../Convert';
 import Header from '../Header';
-import { ReportOptions } from '../ReportOptions';
+import { ReportOptions, defaultState } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportLegend, ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
@@ -47,29 +48,38 @@ export default function CustomReport() {
   } = useFilters();
 
   const location = useLocation();
+  const converted = location.state.report && {
+    ...location.state.report,
+    empty: Convert(location.state.report.empty),
+    hidden: Convert(location.state.report.hidden),
+    uncat: Convert(location.state.report.uncat),
+    viewLabels: Convert(location.state.report.viewLabels),
+    viewLegend: Convert(location.state.report.viewLegend),
+    viewSummary: Convert(location.state.report.viewSummary),
+  };
+  const loadReport = location.state.report ? converted : defaultState();
+
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);
-  const [start, setStart] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 5),
-  );
-  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [start, setStart] = useState(loadReport.start);
+  const [end, setEnd] = useState(loadReport.end);
 
-  const [mode, setMode] = useState('total');
+  const [mode, setMode] = useState(loadReport.mode);
   const [reportId, setReportId] = useState(
-    location.state ? location.state.report : [],
+    location.state.report ? location.state.report : [],
   );
-  const [groupBy, setGroupBy] = useState('Category');
-  const [balanceType, setBalanceType] = useState('Expense');
-  const [empty, setEmpty] = useState(false);
-  const [hidden, setHidden] = useState(false);
-  const [uncat, setUncat] = useState(false);
+  const [groupBy, setGroupBy] = useState(loadReport.groupBy);
+  const [balanceType, setBalanceType] = useState(loadReport.balanceType);
+  const [empty, setEmpty] = useState(loadReport.empty);
+  const [hidden, setHidden] = useState(loadReport.hidden);
+  const [uncat, setUncat] = useState(loadReport.uncat);
   const [dateRange, setDateRange] = useState('6 months');
 
-  const [graphType, setGraphType] = useState('BarGraph');
-  const [viewLegend, setViewLegend] = useState(false);
-  const [viewSummary, setViewSummary] = useState(false);
-  const [viewLabels, setViewLabels] = useState(false);
+  const [graphType, setGraphType] = useState(loadReport.graphType);
+  const [viewLegend, setViewLegend] = useState(loadReport.viewLegend);
+  const [viewSummary, setViewSummary] = useState(loadReport.viewSummary);
+  const [viewLabels, setViewLabels] = useState(loadReport.viewLabels);
   //const [legend, setLegend] = useState([]);
   let legend = [];
   const dateRangeLine = ReportOptions.dateRange.length - 1;
@@ -142,6 +152,7 @@ export default function CustomReport() {
   }, []);
 
   let [scrollWidth, setScrollWidth] = useState(0);
+  const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
 
   if (!allMonths || !data) {
     return null;
@@ -209,9 +220,12 @@ export default function CustomReport() {
           <ReportTopbar
             start={start}
             end={end}
+            mode={mode}
+            empty={empty}
+            hidden={hidden}
+            uncat={uncat}
             graphType={graphType}
             setGraphType={setGraphType}
-            mode={mode}
             viewLegend={viewLegend}
             setViewLegend={setViewLegend}
             setTypeDisabled={setTypeDisabled}
@@ -228,6 +242,7 @@ export default function CustomReport() {
             conditionsOp={conditionsOp}
             reportId={reportId}
             onReportChange={onReportChange}
+            data={{ [splitData]: data[splitData] }}
           />
           {filters && filters.length > 0 && (
             <View
@@ -315,7 +330,7 @@ export default function CustomReport() {
                   months={months}
                 />
               </View>
-              {(viewLegend || viewSummary) && (
+              {false && (
                 <View
                   style={{
                     padding: 10,

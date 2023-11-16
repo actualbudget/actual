@@ -104,12 +104,8 @@ function conditionExists(item, filters, newItem) {
 async function createReport(report) {
   let reportId = uuidv4();
   let item = {
+    ...report.state,
     id: reportId,
-    conditions: report.state.conditions,
-    conditionsOp: report.state.conditionsOp,
-    name: report.state.name,
-    start: report.state.start,
-    end: report.state.end,
   };
 
   if (item.name) {

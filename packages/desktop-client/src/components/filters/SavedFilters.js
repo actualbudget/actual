@@ -34,7 +34,7 @@ function FilterMenu({ onClose, filterId, onFilterMenuSelect }) {
                   ? [
                       { name: 'rename-filter', text: 'Rename' },
                       { name: 'delete-filter', text: 'Delete' },
-                      Menu.line,
+                      { name: 'menu-line', type: Menu.line },
                       {
                         name: 'save-filter',
                         text: 'Save new filter',
@@ -47,7 +47,7 @@ function FilterMenu({ onClose, filterId, onFilterMenuSelect }) {
                       { name: 'update-filter', text: 'Update condtions' },
                       { name: 'reload-filter', text: 'Revert changes' },
                       { name: 'delete-filter', text: 'Delete' },
-                      Menu.line,
+                      { name: 'menu-line', type: Menu.line },
                       { name: 'save-filter', text: 'Save new filter' },
                       { name: 'clear-filter', text: 'Clear all conditions' },
                     ]),
@@ -197,49 +197,7 @@ function SavedFilterMenuButton({
     }
   };
 
-  function FilterMenu({ onClose, filterId }) {
-    return (
-      <MenuTooltip width={200} onClose={onClose}>
-        <Menu
-          onMenuSelect={item => {
-            onFilterMenuSelect(item);
-          }}
-          items={[
-            ...(!filterId.id
-              ? [
-                  { name: 'save-filter', text: 'Save new filter' },
-                  { name: 'clear-filter', text: 'Clear all conditions' },
-                ]
-              : [
-                  ...(filterId.id !== null && filterId.status === 'saved'
-                    ? [
-                        { name: 'rename-filter', text: 'Rename' },
-                        { name: 'delete-filter', text: 'Delete' },
-                        { name: 'menu-line', type: Menu.line },
-                        {
-                          name: 'save-filter',
-                          text: 'Save new filter',
-                          disabled: true,
-                        },
-                        { name: 'clear-filter', text: 'Clear all conditions' },
-                      ]
-                    : [
-                        { name: 'rename-filter', text: 'Rename' },
-                        { name: 'update-filter', text: 'Update condtions' },
-                        { name: 'reload-filter', text: 'Revert changes' },
-                        { name: 'delete-filter', text: 'Delete' },
-                        { name: 'menu-line', type: Menu.line },
-                        { name: 'save-filter', text: 'Save new filter' },
-                        { name: 'clear-filter', text: 'Clear all conditions' },
-                      ]),
-                ]),
-          ]}
-        />
-      </MenuTooltip>
-    );
-  }
-
-  async function onAddUpdate() {
+  const onAddUpdate = async () => {
     if (adding) {
       //create new flow
       savedFilter = {
@@ -275,7 +233,7 @@ function SavedFilterMenuButton({
       setNameOpen(false);
       onReloadSavedFilter(savedFilter);
     }
-  }
+  };
 
   return (
     <View>
