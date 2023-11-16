@@ -15,7 +15,7 @@ export function ReportRouter() {
       <Route path="/net-worth" element={<NetWorth />} />
       <Route path="/cash-flow" element={<CashFlow />} />
       <Route path="/category-spending" element={<CategorySpending />} />
-      <Route path="/custom-report" element={<CustomReport />} />
+      <Route path="/custom" element={<CustomReport />} />
       <Route path="/sankey" element={<Sankey />} />
     </Routes>
   );

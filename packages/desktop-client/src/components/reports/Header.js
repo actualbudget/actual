@@ -85,7 +85,7 @@ function Header({
       </ButtonLink>
       <View style={styles.veryLargeText}>{title}</View>
 
-      {path !== '/reports/custom-report' && (
+      {path !== '/reports/custom' && (
         <View
           style={{
             flexDirection: 'row',

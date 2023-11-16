@@ -77,9 +77,9 @@ export function ReportSidebar({
     setMode(cond);
     if (cond === 'time') {
       if (graphType === 'TableGraph') {
-        setTypeDisabled([0]);
+        setTypeDisabled([]);
       } else {
-        setTypeDisabled([3]);
+        setTypeDisabled(['Net']);
         if (['Net'].includes(balanceType)) {
           setBalanceType('Expense');
         }
@@ -178,10 +178,10 @@ export function ReportSidebar({
             ])}
             disabledKeys={
               mode === 'time'
-                ? [5, 6]
+                ? ['Month', 'Year']
                 : graphType === 'AreaGraph'
-                ? [1, 2, 3, 4, 6]
-                : [6]
+                ? ['Category', 'Group', 'Payee', 'Account', 'Year']
+                : ['Year']
             }
           />
         </View>
