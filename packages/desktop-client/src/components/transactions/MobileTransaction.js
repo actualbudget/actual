@@ -694,8 +694,8 @@ class TransactionEditInner extends PureComponent {
             style={{
               paddingLeft: styles.mobileEditingPadding,
               paddingRight: styles.mobileEditingPadding,
-              paddingTop: 15,
-              paddingBottom: 15,
+              paddingTop: 10,
+              paddingBottom: 10,
               backgroundColor: theme.tableHeaderBackground,
               borderTopWidth: 1,
               borderColor: theme.tableBorder,
