@@ -2061,9 +2061,18 @@ export let TransactionTable = forwardRef((props, ref) => {
   );
 
   let onBalanceLastSplit = useCallback(async () => {
-    const { tableNavigator, newTransactions } = latestState.current;
-    const parentTransaction = newTransactions[0];
+    let { tableNavigator, newTransactions } = latestState.current;
 
+    if (newTransactions === null) {
+      let editingTransaction = latestState.current.transactions.filter(
+        t => t.id == tableNavigator.editingId,
+      );
+      newTransactions = latestState.current.transactions.filter(
+        t => t.parent_id == editingTransaction.parent_id
+      );
+    }
+
+    const parentTransaction = newTransactions[0];
     const allSubTransactions = newTransactions.filter(
       t => t.parent_id === parentTransaction.id,
     );
