@@ -19,7 +19,7 @@ import View from '../common/View';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
-type CategoryListProps = {
+export type CategoryListProps = {
   items: Array<CategoryEntity & { group?: CategoryGroupEntity }>;
   getItemProps?: (arg: { item }) => Partial<ComponentProps<typeof View>>;
   highlightedIndex: number;
