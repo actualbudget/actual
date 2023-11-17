@@ -70,7 +70,7 @@ function ToBudget({ toBudget, onClick }) {
   );
 }
 
-function Saved({ projected }) {
+function Saved({ projected, onClick }) {
   let binding = projected
     ? reportBudget.totalBudgetedSaved
     : reportBudget.totalSaved;
@@ -79,21 +79,32 @@ function Saved({ projected }) {
   let isNegative = saved < 0;
 
   return (
-    <View
+    <Button
+      type="bare"
       style={{
         flexDirection: 'column',
         alignItems: 'flex-start',
       }}
+      onClick={onClick}
     >
       {projected ? (
         <Label
           title="PROJECTED SAVINGS"
-          style={{ color: theme.formInputText, textAlign: 'left', fontSize: 9 }}
+          style={{
+            ...styles.underlinedText,
+            color: theme.formInputText,
+            textAlign: 'left',
+            fontSize: 9,
+          }}
         />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: theme.formInputText, textAlign: 'left' }}
+          style={{
+            ...styles.underlinedText,
+            color: theme.formInputText,
+            textAlign: 'left',
+          }}
         />
       )}
 
@@ -110,7 +121,7 @@ function Saved({ projected }) {
             : theme.formInputText,
         }}
       />
-    </View>
+    </Button>
   );
 }
 
@@ -1615,7 +1626,7 @@ export function BudgetTable(props) {
     onEditMode,
     onReorderCategory,
     onReorderGroup,
-    onShowBudgetDetails,
+    onShowBudgetSummary,
     // onOpenActionSheet,
     onBudgetAction,
     onRefresh,
@@ -1733,11 +1744,14 @@ export function BudgetTable(props) {
           }}
         >
           {type === 'report' ? (
-            <Saved projected={month >= currentMonth} />
+            <Saved
+              projected={month >= currentMonth}
+              onClick={onShowBudgetSummary}
+            />
           ) : (
             <ToBudget
               toBudget={rolloverBudget.toBudget}
-              onClick={onShowBudgetDetails}
+              onClick={onShowBudgetSummary}
             />
           )}
           <View style={{ flex: 1 }} />

@@ -39,9 +39,9 @@ import View from '../common/View';
 import { TitlebarContext, type TitlebarContextValue } from '../Titlebar';
 
 import DynamicBudgetTable from './DynamicBudgetTable';
-import * as report from './report/components';
+import * as report from './report/ReportComponents';
 import { ReportProvider } from './report/ReportContext';
-import * as rollover from './rollover/rollover-components';
+import * as rollover from './rollover/RolloverComponents';
 import { RolloverContext } from './rollover/RolloverContext';
 import { prewarmAllMonths, prewarmMonth, switchBudgetType } from './util';
 

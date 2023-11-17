@@ -85,8 +85,17 @@ class Budget extends Component {
     this.cleanup?.();
   }
 
-  onShowBudgetDetails = () => {
-    this.props.pushModal('budget-summary', { month: this.state.currentMonth });
+  onShowBudgetSummary = () => {
+    if (this.props.budgetType === 'report') {
+      this.props.pushModal('report-budget-summary', {
+        month: this.state.currentMonth,
+      });
+    } else {
+      this.props.pushModal('rollover-budget-summary', {
+        month: this.state.currentMonth,
+        onBudgetAction: this.props.applyBudgetAction,
+      });
+    }
   };
 
   onBudgetAction = type => {
@@ -375,7 +384,7 @@ class Budget extends Component {
             //   }
             editMode={editMode}
             onEditMode={flag => this.setState({ editMode: flag })}
-            onShowBudgetDetails={this.onShowBudgetDetails}
+            onShowBudgetSummary={this.onShowBudgetSummary}
             onPrevMonth={this.onPrevMonth}
             onNextMonth={this.onNextMonth}
             onSaveGroup={this.onSaveGroup}

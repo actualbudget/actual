@@ -20,8 +20,6 @@ import { makeAmountGrey } from '../util';
 
 import BalanceTooltip from './BalanceTooltip';
 
-export { BudgetSummary } from './BudgetSummary';
-
 let headerLabelStyle: CSSProperties = {
   flex: 1,
   padding: '0 5px',
@@ -345,6 +343,8 @@ export const CategoryMonth = memo(function CategoryMonth({
     </View>
   );
 });
+
+export { default as BudgetSummary } from './budgetsummary/BudgetSummary';
 
 export const ExpenseGroupMonth = GroupMonth;
 export const ExpenseCategoryMonth = CategoryMonth;
