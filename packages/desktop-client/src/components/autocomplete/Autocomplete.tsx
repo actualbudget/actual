@@ -147,7 +147,9 @@ type SingleAutocompleteProps = {
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
   labelProps?: { id?: string };
-  inputProps?: ComponentProps<typeof Input>;
+  inputProps?: Omit<ComponentProps<typeof Input>, 'onChange'> & {
+    onChange?: (value: string) => void;
+  };
   suggestions?: unknown[];
   tooltipStyle?: CSSProperties;
   tooltipProps?: ComponentProps<typeof Tooltip>;
@@ -158,7 +160,7 @@ type SingleAutocompleteProps = {
     idx: number,
     value?: unknown,
   ) => ReactNode;
-  itemToString?: (item: unknown) => string;
+  itemToString?: (item) => string;
   shouldSaveFromKey?: (e: KeyboardEvent) => boolean;
   filterSuggestions?: (suggestions, value: string) => unknown[];
   openOnFocus?: boolean;
@@ -482,7 +484,6 @@ function SingleAutocomplete({
               },
               onChange: (e: ChangeEvent<HTMLInputElement>) => {
                 const { onChange } = inputProps || {};
-                // @ts-expect-error unsure if onChange needs an event or a string
                 onChange?.(e.target.value);
               },
             }),

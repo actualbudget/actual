@@ -1,4 +1,10 @@
-import React, { Fragment, useState, useMemo } from 'react';
+import React, {
+  Fragment,
+  useState,
+  useMemo,
+  type ComponentProps,
+  type CSSProperties,
+} from 'react';
 import { useDispatch } from 'react-redux';
 
 import { css } from 'glamor';
@@ -7,6 +13,10 @@ import { createPayee } from 'loot-core/src/client/actions/queries';
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { getActivePayees } from 'loot-core/src/client/reducers/queries';
+import {
+  type AccountEntity,
+  type PayeeEntity,
+} from 'loot-core/src/types/models';
 
 import Add from '../../icons/v1/Add';
 import { useResponsive } from '../../ResponsiveProvider';
@@ -202,6 +212,23 @@ function PayeeList({
   );
 }
 
+type PayeeAutocompleteProps = {
+  value: ComponentProps<typeof Autocomplete>['value'];
+  inputProps: ComponentProps<typeof Autocomplete>['inputProps'];
+  showMakeTransfer?: boolean;
+  showManagePayees?: boolean;
+  tableBehavior: ComponentProps<typeof Autocomplete>['tableBehavior'];
+  embedded?: boolean;
+  closeOnBlur: ComponentProps<typeof Autocomplete>['closeOnBlur'];
+  onUpdate?: (value: string) => void;
+  onSelect?: (value: string) => void;
+  onManagePayees: () => void;
+  groupHeaderStyle: CSSProperties;
+  accounts?: AccountEntity[];
+  payees?: PayeeEntity[];
+  // ...props
+};
+
 export default function PayeeAutocomplete({
   value,
   inputProps,
@@ -217,7 +244,7 @@ export default function PayeeAutocomplete({
   accounts,
   payees,
   ...props
-}) {
+}: PayeeAutocompleteProps) {
   let cachedPayees = useCachedPayees();
   if (!payees) {
     payees = cachedPayees;

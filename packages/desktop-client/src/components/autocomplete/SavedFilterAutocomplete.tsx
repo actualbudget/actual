@@ -1,4 +1,4 @@
-import React, { ComponentProps } from 'react';
+import React, { type ComponentProps } from 'react';
 
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 
@@ -12,9 +12,14 @@ type FilterListProps = {
   getItemProps: (arg: { item: unknown }) => ComponentProps<typeof View>;
   highlightedIndex: number;
   embedded?: boolean;
-}
+};
 
-function FilterList({ items, getItemProps, highlightedIndex, embedded }: FilterListProps) {
+function FilterList({
+  items,
+  getItemProps,
+  highlightedIndex,
+  embedded,
+}: FilterListProps) {
   return (
     <View>
       <View
@@ -55,7 +60,10 @@ type SavedFilterAutocompleteProps = {
   embedded?: boolean;
 } & ComponentProps<typeof Autocomplete>;
 
-export default function SavedFilterAutocomplete({ embedded, ...props }: SavedFilterAutocompleteProps) {
+export default function SavedFilterAutocomplete({
+  embedded,
+  ...props
+}: SavedFilterAutocompleteProps) {
   let filters = useFilters() || [];
 
   return (
