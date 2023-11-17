@@ -18,7 +18,7 @@
     "@actual-app/crdt": "2.1.0",
     "@actual-app/web": "23.11.0",
     "bcrypt": "^5.1.0",
-    "better-sqlite3": "^8.6.0",
+    "better-sqlite3": "^9.1.1",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@babel/preset-typescript": "^7.20.2",
     "@types/bcrypt": "^5.0.0",
-    "@types/better-sqlite3": "^7.6.5",
+    "@types/better-sqlite3": "^7.6.7",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/express-actuator": "^1.8.0",
@@ -52,5 +52,8 @@
     "supertest": "^6.3.1",
     "typescript": "^4.9.5"
   },
-  "packageManager": "yarn@3.4.1"
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "yarn@4.0.1"
 }

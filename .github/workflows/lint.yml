@@ -15,7 +15,7 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
       - name: Cache
         uses: actions/cache@v2
         id: cache
