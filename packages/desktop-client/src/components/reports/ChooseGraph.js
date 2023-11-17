@@ -17,6 +17,8 @@ import ReportTableTotals from './ReportTableTotals';
 export function ChooseGraph({
   start,
   end,
+  compact,
+  style,
   data,
   mode,
   graphType,
@@ -27,6 +29,8 @@ export function ChooseGraph({
   setScrollWidth,
   months,
 }) {
+  const graphStyle = compact ? { ...style } : { flexGrow: 1 };
+
   function saveScrollWidth(parent, child) {
     let width = parent > 0 && child > 0 && parent - child;
 
@@ -36,7 +40,8 @@ export function ChooseGraph({
   if (graphType === 'AreaGraph') {
     return (
       <AreaGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         start={start}
         end={end}
         data={data}
@@ -47,7 +52,8 @@ export function ChooseGraph({
   if (graphType === 'BarGraph') {
     return (
       <BarGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         start={start}
         end={end}
         data={data}
@@ -60,17 +66,19 @@ export function ChooseGraph({
   if (graphType === 'BarLineGraph') {
     return (
       <BarLineGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         start={start}
         end={end}
-        graphData={data.graphData}
+        graphData={data}
       />
     );
   }
   if (graphType === 'DonutGraph') {
     return (
       <DonutGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         start={start}
         end={end}
         data={data}
@@ -83,17 +91,19 @@ export function ChooseGraph({
   if (graphType === 'LineGraph') {
     return (
       <LineGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         start={start}
         end={end}
-        graphData={data.graphData}
+        graphData={data}
       />
     );
   }
   if (graphType === 'StackedBarGraph') {
     return (
       <StackedBarGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         start={start}
         end={end}
         data={data}

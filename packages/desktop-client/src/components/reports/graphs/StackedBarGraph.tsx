@@ -164,9 +164,9 @@ function StackedBarGraph({
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
+                {!compact && <CartesianGrid strokeDasharray="3 3" />}
+                {!compact && <XAxis dataKey="date" />}
+                {!compact && <YAxis />}
                 {data.groupBy
                   .slice(0)
                   .reverse()

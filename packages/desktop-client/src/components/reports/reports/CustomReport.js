@@ -268,7 +268,11 @@ export default function CustomReport() {
             reportId={reportId}
             onReportChange={onReportChange}
             onResetReports={onResetReports}
-            data={{ [splitData]: data[splitData] }}
+            data={
+              graphType === 'StackedBarGraph'
+                ? { data }.data
+                : { [splitData]: data[splitData] }
+            }
           />
           {filters && filters.length > 0 && (
             <View

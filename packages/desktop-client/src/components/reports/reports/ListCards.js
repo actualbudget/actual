@@ -8,11 +8,11 @@ import Menu from '../../common/Menu';
 import MenuButton from '../../common/MenuButton';
 import MenuTooltip from '../../common/MenuTooltip';
 import View from '../../common/View';
+import { ChooseGraph } from '../ChooseGraph';
+import Convert from '../Convert';
 import DateRange from '../DateRange';
-import BarGraph from '../graphs/BarGraph';
 import { LoadingIndicator } from '../Overview';
 import ReportCard from '../ReportCard';
-import { ReportOptions } from '../ReportOptions';
 
 function CardMenu({ onClose, onMenuSelect, reportId }) {
   return (
@@ -94,7 +94,9 @@ export default function CustomReportsCardList({ reports }) {
                   <ReportCard to="/reports/custom" report={report.props.data}>
                     <View
                       style={{ flex: 1, padding: 20 }}
-                      onMouseEnter={() => setIsCardHovered(id)}
+                      onMouseEnter={() =>
+                        setIsCardHovered(report.props.data.id)
+                      }
                       onMouseLeave={() => {
                         setIsCardHovered(null);
                         onMenuOpen(report.props.data.id, false);
@@ -120,16 +122,15 @@ export default function CustomReportsCardList({ reports }) {
                       </View>
 
                       {report.props.data.data ? (
-                        <BarGraph
+                        <ChooseGraph
+                          graphType={report.props.data.graphType}
                           start={report.props.data.start}
                           end={report.props.data.end}
                           data={report.props.data.data}
                           compact={true}
                           groupBy={report.props.data.groupBy}
-                          empty={report.props.data.empty === 1 ? true : false}
-                          balanceTypeOp={ReportOptions.balanceTypeMap.get(
-                            report.props.data.balanceType,
-                          )}
+                          empty={Convert(report.props.data.empty)}
+                          balanceType={report.props.data.balanceType}
                           style={{ height: 'auto', flex: 1 }}
                         />
                       ) : (
@@ -149,7 +150,10 @@ export default function CustomReportsCardList({ reports }) {
                   <MenuButton
                     onClick={() => onMenuOpen(report.props.data.id, true)}
                     style={{
-                      color: isCardHovered === id ? 'inherit' : 'transparent',
+                      color:
+                        isCardHovered === report.props.data.id
+                          ? 'inherit'
+                          : 'transparent',
                     }}
                   />
                   {reportMenu[report.props.data.id] && (
@@ -165,7 +169,7 @@ export default function CustomReportsCardList({ reports }) {
             {remainder !== 3 &&
               i + 1 === groupedData.length &&
               [...Array(remainder)].map((e, i) => (
-                <View key={i} style={{ padding: 15, flex: 1 }} />
+                <View key={i} style={{ flex: 1 }} />
               ))}
           </View>
         ))}
