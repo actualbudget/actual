@@ -294,10 +294,10 @@ export function openAccountCloseModal(accountId) {
 }
 
 export function closeAccount(
-  accountId,
-  transferAccountId,
-  categoryId,
-  forced?,
+  accountId: string,
+  transferAccountId: string,
+  categoryId: string,
+  forced?: boolean,
 ) {
   return async (dispatch: Dispatch) => {
     await send('account-close', {
