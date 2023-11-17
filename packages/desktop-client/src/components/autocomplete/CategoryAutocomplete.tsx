@@ -20,7 +20,9 @@ import View from '../common/View';
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
 
 export type CategoryListProps = {
-  items: Array<CategoryEntity & { group?: CategoryGroupEntity }>;
+  items: Array<
+    CategoryEntity & { group?: CategoryGroupEntity; groupDisplayName?: string }
+  >;
   getItemProps?: (arg: { item }) => Partial<ComponentProps<typeof View>>;
   highlightedIndex: number;
   embedded: boolean;
@@ -120,7 +122,7 @@ function CategoryList({
                   }}
                   data-testid="category-item-group"
                 >
-                  {`${item.group?.name}`}
+                  {`${item.groupDisplayName}`}
                 </div>
               )}
               <div
@@ -143,8 +145,14 @@ function CategoryList({
                   (highlightedIndex === idx ? '-highlighted' : '')
                 }
               >
-                {item.hidden && (<div>`${item.group?.name}`</div>)}
-                {item.hidden && (<div>`${item.group?.name}`</div>)}
+                {item.name}
+                {item.hidden ? (
+                  <i>
+                    {' ('}
+                    {item.group?.name}
+                    {')'}
+                  </i>
+                ) : null}
               </div>
             </Fragment>
           );
@@ -171,36 +179,44 @@ export default function CategoryAutocomplete({
   ...props
 }: CategoryAutocompleteProps) {
   let categorySuggestions: Array<
-    CategoryEntity & { group?: CategoryGroupEntity }
+    CategoryEntity & { group?: CategoryGroupEntity; groupDisplayName?: string }
   > = useMemo(
     () =>
-      categoryGroups.reduce(
-        (list, group) =>
-          list.concat(
-            group.categories
-              .filter(category => category.cat_group === group.id && category.hidden === 0)
-              .map(category => ({
-                ...category,
-                group: group,
-              })),
-          ),
-        showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
-      )
-      .concat(
-        categoryGroups.reduce(
+      categoryGroups
+        .reduce(
           (list, group) =>
             list.concat(
               group.categories
-                .filter(category => category.cat_group === group.id && category.hidden === 1)
+                .filter(
+                  category =>
+                    category.cat_group === group.id && category.hidden === 0,
+                )
                 .map(category => ({
                   ...category,
-                  cat_group: 'Hidden',
-                  group: group
+                  group: group,
+                  groupDisplayName: group.name,
                 })),
             ),
+          showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
+        )
+        .concat(
+          categoryGroups.reduce(
+            (list, group) =>
+              list.concat(
+                group.categories
+                  .filter(
+                    category =>
+                      category.cat_group === group.id && category.hidden === 1,
+                  )
+                  .map(category => ({
+                    ...category,
+                    group: group,
+                    groupDisplayName: 'Hidden',
+                  })),
+              ),
             [],
+          ),
         ),
-      ),
     [showSplitOption, categoryGroups],
   );
 
