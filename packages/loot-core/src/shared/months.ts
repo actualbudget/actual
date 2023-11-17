@@ -137,6 +137,13 @@ export function differenceInCalendarMonths(
   return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
 }
 
+export function differenceInCalendarDays(
+  month1: DateLike,
+  month2: DateLike,
+): number {
+  return d.differenceInCalendarDays(_parse(month1), _parse(month2));
+}
+
 export function subMonths(month: string | Date, n: number) {
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
