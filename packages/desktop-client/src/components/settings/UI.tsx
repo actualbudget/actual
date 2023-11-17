@@ -24,7 +24,7 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
           alignItems: 'flex-start',
           padding: 15,
           borderRadius: 4,
-          border: '1px solid ' + theme.altPillBorder,
+          border: '1px solid ' + theme.pillBorderDark,
           width: '100%',
         },
         style,

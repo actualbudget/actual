@@ -1,27 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import useFilters from '../../hooks/useFilters';
-import { theme, styles } from '../../style';
-import Paragraph from '../common/Paragraph';
-import View from '../common/View';
-import PrivacyFilter from '../PrivacyFilter';
+import useCategories from '../../../hooks/useCategories';
+import useFilters from '../../../hooks/useFilters';
+import { theme, styles } from '../../../style';
+import Paragraph from '../../common/Paragraph';
+import View from '../../common/View';
+import SankeyGraph from '../graphs/SankeyGraph';
+import Header from '../Header';
+import sankeySpreadsheet from '../spreadsheets/sankey-spreadsheet';
+import useReport from '../useReport';
+import { fromDateRepr } from '../util';
 
-import Change from './Change';
-import netWorthSpreadsheet from './graphs/net-worth-spreadsheet';
-import NetWorthGraph from './graphs/NetWorthGraph';
-import Header from './Header';
-import useReport from './useReport';
-import { fromDateRepr } from './util';
-
-export default function NetWorth() {
-  let accounts = useSelector(state => state.queries.accounts);
+export default function Sankey() {
+  const { grouped: categoryGroups } = useCategories();
   const {
     filters,
     saved,
@@ -39,10 +35,10 @@ export default function NetWorth() {
   const [end, setEnd] = useState(monthUtils.currentMonth());
 
   const params = useMemo(
-    () => netWorthSpreadsheet(start, end, accounts, filters, conditionsOp),
-    [start, end, accounts, filters, conditionsOp],
+    () => sankeySpreadsheet(start, end, categoryGroups, filters, conditionsOp),
+    [start, end, categoryGroups, filters, conditionsOp],
   );
-  const data = useReport('net_worth', params);
+  const data = useReport('sankey', params);
   useEffect(() => {
     async function run() {
       const trans = await send('get-earliest-transaction');
@@ -84,7 +80,7 @@ export default function NetWorth() {
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header
-        title="Net Worth"
+        title="Sankey"
         allMonths={allMonths}
         start={start}
         end={end}
@@ -117,36 +113,20 @@ export default function NetWorth() {
         >
           <View
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
-          >
-            <PrivacyFilter blurIntensity={5}>
-              {integerToCurrency(data.netWorth)}
-            </PrivacyFilter>
-          </View>
-          <PrivacyFilter>
-            <Change amount={data.totalChange} />
-          </PrivacyFilter>
+          />
         </View>
 
-        <NetWorthGraph
-          style={{ flexGrow: 1 }}
-          start={start}
-          end={end}
-          graphData={data.graphData}
-          domain={{
-            y: [data.lowestNetWorth * 0.99, data.highestNetWorth * 1.01],
-          }}
-        />
+        <SankeyGraph style={{ flexGrow: 1 }} data={data} />
 
         <View style={{ marginTop: 30 }}>
           <Paragraph>
-            <strong>How is net worth calculated?</strong>
+            <strong>What is a Sankey plot?</strong>
           </Paragraph>
           <Paragraph>
-            Net worth shows the balance of all accounts over time, including all
-            of your investments. Your “net worth” is considered to be the amount
-            you’d have if you sold all your assets and paid off as much debt as
-            possible. If you hover over the graph, you can also see the amount
-            of assets and debt individually.
+            A Sankey plot visualizes the flow of quantities between multiple
+            categories, emphasizing the distribution and proportional
+            relationships of data streams. If you hover over the graph, you can
+            see detailed flow values between categories.
           </Paragraph>
         </View>
       </View>

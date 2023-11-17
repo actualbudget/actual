@@ -5,17 +5,16 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useCategories from '../../hooks/useCategories';
-import { styles } from '../../style';
-import Select from '../common/Select';
-import View from '../common/View';
-
-import CategorySelector from './CategorySelector';
-import categorySpendingSpreadsheet from './graphs/category-spending-spreadsheet';
-import CategorySpendingGraph from './graphs/CategorySpendingGraph';
-import Header from './Header';
-import useReport from './useReport';
-import { fromDateRepr } from './util';
+import useCategories from '../../../hooks/useCategories';
+import { styles } from '../../../style';
+import Select from '../../common/Select';
+import View from '../../common/View';
+import CategorySelector from '../CategorySelector';
+import CategorySpendingGraph from '../graphs/CategorySpendingGraph';
+import Header from '../Header';
+import categorySpendingSpreadsheet from '../spreadsheets/category-spending-spreadsheet';
+import useReport from '../useReport';
+import { fromDateRepr } from '../util';
 
 function CategoryAverage() {
   const categories = useCategories();

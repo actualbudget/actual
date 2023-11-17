@@ -101,6 +101,8 @@ export default function ExperimentalFeatures() {
             <FeatureToggle flag="categorySpendingReport">
               Category spending report
             </FeatureToggle>
+            <FeatureToggle flag="customReports">Custom reports</FeatureToggle>
+            <FeatureToggle flag="sankeyReport">Sankey report</FeatureToggle>
 
             <ReportBudgetFeature />
 

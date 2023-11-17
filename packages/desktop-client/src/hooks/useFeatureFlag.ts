@@ -4,9 +4,11 @@ import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   categorySpendingReport: false,
+  sankeyReport: false,
   reportBudget: false,
   goalTemplatesEnabled: false,
   themes: false,
+  customReports: false,
   experimentalOfxParser: true,
 };
 

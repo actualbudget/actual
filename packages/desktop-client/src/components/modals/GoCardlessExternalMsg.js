@@ -154,7 +154,7 @@ export default function GoCardlessExternalMsg({
             be misconfigured. Please{' '}
             <LinkButton
               onClick={onGoCardlessInit}
-              style={{ color: theme.altFormLabelText, display: 'inline' }}
+              style={{ color: theme.formLabelText, display: 'inline' }}
             >
               set them up
             </LinkButton>{' '}
