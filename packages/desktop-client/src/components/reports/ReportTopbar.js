@@ -36,7 +36,6 @@ function GraphButton({ selected, children, style, onSelect, title, disabled }) {
 export function ReportTopbar({
   start,
   end,
-  name,
   mode,
   empty,
   hidden,
@@ -59,6 +58,7 @@ export function ReportTopbar({
   conditionsOp,
   reportId,
   onReportChange,
+  onResetReports,
   data,
 }) {
   return (
@@ -191,6 +191,7 @@ export function ReportTopbar({
         filters={filters}
         conditionsOp={conditionsOp}
         onReportChange={onReportChange}
+        onResetReports={onResetReports}
         mode={mode}
         groupBy={groupBy}
         balanceType={balanceType}

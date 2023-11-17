@@ -55,52 +55,6 @@ async function reportNameExists(name, reportId, newItem) {
   return true;
 }
 
-//TODO: Possible to simplify this?
-//use filters and maps
-function conditionExists(item, filters, newItem) {
-  let { conditions, conditionsOp } = item;
-  let condCheck = [];
-  let fCondCheck = false;
-  let fCondFound;
-
-  filters.map(filter => {
-    if (
-      !fCondCheck &&
-      //If conditions.length equals 1 then ignore conditionsOp
-      (conditions.length === 1 ? true : filter.conditionsOp === conditionsOp) &&
-      !filter.tombstone &&
-      filter.conditions.length === conditions.length
-    ) {
-      fCondCheck = false;
-      conditions.map((cond, i) => {
-        condCheck[i] =
-          filter.conditions.filter(fcond => {
-            return (
-              cond.value === fcond.value &&
-              cond.op === fcond.op &&
-              cond.field === fcond.field
-            );
-          }).length > 0;
-        fCondCheck = (i === 0 ? true : fCondCheck) && condCheck[i];
-        return true;
-      });
-      fCondFound = fCondCheck && condCheck[conditions.length - 1] && filter;
-    }
-    return true;
-  });
-
-  condCheck = [];
-
-  if (!newItem) {
-    return fCondFound
-      ? fCondFound.id !== item.id
-        ? fCondFound.name
-        : false
-      : false;
-  }
-  return fCondFound ? fCondFound.name : false;
-}
-
 async function createReport(report) {
   let reportId = uuidv4();
   let item = {
@@ -124,10 +78,7 @@ async function createReport(report) {
 
 async function updateReport(report) {
   let item = {
-    id: report.state.id,
-    conditions: report.state.conditions,
-    conditionsOp: report.state.conditionsOp,
-    name: report.state.name,
+    ...report.state,
   };
   if (item.name) {
     if (await reportNameExists(item.name, item.id, false)) {

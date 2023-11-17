@@ -26,7 +26,7 @@ function SaveReportMenu({ reportId, onClose, onMenuSelect }) {
           ...(reportId.length === 0
             ? [
                 { name: 'save-report', text: 'Save new report' },
-                { name: 'clear-report', text: 'Reset to default' },
+                { name: 'reset-report', text: 'Reset to default' },
               ]
             : [
                 ...(reportId.id !== null && reportId.status === 'saved'
@@ -39,7 +39,7 @@ function SaveReportMenu({ reportId, onClose, onMenuSelect }) {
                         text: 'Save new report',
                         disabled: true,
                       },
-                      { name: 'clear-report', text: 'Reset to default' },
+                      { name: 'reset-report', text: 'Reset to default' },
                     ]
                   : [
                       { name: 'rename-report', text: 'Rename' },
@@ -48,7 +48,7 @@ function SaveReportMenu({ reportId, onClose, onMenuSelect }) {
                       { name: 'delete-report', text: 'Delete' },
                       { name: 'menu-line', type: Menu.line },
                       { name: 'save-report', text: 'Save new report' },
-                      { name: 'clear-report', text: 'Reset to default' },
+                      { name: 'reset-report', text: 'Reset to default' },
                     ]),
               ]),
         ]}
@@ -60,12 +60,17 @@ function SaveReportMenu({ reportId, onClose, onMenuSelect }) {
 function NameReport({
   onClose,
   menuItem,
-  onName,
+  onNameChange,
   inputRef,
   onAddUpdate,
-  adding,
   err,
 }) {
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
     <MenuTooltip width={325} onClose={onClose}>
       {menuItem !== 'update-report' && (
@@ -82,7 +87,7 @@ function NameReport({
                 htmlFor="name-field"
                 style={{ userSelect: 'none' }}
               />
-              <Input inputRef={inputRef} onUpdate={e => onName(e)} />
+              <Input inputRef={inputRef} onUpdate={e => onNameChange(e)} />
             </FormField>
             <Button
               type="primary"
@@ -92,7 +97,7 @@ function NameReport({
                 onAddUpdate();
               }}
             >
-              {adding ? 'Add' : 'Update'}
+              {menuItem === 'save-report' ? 'Add' : 'Update'}
             </Button>
           </Stack>
         </form>
@@ -123,6 +128,7 @@ export function SaveReportMenuButton({
   filters,
   conditionsOp,
   onReportChange,
+  onResetReports,
   data,
 }) {
   let [nameOpen, setNameOpen] = useState(false);
@@ -130,36 +136,36 @@ export function SaveReportMenuButton({
   let [menuItem, setMenuItem] = useState(null);
   let [err, setErr] = useState(null);
   let [name, setName] = useState(reportId.name);
-  let [adding, setAdding] = useState(false);
   let inputRef = createRef<HTMLInputElement>();
   let id = reportId.id;
-  let res;
   let savedReport;
 
   const onAddUpdate = async () => {
     let savedReport;
     let res;
-    if (adding) {
+    //save existing states
+    savedReport = {
+      ...reportId,
+      mode: mode,
+      groupBy: groupBy,
+      balanceType: balanceType,
+      empty: Convert(empty),
+      hidden: Convert(hidden),
+      uncat: Convert(uncat),
+      graphType: graphType,
+      viewLabels: Convert(viewLabels),
+      viewLegend: Convert(viewLegend),
+      viewSummary: Convert(viewSummary),
+      conditions: filters,
+      conditionsOp: conditionsOp,
+      name: name,
+      start: start,
+      end: end,
+      data: data,
+      status: 'saved',
+    };
+    if (menuItem === 'save-report') {
       //create new flow
-      savedReport = {
-        mode: mode,
-        groupBy: groupBy,
-        balanceType: balanceType,
-        empty: Convert(empty),
-        hidden: Convert(hidden),
-        uncat: Convert(uncat),
-        graphType: graphType,
-        viewLabels: Convert(viewLabels),
-        viewLegend: Convert(viewLegend),
-        viewSummary: Convert(viewSummary),
-        conditions: filters,
-        conditionsOp: conditionsOp,
-        name: name,
-        start: start,
-        end: end,
-        data: data,
-        status: 'saved',
-      };
       const { status, ...sendSaved } = savedReport;
       res = await sendCatch('report-create', {
         state: sendSaved,
@@ -169,80 +175,53 @@ export function SaveReportMenuButton({
         id: res.data,
       };
     } else {
-      //rename flow
-      savedReport = {
-        ...reportId,
-        name: name,
-      };
+      //rename or update flow
+      if (menuItem === 'rename-report') {
+        //rename
+        savedReport = {
+          ...reportId,
+          name: name,
+        };
+      }
+      //send update and rename to DB
+      const { status, ...sendSaved } = savedReport;
       res = await sendCatch('report-update', {
-        state: savedReport,
+        state: sendSaved,
       });
     }
     if (res.error) {
-      onErr(res.error.message);
+      setErr(res.error.message);
+      setNameOpen(true);
     } else {
-      onNameChange(false);
-      onReportChange(savedReport);
-      //onReloadSavedFilter(savedReport);
+      setNameOpen(false);
+      onReportChange(savedReport, 'add-update');
     }
-  };
-
-  const onName = cond => {
-    setName(cond);
-  };
-
-  const onErr = cond => {
-    setErr(cond);
   };
 
   const onNameChange = cond => {
-    setNameOpen(cond);
+    setName(cond);
   };
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [NameReport]);
 
   const onMenuSelect = async item => {
     setMenuItem(item);
     switch (item) {
       case 'rename-report':
         setErr(null);
-        setAdding(false);
         setMenuOpen(false);
         setNameOpen(true);
         break;
       case 'delete-report':
         setMenuOpen(false);
         await send('report-delete', id);
-        //onClearFilters();
+        onResetReports();
         break;
       case 'update-report':
         setErr(null);
-        setAdding(false);
         setMenuOpen(false);
-        savedReport = {
-          conditions: filters,
-          conditionsOp: conditionsOp,
-          id: reportId.id,
-          name: reportId.name,
-          status: 'saved',
-        };
-        res = await sendCatch('report-update', {
-          state: savedReport,
-        });
-        if (res.error) {
-          setErr(res.error.message);
-          setNameOpen(true);
-        } else {
-          //onReloadSavedFilter(savedReport, 'update');
-        }
+        onAddUpdate();
         break;
       case 'save-report':
         setErr(null);
-        setAdding(true);
         setMenuOpen(false);
         setNameOpen(true);
         break;
@@ -251,11 +230,11 @@ export function SaveReportMenuButton({
         savedReport = {
           status: 'saved',
         };
-        //onReloadSavedFilter(savedReport, 'reload');
+        onReportChange(savedReport, 'reload');
         break;
-      case 'clear-report':
+      case 'reset-report':
         setMenuOpen(false);
-        //onClearFilters();
+        onResetReports();
         break;
       default:
     }
@@ -298,10 +277,9 @@ export function SaveReportMenuButton({
         <NameReport
           onClose={() => setNameOpen(false)}
           menuItem={menuItem}
-          onName={onName}
+          onNameChange={onNameChange}
           inputRef={inputRef}
           onAddUpdate={onAddUpdate}
-          adding={adding}
           err={err}
         />
       )}

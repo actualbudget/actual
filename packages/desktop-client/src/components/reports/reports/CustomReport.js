@@ -58,6 +58,7 @@ export default function CustomReport() {
     viewSummary: Convert(location.state.report.viewSummary),
   };
   const loadReport = location.state.report ? converted : defaultState();
+  const stateDefault = defaultState();
 
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
@@ -162,8 +163,32 @@ export default function CustomReport() {
     setEnd(end);
   };
 
-  const onReportChange = cond => {
-    setReportId(cond);
+  const onResetReports = () => {
+    setMode(stateDefault.mode);
+    setGroupBy(stateDefault.groupBy);
+    setBalanceType(stateDefault.balanceType);
+    setEmpty(stateDefault.empty);
+    setHidden(stateDefault.hidden);
+    setUncat(stateDefault.uncat);
+    setGraphType(stateDefault.graphType);
+    setViewLabels(stateDefault.viewLabels);
+    setViewLegend(stateDefault.viewLegend);
+    setViewSummary(stateDefault.viewSummary);
+    onApplyFilter(null);
+    onCondOpChange('and');
+    setReportId([]);
+    setStart(stateDefault.start);
+    setEnd(stateDefault.end);
+  };
+
+  const onReportChange = (savedReport, item) => {
+    if (item === 'reload') {
+      //need to pull reportsList with state change PR
+    } else {
+      if (savedReport.status) {
+      }
+    }
+    setReportId({ ...reportId, ...savedReport });
   };
 
   return (
@@ -242,6 +267,7 @@ export default function CustomReport() {
             conditionsOp={conditionsOp}
             reportId={reportId}
             onReportChange={onReportChange}
+            onResetReports={onResetReports}
             data={{ [splitData]: data[splitData] }}
           />
           {filters && filters.length > 0 && (
