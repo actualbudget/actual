@@ -74,11 +74,23 @@ export async function goalsSchedule(
           );
           while (next_date < next_month) {
             monthlyTarget += -target;
+            let current_date = next_date;
             next_date = monthUtils.addDays(next_date, 1);
             next_date = getNextDate(
               dateConditions,
               monthUtils._parse(next_date),
             );
+            let diffDays = monthUtils.differenceInCalendarDays(
+              next_date,
+              current_date,
+            );
+            if (!diffDays) {
+              next_date = monthUtils.addDays(next_date, 3);
+              next_date = getNextDate(
+                dateConditions,
+                monthUtils._parse(next_date),
+              );
+            }
           }
           t[ll].target = -monthlyTarget;
           totalScheduledGoal += target;
