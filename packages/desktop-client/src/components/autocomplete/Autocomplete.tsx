@@ -169,7 +169,7 @@ type SingleAutocompleteProps = {
   onSelect: (id: unknown, value: string) => void;
   tableBehavior?: boolean;
   closeOnBlur?: boolean;
-  value: unknown[];
+  value: unknown[] | string;
   isMulti?: boolean;
 };
 function SingleAutocomplete({
@@ -679,13 +679,25 @@ export function AutocompleteFooter({
   );
 }
 
-type AutocompleteProps = ComponentProps<typeof SingleAutocomplete> & {
-  multi?: boolean;
-};
-export default function Autocomplete({ multi, ...props }: AutocompleteProps) {
+type AutocompleteProps =
+  | ComponentProps<typeof SingleAutocomplete>
+  | ComponentProps<typeof MultiAutocomplete>;
+
+export default function Autocomplete({
+  multi,
+  ...props
+}: AutocompleteProps & { multi?: boolean }) {
   if (multi) {
-    return <MultiAutocomplete {...props} />;
+    return (
+      <MultiAutocomplete
+        {...(props as ComponentProps<typeof MultiAutocomplete>)}
+      />
+    );
   } else {
-    return <SingleAutocomplete {...props} />;
+    return (
+      <SingleAutocomplete
+        {...(props as ComponentProps<typeof SingleAutocomplete>)}
+      />
+    );
   }
 }

@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
+import {
+  type AccountEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
 
+import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
+import { type CommonModalProps } from '../../types/modals';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
@@ -13,7 +19,11 @@ import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
 
-function needsCategory(account, currentTransfer, accounts) {
+function needsCategory(
+  account: AccountEntity,
+  currentTransfer: string,
+  accounts: AccountEntity[],
+) {
   const acct = accounts.find(a => a.id === currentTransfer);
   const isOffBudget = acct && acct.offbudget === 1;
 
@@ -21,6 +31,16 @@ function needsCategory(account, currentTransfer, accounts) {
   // account to an off-budget account
   return account.offbudget === 0 && isOffBudget;
 }
+
+type CloseAccountProps = {
+  account: AccountEntity;
+  accounts: AccountEntity[];
+  categoryGroups: CategoryGroupEntity[];
+  balance: number;
+  canDelete: boolean;
+  actions: BoundActions;
+  modalProps: CommonModalProps;
+};
 
 function CloseAccount({
   account,
@@ -30,7 +50,7 @@ function CloseAccount({
   canDelete,
   actions,
   modalProps,
-}) {
+}: CloseAccountProps) {
   let [loading, setLoading] = useState(false);
   let [transfer, setTransfer] = useState('');
   let [category, setCategory] = useState('');
@@ -95,7 +115,6 @@ function CloseAccount({
                   <AccountAutocomplete
                     includeClosedAccounts={false}
                     value={transfer}
-                    accounts={accounts}
                     inputProps={{
                       placeholder: 'Select account...',
                     }}
