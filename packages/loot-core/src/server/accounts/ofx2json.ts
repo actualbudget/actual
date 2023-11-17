@@ -77,7 +77,7 @@ function getInvStmtTrn(ofx) {
   const msg = ofx?.['INVSTMTMSGSRSV1'];
   const stmtTrnRs = getAsArray(msg?.['INVSTMTTRNRS']);
   const result = stmtTrnRs.flatMap(s => {
-    const stmtRs = s?.['INVSTMTRS']
+    const stmtRs = s?.['INVSTMTRS'];
     const tranList = stmtRs?.['INVTRANLIST'];
     const stmtTrn = tranList?.['INVBANKTRAN']?.flatMap(t => t?.['STMTTRN']);
     return getAsArray(stmtTrn);
