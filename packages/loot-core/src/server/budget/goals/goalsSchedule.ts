@@ -96,82 +96,9 @@ export async function goalsSchedule(
     let totalScheduledGoal = 0;
 
     for (let ll = 0; ll < template.length; ll++) {
-      let { id: sid, completed: complete } = await db.first(
-        'SELECT * FROM schedules WHERE name = ?',
-        [template[ll].name],
-      );
-      console.log(complete);
-      let rule = await getRuleForSchedule(sid);
-      let conditions = rule.serialize().conditions;
-      let { date: dateConditions, amount: amountCondition } =
-        extractScheduleConds(conditions);
-      let target =
-        amountCondition.op === 'isbetween'
-          ? -Math.round(
-              amountCondition.value.num1 + amountCondition.value.num2,
-            ) / 2
-          : -amountCondition.value;
-      let next_date_string = getNextDate(
-        dateConditions,
-        monthUtils._parse(current_month),
-      );
-      let target_interval = dateConditions.value.interval
-        ? dateConditions.value.interval
-        : 1;
-      let target_frequency = dateConditions.value.frequency;
-      let isRepeating =
-        Object(dateConditions.value) === dateConditions.value &&
-        'frequency' in dateConditions.value;
-      let num_months = monthUtils.differenceInCalendarMonths(
-        next_date_string,
-        current_month,
-      );
-      t.push({
-        template: template[ll],
-        target: target,
-        next_date_string: next_date_string,
-        target_interval: target_interval,
-        target_frequency: target_frequency,
-        num_months: num_months,
-        completed: complete,
-      });
-      if (!complete) {
-        if (isRepeating) {
-          let monthlyTarget = 0;
-          let next_month = monthUtils.addMonths(
-            current_month,
-            t[ll].num_months + 1,
-          );
-          let next_date = getNextDate(
-            dateConditions,
-            monthUtils._parse(current_month),
-          );
-          while (next_date < next_month) {
-            monthlyTarget += -target;
-            let current_date = next_date;
-            next_date = monthUtils.addDays(next_date, 1);
-            next_date = getNextDate(
-              dateConditions,
-              monthUtils._parse(next_date),
-            );
-            let diffDays = monthUtils.differenceInCalendarDays(
-              next_date,
-              current_date,
-            );
-            if (!diffDays) {
-              next_date = monthUtils.addDays(next_date, 3);
-              next_date = getNextDate(
-                dateConditions,
-                monthUtils._parse(next_date),
-              );
-            }
-          }
-          t[ll].target = -monthlyTarget;
-          totalScheduledGoal += target;
-        }
-      } else {
-        errors.push(`Schedule ${t[ll].template.name} is a completed schedule.`);
-      }
+      let parseReturn = await parseSchedules(template[ll], current_month, t, errors);
+      errors = parseReturn.errors;
+      t = parseReturn.t;
     }
 
     t = t.filter(t => t.completed === 0);
@@ -262,6 +189,7 @@ export async function goalsSchedule2(
   to_budget,
   errors,
 ) {
+  //Alternate approach to schedule calculations based on a shortfall adjustment
   if (!scheduleFlag) {
     scheduleFlag = true;
     let template = template_lines.filter(t => t.type === 'schedule');
