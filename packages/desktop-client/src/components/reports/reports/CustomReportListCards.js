@@ -45,7 +45,7 @@ function index(data) {
   return result;
 }
 
-export default function CustomReportsCardList({ reports }) {
+export default function CustomReportListCards({ reports }) {
   let result = index(reports);
   let [reportMenu, setReportMenu] = useState(result);
 

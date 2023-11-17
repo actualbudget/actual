@@ -12,7 +12,7 @@ import Convert from './Convert';
 import CashFlowCard from './reports/CashFlowCard';
 import CategorySpendingCard from './reports/CategorySpendingCard';
 import CustomReportCard from './reports/CustomReportCard';
-import CustomReportsCardList from './reports/ListCards';
+import CustomReportListCards from './reports/CustomReportListCards';
 import NetWorthCard from './reports/NetWorthCard';
 import SankeyCard from './reports/SankeyCard';
 
@@ -86,7 +86,7 @@ export default function Overview() {
               flexShrink: 0,
             }}
           />
-          <CustomReportsCardList reports={reports} />
+          <CustomReportListCards reports={reports} />
         </>
       )}
     </View>

@@ -372,7 +372,7 @@ export default function CustomReport() {
                   months={months}
                 />
               </View>
-              {(viewSummary || viewLegend) && (
+              {(viewLegend || viewSummary) && (
                 <View
                   style={{
                     padding: 10,
