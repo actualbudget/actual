@@ -143,7 +143,8 @@ function CategoryList({
                   (highlightedIndex === idx ? '-highlighted' : '')
                 }
               >
-                {item.name}
+                {item.hidden && (<div>`${item.group?.name}`</div>)}
+                {item.hidden && (<div>`${item.group?.name}`</div>)}
               </div>
             </Fragment>
           );
@@ -177,13 +178,28 @@ export default function CategoryAutocomplete({
         (list, group) =>
           list.concat(
             group.categories
-              .filter(category => category.cat_group === group.id)
+              .filter(category => category.cat_group === group.id && category.hidden === 0)
               .map(category => ({
                 ...category,
                 group: group,
               })),
           ),
         showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
+      )
+      .concat(
+        categoryGroups.reduce(
+          (list, group) =>
+            list.concat(
+              group.categories
+                .filter(category => category.cat_group === group.id && category.hidden === 1)
+                .map(category => ({
+                  ...category,
+                  cat_group: 'Hidden',
+                  group: group
+                })),
+            ),
+            [],
+        ),
       ),
     [showSplitOption, categoryGroups],
   );
