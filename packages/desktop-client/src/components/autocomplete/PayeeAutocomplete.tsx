@@ -226,7 +226,6 @@ type PayeeAutocompleteProps = {
   groupHeaderStyle: CSSProperties;
   accounts?: AccountEntity[];
   payees?: PayeeEntity[];
-  // ...props
 };
 
 export default function PayeeAutocomplete({
