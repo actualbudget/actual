@@ -6,6 +6,7 @@ import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
 import View from '../common/View';
 
+import Convert from './Convert';
 import CashFlowCard from './reports/CashFlowCard';
 import CategorySpendingCard from './reports/CategorySpendingCard';
 import CustomReportCard from './reports/CustomReportCard';
@@ -35,6 +36,12 @@ export default function Overview() {
 
   let customReportsFeatureFlag = useFeatureFlag('customReports');
 
+  const featureCount =
+    3 -
+    Convert(categorySpendingReportFeatureFlag) -
+    Convert(sankeyFeatureFlag) -
+    Convert(customReportsFeatureFlag);
+
   let accounts = useSelector(state => state.queries.accounts);
   return (
     <View
@@ -60,13 +67,11 @@ export default function Overview() {
       >
         {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
         {sankeyFeatureFlag && <SankeyCard />}
-        {!categorySpendingReportFeatureFlag && <div style={{ flex: 1 }} />}
-        {!sankeyFeatureFlag && <div style={{ flex: 1 }} />}
-        {customReportsFeatureFlag ? (
-          <CustomReportCard />
-        ) : (
-          <div style={{ flex: 1 }} />
-        )}
+        {customReportsFeatureFlag && <CustomReportCard />}
+        {featureCount !== 3 &&
+          [...Array(featureCount)].map((e, i) => (
+            <View key={i} style={{ padding: 15, flex: 1 }} />
+          ))}
       </View>
       {customReportsFeatureFlag && (
         <>

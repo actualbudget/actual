@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Children } from 'react';
 
 import { useReports } from 'loot-core/src/client/data-hooks/reports';
 
@@ -15,30 +15,44 @@ export default function CustomReportsCardList() {
   let reports = useReports();
   //const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
 
-  return (
-    <View
-      style={{
-        flex: '0 0 auto',
-        flexDirection: 'row',
-      }}
-    >
-      {reports.length > 0 &&
-        reports.map(report => (
-          <ReportCard
-            flex={1}
-            to="/reports/custom"
-            key={report.id}
-            report={report}
+  const ReportGrid = slice => {
+    const pack = [];
+
+    slice?.map((item, i) => {
+      pack.push(<Children data={item} />);
+      return null;
+    });
+
+    const data2 = [...pack];
+    const remainder = 3 - (data2.length % 3);
+    const groupedData = [];
+
+    while (data2.length) {
+      groupedData.push(data2.splice(0, 3));
+    }
+
+    return (
+      <>
+        {groupedData.map((data, i) => (
+          <View
+            key={i}
+            style={{
+              flex: '0 0 auto',
+              flexDirection: 'row',
+            }}
           >
-            {!report.start ? (
-              <View>Error</View>
-            ) : (
-              <>
-                <View>
-                  <View
-                    style={{ flexDirection: 'row', padding: '20px 20px 0' }}
-                  >
-                    <View style={{ flex: 1 }}>
+            {data.map((report, id) => (
+              <ReportCard
+                flex={1}
+                to="/reports/custom"
+                key={id}
+                report={report.props.data}
+              >
+                {!report.props.data.start ? (
+                  <View>Error</View>
+                ) : (
+                  <>
+                    <View style={{ flex: 1, padding: 20 }}>
                       <Block
                         style={{
                           ...styles.mediumText,
@@ -47,33 +61,44 @@ export default function CustomReportsCardList() {
                         }}
                         role="heading"
                       >
-                        {report.name}
+                        {report.props.data.name}
                       </Block>
-                      <DateRange start={report.start} end={report.end} />
+                      <DateRange
+                        start={report.props.data.start}
+                        end={report.props.data.end}
+                      />
                     </View>
-                  </View>
-                </View>
 
-                {report.data ? (
-                  <BarGraph
-                    start={report.start}
-                    end={report.end}
-                    data={report.data}
-                    compact={true}
-                    groupBy={report.groupBy}
-                    empty={report.empty === 1 ? true : false}
-                    balanceTypeOp={ReportOptions.balanceTypeMap.get(
-                      report.balanceType,
+                    {report.props.data.data ? (
+                      <BarGraph
+                        start={report.props.data.start}
+                        end={report.props.data.end}
+                        data={report.props.data.data}
+                        compact={true}
+                        groupBy={report.props.data.groupBy}
+                        empty={report.props.data.empty === 1 ? true : false}
+                        balanceTypeOp={ReportOptions.balanceTypeMap.get(
+                          report.props.data.balanceType,
+                        )}
+                        style={{ height: 'auto', flex: 1 }}
+                      />
+                    ) : (
+                      <LoadingIndicator />
                     )}
-                    style={{ height: 'auto', flex: 1 }}
-                  />
-                ) : (
-                  <LoadingIndicator />
+                  </>
                 )}
-              </>
-            )}
-          </ReportCard>
+              </ReportCard>
+            ))}
+            {remainder !== 3 &&
+              i + 1 === groupedData.length &&
+              [...Array(remainder)].map((e, i) => (
+                <View key={i} style={{ padding: 15, flex: 1 }} />
+              ))}
+          </View>
         ))}
-    </View>
-  );
+      </>
+    );
+  };
+
+  return reports.length > 0 && ReportGrid(reports);
 }
