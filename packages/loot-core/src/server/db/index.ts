@@ -348,8 +348,8 @@ export async function insertCategory(
   await batchMessages(async () => {
     // Dont allow duplicated names in groups
     const existingCatInGroup = await first(
-      `SELECT id FROM categories WHERE cat_group = ? and name = ? LIMIT 1`,
-      [category.cat_group, category.name],
+      `SELECT id FROM categories WHERE cat_group = ? and UPPER(name) = ? LIMIT 1`,
+      [category.cat_group, category.name.toUpperCase()],
     );
     if (existingCatInGroup) {
       throw new Error(

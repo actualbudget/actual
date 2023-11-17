@@ -269,7 +269,9 @@ function Budget(props: BudgetProps) {
     let exists =
       (await props.getCategories()).grouped
         .filter(g => g.id === category.cat_group)[0]
-        .categories.filter(c => c.name === category.name)
+        .categories.filter(
+          c => c.name.toUpperCase() === category.name.toUpperCase()
+        )
         .filter(c => (category.id === 'new' ? true : c.id !== category.id))
         .length > 0;
 
@@ -391,7 +393,9 @@ function Budget(props: BudgetProps) {
     let exists =
       cats.grouped
         .filter(g => g.id === sortInfo.groupId)[0]
-        .categories.filter(c => c.name === moveCandidate.name)
+        .categories.filter(
+          c => c.name.toUpperCase() === moveCandidate.name.toUpperCase()
+        )
         .filter(c => c.id !== moveCandidate.id).length > 0;
 
     if (exists) {
