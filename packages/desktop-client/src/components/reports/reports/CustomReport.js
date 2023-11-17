@@ -60,7 +60,18 @@ export default function CustomReport() {
   const loadReport = location.state.report ? converted : defaultState();
   const stateDefault = defaultState();
 
-  const [selectedCategories, setSelectedCategories] = useState(null);
+  useEffect(() => {
+    if (location.state.report) {
+      onCondOpChange(location.state.report.conditionsOp);
+      location.state.report.conditions.forEach(filter => {
+        onApplyFilter(filter);
+      });
+    }
+  }, []);
+
+  const [selectedCategories, setSelectedCategories] = useState(
+    loadReport.selectedCategories,
+  );
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);
   const [start, setStart] = useState(loadReport.start);
@@ -265,6 +276,7 @@ export default function CustomReport() {
             onApplyFilter={onApplyFilter}
             filters={filters}
             conditionsOp={conditionsOp}
+            selectedCategories={selectedCategories}
             reportId={reportId}
             onReportChange={onReportChange}
             onResetReports={onResetReports}

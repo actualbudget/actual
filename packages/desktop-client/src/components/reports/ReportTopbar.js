@@ -56,6 +56,7 @@ export function ReportTopbar({
   onApplyFilter,
   filters,
   conditionsOp,
+  selectedCategories,
   reportId,
   onReportChange,
   onResetReports,
@@ -190,6 +191,7 @@ export function ReportTopbar({
         end={end}
         filters={filters}
         conditionsOp={conditionsOp}
+        selectedCategories={selectedCategories}
         onReportChange={onReportChange}
         onResetReports={onResetReports}
         mode={mode}

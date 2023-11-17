@@ -16,6 +16,7 @@ export function defaultState() {
     viewSummary: false,
     start: start,
     end: end,
+    selectedCategories: null,
   };
 }
 
