@@ -164,6 +164,14 @@ export function isAfter(month1: DateLike, month2: DateLike): boolean {
   return d.isAfter(_parse(month1), _parse(month2));
 }
 
+export function isWeekendOrFriday(day: DateLike): boolean {
+  return d.isWeekend(_parse(day)) || d.isFriday(_parse(day));
+}
+
+export function nextMonday(day: DateLike): string {
+  return d.format(d.nextMonday(_parse(day)), 'yyyy-MM-dd');
+}
+
 // TODO: This doesn't really fit in this module anymore, should
 // probably live elsewhere
 export function bounds(month: DateLike): { start: number; end: number } {

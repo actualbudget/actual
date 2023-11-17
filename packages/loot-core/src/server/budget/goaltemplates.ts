@@ -9,7 +9,7 @@ import { parse } from './goal-template.pegjs';
 import { goalsBy } from './goals/goalsBy';
 import { goalsPercentage } from './goals/goalsPercentage';
 import { findRemainder, goalsRemainder } from './goals/goalsRemainder';
-import { goalsSchedule } from './goals/goalsSchedule';
+import { goalsSchedule2 } from './goals/goalsSchedule';
 import { goalsSimple } from './goals/goalsSimple';
 import { goalsSpend } from './goals/goalsSpend';
 import { goalsWeek } from './goals/goalsWeek';
@@ -590,19 +590,19 @@ async function applyCategoryTemplate(
         break;
       }
       case 'schedule': {
-        let goalsReturn = await goalsSchedule(
+        let goalsReturn = await goalsSchedule2(
           scheduleFlag,
           template_lines,
           current_month,
           balance,
-          remainder,
-          last_month_balance,
+          //remainder,
+          //last_month_balance,
           to_budget,
           errors,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
-        remainder = goalsReturn.remainder;
+        //remainder = goalsReturn.remainder;
         break;
       }
       case 'remainder': {
