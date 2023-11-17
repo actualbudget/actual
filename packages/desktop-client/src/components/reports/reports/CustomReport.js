@@ -281,7 +281,7 @@ export default function CustomReport() {
             onReportChange={onReportChange}
             onResetReports={onResetReports}
             data={
-              graphType === 'StackedBarGraph'
+              ['StackedBarGraph', 'TableGraph'].includes(graphType)
                 ? { data }.data
                 : { [splitData]: data[splitData] }
             }
@@ -370,6 +370,7 @@ export default function CustomReport() {
                   scrollWidth={scrollWidth}
                   setScrollWidth={setScrollWidth}
                   months={months}
+                  compact={false}
                 />
               </View>
               {(viewLegend || viewSummary) && (

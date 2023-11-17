@@ -1,8 +1,19 @@
 import React, { useLayoutEffect, useRef } from 'react';
 
+import { type CSSProperties } from '../../style';
 import View from '../common/View';
 
-export default function ReportTable({ saveScrollWidth, style, children }) {
+type ReportTableProps = {
+  style?: CSSProperties;
+  saveScrollWidth?;
+  children;
+};
+
+export default function ReportTable({
+  saveScrollWidth,
+  style,
+  children,
+}: ReportTableProps) {
   let contentRef = useRef<HTMLDivElement>();
 
   useLayoutEffect(() => {

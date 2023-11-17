@@ -6,7 +6,7 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
-import { theme } from '../../style';
+import { styles, theme } from '../../style';
 import View from '../common/View';
 import { Row, Cell } from '../table';
 
@@ -23,6 +23,7 @@ type TableRowProps = {
   mode: string;
   monthsCount: number;
   style?: object | null;
+  compact?;
 };
 
 const TableRow = memo(
@@ -33,8 +34,11 @@ const TableRow = memo(
     mode,
     monthsCount,
     style,
+    compact,
   }: TableRowProps) => {
     const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
+    const compactStyle = compact && { ...styles.tinyText };
+    const rowStyle = compact && { flex: '0 0 20px', height: 20 };
     return (
       <Row
         key={item[groupByItem]}
@@ -42,6 +46,7 @@ const TableRow = memo(
         style={{
           color: theme.tableText,
           backgroundColor: theme.tableBackground,
+          ...rowStyle,
           ...style,
         }}
       >
@@ -50,7 +55,8 @@ const TableRow = memo(
           width="flex"
           title={item[groupByItem].length > 12 && item[groupByItem]}
           style={{
-            minWidth: 125,
+            minWidth: !compact && 125,
+            ...compactStyle,
           }}
         />
         {item.monthData && mode === 'time'
@@ -58,7 +64,8 @@ const TableRow = memo(
               return (
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: !compact && 85,
+                    ...compactStyle,
                   }}
                   key={amountToCurrency(month[balanceTypeOp])}
                   value={amountToCurrency(month[balanceTypeOp])}
@@ -81,7 +88,8 @@ const TableRow = memo(
                   }
                   width="flex"
                   style={{
-                    minWidth: 85,
+                    minWidth: !compact && 85,
+                    ...compactStyle,
                   }}
                 />
                 <Cell
@@ -92,7 +100,8 @@ const TableRow = memo(
                   }
                   width="flex"
                   style={{
-                    minWidth: 85,
+                    minWidth: !compact && 85,
+                    ...compactStyle,
                   }}
                 />
               </>
@@ -105,7 +114,8 @@ const TableRow = memo(
           }
           style={{
             fontWeight: 600,
-            minWidth: 85,
+            minWidth: !compact && 85,
+            ...compactStyle,
           }}
           width="flex"
           privacyFilter
@@ -118,7 +128,8 @@ const TableRow = memo(
           }
           style={{
             fontWeight: 600,
-            minWidth: 85,
+            minWidth: !compact && 85,
+            ...compactStyle,
           }}
           width="flex"
           privacyFilter
@@ -135,11 +146,13 @@ function GroupedTableRow({
   mode,
   monthsCount,
   empty,
+  compact,
 }) {
   return (
     <>
       <TableRow
         key={item.id}
+        compact={compact}
         item={item}
         balanceTypeOp={balanceTypeOp}
         groupByItem={groupByItem}
@@ -166,6 +179,7 @@ function GroupedTableRow({
             return (
               <TableRow
                 key={cat.id}
+                compact={compact}
                 item={cat}
                 balanceTypeOp={balanceTypeOp}
                 groupByItem={groupByItem}
@@ -175,7 +189,7 @@ function GroupedTableRow({
             );
           })}
       </View>
-      <Row height={20} />
+      <Row height={compact ? 10 : 20} />
     </>
   );
 }
@@ -187,6 +201,7 @@ export default function ReportTableList({
   balanceTypeOp,
   mode,
   groupBy,
+  compact,
 }) {
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const groupByData =
@@ -217,6 +232,7 @@ export default function ReportTableList({
                 mode={mode}
                 monthsCount={monthsCount}
                 empty={empty}
+                compact={compact}
               />
             );
           } else {
@@ -228,6 +244,7 @@ export default function ReportTableList({
                 groupByItem={groupByItem}
                 mode={mode}
                 monthsCount={monthsCount}
+                compact={compact}
               />
             );
           }

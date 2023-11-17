@@ -10,6 +10,9 @@ export default function ReportTableHeader({
   groupBy,
   interval,
   balanceType,
+  style,
+  cellStyle,
+  compact,
 }) {
   return (
     <Row
@@ -18,11 +21,13 @@ export default function ReportTableHeader({
         color: theme.tableHeaderText,
         backgroundColor: theme.tableHeaderBackground,
         fontWeight: 600,
+        ...style,
       }}
     >
       <Cell
         style={{
-          minWidth: 125,
+          minWidth: !compact && 125,
+          ...cellStyle,
         }}
         value={groupBy}
         width="flex"
@@ -32,7 +37,8 @@ export default function ReportTableHeader({
             return (
               <Cell
                 style={{
-                  minWidth: 85,
+                  minWidth: !compact && 85,
+                  ...cellStyle,
                 }}
                 key={header}
                 // eslint-disable-next-line rulesdir/typography
@@ -45,14 +51,16 @@ export default function ReportTableHeader({
             <>
               <Cell
                 style={{
-                  minWidth: 85,
+                  minWidth: !compact && 85,
+                  ...cellStyle,
                 }}
                 value={'Assets'}
                 width="flex"
               />
               <Cell
                 style={{
-                  minWidth: 85,
+                  minWidth: !compact && 85,
+                  ...cellStyle,
                 }}
                 value={'Debts'}
                 width="flex"
@@ -61,14 +69,16 @@ export default function ReportTableHeader({
           )}
       <Cell
         style={{
-          minWidth: 85,
+          minWidth: !compact && 85,
+          ...cellStyle,
         }}
         value={'Totals'}
         width="flex"
       />
       <Cell
         style={{
-          minWidth: 85,
+          minWidth: !compact && 85,
+          ...cellStyle,
         }}
         value={'Average'}
         width="flex"

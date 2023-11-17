@@ -102,7 +102,13 @@ export default function CustomReportListCards({ reports }) {
                         onMenuOpen(report.props.data.id, false);
                       }}
                     >
-                      <View style={{ flexDirection: 'row' }}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          flexShrink: 0,
+                          paddingBottom: 5,
+                        }}
+                      >
                         <View style={{ flex: 1 }}>
                           <Block
                             style={{

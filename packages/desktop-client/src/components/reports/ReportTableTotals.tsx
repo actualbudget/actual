@@ -6,8 +6,20 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
+import { type CSSProperties } from '../../style';
 import { theme } from '../../style';
 import { Row, Cell } from '../table';
+
+type ReportTableTotalsProps = {
+  style?: CSSProperties;
+  data;
+  scrollWidth?;
+  balanceTypeOp;
+  mode;
+  monthsCount;
+  cellStyle?;
+  compact?;
+};
 
 export default function ReportTableTotals({
   data,
@@ -15,7 +27,10 @@ export default function ReportTableTotals({
   balanceTypeOp,
   mode,
   monthsCount,
-}) {
+  style,
+  cellStyle,
+  compact,
+}: ReportTableTotalsProps) {
   const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
   return (
     <Row
@@ -24,11 +39,13 @@ export default function ReportTableTotals({
         color: theme.tableHeaderText,
         backgroundColor: theme.tableHeaderBackground,
         fontWeight: 600,
+        ...style,
       }}
     >
       <Cell
         style={{
-          minWidth: 125,
+          minWidth: !compact && 125,
+          ...cellStyle,
         }}
         value={'Totals'}
         width="flex"
@@ -38,7 +55,8 @@ export default function ReportTableTotals({
             return (
               <Cell
                 style={{
-                  minWidth: 85,
+                  minWidth: !compact && 85,
+                  ...cellStyle,
                 }}
                 key={amountToCurrency(item[balanceTypeOp])}
                 value={amountToCurrency(item[balanceTypeOp])}
@@ -55,7 +73,8 @@ export default function ReportTableTotals({
             <>
               <Cell
                 style={{
-                  minWidth: 85,
+                  minWidth: !compact && 85,
+                  ...cellStyle,
                 }}
                 value={amountToCurrency(data.totalAssets)}
                 title={
@@ -66,7 +85,8 @@ export default function ReportTableTotals({
               />
               <Cell
                 style={{
-                  minWidth: 85,
+                  minWidth: !compact && 85,
+                  ...cellStyle,
                 }}
                 value={amountToCurrency(data.totalDebts)}
                 title={
@@ -79,7 +99,8 @@ export default function ReportTableTotals({
           )}
       <Cell
         style={{
-          minWidth: 85,
+          minWidth: !compact && 85,
+          ...cellStyle,
         }}
         value={amountToCurrency(data[balanceTypeOp])}
         title={
@@ -91,7 +112,8 @@ export default function ReportTableTotals({
       />
       <Cell
         style={{
-          minWidth: 85,
+          minWidth: !compact && 85,
+          ...cellStyle,
         }}
         value={integerToCurrency(Math.round(average))}
         title={
