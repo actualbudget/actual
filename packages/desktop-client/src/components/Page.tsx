@@ -20,7 +20,7 @@ function PageTitle({
       <View
         style={{
           alignItems: 'center',
-          backgroundColor: theme.sidebarItemBackground,
+          backgroundColor: theme.mobilePageBackground,
           color: theme.mobileModalText,
           flexDirection: 'row',
           flex: '1 0 auto',

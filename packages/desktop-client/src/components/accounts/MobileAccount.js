@@ -165,7 +165,7 @@ export default function Account(props) {
 
   useEffect(updateSearchQuery, [searchText, currentQuery, state.dateFormat]);
 
-  useSetThemeColor(theme.mobileAccountViewTheme);
+  useSetThemeColor(theme.mobileViewTheme);
 
   if (!accounts || !accounts.length) {
     return null;

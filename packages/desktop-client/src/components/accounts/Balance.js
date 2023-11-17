@@ -24,7 +24,7 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
         marginLeft: 15,
         borderRadius: 4,
         padding: '4px 6px',
-        color: theme.alt2PillText,
+        color: theme.pillText,
         backgroundColor: theme.pillBackground,
       }}
     >
@@ -172,7 +172,7 @@ export function Balances({
             width: 10,
             height: 10,
             marginLeft: 10,
-            color: theme.alt2PillText,
+            color: theme.pillText,
             transform: showExtraBalances ? 'rotateZ(180deg)' : 'rotateZ(0)',
           }}
         />
