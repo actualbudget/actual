@@ -353,8 +353,6 @@ export default function Titlebar({ style }) {
     state => state.prefs.global.floatingSidebar,
   );
 
-  let themesFlag = useFeatureFlag('themes');
-
   return isNarrowWidth ? null : (
     <View
       style={{
@@ -424,7 +422,7 @@ export default function Titlebar({ style }) {
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      {themesFlag && <ThemeSelector />}
+      <ThemeSelector />
       <PrivacyButton />
       {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
