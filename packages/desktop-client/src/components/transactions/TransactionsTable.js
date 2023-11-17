@@ -2065,10 +2065,10 @@ export let TransactionTable = forwardRef((props, ref) => {
 
     if (newTransactions === null) {
       let editingTransaction = latestState.current.transactions.filter(
-        t => t.id == tableNavigator.editingId,
+        t => t.id === tableNavigator.editingId,
       );
       newTransactions = latestState.current.transactions.filter(
-        t => t.parent_id == editingTransaction.parent_id
+        t => t.parent_id === editingTransaction.parent_id,
       );
     }
 
@@ -2102,7 +2102,7 @@ export let TransactionTable = forwardRef((props, ref) => {
       await onSave({
         ...emptyTransactions[transactionIndex],
         amount: amounts[transactionIndex],
-        error: null
+        error: null,
       });
     }
 
