@@ -54,9 +54,10 @@ export const InputField = forwardRef(function InputField(
       style={{
         ...valueStyle,
         ...style,
+        color: disabled ? theme.tableTextInactive : theme.tableText,
         backgroundColor: disabled
           ? theme.formInputTextReadOnlySelection
-          : 'white',
+          : theme.tableBackground,
       }}
       {...props}
     />
@@ -82,7 +83,7 @@ export function TapField({
         alignItems: 'center',
         ...style,
         ...valueStyle,
-        backgroundColor: 'white',
+        backgroundColor: theme.tableBackground,
         ...(disabled && {
           backgroundColor: theme.formInputTextReadOnlySelection,
         }),

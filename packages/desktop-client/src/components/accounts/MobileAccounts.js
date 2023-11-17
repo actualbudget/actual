@@ -23,6 +23,7 @@ function AccountHeader({ name, amount, style = {} }) {
         flex: '1 0 auto',
         flexDirection: 'row',
         marginTop: 10,
+        marginRight: 10,
         color: theme.pageTextLight,
         ...style,
       }}
@@ -58,6 +59,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         borderRadius: 6,
         marginTop: 10,
+        marginRight: 10,
       }}
       data-testid="account"
     >
@@ -170,8 +172,15 @@ function AccountList({
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <Page title="Accounts">
+    <View style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}>
+      <Page
+        title="Accounts"
+        titleStyle={{
+          backgroundColor: theme.mobileHeaderBackground,
+          color: theme.mobileHeaderText,
+          fontSize: 16,
+        }}
+      >
         <PullToRefresh onRefresh={syncAndDownload}>
           <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
           {budgetedAccounts.map(acct => (
@@ -233,7 +242,7 @@ export default function Accounts() {
     navigate(`/transaction/${transaction}`);
   };
 
-  useSetThemeColor(theme.mobileAccountsViewTheme);
+  useSetThemeColor(theme.mobileViewTheme);
 
   return (
     <View style={{ flex: 1 }}>
