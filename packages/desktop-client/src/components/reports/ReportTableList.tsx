@@ -55,7 +55,7 @@ const TableRow = memo(
           width="flex"
           title={item[groupByItem].length > 12 && item[groupByItem]}
           style={{
-            minWidth: !compact && 125,
+            minWidth: compact ? 80 : 125,
             ...compactStyle,
           }}
         />
@@ -64,7 +64,7 @@ const TableRow = memo(
               return (
                 <Cell
                   style={{
-                    minWidth: !compact && 85,
+                    minWidth: compact ? 50 : 85,
                     ...compactStyle,
                   }}
                   key={amountToCurrency(month[balanceTypeOp])}
@@ -88,7 +88,7 @@ const TableRow = memo(
                   }
                   width="flex"
                   style={{
-                    minWidth: !compact && 85,
+                    minWidth: compact ? 50 : 85,
                     ...compactStyle,
                   }}
                 />
@@ -100,7 +100,7 @@ const TableRow = memo(
                   }
                   width="flex"
                   style={{
-                    minWidth: !compact && 85,
+                    minWidth: compact ? 50 : 85,
                     ...compactStyle,
                   }}
                 />
@@ -114,7 +114,7 @@ const TableRow = memo(
           }
           style={{
             fontWeight: 600,
-            minWidth: !compact && 85,
+            minWidth: compact ? 50 : 85,
             ...compactStyle,
           }}
           width="flex"
@@ -128,7 +128,7 @@ const TableRow = memo(
           }
           style={{
             fontWeight: 600,
-            minWidth: !compact && 85,
+            minWidth: compact ? 50 : 85,
             ...compactStyle,
           }}
           width="flex"

@@ -43,7 +43,7 @@ function TableGraph({
   return (
     <View
       style={{
-        overflow: compact ? 'auto' : 'auto',
+        overflow: compact ? 'hidden' : 'auto',
       }}
     >
       <ReportTableHeader

@@ -26,7 +26,7 @@ export default function ReportTableHeader({
     >
       <Cell
         style={{
-          minWidth: !compact && 125,
+          minWidth: compact ? 80 : 125,
           ...cellStyle,
         }}
         value={groupBy}
@@ -37,7 +37,7 @@ export default function ReportTableHeader({
             return (
               <Cell
                 style={{
-                  minWidth: !compact && 85,
+                  minWidth: compact ? 50 : 85,
                   ...cellStyle,
                 }}
                 key={header}
@@ -51,7 +51,7 @@ export default function ReportTableHeader({
             <>
               <Cell
                 style={{
-                  minWidth: !compact && 85,
+                  minWidth: compact ? 50 : 85,
                   ...cellStyle,
                 }}
                 value={'Assets'}
@@ -59,7 +59,7 @@ export default function ReportTableHeader({
               />
               <Cell
                 style={{
-                  minWidth: !compact && 85,
+                  minWidth: compact ? 50 : 85,
                   ...cellStyle,
                 }}
                 value={'Debts'}
@@ -69,7 +69,7 @@ export default function ReportTableHeader({
           )}
       <Cell
         style={{
-          minWidth: !compact && 85,
+          minWidth: compact ? 50 : 85,
           ...cellStyle,
         }}
         value={'Totals'}
@@ -77,7 +77,7 @@ export default function ReportTableHeader({
       />
       <Cell
         style={{
-          minWidth: !compact && 85,
+          minWidth: compact ? 50 : 85,
           ...cellStyle,
         }}
         value={'Average'}

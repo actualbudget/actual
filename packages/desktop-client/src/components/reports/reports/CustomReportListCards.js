@@ -129,6 +129,7 @@ export default function CustomReportListCards({ reports }) {
 
                       {report.props.data.data ? (
                         <ChooseGraph
+                          mode={report.props.data.mode}
                           graphType={report.props.data.graphType}
                           start={report.props.data.start}
                           end={report.props.data.end}
