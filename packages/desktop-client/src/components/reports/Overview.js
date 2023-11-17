@@ -1,6 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { useReports } from 'loot-core/src/client/data-hooks/reports';
+
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
@@ -29,6 +31,7 @@ export function LoadingIndicator() {
 }
 
 export default function Overview() {
+  let reports = useReports();
   let categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );
@@ -83,7 +86,7 @@ export default function Overview() {
               flexShrink: 0,
             }}
           />
-          <CustomReportsCardList />
+          <CustomReportsCardList reports={reports} />
         </>
       )}
     </View>

@@ -1,9 +1,12 @@
-import React, { Children } from 'react';
+import React, { Children, useState } from 'react';
 
-import { useReports } from 'loot-core/src/client/data-hooks/reports';
+import { send } from 'loot-core/src/platform/client/fetch';
 
 import { styles } from '../../../style';
 import Block from '../../common/Block';
+import Menu from '../../common/Menu';
+import MenuButton from '../../common/MenuButton';
+import MenuTooltip from '../../common/MenuTooltip';
 import View from '../../common/View';
 import DateRange from '../DateRange';
 import BarGraph from '../graphs/BarGraph';
@@ -11,9 +14,53 @@ import { LoadingIndicator } from '../Overview';
 import ReportCard from '../ReportCard';
 import { ReportOptions } from '../ReportOptions';
 
-export default function CustomReportsCardList() {
-  let reports = useReports();
-  //const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
+function CardMenu({ onClose, onMenuSelect, reportId }) {
+  return (
+    <MenuTooltip onClose={onClose}>
+      <Menu
+        onMenuSelect={item => {
+          onMenuSelect(item, reportId);
+        }}
+        items={[
+          {
+            name: 'rename',
+            text: 'Rename report',
+            disabled: true,
+          },
+          {
+            name: 'delete',
+            text: 'Delete report',
+          },
+        ]}
+      />
+    </MenuTooltip>
+  );
+}
+
+function index(data) {
+  const result = {};
+  data.forEach(report => {
+    result[report.id] = false;
+  });
+  return result;
+}
+
+export default function CustomReportsCardList({ reports }) {
+  let result = index(reports);
+  let [reportMenu, setReportMenu] = useState(result);
+
+  const [isCardHovered, setIsCardHovered] = useState(null);
+
+  const onMenuSelect = async (item, reportId) => {
+    if (item === 'delete') {
+      onMenuOpen(reportId, false);
+      await send('report-delete', reportId);
+    }
+  };
+
+  const onMenuOpen = (item, state) => {
+    setReportMenu({ ...reportMenu, [item]: state });
+  };
 
   const ReportGrid = slice => {
     const pack = [];
@@ -42,52 +89,78 @@ export default function CustomReportsCardList() {
             }}
           >
             {data.map((report, id) => (
-              <ReportCard
-                flex={1}
-                to="/reports/custom"
-                key={id}
-                report={report.props.data}
-              >
-                {!report.props.data.start ? (
-                  <View>Error</View>
-                ) : (
-                  <>
-                    <View style={{ flex: 1, padding: 20 }}>
-                      <Block
-                        style={{
-                          ...styles.mediumText,
-                          fontWeight: 500,
-                          marginBottom: 5,
-                        }}
-                        role="heading"
-                      >
-                        {report.props.data.name}
-                      </Block>
-                      <DateRange
-                        start={report.props.data.start}
-                        end={report.props.data.end}
-                      />
-                    </View>
+              <View key={id} style={{ position: 'relative', flex: '1' }}>
+                <View style={{ width: '100%', height: '100%' }}>
+                  <ReportCard to="/reports/custom" report={report.props.data}>
+                    <View
+                      style={{ flex: 1, padding: 20 }}
+                      onMouseEnter={() => setIsCardHovered(id)}
+                      onMouseLeave={() => {
+                        setIsCardHovered(null);
+                        onMenuOpen(report.props.data.id, false);
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row' }}>
+                        <View style={{ flex: 1 }}>
+                          <Block
+                            style={{
+                              ...styles.mediumText,
+                              fontWeight: 500,
+                              marginBottom: 5,
+                            }}
+                            role="heading"
+                          >
+                            {report.props.data.name}
+                          </Block>
+                          <DateRange
+                            start={report.props.data.start}
+                            end={report.props.data.end}
+                          />
+                        </View>
+                      </View>
 
-                    {report.props.data.data ? (
-                      <BarGraph
-                        start={report.props.data.start}
-                        end={report.props.data.end}
-                        data={report.props.data.data}
-                        compact={true}
-                        groupBy={report.props.data.groupBy}
-                        empty={report.props.data.empty === 1 ? true : false}
-                        balanceTypeOp={ReportOptions.balanceTypeMap.get(
-                          report.props.data.balanceType,
-                        )}
-                        style={{ height: 'auto', flex: 1 }}
-                      />
-                    ) : (
-                      <LoadingIndicator />
-                    )}
-                  </>
-                )}
-              </ReportCard>
+                      {report.props.data.data ? (
+                        <BarGraph
+                          start={report.props.data.start}
+                          end={report.props.data.end}
+                          data={report.props.data.data}
+                          compact={true}
+                          groupBy={report.props.data.groupBy}
+                          empty={report.props.data.empty === 1 ? true : false}
+                          balanceTypeOp={ReportOptions.balanceTypeMap.get(
+                            report.props.data.balanceType,
+                          )}
+                          style={{ height: 'auto', flex: 1 }}
+                        />
+                      ) : (
+                        <LoadingIndicator />
+                      )}
+                    </View>
+                  </ReportCard>
+                </View>
+                <View
+                  style={{
+                    textAlign: 'right',
+                    position: 'absolute',
+                    right: 25,
+                    top: 25,
+                  }}
+                >
+                  <MenuButton
+                    onClick={() => onMenuOpen(report.props.data.id, true)}
+                    style={{
+                      color: isCardHovered === id ? 'inherit' : 'transparent',
+                    }}
+                  />
+                  {reportMenu[report.props.data.id] && (
+                    <CardMenu
+                      onMenuSelect={onMenuSelect}
+                      onClose={() => onMenuOpen(report.props.data.id, false)}
+                      reportId={report.props.data.id}
+                    />
+                  )}
+                </View>
+              </View>
             ))}
             {remainder !== 3 &&
               i + 1 === groupedData.length &&
