@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
+import { initiallyLoadPayees } from 'loot-core/src/client/actions';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -28,13 +29,7 @@ import { fromDateRepr } from '../util';
 
 export default function CustomReport() {
   const categories = useCategories();
-
-  let { payees, accounts } = useSelector(state => {
-    return {
-      payees: state.queries.payees,
-      accounts: state.queries.accounts,
-    };
-  });
+  let dispatch = useDispatch();
 
   const {
     filters,
@@ -68,8 +63,51 @@ export default function CustomReport() {
   //const [legend, setLegend] = useState([]);
   let legend = [];
   const dateRangeLine = ReportOptions.dateRange.length - 1;
-
   const months = monthUtils.rangeInclusive(start, end);
+
+  useEffect(() => {
+    if (selectedCategories === null && categories.list.length !== 0) {
+      setSelectedCategories(categories.list);
+    }
+  }, [categories, selectedCategories]);
+
+  useEffect(() => {
+    async function run() {
+      dispatch(initiallyLoadPayees());
+      const trans = await send('get-earliest-transaction');
+      const currentMonth = monthUtils.currentMonth();
+      let earliestMonth = trans
+        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
+        : currentMonth;
+
+      // Make sure the month selects are at least populates with a
+      // year's worth of months. We can undo this when we have fancier
+      // date selects.
+      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      if (earliestMonth > yearAgo) {
+        earliestMonth = yearAgo;
+      }
+
+      const allMonths = monthUtils
+        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+        .map(month => ({
+          name: month,
+          pretty: monthUtils.format(month, 'MMMM, yyyy'),
+        }))
+        .reverse();
+
+      setAllMonths(allMonths);
+    }
+    run();
+  }, []);
+
+  let { payees, accounts } = useSelector(state => {
+    return {
+      payees: state.queries.payees,
+      accounts: state.queries.accounts,
+    };
+  });
+
   const getGraphData = useMemo(() => {
     return defaultSpreadsheet(
       start,
@@ -101,41 +139,6 @@ export default function CustomReport() {
   ]);
   const data = useReport('default', getGraphData);
 
-  useEffect(() => {
-    if (selectedCategories === null && categories.list.length !== 0) {
-      setSelectedCategories(categories.list);
-    }
-  }, [categories, selectedCategories]);
-
-  useEffect(() => {
-    async function run() {
-      const trans = await send('get-earliest-transaction');
-      const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-        : currentMonth;
-
-      // Make sure the month selects are at least populates with a
-      // year's worth of months. We can undo this when we have fancier
-      // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
-      if (earliestMonth > yearAgo) {
-        earliestMonth = yearAgo;
-      }
-
-      const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
-        .map(month => ({
-          name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy'),
-        }))
-        .reverse();
-
-      setAllMonths(allMonths);
-    }
-    run();
-  }, []);
-
   let [scrollWidth, setScrollWidth] = useState(0);
 
   if (!allMonths || !data) {
@@ -149,12 +152,7 @@ export default function CustomReport() {
 
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
-      <Header
-        title="Custom Reports"
-        allMonths={allMonths}
-        start={start}
-        end={end}
-      />
+      <Header title="Custom Reports" />
       <View
         style={{
           display: 'flex',

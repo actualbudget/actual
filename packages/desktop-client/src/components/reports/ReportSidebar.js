@@ -332,7 +332,7 @@ export function ReportSidebar({
             value={dateRange}
             onChange={e => {
               setDateRange(e);
-              if (e === 'allMonths') {
+              if (e === 'All time') {
                 onChangeDates(...getFullRange(allMonths));
               } else {
                 onChangeDates(
