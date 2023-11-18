@@ -1,7 +1,7 @@
 const electron = require('electron');
 
 electron.app.on('web-contents-created', function (event, contents) {
-  contents.on('will-attach-webview', function (event, webPreferences, params) {
+  contents.on('will-attach-webview', function (event, webPreferences) {
     delete webPreferences.preloadURL;
     delete webPreferences.preload;
 
@@ -15,11 +15,11 @@ electron.app.on('web-contents-created', function (event, contents) {
     event.preventDefault();
   });
 
-  contents.on('will-navigate', (event, navigationUrl) => {
+  contents.on('will-navigate', event => {
     event.preventDefault();
   });
 
-  contents.on('new-window', (event, navigationUrl) => {
+  contents.on('new-window', event => {
     event.preventDefault();
   });
 });

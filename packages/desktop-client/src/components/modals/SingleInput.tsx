@@ -72,7 +72,7 @@ function SingleInput({
               paddingBottom: 15,
             }}
           >
-            <Button onPointerUp={e => _onSubmit(value)}>{buttonText}</Button>
+            <Button onPointerUp={() => _onSubmit(value)}>{buttonText}</Button>
           </View>
         </>
       )}

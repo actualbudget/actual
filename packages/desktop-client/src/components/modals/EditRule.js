@@ -122,7 +122,7 @@ export function OpSelect({
   );
 }
 
-function EditorButtons({ onAdd, onDelete, style }) {
+function EditorButtons({ onAdd, onDelete }) {
   return (
     <>
       {onDelete && (
@@ -309,7 +309,7 @@ let actionFields = [
   'date',
   'amount',
 ].map(field => [field, mapField(field)]);
-function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
+function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
   let { field, op, value, type, error, inputKey = 'initial' } = action;
 
   return (

@@ -133,7 +133,7 @@ function getFileType(filepath) {
   return rawType;
 }
 
-function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
+function ParsedDate({ parseDateFormat, dateFormat, date }) {
   let parsed =
     date &&
     formatDate(
@@ -185,29 +185,29 @@ function getInitialMappings(transactions) {
   }
 
   let dateField = key(
-    fields.find(([name, value]) => name.toLowerCase().includes('date')) ||
-      fields.find(([name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
+    fields.find(([name]) => name.toLowerCase().includes('date')) ||
+      fields.find(([value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
   );
 
   let amountField = key(
-    fields.find(([name, value]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([name, value]) => value.match(/^-?[.,\d]+$/)),
+    fields.find(([name]) => name.toLowerCase().includes('amount')) ||
+      fields.find(([value]) => value.match(/^-?[.,\d]+$/)),
   );
 
   let payeeField = key(
-    fields.find(([name, value]) => name !== dateField && name !== amountField),
+    fields.find(([name]) => name !== dateField && name !== amountField),
   );
 
   let notesField = key(
     fields.find(
-      ([name, value]) =>
+      ([name]) =>
         name !== dateField && name !== amountField && name !== payeeField,
     ),
   );
 
   let inOutField = key(
     fields.find(
-      ([name, value]) =>
+      ([name]) =>
         name !== dateField &&
         name !== amountField &&
         name !== payeeField &&
@@ -974,7 +974,7 @@ export default function ImportTransactions({ modalProps, options }) {
                 </View>
               );
             }}
-            renderItem={({ key, style, item, editing, focusedField }) => (
+            renderItem={({ key, style, item }) => (
               <View key={key} style={style}>
                 <Transaction
                   transaction={item}

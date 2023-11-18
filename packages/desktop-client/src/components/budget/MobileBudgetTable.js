@@ -132,7 +132,7 @@ function BudgetCell({
     });
   }
 
-  function onAmountClick(e) {
+  function onAmountClick() {
     onEdit?.(categoryId);
   }
 

@@ -22,7 +22,7 @@ if (process.env.REVIEW_ID) {
 
 module.exports = {
   webpack: {
-    configure: (webpackConfig, { env, paths }) => {
+    configure: webpackConfig => {
       webpackConfig.mode =
         process.env.NODE_ENV === 'development' ? 'development' : 'production';
 
@@ -92,7 +92,7 @@ module.exports = {
       return webpackConfig;
     },
   },
-  devServer: (devServerConfig, { env, paths, proxy, allowedHost }) => {
+  devServer: devServerConfig => {
     devServerConfig.onBeforeSetupMiddleware = server => {
       chokidar
         .watch([

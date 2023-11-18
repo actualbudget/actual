@@ -774,7 +774,7 @@ describe('Transactions', () => {
     updateProps({ transactions });
 
     function expectErrorToNotExist(transactions) {
-      transactions.forEach((transaction, idx) => {
+      transactions.forEach(transaction => {
         expect(transaction.error).toBeFalsy();
       });
     }

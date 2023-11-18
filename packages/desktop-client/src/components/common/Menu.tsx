@@ -158,7 +158,7 @@ export default function Menu({
             }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
-            onClick={e =>
+            onClick={() =>
               !item.disabled && onMenuSelect && onMenuSelect(item.name)
             }
           >

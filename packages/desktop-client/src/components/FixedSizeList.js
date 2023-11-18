@@ -8,7 +8,7 @@ import View from './common/View';
 
 const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
 
-const defaultItemKey = (index, data) => index;
+const defaultItemKey = index => index;
 
 function ResizeObserver({ onResize, children }) {
   let ref = useResizeObserver(onResize);
@@ -241,7 +241,7 @@ export default class FixedSizeList extends PureComponent {
     }
   };
 
-  onHeaderResize = rect => {
+  onHeaderResize = () => {
     // this.setState({ headerHeight: rect.height });
   };
 
@@ -268,7 +268,7 @@ export default class FixedSizeList extends PureComponent {
   }
 
   getItemOffset = index => index * this.props.itemSize;
-  getItemSize = index => this.props.itemSize;
+  getItemSize = () => this.props.itemSize;
   getEstimatedTotalSize = () => this.props.itemSize * this.props.itemCount;
 
   getOffsetForIndexAndAlignment = (index, align, scrollOffset) => {

@@ -35,7 +35,7 @@ type CustomTooltipProps = {
   label?: string;
 };
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -78,12 +78,7 @@ type BarLineGraphProps = {
   };
 };
 
-function BarLineGraph({
-  style,
-  graphData,
-  compact,
-  domain,
-}: BarLineGraphProps) {
+function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -95,7 +90,7 @@ function BarLineGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         graphData && (
           <ResponsiveContainer>
             <div>

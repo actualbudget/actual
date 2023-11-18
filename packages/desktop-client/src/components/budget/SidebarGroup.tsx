@@ -43,7 +43,6 @@ function SidebarGroup({
   dragPreview,
   innerRef,
   style,
-  borderColor = theme.tableBorder,
   onEdit,
   onSave,
   onDelete,
@@ -62,7 +61,7 @@ function SidebarGroup({
         userSelect: 'none',
         WebkitUserSelect: 'none',
       }}
-      onClick={e => {
+      onClick={() => {
         onToggleCollapse(group.id);
       }}
     >
@@ -168,7 +167,7 @@ function SidebarGroup({
     >
       <InputCell
         value={group.name}
-        formatter={value => displayed}
+        formatter={() => displayed}
         width="flex"
         exposed={editing}
         onUpdate={value => {

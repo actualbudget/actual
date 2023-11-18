@@ -7,7 +7,7 @@ export function handleGlobalEvents(actions, store) {
     actions.setAppState({ updateInfo: info });
   });
 
-  global.Actual.onEventFromMain('update-error', msg => {
+  global.Actual.onEventFromMain('update-error', () => {
     // Ignore errors. We don't want to constantly bug the user if they
     // always have a flaky connection or have intentionally disabled
     // updates. They will see the error in the about page if they try
@@ -18,7 +18,7 @@ export function handleGlobalEvents(actions, store) {
     actions.saveGlobalPrefs({ theme });
   };
 
-  listen('server-error', info => {
+  listen('server-error', () => {
     actions.addGenericErrorNotification();
   });
 

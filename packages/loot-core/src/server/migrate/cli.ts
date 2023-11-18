@@ -45,7 +45,7 @@ function create(migrationName) {
   fs.writeFileSync(up, 'BEGIN TRANSACTION;\n\nCOMMIT;', 'utf8');
 }
 
-async function list(db) {
+async function list(_db) {
   const migrationsDir = getMigrationsDir();
   const applied = await getAppliedMigrations(getDatabase());
   const all = await getMigrationList(migrationsDir);

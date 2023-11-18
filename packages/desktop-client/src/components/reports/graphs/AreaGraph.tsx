@@ -127,7 +127,7 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data.monthData && (
           <ResponsiveContainer>
             <div>

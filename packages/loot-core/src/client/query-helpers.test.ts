@@ -361,7 +361,7 @@ describe('query helpers', () => {
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
     await tracer.expect('server-query', ['id']);
-    await tracer.expect('data', data => {});
+    await tracer.expect('data', () => {});
 
     paged.fetchNext();
     paged.fetchNext();
@@ -369,7 +369,7 @@ describe('query helpers', () => {
     paged.fetchNext();
 
     await tracer.expect('server-query', ['id']);
-    await tracer.expect('data', data => {});
+    await tracer.expect('data', () => {});
 
     // Wait a bit and make sure nothing comes through
     let p = Promise.race([tracer.expect('server-query'), wait(200)]);

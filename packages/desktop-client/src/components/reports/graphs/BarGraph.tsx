@@ -146,7 +146,6 @@ function BarGraph({
   empty,
   balanceTypeOp,
   compact,
-  domain,
 }: BarGraphProps) {
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
@@ -171,7 +170,7 @@ function BarGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data[splitData] && (
           <ResponsiveContainer>
             <div>

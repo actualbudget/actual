@@ -146,7 +146,7 @@ function SidebarCategory({
     >
       <InputCell
         value={category.name}
-        formatter={value => displayed}
+        formatter={() => displayed}
         width="flex"
         exposed={editing || temporary}
         onUpdate={value => {

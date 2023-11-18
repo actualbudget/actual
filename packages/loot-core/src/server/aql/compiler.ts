@@ -991,7 +991,7 @@ export function compileQuery(
 
   let {
     tableViews = {},
-    tableFilters = name => [],
+    tableFilters = () => [],
     customizeQuery = queryState => queryState,
   } = schemaConfig;
 

@@ -26,12 +26,7 @@ type NetWorthGraphProps = {
   };
 };
 
-function NetWorthGraph({
-  style,
-  graphData,
-  compact,
-  domain,
-}: NetWorthGraphProps) {
+function NetWorthGraph({ style, graphData, compact }: NetWorthGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -69,7 +64,7 @@ function NetWorthGraph({
   };
 
   // eslint-disable-next-line react/no-unstable-nested-components
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div
@@ -112,7 +107,7 @@ function NetWorthGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         graphData && (
           <ResponsiveContainer>
             <div>

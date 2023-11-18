@@ -353,7 +353,7 @@ class Budget extends Component {
 
     return (
       <SyncRefresh onSync={this.sync}>
-        {({ refreshing, onRefresh }) => (
+        {({ onRefresh }) => (
           <BudgetTable
             // This key forces the whole table rerender when the number
             // format changes

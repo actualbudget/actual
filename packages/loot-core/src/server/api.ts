@@ -252,7 +252,7 @@ handlers['api/finish-import'] = async function () {
   await handlers['get-budget-bounds']();
   await sheet.waitOnSpreadsheet();
 
-  await cloudStorage.upload().catch(err => {});
+  await cloudStorage.upload().catch(() => {});
 
   connection.send('finish-import');
   IMPORT_MODE = false;
@@ -420,7 +420,7 @@ handlers['api/transactions-get'] = async function ({
   return data;
 };
 
-handlers['api/transactions-filter'] = async function ({ text, accountId }) {
+handlers['api/transactions-filter'] = async function () {
   throw new Error('`filterTransactions` is deprecated, use `runQuery` instead');
 };
 

@@ -198,7 +198,7 @@ async function importTransactions(
 
             subtransactions:
               transaction.subTransactions &&
-              transaction.subTransactions.map((t, i) => {
+              transaction.subTransactions.map(t => {
                 return {
                   id: entityIdMap.get(t.entityId),
                   amount: amountToInteger(t.amount),

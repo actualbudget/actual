@@ -57,7 +57,7 @@ export function cashFlowByDate(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    function makeQuery(where) {
+    function makeQuery(_where) {
       let query = q('transactions')
         .filter({
           [conditionsOpKey]: [...filters],

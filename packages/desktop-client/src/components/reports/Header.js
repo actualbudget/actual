@@ -63,7 +63,6 @@ function Header({
   onDeleteFilter,
   onCondOpChange,
   headerPrefixItems,
-  selectGraph,
 }) {
   let location = useLocation();
   let path = location.pathname;

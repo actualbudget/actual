@@ -506,7 +506,7 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
   );
 });
 
-export default function BudgetWrapper(props) {
+export default function BudgetWrapper() {
   let startMonth = useSelector(state => state.prefs.local['budget.startMonth']);
   let collapsedPrefs = useSelector(
     state => state.prefs.local['budget.collapsed'],

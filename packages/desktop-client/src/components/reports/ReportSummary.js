@@ -136,7 +136,7 @@ export function ReportSummary({
   );
 }
 
-export function ReportLegend({ data, legend, groupBy }) {
+export function ReportLegend({ legend, groupBy }) {
   return (
     <View
       style={{

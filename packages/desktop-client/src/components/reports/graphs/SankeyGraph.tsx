@@ -113,7 +113,7 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) => (
+      {width => (
         <ResponsiveContainer>
           <Sankey
             data={sankeyData}

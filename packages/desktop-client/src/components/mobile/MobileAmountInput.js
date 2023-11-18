@@ -48,7 +48,7 @@ class AmountInput extends PureComponent {
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps, _prevState) {
     if (!prevProps.focused && this.props.focused) {
       this.focus();
     }

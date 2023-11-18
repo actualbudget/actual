@@ -34,7 +34,7 @@ type CustomTooltipProps = {
   label?: string;
 };
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -77,7 +77,7 @@ type LineGraphProps = {
   };
 };
 
-function LineGraph({ style, graphData, compact, domain }: LineGraphProps) {
+function LineGraph({ style, graphData, compact }: LineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -89,7 +89,7 @@ function LineGraph({ style, graphData, compact, domain }: LineGraphProps) {
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         graphData && (
           <ResponsiveContainer>
             <div>

@@ -124,7 +124,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
   );
 }
 
-function EmptyMessage({ onAdd }) {
+function EmptyMessage() {
   return (
     <View style={{ flex: 1, padding: 30 }}>
       <Text style={styles.text}>

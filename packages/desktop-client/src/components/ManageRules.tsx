@@ -236,7 +236,7 @@ function ManageRulesContent({
         onSave: async newRule => {
           let newRules = await loadRules();
 
-          setRules(rules => {
+          setRules(() => {
             let newIdx = newRules.findIndex(rule => rule.id === newRule.id);
             return newRules.slice(0, newIdx + 75);
           });

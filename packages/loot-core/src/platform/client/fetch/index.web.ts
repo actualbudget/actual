@@ -69,7 +69,7 @@ function connectSocket(port, onOpen) {
     }
   };
 
-  client.onopen = event => {
+  client.onopen = () => {
     // Send any messages that were queued while closed
     if (messageQueue.length > 0) {
       messageQueue.forEach(msg => {
@@ -150,7 +150,7 @@ export const unlisten: T.Unlisten = function (name) {
 };
 
 async function closeSocket(onClose) {
-  socketClient.onclose = event => {
+  socketClient.onclose = () => {
     socketClient = null;
     onClose();
   };

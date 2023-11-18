@@ -63,7 +63,7 @@ export default function ManagePayeesWithData({ initialSelectedIds }) {
     };
   }, []);
 
-  async function onUndo({ tables, messages, meta, url }, scroll = false) {
+  async function onUndo({ tables, messages, meta }, _scroll = false) {
     if (!tables.includes('payees') && !tables.includes('payee_mapping')) {
       return;
     }

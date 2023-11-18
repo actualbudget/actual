@@ -228,7 +228,7 @@ class TransactionEditInner extends PureComponent {
     this.props.navigate(`/accounts/${account.id}`, { replace: true });
   };
 
-  onSaveChild = childTransaction => {
+  onSaveChild = () => {
     this.setState({ editingChild: null });
   };
 
@@ -871,7 +871,7 @@ function TransactionEditUnconnected(props) {
         navigate={navigate}
         // TODO: ChildEdit is complicated and heavily relies on RN
         // renderChildEdit={props => <ChildEdit {...props} />}
-        renderChildEdit={props => {}}
+        renderChildEdit={() => {}}
         dateFormat={dateFormat}
         // TODO: was this a mistake in the original code?
         // onTapField={this.onTapField}

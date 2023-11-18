@@ -48,7 +48,7 @@ function getRank(day1, day2) {
   return 1 / (dayDiff + 1);
 }
 
-function matchSchedules(allOccurs, config, partialMatchRank = 0.5) {
+function matchSchedules(allOccurs, config, _partialMatchRank = 0.5) {
   allOccurs = [...allOccurs].reverse();
   let baseOccur = allOccurs[0];
   let occurs = allOccurs.slice(1);
@@ -363,7 +363,7 @@ export async function findSchedules() {
   }
 
   let schedules = [...groupBy(allSchedules, 'payee').entries()].map(
-    ([payeeId, schedules]) => {
+    ([schedules]) => {
       schedules.sort((s1, s2) => s2.rank - s1.rank);
       let winner = schedules[0];
 

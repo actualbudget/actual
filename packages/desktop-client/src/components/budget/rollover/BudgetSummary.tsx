@@ -274,7 +274,7 @@ export function BudgetSummary({
   } = useRollover();
 
   let [menuOpen, setMenuOpen] = useState(false);
-  function onMenuOpen(e) {
+  function onMenuOpen() {
     setMenuOpen(true);
   }
 

@@ -518,7 +518,7 @@ export class Rule {
     });
   }
 
-  execActions(object) {
+  execActions(_object) {
     let changes = {};
     this.actions.forEach(action => action.exec(changes));
     return changes;

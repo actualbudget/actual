@@ -77,7 +77,7 @@ export default class Spreadsheet {
     return this.nodes.has(name);
   }
 
-  add(name, expr, value) {
+  add(name, expr) {
     this.set(name, expr);
   }
 

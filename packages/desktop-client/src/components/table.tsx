@@ -850,7 +850,7 @@ type TableWithNavigatorProps = TableProps & {
 export const TableWithNavigator = forwardRef<
   TableHandleRef,
   TableWithNavigatorProps
->(({ fields, ...props }, ref) => {
+>(({ fields, ...props }) => {
   let navigator = useTableNavigator(props.items, fields);
   return <Table {...props} navigator={navigator} />;
 });
@@ -905,7 +905,6 @@ export const Table: <T extends TableItem>(
       style,
       navigator,
       onScroll,
-      version = 'v1',
       allowPopupsEscape,
       isSelected,
       saveScrollWidth,
@@ -1044,7 +1043,7 @@ export const Table: <T extends TableItem>(
       );
     }
 
-    function onItemsRendered({ overscanStartIndex, overscanStopIndex }) {
+    function onItemsRendered({ overscanStopIndex }) {
       if (loadMore && overscanStopIndex > items.length - 100) {
         loadMore();
       }
@@ -1136,9 +1135,7 @@ export const Table: <T extends TableItem>(
                         renderRow={renderRow}
                         itemCount={count || items.length}
                         itemSize={rowHeight - 1}
-                        itemKey={
-                          getItemKey || ((index, data) => items[index].id)
-                        }
+                        itemKey={getItemKey || (index => items[index].id)}
                         indexForKey={key =>
                           items.findIndex(item => item.id === key)
                         }

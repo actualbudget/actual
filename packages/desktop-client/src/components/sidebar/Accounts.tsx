@@ -77,7 +77,7 @@ function Accounts({
     setIsDragging(drag.state === 'start');
   }
 
-  let makeDropPadding = (i, length) => {
+  let makeDropPadding = (i, _length) => {
     if (i === 0) {
       return {
         paddingTop: isDragging ? 15 : 0,
@@ -156,7 +156,7 @@ function Accounts({
       )}
 
       {showClosedAccounts &&
-        closedAccounts.map((account, i) => (
+        closedAccounts.map(account => (
           <Account
             key={account.id}
             name={account.name}

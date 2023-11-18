@@ -170,7 +170,6 @@ const PayeeTable = forwardRef(
       navigator,
       categoryGroups,
       highlightedRows,
-      ruleActions,
       onUpdate,
       onViewRules,
       onCreateRule,

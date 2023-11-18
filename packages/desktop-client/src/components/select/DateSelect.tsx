@@ -343,7 +343,7 @@ export default function DateSelect({
         {...inputProps}
         inputRef={inputRef}
         value={value}
-        onPointerUp={e => {
+        onPointerUp={() => {
           if (!embedded) {
             setOpen(true);
           }

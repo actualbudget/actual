@@ -163,7 +163,7 @@ function BalanceTooltip({
       onClose={tooltip.close}
     >
       <Menu
-        onMenuSelect={type => {
+        onMenuSelect={() => {
           onBudgetAction(monthIndex, 'carryover', {
             category: categoryId,
             flag: !carryover,
