@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 
 import { css } from 'glamor';
 
@@ -108,13 +108,20 @@ function AccountList({
   );
 }
 
+type AutoCompleteProps = {
+  embedded?: boolean;
+  includeClosedAccounts: boolean;
+  groupHeaderStyle?: boolean;
+  closeOnBlur?: boolean;
+} & ComponentProps<typeof Autocomplete>;
+
 export default function AccountAutocomplete({
   embedded,
   includeClosedAccounts = true,
   groupHeaderStyle,
   closeOnBlur,
   ...props
-}) {
+}: AutoCompleteProps) {
   let accounts = useCachedAccounts() || [];
 
   //remove closed accounts if needed
