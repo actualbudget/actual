@@ -8,6 +8,7 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
+import { Add } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import AccountAutocomplete, {
@@ -28,6 +29,10 @@ import Modal from '../common/Modal';
 import View from '../common/View';
 import { SectionLabel } from '../forms';
 import DateSelect from '../select/DateSelect';
+
+function CreatePayeeIcon(props) {
+  return <Add {...props} width={12} height={12} />;
+}
 
 export default function EditField({ modalProps, name, onSubmit }) {
   let dateFormat = useSelector(
@@ -159,10 +164,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
           renderCreatePayeeButton={props => (
             <CreatePayeeButton
               {...props}
-              iconProps={{
-                width: 12,
-                height: 12,
-              }}
+              Icon={CreatePayeeIcon}
               style={{
                 ...styles.largeText,
                 fontWeight: 450,

@@ -5,6 +5,8 @@ import React, {
   type ComponentProps,
   type CSSProperties,
   type ReactNode,
+  type ComponentType,
+  type SVGProps,
 } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -372,18 +374,17 @@ export default function PayeeAutocomplete({
 
 type CreatePayeeButtonProps = {
   payeeName: string;
-  iconProps?: ComponentProps<typeof Add>;
+  Icon?: ComponentType<SVGProps<SVGElement>>;
   style?: CSSProperties;
 };
 
 export function CreatePayeeButton({
   payeeName,
-  iconProps,
+  Icon,
   style,
   ...props
 }: CreatePayeeButtonProps) {
   const isNarrowWidth = useResponsive();
-  const { style: iconStyle, ...restIconProps } = iconProps;
   return (
     <View
       style={{
@@ -397,12 +398,15 @@ export function CreatePayeeButton({
       data-testid="create-payee-button"
       {...props}
     >
-      <Add
-        width={8}
-        height={8}
-        style={{ marginRight: 5, display: 'inline-block', ...iconStyle }}
-        {...restIconProps}
-      />
+      {Icon ? (
+        <Icon style={{ marginRight: 5, display: 'inline-block' }} />
+      ) : (
+        <Add
+          width={8}
+          height={8}
+          style={{ marginRight: 5, display: 'inline-block' }}
+        />
+      )}
       Create Payee “{payeeName}”
     </View>
   );

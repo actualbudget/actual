@@ -4,6 +4,7 @@ import React, {
   useMemo,
   type ReactNode,
   type SVGProps,
+  type ComponentType,
 } from 'react';
 
 import { css } from 'glamor';
@@ -199,14 +200,14 @@ function defaultRenderGroupHeader(props: CategoryGroupHeaderProps) {
 }
 
 type SplitTransactionButtonProps = {
-  iconProps?: SVGProps<SVGSVGElement>;
+  Icon?: ComponentType<SVGProps<SVGElement>>;
   highlighted?: boolean;
   embedded?: boolean;
 };
 
 // eslint-disable-next-line import/no-unused-modules
 export function SplitTransactionButton({
-  iconProps = {},
+  Icon,
   highlighted,
   embedded,
   ...props
@@ -255,12 +256,11 @@ export function SplitTransactionButton({
       {...props}
     >
       <Text style={{ lineHeight: 0 }}>
-        <Split
-          width={10}
-          height={10}
-          style={{ marginRight: 5, ...iconProps?.style }}
-          {...iconProps}
-        />
+        {Icon ? (
+          <Icon style={{ marginRight: 5 }} />
+        ) : (
+          <Split width={10} height={10} style={{ marginRight: 5 }} />
+        )}
       </Text>
       Split Transaction
     </View>
