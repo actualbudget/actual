@@ -690,6 +690,7 @@ function isMultiAutocomplete(
 ): props is ComponentProps<typeof MultiAutocomplete> {
   return multi;
 }
+
 function isSingleAutocomplete(
   props: AutocompleteProps,
   multi?: boolean,
