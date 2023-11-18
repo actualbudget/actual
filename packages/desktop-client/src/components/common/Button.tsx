@@ -22,7 +22,13 @@ type ButtonProps = HTMLProps<HTMLButtonElement> & {
   as?: ElementType;
 };
 
-type ButtonType = 'normal' | 'primary' | 'bare' | 'link';
+type ButtonType =
+  | 'normal'
+  | 'primary'
+  | 'bare'
+  | 'link'
+  | 'menu'
+  | 'menuSelected';
 
 const backgroundColor = {
   normal: theme.buttonNormalBackground,
