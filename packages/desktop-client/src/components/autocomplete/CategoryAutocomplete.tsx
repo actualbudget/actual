@@ -67,18 +67,21 @@ function CategoryList({
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
-              {showGroup &&
-                renderGroupHeader({
-                  ...{ key: item.group?.name },
-                  title: item.group?.name,
+              {showGroup && (
+                <Fragment key={item.group?.name}>
+                  {renderGroupHeader({
+                    title: item.group?.name,
+                  })}
+                </Fragment>
+              )}
+              <Fragment key={item.id}>
+                {renderCategoryItem({
+                  ...(getItemProps ? getItemProps({ item }) : null),
+                  item: item,
+                  highlighted: highlightedIndex === idx,
+                  embedded: embedded,
                 })}
-              {renderCategoryItem({
-                key: item.id,
-                ...(getItemProps ? getItemProps({ item }) : null),
-                item: item,
-                highlighted: highlightedIndex === idx,
-                embedded: embedded,
-              })}
+              </Fragment>
             </Fragment>
           );
         })}
