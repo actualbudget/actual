@@ -684,21 +684,26 @@ type AutocompleteProps =
   | ComponentProps<typeof SingleAutocomplete>
   | ComponentProps<typeof MultiAutocomplete>;
 
+function isMultiAutocomplete(
+  props: AutocompleteProps,
+  multi?: boolean,
+): props is ComponentProps<typeof MultiAutocomplete> {
+  return multi;
+}
+function isSingleAutocomplete(
+  props: AutocompleteProps,
+  multi?: boolean,
+): props is ComponentProps<typeof SingleAutocomplete> {
+  return !multi;
+}
+
 export default function Autocomplete({
   multi,
   ...props
 }: AutocompleteProps & { multi?: boolean }) {
-  if (multi) {
-    return (
-      <MultiAutocomplete
-        {...(props as ComponentProps<typeof MultiAutocomplete>)}
-      />
-    );
-  } else {
-    return (
-      <SingleAutocomplete
-        {...(props as ComponentProps<typeof SingleAutocomplete>)}
-      />
-    );
+  if (isMultiAutocomplete(props, multi)) {
+    return <MultiAutocomplete {...props} />;
+  } else if (isSingleAutocomplete(props, multi)) {
+    return <SingleAutocomplete {...props} />;
   }
 }
