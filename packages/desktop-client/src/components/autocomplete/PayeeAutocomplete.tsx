@@ -4,6 +4,7 @@ import React, {
   useMemo,
   type ComponentProps,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -61,7 +62,7 @@ function PayeeList({
   highlightedIndex,
   embedded,
   inputValue,
-  renderCreatePayeeButton = defaultRenderPayeeButton,
+  renderCreatePayeeButton = defaultRenderCreatePayeeButton,
   renderGroupHeader = defaultRenderGroupHeader,
   renderPayeeItem = defaultRenderPayeeItem,
   footer,
@@ -125,14 +126,19 @@ function PayeeList({
 
           return (
             <Fragment key={item.id}>
-              {title && renderGroupHeader({ key: 'title-' + idx, title })}
-              {renderPayeeItem({
-                key: item.id,
-                ...(getItemProps ? getItemProps({ item }) : null),
-                item: item,
-                highlighted: highlightedIndex === idx + offset,
-                embedded: embedded,
-              })}
+              {title && (
+                <Fragment key={`title-${idx}`}>
+                  {renderGroupHeader({ title })}
+                </Fragment>
+              )}
+              <Fragment key={item.id}>
+                {renderPayeeItem({
+                  ...(getItemProps ? getItemProps({ item }) : null),
+                  item: item,
+                  highlighted: highlightedIndex === idx + offset,
+                  embedded: embedded,
+                })}
+              </Fragment>
 
               {showMoreMessage && (
                 <div
@@ -166,7 +172,9 @@ type PayeeAutocompleteProps = {
   onUpdate?: (value: string) => void;
   onSelect?: (value: string) => void;
   onManagePayees: () => void;
-  groupHeaderStyle: CSSProperties;
+  renderCreatePayeeButton?: (props: CreatePayeeButtonProps) => ReactNode;
+  renderGroupHeader?: (props: PayeeGroupHeaderProps) => ReactNode;
+  renderPayeeItem?: (props: PayeeItemProps) => ReactNode;
   accounts?: AccountEntity[];
   payees?: PayeeEntity[];
 };
@@ -182,9 +190,9 @@ export default function PayeeAutocomplete({
   onUpdate,
   onSelect,
   onManagePayees,
-  renderCreatePayeeButton,
-  renderGroupHeader,
-  renderPayeeItem,
+  renderCreatePayeeButton = defaultRenderCreatePayeeButton,
+  renderGroupHeader = defaultRenderGroupHeader,
+  renderPayeeItem = defaultRenderPayeeItem,
   accounts,
   payees,
   ...props
@@ -362,12 +370,18 @@ export default function PayeeAutocomplete({
   );
 }
 
+type CreatePayeeButtonProps = {
+  payeeName: string;
+  iconProps?: ComponentProps<typeof Add>;
+  style?: CSSProperties;
+};
+
 export function CreatePayeeButton({
-  iconProps = {},
-  style,
   payeeName,
+  iconProps,
+  style,
   ...props
-}) {
+}: CreatePayeeButtonProps) {
   const isNarrowWidth = useResponsive();
   const { style: iconStyle, ...restIconProps } = iconProps;
   return (
@@ -394,11 +408,22 @@ export function CreatePayeeButton({
   );
 }
 
-function defaultRenderPayeeButton(props) {
+function defaultRenderCreatePayeeButton(
+  props: CreatePayeeButtonProps,
+): ReactNode {
   return <CreatePayeeButton {...props} />;
 }
 
-export function PayeeGroupHeader({ title, style, ...props }) {
+type PayeeGroupHeaderProps = {
+  title: string;
+  style?: CSSProperties;
+};
+
+export function PayeeGroupHeader({
+  title,
+  style,
+  ...props
+}: PayeeGroupHeaderProps) {
   return (
     <div
       style={{
@@ -414,9 +439,16 @@ export function PayeeGroupHeader({ title, style, ...props }) {
   );
 }
 
-function defaultRenderGroupHeader(props) {
+function defaultRenderGroupHeader(props: PayeeGroupHeaderProps): ReactNode {
   return <PayeeGroupHeader {...props} />;
 }
+
+type PayeeItemProps = {
+  item: PayeeEntity;
+  className?: string;
+  highlighted?: boolean;
+  embedded?: boolean;
+};
 
 export function PayeeItem({
   item,
@@ -424,7 +456,7 @@ export function PayeeItem({
   highlighted,
   embedded,
   ...props
-}) {
+}: PayeeItemProps) {
   return (
     <div
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
@@ -468,6 +500,6 @@ export function PayeeItem({
   );
 }
 
-function defaultRenderPayeeItem(props) {
+function defaultRenderPayeeItem(props: PayeeItemProps): ReactNode {
   return <PayeeItem {...props} />;
 }
