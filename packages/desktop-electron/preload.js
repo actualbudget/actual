@@ -56,6 +56,6 @@ contextBridge.exposeInMainWorld('Actual', {
   },
 
   setTheme: theme => {
-    ipcRenderer.send('set-theme', { theme } );
+    ipcRenderer.send('set-theme', { theme });
   },
 });
