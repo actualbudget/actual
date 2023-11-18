@@ -169,7 +169,7 @@ class AmountInput extends PureComponent {
           ...style,
         }}
       >
-        <View style={{ overflowY: 'auto' }}>{input}</View>
+        <View style={{ overflowY: 'auto', overflowX: 'hidden' }}>{input}</View>
 
         {/* <Animated.View
           style={{
