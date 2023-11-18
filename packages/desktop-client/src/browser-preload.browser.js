@@ -1,6 +1,7 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 import * as Platform from 'loot-core/src/client/platform';
+import { saveGlobalPrefs } from 'loot-core/src/client/actions';
 
 import packageJson from '../package.json';
 
@@ -129,7 +130,9 @@ global.Actual = {
     return worker;
   },
 
-  setTheme: () => {},
+  setTheme: theme => {
+    saveGlobalPrefs({ theme });
+  },
 };
 
 document.addEventListener('keydown', e => {

@@ -407,3 +407,9 @@ ipcMain.on('apply-update', () => {
 ipcMain.on('update-menu', (event, isBudgetOpen) => {
   updateMenu(isBudgetOpen);
 });
+
+ipcMain.on('set-theme', theme => {
+  clientWin.webContents.executeJavaScript(
+    `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${theme})`,
+  );
+});
