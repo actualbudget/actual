@@ -1,7 +1,7 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
-import * as Platform from 'loot-core/src/client/platform';
 import { saveGlobalPrefs } from 'loot-core/src/client/actions';
+import * as Platform from 'loot-core/src/client/platform';
 
 import packageJson from '../package.json';
 
