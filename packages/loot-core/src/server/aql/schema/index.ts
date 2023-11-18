@@ -129,6 +129,7 @@ export const schema = {
     mode: f('string', { default: 'total' }),
     groupBy: f('string', { default: 'Category' }),
     balanceType: f('string', { default: 'Expense' }),
+    interval: f('string', { default: 'Monthly' }),    
     empty: f('integer', { default: 0 }),
     hidden: f('integer', { default: 0 }),
     uncat: f('integer', { default: 0 }),
@@ -141,6 +142,7 @@ export const schema = {
     conditions_op: f('string'),
     sort_order: f('float'),
     data: f('json'),
+    colors: f('json'),
     tombstone: f('boolean'),
   },
   reflect_budgets: {

@@ -8,6 +8,7 @@ CREATE TABLE reports
    mode TEXT DEFAULT 'total',
    groupBy TEXT DEFAULT 'Category',
    balanceType TEXT DEFAULT 'Expense',
+   interval TEXT DEFAULT 'Monthly',
    empty INTEGER DEFAULT 0,
    hidden INTEGER DEFAULT 0,
    uncat INTEGER DEFAULT 0,
@@ -20,6 +21,7 @@ CREATE TABLE reports
    conditions_op TEXT DEFAULT 'and',
    sort_order REAL,
    data TEXT,
+   colors TEXT,
    tombstone INTEGER DEFAULT 0);
 
 COMMIT;
