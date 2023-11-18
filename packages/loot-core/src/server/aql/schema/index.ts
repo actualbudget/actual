@@ -129,7 +129,7 @@ export const schema = {
     mode: f('string', { default: 'total' }),
     groupBy: f('string', { default: 'Category' }),
     balanceType: f('string', { default: 'Expense' }),
-    interval: f('string', { default: 'Monthly' }),    
+    interval: f('string', { default: 'Monthly' }),
     empty: f('integer', { default: 0 }),
     hidden: f('integer', { default: 0 }),
     uncat: f('integer', { default: 0 }),
