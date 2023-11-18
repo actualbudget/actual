@@ -55,7 +55,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
   let label, editor, minWidth;
   let inputStyle = {
     ':focus': { boxShadow: 0 },
-    ...(isNarrowWidth && { fontSize: 20 }),
+    ...(isNarrowWidth && { fontSize: 25 }),
   };
   let autocompleteProps = {
     inputProps: { style: inputStyle },
@@ -101,7 +101,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
               {...props}
               style={{
                 ...styles.largeText,
-                color: theme.tableTextLight,
+                color: theme.tableHeaderText,
                 paddingTop: 10,
                 paddingBottom: 10,
               }}
@@ -111,9 +111,12 @@ export default function EditField({ modalProps, name, onSubmit }) {
             <AccountItem
               {...props}
               style={{
-                ...styles.mediumText,
+                ...styles.largeText,
+                fontWeight: 450,
                 paddingTop: 10,
                 paddingBottom: 10,
+                borderRadius: 0,
+                borderTop: `1px solid ${theme.pillBorder}`,
               }}
             />
           )}
@@ -147,7 +150,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
               {...props}
               style={{
                 ...styles.largeText,
-                color: theme.tableTextLight,
+                color: theme.tableHeaderText,
                 paddingTop: 10,
                 paddingBottom: 10,
               }}
@@ -161,7 +164,8 @@ export default function EditField({ modalProps, name, onSubmit }) {
                 height: 12,
               }}
               style={{
-                ...styles.mediumText,
+                ...styles.largeText,
+                fontWeight: 450,
                 paddingTop: 5,
                 paddingBottom: 5,
               }}
@@ -171,9 +175,12 @@ export default function EditField({ modalProps, name, onSubmit }) {
             <PayeeItem
               {...props}
               style={{
-                ...styles.mediumText,
+                ...styles.largeText,
+                fontWeight: 450,
                 paddingTop: 10,
                 paddingBottom: 10,
+                borderRadius: 0,
+                borderTop: `1px solid ${theme.pillBorder}`,
               }}
             />
           )}
@@ -212,7 +219,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
               {...props}
               style={{
                 ...styles.largeText,
-                color: theme.tableTextLight,
+                color: theme.tableHeaderText,
                 paddingTop: 10,
                 paddingBottom: 10,
               }}
@@ -222,9 +229,12 @@ export default function EditField({ modalProps, name, onSubmit }) {
             <CategoryItem
               {...props}
               style={{
-                ...styles.mediumText,
+                ...styles.largeText,
+                fontWeight: 450,
                 paddingTop: 10,
                 paddingBottom: 10,
+                borderRadius: 0,
+                borderTop: `1px solid ${theme.pillBorder}`,
               }}
             />
           )}
