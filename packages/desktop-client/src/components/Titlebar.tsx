@@ -12,6 +12,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
+import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
 import useFeatureFlag from '../hooks/useFeatureFlag';
@@ -41,9 +42,10 @@ import useSheetValue from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 import { Tooltip } from './tooltips';
 
+type Listener = (msg: string, newBudgetType?: LocalPrefs['budgetType']) => void;
 export type TitlebarContextValue = {
-  sendEvent: (msg: string) => void;
-  subscribe: (listener) => () => void;
+  sendEvent: (msg: string, newBudgetType?: LocalPrefs['budgetType']) => void;
+  subscribe: (listener: Listener) => () => void;
 };
 
 export let TitlebarContext = createContext<TitlebarContextValue>(null);
@@ -53,13 +55,13 @@ type TitlebarProviderProps = {
 };
 
 export function TitlebarProvider({ children }: TitlebarProviderProps) {
-  let listeners = useRef([]);
+  let listeners = useRef<Listener[]>([]);
 
-  function sendEvent(msg: string) {
-    listeners.current.forEach(func => func(msg));
+  function sendEvent(msg: string, newBudgetType?: LocalPrefs['budgetType']) {
+    listeners.current.forEach(func => func(msg, newBudgetType));
   }
 
-  function subscribe(listener) {
+  function subscribe(listener: Listener) {
     listeners.current.push(listener);
     return () =>
       (listeners.current = listeners.current.filter(func => func !== listener));
@@ -268,7 +270,8 @@ function BudgetTitlebar() {
   function onSwitchType() {
     setLoading(true);
     if (!loading) {
-      sendEvent('budget/switch-type');
+      const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
+      sendEvent('budget/switch-type', newBudgetType);
     }
   }
 

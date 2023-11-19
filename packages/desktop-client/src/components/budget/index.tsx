@@ -406,11 +406,14 @@ function Budget(props: BudgetProps) {
     props.savePrefs({ 'budget.summaryCollapsed': collapsed });
   };
 
-  const onTitlebarEvent = async msg => {
+  const onTitlebarEvent = async (
+    msg: string,
+    newBudgetType: LocalPrefs['budgetType'],
+  ) => {
     switch (msg) {
       case 'budget/switch-type': {
         await switchBudgetType(
-          props.budgetType,
+          newBudgetType,
           props.spreadsheet,
           bounds,
           prewarmStartMonth,
