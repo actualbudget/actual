@@ -24,6 +24,7 @@ import View from '../common/View';
 import SyncRefresh from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';
+import { prewarmMonth, switchBudgetType } from './util';
 
 class Budget extends Component {
   constructor(props) {
@@ -54,7 +55,13 @@ class Budget extends Component {
     const { start, end } = await send('get-budget-bounds');
     this.setState({ bounds: { start, end } });
 
-    this.prewarmMonth(this.state.currentMonth);
+    await prewarmMonth(
+      this.props.budgetType,
+      this.props.spreadsheet,
+      this.state.currentMonth,
+    );
+
+    this.setState({ initialized: true });
 
     let unlisten = listen('sync-event', ({ type, tables }) => {
       if (
@@ -78,25 +85,17 @@ class Budget extends Component {
     this.cleanup?.();
   }
 
-  prewarmMonth = async (month, type = null) => {
-    type = type || this.props.budgetType;
-
-    let method =
-      type === 'report' ? 'report-budget-month' : 'rollover-budget-month';
-
-    let values = await send(method, { month });
-
-    for (let value of values) {
-      this.props.spreadsheet.prewarmCache(value.name, value);
+  onShowBudgetSummary = () => {
+    if (this.props.budgetType === 'report') {
+      this.props.pushModal('report-budget-summary', {
+        month: this.state.currentMonth,
+      });
+    } else {
+      this.props.pushModal('rollover-budget-summary', {
+        month: this.state.currentMonth,
+        onBudgetAction: this.props.applyBudgetAction,
+      });
     }
-
-    if (!this.state.initialized) {
-      this.setState({ initialized: true });
-    }
-  };
-
-  onShowBudgetDetails = () => {
-    this.props.pushModal('budget-summary', { month: this.state.currentMonth });
   };
 
   onBudgetAction = type => {
@@ -267,15 +266,17 @@ class Budget extends Component {
   };
 
   onPrevMonth = async () => {
+    let { spreadsheet, budgetType } = this.props;
     let month = monthUtils.subMonths(this.state.currentMonth, 1);
-    await this.prewarmMonth(month);
-    this.setState({ currentMonth: month });
+    await prewarmMonth(budgetType, spreadsheet, month);
+    this.setState({ currentMonth: month, initialized: true });
   };
 
   onNextMonth = async () => {
+    let { spreadsheet, budgetType } = this.props;
     let month = monthUtils.addMonths(this.state.currentMonth, 1);
-    await this.prewarmMonth(month);
-    this.setState({ currentMonth: month });
+    await prewarmMonth(budgetType, spreadsheet, month);
+    this.setState({ currentMonth: month, initialized: true });
   };
 
   onOpenActionSheet = () => {
@@ -321,6 +322,19 @@ class Budget extends Component {
     );
   };
 
+  onSwitchBudgetType = async () => {
+    const { spreadsheet, budgetType, loadPrefs } = this.props;
+    const { bounds, currentMonth } = this.state;
+
+    this.setState({ initialized: false });
+
+    await switchBudgetType(budgetType, spreadsheet, bounds, currentMonth, () =>
+      loadPrefs(),
+    );
+
+    this.setState({ initialized: true });
+  };
+
   render() {
     const { currentMonth, bounds, editMode, initialized } = this.state;
     const {
@@ -331,6 +345,7 @@ class Budget extends Component {
       budgetType,
       navigation,
       applyBudgetAction,
+      pushModal,
     } = this.props;
     let numberFormat = prefs.numberFormat || 'comma-dot';
     let hideFraction = prefs.hideFraction || false;
@@ -369,7 +384,7 @@ class Budget extends Component {
             //   }
             editMode={editMode}
             onEditMode={flag => this.setState({ editMode: flag })}
-            onShowBudgetDetails={this.onShowBudgetDetails}
+            onShowBudgetSummary={this.onShowBudgetSummary}
             onPrevMonth={this.onPrevMonth}
             onNextMonth={this.onNextMonth}
             onSaveGroup={this.onSaveGroup}
@@ -383,7 +398,9 @@ class Budget extends Component {
             onOpenActionSheet={() => {}} //this.onOpenActionSheet}
             onBudgetAction={applyBudgetAction}
             onRefresh={onRefresh}
+            onSwitchBudgetType={this.onSwitchBudgetType}
             savePrefs={savePrefs}
+            pushModal={pushModal}
           />
         )}
       </SyncRefresh>

@@ -21,13 +21,13 @@ export default function HoverTarget({
 }: HoverTargetProps) {
   let [hovered, setHovered] = useState(false);
 
-  const onMouseEnter = useCallback(() => {
+  const onPointerEnter = useCallback(() => {
     if (!disabled) {
       setHovered(true);
     }
   }, [disabled]);
 
-  const onMouseLeave = useCallback(() => {
+  const onPointerLeave = useCallback(() => {
     if (!disabled) {
       setHovered(false);
     }
@@ -42,8 +42,8 @@ export default function HoverTarget({
   return (
     <View style={style}>
       <View
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
         style={contentStyle}
       >
         {children}
