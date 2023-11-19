@@ -116,9 +116,6 @@ type StackedBarGraphProps = {
   data;
   balanceTypeOp;
   compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
 };
 
 function StackedBarGraph({
@@ -126,17 +123,8 @@ function StackedBarGraph({
   data,
   balanceTypeOp,
   compact,
-  domain,
 }: StackedBarGraphProps) {
   const colorScale = getColorScale('qualitative');
-
-  const getVal = (obj, key) => {
-    if (balanceTypeOp === 'totalDebts') {
-      return -1 * obj[key].amount;
-    } else {
-      return obj[key].amount;
-    }
-  };
 
   return (
     <Container
@@ -167,18 +155,14 @@ function StackedBarGraph({
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
-                {data.groupBy
-                  .slice(0)
-                  .reverse()
-                  .map((c, index) => (
-                    <Bar
-                      key={c.id}
-                      dataKey={val => getVal(val, c.name)}
-                      name={c.name}
-                      stackId="a"
-                      fill={colorScale[index % colorScale.length]}
-                    />
-                  ))}
+                {data.groupBy.reverse().map((c, index) => (
+                  <Bar
+                    key={c.date}
+                    dataKey={c.name}
+                    stackId="a"
+                    fill={colorScale[index % colorScale.length]}
+                  />
+                ))}
               </BarChart>
             </div>
           </ResponsiveContainer>

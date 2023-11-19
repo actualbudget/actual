@@ -5,13 +5,13 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
 
-import { index } from '../util';
+import { index, indexStack } from '../util';
 
 export default function createSpreadsheet(
   start,
   end,
   groupBy,
-  typeItem,
+  balanceTypeOp,
   categories,
   selectedCategories,
   payees,
@@ -282,8 +282,11 @@ export default function createSpreadsheet(
       };
     });
 
-    const categoryGroupCalcData = catGroup.map(group => {
-      if (hidden || group.hidden === 0) {
+    const categoryGroupCalcData = catGroup
+      .filter(f => {
+        return (hidden || f.hidden === 0) && f;
+      })
+      .map(group => {
         let groupedStarting = 0;
         const mon = months.map(month => {
           let groupedAssets = 0;
@@ -317,10 +320,7 @@ export default function createSpreadsheet(
           hidden: group.hidden,
           balances: index(mon, 'date'),
         };
-      } else {
-        return null;
-      }
-    });
+      });
 
     const groupByData = groupBy === 'Group' ? categoryGroupCalcData : calcData;
 
@@ -393,26 +393,27 @@ export default function createSpreadsheet(
     });
 
     const stackedData = months.map(month => {
-      let perMonthAmounts = 0;
       const stacked = data.map(graph => {
         let stackAmounts = 0;
         if (graph.indexedMonthData[month]) {
-          perMonthAmounts += graph.indexedMonthData[month][typeItem];
-          stackAmounts += graph.indexedMonthData[month][typeItem];
+          stackAmounts += graph.indexedMonthData[month][balanceTypeOp];
         }
         return {
           name: graph.name,
           id: graph.id,
-          amount: stackAmounts,
+          amount: Math.abs(stackAmounts),
         };
       });
 
-      const indexedStack = index(stacked, 'name');
+      const indexedStack = indexStack(
+        stacked.filter(i => i[balanceTypeOp] !== 0),
+        'name',
+        'amount',
+      );
       return {
         // eslint-disable-next-line rulesdir/typography
         date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
         ...indexedStack,
-        totalTotals: perMonthAmounts,
       };
     });
 

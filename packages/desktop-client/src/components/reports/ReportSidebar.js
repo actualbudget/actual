@@ -118,10 +118,11 @@ export function ReportSidebar({
   return (
     <View
       style={{
-        width: 200,
+        width: 225,
         paddingTop: 10,
         paddingRight: 10,
         flexShrink: 0,
+        overflowY: 'auto',
       }}
     >
       <View style={{ flexShrink: 0 }}>
@@ -397,6 +398,7 @@ export function ReportSidebar({
         <View
           style={{
             marginTop: 10,
+            minHeight: 200,
           }}
         >
           <CategorySelector
