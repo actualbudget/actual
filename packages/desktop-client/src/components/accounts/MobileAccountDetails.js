@@ -106,109 +106,7 @@ export default function AccountDetails({
           top: 0,
         }}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            flexShrink: 0,
-            height: BUDGET_HEADER_HEIGHT,
-            width: '100%',
-            backgroundColor: theme.mobileHeaderBackground,
-          }}
-        >
-          <View
-            style={{
-              width: LEFT_RIGHT_FLEX_WIDTH,
-              flexDirection: 'row',
-            }}
-          >
-            <Button
-              type="bare"
-              style={{
-                color: theme.mobileHeaderText,
-                justifyContent: 'center',
-                margin: 10,
-                paddingLeft: 5,
-                paddingRight: 3,
-              }}
-              hoveredStyle={{
-                color: theme.mobileHeaderText,
-                background: theme.mobileHeaderTextHover,
-              }}
-            >
-              <Link
-                to={-1}
-                style={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  textDecoration: 'none',
-                }}
-              >
-                <CheveronLeft
-                  style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}
-                />
-                <Text
-                  style={{
-                    ...styles.text,
-                    fontWeight: 500,
-                    marginLeft: 5,
-                    marginRight: 5,
-                  }}
-                >
-                  Back
-                </Text>
-              </Link>
-            </Button>
-            <View
-              style={{
-                flex: 1,
-              }}
-            />
-          </View>
-          <View
-            style={{
-              flex: 1,
-              fontSize: 16,
-              fontWeight: 500,
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: theme.mobileHeaderText,
-            }}
-            role="heading"
-          >
-            {account.name}
-          </View>
-
-          <View
-            style={{
-              width: LEFT_RIGHT_FLEX_WIDTH,
-              flexDirection: 'row',
-            }}
-          >
-            <View
-              style={{
-                flex: 1,
-              }}
-            />
-            <ButtonLink
-              to="transactions/new"
-              type="bare"
-              aria-label="Add Transaction"
-              style={{
-                justifyContent: 'center',
-                padding: 10,
-                margin: 10,
-                color: theme.mobileHeaderText,
-              }}
-              hoveredStyle={{
-                color: theme.mobileHeaderText,
-                background: theme.mobileHeaderTextHover,
-              }}
-              activeStyle={{ background: 'transparent' }}
-            >
-              <Add width={20} height={20} style={{ margin: -5 }} />
-            </ButtonLink>
-          </View>
-        </View>
+        <AccountDetailsHeader account={account} />
         <Label title="BALANCE" style={{ marginTop: 10 }} />
         <CellValue
           binding={balance}
@@ -242,6 +140,115 @@ export default function AccountDetails({
           pushModal={pushModal}
         />
       </PullToRefresh>
+    </View>
+  );
+}
+
+function AccountDetailsHeader({ account }) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        flexShrink: 0,
+        height: BUDGET_HEADER_HEIGHT,
+        width: '100%',
+        backgroundColor: theme.mobileHeaderBackground,
+      }}
+    >
+      <View
+        style={{
+          width: LEFT_RIGHT_FLEX_WIDTH,
+          flexDirection: 'row',
+        }}
+      >
+        <Button
+          type="bare"
+          style={{
+            color: theme.mobileHeaderText,
+            justifyContent: 'center',
+            margin: 10,
+            paddingLeft: 5,
+            paddingRight: 3,
+          }}
+          hoveredStyle={{
+            color: theme.mobileHeaderText,
+            background: theme.mobileHeaderTextHover,
+          }}
+        >
+          <Link
+            to={-1}
+            style={{
+              ...styles.noTapHighlight,
+              alignItems: 'center',
+              display: 'flex',
+              textDecoration: 'none',
+            }}
+          >
+            <CheveronLeft
+              style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}
+            />
+            <Text
+              style={{
+                ...styles.text,
+                fontWeight: 500,
+                marginLeft: 5,
+                marginRight: 5,
+              }}
+            >
+              Back
+            </Text>
+          </Link>
+        </Button>
+        <View
+          style={{
+            flex: 1,
+          }}
+        />
+      </View>
+      <View
+        style={{
+          flex: 1,
+          fontSize: 16,
+          fontWeight: 500,
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: theme.mobileHeaderText,
+        }}
+        role="heading"
+      >
+        {account.name}
+      </View>
+
+      <View
+        style={{
+          width: LEFT_RIGHT_FLEX_WIDTH,
+          flexDirection: 'row',
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+          }}
+        />
+        <ButtonLink
+          to="transactions/new"
+          type="bare"
+          aria-label="Add Transaction"
+          style={{
+            justifyContent: 'center',
+            padding: 10,
+            margin: 10,
+            color: theme.mobileHeaderText,
+          }}
+          hoveredStyle={{
+            color: theme.mobileHeaderText,
+            background: theme.mobileHeaderTextHover,
+          }}
+          activeStyle={{ background: 'transparent' }}
+        >
+          <Add width={20} height={20} style={{ margin: -5 }} />
+        </ButtonLink>
+      </View>
     </View>
   );
 }
