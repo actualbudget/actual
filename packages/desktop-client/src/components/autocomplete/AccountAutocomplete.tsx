@@ -152,6 +152,7 @@ function defaultRenderGroupHeader(props: AccountGroupHeaderProps): ReactNode {
 type AccountItemProps = {
   item: AccountEntity;
   className?: string;
+  style?: CSSProperties;
   highlighted?: boolean;
   embedded?: boolean;
 };

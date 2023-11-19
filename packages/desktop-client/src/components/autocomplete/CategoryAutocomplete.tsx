@@ -276,6 +276,7 @@ function defaultRenderSplitTransactionButton(
 type CategoryItemProps = {
   item: CategoryEntity & { group?: CategoryGroupEntity };
   className?: string;
+  style?: CSSProperties;
   highlighted?: boolean;
   embedded?: boolean;
 };

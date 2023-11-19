@@ -450,6 +450,7 @@ function defaultRenderGroupHeader(props: PayeeGroupHeaderProps): ReactNode {
 type PayeeItemProps = {
   item: PayeeEntity;
   className?: string;
+  style?: CSSProperties;
   highlighted?: boolean;
   embedded?: boolean;
 };
