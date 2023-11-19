@@ -28,7 +28,6 @@ import {
   deleteGroup,
 } from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { type Handlers } from 'loot-core/src/types/handlers';
 import { type GlobalPrefs, type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { type BoundActions, useActions } from '../../hooks/useActions';
@@ -40,11 +39,11 @@ import View from '../common/View';
 import { TitlebarContext, type TitlebarContextValue } from '../Titlebar';
 
 import DynamicBudgetTable from './DynamicBudgetTable';
-import { getValidMonthBounds } from './MonthsContext';
-import * as report from './report/components';
+import * as report from './report/ReportComponents';
 import { ReportProvider } from './report/ReportContext';
-import * as rollover from './rollover/rollover-components';
+import * as rollover from './rollover/RolloverComponents';
 import { RolloverContext } from './rollover/RolloverContext';
+import { prewarmAllMonths, prewarmMonth, switchBudgetType } from './util';
 
 type ReportComponents = {
   SummaryComponent: typeof report.BudgetSummary;
@@ -131,7 +130,14 @@ function Budget(props: BudgetProps) {
       let { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
 
-      prewarmAllMonths({ start, end }, budgetType);
+      await prewarmAllMonths(
+        budgetType,
+        props.spreadsheet,
+        { start, end },
+        prewarmStartMonth,
+      );
+
+      setInitialized(true);
     }
 
     run();
@@ -185,36 +191,6 @@ function Budget(props: BudgetProps) {
     });
   }, [props.accountId]);
 
-  const prewarmMonth = async (month, type = null) => {
-    type = type || props.budgetType;
-
-    let method: keyof Handlers =
-      type === 'report' ? 'report-budget-month' : 'rollover-budget-month';
-
-    let values = await send(method, { month });
-
-    for (let value of values) {
-      props.spreadsheet.prewarmCache(value.name, value);
-    }
-  };
-
-  async function prewarmAllMonths(bounds, type = null) {
-    let numMonths = 3;
-
-    const startMonth = props.startMonth || currentMonth;
-
-    bounds = getValidMonthBounds(
-      bounds,
-      monthUtils.subMonths(startMonth, 1),
-      monthUtils.addMonths(startMonth, numMonths + 1),
-    );
-    let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
-
-    await Promise.all(months.map(month => prewarmMonth(month, type)));
-
-    setInitialized(true);
-  }
-
   const onMonthSelect = async (month, numDisplayed) => {
     setPrewarmStartMonth(month);
 
@@ -230,10 +206,18 @@ function Budget(props: BudgetProps) {
     // but it will just load in some unnecessary data.
     if (month < startMonth) {
       // pre-warm prev month
-      await prewarmMonth(monthUtils.subMonths(month, 1));
+      await prewarmMonth(
+        props.budgetType,
+        props.spreadsheet,
+        monthUtils.subMonths(month, 1),
+      );
     } else if (month > startMonth) {
       // pre-warm next month
-      await prewarmMonth(monthUtils.addMonths(month, numDisplayed));
+      await prewarmMonth(
+        props.budgetType,
+        props.spreadsheet,
+        monthUtils.addMonths(month, numDisplayed),
+      );
     }
 
     if (warmingMonth === month) {
@@ -425,14 +409,13 @@ function Budget(props: BudgetProps) {
   const onTitlebarEvent = async msg => {
     switch (msg) {
       case 'budget/switch-type': {
-        let type = props.budgetType;
-        let newType = type === 'rollover' ? 'report' : 'rollover';
-
-        props.spreadsheet.disableObservers();
-        await send('budget-set-type', { type: newType });
-        await prewarmAllMonths(bounds, newType);
-        props.spreadsheet.enableObservers();
-        props.loadPrefs();
+        await switchBudgetType(
+          props.budgetType,
+          props.spreadsheet,
+          bounds,
+          prewarmStartMonth,
+          () => props.loadPrefs(),
+        );
         break;
       }
       default:
