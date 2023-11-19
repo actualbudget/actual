@@ -2,7 +2,7 @@ import React, {
   useState,
   useContext,
   useEffect,
-  type ComponentProps,
+  type ComponentPropsWithoutRef,
 } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -19,21 +19,20 @@ import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../tooltips';
 import { addToBeBudgetedGroup } from '../util';
 
-type TransferTooltipProps = {
+type TransferTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
   initialAmount?: number;
   initialAmountName?: string;
   showToBeBudgeted?: boolean;
-  tooltipProps?: ComponentProps<typeof Tooltip>;
   onSubmit: (amount: number, category: unknown) => void;
-  onClose: () => void;
 };
 export default function TransferTooltip({
   initialAmount,
   initialAmountName,
   showToBeBudgeted,
-  tooltipProps,
   onSubmit,
   onClose,
+  position = 'bottom-right',
+  ...props
 }: TransferTooltipProps) {
   let spreadsheet = useSpreadsheet();
   let sheetName = useContext(NamespaceContext);
@@ -76,11 +75,11 @@ export default function TransferTooltip({
 
   return (
     <Tooltip
-      position="bottom-right"
+      position={position}
       width={200}
       style={{ padding: 10 }}
-      {...tooltipProps}
       onClose={onClose}
+      {...props}
     >
       <View style={{ marginBottom: 5 }}>Transfer this amount:</View>
       <View>
