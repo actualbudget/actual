@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import usePrivacyMode from 'loot-core/src/client/privacy';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
@@ -32,7 +33,7 @@ type PayloadChild = {
 };
 
 type PayloadItem = {
-  value: string;
+  value?;
   payload: {
     name: string;
     totalAssets: number | string;
@@ -105,7 +106,6 @@ const CustomTooltip = ({
     );
   }
 };
-
 /* Descoped for future PR
 type CustomLegendProps = {
   active?: boolean;
@@ -148,9 +148,16 @@ function BarGraph({
   compact,
   domain,
 }: BarGraphProps) {
+  let privacyMode = usePrivacyMode();
+
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
+
+  const CustomTick = (value: string, index: number) => {
+    if (!privacyMode) return value;
+    return '...';
+  };
 
   const getVal = obj => {
     if (balanceTypeOp === 'totalDebts') {
@@ -207,7 +214,7 @@ function BarGraph({
                     height={Math.sqrt(longestLabelLength) * 25}
                   />
                 )}
-                {!compact && <YAxis />}
+                {!compact && <YAxis tickFormatter={CustomTick} />}
                 {!compact && <ReferenceLine y={0} stroke="#000" />}
                 <Bar dataKey={val => getVal(val)} stackId="a">
                   {data[splitData]
