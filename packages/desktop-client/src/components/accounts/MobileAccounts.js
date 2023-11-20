@@ -21,11 +21,12 @@ function AccountHeader({ name, amount, style = {} }) {
   return (
     <View
       style={{
-        flex: '1 0 auto',
+        flex: 1,
         flexDirection: 'row',
         marginTop: 10,
         marginRight: 10,
         color: theme.pageTextLight,
+        width: '100%',
         ...style,
       }}
     >
@@ -54,13 +55,14 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
   return (
     <View
       style={{
-        flex: '1 0 auto',
+        flex: 1,
         flexDirection: 'row',
         backgroundColor: theme.tableBackground,
         boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
         borderRadius: 6,
         marginTop: 10,
         marginRight: 10,
+        width: '100%',
       }}
       data-testid="account"
     >
@@ -78,7 +80,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
       >
         <View
           style={{
-            flex: '1 auto',
+            flex: 1,
             margin: '10px 0',
           }}
         >
