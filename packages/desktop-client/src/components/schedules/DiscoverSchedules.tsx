@@ -3,7 +3,12 @@ import React, { useState } from 'react';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
+import type {
+  DiscoverScheduleEntity,
+  TransactionEntity,
+} from 'loot-core/src/types/models';
 
+import type { BoundActions } from '../../hooks/useActions';
 import useSelected, {
   useSelectedDispatch,
   useSelectedItems,
@@ -11,6 +16,7 @@ import useSelected, {
 } from '../../hooks/useSelected';
 import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
 import { theme } from '../../style';
+import type { CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
 import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
@@ -21,16 +27,22 @@ import DisplayId from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';
 
-let ROW_HEIGHT = 43;
+const ROW_HEIGHT = 43;
 
-function DiscoverSchedulesTable({ schedules, loading }) {
-  let selectedItems = useSelectedItems();
-  let dispatchSelected = useSelectedDispatch();
+function DiscoverSchedulesTable({
+  schedules,
+  loading,
+}: {
+  schedules: DiscoverScheduleEntity[];
+  loading: boolean;
+}) {
+  const selectedItems = useSelectedItems();
+  const dispatchSelected = useSelectedDispatch();
 
-  function renderItem({ item }) {
-    let selected = selectedItems.has(item.id);
-    let amountOp = item._conditions.find(c => c.field === 'amount').op;
-    let recurDescription = getRecurringDescription(item.date);
+  function renderItem({ item }: { item: DiscoverScheduleEntity }) {
+    const selected = selectedItems.has(item.id);
+    const amountOp = item._conditions.find(c => c.field === 'amount').op;
+    const recurDescription = getRecurringDescription(item.date);
 
     return (
       <Row
@@ -110,33 +122,53 @@ function DiscoverSchedulesTable({ schedules, loading }) {
   );
 }
 
-export default function DiscoverSchedules({ modalProps, actions }) {
-  let { data: schedules, isLoading } =
-    useSendPlatformRequest('schedule/discover');
-  if (!schedules) schedules = [];
+export default function DiscoverSchedules({
+  modalProps,
+  actions,
+}: {
+  modalProps: CommonModalProps;
+  actions: BoundActions;
+}) {
+  const { data, isLoading } = useSendPlatformRequest('schedule/discover') as {
+    data: DiscoverScheduleEntity[] | null;
+    isLoading: boolean;
+  };
 
-  let [creating, setCreating] = useState(false);
+  const schedules = data || [];
 
-  let selectedInst = useSelected('discover-schedules', schedules, []);
+  console.log({ schedules });
+
+  const [creating, setCreating] = useState(false);
+
+  const selectedInst = useSelected<DiscoverScheduleEntity>(
+    'discover-schedules',
+    schedules,
+    [],
+    item => item.amount !== -668,
+  );
 
   async function onCreate() {
-    let selected = schedules.filter(s => selectedInst.items.has(s.id));
+    const selected = schedules.filter(s => selectedInst.items.has(s.id));
     setCreating(true);
 
     for (let schedule of selected) {
-      let scheduleId = await send('schedule/create', {
+      const scheduleId = await send('schedule/create', {
         conditions: schedule._conditions,
+        schedule: {},
       });
 
       // Now query for matching transactions and link them automatically
-      let { filters } = await send('make-filters-from-conditions', {
+      const { filters } = await send('make-filters-from-conditions', {
         conditions: schedule._conditions,
       });
 
       if (filters.length > 0) {
-        let { data: transactions } = await runQuery(
+        const {
+          data: transactions,
+        }: { data: Pick<TransactionEntity, 'id'>[] } = await runQuery(
           q('transactions').filter({ $and: filters }).select('id'),
         );
+
         await send('transactions-batch-update', {
           updated: transactions.map(t => ({
             id: t.id,
