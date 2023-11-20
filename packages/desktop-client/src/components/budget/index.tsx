@@ -92,6 +92,7 @@ type BudgetProps = {
   moveCategory: BoundActions['moveCategory'];
   moveCategoryGroup: BoundActions['moveCategoryGroup'];
   loadPrefs: BoundActions['loadPrefs'];
+  addNotification: BoundActions['addNotification'];
 };
 
 function Budget(props: BudgetProps) {
@@ -241,7 +242,28 @@ function Budget(props: BudgetProps) {
     setIsAddingGroup(false);
   };
 
+  const categoryNameAlreadyExistsNotification = name => {
+    props.addNotification({
+      type: 'error',
+      message: `Category ‘${name}’ already exists in group (May be Hidden)`,
+    });
+  };
+
   const onSaveCategory = async category => {
+    let exists =
+      (await props.getCategories()).grouped
+        .filter(g => g.id === category.cat_group)[0]
+        .categories.filter(
+          c => c.name.toUpperCase() === category.name.toUpperCase(),
+        )
+        .filter(c => (category.id === 'new' ? true : c.id !== category.id))
+        .length > 0;
+
+    if (exists) {
+      categoryNameAlreadyExistsNotification(category.name);
+      return;
+    }
+
     if (category.id === 'new') {
       let id = await props.createCategory(
         category.name,
@@ -350,6 +372,21 @@ function Budget(props: BudgetProps) {
   };
 
   const onReorderCategory = async sortInfo => {
+    let cats = await props.getCategories();
+    let moveCandidate = cats.list.filter(c => c.id === sortInfo.id)[0];
+    let exists =
+      cats.grouped
+        .filter(g => g.id === sortInfo.groupId)[0]
+        .categories.filter(
+          c => c.name.toUpperCase() === moveCandidate.name.toUpperCase(),
+        )
+        .filter(c => c.id !== moveCandidate.id).length > 0;
+
+    if (exists) {
+      categoryNameAlreadyExistsNotification(moveCandidate.name);
+      return;
+    }
+
     props.moveCategory(sortInfo.id, sortInfo.groupId, sortInfo.targetId);
     setCategoryGroups(state =>
       moveCategory(state, sortInfo.id, sortInfo.groupId, sortInfo.targetId),
