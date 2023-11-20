@@ -15,8 +15,8 @@ import { groupById } from 'loot-core/src/shared/util';
 
 import useSelected, {
   SelectedProvider,
-  useSelectedItems,
   useSelectedDispatch,
+  useSelectedItems,
 } from '../../hooks/useSelected';
 import useStableCallback from '../../hooks/useStableCallback';
 import ExpandArrow from '../../icons/v0/ExpandArrow';

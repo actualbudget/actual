@@ -1,3 +1,5 @@
+import { type PayeeEntity } from 'loot-core/src/types/models';
+
 import Delete from '../../icons/v0/Delete';
 import Merge from '../../icons/v0/Merge';
 import { theme } from '../../style';
@@ -5,13 +7,21 @@ import Menu from '../common/Menu';
 import View from '../common/View';
 import { Tooltip } from '../tooltips';
 
+type PayeeMenuProps = {
+  payeesById: Record<PayeeEntity['id'], PayeeEntity>;
+  selectedPayees: Set<PayeeEntity['id']>;
+  onDelete: () => void;
+  onMerge: () => Promise<void>;
+  onClose: () => void;
+};
+
 export default function PayeeMenu({
   payeesById,
   selectedPayees,
   onDelete,
   onMerge,
   onClose,
-}) {
+}: PayeeMenuProps) {
   // Transfer accounts are never editable
   let isDisabled = [...selectedPayees].some(
     id => payeesById[id] == null || payeesById[id].transfer_acct,
