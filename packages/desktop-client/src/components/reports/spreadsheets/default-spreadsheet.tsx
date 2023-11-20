@@ -329,35 +329,39 @@ export default function createSpreadsheet(
       return { ...calc };
     });
 
-    const categoryGroupData = catGroup.map(group => {
-      const catData = group.categories.map(graph => {
-        let catMatch = null;
-        calcData.map(cat => {
-          if (
-            cat.id === null
-              ? cat.uncat_id === graph.uncat_id
-              : cat.id === graph.id
-          ) {
-            catMatch = cat;
+    const categoryGroupData = catGroup
+      .filter(f => {
+        return (hidden || f.hidden === 0) && f;
+      })
+      .map(group => {
+        const catData = group.categories.map(graph => {
+          let catMatch = null;
+          calcData.map(cat => {
+            if (
+              cat.id === null
+                ? cat.uncat_id === graph.uncat_id
+                : cat.id === graph.id
+            ) {
+              catMatch = cat;
+            }
+            return null;
+          });
+          const calcCat = catMatch && recalculate(catMatch, start, end);
+          return { ...calcCat };
+        });
+        let groupMatch = null;
+        categoryGroupCalcData.map(split => {
+          if (split.id === group.id) {
+            groupMatch = split;
           }
           return null;
         });
-        const calcCat = catMatch && recalculate(catMatch, start, end);
-        return { ...calcCat };
+        const calcGroup = groupMatch && recalculate(groupMatch, start, end);
+        return {
+          ...calcGroup,
+          categories: catData,
+        };
       });
-      let groupMatch = null;
-      categoryGroupCalcData.map(split => {
-        if (split.id === group.id) {
-          groupMatch = split;
-        }
-        return null;
-      });
-      const calcGroup = groupMatch && recalculate(groupMatch, start, end);
-      return {
-        ...calcGroup,
-        categories: catData,
-      };
-    });
 
     let totalAssets = 0;
     let totalDebts = 0;
