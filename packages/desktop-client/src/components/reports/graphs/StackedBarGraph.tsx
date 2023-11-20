@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import usePrivacyMode from 'loot-core/src/client/privacy';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
@@ -118,13 +119,14 @@ type StackedBarGraphProps = {
   compact: boolean;
 };
 
-function StackedBarGraph({
-  style,
-  data,
-  balanceTypeOp,
-  compact,
-}: StackedBarGraphProps) {
+function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
+  let privacyMode = usePrivacyMode();
   const colorScale = getColorScale('qualitative');
+
+  const CustomTick = (value: string, index: number) => {
+    if (!privacyMode) return value;
+    return '...';
+  };
 
   return (
     <Container
@@ -154,7 +156,7 @@ function StackedBarGraph({
                 />
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
-                <YAxis />
+                {!compact && <YAxis tickFormatter={CustomTick} />}
                 {data.groupBy.reverse().map((c, index) => (
                   <Bar
                     key={c.date}
