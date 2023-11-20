@@ -855,7 +855,7 @@ class AccountInternal extends PureComponent {
       }
     };
 
-    if (name === 'amount' || name === 'payee') {
+    if (name === 'amount' || name === 'payee' || name === 'account') {
       let { data } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids }, reconciled: true })

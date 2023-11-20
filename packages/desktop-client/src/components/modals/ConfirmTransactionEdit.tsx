@@ -1,13 +1,26 @@
+import React from 'react';
+
+import { type CommonModalProps } from '../../types/modals';
 import Block from '../common/Block';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import View from '../common/View';
 
-export default function ConfirmTransactionEdit({
+type ConfirmTransactionEditProps = {
+  modalProps: Partial<CommonModalProps>;
+  onConfirm: () => void;
+  confirmReason: string;
+};
+
+function ConfirmTransactionEdit({
   modalProps,
   onConfirm,
   confirmReason,
-}) {
+}: ConfirmTransactionEditProps) {
+  const _onConfirm = value => {
+    onConfirm?.();
+    modalProps.onClose();
+  };
   return (
     <Modal title="Reconciled Transaction" {...modalProps} style={{ flex: 0 }}>
       {() => (
@@ -61,8 +74,7 @@ export default function ConfirmTransactionEdit({
               <Button
                 type="primary"
                 onClick={() => {
-                  modalProps.onClose();
-                  onConfirm();
+                  _onConfirm();
                 }}
               >
                 Confirm
@@ -74,3 +86,5 @@ export default function ConfirmTransactionEdit({
     </Modal>
   );
 }
+
+export default ConfirmTransactionEdit;
