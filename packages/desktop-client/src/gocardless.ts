@@ -1,25 +1,33 @@
+import type { pushModal as pushModalAction } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-function _authorize(pushModal, upgradingAccountId, { onSuccess, onClose }) {
+function _authorize(
+  pushModal: typeof pushModalAction,
+  upgradingAccountId: string,
+  {
+    onSuccess,
+    onClose,
+  }: {
+    onSuccess: (data: { id: string; accounts: unknown[] }) => Promise<void>;
+    onClose?: () => void;
+  },
+) {
   pushModal('gocardless-external-msg', {
     onMoveExternal: async ({ institutionId }) => {
-      const accessValidForDays = 30;
       const resp = await send('gocardless-create-web-token', {
         upgradingAccountId,
         institutionId,
-        accessValidForDays,
+        accessValidForDays: 30,
       });
 
-      if (resp.error) return resp;
+      if ('error' in resp) return resp;
       const { link, requisitionId } = resp;
       window.Actual.openURLInBrowser(link);
 
-      let { error, data } = await send('gocardless-poll-web-token', {
+      return send('gocardless-poll-web-token', {
         upgradingAccountId,
         requisitionId,
       });
-
-      return { error, data };
     },
 
     onClose,
@@ -27,7 +35,10 @@ function _authorize(pushModal, upgradingAccountId, { onSuccess, onClose }) {
   });
 }
 
-export async function authorizeBank(pushModal, { upgradingAccountId } = {}) {
+export async function authorizeBank(
+  pushModal: typeof pushModalAction,
+  { upgradingAccountId }: { upgradingAccountId?: string } = {},
+) {
   _authorize(pushModal, upgradingAccountId, {
     onSuccess: async data => {
       pushModal('select-linked-accounts', {

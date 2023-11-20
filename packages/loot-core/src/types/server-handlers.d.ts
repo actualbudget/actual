@@ -196,9 +196,9 @@ export interface ServerHandlers {
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
   'gocardless-poll-web-token': (arg: {
-    upgradingAccountId;
-    requisitionId;
-  }) => Promise<{ error } | { data }>;
+    upgradingAccountId: string;
+    requisitionId: string;
+  }) => Promise<{ error: 'unknown' } | { error: 'timeout' } | { data }>;
 
   'gocardless-status': () => Promise<{ configured: boolean }>;
 
@@ -207,10 +207,17 @@ export interface ServerHandlers {
   'gocardless-poll-web-token-stop': () => Promise<'ok'>;
 
   'gocardless-create-web-token': (arg: {
-    upgradingAccountId;
-    institutionId;
-    accessValidForDays;
-  }) => Promise<unknown>;
+    upgradingAccountId: string;
+    institutionId: string;
+    accessValidForDays: number;
+  }) => Promise<
+    | {
+        requisitionId: string;
+        link: string;
+      }
+    | { error: 'unauthorized' }
+    | { error: 'failed' }
+  >;
 
   'gocardless-accounts-sync': (arg: { id }) => Promise<{
     errors;

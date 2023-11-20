@@ -67,7 +67,7 @@ type FinanceModals = {
       institutionId: string;
     }) => Promise<{ error: string } | { data: unknown }>;
     onClose?: () => void;
-    onSuccess: (data: unknown) => Promise<void>;
+    onSuccess: (data: { id: string; accounts: unknown[] }) => Promise<void>;
   };
 
   'create-encryption-key': { recreate?: boolean };
