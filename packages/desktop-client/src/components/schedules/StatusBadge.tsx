@@ -70,7 +70,7 @@ export function getStatusProps(status: StatusTypes) {
     case 'reconciled':
       return {
         color: theme.noticeTextLight,
-        backgroundColor: theme.altTableBackground,
+        backgroundColor: theme.tableRowHeaderBackground,
         Icon: Lock,
       };
     default:
