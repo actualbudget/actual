@@ -92,7 +92,6 @@ export function AmountInput({
           )}
         </Button>
       }
-      rightContent={undefined}
       value={value}
       focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
