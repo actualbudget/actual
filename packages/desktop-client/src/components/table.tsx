@@ -60,7 +60,7 @@ function fireBlur(onBlur, e) {
 }
 
 type FieldProps = ComponentProps<typeof View> & {
-  width: number | 'flex';
+  width: CSSProperties['width'];
   name?: string;
   truncate?: boolean;
   contentStyle?: CSSProperties;

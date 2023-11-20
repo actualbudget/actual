@@ -7,6 +7,7 @@ import React, {
   useRef,
   type Dispatch,
   type ReactElement,
+  type MouseEvent,
 } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -53,7 +54,7 @@ export default function useSelected<T extends Item>(
   name: string,
   items: T[],
   initialSelectedIds: string[],
-  selectAllFilter?: (T) => boolean,
+  selectAllFilter?: (item: T) => boolean,
 ) {
   let [state, dispatch] = useReducer(
     (state: State, action: Actions) => {
@@ -312,7 +313,7 @@ type SelectedProviderWithItemsProps<T extends Item> = {
   initialSelectedIds: string[];
   fetchAllIds: () => Promise<string[]>;
   registerDispatch?: (dispatch: Dispatch<Actions>) => void;
-  selectAllFilter?: (T) => boolean;
+  selectAllFilter?: (item: T) => boolean;
   children: ReactElement;
 };
 
