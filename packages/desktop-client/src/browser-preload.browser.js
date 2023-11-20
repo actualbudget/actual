@@ -129,7 +129,9 @@ global.Actual = {
     return worker;
   },
 
-  setTheme: () => {},
+  setTheme: theme => {
+    window.__actionsForMenu.saveGlobalPrefs({ theme: theme });
+  },
 };
 
 document.addEventListener('keydown', e => {
