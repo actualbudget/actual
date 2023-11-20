@@ -18,6 +18,7 @@ import {
   bindActionCreators,
 } from 'redux';
 import thunk from 'redux-thunk';
+import { type BoundActions } from './hooks/useActions';
 
 import * as actions from 'loot-core/src/client/actions';
 import * as constants from 'loot-core/src/client/constants';
@@ -25,6 +26,7 @@ import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import reducers from 'loot-core/src/client/reducers';
 import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
 import { send } from 'loot-core/src/platform/client/fetch';
+import type { Action, State } from 'loot-core/src/client/state-types';
 
 import App from './components/App';
 import { ServerProvider } from './components/ServerContext';
@@ -57,7 +59,10 @@ function rootReducer(state, action) {
 }
 
 const store = createStore(rootReducer, undefined, applyMiddleware(thunk));
-const boundActions = bindActionCreators(actions, store.dispatch);
+const boundActions = bindActionCreators(
+  actions,
+  store.dispatch,
+) as unknown as BoundActions;
 
 // Listen for global events from the server or main process
 handleGlobalEvents(boundActions, store);

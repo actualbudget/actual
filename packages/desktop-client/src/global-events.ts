@@ -1,14 +1,11 @@
 import * as sharedListeners from 'loot-core/src/client/shared-listeners';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
-import reducers from 'loot-core/src/client/reducers';
 import { type BoundActions } from './hooks/useActions';
-import { createStore } from 'redux';
+import { type Store } from 'redux';
+import type { State } from 'loot-core/src/client/state-types';
 
-export function handleGlobalEvents(
-  actions: BoundActions,
-  store: ReturnType<typeof createStore<{ test: unknown }>>,
-) {
+export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
   global.Actual.onEventFromMain('update-downloaded', (event, updateInfo) => {
     actions.setAppState({ updateInfo });
   });
