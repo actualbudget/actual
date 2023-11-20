@@ -12,6 +12,8 @@ import * as db from '../db';
 import { fromDateRepr } from '../models';
 import { Schedule as RSchedule } from '../util/rschedule';
 
+import { SchedulesHandlers } from './types/handlers';
+
 function takeDates(config) {
   let schedule = new RSchedule({ rrules: recurConfigToRSchedule(config) });
   return schedule
@@ -392,9 +394,11 @@ export async function findSchedules() {
     },
   );
 
-  let finalized = [];
+  const finalized = [];
   for (let schedule of schedules) {
     finalized.push(await findStartDate(schedule));
   }
-  return finalized;
+  return finalized as unknown as Awaited<
+    ReturnType<SchedulesHandlers['schedule/discover']>
+  >;
 }

@@ -1,3 +1,9 @@
+import {
+  AccountEntity,
+  PayeeEntity,
+  ScheduleEntity,
+} from '../../../types/models';
+
 export interface SchedulesHandlers {
   'schedule/create': (arg: {
     schedule: {
@@ -22,7 +28,27 @@ export interface SchedulesHandlers {
 
   'schedule/force-run-service': () => Promise<unknown>;
 
-  'schedule/discover': () => Promise<unknown>;
+  'schedule/discover': () => Promise<{
+    id: ScheduleEntity['id'];
+    account: AccountEntity['id'];
+    payee: PayeeEntity['id'];
+    date: ScheduleEntity['_date'];
+    amount: ScheduleEntity['_amount'];
+    _conditions: [
+      { op: 'is'; field: 'account'; value: AccountEntity['id'] },
+      { op: 'is'; field: 'payee'; value: PayeeEntity['id'] },
+      {
+        op: 'is' | 'isapprox';
+        field: 'date';
+        value: ScheduleEntity['_date'];
+      },
+      {
+        op: 'is' | 'isapprox';
+        field: 'amount';
+        value: ScheduleEntity['_amount'];
+      },
+    ];
+  }>;
 
   'schedule/get-upcoming-dates': (arg: {
     config;
