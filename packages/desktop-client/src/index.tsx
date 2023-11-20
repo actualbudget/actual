@@ -65,13 +65,6 @@ handleGlobalEvents(boundActions, store);
 declare global {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
-    // Actual: {
-    //   IS_DEV: boolean;
-    //   ACTUAL_VERSION: string;
-
-    //   openURLInBrowser: (url: string) => void;
-    // };
-
     __actionsForMenu: typeof actions;
 
     $send: typeof send;
