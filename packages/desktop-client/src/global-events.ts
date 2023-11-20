@@ -1,30 +1,27 @@
 import * as sharedListeners from 'loot-core/src/client/shared-listeners';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
+import reducers from 'loot-core/src/client/reducers';
+import { type BoundActions } from './hooks/useActions';
+import { createStore } from 'redux';
 
-export function handleGlobalEvents(actions, store) {
-  global.Actual.onEventFromMain('update-downloaded', (event, info) => {
-    actions.setAppState({ updateInfo: info });
+export function handleGlobalEvents(
+  actions: BoundActions,
+  store: ReturnType<typeof createStore<{ test: unknown }>>,
+) {
+  global.Actual.onEventFromMain('update-downloaded', (event, updateInfo) => {
+    actions.setAppState({ updateInfo });
   });
 
-  global.Actual.onEventFromMain('update-error', msg => {
+  global.Actual.onEventFromMain('update-error', () => {
     // Ignore errors. We don't want to constantly bug the user if they
     // always have a flaky connection or have intentionally disabled
     // updates. They will see the error in the about page if they try
     // to update.
   });
 
-  listen('server-error', info => {
+  listen('server-error', () => {
     actions.addGenericErrorNotification();
-  });
-
-  listen('update-loading-status', status => {
-    switch (status) {
-      case 'updating':
-        actions.updateStatusText('Updating...');
-        break;
-      default:
-    }
   });
 
   listen('orphaned-payees', ({ orphanedIds, updatedPayeeIds }) => {
@@ -36,7 +33,7 @@ export function handleGlobalEvents(actions, store) {
   });
 
   listen('schedules-offline', ({ payees }) => {
-    actions.pushModal(`schedule-posts-offline-notification`, { payees });
+    actions.pushModal('schedule-posts-offline-notification', { payees });
   });
 
   // This is experimental: we sync data locally automatically when
@@ -71,7 +68,7 @@ export function handleGlobalEvents(actions, store) {
 
   listen('undo-event', undoState => {
     let { tables, undoTag } = undoState;
-    let promises = [];
+    let promises: Promise<unknown>[] = [];
 
     if (
       tables.includes('categories') ||

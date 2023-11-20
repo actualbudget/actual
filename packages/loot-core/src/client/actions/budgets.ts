@@ -8,19 +8,6 @@ import { closeModal, pushModal } from './modals';
 import { loadPrefs, loadGlobalPrefs } from './prefs';
 import type { Dispatch, GetState } from './types';
 
-export function updateStatusText(text: string | null) {
-  return (dispatch: Dispatch, getState: GetState) => {
-    const { loadingText } = getState().app;
-    // The presence of any loading text puts the app in a "loading"
-    // state. We only ever want to update the text, we never want to
-    // set the app into a loading state. It's expected for workflows
-    // to set a blank loading text to show the loading screen.
-    if (loadingText != null) {
-      dispatch(setAppState({ loadingText: text }));
-    }
-  };
-}
-
 export function loadBudgets() {
   return async (dispatch: Dispatch) => {
     const budgets = await send('get-budgets');
