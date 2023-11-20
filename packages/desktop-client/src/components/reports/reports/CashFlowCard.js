@@ -56,7 +56,7 @@ function CashFlowCard() {
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
                   amount={income - expense}
-                  style={{ color: theme.altTableText, fontWeight: 300 }}
+                  style={{ color: theme.tableText, fontWeight: 300 }}
                 />
               </PrivacyFilter>
             </View>

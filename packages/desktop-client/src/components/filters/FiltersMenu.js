@@ -341,7 +341,7 @@ function ButtonType({ type, dispatch }) {
     <Button
       type="bare"
       onClick={() => dispatch({ type: 'select-field' })}
-      title={type && 'Filters'}
+      title={type !== 'reports' && 'Filters'}
     >
       {type === 'reports' ? (
         <Filter width={15} height={15} />

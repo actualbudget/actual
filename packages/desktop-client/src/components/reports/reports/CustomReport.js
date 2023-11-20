@@ -19,6 +19,7 @@ import { AppliedFilters } from '../../filters/FiltersMenu';
 import PrivacyFilter from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import Header from '../Header';
+import { LoadingIndicator } from '../Overview';
 import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportLegend, ReportSummary } from '../ReportSummary';
@@ -62,7 +63,7 @@ export default function CustomReport() {
   const [viewLabels, setViewLabels] = useState(false);
   //const [legend, setLegend] = useState([]);
   let legend = [];
-  const dateRangeLine = ReportOptions.dateRange.length - 1;
+  const dateRangeLine = ReportOptions.dateRange.length - 3;
   const months = monthUtils.rangeInclusive(start, end);
 
   useEffect(() => {
@@ -285,19 +286,24 @@ export default function CustomReport() {
                     </View>
                   </View>
                 )}
-                <ChooseGraph
-                  start={start}
-                  end={end}
-                  data={data}
-                  mode={mode}
-                  graphType={graphType}
-                  balanceType={balanceType}
-                  groupBy={groupBy}
-                  empty={empty}
-                  scrollWidth={scrollWidth}
-                  setScrollWidth={setScrollWidth}
-                  months={months}
-                />
+
+                {data ? (
+                  <ChooseGraph
+                    start={start}
+                    end={end}
+                    data={data}
+                    mode={mode}
+                    graphType={graphType}
+                    balanceType={balanceType}
+                    groupBy={groupBy}
+                    empty={empty}
+                    scrollWidth={scrollWidth}
+                    setScrollWidth={setScrollWidth}
+                    months={months}
+                  />
+                ) : (
+                  <LoadingIndicator />
+                )}
               </View>
               {(viewLegend || viewSummary) && (
                 <View

@@ -15,6 +15,7 @@ import {
   validateEnd,
   getLatestRange,
   getFullRange,
+  validateRange,
 } from './Header';
 import { ReportOptions } from './ReportOptions';
 
@@ -73,7 +74,39 @@ export function ReportSidebar({
   selectedCategories,
   setSelectedCategories,
 }) {
-  function onChangeMode(cond) {
+  const onSelectRange = cond => {
+    switch (cond) {
+      case 'All time':
+        onChangeDates(...getFullRange(allMonths));
+        break;
+      case 'Year to date':
+        onChangeDates(
+          ...validateRange(
+            allMonths,
+            monthUtils.getYearStart(monthUtils.currentMonth()),
+            monthUtils.currentMonth(),
+          ),
+        );
+        break;
+      case 'Last year':
+        onChangeDates(
+          ...validateRange(
+            allMonths,
+            monthUtils.getYearStart(
+              monthUtils.prevYear(monthUtils.currentMonth()),
+            ),
+            monthUtils.getYearEnd(
+              monthUtils.prevYear(monthUtils.currentDate()),
+            ),
+          ),
+        );
+        break;
+      default:
+        onChangeDates(...getLatestRange(ReportOptions.dateRangeMap.get(cond)));
+    }
+  };
+
+  const onChangeMode = cond => {
     setMode(cond);
     if (cond === 'time') {
       if (graphType === 'TableGraph') {
@@ -101,9 +134,9 @@ export function ReportSidebar({
         setTypeDisabled([]);
       }
     }
-  }
+  };
 
-  function onChangeSplit(cond) {
+  const onChangeSplit = cond => {
     setGroupBy(cond);
     if (mode === 'total') {
       if (graphType !== 'TableGraph') {
@@ -113,7 +146,7 @@ export function ReportSidebar({
     if (['Net'].includes(balanceType) && graphType !== 'TableGraph') {
       setBalanceType('Expense');
     }
-  }
+  };
 
   return (
     <View
@@ -302,7 +335,7 @@ export function ReportSidebar({
         <View
           style={{
             height: 1,
-            backgroundColor: theme.altPillBorder,
+            backgroundColor: theme.pillBorderDark,
             marginTop: 10,
             flexShrink: 0,
           }}
@@ -333,13 +366,7 @@ export function ReportSidebar({
             value={dateRange}
             onChange={e => {
               setDateRange(e);
-              if (e === 'All time') {
-                onChangeDates(...getFullRange(allMonths));
-              } else {
-                onChangeDates(
-                  ...getLatestRange(ReportOptions.dateRangeMap.get(e)),
-                );
-              }
+              onSelectRange(e);
             }}
             options={ReportOptions.dateRange.map(option => [
               option.description,
@@ -388,7 +415,7 @@ export function ReportSidebar({
         <View
           style={{
             height: 1,
-            backgroundColor: theme.altPillBorder,
+            backgroundColor: theme.pillBorderDark,
             marginTop: 10,
             flexShrink: 0,
           }}

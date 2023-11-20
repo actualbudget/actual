@@ -9,27 +9,47 @@ import Queue from '../../icons/v1/Queue';
 import Tag from '../../icons/v1/Tag';
 import { theme } from '../../style';
 import Button from '../common/Button';
+import HoverTarget from '../common/HoverTarget';
+import Text from '../common/Text';
 import View from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
+import { Tooltip } from '../tooltips';
 
 import { SaveReportMenuButton } from './SaveReport';
 
 function GraphButton({ selected, children, style, onSelect, title, disabled }) {
   return (
-    <Button
-      type="bare"
-      style={{
-        ...(selected && {
-          backgroundColor: theme.buttonBareBackgroundHover,
-        }),
-        ...style,
-      }}
-      onClick={onSelect}
-      title={title}
-      disabled={disabled}
+    <HoverTarget
+      style={{ flexShrink: 0 }}
+      renderContent={() => (
+        <Tooltip
+          position="bottom-left"
+          style={{
+            lineHeight: 1.5,
+            padding: '6px 10px',
+            backgroundColor: theme.menuAutoCompleteBackground,
+            color: theme.menuAutoCompleteText,
+          }}
+        >
+          <Text>{title}</Text>
+        </Tooltip>
+      )}
     >
-      {children}
-    </Button>
+      <Button
+        type="bare"
+        style={{
+          ...(selected && {
+            backgroundColor: theme.buttonBareBackgroundHover,
+          }),
+          ...style,
+        }}
+        onClick={onSelect}
+        title={title}
+        disabled={disabled}
+      >
+        {children}
+      </Button>
+    </HoverTarget>
   );
 }
 
@@ -67,6 +87,7 @@ export function ReportTopbar({
           //setViewLegend(false);
           setTypeDisabled([]);
         }}
+        style={{ marginRight: 15 }}
       >
         <Queue width={15} height={15} />
       </GraphButton>
@@ -86,7 +107,7 @@ export function ReportTopbar({
             setBalanceType('Expense');
           }
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
       >
         <ChartBar width={15} height={15} />
       </GraphButton>
@@ -99,7 +120,7 @@ export function ReportTopbar({
           //setViewLegend(false);
           setTypeDisabled([]);
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         disabled={mode === 'total' ? false : true}
       >
         <Chart width={15} height={15} />
@@ -112,7 +133,7 @@ export function ReportTopbar({
           setTypeDisabled(['Net']);
           setBalanceType('Expense');
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         disabled={mode === 'total' ? false : true}
       >
         <ChartPie width={15} height={15} />
@@ -121,8 +142,8 @@ export function ReportTopbar({
         style={{
           width: 1,
           height: 30,
-          backgroundColor: theme.altPillBorder,
-          marginLeft: 15,
+          backgroundColor: theme.pillBorderDark,
+          marginRight: 15,
           flexShrink: 0,
         }}
       />
@@ -131,7 +152,7 @@ export function ReportTopbar({
         onSelect={() => {
           setViewLegend(!viewLegend);
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         title="Show Legend"
         disabled={
           true //descoping for future PR
@@ -145,7 +166,7 @@ export function ReportTopbar({
         onSelect={() => {
           setViewSummary(!viewSummary);
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         title="Show Summary"
       >
         <Calculator width={15} height={15} />
@@ -155,7 +176,7 @@ export function ReportTopbar({
         onSelect={() => {
           setViewLabels(!viewLabels);
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         title="Show labels"
         disabled={true}
       >
@@ -165,13 +186,29 @@ export function ReportTopbar({
         style={{
           width: 1,
           height: 30,
-          backgroundColor: theme.altPillBorder,
+          backgroundColor: theme.pillBorderDark,
           marginRight: 15,
-          marginLeft: 15,
           flexShrink: 0,
         }}
       />
-      <FilterButton onApply={onApplyFilter} type="reports" />
+      <HoverTarget
+        style={{ flexShrink: 0 }}
+        renderContent={() => (
+          <Tooltip
+            position="bottom-left"
+            style={{
+              lineHeight: 1.5,
+              padding: '6px 10px',
+              backgroundColor: theme.menuAutoCompleteBackground,
+              color: theme.menuAutoCompleteText,
+            }}
+          >
+            <Text>Filters</Text>
+          </Tooltip>
+        )}
+      >
+        <FilterButton onApply={onApplyFilter} type="reports" />
+      </HoverTarget>
       <View style={{ flex: 1 }} />
       <SaveReportMenuButton />
     </View>
