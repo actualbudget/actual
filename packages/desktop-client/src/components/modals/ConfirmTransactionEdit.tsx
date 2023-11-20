@@ -17,10 +17,6 @@ function ConfirmTransactionEdit({
   onConfirm,
   confirmReason,
 }: ConfirmTransactionEditProps) {
-  const _onConfirm = value => {
-    onConfirm?.();
-    modalProps.onClose();
-  };
   return (
     <Modal title="Reconciled Transaction" {...modalProps} style={{ flex: 0 }}>
       {() => (
@@ -74,7 +70,8 @@ function ConfirmTransactionEdit({
               <Button
                 type="primary"
                 onClick={() => {
-                  _onConfirm();
+                  onConfirm();
+                  modalProps.onClose();
                 }}
               >
                 Confirm
