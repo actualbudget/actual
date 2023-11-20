@@ -3,6 +3,7 @@ import React, {
   Fragment,
   useMemo,
   type ReactNode,
+  type CSSProperties,
 } from 'react';
 
 import { css } from 'glamor';
@@ -77,7 +78,7 @@ function CategoryList({
                 style={{
                   backgroundColor:
                     highlightedIndex === idx
-                      ? theme.alt2MenuItemBackgroundHover
+                      ? theme.menuAutoCompleteBackgroundHover
                       : 'transparent',
                   borderRadius: embedded ? 4 : 0,
                   flexShrink: 0,
@@ -108,7 +109,7 @@ function CategoryList({
               {showGroup && (
                 <div
                   style={{
-                    color: theme.alt2MenuItemTextHeader,
+                    color: theme.menuAutoCompleteTextHeader,
                     padding: '4px 9px',
                     ...groupHeaderStyle,
                   }}
@@ -125,7 +126,7 @@ function CategoryList({
                   {
                     backgroundColor:
                       highlightedIndex === idx
-                        ? theme.alt2MenuItemBackgroundHover
+                        ? theme.menuAutoCompleteBackgroundHover
                         : 'transparent',
                     padding: 4,
                     paddingLeft: 20,
@@ -151,8 +152,9 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
-  groupHeaderStyle?: object;
+  groupHeaderStyle?: CSSProperties;
 };
+
 export default function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,

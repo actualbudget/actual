@@ -1,13 +1,18 @@
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
-import { extractScheduleConds } from '../../shared/schedules';
-import { amountToInteger, integerToAmount } from '../../shared/util';
+import { integerToAmount } from '../../shared/util';
 import * as db from '../db';
-import { getRuleForSchedule, getNextDate } from '../schedules/app';
 import { batchMessages } from '../sync';
 
 import { setBudget, getSheetValue, isReflectBudget, setGoal } from './actions';
 import { parse } from './goal-template.pegjs';
+import { goalsBy } from './goals/goalsBy';
+import { goalsPercentage } from './goals/goalsPercentage';
+import { findRemainder, goalsRemainder } from './goals/goalsRemainder';
+import { goalsSchedule } from './goals/goalsSchedule';
+import { goalsSimple } from './goals/goalsSimple';
+import { goalsSpend } from './goals/goalsSpend';
+import { goalsWeek } from './goals/goalsWeek';
 
 export async function applyTemplate({ month }) {
   await storeTemplates();
@@ -195,23 +200,8 @@ async function processTemplate(
     .sort()
     .filter((item, index, curr) => curr.indexOf(item) === index);
 
-  // find all remainder templates, place them at highest priority
-  let remainder_found;
-  let remainder_weight_total = 0;
-  let remainder_priority = priority_list[priority_list.length - 1] + 1;
-  for (let c = 0; c < categories.length; c++) {
-    let category = categories[c];
-    let templates = category_templates[category.id];
-    if (templates) {
-      for (let i = 0; i < templates.length; i++) {
-        if (templates[i].type === 'remainder') {
-          templates[i].priority = remainder_priority;
-          remainder_weight_total += templates[i].weight;
-          remainder_found = true;
-        }
-      }
-    }
-  }
+  let { remainder_found, remainder_priority, remainder_weight_total } =
+    findRemainder(priority_list, categories, category_templates);
   if (remainder_found) priority_list.push(remainder_priority);
 
   let sheetName = monthUtils.sheetForMonth(month);
@@ -299,7 +289,6 @@ async function processTemplate(
                 available_start,
                 budgetAvailable,
                 prev_budgeted,
-                force,
               );
             if (to_budget != null) {
               num_applied++;
@@ -439,7 +428,6 @@ async function applyCategoryTemplate(
   available_start,
   budgetAvailable,
   prev_budgeted,
-  force,
 ) {
   let current_month = `${month}-01`;
   let errors = [];
@@ -512,377 +500,119 @@ async function applyCategoryTemplate(
       }
     });
   }
-  let sheetName = monthUtils.sheetForMonth(month);
-  let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
-  let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
+
+  const sheetName = monthUtils.sheetForMonth(month);
+  const spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
+  const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
+  const last_month_balance = balance - spent - prev_budgeted;
   let to_budget = 0;
   let limit = 0;
   let hold = false;
   let limitCheck = false;
-  let last_month_balance = balance - spent - prev_budgeted;
   let remainder = 0;
+
   for (let l = 0; l < template_lines.length; l++) {
     let template = template_lines[l];
     switch (template.type) {
       case 'simple': {
-        // simple has 'monthly' and/or 'limit' params
-        if (template.limit != null) {
-          if (limitCheck) {
-            errors.push(`More than one “up to” limit found.`);
-            return { errors };
-          } else {
-            limitCheck = true;
-            limit = amountToInteger(template.limit.amount);
-            hold = template.limit.hold;
-          }
-        }
-        let increment = 0;
-        if (template.monthly != null) {
-          let monthly = amountToInteger(template.monthly);
-          increment = monthly;
-        } else {
-          increment = limit;
-        }
-        to_budget += increment;
+        let goalsReturn = await goalsSimple(
+          template,
+          limitCheck,
+          errors,
+          limit,
+          hold,
+          to_budget,
+        );
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
+        limit = goalsReturn.limit;
+        limitCheck = goalsReturn.limitCheck;
+        hold = goalsReturn.hold;
         break;
       }
       case 'by': {
-        // by has 'amount' and 'month' params
-        if (!isReflectBudget()) {
-          let target = 0;
-          let target_month = `${template_lines[l].month}-01`;
-          let num_months = monthUtils.differenceInCalendarMonths(
-            target_month,
-            current_month,
-          );
-          let repeat =
-            template.type === 'by'
-              ? template.repeat
-              : (template.repeat || 1) * 12;
-          while (num_months < 0 && repeat) {
-            target_month = monthUtils.addMonths(target_month, repeat);
-            num_months = monthUtils.differenceInCalendarMonths(
-              template_lines[l].month,
-              current_month,
-            );
-          }
-          if (l === 0) remainder = last_month_balance;
-          remainder = amountToInteger(template_lines[l].amount) - remainder;
-          if (remainder >= 0) {
-            target = remainder;
-            remainder = 0;
-          } else {
-            target = 0;
-            remainder = Math.abs(remainder);
-          }
-          let increment =
-            num_months >= 0 ? Math.round(target / (num_months + 1)) : 0;
-          to_budget += increment;
-        } else {
-          errors.push(`by templates are not supported in Report budgets`);
-        }
+        let goalsReturn = await goalsBy(
+          template_lines,
+          current_month,
+          template,
+          l,
+          remainder,
+          last_month_balance,
+          to_budget,
+          errors,
+        );
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
+        remainder = goalsReturn.remainder;
         break;
       }
       case 'week': {
-        // week has 'amount', 'starting', 'weeks' and optional 'limit' params
-        let amount = amountToInteger(template.amount);
-        let weeks = template.weeks != null ? Math.round(template.weeks) : 1;
-        if (template.limit != null) {
-          if (limit != null) {
-            errors.push(`More than one “up to” limit found.`);
-            return { errors };
-          } else {
-            limitCheck = true;
-            limit = amountToInteger(template.limit.amount);
-            hold = template.limit.hold;
-          }
-        }
-        let w = template.starting;
-        let next_month = monthUtils.addMonths(current_month, 1);
-
-        while (w < next_month) {
-          if (w >= current_month) {
-            to_budget += amount;
-          }
-          w = monthUtils.addWeeks(w, weeks);
-        }
+        let goalsReturn = await goalsWeek(
+          template,
+          limit,
+          limitCheck,
+          hold,
+          current_month,
+          to_budget,
+          errors,
+        );
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
+        limit = goalsReturn.limit;
+        limitCheck = goalsReturn.limitCheck;
+        hold = goalsReturn.hold;
         break;
       }
       case 'spend': {
-        // spend has 'amount' and 'from' and 'month' params
-        let from_month = `${template.from}-01`;
-        let to_month = `${template.month}-01`;
-        let already_budgeted = last_month_balance;
-        let first_month = true;
-        for (
-          let m = from_month;
-          monthUtils.differenceInCalendarMonths(current_month, m) > 0;
-          m = monthUtils.addMonths(m, 1)
-        ) {
-          let sheetName = monthUtils.sheetForMonth(
-            monthUtils.format(m, 'yyyy-MM'),
-          );
-
-          if (first_month) {
-            let spent = await getSheetValue(
-              sheetName,
-              `sum-amount-${category.id}`,
-            );
-            let balance = await getSheetValue(
-              sheetName,
-              `leftover-${category.id}`,
-            );
-            already_budgeted = balance - spent;
-            first_month = false;
-          } else {
-            let budgeted = await getSheetValue(
-              sheetName,
-              `budget-${category.id}`,
-            );
-            already_budgeted += budgeted;
-          }
-        }
-        let num_months = monthUtils.differenceInCalendarMonths(
-          to_month,
-          monthUtils._parse(current_month),
+        let goalsReturn = await goalsSpend(
+          template,
+          last_month_balance,
+          current_month,
+          to_budget,
+          errors,
+          category,
         );
-        let target = amountToInteger(template.amount);
-
-        let increment = 0;
-        if (num_months < 0) {
-          errors.push(`${template.month} is in the past.`);
-          return { errors };
-        } else if (num_months === 0) {
-          increment = target - already_budgeted;
-        } else {
-          increment = Math.round(
-            (target - already_budgeted) / (num_months + 1),
-          );
-        }
-        to_budget = increment;
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
         break;
       }
       case 'percentage': {
-        let percent = template.percent;
-        let monthlyIncome = 0;
-
-        if (template.category.toLowerCase() === 'all income') {
-          if (template.previous) {
-            let sheetName_lastmonth = monthUtils.sheetForMonth(
-              monthUtils.addMonths(month, -1),
-            );
-            monthlyIncome = await getSheetValue(
-              sheetName_lastmonth,
-              'total-income',
-            );
-          } else {
-            monthlyIncome = await getSheetValue(sheetName, `total-income`);
-          }
-        } else if (template.category.toLowerCase() === 'available funds') {
-          monthlyIncome = available_start;
-        } else {
-          let income_category = (await db.getCategories()).find(
-            c =>
-              c.is_income &&
-              c.name.toLowerCase() === template.category.toLowerCase(),
-          );
-          if (!income_category) {
-            errors.push(`Could not find category “${template.category}”`);
-            return { errors };
-          }
-          if (template.previous) {
-            let sheetName_lastmonth = monthUtils.sheetForMonth(
-              monthUtils.addMonths(month, -1),
-            );
-            monthlyIncome = await getSheetValue(
-              sheetName_lastmonth,
-              `sum-amount-${income_category.id}`,
-            );
-          } else {
-            monthlyIncome = await getSheetValue(
-              sheetName,
-              `sum-amount-${income_category.id}`,
-            );
-          }
-        }
-
-        let increment = Math.max(
-          0,
-          Math.round(monthlyIncome * (percent / 100)),
+        let goalsReturn = await goalsPercentage(
+          template,
+          month,
+          available_start,
+          sheetName,
+          to_budget,
+          errors,
         );
-        to_budget += increment;
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
         break;
       }
       case 'schedule': {
-        if (!scheduleFlag) {
-          scheduleFlag = true;
-          let template = template_lines.filter(t => t.type === 'schedule');
-          //in the case of multiple templates per category, schedules may have wrong priority level
-          let t = [];
-          let totalScheduledGoal = 0;
-
-          for (let ll = 0; ll < template.length; ll++) {
-            let { id: sid, completed: complete } = await db.first(
-              'SELECT * FROM schedules WHERE name = ?',
-              [template[ll].name],
-            );
-            console.log(complete);
-            let rule = await getRuleForSchedule(sid);
-            let conditions = rule.serialize().conditions;
-            let { date: dateConditions, amount: amountCondition } =
-              extractScheduleConds(conditions);
-            let target =
-              amountCondition.op === 'isbetween'
-                ? -Math.round(
-                    amountCondition.value.num1 + amountCondition.value.num2,
-                  ) / 2
-                : -amountCondition.value;
-            let next_date_string = getNextDate(
-              dateConditions,
-              monthUtils._parse(current_month),
-            );
-            let target_interval = dateConditions.value.interval
-              ? dateConditions.value.interval
-              : 1;
-            let target_frequency = dateConditions.value.frequency;
-            let isRepeating =
-              Object(dateConditions.value) === dateConditions.value &&
-              'frequency' in dateConditions.value;
-            let num_months = monthUtils.differenceInCalendarMonths(
-              next_date_string,
-              current_month,
-            );
-            t.push({
-              template: template[ll],
-              target: target,
-              next_date_string: next_date_string,
-              target_interval: target_interval,
-              target_frequency: target_frequency,
-              num_months: num_months,
-              completed: complete,
-            });
-            if (!complete) {
-              if (isRepeating) {
-                let monthlyTarget = 0;
-                let next_month = monthUtils.addMonths(
-                  current_month,
-                  t[ll].num_months + 1,
-                );
-                let next_date = getNextDate(
-                  dateConditions,
-                  monthUtils._parse(current_month),
-                );
-                while (next_date < next_month) {
-                  monthlyTarget += -target;
-                  next_date = monthUtils.addDays(next_date, 1);
-                  next_date = getNextDate(
-                    dateConditions,
-                    monthUtils._parse(next_date),
-                  );
-                }
-                t[ll].target = -monthlyTarget;
-                totalScheduledGoal += target;
-              }
-            } else {
-              errors.push(
-                `Schedule ${t[ll].template.name} is a completed schedule.`,
-              );
-            }
-          }
-
-          t = t.filter(t => t.completed === 0);
-          t = t.sort((a, b) => b.target - a.target);
-
-          let increment = 0;
-          if (balance >= totalScheduledGoal) {
-            for (let ll = 0; ll < t.length; ll++) {
-              if (t[ll].num_months < 0) {
-                errors.push(
-                  `Non-repeating schedule ${t[ll].template.name} was due on ${t[ll].next_date_string}, which is in the past.`,
-                );
-                break;
-              }
-              if (
-                (t[ll].template.full && t[ll].num_months === 0) ||
-                t[ll].target_frequency === 'weekly' ||
-                t[ll].target_frequency === 'daily'
-              ) {
-                increment += t[ll].target;
-              } else if (t[ll].template.full && t[ll].num_months > 0) {
-                increment += 0;
-              } else {
-                increment += t[ll].target / t[ll].target_interval;
-              }
-            }
-          } else if (balance < totalScheduledGoal) {
-            for (let ll = 0; ll < t.length; ll++) {
-              if (isReflectBudget()) {
-                if (!t[ll].template.full) {
-                  errors.push(
-                    `Report budgets require the full option for Schedules.`,
-                  );
-                  break;
-                }
-                if (t[ll].template.full && t[ll].num_months === 0) {
-                  to_budget += t[ll].target;
-                }
-              }
-              if (!isReflectBudget()) {
-                if (t[ll].num_months < 0) {
-                  errors.push(
-                    `Non-repeating schedule ${t[ll].template.name} was due on ${t[ll].next_date_string}, which is in the past.`,
-                  );
-                  break;
-                }
-                if (t[ll].template.full && t[ll].num_months > 0) {
-                  remainder = 0;
-                } else if (ll === 0 && !t[ll].template.full) {
-                  remainder = t[ll].target - last_month_balance;
-                } else {
-                  remainder = t[ll].target - remainder;
-                }
-                let tg = 0;
-                if (remainder >= 0) {
-                  tg = remainder;
-                  remainder = 0;
-                } else {
-                  tg = 0;
-                  remainder = Math.abs(remainder);
-                }
-                if (
-                  t[ll].template.full ||
-                  t[ll].num_months === 0 ||
-                  t[ll].target_frequency === 'weekly' ||
-                  t[ll].target_frequency === 'daily'
-                ) {
-                  increment += tg;
-                } else if (t[ll].template.full && t[ll].num_months > 0) {
-                  increment += 0;
-                } else {
-                  increment += tg / (t[ll].num_months + 1);
-                }
-              }
-            }
-          }
-          increment = Math.round(increment);
-          to_budget += increment;
-        }
+        let goalsReturn = await goalsSchedule(
+          scheduleFlag,
+          template_lines,
+          current_month,
+          balance,
+          remainder,
+          last_month_balance,
+          to_budget,
+          errors,
+        );
+        to_budget = goalsReturn.to_budget;
+        errors = goalsReturn.errors;
+        remainder = goalsReturn.remainder;
         break;
       }
       case 'remainder': {
-        if (remainder_scale >= 0) {
-          to_budget +=
-            remainder_scale === 0
-              ? Math.round(template.weight)
-              : Math.round(remainder_scale * template.weight);
-          // can over budget with the rounding, so checking that
-          if (to_budget >= budgetAvailable) {
-            to_budget = budgetAvailable;
-            // check if there is 1 cent leftover from rounding
-          } else if (budgetAvailable - to_budget === 1) {
-            to_budget = to_budget + 1;
-          }
-        }
+        let goalsReturn = await goalsRemainder(
+          template,
+          budgetAvailable,
+          remainder_scale,
+          to_budget,
+        );
+        to_budget = goalsReturn.to_budget;
         break;
       }
       case 'error':

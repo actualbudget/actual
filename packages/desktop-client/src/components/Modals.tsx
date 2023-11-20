@@ -9,7 +9,6 @@ import useCategories from '../hooks/useCategories';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
 import { type CommonModalProps } from '../types/modals';
 
-import BudgetSummary from './modals/BudgetSummary';
 import CloseAccount from './modals/CloseAccount';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
 import ConfirmTransactionEdit from './modals/ConfirmTransactionEdit';
@@ -26,8 +25,11 @@ import LoadBackup from './modals/LoadBackup';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
+import ReportBudgetSummary from './modals/ReportBudgetSummary';
+import RolloverBudgetSummary from './modals/RolloverBudgetSummary';
 import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
 import SingleInput from './modals/SingleInput';
+import SwitchBudgetType from './modals/SwitchBudgetType';
 import DiscoverSchedules from './schedules/DiscoverSchedules';
 import ScheduleDetails from './schedules/EditSchedule';
 import ScheduleLink from './schedules/LinkSchedule';
@@ -257,9 +259,19 @@ export default function Modals() {
             />
           );
 
-        case 'budget-summary':
+        case 'rollover-budget-summary':
           return (
-            <BudgetSummary
+            <RolloverBudgetSummary
+              key={name}
+              modalProps={modalProps}
+              month={options.month}
+              onBudgetAction={options.onBudgetAction}
+            />
+          );
+
+        case 'report-budget-summary':
+          return (
+            <ReportBudgetSummary
               key={name}
               modalProps={modalProps}
               month={options.month}
@@ -301,6 +313,15 @@ export default function Modals() {
               key={name}
               modalProps={modalProps}
               actions={actions}
+            />
+          );
+
+        case 'switch-budget-type':
+          return (
+            <SwitchBudgetType
+              key={name}
+              modalProps={modalProps}
+              onSwitch={options?.onSwitch}
             />
           );
 

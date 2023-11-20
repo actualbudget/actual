@@ -416,17 +416,19 @@ export class Condition {
   }
 }
 
-let ACTION_OPS = ['set', 'link-schedule'];
+type ActionOperator = 'set' | 'link-schedule';
+
+let ACTION_OPS: ActionOperator[] = ['set', 'link-schedule'];
 
 export class Action {
   field;
-  op;
+  op: ActionOperator;
   options;
   rawValue;
   type;
   value;
 
-  constructor(op, field, value, options, fieldTypes) {
+  constructor(op: ActionOperator, field, value, options, fieldTypes) {
     assert(
       ACTION_OPS.includes(op),
       'internal',

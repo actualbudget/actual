@@ -34,18 +34,59 @@ async function parseXml(content) {
 
 function getStmtTrn(data) {
   const ofx = data?.['OFX'];
-  const isCc = ofx?.['CREDITCARDMSGSRSV1'] != null;
-  const msg = isCc ? ofx?.['CREDITCARDMSGSRSV1'] : ofx?.['BANKMSGSRSV1'];
-  const stmtTrnRs = msg?.[`${isCc ? 'CC' : ''}STMTTRNRS`];
-  const stmtRs = stmtTrnRs?.[`${isCc ? 'CC' : ''}STMTRS`];
-  const bankTranList = stmtRs?.['BANKTRANLIST'];
-  // Could be an array or a single object.
-  // xml2js serializes single item to an object and multiple to an array.
-  const stmtTrn = bankTranList?.['STMTTRN'];
-  if (!Array.isArray(stmtTrn)) {
-    return [stmtTrn];
+  if (ofx?.['CREDITCARDMSGSRSV1'] != null) {
+    return getCcStmtTrn(ofx);
+  } else if (ofx?.['INVSTMTMSGSRSV1'] != null) {
+    return getInvStmtTrn(ofx);
+  } else {
+    return getBankStmtTrn(ofx);
   }
-  return stmtTrn;
+}
+
+function getBankStmtTrn(ofx) {
+  // Somes values could be an array or a single object.
+  // xml2js serializes single item to an object and multiple to an array.
+  const msg = ofx?.['BANKMSGSRSV1'];
+  const stmtTrnRs = getAsArray(msg?.['STMTTRNRS']);
+  const result = stmtTrnRs.flatMap(s => {
+    const stmtRs = s?.['STMTRS'];
+    const tranList = stmtRs?.['BANKTRANLIST'];
+    const stmtTrn = tranList?.['STMTTRN'];
+    return getAsArray(stmtTrn);
+  });
+  return result;
+}
+
+function getCcStmtTrn(ofx) {
+  // Some values could be an array or a single object.
+  // xml2js serializes single item to an object and multiple to an array.
+  const msg = ofx?.['CREDITCARDMSGSRSV1'];
+  const stmtTrnRs = getAsArray(msg?.['CCSTMTTRNRS']);
+  const result = stmtTrnRs.flatMap(s => {
+    const stmtRs = s?.['CCSTMTRS'];
+    const tranList = stmtRs?.['BANKTRANLIST'];
+    const stmtTrn = tranList?.['STMTTRN'];
+    return getAsArray(stmtTrn);
+  });
+  return result;
+}
+
+function getInvStmtTrn(ofx) {
+  // Somes values could be an array or a single object.
+  // xml2js serializes single item to an object and multiple to an array.
+  const msg = ofx?.['INVSTMTMSGSRSV1'];
+  const stmtTrnRs = getAsArray(msg?.['INVSTMTTRNRS']);
+  const result = stmtTrnRs.flatMap(s => {
+    const stmtRs = s?.['INVSTMTRS'];
+    const tranList = stmtRs?.['INVTRANLIST'];
+    const stmtTrn = tranList?.['INVBANKTRAN']?.flatMap(t => t?.['STMTTRN']);
+    return getAsArray(stmtTrn);
+  });
+  return result;
+}
+
+function getAsArray(value) {
+  return Array.isArray(value) ? value : [value];
 }
 
 function mapOfxTransaction(stmtTrn): OFXTransaction {

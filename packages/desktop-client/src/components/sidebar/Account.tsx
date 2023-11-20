@@ -41,7 +41,7 @@ type AccountProps = {
   updated?: boolean;
   style?: CSSProperties;
   outerStyle?: CSSProperties;
-  onDragChange?: OnDragChangeCallback;
+  onDragChange?: OnDragChangeCallback<{ id: string }>;
   onDrop?: OnDropCallback;
 };
 
@@ -103,7 +103,7 @@ function Account({
               // ignores it if it's active
               fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
-                backgroundColor: theme.sidebarItemBackgroundSelected,
+                backgroundColor: theme.sidebarItemAccentSelected,
                 transform: 'translateX(-4.5px)',
               },
             }}

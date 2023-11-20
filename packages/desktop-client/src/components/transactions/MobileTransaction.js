@@ -132,27 +132,6 @@ function lookupName(items, id) {
   return items.find(item => item.id === id).name;
 }
 
-// TODO: delete if not needed
-/* eslint-disable-next-line import/no-unused-modules */
-export function DateHeader({ date }) {
-  return (
-    <ListItem
-      style={{
-        height: 25,
-        backgroundColor: theme.mobileDateBackground,
-        borderColor: theme.tableBorder,
-        justifyContent: 'center',
-      }}
-    >
-      <Text
-        style={{ ...styles.text, fontSize: 13, color: theme.alt2TableText }}
-      >
-        {monthUtils.format(date, 'MMMM dd, yyyy')}
-      </Text>
-    </ListItem>
-  );
-}
-
 function Status({ status }) {
   let color;
 
@@ -164,7 +143,7 @@ function Status({ status }) {
       color = theme.warningText;
       break;
     case 'upcoming':
-      color = theme.alt2TableText;
+      color = theme.tableHeaderText;
       break;
     default:
   }
@@ -184,6 +163,8 @@ function Status({ status }) {
 }
 
 const LEFT_RIGHT_FLEX_WIDTH = 70;
+const BUDGET_HEADER_HEIGHT = 50;
+
 class TransactionEditInner extends PureComponent {
   constructor(props) {
     super(props);
@@ -378,11 +359,8 @@ class TransactionEditInner extends PureComponent {
       // <KeyboardAvoidingView>
       <View
         style={{
-          margin: 10,
-          marginTop: 3,
-          backgroundColor: theme.tableHeaderBackground,
-          flex: 1,
-          borderRadius: 4,
+          backgroundColor: theme.mobilePageBackground,
+          flexGrow: 1,
 
           // This shadow make the card "pop" off of the screen below
           // it
@@ -394,66 +372,98 @@ class TransactionEditInner extends PureComponent {
       >
         <View
           style={{
-            borderRadius: 4,
             overflow: 'hidden',
             display: 'flex',
-            flex: 'auto',
+            flexGrow: 1,
           }}
         >
           <View
             style={{
-              borderBottomWidth: 1,
-              borderColor: theme.tableBorder,
-              backgroundColor: theme.tableBackground,
-              alignItems: 'center',
-              flexDirection: 'row',
               flexShrink: 0,
-              justifyContent: 'space-between',
+              height: BUDGET_HEADER_HEIGHT,
+              flexDirection: 'row',
               width: '100%',
-              padding: 10,
+              backgroundColor: theme.mobileHeaderBackground,
             }}
           >
-            <Link
-              to={-1}
+            <View
               style={{
-                alignItems: 'center',
-                display: 'flex',
-                textDecoration: 'none',
                 width: LEFT_RIGHT_FLEX_WIDTH,
+                flexDirection: 'row',
               }}
             >
-              <CheveronLeft
+              <Button
+                type="bare"
                 style={{
-                  color: theme.formLabelText,
-                  width: 32,
-                  height: 32,
+                  ...styles.noTapHighlight,
+                  color: theme.mobileHeaderText,
+                  justifyContent: 'center',
+                  margin: 10,
+                  paddingLeft: 5,
+                  paddingRight: 3,
                 }}
-              />
-              <Text
-                style={{
-                  ...styles.text,
-                  color: theme.formLabelText,
-                  fontWeight: 500,
+                hoveredStyle={{
+                  color: theme.mobileHeaderText,
+                  background: theme.mobileHeaderTextHover,
                 }}
               >
-                Back
-              </Text>
-            </Link>
-            <TextOneLine
+                <Link
+                  to={-1}
+                  style={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <CheveronLeft
+                    style={{
+                      width: 30,
+                      height: 30,
+                      margin: -10,
+                      marginLeft: -5,
+                    }}
+                  />
+                  <Text
+                    style={{
+                      ...styles.text,
+                      fontWeight: 500,
+                      marginLeft: 5,
+                      marginRight: 5,
+                    }}
+                  >
+                    Back
+                  </Text>
+                </Link>
+              </Button>
+              <View
+                style={{
+                  flex: 1,
+                }}
+              />
+            </View>
+            <View
               style={{
-                color: theme.formInputText,
-                fontSize: 15,
-                fontWeight: 600,
-                userSelect: 'none',
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                color: theme.mobileHeaderText,
               }}
-              role="heading"
             >
-              {payeeId == null
-                ? adding
-                  ? 'New Transaction'
-                  : 'Transaction'
-                : descriptionPretty}
-            </TextOneLine>
+              <TextOneLine
+                style={{
+                  fontSize: 16,
+                  fontWeight: 500,
+                  userSelect: 'none',
+                }}
+                role="heading"
+              >
+                {payeeId == null
+                  ? adding
+                    ? 'New Transaction'
+                    : 'Transaction'
+                  : descriptionPretty}
+              </TextOneLine>
+            </View>
             {/* For centering the transaction title */}
             <View
               style={{
@@ -581,7 +591,7 @@ class TransactionEditInner extends PureComponent {
                 <InputField
                   type="date"
                   required
-                  style={{ color: 'canvastext', minWidth: '150px' }}
+                  style={{ color: theme.tableText, minWidth: '150px' }}
                   defaultValue={dateDefaultValue}
                   onUpdate={value =>
                     this.onEdit(
@@ -641,6 +651,7 @@ class TransactionEditInner extends PureComponent {
                 onChange={e =>
                   this.onQueueChange(transaction, 'notes', e.target.value)
                 }
+                style={{ marginBottom: 10 }}
               />
             </View>
 
@@ -653,7 +664,7 @@ class TransactionEditInner extends PureComponent {
                     paddingVertical: 5,
                     marginLeft: styles.mobileEditingPadding,
                     marginRight: styles.mobileEditingPadding,
-                    marginTop: 20,
+                    marginTop: 10,
                     marginBottom: 15,
                     backgroundColor: 'transparent',
                   }}
@@ -696,12 +707,12 @@ class TransactionEditInner extends PureComponent {
                 <SvgAdd
                   width={17}
                   height={17}
-                  style={{ color: theme.altFormLabelText }}
+                  style={{ color: theme.formLabelText }}
                 />
                 <Text
                   style={{
                     ...styles.text,
-                    color: theme.altFormLabelText,
+                    color: theme.formLabelText,
                     marginLeft: 5,
                   }}
                 >
@@ -774,7 +785,7 @@ function TransactionEditUnconnected(props) {
   let transactions = [];
   let adding = false;
   let deleted = false;
-  useSetThemeColor(theme.mobileTransactionViewTheme);
+  useSetThemeColor(theme.mobileViewTheme);
 
   useEffect(() => {
     // May as well update categories / accounts when transaction ID changes
@@ -895,7 +906,7 @@ function TransactionEditUnconnected(props) {
     <View
       style={{
         flex: 1,
-        backgroundColor: theme.buttonPrimaryBackground,
+        backgroundColor: theme.pageBackground,
       }}
     >
       <TransactionEditInner
@@ -1000,7 +1011,7 @@ class Transaction extends PureComponent {
       <Button
         onClick={() => onSelect(transaction)}
         style={{
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           border: 'none',
           width: '100%',
         }}
@@ -1035,7 +1046,7 @@ class Transaction extends PureComponent {
                   fontSize: 14,
                   fontWeight: added ? '600' : '400',
                   ...(prettyDescription === '' && {
-                    color: theme.altTableText,
+                    color: theme.tableTextLight,
                     fontStyle: 'italic',
                   }),
                 }}
@@ -1069,7 +1080,7 @@ class Transaction extends PureComponent {
                       height: 11,
                       color: cleared
                         ? theme.noticeTextLight
-                        : theme.altButtonBareText,
+                        : theme.pageTextSubdued,
                       marginRight: 5,
                     }}
                   />
@@ -1082,7 +1093,7 @@ class Transaction extends PureComponent {
                       fontWeight: '400',
                       color: prettyCategory
                         ? theme.tableTextSelected
-                        : theme.altMenuItemTextSelected,
+                        : theme.menuItemTextSelected,
                       fontStyle: prettyCategory ? null : 'italic',
                       textAlign: 'left',
                     }}
@@ -1166,6 +1177,7 @@ export class TransactionList extends Component {
                     display: 'flex',
                     justifyContent: 'center',
                     width: '100%',
+                    backgroundColor: theme.mobilePageBackground,
                   }}
                 >
                   <Text style={{ fontSize: 15 }}>No transactions</Text>
@@ -1274,10 +1286,10 @@ function ListBoxSection({ section, state }) {
         <div
           {...headingProps}
           className={`${css(styles.smallText, {
-            backgroundColor: theme.mobileDateBackground,
+            backgroundColor: theme.pageBackground,
             borderBottom: `1px solid ${theme.tableBorder}`,
             borderTop: `1px solid ${theme.tableBorder}`,
-            color: theme.alt2TableText,
+            color: theme.tableHeaderText,
             display: 'flex',
             justifyContent: 'center',
             paddingBottom: 4,

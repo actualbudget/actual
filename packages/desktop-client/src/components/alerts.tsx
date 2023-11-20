@@ -33,7 +33,7 @@ const Alert = ({
         padding: 10,
         flexDirection: 'row',
         '& a, & a:active, & a:visited': {
-          color: theme.altFormLabelText,
+          color: theme.formLabelText,
         },
         ...style,
       }}

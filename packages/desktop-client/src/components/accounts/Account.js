@@ -71,7 +71,7 @@ function EmptyMessage({ onAdd }) {
         </Button>
 
         <View
-          style={{ marginTop: 20, fontSize: 13, color: theme.alttableText }}
+          style={{ marginTop: 20, fontSize: 13, color: theme.tableTextLight }}
         >
           In the future, you can add accounts from the sidebar.
         </View>

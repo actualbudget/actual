@@ -128,6 +128,10 @@ global.Actual = {
   getServerSocket: async () => {
     return worker;
   },
+
+  setTheme: theme => {
+    window.__actionsForMenu.saveGlobalPrefs({ theme: theme });
+  },
 };
 
 document.addEventListener('keydown', e => {

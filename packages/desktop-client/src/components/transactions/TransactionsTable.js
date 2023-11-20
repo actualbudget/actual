@@ -880,7 +880,7 @@ const Transaction = memo(function Transaction(props) {
         ...style,
         ...(isPreview && {
           color: theme.tableTextInactive,
-          backgroundColor: !selected ? '#fcfcfc' : undefined,
+          backgroundColor: !selected ? theme.tableBackground : undefined,
           fontStyle: 'italic',
         }),
         ...(_unmatched && { opacity: 0.5 }),
@@ -1085,7 +1085,7 @@ const Transaction = memo(function Transaction(props) {
                     ? theme.warningText
                     : selected
                     ? theme.formLabelText
-                    : theme.altTableText,
+                    : theme.tableTextLight,
                 backgroundColor:
                   notes === 'missed'
                     ? theme.errorBackground
@@ -1093,7 +1093,7 @@ const Transaction = memo(function Transaction(props) {
                     ? theme.warningBackground
                     : selected
                     ? theme.formLabelBackground
-                    : theme.alt2TableBackground,
+                    : theme.pageBackground,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
@@ -1174,7 +1174,7 @@ const Transaction = memo(function Transaction(props) {
           valueStyle={valueStyle}
           style={{
             fontStyle: 'italic',
-            color: '#c0c0c0',
+            color: theme.pageTextSubdued,
             fontWeight: 300,
           }}
           inputProps={{

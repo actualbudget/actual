@@ -165,11 +165,11 @@ class AmountInput extends PureComponent {
           borderColor: theme.pillBorderSelected,
           borderRadius: 4,
           padding: 5,
-          backgroundColor: 'white',
+          backgroundColor: theme.tableBackground,
           ...style,
         }}
       >
-        <View style={{ overflowY: 'auto' }}>{input}</View>
+        <View style={{ overflowY: 'auto', overflowX: 'hidden' }}>{input}</View>
 
         {/* <Animated.View
           style={{

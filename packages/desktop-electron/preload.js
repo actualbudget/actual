@@ -54,4 +54,8 @@ contextBridge.exposeInMainWorld('Actual', {
   getServerSocket: () => {
     return socketPromise;
   },
+
+  setTheme: theme => {
+    ipcRenderer.send('set-theme', theme);
+  },
 });

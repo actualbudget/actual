@@ -45,8 +45,8 @@ export function getStatusProps(status: StatusTypes) {
       };
     case 'completed':
       return {
-        color: theme.alt2TableText,
-        backgroundColor: theme.altTableBackground,
+        color: theme.tableHeaderText,
+        backgroundColor: theme.tableRowHeaderBackground,
         Icon: FavoriteStar,
       };
     case 'pending':
@@ -57,14 +57,14 @@ export function getStatusProps(status: StatusTypes) {
       };
     case 'scheduled':
       return {
-        color: theme.menuItemText,
-        backgroundColor: theme.altTableBackground,
+        color: theme.tableRowHeaderText,
+        backgroundColor: theme.tableRowHeaderBackground,
         Icon: CalendarIcon,
       };
     case 'cleared':
       return {
         color: theme.noticeTextLight,
-        backgroundColor: theme.altTableBackground,
+        backgroundColor: theme.tableRowHeaderBackground,
         Icon: CheckCircle1,
       };
     case 'reconciled':
@@ -76,7 +76,7 @@ export function getStatusProps(status: StatusTypes) {
     default:
       return {
         color: theme.buttonNormalDisabledText,
-        backgroundColor: theme.altTableBackground,
+        backgroundColor: theme.tableRowHeaderBackground,
         Icon: CheckCircleHollow,
       };
   }
