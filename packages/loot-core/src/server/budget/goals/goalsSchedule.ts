@@ -26,7 +26,6 @@ export async function goalsSchedule(
         'SELECT * FROM schedules WHERE name = ?',
         [template[ll].name],
       );
-      console.log(complete);
       const rule = await getRuleForSchedule(sid);
       const conditions = rule.serialize().conditions;
       const { date: dateConditions, amount: amountCondition } =
@@ -90,6 +89,10 @@ export async function goalsSchedule(
                 dateConditions,
                 monthUtils._parse(next_date),
               );
+              if (!diffDays) {
+                // This can happen if the schedule has an end condition
+                break;
+              }
             }
           }
           t[ll].target = -monthlyTarget;
