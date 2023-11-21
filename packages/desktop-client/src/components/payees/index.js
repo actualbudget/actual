@@ -19,17 +19,14 @@ import useSelected, {
   useSelectedDispatch,
 } from '../../hooks/useSelected';
 import useStableCallback from '../../hooks/useStableCallback';
-import Delete from '../../icons/v0/Delete';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
-import Merge from '../../icons/v0/Merge';
 import { theme } from '../../style';
 import Button from '../common/Button';
-import Menu from '../common/Menu';
 import Search from '../common/Search';
 import View from '../common/View';
 import { TableHeader, Cell, SelectCell, useTableNavigator } from '../table';
-import { Tooltip } from '../tooltips';
 
+import PayeeMenu from './PayeeMenu';
 import PayeeTable from './PayeeTable';
 
 let getPayeesById = memoizeOne(payees => groupById(payees));
@@ -81,68 +78,6 @@ function EmptyMessage({ text, style }) {
     >
       {text}
     </View>
-  );
-}
-
-function PayeeMenu({ payeesById, selectedPayees, onDelete, onMerge, onClose }) {
-  // Transfer accounts are never editable
-  let isDisabled = [...selectedPayees].some(
-    id => payeesById[id] == null || payeesById[id].transfer_acct,
-  );
-
-  return (
-    <Tooltip
-      position="bottom"
-      width={250}
-      style={{ padding: 0 }}
-      onClose={onClose}
-    >
-      <Menu
-        onMenuSelect={type => {
-          onClose();
-          switch (type) {
-            case 'delete':
-              onDelete();
-              break;
-            case 'merge':
-              onMerge();
-              break;
-            default:
-          }
-        }}
-        footer={
-          <View
-            style={{
-              padding: 3,
-              fontSize: 11,
-              fontStyle: 'italic',
-              color: theme.pageTextSubdued,
-            }}
-          >
-            {[...selectedPayees]
-              .slice(0, 4)
-              .map(id => payeesById[id].name)
-              .join(', ') + (selectedPayees.size > 4 ? ', and more' : '')}
-          </View>
-        }
-        items={[
-          {
-            icon: Delete,
-            name: 'delete',
-            text: 'Delete',
-            disabled: isDisabled,
-          },
-          {
-            icon: Merge,
-            iconSize: 9,
-            name: 'merge',
-            text: 'Merge',
-            disabled: isDisabled || selectedPayees.size < 2,
-          },
-          Menu.line,
-        ]}
-      />
-    </Tooltip>
   );
 }
 
