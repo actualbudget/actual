@@ -219,7 +219,7 @@ export function getNumberFormat({ format, hideFraction } = numberFormatConfig) {
 
   switch (format) {
     case 'space-comma':
-      locale = 'en-ZA';
+      locale = 'en-SE';
       regex = /[^-0-9,]/g;
       separator = ',';
       break;

@@ -6,13 +6,21 @@ import { theme, styles, type CSSProperties } from '../style';
 import Text from './common/Text';
 import View from './common/View';
 
-function PageTitle({
-  name,
-  style,
-}: {
+type PageHeaderProps = {
   name: ReactNode;
   style?: CSSProperties;
-}) {
+  leftContent?: ReactNode;
+  rightContent?: ReactNode;
+};
+
+const HEADER_HEIGHT = 50;
+
+function PageHeader({
+  name,
+  style,
+  leftContent,
+  rightContent,
+}: PageHeaderProps) {
   const { isNarrowWidth } = useResponsive();
 
   if (isNarrowWidth) {
@@ -23,16 +31,42 @@ function PageTitle({
           backgroundColor: theme.mobilePageBackground,
           color: theme.mobileModalText,
           flexDirection: 'row',
-          flex: '1 0 auto',
-          fontSize: 18,
-          fontWeight: 500,
-          height: 50,
-          justifyContent: 'center',
-          overflowY: 'auto',
+          flexShrink: 0,
+          height: HEADER_HEIGHT,
           ...style,
         }}
       >
-        {name}
+        <View
+          style={{
+            flexBasis: '25%',
+            justifyContent: 'flex-start',
+            flexDirection: 'row',
+          }}
+        >
+          {leftContent}
+        </View>
+        <View
+          style={{
+            alignItems: 'center',
+            flexDirection: 'row',
+            flexBasis: '50%',
+            fontSize: 18,
+            fontWeight: 500,
+            justifyContent: 'center',
+            overflowY: 'auto',
+          }}
+        >
+          {name}
+        </View>
+        <View
+          style={{
+            flexBasis: '25%',
+            justifyContent: 'flex-end',
+            flexDirection: 'row',
+          }}
+        >
+          {rightContent}
+        </View>
       </View>
     );
   }
@@ -51,25 +85,33 @@ function PageTitle({
   );
 }
 
+type PageProps = {
+  title: ReactNode;
+  titleStyle?: CSSProperties;
+  headerLeftContent?: ReactNode;
+  headerRightContent?: ReactNode;
+  children: ReactNode;
+};
+
 export function Page({
   title,
-  children,
   titleStyle,
-}: {
-  title: ReactNode;
-  children: ReactNode;
-  titleStyle?: CSSProperties;
-}) {
+  headerLeftContent,
+  headerRightContent,
+  children,
+}: PageProps) {
   let { isNarrowWidth } = useResponsive();
   let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
 
   return (
     <View style={isNarrowWidth ? undefined : styles.page}>
-      <PageTitle
+      <PageHeader
         name={title}
+        leftContent={headerLeftContent}
+        rightContent={headerRightContent}
         style={{
           ...titleStyle,
-          paddingInline: HORIZONTAL_PADDING,
+          ...(!isNarrowWidth && { paddingInline: HORIZONTAL_PADDING }),
         }}
       />
       <View

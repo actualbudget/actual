@@ -93,6 +93,7 @@ type FinanceModals = {
   'schedules-discover': null;
 
   'schedule-posts-offline-notification': null;
+  'switch-budget-type': { onSwitch: () => void };
 };
 
 export type PushModalAction = {

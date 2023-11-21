@@ -3,6 +3,9 @@
   "version": "6.2.1",
   "license": "MIT",
   "description": "An API for Actual",
+  "engines": {
+    "node": ">=18.12.0"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
