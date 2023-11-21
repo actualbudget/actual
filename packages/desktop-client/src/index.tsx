@@ -69,7 +69,7 @@ handleGlobalEvents(boundActions, store);
 declare global {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
-    __actionsForMenu: typeof actions;
+    __actionsForMenu: BoundActions;
 
     $send: typeof send;
     $query: typeof runQuery;
