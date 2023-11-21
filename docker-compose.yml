@@ -1,7 +1,7 @@
 version: '3'
 services:
   actual_server:
-    image: actualbudget/actual-server:latest
+    image: docker.io/actualbudget/actual-server:latest
     ports:
       # This line makes Actual available at port 5006 of the device you run the server on,
       # i.e. http://localhost:5006. You can change the first number to change the port, if you want.
