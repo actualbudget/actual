@@ -833,12 +833,12 @@ let rowStyle: CSSProperties = {
   width: '100%',
 };
 
-type TableHandleRef = {
-  scrollTo: (id: number, alignment?: string) => void;
+type TableHandleRef<T extends TableItem = TableItem> = {
+  scrollTo: (id: T['id'], alignment?: string) => void;
   scrollToTop: () => void;
-  getScrolledItem: () => TableItem['id'];
+  getScrolledItem: () => T['id'];
   setRowAnimation: (flag) => void;
-  edit(id: number, field, shouldScroll): void;
+  edit(id: number, field: string, shouldScroll: boolean): void;
   anchor(): void;
   unanchor(): void;
   isAnchored(): boolean;
@@ -848,7 +848,7 @@ type TableWithNavigatorProps = TableProps & {
   fields;
 };
 export const TableWithNavigator = forwardRef<
-  TableHandleRef,
+  TableHandleRef<TableItem>,
   TableWithNavigatorProps
 >(({ fields, ...props }, ref) => {
   let navigator = useTableNavigator(props.items, fields);
@@ -887,7 +887,7 @@ type TableProps<T extends TableItem = TableItem> = {
 };
 
 export const Table: <T extends TableItem>(
-  props: TableProps<T> & { ref?: Ref<TableHandleRef> },
+  props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
 ) => ReactElement = forwardRef<TableHandleRef, TableProps>(
   (
     {

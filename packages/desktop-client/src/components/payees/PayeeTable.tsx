@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useState,
   type ComponentProps,
+  type ComponentRef,
 } from 'react';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
@@ -27,25 +28,22 @@ type PayeeTableProps = {
   'onUpdate' | 'onViewRules' | 'onCreateRule'
 >;
 
-const PayeeTable = forwardRef(
+const PayeeTable = forwardRef<
+  ComponentRef<typeof Table<PayeeWithId>>,
+  PayeeTableProps
+>(
   (
-    {
-      payees,
-      ruleCounts,
-      navigator,
-      onUpdate,
-      onViewRules,
-      onCreateRule,
-    }: PayeeTableProps,
-    ref: ComponentProps<typeof Table>['ref'],
+    { payees, ruleCounts, navigator, onUpdate, onViewRules, onCreateRule },
+    ref,
   ) => {
     let [hovered, setHovered] = useState(null);
     let selectedItems = useSelectedItems();
 
     useLayoutEffect(() => {
       let firstSelected = [...selectedItems][0] as string;
-      // @ts-expect-error something off with this type (see: Table L967)
-      ref.current.scrollTo(firstSelected, 'center');
+      if (typeof ref !== 'function') {
+        ref.current.scrollTo(firstSelected, 'center');
+      }
       navigator.onEdit(firstSelected, 'select');
     }, []);
 
