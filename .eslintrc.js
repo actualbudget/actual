@@ -92,6 +92,8 @@ module.exports = {
     //   },
     // ],
 
+    'no-var': 'warn',
+
     'import/extensions': [
       'warn',
       'never',
