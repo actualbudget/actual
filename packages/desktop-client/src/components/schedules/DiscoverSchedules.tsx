@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type SchedulesHandlers } from 'loot-core/src/server/schedules/types/handlers';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import type {
   DiscoverScheduleEntity,
@@ -130,13 +131,11 @@ export default function DiscoverSchedules({
   actions: BoundActions;
 }) {
   const { data, isLoading } = useSendPlatformRequest('schedule/discover') as {
-    data: DiscoverScheduleEntity[] | null;
+    data: Awaited<ReturnType<SchedulesHandlers['schedule/discover']>> | null;
     isLoading: boolean;
   };
 
   const schedules = data || [];
-
-  console.log({ schedules });
 
   const [creating, setCreating] = useState(false);
 

@@ -1,5 +1,3 @@
-import { SchedulesHandlers } from '../../server/schedules/types/handlers';
-
 import type { AccountEntity } from './account';
 import type { PayeeEntity } from './payee';
 import type { RuleEntity } from './rule';
@@ -34,6 +32,24 @@ export interface ScheduleEntity {
   _actions: unknown;
 }
 
-export type DiscoverScheduleEntity = Awaited<
-  ReturnType<SchedulesHandlers['schedule/discover']>
->;
+export type DiscoverScheduleEntity = {
+  id: ScheduleEntity['id'];
+  account: AccountEntity['id'];
+  payee: PayeeEntity['id'];
+  date: ScheduleEntity['_date'];
+  amount: ScheduleEntity['_amount'];
+  _conditions: [
+    { op: 'is'; field: 'account'; value: AccountEntity['id'] },
+    { op: 'is'; field: 'payee'; value: PayeeEntity['id'] },
+    {
+      op: 'is' | 'isapprox';
+      field: 'date';
+      value: ScheduleEntity['_date'];
+    },
+    {
+      op: 'is' | 'isapprox';
+      field: 'amount';
+      value: ScheduleEntity['_amount'];
+    },
+  ];
+};
