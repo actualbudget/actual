@@ -13,13 +13,12 @@ import Text from '../../common/Text';
 import View from '../../common/View';
 import CellValue from '../../spreadsheet/CellValue';
 import useFormat from '../../spreadsheet/useFormat';
-import useSheetValue from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell } from '../../table';
 import { Tooltip, useTooltip } from '../../tooltips';
 import BalanceWithCarryover from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
-export { BudgetSummary } from './BudgetSummary';
+import BalanceTooltip from './BalanceTooltip';
 
 let headerLabelStyle: CSSProperties = {
   flex: 1,
@@ -140,48 +139,6 @@ export const GroupMonth = memo(function GroupMonth({ group }: GroupMonthProps) {
     </View>
   );
 });
-
-type BalanceTooltipProps = {
-  categoryId: string;
-  tooltip: { close: () => void };
-  monthIndex: number;
-  onBudgetAction: (idx: number, action: string, arg: unknown) => void;
-};
-function BalanceTooltip({
-  categoryId,
-  tooltip,
-  monthIndex,
-  onBudgetAction,
-}: BalanceTooltipProps) {
-  let carryover = useSheetValue(reportBudget.catCarryover(categoryId));
-
-  return (
-    <Tooltip
-      position="bottom-right"
-      width={200}
-      style={{ padding: 0 }}
-      onClose={tooltip.close}
-    >
-      <Menu
-        onMenuSelect={type => {
-          onBudgetAction(monthIndex, 'carryover', {
-            category: categoryId,
-            flag: !carryover,
-          });
-          tooltip.close();
-        }}
-        items={[
-          {
-            name: 'carryover',
-            text: carryover
-              ? 'Remove overspending rollover'
-              : 'Rollover overspending',
-          },
-        ]}
-      />
-    </Tooltip>
-  );
-}
 
 type CategoryMonthProps = {
   monthIndex: number;
@@ -386,6 +343,8 @@ export const CategoryMonth = memo(function CategoryMonth({
     </View>
   );
 });
+
+export { default as BudgetSummary } from './budgetsummary/BudgetSummary';
 
 export const ExpenseGroupMonth = GroupMonth;
 export const ExpenseCategoryMonth = CategoryMonth;

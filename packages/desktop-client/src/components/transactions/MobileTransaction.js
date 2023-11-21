@@ -362,6 +362,7 @@ class TransactionEditInner extends PureComponent {
               <Button
                 type="bare"
                 style={{
+                  ...styles.noTapHighlight,
                   color: theme.mobileHeaderText,
                   justifyContent: 'center',
                   margin: 10,
