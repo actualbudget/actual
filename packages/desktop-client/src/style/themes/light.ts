@@ -176,6 +176,7 @@ export const checkboxBorderSelected = colorPalette.blue500;
 export const checkboxShadowSelected = colorPalette.blue300;
 
 export const pillBackground = colorPalette.navy150;
+export const pillBackgroundLight = pillBackground;
 export const pillText = colorPalette.navy800;
 export const pillTextHighlighted = colorPalette.purple600;
 export const pillBorder = colorPalette.navy150;

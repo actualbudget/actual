@@ -67,6 +67,7 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         onMouseDown={() => onSelect(account.id)}
         style={{
           flexDirection: 'row',
+          border: '1px solid ' + theme.pillBorder,
           flex: 1,
           alignItems: 'center',
           borderRadius: 6,
