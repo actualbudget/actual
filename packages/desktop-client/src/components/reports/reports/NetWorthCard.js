@@ -7,10 +7,10 @@ import { theme, styles } from '../../../style';
 import Block from '../../common/Block';
 import View from '../../common/View';
 import PrivacyFilter from '../../PrivacyFilter';
+import { LoadComponent } from '../../util/LoadComponent';
 import Change from '../Change';
 import DateRange from '../DateRange';
 import NetWorthGraph from '../graphs/NetWorthGraph';
-import { LoadingIndicator } from '../Overview';
 import ReportCard from '../ReportCard';
 import netWorthSpreadsheet from '../spreadsheets/net-worth-spreadsheet';
 import useReport from '../useReport';
@@ -77,7 +77,7 @@ function NetWorthCard({ accounts }) {
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (
-          <LoadingIndicator />
+          <LoadComponent />
         )}
       </View>
     </ReportCard>

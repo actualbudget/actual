@@ -20,6 +20,7 @@ export default function createSpreadsheet(
   conditionsOp,
   hidden,
   uncat,
+  setDataCheck,
 ) {
   let uncatCat = {
     name: 'Uncategorized',
@@ -433,6 +434,7 @@ export default function createSpreadsheet(
       totalAssets: integerToAmount(totalAssets),
       totalTotals: integerToAmount(totalTotals),
     });
+    setDataCheck?.(true);
   };
 }
 

@@ -6,9 +6,9 @@ import useCategories from '../../../hooks/useCategories';
 import { styles } from '../../../style';
 import Block from '../../common/Block';
 import View from '../../common/View';
+import { LoadComponent } from '../../util/LoadComponent';
 import DateRange from '../DateRange';
 import SankeyGraph from '../graphs/SankeyGraph';
-import { LoadingIndicator } from '../Overview';
 import ReportCard from '../ReportCard';
 import sankeySpreadsheet from '../spreadsheets/sankey-spreadsheet';
 import useReport from '../useReport';
@@ -38,11 +38,7 @@ function SankeyCard() {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        {data ? (
-          <SankeyGraph data={data} compact={true} />
-        ) : (
-          <LoadingIndicator />
-        )}
+        {data ? <SankeyGraph data={data} compact={true} /> : <LoadComponent />}
       </View>
     </ReportCard>
   );

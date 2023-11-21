@@ -17,9 +17,9 @@ import Text from '../../common/Text';
 import View from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
 import PrivacyFilter from '../../PrivacyFilter';
+import { LoadComponent } from '../../util/LoadComponent';
 import { ChooseGraph } from '../ChooseGraph';
 import Header from '../Header';
-import { LoadingIndicator } from '../Overview';
 import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportLegend, ReportSummary } from '../ReportSummary';
@@ -56,6 +56,7 @@ export default function CustomReport() {
   const [hidden, setHidden] = useState(false);
   const [uncat, setUncat] = useState(false);
   const [dateRange, setDateRange] = useState('6 months');
+  const [dataCheck, setDataCheck] = useState(false);
 
   const [graphType, setGraphType] = useState('BarGraph');
   const [viewLegend, setViewLegend] = useState(false);
@@ -110,6 +111,7 @@ export default function CustomReport() {
   });
 
   const getGraphData = useMemo(() => {
+    setDataCheck(false);
     return defaultSpreadsheet(
       start,
       end,
@@ -123,6 +125,7 @@ export default function CustomReport() {
       conditionsOp,
       hidden,
       uncat,
+      setDataCheck,
     );
   }, [
     start,
@@ -287,7 +290,7 @@ export default function CustomReport() {
                   </View>
                 )}
 
-                {data ? (
+                {dataCheck ? (
                   <ChooseGraph
                     start={start}
                     end={end}
@@ -302,7 +305,7 @@ export default function CustomReport() {
                     months={months}
                   />
                 ) : (
-                  <LoadingIndicator />
+                  <LoadComponent message={'Loading report...'} />
                 )}
               </View>
               {(viewLegend || viewSummary) && (

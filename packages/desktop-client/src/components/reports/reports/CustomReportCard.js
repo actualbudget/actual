@@ -6,9 +6,9 @@ import useCategories from '../../../hooks/useCategories';
 import { styles } from '../../../style';
 import Block from '../../common/Block';
 import View from '../../common/View';
+import { LoadComponent } from '../../util/LoadComponent';
 import DateRange from '../DateRange';
 import BarGraph from '../graphs/BarGraph';
-import { LoadingIndicator } from '../Overview';
 import ReportCard from '../ReportCard';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
 import useReport from '../useReport';
@@ -53,7 +53,7 @@ function CustomReportCard() {
           style={{ height: 'auto', flex: 1 }}
         />
       ) : (
-        <LoadingIndicator />
+        <LoadComponent />
       )}
     </ReportCard>
   );
