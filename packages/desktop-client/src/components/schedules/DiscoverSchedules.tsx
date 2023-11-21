@@ -143,7 +143,6 @@ export default function DiscoverSchedules({
     'discover-schedules',
     schedules,
     [],
-    item => item.amount !== -668,
   );
 
   async function onCreate() {
