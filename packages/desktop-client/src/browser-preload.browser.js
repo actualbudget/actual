@@ -82,7 +82,7 @@ global.Actual = {
         let filename = file.name.replace(/.*(\.[^.]*)/, 'file$1');
 
         if (file) {
-          var reader = new FileReader();
+          let reader = new FileReader();
           reader.readAsArrayBuffer(file);
           reader.onload = async function (ev) {
             let filepath = `/uploads/${filename}`;

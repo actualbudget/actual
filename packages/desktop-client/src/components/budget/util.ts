@@ -165,18 +165,15 @@ export async function prewarmAllMonths(
 }
 
 export async function switchBudgetType(
-  budgetType: LocalPrefs['budgetType'],
+  newBudgetType: LocalPrefs['budgetType'],
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   bounds: { start: string; end: string },
   startMonth: string,
   onSuccess: () => Promise<void> | undefined,
 ) {
-  let newType: 'rollover' | 'report' =
-    budgetType === 'rollover' ? 'report' : 'rollover';
-
   spreadsheet.disableObservers();
-  await send('budget-set-type', { type: newType });
-  await prewarmAllMonths(newType, spreadsheet, bounds, startMonth);
+  await send('budget-set-type', { type: newBudgetType });
+  await prewarmAllMonths(newBudgetType, spreadsheet, bounds, startMonth);
   spreadsheet.enableObservers();
   await onSuccess?.();
 }
