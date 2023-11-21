@@ -135,6 +135,7 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
             <InlineField label="Balance" width="75%">
               <Input
                 name="balance"
+                inputMode="decimal"
                 value={balance}
                 onChange={event => setBalance(event.target.value)}
                 onBlur={event => {

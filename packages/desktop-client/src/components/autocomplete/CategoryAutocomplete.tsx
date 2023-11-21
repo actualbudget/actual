@@ -3,6 +3,7 @@ import React, {
   Fragment,
   useMemo,
   type ReactNode,
+  type CSSProperties,
 } from 'react';
 
 import { css } from 'glamor';
@@ -151,8 +152,9 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
-  groupHeaderStyle?: object;
+  groupHeaderStyle?: CSSProperties;
 };
+
 export default function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,

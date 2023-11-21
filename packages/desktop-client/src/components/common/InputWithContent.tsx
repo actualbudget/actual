@@ -6,8 +6,8 @@ import Input, { defaultInputStyle } from './Input';
 import View from './View';
 
 type InputWithContentProps = ComponentProps<typeof Input> & {
-  leftContent: ReactNode;
-  rightContent: ReactNode;
+  leftContent?: ReactNode;
+  rightContent?: ReactNode;
   inputStyle?: CSSProperties;
   focusStyle?: CSSProperties;
   style?: CSSProperties;
