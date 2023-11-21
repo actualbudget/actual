@@ -308,7 +308,6 @@ export const ManagePayees = forwardRef(
                 payees={filteredPayees}
                 ruleCounts={ruleCounts}
                 categoryGroups={categoryGroups}
-                highlightedRows={highlightedRows}
                 navigator={tableNavigator}
                 onUpdate={onUpdate}
                 onViewRules={onViewRules}

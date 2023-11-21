@@ -1,10 +1,31 @@
-import { forwardRef, useState, useLayoutEffect, useCallback } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useLayoutEffect,
+  useState,
+  type ComponentProps,
+} from 'react';
+
+import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedItems } from '../../hooks/useSelected';
 import View from '../common/View';
-import { Table } from '../table';
+import { Table, type TableNavigator } from '../table';
 
 import PayeeTableRow from './PayeeTableRow';
+
+// Table items require an ID to work, it's optional in the loot-core
+// model so would need to verify accuracy of that before changing there
+type PayeeWithId = PayeeEntity & Required<Pick<PayeeEntity, 'id'>>;
+
+type PayeeTableProps = {
+  payees: PayeeWithId[];
+  ruleCounts: Map<PayeeWithId['id'], number>;
+  navigator: TableNavigator<PayeeWithId>;
+} & Pick<
+  ComponentProps<typeof PayeeTableRow>,
+  'onUpdate' | 'onViewRules' | 'onCreateRule'
+>;
 
 const PayeeTable = forwardRef(
   (
@@ -12,20 +33,18 @@ const PayeeTable = forwardRef(
       payees,
       ruleCounts,
       navigator,
-      categoryGroups,
-      highlightedRows,
-      ruleActions,
       onUpdate,
       onViewRules,
       onCreateRule,
-    },
-    ref,
+    }: PayeeTableProps,
+    ref: ComponentProps<typeof Table>['ref'],
   ) => {
     let [hovered, setHovered] = useState(null);
     let selectedItems = useSelectedItems();
 
     useLayoutEffect(() => {
-      let firstSelected = [...selectedItems][0];
+      let firstSelected = [...selectedItems][0] as string;
+      // @ts-expect-error something off with this type (see: Table L967)
       ref.current.scrollTo(firstSelected, 'center');
       navigator.onEdit(firstSelected, 'select');
     }, []);
@@ -36,7 +55,7 @@ const PayeeTable = forwardRef(
 
     return (
       <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
-        <Table
+        <Table<PayeeWithId>
           ref={ref}
           items={payees}
           navigator={navigator}
@@ -45,9 +64,7 @@ const PayeeTable = forwardRef(
               <PayeeTableRow
                 payee={item}
                 ruleCount={ruleCounts.get(item.id) || 0}
-                categoryGroups={categoryGroups}
                 selected={selectedItems.has(item.id)}
-                highlighted={highlightedRows && highlightedRows.has(item.id)}
                 editing={editing}
                 focusedField={focusedField}
                 hovered={hovered === item.id}
