@@ -359,7 +359,7 @@ function InputValue({
 type InputCellProps = ComponentProps<typeof Cell> & {
   inputProps: ComponentProps<typeof InputValue>;
   onUpdate: ComponentProps<typeof InputValue>['onUpdate'];
-  onBlur: ComponentProps<typeof InputValue>['onBlur'];
+  onBlur?: ComponentProps<typeof InputValue>['onBlur'];
   textAlign?: CSSProperties['textAlign'];
   error?: ReactNode;
 };
@@ -857,7 +857,7 @@ export const TableWithNavigator = forwardRef<
 
 type TableItem = { id: number | string };
 
-type TableProps<T = TableItem> = {
+type TableProps<T extends TableItem = TableItem> = {
   items: T[];
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
@@ -868,8 +868,8 @@ type TableProps<T = TableItem> = {
   renderItem: (arg: {
     item: T;
     editing: boolean;
-    focusedField: unknown;
-    onEdit: (id, field) => void;
+    focusedField: string | null;
+    onEdit: (id: T['id'], field: string) => void;
     index: number;
     position: number;
   }) => ReactNode;
@@ -877,7 +877,7 @@ type TableProps<T = TableItem> = {
   getItemKey?: (index: number) => TableItem['id'];
   loadMore?: () => void;
   style?: CSSProperties;
-  navigator?: ReturnType<typeof useTableNavigator>;
+  navigator?: ReturnType<typeof useTableNavigator<T>>;
   listRef?: unknown;
   onScroll?: () => void;
   version?: string;
@@ -1096,7 +1096,7 @@ export const Table: <T extends TableItem>(
           outline: 'none',
           ...style,
         }}
-        tabIndex="1"
+        tabIndex={1}
         {...getNavigatorProps(props)}
         data-testid="table"
       >
@@ -1163,10 +1163,20 @@ export const Table: <T extends TableItem>(
   },
 );
 
-export function useTableNavigator(data, fields) {
+export type TableNavigator<T extends TableItem> = {
+  onEdit: (id: T['id'], field?: string) => void;
+  editingId: T['id'];
+  focusedField: string;
+  getNavigatorProps: (userProps: object) => object;
+};
+
+export function useTableNavigator<T extends TableItem>(
+  data: T[],
+  fields: string[] | ((item?: T) => string[]),
+): TableNavigator<T> {
   let getFields = typeof fields !== 'function' ? () => fields : fields;
-  let [editingId, setEditingId] = useState(null);
-  let [focusedField, setFocusedField] = useState(null);
+  let [editingId, setEditingId] = useState<T['id']>(null);
+  let [focusedField, setFocusedField] = useState<string>(null);
   let containerRef = useRef<HTMLDivElement>();
 
   // See `onBlur` for why we need this
@@ -1174,7 +1184,7 @@ export function useTableNavigator(data, fields) {
   let modalStackLength = useRef(0);
 
   // onEdit is passed to children, so make sure it maintains identity
-  let onEdit = useCallback((id, field?) => {
+  let onEdit = useCallback((id: T['id'], field?: string) => {
     setEditingId(id);
     setFocusedField(id ? field : null);
   }, []);
