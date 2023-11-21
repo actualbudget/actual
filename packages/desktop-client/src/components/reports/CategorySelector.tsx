@@ -101,7 +101,7 @@ export default function CategorySelector({
           paddingRight: 10,
           height: 320,
           flexGrow: 1,
-          overflowY: 'scroll',
+          overflowY: 'auto',
         }}
       >
         {categoryGroups &&
