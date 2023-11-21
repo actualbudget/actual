@@ -328,8 +328,13 @@ class Budget extends Component {
 
     this.setState({ initialized: false });
 
-    await switchBudgetType(budgetType, spreadsheet, bounds, currentMonth, () =>
-      loadPrefs(),
+    const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
+    await switchBudgetType(
+      newBudgetType,
+      spreadsheet,
+      bounds,
+      currentMonth,
+      () => loadPrefs(),
     );
 
     this.setState({ initialized: true });
