@@ -42,9 +42,19 @@ import useSheetValue from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 import { Tooltip } from './tooltips';
 
-type Listener = (msg: string, newBudgetType?: LocalPrefs['budgetType']) => void;
+export const SWITCH_BUDGET_MESSAGE_TYPE = 'budget/switch-type';
+
+type SwitchBudgetTypeMessage = {
+  type: typeof SWITCH_BUDGET_MESSAGE_TYPE;
+  payload: {
+    newBudgetType: LocalPrefs['budgetType'];
+  };
+};
+export type TitlebarMessage = SwitchBudgetTypeMessage;
+
+type Listener = (msg: TitlebarMessage) => void;
 export type TitlebarContextValue = {
-  sendEvent: (msg: string, newBudgetType?: LocalPrefs['budgetType']) => void;
+  sendEvent: (msg: TitlebarMessage) => void;
   subscribe: (listener: Listener) => () => void;
 };
 
@@ -57,8 +67,8 @@ type TitlebarProviderProps = {
 export function TitlebarProvider({ children }: TitlebarProviderProps) {
   let listeners = useRef<Listener[]>([]);
 
-  function sendEvent(msg: string, newBudgetType?: LocalPrefs['budgetType']) {
-    listeners.current.forEach(func => func(msg, newBudgetType));
+  function sendEvent(msg: TitlebarMessage) {
+    listeners.current.forEach(func => func(msg));
   }
 
   function subscribe(listener: Listener) {
@@ -271,7 +281,12 @@ function BudgetTitlebar() {
     setLoading(true);
     if (!loading) {
       const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
-      sendEvent('budget/switch-type', newBudgetType);
+      sendEvent({
+        type: SWITCH_BUDGET_MESSAGE_TYPE,
+        payload: {
+          newBudgetType,
+        },
+      });
     }
   }
 
