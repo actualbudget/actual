@@ -29,6 +29,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import App from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
+import { type BoundActions } from './hooks/useActions';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
@@ -57,7 +58,10 @@ function rootReducer(state, action) {
 }
 
 const store = createStore(rootReducer, undefined, applyMiddleware(thunk));
-const boundActions = bindActionCreators(actions, store.dispatch);
+const boundActions = bindActionCreators(
+  actions,
+  store.dispatch,
+) as unknown as BoundActions;
 
 // Listen for global events from the server or main process
 handleGlobalEvents(boundActions, store);
@@ -65,7 +69,7 @@ handleGlobalEvents(boundActions, store);
 declare global {
   // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
   interface Window {
-    __actionsForMenu: typeof actions;
+    __actionsForMenu: BoundActions;
 
     $send: typeof send;
     $query: typeof runQuery;

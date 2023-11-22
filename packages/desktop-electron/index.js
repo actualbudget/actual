@@ -188,7 +188,7 @@ async function createWindow() {
   });
 
   win.on('focus', async () => {
-    let url = clientWin.webContents.getURL();
+    const url = clientWin.webContents.getURL();
     if (url.includes('app://') || url.includes('localhost:')) {
       clientWin.webContents.executeJavaScript('__actionsForMenu.focused()');
     }
@@ -239,7 +239,7 @@ function updateMenu(isBudgetOpen) {
     .filter(item => item.label === 'Load Backup...')
     .map(item => (item.enabled = isBudgetOpen));
 
-  let tools = menu.items.filter(item => item.label === 'Tools')[0];
+  const tools = menu.items.filter(item => item.label === 'Tools')[0];
   tools.submenu.items.forEach(item => {
     item.enabled = isBudgetOpen;
   });
@@ -356,7 +356,7 @@ ipcMain.handle('open-file-dialog', (event, { filters, properties }) => {
 ipcMain.handle(
   'save-file-dialog',
   (event, { title, defaultPath, fileContents }) => {
-    let fileLocation = dialog.showSaveDialogSync({ title, defaultPath });
+    const fileLocation = dialog.showSaveDialogSync({ title, defaultPath });
 
     return new Promise((resolve, reject) => {
       if (fileLocation) {
@@ -379,7 +379,7 @@ ipcMain.on('show-about', () => {
 
 ipcMain.on('screenshot', () => {
   if (isDev) {
-    let width = 1100;
+    const width = 1100;
 
     // This is for the main screenshot inside the frame
     clientWin.setSize(width, Math.floor(width * (427 / 623)));
@@ -409,7 +409,7 @@ ipcMain.on('update-menu', (event, isBudgetOpen) => {
 });
 
 ipcMain.on('set-theme', theme => {
-  let obj = { theme: theme };
+  const obj = { theme: theme };
 
   clientWin.webContents.executeJavaScript(
     `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${obj})`,

@@ -1,10 +1,10 @@
-let fs = require('fs');
-let path = require('path');
+const fs = require('fs');
+const path = require('path');
 
-let electron = require('electron');
+const electron = require('electron');
 
 // eslint-disable-next-line import/extensions
-let backend = require('loot-core/lib-dist/bundle.desktop.js');
+const backend = require('loot-core/lib-dist/bundle.desktop.js');
 
 function loadState() {
   let state = {};
