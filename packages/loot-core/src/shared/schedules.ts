@@ -4,7 +4,7 @@ import * as monthUtils from './months';
 import q from './query';
 
 export function getStatus(nextDate, completed, hasTrans) {
-  let today = monthUtils.currentDay();
+  const today = monthUtils.currentDay();
 
   if (completed) {
     return 'completed';
@@ -22,8 +22,8 @@ export function getStatus(nextDate, completed, hasTrans) {
 }
 
 export function getHasTransactionsQuery(schedules) {
-  let filters = schedules.map(schedule => {
-    let dateCond = schedule._conditions.find(c => c.field === 'date');
+  const filters = schedules.map(schedule => {
+    const dateCond = schedule._conditions.find(c => c.field === 'date');
     return {
       $and: {
         schedule: schedule.id,
@@ -51,7 +51,7 @@ function makeNumberSuffix(num) {
 }
 
 function prettyDayName(day) {
-  let days = {
+  const days = {
     SU: 'Sunday',
     MO: 'Monday',
     TU: 'Tuesday',
@@ -64,9 +64,9 @@ function prettyDayName(day) {
 }
 
 export function getRecurringDescription(config) {
-  let interval = config.interval || 1;
+  const interval = config.interval || 1;
 
-  let weekendSolveSuffix = config.skipWeekend
+  const weekendSolveSuffix = config.skipWeekend
     ? ` (${config.weekendSolveMode} weekend) `
     : '';
 
@@ -92,9 +92,9 @@ export function getRecurringDescription(config) {
         // sort would put them first
         let patterns = [...config.patterns]
           .sort((p1, p2) => {
-            let typeOrder =
+            const typeOrder =
               (p1.type === 'day' ? 1 : 0) - (p2.type === 'day' ? 1 : 0);
-            let valOrder = p1.value - p2.value;
+            const valOrder = p1.value - p2.value;
 
             if (typeOrder === 0) {
               return valOrder;
@@ -108,12 +108,12 @@ export function getRecurringDescription(config) {
 
         desc += ' on the ';
 
-        let strs = [];
+        const strs = [];
 
-        let uniqueDays = new Set(patterns.map(p => p.type));
-        let isSameDay = uniqueDays.size === 1 && !uniqueDays.has('day');
+        const uniqueDays = new Set(patterns.map(p => p.type));
+        const isSameDay = uniqueDays.size === 1 && !uniqueDays.has('day');
 
-        for (let pattern of patterns) {
+        for (const pattern of patterns) {
           if (pattern.type === 'day') {
             if (pattern.value === -1) {
               strs.push('last day');
@@ -122,7 +122,7 @@ export function getRecurringDescription(config) {
               strs.push(makeNumberSuffix(pattern.value));
             }
           } else {
-            let dayName = isSameDay ? '' : ' ' + prettyDayName(pattern.type);
+            const dayName = isSameDay ? '' : ' ' + prettyDayName(pattern.type);
 
             if (pattern.value === -1) {
               // Example: last Monday
@@ -163,7 +163,7 @@ export function getRecurringDescription(config) {
 }
 
 export function recurConfigToRSchedule(config) {
-  let base: IRuleOptions = {
+  const base: IRuleOptions = {
     start: monthUtils.parseDate(config.start),
     frequency: config.frequency.toUpperCase(),
     byHourOfDay: [12],
@@ -173,7 +173,7 @@ export function recurConfigToRSchedule(config) {
     base.interval = config.interval;
   }
 
-  let abbrevDay = name => name.slice(0, 2).toUpperCase();
+  const abbrevDay = name => name.slice(0, 2).toUpperCase();
 
   switch (config.frequency) {
     case 'daily':
@@ -184,8 +184,8 @@ export function recurConfigToRSchedule(config) {
       return [base];
     case 'monthly':
       if (config.patterns && config.patterns.length > 0) {
-        let days = config.patterns.filter(p => p.type === 'day');
-        let dayNames = config.patterns.filter(p => p.type !== 'day');
+        const days = config.patterns.filter(p => p.type === 'day');
+        const dayNames = config.patterns.filter(p => p.type !== 'day');
 
         return [
           days.length > 0 && { ...base, byDayOfMonth: days.map(p => p.value) },

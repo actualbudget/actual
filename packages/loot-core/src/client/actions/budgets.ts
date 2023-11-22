@@ -50,14 +50,14 @@ export function loadBudget(id: string, loadingText = '', options = {}) {
     dispatch(setAppState({ loadingText }));
 
     // Loading a budget may fail
-    let { error } = await send('load-budget', { id, ...options });
+    const { error } = await send('load-budget', { id, ...options });
 
     if (error) {
-      let message = getSyncError(error, id);
+      const message = getSyncError(error, id);
       if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
         // confirm is not available on iOS
         if (typeof window.confirm !== 'undefined') {
-          let showBackups = window.confirm(
+          const showBackups = window.confirm(
             message +
               ' Make sure the app is up-to-date. Do you want to load a backup?',
           );
@@ -103,7 +103,7 @@ export function closeBudget() {
 
 export function closeBudgetUI() {
   return async (dispatch: Dispatch, getState: GetState) => {
-    let prefs = getState().prefs.local;
+    const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       dispatch({ type: constants.CLOSE_BUDGET });
     }
@@ -164,7 +164,7 @@ export function importBudget(
 
 export function uploadBudget(id: string) {
   return async (dispatch: Dispatch) => {
-    let { error } = await send('upload-budget', { id });
+    const { error } = await send('upload-budget', { id });
     if (error) {
       return { error };
     }
@@ -190,14 +190,14 @@ export function downloadBudget(cloudFileId: string, { replace = false } = {}) {
   return async (dispatch: Dispatch) => {
     dispatch(setAppState({ loadingText: 'Downloading...' }));
 
-    let { id, error } = await send('download-budget', {
+    const { id, error } = await send('download-budget', {
       fileId: cloudFileId,
       replace,
     });
 
     if (error) {
       if (error.reason === 'decrypt-failure') {
-        let opts = {
+        const opts = {
           hasExistingKey: error.meta && error.meta.isMissingKey,
           cloudFileId,
           onSuccess: () => {
