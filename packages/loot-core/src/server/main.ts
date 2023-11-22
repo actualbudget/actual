@@ -1043,7 +1043,7 @@ handlers['gocardless-poll-web-token'] = async function ({
   requisitionId,
 }) {
   let userToken = await asyncStorage.getItem('user-token');
-  if (!userToken) return null;
+  if (!userToken) return { error: 'unknown' };
 
   let startTime = Date.now();
   stopPolling = false;
