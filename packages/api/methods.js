@@ -66,8 +66,8 @@ export function addTransactions(
   return send('api/transactions-add', {
     accountId,
     transactions,
-    learnCategories: learnCategories,
-    runTransfers: runTransfers,
+    learnCategories,
+    runTransfers,
   });
 }
 

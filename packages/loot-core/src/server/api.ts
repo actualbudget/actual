@@ -398,8 +398,8 @@ handlers['api/transactions-add'] = withMutation(async function ({
 }) {
   checkFileOpen();
   await addTransactions(accountId, transactions, {
-    runTransfers: runTransfers,
-    learnCategories: learnCategories,
+    runTransfers,
+    learnCategories,
   });
   return 'ok';
 });

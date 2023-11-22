@@ -740,8 +740,8 @@ export async function addTransactions(
   if (runTransfers || learnCategories) {
     let res = await batchUpdateTransactions({
       added,
-      learnCategories: learnCategories,
-      runTransfers: runTransfers,
+      learnCategories,
+      runTransfers,
     });
     newTransactions = res.added.map(t => t.id);
   } else {
