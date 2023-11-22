@@ -394,11 +394,10 @@ export async function findSchedules() {
     },
   );
 
-  const finalized = [];
+  const finalized: Awaited<ReturnType<SchedulesHandlers['schedule/discover']>> =
+    [];
   for (let schedule of schedules) {
     finalized.push(await findStartDate(schedule));
   }
-  return finalized as unknown as Awaited<
-    ReturnType<SchedulesHandlers['schedule/discover']>
-  >;
+  return finalized;
 }
