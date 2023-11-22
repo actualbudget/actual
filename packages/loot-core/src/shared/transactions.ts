@@ -83,11 +83,12 @@ function getSplit(transactions, parentIndex) {
 export function ungroupTransactions(transactions) {
   const x = transactions.reduce((list, parent) => {
     const { subtransactions, ...trans } = parent;
+    const _subtransactions = subtransactions || [];
 
     list.push(trans);
 
-    for (let i = 0; i < subtransactions?.length ?? 0; i++) {
-      list.push(subtransactions?.[i]);
+    for (let i = 0; i < _subtransactions.length; i++) {
+      list.push(_subtransactions[i]);
     }
     return list;
   }, []);
