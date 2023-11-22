@@ -1638,7 +1638,7 @@ __metadata:
     express-response-size: "npm:^0.0.3"
     jest: "npm:^29.3.1"
     jws: "npm:^4.0.0"
-    migrate: "npm:^2.0.0"
+    migrate: "npm:^2.0.1"
     nordigen-node: "npm:^1.2.6"
     prettier: "npm:^2.8.3"
     supertest: "npm:^6.3.1"
@@ -4469,9 +4469,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"migrate@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "migrate@npm:2.0.0"
+"migrate@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "migrate@npm:2.0.1"
   dependencies:
     chalk: "npm:^4.1.2"
     commander: "npm:^2.20.3"
@@ -4488,7 +4488,7 @@ __metadata:
     migrate-init: bin/migrate-init
     migrate-list: bin/migrate-list
     migrate-up: bin/migrate-up
-  checksum: 15ca13c0dd4a3eb590dccc88a76bfd577f3b0fce727959666683e290a048acc074e1d36eaed1c76cb3e7dd7b5ef4e243615fc5281369ad641544334938576bc0
+  checksum: 69c9d50ef5c8502be51d7411d251e4c053973b95076d1732e61227971a29b2a8c3030beb0d66fad9c7e8eba1acf9f240b51fbc35190407d85f4e1a40ae39c8aa
   languageName: node
   linkType: hard
 

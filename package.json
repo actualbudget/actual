@@ -28,7 +28,7 @@
     "express-rate-limit": "^6.7.0",
     "express-response-size": "^0.0.3",
     "jws": "^4.0.0",
-    "migrate": "^2.0.0",
+    "migrate": "^2.0.1",
     "nordigen-node": "^1.2.6",
     "uuid": "^9.0.0"
   },
