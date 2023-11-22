@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-let electron_notarize = require('electron-notarize');
+const electron_notarize = require('electron-notarize');
 
 // This is expected to be run by `electron-builder` after it signs the build.
 // It's disabled for now as we currently don't sign builds after Actual being open sourced.
@@ -16,9 +16,9 @@ module.exports = async function (params) {
   }
 
   // Same appId in electron-builder.
-  let appId = 'com.shiftreset.actual';
+  const appId = 'com.shiftreset.actual';
 
-  let appPath = path.join(
+  const appPath = path.join(
     params.appOutDir,
     `${params.packager.appInfo.productFilename}.app`,
   );

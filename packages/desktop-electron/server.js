@@ -10,9 +10,9 @@ function getBackend() {
 }
 
 if (process.argv[2] === '--subprocess') {
-  let isDev = false;
+  const isDev = false;
   // let version = process.argv[3];
-  let socketName = process.argv[4];
+  const socketName = process.argv[4];
 
   // Start the app
   getBackend().initApp(isDev, socketName);
@@ -20,8 +20,8 @@ if (process.argv[2] === '--subprocess') {
   require('source-map-support').install();
   getBackend().initApp(true, 'actual-standalone');
 } else {
-  let { ipcRenderer } = require('electron');
-  let isDev = true;
+  const { ipcRenderer } = require('electron');
+  const isDev = true;
 
   ipcRenderer.on('set-socket', (event, { name }) => {
     // Start the app

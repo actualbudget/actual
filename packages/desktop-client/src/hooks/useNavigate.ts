@@ -26,7 +26,7 @@ export default function useNavigate(): NavigateFunction {
           },
         };
 
-        let { previousLocation, ...previousOriginalState } =
+        const { previousLocation, ...previousOriginalState } =
           location.state || {};
 
         if (
