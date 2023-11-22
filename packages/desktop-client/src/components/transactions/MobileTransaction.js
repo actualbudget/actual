@@ -749,7 +749,7 @@ class TransactionEditInner extends PureComponent {
               editingChild && transactions.find(t => t.id === editingChild),
             amountSign: forcedSign,
             getCategoryName: id => (id ? lookupName(categories, id) : null),
-            navigate: navigate,
+            navigate,
             onEdit: this.onEdit,
             onStartClose: this.onSaveChild,
           })}

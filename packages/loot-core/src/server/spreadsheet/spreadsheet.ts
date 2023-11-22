@@ -63,7 +63,7 @@ export default class Spreadsheet {
         name,
         expr: null,
         value: null,
-        sheet: sheet,
+        sheet,
       });
     }
     return this.nodes.get(name);

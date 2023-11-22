@@ -409,7 +409,7 @@ ipcMain.on('update-menu', (event, isBudgetOpen) => {
 });
 
 ipcMain.on('set-theme', theme => {
-  const obj = { theme: theme };
+  const obj = { theme };
 
   clientWin.webContents.executeJavaScript(
     `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${obj})`,

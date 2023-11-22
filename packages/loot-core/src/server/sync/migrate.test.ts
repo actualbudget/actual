@@ -44,7 +44,7 @@ let messageArb: fc.Arbitrary<Message> = fc
       .map(Timestamp.parse);
 
     return fc.record<Message>({
-      timestamp: timestamp,
+      timestamp,
       dataset: fc.constant('transactions'),
       column: fc.constant(toInternalField(field) || field),
       row: fc.oneof(
@@ -53,7 +53,7 @@ let messageArb: fc.Arbitrary<Message> = fc
           return fc.integer({ min: 0, max: 5 }).map(j => `id${i}/child${j}`);
         }),
       ),
-      value: value,
+      value,
     });
   });
 

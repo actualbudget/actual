@@ -115,7 +115,7 @@ export async function decode(
     }
 
     messages.push({
-      timestamp: timestamp,
+      timestamp,
       dataset: msg.getDataset(),
       row: msg.getRow(),
       column: msg.getColumn(),

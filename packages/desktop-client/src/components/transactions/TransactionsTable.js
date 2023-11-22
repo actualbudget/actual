@@ -496,8 +496,8 @@ function HeaderCell({
             textOverflow: 'ellipsis',
             color: theme.tableHeaderText,
             fontWeight: 300,
-            marginLeft: marginLeft,
-            marginRight: marginRight,
+            marginLeft,
+            marginRight,
           }}
         >
           <UnexposedCellContent value={value} />

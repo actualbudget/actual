@@ -19,7 +19,7 @@ export function rebuildMerkleHash(): {
 
   return {
     numMessages: rows.length,
-    trie: trie,
+    trie,
   };
 }
 
