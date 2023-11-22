@@ -3,10 +3,7 @@ import React, { useState } from 'react';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
-import type {
-  DiscoverScheduleEntity,
-  TransactionEntity,
-} from 'loot-core/src/types/models';
+import type { DiscoverScheduleEntity } from 'loot-core/src/types/models';
 
 import type { BoundActions } from '../../hooks/useActions';
 import useSelected, {
@@ -157,9 +154,7 @@ export default function DiscoverSchedules({
       });
 
       if (filters.length > 0) {
-        const {
-          data: transactions,
-        }: { data: Pick<TransactionEntity, 'id'>[] } = await runQuery(
+        const { data: transactions } = await runQuery(
           q('transactions').filter({ $and: filters }).select('id'),
         );
 
