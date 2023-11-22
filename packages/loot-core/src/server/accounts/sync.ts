@@ -128,7 +128,7 @@ async function downloadTransactions(
     const endDate = monthUtils.currentDay();
 
     const res = await post(getServer().PLAID_SERVER + '/transactions', {
-      userId: userId,
+      userId,
       key: userKey,
       item_id: '' + bankId,
       account_id: acctId,
@@ -187,7 +187,7 @@ async function downloadGoCardlessTransactions(
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/transactions',
     {
-      userId: userId,
+      userId,
       key: userKey,
       requisitionId: bankId,
       accountId: acctId,

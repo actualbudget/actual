@@ -181,7 +181,7 @@ async function importTransactions(
             return {
               transfer_id: transferId,
               payee,
-              imported_payee: imported_payee,
+              imported_payee,
             };
           }
 

@@ -160,7 +160,7 @@ function SavedFilterMenuButton({
         setMenuOpen(false);
         savedFilter = {
           conditions: filters,
-          conditionsOp: conditionsOp,
+          conditionsOp,
           id: filterId.id,
           name: filterId.name,
           status: 'saved',
@@ -202,8 +202,8 @@ function SavedFilterMenuButton({
       //create new flow
       savedFilter = {
         conditions: filters,
-        conditionsOp: conditionsOp,
-        name: name,
+        conditionsOp,
+        name,
         status: 'saved',
       };
       res = await sendCatch('filter-create', {
@@ -220,7 +220,7 @@ function SavedFilterMenuButton({
         conditions: filterId.conditions,
         conditionsOp: filterId.conditionsOp,
         id: filterId.id,
-        name: name,
+        name,
       };
       res = await sendCatch('filter-update', {
         state: savedFilter,

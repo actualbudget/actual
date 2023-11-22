@@ -122,12 +122,12 @@ export function setGoal({ month, category, goal }): Promise<void> {
   if (existing) {
     return db.update(table, {
       id: existing.id,
-      goal: goal,
+      goal,
     });
   }
   return db.insert(table, {
     id: month,
-    goal: goal,
+    goal,
   });
 }
 
@@ -204,7 +204,7 @@ export async function copySinglePreviousMonth({
     'budget-' + category,
   );
   await batchMessages(async () => {
-    setBudget({ category: category, month, amount: newAmount });
+    setBudget({ category, month, amount: newAmount });
   });
 }
 
@@ -281,7 +281,7 @@ export async function setNMonthAvg({
   }
   await batchMessages(async () => {
     const avg = Math.round(sumAmount / N);
-    setBudget({ category: category, month, amount: -avg });
+    setBudget({ category, month, amount: -avg });
   });
 }
 
