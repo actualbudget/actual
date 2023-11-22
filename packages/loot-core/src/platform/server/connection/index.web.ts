@@ -4,7 +4,7 @@ import { captureException } from '../../exceptions';
 import type * as T from '.';
 
 function getGlobalObject() {
-  let obj =
+  const obj =
     typeof window !== 'undefined'
       ? window
       : typeof self !== 'undefined'
@@ -35,14 +35,14 @@ export const init: T.Init = function (serverChn, handlers) {
   serverChannel.addEventListener(
     'message',
     e => {
-      let data = e.data;
-      let msg = typeof data === 'string' ? JSON.parse(data) : data;
+      const data = e.data;
+      const msg = typeof data === 'string' ? JSON.parse(data) : data;
 
       if (msg.type && (msg.type === 'init' || msg.type.startsWith('__'))) {
         return;
       }
 
-      let { id, name, args, undoTag, catchErrors } = msg;
+      const { id, name, args, undoTag, catchErrors } = msg;
 
       if (handlers[name]) {
         runHandler(handlers[name], args, { undoTag, name }).then(
@@ -60,7 +60,7 @@ export const init: T.Init = function (serverChn, handlers) {
             });
           },
           nativeError => {
-            let error = coerceError(nativeError);
+            const error = coerceError(nativeError);
 
             if (name.startsWith('api/')) {
               // The API is newer and does automatically forward
