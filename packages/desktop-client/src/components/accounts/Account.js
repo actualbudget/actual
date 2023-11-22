@@ -740,7 +740,14 @@ class AccountInternal extends PureComponent {
         .options({ splits: 'grouped' }),
     );
     let transactions = ungroupTransactions(data);
-    let cleared = transactions.reduce((sum, trans) => sum + trans.is_parent ? 0 : trans.amount, 0);
+
+    let cleared = 0;
+
+    transactions.forEach(trans => {
+      if (!trans.is_parent) {
+        cleared += trans.amount;
+      }
+    });
 
     let targetDiff = reconcileAmount - cleared;
 
