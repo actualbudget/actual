@@ -4,7 +4,7 @@ import q from '../query-helpers';
 import { useLiveQuery } from '../query-hooks';
 
 function toJS(rows) {
-  let filters = rows.map(row => {
+  const filters = rows.map(row => {
     return {
       ...row.fields,
       id: row.id,

@@ -5,7 +5,7 @@ import * as lootFs from '../fs';
 
 import * as T from '.';
 
-let getStorePath = () => join(lootFs.getDataDir(), 'global-store.json');
+const getStorePath = () => join(lootFs.getDataDir(), 'global-store.json');
 let store;
 let persisted = true;
 

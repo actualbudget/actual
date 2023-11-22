@@ -65,8 +65,8 @@ function makeSpreadsheet() {
       binding =
         typeof binding === 'string' ? { name: binding, value: null } : binding;
 
-      let resolvedName = `${sheetName}!${binding.name}`;
-      let cleanup = this.observeCell(resolvedName, cb);
+      const resolvedName = `${sheetName}!${binding.name}`;
+      const cleanup = this.observeCell(resolvedName, cb);
 
       // Always synchronously call with the existing value if it has one.
       // This is a display optimization to avoid flicker. The LRU cache
@@ -118,7 +118,7 @@ function makeSpreadsheet() {
 }
 
 export function SpreadsheetProvider({ children }) {
-  let spreadsheet = useMemo(() => makeSpreadsheet(), []);
+  const spreadsheet = useMemo(() => makeSpreadsheet(), []);
 
   useEffect(() => {
     return spreadsheet.listen();

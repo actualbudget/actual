@@ -119,7 +119,7 @@ describe('async', () => {
       return {};
     });
 
-    let results = await Promise.all([fn(), fn(), fn()]);
+    const results = await Promise.all([fn(), fn(), fn()]);
 
     // It should only have been called once
     expect(timesCalled).toBe(1);

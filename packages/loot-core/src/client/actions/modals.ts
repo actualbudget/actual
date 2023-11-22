@@ -37,7 +37,7 @@ export function replaceModal<M extends ModalType>(
   options?: FinanceModals[M],
 ): ReplaceModalAction {
   // @ts-expect-error TS is unable to determine that `name` and `options` match
-  let modal: M = { name, options };
+  const modal: M = { name, options };
   return { type: constants.REPLACE_MODAL, modal };
 }
 

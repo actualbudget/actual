@@ -25,7 +25,7 @@ function normalizeStringPosix(path, allowAboveRoot) {
           res.charCodeAt(res.length - 2) !== 46 /*.*/
         ) {
           if (res.length > 2) {
-            let lastSlashIndex = res.lastIndexOf('/');
+            const lastSlashIndex = res.lastIndexOf('/');
             if (lastSlashIndex !== res.length - 1) {
               if (lastSlashIndex === -1) {
                 res = '';
@@ -70,8 +70,8 @@ function normalizeStringPosix(path, allowAboveRoot) {
 function normalizePath(path) {
   if (path.length === 0) return '.';
 
-  let isAbsolute = path.charCodeAt(0) === 47; /*/*/
-  let trailingSeparator = path.charCodeAt(path.length - 1) === 47; /*/*/
+  const isAbsolute = path.charCodeAt(0) === 47; /*/*/
+  const trailingSeparator = path.charCodeAt(path.length - 1) === 47; /*/*/
 
   // Normalize the path
   path = normalizeStringPosix(path, !isAbsolute);
@@ -87,7 +87,7 @@ const join: T.Join = (...args) => {
   if (args.length === 0) return '.';
   let joined;
   for (let i = 0; i < args.length; ++i) {
-    let arg = args[i];
+    const arg = args[i];
     if (arg.length > 0) {
       if (joined === undefined) joined = arg;
       else joined += '/' + arg;
