@@ -1,12 +1,21 @@
 import { memo } from 'react';
 
+import { type PayeeEntity } from 'loot-core/src/types/models';
+
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import Text from '../common/Text';
-import { Row, Cell, InputCell, SelectCell, CellButton } from '../table';
+import { Cell, CellButton, InputCell, Row, SelectCell } from '../table';
 
-function RuleButton({ ruleCount, focused, onEdit, onClick }) {
+type RuleButtonProps = {
+  ruleCount: number;
+  focused: boolean;
+  onEdit: () => void;
+  onClick: () => void;
+};
+
+function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
   return (
     <Cell
       name="rule-count"
@@ -26,7 +35,6 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
         }}
         onEdit={onEdit}
         onSelect={onClick}
-        onFocus={onEdit}
       >
         <Text style={{ paddingRight: 5 }}>
           {ruleCount > 0 ? (
@@ -43,9 +51,29 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }) {
   );
 }
 
+type EditablePayeeFields = keyof Pick<PayeeEntity, 'name'>;
+
+type PayeeTableRowProps = {
+  payee: PayeeEntity;
+  ruleCount: number;
+  selected: boolean;
+  hovered: boolean;
+  editing: boolean;
+  focusedField: string;
+  onHover?: (id: PayeeEntity['id']) => void;
+  onEdit: (id: PayeeEntity['id'], field: string) => void;
+  onUpdate: (
+    id: PayeeEntity['id'],
+    field: EditablePayeeFields,
+    value: unknown,
+  ) => void;
+  onViewRules: (id: PayeeEntity['id']) => void;
+  onCreateRule: (id: PayeeEntity['id']) => void;
+  style?: CSSProperties;
+};
+
 const PayeeTableRow = memo(
   ({
-    style,
     payee,
     ruleCount,
     selected,
@@ -57,7 +85,8 @@ const PayeeTableRow = memo(
     onHover,
     onEdit,
     onUpdate,
-  }) => {
+    style,
+  }: PayeeTableRowProps) => {
     let { id } = payee;
     let dispatchSelected = useSelectedDispatch();
     let borderColor = selected ? theme.tableBorderSelected : theme.tableBorder;
