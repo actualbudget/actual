@@ -288,6 +288,7 @@ const sidebars = {
             'troubleshooting/edge-browser',
           ],
         },
+        'community-repos',
       ],
     },
   ],
