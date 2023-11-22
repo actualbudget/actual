@@ -20,6 +20,7 @@ export interface TransactionEntity {
   transfer_id?: string;
   sort_order?: number;
   cleared?: boolean;
+  reconciled?: boolean;
   tombstone?: boolean;
   schedule?: ScheduleEntity;
   subtransactions?: TransactionEntity[];
