@@ -2,7 +2,7 @@ const isDev = require('electron-is-dev');
 const { autoUpdater } = require('electron-updater');
 
 // Every 5 minutes
-let INTERVAL = 1000 * 60 * 5;
+const INTERVAL = 1000 * 60 * 5;
 let updateTimer = null;
 let isCheckingForUpdates = false;
 let emitEvent = null;
