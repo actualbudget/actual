@@ -92,6 +92,8 @@ module.exports = {
     //   },
     // ],
 
+    'no-var': 'warn',
+
     'import/extensions': [
       'warn',
       'never',
@@ -228,6 +230,25 @@ module.exports = {
       ],
       rules: {
         'no-restricted-imports': ['off', { patterns: restrictedImportColors }],
+      },
+    },
+    // TODO: Remove this override once we addressed all warnings and enable the rule globally.
+    {
+      files: [
+        './packages/api/*',
+        './packages/api/app/**/*',
+        './packages/crdt/**/*',
+        './packages/desktop-client/src/*',
+        './packages/desktop-client/src/hooks/**/*',
+        './packages/desktop-client/src/icons/**/*',
+        './packages/desktop-client/src/style/**/*',
+        './packages/desktop-client/src/types/**/*',
+        './packages/desktop-client/src/util/**/*',
+        './packages/desktop-electron/**/*',
+        './packages/eslint-plugin-actual/**/*',
+      ],
+      rules: {
+        'prefer-const': 'warn',
       },
     },
   ],

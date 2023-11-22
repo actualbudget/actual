@@ -41,7 +41,7 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
     // We don't need to query anything until the file is loaded, and
     // sync events might come in if the file is being synced before
     // being loaded (happens when downloading)
-    let prefs = store.getState().prefs.local;
+    const prefs = store.getState().prefs.local;
     if (prefs && prefs.id) {
       if (type === 'applied') {
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -66,8 +66,8 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
   sharedListeners.listenForSyncEvent(actions, store);
 
   listen('undo-event', undoState => {
-    let { tables, undoTag } = undoState;
-    let promises: Promise<unknown>[] = [];
+    const { tables, undoTag } = undoState;
+    const promises: Promise<unknown>[] = [];
 
     if (
       tables.includes('categories') ||
@@ -81,7 +81,7 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
       promises.push(actions.getAccounts());
     }
 
-    let tagged = undo.getTaggedState(undoTag);
+    const tagged = undo.getTaggedState(undoTag);
 
     if (tagged) {
       Promise.all(promises).then(() => {
@@ -89,7 +89,7 @@ export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
 
         // If a modal has been tagged, open it instead of navigating
         if (tagged.openModal) {
-          let { modalStack } = store.getState().modals;
+          const { modalStack } = store.getState().modals;
 
           if (
             modalStack.length === 0 ||

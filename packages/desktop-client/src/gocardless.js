@@ -14,7 +14,7 @@ function _authorize(pushModal, upgradingAccountId, { onSuccess, onClose }) {
       const { link, requisitionId } = resp;
       window.Actual.openURLInBrowser(link);
 
-      let { error, data } = await send('gocardless-poll-web-token', {
+      const { error, data } = await send('gocardless-poll-web-token', {
         upgradingAccountId,
         requisitionId,
       });

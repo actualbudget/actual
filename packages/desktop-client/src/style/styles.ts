@@ -157,11 +157,11 @@ function onScrollbarChange() {
 
 if (Platform.env === 'web') {
   function testScrollbars() {
-    let el = document.createElement('div');
+    const el = document.createElement('div');
     el.innerHTML =
       '<div style="width:100px;height:100px;overflow:scroll;position:absolute;top:-9999px;"/>';
     document.body.appendChild(el);
-    let testNode = el.childNodes[0] as HTMLDivElement;
+    const testNode = el.childNodes[0] as HTMLDivElement;
     if (testNode.offsetWidth === testNode.clientWidth) {
       return true;
     }

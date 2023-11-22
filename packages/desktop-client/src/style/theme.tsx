@@ -24,9 +24,9 @@ export function useTheme() {
 }
 
 export function ThemeStyle() {
-  let theme = useTheme();
-  let themeColors = themes[theme].colors;
-  let css = Object.keys(themeColors)
+  const theme = useTheme();
+  const themeColors = themes[theme].colors;
+  const css = Object.keys(themeColors)
     .map(key => `  --color-${key}: ${themeColors[key]};`)
     .join('\n');
   return <style>{`:root {\n${css}}`}</style>;
