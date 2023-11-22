@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 function useIsOutdated(): boolean {
-  let [isOutdated, setIsOutdated] = useState(false);
+  const [isOutdated, setIsOutdated] = useState(false);
   const latestVersion = useLatestVersion();
 
   useEffect(() => {
@@ -16,7 +16,7 @@ function useIsOutdated(): boolean {
 }
 
 function useLatestVersion(): string {
-  let [latestVersion, setLatestVersion] = useState('');
+  const [latestVersion, setLatestVersion] = useState('');
   useEffect(() => {
     (async () => {
       setLatestVersion(await getLatestVersion());
