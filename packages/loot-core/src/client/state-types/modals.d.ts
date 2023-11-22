@@ -1,4 +1,4 @@
-import type { AccountEntity } from '../../types/models';
+import type { AccountEntity, GoCardlessToken } from '../../types/models';
 import type { RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
@@ -67,7 +67,7 @@ type FinanceModals = {
       institutionId: string;
     }) => Promise<{ error: string } | { data: unknown }>;
     onClose?: () => void;
-    onSuccess: (data: { id: string; accounts: unknown[] }) => Promise<void>;
+    onSuccess: (data: GoCardlessToken) => Promise<void>;
   };
 
   'create-encryption-key': { recreate?: boolean };
