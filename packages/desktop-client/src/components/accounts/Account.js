@@ -983,7 +983,7 @@ class AccountInternal extends PureComponent {
         onConfirm: () => {
           onConfirm(ids);
         },
-        confirmReason: confirmReason,
+        confirmReason,
       });
     } else {
       onConfirm(ids);
@@ -1232,7 +1232,7 @@ class AccountInternal extends PureComponent {
       this.setState({
         sort: {
           ...this.state.sort,
-          ascDesc: ascDesc,
+          ascDesc,
         },
       });
     } else {
@@ -1243,7 +1243,7 @@ class AccountInternal extends PureComponent {
       this.setState({
         sort: {
           field: headerClicked,
-          ascDesc: ascDesc,
+          ascDesc,
           prevField: this.state.sort.field,
           prevAscDesc: this.state.sort.ascDesc,
         },

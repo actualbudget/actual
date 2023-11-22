@@ -130,7 +130,7 @@ global.Actual = {
   },
 
   setTheme: theme => {
-    window.__actionsForMenu.saveGlobalPrefs({ theme: theme });
+    window.__actionsForMenu.saveGlobalPrefs({ theme });
   },
 };
 

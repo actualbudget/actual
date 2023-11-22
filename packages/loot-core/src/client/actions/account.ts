@@ -248,6 +248,6 @@ export function updateNewTransactions(changedId): UpdateNewTransactionsAction {
 export function markAccountRead(accountId): MarkAccountReadAction {
   return {
     type: constants.MARK_ACCOUNT_READ,
-    accountId: accountId,
+    accountId,
   };
 }

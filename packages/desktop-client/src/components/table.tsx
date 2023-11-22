@@ -176,7 +176,7 @@ export function Cell({
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: theme.tableBorder,
-    alignItems: alignItems,
+    alignItems,
   };
 
   let conditionalPrivacyFilter = useMemo(

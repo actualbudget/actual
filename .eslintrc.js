@@ -93,6 +93,7 @@ module.exports = {
     // ],
 
     'no-var': 'warn',
+    'object-shorthand': ['warn', 'properties'],
 
     'import/extensions': [
       'warn',

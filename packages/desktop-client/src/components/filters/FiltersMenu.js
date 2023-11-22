@@ -137,7 +137,7 @@ function updateFilterReducer(state, action) {
       let { value } = makeValue(action.value, {
         type: FIELD_TYPES.get(state.field),
       });
-      return { ...state, value: value };
+      return { ...state, value };
     }
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
@@ -453,7 +453,7 @@ export function FilterButton({ onApply, type }) {
               dispatch({ type: 'configure', field: name });
             }}
             items={filterFields.map(([name, text]) => ({
-              name: name,
+              name,
               text: titleFirst(text),
             }))}
           />

@@ -174,7 +174,7 @@ export default function CategoryAutocomplete({
               .filter(category => category.cat_group === group.id)
               .map(category => ({
                 ...category,
-                group: group,
+                group,
               })),
           ),
         showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
