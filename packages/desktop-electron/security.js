@@ -30,7 +30,7 @@ electron.app.on('ready', function () {
     permission,
     callback,
   ) {
-    var url = webContents.getURL();
+    const url = webContents.getURL();
     if (url.startsWith('file://')) {
       callback(true);
     } else {

@@ -11,8 +11,8 @@ const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 // browser environment this is where we initialize the backend and
 // everything else.
 
-let IS_DEV = process.env.NODE_ENV === 'development';
-let ACTUAL_VERSION = Platform.isPlaywright ? '99.9.9' : packageJson.version;
+const IS_DEV = process.env.NODE_ENV === 'development';
+const ACTUAL_VERSION = Platform.isPlaywright ? '99.9.9' : packageJson.version;
 
 // *** Start the backend ***
 let worker;
@@ -67,7 +67,7 @@ global.Actual = {
       input.id = 'open-file-dialog-input';
       input.value = null;
 
-      let filter = filters.find(filter => filter.extensions);
+      const filter = filters.find(filter => filter.extensions);
       if (filter) {
         input.accept = filter.extensions.map(ext => '.' + ext).join(',');
       }
@@ -78,14 +78,14 @@ global.Actual = {
       input.style.display = 'none';
 
       input.onchange = e => {
-        let file = e.target.files[0];
-        let filename = file.name.replace(/.*(\.[^.]*)/, 'file$1');
+        const file = e.target.files[0];
+        const filename = file.name.replace(/.*(\.[^.]*)/, 'file$1');
 
         if (file) {
-          var reader = new FileReader();
+          const reader = new FileReader();
           reader.readAsArrayBuffer(file);
           reader.onload = async function (ev) {
-            let filepath = `/uploads/${filename}`;
+            const filepath = `/uploads/${filename}`;
 
             window.__actionsForMenu
               .uploadFile(filename, ev.target.result)

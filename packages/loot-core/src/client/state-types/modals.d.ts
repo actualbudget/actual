@@ -33,7 +33,7 @@ type FinanceModals = {
   'select-linked-accounts': {
     accounts: unknown[];
     requisitionId: string;
-    upgradingAccountId: string;
+    upgradingAccountId?: string;
   };
 
   'confirm-category-delete': { onDelete: () => void } & (

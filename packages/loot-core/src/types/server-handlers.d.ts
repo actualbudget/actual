@@ -6,7 +6,12 @@ import { RemoteFile } from '../server/cloud-storage';
 import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
 import { Message } from '../server/sync';
 
-import { AccountEntity, CategoryEntity, CategoryGroupEntity } from './models';
+import {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  GoCardlessToken,
+} from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -196,9 +201,11 @@ export interface ServerHandlers {
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
   'gocardless-poll-web-token': (arg: {
-    upgradingAccountId: string;
+    upgradingAccountId?: string;
     requisitionId: string;
-  }) => Promise<{ error: 'unknown' } | { error: 'timeout' } | { data }>;
+  }) => Promise<
+    { error: 'unknown' } | { error: 'timeout' } | { data: GoCardlessToken }
+  >;
 
   'gocardless-status': () => Promise<{ configured: boolean }>;
 
@@ -207,7 +214,7 @@ export interface ServerHandlers {
   'gocardless-poll-web-token-stop': () => Promise<'ok'>;
 
   'gocardless-create-web-token': (arg: {
-    upgradingAccountId: string;
+    upgradingAccountId?: string;
     institutionId: string;
     accessValidForDays: number;
   }) => Promise<

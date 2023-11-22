@@ -36,7 +36,12 @@ import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useNavigate from '../../hooks/useNavigate';
 import { styles } from '../../style';
 import View from '../common/View';
-import { TitlebarContext, type TitlebarContextValue } from '../Titlebar';
+import {
+  SWITCH_BUDGET_MESSAGE_TYPE,
+  TitlebarContext,
+  type TitlebarContextValue,
+  type TitlebarMessage,
+} from '../Titlebar';
 
 import DynamicBudgetTable from './DynamicBudgetTable';
 import * as report from './report/ReportComponents';
@@ -406,11 +411,11 @@ function Budget(props: BudgetProps) {
     props.savePrefs({ 'budget.summaryCollapsed': collapsed });
   };
 
-  const onTitlebarEvent = async msg => {
-    switch (msg) {
-      case 'budget/switch-type': {
+  const onTitlebarEvent = async ({ type, payload }: TitlebarMessage) => {
+    switch (type) {
+      case SWITCH_BUDGET_MESSAGE_TYPE: {
         await switchBudgetType(
-          props.budgetType,
+          payload.newBudgetType,
           props.spreadsheet,
           bounds,
           prewarmStartMonth,

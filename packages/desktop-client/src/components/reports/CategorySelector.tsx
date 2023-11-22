@@ -5,8 +5,8 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import Eye from '../../icons/v2/Eye';
-import EyeSlashed from '../../icons/v2/EyeSlashed';
+import ViewHide from '../../icons/v2/ViewHide';
+import ViewShow from '../../icons/v2/ViewShow';
 import { type CategoryListProps } from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
 import { Checkbox } from '../forms';
@@ -30,12 +30,12 @@ export default function CategorySelector({
         <Button onClick={() => setUncheckedHidden(state => !state)}>
           {uncheckedHidden ? (
             <>
-              <Eye width={20} height={20} />
+              <ViewShow width={15} height={15} style={{ marginRight: 5 }} />
               Show unchecked
             </>
           ) : (
             <>
-              <EyeSlashed width={20} height={20} />
+              <ViewHide width={15} height={15} style={{ marginRight: 5 }} />
               Hide unchecked
             </>
           )}

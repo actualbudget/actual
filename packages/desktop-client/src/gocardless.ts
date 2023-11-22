@@ -1,14 +1,15 @@
 import type { pushModal as pushModalAction } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { type GoCardlessToken } from 'loot-core/src/types/models';
 
 function _authorize(
   pushModal: typeof pushModalAction,
-  upgradingAccountId: string,
+  upgradingAccountId: string | undefined,
   {
     onSuccess,
     onClose,
   }: {
-    onSuccess: (data: { id: string; accounts: unknown[] }) => Promise<void>;
+    onSuccess: (data: GoCardlessToken) => Promise<void>;
     onClose?: () => void;
   },
 ) {
