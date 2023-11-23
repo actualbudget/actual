@@ -28,6 +28,7 @@ import Filter from '../../icons/v1/Filter';
 import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
 import { theme } from '../../style';
 import Button from '../common/Button';
+import HoverTarget from '../common/HoverTarget';
 import Menu from '../common/Menu';
 import Select from '../common/Select';
 import Stack from '../common/Stack';
@@ -338,22 +339,45 @@ function ConfigureField({
 
 function ButtonType({ type, dispatch }) {
   return (
-    <Button
-      type="bare"
-      onClick={() => dispatch({ type: 'select-field' })}
-      title={type !== 'reports' && 'Filters'}
-    >
+    <View>
       {type === 'reports' ? (
-        <Filter width={15} height={15} />
+        <HoverTarget
+          style={{ flexShrink: 0 }}
+          renderContent={() => (
+            <Tooltip
+              position="bottom-left"
+              style={{
+                lineHeight: 1.5,
+                padding: '6px 10px',
+                backgroundColor: theme.menuAutoCompleteBackground,
+                color: theme.menuAutoCompleteText,
+              }}
+            >
+              <Text>Filters</Text>
+            </Tooltip>
+          )}
+        >
+          <Button
+            type="bare"
+            onClick={() => dispatch({ type: 'select-field' })}
+            title={type !== 'reports' && 'Filters'}
+          >
+            <Filter width={15} height={15} />
+          </Button>
+        </HoverTarget>
       ) : (
-        <>
+        <Button
+          type="bare"
+          onClick={() => dispatch({ type: 'select-field' })}
+          title={type !== 'reports' && 'Filters'}
+        >
           <SettingsSliderAlternate
             style={{ width: 16, height: 16, marginRight: 5 }}
           />{' '}
           Filter
-        </>
+        </Button>
       )}
-    </Button>
+    </View>
   );
 }
 

@@ -8,11 +8,8 @@ import ListBullet from '../../icons/v1/ListBullet';
 import Queue from '../../icons/v1/Queue';
 import Tag from '../../icons/v1/Tag';
 import { theme } from '../../style';
-import HoverTarget from '../common/HoverTarget';
-import Text from '../common/Text';
 import View from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
-import { Tooltip } from '../tooltips';
 
 import GraphButton from './GraphButton';
 import { SaveReportMenuButton } from './SaveReport';
@@ -155,24 +152,7 @@ export function ReportTopbar({
           flexShrink: 0,
         }}
       />
-      <HoverTarget
-        style={{ flexShrink: 0 }}
-        renderContent={() => (
-          <Tooltip
-            position="bottom-left"
-            style={{
-              lineHeight: 1.5,
-              padding: '6px 10px',
-              backgroundColor: theme.menuAutoCompleteBackground,
-              color: theme.menuAutoCompleteText,
-            }}
-          >
-            <Text>Filters</Text>
-          </Tooltip>
-        )}
-      >
-        <FilterButton onApply={onApplyFilter} type="reports" />
-      </HoverTarget>
+      <FilterButton onApply={onApplyFilter} type="reports" />
       <View style={{ flex: 1 }} />
       <SaveReportMenuButton />
     </View>
