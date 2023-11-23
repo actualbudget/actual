@@ -79,6 +79,7 @@ type NotesProps = {
   notes: string;
   editable?: boolean;
   onChange?: (value: string) => void;
+  onBlur?: (value: string) => void;
   getStyle?: (editable: boolean) => CSSProperties;
 };
 
@@ -86,9 +87,12 @@ export default function Notes({
   notes: originalNotes,
   editable,
   onChange,
+  onBlur,
   getStyle,
 }: NotesProps) {
   const [notes, setNotes] = useState(originalNotes);
+  useEffect(() => setNotes(originalNotes), [originalNotes]);
+
   const _onChange = value => {
     setNotes(value);
     onChange?.(value);
@@ -99,7 +103,7 @@ export default function Notes({
     if (editable) {
       textAreaRef.current.focus();
     }
-  }, [textAreaRef, editable]);
+  }, [editable]);
 
   return editable ? (
     <textarea
@@ -116,6 +120,7 @@ export default function Notes({
       })}`}
       value={notes || ''}
       onChange={e => _onChange(e.target.value)}
+      onBlur={e => onBlur?.(e.target.value)}
       placeholder="Notes (markdown supported)"
     />
   ) : (

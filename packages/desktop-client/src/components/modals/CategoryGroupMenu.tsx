@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import q from 'loot-core/src/shared/query';
-import { type CategoryEntity } from 'loot-core/src/types/models';
+import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
+import Add from '../../icons/v1/Add';
 import Trash from '../../icons/v1/Trash';
 import ViewHide from '../../icons/v2/ViewHide';
 import ViewShow from '../../icons/v2/ViewShow';
@@ -15,31 +16,31 @@ import Modal from '../common/Modal';
 import View from '../common/View';
 import Notes from '../Notes';
 
-type CategoryMenuProps = {
+type CategoryGroupMenuProps = {
   modalProps: CommonModalProps;
-  category: CategoryEntity;
-  onSave: (category: CategoryEntity) => void;
+  group: CategoryGroupEntity;
+  onSave: (group: CategoryGroupEntity) => void;
+  onAddCategory: (groupId: string, isIncome: boolean) => void;
   onToggleVisibility: (isHidden: boolean) => void;
   onSaveNotes: (id: string, notes: string) => void;
-  onDelete: (categoryId: string) => void;
-  onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+  onDelete: (groupId: string) => void;
 };
 
-export default function CategoryMenu({
+export default function CategoryGroupMenu({
   modalProps,
-  category,
+  group,
   onSave,
+  onAddCategory,
   onToggleVisibility,
   onSaveNotes,
   onDelete,
-  onBudgetAction,
-}: CategoryMenuProps) {
+}: CategoryGroupMenuProps) {
   const { isNarrowWidth } = useResponsive();
-  const { id, hidden } = category;
+  const { id, hidden } = group;
   const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 
-  const [name, setName] = useState(category.name);
+  const [name, setName] = useState(group.name);
   const [notes, setNotes] = useState(originalNotes);
   useEffect(() => setNotes(originalNotes), [originalNotes]);
 
@@ -48,9 +49,9 @@ export default function CategoryMenu({
       onSaveNotes?.(id, notes);
     }
 
-    if (name !== category.name) {
+    if (name !== group.name) {
       onSave?.({
-        ...category,
+        ...group,
         name,
       });
     }
@@ -58,13 +59,18 @@ export default function CategoryMenu({
     modalProps?.onClose();
   }
 
-  function _onSaveNotes(value) {
-    setNotes(value);
+  function _onAddCategory() {
+    _onClose();
+    onAddCategory?.(group.id, group.is_income);
   }
 
   function _onToggleVisibility() {
     onToggleVisibility?.(!!hidden);
     _onClose();
+  }
+
+  function _onSaveNotes(value) {
+    setNotes(value);
   }
 
   function _onDelete() {
@@ -126,21 +132,29 @@ export default function CategoryMenu({
             <Button
               type="primary"
               style={menuItemStyle}
+              onPointerUp={_onAddCategory}
+            >
+              <Add width={17} height={17} style={{ paddingRight: 5 }} />
+              Add category
+            </Button>
+            <Button
+              type="primary"
+              style={menuItemStyle}
               onPointerUp={_onToggleVisibility}
             >
-              {category.hidden ? (
+              {hidden ? (
                 <ViewShow width={20} height={20} style={{ paddingRight: 5 }} />
               ) : (
                 <ViewHide width={20} height={20} style={{ paddingRight: 5 }} />
               )}
-              {category.hidden ? 'Unhide' : 'Hide'}
+              {hidden ? 'Unhide' : 'Hide'}
             </Button>
             <Button
               type="primary"
               style={menuItemStyle}
               onPointerUp={_onDelete}
             >
-              <Trash width={17} height={17} style={{ paddingRight: 5 }} />
+              <Trash width={20} height={20} style={{ paddingRight: 5 }} />
               Delete
             </Button>
           </View>

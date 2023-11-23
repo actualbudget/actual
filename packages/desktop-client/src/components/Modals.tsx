@@ -9,6 +9,7 @@ import useCategories from '../hooks/useCategories';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
 import { type CommonModalProps } from '../types/modals';
 
+import CategoryGroupMenu from './modals/CategoryGroupMenu';
 import CategoryMenu from './modals/CategoryMenu';
 import CloseAccount from './modals/CloseAccount';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
@@ -338,6 +339,20 @@ export default function Modals() {
               onSaveNotes={options?.onSaveNotes}
               onDelete={options?.onDelete}
               onBudgetAction={options?.onBudgetAction}
+            />
+          );
+
+        case 'category-group-menu':
+          return (
+            <CategoryGroupMenu
+              key={name}
+              modalProps={modalProps}
+              group={options?.group}
+              onSave={options?.onSave}
+              onAddCategory={options?.onAddCategory}
+              onToggleVisibility={options?.onToggleVisibility}
+              onSaveNotes={options?.onSaveNotes}
+              onDelete={options?.onDelete}
             />
           );
 

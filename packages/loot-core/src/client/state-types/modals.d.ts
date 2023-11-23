@@ -2,6 +2,7 @@ import { type File } from '../../types/file';
 import type {
   AccountEntity,
   CategoryEntity,
+  CategoryGroupEntity,
   GoCardlessToken,
 } from '../../types/models';
 import type { RuleEntity } from '../../types/models/rule';
@@ -116,6 +117,14 @@ type FinanceModals = {
     onSaveNotes: (id: string, notes: string) => void;
     onDelete: (categoryId: string) => void;
     onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+  };
+  'category-group-menu': {
+    group: CategoryGroupEntity;
+    onSave: (group: CategoryGroupEntity) => void;
+    onAddCategory: (groupId: string, isIncome: boolean) => void;
+    onToggleVisibility: (isHidden: boolean) => void;
+    onSaveNotes: (id: string, notes: string) => void;
+    onDelete: (groupId: string) => void;
   };
 };
 

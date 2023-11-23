@@ -7,7 +7,6 @@ import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
@@ -256,6 +255,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   onBudgetAction,
   show3Cols,
   showBudgetedCol,
+  pushModal,
 }) {
   const opacity = blank ? 0 : 1;
   const showEditables = editMode || isEditing;
@@ -265,7 +265,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const tooltip = useTooltip();
   const balanceTooltip = useTooltip();
-  const actions = useActions();
 
   useEffect(() => {
     if (isBudgetActionMenuOpen) {
@@ -329,7 +328,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   };
 
   const onCategoryNameClick = () => {
-    actions.pushModal('category-menu', {
+    pushModal('category-menu', {
       category,
       onSave,
       onToggleVisibility,
@@ -577,6 +576,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   onDelete,
   show3Cols,
   showBudgetedCol,
+  pushModal,
 }) {
   const opacity = blank ? 0 : 1;
   const showEditables = editMode || isEditing;
@@ -604,6 +604,14 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
     onEdit?.(null);
   };
 
+  const onToggleVisibility = isHidden => {
+    onSave?.({
+      ...group,
+      hidden: !isHidden,
+    });
+    setIsHidden(!isHidden);
+  };
+
   const onMenuSelect = type => {
     onEdit?.(null);
     switch (type) {
@@ -611,11 +619,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         onAddCategory?.(group.id, group.is_income);
         break;
       case 'toggle-visibility':
-        setIsHidden(!isHidden);
-        onSave?.({
-          ...group,
-          hidden: !isHidden,
-        });
+        onToggleVisibility(isHidden);
         break;
       case 'delete':
         onDelete?.(group.id);
@@ -623,6 +627,21 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       default:
         throw new Error(`Unrecognized group menu type: ${type}`);
     }
+  };
+
+  const onSaveNotes = async (id, notes) => {
+    await send('notes-save', { id, note: notes });
+  };
+
+  const onGroupNameClick = () => {
+    pushModal('category-group-menu', {
+      group,
+      onSave,
+      onAddCategory,
+      onToggleVisibility,
+      onSaveNotes,
+      onDelete,
+    });
   };
 
   const listItemRef = useRef();
@@ -717,7 +736,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
             ...styles.lineClamp(2),
             fontWeight: '500',
           }}
-          onPointerUp={() => onEdit?.(group.id)}
+          onPointerUp={onGroupNameClick}
           data-testid="name"
         >
           {group.name}
@@ -833,9 +852,10 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   editMode,
   isEditing,
   onEdit,
+  pushModal,
 }) {
   const [groupName, setGroupName] = useState(group.name);
-  const [isHidden, setIsHidden] = useState(group.hidden);
+  const [isHidden, setIsHidden] = useState(!!group.hidden);
   const showEditables = editMode || isEditing;
 
   const tooltip = useTooltip();
@@ -858,6 +878,14 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
     onEdit?.(null);
   };
 
+  const onToggleVisibility = isHidden => {
+    onSave?.({
+      ...group,
+      hidden: !isHidden,
+    });
+    setIsHidden(!isHidden);
+  };
+
   const onMenuSelect = type => {
     onEdit?.(null);
     switch (type) {
@@ -865,11 +893,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         onAddCategory?.(group.id, group.is_income);
         break;
       case 'toggle-visibility':
-        setIsHidden(!isHidden);
-        onSave?.({
-          ...group,
-          hidden: !isHidden,
-        });
+        onToggleVisibility(isHidden);
         break;
       case 'delete':
         onDelete?.(group.id);
@@ -877,6 +901,21 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       default:
         throw new Error(`Unrecognized group menu type: ${type}`);
     }
+  };
+
+  const onSaveNotes = async (id, notes) => {
+    await send('notes-save', { id, note: notes });
+  };
+
+  const onGroupNameClick = () => {
+    pushModal('category-group-menu', {
+      group,
+      onSave,
+      onAddCategory,
+      onToggleVisibility,
+      onSaveNotes,
+      onDelete,
+    });
   };
 
   const listItemRef = useRef();
@@ -977,7 +1016,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             ...styles.lineClamp(2),
             fontWeight: '500',
           }}
-          onPointerUp={() => onEdit?.(group.id)}
+          onPointerUp={onGroupNameClick}
           data-testid="name"
         >
           {group.name}
@@ -1041,9 +1080,10 @@ const IncomeCategory = memo(function IncomeCategory({
   onBudgetAction,
   isEditingBudget,
   onEditBudget,
+  pushModal,
 }) {
   const [categoryName, setCategoryName] = useState(category.name);
-  const [isHidden, setIsHidden] = useState(category.hidden);
+  const [isHidden, setIsHidden] = useState(!!category.hidden);
   const showEditables = editMode || isEditing;
 
   const tooltip = useTooltip();
@@ -1066,15 +1106,19 @@ const IncomeCategory = memo(function IncomeCategory({
     onEdit?.(null);
   };
 
+  const onToggleVisibility = isHidden => {
+    onSave?.({
+      ...category,
+      hidden: !isHidden,
+    });
+    setIsHidden(!isHidden);
+  };
+
   const onMenuSelect = type => {
     onEdit?.(null);
     switch (type) {
       case 'toggle-visibility':
-        setIsHidden(!isHidden);
-        onSave?.({
-          ...category,
-          hidden: !isHidden,
-        });
+        onToggleVisibility(isHidden);
         break;
       case 'delete':
         onDelete?.(category.id);
@@ -1082,6 +1126,21 @@ const IncomeCategory = memo(function IncomeCategory({
       default:
         throw new Error(`Unrecognized category menu type: ${type}`);
     }
+  };
+
+  const onSaveNotes = async (id, notes) => {
+    await send('notes-save', { id, note: notes });
+  };
+
+  const onCategoryNameClick = () => {
+    pushModal('category-menu', {
+      category,
+      onSave,
+      onToggleVisibility,
+      onSaveNotes,
+      onDelete,
+      onBudgetAction,
+    });
   };
 
   const listItemRef = useRef();
@@ -1178,7 +1237,7 @@ const IncomeCategory = memo(function IncomeCategory({
             ...styles.underlinedText,
             ...styles.lineClamp(2),
           }}
-          onPointerUp={() => onEdit?.(category.id)}
+          onPointerUp={onCategoryNameClick}
           data-testid="name"
         >
           {category.name}
@@ -1303,6 +1362,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
   showBudgetedCol,
   show3Cols,
   showHiddenCategories,
+  pushModal,
 }) {
   function editable(content) {
     if (!editMode) {
@@ -1365,6 +1425,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
         onDelete={onDelete}
         isEditing={editingGroupId === group.id}
         onEdit={onEditGroup}
+        pushModal={pushModal}
         // onReorderCategory={onReorderCategory}
       />
 
@@ -1424,6 +1485,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
               style={{
                 backgroundColor: theme.tableBackground,
               }}
+              pushModal={pushModal}
             />
           );
         })}
@@ -1449,6 +1511,7 @@ function IncomeGroup({
   editingBudgetCategoryId,
   onEditCategoryBudget,
   onBudgetAction,
+  pushModal,
 }) {
   return (
     <View>
@@ -1486,6 +1549,7 @@ function IncomeGroup({
           editMode={editMode}
           isEditing={editingGroupId === group.id}
           onEdit={onEditGroup}
+          pushModal={pushModal}
         />
 
         {group.categories
@@ -1519,6 +1583,7 @@ function IncomeGroup({
                 onBudgetAction={onBudgetAction}
                 isEditingBudget={editingBudgetCategoryId === category.id}
                 onEditBudget={onEditCategoryBudget}
+                pushModal={pushModal}
               />
             );
           })}
@@ -1553,6 +1618,7 @@ function BudgetGroups({
   showBudgetedCol,
   show3Cols,
   showHiddenCategories,
+  pushModal,
 }) {
   const separateGroups = memoizeOne(groups => {
     return {
@@ -1598,6 +1664,7 @@ function BudgetGroups({
               onBudgetAction={onBudgetAction}
               show3Cols={show3Cols}
               showHiddenCategories={showHiddenCategories}
+              pushModal={pushModal}
             />
           );
         })}
@@ -1632,6 +1699,7 @@ function BudgetGroups({
           editingBudgetCategoryId={editingBudgetCategoryId}
           onEditCategoryBudget={onEditCategoryBudget}
           onBudgetAction={onBudgetAction}
+          pushModal={pushModal}
         />
       )}
     </View>
@@ -1965,6 +2033,7 @@ export function BudgetTable(props) {
                 onReorderCategory={onReorderCategory}
                 onReorderGroup={onReorderGroup}
                 onBudgetAction={onBudgetAction}
+                pushModal={pushModal}
               />
             </View>
           ) : (
@@ -2001,6 +2070,7 @@ export function BudgetTable(props) {
                 onReorderCategory={onReorderCategory}
                 onReorderGroup={onReorderGroup}
                 onBudgetAction={onBudgetAction}
+                pushModal={pushModal}
               />
             </View>
 

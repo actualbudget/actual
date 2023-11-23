@@ -3,6 +3,7 @@ import React, {
   useRef,
   useLayoutEffect,
   type ReactNode,
+  useState,
 } from 'react';
 import ReactModal from 'react-modal';
 
@@ -14,6 +15,7 @@ import { type CSSProperties, styles, theme } from '../../style';
 import tokens from '../../tokens';
 
 import Button from './Button';
+import Input from './Input';
 import Text from './Text';
 import View from './View';
 
@@ -26,6 +28,7 @@ export type ModalProps = {
   padding?: CSSProperties['padding'];
   showHeader?: boolean;
   showTitle?: boolean;
+  editableTitle?: boolean;
   showClose?: boolean;
   showOverlay?: boolean;
   loading?: boolean;
@@ -34,9 +37,11 @@ export type ModalProps = {
   stackIndex?: number;
   parent?: HTMLElement;
   style?: CSSProperties;
+  titleStyle?: CSSProperties;
   contentStyle?: CSSProperties;
   overlayStyle?: CSSProperties;
   onClose?: () => void;
+  onTitleChange?: (title: string) => void;
 };
 
 const Modal = ({
@@ -47,6 +52,7 @@ const Modal = ({
   padding = 20,
   showHeader = true,
   showTitle = true,
+  editableTitle = false,
   showClose = true,
   showOverlay = true,
   loading = false,
@@ -55,10 +61,12 @@ const Modal = ({
   stackIndex,
   parent,
   style,
+  titleStyle,
   contentStyle,
   overlayStyle,
   children,
   onClose,
+  onTitleChange,
 }: ModalProps) => {
   useEffect(() => {
     // This deactivates any key handlers in the "app" scope. Ideally
@@ -68,6 +76,17 @@ const Modal = ({
     hotkeys.setScope('modal');
     return () => hotkeys.setScope(prevScope);
   }, []);
+
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [_title, _setTitle] = useState(title);
+  const onTitleClick = () => {
+    setIsEditingTitle(true);
+  };
+
+  const _onTitleChange = newTitle => {
+    onTitleChange?.(newTitle);
+    setIsEditingTitle(false);
+  };
 
   return (
     <ReactModal
@@ -155,17 +174,38 @@ const Modal = ({
                   width: 'calc(100% - 40px)',
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 25,
-                    fontWeight: 700,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {title}
-                </Text>
+                {isEditingTitle ? (
+                  <Input
+                    style={{
+                      fontSize: 25,
+                      fontWeight: 700,
+                      textAlign: 'center',
+                    }}
+                    value={_title}
+                    onChange={e => _setTitle(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        _onTitleChange(e.currentTarget.value);
+                      }
+                    }}
+                    onBlur={e => _onTitleChange(e.target.value)}
+                  />
+                ) : (
+                  <Text
+                    style={{
+                      fontSize: 25,
+                      fontWeight: 700,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      ...titleStyle,
+                    }}
+                    {...(editableTitle && { onPointerUp: onTitleClick })}
+                  >
+                    {title}
+                  </Text>
+                )}
               </View>
             )}
 
@@ -185,7 +225,7 @@ const Modal = ({
                   marginRight: 15,
                 }}
               >
-                {showClose && (
+                {showClose && !isEditingTitle && (
                   <Button
                     type="bare"
                     onClick={onClose}
