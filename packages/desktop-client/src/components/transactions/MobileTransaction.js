@@ -762,7 +762,7 @@ class TransactionEditInner extends PureComponent {
             transaction:
               editingChild && transactions.find(t => t.id === editingChild),
             amountSign: forcedSign,
-            getCategoryName: id => (id ? lookupName(categories, id) : null),
+            getCategoryName: id => lookupName(categories, id),
             navigate,
             onEdit: this.onEdit,
             onStartClose: this.onSaveChild,
@@ -995,7 +995,7 @@ class Transaction extends PureComponent {
       amount = getScheduledAmount(amount);
     }
 
-    let categoryName = category ? lookupName(categories, category) : null;
+    let categoryName = lookupName(categories, category);
 
     let payee = payees && payeeId && getPayeesById(payees)[payeeId];
     let transferAcct =
