@@ -826,10 +826,16 @@ class AccountInternal extends PureComponent {
           return;
         }
 
-        let { diff } = updateTransaction(transactions, {
+        let transaction = {
           ...trans,
           [name]: value,
-        });
+        };
+
+        if (name === 'account' && trans.account !== value) {
+          transaction.reconciled = false;
+        }
+
+        let { diff } = updateTransaction(transactions, transaction);
 
         // TODO: We need to keep an updated list of transactions so
         // the logic in `updateTransaction`, particularly about
