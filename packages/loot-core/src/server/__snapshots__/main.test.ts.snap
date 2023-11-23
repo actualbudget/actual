@@ -19,6 +19,7 @@ Array [
     "notes": null,
     "parent_id": null,
     "pending": 0,
+    "reconciled": 0,
     "schedule": null,
     "sort_order": 123456789,
     "starting_balance_flag": 0,
@@ -43,6 +44,7 @@ Array [
     "notes": null,
     "parent_id": null,
     "pending": 0,
+    "reconciled": 0,
     "schedule": null,
     "sort_order": 123456789,
     "starting_balance_flag": 0,
@@ -73,7 +75,7 @@ exports[`Accounts Transfers are properly updated 2`] = `
       \\"id\\": \\"test-transfer\\",
       \\"imported_description\\": null,
       \\"isChild\\": 0,
-@@ -22,15 +22,15 @@
+@@ -23,15 +23,15 @@
       \\"tombstone\\": 0,
       \\"transferred_id\\": \\"id2\\",
       \\"type\\": null,
@@ -98,9 +100,9 @@ exports[`Accounts Transfers are properly updated 3`] = `
 - First value
 + Second value
 
-@@ -17,12 +17,12 @@
-      \\"parent_id\\": null,
+@@ -18,12 +18,12 @@
       \\"pending\\": 0,
+      \\"reconciled\\": 0,
       \\"schedule\\": null,
       \\"sort_order\\": 123456789,
       \\"starting_balance_flag\\": 0,
@@ -113,9 +115,9 @@ exports[`Accounts Transfers are properly updated 3`] = `
     Object {
       \\"acct\\": \\"three\\",
       \\"amount\\": -5000,
-@@ -41,10 +41,10 @@
-      \\"parent_id\\": null,
+@@ -43,10 +43,10 @@
       \\"pending\\": 0,
+      \\"reconciled\\": 0,
       \\"schedule\\": null,
       \\"sort_order\\": 123456789,
       \\"starting_balance_flag\\": 0,

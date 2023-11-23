@@ -33,7 +33,7 @@ class Budget extends Component {
     const currentMonth = monthUtils.currentMonth();
     this.state = {
       bounds: { start: currentMonth, end: currentMonth },
-      currentMonth: currentMonth,
+      currentMonth,
       initialized: false,
       editMode: false,
       categoryGroups: [],
@@ -328,8 +328,13 @@ class Budget extends Component {
 
     this.setState({ initialized: false });
 
-    await switchBudgetType(budgetType, spreadsheet, bounds, currentMonth, () =>
-      loadPrefs(),
+    const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
+    await switchBudgetType(
+      newBudgetType,
+      spreadsheet,
+      bounds,
+      currentMonth,
+      () => loadPrefs(),
     );
 
     this.setState({ initialized: true });

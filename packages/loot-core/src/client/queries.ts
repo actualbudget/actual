@@ -49,7 +49,7 @@ export function getAccountFilter(accountId, field = 'account') {
 export function makeTransactionsQuery(accountId) {
   let query = q('transactions').options({ splits: 'grouped' });
 
-  let filter = getAccountFilter(accountId);
+  const filter = getAccountFilter(accountId);
   if (filter) {
     query = query.filter(filter);
   }
@@ -58,7 +58,7 @@ export function makeTransactionsQuery(accountId) {
 }
 
 export function makeTransactionSearchQuery(currentQuery, search, dateFormat) {
-  let amount = currencyToAmount(search);
+  const amount = currencyToAmount(search);
 
   // Support various date formats
   let parsedDate;
@@ -130,7 +130,7 @@ export function offbudgetAccountBalance() {
   };
 }
 
-let uncategorizedQuery = q('transactions').filter({
+const uncategorizedQuery = q('transactions').filter({
   'account.offbudget': false,
   category: null,
   $or: [

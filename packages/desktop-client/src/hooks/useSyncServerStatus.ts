@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux';
 
 import { useServerURL } from '../components/ServerContext';
 
-type SyncServerStatus = 'offline' | 'no-server' | 'online';
+export type SyncServerStatus = 'offline' | 'no-server' | 'online';
 
 export default function useSyncServerStatus(): SyncServerStatus {
   const serverUrl = useServerURL();

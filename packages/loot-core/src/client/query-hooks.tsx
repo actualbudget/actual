@@ -12,12 +12,12 @@ import { type Query } from '../shared/query';
 import { liveQuery, LiveQuery } from './query-helpers';
 
 function makeContext(queryState, opts, QueryClass) {
-  let query = new QueryClass(queryState, null, opts);
-  let Context = createContext(null);
+  const query = new QueryClass(queryState, null, opts);
+  const Context = createContext(null);
 
   function Provider({ children }) {
-    let [data, setData] = useState(query.getData());
-    let value = useMemo(() => ({ data, query }), [data, query]);
+    const [data, setData] = useState(query.getData());
+    const value = useMemo(() => ({ data, query }), [data, query]);
 
     useEffect(() => {
       if (query.getNumListeners() !== 0) {
@@ -26,7 +26,7 @@ function makeContext(queryState, opts, QueryClass) {
         );
       }
 
-      let unlisten = query.addListener(data => setData(data));
+      const unlisten = query.addListener(data => setData(data));
 
       // Start the query if it hasn't run yet. Most likely it's not
       // running, however the user can freely start the query early if
@@ -50,7 +50,7 @@ function makeContext(queryState, opts, QueryClass) {
   }
 
   function useQuery() {
-    let queryData = useContext(Context);
+    const queryData = useContext(Context);
     if (queryData == null) {
       throw new Error(
         '`useQuery` tried to access a query that hasn’t been run. You need to put its `Provider` in a parent component',
@@ -70,8 +70,8 @@ export function liveQueryContext(query, opts?) {
 }
 
 export function useLiveQuery(makeQuery: () => Query, deps: DependencyList) {
-  let [data, setData] = useState(null);
-  let query = useMemo(makeQuery, deps);
+  const [data, setData] = useState(null);
+  const query = useMemo(makeQuery, deps);
 
   useEffect(() => {
     let live = liveQuery(query, async data => {

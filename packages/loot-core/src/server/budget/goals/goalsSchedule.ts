@@ -54,11 +54,11 @@ export async function goalsSchedule(
       );
       t.push({
         template: template[ll],
-        target: target,
-        next_date_string: next_date_string,
-        target_interval: target_interval,
-        target_frequency: target_frequency,
-        num_months: num_months,
+        target,
+        next_date_string,
+        target_interval,
+        target_frequency,
+        num_months,
         completed: complete,
       });
       if (!complete) {

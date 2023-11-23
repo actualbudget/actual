@@ -3,8 +3,8 @@ import React, { Fragment, useState } from 'react';
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
 import { CheckAll, UncheckAll } from '../../icons/v2';
-import Eye from '../../icons/v2/Eye';
-import EyeSlashed from '../../icons/v2/EyeSlashed';
+import ViewHide from '../../icons/v2/ViewHide';
+import ViewShow from '../../icons/v2/ViewShow';
 import { type CategoryListProps } from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
 import Text from '../common/Text';
@@ -57,12 +57,12 @@ export default function CategorySelector({
           <View>
             {uncheckedHidden ? (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Eye width={20} height={20} />
+                <ViewShow width={15} height={15} style={{ marginRight: 5 }} />
                 <Text>Show unchecked</Text>
               </View>
             ) : (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <EyeSlashed width={20} height={20} />
+                <ViewHide width={15} height={15} style={{ marginRight: 5 }} />
                 <Text>Hide unchecked</Text>
               </View>
             )}
