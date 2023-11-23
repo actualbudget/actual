@@ -141,7 +141,7 @@ function BudgetCell({
   function updateBudgetAmount(amount) {
     onBudgetAction?.(month, 'budget-amount', {
       category: categoryId,
-      amount: amount,
+      amount,
     });
   }
 

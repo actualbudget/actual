@@ -19,9 +19,9 @@ import useFeatureFlag from '../hooks/useFeatureFlag';
 import useNavigate from '../hooks/useNavigate';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
-import SvgEye from '../icons/v2/Eye';
-import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
+import ViewHide from '../icons/v2/ViewHide';
+import ViewShow from '../icons/v2/ViewShow';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, type CSSProperties, styles } from '../style';
 
@@ -103,23 +103,24 @@ function UncategorizedButton() {
   );
 }
 
-function PrivacyButton() {
+function PrivacyButton({ style }) {
   let isPrivacyEnabled = useSelector(
     state => state.prefs.local.isPrivacyEnabled,
   );
   let { savePrefs } = useActions();
 
-  let privacyIconStyle = { width: 23, height: 23 };
+  let privacyIconStyle = { width: 15, height: 15 };
 
   return (
     <Button
       type="bare"
       onClick={() => savePrefs({ isPrivacyEnabled: !isPrivacyEnabled })}
+      style={style}
     >
       {isPrivacyEnabled ? (
-        <SvgEyeSlashed style={privacyIconStyle} />
+        <ViewHide style={privacyIconStyle} />
       ) : (
-        <SvgEye style={privacyIconStyle} />
+        <ViewShow style={privacyIconStyle} />
       )}
     </Button>
   );
@@ -440,8 +441,8 @@ export default function Titlebar({ style }) {
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      <ThemeSelector />
-      <PrivacyButton />
+      <ThemeSelector style={{ marginLeft: 10 }} />
+      <PrivacyButton style={{ marginLeft: 10 }} />
       {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>

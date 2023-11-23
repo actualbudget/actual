@@ -1,6 +1,7 @@
 export type * from './account';
 export type * from './category';
 export type * from './category-group';
+export type * from './gocardless';
 export type * from './payee';
 export type * from './rule';
 export type * from './schedule';

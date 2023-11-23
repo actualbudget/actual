@@ -1,6 +1,6 @@
-let path = require('path');
+const path = require('path');
 
-let config = require('./webpack.desktop.config');
+const config = require('./webpack.desktop.config');
 
 config.resolve.extensions = [
   '.api.js',
