@@ -54,9 +54,9 @@ function AccountList({
             <Fragment key={item.id}>
               {renderAccountItem({
                 ...(getItemProps ? getItemProps({ item }) : null),
-                item: item,
+                item,
                 highlighted: highlightedIndex === idx,
-                embedded: embedded,
+                embedded,
               })}
             </Fragment>,
           ];

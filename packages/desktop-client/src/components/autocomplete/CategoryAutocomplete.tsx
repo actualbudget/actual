@@ -60,7 +60,7 @@ function CategoryList({
               key: 'split',
               ...(getItemProps ? getItemProps({ item }) : null),
               highlighted: highlightedIndex === idx,
-              embedded: embedded,
+              embedded,
             });
           }
 
@@ -78,9 +78,9 @@ function CategoryList({
               <Fragment key={item.id}>
                 {renderCategoryItem({
                   ...(getItemProps ? getItemProps({ item }) : null),
-                  item: item,
+                  item,
                   highlighted: highlightedIndex === idx,
-                  embedded: embedded,
+                  embedded,
                 })}
               </Fragment>
             </Fragment>

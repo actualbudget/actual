@@ -136,9 +136,9 @@ function PayeeList({
               <Fragment key={item.id}>
                 {renderPayeeItem({
                   ...(getItemProps ? getItemProps({ item }) : null),
-                  item: item,
+                  item,
                   highlighted: highlightedIndex === idx + offset,
-                  embedded: embedded,
+                  embedded,
                 })}
               </Fragment>
 
