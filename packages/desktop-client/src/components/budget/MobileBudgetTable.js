@@ -151,43 +151,42 @@ function BudgetCell({
 
   return (
     <View style={style}>
-      {isEditing ? (
-        <AmountInput
-          initialValue={sheetValue}
-          zeroSign="+"
+      <AmountInput
+        initialValue={sheetValue}
+        zeroSign="+"
+        style={{
+          ...(!isEditing && { display: 'none' }),
+          height: ROW_HEIGHT,
+          transform: 'translateX(6px)',
+        }}
+        focused={isEditing}
+        textStyle={{ ...styles.smallText, ...textStyle }}
+        onChange={updateBudgetAmount}
+        onBlur={() => onEdit?.(null)}
+      />
+      <View
+        role="button"
+        style={{
+          ...(isEditing && { display: 'none' }),
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          height: ROW_HEIGHT,
+        }}
+      >
+        <CellValue
+          binding={binding}
+          type="financial"
           style={{
-            height: ROW_HEIGHT,
-            transform: 'translateX(6px)',
+            ...styles.smallText,
+            ...textStyle,
+            ...styles.underlinedText,
           }}
-          focused={isEditing}
-          textStyle={{ ...styles.smallText, ...textStyle }}
-          onChange={updateBudgetAmount}
-          onBlur={() => onEdit?.(null)}
+          getStyle={makeAmountGrey}
+          data-testid={name}
+          onPointerUp={onAmountClick}
+          onPointerDown={e => e.preventDefault()}
         />
-      ) : (
-        <View
-          role="button"
-          style={{
-            justifyContent: 'center',
-            alignItems: 'flex-end',
-            height: ROW_HEIGHT,
-          }}
-        >
-          <CellValue
-            binding={binding}
-            type="financial"
-            style={{
-              ...styles.smallText,
-              ...textStyle,
-              ...styles.underlinedText,
-            }}
-            getStyle={makeAmountGrey}
-            data-testid={name}
-            onPointerUp={onAmountClick}
-            onPointerDown={e => e.preventDefault()}
-          />
-        </View>
-      )}
+      </View>
     </View>
   );
 }
