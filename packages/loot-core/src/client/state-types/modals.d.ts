@@ -1,5 +1,9 @@
 import { type File } from '../../types/file';
-import type { AccountEntity, GoCardlessToken } from '../../types/models';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  GoCardlessToken,
+} from '../../types/models';
 import type { RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
@@ -105,6 +109,14 @@ type FinanceModals = {
 
   'schedule-posts-offline-notification': null;
   'switch-budget-type': { onSwitch: () => void };
+  'category-menu': {
+    category: CategoryEntity;
+    onSave: (category: CategoryEntity) => void;
+    onToggleVisibility: (isHidden: boolean) => void;
+    onSaveNotes: (id: string, notes: string) => void;
+    onDelete: (categoryId: string) => void;
+    onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+  };
 };
 
 export type PushModalAction = {

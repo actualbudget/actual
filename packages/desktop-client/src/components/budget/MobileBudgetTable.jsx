@@ -4,8 +4,10 @@ import { useSelector } from 'react-redux';
 import memoizeOne from 'memoize-one';
 
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
+import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
@@ -259,10 +261,11 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const showEditables = editMode || isEditing;
 
   const [categoryName, setCategoryName] = useState(category.name);
-  const [isHidden, setIsHidden] = useState(category.hidden);
+  const [isHidden, setIsHidden] = useState(!!category.hidden);
 
   const tooltip = useTooltip();
   const balanceTooltip = useTooltip();
+  const actions = useActions();
 
   useEffect(() => {
     if (isBudgetActionMenuOpen) {
@@ -288,15 +291,19 @@ const ExpenseCategory = memo(function ExpenseCategory({
     onEdit?.(null);
   };
 
+  const onToggleVisibility = isHidden => {
+    onSave?.({
+      ...category,
+      hidden: !isHidden,
+    });
+    setIsHidden(!isHidden);
+  };
+
   const onMenuSelect = type => {
     onEdit?.(null);
     switch (type) {
       case 'toggle-visibility':
-        setIsHidden(!isHidden);
-        onSave?.({
-          ...category,
-          hidden: !isHidden,
-        });
+        onToggleVisibility(isHidden);
         break;
       case 'delete':
         onDelete?.(category.id);
@@ -315,6 +322,21 @@ const ExpenseCategory = memo(function ExpenseCategory({
       action,
       arg,
     );
+  };
+
+  const onSaveNotes = async (id, notes) => {
+    await send('notes-save', { id, note: notes });
+  };
+
+  const onCategoryNameClick = () => {
+    actions.pushModal('category-menu', {
+      category,
+      onSave,
+      onToggleVisibility,
+      onSaveNotes,
+      onDelete,
+      onBudgetAction,
+    });
   };
 
   const content = (
@@ -403,7 +425,8 @@ const ExpenseCategory = memo(function ExpenseCategory({
             ...styles.underlinedText,
             ...styles.lineClamp(2),
           }}
-          onPointerUp={() => onEdit?.(category.id)}
+          // onPointerUp={() => onEdit?.(category.id)}
+          onPointerUp={onCategoryNameClick}
           data-testid="category-name"
         >
           {category.name}
