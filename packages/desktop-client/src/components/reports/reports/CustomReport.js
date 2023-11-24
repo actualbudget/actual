@@ -17,9 +17,9 @@ import Text from '../../common/Text';
 import View from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
 import PrivacyFilter from '../../PrivacyFilter';
-import { LoadComponent } from '../../util/LoadComponent';
 import { ChooseGraph } from '../ChooseGraph';
 import Header from '../Header';
+import LoadingIndicator from '../LoadingIndicator';
 import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportLegend, ReportSummary } from '../ReportSummary';
@@ -299,7 +299,7 @@ export default function CustomReport() {
                     months={months}
                   />
                 ) : (
-                  <LoadComponent message={'Loading report...'} />
+                  <LoadingIndicator message={'Loading report...'} />
                 )}
               </View>
               {(viewLegend || viewSummary) && (

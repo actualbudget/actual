@@ -9,11 +9,11 @@ import { theme, styles } from '../../../style';
 import Block from '../../common/Block';
 import View from '../../common/View';
 import PrivacyFilter from '../../PrivacyFilter';
-import { LoadComponent } from '../../util/LoadComponent';
 import Change from '../Change';
 import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import DateRange from '../DateRange';
+import LoadingIndicator from '../LoadingIndicator';
 import ReportCard from '../ReportCard';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
 import Tooltip from '../Tooltip';
@@ -143,7 +143,7 @@ function CashFlowCard() {
             )}
           </Container>
         ) : (
-          <LoadComponent />
+          <LoadingIndicator />
         )}
       </View>
     </ReportCard>

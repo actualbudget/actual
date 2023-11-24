@@ -9,7 +9,7 @@ type ProplessComponent = ComponentType<Record<string, never>>;
 type LoadComponentProps<K extends string> = {
   name: K;
   message?: string;
-  importer?: () => Promise<{ [key in K]: ProplessComponent }>;
+  importer: () => Promise<{ [key in K]: ProplessComponent }>;
 };
 export function LoadComponent<K extends string>(props: LoadComponentProps<K>) {
   // need to set `key` so the component is reloaded when the name changes
@@ -23,11 +23,8 @@ function LoadComponentInner<K extends string>({
   importer,
 }: LoadComponentProps<K>) {
   let [Component, setComponent] = useState<ProplessComponent | null>(null);
-
   useEffect(() => {
-    if (importer) {
-      importer().then(module => setComponent(() => module[name]));
-    }
+    importer().then(module => setComponent(() => module[name]));
   }, [name, importer]);
 
   if (!Component) {
@@ -44,9 +41,7 @@ function LoadComponentInner<K extends string>({
         {message && (
           <Block style={{ marginBottom: 20, fontSize: 18 }}>{message}</Block>
         )}
-        <AnimatedLoading
-          style={{ width: 25, height: 25, color: theme.pageTextDark }}
-        />
+        <AnimatedLoading width={25} color={theme.pageTextDark} />
       </View>
     );
   }

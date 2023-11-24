@@ -156,13 +156,13 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
                 />
-                {!compact && 
+                {!compact && (
                   <YAxis
                     tickFormatter={value => CustomTick(value, privacyMode)}
                     tick={{ fill: theme.pageText }}
                     tickLine={{ stroke: theme.pageText }}
                   />
-                }
+                )}
                 {data.groupBy.reverse().map((c, index) => (
                   <Bar
                     key={c.date}

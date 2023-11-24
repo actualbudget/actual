@@ -1,4 +1,4 @@
-import React, { forwardRef, type HTMLProps } from 'react';
+import React, { type HTMLProps } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
 import Button from '../common/Button';

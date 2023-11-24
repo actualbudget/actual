@@ -219,8 +219,9 @@ function BarGraph({
                     tickLine={{ stroke: theme.pageText }}
                   />
                 )}
-                {!compact && <ReferenceLine y={0} stroke={theme.pageTextLight} />
-                }
+                {!compact && (
+                  <ReferenceLine y={0} stroke={theme.pageTextLight} />
+                )}
                 <Bar dataKey={val => getVal(val)} stackId="a">
                   {data[splitData]
                     .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
