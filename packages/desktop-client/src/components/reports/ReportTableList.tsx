@@ -191,7 +191,7 @@ export default function ReportTableList({
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const groupByData =
     groupBy === 'Category'
-      ? 'groupData'
+      ? 'groupedData'
       : ['Month', 'Year'].includes(groupBy)
       ? 'monthData'
       : 'data';

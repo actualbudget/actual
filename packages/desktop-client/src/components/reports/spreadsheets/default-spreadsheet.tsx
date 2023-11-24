@@ -3,9 +3,7 @@ import * as d from 'date-fns';
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
-import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
-
-import { index } from '../util';
+import { integerToAmount } from 'loot-core/src/shared/util';
 
 export default function createSpreadsheet(
   start,
@@ -105,7 +103,7 @@ export default function createSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    function makeQuery(splt, name) {
+    function makeQuery2(name) {
       let query = q('transactions')
         .filter(
           //Show Offbudget and hidden categories
@@ -142,21 +140,9 @@ export default function createSpreadsheet(
             ],
           },
         )
-        //Calculate uncategorized transactions when box checked
-        .filter(
-          splt.uncat_id === '2'
-            ? {
-                'payee.transfer_acct.closed': false,
-              }
-            : {
-                'payee.transfer_acct': null,
-                'account.offbudget': splt.offBudget ? splt.offBudget : false,
-              },
-        )
         //Apply filters and split by "Group By"
         .filter({
           [conditionsOpKey]: [...filters],
-          [groupByLabel]: splt.id,
         })
         //Apply month range filters
         .filter({
@@ -171,303 +157,253 @@ export default function createSpreadsheet(
         );
 
       return query
-        .groupBy({ $month: '$date' })
+        .groupBy([
+          { $month: '$date' },
+          { $id: '$account' },
+          { $id: '$payee' },
+          { $id: '$category' },
+        ])
         .select([
           { date: { $month: '$date' } },
-          { [name]: { $sum: '$amount' } },
+          { category: { $id: '$category' } },
+          { account: { $id: '$account' } },
+          { payee: { $id: '$payee' } },
+          { amount: { $sum: '$amount' } },
         ]);
     }
 
-    const graphData = await Promise.all(
-      groupByList.map(async splt => {
-        let [starting, assets, debts] = await Promise.all([
-          runQuery(
-            q('transactions')
-              .filter(
-                !hidden && {
-                  $and: [
-                    {
-                      'account.offbudget': false,
-                      $or: [
-                        {
-                          'category.hidden': false,
-                          category: null,
-                        },
-                      ],
-                    },
-                  ],
-                  $or: [
-                    {
-                      'payee.transfer_acct.offbudget': true,
-                      'payee.transfer_acct': null,
-                    },
-                  ],
-                },
-              )
-              .filter(
-                splt.uncat_id === '2'
-                  ? {
-                      'payee.transfer_acct.closed': false,
-                    }
-                  : {
-                      'payee.transfer_acct': null,
-                      'account.offbudget': splt.offBudget
-                        ? splt.offBudget
-                        : false,
-                    },
-              )
-              .filter(
-                selectedCategories && {
-                  $or: categoryFilter.map(category => ({
-                    category: category.id,
-                  })),
-                },
-              )
-              .filter({
-                [conditionsOpKey]: [...filters],
-                [groupByLabel]: splt.id,
-              })
-              .filter({
-                $and: [{ date: { $lt: start + '-01' } }],
-              })
-              .calculate({ $sum: '$amount' }),
-          ).then(({ data }) => data),
-
-          runQuery(makeQuery(splt, 'assets')).then(({ data }) => data),
-          runQuery(makeQuery(splt, 'debts')).then(({ data }) => data),
-        ]);
-
-        return {
-          id: splt.id,
-          uncat_id: splt.uncat_id,
-          name: splt.name,
-          starting,
-          hidden: splt.hidden,
-          assets: index(assets, 'date'),
-          debts: index(debts, 'date'),
-        };
-      }),
-    );
+    const [assets, debts] = await Promise.all([
+      runQuery(makeQuery2('assets')).then(({ data }) => data),
+      runQuery(makeQuery2('debts')).then(({ data }) => data),
+    ]);
 
     const months = monthUtils.rangeInclusive(start, end);
-    const calcData = graphData.map(graph => {
-      let graphStarting = 0;
-      const mon = months.map(month => {
-        let graphAssets = 0;
-        let graphDebts = 0;
-        if (graph.assets[month] || graph.debts[month]) {
-          if (graph.assets[month]) {
-            graphAssets += graph.assets[month].assets;
-          }
-          if (graph.debts[month]) {
-            graphDebts += graph.debts[month].debts;
-          }
-        }
-
-        graphStarting += graph.starting;
-        return {
-          date: month,
-          assets: graphAssets,
-          debts: graphDebts,
-        };
-      });
-
-      return {
-        id: graph.id,
-        uncat_id: graph.uncat_id,
-        name: graph.name,
-        starting: graphStarting,
-        hidden: graph.hidden,
-        balances: index(mon, 'date'),
-      };
-    });
-
-    const categoryGroupCalcData = catGroup.map(group => {
-      if (hidden || group.hidden === 0) {
-        let groupedStarting = 0;
-        const mon = months.map(month => {
-          let groupedAssets = 0;
-          let groupedDebts = 0;
-          graphData.map(graph => {
-            if (graph.assets[month] || graph.debts[month]) {
-              if (group.categories.map(v => v.id).includes(graph.id)) {
-                if (graph.assets[month]) {
-                  groupedAssets += graph.assets[month].assets;
-                }
-                if (graph.debts[month]) {
-                  groupedDebts += graph.debts[month].debts;
-                }
-              }
-            }
-
-            groupedStarting += graph.starting;
-            return null;
-          });
-          return {
-            date: month,
-            assets: groupedAssets,
-            debts: groupedDebts,
-          };
-        });
-
-        return {
-          id: group.id,
-          name: group.name,
-          starting: groupedStarting,
-          hidden: group.hidden,
-          balances: index(mon, 'date'),
-        };
-      } else {
-        return null;
-      }
-    });
-
-    const groupByData = groupBy === 'Group' ? categoryGroupCalcData : calcData;
-
-    const data = groupByData.map(graph => {
-      const calc = recalculate(graph, start, end);
-      return { ...calc };
-    });
-
-    const categoryGroupData = catGroup.map(group => {
-      const catData = group.categories.map(graph => {
-        let catMatch = null;
-        calcData.map(cat => {
-          if (
-            cat.id === null
-              ? cat.uncat_id === graph.uncat_id
-              : cat.id === graph.id
-          ) {
-            catMatch = cat;
-          }
-          return null;
-        });
-        const calcCat = catMatch && recalculate(catMatch, start, end);
-        return { ...calcCat };
-      });
-      let groupMatch = null;
-      categoryGroupCalcData.map(split => {
-        if (split.id === group.id) {
-          groupMatch = split;
-        }
-        return null;
-      });
-      const calcGroup = groupMatch && recalculate(groupMatch, start, end);
-      return {
-        ...calcGroup,
-        categories: catData,
-      };
-    });
 
     let totalAssets = 0;
     let totalDebts = 0;
-    let totalTotals = 0;
 
-    const monthData = months.map(month => {
+    const groupedData = catGroup
+      .filter(f => (hidden || f.hidden === 0) && f)
+      .map(
+        group => {
+          let totalAssets = 0;
+          let totalDebts = 0;
+
+          const monthData = months.reduce((arr, month) => {
+            let groupedAssets = 0;
+            let groupedDebts = 0;
+
+            group.categories.map(item => {
+              let monthAssets = assets
+                .filter(
+                  asset =>
+                    asset[groupByLabel] === item.id && asset.date === month,
+                )
+                .reduce((a, v) => (a = a + v.amount), 0);
+              groupedAssets += monthAssets;
+
+              let monthDebts = debts
+                .filter(
+                  debts =>
+                    debts[groupByLabel] === item.id && debts.date === month,
+                )
+                .reduce((a, v) => (a = a + v.amount), 0);
+              groupedDebts += monthDebts;
+
+              return null;
+            });
+
+            totalAssets += groupedAssets;
+            totalDebts += groupedDebts;
+
+            arr.push({
+              date: month,
+              totalAssets: integerToAmount(groupedAssets),
+              totalDebts: integerToAmount(groupedDebts),
+              totalTotals: integerToAmount(groupedDebts + groupedAssets),
+            });
+
+            return arr;
+          }, []);
+
+          const stackedCategories = group.categories.map(item => {
+            const calc = recalculate(item, months, assets, debts, groupByLabel);
+            return { ...calc };
+          });
+
+          return {
+            id: group.id,
+            name: group.name,
+            totalAssets: integerToAmount(totalAssets),
+            totalDebts: integerToAmount(totalDebts),
+            totalTotals: integerToAmount(totalAssets + totalDebts),
+            monthData,
+            categories: stackedCategories,
+          };
+        },
+        [start, end],
+      );
+
+    const groupByData = groupBy === 'Group' ? catGroup : groupByList;
+
+    const monthData = months.reduce((arr, month) => {
       let perMonthAssets = 0;
       let perMonthDebts = 0;
-      let perMonthTotals = 0;
-      graphData.map(graph => {
-        if (graph.assets[month] || graph.debts[month]) {
-          if (graph.assets[month]) {
-            perMonthAssets += graph.assets[month].assets;
-          }
-          if (graph.debts[month]) {
-            perMonthDebts += graph.debts[month].debts;
-          }
-          perMonthTotals = perMonthAssets + perMonthDebts;
+      let stacked = {};
+
+      groupByData.map(item => {
+        let stackAmounts = 0;
+
+        let monthAssets = assets
+          .filter(
+            asset =>
+              asset.date === month &&
+              (groupBy === 'Group'
+                ? item.categories
+                    .map(cat => cat.id)
+                    .includes(asset[groupByLabel])
+                : asset[groupByLabel] === item.id),
+          )
+          .reduce((a, v) => (a = a + v.amount), 0);
+        perMonthAssets += monthAssets;
+
+        let monthDebts = debts
+          .filter(
+            debts =>
+              debts.date === month &&
+              (groupBy === 'Group'
+                ? item.categories
+                    .map(cat => cat.id)
+                    .includes(debts[groupByLabel])
+                : debts[groupByLabel] === item.id),
+          )
+          .reduce((a, v) => (a = a + v.amount), 0);
+        perMonthDebts += monthDebts;
+
+        if (typeItem === 'totalAssets') {
+          stackAmounts += monthAssets;
         }
+        if (typeItem === 'totalDebts') {
+          stackAmounts += monthDebts;
+        }
+        if (stackAmounts !== 0) {
+          stacked[item.name] = integerToAmount(Math.abs(stackAmounts));
+        }
+
         return null;
       });
       totalAssets += perMonthAssets;
       totalDebts += perMonthDebts;
-      totalTotals += perMonthTotals;
 
-      return {
+      arr.push({
         // eslint-disable-next-line rulesdir/typography
         date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
+        ...stacked,
         totalDebts: integerToAmount(perMonthDebts),
         totalAssets: integerToAmount(perMonthAssets),
-        totalTotals: integerToAmount(perMonthTotals),
-      };
-    });
-
-    const stackedData = months.map(month => {
-      let perMonthAmounts = 0;
-      const stacked = data.map(graph => {
-        let stackAmounts = 0;
-        if (graph.indexedMonthData[month]) {
-          perMonthAmounts += graph.indexedMonthData[month][typeItem];
-          stackAmounts += graph.indexedMonthData[month][typeItem];
-        }
-        return {
-          name: graph.name,
-          id: graph.id,
-          amount: stackAmounts,
-        };
+        totalTotals: integerToAmount(perMonthDebts + perMonthAssets),
       });
 
-      const indexedStack = index(stacked, 'name');
-      return {
-        // eslint-disable-next-line rulesdir/typography
-        date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
-        ...indexedStack,
-        totalTotals: perMonthAmounts,
-      };
-    });
+      return arr;
+    }, []);
+
+    let calcData;
+
+    if (groupBy === 'Group') {
+      calcData = catGroup
+        .filter(f => (hidden || f.hidden === 0) && f)
+        .map(group => {
+          let groupedAssets = 0;
+          let groupedDebts = 0;
+
+          const monthData = months.reduce((arr, month) => {
+            let perMonthAssets = 0;
+            let perMonthDebts = 0;
+
+            group.categories.map(item => {
+              let monthAssets = assets
+                .filter(
+                  asset =>
+                    asset[groupByLabel] === item.id && asset.date === month,
+                )
+                .reduce((a, v) => (a = a + v.amount), 0);
+              perMonthAssets += monthAssets;
+
+              let monthDebts = debts
+                .filter(
+                  debts =>
+                    debts[groupByLabel] === item.id && debts.date === month,
+                )
+                .reduce((a, v) => (a = a + v.amount), 0);
+              perMonthDebts += monthDebts;
+
+              return null;
+            });
+
+            groupedAssets += perMonthAssets;
+            groupedDebts += perMonthDebts;
+
+            arr.push({
+              date: month,
+              totalAssets: integerToAmount(perMonthAssets),
+              totalDebts: integerToAmount(perMonthDebts),
+              totalTotals: integerToAmount(perMonthAssets + perMonthDebts),
+            });
+
+            return arr;
+          }, []);
+
+          return {
+            id: group.id,
+            name: group.name,
+            totalAssets: integerToAmount(groupedAssets),
+            totalDebts: integerToAmount(groupedDebts),
+            totalTotals: integerToAmount(groupedAssets + groupedDebts),
+            monthData,
+          };
+        });
+    } else {
+      calcData = groupByList.map(item => {
+        const calc = recalculate(item, months, assets, debts, groupByLabel);
+        return { ...calc };
+      });
+    }
 
     setData({
-      stackedData: stackedData,
-      groupBy: groupBy === 'Group' ? catGroup : groupByList,
-      data,
-      groupData: categoryGroupData,
+      data: calcData,
       monthData,
+      groupedData,
       start,
       end,
       totalDebts: integerToAmount(totalDebts),
       totalAssets: integerToAmount(totalAssets),
-      totalTotals: integerToAmount(totalTotals),
+      totalTotals: integerToAmount(totalAssets + totalDebts),
     });
   };
 }
 
-function recalculate(item, start, end) {
-  const months = monthUtils.rangeInclusive(start, end);
-
-  let totalDebts = 0;
+function recalculate(item, months, assets, debts, groupByLabel) {
   let totalAssets = 0;
-  let totalTotals = 0;
-  let exists = false;
-
+  let totalDebts = 0;
   const monthData = months.reduce((arr, month) => {
-    let debts = 0;
-    let assets = 0;
-    let total = 0;
-    const last = arr.length === 0 ? null : arr[arr.length - 1];
+    let monthAssets = assets
+      .filter(asset => asset[groupByLabel] === item.id && asset.date === month)
+      .reduce((a, v) => (a = a + v.amount), 0);
+    totalAssets += monthAssets;
 
-    if (item.balances[month]) {
-      exists = true;
-      if (item.balances[month].debts) {
-        debts += item.balances[month].debts;
-        totalDebts += item.balances[month].debts;
-      }
-      if (item.balances[month].assets) {
-        assets += item.balances[month].assets;
-        totalAssets += item.balances[month].assets;
-      }
-      total = assets + debts;
-      totalTotals = totalAssets + totalDebts;
-    }
+    let monthDebts = debts
+      .filter(debts => debts[groupByLabel] === item.id && debts.date === month)
+      .reduce((a, v) => (a = a + v.amount), 0);
+    totalDebts += monthDebts;
 
     const dateParse = d.parseISO(`${month}-01`);
-    const change = last ? total - amountToInteger(last.totalTotals) : 0;
+    //const change = last ? total - amountToInteger(last.totalTotals) : 0;
 
     arr.push({
       dateParse,
-      totalTotals: integerToAmount(total),
-      totalAssets: integerToAmount(assets),
-      totalDebts: integerToAmount(debts),
-      totalChange: integerToAmount(change),
+      totalAssets: integerToAmount(monthAssets),
+      totalDebts: integerToAmount(monthDebts),
+      totalTotals: integerToAmount(monthAssets + monthDebts),
       // eslint-disable-next-line rulesdir/typography
       date: d.format(dateParse, "MMM ''yy"),
       dateLookup: month,
@@ -476,15 +412,12 @@ function recalculate(item, start, end) {
     return arr;
   }, []);
 
-  const indexedMonthData = exists ? index(monthData, 'dateLookup') : monthData;
-
   return {
-    indexedMonthData: indexedMonthData,
-    monthData: monthData,
-    totalAssets: integerToAmount(totalAssets),
-    totalDebts: integerToAmount(totalDebts),
-    totalTotals: integerToAmount(totalTotals),
     id: item.id,
     name: item.name,
+    totalAssets: integerToAmount(totalAssets),
+    totalDebts: integerToAmount(totalDebts),
+    totalTotals: integerToAmount(totalAssets + totalDebts),
+    monthData,
   };
 }

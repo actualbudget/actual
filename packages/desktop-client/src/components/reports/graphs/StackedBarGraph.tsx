@@ -114,29 +114,11 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data;
-  balanceTypeOp;
   compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
 };
 
-function StackedBarGraph({
-  style,
-  data,
-  balanceTypeOp,
-  compact,
-  domain,
-}: StackedBarGraphProps) {
+function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
   const colorScale = getColorScale('qualitative');
-
-  const getVal = (obj, key) => {
-    if (balanceTypeOp === 'totalDebts') {
-      return -1 * obj[key].amount;
-    } else {
-      return obj[key].amount;
-    }
-  };
 
   return (
     <Container
@@ -146,14 +128,14 @@ function StackedBarGraph({
       }}
     >
       {(width, height, portalHost) =>
-        data.stackedData && (
+        data.monthData && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <BarChart
                 width={width}
                 height={height}
-                data={data.stackedData}
+                data={data.monthData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 {
@@ -166,19 +148,15 @@ function StackedBarGraph({
                 />
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
-                <YAxis />
-                {data.groupBy
-                  .slice(0)
-                  .reverse()
-                  .map((c, index) => (
-                    <Bar
-                      key={c.id}
-                      dataKey={val => getVal(val, c.name)}
-                      name={c.name}
-                      stackId="a"
-                      fill={colorScale[index % colorScale.length]}
-                    />
-                  ))}
+                {!compact && <YAxis />}
+                {data.data.reverse().map((c, index) => (
+                  <Bar
+                    key={c.date}
+                    dataKey={c.name}
+                    stackId="a"
+                    fill={colorScale[index % colorScale.length]}
+                  />
+                ))}
               </BarChart>
             </div>
           </ResponsiveContainer>
