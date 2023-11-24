@@ -21,6 +21,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import CustomTick from '../CustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadItem = {
@@ -123,11 +124,6 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
   let privacyMode = usePrivacyMode();
   const colorScale = getColorScale('qualitative');
 
-  const CustomTick = (value: string, index: number) => {
-    if (!privacyMode) return value;
-    return '...';
-  };
-
   return (
     <Container
       style={{
@@ -156,7 +152,11 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
                 />
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
-                {!compact && <YAxis tickFormatter={CustomTick} />}
+                {!compact && (
+                  <YAxis
+                    tickFormatter={value => CustomTick(value, privacyMode)}
+                  />
+                )}
                 {data.groupBy.reverse().map((c, index) => (
                   <Bar
                     key={c.date}

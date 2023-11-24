@@ -23,6 +23,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import CustomTick from '../CustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadChild = {
@@ -154,11 +155,6 @@ function BarGraph({
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
 
-  const CustomTick = (value: string, index: number) => {
-    if (!privacyMode) return value;
-    return '...';
-  };
-
   const getVal = obj => {
     if (balanceTypeOp === 'totalDebts') {
       return -1 * obj.totalDebts;
@@ -214,7 +210,11 @@ function BarGraph({
                     height={Math.sqrt(longestLabelLength) * 25}
                   />
                 )}
-                {!compact && <YAxis tickFormatter={CustomTick} />}
+                {!compact && (
+                  <YAxis
+                    tickFormatter={value => CustomTick(value, privacyMode)}
+                  />
+                )}
                 {!compact && <ReferenceLine y={0} stroke="#000" />}
                 <Bar dataKey={val => getVal(val)} stackId="a">
                   {data[splitData]

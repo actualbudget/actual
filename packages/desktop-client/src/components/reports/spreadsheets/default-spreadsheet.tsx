@@ -284,9 +284,7 @@ export default function createSpreadsheet(
     });
 
     const categoryGroupCalcData = catGroup
-      .filter(f => {
-        return (hidden || f.hidden === 0) && f;
-      })
+      .filter(f => hidden || f.hidden === 0)
       .map(group => {
         let groupedStarting = 0;
         const mon = months.map(month => {
@@ -331,9 +329,7 @@ export default function createSpreadsheet(
     });
 
     const categoryGroupData = catGroup
-      .filter(f => {
-        return (hidden || f.hidden === 0) && f;
-      })
+      .filter(f => hidden || f.hidden === 0)
       .map(group => {
         const catData = group.categories.map(graph => {
           let catMatch = null;

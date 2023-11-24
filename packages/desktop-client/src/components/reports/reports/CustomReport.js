@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
-import { initiallyLoadPayees } from 'loot-core/src/client/actions';
+import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
+import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -30,7 +30,6 @@ import { fromDateRepr } from '../util';
 
 export default function CustomReport() {
   const categories = useCategories();
-  let dispatch = useDispatch();
 
   const {
     filters,
@@ -75,7 +74,6 @@ export default function CustomReport() {
 
   useEffect(() => {
     async function run() {
-      dispatch(initiallyLoadPayees());
       const trans = await send('get-earliest-transaction');
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = trans
@@ -103,12 +101,8 @@ export default function CustomReport() {
     run();
   }, []);
 
-  let { payees, accounts } = useSelector(state => {
-    return {
-      payees: state.queries.payees,
-      accounts: state.queries.accounts,
-    };
-  });
+  let payees = useCachedPayees();
+  let accounts = useCachedAccounts();
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);

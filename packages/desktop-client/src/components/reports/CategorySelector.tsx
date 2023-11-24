@@ -1,6 +1,9 @@
 import React, { Fragment, useState } from 'react';
 
-import { type CategoryGroupEntity } from 'loot-core/src/types/models';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
 
 import { CheckAll, UncheckAll } from '../../icons/v2';
 import ViewHide from '../../icons/v2/ViewHide';
@@ -16,7 +19,7 @@ import GraphButton from './GraphButton';
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroupEntity>;
   selectedCategories: CategoryListProps['items'];
-  setSelectedCategories: (selectedCategories) => null;
+  setSelectedCategories: (selectedCategories: CategoryEntity[]) => null;
 };
 
 export default function CategorySelector({
@@ -42,13 +45,10 @@ export default function CategorySelector({
     ),
   );
 
-  const selectAll = () => {
-    let test = [];
-    categoryGroups.map(categoryGroup =>
-      categoryGroup.categories.map(category => test.push(category)),
-    );
-    return test;
-  };
+  let selectAll: CategoryEntity[] = [];
+  categoryGroups.map(categoryGroup =>
+    categoryGroup.categories.map(category => selectAll.push(category)),
+  );
 
   return (
     <View>

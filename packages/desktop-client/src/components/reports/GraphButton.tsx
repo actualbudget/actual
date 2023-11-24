@@ -9,46 +9,51 @@ import { Tooltip } from '../tooltips';
 type GraphButtonProps = HTMLProps<HTMLButtonElement> & {
   selected?: boolean;
   style?: CSSProperties;
-  onSelect;
+  onSelect?: (newValue) => void;
   title?: string;
   disabled?: boolean;
 };
 
-const GraphButton = forwardRef<HTMLButtonElement, GraphButtonProps>(
-  ({ selected, children, onSelect, title, style, disabled }) => {
-    return (
-      <HoverTarget
-        style={{ flexShrink: 0 }}
-        renderContent={() => (
-          <Tooltip
-            position="bottom-left"
-            style={{
-              lineHeight: 1.5,
-              padding: '6px 10px',
-              backgroundColor: theme.menuAutoCompleteBackground,
-              color: theme.menuAutoCompleteText,
-            }}
-          >
-            <Text>{title}</Text>
-          </Tooltip>
-        )}
-      >
-        <Button
-          type="bare"
+const GraphButton = ({
+  selected,
+  children,
+  onSelect,
+  title,
+  style,
+  disabled,
+}: GraphButtonProps) => {
+  return (
+    <HoverTarget
+      style={{ flexShrink: 0 }}
+      renderContent={() => (
+        <Tooltip
+          position="bottom-left"
           style={{
-            ...(selected && {
-              backgroundColor: theme.buttonBareBackgroundHover,
-            }),
-            ...style,
+            lineHeight: 1.5,
+            padding: '6px 10px',
+            backgroundColor: theme.menuAutoCompleteBackground,
+            color: theme.menuAutoCompleteText,
           }}
-          onClick={onSelect}
-          disabled={disabled}
         >
-          {children}
-        </Button>
-      </HoverTarget>
-    );
-  },
-);
+          <Text>{title}</Text>
+        </Tooltip>
+      )}
+    >
+      <Button
+        type="bare"
+        style={{
+          ...(selected && {
+            backgroundColor: theme.buttonBareBackgroundHover,
+          }),
+          ...style,
+        }}
+        onClick={onSelect}
+        disabled={disabled}
+      >
+        {children}
+      </Button>
+    </HoverTarget>
+  );
+};
 
 export default GraphButton;
