@@ -50,7 +50,7 @@ export function generateTransaction(
       reason: null,
       reference_number: null,
     },
-    pending: pending,
+    pending,
     pending_transaction_id: null,
     transaction_id: uuidv4(),
     transaction_type: 'special',

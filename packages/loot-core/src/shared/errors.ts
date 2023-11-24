@@ -51,7 +51,7 @@ export function getDownloadError({ reason, meta, fileName }) {
       );
 
     default:
-      let info = meta && meta.fileId ? `, fileId: ${meta.fileId}` : '';
+      const info = meta && meta.fileId ? `, fileId: ${meta.fileId}` : '';
       return (
         'Something went wrong trying to download that file, sorry! ' +
         'Visit https://actualbudget.org/contact/ for support. ' +

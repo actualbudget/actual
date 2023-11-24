@@ -15,8 +15,8 @@ import { groupById } from 'loot-core/src/shared/util';
 
 import useSelected, {
   SelectedProvider,
-  useSelectedItems,
   useSelectedDispatch,
+  useSelectedItems,
 } from '../../hooks/useSelected';
 import useStableCallback from '../../hooks/useStableCallback';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
@@ -308,7 +308,6 @@ export const ManagePayees = forwardRef(
                 payees={filteredPayees}
                 ruleCounts={ruleCounts}
                 categoryGroups={categoryGroups}
-                highlightedRows={highlightedRows}
                 navigator={tableNavigator}
                 onUpdate={onUpdate}
                 onViewRules={onViewRules}

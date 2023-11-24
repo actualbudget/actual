@@ -1,30 +1,26 @@
+import { type Store } from 'redux';
+
 import * as sharedListeners from 'loot-core/src/client/shared-listeners';
+import type { State } from 'loot-core/src/client/state-types';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 
-export function handleGlobalEvents(actions, store) {
-  global.Actual.onEventFromMain('update-downloaded', (event, info) => {
-    actions.setAppState({ updateInfo: info });
+import { type BoundActions } from './hooks/useActions';
+
+export function handleGlobalEvents(actions: BoundActions, store: Store<State>) {
+  global.Actual.onEventFromMain('update-downloaded', (event, updateInfo) => {
+    actions.setAppState({ updateInfo });
   });
 
-  global.Actual.onEventFromMain('update-error', msg => {
+  global.Actual.onEventFromMain('update-error', () => {
     // Ignore errors. We don't want to constantly bug the user if they
     // always have a flaky connection or have intentionally disabled
     // updates. They will see the error in the about page if they try
     // to update.
   });
 
-  listen('server-error', info => {
+  listen('server-error', () => {
     actions.addGenericErrorNotification();
-  });
-
-  listen('update-loading-status', status => {
-    switch (status) {
-      case 'updating':
-        actions.updateStatusText('Updating...');
-        break;
-      default:
-    }
   });
 
   listen('orphaned-payees', ({ orphanedIds, updatedPayeeIds }) => {
@@ -36,7 +32,7 @@ export function handleGlobalEvents(actions, store) {
   });
 
   listen('schedules-offline', ({ payees }) => {
-    actions.pushModal(`schedule-posts-offline-notification`, { payees });
+    actions.pushModal('schedule-posts-offline-notification', { payees });
   });
 
   // This is experimental: we sync data locally automatically when
@@ -45,7 +41,7 @@ export function handleGlobalEvents(actions, store) {
     // We don't need to query anything until the file is loaded, and
     // sync events might come in if the file is being synced before
     // being loaded (happens when downloading)
-    let prefs = store.getState().prefs.local;
+    const prefs = store.getState().prefs.local;
     if (prefs && prefs.id) {
       if (type === 'applied') {
         if (tables.includes('payees') || tables.includes('payee_mapping')) {
@@ -70,8 +66,8 @@ export function handleGlobalEvents(actions, store) {
   sharedListeners.listenForSyncEvent(actions, store);
 
   listen('undo-event', undoState => {
-    let { tables, undoTag } = undoState;
-    let promises = [];
+    const { tables, undoTag } = undoState;
+    const promises: Promise<unknown>[] = [];
 
     if (
       tables.includes('categories') ||
@@ -85,7 +81,7 @@ export function handleGlobalEvents(actions, store) {
       promises.push(actions.getAccounts());
     }
 
-    let tagged = undo.getTaggedState(undoTag);
+    const tagged = undo.getTaggedState(undoTag);
 
     if (tagged) {
       Promise.all(promises).then(() => {
@@ -93,7 +89,7 @@ export function handleGlobalEvents(actions, store) {
 
         // If a modal has been tagged, open it instead of navigating
         if (tagged.openModal) {
-          let { modalStack } = store.getState().modals;
+          const { modalStack } = store.getState().modals;
 
           if (
             modalStack.length === 0 ||

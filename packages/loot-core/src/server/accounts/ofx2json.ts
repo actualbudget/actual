@@ -138,7 +138,7 @@ export default async function parse(ofx: string): Promise<OFXParseResult> {
   }
 
   return {
-    headers: headers,
+    headers,
     transactions: getStmtTrn(dataParsed).map(mapOfxTransaction),
   };
 }

@@ -306,7 +306,7 @@ export async function insertCategoryGroup(group) {
 
   group = {
     ...categoryGroupModel.validate(group),
-    sort_order: sort_order,
+    sort_order,
   };
   return insertWithUUID('category_groups', group);
 }
@@ -382,7 +382,7 @@ export async function insertCategory(
 
     category = {
       ...categoryModel.validate(category),
-      sort_order: sort_order,
+      sort_order,
     };
 
     const id = await insertWithUUID('categories', category);

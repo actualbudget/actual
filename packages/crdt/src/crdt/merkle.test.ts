@@ -69,8 +69,8 @@ describe('merkle trie', () => {
   });
 
   test('diffing works with empty tries', () => {
-    let trie1 = merkle.emptyTrie();
-    let trie2 = merkle.insert(
+    const trie1 = merkle.emptyTrie();
+    const trie2 = merkle.insert(
       merkle.emptyTrie(),
       Timestamp.parse('2009-01-02T10:17:37.789Z-0000-0000testinguuid1')!,
     );
@@ -79,7 +79,7 @@ describe('merkle trie', () => {
   });
 
   test('pruning works and keeps correct hashes', () => {
-    let messages = [
+    const messages = [
       message('2018-11-01T01:00:00.000Z-0000-0123456789ABCDEF', 1000),
       message('2018-11-01T01:09:00.000Z-0000-0123456789ABCDEF', 1100),
       message('2018-11-01T01:18:00.000Z-0000-0123456789ABCDEF', 1200),
@@ -101,13 +101,13 @@ describe('merkle trie', () => {
     expect(trie.hash).toBe(2496);
     expect(trie).toMatchSnapshot();
 
-    let pruned = merkle.prune(trie);
+    const pruned = merkle.prune(trie);
     expect(pruned.hash).toBe(2496);
     expect(pruned).toMatchSnapshot();
   });
 
   test('diffing differently shaped tries returns correct time', () => {
-    let messages = [
+    const messages = [
       message('2018-11-01T01:00:00.000Z-0000-0123456789ABCDEF', 1000),
       message('2018-11-01T01:09:00.000Z-0000-0123456789ABCDEF', 1100),
       message('2018-11-01T01:18:00.000Z-0000-0123456789ABCDEF', 1200),
@@ -122,7 +122,7 @@ describe('merkle trie', () => {
       message('2018-11-01T02:37:00.000Z-0000-0123456789ABCDEF', 2100),
     ];
 
-    let trie = insertMessages({}, messages);
+    const trie = insertMessages({}, messages);
 
     // Case 0: It always returns a base time when comparing with an
     // empty trie
@@ -136,7 +136,7 @@ describe('merkle trie', () => {
     // Case 1: Add an older message that modifies the trie in such a
     // way that it modifies the 1st out of 3 branches (so it will be
     // pruned away)
-    let trie1 = insertMessages(trie, [
+    const trie1 = insertMessages(trie, [
       message('2018-11-01T00:59:00.000Z-0000-0123456789ABCDEF', 900),
     ]);
 
@@ -167,7 +167,7 @@ describe('merkle trie', () => {
     // Case 2: Add two messages similar to the above case, but the
     // second message modifies the 2nd key at the same level as the
     // first message modifying the 1st key
-    let trie2 = insertMessages(trie, [
+    const trie2 = insertMessages(trie, [
       message('2018-11-01T00:59:00.000Z-0000-0123456789ABCDEF', 900),
       message('2018-11-01T01:15:00.000Z-0000-0123456789ABCDEF', 1422),
     ]);

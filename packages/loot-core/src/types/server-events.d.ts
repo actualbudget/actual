@@ -1,10 +1,15 @@
+import { type UndoState } from '../server/undo';
+
 export interface ServerEvents {
   'backups-updated': unknown;
   'cells-changed': Array<{ name }>;
   'fallback-write-error': unknown;
   'finish-import': unknown;
   'finish-load': unknown;
-  'orphaned-payees': unknown;
+  'orphaned-payees': {
+    orphanedIds: string[];
+    updatedPayeeIds: string[];
+  };
   'prefs-updated': unknown;
   'schedules-offline': { payees: unknown[] };
   'server-error': unknown;
@@ -12,5 +17,5 @@ export interface ServerEvents {
   'start-import': unknown;
   'start-load': unknown;
   'sync-event': { type; subtype; meta; tables; syncDisabled };
-  'undo-event': unknown;
+  'undo-event': UndoState;
 }
