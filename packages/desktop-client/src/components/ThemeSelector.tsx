@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { useActions } from '../hooks/useActions';
-import useFeatureFlag from '../hooks/useFeatureFlag';
 import MoonStars from '../icons/v2/MoonStars';
 import Sun from '../icons/v2/Sun';
 import { useResponsive } from '../ResponsiveProvider';
@@ -18,9 +17,8 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
   let { saveGlobalPrefs } = useActions();
 
   let { isNarrowWidth } = useResponsive();
-  let themesFlag = useFeatureFlag('themes');
 
-  return isNarrowWidth || !themesFlag ? null : (
+  return isNarrowWidth ? null : (
     <Button
       type="bare"
       onClick={() => {
