@@ -5,7 +5,7 @@ import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
-import { theme, useTheme } from '../../style';
+import { theme } from '../../style';
 import LinkButton from '../common/LinkButton';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -75,21 +75,6 @@ function ReportBudgetFeature() {
   );
 }
 
-function ThemeFeature() {
-  let theme = useTheme();
-  let enabled = useFeatureFlag('themes');
-  let blockToggleOff = theme !== 'light' && enabled;
-  return (
-    <FeatureToggle
-      flag="themes"
-      disableToggle={blockToggleOff}
-      error="Switch to the light theme before turning off this feature"
-    >
-      Dark mode
-    </FeatureToggle>
-  );
-}
-
 export default function ExperimentalFeatures() {
   let [expanded, setExpanded] = useState(false);
 
@@ -113,8 +98,6 @@ export default function ExperimentalFeatures() {
             <FeatureToggle flag="experimentalOfxParser">
               Experimental OFX parser
             </FeatureToggle>
-
-            <ThemeFeature />
           </View>
         ) : (
           <LinkButton

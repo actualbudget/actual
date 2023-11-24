@@ -151,12 +151,18 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
                   isAnimationActive={false}
                 />
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                {!compact && (
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                />
+                {!compact && 
                   <YAxis
                     tickFormatter={value => CustomTick(value, privacyMode)}
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
                   />
-                )}
+                }
                 {data.groupBy.reverse().map((c, index) => (
                   <Bar
                     key={c.date}

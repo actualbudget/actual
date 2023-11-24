@@ -208,14 +208,19 @@ function BarGraph({
                     angle={-35}
                     textAnchor="end"
                     height={Math.sqrt(longestLabelLength) * 25}
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
                   />
                 )}
                 {!compact && (
                   <YAxis
                     tickFormatter={value => CustomTick(value, privacyMode)}
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
                   />
                 )}
-                {!compact && <ReferenceLine y={0} stroke="#000" />}
+                {!compact && <ReferenceLine y={0} stroke={theme.pageTextLight} />
+                }
                 <Bar dataKey={val => getVal(val)} stackId="a">
                   {data[splitData]
                     .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
