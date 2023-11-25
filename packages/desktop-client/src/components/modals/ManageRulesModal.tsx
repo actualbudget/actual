@@ -25,7 +25,7 @@ export default function ManageRulesModal({
       );
     }
   }
-  debugger;
+
   return (
     <Modal
       title="Rules"
