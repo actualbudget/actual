@@ -4,9 +4,11 @@ import { useSelector } from 'react-redux';
 import { selectNumberFormat } from 'loot-core/src/client/selectors';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+type FormatType = 'string' | 'number' | 'financial' | 'financial-with-sign';
+
 function format(
   value: unknown,
-  type = 'string',
+  type: FormatType = 'string',
   formatter?: Intl.NumberFormat,
 ): string {
   switch (type) {
@@ -49,7 +51,7 @@ export function useFormat() {
   const numberFormat = useSelector(selectNumberFormat);
 
   return useCallback(
-    (value: unknown, type = 'string') =>
+    (value: unknown, type: FormatType = 'string') =>
       format(value, type, numberFormat.formatter),
     [numberFormat],
   );

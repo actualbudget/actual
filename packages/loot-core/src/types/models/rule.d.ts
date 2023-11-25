@@ -39,7 +39,9 @@ export interface SetRuleActionEntity {
   field: string;
   op: 'set';
   value: unknown;
-  options?: unknown;
+  options?: {
+    splitIndex?: number;
+  };
   type?: string;
 }
 
