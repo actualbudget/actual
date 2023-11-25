@@ -18,31 +18,25 @@ import GraphButton from './GraphButton';
 
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroupEntity>;
+  categories: Array<CategoryEntity>;
   selectedCategories: CategoryListProps['items'];
   setSelectedCategories: (selectedCategories: CategoryEntity[]) => null;
 };
 
 export default function CategorySelector({
   categoryGroups,
+  categories,
   selectedCategories,
   setSelectedCategories,
 }: CategorySelectorProps) {
   const [uncheckedHidden, setUncheckedHidden] = useState(false);
 
-  const allCategoriesSelected = categoryGroups.every(categoryGroup =>
-    categoryGroup.categories.every(category =>
-      selectedCategories.some(
-        selectedCategory => selectedCategory.id === category.id,
-      ),
-    ),
+  const allCategoriesSelected = categories.every(category =>
+    selectedCategories.map(selected => selected.id).includes(category.id),
   );
 
-  const allCategoriesUnselected = !categoryGroups.some(categoryGroup =>
-    categoryGroup.categories.some(category =>
-      selectedCategories.some(
-        selectedCategory => selectedCategory.id !== category.id,
-      ),
-    ),
+  const allCategoriesUnselected = !categories.some(category =>
+    selectedCategories.map(selected => selected.id).includes(category.id),
   );
 
   let selectAll: CategoryEntity[] = [];

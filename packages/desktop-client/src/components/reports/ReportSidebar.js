@@ -430,6 +430,7 @@ export function ReportSidebar({
         >
           <CategorySelector
             categoryGroups={categories.grouped}
+            categories={categories.list}
             selectedCategories={selectedCategories}
             setSelectedCategories={setSelectedCategories}
           />
