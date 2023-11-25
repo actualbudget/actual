@@ -7,7 +7,6 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
@@ -135,7 +134,6 @@ export default function Settings() {
   }, [loadPrefs]);
 
   const { isNarrowWidth } = useResponsive();
-  const themesFlag = useFeatureFlag('themes');
 
   useSetThemeColor(theme.mobileViewTheme);
   return (
@@ -180,7 +178,7 @@ export default function Settings() {
 
           {!Platform.isBrowser && <GlobalSettings />}
 
-          {themesFlag && <ThemeSettings />}
+          <ThemeSettings />
           <FormatSettings />
           <EncryptionSettings />
           <ExportBudget />
