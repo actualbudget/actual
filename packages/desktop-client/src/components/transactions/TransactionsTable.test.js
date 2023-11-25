@@ -546,8 +546,8 @@ describe('Transactions', () => {
     await userEvent.hover(items[3]);
 
     // Make sure one of them is highlighted
-    let highlighted = tooltip.querySelector('[data-highlighted]');
-    expect(highlighted).not.toBeNull();
+    let highlighted = tooltip.querySelectorAll('[data-highlighted]');
+    expect(highlighted).toHaveLength(1);
 
     // Navigate away from the field with the keyboard
     await userEvent.type(input, '[Tab]');
