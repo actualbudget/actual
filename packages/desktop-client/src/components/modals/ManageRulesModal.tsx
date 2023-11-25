@@ -3,10 +3,19 @@ import { useLocation } from 'react-router-dom';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
+import { type CommonModalProps } from '../../types/modals';
 import Modal from '../common/Modal';
 import ManageRules from '../ManageRules';
 
-export default function ManageRulesModal({ modalProps, payeeId }) {
+type ManageRulesModalProps = {
+  modalProps: CommonModalProps;
+  payeeId?: string;
+};
+
+export default function ManageRulesModal({
+  modalProps,
+  payeeId,
+}: ManageRulesModalProps) {
   let [loading, setLoading] = useState(true);
   let location = useLocation();
   if (isNonProductionEnvironment()) {
@@ -16,6 +25,7 @@ export default function ManageRulesModal({ modalProps, payeeId }) {
       );
     }
   }
+  debugger;
   return (
     <Modal
       title="Rules"
@@ -23,7 +33,6 @@ export default function ManageRulesModal({ modalProps, payeeId }) {
       loading={loading}
       {...modalProps}
       style={{
-        ...modalProps.style,
         flex: 1,
         maxWidth: '90%',
         maxHeight: '90%',
