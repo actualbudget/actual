@@ -293,8 +293,6 @@ export default function GoCardlessExternalMsg({
                 fontSize: 15,
                 fontWeight: 600,
                 marginTop: 10,
-                backgroundColor: theme.noticeBackgroundDark,
-                borderColor: theme.noticeBackgroundDark,
               }}
               onClick={onContinue}
             >
