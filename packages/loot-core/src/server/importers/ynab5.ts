@@ -234,7 +234,9 @@ async function importTransactions(
         })
         .filter(x => x);
 
-      await actual.addTransactions(entityIdMap.get(accountId), toImport);
+      await actual.addTransactions(entityIdMap.get(accountId), toImport, {
+        learnCategories: true,
+      });
     }),
   );
 }

@@ -96,9 +96,9 @@ export class Timestamp {
 
   constructor(millis: number, counter: number, node: string) {
     this._state = {
-      millis: millis,
-      counter: counter,
-      node: node,
+      millis,
+      counter,
+      node,
     };
   }
 

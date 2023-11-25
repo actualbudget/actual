@@ -141,12 +141,20 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 )}
-                {compact ? null : <XAxis dataKey="date" />}
+                {compact ? null : (
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
+                  />
+                )}
                 {compact ? null : (
                   <YAxis
                     dataKey={...balanceTypeOp}
                     domain={['auto', 'auto']}
                     tickFormatter={tickFormatter}
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
                   />
                 )}
                 <Tooltip

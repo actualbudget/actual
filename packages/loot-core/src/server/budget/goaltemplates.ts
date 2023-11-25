@@ -78,7 +78,7 @@ async function setCategoryTargets({ month, idealTemplate }) {
       setGoal({
         category: element.category,
         goal: element.amount,
-        month: month,
+        month,
       });
     });
   });
@@ -96,7 +96,7 @@ async function resetCategoryTargets({ month, category }) {
       setGoal({
         category: element.id,
         goal: null,
-        month: month,
+        month,
       });
     });
   });
