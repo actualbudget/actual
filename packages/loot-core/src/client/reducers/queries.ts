@@ -89,7 +89,7 @@ export default function update(
 export const getAccountsById = memoizeOne(accounts => groupById(accounts));
 export const getPayeesById = memoizeOne(payees => groupById(payees));
 export const getCategoriesById = memoizeOne(categoryGroups => {
-  let res = {};
+  const res = {};
   categoryGroups.forEach(group => {
     group.categories.forEach(cat => {
       res[cat.id] = cat;
@@ -99,11 +99,11 @@ export const getCategoriesById = memoizeOne(categoryGroups => {
 });
 
 export const getActivePayees = memoizeOne((payees, accounts) => {
-  let accountsById = getAccountsById(accounts);
+  const accountsById = getAccountsById(accounts);
 
   return payees.filter(payee => {
     if (payee.transfer_acct) {
-      let account = accountsById[payee.transfer_acct];
+      const account = accountsById[payee.transfer_acct];
       return account != null && !account.closed;
     }
     return true;

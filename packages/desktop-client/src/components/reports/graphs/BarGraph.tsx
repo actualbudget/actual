@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import usePrivacyMode from 'loot-core/src/client/privacy';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
@@ -22,6 +23,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import CustomTick from '../CustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadChild = {
@@ -32,7 +34,7 @@ type PayloadChild = {
 };
 
 type PayloadItem = {
-  value: string;
+  value?;
   payload: {
     name: string;
     totalAssets: number | string;
@@ -105,7 +107,6 @@ const CustomTooltip = ({
     );
   }
 };
-
 /* Descoped for future PR
 type CustomLegendProps = {
   active?: boolean;
@@ -148,6 +149,8 @@ function BarGraph({
   compact,
   domain,
 }: BarGraphProps) {
+  let privacyMode = usePrivacyMode();
+
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
@@ -205,10 +208,20 @@ function BarGraph({
                     angle={-35}
                     textAnchor="end"
                     height={Math.sqrt(longestLabelLength) * 25}
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
                   />
                 )}
-                {!compact && <YAxis />}
-                {!compact && <ReferenceLine y={0} stroke="#000" />}
+                {!compact && (
+                  <YAxis
+                    tickFormatter={value => CustomTick(value, privacyMode)}
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
+                  />
+                )}
+                {!compact && (
+                  <ReferenceLine y={0} stroke={theme.pageTextLight} />
+                )}
                 <Bar dataKey={val => getVal(val)} stackId="a">
                   {data[splitData]
                     .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))

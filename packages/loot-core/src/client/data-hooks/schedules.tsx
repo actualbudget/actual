@@ -11,7 +11,7 @@ export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
 function loadStatuses(schedules: ScheduleEntity[], onData) {
   return liveQuery(getHasTransactionsQuery(schedules), onData, {
     mapper: data => {
-      let hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
+      const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
 
       return new Map(
         schedules.map(s => [
@@ -35,9 +35,9 @@ export function useSchedules({
 
   useEffect(() => {
     const query = q('schedules').select('*');
-    let scheduleQuery, statusQuery;
+    let statusQuery;
 
-    scheduleQuery = liveQuery(
+    const scheduleQuery = liveQuery(
       transform ? transform(query) : query,
       async (schedules: ScheduleEntity[]) => {
         if (scheduleQuery) {
@@ -65,7 +65,7 @@ export function useSchedules({
   return data;
 }
 
-let SchedulesContext = createContext(null);
+const SchedulesContext = createContext(null);
 
 export function SchedulesProvider({ transform, children }) {
   const data = useSchedules({ transform });

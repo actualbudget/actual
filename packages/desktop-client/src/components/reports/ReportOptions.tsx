@@ -18,6 +18,8 @@ const dateRangeOptions = [
   { description: '3 months', name: 2 },
   { description: '6 months', name: 5 },
   { description: '1 year', name: 11 },
+  { description: 'Year to date', name: 'yearToDate' },
+  { description: 'Last year', name: 'lastYear' },
   { description: 'All time', name: 'allMonths' },
 ];
 

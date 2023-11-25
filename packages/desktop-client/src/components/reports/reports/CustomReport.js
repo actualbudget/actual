@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
+import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
+import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
@@ -18,6 +19,7 @@ import { AppliedFilters } from '../../filters/FiltersMenu';
 import PrivacyFilter from '../../PrivacyFilter';
 import { ChooseGraph } from '../ChooseGraph';
 import Header from '../Header';
+import LoadingIndicator from '../LoadingIndicator';
 import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportLegend, ReportSummary } from '../ReportSummary';
@@ -28,13 +30,6 @@ import { fromDateRepr } from '../util';
 
 export default function CustomReport() {
   const categories = useCategories();
-
-  let { payees, accounts } = useSelector(state => {
-    return {
-      payees: state.queries.payees,
-      accounts: state.queries.accounts,
-    };
-  });
 
   const {
     filters,
@@ -60,6 +55,7 @@ export default function CustomReport() {
   const [hidden, setHidden] = useState(false);
   const [uncat, setUncat] = useState(false);
   const [dateRange, setDateRange] = useState('6 months');
+  const [dataCheck, setDataCheck] = useState(false);
 
   const [graphType, setGraphType] = useState('BarGraph');
   const [viewLegend, setViewLegend] = useState(false);
@@ -67,39 +63,8 @@ export default function CustomReport() {
   const [viewLabels, setViewLabels] = useState(false);
   //const [legend, setLegend] = useState([]);
   let legend = [];
-  const dateRangeLine = ReportOptions.dateRange.length - 1;
-
+  const dateRangeLine = ReportOptions.dateRange.length - 3;
   const months = monthUtils.rangeInclusive(start, end);
-  const getGraphData = useMemo(() => {
-    return defaultSpreadsheet(
-      start,
-      end,
-      groupBy,
-      ReportOptions.balanceTypeMap.get(balanceType),
-      categories,
-      selectedCategories,
-      payees,
-      accounts,
-      filters,
-      conditionsOp,
-      hidden,
-      uncat,
-    );
-  }, [
-    start,
-    end,
-    groupBy,
-    balanceType,
-    categories,
-    selectedCategories,
-    payees,
-    accounts,
-    filters,
-    conditionsOp,
-    hidden,
-    uncat,
-  ]);
-  const data = useReport('default', getGraphData);
 
   useEffect(() => {
     if (selectedCategories === null && categories.list.length !== 0) {
@@ -136,6 +101,42 @@ export default function CustomReport() {
     run();
   }, []);
 
+  let payees = useCachedPayees();
+  let accounts = useCachedAccounts();
+
+  const getGraphData = useMemo(() => {
+    setDataCheck(false);
+    return defaultSpreadsheet(
+      start,
+      end,
+      groupBy,
+      ReportOptions.balanceTypeMap.get(balanceType),
+      categories,
+      selectedCategories,
+      payees,
+      accounts,
+      filters,
+      conditionsOp,
+      hidden,
+      uncat,
+      setDataCheck,
+    );
+  }, [
+    start,
+    end,
+    groupBy,
+    balanceType,
+    categories,
+    selectedCategories,
+    payees,
+    accounts,
+    filters,
+    conditionsOp,
+    hidden,
+    uncat,
+  ]);
+  const data = useReport('default', getGraphData);
+
   let [scrollWidth, setScrollWidth] = useState(0);
 
   if (!allMonths || !data) {
@@ -149,12 +150,7 @@ export default function CustomReport() {
 
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
-      <Header
-        title="Custom Reports"
-        allMonths={allMonths}
-        start={start}
-        end={end}
-      />
+      <Header title="Custom Reports" />
       <View
         style={{
           display: 'flex',
@@ -287,19 +283,24 @@ export default function CustomReport() {
                     </View>
                   </View>
                 )}
-                <ChooseGraph
-                  start={start}
-                  end={end}
-                  data={data}
-                  mode={mode}
-                  graphType={graphType}
-                  balanceType={balanceType}
-                  groupBy={groupBy}
-                  empty={empty}
-                  scrollWidth={scrollWidth}
-                  setScrollWidth={setScrollWidth}
-                  months={months}
-                />
+
+                {dataCheck ? (
+                  <ChooseGraph
+                    start={start}
+                    end={end}
+                    data={data}
+                    mode={mode}
+                    graphType={graphType}
+                    balanceType={balanceType}
+                    groupBy={groupBy}
+                    empty={empty}
+                    scrollWidth={scrollWidth}
+                    setScrollWidth={setScrollWidth}
+                    months={months}
+                  />
+                ) : (
+                  <LoadingIndicator message={'Loading report...'} />
+                )}
               </View>
               {(viewLegend || viewSummary) && (
                 <View

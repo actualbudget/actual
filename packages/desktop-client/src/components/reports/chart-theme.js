@@ -66,7 +66,7 @@ export const chartTheme = {
       ...axisBaseStyles,
       grid: {
         ...axisBaseStyles.grid,
-        stroke: 'rgba(0,0,0,.2)',
+        stroke: theme.pageTextSubdued,
         strokeDasharray: '1,1',
       },
       tickLabels: { ...baseLabelStyles, padding: 5 },
@@ -75,7 +75,7 @@ export const chartTheme = {
   independentAxis: {
     style: {
       ...axisBaseStyles,
-      axis: { ...axisBaseStyles.axis, stroke: 'rgba(0,0,0,.2)' },
+      axis: { ...axisBaseStyles.axis, stroke: theme.pageTextSubdued },
       tickLabels: { ...baseLabelStyles, padding: 10 },
     },
   },

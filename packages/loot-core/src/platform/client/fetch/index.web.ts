@@ -4,8 +4,8 @@ import * as undo from '../undo';
 
 import type * as T from '.';
 
-let replyHandlers = new Map();
-let listeners = new Map();
+const replyHandlers = new Map();
+const listeners = new Map();
 let messageQueue = [];
 let socketClient = null;
 let activePort = null;
@@ -16,7 +16,7 @@ function connectSocket(port, onOpen) {
     return;
   }
 
-  let client = new WebSocket('ws://localhost:' + port);
+  const client = new WebSocket('ws://localhost:' + port);
   socketClient = client;
   activePort = port;
 
@@ -32,7 +32,8 @@ function connectSocket(port, onOpen) {
       const { id } = msg;
       replyHandlers.delete(id);
     } else if (msg.type === 'reply') {
-      let { id, result, mutated, undoTag } = msg;
+      let { result } = msg;
+      const { id, mutated, undoTag } = msg;
 
       // Check if the result is a serialized buffer, and if so
       // convert it to a Uint8Array. This is only needed when working
@@ -58,7 +59,7 @@ function connectSocket(port, onOpen) {
       const listens = listeners.get(name);
       if (listens) {
         for (let i = 0; i < listens.length; i++) {
-          let stop = listens[i](args);
+          const stop = listens[i](args);
           if (stop === true) {
             break;
           }
@@ -96,7 +97,7 @@ export const send: T.Send = function (
   { catchErrors = false } = {},
 ) {
   return new Promise((resolve, reject) => {
-    let id = uuidv4();
+    const id = uuidv4();
     replyHandlers.set(id, { resolve, reject });
 
     if (socketClient) {
@@ -135,7 +136,7 @@ export const listen: T.Listen = function (name, cb) {
   listeners.get(name).push(cb);
 
   return () => {
-    let arr = listeners.get(name);
+    const arr = listeners.get(name);
     if (arr) {
       listeners.set(
         name,

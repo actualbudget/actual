@@ -76,7 +76,7 @@ function Account({
   let { dropRef, dropPos } = useDroppable({
     types: account ? [type] : [],
     id: account && account.id,
-    onDrop: onDrop,
+    onDrop,
   });
 
   return (

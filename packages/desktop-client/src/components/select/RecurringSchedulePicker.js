@@ -247,7 +247,7 @@ function MonthlyPatterns({ config, dispatch }) {
             onClick={() =>
               dispatch({
                 type: 'remove-recurrence',
-                recurrence: recurrence,
+                recurrence,
               })
             }
           >
@@ -401,9 +401,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
               ['after', 'after'],
             ]}
             value={state.config.weekendSolveMode}
-            onChange={value =>
-              dispatch({ type: 'set-weekend-solve', value: value })
-            }
+            onChange={value => dispatch({ type: 'set-weekend-solve', value })}
             style={{
               minHeight: '1px',
               width: '5rem',

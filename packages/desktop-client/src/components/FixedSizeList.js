@@ -61,7 +61,7 @@ export default class FixedSizeList extends PureComponent {
       return {
         scrollDirection:
           prevState.scrollOffset < scrollOffset ? 'forward' : 'backward',
-        scrollOffset: scrollOffset,
+        scrollOffset,
         scrollUpdateWasRequested: true,
       };
     }, this._resetIsScrollingDebounced);

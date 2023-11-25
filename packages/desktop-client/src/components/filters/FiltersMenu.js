@@ -24,8 +24,6 @@ import {
 import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
-import Filter from '../../icons/v1/Filter';
-import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
 import { theme } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
@@ -37,6 +35,7 @@ import Value from '../rules/Value';
 import { Tooltip } from '../tooltips';
 import GenericInput from '../util/GenericInput';
 
+import FilterButtonType from './FilterButtonType';
 import { CondOpMenu } from './SavedFilters';
 
 let filterFields = [
@@ -137,7 +136,7 @@ function updateFilterReducer(state, action) {
       let { value } = makeValue(action.value, {
         type: FIELD_TYPES.get(state.field),
       });
-      return { ...state, value: value };
+      return { ...state, value };
     }
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
@@ -336,27 +335,6 @@ function ConfigureField({
   );
 }
 
-function ButtonType({ type, dispatch }) {
-  return (
-    <Button
-      type="bare"
-      onClick={() => dispatch({ type: 'select-field' })}
-      title={type && 'Filters'}
-    >
-      {type === 'reports' ? (
-        <Filter width={15} height={15} />
-      ) : (
-        <>
-          <SettingsSliderAlternate
-            style={{ width: 16, height: 16, marginRight: 5 }}
-          />{' '}
-          Filter
-        </>
-      )}
-    </Button>
-  );
-}
-
 export function FilterButton({ onApply, type }) {
   let filters = useFilters();
 
@@ -440,7 +418,10 @@ export function FilterButton({ onApply, type }) {
 
   return (
     <View>
-      <ButtonType type={type} dispatch={dispatch} />
+      <FilterButtonType
+        type={type}
+        onClick={() => dispatch({ type: 'select-field' })}
+      />
       {state.fieldsOpen && (
         <Tooltip
           position="bottom-left"
@@ -453,7 +434,7 @@ export function FilterButton({ onApply, type }) {
               dispatch({ type: 'configure', field: name });
             }}
             items={filterFields.map(([name, text]) => ({
-              name: name,
+              name,
               text: titleFirst(text),
             }))}
           />

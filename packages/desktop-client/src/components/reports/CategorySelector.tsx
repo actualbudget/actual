@@ -5,42 +5,87 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import Eye from '../../icons/v2/Eye';
-import EyeSlashed from '../../icons/v2/EyeSlashed';
+import { CheckAll, UncheckAll } from '../../icons/v2';
+import ViewHide from '../../icons/v2/ViewHide';
+import ViewShow from '../../icons/v2/ViewShow';
 import { type CategoryListProps } from '../autocomplete/CategoryAutocomplete';
 import Button from '../common/Button';
+import Text from '../common/Text';
+import View from '../common/View';
 import { Checkbox } from '../forms';
+
+import GraphButton from './GraphButton';
 
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroupEntity>;
+  categories: Array<CategoryEntity>;
   selectedCategories: CategoryListProps['items'];
   setSelectedCategories: (selectedCategories: CategoryEntity[]) => null;
 };
 
 export default function CategorySelector({
   categoryGroups,
+  categories,
   selectedCategories,
   setSelectedCategories,
 }: CategorySelectorProps) {
   const [uncheckedHidden, setUncheckedHidden] = useState(false);
 
+  const allCategoriesSelected = categories.every(category =>
+    selectedCategories.map(selected => selected.id).includes(category.id),
+  );
+
+  const allCategoriesUnselected = !categories.some(category =>
+    selectedCategories.map(selected => selected.id).includes(category.id),
+  );
+
+  let selectAll: CategoryEntity[] = [];
+  categoryGroups.map(categoryGroup =>
+    categoryGroup.categories.map(category => selectAll.push(category)),
+  );
+
   return (
-    <>
-      <div>
-        <Button onClick={() => setUncheckedHidden(state => !state)}>
-          {uncheckedHidden ? (
-            <>
-              <Eye width={20} height={20} />
-              Show unchecked
-            </>
-          ) : (
-            <>
-              <EyeSlashed width={20} height={20} />
-              Hide unchecked
-            </>
-          )}
+    <View>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Button type="bare" onClick={() => setUncheckedHidden(state => !state)}>
+          <View>
+            {uncheckedHidden ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <ViewShow width={15} height={15} style={{ marginRight: 5 }} />
+                <Text>Show unchecked</Text>
+              </View>
+            ) : (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <ViewHide width={15} height={15} style={{ marginRight: 5 }} />
+                <Text>Hide unchecked</Text>
+              </View>
+            )}
+          </View>
         </Button>
-      </div>
+        <View style={{ flex: 1 }} />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <GraphButton
+            selected={allCategoriesSelected}
+            title="Select All"
+            onSelect={() => {
+              setSelectedCategories(selectAll);
+            }}
+            style={{ marginRight: 5, padding: 8 }}
+          >
+            <CheckAll width={15} height={15} />
+          </GraphButton>
+          <GraphButton
+            selected={allCategoriesUnselected}
+            title="Unselect All"
+            onSelect={() => {
+              setSelectedCategories([]);
+            }}
+            style={{ padding: 8 }}
+          >
+            <UncheckAll width={15} height={15} />
+          </GraphButton>
+        </View>
+      </View>
 
       <ul
         style={{
@@ -50,7 +95,7 @@ export default function CategorySelector({
           paddingRight: 10,
           height: 320,
           flexGrow: 1,
-          overflowY: 'scroll',
+          overflowY: 'auto',
         }}
       >
         {categoryGroups &&
@@ -166,6 +211,6 @@ export default function CategorySelector({
             );
           })}
       </ul>
-    </>
+    </View>
   );
 }

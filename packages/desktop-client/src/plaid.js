@@ -4,7 +4,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
   pushModal('plaid-external-msg', {
     onMoveExternal: async () => {
-      let token = await send('create-web-token');
+      const token = await send('create-web-token');
       let url = 'http://link.actualbudget.com/?token=' + token;
       // let url = 'http://localhost:8080/?token=' + token;
       if (plaidToken) {
@@ -12,7 +12,7 @@ function _authorize(pushModal, plaidToken, { onSuccess, onClose }) {
       }
       window.Actual.openURLInBrowser(url);
 
-      let { error, data } = await send('poll-web-token', { token });
+      const { error, data } = await send('poll-web-token', { token });
 
       return { error, data };
     },
@@ -36,7 +36,7 @@ export async function authorizeBank(pushModal, { upgradingId } = {}) {
 }
 
 export async function reauthorizeBank(pushModal, bankId, onSuccess) {
-  let { linkToken } = await send('make-plaid-public-token', {
+  const { linkToken } = await send('make-plaid-public-token', {
     bankId,
   });
 

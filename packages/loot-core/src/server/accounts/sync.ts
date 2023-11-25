@@ -128,7 +128,7 @@ async function downloadTransactions(
     const endDate = monthUtils.currentDay();
 
     const res = await post(getServer().PLAID_SERVER + '/transactions', {
-      userId: userId,
+      userId,
       key: userKey,
       item_id: '' + bankId,
       account_id: acctId,
@@ -187,7 +187,7 @@ async function downloadGoCardlessTransactions(
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/transactions',
     {
-      userId: userId,
+      userId,
       key: userKey,
       requisitionId: bankId,
       accountId: acctId,
@@ -705,7 +705,7 @@ export async function reconcileTransactions(acctId, transactions) {
 export async function addTransactions(
   acctId,
   transactions,
-  { runTransfers = true } = {},
+  { runTransfers = true, learnCategories = false } = {},
 ) {
   const added = [];
 
@@ -737,8 +737,12 @@ export async function addTransactions(
   await createNewPayees(payeesToCreate, added);
 
   let newTransactions;
-  if (runTransfers) {
-    let res = await batchUpdateTransactions({ added });
+  if (runTransfers || learnCategories) {
+    let res = await batchUpdateTransactions({
+      added,
+      learnCategories,
+      runTransfers,
+    });
     newTransactions = res.added.map(t => t.id);
   } else {
     await batchMessages(async () => {

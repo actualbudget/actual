@@ -13,7 +13,7 @@ import Change from '../Change';
 import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import DateRange from '../DateRange';
-import { LoadingIndicator } from '../Overview';
+import LoadingIndicator from '../LoadingIndicator';
 import ReportCard from '../ReportCard';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
 import Tooltip from '../Tooltip';
@@ -56,7 +56,7 @@ function CashFlowCard() {
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
                   amount={income - expense}
-                  style={{ color: theme.altTableText, fontWeight: 300 }}
+                  style={{ color: theme.tableText, fontWeight: 300 }}
                 />
               </PrivacyFilter>
             </View>

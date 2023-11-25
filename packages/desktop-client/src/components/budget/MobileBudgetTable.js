@@ -141,7 +141,7 @@ function BudgetCell({
   function updateBudgetAmount(amount) {
     onBudgetAction?.(month, 'budget-amount', {
       category: categoryId,
-      amount: amount,
+      amount,
     });
   }
 
@@ -1396,6 +1396,9 @@ const ExpenseGroup = memo(function ExpenseGroup({
               onDelete={onDeleteCategory}
               // onReorder={onReorderCategory}
               onBudgetAction={onBudgetAction}
+              style={{
+                backgroundColor: theme.tableBackground,
+              }}
             />
           );
         })}
@@ -1485,6 +1488,9 @@ function IncomeGroup({
                 editMode={editMode}
                 isEditing={editingCategoryId === category.id}
                 onEdit={onEditCategory}
+                style={{
+                  backgroundColor: theme.tableBackground,
+                }}
                 onBudgetAction={onBudgetAction}
                 isEditingBudget={editingBudgetCategoryId === category.id}
                 onEditBudget={onEditCategoryBudget}

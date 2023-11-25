@@ -96,7 +96,7 @@ function makePath(state, path) {
   }
 
   return {
-    tableName: tableName,
+    tableName,
     tableId: uid(tableName),
     joinField: parts[parts.length - 1],
     joinTable,

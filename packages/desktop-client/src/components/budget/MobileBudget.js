@@ -33,7 +33,7 @@ class Budget extends Component {
     const currentMonth = monthUtils.currentMonth();
     this.state = {
       bounds: { start: currentMonth, end: currentMonth },
-      currentMonth: currentMonth,
+      currentMonth,
       initialized: false,
       editMode: false,
       categoryGroups: [],

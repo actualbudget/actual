@@ -1,8 +1,8 @@
 import React, { type SVGProps, useState } from 'react';
 
 const SvgLoading = (props: SVGProps<SVGSVGElement>) => {
-  let { color = 'currentColor' } = props;
-  let [gradientId] = useState('gradient-' + Math.random());
+  const { color = 'currentColor' } = props;
+  const [gradientId] = useState('gradient-' + Math.random());
 
   return (
     <svg {...props} viewBox="0 0 38 38" style={{ ...props.style }}>
