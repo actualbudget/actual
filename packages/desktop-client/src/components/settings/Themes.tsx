@@ -17,11 +17,13 @@ export default function ThemeSettings() {
       primaryAction={
         <Button bounce={false} style={{ padding: 0 }}>
           <Select
+            bare
             onChange={value => {
               saveGlobalPrefs({ theme: value });
             }}
             value={theme}
             options={themeOptions}
+            style={{ padding: '2px 10px', fontSize: 15 }}
           />
         </Button>
       }
