@@ -27,7 +27,12 @@ function NotesTooltip({
   const [notes, setNotes] = useState<string>(defaultNotes);
   return (
     <Tooltip position={position} onClose={() => onClose(notes)}>
-      <Notes notes={notes} editable={editable} onChange={setNotes} />
+      <Notes
+        notes={notes}
+        editable={editable}
+        focused={editable}
+        onChange={setNotes}
+      />
     </Tooltip>
   );
 }

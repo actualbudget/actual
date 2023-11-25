@@ -78,6 +78,7 @@ const markdownStyles = css({
 type NotesProps = {
   notes: string;
   editable?: boolean;
+  focused?: boolean;
   onChange?: (value: string) => void;
   onBlur?: (value: string) => void;
   getStyle?: (editable: boolean) => CSSProperties;
@@ -86,6 +87,7 @@ type NotesProps = {
 export default function Notes({
   notes: originalNotes,
   editable,
+  focused,
   onChange,
   onBlur,
   getStyle,
@@ -97,13 +99,14 @@ export default function Notes({
     setNotes(value);
     onChange?.(value);
   };
+
   const textAreaRef = useRef<HTMLTextAreaElement>();
 
   useEffect(() => {
-    if (editable) {
+    if (focused && editable) {
       textAreaRef.current.focus();
     }
-  }, [editable]);
+  }, [focused, editable]);
 
   return editable ? (
     <textarea

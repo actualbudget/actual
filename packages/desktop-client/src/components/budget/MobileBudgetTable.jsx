@@ -327,12 +327,22 @@ const ExpenseCategory = memo(function ExpenseCategory({
     await send('notes-save', { id, note: notes });
   };
 
+  const onEditNotes = id => {
+    if (id === category.id) {
+      pushModal('notes', {
+        id,
+        name: category.name,
+        onSave: onSaveNotes,
+      });
+    }
+  };
+
   const onCategoryNameClick = () => {
     pushModal('category-menu', {
       category,
       onSave,
       onToggleVisibility,
-      onSaveNotes,
+      onEditNotes,
       onDelete,
       onBudgetAction,
     });
@@ -633,12 +643,23 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
     await send('notes-save', { id, note: notes });
   };
 
+  const onEditNotes = id => {
+    if (id === group.id) {
+      pushModal('notes', {
+        id,
+        name: group.name,
+        onSave: onSaveNotes,
+      });
+    }
+  };
+
   const onGroupNameClick = () => {
     pushModal('category-group-menu', {
       group,
       onSave,
       onAddCategory,
       onToggleVisibility,
+      onEditNotes,
       onSaveNotes,
       onDelete,
     });
@@ -907,12 +928,23 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
     await send('notes-save', { id, note: notes });
   };
 
+  const onEditNotes = id => {
+    if (id === group.id) {
+      pushModal('notes', {
+        id,
+        name: group.name,
+        onSave: onSaveNotes,
+      });
+    }
+  };
+
   const onGroupNameClick = () => {
     pushModal('category-group-menu', {
       group,
       onSave,
       onAddCategory,
       onToggleVisibility,
+      onEditNotes,
       onSaveNotes,
       onDelete,
     });
@@ -1132,12 +1164,22 @@ const IncomeCategory = memo(function IncomeCategory({
     await send('notes-save', { id, note: notes });
   };
 
+  const onEditNotes = id => {
+    if (id === category.id) {
+      pushModal('notes', {
+        id,
+        name: category.name,
+        onSave: onSaveNotes,
+      });
+    }
+  };
+
   const onCategoryNameClick = () => {
     pushModal('category-menu', {
       category,
       onSave,
       onToggleVisibility,
-      onSaveNotes,
+      onEditNotes,
       onDelete,
       onBudgetAction,
     });

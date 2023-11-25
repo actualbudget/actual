@@ -26,6 +26,7 @@ import ImportTransactions from './modals/ImportTransactions';
 import LoadBackup from './modals/LoadBackup';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
+import Notes from './modals/Notes';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import ReportBudgetSummary from './modals/ReportBudgetSummary';
 import RolloverBudgetSummary from './modals/RolloverBudgetSummary';
@@ -243,7 +244,7 @@ export default function Modals() {
             <SingleInput
               modalProps={modalProps}
               title="New Category"
-              inputPlaceholder="Name"
+              inputPlaceholder="Category name"
               buttonText="Add"
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
@@ -255,7 +256,7 @@ export default function Modals() {
             <SingleInput
               modalProps={modalProps}
               title="New Category Group"
-              inputPlaceholder="Name"
+              inputPlaceholder="Category group name"
               buttonText="Add"
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
@@ -335,8 +336,8 @@ export default function Modals() {
               modalProps={modalProps}
               category={options?.category}
               onSave={options?.onSave}
+              onEditNotes={options?.onEditNotes}
               onToggleVisibility={options?.onToggleVisibility}
-              onSaveNotes={options?.onSaveNotes}
               onDelete={options?.onDelete}
               onBudgetAction={options?.onBudgetAction}
             />
@@ -350,9 +351,21 @@ export default function Modals() {
               group={options?.group}
               onSave={options?.onSave}
               onAddCategory={options?.onAddCategory}
-              onToggleVisibility={options?.onToggleVisibility}
+              onEditNotes={options?.onEditNotes}
               onSaveNotes={options?.onSaveNotes}
+              onToggleVisibility={options?.onToggleVisibility}
               onDelete={options?.onDelete}
+            />
+          );
+
+        case 'notes':
+          return (
+            <Notes
+              key={name}
+              modalProps={modalProps}
+              id={options?.id}
+              name={options?.name}
+              onSave={options?.onSave}
             />
           );
 

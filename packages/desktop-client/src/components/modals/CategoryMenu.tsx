@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import q from 'loot-core/src/shared/query';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import Trash from '../../icons/v1/Trash';
+import NotesPaper from '../../icons/v2/NotesPaper';
 import ViewHide from '../../icons/v2/ViewHide';
 import ViewShow from '../../icons/v2/ViewShow';
-import { useResponsive } from '../../ResponsiveProvider';
-import { styles } from '../../style';
+import { type CSSProperties, styles } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
@@ -20,7 +20,7 @@ type CategoryMenuProps = {
   category: CategoryEntity;
   onSave: (category: CategoryEntity) => void;
   onToggleVisibility: (isHidden: boolean) => void;
-  onSaveNotes: (id: string, notes: string) => void;
+  onEditNotes: (id: string) => void;
   onDelete: (categoryId: string) => void;
   onBudgetAction: (idx: number, action: string, arg: unknown) => void;
 };
@@ -30,41 +30,36 @@ export default function CategoryMenu({
   category,
   onSave,
   onToggleVisibility,
-  onSaveNotes,
+  onEditNotes,
   onDelete,
   onBudgetAction,
 }: CategoryMenuProps) {
-  const { isNarrowWidth } = useResponsive();
   const { id, hidden } = category;
   const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 
   const [name, setName] = useState(category.name);
-  const [notes, setNotes] = useState(originalNotes);
-  useEffect(() => setNotes(originalNotes), [originalNotes]);
 
   function _onClose() {
-    if (notes !== originalNotes) {
-      onSaveNotes?.(id, notes);
-    }
-
-    if (name !== category.name) {
-      onSave?.({
-        ...category,
-        name,
-      });
-    }
-
     modalProps?.onClose();
   }
 
-  function _onSaveNotes(value) {
-    setNotes(value);
+  function _onRename(newName) {
+    if (newName !== name) {
+      onSave?.({
+        ...category,
+        name: newName,
+      });
+    }
   }
 
   function _onToggleVisibility() {
     onToggleVisibility?.(!!hidden);
     _onClose();
+  }
+
+  function _onEditNotes() {
+    onEditNotes?.(id);
   }
 
   function _onDelete() {
@@ -73,15 +68,14 @@ export default function CategoryMenu({
   }
 
   function onNameChange(newName) {
+    _onRename(newName);
     setName(newName);
   }
 
-  const menuItemStyle = {
+  const menuItemStyle: CSSProperties = {
     fontSize: 17,
     fontWeight: 400,
-    paddingTop: 8,
-    paddingBottom: 8,
-    marginTop: 8,
+    width: '100%',
   };
 
   return (
@@ -93,24 +87,33 @@ export default function CategoryMenu({
       onClose={_onClose}
       padding={0}
       style={{
-        flex: 0,
-        height: isNarrowWidth ? '85vh' : 275,
-        padding: '15px 10px',
+        flex: 1,
+        height: '85vh',
+        padding: '0 10px',
         borderRadius: '6px',
       }}
       editableTitle={true}
-      titleStyle={{
-        ...styles.underlinedText,
-      }}
+      titleStyle={styles.underlinedText}
       onTitleChange={onNameChange}
     >
       {() => (
-        <View>
-          <View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'column',
+          }}
+        >
+          <View
+            style={{
+              overflowY: 'auto',
+              width: '100%',
+              flex: 1,
+            }}
+          >
             <Notes
               notes={originalNotes}
-              editable={true}
-              onBlur={_onSaveNotes}
+              editable={false}
+              focused={false}
               getStyle={editable => ({
                 borderRadius: 6,
               })}
@@ -119,13 +122,30 @@ export default function CategoryMenu({
           <View
             style={{
               flexDirection: 'column',
-              flex: 1,
+              alignItems: 'center',
+              justifyItems: 'center',
               width: '100%',
+              paddingTop: 10,
+              paddingBottom: 10,
             }}
           >
             <Button
               type="primary"
-              style={menuItemStyle}
+              style={{
+                ...menuItemStyle,
+                marginBottom: 10,
+              }}
+              onPointerUp={_onEditNotes}
+            >
+              <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
+              Edit notes
+            </Button>
+            <Button
+              type="primary"
+              style={{
+                ...menuItemStyle,
+                marginBottom: 10,
+              }}
               onPointerUp={_onToggleVisibility}
             >
               {category.hidden ? (

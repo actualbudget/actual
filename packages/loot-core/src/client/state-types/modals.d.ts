@@ -114,6 +114,7 @@ type FinanceModals = {
     category: CategoryEntity;
     onSave: (category: CategoryEntity) => void;
     onToggleVisibility: (isHidden: boolean) => void;
+    onEditNotes: (id: string) => void;
     onSaveNotes: (id: string, notes: string) => void;
     onDelete: (categoryId: string) => void;
     onBudgetAction: (idx: number, action: string, arg: unknown) => void;
@@ -122,9 +123,14 @@ type FinanceModals = {
     group: CategoryGroupEntity;
     onSave: (group: CategoryGroupEntity) => void;
     onAddCategory: (groupId: string, isIncome: boolean) => void;
+    onEditNotes: (id: string) => void;
     onToggleVisibility: (isHidden: boolean) => void;
-    onSaveNotes: (id: string, notes: string) => void;
     onDelete: (groupId: string) => void;
+  };
+  notes: {
+    id: string;
+    name: string;
+    onSave: (id: string, notes: string) => void;
   };
 };
 

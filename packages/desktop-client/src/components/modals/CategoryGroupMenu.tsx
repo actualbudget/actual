@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import q from 'loot-core/src/shared/query';
@@ -6,9 +6,9 @@ import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
 import Add from '../../icons/v1/Add';
 import Trash from '../../icons/v1/Trash';
+import NotesPaper from '../../icons/v2/NotesPaper';
 import ViewHide from '../../icons/v2/ViewHide';
 import ViewShow from '../../icons/v2/ViewShow';
-import { useResponsive } from '../../ResponsiveProvider';
 import { styles } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import Button from '../common/Button';
@@ -22,6 +22,7 @@ type CategoryGroupMenuProps = {
   onSave: (group: CategoryGroupEntity) => void;
   onAddCategory: (groupId: string, isIncome: boolean) => void;
   onToggleVisibility: (isHidden: boolean) => void;
+  onEditNotes: (id: string) => void;
   onSaveNotes: (id: string, notes: string) => void;
   onDelete: (groupId: string) => void;
 };
@@ -32,45 +33,39 @@ export default function CategoryGroupMenu({
   onSave,
   onAddCategory,
   onToggleVisibility,
-  onSaveNotes,
+  onEditNotes,
   onDelete,
 }: CategoryGroupMenuProps) {
-  const { isNarrowWidth } = useResponsive();
   const { id, hidden } = group;
   const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 
   const [name, setName] = useState(group.name);
-  const [notes, setNotes] = useState(originalNotes);
-  useEffect(() => setNotes(originalNotes), [originalNotes]);
 
   function _onClose() {
-    if (notes !== originalNotes) {
-      onSaveNotes?.(id, notes);
-    }
-
-    if (name !== group.name) {
-      onSave?.({
-        ...group,
-        name,
-      });
-    }
-
     modalProps?.onClose();
   }
 
+  function _onRename(newName) {
+    if (newName !== name) {
+      onSave?.({
+        ...group,
+        name: newName,
+      });
+    }
+  }
+
   function _onAddCategory() {
-    _onClose();
     onAddCategory?.(group.id, group.is_income);
+  }
+
+  function _onEditNotes() {
+    onEditNotes?.(id);
   }
 
   function _onToggleVisibility() {
     onToggleVisibility?.(!!hidden);
     _onClose();
-  }
-
-  function _onSaveNotes(value) {
-    setNotes(value);
   }
 
   function _onDelete() {
@@ -79,15 +74,14 @@ export default function CategoryGroupMenu({
   }
 
   function onNameChange(newName) {
+    _onRename(newName);
     setName(newName);
   }
 
   const menuItemStyle = {
     fontSize: 17,
     fontWeight: 400,
-    paddingTop: 8,
-    paddingBottom: 8,
-    marginTop: 8,
+    width: '100%',
   };
 
   return (
@@ -99,25 +93,35 @@ export default function CategoryGroupMenu({
       onClose={_onClose}
       padding={0}
       style={{
-        flex: 0,
-        height: isNarrowWidth ? '85vh' : 275,
-        padding: '15px 10px',
+        flex: 1,
+        height: '85vh',
+        padding: '0 10px',
         borderRadius: '6px',
       }}
       editableTitle={true}
-      titleStyle={{
-        ...styles.underlinedText,
-      }}
+      titleStyle={styles.underlinedText}
       onTitleChange={onNameChange}
     >
       {() => (
-        <View>
-          <View>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'column',
+          }}
+        >
+          <View
+            style={{
+              overflowY: 'auto',
+              width: '100%',
+              flex: 1,
+            }}
+          >
             <Notes
               notes={originalNotes}
-              editable={true}
-              onBlur={_onSaveNotes}
+              editable={false}
+              focused={false}
               getStyle={editable => ({
+                ...styles.mediumText,
                 borderRadius: 6,
               })}
             />
@@ -125,13 +129,19 @@ export default function CategoryGroupMenu({
           <View
             style={{
               flexDirection: 'column',
-              flex: 1,
+              alignItems: 'center',
+              justifyItems: 'center',
               width: '100%',
+              paddingTop: 10,
+              paddingBottom: 10,
             }}
           >
             <Button
               type="primary"
-              style={menuItemStyle}
+              style={{
+                ...menuItemStyle,
+                marginBottom: 10,
+              }}
               onPointerUp={_onAddCategory}
             >
               <Add width={17} height={17} style={{ paddingRight: 5 }} />
@@ -139,7 +149,21 @@ export default function CategoryGroupMenu({
             </Button>
             <Button
               type="primary"
-              style={menuItemStyle}
+              style={{
+                ...menuItemStyle,
+                marginBottom: 10,
+              }}
+              onPointerUp={_onEditNotes}
+            >
+              <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
+              Edit notes
+            </Button>
+            <Button
+              type="primary"
+              style={{
+                ...menuItemStyle,
+                marginBottom: 10,
+              }}
               onPointerUp={_onToggleVisibility}
             >
               {hidden ? (
