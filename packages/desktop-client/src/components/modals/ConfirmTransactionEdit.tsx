@@ -70,8 +70,8 @@ function ConfirmTransactionEdit({
               <Button
                 type="primary"
                 onClick={() => {
-                  onConfirm();
                   modalProps.onClose();
+                  onConfirm();
                 }}
               >
                 Confirm

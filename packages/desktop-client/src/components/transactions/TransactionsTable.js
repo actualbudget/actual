@@ -796,6 +796,10 @@ const Transaction = memo(function Transaction(props) {
       newTransaction['credit'] = '';
     }
 
+    if (name === 'account' && transaction.account !== value) {
+      newTransaction.reconciled = false;
+    }
+
     // Don't save a temporary value (a new payee) which will be
     // filled in with a real id later
     if (name === 'payee' && value && value.startsWith('new:')) {
