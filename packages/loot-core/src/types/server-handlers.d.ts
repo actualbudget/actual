@@ -11,6 +11,7 @@ import {
   CategoryEntity,
   CategoryGroupEntity,
   GoCardlessToken,
+  GoCardlessInstitution,
 } from './models';
 import { EmptyObject } from './util';
 
@@ -209,7 +210,10 @@ export interface ServerHandlers {
 
   'gocardless-status': () => Promise<{ configured: boolean }>;
 
-  'gocardless-get-banks': (country) => Promise<unknown>;
+  'gocardless-get-banks': (country: string) => Promise<{
+    data: GoCardlessInstitution[];
+    error?: { status: string; reason: string };
+  }>;
 
   'gocardless-poll-web-token-stop': () => Promise<'ok'>;
 
