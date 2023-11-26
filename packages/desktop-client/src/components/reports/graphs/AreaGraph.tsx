@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import usePrivacyMode from 'loot-core/src/client/privacy';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
@@ -94,14 +95,14 @@ type AreaGraphProps = {
   data;
   balanceTypeOp;
   compact: boolean;
-  domain?: {
-    totalTotals?: [number, number];
-  };
 };
 
 function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
+  let privacyMode = usePrivacyMode();
+
   const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    if (!privacyMode) return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    return '...';
   };
 
   const gradientOffset = () => {

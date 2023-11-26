@@ -2,7 +2,7 @@ import React from 'react';
 
 import * as d from 'date-fns';
 
-import { theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Row, Cell } from '../table';
 
 export default function ReportTableHeader({
@@ -23,6 +23,7 @@ export default function ReportTableHeader({
       <Cell
         style={{
           minWidth: 125,
+          ...styles.tnum,
         }}
         value={groupBy}
         width="flex"
@@ -33,6 +34,7 @@ export default function ReportTableHeader({
               <Cell
                 style={{
                   minWidth: 85,
+                  ...styles.tnum,
                 }}
                 key={header}
                 // eslint-disable-next-line rulesdir/typography
@@ -46,6 +48,7 @@ export default function ReportTableHeader({
               <Cell
                 style={{
                   minWidth: 85,
+                  ...styles.tnum,
                 }}
                 value={'Assets'}
                 width="flex"
@@ -53,6 +56,7 @@ export default function ReportTableHeader({
               <Cell
                 style={{
                   minWidth: 85,
+                  ...styles.tnum,
                 }}
                 value={'Debts'}
                 width="flex"
@@ -62,6 +66,7 @@ export default function ReportTableHeader({
       <Cell
         style={{
           minWidth: 85,
+          ...styles.tnum,
         }}
         value={'Totals'}
         width="flex"
@@ -69,6 +74,7 @@ export default function ReportTableHeader({
       <Cell
         style={{
           minWidth: 85,
+          ...styles.tnum,
         }}
         value={'Average'}
         width="flex"
