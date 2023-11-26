@@ -1,3 +1,5 @@
+import { DiscoverScheduleEntity } from '../../../types/models';
+
 export interface SchedulesHandlers {
   'schedule/create': (arg: {
     schedule: {
@@ -22,7 +24,7 @@ export interface SchedulesHandlers {
 
   'schedule/force-run-service': () => Promise<unknown>;
 
-  'schedule/discover': () => Promise<unknown>;
+  'schedule/discover': () => Promise<DiscoverScheduleEntity[]>;
 
   'schedule/get-upcoming-dates': (arg: {
     config;
