@@ -152,7 +152,7 @@ export function ReportTopbar({
           flexShrink: 0,
         }}
       />
-      <FilterButton onApply={onApplyFilter} type="reports" />
+      <FilterButton onApply={onApplyFilter} compact hover />
       <View style={{ flex: 1 }} />
       <SaveReportMenuButton />
     </View>

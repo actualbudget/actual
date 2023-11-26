@@ -26,6 +26,7 @@ import { titleFirst } from 'loot-core/src/shared/util';
 import DeleteIcon from '../../icons/v0/Delete';
 import { theme } from '../../style';
 import Button from '../common/Button';
+import HoverTarget from '../common/HoverTarget';
 import Menu from '../common/Menu';
 import Select from '../common/Select';
 import Stack from '../common/Stack';
@@ -35,7 +36,8 @@ import Value from '../rules/Value';
 import { Tooltip } from '../tooltips';
 import GenericInput from '../util/GenericInput';
 
-import FilterButtonType from './FilterButtonType';
+import CompactFiltersButton from './CompactFiltersButton';
+import FiltersButton from './FiltersButton';
 import { CondOpMenu } from './SavedFilters';
 
 let filterFields = [
@@ -335,7 +337,7 @@ function ConfigureField({
   );
 }
 
-export function FilterButton({ onApply, type }) {
+export function FilterButton({ onApply, compact, hover }) {
   let filters = useFilters();
 
   let { dateFormat } = useSelector(state => {
@@ -418,10 +420,32 @@ export function FilterButton({ onApply, type }) {
 
   return (
     <View>
-      <FilterButtonType
-        type={type}
-        onClick={() => dispatch({ type: 'select-field' })}
-      />
+      <HoverTarget
+        style={{ flexShrink: 0 }}
+        renderContent={() =>
+          hover && (
+            <Tooltip
+              position="bottom-left"
+              style={{
+                lineHeight: 1.5,
+                padding: '6px 10px',
+                backgroundColor: theme.menuAutoCompleteBackground,
+                color: theme.menuAutoCompleteText,
+              }}
+            >
+              <Text>Filters</Text>
+            </Tooltip>
+          )
+        }
+      >
+        {compact ? (
+          <CompactFiltersButton
+            onClick={() => dispatch({ type: 'select-field' })}
+          />
+        ) : (
+          <FiltersButton onClick={() => dispatch({ type: 'select-field' })} />
+        )}
+      </HoverTarget>
       {state.fieldsOpen && (
         <Tooltip
           position="bottom-left"
