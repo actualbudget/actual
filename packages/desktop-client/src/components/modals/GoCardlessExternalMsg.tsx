@@ -3,11 +3,16 @@ import { useDispatch } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
+import {
+  type GoCardlessInstitution,
+  type GoCardlessToken,
+} from 'loot-core/src/types/models';
 
 import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { theme } from '../../style';
+import { type CommonModalProps } from '../../types/modals';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
 import Button from '../common/Button';
@@ -22,8 +27,8 @@ import { Tooltip } from '../tooltips';
 
 import { COUNTRY_OPTIONS } from './countries';
 
-function useAvailableBanks(country) {
-  const [banks, setBanks] = useState([]);
+function useAvailableBanks(country: string) {
+  const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
@@ -61,7 +66,7 @@ function useAvailableBanks(country) {
   };
 }
 
-function renderError(error) {
+function renderError(error: 'unknown' | 'timeout') {
   return (
     <Error style={{ alignSelf: 'center' }}>
       {error === 'timeout'
@@ -71,23 +76,33 @@ function renderError(error) {
   );
 }
 
+type GoCardlessExternalMsgProps = {
+  modalProps: CommonModalProps;
+  onMoveExternal: (arg: {
+    institutionId: string;
+  }) => Promise<{ error?: 'unknown' | 'timeout'; data?: GoCardlessToken }>;
+  onSuccess: (data: GoCardlessToken) => Promise<void>;
+  onClose: () => void;
+};
+
 export default function GoCardlessExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,
   onClose: originalOnClose,
-}) {
+}: GoCardlessExternalMsgProps) {
   const dispatch = useDispatch();
 
-  let [waiting, setWaiting] = useState(null);
-  let [success, setSuccess] = useState(false);
-  let [institutionId, setInstitutionId] = useState();
-  let [country, setCountry] = useState();
-  let [error, setError] = useState(null);
-  let [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
-    useState(null);
-  let [menuOpen, setMenuOpen] = useState(false);
-  let data = useRef(null);
+  let [waiting, setWaiting] = useState<string | null>(null);
+  let [success, setSuccess] = useState<boolean>(false);
+  let [institutionId, setInstitutionId] = useState<string>();
+  let [country, setCountry] = useState<string>();
+  let [error, setError] = useState<'unknown' | 'timeout' | null>(null);
+  let [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
+    boolean | null
+  >(null);
+  let [menuOpen, setMenuOpen] = useState<boolean>(false);
+  let data = useRef<GoCardlessToken | null>(null);
 
   const {
     data: bankOptions,
@@ -140,7 +155,6 @@ export default function GoCardlessExternalMsg({
           <Autocomplete
             strict
             highlightFirst
-            disabled={isConfigurationLoading}
             suggestions={COUNTRY_OPTIONS}
             onSelect={setCountry}
             value={country}
