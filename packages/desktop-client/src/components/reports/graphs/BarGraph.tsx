@@ -23,7 +23,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
-import CustomTick from '../CustomTick';
+import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadChild = {
@@ -34,7 +34,6 @@ type PayloadChild = {
 };
 
 type PayloadItem = {
-  value?;
   payload: {
     name: string;
     totalAssets: number | string;
@@ -214,7 +213,7 @@ function BarGraph({
                 )}
                 {!compact && (
                   <YAxis
-                    tickFormatter={value => CustomTick(value, privacyMode)}
+                    tickFormatter={value => getCustomTick(value, privacyMode)}
                     tick={{ fill: theme.pageText }}
                     tickLine={{ stroke: theme.pageText }}
                   />

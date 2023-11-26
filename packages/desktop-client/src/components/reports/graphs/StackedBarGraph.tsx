@@ -21,7 +21,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
-import CustomTick from '../CustomTick';
+import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadItem = {
@@ -158,7 +158,7 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
                 />
                 {!compact && (
                   <YAxis
-                    tickFormatter={value => CustomTick(value, privacyMode)}
+                    tickFormatter={value => getCustomTick(value, privacyMode)}
                     tick={{ fill: theme.pageText }}
                     tickLine={{ stroke: theme.pageText }}
                   />

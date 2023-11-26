@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 
 import {
   type CategoryEntity,
@@ -31,12 +31,16 @@ export default function CategorySelector({
 }: CategorySelectorProps) {
   const [uncheckedHidden, setUncheckedHidden] = useState(false);
 
+  const selectedCategoryMap = useMemo(
+    () => selectedCategories.map(selected => selected.id),
+    [selectedCategories],
+  );
   const allCategoriesSelected = categories.every(category =>
-    selectedCategories.map(selected => selected.id).includes(category.id),
+    selectedCategoryMap.includes(category.id),
   );
 
   const allCategoriesUnselected = !categories.some(category =>
-    selectedCategories.map(selected => selected.id).includes(category.id),
+    selectedCategoryMap.includes(category.id),
   );
 
   let selectAll: CategoryEntity[] = [];
