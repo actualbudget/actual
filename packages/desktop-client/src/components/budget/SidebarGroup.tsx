@@ -185,7 +185,6 @@ function SidebarGroup({
         onBlur={() => onEdit(null)}
         style={{ fontWeight: 600 }}
         inputProps={{
-          value: undefined,
           style: { marginLeft: 20 },
           placeholder: temporary ? 'New Group Name' : '',
         }}
