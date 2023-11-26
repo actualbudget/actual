@@ -170,11 +170,11 @@ export function parse(item) {
       return { ...item, value: parsed };
     }
     case 'string': {
-      let parsed = item.value == null ? '' : item.value;
+      const parsed = item.value == null ? '' : item.value;
       return { ...item, value: parsed };
     }
     case 'boolean': {
-      let parsed = item.value;
+      const parsed = item.value;
       return { ...item, value: parsed };
     }
     default:
@@ -194,11 +194,11 @@ export function unparse({ error, inputKey, ...item }) {
       return { ...item, value: unparsed };
     }
     case 'string': {
-      let unparsed = item.value == null ? '' : item.value;
+      const unparsed = item.value == null ? '' : item.value;
       return { ...item, value: unparsed };
     }
     case 'boolean': {
-      let unparsed = item.value == null ? false : item.value;
+      const unparsed = item.value == null ? false : item.value;
       return { ...item, value: unparsed };
     }
     default:

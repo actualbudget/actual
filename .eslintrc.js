@@ -92,6 +92,9 @@ module.exports = {
     //   },
     // ],
 
+    'no-var': 'warn',
+    'object-shorthand': ['warn', 'properties'],
+
     'import/extensions': [
       'warn',
       'never',
@@ -228,6 +231,34 @@ module.exports = {
       ],
       rules: {
         'no-restricted-imports': ['off', { patterns: restrictedImportColors }],
+      },
+    },
+    // TODO: Remove this override once we addressed all warnings and enable the rule globally.
+    {
+      files: [
+        './packages/api/*',
+        './packages/api/app/**/*',
+        './packages/crdt/**/*',
+        './packages/desktop-client/src/*',
+        // './packages/desktop-client/src/components/**/*',
+        './packages/desktop-client/src/hooks/**/*',
+        './packages/desktop-client/src/icons/**/*',
+        './packages/desktop-client/src/style/**/*',
+        './packages/desktop-client/src/types/**/*',
+        './packages/desktop-client/src/util/**/*',
+        './packages/desktop-electron/**/*',
+        './packages/eslint-plugin-actual/**/*',
+        './packages/loot-core/*',
+        './packages/loot-core/src/client/**/*',
+        './packages/loot-core/src/mocks/**/*',
+        './packages/loot-core/src/platform/**/*',
+        // './packages/loot-core/src/server/**/*',
+        './packages/loot-core/src/shared/**/*',
+        './packages/loot-core/src/types/**/*',
+        './packages/loot-core/webpack/**/*',
+      ],
+      rules: {
+        'prefer-const': 'warn',
       },
     },
   ],

@@ -87,7 +87,7 @@ export default function Select<Value extends string>({
             whiteSpace: 'nowrap',
             maxWidth: `calc(100% - ${arrowSize + 5}px)`,
             alignItems: 'center',
-            minHeight: minHeight,
+            minHeight,
           }}
         >
           {targetOption.length !== 0 ? targetOption[0][1] : defaultLabel}

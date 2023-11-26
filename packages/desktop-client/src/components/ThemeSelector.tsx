@@ -4,11 +4,15 @@ import { useActions } from '../hooks/useActions';
 import MoonStars from '../icons/v2/MoonStars';
 import Sun from '../icons/v2/Sun';
 import { useResponsive } from '../ResponsiveProvider';
-import { useTheme } from '../style';
+import { type CSSProperties, useTheme } from '../style';
 
 import Button from './common/Button';
 
-export function ThemeSelector() {
+type ThemeSelectorProps = {
+  style?: CSSProperties;
+};
+
+export function ThemeSelector({ style }: ThemeSelectorProps) {
   let theme = useTheme();
   let { saveGlobalPrefs } = useActions();
 
@@ -22,11 +26,12 @@ export function ThemeSelector() {
           theme: theme === 'dark' ? 'light' : 'dark',
         });
       }}
+      style={style}
     >
       {theme === 'light' ? (
-        <MoonStars style={{ width: 13, height: 13, color: 'inherit' }} />
+        <MoonStars style={{ width: 15, height: 15, color: 'inherit' }} />
       ) : (
-        <Sun style={{ width: 13, height: 13, color: 'inherit' }} />
+        <Sun style={{ width: 15, height: 15, color: 'inherit' }} />
       )}
     </Button>
   );

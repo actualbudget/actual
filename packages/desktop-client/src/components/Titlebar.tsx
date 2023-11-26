@@ -12,15 +12,16 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import * as Platform from 'loot-core/src/client/platform';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
+import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
 import useFeatureFlag from '../hooks/useFeatureFlag';
 import useNavigate from '../hooks/useNavigate';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
-import SvgEye from '../icons/v2/Eye';
-import SvgEyeSlashed from '../icons/v2/EyeSlashed';
 import NavigationMenu from '../icons/v2/NavigationMenu';
+import ViewHide from '../icons/v2/ViewHide';
+import ViewShow from '../icons/v2/ViewShow';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, type CSSProperties, styles } from '../style';
 
@@ -41,9 +42,20 @@ import useSheetValue from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 import { Tooltip } from './tooltips';
 
+export const SWITCH_BUDGET_MESSAGE_TYPE = 'budget/switch-type';
+
+type SwitchBudgetTypeMessage = {
+  type: typeof SWITCH_BUDGET_MESSAGE_TYPE;
+  payload: {
+    newBudgetType: LocalPrefs['budgetType'];
+  };
+};
+export type TitlebarMessage = SwitchBudgetTypeMessage;
+
+type Listener = (msg: TitlebarMessage) => void;
 export type TitlebarContextValue = {
-  sendEvent: (msg: string) => void;
-  subscribe: (listener) => () => void;
+  sendEvent: (msg: TitlebarMessage) => void;
+  subscribe: (listener: Listener) => () => void;
 };
 
 export let TitlebarContext = createContext<TitlebarContextValue>(null);
@@ -53,13 +65,13 @@ type TitlebarProviderProps = {
 };
 
 export function TitlebarProvider({ children }: TitlebarProviderProps) {
-  let listeners = useRef([]);
+  let listeners = useRef<Listener[]>([]);
 
-  function sendEvent(msg: string) {
+  function sendEvent(msg: TitlebarMessage) {
     listeners.current.forEach(func => func(msg));
   }
 
-  function subscribe(listener) {
+  function subscribe(listener: Listener) {
     listeners.current.push(listener);
     return () =>
       (listeners.current = listeners.current.filter(func => func !== listener));
@@ -91,23 +103,24 @@ function UncategorizedButton() {
   );
 }
 
-function PrivacyButton() {
+function PrivacyButton({ style }) {
   let isPrivacyEnabled = useSelector(
     state => state.prefs.local.isPrivacyEnabled,
   );
   let { savePrefs } = useActions();
 
-  let privacyIconStyle = { width: 23, height: 23 };
+  let privacyIconStyle = { width: 15, height: 15 };
 
   return (
     <Button
       type="bare"
       onClick={() => savePrefs({ isPrivacyEnabled: !isPrivacyEnabled })}
+      style={style}
     >
       {isPrivacyEnabled ? (
-        <SvgEyeSlashed style={privacyIconStyle} />
+        <ViewHide style={privacyIconStyle} />
       ) : (
-        <SvgEye style={privacyIconStyle} />
+        <ViewShow style={privacyIconStyle} />
       )}
     </Button>
   );
@@ -268,7 +281,13 @@ function BudgetTitlebar() {
   function onSwitchType() {
     setLoading(true);
     if (!loading) {
-      sendEvent('budget/switch-type');
+      const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
+      sendEvent({
+        type: SWITCH_BUDGET_MESSAGE_TYPE,
+        payload: {
+          newBudgetType,
+        },
+      });
     }
   }
 
@@ -353,8 +372,6 @@ export default function Titlebar({ style }) {
     state => state.prefs.global.floatingSidebar,
   );
 
-  let themesFlag = useFeatureFlag('themes');
-
   return isNarrowWidth ? null : (
     <View
       style={{
@@ -424,8 +441,8 @@ export default function Titlebar({ style }) {
       </Routes>
       <View style={{ flex: 1 }} />
       <UncategorizedButton />
-      {themesFlag && <ThemeSelector />}
-      <PrivacyButton />
+      <ThemeSelector style={{ marginLeft: 10 }} />
+      <PrivacyButton style={{ marginLeft: 10 }} />
       {serverURL ? <SyncButton style={{ marginLeft: 10 }} /> : null}
       <LoggedInUser style={{ marginLeft: 10 }} />
     </View>

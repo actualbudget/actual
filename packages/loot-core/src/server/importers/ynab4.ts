@@ -181,7 +181,7 @@ async function importTransactions(
             return {
               transfer_id: transferId,
               payee,
-              imported_payee: imported_payee,
+              imported_payee,
             };
           }
 
@@ -213,7 +213,9 @@ async function importTransactions(
         })
         .filter(x => x);
 
-      await actual.addTransactions(entityIdMap.get(accountId), toImport);
+      await actual.addTransactions(entityIdMap.get(accountId), toImport, {
+        learnCategories: true,
+      });
     }),
   );
 }

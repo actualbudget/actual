@@ -211,7 +211,7 @@ function getMenu(isDev, createWindow) {
       ].filter(x => x),
     });
     // Edit menu.
-    let editIdx = template.findIndex(t => t.label === 'Edit');
+    const editIdx = template.findIndex(t => t.label === 'Edit');
     template[editIdx].submenu.push(
       {
         type: 'separator',
@@ -229,7 +229,7 @@ function getMenu(isDev, createWindow) {
       },
     );
     // Window menu.
-    let windowIdx = template.findIndex(t => t.role === 'window');
+    const windowIdx = template.findIndex(t => t.role === 'window');
     template[windowIdx].submenu = [
       {
         label: 'Close',

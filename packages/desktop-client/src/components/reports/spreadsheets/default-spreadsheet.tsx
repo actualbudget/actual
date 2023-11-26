@@ -417,7 +417,7 @@ export default function createSpreadsheet(
     });
 
     setData({
-      stackedData: stackedData,
+      stackedData,
       groupBy: groupBy === 'Group' ? catGroup : groupByList,
       data,
       groupData: categoryGroupData,
@@ -479,8 +479,8 @@ function recalculate(item, start, end) {
   const indexedMonthData = exists ? index(monthData, 'dateLookup') : monthData;
 
   return {
-    indexedMonthData: indexedMonthData,
-    monthData: monthData,
+    indexedMonthData,
+    monthData,
     totalAssets: integerToAmount(totalAssets),
     totalDebts: integerToAmount(totalDebts),
     totalTotals: integerToAmount(totalTotals),

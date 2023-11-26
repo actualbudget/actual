@@ -38,13 +38,13 @@ const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
 
 self.addEventListener('message', async e => {
   if (!hasInitialized) {
-    let msg = e.data;
+    const msg = e.data;
 
     if (msg.type === 'init') {
       hasInitialized = true;
-      let isDev = !!msg.isDev;
+      const isDev = !!msg.isDev;
       // let version = msg.version;
-      let hash = msg.hash;
+      const hash = msg.hash;
 
       if (!self.SharedArrayBuffer && !msg.isSharedArrayBufferOverrideEnabled) {
         self.postMessage({
@@ -61,7 +61,7 @@ self.addEventListener('message', async e => {
 
       backend.initApp(isDev, self).catch(err => {
         console.log(err);
-        let msg = {
+        const msg = {
           type: 'app-init-failure',
           IDBFailure: err.message.includes('indexeddb-failure'),
         };

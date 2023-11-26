@@ -3,6 +3,7 @@ import React, {
   useContext,
   useEffect,
   type ChangeEvent,
+  type ComponentPropsWithoutRef,
 } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
@@ -16,11 +17,15 @@ import View from '../../common/View';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../tooltips';
 
-type HoldTooltipProps = {
+type HoldTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
   onSubmit: (amount: number) => void;
-  onClose: () => void;
 };
-export default function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
+export default function HoldTooltip({
+  onSubmit,
+  onClose,
+  position = 'bottom-right',
+  ...props
+}: HoldTooltipProps) {
   const spreadsheet = useSpreadsheet();
   const sheetName = useContext(NamespaceContext);
 
@@ -48,10 +53,11 @@ export default function HoldTooltip({ onSubmit, onClose }: HoldTooltipProps) {
 
   return (
     <Tooltip
-      position="bottom-right"
+      position={position}
       width={200}
       style={{ padding: 10 }}
       onClose={onClose}
+      {...props}
     >
       <View style={{ marginBottom: 5 }}>Hold this amount:</View>
       <View>

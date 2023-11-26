@@ -187,9 +187,9 @@ function renderTransactions(extraProps) {
 
   let defaultProps = {
     transactions,
-    payees: payees,
-    accounts: accounts,
-    categoryGroups: categoryGroups,
+    payees,
+    accounts,
+    categoryGroups,
     currentAccountId: accounts[0].id,
     showAccount: true,
     showCategory: true,

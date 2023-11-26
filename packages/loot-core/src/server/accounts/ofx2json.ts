@@ -44,48 +44,49 @@ function getStmtTrn(data) {
 }
 
 function getBankStmtTrn(ofx) {
-  const msg = ofx?.['BANKMSGSRSV1'];
-  const stmtTrnRs = msg?.['STMTTRNRS'];
-  const stmtRs = stmtTrnRs?.['STMTRS'];
-  const tranList = stmtRs?.['BANKTRANLIST'];
-  // Could be an array or a single object.
+  // Somes values could be an array or a single object.
   // xml2js serializes single item to an object and multiple to an array.
-  const stmtTrn = tranList?.['STMTTRN'];
-
-  if (!Array.isArray(stmtTrn)) {
-    return [stmtTrn];
-  }
-  return stmtTrn;
+  const msg = ofx?.['BANKMSGSRSV1'];
+  const stmtTrnRs = getAsArray(msg?.['STMTTRNRS']);
+  const result = stmtTrnRs.flatMap(s => {
+    const stmtRs = s?.['STMTRS'];
+    const tranList = stmtRs?.['BANKTRANLIST'];
+    const stmtTrn = tranList?.['STMTTRN'];
+    return getAsArray(stmtTrn);
+  });
+  return result;
 }
 
 function getCcStmtTrn(ofx) {
-  const msg = ofx?.['CREDITCARDMSGSRSV1'];
-  const stmtTrnRs = msg?.['CCSTMTTRNRS'];
-  const stmtRs = stmtTrnRs?.['CCSTMTRS'];
-  const tranList = stmtRs?.['BANKTRANLIST'];
-  // Could be an array or a single object.
+  // Some values could be an array or a single object.
   // xml2js serializes single item to an object and multiple to an array.
-  const stmtTrn = tranList?.['STMTTRN'];
-
-  if (!Array.isArray(stmtTrn)) {
-    return [stmtTrn];
-  }
-  return stmtTrn;
+  const msg = ofx?.['CREDITCARDMSGSRSV1'];
+  const stmtTrnRs = getAsArray(msg?.['CCSTMTTRNRS']);
+  const result = stmtTrnRs.flatMap(s => {
+    const stmtRs = s?.['CCSTMTRS'];
+    const tranList = stmtRs?.['BANKTRANLIST'];
+    const stmtTrn = tranList?.['STMTTRN'];
+    return getAsArray(stmtTrn);
+  });
+  return result;
 }
 
 function getInvStmtTrn(ofx) {
-  const msg = ofx?.['INVSTMTMSGSRSV1'];
-  const stmtTrnRs = msg?.['INVSTMTTRNRS'];
-  const stmtRs = stmtTrnRs?.['INVSTMTRS'];
-  const tranList = stmtRs?.['INVTRANLIST'];
-  // Could be an array or a single object.
+  // Somes values could be an array or a single object.
   // xml2js serializes single item to an object and multiple to an array.
-  const stmtTrn = tranList?.['INVBANKTRAN']?.flatMap(t => t?.['STMTTRN']);
+  const msg = ofx?.['INVSTMTMSGSRSV1'];
+  const stmtTrnRs = getAsArray(msg?.['INVSTMTTRNRS']);
+  const result = stmtTrnRs.flatMap(s => {
+    const stmtRs = s?.['INVSTMTRS'];
+    const tranList = stmtRs?.['INVTRANLIST'];
+    const stmtTrn = tranList?.['INVBANKTRAN']?.flatMap(t => t?.['STMTTRN']);
+    return getAsArray(stmtTrn);
+  });
+  return result;
+}
 
-  if (!Array.isArray(stmtTrn)) {
-    return [stmtTrn];
-  }
-  return stmtTrn;
+function getAsArray(value) {
+  return Array.isArray(value) ? value : [value];
 }
 
 function mapOfxTransaction(stmtTrn): OFXTransaction {
@@ -137,7 +138,7 @@ export default async function parse(ofx: string): Promise<OFXParseResult> {
   }
 
   return {
-    headers: headers,
+    headers,
     transactions: getStmtTrn(dataParsed).map(mapOfxTransaction),
   };
 }

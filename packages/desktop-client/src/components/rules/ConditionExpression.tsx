@@ -37,7 +37,7 @@ export default function ConditionExpression({
         display: 'block',
         maxWidth: '100%',
         color: theme.pillText,
-        backgroundColor: theme.pillBackground,
+        backgroundColor: theme.pillBackgroundLight,
         borderRadius: 4,
         padding: '3px 5px',
         whiteSpace: 'nowrap',

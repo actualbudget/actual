@@ -15,6 +15,7 @@ import Input from '../common/Input';
 import Modal, { ModalButtons } from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
+import { Checkbox } from '../forms';
 
 type CreateLocalAccountProps = {
   modalProps: CommonModalProps;
@@ -86,26 +87,28 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
               }}
             >
               <View style={{ flexDirection: 'column' }}>
-                <label
+                <View
                   style={{
-                    userSelect: 'none',
-                    textAlign: 'right',
-                    width: '100%',
-                    display: 'flex',
-                    verticalAlign: 'center',
+                    flexDirection: 'row',
                     justifyContent: 'flex-end',
                   }}
-                  htmlFor="offbudget"
                 >
-                  <input
+                  <Checkbox
                     id="offbudget"
                     name="offbudget"
-                    type="checkbox"
                     checked={offbudget}
-                    onChange={event => setOffbudget(event.target.checked)}
+                    onChange={() => setOffbudget(!offbudget)}
                   />
-                  Off-budget
-                </label>
+                  <label
+                    htmlFor="offbudget"
+                    style={{
+                      userSelect: 'none',
+                      verticalAlign: 'center',
+                    }}
+                  >
+                    Off-budget
+                  </label>
+                </View>
                 <div
                   style={{
                     textAlign: 'right',
@@ -132,6 +135,7 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
             <InlineField label="Balance" width="75%">
               <Input
                 name="balance"
+                inputMode="decimal"
                 value={balance}
                 onChange={event => setBalance(event.target.value)}
                 onBlur={event => {

@@ -52,6 +52,7 @@ import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SvgTrash from '../../icons/v1/Trash';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
+import Lock from '../../icons/v2/LockClosed';
 import SvgPencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
 import { styles, theme } from '../../style';
 import Button from '../common/Button';
@@ -200,32 +201,50 @@ class TransactionEditInner extends PureComponent {
   };
 
   onSave = async () => {
-    let { transactions } = this.state;
-    const [transaction, ..._childTransactions] = transactions;
-    const { account: accountId } = transaction;
-    let account = getAccountsById(this.props.accounts)[accountId];
+    let onConfirmSave = async () => {
+      let { transactions } = this.state;
+      const [transaction, ..._childTransactions] = transactions;
+      const { account: accountId } = transaction;
+      let account = getAccountsById(this.props.accounts)[accountId];
 
-    if (transactions.find(t => t.account == null)) {
-      // Ignore transactions if any of them don't have an account
-      // TODO: Should we display validation error?
-      return;
+      if (transactions.find(t => t.account == null)) {
+        // Ignore transactions if any of them don't have an account
+        // TODO: Should we display validation error?
+        return;
+      }
+
+      // Since we don't own the state, we have to handle the case where
+      // the user saves while editing an input. We won't have the
+      // updated value so we "apply" a queued change. Maybe there's a
+      // better way to do this (lift the state?)
+      if (this._queuedChange) {
+        let [transaction, name, value] = this._queuedChange;
+        transactions = await this.onEdit(transaction, name, value);
+      }
+
+      if (this.props.adding) {
+        transactions = realizeTempTransactions(transactions);
+      }
+
+      this.props.onSave(transactions);
+      this.props.navigate(`/accounts/${account.id}`, { replace: true });
+    };
+
+    const { transactions } = this.state;
+    const [transaction] = transactions;
+
+    if (transaction.reconciled) {
+      // On mobile any save gives the warning.
+      // On the web only certain changes trigger a warning.
+      // Should we bring that here as well? Or does the nature of the editing form
+      // make this more appropriate?
+      this.props.pushModal('confirm-transaction-edit', {
+        onConfirm: onConfirmSave,
+        confirmReason: 'editReconciled',
+      });
+    } else {
+      onConfirmSave();
     }
-
-    // Since we don't own the state, we have to handle the case where
-    // the user saves while editing an input. We won't have the
-    // updated value so we "apply" a queued change. Maybe there's a
-    // better way to do this (lift the state?)
-    if (this._queuedChange) {
-      let [transaction, name, value] = this._queuedChange;
-      transactions = await this.onEdit(transaction, name, value);
-    }
-
-    if (this.props.adding) {
-      transactions = realizeTempTransactions(transactions);
-    }
-
-    this.props.onSave(transactions);
-    this.props.navigate(`/accounts/${account.id}`, { replace: true });
   };
 
   onSaveChild = childTransaction => {
@@ -276,15 +295,29 @@ class TransactionEditInner extends PureComponent {
   };
 
   onDelete = () => {
-    this.props.onDelete();
+    let onConfirmDelete = () => {
+      this.props.onDelete();
+
+      const { transactions } = this.state;
+      const [transaction, ..._childTransactions] = transactions;
+      const { account: accountId } = transaction;
+      if (accountId) {
+        this.props.navigate(`/accounts/${accountId}`, { replace: true });
+      } else {
+        this.props.navigate(-1);
+      }
+    };
 
     const { transactions } = this.state;
-    const [transaction, ..._childTransactions] = transactions;
-    const { account: accountId } = transaction;
-    if (accountId) {
-      this.props.navigate(`/accounts/${accountId}`, { replace: true });
+    const [transaction] = transactions;
+
+    if (transaction.reconciled) {
+      this.props.pushModal('confirm-transaction-edit', {
+        onConfirm: onConfirmDelete,
+        confirmReason: 'deleteReconciled',
+      });
     } else {
-      this.props.navigate(-1);
+      onConfirmDelete();
     }
   };
 
@@ -362,6 +395,7 @@ class TransactionEditInner extends PureComponent {
               <Button
                 type="bare"
                 style={{
+                  ...styles.noTapHighlight,
                   color: theme.mobileHeaderText,
                   justifyContent: 'center',
                   margin: 10,
@@ -578,21 +612,35 @@ class TransactionEditInner extends PureComponent {
                   }
                 />
               </View>
-
-              <View style={{ marginLeft: 0, marginRight: 8 }}>
-                <FieldLabel title="Cleared" />
-                <BooleanField
-                  checked={transaction.cleared}
-                  onUpdate={checked =>
-                    this.onEdit(transaction, 'cleared', checked)
-                  }
-                  style={{
-                    margin: 'auto',
-                    width: 22,
-                    height: 22,
-                  }}
-                />
-              </View>
+              {transaction.reconciled ? (
+                <View style={{ marginLeft: 0, marginRight: 8 }}>
+                  <FieldLabel title="Reconciled" />
+                  <BooleanField
+                    checked
+                    style={{
+                      margin: 'auto',
+                      width: 22,
+                      height: 22,
+                    }}
+                    disabled
+                  />
+                </View>
+              ) : (
+                <View style={{ marginLeft: 0, marginRight: 8 }}>
+                  <FieldLabel title="Cleared" />
+                  <BooleanField
+                    checked={transaction.cleared}
+                    onUpdate={checked =>
+                      this.onEdit(transaction, 'cleared', checked)
+                    }
+                    style={{
+                      margin: 'auto',
+                      width: 22,
+                      height: 22,
+                    }}
+                  />
+                </View>
+              )}
             </View>
 
             <View>
@@ -701,7 +749,7 @@ class TransactionEditInner extends PureComponent {
               editingChild && transactions.find(t => t.id === editingChild),
             amountSign: forcedSign,
             getCategoryName: id => (id ? lookupName(categories, id) : null),
-            navigate: navigate,
+            navigate,
             onEdit: this.onEdit,
             onStartClose: this.onSaveChild,
           })}
@@ -953,6 +1001,7 @@ class Transaction extends PureComponent {
       : categoryName;
 
     let isPreview = isPreviewId(id);
+    let isReconciled = transaction.reconciled;
     let textStyle = isPreview && {
       fontStyle: 'italic',
       color: theme.pageTextLight,
@@ -1015,16 +1064,27 @@ class Transaction extends PureComponent {
                   marginTop: 3,
                 }}
               >
-                <CheckCircle1
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: cleared
-                      ? theme.noticeTextLight
-                      : theme.pageTextSubdued,
-                    marginRight: 5,
-                  }}
-                />
+                {isReconciled ? (
+                  <Lock
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: theme.noticeTextLight,
+                      marginRight: 5,
+                    }}
+                  />
+                ) : (
+                  <CheckCircle1
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: cleared
+                        ? theme.noticeTextLight
+                        : theme.pageTextSubdued,
+                      marginRight: 5,
+                    }}
+                  />
+                )}
                 {showCategory && (
                   <TextOneLine
                     style={{

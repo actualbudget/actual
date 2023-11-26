@@ -39,8 +39,8 @@ export function findRemainder(priority_list, categories, category_templates) {
     }
   }
   return {
-    remainder_found: remainder_found,
-    remainder_priority: remainder_priority,
-    remainder_weight_total: remainder_weight_total,
+    remainder_found,
+    remainder_priority,
+    remainder_weight_total,
   };
 }

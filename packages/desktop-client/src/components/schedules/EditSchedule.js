@@ -296,7 +296,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       });
 
       send('make-filters-from-conditions', {
-        conditions: conditions,
+        conditions,
       }).then(({ filters }) => {
         if (current) {
           let live = liveQuery(
