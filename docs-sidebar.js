@@ -26,6 +26,7 @@ const unavailable = title => ({
 const sidebars = {
   docs: [
     'index',
+    'vision',
     'releases',
     {
       type: 'category',
