@@ -38,7 +38,7 @@ export type DiscoverScheduleEntity = {
   payee: PayeeEntity['id'];
   date: ScheduleEntity['_date'];
   amount: ScheduleEntity['_amount'];
-  _conditions: [
+  _conditions: Array<
     | { op: 'is'; field: 'account'; value: AccountEntity['id'] }
     | { op: 'is'; field: 'payee'; value: PayeeEntity['id'] }
     | {
@@ -50,6 +50,6 @@ export type DiscoverScheduleEntity = {
         op: 'is' | 'isapprox';
         field: 'amount';
         value: ScheduleEntity['_amount'];
-      },
-  ];
+      }
+  >;
 };
