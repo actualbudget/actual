@@ -8,30 +8,11 @@ import ListBullet from '../../icons/v1/ListBullet';
 import Queue from '../../icons/v1/Queue';
 import Tag from '../../icons/v1/Tag';
 import { theme } from '../../style';
-import Button from '../common/Button';
 import View from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 
+import GraphButton from './GraphButton';
 import { SaveReportMenuButton } from './SaveReport';
-
-function GraphButton({ selected, children, style, onSelect, title, disabled }) {
-  return (
-    <Button
-      type="bare"
-      style={{
-        ...(selected && {
-          backgroundColor: theme.buttonBareBackgroundHover,
-        }),
-        ...style,
-      }}
-      onClick={onSelect}
-      title={title}
-      disabled={disabled}
-    >
-      {children}
-    </Button>
-  );
-}
 
 export function ReportTopbar({
   graphType,
@@ -67,6 +48,7 @@ export function ReportTopbar({
           //setViewLegend(false);
           setTypeDisabled([]);
         }}
+        style={{ marginRight: 15 }}
       >
         <Queue width={15} height={15} />
       </GraphButton>
@@ -86,7 +68,7 @@ export function ReportTopbar({
             setBalanceType('Expense');
           }
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
       >
         <ChartBar width={15} height={15} />
       </GraphButton>
@@ -99,7 +81,7 @@ export function ReportTopbar({
           //setViewLegend(false);
           setTypeDisabled([]);
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         disabled={mode === 'total' ? false : true}
       >
         <Chart width={15} height={15} />
@@ -112,7 +94,7 @@ export function ReportTopbar({
           setTypeDisabled(['Net']);
           setBalanceType('Expense');
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         disabled={mode === 'total' ? false : true}
       >
         <ChartPie width={15} height={15} />
@@ -121,8 +103,8 @@ export function ReportTopbar({
         style={{
           width: 1,
           height: 30,
-          backgroundColor: theme.altPillBorder,
-          marginLeft: 15,
+          backgroundColor: theme.pillBorderDark,
+          marginRight: 15,
           flexShrink: 0,
         }}
       />
@@ -131,7 +113,7 @@ export function ReportTopbar({
         onSelect={() => {
           setViewLegend(!viewLegend);
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         title="Show Legend"
         disabled={
           true //descoping for future PR
@@ -145,7 +127,7 @@ export function ReportTopbar({
         onSelect={() => {
           setViewSummary(!viewSummary);
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         title="Show Summary"
       >
         <Calculator width={15} height={15} />
@@ -155,7 +137,7 @@ export function ReportTopbar({
         onSelect={() => {
           setViewLabels(!viewLabels);
         }}
-        style={{ marginLeft: 15 }}
+        style={{ marginRight: 15 }}
         title="Show labels"
         disabled={true}
       >
@@ -165,13 +147,12 @@ export function ReportTopbar({
         style={{
           width: 1,
           height: 30,
-          backgroundColor: theme.altPillBorder,
+          backgroundColor: theme.pillBorderDark,
           marginRight: 15,
-          marginLeft: 15,
           flexShrink: 0,
         }}
       />
-      <FilterButton onApply={onApplyFilter} type="reports" />
+      <FilterButton onApply={onApplyFilter} compact hover />
       <View style={{ flex: 1 }} />
       <SaveReportMenuButton />
     </View>

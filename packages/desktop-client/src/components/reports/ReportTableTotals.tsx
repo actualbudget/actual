@@ -6,7 +6,7 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
-import { theme } from '../../style';
+import { styles, theme } from '../../style';
 import { Row, Cell } from '../table';
 
 export default function ReportTableTotals({
@@ -29,6 +29,7 @@ export default function ReportTableTotals({
       <Cell
         style={{
           minWidth: 125,
+          ...styles.tnum,
         }}
         value={'Totals'}
         width="flex"
@@ -39,6 +40,7 @@ export default function ReportTableTotals({
               <Cell
                 style={{
                   minWidth: 85,
+                  ...styles.tnum,
                 }}
                 key={amountToCurrency(item[balanceTypeOp])}
                 value={amountToCurrency(item[balanceTypeOp])}
@@ -56,6 +58,7 @@ export default function ReportTableTotals({
               <Cell
                 style={{
                   minWidth: 85,
+                  ...styles.tnum,
                 }}
                 value={amountToCurrency(data.totalAssets)}
                 title={
@@ -67,6 +70,7 @@ export default function ReportTableTotals({
               <Cell
                 style={{
                   minWidth: 85,
+                  ...styles.tnum,
                 }}
                 value={amountToCurrency(data.totalDebts)}
                 title={
@@ -80,6 +84,7 @@ export default function ReportTableTotals({
       <Cell
         style={{
           minWidth: 85,
+          ...styles.tnum,
         }}
         value={amountToCurrency(data[balanceTypeOp])}
         title={
@@ -92,6 +97,7 @@ export default function ReportTableTotals({
       <Cell
         style={{
           minWidth: 85,
+          ...styles.tnum,
         }}
         value={integerToCurrency(Math.round(average))}
         title={

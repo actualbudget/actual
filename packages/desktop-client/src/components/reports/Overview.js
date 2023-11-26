@@ -2,7 +2,6 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import useFeatureFlag from '../../hooks/useFeatureFlag';
-import AnimatedLoading from '../../icons/AnimatedLoading';
 import { styles } from '../../style';
 import View from '../common/View';
 
@@ -11,20 +10,6 @@ import CategorySpendingCard from './reports/CategorySpendingCard';
 import CustomReportCard from './reports/CustomReportCard';
 import NetWorthCard from './reports/NetWorthCard';
 import SankeyCard from './reports/SankeyCard';
-
-export function LoadingIndicator() {
-  return (
-    <View
-      style={{
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <AnimatedLoading style={{ width: 25, height: 25 }} />
-    </View>
-  );
-}
 
 export default function Overview() {
   let categorySpendingReportFeatureFlag = useFeatureFlag(

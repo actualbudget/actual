@@ -6,7 +6,7 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
-import { theme } from '../../style';
+import { styles, theme } from '../../style';
 import View from '../common/View';
 import { Row, Cell } from '../table';
 
@@ -51,6 +51,7 @@ const TableRow = memo(
           title={item[groupByItem].length > 12 && item[groupByItem]}
           style={{
             minWidth: 125,
+            ...styles.tnum,
           }}
         />
         {item.monthData && mode === 'time'
@@ -59,6 +60,7 @@ const TableRow = memo(
                 <Cell
                   style={{
                     minWidth: 85,
+                    ...styles.tnum,
                   }}
                   key={amountToCurrency(month[balanceTypeOp])}
                   value={amountToCurrency(month[balanceTypeOp])}
@@ -82,6 +84,7 @@ const TableRow = memo(
                   width="flex"
                   style={{
                     minWidth: 85,
+                    ...styles.tnum,
                   }}
                 />
                 <Cell
@@ -93,6 +96,7 @@ const TableRow = memo(
                   width="flex"
                   style={{
                     minWidth: 85,
+                    ...styles.tnum,
                   }}
                 />
               </>
@@ -106,6 +110,7 @@ const TableRow = memo(
           style={{
             fontWeight: 600,
             minWidth: 85,
+            ...styles.tnum,
           }}
           width="flex"
           privacyFilter
@@ -119,6 +124,7 @@ const TableRow = memo(
           style={{
             fontWeight: 600,
             minWidth: 85,
+            ...styles.tnum,
           }}
           width="flex"
           privacyFilter
