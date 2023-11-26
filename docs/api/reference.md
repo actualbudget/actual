@@ -134,13 +134,18 @@ If you want to create a transfer, use the transfer payee for the account you wis
 
 #### `addTransactions`
 
-<Method name="addTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'transactions', type: 'Transaction[]'}]} returns="Promise<id[]>" />
+<Method name="addTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'transactions', type: 'Transaction[]'}, { name: 'runTransfers = false', type: 'bool?'}, { name: 'learnCategories = false', type: 'bool?'}]} returns="Promise<id[]>" />
 
 Adds multiple transactions at once. Does not reconcile (see `importTransactions`). Returns an array of ids of the newly created transactions.
 
-If a transfer payee is given, this method does **not** create a transfer. Use `importTransactions` if you want to create transfers.
+This method does **not** avoid duplicates. Use `importTransactions` if you want the full reconcile behavior.
 
-You probably want to use `importTransactions`. This method is mainly for custom importers that want to skip all the automatic stuff because it wants to create raw data.
+This method has the following optional flags:
+
+- `runTransfers`:  create transfers for transactions where transfer payee is given (defaults to false)
+- `learnCategories`: update Rules based on the category field in the transactions (defaults to false)
+
+This method is mainly for custom importers that want to skip all the automatic stuff because it wants to create raw data. You probably want to use `importTransactions`.
 
 #### `importTransactions`
 
