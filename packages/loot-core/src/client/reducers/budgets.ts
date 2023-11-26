@@ -31,7 +31,6 @@ function reconcileFiles(
   localFiles: Budget[],
   remoteFiles: RemoteFile[] | null,
 ): File[] {
-  console.log({ localFiles, remoteFiles });
   const reconciled = new Set();
 
   const files = localFiles.map((localFile): File & { deleted: boolean } => {
