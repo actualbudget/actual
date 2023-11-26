@@ -212,7 +212,7 @@ export interface ServerHandlers {
 
   'gocardless-get-banks': (country: string) => Promise<{
     data: GoCardlessInstitution[];
-    error?: { status: string; reason: string };
+    error?: { reason: string };
   }>;
 
   'gocardless-poll-web-token-stop': () => Promise<'ok'>;
