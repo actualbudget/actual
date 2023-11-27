@@ -27,9 +27,11 @@ export type CategoryListProps = {
   highlightedIndex: number;
   embedded: boolean;
   footer?: ReactNode;
-  renderGroupHeader?: (props: CategoryGroupHeaderProps) => ReactNode;
   renderSplitTransactionButton?: (
     props: SplitTransactionButtonProps,
+  ) => ReactNode;
+  renderCategoryItemGroupHeader?: (
+    props: CategoryItemGroupHeaderProps,
   ) => ReactNode;
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
@@ -39,8 +41,8 @@ function CategoryList({
   highlightedIndex,
   embedded,
   footer,
-  renderGroupHeader = defaultRenderGroupHeader,
   renderSplitTransactionButton = defaultRenderSplitTransactionButton,
+  renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
 }: CategoryListProps) {
   let lastGroup = null;
@@ -70,7 +72,7 @@ function CategoryList({
             <Fragment key={item.id}>
               {showGroup && (
                 <Fragment key={item.group?.name}>
-                  {renderGroupHeader({
+                  {renderCategoryItemGroupHeader({
                     title: item.group?.name,
                   })}
                 </Fragment>
@@ -95,9 +97,11 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
-  renderGroupHeader?: (props: CategoryGroupHeaderProps) => ReactNode;
   renderSplitTransactionButton?: (
     props: SplitTransactionButtonProps,
+  ) => ReactNode;
+  renderCategoryItemGroupHeader?: (
+    props: CategoryItemGroupHeaderProps,
   ) => ReactNode;
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
@@ -107,8 +111,8 @@ export default function CategoryAutocomplete({
   showSplitOption,
   embedded,
   closeOnBlur,
-  renderGroupHeader,
   renderSplitTransactionButton,
+  renderCategoryItemGroupHeader,
   renderCategoryItem,
   ...props
 }: CategoryAutocompleteProps) {
@@ -160,8 +164,8 @@ export default function CategoryAutocomplete({
           embedded={embedded}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
-          renderGroupHeader={renderGroupHeader}
           renderSplitTransactionButton={renderSplitTransactionButton}
+          renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
           renderCategoryItem={renderCategoryItem}
         />
       )}
@@ -170,16 +174,16 @@ export default function CategoryAutocomplete({
   );
 }
 
-type CategoryGroupHeaderProps = {
+type CategoryItemGroupHeaderProps = {
   title: string;
   style?: CSSProperties;
 };
 
-export function CategoryGroupHeader({
+export function CategoryItemGroupHeader({
   title,
   style,
   ...props
-}: CategoryGroupHeaderProps) {
+}: CategoryItemGroupHeaderProps) {
   return (
     <div
       style={{
@@ -195,14 +199,17 @@ export function CategoryGroupHeader({
   );
 }
 
-function defaultRenderGroupHeader(props: CategoryGroupHeaderProps) {
-  return <CategoryGroupHeader {...props} />;
+function defaultRenderCategoryItemGroupHeader(
+  props: CategoryItemGroupHeaderProps,
+) {
+  return <CategoryItemGroupHeader {...props} />;
 }
 
 type SplitTransactionButtonProps = {
   Icon?: ComponentType<SVGProps<SVGElement>>;
   highlighted?: boolean;
   embedded?: boolean;
+  style?: CSSProperties;
 };
 
 // eslint-disable-next-line import/no-unused-modules
@@ -210,6 +217,7 @@ export function SplitTransactionButton({
   Icon,
   highlighted,
   embedded,
+  style,
   ...props
 }: SplitTransactionButtonProps) {
   return (
@@ -253,6 +261,7 @@ export function SplitTransactionButton({
         ':active': {
           backgroundColor: 'rgba(100, 100, 100, .25)',
         },
+        ...style,
       }}
       data-testid="split-transaction-button"
       {...props}

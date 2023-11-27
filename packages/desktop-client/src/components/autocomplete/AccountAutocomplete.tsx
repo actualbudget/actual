@@ -15,7 +15,7 @@ function AccountList({
   getItemProps,
   highlightedIndex,
   embedded,
-  renderGroupHeader = defaultRenderGroupHeader,
+  renderAccountItemGroupHeader = defaultRenderAccountItemGroupHeader,
   renderAccountItem = defaultRenderAccountItem,
 }) {
   let lastItem = null;
@@ -48,7 +48,7 @@ function AccountList({
           return [
             showGroup ? (
               <Fragment key={group}>
-                {renderGroupHeader({ title: group })}
+                {renderAccountItemGroupHeader({ title: group })}
               </Fragment>
             ) : null,
             <Fragment key={item.id}>
@@ -69,7 +69,9 @@ function AccountList({
 type AccountAutoCompleteProps = {
   embedded?: boolean;
   includeClosedAccounts: boolean;
-  renderGroupHeader?: (props: AccountGroupHeaderProps) => ReactNode;
+  renderAccountItemGroupHeader?: (
+    props: AccountItemGroupHeaderProps,
+  ) => ReactNode;
   renderAccountItem?: (props: AccountItemProps) => ReactNode;
   closeOnBlur?: boolean;
 } & ComponentProps<typeof Autocomplete>;
@@ -77,7 +79,7 @@ type AccountAutoCompleteProps = {
 export default function AccountAutocomplete({
   embedded,
   includeClosedAccounts = true,
-  renderGroupHeader,
+  renderAccountItemGroupHeader,
   renderAccountItem,
   closeOnBlur,
   ...props
@@ -111,7 +113,7 @@ export default function AccountAutocomplete({
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
           embedded={embedded}
-          renderGroupHeader={renderGroupHeader}
+          renderAccountItemGroupHeader={renderAccountItemGroupHeader}
           renderAccountItem={renderAccountItem}
         />
       )}
@@ -120,16 +122,16 @@ export default function AccountAutocomplete({
   );
 }
 
-type AccountGroupHeaderProps = {
+type AccountItemGroupHeaderProps = {
   title: string;
   style?: CSSProperties;
 };
 
-export function AccountGroupHeader({
+export function AccountItemGroupHeader({
   title,
   style,
   ...props
-}: AccountGroupHeaderProps) {
+}: AccountItemGroupHeaderProps) {
   return (
     <div
       style={{
@@ -145,8 +147,10 @@ export function AccountGroupHeader({
   );
 }
 
-function defaultRenderGroupHeader(props: AccountGroupHeaderProps): ReactNode {
-  return <AccountGroupHeader {...props} />;
+function defaultRenderAccountItemGroupHeader(
+  props: AccountItemGroupHeaderProps,
+): ReactNode {
+  return <AccountItemGroupHeader {...props} />;
 }
 
 type AccountItemProps = {

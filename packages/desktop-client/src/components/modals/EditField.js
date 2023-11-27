@@ -12,16 +12,16 @@ import { Add } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import AccountAutocomplete, {
-  AccountGroupHeader,
+  AccountItemGroupHeader,
   AccountItem,
 } from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete, {
-  CategoryGroupHeader,
+  CategoryItemGroupHeader,
   CategoryItem,
 } from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete, {
   CreatePayeeButton,
-  PayeeGroupHeader,
+  PayeeItemGroupHeader,
   PayeeItem,
 } from '../autocomplete/PayeeAutocomplete';
 import Input from '../common/Input';
@@ -31,7 +31,7 @@ import { SectionLabel } from '../forms';
 import DateSelect from '../select/DateSelect';
 
 function CreatePayeeIcon(props) {
-  return <Add {...props} width={12} height={12} />;
+  return <Add {...props} width={14} height={14} />;
 }
 
 export default function EditField({ modalProps, name, onSubmit }) {
@@ -108,8 +108,8 @@ export default function EditField({ modalProps, name, onSubmit }) {
               onSelect(value);
             }
           }}
-          renderGroupHeader={props => (
-            <AccountGroupHeader
+          renderAccountItemGroupHeader={props => (
+            <AccountItemGroupHeader
               {...props}
               style={{
                 ...styles.largeText,
@@ -155,25 +155,21 @@ export default function EditField({ modalProps, name, onSubmit }) {
             onSelect(value);
           }}
           isCreatable
-          renderGroupHeader={props => (
-            <PayeeGroupHeader
+          renderCreatePayeeButton={props => (
+            <CreatePayeeButton
+              {...props}
+              Icon={CreatePayeeIcon}
+              style={itemStyle}
+            />
+          )}
+          renderPayeeItemGroupHeader={props => (
+            <PayeeItemGroupHeader
               {...props}
               style={{
                 ...styles.largeText,
                 color: theme.menuItemTextHeader,
                 paddingTop: 10,
                 paddingBottom: 10,
-              }}
-            />
-          )}
-          renderCreatePayeeButton={props => (
-            <CreatePayeeButton
-              {...props}
-              Icon={CreatePayeeIcon}
-              style={{
-                ...itemStyle,
-                paddingTop: 4,
-                paddingBottom: 4,
               }}
             />
           )}
@@ -218,8 +214,8 @@ export default function EditField({ modalProps, name, onSubmit }) {
           onSelect={value => {
             onSelect(value);
           }}
-          renderGroupHeader={props => (
-            <CategoryGroupHeader
+          renderCategoryItemGroupHeader={props => (
+            <CategoryItemGroupHeader
               {...props}
               style={{
                 ...styles.largeText,

@@ -3,7 +3,6 @@ import React, {
   useState,
   useMemo,
   type ComponentProps,
-  type CSSProperties,
   type ReactNode,
   type ComponentType,
   type SVGProps,
@@ -22,8 +21,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import Add from '../../icons/v1/Add';
-import { useResponsive } from '../../ResponsiveProvider';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import Button from '../common/Button';
 import View from '../common/View';
 
@@ -65,11 +63,10 @@ function PayeeList({
   embedded,
   inputValue,
   renderCreatePayeeButton = defaultRenderCreatePayeeButton,
-  renderGroupHeader = defaultRenderGroupHeader,
+  renderPayeeItemGroupHeader = defaultRenderPayeeItemGroupHeader,
   renderPayeeItem = defaultRenderPayeeItem,
   footer,
 }) {
-  const { isNarrowWidth } = useResponsive();
   let isFiltered = items.filtered;
   let createNew = null;
   items = [...items];
@@ -95,27 +92,13 @@ function PayeeList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {createNew && (
-          <View
-            {...(getItemProps ? getItemProps({ item: createNew }) : null)}
-            style={{
-              flexShrink: 0,
-              padding: '6px 9px',
-              backgroundColor:
-                highlightedIndex === 0
-                  ? embedded
-                    ? theme.menuItemBackgroundHover
-                    : theme.menuAutoCompleteBackgroundHover
-                  : 'transparent',
-              borderRadius: embedded ? 4 : 0,
-              ':active': {
-                backgroundColor: 'rgba(100, 100, 100, .25)',
-              },
-            }}
-          >
-            {renderCreatePayeeButton({ payeeName: inputValue })}
-          </View>
-        )}
+        {createNew &&
+          renderCreatePayeeButton({
+            ...(getItemProps ? getItemProps({ item: createNew }) : null),
+            payeeName: inputValue,
+            highlighted: highlightedIndex === 0,
+            embedded,
+          })}
 
         {items.map((item, idx) => {
           let type = item.transfer_acct ? 'account' : 'payee';
@@ -132,7 +115,7 @@ function PayeeList({
             <Fragment key={item.id}>
               {title && (
                 <Fragment key={`title-${idx}`}>
-                  {renderGroupHeader({ title })}
+                  {renderPayeeItemGroupHeader({ title })}
                 </Fragment>
               )}
               <Fragment key={item.id}>
@@ -147,7 +130,7 @@ function PayeeList({
               {showMoreMessage && (
                 <div
                   style={{
-                    fontSize: isNarrowWidth ? 'inherit' : 11,
+                    fontSize: 11,
                     padding: 5,
                     color: theme.pageTextLight,
                     textAlign: 'center',
@@ -177,7 +160,7 @@ type PayeeAutocompleteProps = {
   onSelect?: (value: string) => void;
   onManagePayees: () => void;
   renderCreatePayeeButton?: (props: CreatePayeeButtonProps) => ReactNode;
-  renderGroupHeader?: (props: PayeeGroupHeaderProps) => ReactNode;
+  renderPayeeItemGroupHeader?: (props: PayeeItemGroupHeaderProps) => ReactNode;
   renderPayeeItem?: (props: PayeeItemProps) => ReactNode;
   accounts?: AccountEntity[];
   payees?: PayeeEntity[];
@@ -195,7 +178,7 @@ export default function PayeeAutocomplete({
   onSelect,
   onManagePayees,
   renderCreatePayeeButton = defaultRenderCreatePayeeButton,
-  renderGroupHeader = defaultRenderGroupHeader,
+  renderPayeeItemGroupHeader = defaultRenderPayeeItemGroupHeader,
   renderPayeeItem = defaultRenderPayeeItem,
   accounts,
   payees,
@@ -343,8 +326,8 @@ export default function PayeeAutocomplete({
           highlightedIndex={highlightedIndex}
           inputValue={inputValue}
           embedded={embedded}
-          renderGroupHeader={renderGroupHeader}
           renderCreatePayeeButton={renderCreatePayeeButton}
+          renderPayeeItemGroupHeader={renderPayeeItemGroupHeader}
           renderPayeeItem={renderPayeeItem}
           footer={
             <AutocompleteFooter embedded={embedded}>
@@ -375,29 +358,42 @@ export default function PayeeAutocomplete({
 }
 
 type CreatePayeeButtonProps = {
-  payeeName: string;
   Icon?: ComponentType<SVGProps<SVGElement>>;
+  payeeName: string;
+  highlighted?: boolean;
+  embedded?: boolean;
   style?: CSSProperties;
 };
 
 export function CreatePayeeButton({
-  payeeName,
   Icon,
+  payeeName,
+  highlighted,
+  embedded,
   style,
   ...props
 }: CreatePayeeButtonProps) {
-  const isNarrowWidth = useResponsive();
   return (
     <View
+      data-testid="create-payee-button"
       style={{
         display: 'block',
-        color: theme.noticeTextMenu,
-        borderRadius: 4,
-        fontSize: isNarrowWidth ? 'inherit' : 11,
+        flexShrink: 0,
+        color: embedded ? theme.noticeTextDark : theme.noticeTextMenu,
+        borderRadius: embedded ? 4 : 0,
+        fontSize: 11,
         fontWeight: 500,
+        padding: '6px 9px',
+        backgroundColor: highlighted
+          ? embedded
+            ? theme.menuItemBackgroundHover
+            : theme.menuAutoCompleteBackgroundHover
+          : 'transparent',
+        ':active': {
+          backgroundColor: 'rgba(100, 100, 100, .25)',
+        },
         ...style,
       }}
-      data-testid="create-payee-button"
       {...props}
     >
       {Icon ? (
@@ -420,16 +416,16 @@ function defaultRenderCreatePayeeButton(
   return <CreatePayeeButton {...props} />;
 }
 
-type PayeeGroupHeaderProps = {
+type PayeeItemGroupHeaderProps = {
   title: string;
   style?: CSSProperties;
 };
 
-export function PayeeGroupHeader({
+export function PayeeItemGroupHeader({
   title,
   style,
   ...props
-}: PayeeGroupHeaderProps) {
+}: PayeeItemGroupHeaderProps) {
   return (
     <div
       style={{
@@ -445,8 +441,10 @@ export function PayeeGroupHeader({
   );
 }
 
-function defaultRenderGroupHeader(props: PayeeGroupHeaderProps): ReactNode {
-  return <PayeeGroupHeader {...props} />;
+function defaultRenderPayeeItemGroupHeader(
+  props: PayeeItemGroupHeaderProps,
+): ReactNode {
+  return <PayeeItemGroupHeader {...props} />;
 }
 
 type PayeeItemProps = {
