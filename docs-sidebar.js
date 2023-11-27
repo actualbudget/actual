@@ -57,6 +57,9 @@ const sidebars = {
           items: [
             'contributing/project-details/database',
             'contributing/project-details/architecture',
+            'contributing/project-details/electron',
+            'contributing/project-details/migrations',
+            'contributing/project-details/advice',
           ],
         },
         'contributing/preview-builds',
