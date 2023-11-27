@@ -103,7 +103,9 @@ function PayeeList({
               padding: '6px 9px',
               backgroundColor:
                 highlightedIndex === 0
-                  ? theme.menuAutoCompleteBackgroundHover
+                  ? embedded
+                    ? theme.menuItemBackgroundHover
+                    : theme.menuAutoCompleteBackgroundHover
                   : 'transparent',
               borderRadius: embedded ? 4 : 0,
               ':active': {
@@ -489,7 +491,9 @@ export function PayeeItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? theme.menuAutoCompleteBackgroundHover
+            ? embedded
+              ? theme.menuItemBackgroundHover
+              : theme.menuAutoCompleteBackgroundHover
             : 'transparent',
           borderRadius: embedded ? 4 : 0,
           padding: 4,

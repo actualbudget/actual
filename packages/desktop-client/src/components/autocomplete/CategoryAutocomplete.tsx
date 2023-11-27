@@ -238,7 +238,9 @@ export function SplitTransactionButton({
       role="button"
       style={{
         backgroundColor: highlighted
-          ? theme.menuAutoCompleteBackgroundHover
+          ? embedded
+            ? theme.menuItemBackgroundHover
+            : theme.menuAutoCompleteBackgroundHover
           : 'transparent',
         borderRadius: embedded ? 4 : 0,
         flexShrink: 0,
@@ -295,7 +297,9 @@ export function CategoryItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? theme.menuAutoCompleteBackgroundHover
+            ? embedded
+              ? theme.menuItemBackgroundHover
+              : theme.menuAutoCompleteBackgroundHover
             : 'transparent',
           padding: 4,
           paddingLeft: 20,

@@ -192,7 +192,9 @@ export function AccountItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? theme.menuAutoCompleteBackgroundHover
+            ? embedded
+              ? theme.menuItemBackgroundHover
+              : theme.menuAutoCompleteBackgroundHover
             : 'transparent',
           padding: 4,
           paddingLeft: 20,
