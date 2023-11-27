@@ -16,11 +16,18 @@ export * as utils from './utils';
 function validateNodeVersion() {
   if (process?.versions?.node) {
     const nodeVersion = process?.versions?.node;
-    const majorVersionString = nodeVersion.split('.')[0];
+    const splitVersion = nodeVersion.split('.');
+    const majorVersionString = splitVersion[0];
+    const minorVersionString = splitVersion[1];
+
     const majorVersionNumber = parseInt(majorVersionString);
-    if (majorVersionNumber < 18) {
+    const minorVersionNumber = parseInt(minorVersionString);
+    if (
+      majorVersionNumber < 18 ||
+      (majorVersionNumber === 18 && minorVersionNumber < 12)
+    ) {
       throw new Error(
-        `@actual-app/api requires a node version >= 18. Found that you are using: ${nodeVersion}. Please upgrade to a higher version`,
+        `@actual-app/api requires a node version >= 18.12.0. Found that you are using: ${nodeVersion}. Please upgrade to a higher version`,
       );
     }
   }
