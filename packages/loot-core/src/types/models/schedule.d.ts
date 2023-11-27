@@ -31,3 +31,25 @@ export interface ScheduleEntity {
   _conditions: unknown;
   _actions: unknown;
 }
+
+export type DiscoverScheduleEntity = {
+  id: ScheduleEntity['id'];
+  account: AccountEntity['id'];
+  payee: PayeeEntity['id'];
+  date: ScheduleEntity['_date'];
+  amount: ScheduleEntity['_amount'];
+  _conditions: Array<
+    | { op: 'is'; field: 'account'; value: AccountEntity['id'] }
+    | { op: 'is'; field: 'payee'; value: PayeeEntity['id'] }
+    | {
+        op: 'is' | 'isapprox';
+        field: 'date';
+        value: ScheduleEntity['_date'];
+      }
+    | {
+        op: 'is' | 'isapprox';
+        field: 'amount';
+        value: ScheduleEntity['_amount'];
+      }
+  >;
+};

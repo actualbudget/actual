@@ -129,7 +129,10 @@ function deserializeTransaction(transaction, originalTransaction, dateFormat) {
 }
 
 function lookupName(items, id) {
-  return items.find(item => item.id === id).name;
+  if (!id) {
+    return null;
+  }
+  return items.find(item => item.id === id)?.name;
 }
 
 function Status({ status }) {
@@ -333,16 +336,17 @@ class TransactionEditInner extends PureComponent {
 
     // Child transactions should always default to the signage
     // of the parent transaction
-    let forcedSign = transaction.amount < 0 ? 'negative' : 'positive';
+    const forcedSign = transaction.amount < 0 ? 'negative' : 'positive';
 
-    let account = getAccountsById(accounts)[accountId];
-    let payee = payees && payeeId && getPayeesById(payees)[payeeId];
-    let transferAcct =
+    const account = getAccountsById(accounts)[accountId];
+    const isOffBudget = account && !!account.offbudget;
+    const payee = payees && payeeId && getPayeesById(payees)[payeeId];
+    const transferAcct =
       payee &&
       payee.transfer_acct &&
       getAccountsById(accounts)[payee.transfer_acct];
-
-    let descriptionPretty = getDescriptionPretty(
+    const isBudgetTransfer = transferAcct && !transferAcct.offbudget;
+    const descriptionPretty = getDescriptionPretty(
       transaction,
       payee,
       transferAcct,
@@ -540,11 +544,21 @@ class TransactionEditInner extends PureComponent {
               />
               {!transaction.is_parent ? (
                 <TapField
-                  value={category ? lookupName(categories, category) : null}
-                  disabled={
-                    (account && !!account.offbudget) ||
-                    (transferAcct && !transferAcct.offbudget)
+                  style={{
+                    ...((isBudgetTransfer || isOffBudget) && {
+                      fontStyle: 'italic',
+                      color: theme.pageTextSubdued,
+                      fontWeight: 300,
+                    }),
+                  }}
+                  value={
+                    isOffBudget
+                      ? 'Off Budget'
+                      : isBudgetTransfer
+                      ? 'Transfer'
+                      : lookupName(categories, category)
                   }
+                  disabled={isBudgetTransfer || isOffBudget}
                   // TODO: the button to turn this transaction into a split
                   // transaction was on top of the category button in the native
                   // app, on the right-hand side
@@ -748,7 +762,7 @@ class TransactionEditInner extends PureComponent {
             transaction:
               editingChild && transactions.find(t => t.id === editingChild),
             amountSign: forcedSign,
-            getCategoryName: id => (id ? lookupName(categories, id) : null),
+            getCategoryName: id => lookupName(categories, id),
             navigate,
             onEdit: this.onEdit,
             onStartClose: this.onSaveChild,
@@ -981,7 +995,7 @@ class Transaction extends PureComponent {
       amount = getScheduledAmount(amount);
     }
 
-    let categoryName = category ? lookupName(categories, category) : null;
+    let categoryName = lookupName(categories, category);
 
     let payee = payees && payeeId && getPayeesById(payees)[payeeId];
     let transferAcct =

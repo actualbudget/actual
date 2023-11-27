@@ -1,4 +1,4 @@
-import React, { type MutableRefObject, useRef, useState } from 'react';
+import React, { type Ref, useRef, useState, useEffect } from 'react';
 
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { amountToInteger } from 'loot-core/src/shared/util';
@@ -14,7 +14,7 @@ import useFormat from '../spreadsheet/useFormat';
 
 type AmountInputProps = {
   id?: string;
-  inputRef?: MutableRefObject<HTMLInputElement>;
+  inputRef?: Ref<HTMLInputElement>;
   initialValue: number;
   zeroSign?: '-' | '+';
   onChange?: (value: number) => void;
@@ -39,8 +39,11 @@ export function AmountInput({
   let [negative, setNegative] = useState(
     (initialValue === 0 && zeroSign === '-') || initialValue < 0,
   );
+
   let initialValueAbsolute = format(Math.abs(initialValue), 'financial');
   let [value, setValue] = useState(initialValueAbsolute);
+  useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
+
   let buttonRef = useRef();
 
   function onSwitch() {
@@ -63,6 +66,12 @@ export function AmountInput({
 
   let ref = useRef<HTMLInputElement>();
   let mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
+
+  useEffect(() => {
+    if (focused) {
+      ref.current?.focus();
+    }
+  }, [focused]);
 
   function onInputAmountBlur(e) {
     fireChange(value, negative);

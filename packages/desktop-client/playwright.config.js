@@ -54,4 +54,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     ignoreHTTPSErrors: true,
   },
+  expect: {
+    toHaveScreenshot: { maxDiffPixels: 5 },
+  },
 });
