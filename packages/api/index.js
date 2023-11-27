@@ -13,10 +13,25 @@ export * as methods from './methods';
 export * from './methods';
 export * as utils from './utils';
 
+function validateNodeVersion() {
+  if (process?.versions?.node) {
+    const nodeVersion = process?.versions?.node;
+    const majorVersionString = nodeVersion.split('.')[0];
+    const majorVersionNumber = parseInt(majorVersionString);
+    if (majorVersionNumber < 18) {
+      throw new Error(
+        `@actual-app/api requires a node version >= 18. Found that you are using: ${nodeVersion}. Please upgrade to a higher version`,
+      );
+    }
+  }
+}
+
 export async function init(config = {}) {
   if (actualApp) {
     return;
   }
+
+  validateNodeVersion();
 
   global.fetch = (...args) =>
     import('node-fetch').then(({ default: fetch }) => fetch(...args));
