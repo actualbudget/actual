@@ -25,6 +25,7 @@ import { ReportSidebar } from '../ReportSidebar';
 import { ReportLegend, ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
+import groupedSpreadsheet from '../spreadsheets/grouped-spreadsheet';
 import useReport from '../useReport';
 import { fromDateRepr } from '../util';
 
@@ -104,6 +105,20 @@ export default function CustomReport() {
   let payees = useCachedPayees();
   let accounts = useCachedAccounts();
 
+  const getGroupData = useMemo(() => {
+    setDataCheck(false);
+    return groupedSpreadsheet(
+      start,
+      end,
+      categories,
+      selectedCategories,
+      filters,
+      conditionsOp,
+      hidden,
+      uncat,
+    );
+  }, []);
+
   const getGraphData = useMemo(() => {
     setDataCheck(false);
     return defaultSpreadsheet(
@@ -135,7 +150,10 @@ export default function CustomReport() {
     hidden,
     uncat,
   ]);
-  const data = useReport('default', getGraphData);
+  const graphData = useReport('default', getGraphData);
+  const groupedData = useReport('grouped', getGroupData);
+
+  const data = { ...graphData, groupedData };
 
   let [scrollWidth, setScrollWidth] = useState(0);
 

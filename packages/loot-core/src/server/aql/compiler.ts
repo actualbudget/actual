@@ -587,7 +587,7 @@ const compileFunction = saveStack('function', (state, func) => {
       );
     }
 
-    // cat functions
+    // id functions
     case '$id': {
       validateArgLength(args, 1);
       return typed(val(state, args[0]), args[0].type);

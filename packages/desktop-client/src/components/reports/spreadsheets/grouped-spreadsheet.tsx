@@ -1,5 +1,3 @@
-import * as d from 'date-fns';
-
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -7,20 +5,15 @@ import { integerToAmount } from 'loot-core/src/shared/util';
 
 import recalculate from './recalculate';
 
-export default function createSpreadsheet(
+function createSpreadsheet(
   start,
   end,
-  groupBy,
-  balanceTypeOp,
   categories,
   selectedCategories,
-  payees,
-  accounts,
   conditions = [],
   conditionsOp,
   hidden,
   uncat,
-  setDataCheck,
 ) {
   let uncatCat = {
     name: 'Uncategorized',
@@ -66,38 +59,8 @@ export default function createSpreadsheet(
       ),
   );
 
-  let groupByList;
-  let groupByLabel;
-  switch (groupBy) {
-    case 'Category':
-      groupByList = catList;
-      groupByLabel = 'category';
-      break;
-    case 'Group':
-      groupByList = catGroup;
-      groupByLabel = 'category_group';
-      break;
-    case 'Payee':
-      groupByList = payees;
-      groupByLabel = 'payee';
-      break;
-    case 'Account':
-      groupByList = accounts;
-      groupByLabel = 'account';
-      break;
-    case 'Month':
-      groupByList = catList;
-      groupByLabel = 'category';
-      break;
-    case 'Year':
-      groupByList = catList;
-      groupByLabel = 'category';
-      break;
-    default:
-  }
-
   return async (spreadsheet, setData) => {
-    if (groupByList.length === 0) {
+    if (catList.length === 0) {
       return null;
     }
 
@@ -168,8 +131,7 @@ export default function createSpreadsheet(
         ])
         .select([
           { date: { $month: '$date' } },
-          { category: { $id: '$category.id' } },
-          { category_group: { $id: '$category.group.id' } },
+          { category: { $id: '$category' } },
           { account: { $id: '$account' } },
           { payee: { $id: '$payee' } },
           { amount: { $sum: '$amount' } },
@@ -183,74 +145,68 @@ export default function createSpreadsheet(
 
     const months = monthUtils.rangeInclusive(start, end);
 
-    let totalAssets = 0;
-    let totalDebts = 0;
+    const groupedData = catGroup
+      .filter(f => (hidden || f.hidden === 0) && f)
+      .map(
+        group => {
+          let totalAssets = 0;
+          let totalDebts = 0;
 
-    const monthData = months.reduce((arr, month) => {
-      let perMonthAssets = 0;
-      let perMonthDebts = 0;
-      let stacked = {};
+          const monthData = months.reduce((arr, month) => {
+            let groupedAssets = 0;
+            let groupedDebts = 0;
 
-      groupByList.map(item => {
-        let stackAmounts = 0;
+            group.categories.map(item => {
+              let monthAssets = assets
+                .filter(
+                  asset => asset.category === item.id && asset.date === month,
+                )
+                .reduce((a, v) => (a = a + v.amount), 0);
+              groupedAssets += monthAssets;
 
-        let monthAssets = assets
-          .filter(
-            asset => asset.date === month && asset[groupByLabel] === item.id,
-          )
-          .reduce((a, v) => (a = a + v.amount), 0);
-        perMonthAssets += monthAssets;
+              let monthDebts = debts
+                .filter(
+                  debts => debts.category === item.id && debts.date === month,
+                )
+                .reduce((a, v) => (a = a + v.amount), 0);
+              groupedDebts += monthDebts;
 
-        let monthDebts = debts
-          .filter(
-            debts => debts.date === month && debts[groupByLabel] === item.id,
-          )
-          .reduce((a, v) => (a = a + v.amount), 0);
-        perMonthDebts += monthDebts;
+              return null;
+            });
 
-        if (balanceTypeOp === 'totalAssets') {
-          stackAmounts += monthAssets;
-        }
-        if (balanceTypeOp === 'totalDebts') {
-          stackAmounts += monthDebts;
-        }
-        if (stackAmounts !== 0) {
-          stacked[item.name] = integerToAmount(Math.abs(stackAmounts));
-        }
+            totalAssets += groupedAssets;
+            totalDebts += groupedDebts;
 
-        return null;
-      });
-      totalAssets += perMonthAssets;
-      totalDebts += perMonthDebts;
+            arr.push({
+              date: month,
+              totalAssets: integerToAmount(groupedAssets),
+              totalDebts: integerToAmount(groupedDebts),
+              totalTotals: integerToAmount(groupedDebts + groupedAssets),
+            });
 
-      arr.push({
-        // eslint-disable-next-line rulesdir/typography
-        date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
-        ...stacked,
-        totalDebts: integerToAmount(perMonthDebts),
-        totalAssets: integerToAmount(perMonthAssets),
-        totalTotals: integerToAmount(perMonthDebts + perMonthAssets),
-      });
+            return arr;
+          }, []);
 
-      return arr;
-    }, []);
+          const stackedCategories = group.categories.map(item => {
+            const calc = recalculate(item, months, assets, debts, 'category');
+            return { ...calc };
+          });
 
-    let calcData;
+          return {
+            id: group.id,
+            name: group.name,
+            totalAssets: integerToAmount(totalAssets),
+            totalDebts: integerToAmount(totalDebts),
+            totalTotals: integerToAmount(totalAssets + totalDebts),
+            monthData,
+            categories: stackedCategories,
+          };
+        },
+        [start, end],
+      );
 
-    calcData = groupByList.map(item => {
-      const calc = recalculate(item, months, assets, debts, groupByLabel);
-      return { ...calc };
-    });
-
-    setData({
-      data: calcData,
-      monthData,
-      start,
-      end,
-      totalDebts: integerToAmount(totalDebts),
-      totalAssets: integerToAmount(totalAssets),
-      totalTotals: integerToAmount(totalAssets + totalDebts),
-    });
-    setDataCheck?.(true);
+    setData(groupedData);
   };
 }
+
+export default createSpreadsheet;
