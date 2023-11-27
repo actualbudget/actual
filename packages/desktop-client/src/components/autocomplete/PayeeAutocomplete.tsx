@@ -379,7 +379,7 @@ export function CreatePayeeButton({
       style={{
         display: 'block',
         flexShrink: 0,
-        color: embedded ? theme.noticeTextDark : theme.noticeTextMenu,
+        color: embedded ? theme.menuItemText : theme.noticeTextMenu,
         borderRadius: embedded ? 4 : 0,
         fontSize: 11,
         fontWeight: 500,
