@@ -281,10 +281,10 @@ export default function createSpreadsheet(
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthDebts += monthDebts;
 
-        if (typeItem === 'totalAssets') {
+        if (balanceTypeOp === 'totalAssets') {
           stackAmounts += monthAssets;
         }
-        if (typeItem === 'totalDebts') {
+        if (balanceTypeOp === 'totalDebts') {
           stackAmounts += monthDebts;
         }
         if (stackAmounts !== 0) {

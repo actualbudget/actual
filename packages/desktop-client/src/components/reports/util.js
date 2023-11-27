@@ -21,14 +21,6 @@ export function index(data, field, mapper) {
   return result;
 }
 
-export function indexStack(data, fieldName, field) {
-  const result = {};
-  data.forEach(item => {
-    result[item[fieldName]] = item[field];
-  });
-  return result;
-}
-
 export function indexCashFlow(data, date, isTransfer) {
   const results = {};
   data.forEach(item => {
