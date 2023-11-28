@@ -177,5 +177,5 @@ export async function goalsSchedule(
     increment = Math.round(increment);
     to_budget += increment;
   }
-  return { to_budget, errors, remainder };
+  return { to_budget, errors, remainder, scheduleFlag };
 }
