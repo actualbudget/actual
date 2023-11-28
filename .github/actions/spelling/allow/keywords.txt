@@ -32,6 +32,8 @@ jwl
 kcab
 keyout
 Kroger
+kubectl
+kubernetes
 ldaplogin
 libofx
 linting
