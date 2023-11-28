@@ -637,7 +637,7 @@ export class RuleIndexer {
   }
 }
 
-const OP_SCORES = {
+const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   is: 10,
   isNot: 10,
   oneOf: 9,
