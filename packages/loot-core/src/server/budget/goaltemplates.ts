@@ -602,7 +602,7 @@ async function applyCategoryTemplate(
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
-        remainder = goalsReturn.remainder;
+        //remainder = goalsReturn.remainder;
         scheduleFlag = goalsReturn.scheduleFlag;
         break;
       }
