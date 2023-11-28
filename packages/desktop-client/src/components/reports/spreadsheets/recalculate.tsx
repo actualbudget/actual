@@ -2,17 +2,19 @@ import * as d from 'date-fns';
 
 import { integerToAmount } from 'loot-core/src/shared/util';
 
+import filterHiddenItems from './filterHiddenItems';
+
 function recalculate(item, months, assets, debts, groupByLabel) {
   let totalAssets = 0;
   let totalDebts = 0;
   const monthData = months.reduce((arr, month) => {
-    let monthAssets = assets
-      .filter(asset => asset[groupByLabel] === item.id && asset.date === month)
+    let monthAssets = filterHiddenItems(item, assets)
+      .filter(asset => asset.date === month && asset[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
     totalAssets += monthAssets;
 
-    let monthDebts = debts
-      .filter(debts => debts[groupByLabel] === item.id && debts.date === month)
+    let monthDebts = filterHiddenItems(item, debts)
+      .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
     totalDebts += monthDebts;
 

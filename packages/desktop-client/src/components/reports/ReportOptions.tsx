@@ -44,3 +44,87 @@ const intervalOptions = [
 { value: 5, description: 'Yearly', name: 5,
 ];
 */
+
+let uncatCat = {
+  name: 'Uncategorized',
+  id: null,
+  uncat_id: '1',
+  hidden: 0,
+  offBudget: false,
+  transfer: false,
+  category: false,
+};
+let uncatTransfer = {
+  name: 'Transfers',
+  id: null,
+  uncat_id: '2',
+  hidden: 0,
+  transfer: true,
+  offBudget: false,
+  category: false,
+};
+let uncatOff = {
+  name: 'OffBudget',
+  id: null,
+  uncat_id: '3',
+  hidden: 0,
+  offBudget: true,
+  transfer: false,
+  category: true,
+};
+
+let uncatGroup = {
+  name: 'Uncategorized',
+  id: null,
+  hidden: 0,
+  categories: [uncatCat, uncatTransfer, uncatOff],
+};
+
+export const categoryLists = (uncat, categories) => {
+  let catList = uncat
+    ? [...categories.list, uncatCat, uncatTransfer, uncatOff]
+    : categories.list;
+  let catGroup = uncat
+    ? [...categories.grouped, uncatGroup]
+    : categories.grouped;
+  return [catList, catGroup];
+};
+
+export const groupBySelections = (
+  groupBy,
+  catList,
+  catGroup,
+  payees,
+  accounts,
+) => {
+  let groupByList;
+  let groupByLabel;
+  switch (groupBy) {
+    case 'Category':
+      groupByList = catList;
+      groupByLabel = 'category';
+      break;
+    case 'Group':
+      groupByList = catGroup;
+      groupByLabel = 'categoryGroup';
+      break;
+    case 'Payee':
+      groupByList = payees;
+      groupByLabel = 'payee';
+      break;
+    case 'Account':
+      groupByList = accounts;
+      groupByLabel = 'account';
+      break;
+    case 'Month':
+      groupByList = catList;
+      groupByLabel = 'category';
+      break;
+    case 'Year':
+      groupByList = catList;
+      groupByLabel = 'category';
+      break;
+    default:
+  }
+  return [groupByList, groupByLabel];
+};

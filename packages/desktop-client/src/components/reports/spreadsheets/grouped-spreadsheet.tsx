@@ -1,8 +1,12 @@
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
 
+import { categoryLists } from '../ReportOptions';
+
+import filterHiddenItems from './filterHiddenItems';
+import makeQuery from './makeQuery';
 import recalculate from './recalculate';
 
 function createSpreadsheet(
@@ -15,40 +19,7 @@ function createSpreadsheet(
   hidden,
   uncat,
 ) {
-  let uncatCat = {
-    name: 'Uncategorized',
-    id: null,
-    uncat_id: '1',
-    hidden: 0,
-    offBudget: false,
-  };
-  let uncatTransfer = {
-    name: 'Transfers',
-    id: null,
-    uncat_id: '2',
-    hidden: 0,
-    transfer: false,
-  };
-  let uncatOff = {
-    name: 'OffBudget',
-    id: null,
-    uncat_id: '3',
-    hidden: 0,
-    offBudget: true,
-  };
-
-  let uncatGroup = {
-    name: 'Uncategorized',
-    id: null,
-    hidden: 0,
-    categories: [uncatCat, uncatTransfer, uncatOff],
-  };
-  let catList = uncat
-    ? [...categories.list, uncatCat, uncatTransfer, uncatOff]
-    : categories.list;
-  let catGroup = uncat
-    ? [...categories.grouped, uncatGroup]
-    : categories.grouped;
+  let [catList, catGroup] = categoryLists(uncat, categories);
 
   let categoryFilter = (catList || []).filter(
     category =>
@@ -69,78 +40,31 @@ function createSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    function makeQuery2(name) {
-      let query = q('transactions')
-        .filter(
-          //Show Offbudget and hidden categories
-          !hidden && {
-            $and: [
-              {
-                'account.offbudget': false,
-                $or: [
-                  {
-                    'category.hidden': false,
-                    category: null,
-                  },
-                ],
-              },
-            ],
-            $or: [
-              {
-                'payee.transfer_acct.offbudget': true,
-                'payee.transfer_acct': null,
-              },
-            ],
-          },
-        )
-        //Apply Category_Selector
-        .filter(
-          selectedCategories && {
-            $or: [
-              {
-                category: null,
-                $or: categoryFilter.map(category => ({
-                  category: category.id,
-                })),
-              },
-            ],
-          },
-        )
-        //Apply filters and split by "Group By"
-        .filter({
-          [conditionsOpKey]: [...filters],
-        })
-        //Apply month range filters
-        .filter({
-          $and: [
-            { date: { $transform: '$month', $gte: start } },
-            { date: { $transform: '$month', $lte: end } },
-          ],
-        })
-        //Show assets or debts
-        .filter(
-          name === 'assets' ? { amount: { $gt: 0 } } : { amount: { $lt: 0 } },
-        );
-
-      return query
-        .groupBy([
-          { $month: '$date' },
-          { $id: '$account' },
-          { $id: '$payee' },
-          { $id: '$category' },
-        ])
-        .select([
-          { date: { $month: '$date' } },
-          { category: { $id: '$category' } },
-          { account: { $id: '$account' } },
-          { payee: { $id: '$payee' } },
-          { amount: { $sum: '$amount' } },
-        ]);
-    }
-
     const [assets, debts] = await Promise.all([
-      runQuery(makeQuery2('assets')).then(({ data }) => data),
-      runQuery(makeQuery2('debts')).then(({ data }) => data),
+      runQuery(
+        makeQuery(
+          'assets',
+          start,
+          end,
+          hidden,
+          selectedCategories,
+          categoryFilter,
+          conditionsOpKey,
+          filters,
+        ),
+      ).then(({ data }) => data),
+      runQuery(
+        makeQuery(
+          'debts',
+          start,
+          end,
+          hidden,
+          selectedCategories,
+          categoryFilter,
+          conditionsOpKey,
+          filters,
+        ),
+      ).then(({ data }) => data),
     ]);
 
     const months = monthUtils.rangeInclusive(start, end);
@@ -157,16 +81,16 @@ function createSpreadsheet(
             let groupedDebts = 0;
 
             group.categories.map(item => {
-              let monthAssets = assets
+              let monthAssets = filterHiddenItems(item, assets)
                 .filter(
-                  asset => asset.category === item.id && asset.date === month,
+                  asset => asset.date === month && asset.category === item.id,
                 )
                 .reduce((a, v) => (a = a + v.amount), 0);
               groupedAssets += monthAssets;
 
-              let monthDebts = debts
+              let monthDebts = filterHiddenItems(item, debts)
                 .filter(
-                  debts => debts.category === item.id && debts.date === month,
+                  debts => debts.date === month && debts.category === item.id,
                 )
                 .reduce((a, v) => (a = a + v.amount), 0);
               groupedDebts += monthDebts;

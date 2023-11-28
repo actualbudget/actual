@@ -106,7 +106,6 @@ export default function CustomReport() {
   let accounts = useCachedAccounts();
 
   const getGroupData = useMemo(() => {
-    setDataCheck(false);
     return groupedSpreadsheet(
       start,
       end,
@@ -117,7 +116,16 @@ export default function CustomReport() {
       hidden,
       uncat,
     );
-  }, []);
+  }, [
+    start,
+    end,
+    categories,
+    selectedCategories,
+    filters,
+    conditionsOp,
+    hidden,
+    uncat,
+  ]);
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
