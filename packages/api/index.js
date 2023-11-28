@@ -1,5 +1,6 @@
 /* eslint-disable import/no-unused-modules */
 
+// eslint-disable-next-line import/extensions
 import * as bundle from './app/bundle.api.js';
 import * as injected from './injected';
 import { validateNodeVersion } from './validateNodeVersion';
