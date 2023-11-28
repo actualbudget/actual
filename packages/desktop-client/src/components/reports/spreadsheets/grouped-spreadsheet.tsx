@@ -16,10 +16,10 @@ function createSpreadsheet(
   selectedCategories,
   conditions = [],
   conditionsOp,
-  hidden,
-  uncat,
+  showOffBudgetHidden,
+  showUncategorized,
 ) {
-  let [catList, catGroup] = categoryLists(uncat, categories);
+  let [catList, catGroup] = categoryLists(showUncategorized, categories);
 
   let categoryFilter = (catList || []).filter(
     category =>
@@ -46,7 +46,7 @@ function createSpreadsheet(
           'assets',
           start,
           end,
-          hidden,
+          showOffBudgetHidden,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -58,7 +58,7 @@ function createSpreadsheet(
           'debts',
           start,
           end,
-          hidden,
+          showOffBudgetHidden,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -70,7 +70,7 @@ function createSpreadsheet(
     const months = monthUtils.rangeInclusive(start, end);
 
     const groupedData = catGroup
-      .filter(f => (hidden || f.hidden === 0) && f)
+      .filter(f => (showOffBudgetHidden || f.hidden === 0) && f)
       .map(
         group => {
           let totalAssets = 0;

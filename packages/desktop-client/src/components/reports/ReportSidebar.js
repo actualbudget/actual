@@ -64,12 +64,12 @@ export function ReportSidebar({
   setBalanceType,
   mode,
   setMode,
-  empty,
-  setEmpty,
-  hidden,
-  setHidden,
-  uncat,
-  setUncat,
+  showEmpty,
+  setShowEmpty,
+  showOffBudgetHidden,
+  setShowOffBudgetHidden,
+  showUncategorized,
+  setShowUncategorized,
   categories,
   selectedCategories,
   setSelectedCategories,
@@ -274,9 +274,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-empty-columns"
-            checked={empty}
-            value={empty}
-            onChange={() => setEmpty(!empty)}
+            checked={showEmpty}
+            value={showEmpty}
+            onChange={() => setShowEmpty(!showEmpty)}
           />
           <label
             htmlFor="show-empty-columns"
@@ -297,9 +297,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-hidden-columns"
-            checked={hidden}
-            value={hidden}
-            onChange={() => setHidden(!hidden)}
+            checked={showOffBudgetHidden}
+            value={showOffBudgetHidden}
+            onChange={() => setShowOffBudgetHidden(!showOffBudgetHidden)}
           />
           <label
             htmlFor="show-hidden-columns"
@@ -320,9 +320,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-uncategorized"
-            checked={uncat}
-            value={uncat}
-            onChange={() => setUncat(!uncat)}
+            checked={showUncategorized}
+            value={showUncategorized}
+            onChange={() => setShowUncategorized(!showUncategorized)}
           />
           <label
             htmlFor="show-uncategorized"

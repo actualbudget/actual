@@ -4,7 +4,7 @@ function makeQuery(
   name,
   start,
   end,
-  hidden,
+  showOffBudgetHidden,
   selectedCategories,
   categoryFilter,
   conditionsOpKey,
@@ -13,7 +13,7 @@ function makeQuery(
   let query = q('transactions')
     .filter(
       //Show Offbudget and hidden categories
-      !hidden && {
+      !showOffBudgetHidden && {
         $and: [
           {
             'account.offbudget': false,
