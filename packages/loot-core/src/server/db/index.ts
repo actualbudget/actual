@@ -306,7 +306,7 @@ export async function insertCategoryGroup(group) {
 
   group = {
     ...categoryGroupModel.validate(group),
-    sort_order: sort_order,
+    sort_order,
   };
   return insertWithUUID('category_groups', group);
 }
@@ -346,6 +346,17 @@ export async function insertCategory(
 
   let id_;
   await batchMessages(async () => {
+    // Dont allow duplicated names in groups
+    const existingCatInGroup = await first(
+      `SELECT id FROM categories WHERE cat_group = ? and UPPER(name) = ? LIMIT 1`,
+      [category.cat_group, category.name.toUpperCase()],
+    );
+    if (existingCatInGroup) {
+      throw new Error(
+        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’`,
+      );
+    }
+
     if (atEnd) {
       const lastCat = await first(`
         SELECT sort_order FROM categories WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
@@ -371,7 +382,7 @@ export async function insertCategory(
 
     category = {
       ...categoryModel.validate(category),
-      sort_order: sort_order,
+      sort_order,
     };
 
     const id = await insertWithUUID('categories', category);

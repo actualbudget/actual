@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import usePrivacyMode from 'loot-core/src/client/privacy';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
@@ -94,14 +95,14 @@ type AreaGraphProps = {
   data;
   balanceTypeOp;
   compact: boolean;
-  domain?: {
-    totalTotals?: [number, number];
-  };
 };
 
 function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
+  let privacyMode = usePrivacyMode();
+
   const tickFormatter = tick => {
-    return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    if (!privacyMode) return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
+    return '...';
   };
 
   const gradientOffset = () => {
@@ -141,12 +142,20 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 )}
-                {compact ? null : <XAxis dataKey="date" />}
+                {compact ? null : (
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
+                  />
+                )}
                 {compact ? null : (
                   <YAxis
                     dataKey={...balanceTypeOp}
                     domain={['auto', 'auto']}
                     tickFormatter={tickFormatter}
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
                   />
                 )}
                 <Tooltip

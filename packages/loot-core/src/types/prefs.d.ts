@@ -5,7 +5,6 @@ export type FeatureFlag =
   | 'sankeyReport'
   | 'reportBudget'
   | 'goalTemplatesEnabled'
-  | 'themes'
   | 'customReports'
   | 'experimentalOfxParser';
 

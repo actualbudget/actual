@@ -78,7 +78,7 @@ async function setCategoryTargets({ month, idealTemplate }) {
       setGoal({
         category: element.category,
         goal: element.amount,
-        month: month,
+        month,
       });
     });
   });
@@ -96,7 +96,7 @@ async function resetCategoryTargets({ month, category }) {
       setGoal({
         category: element.id,
         goal: null,
-        month: month,
+        month,
       });
     });
   });
@@ -603,6 +603,7 @@ async function applyCategoryTemplate(
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         remainder = goalsReturn.remainder;
+        scheduleFlag = goalsReturn.scheduleFlag;
         break;
       }
       case 'remainder': {

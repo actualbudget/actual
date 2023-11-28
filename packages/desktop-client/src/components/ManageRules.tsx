@@ -154,7 +154,9 @@ function ManageRulesContent({
       await dispatch(initiallyLoadPayees());
     }
 
-    undo.setUndoState('openModal', 'manage-rules');
+    if (payeeId) {
+      undo.setUndoState('openModal', 'manage-rules');
+    }
 
     loadData();
 

@@ -9,13 +9,14 @@ import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import CheckCircleHollow from '../../icons/v2/CheckCircleHollow';
 import EditSkull1 from '../../icons/v2/EditSkull1';
 import FavoriteStar from '../../icons/v2/FavoriteStar';
+import Lock from '../../icons/v2/LockClosed';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
 import { theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
 // Consists of Schedule Statuses + Transaction statuses
-type StatusTypes = ScheduleStatusType | 'cleared' | 'pending';
+type StatusTypes = ScheduleStatusType | 'cleared' | 'pending' | 'reconciled';
 export function getStatusProps(status: StatusTypes) {
   switch (status) {
     case 'missed':
@@ -65,6 +66,12 @@ export function getStatusProps(status: StatusTypes) {
         color: theme.noticeTextLight,
         backgroundColor: theme.tableRowHeaderBackground,
         Icon: CheckCircle1,
+      };
+    case 'reconciled':
+      return {
+        color: theme.noticeTextLight,
+        backgroundColor: theme.tableRowHeaderBackground,
+        Icon: Lock,
       };
     default:
       return {

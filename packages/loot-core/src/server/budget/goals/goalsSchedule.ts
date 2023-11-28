@@ -54,11 +54,11 @@ export async function goalsSchedule(
       );
       t.push({
         template: template[ll],
-        target: target,
-        next_date_string: next_date_string,
-        target_interval: target_interval,
-        target_frequency: target_frequency,
-        num_months: num_months,
+        target,
+        next_date_string,
+        target_interval,
+        target_frequency,
+        num_months,
         completed: complete,
       });
       if (!complete) {
@@ -74,11 +74,23 @@ export async function goalsSchedule(
           );
           while (next_date < next_month) {
             monthlyTarget += -target;
+            let current_date = next_date;
             next_date = monthUtils.addDays(next_date, 1);
             next_date = getNextDate(
               dateConditions,
               monthUtils._parse(next_date),
             );
+            let diffDays = monthUtils.differenceInCalendarDays(
+              next_date,
+              current_date,
+            );
+            if (!diffDays) {
+              next_date = monthUtils.addDays(next_date, 3);
+              next_date = getNextDate(
+                dateConditions,
+                monthUtils._parse(next_date),
+              );
+            }
           }
           t[ll].target = -monthlyTarget;
           totalScheduledGoal += target;
@@ -165,5 +177,5 @@ export async function goalsSchedule(
     increment = Math.round(increment);
     to_budget += increment;
   }
-  return { to_budget, errors, remainder };
+  return { to_budget, errors, remainder, scheduleFlag };
 }

@@ -7,10 +7,10 @@ import type { Dispatch, GetState } from './types';
 
 export function loadPrefs() {
   return async (dispatch: Dispatch, getState: GetState) => {
-    let prefs = await send('load-prefs');
+    const prefs = await send('load-prefs');
 
     // Remove any modal state if switching between budgets
-    let currentPrefs = getState().prefs.local;
+    const currentPrefs = getState().prefs.local;
     if (prefs && prefs.id && !currentPrefs) {
       dispatch(closeModal());
     }
@@ -37,7 +37,7 @@ export function savePrefs(prefs: Partial<prefs.LocalPrefs>) {
 
 export function loadGlobalPrefs() {
   return async (dispatch: Dispatch, getState: GetState) => {
-    let globalPrefs = await send('load-global-prefs');
+    const globalPrefs = await send('load-global-prefs');
     dispatch({
       type: constants.SET_PREFS,
       prefs: getState().prefs.local,

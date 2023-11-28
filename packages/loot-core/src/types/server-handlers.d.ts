@@ -6,7 +6,13 @@ import { RemoteFile } from '../server/cloud-storage';
 import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
 import { Message } from '../server/sync';
 
-import { AccountEntity, CategoryEntity, CategoryGroupEntity } from './models';
+import {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  GoCardlessToken,
+  GoCardlessInstitution,
+} from './models';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -196,21 +202,33 @@ export interface ServerHandlers {
   'secret-check': (arg: string) => Promise<string | { error?: string }>;
 
   'gocardless-poll-web-token': (arg: {
-    upgradingAccountId;
-    requisitionId;
-  }) => Promise<{ error } | { data }>;
+    upgradingAccountId?: string;
+    requisitionId: string;
+  }) => Promise<
+    { error: 'unknown' } | { error: 'timeout' } | { data: GoCardlessToken }
+  >;
 
   'gocardless-status': () => Promise<{ configured: boolean }>;
 
-  'gocardless-get-banks': (country) => Promise<unknown>;
+  'gocardless-get-banks': (country: string) => Promise<{
+    data: GoCardlessInstitution[];
+    error?: { reason: string };
+  }>;
 
   'gocardless-poll-web-token-stop': () => Promise<'ok'>;
 
   'gocardless-create-web-token': (arg: {
-    upgradingAccountId;
-    institutionId;
-    accessValidForDays;
-  }) => Promise<unknown>;
+    upgradingAccountId?: string;
+    institutionId: string;
+    accessValidForDays: number;
+  }) => Promise<
+    | {
+        requisitionId: string;
+        link: string;
+      }
+    | { error: 'unauthorized' }
+    | { error: 'failed' }
+  >;
 
   'gocardless-accounts-sync': (arg: { id }) => Promise<{
     errors;

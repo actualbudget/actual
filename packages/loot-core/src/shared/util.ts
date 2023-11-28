@@ -10,7 +10,7 @@ export function getChangedValues(obj1, obj2) {
   let hasChanged = false;
 
   for (let i = 0; i < keys.length; i++) {
-    let key = keys[i];
+    const key = keys[i];
 
     if (obj1[key] !== obj2[key]) {
       diff[key] = obj2[key];
@@ -24,7 +24,7 @@ export function getChangedValues(obj1, obj2) {
 export function hasFieldsChanged(obj1, obj2, fields) {
   let changed = false;
   for (let i = 0; i < fields.length; i++) {
-    let field = fields[i];
+    const field = fields[i];
     if (obj1[field] !== obj2[field]) {
       changed = true;
       break;
@@ -65,12 +65,12 @@ export function applyChanges(changes, items) {
 }
 
 export function partitionByField(data, field) {
-  let res = new Map();
+  const res = new Map();
   for (let i = 0; i < data.length; i++) {
-    let item = data[i];
-    let key = item[field];
+    const item = data[i];
+    const key = item[field];
 
-    let items = res.get(key) || [];
+    const items = res.get(key) || [];
     items.push(item);
 
     res.set(key, items);
@@ -79,11 +79,11 @@ export function partitionByField(data, field) {
 }
 
 export function groupBy<T, K extends keyof T>(data: T[], field: K) {
-  let res = new Map<T[K], T[]>();
+  const res = new Map<T[K], T[]>();
   for (let i = 0; i < data.length; i++) {
-    let item = data[i];
-    let key = item[field];
-    let existing = res.get(key) || [];
+    const item = data[i];
+    const key = item[field];
+    const existing = res.get(key) || [];
     res.set(key, existing.concat([item]));
   }
   return res;
@@ -94,26 +94,26 @@ export function groupBy<T, K extends keyof T>(data: T[], field: K) {
 // different API and we need to go through and update everywhere that
 // uses it.
 function _groupById(data) {
-  let res = new Map();
+  const res = new Map();
   for (let i = 0; i < data.length; i++) {
-    let item = data[i];
+    const item = data[i];
     res.set(item.id, item);
   }
   return res;
 }
 
 export function diffItems(items, newItems) {
-  let grouped = _groupById(items);
-  let newGrouped = _groupById(newItems);
-  let added = [];
-  let updated = [];
+  const grouped = _groupById(items);
+  const newGrouped = _groupById(newItems);
+  const added = [];
+  const updated = [];
 
-  let deleted = items
+  const deleted = items
     .filter(item => !newGrouped.has(item.id))
     .map(item => ({ id: item.id }));
 
   newItems.forEach(newItem => {
-    let item = grouped.get(newItem.id);
+    const item = grouped.get(newItem.id);
     if (!item) {
       added.push(newItem);
     } else {
@@ -128,9 +128,9 @@ export function diffItems(items, newItems) {
 }
 
 export function groupById(data) {
-  let res = {};
+  const res = {};
   for (let i = 0; i < data.length; i++) {
-    let item = data[i];
+    const item = data[i];
     res[item.id] = item;
   }
   return res;
@@ -169,8 +169,8 @@ export function getIn(map, keys) {
 }
 
 export function fastSetMerge(set1, set2) {
-  let finalSet = new Set(set1);
-  let iter = set2.values();
+  const finalSet = new Set(set1);
+  const iter = set2.values();
   let value = iter.next();
   while (!value.done) {
     finalSet.add(value.value);
@@ -219,7 +219,7 @@ export function getNumberFormat({ format, hideFraction } = numberFormatConfig) {
 
   switch (format) {
     case 'space-comma':
-      locale = 'en-ZA';
+      locale = 'en-SE';
       regex = /[^-0-9,]/g;
       separator = ',';
       break;
@@ -295,7 +295,7 @@ export function amountToCurrency(n) {
 }
 
 export function currencyToAmount(str) {
-  let amount = parseFloat(
+  const amount = parseFloat(
     str
       .replace(getNumberFormat().regex, '')
       .replace(getNumberFormat().separator, '.'),
@@ -304,12 +304,12 @@ export function currencyToAmount(str) {
 }
 
 export function currencyToInteger(str) {
-  let amount = currencyToAmount(str);
+  const amount = currencyToAmount(str);
   return amount == null ? null : amountToInteger(amount);
 }
 
 export function stringToInteger(str) {
-  let amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
+  const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
   if (!isNaN(amount)) {
     return amount;
   }
@@ -341,13 +341,13 @@ export function looselyParseAmount(amount) {
     amount = amount.replace('(', '-').replace(')', '');
   }
 
-  let m = amount.match(/[.,][^.,]*$/);
+  const m = amount.match(/[.,][^.,]*$/);
   if (!m || m.index === 0) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
 
-  let left = extractNumbers(amount.slice(0, m.index));
-  let right = extractNumbers(amount.slice(m.index + 1));
+  const left = extractNumbers(amount.slice(0, m.index));
+  const right = extractNumbers(amount.slice(m.index + 1));
 
   return safeNumber(parseFloat(left + '.' + right));
 }

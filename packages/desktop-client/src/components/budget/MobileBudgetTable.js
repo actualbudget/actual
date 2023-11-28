@@ -6,6 +6,7 @@ import memoizeOne from 'memoize-one';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import useFeatureFlag from '../../hooks/useFeatureFlag';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
@@ -35,7 +36,8 @@ import { AmountInput } from '../util/AmountInput';
 // import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
 import BalanceWithCarryover from './BalanceWithCarryover';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
-import BalanceTooltip from './rollover/BalanceTooltip';
+import ReportBudgetBalanceTooltip from './report/BalanceTooltip';
+import RolloverBudgetBalanceTooltip from './rollover/BalanceTooltip';
 import { makeAmountGrey } from './util';
 
 function ToBudget({ toBudget, onClick }) {
@@ -68,7 +70,7 @@ function ToBudget({ toBudget, onClick }) {
   );
 }
 
-function Saved({ projected }) {
+function Saved({ projected, onClick }) {
   let binding = projected
     ? reportBudget.totalBudgetedSaved
     : reportBudget.totalSaved;
@@ -77,21 +79,32 @@ function Saved({ projected }) {
   let isNegative = saved < 0;
 
   return (
-    <View
+    <Button
+      type="bare"
       style={{
         flexDirection: 'column',
         alignItems: 'flex-start',
       }}
+      onClick={onClick}
     >
       {projected ? (
         <Label
           title="PROJECTED SAVINGS"
-          style={{ color: theme.formInputText, textAlign: 'left' }}
+          style={{
+            ...styles.underlinedText,
+            color: theme.formInputText,
+            textAlign: 'left',
+            fontSize: 9,
+          }}
         />
       ) : (
         <Label
           title={isNegative ? 'OVERSPENT' : 'SAVED'}
-          style={{ color: theme.formInputText, textAlign: 'left' }}
+          style={{
+            ...styles.underlinedText,
+            color: theme.formInputText,
+            textAlign: 'left',
+          }}
         />
       )}
 
@@ -108,7 +121,7 @@ function Saved({ projected }) {
             : theme.formInputText,
         }}
       />
-    </View>
+    </Button>
   );
 }
 
@@ -128,7 +141,7 @@ function BudgetCell({
   function updateBudgetAmount(amount) {
     onBudgetAction?.(month, 'budget-amount', {
       category: categoryId,
-      amount: amount,
+      amount,
     });
   }
 
@@ -138,43 +151,42 @@ function BudgetCell({
 
   return (
     <View style={style}>
-      {isEditing ? (
-        <AmountInput
-          initialValue={sheetValue}
-          zeroSign="+"
+      <AmountInput
+        initialValue={sheetValue}
+        zeroSign="+"
+        style={{
+          ...(!isEditing && { display: 'none' }),
+          height: ROW_HEIGHT,
+          transform: 'translateX(6px)',
+        }}
+        focused={isEditing}
+        textStyle={{ ...styles.smallText, ...textStyle }}
+        onChange={updateBudgetAmount}
+        onBlur={() => onEdit?.(null)}
+      />
+      <View
+        role="button"
+        style={{
+          ...(isEditing && { display: 'none' }),
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          height: ROW_HEIGHT,
+        }}
+      >
+        <CellValue
+          binding={binding}
+          type="financial"
           style={{
-            height: ROW_HEIGHT,
-            transform: 'translateX(6px)',
+            ...styles.smallText,
+            ...textStyle,
+            ...styles.underlinedText,
           }}
-          focused={isEditing}
-          textStyle={{ ...styles.smallText, ...textStyle }}
-          onChange={updateBudgetAmount}
-          onBlur={() => onEdit?.(null)}
+          getStyle={makeAmountGrey}
+          data-testid={name}
+          onPointerUp={onAmountClick}
+          onPointerDown={e => e.preventDefault()}
         />
-      ) : (
-        <View
-          role="button"
-          style={{
-            justifyContent: 'center',
-            alignItems: 'flex-end',
-            height: ROW_HEIGHT,
-          }}
-        >
-          <CellValue
-            binding={binding}
-            type="financial"
-            style={{
-              ...styles.smallText,
-              ...textStyle,
-              ...styles.underlinedText,
-            }}
-            getStyle={makeAmountGrey}
-            data-testid={name}
-            onPointerUp={onAmountClick}
-            onPointerDown={e => e.preventDefault()}
-          />
-        </View>
-      )}
+      </View>
     </View>
   );
 }
@@ -219,7 +231,13 @@ function ExpenseCategoryPreview({ name, pending, style }) {
 }
 
 const ExpenseCategory = memo(function ExpenseCategory({
+  type,
   category,
+  goal,
+  budgeted,
+  spent,
+  balance,
+  carryover,
   index,
   // gestures,
   blank,
@@ -243,9 +261,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   let [categoryName, setCategoryName] = useState(category.name);
   let [isHidden, setIsHidden] = useState(category.hidden);
-
-  let budgeted = rolloverBudget.catBudgeted(category.id);
-  let spent = rolloverBudget.catSumAmount(category.id);
 
   let tooltip = useTooltip();
   let balanceTooltip = useTooltip();
@@ -294,6 +309,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   let listItemRef = useRef();
   let inputRef = useRef();
+
+  let _onBudgetAction = (monthIndex, action, arg) => {
+    onBudgetAction?.(
+      monthUtils.getMonthFromIndex(monthUtils.getYear(month), monthIndex),
+      action,
+      arg,
+    );
+  };
 
   let content = (
     <ListItem
@@ -444,36 +467,39 @@ const ExpenseCategory = memo(function ExpenseCategory({
             onPointerDown={e => e.preventDefault()}
           >
             <BalanceWithCarryover
-              carryover={rolloverBudget.catCarryover(category.id)}
-              balance={rolloverBudget.catBalance(category.id)}
-              goal={reportBudget.catGoal(category.id)}
-              budgeted={reportBudget.catBudgeted(category.id)}
+              carryover={carryover}
+              balance={balance}
+              goal={goal}
+              budgeted={budgeted}
               balanceStyle={{
                 ...styles.smallText,
                 ...styles.underlinedText,
               }}
             />
-            {balanceTooltip.isOpen && (
-              <BalanceTooltip
-                offset={5}
-                categoryId={category.id}
-                tooltip={balanceTooltip}
-                monthIndex={monthUtils.getMonthIndex(month)}
-                onBudgetAction={(monthIndex, action, arg) => {
-                  onBudgetAction?.(
-                    monthUtils.getMonthFromIndex(
-                      monthUtils.getYear(month),
-                      monthIndex,
-                    ),
-                    action,
-                    arg,
-                  );
-                }}
-                onClose={() => {
-                  onOpenBudgetActionMenu?.(null);
-                }}
-              />
-            )}
+            {balanceTooltip.isOpen &&
+              (type === 'report' ? (
+                <ReportBudgetBalanceTooltip
+                  offset={5}
+                  categoryId={category.id}
+                  tooltip={balanceTooltip}
+                  monthIndex={monthUtils.getMonthIndex(month)}
+                  onBudgetAction={_onBudgetAction}
+                  onClose={() => {
+                    onOpenBudgetActionMenu?.(null);
+                  }}
+                />
+              ) : (
+                <RolloverBudgetBalanceTooltip
+                  offset={5}
+                  categoryId={category.id}
+                  tooltip={balanceTooltip}
+                  monthIndex={monthUtils.getMonthIndex(month)}
+                  onBudgetAction={_onBudgetAction}
+                  onClose={() => {
+                    onOpenBudgetActionMenu?.(null);
+                  }}
+                />
+              ))}
           </span>
         </View>
       </View>
@@ -516,6 +542,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
 const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   group,
+  budgeted,
+  spent,
+  balance,
   editMode,
   isEditing,
   onEdit,
@@ -690,7 +719,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           }}
         >
           <CellValue
-            binding={rolloverBudget.groupBudgeted(group.id)}
+            binding={budgeted}
             style={{
               ...styles.smallText,
               fontWeight: '500',
@@ -709,7 +738,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           }}
         >
           <CellValue
-            binding={rolloverBudget.groupSumAmount(group.id)}
+            binding={spent}
             style={{
               ...styles.smallText,
               fontWeight: '500',
@@ -727,7 +756,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
           }}
         >
           <CellValue
-            binding={rolloverBudget.groupBalance(group.id)}
+            binding={balance}
             style={{
               ...styles.smallText,
               fontWeight: '500',
@@ -771,7 +800,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
 
 const IncomeGroupTotals = memo(function IncomeGroupTotals({
   group,
-  budget,
+  budgeted,
   balance,
   style,
   onAddCategory,
@@ -929,7 +958,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           {group.name}
         </Text>
       </View>
-      {budget && (
+      {budgeted && (
         <View
           style={{
             ...(showEditables && { display: 'none' }),
@@ -940,7 +969,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
           }}
         >
           <CellValue
-            binding={budget}
+            binding={budgeted}
             style={{
               ...styles.smallText,
               textAlign: 'right',
@@ -975,14 +1004,18 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
 
 const IncomeCategory = memo(function IncomeCategory({
   category,
-  budget,
+  budgeted,
   balance,
+  month,
   style,
   onSave,
   onDelete,
   editMode,
   isEditing,
   onEdit,
+  onBudgetAction,
+  isEditingBudget,
+  onEditBudget,
 }) {
   let [categoryName, setCategoryName] = useState(category.name);
   let [isHidden, setIsHidden] = useState(category.hidden);
@@ -1125,7 +1158,7 @@ const IncomeCategory = memo(function IncomeCategory({
           {category.name}
         </Text>
       </View>
-      {budget && (
+      {budgeted && (
         <View
           style={{
             ...(showEditables && { display: 'none' }),
@@ -1135,14 +1168,27 @@ const IncomeCategory = memo(function IncomeCategory({
             height: ROW_HEIGHT,
           }}
         >
-          <CellValue
+          <BudgetCell
+            name="budgeted"
+            binding={budgeted}
+            style={{
+              width: 90,
+            }}
+            textStyle={{ ...styles.smallText, textAlign: 'right' }}
+            categoryId={category.id}
+            month={month}
+            onBudgetAction={onBudgetAction}
+            isEditing={isEditingBudget}
+            onEdit={onEditBudget}
+          />
+          {/* <CellValue
             binding={budget}
             style={{
               ...styles.smallText,
               textAlign: 'right',
             }}
             type="financial"
-          />
+          /> */}
         </View>
       )}
       <View
@@ -1207,6 +1253,7 @@ const IncomeCategory = memo(function IncomeCategory({
 // }
 
 const ExpenseGroup = memo(function ExpenseGroup({
+  type,
   group,
   editMode,
   editingGroupId,
@@ -1270,8 +1317,21 @@ const ExpenseGroup = memo(function ExpenseGroup({
       <ExpenseGroupTotals
         group={group}
         showBudgetedCol={showBudgetedCol}
-        budgeted={rolloverBudget.groupBudgeted(group.id)}
-        balance={rolloverBudget.groupBalance(group.id)}
+        budgeted={
+          type === 'report'
+            ? reportBudget.groupBudgeted(group.id)
+            : rolloverBudget.groupBudgeted(group.id)
+        }
+        spent={
+          type === 'report'
+            ? reportBudget.groupSumAmount(group.id)
+            : rolloverBudget.groupSumAmount(group.id)
+        }
+        balance={
+          type === 'report'
+            ? reportBudget.groupBalance(group.id)
+            : rolloverBudget.groupBalance(group.id)
+        }
         show3Cols={show3Cols}
         editMode={editMode}
         onAddCategory={onAddCategory}
@@ -1291,10 +1351,36 @@ const ExpenseGroup = memo(function ExpenseGroup({
           const isBudgetActionMenuOpen = openBudgetActionMenuId === category.id;
           return (
             <ExpenseCategory
-              show3Cols={show3Cols}
               key={category.id}
+              show3Cols={show3Cols}
+              type={type}
               index={index}
               category={category}
+              goal={
+                type === 'report'
+                  ? reportBudget.catGoal(category.id)
+                  : rolloverBudget.catGoal(category.id)
+              }
+              budgeted={
+                type === 'report'
+                  ? reportBudget.catBudgeted(category.id)
+                  : rolloverBudget.catBudgeted(category.id)
+              }
+              spent={
+                type === 'report'
+                  ? reportBudget.catSumAmount(category.id)
+                  : rolloverBudget.catSumAmount(category.id)
+              }
+              balance={
+                type === 'report'
+                  ? reportBudget.catBalance(category.id)
+                  : rolloverBudget.catBalance(category.id)
+              }
+              carryover={
+                type === 'report'
+                  ? reportBudget.catCarryover(category.id)
+                  : rolloverBudget.catCarryover(category.id)
+              }
               showBudgetedCol={showBudgetedCol}
               editMode={editMode}
               isEditing={isEditingCategory}
@@ -1309,6 +1395,9 @@ const ExpenseGroup = memo(function ExpenseGroup({
               onDelete={onDeleteCategory}
               // onReorder={onReorderCategory}
               onBudgetAction={onBudgetAction}
+              style={{
+                backgroundColor: theme.tableBackground,
+              }}
             />
           );
         })}
@@ -1319,6 +1408,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
 function IncomeGroup({
   type,
   group,
+  month,
   onSave,
   onDelete,
   onAddCategory,
@@ -1330,6 +1420,9 @@ function IncomeGroup({
   onEditGroup,
   editingCategoryId,
   onEditCategory,
+  editingBudgetCategoryId,
+  onEditCategoryBudget,
+  onBudgetAction,
 }) {
   return (
     <View>
@@ -1350,7 +1443,7 @@ function IncomeGroup({
       <Card style={{ marginTop: 0 }}>
         <IncomeGroupTotals
           group={group}
-          budget={
+          budgeted={
             type === 'report' ? reportBudget.groupBudgeted(group.id) : null
           }
           balance={
@@ -1376,8 +1469,9 @@ function IncomeGroup({
               <IncomeCategory
                 key={category.id}
                 category={category}
+                month={month}
                 type={type}
-                budget={
+                budgeted={
                   type === 'report'
                     ? reportBudget.catBudgeted(category.id)
                     : null
@@ -1393,6 +1487,12 @@ function IncomeGroup({
                 editMode={editMode}
                 isEditing={editingCategoryId === category.id}
                 onEdit={onEditCategory}
+                style={{
+                  backgroundColor: theme.tableBackground,
+                }}
+                onBudgetAction={onBudgetAction}
+                isEditingBudget={editingBudgetCategoryId === category.id}
+                onEditBudget={onEditCategoryBudget}
               />
             );
           })}
@@ -1448,6 +1548,7 @@ function BudgetGroups({
           return (
             <ExpenseGroup
               key={group.id}
+              type={type}
               group={group}
               showBudgetedCol={showBudgetedCol}
               gestures={gestures}
@@ -1490,6 +1591,7 @@ function BudgetGroups({
         <IncomeGroup
           type={type}
           group={incomeGroup}
+          month={month}
           onSave={onSaveGroup}
           onDelete={onDeleteGroup}
           onAddCategory={onAddCategory}
@@ -1501,6 +1603,9 @@ function BudgetGroups({
           onEditGroup={onEditGroup}
           editingCategoryId={editingCategoryId}
           onEditCategory={onEditCategory}
+          editingBudgetCategoryId={editingBudgetCategoryId}
+          onEditCategoryBudget={onEditCategoryBudget}
+          onBudgetAction={onBudgetAction}
         />
       )}
     </View>
@@ -1526,11 +1631,13 @@ export function BudgetTable(props) {
     onEditMode,
     onReorderCategory,
     onReorderGroup,
-    onShowBudgetDetails,
+    onShowBudgetSummary,
     // onOpenActionSheet,
     onBudgetAction,
     onRefresh,
+    onSwitchBudgetType,
     savePrefs,
+    pushModal,
   } = props;
 
   const GROUP_EDIT_ACTION = 'group';
@@ -1627,6 +1734,8 @@ export function BudgetTable(props) {
           onNextMonth={onNextMonth}
           showHiddenCategories={showHiddenCategories}
           savePrefs={savePrefs}
+          pushModal={pushModal}
+          onSwitchBudgetType={onSwitchBudgetType}
         />
         <View
           style={{
@@ -1640,11 +1749,14 @@ export function BudgetTable(props) {
           }}
         >
           {type === 'report' ? (
-            <Saved projected={month >= currentMonth} />
+            <Saved
+              projected={month >= currentMonth}
+              onClick={onShowBudgetSummary}
+            />
           ) : (
             <ToBudget
               toBudget={rolloverBudget.toBudget}
-              onClick={onShowBudgetDetails}
+              onClick={onShowBudgetSummary}
             />
           )}
           <View style={{ flex: 1 }} />
@@ -1676,7 +1788,11 @@ export function BudgetTable(props) {
                   style={{ color: theme.buttonNormalText }}
                 />
                 <CellValue
-                  binding={reportBudget.totalBudgetedExpense}
+                  binding={
+                    type === 'report'
+                      ? reportBudget.totalBudgetedExpense
+                      : rolloverBudget.totalBudgeted
+                  }
                   type="financial"
                   style={{
                     ...styles.smallText,
@@ -1713,7 +1829,11 @@ export function BudgetTable(props) {
               >
                 <Label title="SPENT" style={{ color: theme.formInputText }} />
                 <CellValue
-                  binding={rolloverBudget.totalSpent}
+                  binding={
+                    type === 'report'
+                      ? reportBudget.totalSpent
+                      : rolloverBudget.totalSpent
+                  }
                   type="financial"
                   style={{
                     ...styles.smallText,
@@ -1734,7 +1854,11 @@ export function BudgetTable(props) {
           >
             <Label title="BALANCE" style={{ color: theme.formInputText }} />
             <CellValue
-              binding={rolloverBudget.totalBalance}
+              binding={
+                type === 'report'
+                  ? reportBudget.totalLeftover
+                  : rolloverBudget.totalBalance
+              }
               type="financial"
               style={{
                 ...styles.smallText,
@@ -1843,6 +1967,8 @@ function BudgetHeader({
   onEditMode,
   showHiddenCategories,
   savePrefs,
+  pushModal,
+  onSwitchBudgetType,
 }) {
   let serverURL = useServerURL();
 
@@ -1861,6 +1987,7 @@ function BudgetHeader({
   };
 
   let tooltip = useTooltip();
+  let isReportBudgetEnabled = useFeatureFlag('reportBudget');
 
   let onMenuSelect = name => {
     tooltip.close();
@@ -1870,6 +1997,11 @@ function BudgetHeader({
         break;
       case 'toggle-hidden-categories':
         toggleHiddenCategories();
+        break;
+      case 'switch-budget-type':
+        pushModal('switch-budget-type', {
+          onSwitch: onSwitchBudgetType,
+        });
         break;
       default:
         throw new Error(`Unrecognized menu option: ${name}`);
@@ -2006,6 +2138,10 @@ function BudgetHeader({
                     {
                       name: 'toggle-hidden-categories',
                       text: 'Toggle hidden categories',
+                    },
+                    isReportBudgetEnabled && {
+                      name: 'switch-budget-type',
+                      text: 'Switch budget type',
                     },
                   ]}
                 />

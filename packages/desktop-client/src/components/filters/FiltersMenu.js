@@ -24,10 +24,9 @@ import {
 import { titleFirst } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
-import Filter from '../../icons/v1/Filter';
-import SettingsSliderAlternate from '../../icons/v2/SettingsSliderAlternate';
 import { theme } from '../../style';
 import Button from '../common/Button';
+import HoverTarget from '../common/HoverTarget';
 import Menu from '../common/Menu';
 import Select from '../common/Select';
 import Stack from '../common/Stack';
@@ -37,6 +36,8 @@ import Value from '../rules/Value';
 import { Tooltip } from '../tooltips';
 import GenericInput from '../util/GenericInput';
 
+import CompactFiltersButton from './CompactFiltersButton';
+import FiltersButton from './FiltersButton';
 import { CondOpMenu } from './SavedFilters';
 
 let filterFields = [
@@ -137,7 +138,7 @@ function updateFilterReducer(state, action) {
       let { value } = makeValue(action.value, {
         type: FIELD_TYPES.get(state.field),
       });
-      return { ...state, value: value };
+      return { ...state, value };
     }
     default:
       throw new Error(`Unhandled action type: ${action.type}`);
@@ -336,28 +337,7 @@ function ConfigureField({
   );
 }
 
-function ButtonType({ type, dispatch }) {
-  return (
-    <Button
-      type="bare"
-      onClick={() => dispatch({ type: 'select-field' })}
-      title={type && 'Filters'}
-    >
-      {type === 'reports' ? (
-        <Filter width={15} height={15} />
-      ) : (
-        <>
-          <SettingsSliderAlternate
-            style={{ width: 16, height: 16, marginRight: 5 }}
-          />{' '}
-          Filter
-        </>
-      )}
-    </Button>
-  );
-}
-
-export function FilterButton({ onApply, type }) {
+export function FilterButton({ onApply, compact, hover }) {
   let filters = useFilters();
 
   let { dateFormat } = useSelector(state => {
@@ -440,7 +420,32 @@ export function FilterButton({ onApply, type }) {
 
   return (
     <View>
-      <ButtonType type={type} dispatch={dispatch} />
+      <HoverTarget
+        style={{ flexShrink: 0 }}
+        renderContent={() =>
+          hover && (
+            <Tooltip
+              position="bottom-left"
+              style={{
+                lineHeight: 1.5,
+                padding: '6px 10px',
+                backgroundColor: theme.menuAutoCompleteBackground,
+                color: theme.menuAutoCompleteText,
+              }}
+            >
+              <Text>Filters</Text>
+            </Tooltip>
+          )
+        }
+      >
+        {compact ? (
+          <CompactFiltersButton
+            onClick={() => dispatch({ type: 'select-field' })}
+          />
+        ) : (
+          <FiltersButton onClick={() => dispatch({ type: 'select-field' })} />
+        )}
+      </HoverTarget>
       {state.fieldsOpen && (
         <Tooltip
           position="bottom-left"
@@ -453,7 +458,7 @@ export function FilterButton({ onApply, type }) {
               dispatch({ type: 'configure', field: name });
             }}
             items={filterFields.map(([name, text]) => ({
-              name: name,
+              name,
               text: titleFirst(text),
             }))}
           />

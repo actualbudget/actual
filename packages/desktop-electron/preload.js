@@ -1,10 +1,10 @@
 const { ipcRenderer, contextBridge } = require('electron');
 
-let { version: VERSION, isDev: IS_DEV } =
+const { version: VERSION, isDev: IS_DEV } =
   ipcRenderer.sendSync('get-bootstrap-data');
 
 let resolveSocketPromise;
-let socketPromise = new Promise(resolve => {
+const socketPromise = new Promise(resolve => {
   resolveSocketPromise = resolve;
 });
 
@@ -55,5 +55,7 @@ contextBridge.exposeInMainWorld('Actual', {
     return socketPromise;
   },
 
-  setTheme: () => {},
+  setTheme: theme => {
+    ipcRenderer.send('set-theme', theme);
+  },
 });

@@ -40,6 +40,7 @@ export async function batchUpdateTransactions({
   updated,
   learnCategories = false,
   detectOrphanPayees = true,
+  runTransfers = true,
 }: {
   added?: Array<{ id: string; payee: unknown; category: unknown }>;
   deleted?: Array<{ id: string; payee: unknown }>;
@@ -51,6 +52,7 @@ export async function batchUpdateTransactions({
   }>;
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;
+  runTransfers?: boolean;
 }) {
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];
@@ -126,18 +128,21 @@ export async function batchUpdateTransactions({
   // to the client so that can apply them. Note that added
   // transactions just return the full transaction.
   let resultAdded = allAdded;
-  let resultUpdated: Awaited<ReturnType<typeof transfer.onUpdate>>[];
+  let resultUpdated = allUpdated;
+  let transfersUpdated: Awaited<ReturnType<typeof transfer.onUpdate>>[];
 
-  await batchMessages(async () => {
-    await Promise.all(allAdded.map(t => transfer.onInsert(t)));
+  if (runTransfers) {
+    await batchMessages(async () => {
+      await Promise.all(allAdded.map(t => transfer.onInsert(t)));
 
-    // Return any updates from here
-    resultUpdated = (
-      await Promise.all(allUpdated.map(t => transfer.onUpdate(t)))
-    ).filter(Boolean);
+      // Return any updates from here
+      transfersUpdated = (
+        await Promise.all(allUpdated.map(t => transfer.onUpdate(t)))
+      ).filter(Boolean);
 
-    await Promise.all(allDeleted.map(t => transfer.onDelete(t)));
-  });
+      await Promise.all(allDeleted.map(t => transfer.onDelete(t)));
+    });
+  }
 
   if (learnCategories) {
     // Analyze any updated categories and update rules to learn from
@@ -176,6 +181,6 @@ export async function batchUpdateTransactions({
 
   return {
     added: resultAdded,
-    updated: resultUpdated,
+    updated: runTransfers ? transfersUpdated : resultUpdated,
   };
 }

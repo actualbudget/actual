@@ -8,7 +8,7 @@ import type { Dispatch, GetState } from './types';
 
 export function resetSync() {
   return async (dispatch: Dispatch) => {
-    let { error } = await send('sync-reset');
+    const { error } = await send('sync-reset');
 
     if (error) {
       alert(getUploadError(error));
@@ -40,7 +40,7 @@ export function sync() {
   return async (dispatch: Dispatch, getState: GetState) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
-      let result = await send('sync');
+      const result = await send('sync');
       if ('error' in result) {
         return { error: result.error };
       }
@@ -56,16 +56,16 @@ export function syncAndDownload(accountId) {
     // clients have already made, so that imported transactions can be
     // reconciled against them. Otherwise, two clients will each add
     // new transactions from the bank and create duplicate ones.
-    let syncState = await dispatch(sync());
+    const syncState = await dispatch(sync());
     if (syncState.error) {
       return { error: syncState.error };
     }
 
-    let hasDownloaded = await dispatch(syncAccounts(accountId));
+    const hasDownloaded = await dispatch(syncAccounts(accountId));
 
     if (hasDownloaded) {
       // Sync again afterwards if new transactions were created
-      let syncState = await dispatch(sync());
+      const syncState = await dispatch(sync());
       if (syncState.error) {
         return { error: syncState.error };
       }

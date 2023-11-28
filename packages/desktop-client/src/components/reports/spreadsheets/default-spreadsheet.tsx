@@ -5,13 +5,13 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount, amountToInteger } from 'loot-core/src/shared/util';
 
-import { index } from '../util';
+import { index, indexStack } from '../util';
 
 export default function createSpreadsheet(
   start,
   end,
   groupBy,
-  typeItem,
+  balanceTypeOp,
   categories,
   selectedCategories,
   payees,
@@ -20,6 +20,7 @@ export default function createSpreadsheet(
   conditionsOp,
   hidden,
   uncat,
+  setDataCheck,
 ) {
   let uncatCat = {
     name: 'Uncategorized',
@@ -282,8 +283,9 @@ export default function createSpreadsheet(
       };
     });
 
-    const categoryGroupCalcData = catGroup.map(group => {
-      if (hidden || group.hidden === 0) {
+    const categoryGroupCalcData = catGroup
+      .filter(f => hidden || f.hidden === 0)
+      .map(group => {
         let groupedStarting = 0;
         const mon = months.map(month => {
           let groupedAssets = 0;
@@ -317,10 +319,7 @@ export default function createSpreadsheet(
           hidden: group.hidden,
           balances: index(mon, 'date'),
         };
-      } else {
-        return null;
-      }
-    });
+      });
 
     const groupByData = groupBy === 'Group' ? categoryGroupCalcData : calcData;
 
@@ -329,35 +328,37 @@ export default function createSpreadsheet(
       return { ...calc };
     });
 
-    const categoryGroupData = catGroup.map(group => {
-      const catData = group.categories.map(graph => {
-        let catMatch = null;
-        calcData.map(cat => {
-          if (
-            cat.id === null
-              ? cat.uncat_id === graph.uncat_id
-              : cat.id === graph.id
-          ) {
-            catMatch = cat;
+    const categoryGroupData = catGroup
+      .filter(f => hidden || f.hidden === 0)
+      .map(group => {
+        const catData = group.categories.map(graph => {
+          let catMatch = null;
+          calcData.map(cat => {
+            if (
+              cat.id === null
+                ? cat.uncat_id === graph.uncat_id
+                : cat.id === graph.id
+            ) {
+              catMatch = cat;
+            }
+            return null;
+          });
+          const calcCat = catMatch && recalculate(catMatch, start, end);
+          return { ...calcCat };
+        });
+        let groupMatch = null;
+        categoryGroupCalcData.map(split => {
+          if (split.id === group.id) {
+            groupMatch = split;
           }
           return null;
         });
-        const calcCat = catMatch && recalculate(catMatch, start, end);
-        return { ...calcCat };
+        const calcGroup = groupMatch && recalculate(groupMatch, start, end);
+        return {
+          ...calcGroup,
+          categories: catData,
+        };
       });
-      let groupMatch = null;
-      categoryGroupCalcData.map(split => {
-        if (split.id === group.id) {
-          groupMatch = split;
-        }
-        return null;
-      });
-      const calcGroup = groupMatch && recalculate(groupMatch, start, end);
-      return {
-        ...calcGroup,
-        categories: catData,
-      };
-    });
 
     let totalAssets = 0;
     let totalDebts = 0;
@@ -393,31 +394,32 @@ export default function createSpreadsheet(
     });
 
     const stackedData = months.map(month => {
-      let perMonthAmounts = 0;
       const stacked = data.map(graph => {
         let stackAmounts = 0;
         if (graph.indexedMonthData[month]) {
-          perMonthAmounts += graph.indexedMonthData[month][typeItem];
-          stackAmounts += graph.indexedMonthData[month][typeItem];
+          stackAmounts += graph.indexedMonthData[month][balanceTypeOp];
         }
         return {
           name: graph.name,
           id: graph.id,
-          amount: stackAmounts,
+          amount: Math.abs(stackAmounts),
         };
       });
 
-      const indexedStack = index(stacked, 'name');
+      const indexedStack = indexStack(
+        stacked.filter(i => i[balanceTypeOp] !== 0),
+        'name',
+        'amount',
+      );
       return {
         // eslint-disable-next-line rulesdir/typography
         date: d.format(d.parseISO(`${month}-01`), "MMM ''yy"),
         ...indexedStack,
-        totalTotals: perMonthAmounts,
       };
     });
 
     setData({
-      stackedData: stackedData,
+      stackedData,
       groupBy: groupBy === 'Group' ? catGroup : groupByList,
       data,
       groupData: categoryGroupData,
@@ -428,6 +430,7 @@ export default function createSpreadsheet(
       totalAssets: integerToAmount(totalAssets),
       totalTotals: integerToAmount(totalTotals),
     });
+    setDataCheck?.(true);
   };
 }
 
@@ -479,8 +482,8 @@ function recalculate(item, start, end) {
   const indexedMonthData = exists ? index(monthData, 'dateLookup') : monthData;
 
   return {
-    indexedMonthData: indexedMonthData,
-    monthData: monthData,
+    indexedMonthData,
+    monthData,
     totalAssets: integerToAmount(totalAssets),
     totalDebts: integerToAmount(totalDebts),
     totalTotals: integerToAmount(totalTotals),
