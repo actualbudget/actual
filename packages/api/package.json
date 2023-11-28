@@ -16,7 +16,8 @@
     "build:node": "tsc --p tsconfig.dist.json",
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
-    "build": "rm -rf dist && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db"
+    "build": "rm -rf dist && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
+    "test": "jest -c jest.config.js"
   },
   "dependencies": {
     "better-sqlite3": "^9.1.1",
@@ -25,7 +26,11 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@swc/core": "^1.3.82",
+    "@swc/jest": "^0.2.29",
+    "@types/jest": "^27.5.0",
     "@types/uuid": "^9.0.2",
+    "jest": "^27.0.0",
     "typescript": "^5.0.2"
   }
 }
