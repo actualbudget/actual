@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 
+import { type CategoryGroupEntity } from 'loot-core/src/types/models';
+
 import { theme } from '../../style';
+import { type CommonModalProps } from '../../types/modals';
 import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import Block from '../common/Block';
 import Button from '../common/Button';
@@ -8,18 +11,26 @@ import Modal from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
 
+type ConfirmCategoryDeleteProps = {
+  modalProps: CommonModalProps;
+  category: CategoryGroupEntity;
+  group: CategoryGroupEntity;
+  categoryGroups: CategoryGroupEntity[];
+  onDelete: (categoryId: string) => void;
+};
+
 export default function ConfirmCategoryDelete({
   modalProps,
   category,
   group,
   categoryGroups,
   onDelete,
-}) {
-  const [transferCategory, setTransferCategory] = useState(null);
-  const [error, setError] = useState(null);
+}: ConfirmCategoryDeleteProps) {
+  const [transferCategory, setTransferCategory] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const renderError = error => {
-    let msg;
+  const renderError = (error: string) => {
+    let msg: string;
 
     switch (error) {
       case 'required-transfer':
