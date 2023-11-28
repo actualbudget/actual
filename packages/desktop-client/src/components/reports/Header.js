@@ -26,6 +26,18 @@ export function validateEnd(allMonths, start, end) {
   return boundedRange(earliest, start, end);
 }
 
+export function validateRange(allMonths, start, end) {
+  const latest = monthUtils.currentMonth();
+  const earliest = allMonths[allMonths.length - 1].name;
+  if (end > latest) {
+    end = latest;
+  }
+  if (start < earliest) {
+    start = earliest;
+  }
+  return [start, end];
+}
+
 function boundedRange(earliest, start, end) {
   const latest = monthUtils.currentMonth();
   if (end > latest) {

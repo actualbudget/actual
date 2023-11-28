@@ -8,7 +8,7 @@ import Block from '../../common/Block';
 import View from '../../common/View';
 import DateRange from '../DateRange';
 import SankeyGraph from '../graphs/SankeyGraph';
-import { LoadingIndicator } from '../Overview';
+import LoadingIndicator from '../LoadingIndicator';
 import ReportCard from '../ReportCard';
 import sankeySpreadsheet from '../spreadsheets/sankey-spreadsheet';
 import useReport from '../useReport';

@@ -5,8 +5,8 @@ export default async function checkForUpdateNotification(
   loadPrefs,
   savePrefs,
 ) {
-  let latestVersion = await getLatestVersion();
-  let isOutdated = await getIsOutdated(latestVersion);
+  const latestVersion = await getLatestVersion();
+  const isOutdated = await getIsOutdated(latestVersion);
   if (
     !isOutdated ||
     (await loadPrefs())['flags.updateNotificationShownForVersion'] ===

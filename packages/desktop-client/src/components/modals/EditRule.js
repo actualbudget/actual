@@ -716,7 +716,7 @@ export default function EditRule({
   function onApply() {
     send('rule-apply-actions', {
       transactionIds: [...selectedInst.items],
-      actions,
+      actions: actions.map(unparse),
     }).then(() => {
       // This makes it refetch the transactions
       setActions([...actions]);
@@ -907,7 +907,10 @@ export default function EditRule({
               <SimpleTransactionsTable
                 transactions={transactions}
                 fields={getTransactionFields(conditions, actions)}
-                style={{ border: '1px solid ' + theme.tableBorder }}
+                style={{
+                  border: '1px solid ' + theme.tableBorder,
+                  borderRadius: '6px 6px 0 0',
+                }}
               />
 
               <Stack

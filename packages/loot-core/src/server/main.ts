@@ -1043,7 +1043,7 @@ handlers['gocardless-poll-web-token'] = async function ({
   requisitionId,
 }) {
   let userToken = await asyncStorage.getItem('user-token');
-  if (!userToken) return null;
+  if (!userToken) return { error: 'unknown' };
 
   let startTime = Date.now();
   stopPolling = false;
@@ -1299,7 +1299,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
       await post(
         getServer().GOCARDLESS_SERVER + '/remove-account',
         {
-          requisitionId: requisitionId,
+          requisitionId,
         },
         {
           'X-ACTUAL-TOKEN': userToken,
@@ -1320,7 +1320,7 @@ handlers['make-plaid-public-token'] = async function ({ bankId }) {
   ]);
 
   let data = await post(getServer().PLAID_SERVER + '/make-public-token', {
-    userId: userId,
+    userId,
     key: userKey,
     item_id: '' + bankId,
   });

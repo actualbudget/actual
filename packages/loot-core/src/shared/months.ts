@@ -61,7 +61,7 @@ export function _parse(value: DateLike): Date {
     // shifted backwards or forwards, doing date logic will stay
     // within the day we want.
 
-    let [year, month, day] = value.split('-');
+    const [year, month, day] = value.split('-');
     if (day != null) {
       return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12);
     } else if (month != null) {
@@ -116,6 +116,10 @@ export function currentDay(): string {
 
 export function nextMonth(month: DateLike): string {
   return d.format(d.addMonths(_parse(month), 1), 'yyyy-MM');
+}
+
+export function prevYear(month: DateLike): string {
+  return d.format(d.subMonths(_parse(month), 12), 'yyyy-MM');
 }
 
 export function prevMonth(month: DateLike): string {
@@ -290,7 +294,7 @@ export const getDayMonthFormat = memoizeOne((format: string) => {
 });
 
 export const getDayMonthRegex = memoizeOne((format: string) => {
-  let regex = format
+  const regex = format
     .replace(/y+/g, '')
     .replace(/[^\w]$/, '')
     .replace(/^[^\w]/, '')
@@ -310,7 +314,7 @@ export const getMonthYearFormat = memoizeOne((format: string) => {
 });
 
 export const getMonthYearRegex = memoizeOne((format: string) => {
-  let regex = format
+  const regex = format
     .replace(/d+/g, '')
     .replace(/[^\w]$/, '')
     .replace(/^[^\w]/, '')
@@ -325,7 +329,7 @@ export const getShortYearFormat = memoizeOne((format: string) => {
 });
 
 export const getShortYearRegex = memoizeOne((format: string) => {
-  let regex = format
+  const regex = format
     .replace(/[^\w]$/, '')
     .replace(/^[^\w]/, '')
     .replace(/d+/g, '\\d{1,2}')

@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
+import usePrivacyMode from 'loot-core/src/client/privacy';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
@@ -20,6 +21,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadItem = {
@@ -116,27 +118,11 @@ type StackedBarGraphProps = {
   data;
   balanceTypeOp;
   compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
 };
 
-function StackedBarGraph({
-  style,
-  data,
-  balanceTypeOp,
-  compact,
-  domain,
-}: StackedBarGraphProps) {
+function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
+  let privacyMode = usePrivacyMode();
   const colorScale = getColorScale('qualitative');
-
-  const getVal = (obj, key) => {
-    if (balanceTypeOp === 'totalDebts') {
-      return -1 * obj[key].amount;
-    } else {
-      return obj[key].amount;
-    }
-  };
 
   return (
     <Container
@@ -165,20 +151,26 @@ function StackedBarGraph({
                   isAnimationActive={false}
                 />
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                {data.groupBy
-                  .slice(0)
-                  .reverse()
-                  .map((c, index) => (
-                    <Bar
-                      key={c.id}
-                      dataKey={val => getVal(val, c.name)}
-                      name={c.name}
-                      stackId="a"
-                      fill={colorScale[index % colorScale.length]}
-                    />
-                  ))}
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                />
+                {!compact && (
+                  <YAxis
+                    tickFormatter={value => getCustomTick(value, privacyMode)}
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
+                  />
+                )}
+                {data.groupBy.reverse().map((c, index) => (
+                  <Bar
+                    key={c.date}
+                    dataKey={c.name}
+                    stackId="a"
+                    fill={colorScale[index % colorScale.length]}
+                  />
+                ))}
               </BarChart>
             </div>
           </ResponsiveContainer>

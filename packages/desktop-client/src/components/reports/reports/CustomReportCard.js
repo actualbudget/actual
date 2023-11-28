@@ -8,7 +8,7 @@ import Block from '../../common/Block';
 import View from '../../common/View';
 import DateRange from '../DateRange';
 import BarGraph from '../graphs/BarGraph';
-import { LoadingIndicator } from '../Overview';
+import LoadingIndicator from '../LoadingIndicator';
 import ReportCard from '../ReportCard';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
 import useReport from '../useReport';

@@ -167,6 +167,7 @@ export default function TransactionList({
   return (
     <TransactionTable
       ref={tableRef}
+      pushModal={pushModal}
       transactions={allTransactions}
       loadMoreTransactions={loadMoreTransactions}
       accounts={accounts}

@@ -86,6 +86,7 @@ export default function FormatSettings() {
           <Column title="Numbers">
             <Button bounce={false} style={{ padding: 0 }}>
               <Select
+                bare
                 key={String(hideFraction)} // needed because label does not update
                 value={numberFormat}
                 onChange={format => savePrefs({ numberFormat: format })}
@@ -112,6 +113,7 @@ export default function FormatSettings() {
           <Column title="Dates">
             <Button bounce={false} style={{ padding: 0 }}>
               <Select
+                bare
                 value={dateFormat}
                 onChange={format => savePrefs({ dateFormat: format })}
                 options={dateFormats.map(f => [f.value, f.label])}
@@ -123,6 +125,7 @@ export default function FormatSettings() {
           <Column title="First day of the week">
             <Button bounce={false} style={{ padding: 0 }}>
               <Select
+                bare
                 value={firstDayOfWeekIdx}
                 onChange={idx => savePrefs({ firstDayOfWeekIdx: idx })}
                 options={daysOfWeek.map(f => [f.value, f.label])}

@@ -25,13 +25,13 @@ export const init: T.Init = function (socketName, handlers) {
     ws.on('error', console.error);
 
     ws.on('message', data => {
-      let msg = JSON.parse(data);
+      const msg = JSON.parse(data);
 
       if (ws.readyState !== 1) {
         return;
       }
 
-      let { id, name, args, undoTag, catchErrors } = msg;
+      const { id, name, args, undoTag, catchErrors } = msg;
 
       if (handlers[name]) {
         runHandler(handlers[name], args, { undoTag, name }).then(
@@ -60,7 +60,7 @@ export const init: T.Init = function (socketName, handlers) {
             if (ws.readyState !== 1) {
               return;
             }
-            let error = coerceError(nativeError);
+            const error = coerceError(nativeError);
 
             if (name.startsWith('api/')) {
               // The API is newer and does automatically forward

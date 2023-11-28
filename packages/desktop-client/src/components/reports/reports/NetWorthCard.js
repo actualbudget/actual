@@ -10,7 +10,7 @@ import PrivacyFilter from '../../PrivacyFilter';
 import Change from '../Change';
 import DateRange from '../DateRange';
 import NetWorthGraph from '../graphs/NetWorthGraph';
-import { LoadingIndicator } from '../Overview';
+import LoadingIndicator from '../LoadingIndicator';
 import ReportCard from '../ReportCard';
 import netWorthSpreadsheet from '../spreadsheets/net-worth-spreadsheet';
 import useReport from '../useReport';
@@ -61,7 +61,7 @@ function NetWorthCard({ accounts }) {
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
                   amount={data.totalChange}
-                  style={{ color: theme.altTableText, fontWeight: 300 }}
+                  style={{ color: theme.tableText, fontWeight: 300 }}
                 />
               </PrivacyFilter>
             </View>

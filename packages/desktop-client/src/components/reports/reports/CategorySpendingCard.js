@@ -8,7 +8,7 @@ import Block from '../../common/Block';
 import View from '../../common/View';
 import DateRange from '../DateRange';
 import CategorySpendingGraph from '../graphs/CategorySpendingGraph';
-import { LoadingIndicator } from '../Overview';
+import LoadingIndicator from '../LoadingIndicator';
 import ReportCard from '../ReportCard';
 import categorySpendingSpreadsheet from '../spreadsheets/category-spending-spreadsheet';
 import useReport from '../useReport';

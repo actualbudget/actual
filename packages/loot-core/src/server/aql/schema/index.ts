@@ -47,6 +47,7 @@ export const schema = {
     transfer_id: f('id'),
     sort_order: f('float', { default: () => Date.now() }),
     cleared: f('boolean', { default: true }),
+    reconciled: f('boolean', { default: false }),
     tombstone: f('boolean'),
     schedule: f('id', { ref: 'schedules' }),
     // subtransactions is a special field added if the table has the

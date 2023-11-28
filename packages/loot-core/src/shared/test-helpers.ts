@@ -2,8 +2,8 @@ export let tracer = null;
 
 function timeout(promise, n) {
   let resolve;
-  let timeoutPromise = new Promise(_ => (resolve = _));
-  let timer = setTimeout(() => resolve(`timeout(${n})`), n);
+  const timeoutPromise = new Promise(_ => (resolve = _));
+  const timer = setTimeout(() => resolve(`timeout(${n})`), n);
 
   return Promise.race([
     promise.then(res => {
@@ -19,12 +19,12 @@ export function resetTracer() {
 }
 
 export function execTracer() {
-  let queue = [];
+  const queue = [];
   let hasStarted = false;
   let waitingFor = null;
   let ended = false;
 
-  let log = false;
+  const log = false;
 
   return {
     event(name: string, data?: unknown) {
@@ -108,7 +108,7 @@ export function execTracer() {
           `Expected event “${name}” but none found - has it happened yet?`,
         );
       } else if (queue[0].name === name) {
-        let entry = queue.shift();
+        const entry = queue.shift();
 
         if (typeof data === 'function') {
           data(entry.data);
@@ -135,7 +135,7 @@ export function execTracer() {
 
     end() {
       if (hasStarted && queue.length !== 0) {
-        let str = queue.map(x => JSON.stringify(x));
+        const str = queue.map(x => JSON.stringify(x));
         throw new Error(
           'Event tracer ended with existing events: ' + str.join('\n\n'),
         );
