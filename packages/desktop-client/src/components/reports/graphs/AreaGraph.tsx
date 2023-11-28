@@ -94,7 +94,7 @@ type AreaGraphProps = {
   style?: CSSProperties;
   data;
   balanceTypeOp;
-  compact: boolean;
+  compact?: boolean;
 };
 
 function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {

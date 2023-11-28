@@ -1,8 +1,26 @@
-import React, { useLayoutEffect, useRef } from 'react';
+import React, {
+  type Ref,
+  useLayoutEffect,
+  useRef,
+  type ReactNode,
+} from 'react';
 
+import { type CSSProperties } from '../../style';
 import View from '../common/View';
 
-export default function ReportTable({ saveScrollWidth, style, children }) {
+type ReportTableProps = {
+  saveScrollWidth?;
+  listScrollRef?: Ref<HTMLDivElement>;
+  style?: CSSProperties;
+  children?: ReactNode;
+};
+
+export default function ReportTable({
+  saveScrollWidth,
+  listScrollRef,
+  style,
+  children,
+}: ReportTableProps) {
   let contentRef = useRef<HTMLDivElement>();
 
   useLayoutEffect(() => {
@@ -18,7 +36,11 @@ export default function ReportTable({ saveScrollWidth, style, children }) {
 
   return (
     <View
+      innerRef={listScrollRef}
       style={{
+        overflowY: 'auto',
+        scrollbarWidth: 'none',
+        '::-webkit-scrollbar': { display: 'none' },
         flex: 1,
         outline: 'none',
         '& .animated .animated-row': { transition: '.25s transform' },

@@ -98,7 +98,7 @@ type DonutGraphProps = {
   groupBy;
   balanceTypeOp;
   showEmpty;
-  compact: boolean;
+  compact?: boolean;
 };
 
 function DonutGraph({

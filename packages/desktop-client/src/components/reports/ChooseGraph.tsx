@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 
 import View from '../common/View';
 
@@ -15,8 +15,6 @@ import ReportTableList from './ReportTableList';
 import ReportTableTotals from './ReportTableTotals';
 
 export function ChooseGraph({
-  start,
-  end,
   data,
   mode,
   graphType,
@@ -33,12 +31,19 @@ export function ChooseGraph({
     setScrollWidth(!width ? 0 : width);
   }
 
+  let headerScrollRef = useRef<HTMLDivElement>(null);
+  let listScrollRef = useRef<HTMLDivElement>(null);
+  let totalScrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScrollTotals = scroll => {
+    headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+  };
+
   if (graphType === 'AreaGraph') {
     return (
       <AreaGraph
         style={{ flexGrow: 1 }}
-        start={start}
-        end={end}
         data={data}
         balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
@@ -48,8 +53,6 @@ export function ChooseGraph({
     return (
       <BarGraph
         style={{ flexGrow: 1 }}
-        start={start}
-        end={end}
         data={data}
         groupBy={groupBy}
         showEmpty={showEmpty}
@@ -58,21 +61,12 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'BarLineGraph') {
-    return (
-      <BarLineGraph
-        style={{ flexGrow: 1 }}
-        start={start}
-        end={end}
-        graphData={data.graphData}
-      />
-    );
+    return <BarLineGraph style={{ flexGrow: 1 }} graphData={data.graphData} />;
   }
   if (graphType === 'DonutGraph') {
     return (
       <DonutGraph
         style={{ flexGrow: 1 }}
-        start={start}
-        end={end}
         data={data}
         groupBy={groupBy}
         showEmpty={showEmpty}
@@ -81,40 +75,25 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'LineGraph') {
-    return (
-      <LineGraph
-        style={{ flexGrow: 1 }}
-        start={start}
-        end={end}
-        graphData={data.graphData}
-      />
-    );
+    return <LineGraph style={{ flexGrow: 1 }} graphData={data.graphData} />;
   }
   if (graphType === 'StackedBarGraph') {
-    return (
-      <StackedBarGraph
-        style={{ flexGrow: 1 }}
-        start={start}
-        end={end}
-        data={data}
-        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
-      />
-    );
+    return <StackedBarGraph style={{ flexGrow: 1 }} data={data} />;
   }
   if (graphType === 'TableGraph') {
     return (
-      <View
-        style={{
-          overflow: 'auto',
-        }}
-      >
+      <View>
         <ReportTableHeader
+          headerScrollRef={headerScrollRef}
           interval={mode === 'time' && months}
           scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
         />
-        <ReportTable saveScrollWidth={saveScrollWidth}>
+        <ReportTable
+          saveScrollWidth={saveScrollWidth}
+          listScrollRef={listScrollRef}
+        >
           <ReportTableList
             data={data}
             showEmpty={showEmpty}
@@ -123,15 +102,16 @@ export function ChooseGraph({
             mode={mode}
             groupBy={groupBy}
           />
-          <ReportTableTotals
-            scrollWidth={scrollWidth}
-            data={data}
-            mode={mode}
-            balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
-            monthsCount={months.length}
-            balanceType={balanceType}
-          />
         </ReportTable>
+        <ReportTableTotals
+          totalScrollRef={totalScrollRef}
+          handleScrollTotals={handleScrollTotals}
+          scrollWidth={scrollWidth}
+          data={data}
+          mode={mode}
+          balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+          monthsCount={months.length}
+        />
       </View>
     );
   }

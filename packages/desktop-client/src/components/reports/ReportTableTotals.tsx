@@ -7,6 +7,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { styles, theme } from '../../style';
+import View from '../common/View';
 import { Row, Cell } from '../table';
 
 export default function ReportTableTotals({
@@ -15,9 +16,21 @@ export default function ReportTableTotals({
   balanceTypeOp,
   mode,
   monthsCount,
+  totalScrollRef,
+  handleScrollTotals,
 }) {
   const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
   return (
+    <View
+      innerRef={totalScrollRef}
+      onScroll={handleScrollTotals}
+      style={{
+        overflowX: 'auto',
+        borderTopWidth: 1,
+        borderColor: theme.tableBorder,
+        justifyContent: 'center',
+      }}
+    >
     <Row
       collapsed={true}
       style={{
@@ -110,5 +123,6 @@ export default function ReportTableTotals({
 
       {scrollWidth > 0 && <Cell width={scrollWidth} />}
     </Row>
+    </View>
   );
 }

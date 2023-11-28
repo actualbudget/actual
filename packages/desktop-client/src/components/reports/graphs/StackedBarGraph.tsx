@@ -116,7 +116,7 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data;
-  compact: boolean;
+  compact?: boolean;
 };
 
 function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
