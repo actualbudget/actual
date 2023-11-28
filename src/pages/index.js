@@ -182,6 +182,15 @@ export default function Hello() {
             categories. An inline editor makes this seamless.
           </SmallFeature>
           <SmallFeature
+            title="Bank Sync"
+            icon={icons.bank}
+            learnMore="/docs/advanced/bank-sync"
+          >
+            Actual has built in support for bank syncing using goCardless 
+            (EU/UK).  Community importers are also available for Plaid and
+            SimpleFIN (US/Canada).
+          </SmallFeature>
+          <SmallFeature
             title="Budgeting"
             icon={icons.wallet}
             learnMore="/docs/budgeting/"
@@ -221,7 +230,7 @@ export default function Hello() {
             learnMore="/docs/migration/"
           >
             We provide builtin YNAB4 & nYNAB importers that keep all of your
-            history.
+            history. There are many more available from the Actual Community.
           </SmallFeature>
           <SmallFeature
             title="API"
@@ -394,6 +403,15 @@ const icons = {
   play: (
     <svg viewBox="0 0 20 20">
       <path d="m4 4 12 6-12 6z" fill="currentColor" />
+    </svg>
+  ),
+  bank: (
+    <svg viewBox="0 0 24 24">
+      <path d="M10.8321 1.24802C11.5779 0.917327 12.4221 0.917327 13.1679 1.24802L21.7995 5.0754C23.7751 5.95141 23.1703 9 21.0209 9H2.97906C0.829669 9 0.224891 5.9514 2.20047 5.0754L10.8321 1.24802ZM12.3893 3.12765C12.1407 3.01742 11.8593 3.01742 11.6107 3.12765L3.41076 6.76352C3.31198 6.80732 3.34324 6.95494 3.45129 6.95494H20.5487C20.6568 6.95494 20.688 6.80732 20.5892 6.76352L12.3893 3.12765Z"/>
+      <path d="M2 22C2 21.4477 2.44772 21 3 21H21C21.5523 21 22 21.4477 22 22C22 22.5523 21.5523 23 21 23H3C2.44772 23 2 22.5523 2 22Z"/>
+      <path d="M11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V11C13 10.4477 12.5523 10 12 10C11.4477 10 11 10.4477 11 11V19Z"/>
+      <path d="M6 20C5.44772 20 5 19.5523 5 19L5 11C5 10.4477 5.44771 10 6 10C6.55228 10 7 10.4477 7 11L7 19C7 19.5523 6.55229 20 6 20Z"/>
+      <path d="M17 19C17 19.5523 17.4477 20 18 20C18.5523 20 19 19.5523 19 19V11C19 10.4477 18.5523 10 18 10C17.4477 10 17 10.4477 17 11V19Z"/>
     </svg>
   ),
 };
