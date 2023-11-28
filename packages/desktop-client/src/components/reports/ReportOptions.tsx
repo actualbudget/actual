@@ -45,7 +45,7 @@ const intervalOptions = [
 ];
 */
 
-let uncatCat = {
+let uncategorizedCategory = {
   name: 'Uncategorized',
   id: null,
   uncat_id: '1',
@@ -54,7 +54,7 @@ let uncatCat = {
   transfer: false,
   category: false,
 };
-let uncatTransfer = {
+let transferCategory = {
   name: 'Transfers',
   id: null,
   uncat_id: '2',
@@ -63,8 +63,8 @@ let uncatTransfer = {
   offBudget: false,
   category: false,
 };
-let uncatOff = {
-  name: 'OffBudget',
+let offBudgetCategory = {
+  name: 'Off Budget',
   id: null,
   uncat_id: '3',
   hidden: 0,
@@ -73,27 +73,32 @@ let uncatOff = {
   category: true,
 };
 
-let uncatGroup = {
-  name: 'Uncategorized',
+let uncategorizedGroup = {
+  name: 'Uncategorized & Off Budget',
   id: null,
   hidden: 0,
-  categories: [uncatCat, uncatTransfer, uncatOff],
+  categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };
 
 export const categoryLists = (showUncategorized, categories) => {
-  let catList = showUncategorized
-    ? [...categories.list, uncatCat, uncatTransfer, uncatOff]
+  let categoryList = showUncategorized
+    ? [
+        ...categories.list,
+        uncategorizedCategory,
+        transferCategory,
+        offBudgetCategory,
+      ]
     : categories.list;
-  let catGroup = showUncategorized
-    ? [...categories.grouped, uncatGroup]
+  let categoryGroup = showUncategorized
+    ? [...categories.grouped, uncategorizedGroup]
     : categories.grouped;
-  return [catList, catGroup];
+  return [categoryList, categoryGroup];
 };
 
 export const groupBySelections = (
   groupBy,
-  catList,
-  catGroup,
+  categoryList,
+  categoryGroup,
   payees,
   accounts,
 ) => {
@@ -101,11 +106,11 @@ export const groupBySelections = (
   let groupByLabel;
   switch (groupBy) {
     case 'Category':
-      groupByList = catList;
+      groupByList = categoryList;
       groupByLabel = 'category';
       break;
     case 'Group':
-      groupByList = catGroup;
+      groupByList = categoryGroup;
       groupByLabel = 'categoryGroup';
       break;
     case 'Payee':
@@ -117,11 +122,11 @@ export const groupBySelections = (
       groupByLabel = 'account';
       break;
     case 'Month':
-      groupByList = catList;
+      groupByList = categoryList;
       groupByLabel = 'category';
       break;
     case 'Year':
-      groupByList = catList;
+      groupByList = categoryList;
       groupByLabel = 'category';
       break;
     default:

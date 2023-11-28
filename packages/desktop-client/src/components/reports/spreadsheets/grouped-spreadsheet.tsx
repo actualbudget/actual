@@ -19,9 +19,12 @@ function createSpreadsheet(
   showOffBudgetHidden,
   showUncategorized,
 ) {
-  let [catList, catGroup] = categoryLists(showUncategorized, categories);
+  let [categoryList, categoryGroup] = categoryLists(
+    showUncategorized,
+    categories,
+  );
 
-  let categoryFilter = (catList || []).filter(
+  let categoryFilter = (categoryList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -31,7 +34,7 @@ function createSpreadsheet(
   );
 
   return async (spreadsheet, setData) => {
-    if (catList.length === 0) {
+    if (categoryList.length === 0) {
       return null;
     }
 
@@ -69,7 +72,7 @@ function createSpreadsheet(
 
     const months = monthUtils.rangeInclusive(start, end);
 
-    const groupedData = catGroup
+    const groupedData = categoryGroup
       .filter(f => (showOffBudgetHidden || f.hidden === 0) && f)
       .map(
         group => {
