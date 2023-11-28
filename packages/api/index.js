@@ -1,8 +1,8 @@
 /* eslint-disable import/no-unused-modules */
 
-// eslint-disable-next-line import/extensions
 import * as bundle from './app/bundle.api.js';
 import * as injected from './injected';
+import { validateNodeVersion } from './validateNodeVersion';
 
 let actualApp;
 export const internal = bundle.lib;
@@ -12,26 +12,6 @@ export * as methods from './methods';
 
 export * from './methods';
 export * as utils from './utils';
-
-function validateNodeVersion() {
-  if (process?.versions?.node) {
-    const nodeVersion = process?.versions?.node;
-    const splitVersion = nodeVersion.split('.');
-    const majorVersionString = splitVersion[0];
-    const minorVersionString = splitVersion[1];
-
-    const majorVersionNumber = parseInt(majorVersionString);
-    const minorVersionNumber = parseInt(minorVersionString);
-    if (
-      majorVersionNumber < 18 ||
-      (majorVersionNumber === 18 && minorVersionNumber < 12)
-    ) {
-      throw new Error(
-        `@actual-app/api requires a node version >= 18.12.0. Found that you are using: ${nodeVersion}. Please upgrade to a higher version`,
-      );
-    }
-  }
-}
 
 export async function init(config = {}) {
   if (actualApp) {
