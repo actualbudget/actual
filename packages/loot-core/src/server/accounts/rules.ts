@@ -639,7 +639,9 @@ export class RuleIndexer {
 
 const OP_SCORES = {
   is: 10,
+  isNot: 10,
   oneOf: 9,
+  notOneOf: 9,
   isapprox: 5,
   isbetween: 5,
   gt: 1,
@@ -647,6 +649,7 @@ const OP_SCORES = {
   lt: 1,
   lte: 1,
   contains: 0,
+  doesNotContain: 0,
 };
 
 function computeScore(rule) {
