@@ -7,8 +7,9 @@ import Text from './common/Text';
 import View from './common/View';
 
 type PageHeaderProps = {
-  name: ReactNode;
+  title: ReactNode;
   style?: CSSProperties;
+  titleStyle?: CSSProperties;
   leftContent?: ReactNode;
   rightContent?: ReactNode;
 };
@@ -16,8 +17,9 @@ type PageHeaderProps = {
 const HEADER_HEIGHT = 50;
 
 function PageHeader({
-  name,
+  title,
   style,
+  titleStyle,
   leftContent,
   rightContent,
 }: PageHeaderProps) {
@@ -28,8 +30,8 @@ function PageHeader({
       <View
         style={{
           alignItems: 'center',
-          backgroundColor: theme.mobilePageBackground,
-          color: theme.mobileModalText,
+          backgroundColor: theme.mobileHeaderBackground,
+          color: theme.mobileHeaderText,
           flexDirection: 'row',
           flexShrink: 0,
           height: HEADER_HEIGHT,
@@ -54,9 +56,10 @@ function PageHeader({
             fontWeight: 500,
             justifyContent: 'center',
             overflowY: 'auto',
+            ...titleStyle,
           }}
         >
-          {name}
+          {title}
         </View>
         <View
           style={{
@@ -80,7 +83,7 @@ function PageHeader({
         ...style,
       }}
     >
-      {name}
+      {title}
     </Text>
   );
 }
@@ -88,40 +91,55 @@ function PageHeader({
 type PageProps = {
   title: ReactNode;
   titleStyle?: CSSProperties;
+  headerStyle?: CSSProperties;
   headerLeftContent?: ReactNode;
   headerRightContent?: ReactNode;
+  style?: CSSProperties;
+  padding?: number;
   children: ReactNode;
 };
 
 export function Page({
   title,
   titleStyle,
+  headerStyle,
   headerLeftContent,
   headerRightContent,
+  style,
+  padding,
   children,
 }: PageProps) {
-  let { isNarrowWidth } = useResponsive();
-  let HORIZONTAL_PADDING = isNarrowWidth ? 10 : 20;
+  const { isNarrowWidth } = useResponsive();
+  const _padding = padding != null ? padding : isNarrowWidth ? 10 : 20;
 
   return (
-    <View style={isNarrowWidth ? undefined : styles.page}>
+    <View
+      style={{
+        ...(!isNarrowWidth && styles.page),
+        ...style,
+      }}
+    >
       <PageHeader
-        name={title}
+        title={title}
         leftContent={headerLeftContent}
         rightContent={headerRightContent}
         style={{
-          ...titleStyle,
-          ...(!isNarrowWidth && { paddingInline: HORIZONTAL_PADDING }),
+          ...(!isNarrowWidth && { paddingInline: _padding }),
+          ...headerStyle,
         }}
+        titleStyle={titleStyle}
       />
       <View
         style={
           isNarrowWidth
-            ? { overflowY: 'auto', padding: HORIZONTAL_PADDING }
+            ? {
+                overflowY: 'auto',
+                padding: _padding,
+              }
             : {
-                paddingLeft: HORIZONTAL_PADDING,
-                paddingRight: HORIZONTAL_PADDING,
                 flex: 1,
+                paddingLeft: _padding,
+                paddingRight: _padding,
               }
         }
       >

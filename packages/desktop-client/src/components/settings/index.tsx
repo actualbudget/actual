@@ -143,19 +143,7 @@ export default function Settings() {
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
-      <Page
-        title="Settings"
-        titleStyle={
-          isNarrowWidth
-            ? {
-                backgroundColor: theme.mobileHeaderBackground,
-                color: theme.mobileHeaderText,
-                fontSize: 16,
-                fontWeight: 500,
-              }
-            : undefined
-        }
-      >
+      <Page title="Settings">
         <View style={{ flexShrink: 0, gap: 30 }}>
           {isNarrowWidth && (
             <View

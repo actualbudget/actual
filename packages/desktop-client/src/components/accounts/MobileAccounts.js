@@ -158,32 +158,28 @@ function AccountList({
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}>
-      <Page
-        title="Accounts"
-        titleStyle={{
-          backgroundColor: theme.mobileHeaderBackground,
-          color: theme.mobileHeaderText,
-          fontSize: 16,
-        }}
-        headerRightContent={
-          <Button
-            type="bare"
-            style={{
-              paddingLeft: 12,
-              paddingRight: 12,
-              ...noBackgroundColorStyle,
-            }}
-            activeStyle={noBackgroundColorStyle}
-            hoveredStyle={noBackgroundColorStyle}
-            onClick={onAddAccount}
-          >
-            <Add width={20} height={20} />
-          </Button>
-        }
-      >
-        {accounts.length === 0 && <EmptyMessage />}
-        <PullToRefresh onRefresh={onSync}>
+    <Page
+      title="Accounts"
+      headerRightContent={
+        <Button
+          type="bare"
+          style={{
+            ...noBackgroundColorStyle,
+            margin: 10,
+          }}
+          activeStyle={noBackgroundColorStyle}
+          hoveredStyle={noBackgroundColorStyle}
+          onClick={onAddAccount}
+        >
+          <Add width={20} height={20} />
+        </Button>
+      }
+      padding={0}
+      style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}
+    >
+      {accounts.length === 0 && <EmptyMessage />}
+      <PullToRefresh onRefresh={onSync}>
+        <View style={{ margin: 10 }}>
           {budgetedAccounts.length > 0 && (
             <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
           )}
@@ -213,9 +209,9 @@ function AccountList({
               onSelect={onSelectAccount}
             />
           ))}
-        </PullToRefresh>
-      </Page>
-    </View>
+        </View>
+      </PullToRefresh>
+    </Page>
   );
 }
 

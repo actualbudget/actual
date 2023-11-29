@@ -57,7 +57,7 @@ export default function MobileNavTabs() {
     },
     {
       name: 'Payees (Soon)',
-      path: '/payees/soon',
+      path: '/payees',
       style: navTabStyle,
       Icon: StoreFront,
     },

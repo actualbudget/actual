@@ -7,7 +7,7 @@ import React, {
   useRef,
 } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { useFocusRing } from '@react-aria/focus';
 import { useListBox, useListBoxSection, useOption } from '@react-aria/listbox';
@@ -48,7 +48,6 @@ import useCategories from '../../hooks/useCategories';
 import useNavigate from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import SvgAdd from '../../icons/v1/Add';
-import CheveronLeft from '../../icons/v1/CheveronLeft';
 import SvgTrash from '../../icons/v1/Trash';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
@@ -66,6 +65,8 @@ import {
   InputField,
   BooleanField,
 } from '../mobile/MobileForms';
+import MobileBackButton from '../MobileBackButton';
+import { Page } from '../Page';
 
 const zIndices = { SECTION_HEADING: 10 };
 
@@ -164,9 +165,6 @@ function Status({ status }) {
     </Text>
   );
 }
-
-const LEFT_RIGHT_FLEX_WIDTH = 70;
-const BUDGET_HEADER_HEIGHT = 50;
 
 class TransactionEditInner extends PureComponent {
   constructor(props) {
@@ -360,132 +358,26 @@ class TransactionEditInner extends PureComponent {
     const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
 
     return (
-      // <KeyboardAvoidingView>
-      <View
+      <Page
+        title={
+          payeeId == null
+            ? adding
+              ? 'New Transaction'
+              : 'Transaction'
+            : descriptionPretty
+        }
+        titleStyle={{
+          fontSize: 16,
+          fontWeight: 500,
+        }}
         style={{
           backgroundColor: theme.mobilePageBackground,
-          flexGrow: 1,
-
-          // This shadow make the card "pop" off of the screen below
-          // it
-          shadowColor: theme.cardShadow,
-          shadowOffset: { width: 0, height: 0 },
-          shadowRadius: 4,
-          shadowOpacity: 1,
+          flex: 1,
         }}
+        headerLeftContent={<MobileBackButton />}
+        padding={0}
       >
-        <View
-          style={{
-            overflow: 'hidden',
-            display: 'flex',
-            flexGrow: 1,
-          }}
-        >
-          <View
-            style={{
-              flexShrink: 0,
-              height: BUDGET_HEADER_HEIGHT,
-              flexDirection: 'row',
-              width: '100%',
-              backgroundColor: theme.mobileHeaderBackground,
-            }}
-          >
-            <View
-              style={{
-                width: LEFT_RIGHT_FLEX_WIDTH,
-                flexDirection: 'row',
-              }}
-            >
-              <Button
-                type="bare"
-                style={{
-                  ...styles.noTapHighlight,
-                  color: theme.mobileHeaderText,
-                  justifyContent: 'center',
-                  margin: 10,
-                  paddingLeft: 5,
-                  paddingRight: 3,
-                }}
-                hoveredStyle={{
-                  color: theme.mobileHeaderText,
-                  background: theme.mobileHeaderTextHover,
-                }}
-              >
-                <Link
-                  to={-1}
-                  style={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    textDecoration: 'none',
-                  }}
-                >
-                  <CheveronLeft
-                    style={{
-                      width: 30,
-                      height: 30,
-                      margin: -10,
-                      marginLeft: -5,
-                    }}
-                  />
-                  <Text
-                    style={{
-                      ...styles.text,
-                      fontWeight: 500,
-                      marginLeft: 5,
-                      marginRight: 5,
-                    }}
-                  >
-                    Back
-                  </Text>
-                </Link>
-              </Button>
-              <View
-                style={{
-                  flex: 1,
-                }}
-              />
-            </View>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                color: theme.mobileHeaderText,
-              }}
-            >
-              <TextOneLine
-                style={{
-                  fontSize: 16,
-                  fontWeight: 500,
-                  userSelect: 'none',
-                }}
-                role="heading"
-              >
-                {payeeId == null
-                  ? adding
-                    ? 'New Transaction'
-                    : 'Transaction'
-                  : descriptionPretty}
-              </TextOneLine>
-            </View>
-            {/* For centering the transaction title */}
-            <View
-              style={{
-                width: LEFT_RIGHT_FLEX_WIDTH,
-              }}
-            />
-          </View>
-
-          {/* <ScrollView
-            ref={el => (this.scrollView = el)}
-            automaticallyAdjustContentInsets={false}
-            keyboardShouldPersistTaps="always"
-            style={{
-              flexGrow: 1,
-              overflow: 'hidden',
-            }}
-            contentContainerStyle={{ flexGrow: 1 }}
-          > */}
+        <View style={{ flex: 1 }}>
           <View
             style={{
               overflowY: 'auto',
@@ -665,7 +557,6 @@ class TransactionEditInner extends PureComponent {
                 onChange={e =>
                   this.onQueueChange(transaction, 'notes', e.target.value)
                 }
-                style={{ marginBottom: 10 }}
               />
             </View>
 
@@ -676,10 +567,9 @@ class TransactionEditInner extends PureComponent {
                   style={{
                     height: 40,
                     borderWidth: 0,
-                    paddingVertical: 5,
                     marginLeft: styles.mobileEditingPadding,
                     marginRight: styles.mobileEditingPadding,
-                    marginTop: 10,
+                    marginTop: 20,
                     marginBottom: 15,
                     backgroundColor: 'transparent',
                   }}
@@ -703,75 +593,75 @@ class TransactionEditInner extends PureComponent {
               </View>
             )}
           </View>
+        </View>
+        <View
+          style={{
+            paddingLeft: styles.mobileEditingPadding,
+            paddingRight: styles.mobileEditingPadding,
+            paddingTop: 15,
+            paddingBottom: 15,
+            backgroundColor: theme.tableHeaderBackground,
+            borderTopWidth: 1,
+            borderColor: theme.tableBorder,
+          }}
+        >
+          {adding ? (
+            <Button style={{ height: 40 }} onClick={() => this.onAdd()}>
+              <SvgAdd
+                width={17}
+                height={17}
+                style={{ color: theme.formLabelText }}
+              />
+              <Text
+                style={{
+                  ...styles.text,
+                  color: theme.formLabelText,
+                  marginLeft: 5,
+                }}
+              >
+                Add transaction
+              </Text>
+            </Button>
+          ) : (
+            <Button style={{ height: 40 }} onClick={() => this.onSave()}>
+              <SvgPencilWriteAlternate
+                style={{
+                  width: 16,
+                  height: 16,
+                  color: theme.formInputText,
+                }}
+              />
+              <Text
+                style={{
+                  ...styles.text,
+                  marginLeft: 6,
+                  color: theme.formInputText,
+                }}
+              >
+                Save changes
+              </Text>
+            </Button>
+          )}
+        </View>
 
-          <View
-            style={{
-              paddingLeft: styles.mobileEditingPadding,
-              paddingRight: styles.mobileEditingPadding,
-              paddingTop: 10,
-              paddingBottom: 10,
-              backgroundColor: theme.tableHeaderBackground,
-              borderTopWidth: 1,
-              borderColor: theme.tableBorder,
-              marginTop: 'auto',
-              flexShrink: 0,
-            }}
-          >
-            {adding ? (
-              <Button style={{ height: 40 }} onClick={() => this.onAdd()}>
-                <SvgAdd
-                  width={17}
-                  height={17}
-                  style={{ color: theme.formLabelText }}
-                />
-                <Text
-                  style={{
-                    ...styles.text,
-                    color: theme.formLabelText,
-                    marginLeft: 5,
-                  }}
-                >
-                  Add transaction
-                </Text>
-              </Button>
-            ) : (
-              <Button style={{ height: 40 }} onClick={() => this.onSave()}>
-                <SvgPencilWriteAlternate
-                  style={{ width: 16, height: 16, color: theme.formInputText }}
-                />
-                <Text
-                  style={{
-                    ...styles.text,
-                    marginLeft: 6,
-                    color: theme.formInputText,
-                  }}
-                >
-                  Save changes
-                </Text>
-              </Button>
-            )}
-          </View>
-
-          {/* <ExitTransition
+        {/* <ExitTransition
             alive={editingChild}
             withProps={{
               transaction:
                 editingChild && transactions.find(t => t.id === editingChild),
             }}
           > */}
-          {renderChildEdit({
-            transaction:
-              editingChild && transactions.find(t => t.id === editingChild),
-            amountSign: forcedSign,
-            getCategoryName: id => lookupName(categories, id),
-            navigate,
-            onEdit: this.onEdit,
-            onStartClose: this.onSaveChild,
-          })}
-          {/* </ExitTransition> */}
-        </View>
-      </View>
-      // </KeyboardAvoidingView>
+        {renderChildEdit({
+          transaction:
+            editingChild && transactions.find(t => t.id === editingChild),
+          amountSign: forcedSign,
+          getCategoryName: id => lookupName(categories, id),
+          navigate,
+          onEdit: this.onEdit,
+          onStartClose: this.onSaveChild,
+        })}
+        {/* </ExitTransition> */}
+      </Page>
     );
   }
 }
