@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React, { type ComponentPropsWithoutRef, type ReactNode } from 'react';
 
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles, type CSSProperties } from '../style';
@@ -8,9 +8,11 @@ import View from './common/View';
 
 type PageHeaderProps = {
   title: ReactNode;
+  titleContainerProps?: ComponentPropsWithoutRef<typeof View>;
   style?: CSSProperties;
-  titleStyle?: CSSProperties;
+  leftContentContainerProps?: ComponentPropsWithoutRef<typeof View>;
   leftContent?: ReactNode;
+  rightContentContainerProps?: ComponentPropsWithoutRef<typeof View>;
   rightContent?: ReactNode;
 };
 
@@ -18,9 +20,11 @@ const HEADER_HEIGHT = 50;
 
 function PageHeader({
   title,
+  titleContainerProps,
   style,
-  titleStyle,
+  leftContentContainerProps,
   leftContent,
+  rightContentContainerProps,
   rightContent,
 }: PageHeaderProps) {
   const { isNarrowWidth } = useResponsive();
@@ -39,15 +43,18 @@ function PageHeader({
         }}
       >
         <View
+          {...leftContentContainerProps}
           style={{
             flexBasis: '25%',
             justifyContent: 'flex-start',
             flexDirection: 'row',
+            ...leftContentContainerProps?.style,
           }}
         >
           {leftContent}
         </View>
         <View
+          {...titleContainerProps}
           style={{
             alignItems: 'center',
             flexDirection: 'row',
@@ -56,16 +63,18 @@ function PageHeader({
             fontWeight: 500,
             justifyContent: 'center',
             overflowY: 'auto',
-            ...titleStyle,
+            ...titleContainerProps?.style,
           }}
         >
           {title}
         </View>
         <View
+          {...rightContentContainerProps}
           style={{
             flexBasis: '25%',
             justifyContent: 'flex-end',
             flexDirection: 'row',
+            ...rightContentContainerProps?.style,
           }}
         >
           {rightContent}
@@ -89,24 +98,30 @@ function PageHeader({
 }
 
 type PageProps = {
-  title: ReactNode;
-  titleStyle?: CSSProperties;
+  titleContainerProps?: PageHeaderProps['titleContainerProps'];
+  title: PageHeaderProps['title'];
   headerStyle?: CSSProperties;
-  headerLeftContent?: ReactNode;
-  headerRightContent?: ReactNode;
+  headerLeftContentContainerProps?: PageHeaderProps['leftContentContainerProps'];
+  headerLeftContent?: PageHeaderProps['leftContent'];
+  headerRightContentContainerProps?: PageHeaderProps['rightContentContainerProps'];
+  headerRightContent?: PageHeaderProps['rightContent'];
   style?: CSSProperties;
   padding?: number;
+  childrenContainerProps?: ComponentPropsWithoutRef<typeof View>;
   children: ReactNode;
 };
 
 export function Page({
+  titleContainerProps,
   title,
-  titleStyle,
   headerStyle,
+  headerLeftContentContainerProps,
   headerLeftContent,
+  headerRightContentContainerProps,
   headerRightContent,
   style,
   padding,
+  childrenContainerProps,
   children,
 }: PageProps) {
   const { isNarrowWidth } = useResponsive();
@@ -121,17 +136,20 @@ export function Page({
     >
       <PageHeader
         title={title}
+        titleContainerProps={titleContainerProps}
+        leftContentContainerProps={headerLeftContentContainerProps}
         leftContent={headerLeftContent}
+        rightContentContainerProps={headerRightContentContainerProps}
         rightContent={headerRightContent}
         style={{
           ...(!isNarrowWidth && { paddingInline: _padding }),
           ...headerStyle,
         }}
-        titleStyle={titleStyle}
       />
       <View
-        style={
-          isNarrowWidth
+        {...childrenContainerProps}
+        style={{
+          ...(isNarrowWidth
             ? {
                 overflowY: 'auto',
                 padding: _padding,
@@ -140,8 +158,9 @@ export function Page({
                 flex: 1,
                 paddingLeft: _padding,
                 paddingRight: _padding,
-              }
-        }
+              }),
+          ...childrenContainerProps?.style,
+        }}
       >
         {children}
       </View>
