@@ -10,7 +10,7 @@ import Modal from '../common/Modal';
 import View from '../common/View';
 import NotesComponent from '../Notes';
 
-type CategoryMenuProps = {
+type NotesProps = {
   modalProps: CommonModalProps;
   id: string;
   name: string;
@@ -22,7 +22,7 @@ export default function Notes({
   id,
   name,
   onSave,
-}: CategoryMenuProps) {
+}: NotesProps) {
   const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 
@@ -51,7 +51,7 @@ export default function Notes({
       padding={0}
       style={{
         flex: 1,
-        height: '85vh',
+        height: '70vh',
         padding: '0 10px',
         borderRadius: '6px',
       }}
