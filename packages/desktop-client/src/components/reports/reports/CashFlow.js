@@ -20,7 +20,13 @@ import Header from '../Header';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import useReport from '../useReport';
 
-function CashFlow() {
+import Change from './Change';
+import { cashFlowByDate } from './graphs/cash-flow-spreadsheet';
+import CashFlowGraph from './graphs/CashFlowGraph';
+import Header from './Header';
+import useReport from './useReport';
+
+export default function CashFlow(): JSX.Element {
   const {
     filters,
     conditionsOp,
@@ -189,5 +195,3 @@ function CashFlow() {
     </View>
   );
 }
-
-export default CashFlow;
