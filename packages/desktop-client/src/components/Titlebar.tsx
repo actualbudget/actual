@@ -131,7 +131,7 @@ type SyncButtonProps = {
   style?: CSSProperties;
   isMobile?: boolean;
 };
-export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+function SyncButton({ style, isMobile = false }: SyncButtonProps) {
   let cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
   let { sync } = useActions();
 
