@@ -46,7 +46,7 @@ export default function Notes({ modalProps, id, name, onSave }: NotesProps) {
       padding={0}
       style={{
         flex: 1,
-        height: '70vh',
+        height: '50vh',
         padding: '0 10px',
         borderRadius: '6px',
       }}

@@ -9,7 +9,7 @@ import Trash from '../../icons/v1/Trash';
 import NotesPaper from '../../icons/v2/NotesPaper';
 import ViewHide from '../../icons/v2/ViewHide';
 import ViewShow from '../../icons/v2/ViewShow';
-import { styles } from '../../style';
+import { styles, theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
@@ -112,17 +112,21 @@ export default function CategoryGroupMenu({
           <View
             style={{
               overflowY: 'auto',
-              width: '100%',
               flex: 1,
             }}
           >
             <Notes
-              notes={originalNotes}
+              notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
               editable={false}
               focused={false}
               getStyle={editable => ({
                 ...styles.mediumText,
                 borderRadius: 6,
+                ...((!originalNotes || originalNotes.length === 0) && {
+                  justifySelf: 'center',
+                  alignSelf: 'center',
+                  color: theme.pageTextSubdued,
+                }),
               })}
             />
           </View>
