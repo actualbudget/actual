@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 
+import useNavigate from '../hooks/useNavigate';
 import CheveronLeft from '../icons/v1/CheveronLeft';
 import { type CSSProperties, styles, theme } from '../style';
 
@@ -12,6 +12,7 @@ type MobileBackButtonProps = {
 };
 
 export default function MobileBackButton({ style }: MobileBackButtonProps) {
+  const navigate = useNavigate();
   return (
     <Button
       type="bare"
@@ -27,30 +28,21 @@ export default function MobileBackButton({ style }: MobileBackButtonProps) {
         color: theme.mobileHeaderText,
         background: theme.mobileHeaderTextHover,
       }}
+      onPointerUp={() => navigate(-1)}
     >
-      <Link
-        to={-1}
+      <CheveronLeft
+        style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}
+      />
+      <Text
         style={{
-          ...styles.noTapHighlight,
-          alignItems: 'center',
-          display: 'flex',
-          textDecoration: 'none',
+          ...styles.text,
+          fontWeight: 500,
+          marginLeft: 5,
+          marginRight: 5,
         }}
       >
-        <CheveronLeft
-          style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}
-        />
-        <Text
-          style={{
-            ...styles.text,
-            fontWeight: 500,
-            marginLeft: 5,
-            marginRight: 5,
-          }}
-        >
-          Back
-        </Text>
-      </Link>
+        Back
+      </Text>
     </Button>
   );
 }
