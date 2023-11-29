@@ -94,7 +94,7 @@ export default function CategoryGroupMenu({
       padding={0}
       style={{
         flex: 1,
-        height: '85vh',
+        height: '70vh',
         padding: '0 10px',
         borderRadius: '6px',
       }}
