@@ -54,14 +54,16 @@ function PageHeader({
           {leftContent}
         </View>
         <View
+          role="heading"
           {...titleContainerProps}
           style={{
+            textAlign: 'center',
             alignItems: 'center',
+            justifyContent: 'center',
             flexDirection: 'row',
             flexBasis: '50%',
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: 500,
-            justifyContent: 'center',
             overflowY: 'auto',
             ...titleContainerProps?.style,
           }}
@@ -109,6 +111,7 @@ type PageProps = {
   padding?: number;
   childrenContainerProps?: ComponentPropsWithoutRef<typeof View>;
   children: ReactNode;
+  footer?: ReactNode;
 };
 
 export function Page({
@@ -123,6 +126,7 @@ export function Page({
   padding,
   childrenContainerProps,
   children,
+  footer,
 }: PageProps) {
   const { isNarrowWidth } = useResponsive();
   const _padding = padding != null ? padding : isNarrowWidth ? 10 : 20;
@@ -146,24 +150,32 @@ export function Page({
           ...headerStyle,
         }}
       />
-      <View
-        {...childrenContainerProps}
-        style={{
-          ...(isNarrowWidth
-            ? {
-                overflowY: 'auto',
-                padding: _padding,
-              }
-            : {
-                flex: 1,
-                paddingLeft: _padding,
-                paddingRight: _padding,
-              }),
-          ...childrenContainerProps?.style,
-        }}
-      >
-        {children}
-      </View>
+      {isNarrowWidth ? (
+        <View
+          {...childrenContainerProps}
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: _padding,
+            ...childrenContainerProps?.style,
+          }}
+        >
+          {children}
+        </View>
+      ) : (
+        <View
+          {...childrenContainerProps}
+          style={{
+            flex: 1,
+            paddingLeft: _padding,
+            paddingRight: _padding,
+            ...childrenContainerProps?.style,
+          }}
+        >
+          {children}
+        </View>
+      )}
+      {footer}
     </View>
   );
 }

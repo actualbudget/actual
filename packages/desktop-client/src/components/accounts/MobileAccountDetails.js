@@ -111,16 +111,12 @@ export default function AccountDetails({
       style={{
         flex: 1,
         backgroundColor: theme.mobilePageBackground,
-        overflowY: 'hidden',
-        flexGrow: 1,
       }}
     >
       <View
         style={{
           alignItems: 'center',
           flexShrink: 0,
-          overflowY: 'hidden',
-          top: 0,
           marginTop: 10,
         }}
       >
