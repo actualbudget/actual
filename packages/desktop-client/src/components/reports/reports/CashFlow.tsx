@@ -108,9 +108,10 @@ export default function CashFlow(): JSX.Element {
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange}
+        onCondOpChange={onCondOpChange} 
+        headerPrefixItems={undefined} 
+        selectGraph={undefined}
       />
-
       <View
         style={{
           backgroundColor: theme.tableBackground,
