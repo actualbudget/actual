@@ -195,7 +195,7 @@ export async function goalsSchedule2(
     let template = template_lines.filter(t => t.type === 'schedule');
     //in the case of multiple templates per category, schedules may have wrong priority level
     let t = [];
-    let totalScheduledGoal = 0;
+    let totalAnnualScheduledGoal = 0;  //annual total
 
     for (let ll = 0; ll < template.length; ll++) {
       let parseReturn = await parseSchedules(template[ll], current_month, t, errors);
@@ -219,7 +219,7 @@ export async function goalsSchedule2(
             balance: 0,
             shortFall: 0,
           });
-          totalScheduledGoal += t[ll].target;
+          totalAnnualScheduledGoal += t[ll].target;
         } else {
           for (let i = 0; i < 12; i += t[ll].target_interval) {
             annualized_t.push({
@@ -233,7 +233,7 @@ export async function goalsSchedule2(
               balance: 0,
               shortFall: 0,
             });
-            totalScheduledGoal += t[ll].target;
+            totalAnnualScheduledGoal += t[ll].target;
           }
         }
       }
@@ -246,7 +246,7 @@ export async function goalsSchedule2(
       ),
     );
 
-    let basePayment = Math.round(totalScheduledGoal / 12);
+    let basePayment = Math.round(totalAnnualScheduledGoal / 12);
 
     for (let ll = 0; ll < annualized_t.length; ll++) {
       if (ll === 0) {
@@ -266,7 +266,7 @@ export async function goalsSchedule2(
           annualized_t[ll].shortFall =
             -annualized_t[ll].balance / monthsSinceToday;
         } else {
-          annualized_t[ll].shortFall = -annualized_t[ll].balance;
+          annualized_t[ll].shortFall = null;
         }
       } else {
         let monthsSinceLast = monthUtils.differenceInCalendarMonths(
@@ -287,7 +287,7 @@ export async function goalsSchedule2(
           annualized_t[ll].shortFall =
             -annualized_t[ll].balance / monthsSinceToday;
         } else {
-          annualized_t[ll].shortFall = -annualized_t[ll].balance;
+          annualized_t[ll].shortFall = null;
         }
       }
     }
@@ -295,7 +295,7 @@ export async function goalsSchedule2(
     annualized_t = annualized_t.sort((a, b) => b.shortFall - a.shortFall);
     let shortFallAdjustment = Math.round(annualized_t[0].shortFall);
 
-    if (balance < totalScheduledGoal) {
+    if (balance < totalAnnualScheduledGoal) {
       to_budget += basePayment + shortFallAdjustment;
     } else {
       to_budget += basePayment;
@@ -303,7 +303,7 @@ export async function goalsSchedule2(
 
     for (let ll = 0; ll < t.length; ll++) {
       if (
-        balance < totalScheduledGoal &&
+        balance < totalAnnualScheduledGoal &&
         !isReflectBudget() &&
         t[ll].full &&
         t[ll].num_months === 0
