@@ -6,7 +6,7 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
-import { styles, theme } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 import View from '../common/View';
 import { Row, Cell } from '../table';
 
@@ -22,7 +22,7 @@ type TableRowProps = {
   groupByItem: string;
   mode: string;
   monthsCount: number;
-  style?: object;
+  style?: CSSProperties;
 };
 
 const TableRow = memo(
