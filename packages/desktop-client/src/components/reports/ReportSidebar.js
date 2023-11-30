@@ -38,6 +38,8 @@ export function ReportSidebar({
   setBalanceType,
   mode,
   setMode,
+  datePaused,
+  setDatePaused,
   showEmpty,
   setShowEmpty,
   showOffBudgetHidden,
@@ -333,59 +335,84 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-            Range:
-          </Text>
-          <Select
-            value={dateRange}
-            onChange={e => {
-              setDateRange(e);
-              onSelectRange(e);
+          <ModeButton
+            selected={datePaused === 'live'}
+            onSelect={() => setDatePaused('live')}
+          >
+            Live
+          </ModeButton>
+          <ModeButton
+            selected={mode === 'static'}
+            onSelect={() => setDatePaused('static')}
+          >
+            Static
+          </ModeButton>
+        </View>
+        {datePaused === 'live' ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
             }}
-            options={ReportOptions.dateRange.map(option => [
-              option.description,
-              option.description,
-            ])}
-            line={dateRangeLine}
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-            From:
-          </Text>
-          <Select
-            onChange={newValue =>
-              onChangeDates(...validateStart(allMonths, newValue, endDate))
-            }
-            value={startDate}
-            defaultLabel={monthUtils.format(startDate, 'MMMM, yyyy')}
-            options={allMonths.map(({ name, pretty }) => [name, pretty])}
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-            To:
-          </Text>
-          <Select
-            onChange={newValue =>
-              onChangeDates(...validateEnd(allMonths, startDate, newValue))
-            }
-            value={endDate}
-            options={allMonths.map(({ name, pretty }) => [name, pretty])}
-          />
-        </View>
+          >
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+              Range:
+            </Text>
+            <Select
+              value={dateRange}
+              onChange={e => {
+                setDateRange(e);
+                onSelectRange(e);
+              }}
+              options={ReportOptions.dateRange.map(option => [
+                option.description,
+                option.description,
+              ])}
+              line={dateRangeLine}
+            />
+          </View>
+        ) : (
+          <>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                From:
+              </Text>
+              <Select
+                onChange={newValue =>
+                  onChangeDates(...validateStart(allMonths, newValue, endDate))
+                }
+                value={startDate}
+                defaultLabel={monthUtils.format(startDate, 'MMMM, yyyy')}
+                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                To:
+              </Text>
+              <Select
+                onChange={newValue =>
+                  onChangeDates(...validateEnd(allMonths, startDate, newValue))
+                }
+                value={endDate}
+                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+              />
+            </View>
+          </>
+        )}
         <View
           style={{
             height: 1,
