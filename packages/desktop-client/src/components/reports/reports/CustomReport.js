@@ -57,7 +57,7 @@ export default function CustomReport() {
   const [showEmpty, setShowEmpty] = useState(false);
   const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(false);
   const [showUncategorized, setShowUncategorized] = useState(false);
-  const [dateRange, setDateRange] = useState('6 months');
+  const [dateRange, setDateRange] = useState('Last 6 months');
   const [dataCheck, setDataCheck] = useState(false);
 
   const [graphType, setGraphType] = useState('BarGraph');

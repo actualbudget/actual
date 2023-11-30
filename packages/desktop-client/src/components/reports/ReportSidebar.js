@@ -82,6 +82,15 @@ export function ReportSidebar({
     }
   };
 
+  const onChangeDatePaused = cond => {
+    setDatePaused(cond);
+    if (cond === 'live') {
+      onSelectRange(dateRange);
+    } else {
+      onChangeDates(startDate, endDate);
+    }
+  };
+
   const onChangeMode = cond => {
     setMode(cond);
     if (cond === 'time') {
@@ -327,23 +336,16 @@ export function ReportSidebar({
           <Text>
             <strong>Date filters</strong>
           </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
+          <View style={{ flex: 1 }} />
           <ModeButton
             selected={datePaused === 'live'}
-            onSelect={() => setDatePaused('live')}
+            onSelect={() => onChangeDatePaused('live')}
           >
             Live
           </ModeButton>
           <ModeButton
-            selected={mode === 'static'}
-            onSelect={() => setDatePaused('static')}
+            selected={datePaused === 'static'}
+            onSelect={() => onChangeDatePaused('static')}
           >
             Static
           </ModeButton>

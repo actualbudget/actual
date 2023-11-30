@@ -14,10 +14,11 @@ const groupByOptions = [
 ];
 
 const dateRangeOptions = [
-  { description: '1 month', name: 1 },
-  { description: '3 months', name: 2 },
-  { description: '6 months', name: 5 },
-  { description: '1 year', name: 11 },
+  { description: 'This month', name: 0 },
+  { description: 'Last month', name: 1 },
+  { description: 'Last 3 months', name: 2 },
+  { description: 'Last 6 months', name: 5 },
+  { description: 'Last 12 months', name: 11 },
   { description: 'Year to date', name: 'yearToDate' },
   { description: 'Last year', name: 'lastYear' },
   { description: 'All time', name: 'allMonths' },
