@@ -53,7 +53,7 @@ export default function CustomReport() {
   const [mode, setMode] = useState('total');
   const [datePaused, setDatePaused] = useState('live');
   const [groupBy, setGroupBy] = useState('Category');
-  const [balanceType, setBalanceType] = useState('Expense');
+  const [balanceType, setBalanceType] = useState('Payment');
   const [showEmpty, setShowEmpty] = useState(false);
   const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(false);
   const [showUncategorized, setShowUncategorized] = useState(false);

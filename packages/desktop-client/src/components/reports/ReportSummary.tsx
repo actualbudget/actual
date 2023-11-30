@@ -27,7 +27,10 @@ function ReportSummary({
   balanceTypeOp,
   monthsCount,
 }: ReportSummaryProps) {
-  let net = data.totalDebts > data.totalAssets ? 'EXPENSE' : 'INCOME';
+  let net =
+    Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
+      ? 'PAYMENT'
+      : 'DEPOSIT';
   const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
   return (
     <View
@@ -76,7 +79,7 @@ function ReportSummary({
           {balanceTypeOp === 'totalDebts'
             ? 'TOTAL SPENDING'
             : balanceTypeOp === 'totalAssets'
-            ? 'TOTAL INCOME'
+            ? 'TOTAL DEPOSITS'
             : 'NET ' + net}
         </Text>
         <Text
@@ -113,7 +116,7 @@ function ReportSummary({
           {balanceTypeOp === 'totalDebts'
             ? 'AVERAGE SPENDING'
             : balanceTypeOp === 'totalAssets'
-            ? 'AVERAGE INCOME'
+            ? 'AVERAGE DEPOSIT'
             : 'AVERAGE NET'}
         </Text>
         <Text

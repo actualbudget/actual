@@ -99,7 +99,7 @@ export function ReportSidebar({
       } else {
         setTypeDisabled(['Net']);
         if (['Net'].includes(balanceType)) {
-          setBalanceType('Expense');
+          setBalanceType('Payment');
         }
       }
       if (graphType === 'BarGraph') {
@@ -129,7 +129,7 @@ export function ReportSidebar({
       }
     }
     if (['Net'].includes(balanceType) && graphType !== 'TableGraph') {
-      setBalanceType('Expense');
+      setBalanceType('Payment');
     }
   };
 

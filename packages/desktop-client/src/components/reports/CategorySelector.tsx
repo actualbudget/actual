@@ -50,8 +50,19 @@ export default function CategorySelector({
 
   return (
     <View>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Button type="bare" onClick={() => setUncheckedHidden(state => !state)}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginBottom: 5,
+          flexShrink: 0,
+        }}
+      >
+        <Button
+          type="bare"
+          onClick={() => setUncheckedHidden(state => !state)}
+          style={{ padding: 8 }}
+        >
           <View>
             {uncheckedHidden ? (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -91,13 +102,12 @@ export default function CategorySelector({
         </View>
       </View>
 
-      <ul
+      <View
         style={{
           listStyle: 'none',
           marginLeft: 0,
           paddingLeft: 0,
           paddingRight: 10,
-          height: 320,
           flexGrow: 1,
           overflowY: 'auto',
         }}
@@ -214,7 +224,8 @@ export default function CategorySelector({
               </Fragment>
             );
           })}
-      </ul>
+      </View>
+      <View />
     </View>
   );
 }

@@ -1,6 +1,6 @@
 const balanceTypeOptions = [
-  { description: 'Expense', format: 'totalDebts' },
-  { description: 'Income', format: 'totalAssets' },
+  { description: 'Payment', format: 'totalDebts' },
+  { description: 'Deposit', format: 'totalAssets' },
   { description: 'Net', format: 'totalTotals' },
 ];
 
