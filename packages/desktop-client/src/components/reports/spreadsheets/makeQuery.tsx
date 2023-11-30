@@ -2,8 +2,8 @@ import q from 'loot-core/src/client/query-helpers';
 
 function makeQuery(
   name,
-  start,
-  end,
+  startDate,
+  endDate,
   showOffBudgetHidden,
   selectedCategories,
   categoryFilter,
@@ -53,8 +53,8 @@ function makeQuery(
     //Apply month range filters
     .filter({
       $and: [
-        { date: { $transform: '$month', $gte: start } },
-        { date: { $transform: '$month', $lte: end } },
+        { date: { $transform: '$month', $gte: startDate } },
+        { date: { $transform: '$month', $lte: endDate } },
       ],
     })
     //Show assets or debts

@@ -17,12 +17,13 @@ import Text from '../../common/Text';
 import View from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
 import PrivacyFilter from '../../PrivacyFilter';
-import { ChooseGraph } from '../ChooseGraph';
+import ChooseGraph from '../ChooseGraph';
 import Header from '../Header';
 import LoadingIndicator from '../LoadingIndicator';
+import ReportLegend from '../ReportLegend';
 import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
-import { ReportLegend, ReportSummary } from '../ReportSummary';
+import ReportSummary from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
 import groupedSpreadsheet from '../spreadsheets/grouped-spreadsheet';
@@ -44,10 +45,10 @@ export default function CustomReport() {
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);
-  const [start, setStart] = useState(
+  const [startDate, setStartDate] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
-  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [endDate, setEndDate] = useState(monthUtils.currentMonth());
 
   const [mode, setMode] = useState('total');
   const [groupBy, setGroupBy] = useState('Category');
@@ -65,7 +66,7 @@ export default function CustomReport() {
   //const [legend, setLegend] = useState([]);
   let legend = [];
   const dateRangeLine = ReportOptions.dateRange.length - 3;
-  const months = monthUtils.rangeInclusive(start, end);
+  const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
     if (selectedCategories === null && categories.list.length !== 0) {
@@ -107,8 +108,8 @@ export default function CustomReport() {
 
   const getGroupData = useMemo(() => {
     return groupedSpreadsheet(
-      start,
-      end,
+      startDate,
+      endDate,
       categories,
       selectedCategories,
       filters,
@@ -117,8 +118,8 @@ export default function CustomReport() {
       showUncategorized,
     );
   }, [
-    start,
-    end,
+    startDate,
+    endDate,
     categories,
     selectedCategories,
     filters,
@@ -130,8 +131,8 @@ export default function CustomReport() {
   const getGraphData = useMemo(() => {
     setDataCheck(false);
     return defaultSpreadsheet(
-      start,
-      end,
+      startDate,
+      endDate,
       groupBy,
       ReportOptions.balanceTypeMap.get(balanceType),
       categories,
@@ -145,8 +146,8 @@ export default function CustomReport() {
       setDataCheck,
     );
   }, [
-    start,
-    end,
+    startDate,
+    endDate,
     groupBy,
     balanceType,
     categories,
@@ -169,9 +170,9 @@ export default function CustomReport() {
     return null;
   }
 
-  const onChangeDates = (start, end) => {
-    setStart(start);
-    setEnd(end);
+  const onChangeDates = (startDate, endDate) => {
+    setStartDate(startDate);
+    setEndDate(endDate);
   };
 
   return (
@@ -187,8 +188,8 @@ export default function CustomReport() {
         }}
       >
         <ReportSidebar
-          start={start}
-          end={end}
+          startDate={startDate}
+          endDate={endDate}
           onChangeDates={onChangeDates}
           dateRange={dateRange}
           setDateRange={setDateRange}
@@ -312,8 +313,6 @@ export default function CustomReport() {
 
                 {dataCheck ? (
                   <ChooseGraph
-                    start={start}
-                    end={end}
                     data={data}
                     mode={mode}
                     graphType={graphType}
@@ -341,8 +340,8 @@ export default function CustomReport() {
                 >
                   {viewSummary && (
                     <ReportSummary
-                      start={start}
-                      end={end}
+                      startDate={startDate}
+                      endDate={endDate}
                       balanceTypeOp={ReportOptions.balanceTypeMap.get(
                         balanceType,
                       )}

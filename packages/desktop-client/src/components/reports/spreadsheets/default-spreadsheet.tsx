@@ -12,8 +12,8 @@ import makeQuery from './makeQuery';
 import recalculate from './recalculate';
 
 export default function createSpreadsheet(
-  start,
-  end,
+  startDate,
+  endDate,
   groupBy,
   balanceTypeOp,
   categories,
@@ -59,8 +59,8 @@ export default function createSpreadsheet(
       runQuery(
         makeQuery(
           'assets',
-          start,
-          end,
+          startDate,
+          endDate,
           showOffBudgetHidden,
           selectedCategories,
           categoryFilter,
@@ -71,8 +71,8 @@ export default function createSpreadsheet(
       runQuery(
         makeQuery(
           'debts',
-          start,
-          end,
+          startDate,
+          endDate,
           showOffBudgetHidden,
           selectedCategories,
           categoryFilter,
@@ -82,7 +82,7 @@ export default function createSpreadsheet(
       ).then(({ data }) => data),
     ]);
 
-    const months = monthUtils.rangeInclusive(start, end);
+    const months = monthUtils.rangeInclusive(startDate, endDate);
 
     let totalAssets = 0;
     let totalDebts = 0;
@@ -144,8 +144,8 @@ export default function createSpreadsheet(
     setData({
       data: calcData,
       monthData,
-      start,
-      end,
+      startDate,
+      endDate,
       totalDebts: integerToAmount(totalDebts),
       totalAssets: integerToAmount(totalAssets),
       totalTotals: integerToAmount(totalAssets + totalDebts),

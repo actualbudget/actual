@@ -10,8 +10,8 @@ import makeQuery from './makeQuery';
 import recalculate from './recalculate';
 
 function createSpreadsheet(
-  start,
-  end,
+  startDate,
+  endDate,
   categories,
   selectedCategories,
   conditions = [],
@@ -47,8 +47,8 @@ function createSpreadsheet(
       runQuery(
         makeQuery(
           'assets',
-          start,
-          end,
+          startDate,
+          endDate,
           showOffBudgetHidden,
           selectedCategories,
           categoryFilter,
@@ -59,8 +59,8 @@ function createSpreadsheet(
       runQuery(
         makeQuery(
           'debts',
-          start,
-          end,
+          startDate,
+          endDate,
           showOffBudgetHidden,
           selectedCategories,
           categoryFilter,
@@ -70,7 +70,7 @@ function createSpreadsheet(
       ).then(({ data }) => data),
     ]);
 
-    const months = monthUtils.rangeInclusive(start, end);
+    const months = monthUtils.rangeInclusive(startDate, endDate);
 
     const groupedData = categoryGroup
       .filter(f => (showOffBudgetHidden || f.hidden === 0) && f)
@@ -129,7 +129,7 @@ function createSpreadsheet(
             categories: stackedCategories,
           };
         },
-        [start, end],
+        [startDate, endDate],
       );
 
     setData(groupedData);
