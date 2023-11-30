@@ -7,6 +7,7 @@ import SandboxfinanceSfin0000 from './banks/sandboxfinance-sfin0000.js';
 import FintroBeGebabebb from './banks/fintro-be-gebabebb.js';
 import DanskeBankDabNO22 from './banks/danskebank-dabno22.js';
 import SparNordSpNoDK22 from './banks/sparnord-spnodk22.js';
+import Belfius from './banks/belfius_gkccbebb.js';
 
 const banks = [
   AmericanExpressAesudef1,
@@ -17,6 +18,7 @@ const banks = [
   FintroBeGebabebb,
   DanskeBankDabNO22,
   SparNordSpNoDK22,
+  Belfius,
 ];
 
 export default (institutionId) =>
