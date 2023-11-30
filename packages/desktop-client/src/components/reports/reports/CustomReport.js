@@ -52,9 +52,9 @@ export default function CustomReport() {
   const [mode, setMode] = useState('total');
   const [groupBy, setGroupBy] = useState('Category');
   const [balanceType, setBalanceType] = useState('Expense');
-  const [showEmpty, setShowEmpty] = useState(false);
-  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(false);
-  const [showUncategorized, setShowUncategorized] = useState(false);
+  const [empty, setEmpty] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [uncat, setUncat] = useState(false);
   const [dateRange, setDateRange] = useState('6 months');
   const [dataCheck, setDataCheck] = useState(false);
 
@@ -113,8 +113,8 @@ export default function CustomReport() {
       selectedCategories,
       filters,
       conditionsOp,
-      showOffBudgetHidden,
-      showUncategorized,
+      hidden,
+      uncat,
     );
   }, [
     start,
@@ -123,8 +123,8 @@ export default function CustomReport() {
     selectedCategories,
     filters,
     conditionsOp,
-    showOffBudgetHidden,
-    showUncategorized,
+    hidden,
+    uncat,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -140,8 +140,8 @@ export default function CustomReport() {
       accounts,
       filters,
       conditionsOp,
-      showOffBudgetHidden,
-      showUncategorized,
+      hidden,
+      uncat,
       setDataCheck,
     );
   }, [
@@ -155,8 +155,8 @@ export default function CustomReport() {
     accounts,
     filters,
     conditionsOp,
-    showOffBudgetHidden,
-    showUncategorized,
+    hidden,
+    uncat,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -205,12 +205,12 @@ export default function CustomReport() {
           setBalanceType={setBalanceType}
           mode={mode}
           setMode={setMode}
-          showEmpty={showEmpty}
-          setShowEmpty={setShowEmpty}
-          showOffBudgetHidden={showOffBudgetHidden}
-          setShowOffBudgetHidden={setShowOffBudgetHidden}
-          showUncategorized={showUncategorized}
-          setShowUncategorized={setShowUncategorized}
+          empty={empty}
+          setEmpty={setEmpty}
+          hidden={hidden}
+          setHidden={setHidden}
+          uncat={uncat}
+          setUncat={setUncat}
           categories={categories}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
@@ -319,7 +319,7 @@ export default function CustomReport() {
                     graphType={graphType}
                     balanceType={balanceType}
                     groupBy={groupBy}
-                    showEmpty={showEmpty}
+                    empty={empty}
                     scrollWidth={scrollWidth}
                     setScrollWidth={setScrollWidth}
                     months={months}

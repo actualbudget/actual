@@ -97,17 +97,21 @@ type DonutGraphProps = {
   data;
   groupBy;
   balanceTypeOp;
-  showEmpty;
-  compact?: boolean;
+  empty;
+  compact: boolean;
+  domain?: {
+    y?: [number, number];
+  };
 };
 
 function DonutGraph({
   style,
   data,
   groupBy,
-  showEmpty,
+  empty,
   balanceTypeOp,
   compact,
+  domain,
 }: DonutGraphProps) {
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
@@ -147,7 +151,7 @@ function DonutGraph({
                   nameKey={yAxis}
                   isAnimationActive={false}
                   data={data[splitData].filter(i =>
-                    !showEmpty ? i[balanceTypeOp] !== 0 : true,
+                    !empty ? i[balanceTypeOp] !== 0 : true,
                   )}
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"

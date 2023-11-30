@@ -80,17 +80,12 @@ let uncategorizedGroup = {
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };
 
-export const categoryLists = (showUncategorized, categories) => {
-  let categoryList = showUncategorized
-    ? [
-        ...categories.list,
-        uncategorizedCategory,
-        transferCategory,
-        offBudgetCategory,
-      ]
+export const categoryLists = (uncat, categories) => {
+  let catList = uncat
+    ? [...categories.list, uncatCat, uncatTransfer, uncatOff]
     : categories.list;
-  let categoryGroup = showUncategorized
-    ? [...categories.grouped, uncategorizedGroup]
+  let catGroup = uncat
+    ? [...categories.grouped, uncatGroup]
     : categories.grouped;
   return [categoryList, categoryGroup];
 };

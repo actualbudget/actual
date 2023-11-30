@@ -20,7 +20,7 @@ export function ChooseGraph({
   graphType,
   balanceType,
   groupBy,
-  showEmpty,
+  empty,
   scrollWidth,
   setScrollWidth,
   months,
@@ -55,7 +55,7 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        showEmpty={showEmpty}
+        empty={empty}
         balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
@@ -69,7 +69,7 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        showEmpty={showEmpty}
+        empty={empty}
         balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
@@ -96,7 +96,7 @@ export function ChooseGraph({
         >
           <ReportTableList
             data={data}
-            showEmpty={showEmpty}
+            empty={empty}
             monthsCount={months.length}
             balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
             mode={mode}

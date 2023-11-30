@@ -132,17 +132,21 @@ type BarGraphProps = {
   data;
   groupBy;
   balanceTypeOp;
-  showEmpty;
-  compact?: boolean;
+  empty;
+  compact: boolean;
+  domain?: {
+    y?: [number, number];
+  };
 };
 
 function BarGraph({
   style,
   data,
   groupBy,
-  showEmpty,
+  empty,
   balanceTypeOp,
   compact,
+  domain,
 }: BarGraphProps) {
   let privacyMode = usePrivacyMode();
 
@@ -179,7 +183,7 @@ function BarGraph({
                 height={height}
                 stackOffset="sign"
                 data={data[splitData].filter(i =>
-                  !showEmpty ? i[balanceTypeOp] !== 0 : true,
+                  !empty ? i[balanceTypeOp] !== 0 : true,
                 )}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
@@ -219,7 +223,7 @@ function BarGraph({
                 )}
                 <Bar dataKey={val => getVal(val)} stackId="a">
                   {data[splitData]
-                    .filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true))
+                    .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
                     .map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
@@ -237,7 +241,7 @@ function BarGraph({
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
                   <Bar dataKey={'totalDebts'} stackId="a">
                     {data[splitData]
-                      .filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true))
+                      .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
                       .map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}

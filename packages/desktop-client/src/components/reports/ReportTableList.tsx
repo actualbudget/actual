@@ -140,7 +140,7 @@ function GroupedTableRow({
   groupByItem,
   mode,
   monthsCount,
-  showEmpty,
+  empty,
 }) {
   return (
     <>
@@ -160,7 +160,7 @@ function GroupedTableRow({
       <View>
         {item.categories
           .filter(i =>
-            !showEmpty
+            !empty
               ? balanceTypeOp === 'totalTotals'
                 ? i.totalAssets !== 0 ||
                   i.totalDebts !== 0 ||
@@ -188,7 +188,7 @@ function GroupedTableRow({
 
 export default function ReportTableList({
   data,
-  showEmpty,
+  empty,
   monthsCount,
   balanceTypeOp,
   mode,
@@ -206,7 +206,7 @@ export default function ReportTableList({
     <View>
       {data[groupByData]
         .filter(i =>
-          !showEmpty
+          !empty
             ? balanceTypeOp === 'totalTotals'
               ? i.totalAssets !== 0 || i.totalDebts !== 0 || i.totalTotals !== 0
               : i[balanceTypeOp] !== 0
@@ -222,7 +222,7 @@ export default function ReportTableList({
                 groupByItem={groupByItem}
                 mode={mode}
                 monthsCount={monthsCount}
-                showEmpty={showEmpty}
+                empty={empty}
               />
             );
           } else {

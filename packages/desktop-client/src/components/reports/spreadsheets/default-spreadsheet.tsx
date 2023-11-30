@@ -22,11 +22,11 @@ export default function createSpreadsheet(
   accounts,
   conditions = [],
   conditionsOp,
-  showOffBudgetHidden,
-  showUncategorized,
+  hidden,
+  uncat,
   setDataCheck,
 ) {
-  let [catList, catGroup] = categoryLists(showUncategorized, categories);
+  let [catList, catGroup] = categoryLists(uncat, categories);
 
   let categoryFilter = (catList || []).filter(
     category =>
@@ -61,7 +61,7 @@ export default function createSpreadsheet(
           'assets',
           start,
           end,
-          showOffBudgetHidden,
+          hidden,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -73,7 +73,7 @@ export default function createSpreadsheet(
           'debts',
           start,
           end,
-          showOffBudgetHidden,
+          hidden,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
