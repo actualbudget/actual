@@ -102,7 +102,7 @@ export default function CategorySelector({
         </View>
       </View>
 
-      <View
+      <ul
         style={{
           listStyle: 'none',
           marginLeft: 0,
@@ -224,7 +224,7 @@ export default function CategorySelector({
               </Fragment>
             );
           })}
-      </View>
+      </ul>
       <View />
     </View>
   );
