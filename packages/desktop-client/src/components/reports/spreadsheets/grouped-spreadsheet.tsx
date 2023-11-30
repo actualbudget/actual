@@ -21,7 +21,7 @@ function createSpreadsheet(
 ) {
   let [catList, catGroup] = categoryLists(uncat, categories);
 
-  let categoryFilter = (categoryList || []).filter(
+  let categoryFilter = (catList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -31,7 +31,7 @@ function createSpreadsheet(
   );
 
   return async (spreadsheet, setData) => {
-    if (categoryList.length === 0) {
+    if (catList.length === 0) {
       return null;
     }
 

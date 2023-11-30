@@ -73,7 +73,7 @@ let offBudgetCategory = {
   category: true,
 };
 
-let uncategorizedGroup = {
+let uncategouncatGrouprizedGroup = {
   name: 'Uncategorized & Off Budget',
   id: null,
   hidden: 0,
@@ -81,11 +81,16 @@ let uncategorizedGroup = {
 };
 
 export const categoryLists = (uncat, categories) => {
-  let catList = uncat
-    ? [...categories.list, uncatCat, uncatTransfer, uncatOff]
+  let categoryList = uncat
+    ? [
+        ...categories.list,
+        uncategorizedCategory,
+        transferCategory,
+        offBudgetCategory,
+      ]
     : categories.list;
-  let catGroup = uncat
-    ? [...categories.grouped, uncatGroup]
+  let categoryGroup = uncat
+    ? [...categories.grouped, uncategouncatGrouprizedGroup]
     : categories.grouped;
   return [categoryList, categoryGroup];
 };

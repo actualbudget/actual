@@ -1,16 +1,12 @@
-import React, {
-  type Ref,
-  useLayoutEffect,
-  useRef,
-  type ReactNode,
-} from 'react';
+import React, { useLayoutEffect, useRef, type ReactNode } from 'react';
+import { type RefProp } from 'react-spring';
 
 import { type CSSProperties } from '../../style';
 import View from '../common/View';
 
 type ReportTableProps = {
-  saveScrollWidth?;
-  listScrollRef?: Ref<HTMLDivElement>;
+  saveScrollWidth?: (value: number) => void;
+  listScrollRef?: RefProp<HTMLDivElement>;
   style?: CSSProperties;
   children?: ReactNode;
 };
@@ -21,16 +17,11 @@ export default function ReportTable({
   style,
   children,
 }: ReportTableProps) {
-  let contentRef = useRef<HTMLDivElement>();
+  let contentRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     if (contentRef.current && saveScrollWidth) {
-      saveScrollWidth(
-        contentRef.current.offsetParent
-          ? contentRef.current.parentElement.offsetWidth
-          : 0,
-        contentRef.current ? contentRef.current.offsetWidth : 0,
-      );
+      saveScrollWidth(contentRef.current ? contentRef.current.offsetWidth : 0);
     }
   });
 

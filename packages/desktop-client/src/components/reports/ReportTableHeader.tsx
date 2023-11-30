@@ -7,9 +7,9 @@ import View from '../common/View';
 import { Row, Cell } from '../table';
 
 type ReportTableHeaderProps = {
-  scrollWidth?;
+  scrollWidth?: number;
   groupBy: string;
-  interval?;
+  interval?: Array<string>;
   balanceType: string;
   headerScrollRef?: Ref<HTMLDivElement>;
 };

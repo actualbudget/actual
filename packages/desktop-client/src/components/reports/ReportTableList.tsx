@@ -18,11 +18,11 @@ type TableRowProps = {
     totalAssets: number;
     totalDebts: number;
   };
-  balanceTypeOp?: string | null;
+  balanceTypeOp?: string;
   groupByItem: string;
   mode: string;
   monthsCount: number;
-  style?: object | null;
+  style?: object;
 };
 
 const TableRow = memo(
