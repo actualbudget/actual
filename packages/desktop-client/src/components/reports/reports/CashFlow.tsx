@@ -52,7 +52,8 @@ export default function CashFlow(): JSX.Element {
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
+      let trans: any
+      trans = await send('get-earliest-transaction');
       const earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(trans.date))
         : monthUtils.currentMonth();
