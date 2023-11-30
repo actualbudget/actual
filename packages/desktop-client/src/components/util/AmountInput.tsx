@@ -89,7 +89,6 @@ export function AmountInput({
         <Button
           type="bare"
           style={{ padding: '0 7px' }}
-          disabled={!focused}
           onPointerUp={onSwitch}
           onPointerDown={e => e.preventDefault()}
           ref={buttonRef}
