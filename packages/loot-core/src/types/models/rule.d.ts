@@ -12,18 +12,18 @@ export interface RuleEntity {
 interface RuleConditionEntity {
   field: unknown;
   op:
-    | is
-    | isNot
-    | oneOf
-    | notOneOf
-    | isapprox
-    | isbetween
-    | gt
-    | gte
-    | lt
-    | lte
-    | contains
-    | doesNotContain;
+    | 'is'
+    | 'isNot'
+    | 'oneOf'
+    | 'notOneOf'
+    | 'isapprox'
+    | 'isbetween'
+    | 'gt'
+    | 'gte'
+    | 'lt'
+    | 'lte'
+    | 'contains'
+    | 'doesNotContain';
   value: unknown;
   options?: unknown;
   conditionsOp?: unknown;
