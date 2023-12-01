@@ -3,7 +3,8 @@ import React, {
   Fragment,
   useMemo,
   type ReactNode,
-  type CSSProperties,
+  type SVGProps,
+  type ComponentType,
 } from 'react';
 
 import { css } from 'glamor';
@@ -14,7 +15,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import Split from '../../icons/v0/Split';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
 
@@ -26,7 +27,13 @@ export type CategoryListProps = {
   highlightedIndex: number;
   embedded: boolean;
   footer?: ReactNode;
-  groupHeaderStyle?: object;
+  renderSplitTransactionButton?: (
+    props: SplitTransactionButtonProps,
+  ) => ReactNode;
+  renderCategoryItemGroupHeader?: (
+    props: CategoryItemGroupHeaderProps,
+  ) => ReactNode;
+  renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
 function CategoryList({
   items,
@@ -34,7 +41,9 @@ function CategoryList({
   highlightedIndex,
   embedded,
   footer,
-  groupHeaderStyle,
+  renderSplitTransactionButton = defaultRenderSplitTransactionButton,
+  renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
+  renderCategoryItem = defaultRenderCategoryItem,
 }: CategoryListProps) {
   let lastGroup = null;
 
@@ -49,57 +58,12 @@ function CategoryList({
       >
         {items.map((item, idx) => {
           if (item.id === 'split') {
-            return (
-              <View
-                key="split"
-                {...(getItemProps ? getItemProps({ item }) : null)}
-                // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
-                // event handler they set on this element. When this code runs
-                // in WebKit on touch-enabled devices, taps on this element end
-                // up not triggering the `onClick` event (and therefore delaying
-                // response to user input) until after the `setTimeout` callback
-                // finishes executing. This is caused by content observation code
-                // that implements various strategies to prevent the user from
-                // accidentally clicking content that changed as a result of code
-                // run in the `onMouseMove` event.
-                //
-                // Long story short, we don't want any delay here between the user
-                // tapping and the resulting action being performed. It turns out
-                // there's some "fast path" logic that can be triggered in various
-                // ways to force WebKit to bail on the content observation process.
-                // One of those ways is setting `role="button"` (or a number of
-                // other aria roles) on the element, which is what we're doing here.
-                //
-                // ref:
-                // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
-                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
-                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
-                role="button"
-                style={{
-                  backgroundColor:
-                    highlightedIndex === idx
-                      ? theme.menuAutoCompleteBackgroundHover
-                      : 'transparent',
-                  borderRadius: embedded ? 4 : 0,
-                  flexShrink: 0,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: theme.noticeTextMenu,
-                  padding: '6px 8px',
-                  ':active': {
-                    backgroundColor: 'rgba(100, 100, 100, .25)',
-                  },
-                }}
-                data-testid="split-transaction-button"
-              >
-                <Text style={{ lineHeight: 0 }}>
-                  <Split width={10} height={10} style={{ marginRight: 5 }} />
-                </Text>
-                Split Transaction
-              </View>
-            );
+            return renderSplitTransactionButton({
+              key: 'split',
+              ...(getItemProps ? getItemProps({ item }) : null),
+              highlighted: highlightedIndex === idx,
+              embedded,
+            });
           }
 
           const showGroup = item.cat_group !== lastGroup;
@@ -107,39 +71,20 @@ function CategoryList({
           return (
             <Fragment key={item.id}>
               {showGroup && (
-                <div
-                  style={{
-                    color: theme.menuAutoCompleteTextHeader,
-                    padding: '4px 9px',
-                    ...groupHeaderStyle,
-                  }}
-                  data-testid="category-item-group"
-                >
-                  {`${item.group?.name}`}
-                </div>
+                <Fragment key={item.group?.name}>
+                  {renderCategoryItemGroupHeader({
+                    title: item.group?.name,
+                  })}
+                </Fragment>
               )}
-              <div
-                {...(getItemProps ? getItemProps({ item }) : null)}
-                // See comment above.
-                role="button"
-                className={`${css([
-                  {
-                    backgroundColor:
-                      highlightedIndex === idx
-                        ? theme.menuAutoCompleteBackgroundHover
-                        : 'transparent',
-                    padding: 4,
-                    paddingLeft: 20,
-                    borderRadius: embedded ? 4 : 0,
-                  },
-                ])}`}
-                data-testid={
-                  'category-item' +
-                  (highlightedIndex === idx ? '-highlighted' : '')
-                }
-              >
-                {item.name}
-              </div>
+              <Fragment key={item.id}>
+                {renderCategoryItem({
+                  ...(getItemProps ? getItemProps({ item }) : null),
+                  item,
+                  highlighted: highlightedIndex === idx,
+                  embedded,
+                })}
+              </Fragment>
             </Fragment>
           );
         })}
@@ -152,7 +97,13 @@ function CategoryList({
 type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   categoryGroups: Array<CategoryGroupEntity>;
   showSplitOption?: boolean;
-  groupHeaderStyle?: CSSProperties;
+  renderSplitTransactionButton?: (
+    props: SplitTransactionButtonProps,
+  ) => ReactNode;
+  renderCategoryItemGroupHeader?: (
+    props: CategoryItemGroupHeaderProps,
+  ) => ReactNode;
+  renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
 
 export default function CategoryAutocomplete({
@@ -160,7 +111,9 @@ export default function CategoryAutocomplete({
   showSplitOption,
   embedded,
   closeOnBlur,
-  groupHeaderStyle,
+  renderSplitTransactionButton,
+  renderCategoryItemGroupHeader,
+  renderCategoryItem,
   ...props
 }: CategoryAutocompleteProps) {
   let categorySuggestions: Array<
@@ -211,10 +164,166 @@ export default function CategoryAutocomplete({
           embedded={embedded}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
-          groupHeaderStyle={groupHeaderStyle}
+          renderSplitTransactionButton={renderSplitTransactionButton}
+          renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
+          renderCategoryItem={renderCategoryItem}
         />
       )}
       {...props}
     />
   );
+}
+
+type CategoryItemGroupHeaderProps = {
+  title: string;
+  style?: CSSProperties;
+};
+
+export function CategoryItemGroupHeader({
+  title,
+  style,
+  ...props
+}: CategoryItemGroupHeaderProps) {
+  return (
+    <div
+      style={{
+        color: theme.menuAutoCompleteTextHeader,
+        padding: '4px 9px',
+        ...style,
+      }}
+      data-testid={`${title}-category-item-group`}
+      {...props}
+    >
+      {title}
+    </div>
+  );
+}
+
+function defaultRenderCategoryItemGroupHeader(
+  props: CategoryItemGroupHeaderProps,
+) {
+  return <CategoryItemGroupHeader {...props} />;
+}
+
+type SplitTransactionButtonProps = {
+  Icon?: ComponentType<SVGProps<SVGElement>>;
+  highlighted?: boolean;
+  embedded?: boolean;
+  style?: CSSProperties;
+};
+
+// eslint-disable-next-line import/no-unused-modules
+export function SplitTransactionButton({
+  Icon,
+  highlighted,
+  embedded,
+  style,
+  ...props
+}: SplitTransactionButtonProps) {
+  return (
+    <View
+      // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
+      // event handler they set on this element. When this code runs
+      // in WebKit on touch-enabled devices, taps on this element end
+      // up not triggering the `onClick` event (and therefore delaying
+      // response to user input) until after the `setTimeout` callback
+      // finishes executing. This is caused by content observation code
+      // that implements various strategies to prevent the user from
+      // accidentally clicking content that changed as a result of code
+      // run in the `onMouseMove` event.
+      //
+      // Long story short, we don't want any delay here between the user
+      // tapping and the resulting action being performed. It turns out
+      // there's some "fast path" logic that can be triggered in various
+      // ways to force WebKit to bail on the content observation process.
+      // One of those ways is setting `role="button"` (or a number of
+      // other aria roles) on the element, which is what we're doing here.
+      //
+      // ref:
+      // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
+      // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
+      // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+      role="button"
+      style={{
+        backgroundColor: highlighted
+          ? embedded
+            ? theme.menuItemBackgroundHover
+            : theme.menuAutoCompleteBackgroundHover
+          : 'transparent',
+        borderRadius: embedded ? 4 : 0,
+        flexShrink: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+        fontSize: 11,
+        fontWeight: 500,
+        color: theme.noticeTextMenu,
+        padding: '6px 8px',
+        ':active': {
+          backgroundColor: 'rgba(100, 100, 100, .25)',
+        },
+        ...style,
+      }}
+      data-testid="split-transaction-button"
+      {...props}
+    >
+      <Text style={{ lineHeight: 0 }}>
+        {Icon ? (
+          <Icon style={{ marginRight: 5 }} />
+        ) : (
+          <Split width={10} height={10} style={{ marginRight: 5 }} />
+        )}
+      </Text>
+      Split Transaction
+    </View>
+  );
+}
+
+function defaultRenderSplitTransactionButton(
+  props: SplitTransactionButtonProps,
+) {
+  return <SplitTransactionButton {...props} />;
+}
+
+type CategoryItemProps = {
+  item: CategoryEntity & { group?: CategoryGroupEntity };
+  className?: string;
+  style?: CSSProperties;
+  highlighted?: boolean;
+  embedded?: boolean;
+};
+
+export function CategoryItem({
+  item,
+  className,
+  highlighted,
+  embedded,
+  ...props
+}: CategoryItemProps) {
+  return (
+    <div
+      // See comment above.
+      role="button"
+      className={`${className} ${css([
+        {
+          backgroundColor: highlighted
+            ? embedded
+              ? theme.menuItemBackgroundHover
+              : theme.menuAutoCompleteBackgroundHover
+            : 'transparent',
+          padding: 4,
+          paddingLeft: 20,
+          borderRadius: embedded ? 4 : 0,
+        },
+      ])}`}
+      data-testid={`${item.name}-category-item`}
+      data-highlighted={highlighted || undefined}
+      {...props}
+    >
+      {item.name}
+    </div>
+  );
+}
+
+function defaultRenderCategoryItem(props: CategoryItemProps) {
+  return <CategoryItem {...props} />;
 }
