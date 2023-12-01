@@ -205,7 +205,7 @@ app.post(
         case isAxiosError(error):
           console.log(
             'Something went wrong',
-            inspect(error.response.data, { depth: null }),
+            inspect(error.response?.data || error, { depth: null }),
           );
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
