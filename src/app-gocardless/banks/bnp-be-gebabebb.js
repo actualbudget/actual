@@ -16,7 +16,11 @@ const SORTED_BALANCE_TYPE_LIST = [
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: ['FINTRO_BE_GEBABEBB'],
+  institutionIds: [
+    'FINTRO_BE_GEBABEBB',
+    'HELLO_BE_GEBABEBB',
+    'BNP_BE_GEBABEBB',
+  ],
 
   normalizeAccount(account) {
     return {
@@ -32,7 +36,7 @@ export default {
     };
   },
 
-  /** FINTRO_BE_GEBABEBB provides a lot of useful information via the 'additionalField'
+  /** BNP_BE_GEBABEBB provides a lot of useful information via the 'additionalField'
    *  There does not seem to be a specification of this field, but the following information is contained in its subfields:
    *  - for pending transactions: the 'atmPosName'
    *  - for booked transactions: the 'narrative'.
