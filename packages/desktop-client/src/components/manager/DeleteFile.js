@@ -1,32 +1,15 @@
 import React, { useState } from 'react';
 
-import { type File, isLocalFile } from 'loot-core/src/types/file';
-
-import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
 import Modal from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
 
-type DeleteMenuProps = {
-  modalProps: CommonModalProps;
-  actions: BoundActions;
-  file: File;
-};
-
-export default function DeleteMenu({
-  modalProps,
-  actions,
-  file,
-}: DeleteMenuProps) {
-  let [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
-    null,
-  );
+export default function DeleteMenu({ modalProps, actions, file }) {
+  let [loadingState, setLoadingState] = useState(null);
 
   async function onDeleteCloud() {
-    if (isLocalFile(file)) return;
     setLoadingState('cloud');
     await actions.deleteBudget(file.id, file.cloudFileId);
     setLoadingState(null);
@@ -45,8 +28,7 @@ export default function DeleteMenu({
   // If the state is "broken" that means it was created by another
   // user. The current user should be able to delete the local file,
   // but not the remote one
-  let isRemote =
-    !isLocalFile(file) && file.cloudFileId && file.state !== 'broken';
+  let isRemote = file.cloudFileId && file.state !== 'broken';
 
   return (
     <Modal

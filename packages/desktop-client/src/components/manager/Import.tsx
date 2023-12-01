@@ -9,7 +9,7 @@ import Modal from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
 
-function getErrorMessage(error: 'not-ynab4' | string | boolean) {
+function getErrorMessage(error: 'not-ynab4' | boolean) {
   switch (error) {
     case 'not-ynab4':
       return 'This file is not valid. Please select a .ynab4 file';
