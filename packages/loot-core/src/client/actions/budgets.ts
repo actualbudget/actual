@@ -110,10 +110,7 @@ export function closeBudgetUI() {
   };
 }
 
-export function deleteBudget(
-  id: string | undefined,
-  cloudFileId: string | undefined,
-) {
+export function deleteBudget(id: string | undefined, cloudFileId?: string) {
   return async (dispatch: Dispatch) => {
     await send('delete-budget', { id, cloudFileId });
     await dispatch(loadAllFiles());

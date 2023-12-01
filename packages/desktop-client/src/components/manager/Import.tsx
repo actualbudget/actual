@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 
+import { type BoundActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
+import { type CommonModalProps } from '../../types/modals';
 import Block from '../common/Block';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
 
-function getErrorMessage(error) {
+function getErrorMessage(error: 'not-ynab4' | string | boolean) {
   switch (error) {
     case 'not-ynab4':
       return 'This file is not valid. Please select a .ynab4 file';
@@ -16,10 +18,15 @@ function getErrorMessage(error) {
   }
 }
 
-function Import({ modalProps, actions }) {
+type ImportProps = {
+  modalProps: CommonModalProps;
+  actions: BoundActions;
+};
+
+function Import({ modalProps, actions }: ImportProps) {
   const [error] = useState(false);
 
-  function onSelectType(type) {
+  function onSelectType(type: 'ynab4' | 'ynab5' | 'actual') {
     switch (type) {
       case 'ynab4':
         actions.pushModal('import-ynab4');

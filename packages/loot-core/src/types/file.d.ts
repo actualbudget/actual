@@ -24,6 +24,7 @@ export type SyncedLocalFile = Budget & {
   state: 'synced' | 'detached';
 };
 export type RemoteFile = {
+  id?: string;
   cloudFileId: string;
   groupId: string;
   name: string;
@@ -31,5 +32,9 @@ export type RemoteFile = {
   hasKey: boolean;
   state: 'remote';
 };
+
+export function isLocalFile(file: File): file is LocalFile {
+  return file.state === 'local';
+}
 
 export type File = LocalFile | SyncableLocalFile | SyncedLocalFile | RemoteFile;
