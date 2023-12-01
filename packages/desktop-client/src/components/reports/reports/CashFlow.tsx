@@ -19,7 +19,6 @@ import CashFlowGraph from '../graphs/CashFlowGraph';
 import Header from '../Header';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import useReport from '../useReport';
-import { Handlers } from 'loot-core/src/types/handlers';
 
 export default function CashFlow(): JSX.Element {
   const {
