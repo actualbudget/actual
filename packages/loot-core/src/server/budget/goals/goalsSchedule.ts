@@ -45,8 +45,6 @@ async function parseSchedules(template, current_month, t, errors) {
     num_months: num_months,
     completed: complete,
     full: template.full,
-    skipWeekend: skipWeekend,
-    weekendSolveMode: weekendSolveMode,
   });
   if (!complete) {
     if (isRepeating) {
@@ -61,7 +59,7 @@ async function parseSchedules(template, current_month, t, errors) {
       );
       while (next_date < next_month) {
         monthlyTarget += -target;
-        if (monthUtils.isWeekendOrFriday(next_date) && t[t.length-1].skipWeekend && t[t.length-1].weekendSolveMode === 'before') {
+        if (monthUtils.isWeekendOrFriday(next_date) && skipWeekend && weekendSolveMode === 'before') {
           next_date = monthUtils.nextMonday(next_date);
         } else {
         next_date = monthUtils.addDays(next_date, 1);
