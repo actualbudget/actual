@@ -15,7 +15,3 @@ export const getEvents: T.GetEvents = function () {
 export const resetEvents: T.ResetEvents = function () {
   events = [];
 };
-
-export const getNumClients: T.GetNumClients = function () {
-  return 1;
-};
