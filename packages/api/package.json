@@ -17,7 +17,7 @@
     "build:migrations": "cp migrations/*.sql dist/migrations",
     "build:default-db": "cp default-db.sqlite dist/",
     "build": "rm -rf dist && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
-    "test": "jest -c jest.config.js"
+    "test": "yarn run build:app && jest -c jest.config.js"
   },
   "dependencies": {
     "better-sqlite3": "^9.1.1",
