@@ -11,5 +11,5 @@
     "outDir": "dist"
   },
   "include": ["."],
-  "exclude": ["dist", "**/*.test.js"]
+  "exclude": ["dist"]
 }

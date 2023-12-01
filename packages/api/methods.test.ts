@@ -1,78 +1,51 @@
-import * as connection from '../loot-core/src/platform/server/connection';
-import * as fs from '../loot-core/src/platform/server/fs';
-import * as db from '../loot-core/src/server/db';
-import * as actualApp from '../loot-core/src/server/main';
-import {
-  runHandler,
-  runMutator,
-  disableGlobalMutations,
-  enableGlobalMutations,
-} from '../loot-core/src/server/mutators';
-import * as prefs from '../loot-core/src/server/prefs';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
-import * as injected from './injected';
-import * as api from './methods';
+import * as api from './index';
 
-let budgetName;
-beforeAll(async () => {
-  budgetName = 'test-budget';
-});
+const budgetName = 'test-budget';
 
 beforeEach(async () => {
-  await global.emptyDatabase()();
-  disableGlobalMutations();
-
-  // Inject the actual API
-  injected.override(actualApp.lib.send);
-
   // we need real datetime if we are going to mix new timestamps with our mock data
   global.restoreDateNow();
+
+  const budgetPath = path.join(__dirname, '/mocks/budgets/', budgetName);
+  await fs.rm(budgetPath, { force: true, recursive: true });
+
+  await createTestBudget('default-budget-template', budgetName);
+  await api.init({
+    dataDir: path.join(__dirname, '/mocks/budgets/'),
+  });
 });
 
 afterEach(async () => {
-  await runHandler(actualApp.handlers['close-budget']);
-  connection.resetEvents();
-  enableGlobalMutations();
   global.currentMonth = null;
-  global.resetTime();
-
-  fs._setDocumentDir(null);
-  const budgetPath = fs.join(__dirname, '/mocks/budgets/', budgetName);
-
-  if (await fs.exists(budgetPath)) {
-    await fs.removeDirRecursively(budgetPath);
-  }
+  await api.shutdown();
 });
 
-async function createTestBudget(templateName, name) {
-  const templatePath = fs.join(
+async function createTestBudget(templateName: string, name: string) {
+  const templatePath = path.join(
     __dirname,
     '/../loot-core/src/mocks/files',
     templateName,
   );
-  const budgetPath = fs.join(__dirname, '/mocks/budgets/', name);
-  fs._setDocumentDir(fs.join(budgetPath, '..'));
+  const budgetPath = path.join(__dirname, '/mocks/budgets/', name);
 
   await fs.mkdir(budgetPath);
   await fs.copyFile(
-    fs.join(templatePath, 'metadata.json'),
-    fs.join(budgetPath, 'metadata.json'),
+    path.join(templatePath, 'metadata.json'),
+    path.join(budgetPath, 'metadata.json'),
   );
   await fs.copyFile(
-    fs.join(templatePath, 'db.sqlite'),
-    fs.join(budgetPath, 'db.sqlite'),
+    path.join(templatePath, 'db.sqlite'),
+    path.join(budgetPath, 'db.sqlite'),
   );
 }
 
 describe('API setup and teardown', () => {
   // apis: loadBudget, getBudgetMonths
   test('successfully loads budget', async () => {
-    await createTestBudget('default-budget-template', budgetName);
-
     await expect(api.loadBudget(budgetName)).resolves.toBeUndefined();
-
-    // Make sure the prefs were loaded
-    expect(prefs.getPrefs().id).toBe(budgetName);
 
     await expect(api.getBudgetMonths()).resolves.toMatchSnapshot();
   });
@@ -81,8 +54,7 @@ describe('API setup and teardown', () => {
 describe('API CRUD operations', () => {
   beforeEach(async () => {
     // load test budget
-    await createTestBudget('default-budget-template', budgetName);
-    await runHandler(actualApp.handlers['load-budget'], { id: budgetName });
+    await api.loadBudget(budgetName);
   });
 
   // apis: setBudgetAmount, setBudgetCarryover, getBudgetMonth
@@ -91,26 +63,25 @@ describe('API CRUD operations', () => {
     global.currentMonth = month;
 
     // create some new categories to test with
-    await runMutator(async () => {
-      await db.insertCategoryGroup({ id: 'tests', name: 'tests' });
-      await db.insertCategory({
-        id: 'test-budget',
-        name: 'test-budget',
-        cat_group: 'tests',
-      });
+    const groupId = await api.createCategoryGroup({
+      name: 'tests',
+    });
+    const categoryId = await api.createCategory({
+      name: 'test-budget',
+      group_id: groupId,
     });
 
-    await api.setBudgetAmount(month, 'test-budget', 100);
-    await api.setBudgetCarryover(month, 'test-budget', true);
+    await api.setBudgetAmount(month, categoryId, 100);
+    await api.setBudgetCarryover(month, categoryId, true);
 
     const budgetMonth = await api.getBudgetMonth(month);
     expect(budgetMonth.categoryGroups).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          id: 'tests',
+          id: groupId,
           categories: expect.arrayContaining([
             expect.objectContaining({
-              id: 'test-budget',
+              id: categoryId,
               budgeted: 100,
               carryover: true,
             }),

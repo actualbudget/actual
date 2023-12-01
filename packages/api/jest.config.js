@@ -18,7 +18,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/../loot-core/src/mocks/setup.ts'],
   transformIgnorePatterns: ['/node_modules/'],
   transform: {
-    '\\.pegjs$': '<rootDir>/../loot-core/peg-transform.mjs',
     '^.+\\.(t|j)sx?$': '@swc/jest',
   },
 };
