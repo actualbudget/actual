@@ -19,6 +19,7 @@ import CashFlowGraph from '../graphs/CashFlowGraph';
 import Header from '../Header';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import useReport from '../useReport';
+import { Handlers } from 'loot-core/src/types/handlers';
 
 export default function CashFlow(): JSX.Element {
   const {
@@ -52,7 +53,7 @@ export default function CashFlow(): JSX.Element {
 
   useEffect(() => {
     async function run() {
-      let trans: any
+      let trans;
       trans = await send('get-earliest-transaction');
       const earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(trans.date))
@@ -108,8 +109,8 @@ export default function CashFlow(): JSX.Element {
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
-        onCondOpChange={onCondOpChange} 
-        headerPrefixItems={undefined} 
+        onCondOpChange={onCondOpChange}
+        headerPrefixItems={undefined}
         selectGraph={undefined}
       />
       <View
