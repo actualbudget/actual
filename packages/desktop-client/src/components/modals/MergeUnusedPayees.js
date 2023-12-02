@@ -12,27 +12,27 @@ import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
 
-let highlightStyle = { color: theme.pageTextPositive };
+const highlightStyle = { color: theme.pageTextPositive };
 
 export default function MergeUnusedPayees({
   modalProps,
   payeeIds,
   targetPayeeId,
 }) {
-  let { payees: allPayees, modalStack } = useSelector(state => ({
+  const { payees: allPayees, modalStack } = useSelector(state => ({
     payees: state.queries.payees,
     modalStack: state.modals.modalStack,
   }));
-  let isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
-  let dispatch = useDispatch();
-  let [shouldCreateRule, setShouldCreateRule] = useState(true);
-  let flashRef = useRef(null);
+  const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
+  const dispatch = useDispatch();
+  const [shouldCreateRule, setShouldCreateRule] = useState(true);
+  const flashRef = useRef(null);
 
   useEffect(() => {
     // Flash the scrollbar
     if (flashRef.current) {
-      let el = flashRef.current;
-      let top = el.scrollTop;
+      const el = flashRef.current;
+      const top = el.scrollTop;
       el.scrollTop = top + 1;
       el.scrollTop = top;
     }
@@ -44,10 +44,10 @@ export default function MergeUnusedPayees({
   //
   // TODO: I think a custom `useSelector` hook that doesn't bind would
   // be nice
-  let [payees] = useState(() =>
+  const [payees] = useState(() =>
     payeeIds.map(id => allPayees.find(p => p.id === id)),
   );
-  let targetPayee = allPayees.find(p => p.id === targetPayeeId);
+  const targetPayee = allPayees.find(p => p.id === targetPayeeId);
 
   if (!targetPayee) {
     return null;
@@ -61,7 +61,7 @@ export default function MergeUnusedPayees({
 
     let ruleId;
     if (shouldCreateRule && !isEditingRule) {
-      let id = await send('rule-add-payee-rename', {
+      const id = await send('rule-add-payee-rename', {
         fromNames: payees.map(p => p.name),
         to: targetPayee.id,
       });
@@ -74,10 +74,10 @@ export default function MergeUnusedPayees({
   }
 
   async function onMergeAndCreateRule() {
-    let ruleId = await onMerge();
+    const ruleId = await onMerge();
 
     if (ruleId) {
-      let rule = await send('rule-get', { id: ruleId });
+      const rule = await send('rule-get', { id: ruleId });
       dispatch(replaceModal('edit-rule', { rule }));
     }
   }

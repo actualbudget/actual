@@ -46,21 +46,21 @@ export default function Menu({
   items: allItems,
   onMenuSelect,
 }: MenuProps) {
-  let elRef = useRef(null);
-  let items = allItems.filter(x => x);
-  let [hoveredIndex, setHoveredIndex] = useState(null);
+  const elRef = useRef(null);
+  const items = allItems.filter(x => x);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
     const el = elRef.current;
     el.focus();
 
-    let onKeyDown = e => {
-      let filteredItems = items.filter(
+    const onKeyDown = e => {
+      const filteredItems = items.filter(
         item => item && item !== Menu.line && item.type !== Menu.label,
       );
-      let currentIndex = filteredItems.indexOf(items[hoveredIndex]);
+      const currentIndex = filteredItems.indexOf(items[hoveredIndex]);
 
-      let transformIndex = idx => items.indexOf(filteredItems[idx]);
+      const transformIndex = idx => items.indexOf(filteredItems[idx]);
 
       switch (e.key) {
         case 'ArrowUp':
@@ -131,7 +131,7 @@ export default function Menu({
           );
         }
 
-        let lastItem = items[idx - 1];
+        const lastItem = items[idx - 1];
 
         return (
           <View

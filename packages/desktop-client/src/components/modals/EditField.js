@@ -35,14 +35,14 @@ function CreatePayeeIcon(props) {
 }
 
 export default function EditField({ modalProps, name, onSubmit }) {
-  let dateFormat = useSelector(
+  const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-  let { grouped: categoryGroups } = useCategories();
-  let accounts = useSelector(state => state.queries.accounts);
-  let payees = useSelector(state => state.queries.payees);
+  const { grouped: categoryGroups } = useCategories();
+  const accounts = useSelector(state => state.queries.accounts);
+  const payees = useSelector(state => state.queries.payees);
 
-  let { createPayee } = useActions();
+  const { createPayee } = useActions();
 
   function onSelect(value) {
     if (value != null) {
@@ -65,18 +65,18 @@ export default function EditField({ modalProps, name, onSubmit }) {
 
   const { isNarrowWidth } = useResponsive();
   let label, editor, minWidth;
-  let inputStyle = {
+  const inputStyle = {
     ':focus': { boxShadow: 0 },
     ...(isNarrowWidth && itemStyle),
   };
-  let autocompleteProps = {
+  const autocompleteProps = {
     inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
   switch (name) {
     case 'date': {
-      let today = currentDay();
+      const today = currentDay();
       label = 'Date';
       minWidth = 350;
       editor = (

@@ -29,11 +29,11 @@ export default function BalanceWithCarryover({
   balanceStyle,
   carryoverStyle,
 }: BalanceWithCarryoverProps) {
-  let carryoverValue = useSheetValue(carryover);
-  let balanceValue = useSheetValue(balance);
-  let goalValue = useSheetValue(goal);
-  let budgetedValue = useSheetValue(budgeted);
-  let isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const carryoverValue = useSheetValue(carryover);
+  const balanceValue = useSheetValue(balance);
+  const goalValue = useSheetValue(goal);
+  const budgetedValue = useSheetValue(budgeted);
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   return (
     <View style={style}>
       <CellValue

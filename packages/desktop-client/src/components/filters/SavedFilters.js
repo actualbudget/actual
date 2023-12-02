@@ -67,7 +67,7 @@ function NameFilter({
   onAddUpdate,
   err,
 }) {
-  let inputRef = useRef();
+  const inputRef = useRef();
 
   useEffect(() => {
     if (inputRef.current) {
@@ -130,13 +130,13 @@ function SavedFilterMenuButton({
   onReloadSavedFilter,
   filtersList,
 }) {
-  let [nameOpen, setNameOpen] = useState(false);
-  let [adding, setAdding] = useState(false);
-  let [menuOpen, setMenuOpen] = useState(false);
-  let [err, setErr] = useState(null);
-  let [menuItem, setMenuItem] = useState(null);
-  let [name, setName] = useState(filterId.name);
-  let id = filterId.id;
+  const [nameOpen, setNameOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [err, setErr] = useState(null);
+  const [menuItem, setMenuItem] = useState(null);
+  const [name, setName] = useState(filterId.name);
+  const id = filterId.id;
   let res;
   let savedFilter;
 

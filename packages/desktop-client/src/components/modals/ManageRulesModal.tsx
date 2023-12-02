@@ -16,8 +16,8 @@ export default function ManageRulesModal({
   modalProps,
   payeeId,
 }: ManageRulesModalProps) {
-  let [loading, setLoading] = useState(true);
-  let location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
   if (isNonProductionEnvironment()) {
     if (location.pathname !== '/payees') {
       throw new Error(

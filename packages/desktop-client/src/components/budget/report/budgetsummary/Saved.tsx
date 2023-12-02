@@ -20,11 +20,11 @@ type SavedProps = {
   style?: CSSProperties;
 };
 export default function Saved({ projected, style }: SavedProps) {
-  let budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
-  let totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
-  let format = useFormat();
-  let saved = projected ? budgetedSaved : totalSaved;
-  let isNegative = saved < 0;
+  const budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
+  const totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
+  const format = useFormat();
+  const saved = projected ? budgetedSaved : totalSaved;
+  const isNegative = saved < 0;
 
   return (
     <View style={{ alignItems: 'center', fontSize: 14, ...style }}>
@@ -39,7 +39,7 @@ export default function Saved({ projected, style }: SavedProps) {
       <HoverTarget
         renderContent={() => {
           if (!projected) {
-            let diff = totalSaved - budgetedSaved;
+            const diff = totalSaved - budgetedSaved;
             return (
               <Tooltip
                 position="bottom-center"

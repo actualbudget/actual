@@ -52,14 +52,14 @@ function ExpenseCategory({
     dragging = true;
   }
 
-  let { dragRef } = useDraggable({
+  const { dragRef } = useDraggable({
     type: 'category',
     onDragChange,
     item: cat,
     canDrag: editingCell === null,
   });
 
-  let { dropRef, dropPos } = useDroppable({
+  const { dropRef, dropPos } = useDroppable({
     types: 'category',
     id: cat.id,
     onDrop: onReorder,

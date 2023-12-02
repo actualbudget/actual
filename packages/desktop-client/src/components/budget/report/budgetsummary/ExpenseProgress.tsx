@@ -13,7 +13,7 @@ type ExpenseProgressProps = {
 };
 export function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   let totalSpent = useSheetValue(current) || 0;
-  let totalBudgeted = useSheetValue(target) || 0;
+  const totalBudgeted = useSheetValue(target) || 0;
 
   // Reverse total spent, and also set a bottom boundary of 0 (in case
   // income goes into an expense category and it's "positive", don't
