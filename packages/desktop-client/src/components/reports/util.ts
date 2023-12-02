@@ -14,23 +14,23 @@ export async function runAll(queries: any[], cb: (data: any[]) => void): Promise
 }
 
 export function index(data: any[], field: string, mapper?: (input: any) => any): { [key: string]: any } {
-  const result = {};
+  const result: { [key: string]: any } = {};
   data.forEach(item => {
     result[mapper ? mapper(item[field]) : item[field]] = item;
   });
   return result;
 }
 
-export function indexStack(data, fieldName, field) {
-  const result = {};
+export function indexStack(data: any[], fieldName: string, field: string): { [key: string]: any } {
+  const result: { [key: string]: any } = {};
   data.forEach(item => {
     result[item[fieldName]] = item[field];
   });
   return result;
 }
 
-export function indexCashFlow(data, date, isTransfer) {
-  const results = {};
+export function indexCashFlow(data: any[], date: string, isTransfer: string): { [key: string]: any } {
+  const results: { [key: string]: any } = {};
   data.forEach(item => {
     let findExisting = results[item.date]
       ? results[item.date][item.isTransfer]
