@@ -1,10 +1,10 @@
 import { runQuery } from 'loot-core/src/client/query-helpers';
 
-export function fromDateRepr(date) {
+export function fromDateRepr(date: string): string {
   return date.slice(0, 7);
 }
 
-export async function runAll(queries, cb) {
+export async function runAll(queries: any[], cb: (data: any[]) => void): Promise<void> {
   let data = await Promise.all(
     queries.map(q => {
       return runQuery(q).then(({ data }) => data);
@@ -13,7 +13,7 @@ export async function runAll(queries, cb) {
   cb(data);
 }
 
-export function index(data, field, mapper) {
+export function index(data: any[], field: string, mapper?: (input: any) => any): { [key: string]: any } {
   const result = {};
   data.forEach(item => {
     result[mapper ? mapper(item[field]) : item[field]] = item;
