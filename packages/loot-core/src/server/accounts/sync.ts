@@ -445,7 +445,7 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
 
     transactionsStep1.push({
       payee_name,
-      updatedTrans,
+      trans: updatedTrans,
       subtransactions,
       match,
       fuzzyDataset,
@@ -599,7 +599,7 @@ export async function reconcileTransactions(acctId, transactions) {
 
     transactionsStep1.push({
       payee_name,
-      updatedTrans,
+      trans: updatedTrans,
       subtransactions,
       match,
       fuzzyDataset,
