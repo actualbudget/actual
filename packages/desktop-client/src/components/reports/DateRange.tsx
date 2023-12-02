@@ -6,29 +6,29 @@ import { theme } from '../../style';
 import Block from '../common/Block';
 
 type DateRangeProps = {
-  start: string;
-  end: string;
+  start: string | Date;
+  end: string | Date;
 };
 
 function DateRange({ start, end }: DateRangeProps): ReactElement {
-  const parseStart = d.parseISO(start);
-  const parseEnd = d.parseISO(end);
+  start = d.parseISO(start as string);
+  end = d.parseISO(end as string);
 
   let content: string | ReactElement;
-  if (parseStart.getFullYear() !== parseEnd.getFullYear()) {
+  if (start.getFullYear() !== end.getFullYear()) {
     content = (
       <div>
-        {d.format(parseStart, 'MMM yyyy')} - ${d.format(parseEnd, 'MMM yyyy')}
+        {d.format(start, 'MMM yyyy')} - ${d.format(end, 'MMM yyyy')}
       </div>
     );
-  } else if (parseStart.getMonth() !== parseEnd.getMonth()) {
+  } else if (start.getMonth() !== end.getMonth()) {
     content = (
       <div>
-        {d.format(parseStart, 'MMM')} - {d.format(parseEnd, 'MMM yyyy')}
+        {d.format(start, 'MMM')} - {d.format(end, 'MMM yyyy')}
       </div>
     );
   } else {
-    content = d.format(parseEnd, 'MMMM yyyy');
+    content = d.format(end, 'MMMM yyyy');
   }
 
   return <Block style={{ color: theme.pageTextSubdued }}>{content}</Block>;
