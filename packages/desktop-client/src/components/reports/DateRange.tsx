@@ -6,13 +6,13 @@ import { theme } from '../../style';
 import Block from '../common/Block';
 
 type DateRangeProps = {
-  start: string | Date;
-  end: string | Date;
+  start: string;
+  end: string;
 };
 
-function DateRange({ start, end }: DateRangeProps): ReactElement {
-  start = d.parseISO(start as string);
-  end = d.parseISO(end as string);
+function DateRange({ start: startProp, end: endProp }: DateRangeProps): ReactElement {
+  const start = d.parseISO(startProp);
+  const end = d.parseISO(endProp);
 
   let content: string | ReactElement;
   if (start.getFullYear() !== end.getFullYear()) {
