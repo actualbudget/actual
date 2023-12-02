@@ -1,12 +1,13 @@
 import { runQuery } from 'loot-core/src/client/query-helpers';
+import { Query } from 'loot-core/src/shared/query';
 
 export function fromDateRepr(date: string): string {
   return date.slice(0, 7);
 }
 
 export async function runAll(
-  queries: any[],
-  cb: (data: any[]) => void,
+  queries: Query[],
+  cb: (data) => void,
 ): Promise<void> {
   let data = await Promise.all(
     queries.map(q => {
@@ -16,36 +17,24 @@ export async function runAll(
   cb(data);
 }
 
-export function index(
-  data: any[],
-  field: string,
-  mapper?: (input: any) => any,
-): { [key: string]: any } {
-  const result: { [key: string]: any } = {};
+export function index(data, field: string, mapper?: (input) => any) {
+  const result = {};
   data.forEach(item => {
     result[mapper ? mapper(item[field]) : item[field]] = item;
   });
   return result;
 }
 
-export function indexStack(
-  data: any[],
-  fieldName: string,
-  field: string,
-): { [key: string]: any } {
-  const result: { [key: string]: any } = {};
+export function indexStack(data, fieldName: string, field: string) {
+  const result = {};
   data.forEach(item => {
     result[item[fieldName]] = item[field];
   });
   return result;
 }
 
-export function indexCashFlow(
-  data: any[],
-  date: string,
-  isTransfer: string,
-): { [key: string]: any } {
-  const results: { [key: string]: any } = {};
+export function indexCashFlow(data, date: string, isTransfer: string) {
+  const results = {};
   data.forEach(item => {
     let findExisting = results[item.date]
       ? results[item.date][item.isTransfer]
