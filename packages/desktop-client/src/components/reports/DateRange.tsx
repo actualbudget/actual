@@ -10,7 +10,10 @@ type DateRangeProps = {
   end: string;
 };
 
-function DateRange({ start: startProp, end: endProp }: DateRangeProps): ReactElement {
+function DateRange({
+  start: startProp,
+  end: endProp,
+}: DateRangeProps): ReactElement {
   const start = d.parseISO(startProp);
   const end = d.parseISO(endProp);
 
