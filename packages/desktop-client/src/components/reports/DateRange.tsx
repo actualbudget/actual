@@ -1,4 +1,4 @@
-import React, {type ReactElement} from 'react';
+import React, { type ReactElement } from 'react';
 
 import * as d from 'date-fns';
 
