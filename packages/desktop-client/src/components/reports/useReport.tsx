@@ -1,8 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SetStateAction } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
-function useReport(sheetName, getData) {
+function useReport(
+  sheetName: string,
+  getData: (
+    spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (results: unknown) => SetStateAction<unknown>,
+  ) => Promise<void>,
+) {
   const spreadsheet = useSpreadsheet();
   const [results, setResults] = useState(null);
 
@@ -15,7 +21,6 @@ function useReport(sheetName, getData) {
       cleanup?.();
     };
   }, [getData]);
-
   return results;
 }
 
