@@ -18,8 +18,7 @@ function DateRange({ start, end }: DateRangeProps): ReactElement {
   if (parseStart.getFullYear() !== parseEnd.getFullYear()) {
     content = (
       <div>
-        `${d.format(parseStart, 'MMM yyyy')} - ${d.format(parseEnd, 'MMM yyyy')}
-        `
+        {d.format(parseStart, 'MMM yyyy')} - ${d.format(parseEnd, 'MMM yyyy')}
       </div>
     );
   } else if (parseStart.getMonth() !== parseEnd.getMonth()) {
