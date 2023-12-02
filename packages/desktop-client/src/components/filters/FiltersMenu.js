@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unused-modules */
 import React, { useState, useRef, useEffect, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -21,7 +22,7 @@ import {
   FIELD_TYPES,
   TYPE_INFO,
 } from 'loot-core/src/shared/rules';
-import { titleFirst } from 'loot-core/src/shared/util';
+import { titleFirst, integerToCurrency } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import { theme } from '../../style';
@@ -156,7 +157,6 @@ function ConfigureField({
   let [subfield, setSubfield] = useState(initialSubfield);
   let inputRef = useRef();
   let prevOp = useRef(null);
-
   useEffect(() => {
     if (prevOp.current !== op && inputRef.current) {
       inputRef.current.focus();
@@ -500,6 +500,7 @@ function FilterEditor({ field, op, value, options, onSave, onClose }) {
       options={state.options}
       dispatch={dispatch}
       onApply={cond => {
+        cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
         onSave(cond);
         onClose();
       }}
@@ -521,7 +522,6 @@ function FilterExpression({
   let [editing, setEditing] = useState(false);
 
   let field = subfieldFromFilter({ field: originalField, value });
-
   return (
     <View
       style={{
@@ -574,7 +574,7 @@ function FilterExpression({
           field={originalField}
           customName={customName}
           op={op}
-          value={value}
+          value={field === 'amount' ? integerToCurrency(value) : value}
           options={options}
           stage={stage}
           onSave={onChange}
