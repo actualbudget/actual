@@ -34,8 +34,8 @@ afterEach(async () => {
 });
 
 async function createTestBudget(name) {
-  let templatePath = fs.join(__dirname, '/../mocks/files', name);
-  let budgetPath = fs.join(__dirname, '/../mocks/files/budgets/test-budget');
+  const templatePath = fs.join(__dirname, '/../mocks/files', name);
+  const budgetPath = fs.join(__dirname, '/../mocks/files/budgets/test-budget');
   fs._setDocumentDir(fs.join(budgetPath, '..'));
 
   await fs.mkdir(budgetPath);
@@ -52,7 +52,10 @@ async function createTestBudget(name) {
 describe('Budgets', () => {
   afterEach(async () => {
     fs._setDocumentDir(null);
-    let budgetPath = fs.join(__dirname, '/../mocks/files/budgets/test-budget');
+    const budgetPath = fs.join(
+      __dirname,
+      '/../mocks/files/budgets/test-budget',
+    );
 
     if (await fs.exists(budgetPath)) {
       await fs.removeDirRecursively(budgetPath);
@@ -64,9 +67,9 @@ describe('Budgets', () => {
 
     // Grab the clock to compare later
     await db.openDatabase('test-budget');
-    let row = await db.first('SELECT * FROM messages_clock');
+    const row = await db.first('SELECT * FROM messages_clock');
 
-    let { error } = await runHandler(handlers['load-budget'], {
+    const { error } = await runHandler(handlers['load-budget'], {
       id: 'test-budget',
     });
     expect(error).toBe(undefined);
@@ -86,7 +89,7 @@ describe('Budgets', () => {
 
     const spy = jest.spyOn(console, 'warn').mockImplementation();
 
-    let { error } = await runHandler(handlers['load-budget'], {
+    const { error } = await runHandler(handlers['load-budget'], {
       id: 'test-budget',
     });
     // There should be an error and the budget should be unloaded
@@ -120,7 +123,7 @@ describe('Accounts', () => {
 
     // Get accounts from the server. This isn't the normal API call,
     // we know that the mock server just returns hardcoded accounts
-    let { accounts } = await post('/plaid/accounts', {});
+    const { accounts } = await post('/plaid/accounts', {});
 
     // Create the accounts for the bank (bank is generally ignored in tests)
     await runHandler(handlers['accounts-connect'], {
@@ -135,7 +138,7 @@ describe('Accounts', () => {
     // Go through each account and make sure the starting balance was
     // created correctly
     const res = await db.all('SELECT * FROM accounts');
-    for (let account of res) {
+    for (const account of res) {
       const sum = await db.first(
         'SELECT sum(amount) as sum FROM transactions WHERE acct = ? AND starting_balance_flag = 0',
         [account.id],
@@ -186,7 +189,7 @@ describe('Accounts', () => {
       payee: 'transfer-two',
       date: '2017-01-01',
     });
-    let differ = expectSnapshotWithDiffer(
+    const differ = expectSnapshotWithDiffer(
       await db.all('SELECT * FROM transactions'),
     );
 
@@ -251,7 +254,7 @@ describe('Budget', () => {
     function captureChangedCells(func) {
       return new Promise<unknown[]>(async resolve => {
         let changed = [];
-        let remove = spreadsheet.addEventListener('change', ({ names }) => {
+        const remove = spreadsheet.addEventListener('change', ({ names }) => {
           changed = changed.concat(names);
         });
         await func();
@@ -303,7 +306,7 @@ describe('Budget', () => {
     });
 
     await db.runQuery("INSERT INTO accounts (id, name) VALUES ('boa', 'boa')");
-    let trans = {
+    const trans = {
       id: 'boa-transaction',
       date: '2017-02-06',
       amount: 5000,
@@ -355,7 +358,7 @@ describe('Categories', () => {
   test('transfers properly when deleted', async () => {
     await sheet.loadSpreadsheet(db);
 
-    let transId = await runMutator(async () => {
+    const transId = await runMutator(async () => {
       await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
       await db.insertCategoryGroup({ id: 'group1b', name: 'group1b' });
       await db.insertCategoryGroup({
@@ -389,7 +392,7 @@ describe('Categories', () => {
     await budget.createAllBudgets();
 
     // Set a budget value for the category `foo` of 1000
-    let sheetName = monthUtils.sheetForMonth('2018-01');
+    const sheetName = monthUtils.sheetForMonth('2018-01');
     await budgetActions.setBudget({
       category: 'foo',
       month: '2018-01',
@@ -417,7 +420,7 @@ describe('Categories', () => {
 
     // Transfering an income category to an expense just doesn't make
     // sense. Make sure this doesn't do anything.
-    let { error } = await runHandler(handlers['category-delete'], {
+    const { error } = await runHandler(handlers['category-delete'], {
       id: 'income1',
       transferId: 'bar',
     });

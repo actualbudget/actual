@@ -6,7 +6,7 @@ async function getPayee(acct) {
 
 async function getTransferredAccount(transaction) {
   if (transaction.payee) {
-    let { transfer_acct } = await db.first(
+    const { transfer_acct } = await db.first(
       'SELECT id, transfer_acct FROM v_payees WHERE id = ?',
       [transaction.payee],
     );
@@ -44,14 +44,14 @@ export async function addTransfer(transaction, transferredAccount) {
     return null;
   }
 
-  let { id: fromPayee } = await db.first(
+  const { id: fromPayee } = await db.first(
     'SELECT id FROM payees WHERE transfer_acct = ?',
     [transaction.account],
   );
 
   // We need to enforce certain constraints with child transaction transfers
   if (transaction.parent_id) {
-    let row = await db.first(
+    const row = await db.first(
       `
         SELECT p.id, p.transfer_acct FROM v_transactions t
         LEFT JOIN payees p ON p.id = t.payee
@@ -93,7 +93,7 @@ export async function addTransfer(transaction, transferredAccount) {
 }
 
 export async function removeTransfer(transaction) {
-  let transferTrans = await db.getTransaction(transaction.transfer_id);
+  const transferTrans = await db.getTransaction(transaction.transfer_id);
 
   // Perform operations on the transfer transaction only
   // if it is found. For example: when users delete both
@@ -118,7 +118,7 @@ export async function removeTransfer(transaction) {
 }
 
 export async function updateTransfer(transaction, transferredAccount) {
-  let payee = await getPayee(transaction.account);
+  const payee = await getPayee(transaction.account);
 
   await db.updateTransaction({
     id: transaction.transfer_id,
@@ -138,7 +138,7 @@ export async function updateTransfer(transaction, transferredAccount) {
 }
 
 export async function onInsert(transaction) {
-  let transferredAccount = await getTransferredAccount(transaction);
+  const transferredAccount = await getTransferredAccount(transaction);
 
   if (transferredAccount) {
     return addTransfer(transaction, transferredAccount);

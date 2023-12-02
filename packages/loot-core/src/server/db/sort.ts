@@ -17,7 +17,7 @@ export function shoveSortOrders(items, targetId?: string) {
   const to = items.findIndex(item => item.id === targetId);
   const target = items[to];
   const before = items[to - 1];
-  let updates = [];
+  const updates = [];
 
   // If no target is specified, append at the end
   if (!targetId || to === -1) {

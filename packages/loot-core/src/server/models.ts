@@ -57,7 +57,7 @@ export const categoryModel = {
       update,
     );
 
-    let { sort_order, ...rest } = category;
+    const { sort_order, ...rest } = category;
     return { ...rest, hidden: rest.hidden ? 1 : 0 };
   },
 };
@@ -71,7 +71,7 @@ export const categoryGroupModel = {
       update,
     );
 
-    let { sort_order, ...rest } = categoryGroup;
+    const { sort_order, ...rest } = categoryGroup;
     return { ...rest, hidden: rest.hidden ? 1 : 0 };
   },
 };
@@ -113,7 +113,7 @@ export const transactionModel = {
       );
     }
 
-    let trans = { ...row };
+    const trans = { ...row };
     trans.error = row.error ? JSON.parse(row.error) : null;
     trans.isParent = row.isParent === 1 ? true : false;
     trans.isChild = row.isChild === 1 ? true : false;
@@ -126,7 +126,7 @@ export const transactionModel = {
   },
 
   fromJS(trans) {
-    let row = { ...trans };
+    const row = { ...trans };
     if ('error' in row) {
       row.error = trans.error ? JSON.stringify(trans.error) : null;
     }

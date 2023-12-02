@@ -19,7 +19,7 @@ import { post } from './post';
 import * as prefs from './prefs';
 import { getServer } from './server-config';
 
-let UPLOAD_FREQUENCY_IN_DAYS = 7;
+const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
 export interface RemoteFile {
   deleted: boolean;
@@ -50,9 +50,9 @@ export async function checkKey(): Promise<{
   valid: boolean;
   error?: { reason: string };
 }> {
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
 
-  let { cloudFileId, encryptKeyId } = prefs.getPrefs();
+  const { cloudFileId, encryptKeyId } = prefs.getPrefs();
 
   let res;
   try {
@@ -75,9 +75,9 @@ export async function checkKey(): Promise<{
 }
 
 export async function resetSyncState(newKeyState) {
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
 
-  let { cloudFileId } = prefs.getPrefs();
+  const { cloudFileId } = prefs.getPrefs();
 
   try {
     await post(getServer().SYNC_SERVER + '/reset-user-file', {
@@ -116,22 +116,22 @@ export async function resetSyncState(newKeyState) {
 }
 
 export async function exportBuffer() {
-  let { id, budgetName } = prefs.getPrefs();
+  const { id, budgetName } = prefs.getPrefs();
   if (!budgetName) {
     return null;
   }
 
-  let budgetDir = fs.getBudgetDir(id);
+  const budgetDir = fs.getBudgetDir(id);
 
   // create zip
-  let zipped = new AdmZip();
+  const zipped = new AdmZip();
 
   // We run this in a mutator even though its not mutating anything
   // because we are reading the sqlite file from disk. We want to make
   // sure that we get a valid snapshot of it so we want this to be
   // serialized with all other mutations.
   await runMutator(async () => {
-    let rawDbContent = await fs.readFile(
+    const rawDbContent = await fs.readFile(
       fs.join(budgetDir, 'db.sqlite'),
       'binary',
     );
@@ -139,7 +139,7 @@ export async function exportBuffer() {
     // Do some post-processing of the database. We NEVER upload the cache with
     // the database; this forces new downloads to always recompute everything
     // which is not only safer, but reduces the filesize a lot.
-    let memDb = await sqlite.openDatabase(rawDbContent);
+    const memDb = await sqlite.openDatabase(rawDbContent);
     sqlite.execQuery(
       memDb,
       `
@@ -148,18 +148,18 @@ export async function exportBuffer() {
       `,
     );
 
-    let dbContent = await sqlite.exportDatabase(memDb);
+    const dbContent = await sqlite.exportDatabase(memDb);
 
     sqlite.closeDatabase(memDb);
 
     // mark it as a file that needs a new clock so when a new client
     // downloads it, it'll get set to a unique node
-    let meta = JSON.parse(
+    const meta = JSON.parse(
       await fs.readFile(fs.join(budgetDir, 'metadata.json')),
     );
 
     meta.resetClock = true;
-    let metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
+    const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
 
     zipped.addFile('db.sqlite', Buffer.from(dbContent));
     zipped.addFile('metadata.json', metaContent);
@@ -176,15 +176,15 @@ export async function importBuffer(fileData, buffer) {
   } catch (err) {
     throw FileDownloadError('not-zip-file');
   }
-  let dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
-  let metaEntry = entries.find(e => e.entryName.includes('metadata.json'));
+  const dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
+  const metaEntry = entries.find(e => e.entryName.includes('metadata.json'));
 
   if (!dbEntry || !metaEntry) {
     throw FileDownloadError('invalid-zip-file');
   }
 
-  let dbContent = zipped.readFile(dbEntry);
-  let metaContent = zipped.readFile(metaEntry);
+  const dbContent = zipped.readFile(dbEntry);
+  const metaContent = zipped.readFile(metaEntry);
 
   let meta;
   try {
@@ -203,12 +203,12 @@ export async function importBuffer(fileData, buffer) {
     encryptKeyId: fileData.encryptMeta ? fileData.encryptMeta.keyId : null,
   };
 
-  let budgetDir = fs.getBudgetDir(meta.id);
+  const budgetDir = fs.getBudgetDir(meta.id);
 
   if (await fs.exists(budgetDir)) {
     // Don't remove the directory so that backups are retained
-    let dbFile = fs.join(budgetDir, 'db.sqlite');
-    let metaFile = fs.join(budgetDir, 'metadata.json');
+    const dbFile = fs.join(budgetDir, 'db.sqlite');
+    const metaFile = fs.join(budgetDir, 'metadata.json');
 
     if (await fs.exists(dbFile)) {
       await fs.removeFile(dbFile);
@@ -227,17 +227,24 @@ export async function importBuffer(fileData, buffer) {
 }
 
 export async function upload() {
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     throw FileUploadError('unauthorized');
   }
 
-  let zipContent = await exportBuffer();
+  const zipContent = await exportBuffer();
   if (zipContent == null) {
     return;
   }
 
-  let { id, groupId, budgetName, cloudFileId, encryptKeyId } = prefs.getPrefs();
+  const {
+    id,
+    groupId,
+    budgetName,
+    cloudFileId: originalCloudFileId,
+    encryptKeyId,
+  } = prefs.getPrefs();
+  let cloudFileId = originalCloudFileId;
   let uploadContent = zipContent;
   let uploadMeta = null;
 
@@ -308,11 +315,11 @@ export async function upload() {
 }
 
 export async function possiblyUpload() {
-  let { cloudFileId, groupId, lastUploaded } = prefs.getPrefs();
+  const { cloudFileId, groupId, lastUploaded } = prefs.getPrefs();
 
-  let threshold =
+  const threshold =
     lastUploaded && monthUtils.addDays(lastUploaded, UPLOAD_FREQUENCY_IN_DAYS);
-  let currentDay = monthUtils.currentDay();
+  const currentDay = monthUtils.currentDay();
 
   // We only want to try to upload every UPLOAD_FREQUENCY_IN_DAYS days
   if (lastUploaded && currentDay < threshold) {
@@ -330,7 +337,7 @@ export async function possiblyUpload() {
 }
 
 export async function removeFile(fileId) {
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
 
   await post(getServer().SYNC_SERVER + '/delete-user-file', {
     token: userToken,
@@ -339,7 +346,7 @@ export async function removeFile(fileId) {
 }
 
 export async function listRemoteFiles(): Promise<RemoteFile[] | null> {
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return null;
   }
@@ -368,7 +375,7 @@ export async function listRemoteFiles(): Promise<RemoteFile[] | null> {
 }
 
 export async function download(fileId) {
-  let userToken = await asyncStorage.getItem('user-token');
+  const userToken = await asyncStorage.getItem('user-token');
 
   let buffer;
   try {
@@ -410,7 +417,7 @@ export async function download(fileId) {
     );
     throw FileDownloadError('internal', { fileId });
   }
-  let fileData = res.data;
+  const fileData = res.data;
 
   // The download process checks if the server gave us decrypt
   // information. It is assumed that this key has already been loaded

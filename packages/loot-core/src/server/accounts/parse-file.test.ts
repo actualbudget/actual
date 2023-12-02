@@ -12,7 +12,7 @@ beforeEach(global.emptyDatabase());
 // libofx spits out errors that contain the entire
 // source code of the file in the stack which makes
 // it hard to test.
-let old = console.warn;
+const old = console.warn;
 beforeAll(() => {
   console.warn = () => {};
 });
@@ -35,11 +35,12 @@ async function importFileWithRealTime(
 ) {
   // Emscripten requires a real Date.now!
   global.restoreDateNow();
-  let { errors, transactions } = await parseFile(filepath, {
+  const parseFileResult = await parseFile(filepath, {
     enableExperimentalOfxParser: true,
   });
   global.restoreFakeDateNow();
 
+  let transactions = parseFileResult.transactions;
   if (transactions) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transactions = (transactions as any[]).map(trans => ({
@@ -50,12 +51,12 @@ async function importFileWithRealTime(
         : trans.date,
     }));
   }
-
+  const errors = parseFileResult.errors;
   if (errors.length > 0) {
     return { errors, added: [] };
   }
 
-  let { added } = await reconcileTransactions(accountId, transactions);
+  const { added } = await reconcileTransactions(accountId, transactions);
   return { errors, added };
 }
 
@@ -63,7 +64,7 @@ describe('File import', () => {
   test('qif import works', async () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.qif',
       'MM/dd/yy',
@@ -76,7 +77,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.ofx',
     );
@@ -88,7 +89,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/credit-card.ofx',
     );
@@ -100,7 +101,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/data.qfx',
     );
@@ -134,7 +135,7 @@ describe('File import', () => {
     prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
 
-    let { errors } = await importFileWithRealTime(
+    const { errors } = await importFileWithRealTime(
       'one',
       __dirname + '/../../mocks/files/8859-1.qfx',
       'yyyy-MM-dd',
