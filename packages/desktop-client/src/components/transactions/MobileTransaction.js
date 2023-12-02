@@ -576,13 +576,9 @@ class TransactionEditInner extends PureComponent {
                     this.onEdit(transaction, 'cleared', checked)
                   }
                   style={{
-                    height: 40,
-                    borderWidth: 0,
-                    marginLeft: styles.mobileEditingPadding,
-                    marginRight: styles.mobileEditingPadding,
-                    marginTop: 20,
-                    marginBottom: 15,
-                    backgroundColor: 'transparent',
+                    margin: 'auto',
+                    width: 22,
+                    height: 22,
                   }}
                 />
               </View>
