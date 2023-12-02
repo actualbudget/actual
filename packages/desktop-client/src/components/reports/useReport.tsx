@@ -1,4 +1,4 @@
-import { useState, useEffect, SetStateAction } from 'react';
+import { useState, useEffect, type SetStateAction } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
