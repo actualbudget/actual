@@ -35,12 +35,15 @@ async function importFileWithRealTime(
 ) {
   // Emscripten requires a real Date.now!
   global.restoreDateNow();
-  const parseFileResult = await parseFile(filepath, {
-    enableExperimentalOfxParser: true,
-  });
+  const { errors, transactions: originalTransactions } = await parseFile(
+    filepath,
+    {
+      enableExperimentalOfxParser: true,
+    },
+  );
   global.restoreFakeDateNow();
 
-  let transactions = parseFileResult.transactions;
+  let transactions = originalTransactions;
   if (transactions) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transactions = (transactions as any[]).map(trans => ({
@@ -51,7 +54,6 @@ async function importFileWithRealTime(
         : trans.date,
     }));
   }
-  const errors = parseFileResult.errors;
   if (errors.length > 0) {
     return { errors, added: [] };
   }
