@@ -10,19 +10,19 @@ export default function useSheetValue(
   binding: Binding,
   onChange?: (result) => void,
 ) {
-  let { sheetName, fullSheetName } = useSheetName(binding);
+  const { sheetName, fullSheetName } = useSheetName(binding);
 
   const bindingObj =
     typeof binding === 'string' ? { name: binding, value: null } : binding;
 
-  let spreadsheet = useSpreadsheet();
-  let [result, setResult] = useState({
+  const spreadsheet = useSpreadsheet();
+  const [result, setResult] = useState({
     name: fullSheetName,
     value: bindingObj.value === undefined ? null : bindingObj.value,
     query: bindingObj.query,
   });
-  let latestOnChange = useRef(onChange);
-  let latestValue = useRef(result.value);
+  const latestOnChange = useRef(onChange);
+  const latestValue = useRef(result.value);
 
   useLayoutEffect(() => {
     latestOnChange.current = onChange;

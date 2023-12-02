@@ -52,13 +52,13 @@ export function cashFlowByDate(
   conditionsOp,
 ) {
   return async (spreadsheet, setData) => {
-    let { filters } = await send('make-filters-from-conditions', {
+    const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     function makeQuery(where) {
-      let query = q('transactions')
+      const query = q('transactions')
         .filter({
           [conditionsOpKey]: [...filters],
         })
@@ -109,11 +109,11 @@ export function cashFlowByDate(
 }
 
 function recalculate(data, start, end, isConcise) {
-  let [startingBalance, income, expense] = data;
-  let convIncome = income.map(t => {
+  const [startingBalance, income, expense] = data;
+  const convIncome = income.map(t => {
     return { ...t, isTransfer: t.isTransfer !== null };
   });
-  let convExpense = expense.map(t => {
+  const convExpense = expense.map(t => {
     return { ...t, isTransfer: t.isTransfer !== null };
   });
   const dates = isConcise

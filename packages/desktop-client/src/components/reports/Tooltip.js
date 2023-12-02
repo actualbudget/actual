@@ -10,16 +10,16 @@ class Tooltip extends Component {
   static defaultEvents = VictoryTooltip.defaultEvents;
 
   render() {
-    let {
+    const {
       active,
       x,
-      y,
+      y: originalY,
       scale,
       datum,
       portalHost,
       offsetX = 0,
       offsetY,
-      position,
+      position: originalPosition,
       light,
       forceActive,
       style,
@@ -27,6 +27,7 @@ class Tooltip extends Component {
     const xRange = scale.x.range();
     const xPos = x - xRange[0];
 
+    let position = originalPosition;
     if (!position) {
       if (datum.labelPosition) {
         position = datum.labelPosition;
@@ -39,7 +40,7 @@ class Tooltip extends Component {
       return null;
     }
 
-    y = offsetY ? offsetY(y) : y;
+    const y = offsetY ? offsetY(originalY) : originalY;
 
     return ReactDOM.createPortal(
       <div

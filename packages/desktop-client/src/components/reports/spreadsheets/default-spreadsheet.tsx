@@ -22,21 +22,21 @@ export default function createSpreadsheet(
   uncat,
   setDataCheck,
 ) {
-  let uncatCat = {
+  const uncatCat = {
     name: 'Uncategorized',
     id: null,
     uncat_id: '1',
     hidden: 0,
     offBudget: false,
   };
-  let uncatTransfer = {
+  const uncatTransfer = {
     name: 'Transfers',
     id: null,
     uncat_id: '2',
     hidden: 0,
     transfer: false,
   };
-  let uncatOff = {
+  const uncatOff = {
     name: 'OffBudget',
     id: null,
     uncat_id: '3',
@@ -44,20 +44,20 @@ export default function createSpreadsheet(
     offBudget: true,
   };
 
-  let uncatGroup = {
+  const uncatGroup = {
     name: 'Uncategorized',
     id: null,
     hidden: 0,
     categories: [uncatCat, uncatTransfer, uncatOff],
   };
-  let catList = uncat
+  const catList = uncat
     ? [...categories.list, uncatCat, uncatTransfer, uncatOff]
     : categories.list;
-  let catGroup = uncat
+  const catGroup = uncat
     ? [...categories.grouped, uncatGroup]
     : categories.grouped;
 
-  let categoryFilter = (catList || []).filter(
+  const categoryFilter = (catList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -101,13 +101,13 @@ export default function createSpreadsheet(
       return null;
     }
 
-    let { filters } = await send('make-filters-from-conditions', {
+    const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     function makeQuery(splt, name) {
-      let query = q('transactions')
+      const query = q('transactions')
         .filter(
           //Show Offbudget and hidden categories
           !hidden && {
@@ -181,7 +181,7 @@ export default function createSpreadsheet(
 
     const graphData = await Promise.all(
       groupByList.map(async splt => {
-        let [starting, assets, debts] = await Promise.all([
+        const [starting, assets, debts] = await Promise.all([
           runQuery(
             q('transactions')
               .filter(

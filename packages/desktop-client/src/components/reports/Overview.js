@@ -12,14 +12,14 @@ import NetWorthCard from './reports/NetWorthCard';
 import SankeyCard from './reports/SankeyCard';
 
 export default function Overview() {
-  let categorySpendingReportFeatureFlag = useFeatureFlag(
+  const categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );
-  let sankeyFeatureFlag = useFeatureFlag('sankeyReport');
+  const sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
-  let customReportsFeatureFlag = useFeatureFlag('customReports');
+  const customReportsFeatureFlag = useFeatureFlag('customReports');
 
-  let accounts = useSelector(state => state.queries.accounts);
+  const accounts = useSelector(state => state.queries.accounts);
   return (
     <View
       style={{

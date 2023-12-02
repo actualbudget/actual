@@ -88,8 +88,8 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
-  let budgetId = useSelector(state => state.prefs.local.id);
-  let groupId = useSelector(state => state.prefs.local.groupId);
+  const budgetId = useSelector(state => state.prefs.local.id);
+  const groupId = useSelector(state => state.prefs.local.groupId);
 
   return (
     <Setting>
@@ -117,15 +117,15 @@ function AdvancedAbout() {
 }
 
 export default function Settings() {
-  let floatingSidebar = useSelector(
+  const floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
-  let budgetName = useSelector(state => state.prefs.local.budgetName);
+  const budgetName = useSelector(state => state.prefs.local.budgetName);
 
-  let { loadPrefs, closeBudget } = useActions();
+  const { loadPrefs, closeBudget } = useActions();
 
   useEffect(() => {
-    let unlisten = listen('prefs-updated', () => {
+    const unlisten = listen('prefs-updated', () => {
       loadPrefs();
     });
 
