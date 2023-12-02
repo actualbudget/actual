@@ -1,5 +1,5 @@
 import { runQuery } from 'loot-core/src/client/query-helpers';
-import { Query } from 'loot-core/src/shared/query';
+import type { Query } from 'loot-core/src/shared/query';
 
 export function fromDateRepr(date: string): string {
   return date.slice(0, 7);
@@ -17,7 +17,7 @@ export async function runAll(
   cb(data);
 }
 
-export function index(data, field: string, mapper?: (input) => any) {
+export function index(data, field: string, mapper?: (input) => unknown) {
   const result = {};
   data.forEach(item => {
     result[mapper ? mapper(item[field]) : item[field]] = item;
