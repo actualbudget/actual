@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unused-modules */
 import React, { useState, useRef, useEffect, useReducer } from 'react';
 import { useSelector } from 'react-redux';
 
