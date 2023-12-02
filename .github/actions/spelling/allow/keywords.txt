@@ -2,6 +2,7 @@ actualbudget
 addtransactions
 AMZN
 Authelia
+AQL
 autocompletes
 Blix
 caniuse
