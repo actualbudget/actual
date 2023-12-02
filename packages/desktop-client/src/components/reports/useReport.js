@@ -1,14 +1,8 @@
-import { useState, useEffect, SetStateAction } from 'react';
+import { useState, useEffect } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
-function useReport(
-  sheetName: string,
-  getData: (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (results: unknown) => SetStateAction<unknown>,
-  ) => Promise<void>,
-) {
+function useReport(sheetName, getData) {
   const spreadsheet = useSpreadsheet();
   const [results, setResults] = useState(null);
 
