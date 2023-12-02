@@ -4,7 +4,10 @@ export function fromDateRepr(date: string): string {
   return date.slice(0, 7);
 }
 
-export async function runAll(queries: any[], cb: (data: any[]) => void): Promise<void> {
+export async function runAll(
+  queries: any[],
+  cb: (data: any[]) => void,
+): Promise<void> {
   let data = await Promise.all(
     queries.map(q => {
       return runQuery(q).then(({ data }) => data);
@@ -13,7 +16,11 @@ export async function runAll(queries: any[], cb: (data: any[]) => void): Promise
   cb(data);
 }
 
-export function index(data: any[], field: string, mapper?: (input: any) => any): { [key: string]: any } {
+export function index(
+  data: any[],
+  field: string,
+  mapper?: (input: any) => any,
+): { [key: string]: any } {
   const result: { [key: string]: any } = {};
   data.forEach(item => {
     result[mapper ? mapper(item[field]) : item[field]] = item;
@@ -21,7 +28,11 @@ export function index(data: any[], field: string, mapper?: (input: any) => any):
   return result;
 }
 
-export function indexStack(data: any[], fieldName: string, field: string): { [key: string]: any } {
+export function indexStack(
+  data: any[],
+  fieldName: string,
+  field: string,
+): { [key: string]: any } {
   const result: { [key: string]: any } = {};
   data.forEach(item => {
     result[item[fieldName]] = item[field];
@@ -29,7 +40,11 @@ export function indexStack(data: any[], fieldName: string, field: string): { [ke
   return result;
 }
 
-export function indexCashFlow(data: any[], date: string, isTransfer: string): { [key: string]: any } {
+export function indexCashFlow(
+  data: any[],
+  date: string,
+  isTransfer: string,
+): { [key: string]: any } {
   const results: { [key: string]: any } = {};
   data.forEach(item => {
     let findExisting = results[item.date]
