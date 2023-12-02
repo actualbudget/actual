@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {ReactElement} from 'react';
 
 import * as d from 'date-fns';
 
@@ -10,11 +10,11 @@ type DateRangeProps = {
   end: string;
 };
 
-function DateRange({ start, end }: DateRangeProps): JSX.Element {
+function DateRange({ start, end }: DateRangeProps): ReactElement {
   const parseStart = d.parseISO(start);
   const parseEnd = d.parseISO(end);
 
-  let content: string | React.ReactElement;
+  let content: string | ReactElement;
   if (parseStart.getFullYear() !== parseEnd.getFullYear()) {
     content = (
       <div>
