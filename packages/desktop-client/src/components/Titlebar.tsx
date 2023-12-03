@@ -114,6 +114,7 @@ function PrivacyButton({ style }) {
   return (
     <Button
       type="bare"
+      aria-label="Toggle Privacy Filter"
       onClick={() => savePrefs({ isPrivacyEnabled: !isPrivacyEnabled })}
       style={style}
     >
@@ -227,6 +228,7 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 
       <Button
         type="bare"
+        aria-label="Sync"
         style={
           isMobile
             ? {

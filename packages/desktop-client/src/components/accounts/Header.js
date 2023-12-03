@@ -168,6 +168,7 @@ export function AccountHeader({
                 )}
                 <Button
                   type="bare"
+                  aria-label="Edit"
                   className="hover-visible"
                   onClick={() => onExposeName(true)}
                 >

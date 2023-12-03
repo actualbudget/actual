@@ -86,6 +86,7 @@ export default function BudgetSummary({
           >
             <Button
               type="bare"
+              aria-label="Toggle Summary"
               className="hover-visible"
               onClick={onToggleSummaryCollapse}
             >
@@ -132,7 +133,7 @@ export default function BudgetSummary({
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
-              <Button type="bare" onClick={onMenuOpen}>
+              <Button type="bare" aria-label="Menu" onClick={onMenuOpen}>
                 <DotsHorizontalTriple
                   width={15}
                   height={15}
