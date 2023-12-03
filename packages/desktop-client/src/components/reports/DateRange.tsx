@@ -1,16 +1,24 @@
-import React from 'react';
+import React, { type ReactElement } from 'react';
 
 import * as d from 'date-fns';
 
 import { theme } from '../../style';
 import Block from '../common/Block';
 
-function DateRange({ start, end }) {
-  start = d.parseISO(start);
-  end = d.parseISO(end);
+type DateRangeProps = {
+  start: string;
+  end: string;
+};
 
-  let content;
-  if (start.getYear() !== end.getYear()) {
+function DateRange({
+  start: startProp,
+  end: endProp,
+}: DateRangeProps): ReactElement {
+  const start = d.parseISO(startProp);
+  const end = d.parseISO(endProp);
+
+  let content: string | ReactElement;
+  if (start.getFullYear() !== end.getFullYear()) {
     content = (
       <div>
         {d.format(start, 'MMM yyyy')} - {d.format(end, 'MMM yyyy')}
