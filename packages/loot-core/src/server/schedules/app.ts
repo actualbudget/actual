@@ -65,7 +65,11 @@ export function updateConditions(conditions, newConditions) {
   return updated.concat(added);
 }
 
-export function getNextDate(dateCond, start = new Date(currentDay())) {
+export function getNextDate(
+  dateCond,
+  start = new Date(currentDay()),
+  noSkipWeekend = false,
+) {
   start = d.startOfDay(start);
 
   const cond = new Condition(
@@ -85,12 +89,12 @@ export function getNextDate(dateCond, start = new Date(currentDay())) {
     if (dates.length === 0) {
       // Could be a schedule with limited occurrences, so we try to
       // find the last occurrence
-      dates = value.schedule.occurrences({ take: 1, reverse: true }).toArray();
+      dates = value.schedule.occurrences({ reverse: true, take: 1 }).toArray();
     }
 
     if (dates.length > 0) {
       let date = dates[0].date;
-      if (value.schedule.data.skipWeekend) {
+      if (value.schedule.data.skipWeekend && !noSkipWeekend) {
         date = getDateWithSkippedWeekend(
           date,
           value.schedule.data.weekendSolve,
@@ -573,7 +577,10 @@ app.events.on('sync', ({ type, subtype }) => {
   }
 });
 
-function getDateWithSkippedWeekend(date, solveMode) {
+export function getDateWithSkippedWeekend(
+  date: Date,
+  solveMode: 'after' | 'before',
+) {
   if (d.isWeekend(date)) {
     if (solveMode === 'after') {
       return d.nextMonday(date);
