@@ -8,7 +8,7 @@ Actual makes a distinction between accounts being **for** budget or **off** budg
 
 **For budget** accounts affect the budget, and transactions can be categorized. These are accounts where you want to track cash flow and use the budget, like checking accounts and credit cards.
 
-Depending on your usage, savings accounts can either be on or off the budget. If you're not sure, we recommend keeping it off the budget at the start.
+Depending on your usage, savings accounts can either be on or off the budget. If you're not sure, we recommend keeping it on budget at the start.
 
 ## Adding a new account
 

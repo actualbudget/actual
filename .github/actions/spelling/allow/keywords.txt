@@ -23,6 +23,7 @@ Firefox
 flyctl
 Formik
 htpasswd
+HSA
 IBANs
 iex
 importtransactions
