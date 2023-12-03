@@ -1,4 +1,14 @@
-function filterHiddenItems(item, data) {
+import {
+  type QueryDataEntity,
+  type UncategorizedEntity,
+} from '../ReportOptions';
+
+type filterHiddenItemsProps = {
+  item: UncategorizedEntity;
+  data: QueryDataEntity[];
+};
+
+function filterHiddenItems({ item, data }: filterHiddenItemsProps) {
   let filtered = data.filter(asset =>
     item.uncat_id
       ? (item.transfer ? asset.transferAccount : !asset.transferAccount) &&

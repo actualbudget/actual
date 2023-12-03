@@ -1,14 +1,15 @@
 import q from 'loot-core/src/client/query-helpers';
+import { type CategoryEntity } from 'loot-core/src/types/models';
 
 function makeQuery(
-  name,
-  start,
-  end,
-  hidden,
-  selectedCategories,
-  categoryFilter,
-  conditionsOpKey,
-  filters,
+  name: string,
+  start: string,
+  end: string,
+  hidden: boolean,
+  selectedCategories: CategoryEntity[],
+  categoryFilter: CategoryEntity[],
+  conditionsOpKey: string,
+  filters: unknown[],
 ) {
   let query = q('transactions')
     .filter(

@@ -4,29 +4,61 @@ import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
+import {
+  type AccountEntity,
+  type PayeeEntity,
+  type CategoryEntity,
+  type RuleConditionEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/src/types/models';
 
-import { categoryLists, groupBySelections } from '../ReportOptions';
+import {
+  categoryLists,
+  groupBySelections,
+  type UncategorizedEntity,
+  type UncategorizedGroupEntity,
+  type QueryDataEntity,
+} from '../ReportOptions';
 
 import filterHiddenItems from './filterHiddenItems';
 import makeQuery from './makeQuery';
 import recalculate from './recalculate';
 
-export default function createSpreadsheet(
+export type createSpreadsheetProps = {
+  start: string;
+  end: string;
+  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  selectedCategories: CategoryEntity[];
+  conditions: RuleConditionEntity[];
+  conditionsOp: string;
+  hidden: boolean;
+  uncat: boolean;
+  groupBy?: string;
+  balanceTypeOp?: string;
+  payees?: PayeeEntity[];
+  accounts?: AccountEntity[];
+  setDataCheck?: (value: boolean) => void;
+};
+
+export default function createSpreadsheet({
   start,
   end,
-  groupBy,
-  balanceTypeOp,
   categories,
   selectedCategories,
-  payees,
-  accounts,
   conditions = [],
   conditionsOp,
   hidden,
   uncat,
+  groupBy,
+  balanceTypeOp,
+  payees,
+  accounts,
   setDataCheck,
-) {
-  let [catList, catGroup] = categoryLists(uncat, categories);
+}) {
+  let catList: CategoryEntity[] | UncategorizedEntity[];
+  let catGroup: CategoryGroupEntity[] | UncategorizedGroupEntity[];
+
+  [catList, catGroup] = categoryLists({ hidden, uncat, categories });
 
   let categoryFilter = (catList || []).filter(
     category =>
@@ -55,7 +87,10 @@ export default function createSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const [assets, debts] = await Promise.all([
+    let assets: QueryDataEntity[];
+    let debts: QueryDataEntity[];
+
+    [assets, debts] = await Promise.all([
       runQuery(
         makeQuery(
           'assets',
@@ -95,14 +130,14 @@ export default function createSpreadsheet(
       groupByList.map(item => {
         let stackAmounts = 0;
 
-        let monthAssets = filterHiddenItems(item, assets)
+        let monthAssets = filterHiddenItems({ item, data: assets })
           .filter(
             asset => asset.date === month && asset[groupByLabel] === item.id,
           )
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthAssets += monthAssets;
 
-        let monthDebts = filterHiddenItems(item, debts)
+        let monthDebts = filterHiddenItems({ item, data: debts })
           .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthDebts += monthDebts;
@@ -137,7 +172,7 @@ export default function createSpreadsheet(
     let calcData;
 
     calcData = groupByList.map(item => {
-      const calc = recalculate(item, months, assets, debts, groupByLabel);
+      const calc = recalculate({ item, months, assets, debts, groupByLabel });
       return { ...calc };
     });
 

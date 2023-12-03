@@ -1,3 +1,10 @@
+import {
+  type AccountEntity,
+  type CategoryEntity,
+  type CategoryGroupEntity,
+  type PayeeEntity,
+} from 'loot-core/src/types/models';
+
 const balanceTypeOptions = [
   { description: 'Expense', format: 'totalDebts' },
   { description: 'Income', format: 'totalAssets' },
@@ -44,43 +51,79 @@ const intervalOptions = [
 { value: 5, description: 'Yearly', name: 5,
 ];
 */
+export type QueryDataEntity = {
+  date: string;
+  category: string;
+  categoryGroup: string;
+  account: string;
+  accountOffBudget: boolean;
+  payee: string;
+  transferAccount: string;
+  amount: number;
+};
 
-let uncategorizedCategory = {
+export type UncategorizedEntity = {
+  id?: string;
+  name: string;
+  hidden?: boolean;
+  uncat_id: string;
+  offBudget: boolean;
+  transfer: boolean;
+  category: boolean;
+};
+
+export type UncategorizedGroupEntity = {
+  id?: string;
+  name: string;
+  hidden?: boolean;
+  categories?: UncategorizedEntity[];
+};
+
+let uncategorizedCategory: UncategorizedEntity = {
   name: 'Uncategorized',
   id: null,
   uncat_id: '1',
-  hidden: 0,
+  hidden: false,
   offBudget: false,
   transfer: false,
   category: false,
 };
-let transferCategory = {
+let transferCategory: UncategorizedEntity = {
   name: 'Transfers',
   id: null,
   uncat_id: '2',
-  hidden: 0,
+  hidden: false,
   transfer: true,
   offBudget: false,
   category: false,
 };
-let offBudgetCategory = {
+let offBudgetCategory: UncategorizedEntity = {
   name: 'Off Budget',
   id: null,
   uncat_id: '3',
-  hidden: 0,
+  hidden: false,
   offBudget: true,
   transfer: false,
   category: true,
 };
 
-let uncategouncatGrouprizedGroup = {
+let uncategouncatGrouprizedGroup: UncategorizedGroupEntity = {
   name: 'Uncategorized & Off Budget',
   id: null,
-  hidden: 0,
+  hidden: false,
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };
 
-export const categoryLists = (uncat, categories) => {
+type categoryListsProps = {
+  hidden: boolean;
+  uncat: boolean;
+  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+};
+export const categoryLists = ({
+  hidden,
+  uncat,
+  categories,
+}: categoryListsProps) => {
   let categoryList = uncat
     ? [
         ...categories.list,
@@ -90,17 +133,20 @@ export const categoryLists = (uncat, categories) => {
       ]
     : categories.list;
   let categoryGroup = uncat
-    ? [...categories.grouped, uncategouncatGrouprizedGroup]
+    ? [
+        ...categories.grouped.filter(f => hidden || !f.hidden),
+        uncategouncatGrouprizedGroup,
+      ]
     : categories.grouped;
   return [categoryList, categoryGroup];
 };
 
 export const groupBySelections = (
-  groupBy,
-  categoryList,
-  categoryGroup,
-  payees,
-  accounts,
+  groupBy: string,
+  categoryList: CategoryEntity[],
+  categoryGroup: CategoryGroupEntity[],
+  payees: PayeeEntity[],
+  accounts: AccountEntity[],
 ) => {
   let groupByList;
   let groupByLabel;
@@ -130,6 +176,7 @@ export const groupBySelections = (
       groupByLabel = 'category';
       break;
     default:
+      throw new Error('Error loading data into the spreadsheet.');
   }
   return [groupByList, groupByLabel];
 };

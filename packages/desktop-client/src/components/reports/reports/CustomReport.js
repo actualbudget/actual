@@ -102,11 +102,12 @@ export default function CustomReport() {
     run();
   }, []);
 
+  let balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   let payees = useCachedPayees();
   let accounts = useCachedAccounts();
 
   const getGroupData = useMemo(() => {
-    return groupedSpreadsheet(
+    return groupedSpreadsheet({
       start,
       end,
       categories,
@@ -115,7 +116,7 @@ export default function CustomReport() {
       conditionsOp,
       hidden,
       uncat,
-    );
+    });
   }, [
     start,
     end,
@@ -129,21 +130,21 @@ export default function CustomReport() {
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
-    return defaultSpreadsheet(
+    return defaultSpreadsheet({
       start,
       end,
-      groupBy,
-      ReportOptions.balanceTypeMap.get(balanceType),
       categories,
       selectedCategories,
-      payees,
-      accounts,
       filters,
       conditionsOp,
       hidden,
       uncat,
+      groupBy,
+      balanceTypeOp,
+      payees,
+      accounts,
       setDataCheck,
-    );
+    });
   }, [
     start,
     end,
@@ -293,15 +294,7 @@ export default function CustomReport() {
                         right={
                           <Text>
                             <PrivacyFilter blurIntensity={5}>
-                              {amountToCurrency(
-                                Math.abs(
-                                  data[
-                                    ReportOptions.balanceTypeMap.get(
-                                      balanceType,
-                                    )
-                                  ],
-                                ),
-                              )}
+                              {amountToCurrency(Math.abs(data[balanceTypeOp]))}
                             </PrivacyFilter>
                           </Text>
                         }
@@ -343,9 +336,7 @@ export default function CustomReport() {
                     <ReportSummary
                       start={start}
                       end={end}
-                      balanceTypeOp={ReportOptions.balanceTypeMap.get(
-                        balanceType,
-                      )}
+                      balanceTypeOp={balanceTypeOp}
                       data={data}
                       monthsCount={months.length}
                     />
