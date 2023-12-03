@@ -6,11 +6,12 @@ AQL
 autocompletes
 Blix
 caniuse
+Cardless
 categorygroup
+Certbot
 clsx
 codemirror
 commandlet
-Cardless
 Crd
 crdt
 creditcards
@@ -37,6 +38,7 @@ Kroger
 kubectl
 kubernetes
 ldaplogin
+letsencrypt
 libofx
 linting
 lte
@@ -67,6 +69,7 @@ subreaper
 subtransaction
 subtransactions
 tini
+traefik
 Upstash
 useb
 usernames
@@ -75,5 +78,5 @@ Venmo
 WSL
 Xxxxx
 ynab
-YNAB
 Ynab
+YNAB
