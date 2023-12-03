@@ -1,4 +1,4 @@
-import React, {
+import {
   createRef,
   PureComponent,
   type ReactElement,
@@ -8,11 +8,10 @@ import React, {
   type UIEvent,
 } from 'react';
 
-import { type CSSProperties } from '../style';
-
 import memoizeOne from 'memoize-one';
 
 import useResizeObserver from '../hooks/useResizeObserver';
+import { type CSSProperties } from '../style';
 
 import View from './common/View';
 
@@ -39,7 +38,7 @@ type FixedSizeListProps = {
     style: CSSProperties;
     isScrolling?: boolean;
     isAnimating: boolean;
-  }) => React.ReactNode;
+  }) => ReactNode;
   layout?: 'vertical' | 'horizontal';
   overscanCount?: number;
   useIsScrolling?: boolean;
@@ -590,7 +589,7 @@ export default class FixedSizeList extends PureComponent<
     this.setState({ isScrolling: false }, () => {
       // Clear style cache after state update has been committed.
       // This way we don't break pure sCU for items that don't use isScrolling param.
-      // @ts-expect-error
+      // @ts-expect-error fix me
       this._getItemStyleCache(-1, null);
     });
   };
