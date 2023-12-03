@@ -37,7 +37,26 @@ const baseLabelStyles: LabelStyles = {
   stroke: 'transparent',
 };
 
-const axisBaseStyles = {
+interface AxisBaseStyles {
+  axis: {
+    fill: string;
+    stroke: string;
+  };
+  grid: {
+    fill: string;
+    stroke: string;
+    pointerEvents: string;
+  };
+  ticks: {
+    fill: string;
+    size: number;
+    stroke: string;
+  };
+  axisLabel: LabelStyles;
+  tickLabels: LabelStyles;
+}
+
+const axisBaseStyles: AxisBaseStyles = {
   axis: {
     fill: 'transparent',
     stroke: 'none',
@@ -56,7 +75,82 @@ const axisBaseStyles = {
   tickLabels: baseLabelStyles,
 };
 
-export const chartTheme = {
+interface ChartTheme {
+  colors: {
+    [key: string]: string;
+  };
+  area: {
+    style: {
+      labels: LabelStyles;
+      data: {
+        stroke: string;
+        strokeWidth: number;
+        strokeLinejoin: string;
+        strokeLinecap: string;
+      };
+    };
+  };
+  axis: {
+    style: AxisBaseStyles;
+  };
+  dependentAxis: {
+    style: {
+      grid: {
+        stroke: string;
+        strokeDasharray: string;
+      };
+      tickLabels: {
+        padding: number;
+      };
+    };
+  };
+  independentAxis: {
+    style: {
+      axis: {
+        stroke: string;
+      };
+      tickLabels: {
+        padding: number;
+      };
+    };
+  };
+  bar: {
+    style: {
+      labels: LabelStyles;
+      data: {
+        fill: string;
+        stroke: string;
+      };
+    };
+  };
+  line: {
+    style: {
+      labels: LabelStyles;
+      data: {
+        fill: string;
+        stroke: string;
+        strokeWidth: number;
+        strokeLinejoin: string;
+        strokeLinecap: string;
+      };
+    };
+  };
+  voronoi: {
+    style: {
+      labels: LabelStyles;
+    };
+  };
+  chart: {
+    padding: {
+      top: number;
+      left: number;
+      right: number;
+      bottom: number;
+    };
+  };
+}
+
+export const chartTheme: ChartTheme = {
   colors: {
     ...colorFades,
     red: theme.reportsRed,
@@ -127,7 +221,7 @@ export const chartTheme = {
   },
 };
 
-export function getColorScale(name) {
+export function getColorScale(name: string) {
   const scales = {
     grayscale: ['#cccccc', '#969696', '#636363', '#252525'],
     qualitative: [
