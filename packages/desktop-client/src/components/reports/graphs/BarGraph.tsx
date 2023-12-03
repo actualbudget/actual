@@ -23,6 +23,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
@@ -129,10 +130,10 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 
 type BarGraphProps = {
   style?: CSSProperties;
-  data;
-  groupBy;
-  balanceTypeOp;
-  showEmpty;
+  data: DataEntity;
+  groupBy: string;
+  balanceTypeOp: string;
+  showEmpty: boolean;
   compact?: boolean;
 };
 

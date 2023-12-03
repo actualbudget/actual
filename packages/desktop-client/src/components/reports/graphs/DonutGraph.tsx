@@ -18,6 +18,7 @@ import Text from '../../common/Text';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import { type DataEntity } from '../entities';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadItem = {
@@ -94,10 +95,10 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 
 type DonutGraphProps = {
   style?: CSSProperties;
-  data;
-  groupBy;
-  balanceTypeOp;
-  showEmpty;
+  data: DataEntity;
+  groupBy: string;
+  balanceTypeOp: string;
+  showEmpty: boolean;
   compact?: boolean;
 };
 
