@@ -1,6 +1,13 @@
 import { theme } from '../../style';
 
-let colorFades = {
+interface ColorFades {
+  blueFadeStart: string;
+  blueFadeEnd: string;
+  redFadeStart: string;
+  redFadeEnd: string;
+}
+
+let colorFades: ColorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',
   blueFadeEnd: 'rgba(229, 245, 255, 0)',
   redFadeStart: 'rgba(255, 243, 242, 1)',
