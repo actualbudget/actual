@@ -15,13 +15,21 @@ let colorFades: ColorFades = {
 };
 
 // Typography
-const sansSerif =
+const sansSerif: string =
   'Inter var, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, Helvetica, Arial, sans-serif';
-const letterSpacing = 'normal';
-const fontSize = 13;
+const letterSpacing: string = 'normal';
+const fontSize: number = 13;
 
 // Labels
-const baseLabelStyles = {
+interface LabelStyles {
+  fontFamily: string;
+  fontSize: number;
+  letterSpacing: string;
+  fill: string;
+  stroke: string;
+}
+
+const baseLabelStyles: LabelStyles = {
   fontFamily: sansSerif,
   fontSize,
   letterSpacing,
