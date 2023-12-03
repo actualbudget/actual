@@ -221,8 +221,12 @@ export const chartTheme: ChartTheme = {
   },
 };
 
-export function getColorScale(name: string) {
-  const scales = {
+interface ColorScales {
+  [key: string]: string[];
+};
+
+export function getColorScale(name: string): string[] {
+  const scales: ColorScales = {
     grayscale: ['#cccccc', '#969696', '#636363', '#252525'],
     qualitative: [
       '#45B29D', //Dark Teal
