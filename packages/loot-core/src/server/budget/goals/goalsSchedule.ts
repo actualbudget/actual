@@ -51,6 +51,8 @@ export async function goalsSchedule(
         next_date_string,
         current_month,
       );
+      const startDate = dateConditions.value.start ?? dateConditions.value;
+      const started = startDate <= monthUtils.addMonths(current_month, 1);
       t.push({
         template: template[ll],
         target,
@@ -59,8 +61,9 @@ export async function goalsSchedule(
         target_frequency,
         num_months,
         completed: complete,
+        started,
       });
-      if (!complete) {
+      if (!complete && started) {
         if (isRepeating) {
           let monthlyTarget = 0;
           const next_month = monthUtils.addMonths(
@@ -99,11 +102,13 @@ export async function goalsSchedule(
           totalScheduledGoal += target;
         }
       } else {
-        errors.push(`Schedule ${t[ll].template.name} is a completed schedule.`);
+        errors.push(
+          `Schedule ${t[ll].template.name} is not active during the month in question.`,
+        );
       }
     }
 
-    t = t.filter(t => t.completed === 0);
+    t = t.filter(t => t.completed === 0 && t.started);
     t = t.sort((a, b) => b.target - a.target);
 
     let increment = 0;
