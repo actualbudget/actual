@@ -55,6 +55,7 @@ const BudgetTotals = memo(function BudgetTotals({
         <View style={{ flexGrow: '1' }}>Category</View>
         <Button
           type="bare"
+          aria-label="Menu"
           onClick={() => {
             setMenuOpen(true);
           }}
