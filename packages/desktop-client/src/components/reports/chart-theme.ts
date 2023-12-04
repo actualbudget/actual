@@ -1,6 +1,6 @@
 import { theme } from '../../style';
 
-interface ColorFades {
+type ColorFades = {
   blueFadeStart: string;
   blueFadeEnd: string;
   redFadeStart: string;
@@ -21,7 +21,7 @@ const letterSpacing: string = 'normal';
 const fontSize: number = 13;
 
 // Labels
-interface LabelStyles {
+type LabelStyles = {
   fontFamily: string;
   fontSize: number;
   letterSpacing: string;
@@ -37,7 +37,7 @@ const baseLabelStyles: LabelStyles = {
   stroke: 'transparent',
 };
 
-interface AxisBaseStyles {
+type AxisBaseStyles = {
   axis: {
     fill: string;
     stroke: string;
@@ -75,7 +75,7 @@ const axisBaseStyles: AxisBaseStyles = {
   tickLabels: baseLabelStyles,
 };
 
-interface ChartTheme {
+type ChartTheme = {
   colors: {
     [key: string]: string;
   };
@@ -221,7 +221,7 @@ export const chartTheme: ChartTheme = {
   },
 };
 
-interface ColorScales {
+type ColorScales = {
   [key: string]: string[];
 };
 
