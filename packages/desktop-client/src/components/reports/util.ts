@@ -17,31 +17,32 @@ export async function runAll(
   cb(data);
 }
 
-export function index<T, K extends keyof T>(
+export function index<T>(
   data: T[],
-  field: K,
-  mapper?: (input: T[K]) => string,
+  field: string,
+  mapper?: (input) => string,
 ) {
   const result: Record<string, T> = {};
   data.forEach(item => {
-    result[mapper ? mapper(item[field]) : (item[field] as unknown as string)] = item;
+    const key = mapper ? mapper(item[field]) : (item[field]);
+    result[key] = item;
   });
   return result;
 }
 
-export function indexStack<T, K extends keyof T>(
+export function indexStack<T>(
   data: T[],
-  fieldName: K,
-  field: K,
+  fieldName: string,
+  field: string,
 ) {
-  const result: Record<string, T[K]> = {};
+  const result = {};
   data.forEach(item => {
-    result[item[fieldName] as unknown as string] = item[field];
+    result[item[fieldName]] = item[field];
   });
   return result;
 }
 
-export function indexCashFlow(data, date, isTransfer) {
+export function indexCashFlow(data, date: string, isTransfer: string) {
   const results = {};
   data.forEach(item => {
     let findExisting = results[item.date]
