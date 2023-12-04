@@ -17,16 +17,25 @@ export async function runAll(
   cb(data);
 }
 
-export function index<T, K extends keyof T>(data: T[], field: K, mapper?: (input: T[K]) => string) {
-  const result: { [key: string]: T } = {};
+export function index<T, K extends keyof T>(
+  data: T[],
+  field: K,
+  mapper?: (input: T[K]) => string,
+) {
+  const result: Record<K, T[K]> = {} as Record<K, T[K]>;
   data.forEach(item => {
-    result[mapper ? mapper(item[field]) : item[field] as unknown as string] = item;
+    result[mapper ? mapper(item[field]) : (item[field] as unknown as string)] =
+      item;
   });
   return result;
 }
 
-export function indexStack<T, K extends keyof T>(data: T[], fieldName: K, field: K) {
-  const result: { [key: string]: T[K] } = {};
+export function indexStack<T, K extends keyof T>(
+  data: T[],
+  fieldName: K,
+  field: K,
+) {
+  const result: Record<K, T[K]> = {} as Record<K, T[K]>;
   data.forEach(item => {
     result[item[fieldName] as string] = item[field];
   });
