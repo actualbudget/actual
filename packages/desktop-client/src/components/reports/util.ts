@@ -22,7 +22,7 @@ export function index<T, K extends keyof T>(
   field: K,
   mapper?: (input: T[K]) => string,
 ) {
-  const result: Record<K, T[K]> = {} as Record<K, T[K]>;
+  const result: Record<string, T> = {} as Record<string, T>;
   data.forEach(item => {
     result[mapper ? mapper(item[field]) : (item[field] as string)] = item;
   });
@@ -34,7 +34,7 @@ export function indexStack<T, K extends keyof T>(
   fieldName: K,
   field: K,
 ) {
-  const result: Record<K, T[K]> = {} as Record<K, T[K]>;
+  const result: Record<string, T[K]> = {} as Record<string, T[K]>;
   data.forEach(item => {
     result[item[fieldName] as string] = item[field];
   });
