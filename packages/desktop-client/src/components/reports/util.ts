@@ -24,8 +24,7 @@ export function index<T, K extends keyof T>(
 ) {
   const result: Record<K, T[K]> = {} as Record<K, T[K]>;
   data.forEach(item => {
-    result[mapper ? mapper(item[field]) : (item[field] as string)] =
-      item;
+    result[mapper ? mapper(item[field]) : (item[field] as string)] = item;
   });
   return result;
 }
@@ -42,7 +41,11 @@ export function indexStack<T, K extends keyof T>(
   return result;
 }
 
-export function indexCashFlow<T, K extends keyof T>(data, date: K, isTransfer: K) {
+export function indexCashFlow<T, K extends keyof T>(
+  data,
+  date: K,
+  isTransfer: K,
+) {
   const results = {};
   data.forEach(item => {
     let findExisting = results[item.date]
