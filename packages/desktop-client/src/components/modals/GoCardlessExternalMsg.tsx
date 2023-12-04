@@ -66,7 +66,7 @@ function useAvailableBanks(country: string) {
   };
 }
 
-function renderError(error: 'unknown' | 'timeout') {
+function renderError(error: 'unauthorized' | 'failed' | 'unknown' | 'timeout') {
   return (
     <Error style={{ alignSelf: 'center' }}>
       {error === 'timeout'
@@ -78,9 +78,10 @@ function renderError(error: 'unknown' | 'timeout') {
 
 type GoCardlessExternalMsgProps = {
   modalProps: CommonModalProps;
-  onMoveExternal: (arg: {
-    institutionId: string;
-  }) => Promise<{ error?: 'unknown' | 'timeout'; data?: GoCardlessToken }>;
+  onMoveExternal: (arg: { institutionId: string }) => Promise<{
+    error?: 'unauthorized' | 'failed' | 'unknown' | 'timeout';
+    data?: GoCardlessToken;
+  }>;
   onSuccess: (data: GoCardlessToken) => Promise<void>;
   onClose: () => void;
 };
@@ -97,7 +98,9 @@ export default function GoCardlessExternalMsg({
   let [success, setSuccess] = useState<boolean>(false);
   let [institutionId, setInstitutionId] = useState<string>();
   let [country, setCountry] = useState<string>();
-  let [error, setError] = useState<'unknown' | 'timeout' | null>(null);
+  let [error, setError] = useState<
+    'unauthorized' | 'failed' | 'unknown' | 'timeout' | null
+  >(null);
   let [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
   >(null);

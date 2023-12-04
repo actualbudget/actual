@@ -3,20 +3,16 @@ import type { AccountEntity, GoCardlessToken } from '../../types/models';
 import type { RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
+
 export type ModalType = keyof FinanceModals;
 
-export type OptionlessModal = {
-  [K in ModalType]: EmptyObject extends FinanceModals[K] ? K : never;
-}[ModalType];
-
-export type ModalWithOptions = StripNever<{
-  [K in ModalType]: keyof FinanceModals[K] extends never
-    ? never
-    : FinanceModals[K];
-}>;
+type Modal<K extends keyof FinanceModals> = {
+  name: K;
+  options: FinanceModals[K];
+};
 
 // There is a separate (overlapping!) set of modals for the management app. Fun!
-type FinanceModals = {
+export type FinanceModals = {
   'import-transactions': {
     accountId: string;
     filename: string;
@@ -41,6 +37,11 @@ type FinanceModals = {
     | { group: string }
   );
 
+  'confirm-transaction-edit': {
+    onConfirm: () => void;
+    confirmReason: string;
+  };
+
   'load-backup': EmptyObject;
 
   'manage-rules': { payeeId?: string };
@@ -54,7 +55,7 @@ type FinanceModals = {
   };
 
   'plaid-external-msg': {
-    onMoveExternal: () => Promise<void>;
+    onMoveExternal: () => Promise<{ error: unknown; data: unknown }>;
     onClose?: () => void;
     onSuccess: (data: unknown) => Promise<void>;
   };
@@ -63,9 +64,10 @@ type FinanceModals = {
     onSuccess: () => void;
   };
   'gocardless-external-msg': {
-    onMoveExternal: (arg: {
-      institutionId: string;
-    }) => Promise<{ error: string } | { data: unknown }>;
+    onMoveExternal: (arg: { institutionId: string }) => Promise<{
+      error?: 'unauthorized' | 'failed' | 'unknown' | 'timeout';
+      data?: GoCardlessToken;
+    }>;
     onClose?: () => void;
     onSuccess: (data: GoCardlessToken) => Promise<void>;
   };
@@ -92,8 +94,14 @@ type FinanceModals = {
     onSubmit: (name: string, value: string) => void;
   };
 
-  'budget-summary': {
-    month: string;
+  'new-category': {
+    onValidate?: (value: string) => string[];
+    onSubmit: (value: string) => void;
+  };
+
+  'new-category-group': {
+    onValidate?: (value: string) => string[];
+    onSubmit: (value: string) => void;
   };
 
   'schedule-edit': { id: string } | null;
@@ -104,6 +112,19 @@ type FinanceModals = {
 
   'schedule-posts-offline-notification': null;
   'switch-budget-type': { onSwitch: () => void };
+
+  'rollover-budget-summary': {
+    month: string;
+    onBudgetAction: (
+      idx: string | number,
+      action: string,
+      arg: unknown,
+    ) => void;
+  };
+
+  'report-budget-summary': {
+    month: string;
+  };
 };
 
 export type PushModalAction = {
