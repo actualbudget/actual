@@ -78,10 +78,9 @@ export function TitlebarProvider({ children }: TitlebarProviderProps) {
   }
 
   return (
-    <TitlebarContext.Provider
-      value={{ sendEvent, subscribe }}
-      children={children}
-    />
+    <TitlebarContext.Provider value={{ sendEvent, subscribe }}>
+      {children}
+    </TitlebarContext.Provider>
   );
 }
 

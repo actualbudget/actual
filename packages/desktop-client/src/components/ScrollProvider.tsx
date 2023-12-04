@@ -42,10 +42,9 @@ export default function ScrollProvider({ children }: ScrollProviderProps) {
   }, []);
 
   return (
-    <ScrollContext.Provider
-      value={{ scrollY, isBottomReached }}
-      children={children}
-    />
+    <ScrollContext.Provider value={{ scrollY, isBottomReached }}>
+      {children}
+    </ScrollContext.Provider>
   );
 }
 
