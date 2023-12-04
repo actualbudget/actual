@@ -86,7 +86,7 @@ export default function BudgetSummary({
           >
             <Button
               type="bare"
-              aria-label="Toggle Summary"
+              aria-label={`${collapsed ? 'Expand' : 'Collapse'} Month Summary`}
               className="hover-visible"
               onClick={onToggleSummaryCollapse}
             >
