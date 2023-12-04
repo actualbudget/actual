@@ -17,24 +17,16 @@ export async function runAll(
   cb(data);
 }
 
-export function index<T>(
-  data: T[],
-  field: string,
-  mapper?: (input) => string,
-) {
+export function index<T>(data: T[], field: string, mapper?: (input) => string) {
   const result: Record<string, T> = {};
   data.forEach(item => {
-    const key = mapper ? mapper(item[field]) : (item[field]);
+    const key = mapper ? mapper(item[field]) : item[field];
     result[key] = item;
   });
   return result;
 }
 
-export function indexStack<T>(
-  data: T[],
-  fieldName: string,
-  field: string,
-) {
+export function indexStack<T>(data: T[], fieldName: string, field: string) {
   const result = {};
   data.forEach(item => {
     result[item[fieldName]] = item[field];
