@@ -17,7 +17,7 @@ function ToggleButton({ style, isFloating, onFloat }: ToggleButtonProps) {
     <View className="float" style={{ ...style, flexShrink: 0 }}>
       <Button
         type="bare"
-        aria-label={`${isFloating ? 'Pin' : 'Unpin'} Sidebar`}
+        aria-label={`${isFloating ? 'Pin' : 'Unpin'} sidebar`}
         onClick={onFloat}
         color={theme.buttonMenuBorder}
       >

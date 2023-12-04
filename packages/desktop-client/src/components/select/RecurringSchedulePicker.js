@@ -243,7 +243,7 @@ function MonthlyPatterns({ config, dispatch }) {
           />
           <Button
             type="bare"
-            aria-label="Remove Recurrence"
+            aria-label="Remove recurrence"
             style={{ padding: 7 }}
             onClick={() =>
               dispatch({

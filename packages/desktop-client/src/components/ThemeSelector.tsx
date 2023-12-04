@@ -21,7 +21,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
   return isNarrowWidth ? null : (
     <Button
       type="bare"
-      aria-label="Switch Theme"
+      aria-label="Switch theme"
       onClick={() => {
         saveGlobalPrefs({
           theme: theme === 'dark' ? 'light' : 'dark',
