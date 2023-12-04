@@ -1,13 +1,6 @@
 import { theme } from '../../style';
 
-type ColorFades = {
-  blueFadeStart: string;
-  blueFadeEnd: string;
-  redFadeStart: string;
-  redFadeEnd: string;
-};
-
-let colorFades: ColorFades = {
+let colorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',
   blueFadeEnd: 'rgba(229, 245, 255, 0)',
   redFadeStart: 'rgba(255, 243, 242, 1)',
@@ -21,15 +14,7 @@ const letterSpacing = 'normal';
 const fontSize = 13;
 
 // Labels
-type LabelStyles = {
-  fontFamily: string;
-  fontSize: number;
-  letterSpacing: string;
-  fill: string;
-  stroke: string;
-};
-
-const baseLabelStyles: LabelStyles = {
+const baseLabelStyles = {
   fontFamily: sansSerif,
   fontSize,
   letterSpacing,
@@ -37,26 +22,7 @@ const baseLabelStyles: LabelStyles = {
   stroke: 'transparent',
 };
 
-type AxisBaseStyles = {
-  axis: {
-    fill: string;
-    stroke: string;
-  };
-  grid: {
-    fill: string;
-    stroke: string;
-    pointerEvents: string;
-  };
-  ticks: {
-    fill: string;
-    size: number;
-    stroke: string;
-  };
-  axisLabel: LabelStyles;
-  tickLabels: LabelStyles;
-};
-
-const axisBaseStyles: AxisBaseStyles = {
+const axisBaseStyles = {
   axis: {
     fill: 'transparent',
     stroke: 'none',
@@ -75,82 +41,7 @@ const axisBaseStyles: AxisBaseStyles = {
   tickLabels: baseLabelStyles,
 };
 
-type ChartTheme = {
-  colors: {
-    [key: string]: string;
-  };
-  area: {
-    style: {
-      labels: LabelStyles;
-      data: {
-        stroke: string;
-        strokeWidth: number;
-        strokeLinejoin: string;
-        strokeLinecap: string;
-      };
-    };
-  };
-  axis: {
-    style: AxisBaseStyles;
-  };
-  dependentAxis: {
-    style: {
-      grid: {
-        stroke: string;
-        strokeDasharray: string;
-      };
-      tickLabels: {
-        padding: number;
-      };
-    };
-  };
-  independentAxis: {
-    style: {
-      axis: {
-        stroke: string;
-      };
-      tickLabels: {
-        padding: number;
-      };
-    };
-  };
-  bar: {
-    style: {
-      labels: LabelStyles;
-      data: {
-        fill: string;
-        stroke: string;
-      };
-    };
-  };
-  line: {
-    style: {
-      labels: LabelStyles;
-      data: {
-        fill: string;
-        stroke: string;
-        strokeWidth: number;
-        strokeLinejoin: string;
-        strokeLinecap: string;
-      };
-    };
-  };
-  voronoi: {
-    style: {
-      labels: LabelStyles;
-    };
-  };
-  chart: {
-    padding: {
-      top: number;
-      left: number;
-      right: number;
-      bottom: number;
-    };
-  };
-};
-
-export const chartTheme: ChartTheme = {
+export const chartTheme = {
   colors: {
     ...colorFades,
     red: theme.reportsRed,
@@ -221,12 +112,8 @@ export const chartTheme: ChartTheme = {
   },
 };
 
-type ColorScales = {
-  [key: string]: string[];
-};
-
 export function getColorScale(name: string): string[] {
-  const scales: ColorScales = {
+  const scales: Record<string, string[]> = {
     grayscale: ['#cccccc', '#969696', '#636363', '#252525'],
     qualitative: [
       '#45B29D', //Dark Teal
