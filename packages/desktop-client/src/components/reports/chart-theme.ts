@@ -5,7 +5,7 @@ type ColorFades = {
   blueFadeEnd: string;
   redFadeStart: string;
   redFadeEnd: string;
-}
+};
 
 let colorFades: ColorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',
@@ -15,10 +15,10 @@ let colorFades: ColorFades = {
 };
 
 // Typography
-const sansSerif: string =
+const sansSerif =
   'Inter var, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, Helvetica, Arial, sans-serif';
-const letterSpacing: string = 'normal';
-const fontSize: number = 13;
+const letterSpacing = 'normal';
+const fontSize = 13;
 
 // Labels
 type LabelStyles = {
@@ -27,7 +27,7 @@ type LabelStyles = {
   letterSpacing: string;
   fill: string;
   stroke: string;
-}
+};
 
 const baseLabelStyles: LabelStyles = {
   fontFamily: sansSerif,
@@ -54,7 +54,7 @@ type AxisBaseStyles = {
   };
   axisLabel: LabelStyles;
   tickLabels: LabelStyles;
-}
+};
 
 const axisBaseStyles: AxisBaseStyles = {
   axis: {
@@ -148,7 +148,7 @@ type ChartTheme = {
       bottom: number;
     };
   };
-}
+};
 
 export const chartTheme: ChartTheme = {
   colors: {
