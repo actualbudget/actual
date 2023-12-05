@@ -88,6 +88,7 @@ export function AmountInput({
       leftContent={
         <Button
           type="bare"
+          aria-label={`Make ${negative ? 'positive' : 'negative'}`}
           style={{ padding: '0 7px' }}
           onPointerUp={onSwitch}
           onPointerDown={e => e.preventDefault()}

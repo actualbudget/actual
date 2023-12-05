@@ -63,6 +63,7 @@ function DetailButton({ state, onDelete }) {
     <View>
       <Button
         type="bare"
+        aria-label="Menu"
         onClick={e => {
           e.stopPropagation();
           setMenuOpen(true);
@@ -235,6 +236,7 @@ function RefreshButton({ onRefresh }) {
   return (
     <Button
       type="bare"
+      aria-label="Refresh"
       style={{ padding: 10, marginRight: 5 }}
       onClick={_onRefresh}
     >
