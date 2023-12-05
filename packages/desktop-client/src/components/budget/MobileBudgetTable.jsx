@@ -2088,7 +2088,7 @@ export function BudgetTable(props) {
             //     scrollRef,
             //     onScroll
             //   }) => (
-            <View>
+            <View data-testid="budget-table">
               <BudgetGroups
                 type={type}
                 categoryGroups={categoryGroups}
