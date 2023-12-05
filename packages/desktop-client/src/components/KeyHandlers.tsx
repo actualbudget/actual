@@ -2,11 +2,11 @@ import React, { createContext, useEffect, useContext } from 'react';
 
 import hotkeys, { type KeyHandler as HotKeyHandler } from 'hotkeys-js';
 
-let KeyScopeContext = createContext('app');
+const KeyScopeContext = createContext('app');
 
 hotkeys.filter = event => {
-  let target = (event.target || event.srcElement) as HTMLElement;
-  let tagName = target.tagName;
+  const target = (event.target || event.srcElement) as HTMLElement;
+  const tagName = target.tagName;
 
   // This is the default behavior of hotkeys, except we only suppress
   // key presses if the meta key is not pressed
@@ -34,7 +34,7 @@ function KeyHandler({
   eventType = 'keydown',
   handler,
 }: KeyHandlerProps) {
-  let scope = useContext(KeyScopeContext);
+  const scope = useContext(KeyScopeContext);
 
   if (eventType !== 'keyup' && eventType !== 'keydown') {
     throw new Error('KeyHandler: unknown event type: ' + eventType);
@@ -70,7 +70,7 @@ type KeyHandlersProps = {
   keys: Record<string, HotKeyHandler>;
 };
 export function KeyHandlers({ eventType, keys = {} }: KeyHandlersProps) {
-  let handlers = Object.keys(keys).map(key => {
+  const handlers = Object.keys(keys).map(key => {
     return (
       <KeyHandler
         key={key}

@@ -43,7 +43,7 @@ export default function CategorySelector({
     selectedCategoryMap.includes(category.id),
   );
 
-  let selectAll: CategoryEntity[] = [];
+  const selectAll: CategoryEntity[] = [];
   categoryGroups.map(categoryGroup =>
     categoryGroup.categories.map(category => selectAll.push(category)),
   );

@@ -77,8 +77,8 @@ function Header({
   headerPrefixItems,
   selectGraph,
 }) {
-  let location = useLocation();
-  let path = location.pathname;
+  const location = useLocation();
+  const path = location.pathname;
 
   return (
     <View

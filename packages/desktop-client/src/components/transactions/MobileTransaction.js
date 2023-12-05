@@ -70,11 +70,11 @@ import { Page } from '../Page';
 
 const zIndices = { SECTION_HEADING: 10 };
 
-let getPayeesById = memoizeOne(payees => groupById(payees));
-let getAccountsById = memoizeOne(accounts => groupById(accounts));
+const getPayeesById = memoizeOne(payees => groupById(payees));
+const getAccountsById = memoizeOne(accounts => groupById(accounts));
 
 function getDescriptionPretty(transaction, payee, transferAcct) {
-  let { amount } = transaction;
+  const { amount } = transaction;
 
   if (transferAcct) {
     return `Transfer ${amount > 0 ? 'from' : 'to'} ${transferAcct.name}`;
@@ -86,7 +86,7 @@ function getDescriptionPretty(transaction, payee, transferAcct) {
 }
 
 function serializeTransaction(transaction, dateFormat) {
-  let { date, amount } = transaction;
+  const { date, amount } = transaction;
   return {
     ...transaction,
     date: formatDate(parseISO(date), dateFormat),
@@ -95,11 +95,12 @@ function serializeTransaction(transaction, dateFormat) {
 }
 
 function deserializeTransaction(transaction, originalTransaction, dateFormat) {
-  let { amount, date, ...realTransaction } = transaction;
+  const { amount, date: originalDate, ...realTransaction } = transaction;
 
-  let dayMonth = monthUtils.getDayMonthRegex(dateFormat);
+  const dayMonth = monthUtils.getDayMonthRegex(dateFormat);
+  let date = originalDate;
   if (dayMonth.test(date)) {
-    let test = parseDate(
+    const test = parseDate(
       date,
       monthUtils.getDayMonthFormat(dateFormat),
       new Date(),
@@ -110,7 +111,7 @@ function deserializeTransaction(transaction, originalTransaction, dateFormat) {
       date = null;
     }
   } else {
-    let test = parseDate(date, dateFormat, new Date());
+    const test = parseDate(date, dateFormat, new Date());
     // This is a quick sanity check to make sure something invalid
     // like "year 201" was entered
     if (test.getFullYear() > 2000 && isValidDate(test)) {
@@ -202,11 +203,11 @@ class TransactionEditInner extends PureComponent {
   };
 
   onSave = async () => {
-    let onConfirmSave = async () => {
+    const onConfirmSave = async () => {
       let { transactions } = this.state;
       const [transaction, ..._childTransactions] = transactions;
       const { account: accountId } = transaction;
-      let account = getAccountsById(this.props.accounts)[accountId];
+      const account = getAccountsById(this.props.accounts)[accountId];
 
       if (transactions.find(t => t.account == null)) {
         // Ignore transactions if any of them don't have an account
@@ -219,7 +220,7 @@ class TransactionEditInner extends PureComponent {
       // updated value so we "apply" a queued change. Maybe there's a
       // better way to do this (lift the state?)
       if (this._queuedChange) {
-        let [transaction, name, value] = this._queuedChange;
+        const [transaction, name, value] = this._queuedChange;
         transactions = await this.onEdit(transaction, name, value);
       }
 
@@ -253,14 +254,14 @@ class TransactionEditInner extends PureComponent {
   };
 
   onEdit = async (transaction, name, value) => {
-    let { transactions } = this.state;
+    const { transactions } = this.state;
 
     let newTransaction = { ...transaction, [name]: value };
     if (this.props.onEdit) {
       newTransaction = await this.props.onEdit(newTransaction);
     }
 
-    let { data: newTransactions } = updateTransaction(
+    const { data: newTransactions } = updateTransaction(
       transactions,
       deserializeTransaction(newTransaction, null, this.props.dateFormat),
     );
@@ -280,13 +281,13 @@ class TransactionEditInner extends PureComponent {
   };
 
   onClick = (transactionId, name) => {
-    let { dateFormat } = this.props;
+    const { dateFormat } = this.props;
 
     this.props.pushModal('edit-field', {
       name,
       onSubmit: (name, value) => {
-        let { transactions } = this.state;
-        let transaction = transactions.find(t => t.id === transactionId);
+        const { transactions } = this.state;
+        const transaction = transactions.find(t => t.id === transactionId);
         // This is a deficiency of this API, need to fix. It
         // assumes that it receives a serialized transaction,
         // but we only have access to the raw transaction
@@ -296,7 +297,7 @@ class TransactionEditInner extends PureComponent {
   };
 
   onDelete = () => {
-    let onConfirmDelete = () => {
+    const onConfirmDelete = () => {
       this.props.onDelete();
 
       const { transactions } = this.state;
@@ -651,9 +652,9 @@ function makeTemporaryTransactions(currentAccountId, lastDate) {
 
 function TransactionEditUnconnected(props) {
   const { categories, accounts, payees, lastTransaction, dateFormat } = props;
-  let { id: accountId, transactionId } = useParams();
-  let navigate = useNavigate();
-  let [fetchedTransactions, setFetchedTransactions] = useState(null);
+  const { id: accountId, transactionId } = useParams();
+  const navigate = useNavigate();
+  const [fetchedTransactions, setFetchedTransactions] = useState(null);
   let transactions = [];
   let adding = false;
   let deleted = false;
@@ -677,7 +678,7 @@ function TransactionEditUnconnected(props) {
         // The edit item components expect to work with a flat array of
         // transactions when handling splits, so we call ungroupTransactions to
         // flatten parent and children into one array.
-        let { data } = await runQuery(
+        const { data } = await runQuery(
           q('transactions')
             .filter({ id: transactionId })
             .select('*')
@@ -712,10 +713,10 @@ function TransactionEditUnconnected(props) {
     // Run the rules to auto-fill in any data. Right now we only do
     // this on new transactions because that's how desktop works.
     if (isTemporary(transaction)) {
-      let afterRules = await send('rules-run', { transaction });
-      let diff = getChangedValues(transaction, afterRules);
+      const afterRules = await send('rules-run', { transaction });
+      const diff = getChangedValues(transaction, afterRules);
 
-      let newTransaction = { ...transaction };
+      const newTransaction = { ...transaction };
       if (diff) {
         Object.keys(diff).forEach(field => {
           if (newTransaction[field] == null) {
@@ -838,10 +839,10 @@ class Transaction extends PureComponent {
       onSelect,
       style,
     } = this.props;
-    let {
+    const {
       id,
       payee: payeeId,
-      amount,
+      amount: originalAmount,
       category,
       cleared,
       is_parent,
@@ -849,32 +850,33 @@ class Transaction extends PureComponent {
       schedule,
     } = transaction;
 
+    let amount = originalAmount;
     if (isPreviewId(id)) {
       amount = getScheduledAmount(amount);
     }
 
-    let categoryName = lookupName(categories, category);
+    const categoryName = lookupName(categories, category);
 
-    let payee = payees && payeeId && getPayeesById(payees)[payeeId];
-    let transferAcct =
+    const payee = payees && payeeId && getPayeesById(payees)[payeeId];
+    const transferAcct =
       payee &&
       payee.transfer_acct &&
       getAccountsById(accounts)[payee.transfer_acct];
 
-    let prettyDescription = getDescriptionPretty(
+    const prettyDescription = getDescriptionPretty(
       transaction,
       payee,
       transferAcct,
     );
-    let prettyCategory = transferAcct
+    const prettyCategory = transferAcct
       ? 'Transfer'
       : is_parent
       ? 'Split'
       : categoryName;
 
-    let isPreview = isPreviewId(id);
-    let isReconciled = transaction.reconciled;
-    let textStyle = isPreview && {
+    const isPreview = isPreviewId(id);
+    const isReconciled = transaction.reconciled;
+    const textStyle = isPreview && {
       fontStyle: 'italic',
       color: theme.pageTextLight,
     };
@@ -1004,9 +1006,9 @@ export class TransactionList extends Component {
       ) {
         // Mark the last transaction in the section so it can render
         // with a different border
-        let lastSection = sections[sections.length - 1];
+        const lastSection = sections[sections.length - 1];
         if (lastSection && lastSection.data.length > 0) {
-          let lastData = lastSection.data;
+          const lastData = lastSection.data;
           lastData[lastData.length - 1].isLast = true;
         }
 
@@ -1099,9 +1101,9 @@ export class TransactionList extends Component {
 }
 
 function ListBox(props) {
-  let state = useListState(props);
-  let listBoxRef = useRef();
-  let { listBoxProps, labelProps } = useListBox(props, state, listBoxRef);
+  const state = useListState(props);
+  const listBoxRef = useRef();
+  const { listBoxProps, labelProps } = useListBox(props, state, listBoxRef);
 
   useEffect(() => {
     function loadMoreTransactions() {
@@ -1145,7 +1147,7 @@ function ListBox(props) {
 }
 
 function ListBoxSection({ section, state }) {
-  let { itemProps, headingProps, groupProps } = useListBoxSection({
+  const { itemProps, headingProps, groupProps } = useListBoxSection({
     heading: section.rendered,
     'aria-label': section['aria-label'],
   });
@@ -1197,12 +1199,12 @@ function ListBoxSection({ section, state }) {
 
 function Option({ isLast, item, state }) {
   // Get props for the option element
-  let ref = useRef();
-  let { optionProps, isSelected } = useOption({ key: item.key }, state, ref);
+  const ref = useRef();
+  const { optionProps, isSelected } = useOption({ key: item.key }, state, ref);
 
   // Determine whether we should show a keyboard
   // focus ring for accessibility
-  let { isFocusVisible, focusProps } = useFocusRing();
+  const { isFocusVisible, focusProps } = useFocusRing();
 
   return (
     <li

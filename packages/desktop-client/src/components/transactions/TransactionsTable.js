@@ -117,11 +117,11 @@ function serializeTransaction(transaction, showZeroInDeposit) {
 }
 
 function deserializeTransaction(transaction, originalTransaction) {
-  let { debit, credit, date, ...realTransaction } = transaction;
+  const { debit, credit, date: originalDate, ...realTransaction } = transaction;
 
   let amount;
   if (debit !== '') {
-    let parsed = evalArithmetic(debit, null);
+    const parsed = evalArithmetic(debit, null);
     amount = parsed != null ? -parsed : null;
   } else {
     amount = evalArithmetic(credit, null);
@@ -130,6 +130,7 @@ function deserializeTransaction(transaction, originalTransaction) {
   amount =
     amount != null ? amountToInteger(amount) : originalTransaction.amount;
 
+  let date = originalDate;
   if (date == null) {
     date = originalTransaction.date || currentDay();
   }
@@ -138,7 +139,7 @@ function deserializeTransaction(transaction, originalTransaction) {
 }
 
 function isLastChild(transactions, index) {
-  let trans = transactions[index];
+  const trans = transactions[index];
   return (
     trans &&
     trans.is_child &&
@@ -147,10 +148,10 @@ function isLastChild(transactions, index) {
   );
 }
 
-let SplitsExpandedContext = createContext(null);
+const SplitsExpandedContext = createContext(null);
 
 export function useSplitsExpanded() {
-  let data = useContext(SplitsExpandedContext);
+  const data = useContext(SplitsExpandedContext);
 
   return useMemo(
     () => ({
@@ -165,14 +166,14 @@ export function useSplitsExpanded() {
 }
 
 export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
-  let cachedState = useSelector(state => state.app.lastSplitState);
-  let reduxDispatch = useDispatch();
+  const cachedState = useSelector(state => state.app.lastSplitState);
+  const reduxDispatch = useDispatch();
 
-  let [state, dispatch] = useReducer((state, action) => {
+  const [state, dispatch] = useReducer((state, action) => {
     switch (action.type) {
       case 'toggle-split': {
-        let ids = new Set([...state.ids]);
-        let { id } = action;
+        const ids = new Set([...state.ids]);
+        const { id } = action;
         if (ids.has(id)) {
           ids.delete(id);
         } else {
@@ -181,8 +182,8 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
         return { ...state, ids };
       }
       case 'open-split': {
-        let ids = new Set([...state.ids]);
-        let { id } = action;
+        const ids = new Set([...state.ids]);
+        const { id } = action;
         if (state.mode === 'collapse') {
           ids.delete(id);
         } else {
@@ -233,7 +234,7 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
     }
   }, [state]);
 
-  let value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
+  const value = useMemo(() => ({ state, dispatch }), [state, dispatch]);
 
   return (
     <SplitsExpandedContext.Provider value={value}>
@@ -262,7 +263,7 @@ const TransactionHeader = memo(
     ascDesc,
     field,
   }) => {
-    let dispatchSelected = useSelectedDispatch();
+    const dispatchSelected = useSelectedDispatch();
 
     return (
       <Row
@@ -373,7 +374,7 @@ const TransactionHeader = memo(
 );
 
 function getPayeePretty(transaction, payee, transferAcct) {
-  let { payee: payeeId } = transaction;
+  const { payee: payeeId } = transaction;
 
   if (transferAcct) {
     return (
@@ -411,11 +412,11 @@ function StatusCell({
   onEdit,
   onUpdate,
 }) {
-  let isClearedField =
+  const isClearedField =
     status === 'cleared' || status === 'reconciled' || status == null;
-  let statusProps = getStatusProps(status);
+  const statusProps = getStatusProps(status);
 
-  let statusColor =
+  const statusColor =
     status === 'cleared'
       ? theme.noticeTextLight
       : status === 'reconciled'
@@ -533,7 +534,7 @@ function PayeeCell({
   onNavigateToTransferAccount,
   onNavigateToSchedule,
 }) {
-  let isCreatingPayee = useRef(false);
+  const isCreatingPayee = useRef(false);
 
   // Filter out the account we're currently in as it is not a valid transfer
   accounts = accounts.filter(account => account.id !== accountId);
@@ -556,7 +557,7 @@ function PayeeCell({
 
         if (value && value.startsWith('new:') && !isCreatingPayee.current) {
           isCreatingPayee.current = true;
-          let id = await onCreatePayee(value.slice('new:'.length));
+          const id = await onCreatePayee(value.slice('new:'.length));
           onUpdate('payee', id);
           isCreatingPayee.current = false;
         }
@@ -617,9 +618,9 @@ function PayeeIcons({
   onNavigateToSchedule,
   children,
 }) {
-  let scheduleId = transaction.schedule;
-  let scheduleData = useCachedSchedules();
-  let schedule = scheduleData
+  const scheduleId = transaction.schedule;
+  const scheduleData = useCachedSchedules();
+  const schedule = scheduleData
     ? scheduleData.schedules.find(s => s.id === scheduleId)
     : null;
 
@@ -628,7 +629,7 @@ function PayeeIcons({
     return children;
   }
 
-  let buttonStyle = {
+  const buttonStyle = {
     marginLeft: -5,
     marginRight: 2,
     width: 23,
@@ -636,11 +637,11 @@ function PayeeIcons({
     color: 'inherit',
   };
 
-  let scheduleIconStyle = { width: 13, height: 13 };
+  const scheduleIconStyle = { width: 13, height: 13 };
 
-  let transferIconStyle = { width: 10, height: 10 };
+  const transferIconStyle = { width: 10, height: 10 };
 
-  let recurring = schedule && schedule._date && !!schedule._date.frequency;
+  const recurring = schedule && schedule._date && !!schedule._date.frequency;
 
   return (
     <>
@@ -684,7 +685,7 @@ function PayeeIcons({
 }
 
 const Transaction = memo(function Transaction(props) {
-  let {
+  const {
     transaction: originalTransaction,
     editing,
     showAccount,
@@ -716,14 +717,14 @@ const Transaction = memo(function Transaction(props) {
     onNavigateToSchedule,
   } = props;
 
-  let dispatchSelected = useSelectedDispatch();
+  const dispatchSelected = useSelectedDispatch();
 
-  let [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
-  let [prevTransaction, setPrevTransaction] = useState(originalTransaction);
-  let [transaction, setTransaction] = useState(() =>
+  const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
+  const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
+  const [transaction, setTransaction] = useState(() =>
     serializeTransaction(originalTransaction, showZeroInDeposit),
   );
-  let isPreview = isPreviewId(transaction.id);
+  const isPreview = isPreviewId(transaction.id);
 
   if (
     originalTransaction !== prevTransaction ||
@@ -736,7 +737,7 @@ const Transaction = memo(function Transaction(props) {
     setPrevShowZero(showZeroInDeposit);
   }
 
-  let [showReconciliationWarning, setShowReconciliationWarning] =
+  const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
 
   function onUpdate(name, value) {
@@ -772,7 +773,7 @@ const Transaction = memo(function Transaction(props) {
   }
 
   function onUpdateAfterConfirm(name, value) {
-    let newTransaction = { ...transaction, [name]: value };
+    const newTransaction = { ...transaction, [name]: value };
 
     // Don't change the note to an empty string if it's null (since they are both rendered the same)
     if (name === 'note' && value === '' && transaction.note == null) {
@@ -806,7 +807,7 @@ const Transaction = memo(function Transaction(props) {
     if (name === 'payee' && value && value.startsWith('new:')) {
       setTransaction(newTransaction);
     } else {
-      let deserialized = deserializeTransaction(
+      const deserialized = deserializeTransaction(
         newTransaction,
         originalTransaction,
       );
@@ -817,7 +818,7 @@ const Transaction = memo(function Transaction(props) {
     }
   }
 
-  let {
+  const {
     id,
     amount,
     debit,
@@ -836,8 +837,8 @@ const Transaction = memo(function Transaction(props) {
   } = transaction;
 
   // Join in some data
-  let payee = payees && payeeId && getPayeesById(payees)[payeeId];
-  let account = accounts && accountId && getAccountsById(accounts)[accountId];
+  const payee = payees && payeeId && getPayeesById(payees)[payeeId];
+  const account = accounts && accountId && getAccountsById(accounts)[accountId];
   let transferAcct;
 
   if (_inverse) {
@@ -850,15 +851,15 @@ const Transaction = memo(function Transaction(props) {
       getAccountsById(accounts)[payee.transfer_acct];
   }
 
-  let isChild = transaction.is_child;
-  let isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
-  let isOffBudget = account && account.offbudget === 1;
+  const isChild = transaction.is_child;
+  const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
+  const isOffBudget = account && account.offbudget === 1;
 
-  let valueStyle = added ? { fontWeight: 600 } : null;
-  let backgroundFocus = focusedField === 'select';
-  let amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
+  const valueStyle = added ? { fontWeight: 600 } : null;
+  const backgroundFocus = focusedField === 'select';
+  const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
-  let runningBalance = !isTemporaryId(id)
+  const runningBalance = !isTemporaryId(id)
     ? balance
     : balance + (_inverse ? -1 : 1) * amount;
 
@@ -993,7 +994,7 @@ const Transaction = memo(function Transaction(props) {
           textAlign="flex"
           value={accountId}
           formatter={acctId => {
-            let acct = acctId && getAccountsById(accounts)[acctId];
+            const acct = acctId && getAccountsById(accounts)[acctId];
             if (acct) {
               return acct.name;
             }
@@ -1532,15 +1533,15 @@ function TransactionTableInner({
 }) {
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
-  let [scrollWidth, setScrollWidth] = useState(0);
+  const [scrollWidth, setScrollWidth] = useState(0);
 
   function saveScrollWidth(parent, child) {
-    let width = parent > 0 && child > 0 && parent - child;
+    const width = parent > 0 && child > 0 && parent - child;
 
     setScrollWidth(!width ? 0 : width);
   }
 
-  let onNavigateToTransferAccount = useCallback(
+  const onNavigateToTransferAccount = useCallback(
     accountId => {
       props.onCloseAddTransaction();
       props.onNavigateToTransferAccount(accountId);
@@ -1548,7 +1549,7 @@ function TransactionTableInner({
     [props.onCloseAddTransaction, props.onNavigateToTransferAccount],
   );
 
-  let onNavigateToSchedule = useCallback(
+  const onNavigateToSchedule = useCallback(
     scheduleId => {
       props.onCloseAddTransaction();
       props.onNavigateToSchedule(scheduleId);
@@ -1580,17 +1581,17 @@ function TransactionTableInner({
       isExpanded,
     } = props;
 
-    let trans = item;
-    let selected = selectedItems.has(trans.id);
+    const trans = item;
+    const selected = selectedItems.has(trans.id);
 
-    let parent = props.transactionMap.get(trans.parent_id);
-    let isChildDeposit = parent && parent.amount > 0;
-    let expanded = isExpanded && isExpanded((parent || trans).id);
+    const parent = props.transactionMap.get(trans.parent_id);
+    const isChildDeposit = parent && parent.amount > 0;
+    const expanded = isExpanded && isExpanded((parent || trans).id);
 
     // For backwards compatibility, read the error of the transaction
     // since in previous versions we stored it there. In the future we
     // can simplify this to just the parent
-    let error = expanded
+    const error = expanded
       ? (parent && parent.error) || trans.error
       : trans.error;
 
@@ -1751,19 +1752,19 @@ function TransactionTableInner({
   );
 }
 
-export let TransactionTable = forwardRef((props, ref) => {
-  let [newTransactions, setNewTransactions] = useState(null);
-  let [prevIsAdding, setPrevIsAdding] = useState(false);
-  let splitsExpanded = useSplitsExpanded();
-  let prevSplitsExpanded = useRef(null);
+export const TransactionTable = forwardRef((props, ref) => {
+  const [newTransactions, setNewTransactions] = useState(null);
+  const [prevIsAdding, setPrevIsAdding] = useState(false);
+  const splitsExpanded = useSplitsExpanded();
+  const prevSplitsExpanded = useRef(null);
 
-  let tableRef = useRef(null);
-  let mergedRef = useMergedRefs(tableRef, ref);
+  const tableRef = useRef(null);
+  const mergedRef = useMergedRefs(tableRef, ref);
 
-  let transactions = useMemo(() => {
+  const transactions = useMemo(() => {
     let result;
     if (splitsExpanded.state.transitionId != null) {
-      let index = props.transactions.findIndex(
+      const index = props.transactions.findIndex(
         t => t.id === splitsExpanded.state.transitionId,
       );
       result = props.transactions.filter((t, idx) => {
@@ -1811,14 +1812,14 @@ export let TransactionTable = forwardRef((props, ref) => {
     }
   }, [prevSplitsExpanded.current]);
 
-  let newNavigator = useTableNavigator(newTransactions, getFields);
-  let tableNavigator = useTableNavigator(transactions, getFields);
-  let shouldAdd = useRef(false);
-  let latestState = useRef({ newTransactions, newNavigator, tableNavigator });
-  let savePending = useRef(false);
-  let afterSaveFunc = useRef(false);
-  let [_, forceRerender] = useState({});
-  let selectedItems = useSelectedItems();
+  const newNavigator = useTableNavigator(newTransactions, getFields);
+  const tableNavigator = useTableNavigator(transactions, getFields);
+  const shouldAdd = useRef(false);
+  const latestState = useRef({ newTransactions, newNavigator, tableNavigator });
+  const savePending = useRef(false);
+  const afterSaveFunc = useRef(false);
+  const [_, forceRerender] = useState({});
+  const selectedItems = useSelectedItems();
 
   useLayoutEffect(() => {
     latestState.current = {
@@ -1851,8 +1852,8 @@ export let TransactionTable = forwardRef((props, ref) => {
         });
         newNavigator.onEdit('temp', 'account');
       } else {
-        let transactions = latestState.current.newTransactions;
-        let lastDate = transactions.length > 0 ? transactions[0].date : null;
+        const transactions = latestState.current.newTransactions;
+        const lastDate = transactions.length > 0 ? transactions[0].date : null;
         setNewTransactions(
           makeTemporaryTransactions(
             props.currentAccountId,
@@ -1924,7 +1925,7 @@ export let TransactionTable = forwardRef((props, ref) => {
         onAddTemporary();
       } else if (!e.shiftKey) {
         function getLastTransaction(state) {
-          let { newTransactions } = state.current;
+          const { newTransactions } = state.current;
           return newTransactions[newTransactions.length - 1];
         }
 
@@ -1938,8 +1939,9 @@ export let TransactionTable = forwardRef((props, ref) => {
         }
 
         afterSave(() => {
-          let lastTransaction = getLastTransaction(latestState);
-          let isSplit = lastTransaction.parent_id || lastTransaction.is_parent;
+          const lastTransaction = getLastTransaction(latestState);
+          const isSplit =
+            lastTransaction.parent_id || lastTransaction.is_parent;
 
           if (
             latestState.current.newTransactions[0].error &&
@@ -1960,12 +1962,12 @@ export let TransactionTable = forwardRef((props, ref) => {
 
   function onCheckEnter(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
-      let { editingId: id, focusedField } = tableNavigator;
+      const { editingId: id, focusedField } = tableNavigator;
 
       afterSave(() => {
-        let transactions = latestState.current.transactions;
-        let idx = transactions.findIndex(t => t.id === id);
-        let parent = transactionMap.get(transactions[idx]?.parent_id);
+        const transactions = latestState.current.transactions;
+        const idx = transactions.findIndex(t => t.id === id);
+        const parent = transactionMap.get(transactions[idx]?.parent_id);
 
         if (
           isLastChild(transactions, idx) &&
@@ -1980,7 +1982,7 @@ export let TransactionTable = forwardRef((props, ref) => {
     }
   }
 
-  let onAddTemporary = useCallback(() => {
+  const onAddTemporary = useCallback(() => {
     shouldAdd.current = true;
     // A little hacky - this forces a rerender which will cause the
     // effect we want to run. We have to wait for all updates to be
@@ -1988,7 +1990,7 @@ export let TransactionTable = forwardRef((props, ref) => {
     forceRerender({});
   }, [props.onAdd, newNavigator.onEdit]);
 
-  let onSave = useCallback(
+  const onSave = useCallback(
     async transaction => {
       savePending.current = true;
 
@@ -1997,7 +1999,7 @@ export let TransactionTable = forwardRef((props, ref) => {
           transaction = await props.onApplyRules(transaction);
         }
 
-        let newTrans = latestState.current.newTransactions;
+        const newTrans = latestState.current.newTransactions;
         setNewTransactions(updateTransaction(newTrans, transaction).data);
       } else {
         props.onSave(transaction);
@@ -2006,11 +2008,11 @@ export let TransactionTable = forwardRef((props, ref) => {
     [props.onSave],
   );
 
-  let onDelete = useCallback(id => {
-    let temporary = isTemporaryId(id);
+  const onDelete = useCallback(id => {
+    const temporary = isTemporaryId(id);
 
     if (temporary) {
-      let newTrans = latestState.current.newTransactions;
+      const newTrans = latestState.current.newTransactions;
 
       if (id === newTrans[0].id) {
         // You can never delete the parent new transaction
@@ -2021,12 +2023,12 @@ export let TransactionTable = forwardRef((props, ref) => {
     }
   }, []);
 
-  let onSplit = useMemo(() => {
+  const onSplit = useMemo(() => {
     return id => {
       if (isTemporaryId(id)) {
-        let { newNavigator } = latestState.current;
-        let newTrans = latestState.current.newTransactions;
-        let { data, diff } = splitTransaction(newTrans, id);
+        const { newNavigator } = latestState.current;
+        const newTrans = latestState.current.newTransactions;
+        const { data, diff } = splitTransaction(newTrans, id);
         setNewTransactions(data);
 
         // Jump next to "debit" field if it is empty
@@ -2041,12 +2043,12 @@ export let TransactionTable = forwardRef((props, ref) => {
           );
         }
       } else {
-        let trans = latestState.current.transactions.find(t => t.id === id);
-        let newId = props.onSplit(id);
+        const trans = latestState.current.transactions.find(t => t.id === id);
+        const newId = props.onSplit(id);
 
         splitsExpanded.dispatch({ type: 'open-split', id: trans.id });
 
-        let { tableNavigator } = latestState.current;
+        const { tableNavigator } = latestState.current;
         if (trans.amount === null) {
           tableNavigator.onEdit(trans.id, 'debit');
         } else {
@@ -2056,18 +2058,18 @@ export let TransactionTable = forwardRef((props, ref) => {
     };
   }, [props.onSplit, splitsExpanded.dispatch]);
 
-  let onAddSplit = useCallback(
+  const onAddSplit = useCallback(
     id => {
       if (isTemporaryId(id)) {
-        let newTrans = latestState.current.newTransactions;
-        let { data, diff } = addSplitTransaction(newTrans, id);
+        const newTrans = latestState.current.newTransactions;
+        const { data, diff } = addSplitTransaction(newTrans, id);
         setNewTransactions(data);
         newNavigator.onEdit(
           diff.added[0].id,
           latestState.current.newNavigator.focusedField,
         );
       } else {
-        let newId = props.onAddSplit(id);
+        const newId = props.onAddSplit(id);
         tableNavigator.onEdit(
           newId,
           latestState.current.tableNavigator.focusedField,
@@ -2087,7 +2089,7 @@ export let TransactionTable = forwardRef((props, ref) => {
     props.onCloseAddTransaction();
   }
 
-  let onToggleSplit = useCallback(
+  const onToggleSplit = useCallback(
     id => splitsExpanded.dispatch({ type: 'toggle-split', id }),
     [splitsExpanded.dispatch],
   );

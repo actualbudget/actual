@@ -113,8 +113,8 @@ function RenderUIError() {
 }
 
 function SharedArrayBufferOverride() {
-  let [expanded, setExpanded] = useState(false);
-  let [understand, setUnderstand] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [understand, setUnderstand] = useState(false);
 
   return expanded ? (
     <>
@@ -152,7 +152,7 @@ function SharedArrayBufferOverride() {
 }
 
 function FatalError({ buttonText, error }: FatalErrorProps) {
-  let [showError, setShowError] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
 

@@ -3,7 +3,7 @@ import React, { useLayoutEffect, useRef } from 'react';
 import View from '../common/View';
 
 export default function ReportTable({ saveScrollWidth, style, children }) {
-  let contentRef = useRef<HTMLDivElement>();
+  const contentRef = useRef<HTMLDivElement>();
 
   useLayoutEffect(() => {
     if (contentRef.current && saveScrollWidth) {

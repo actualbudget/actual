@@ -11,7 +11,7 @@ import Text from './common/Text';
 import View from './common/View';
 import { Checkbox } from './forms';
 
-let buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
+const buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
 
 export default function MobileWebMessage() {
   const hideMobileMessagePref = useSelector(state => {
@@ -20,14 +20,14 @@ export default function MobileWebMessage() {
 
   const { isNarrowWidth } = useResponsive();
 
-  let [show, setShow] = useState(
+  const [show, setShow] = useState(
     isNarrowWidth &&
       !hideMobileMessagePref &&
       !document.cookie.match(/hideMobileMessage=true/),
   );
-  let [requestDontRemindMe, setRequestDontRemindMe] = useState(false);
+  const [requestDontRemindMe, setRequestDontRemindMe] = useState(false);
 
-  let dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   function onTry() {
     setShow(false);
@@ -37,7 +37,7 @@ export default function MobileWebMessage() {
       dispatch(savePrefs({ hideMobileMessage: true }));
     } else {
       // Set a cookie for 5 minutes
-      let d = new Date();
+      const d = new Date();
       d.setTime(d.getTime() + 1000 * 60 * 5);
       document.cookie =
         'hideMobileMessage=true;path=/;expires=' + d.toUTCString();

@@ -10,20 +10,20 @@ import useCategories from '../../hooks/useCategories';
 import { ManagePayees } from './ManagePayees';
 
 export default function ManagePayeesWithData({ initialSelectedIds }) {
-  let initialPayees = useSelector(state => state.queries.payees);
-  let lastUndoState = useSelector(state => state.app.lastUndoState);
-  let { grouped: categoryGroups } = useCategories();
+  const initialPayees = useSelector(state => state.queries.payees);
+  const lastUndoState = useSelector(state => state.app.lastUndoState);
+  const { grouped: categoryGroups } = useCategories();
 
-  let { initiallyLoadPayees, getPayees, setLastUndoState, pushModal } =
+  const { initiallyLoadPayees, getPayees, setLastUndoState, pushModal } =
     useActions();
 
-  let [payees, setPayees] = useState(initialPayees);
-  let [ruleCounts, setRuleCounts] = useState({ value: new Map() });
-  let [orphans, setOrphans] = useState({ value: new Map() });
-  let payeesRef = useRef();
+  const [payees, setPayees] = useState(initialPayees);
+  const [ruleCounts, setRuleCounts] = useState({ value: new Map() });
+  const [orphans, setOrphans] = useState({ value: new Map() });
+  const payeesRef = useRef();
 
   async function refetchOrphanedPayees() {
-    let orphs = await send('payees-get-orphaned');
+    const orphs = await send('payees-get-orphaned');
     setOrphans(orphs);
   }
 
@@ -35,7 +35,7 @@ export default function ManagePayeesWithData({ initialSelectedIds }) {
 
   useEffect(() => {
     async function loadData() {
-      let result = await initiallyLoadPayees();
+      const result = await initiallyLoadPayees();
 
       // Wait a bit before setting the data. This lets the modal
       // settle and makes for a smoother experience.
@@ -50,7 +50,7 @@ export default function ManagePayeesWithData({ initialSelectedIds }) {
     }
     loadData();
 
-    let unlisten = listen('sync-event', async ({ type, tables }) => {
+    const unlisten = listen('sync-event', async ({ type, tables }) => {
       if (type === 'applied') {
         if (tables.includes('rules')) {
           refetchRuleCounts();
@@ -94,7 +94,7 @@ export default function ManagePayeesWithData({ initialSelectedIds }) {
   }
 
   function onCreateRule(id) {
-    let rule = {
+    const rule = {
       stage: null,
       conditionsOp: 'and',
       conditions: [
@@ -134,20 +134,21 @@ export default function ManagePayeesWithData({ initialSelectedIds }) {
       onMerge={async ([targetId, ...mergeIds]) => {
         await send('payees-merge', { targetId, mergeIds });
 
-        let targetIdIsOrphan = orphans.map(o => o.id).includes(targetId);
-        let mergeIdsOrphans = mergeIds.filter(m =>
+        const targetIdIsOrphan = orphans.map(o => o.id).includes(targetId);
+        const mergeIdsOrphans = mergeIds.filter(m =>
           orphans.map(o => o.id).includes(m),
         );
 
+        let filtedOrphans = orphans;
         if (targetIdIsOrphan && mergeIdsOrphans.length !== mergeIds.length) {
           // there is a non-orphan in mergeIds, target can be removed from orphan arr
-          orphans = orphans.filter(o => o.id !== targetId);
+          filtedOrphans = filtedOrphans.filter(o => o.id !== targetId);
         }
-        orphans = orphans.filter(o => !mergeIds.includes(o.id));
+        filtedOrphans = filtedOrphans.filter(o => !mergeIds.includes(o.id));
 
-        let result = payees.filter(p => !mergeIds.includes(p.id));
+        const result = payees.filter(p => !mergeIds.includes(p.id));
         mergeIds.forEach(id => {
-          let count = ruleCounts.value.get(id) || 0;
+          const count = ruleCounts.value.get(id) || 0;
           ruleCounts.value.set(
             targetId,
             (ruleCounts.value.get(targetId) || 0) + count,
@@ -155,7 +156,7 @@ export default function ManagePayeesWithData({ initialSelectedIds }) {
         });
 
         setPayees(result);
-        setOrphans(orphans);
+        setOrphans(filtedOrphans);
         setRuleCounts({ value: ruleCounts.value });
       }}
       onViewRules={onViewRules}
