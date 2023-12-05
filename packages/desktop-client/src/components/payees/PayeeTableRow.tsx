@@ -87,10 +87,12 @@ const PayeeTableRow = memo(
     onUpdate,
     style,
   }: PayeeTableRowProps) => {
-    let { id } = payee;
-    let dispatchSelected = useSelectedDispatch();
-    let borderColor = selected ? theme.tableBorderSelected : theme.tableBorder;
-    let backgroundFocus = hovered || focusedField === 'select';
+    const { id } = payee;
+    const dispatchSelected = useSelectedDispatch();
+    const borderColor = selected
+      ? theme.tableBorderSelected
+      : theme.tableBorder;
+    const backgroundFocus = hovered || focusedField === 'select';
 
     return (
       <Row

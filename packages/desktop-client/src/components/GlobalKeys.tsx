@@ -5,7 +5,7 @@ import * as Platform from 'loot-core/src/client/platform';
 import useNavigate from '../hooks/useNavigate';
 
 export default function GlobalKeys() {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   useEffect(() => {
     const handleKeys = e => {
       if (Platform.isBrowser) {

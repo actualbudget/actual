@@ -2,7 +2,7 @@ import React, { type ReactNode, forwardRef } from 'react';
 
 import { theme } from '../../style';
 
-let externalLinkColors = {
+const externalLinkColors = {
   purple: theme.pageTextPositive,
   blue: theme.pageTextLink,
   muted: 'inherit',

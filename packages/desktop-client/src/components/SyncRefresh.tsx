@@ -9,7 +9,7 @@ type SyncRefreshProps = {
   children: (props: ChildrenProps) => ReactNode;
 };
 export default function SyncRefresh({ onSync, children }: SyncRefreshProps) {
-  let [syncing, setSyncing] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   async function onSync_() {
     setSyncing(true);

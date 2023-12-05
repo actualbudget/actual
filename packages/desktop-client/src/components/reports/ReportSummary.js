@@ -19,7 +19,7 @@ export function ReportSummary({
   balanceTypeOp,
   monthsCount,
 }) {
-  let net = data.totalDebts > data.totalAssets ? 'EXPENSE' : 'INCOME';
+  const net = data.totalDebts > data.totalAssets ? 'EXPENSE' : 'INCOME';
   const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
   return (
     <View

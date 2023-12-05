@@ -2,7 +2,7 @@ import React, { type ReactNode, createContext, useContext } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-let Context = createContext(null);
+const Context = createContext(null);
 
 type ReportProviderProps = {
   summaryCollapsed: boolean;
@@ -16,7 +16,7 @@ export function ReportProvider({
   onToggleSummaryCollapse,
   children,
 }: ReportProviderProps) {
-  let currentMonth = monthUtils.currentMonth();
+  const currentMonth = monthUtils.currentMonth();
 
   return (
     <Context.Provider
@@ -26,8 +26,9 @@ export function ReportProvider({
         onBudgetAction,
         onToggleSummaryCollapse,
       }}
-      children={children}
-    />
+    >
+      {children}
+    </Context.Provider>
   );
 }
 

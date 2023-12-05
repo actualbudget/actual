@@ -54,7 +54,7 @@ export default function Modals() {
 
   const syncServerStatus = useSyncServerStatus();
 
-  let modals = modalStack
+  const modals = modalStack
     .map(({ name, options }, idx) => {
       const modalProps: CommonModalProps = {
         onClose: actions.popModal,

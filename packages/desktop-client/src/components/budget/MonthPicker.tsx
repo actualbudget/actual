@@ -57,7 +57,7 @@ export const MonthPicker = ({
     );
   });
 
-  let yearHeadersShown = [];
+  const yearHeadersShown = [];
 
   return (
     <View

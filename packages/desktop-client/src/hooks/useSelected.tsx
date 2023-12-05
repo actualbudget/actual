@@ -340,10 +340,8 @@ export function SelectedProviderWithItems<T extends Item>({
   }, [registerDispatch]);
 
   return (
-    <SelectedProvider<T>
-      instance={selected}
-      fetchAllIds={fetchAllIds}
-      children={children}
-    />
+    <SelectedProvider<T> instance={selected} fetchAllIds={fetchAllIds}>
+      {children}
+    </SelectedProvider>
   );
 }

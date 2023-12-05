@@ -117,7 +117,7 @@ export default function CategoryAutocomplete({
   renderCategoryItem,
   ...props
 }: CategoryAutocompleteProps) {
-  let categorySuggestions: Array<
+  const categorySuggestions: Array<
     CategoryEntity & { group?: CategoryGroupEntity }
   > = useMemo(
     () =>

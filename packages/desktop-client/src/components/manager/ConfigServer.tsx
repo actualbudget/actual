@@ -19,16 +19,16 @@ import { Title } from './subscribe/common';
 
 export default function ConfigServer() {
   useSetThemeColor(theme.mobileConfigServerViewTheme);
-  let { createBudget, signOut, loggedIn } = useActions();
-  let navigate = useNavigate();
-  let [url, setUrl] = useState('');
-  let currentUrl = useServerURL();
-  let setServerUrl = useSetServerURL();
+  const { createBudget, signOut, loggedIn } = useActions();
+  const navigate = useNavigate();
+  const [url, setUrl] = useState('');
+  const currentUrl = useServerURL();
+  const setServerUrl = useSetServerURL();
   useEffect(() => {
     setUrl(currentUrl);
   }, [currentUrl]);
-  let [loading, setLoading] = useState(false);
-  let [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function getErrorMessage(error: string) {
     switch (error) {
@@ -46,14 +46,14 @@ export default function ConfigServer() {
 
     setError(null);
     setLoading(true);
-    let { error } = await setServerUrl(url);
+    const { error } = await setServerUrl(url);
 
     if (
       ['network-failure', 'get-server-failure'].includes(error) &&
       !url.startsWith('http://') &&
       !url.startsWith('https://')
     ) {
-      let { error } = await setServerUrl('https://' + url);
+      const { error } = await setServerUrl('https://' + url);
       if (error) {
         setUrl('https://' + url);
         setError(error);

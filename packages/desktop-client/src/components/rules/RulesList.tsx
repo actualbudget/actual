@@ -28,8 +28,8 @@ export default function RulesList({
   return (
     <View>
       {rules.map(rule => {
-        let hovered = hoveredRule === rule.id;
-        let selected = selectedItems.has(rule.id);
+        const hovered = hoveredRule === rule.id;
+        const selected = selectedItems.has(rule.id);
 
         return (
           <RuleRow
