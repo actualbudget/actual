@@ -26,8 +26,9 @@ export function ReportProvider({
         onBudgetAction,
         onToggleSummaryCollapse,
       }}
-      children={children}
-    />
+    >
+      {children}
+    </Context.Provider>
   );
 }
 

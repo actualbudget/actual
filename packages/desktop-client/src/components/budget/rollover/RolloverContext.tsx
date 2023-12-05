@@ -29,8 +29,9 @@ export function RolloverContext({
         onBudgetAction,
         onToggleSummaryCollapse,
       }}
-      children={children}
-    />
+    >
+      {children}
+    </Context.Provider>
   );
 }
 

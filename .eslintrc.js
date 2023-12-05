@@ -82,7 +82,6 @@ module.exports = {
 
     // TODO: re-enable these rules
     'react-hooks/exhaustive-deps': 'off',
-    'react/no-children-prop': 'off',
     'react/display-name': 'off',
     'react/react-in-jsx-scope': 'off',
     // 'react-hooks/exhaustive-deps': [

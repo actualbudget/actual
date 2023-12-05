@@ -124,11 +124,9 @@ function NotesTooltip({
         />
       ) : (
         <Text {...markdownStyles}>
-          <ReactMarkdown
-            remarkPlugins={remarkPlugins}
-            linkTarget="_blank"
-            children={notes}
-          />
+          <ReactMarkdown remarkPlugins={remarkPlugins} linkTarget="_blank">
+            {notes}
+          </ReactMarkdown>
         </Text>
       )}
     </Tooltip>
