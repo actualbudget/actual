@@ -216,18 +216,18 @@ function AccountList({
 }
 
 export default function Accounts() {
-  let accounts = useSelector(state => state.queries.accounts);
-  let newTransactions = useSelector(state => state.queries.newTransactions);
-  let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  let numberFormat = useSelector(
+  const accounts = useSelector(state => state.queries.accounts);
+  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+  const numberFormat = useSelector(
     state => state.prefs.local.numberFormat || 'comma-dot',
   );
-  let hideFraction = useSelector(
+  const hideFraction = useSelector(
     state => state.prefs.local.hideFraction || false,
   );
 
   const { list: categories } = useCategories();
-  let { getAccounts, replaceModal, syncAndDownload } = useActions();
+  const { getAccounts, replaceModal, syncAndDownload } = useActions();
 
   const transactions = useState({});
   const navigate = useNavigate();

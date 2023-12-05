@@ -10,7 +10,7 @@ import BudgetPageHeader from './BudgetPageHeader';
 import BudgetTable from './BudgetTable';
 
 function getNumPossibleMonths(width: number) {
-  let estimatedTableWidth = width - 200;
+  const estimatedTableWidth = width - 200;
 
   if (estimatedTableWidth < 500) {
     return 1;
@@ -51,13 +51,13 @@ const DynamicBudgetTableInner = forwardRef<
     },
     ref,
   ) => {
-    let prefs = useSelector(state => state.prefs.local);
-    let { setDisplayMax } = useBudgetMonthCount();
-    let actions = useActions();
+    const prefs = useSelector(state => state.prefs.local);
+    const { setDisplayMax } = useBudgetMonthCount();
+    const actions = useActions();
 
-    let numPossible = getNumPossibleMonths(width);
-    let numMonths = Math.min(numPossible, maxMonths);
-    let maxWidth = 200 + 500 * numMonths;
+    const numPossible = getNumPossibleMonths(width);
+    const numMonths = Math.min(numPossible, maxMonths);
+    const maxWidth = 200 + 500 * numMonths;
 
     useEffect(() => {
       setDisplayMax(numPossible);

@@ -22,7 +22,7 @@ export default function InputWithContent({
   getStyle,
   ...props
 }: InputWithContentProps) {
-  let [focused, setFocused] = useState(props.focused);
+  const [focused, setFocused] = useState(props.focused);
 
   return (
     <View

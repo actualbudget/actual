@@ -30,19 +30,19 @@ export default function CreateEncryptionKey({
   actions,
   options = {},
 }: CreateEncryptionKeyProps) {
-  let [password, setPassword] = useState('');
-  let [loading, setLoading] = useState(false);
-  let [error, setError] = useState('');
-  let [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  let isRecreating = options.recreate;
+  const isRecreating = options.recreate;
 
   async function onCreateKey() {
     if (password !== '' && !loading) {
       setLoading(true);
       setError(null);
 
-      let res = await send('key-make', { password });
+      const res = await send('key-make', { password });
       if (res.error) {
         setLoading(null);
         setError(getCreateKeyError(res.error));

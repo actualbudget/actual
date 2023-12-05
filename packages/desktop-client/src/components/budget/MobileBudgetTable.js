@@ -40,7 +40,7 @@ import RolloverBudgetBalanceTooltip from './rollover/BalanceTooltip';
 import { makeAmountGrey } from './util';
 
 function ToBudget({ toBudget, onClick }) {
-  let amount = useSheetValue(toBudget);
+  const amount = useSheetValue(toBudget);
   return (
     <Button
       type="bare"
@@ -70,12 +70,12 @@ function ToBudget({ toBudget, onClick }) {
 }
 
 function Saved({ projected, onClick }) {
-  let binding = projected
+  const binding = projected
     ? reportBudget.totalBudgetedSaved
     : reportBudget.totalSaved;
 
-  let saved = useSheetValue(binding) || 0;
-  let isNegative = saved < 0;
+  const saved = useSheetValue(binding) || 0;
+  const isNegative = saved < 0;
 
   return (
     <Button
@@ -135,7 +135,7 @@ function BudgetCell({
   onEdit,
   isEditing,
 }) {
-  let sheetValue = useSheetValue(binding);
+  const sheetValue = useSheetValue(binding);
 
   function updateBudgetAmount(amount) {
     onBudgetAction?.(month, 'budget-amount', {
@@ -255,14 +255,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
   show3Cols,
   showBudgetedCol,
 }) {
-  let opacity = blank ? 0 : 1;
-  let showEditables = editMode || isEditing;
+  const opacity = blank ? 0 : 1;
+  const showEditables = editMode || isEditing;
 
-  let [categoryName, setCategoryName] = useState(category.name);
-  let [isHidden, setIsHidden] = useState(category.hidden);
+  const [categoryName, setCategoryName] = useState(category.name);
+  const [isHidden, setIsHidden] = useState(category.hidden);
 
-  let tooltip = useTooltip();
-  let balanceTooltip = useTooltip();
+  const tooltip = useTooltip();
+  const balanceTooltip = useTooltip();
 
   useEffect(() => {
     if (isBudgetActionMenuOpen) {
@@ -276,7 +276,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
     }
   }, [isEditing, tooltip]);
 
-  let onSubmit = () => {
+  const onSubmit = () => {
     if (categoryName) {
       onSave?.({
         ...category,
@@ -288,7 +288,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
     onEdit?.(null);
   };
 
-  let onMenuSelect = type => {
+  const onMenuSelect = type => {
     onEdit?.(null);
     switch (type) {
       case 'toggle-visibility':
@@ -306,10 +306,10 @@ const ExpenseCategory = memo(function ExpenseCategory({
     }
   };
 
-  let listItemRef = useRef();
-  let inputRef = useRef();
+  const listItemRef = useRef();
+  const inputRef = useRef();
 
-  let _onBudgetAction = (monthIndex, action, arg) => {
+  const _onBudgetAction = (monthIndex, action, arg) => {
     onBudgetAction?.(
       monthUtils.getMonthFromIndex(monthUtils.getYear(month), monthIndex),
       action,
@@ -317,7 +317,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
     );
   };
 
-  let content = (
+  const content = (
     <ListItem
       style={{
         backgroundColor: isEditingBudget
@@ -555,13 +555,13 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   show3Cols,
   showBudgetedCol,
 }) {
-  let opacity = blank ? 0 : 1;
-  let showEditables = editMode || isEditing;
+  const opacity = blank ? 0 : 1;
+  const showEditables = editMode || isEditing;
 
-  let [groupName, setGroupName] = useState(group.name);
-  let [isHidden, setIsHidden] = useState(group.hidden);
+  const [groupName, setGroupName] = useState(group.name);
+  const [isHidden, setIsHidden] = useState(group.hidden);
 
-  let tooltip = useTooltip();
+  const tooltip = useTooltip();
 
   useEffect(() => {
     if (!isEditing && tooltip.isOpen) {
@@ -569,7 +569,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
     }
   }, [isEditing]);
 
-  let onSubmit = () => {
+  const onSubmit = () => {
     if (groupName) {
       onSave?.({
         ...group,
@@ -581,7 +581,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
     onEdit?.(null);
   };
 
-  let onMenuSelect = type => {
+  const onMenuSelect = type => {
     onEdit?.(null);
     switch (type) {
       case 'add-category':
@@ -602,10 +602,10 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
     }
   };
 
-  let listItemRef = useRef();
-  let inputRef = useRef();
+  const listItemRef = useRef();
+  const inputRef = useRef();
 
-  let content = (
+  const content = (
     <ListItem
       style={{
         flexDirection: 'row',
@@ -811,11 +811,11 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   isEditing,
   onEdit,
 }) {
-  let [groupName, setGroupName] = useState(group.name);
-  let [isHidden, setIsHidden] = useState(group.hidden);
-  let showEditables = editMode || isEditing;
+  const [groupName, setGroupName] = useState(group.name);
+  const [isHidden, setIsHidden] = useState(group.hidden);
+  const showEditables = editMode || isEditing;
 
-  let tooltip = useTooltip();
+  const tooltip = useTooltip();
 
   useEffect(() => {
     if (!isEditing && tooltip.isOpen) {
@@ -823,7 +823,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
     }
   }, [isEditing]);
 
-  let onSubmit = () => {
+  const onSubmit = () => {
     if (groupName) {
       onSave?.({
         ...group,
@@ -835,7 +835,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
     onEdit?.(null);
   };
 
-  let onMenuSelect = type => {
+  const onMenuSelect = type => {
     onEdit?.(null);
     switch (type) {
       case 'add-category':
@@ -856,8 +856,8 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
     }
   };
 
-  let listItemRef = useRef();
-  let inputRef = useRef();
+  const listItemRef = useRef();
+  const inputRef = useRef();
 
   return (
     <ListItem
@@ -1019,11 +1019,11 @@ const IncomeCategory = memo(function IncomeCategory({
   isEditingBudget,
   onEditBudget,
 }) {
-  let [categoryName, setCategoryName] = useState(category.name);
-  let [isHidden, setIsHidden] = useState(category.hidden);
-  let showEditables = editMode || isEditing;
+  const [categoryName, setCategoryName] = useState(category.name);
+  const [isHidden, setIsHidden] = useState(category.hidden);
+  const showEditables = editMode || isEditing;
 
-  let tooltip = useTooltip();
+  const tooltip = useTooltip();
 
   useEffect(() => {
     if (!isEditing && tooltip.isOpen) {
@@ -1031,7 +1031,7 @@ const IncomeCategory = memo(function IncomeCategory({
     }
   }, [isEditing]);
 
-  let onSubmit = () => {
+  const onSubmit = () => {
     if (categoryName) {
       onSave?.({
         ...category,
@@ -1043,7 +1043,7 @@ const IncomeCategory = memo(function IncomeCategory({
     onEdit?.(null);
   };
 
-  let onMenuSelect = type => {
+  const onMenuSelect = type => {
     onEdit?.(null);
     switch (type) {
       case 'toggle-visibility':
@@ -1061,8 +1061,8 @@ const IncomeCategory = memo(function IncomeCategory({
     }
   };
 
-  let listItemRef = useRef();
-  let inputRef = useRef();
+  const listItemRef = useRef();
+  const inputRef = useRef();
 
   return (
     <ListItem
@@ -1694,7 +1694,7 @@ export function BudgetTable(props) {
   const show3Cols = width >= 360;
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
-  let format = useFormat();
+  const format = useFormat();
 
   const mobileShowBudgetedColPref = useSelector(state => {
     return state.prefs?.local?.toggleMobileDisplayPref || true;
@@ -1704,7 +1704,7 @@ export function BudgetTable(props) {
     return state.prefs?.local?.['budget.showHiddenCategories'] || false;
   });
 
-  let [showBudgetedCol, setShowBudgetedCol] = useState(
+  const [showBudgetedCol, setShowBudgetedCol] = useState(
     !mobileShowBudgetedColPref &&
       !document.cookie.match(/mobileShowBudgetedColPref=true/),
   );
@@ -1716,7 +1716,7 @@ export function BudgetTable(props) {
     }
   }
 
-  let buttonStyle = {
+  const buttonStyle = {
     padding: 0,
     backgroundColor: 'transparent',
     borderRadius: 'unset',
@@ -1995,10 +1995,10 @@ function BudgetMenu({
   onToggleHiddenCategories,
   onSwitchBudgetType,
 }) {
-  let tooltip = useTooltip();
-  let isReportBudgetEnabled = useFeatureFlag('reportBudget');
+  const tooltip = useTooltip();
+  const isReportBudgetEnabled = useFeatureFlag('reportBudget');
 
-  let onMenuSelect = name => {
+  const onMenuSelect = name => {
     tooltip.close();
     switch (name) {
       case 'edit-mode':
@@ -2062,10 +2062,10 @@ function BudgetMenu({
 }
 
 function MonthSelector({ month, monthBounds, onPrevMonth, onNextMonth }) {
-  let prevEnabled = month > monthBounds.start;
-  let nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
+  const prevEnabled = month > monthBounds.start;
+  const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
 
-  let arrowButtonStyle = {
+  const arrowButtonStyle = {
     padding: 10,
     margin: 2,
   };

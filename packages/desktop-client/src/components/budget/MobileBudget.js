@@ -41,7 +41,7 @@ class Budget extends Component {
   }
 
   async loadCategories() {
-    let result = await this.props.getCategories();
+    const result = await this.props.getCategories();
     this.setState({ categoryGroups: result.grouped });
   }
 
@@ -63,7 +63,7 @@ class Budget extends Component {
 
     this.setState({ initialized: true });
 
-    let unlisten = listen('sync-event', ({ type, tables }) => {
+    const unlisten = listen('sync-event', ({ type, tables }) => {
       if (
         type === 'success' &&
         (tables.includes('categories') ||
@@ -145,14 +145,14 @@ class Budget extends Component {
   };
 
   onDeleteGroup = async groupId => {
-    let group = this.state.categoryGroups?.find(g => g.id === groupId);
+    const group = this.state.categoryGroups?.find(g => g.id === groupId);
 
     if (!group) {
       return;
     }
 
     let mustTransfer = false;
-    for (let category of group.categories) {
+    for (const category of group.categories) {
       if (await send('must-category-transfer', { id: category.id })) {
         mustTransfer = true;
         break;
@@ -210,21 +210,22 @@ class Budget extends Component {
   };
 
   onReorderCategory = (id, { inGroup, aroundCategory }) => {
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
     let groupId, targetId;
 
     if (inGroup) {
       groupId = inGroup;
     } else if (aroundCategory) {
-      let { id: catId, position } = aroundCategory;
+      const { id: originalCatId, position } = aroundCategory;
 
-      let group = categoryGroups.find(group =>
+      let catId = originalCatId;
+      const group = categoryGroups.find(group =>
         group.categories.find(cat => cat.id === catId),
       );
 
       if (position === 'bottom') {
-        let { categories } = group;
-        let idx = categories.findIndex(cat => cat.id === catId);
+        const { categories } = group;
+        const idx = categories.findIndex(cat => cat.id === catId);
         catId = idx < categories.length - 1 ? categories[idx + 1].id : null;
       }
 
@@ -240,10 +241,10 @@ class Budget extends Component {
   };
 
   onReorderGroup = (id, targetId, position) => {
-    let { categoryGroups } = this.state;
+    const { categoryGroups } = this.state;
 
     if (position === 'bottom') {
-      let idx = categoryGroups.findIndex(group => group.id === targetId);
+      const idx = categoryGroups.findIndex(group => group.id === targetId);
       targetId =
         idx < categoryGroups.length - 1 ? categoryGroups[idx + 1].id : null;
     }
@@ -266,23 +267,23 @@ class Budget extends Component {
   };
 
   onPrevMonth = async () => {
-    let { spreadsheet, budgetType } = this.props;
-    let month = monthUtils.subMonths(this.state.currentMonth, 1);
+    const { spreadsheet, budgetType } = this.props;
+    const month = monthUtils.subMonths(this.state.currentMonth, 1);
     await prewarmMonth(budgetType, spreadsheet, month);
     this.setState({ currentMonth: month, initialized: true });
   };
 
   onNextMonth = async () => {
-    let { spreadsheet, budgetType } = this.props;
-    let month = monthUtils.addMonths(this.state.currentMonth, 1);
+    const { spreadsheet, budgetType } = this.props;
+    const month = monthUtils.addMonths(this.state.currentMonth, 1);
     await prewarmMonth(budgetType, spreadsheet, month);
     this.setState({ currentMonth: month, initialized: true });
   };
 
   onOpenActionSheet = () => {
-    let { budgetType } = this.props;
+    const { budgetType } = this.props;
 
-    let options = [
+    const options = [
       'Edit Categories',
       'Copy last month’s budget',
       'Set budgets to zero',
@@ -352,8 +353,8 @@ class Budget extends Component {
       applyBudgetAction,
       pushModal,
     } = this.props;
-    let numberFormat = prefs.numberFormat || 'comma-dot';
-    let hideFraction = prefs.hideFraction || false;
+    const numberFormat = prefs.numberFormat || 'comma-dot';
+    const hideFraction = prefs.hideFraction || false;
 
     if (!categoryGroups || !initialized) {
       return (
@@ -414,14 +415,14 @@ class Budget extends Component {
 }
 
 export default function BudgetWrapper() {
-  let { list: categories, grouped: categoryGroups } = useCategories();
-  let budgetType = useSelector(
+  const { list: categories, grouped: categoryGroups } = useCategories();
+  const budgetType = useSelector(
     state => state.prefs.local.budgetType || 'rollover',
   );
-  let prefs = useSelector(state => state.prefs.local);
+  const prefs = useSelector(state => state.prefs.local);
 
-  let actions = useActions();
-  let spreadsheet = useSpreadsheet();
+  const actions = useActions();
+  const spreadsheet = useSpreadsheet();
   useSetThemeColor(theme.mobileViewTheme);
   return (
     <Budget

@@ -23,7 +23,7 @@ import View from '../common/View';
 import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 
-let dateFormats = [
+const dateFormats = [
   { format: 'yyyy mm dd', label: 'YYYY MM DD' },
   { format: 'yy mm dd', label: 'YY MM DD' },
   { format: 'mm dd yyyy', label: 'MM DD YYYY' },
@@ -108,7 +108,7 @@ export function parseDate(str, order) {
       day = parts[1];
   }
 
-  let parsed = `${year}-${pad(month)}-${pad(day)}`;
+  const parsed = `${year}-${pad(month)}-${pad(day)}`;
   if (!d.isValid(d.parseISO(parsed))) {
     return null;
   }
@@ -126,15 +126,15 @@ function formatDate(date, format) {
 }
 
 function getFileType(filepath) {
-  let m = filepath.match(/\.([^.]*)$/);
+  const m = filepath.match(/\.([^.]*)$/);
   if (!m) return 'ofx';
-  let rawType = m[1].toLowerCase();
+  const rawType = m[1].toLowerCase();
   if (rawType === 'tsv') return 'csv';
   return rawType;
 }
 
 function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
-  let parsed =
+  const parsed =
     date &&
     formatDate(
       parseDateFormat ? parseDate(date, parseDateFormat) : date,
@@ -162,10 +162,10 @@ function getInitialDateFormat(transactions, mappings) {
     return 'yyyy mm dd';
   }
 
-  let transaction = transactions[0];
-  let date = transaction[mappings.date];
+  const transaction = transactions[0];
+  const date = transaction[mappings.date];
 
-  let found =
+  const found =
     date == null
       ? null
       : dateFormats.find(f => parseDate(date, f.format) != null);
@@ -177,35 +177,35 @@ function getInitialMappings(transactions) {
     return {};
   }
 
-  let transaction = transactions[0];
-  let fields = Object.entries(transaction);
+  const transaction = transactions[0];
+  const fields = Object.entries(transaction);
 
   function key(entry) {
     return entry ? entry[0] : null;
   }
 
-  let dateField = key(
+  const dateField = key(
     fields.find(([name, value]) => name.toLowerCase().includes('date')) ||
       fields.find(([name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
   );
 
-  let amountField = key(
+  const amountField = key(
     fields.find(([name, value]) => name.toLowerCase().includes('amount')) ||
       fields.find(([name, value]) => value.match(/^-?[.,\d]+$/)),
   );
 
-  let payeeField = key(
+  const payeeField = key(
     fields.find(([name, value]) => name !== dateField && name !== amountField),
   );
 
-  let notesField = key(
+  const notesField = key(
     fields.find(
       ([name, value]) =>
         name !== dateField && name !== amountField && name !== payeeField,
     ),
   );
 
-  let inOutField = key(
+  const inOutField = key(
     fields.find(
       ([name, value]) =>
         name !== dateField &&
@@ -225,8 +225,9 @@ function getInitialMappings(transactions) {
 }
 
 function applyFieldMappings(transaction, mappings) {
-  let result = {};
-  for (let [field, target] of Object.entries(mappings)) {
+  const result = {};
+  for (const [originalField, target] of Object.entries(mappings)) {
+    let field = originalField;
     if (field === 'payee') {
       field = 'payee_name';
     }
@@ -240,8 +241,9 @@ function parseAmount(amount, mapper) {
   if (amount == null) {
     return null;
   }
-  let parsed = typeof amount === 'string' ? looselyParseAmount(amount) : amount;
-  let value = mapper(parsed);
+  const parsed =
+    typeof amount === 'string' ? looselyParseAmount(amount) : amount;
+  const value = mapper(parsed);
   return value;
 }
 
@@ -259,8 +261,8 @@ function parseAmountFields(
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    let outflow = parseAmount(trans.outflow, n => -Math.abs(n)) * multiplier;
-    let inflow = outflow
+    const outflow = parseAmount(trans.outflow, n => -Math.abs(n)) * multiplier;
+    const inflow = outflow
       ? 0
       : parseAmount(trans.inflow, n => Math.abs(n)) * multiplier;
 
@@ -300,7 +302,7 @@ function Transaction({
   flipAmount,
   multiplierAmount,
 }) {
-  let transaction = useMemo(
+  const transaction = useMemo(
     () =>
       fieldMappings
         ? applyFieldMappings(rawTransaction, fieldMappings)
@@ -434,8 +436,8 @@ function DateFormatSelect({
   // to space if we can't figure it out.
   let delimiter = '-';
   if (transactions.length > 0 && fieldMappings && fieldMappings.date != null) {
-    let date = transactions[0][fieldMappings.date];
-    let m = date && date.match(/[/.,-/\\]/);
+    const date = transactions[0][fieldMappings.date];
+    const m = date && date.match(/[/.,-/\\]/);
     delimiter = m ? m[0] : ' ';
   }
 
@@ -555,7 +557,7 @@ function FieldMappings({
     return null;
   }
 
-  let options = Object.keys(transactions[0]);
+  const options = Object.keys(transactions[0]);
   mappings = mappings || {};
 
   return (
@@ -655,53 +657,53 @@ function FieldMappings({
 }
 
 export default function ImportTransactions({ modalProps, options }) {
-  let dateFormat = useSelector(
+  const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-  let prefs = useSelector(state => state.prefs.local);
-  let { parseTransactions, importTransactions, getPayees, savePrefs } =
+  const prefs = useSelector(state => state.prefs.local);
+  const { parseTransactions, importTransactions, getPayees, savePrefs } =
     useActions();
 
-  let [multiplierAmount, setMultiplierAmount] = useState('');
-  let [loadingState, setLoadingState] = useState('parsing');
-  let [error, setError] = useState(null);
-  let [filename, setFilename] = useState(options.filename);
-  let [transactions, setTransactions] = useState([]);
-  let [filetype, setFileType] = useState(null);
-  let [fieldMappings, setFieldMappings] = useState(null);
-  let [splitMode, setSplitMode] = useState(false);
-  let [inOutMode, setInOutMode] = useState(false);
-  let [outValue, setOutValue] = useState('');
-  let [flipAmount, setFlipAmount] = useState(false);
-  let [multiplierEnabled, setMultiplierEnabled] = useState(false);
-  let { accountId, onImported } = options;
+  const [multiplierAmount, setMultiplierAmount] = useState('');
+  const [loadingState, setLoadingState] = useState('parsing');
+  const [error, setError] = useState(null);
+  const [filename, setFilename] = useState(options.filename);
+  const [transactions, setTransactions] = useState([]);
+  const [filetype, setFileType] = useState(null);
+  const [fieldMappings, setFieldMappings] = useState(null);
+  const [splitMode, setSplitMode] = useState(false);
+  const [inOutMode, setInOutMode] = useState(false);
+  const [outValue, setOutValue] = useState('');
+  const [flipAmount, setFlipAmount] = useState(false);
+  const [multiplierEnabled, setMultiplierEnabled] = useState(false);
+  const { accountId, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
   // options which are simple post-processing. That means if you
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
-  let [delimiter, setDelimiter] = useState(
+  const [delimiter, setDelimiter] = useState(
     prefs[`csv-delimiter-${accountId}`] ||
       (filename.endsWith('.tsv') ? '\t' : ','),
   );
-  let [hasHeaderRow, setHasHeaderRow] = useState(
+  const [hasHeaderRow, setHasHeaderRow] = useState(
     prefs[`csv-has-header-${accountId}`] ?? true,
   );
-  let [fallbackMissingPayeeToMemo, setFallbackMissingPayeeToMemo] = useState(
+  const [fallbackMissingPayeeToMemo, setFallbackMissingPayeeToMemo] = useState(
     prefs[`ofx-fallback-missing-payee-${accountId}`] ?? true,
   );
 
-  let [parseDateFormat, setParseDateFormat] = useState(null);
+  const [parseDateFormat, setParseDateFormat] = useState(null);
 
-  let [clearOnImport, setClearOnImport] = useState(true);
+  const [clearOnImport, setClearOnImport] = useState(true);
 
   const enableExperimentalOfxParser = useFeatureFlag('experimentalOfxParser');
 
   async function parse(filename, options) {
     setLoadingState('parsing');
 
-    let filetype = getFileType(filename);
+    const filetype = getFileType(filename);
     setFilename(filename);
     setFileType(filetype);
 
@@ -710,7 +712,7 @@ export default function ImportTransactions({ modalProps, options }) {
       enableExperimentalOfxParser,
     };
 
-    let { errors, transactions } = await parseTransactions(filename, options);
+    const { errors, transactions } = await parseTransactions(filename, options);
     setLoadingState(null);
     setError(null);
 
@@ -734,7 +736,7 @@ export default function ImportTransactions({ modalProps, options }) {
         setFieldMappings(mappings);
 
         // Set initial split mode based on any saved mapping
-        let initialSplitMode = !!(mappings.outflow || mappings.inflow);
+        const initialSplitMode = !!(mappings.outflow || mappings.inflow);
         setSplitMode(initialSplitMode);
 
         setParseDateFormat(
@@ -785,16 +787,16 @@ export default function ImportTransactions({ modalProps, options }) {
       setFlipAmount(!flipAmount);
     }
 
-    let isSplit = !splitMode;
+    const isSplit = !splitMode;
     setSplitMode(isSplit);
     setInOutMode(false);
     setFlipAmount(false);
 
     // Run auto-detection on the fields to try to detect the fields
     // automatically
-    let mappings = getInitialMappings(transactions);
+    const mappings = getInitialMappings(transactions);
 
-    let newFieldMappings = isSplit
+    const newFieldMappings = isSplit
       ? {
           amount: null,
           outflow: mappings.amount,
@@ -835,13 +837,13 @@ export default function ImportTransactions({ modalProps, options }) {
   async function onImport() {
     setLoadingState('importing');
 
-    let finalTransactions = [];
+    const finalTransactions = [];
     let errorMessage;
 
     for (let trans of transactions) {
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      let date = isOfxFile(filetype)
+      const date = isOfxFile(filetype)
         ? trans.date
         : parseDate(trans.date, parseDateFormat);
       if (date == null) {
@@ -851,7 +853,7 @@ export default function ImportTransactions({ modalProps, options }) {
         break;
       }
 
-      let { amount } = parseAmountFields(
+      const { amount } = parseAmountFields(
         trans,
         splitMode,
         inOutMode,
@@ -864,7 +866,7 @@ export default function ImportTransactions({ modalProps, options }) {
         break;
       }
 
-      let { inflow, outflow, inOut, ...finalTransaction } = trans;
+      const { inflow, outflow, inOut, ...finalTransaction } = trans;
       finalTransactions.push({
         ...finalTransaction,
         date,
@@ -880,7 +882,7 @@ export default function ImportTransactions({ modalProps, options }) {
     }
 
     if (!isOfxFile(filetype)) {
-      let key = `parse-date-${accountId}-${filetype}`;
+      const key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
     }
 
@@ -901,7 +903,7 @@ export default function ImportTransactions({ modalProps, options }) {
       savePrefs({ [`flip-amount-${accountId}-${filetype}`]: flipAmount });
     }
 
-    let didChange = await importTransactions(accountId, finalTransactions);
+    const didChange = await importTransactions(accountId, finalTransactions);
     if (didChange) {
       await getPayees();
     }
@@ -913,7 +915,7 @@ export default function ImportTransactions({ modalProps, options }) {
     modalProps.onClose();
   }
 
-  let headers = [
+  const headers = [
     { name: 'Date', width: 200 },
     { name: 'Payee', width: 'flex' },
     { name: 'Notes', width: 'flex' },

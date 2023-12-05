@@ -12,9 +12,9 @@ import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function ChangePassword() {
-  let navigate = useNavigate();
-  let [error, setError] = useState(null);
-  let [msg, setMessage] = useState(null);
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+  const [msg, setMessage] = useState(null);
 
   function getErrorMessage(error) {
     switch (error) {
@@ -31,7 +31,7 @@ export default function ChangePassword() {
 
   async function onSetPassword(password) {
     setError(null);
-    let { error } = await send('subscribe-change-password', { password });
+    const { error } = await send('subscribe-change-password', { password });
 
     if (error) {
       setError(error);
