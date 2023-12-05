@@ -17,24 +17,32 @@ export async function runAll(
   cb(data);
 }
 
-export function index<T>(data: T[], field: string, mapper?: (input) => string) {
-  const result: Record<string, T> = {};
+export function index<
+  T extends Record<string, string | number>,
+  K extends keyof T,
+>(data: T[], field: K) {
+  const result: Record<string | number, T> = {};
   data.forEach(item => {
-    const key = mapper ? mapper(item[field]) : item[field];
+    const key = item[field];
     result[key] = item;
   });
   return result;
 }
 
-export function indexStack<T>(data: T[], fieldName: string, field: string) {
-  const result = {};
+export function indexStack<
+  T extends Record<string, string | number>,
+  K extends keyof T,
+>(data: T[], fieldName: K, field: K) {
+  const result: Record<string | number, T[K]> = {};
   data.forEach(item => {
     result[item[fieldName]] = item[field];
   });
   return result;
 }
 
-export function indexCashFlow(data, date: string, isTransfer: string) {
+export function indexCashFlow<
+  T extends { date: string; isTransfer: boolean; amount: number },
+>(data: T[], date: string, isTransfer: string) {
   const results = {};
   data.forEach(item => {
     let findExisting = results[item.date]
