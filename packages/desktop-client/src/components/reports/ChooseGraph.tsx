@@ -12,7 +12,6 @@ import StackedBarGraph from './graphs/StackedBarGraph';
 import { ReportOptions } from './ReportOptions';
 import ReportTable from './ReportTable';
 import ReportTableHeader from './ReportTableHeader';
-import ReportTableInner from './ReportTableInner';
 import ReportTableTotals from './ReportTableTotals';
 
 type ChooseGraphProps = {
@@ -151,16 +150,9 @@ function ChooseGraph({
           groupBy={groupBy}
           data={filteredData}
           showEmpty={showEmpty}
-        >
-          <ReportTableInner
-            data={filteredData}
-            showEmpty={showEmpty}
-            monthsCount={months.length}
-            balanceTypeOp={balanceTypeOp}
-            mode={mode}
-            groupBy={groupBy}
-          />
-        </ReportTable>
+          mode={mode}
+          monthsCount={months.length}
+        />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
           handleScroll={handleScroll}

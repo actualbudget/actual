@@ -1,11 +1,10 @@
 import React from 'react';
 
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import View from '../common/View';
 import { Row } from '../table';
 
 import { type GroupedEntity } from './entities';
-import ReportTableRow from './ReportTableRow';
 
 type ReportTableInnerProps = {
   data: GroupedEntity[];
@@ -14,6 +13,7 @@ type ReportTableInnerProps = {
   monthsCount: number;
   showEmpty: boolean;
   groupBy: string;
+  renderItem;
 };
 
 function ReportTableInner({
@@ -23,21 +23,46 @@ function ReportTableInner({
   balanceTypeOp,
   mode,
   groupBy,
+  renderItem,
 }: ReportTableInnerProps) {
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
 
+  type RenderRowProps = {
+    key: string;
+    row;
+    index: number;
+    parent_index?: number;
+    style?: CSSProperties;
+  };
+  function RenderRow({ row, index, parent_index, style, key }: RenderRowProps) {
+    let item;
+    if (row.categories) {
+      item = data[index];
+    } else {
+      item = data[parent_index].categories[index];
+    }
+
+    let rendered_row = renderItem({
+      item,
+      groupByItem,
+      mode,
+      monthsCount,
+      style,
+      key,
+    });
+
+    return rendered_row;
+  }
+
   return (
     <View>
-      {data.map(item => {
+      {data.map((item, index) => {
         return (
           <>
-            <ReportTableRow
+            <RenderRow
               key={item.id}
-              item={item}
-              balanceTypeOp={balanceTypeOp}
-              groupByItem={groupByItem}
-              mode={mode}
-              monthsCount={monthsCount}
+              row={item}
+              index={index}
               style={
                 item.categories && {
                   color: theme.tableRowHeaderText,
@@ -59,15 +84,13 @@ function ReportTableInner({
                           : i[balanceTypeOp] !== 0
                         : true,
                     )
-                    .map(cat => {
+                    .map((category, i) => {
                       return (
-                        <ReportTableRow
-                          key={cat.id}
-                          item={cat}
-                          balanceTypeOp={balanceTypeOp}
-                          groupByItem={groupByItem}
-                          mode={mode}
-                          monthsCount={monthsCount}
+                        <RenderRow
+                          key={category.id}
+                          row={category}
+                          index={i}
+                          parent_index={index}
                         />
                       );
                     })}

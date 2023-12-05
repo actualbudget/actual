@@ -1,6 +1,6 @@
 import React, {
+  useCallback,
   useLayoutEffect,
-  type ReactNode,
   type UIEventHandler,
 } from 'react';
 import { type RefProp } from 'react-spring';
@@ -12,6 +12,8 @@ import View from '../common/View';
 import ColumnPrimary from './ColumnPrimary';
 import ColumnScrollbar from './ColumnScrollbar';
 import { type GroupedEntity } from './entities';
+import ReportTableInner from './ReportTableInner';
+import ReportTableRow from './ReportTableRow';
 
 type ReportTableProps = {
   saveScrollWidth: (value: number) => void;
@@ -20,11 +22,12 @@ type ReportTableProps = {
   scrollScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   style?: CSSProperties;
-  children: ReactNode;
   groupBy: string;
   balanceTypeOp: string;
   showEmpty: boolean;
   data: GroupedEntity[];
+  mode: string;
+  monthsCount: number;
 };
 
 export default function ReportTable({
@@ -34,11 +37,12 @@ export default function ReportTable({
   scrollScrollRef,
   handleScroll,
   style,
-  children,
   groupBy,
   balanceTypeOp,
   showEmpty,
   data,
+  mode,
+  monthsCount,
 }: ReportTableProps) {
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
 
@@ -49,6 +53,23 @@ export default function ReportTable({
       );
     }
   });
+
+  let renderItem = useCallback(
+    ({ item, groupByItem, mode, monthsCount, style, key }) => {
+      return (
+        <ReportTableRow
+          key={key}
+          item={item}
+          balanceTypeOp={balanceTypeOp}
+          groupByItem={groupByItem}
+          mode={mode}
+          monthsCount={monthsCount}
+          style={style}
+        />
+      );
+    },
+    [],
+  );
 
   return (
     <View
@@ -98,7 +119,15 @@ export default function ReportTable({
         innerRef={listScrollRef}
         onScroll={handleScroll}
       >
-        {children}
+        <ReportTableInner
+          data={data}
+          showEmpty={showEmpty}
+          monthsCount={monthsCount}
+          balanceTypeOp={balanceTypeOp}
+          mode={mode}
+          groupBy={groupBy}
+          renderItem={renderItem}
+        />
       </Block>
       <Block
         id={'scroll'}
