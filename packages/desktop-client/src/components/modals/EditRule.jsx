@@ -272,7 +272,7 @@ function ScheduleDescription({ id }) {
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-      <View style={{ marginRight: 15, flexDirection: 'row' }}>
+      <View style={{ marginRight: 15, flexWrap: 'wrap', flexDirection: 'row' }}>
         <Text
           style={{
             whiteSpace: 'nowrap',
@@ -288,13 +288,9 @@ function ScheduleDescription({ id }) {
           />
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
-        <Text style={{ flexShrink: 0 }}>
-          Amount: {formatAmount(schedule._amount)}
-        </Text>
+        <Text>Amount: {formatAmount(schedule._amount)}</Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
-        <Text style={{ flexShrink: 0 }}>
-          Next: {monthUtils.format(schedule.next_date, dateFormat)}
-        </Text>
+        <Text>Next: {monthUtils.format(schedule.next_date, dateFormat)}</Text>
       </View>
       <StatusBadge status={status} />
     </View>
