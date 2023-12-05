@@ -53,22 +53,22 @@ function Accounts({
   onToggleClosedAccounts,
   onReorder,
 }: AccountsProps) {
-  let [isDragging, setIsDragging] = useState(false);
-  let offbudgetAccounts = useMemo(
+  const [isDragging, setIsDragging] = useState(false);
+  const offbudgetAccounts = useMemo(
     () =>
       accounts.filter(
         account => account.closed === 0 && account.offbudget === 1,
       ),
     [accounts],
   );
-  let budgetedAccounts = useMemo(
+  const budgetedAccounts = useMemo(
     () =>
       accounts.filter(
         account => account.closed === 0 && account.offbudget === 0,
       ),
     [accounts],
   );
-  let closedAccounts = useMemo(
+  const closedAccounts = useMemo(
     () => accounts.filter(account => account.closed === 1),
     [accounts],
   );
@@ -77,7 +77,7 @@ function Accounts({
     setIsDragging(drag.state === 'start');
   }
 
-  let makeDropPadding = (i, length) => {
+  const makeDropPadding = (i, length) => {
     if (i === 0) {
       return {
         paddingTop: isDragging ? 15 : 0,

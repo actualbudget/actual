@@ -58,7 +58,7 @@ function Account({
   onDragChange,
   onDrop,
 }: AccountProps) {
-  let type = account
+  const type = account
     ? account.closed
       ? 'account-closed'
       : account.offbudget
@@ -66,14 +66,14 @@ function Account({
       : 'account-onbudget'
     : 'title';
 
-  let { dragRef } = useDraggable({
+  const { dragRef } = useDraggable({
     type,
     onDragChange,
     item: { id: account && account.id },
     canDrag: account != null,
   });
 
-  let { dropRef, dropPos } = useDroppable({
+  const { dropRef, dropPos } = useDroppable({
     types: account ? [type] : [],
     id: account && account.id,
     onDrop,

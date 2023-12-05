@@ -33,9 +33,9 @@ function CellValue({
   'data-testid': testId,
   ...props
 }: CellValueProps) {
-  let { fullSheetName } = useSheetName(binding);
-  let sheetValue = useSheetValue(binding);
-  let format = useFormat();
+  const { fullSheetName } = useSheetName(binding);
+  const sheetValue = useSheetValue(binding);
+  const format = useFormat();
 
   return (
     <ConditionalPrivacyFilter

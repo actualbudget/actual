@@ -36,7 +36,7 @@ import { TransactionTable } from './TransactionsTable';
 // one to use when doing updates.
 
 async function saveDiff(diff) {
-  let remoteUpdates = await send('transactions-batch-update', {
+  const remoteUpdates = await send('transactions-batch-update', {
     ...diff,
     learnCategories: true,
   });
@@ -47,7 +47,7 @@ async function saveDiff(diff) {
 }
 
 async function saveDiffAndApply(diff, changes, onChange) {
-  let remoteDiff = await saveDiff(diff);
+  const remoteDiff = await saveDiff(diff);
   onChange(
     applyTransactionDiff(changes.newTransaction, remoteDiff),
     applyChanges(remoteDiff, changes.data),
@@ -86,25 +86,25 @@ export default function TransactionList({
   onCloseAddTransaction,
   onCreatePayee,
 }) {
-  let transactionsLatest = useRef();
-  let navigate = useNavigate();
+  const transactionsLatest = useRef();
+  const navigate = useNavigate();
 
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
   }, [transactions]);
 
-  let onAdd = useCallback(async newTransactions => {
+  const onAdd = useCallback(async newTransactions => {
     newTransactions = realizeTempTransactions(newTransactions);
 
     await saveDiff({ added: newTransactions });
     onRefetch();
   }, []);
 
-  let onSave = useCallback(async transaction => {
-    let changes = updateTransaction(transactionsLatest.current, transaction);
+  const onSave = useCallback(async transaction => {
+    const changes = updateTransaction(transactionsLatest.current, transaction);
 
     if (changes.diff.updated.length > 0) {
-      let dateChanged = !!changes.diff.updated[0].date;
+      const dateChanged = !!changes.diff.updated[0].date;
       if (dateChanged) {
         // Make sure it stays at the top of the list of transactions
         // for that date
@@ -118,25 +118,25 @@ export default function TransactionList({
     }
   }, []);
 
-  let onAddSplit = useCallback(id => {
+  const onAddSplit = useCallback(id => {
     const changes = addSplitTransaction(transactionsLatest.current, id);
     onChange(changes.newTransaction, changes.data);
     saveDiffAndApply(changes.diff, changes, onChange);
     return changes.diff.added[0].id;
   }, []);
 
-  let onSplit = useCallback(id => {
+  const onSplit = useCallback(id => {
     const changes = splitTransaction(transactionsLatest.current, id);
     onChange(changes.newTransaction, changes.data);
     saveDiffAndApply(changes.diff, changes, onChange);
     return changes.diff.added[0].id;
   }, []);
 
-  let onApplyRules = useCallback(async transaction => {
-    let afterRules = await send('rules-run', { transaction });
-    let diff = getChangedValues(transaction, afterRules);
+  const onApplyRules = useCallback(async transaction => {
+    const afterRules = await send('rules-run', { transaction });
+    const diff = getChangedValues(transaction, afterRules);
 
-    let newTransaction = { ...transaction };
+    const newTransaction = { ...transaction };
     if (diff) {
       Object.keys(diff).forEach(field => {
         if (
@@ -152,15 +152,15 @@ export default function TransactionList({
     return newTransaction;
   }, []);
 
-  let onManagePayees = useCallback(id => {
+  const onManagePayees = useCallback(id => {
     navigate('/payees', { selectedPayee: id });
   });
 
-  let onNavigateToTransferAccount = useCallback(accountId => {
+  const onNavigateToTransferAccount = useCallback(accountId => {
     navigate(`/accounts/${accountId}`);
   });
 
-  let onNavigateToSchedule = useCallback(scheduleId => {
+  const onNavigateToSchedule = useCallback(scheduleId => {
     pushModal('schedule-edit', { id: scheduleId });
   });
 

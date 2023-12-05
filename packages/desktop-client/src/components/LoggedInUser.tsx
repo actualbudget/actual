@@ -21,10 +21,10 @@ export default function LoggedInUser({
   style,
   color,
 }: LoggedInUserProps) {
-  let userData = useSelector(state => state.user.data);
-  let { getUserData, signOut, closeBudget } = useActions();
-  let [loading, setLoading] = useState(true);
-  let [menuOpen, setMenuOpen] = useState(false);
+  const userData = useSelector(state => state.user.data);
+  const { getUserData, signOut, closeBudget } = useActions();
+  const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
   const serverUrl = useServerURL();
 
   useEffect(() => {

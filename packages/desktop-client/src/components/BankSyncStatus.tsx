@@ -9,9 +9,9 @@ import Text from './common/Text';
 import View from './common/View';
 
 export default function BankSyncStatus() {
-  let accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
 
-  let name = accountsSyncing
+  const name = accountsSyncing
     ? accountsSyncing === '__all'
       ? 'accounts'
       : accountsSyncing

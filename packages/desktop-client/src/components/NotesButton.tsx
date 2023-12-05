@@ -95,8 +95,8 @@ function NotesTooltip({
   position = 'bottom-left',
   onClose,
 }: NotesTooltipProps) {
-  let [notes, setNotes] = useState<string>(defaultNotes);
-  let inputRef = createRef<HTMLTextAreaElement>();
+  const [notes, setNotes] = useState<string>(defaultNotes);
+  const inputRef = createRef<HTMLTextAreaElement>();
 
   useEffect(() => {
     if (editable) {
@@ -149,11 +149,11 @@ export default function NotesButton({
   tooltipPosition,
   style,
 }: NotesButtonProps) {
-  let [hover, setHover] = useState(false);
-  let tooltip = useTooltip();
-  let data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
-  let note = data && data.length > 0 ? data[0].note : null;
-  let hasNotes = note && note !== '';
+  const [hover, setHover] = useState(false);
+  const tooltip = useTooltip();
+  const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
+  const note = data && data.length > 0 ? data[0].note : null;
+  const hasNotes = note && note !== '';
 
   function onClose(notes) {
     send('notes-save', { id, note: notes });

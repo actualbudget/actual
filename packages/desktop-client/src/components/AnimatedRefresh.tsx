@@ -7,7 +7,7 @@ import { type CSSProperties } from '../style';
 
 import View from './common/View';
 
-let spin = keyframes({
+const spin = keyframes({
   '0%': { transform: 'rotateZ(0deg)' },
   '100%': { transform: 'rotateZ(360deg)' },
 });

@@ -20,7 +20,7 @@ import useReport from '../useReport';
 import { fromDateRepr } from '../util';
 
 function NetWorth() {
-  let accounts = useSelector(state => state.queries.accounts);
+  const accounts = useSelector(state => state.queries.accounts);
   const {
     filters,
     saved,
