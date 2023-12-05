@@ -116,11 +116,11 @@ let uncategouncatGrouprizedGroup: UncategorizedGroupEntity = {
 };
 
 export const categoryLists = (
-  hidden: boolean,
-  uncat: boolean,
+  showOffBudgetHidden: boolean,
+  showUncategorized: boolean,
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] },
 ) => {
-  let categoryList = uncat
+  let categoryList = showUncategorized
     ? [
         ...categories.list,
         uncategorizedCategory,
@@ -128,9 +128,9 @@ export const categoryLists = (
         offBudgetCategory,
       ]
     : categories.list;
-  let categoryGroup = uncat
+  let categoryGroup = showUncategorized
     ? [
-        ...categories.grouped.filter(f => hidden || !f.hidden),
+        ...categories.grouped.filter(f => showOffBudgetHidden || !f.hidden),
         uncategouncatGrouprizedGroup,
       ]
     : categories.grouped;
