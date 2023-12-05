@@ -137,61 +137,48 @@ export default function Settings() {
 
   useSetThemeColor(theme.mobileViewTheme);
   return (
-    <View
+    <Page
+      title="Settings"
       style={{
         backgroundColor: isNarrowWidth && theme.mobilePageBackground,
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
-      <Page
-        title="Settings"
-        titleStyle={
-          isNarrowWidth
-            ? {
-                backgroundColor: theme.mobileHeaderBackground,
-                color: theme.mobileHeaderText,
-                fontSize: 16,
-                fontWeight: 500,
-              }
-            : undefined
-        }
-      >
-        <View style={{ flexShrink: 0, gap: 30 }}>
-          {isNarrowWidth && (
-            <View
-              style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
-            >
-              {/* The only spot to close a budget on mobile */}
-              <FormField>
-                <FormLabel title="Budget Name" />
-                <Input
-                  value={budgetName}
-                  disabled
-                  style={{ color: theme.buttonNormalDisabledText }}
-                />
-              </FormField>
-              <Button onClick={closeBudget}>Close Budget</Button>
-            </View>
-          )}
+      <View style={{ flexShrink: 0, maxWidth: 530, gap: 30 }}>
+        {isNarrowWidth && (
+          <View
+            style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
+          >
+            {/* The only spot to close a budget on mobile */}
+            <FormField>
+              <FormLabel title="Budget Name" />
+              <Input
+                value={budgetName}
+                disabled
+                style={{ color: theme.buttonNormalDisabledText }}
+              />
+            </FormField>
+            <Button onClick={closeBudget}>Close Budget</Button>
+          </View>
+        )}
 
-          <About />
+        <About />
 
-          {!Platform.isBrowser && <GlobalSettings />}
+        {!Platform.isBrowser && <GlobalSettings />}
 
-          <ThemeSettings />
-          <FormatSettings />
-          <EncryptionSettings />
-          <ExportBudget />
+        <ThemeSettings />
+        <FormatSettings />
+        <EncryptionSettings />
+        <ExportBudget />
 
-          <AdvancedToggle>
-            <AdvancedAbout />
-            <ResetCache />
-            <ResetSync />
-            <FixSplitsTool />
-            <ExperimentalFeatures />
-          </AdvancedToggle>
-        </View>
-      </Page>
-    </View>
+        <AdvancedToggle>
+          <AdvancedAbout />
+          <ResetCache />
+          <ResetSync />
+          <FixSplitsTool />
+          <ExperimentalFeatures />
+        </AdvancedToggle>
+      </View>
+    </Page>
   );
 }
