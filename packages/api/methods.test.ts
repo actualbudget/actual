@@ -57,6 +57,109 @@ describe('API CRUD operations', () => {
     await api.loadBudget(budgetName);
   });
 
+  // apis: createCategoryGroup, updateCategoryGroup, deleteCategoryGroup
+  test('CategoryGroups: successfully update category groups', async () => {
+    const month = '2023-10';
+    global.currentMonth = month;
+
+    // create our test category group
+    const mainGroupId = await api.createCategoryGroup({
+      name: 'test-group',
+    });
+
+    let budgetMonth = await api.getBudgetMonth(month);
+    expect(budgetMonth.categoryGroups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: mainGroupId,
+        }),
+      ]),
+    );
+
+    // update group
+    await api.updateCategoryGroup(mainGroupId, {
+      name: 'update-tests',
+    });
+
+    budgetMonth = await api.getBudgetMonth(month);
+    expect(budgetMonth.categoryGroups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: mainGroupId,
+        }),
+      ]),
+    );
+
+    // delete group
+    await api.deleteCategoryGroup(mainGroupId);
+
+    budgetMonth = await api.getBudgetMonth(month);
+    expect(budgetMonth.categoryGroups).toEqual(
+      expect.arrayContaining([
+        expect.not.objectContaining({
+          id: mainGroupId,
+        }),
+      ]),
+    );
+  });
+
+  // apis: createCategory, getCategories, updateCategory, deleteCategory
+  test('Categories: successfully update categories', async () => {
+    const month = '2023-10';
+    global.currentMonth = month;
+
+    // create our test category group
+    const mainGroupId = await api.createCategoryGroup({
+      name: 'test-group',
+    });
+    const secondaryGroupId = await api.createCategoryGroup({
+      name: 'test-secondary-group',
+    });
+    const categoryId = await api.createCategory({
+      name: 'test-budget',
+      group_id: mainGroupId,
+    });
+
+    let categories = await api.getCategories();
+    expect(categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: categoryId,
+          name: 'test-budget',
+          group_id: mainGroupId,
+        }),
+      ]),
+    );
+
+    // update/move category
+    await api.updateCategory(categoryId, {
+      name: 'updated-budget',
+      group_id: secondaryGroupId,
+    });
+
+    categories = await api.getCategories();
+    expect(categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: categoryId,
+          name: 'updated-budget',
+          group_id: secondaryGroupId,
+        }),
+      ]),
+    );
+
+    // delete categories
+    await api.deleteCategory(categoryId);
+
+    expect(categories).toEqual(
+      expect.arrayContaining([
+        expect.not.objectContaining({
+          id: categoryId,
+        }),
+      ]),
+    );
+  });
+
   // apis: setBudgetAmount, setBudgetCarryover, getBudgetMonth
   test('Budgets: successfully update budgets', async () => {
     const month = '2023-10';
