@@ -197,9 +197,7 @@ async function processTemplate(
 
   // sort and filter down to just the requested priorities
   priority_list = priority_list
-    .sort(function (a, b) {
-      return a - b;
-    })
+    .sort()
     .filter((item, index, curr) => curr.indexOf(item) === index);
 
   let { remainder_found, remainder_priority, remainder_weight_total } =

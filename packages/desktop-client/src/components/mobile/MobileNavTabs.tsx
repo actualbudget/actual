@@ -35,43 +35,43 @@ export default function MobileNavTabs() {
       name: 'Budget',
       path: '/budget',
       style: navTabStyle,
-      Icon: Wallet,
+      icon: Wallet,
     },
     {
       name: 'Transaction',
       path: '/transactions/new',
       style: navTabStyle,
-      Icon: Add,
+      icon: Add,
     },
     {
       name: 'Accounts',
       path: '/accounts',
       style: navTabStyle,
-      Icon: PiggyBank,
+      icon: PiggyBank,
     },
     {
       name: 'Schedules (Soon)',
       path: '/schedules/soon',
       style: navTabStyle,
-      Icon: Calendar,
+      icon: Calendar,
     },
     {
       name: 'Payees (Soon)',
       path: '/payees/soon',
       style: navTabStyle,
-      Icon: StoreFront,
+      icon: StoreFront,
     },
     {
       name: 'Rules (Soon)',
       path: '/rules/soon',
       style: navTabStyle,
-      Icon: Tuning,
+      icon: Tuning,
     },
     {
       name: 'Settings',
       path: '/settings',
       style: navTabStyle,
-      Icon: Cog,
+      icon: Cog,
     },
   ].map(tab => <NavTab key={tab.path} {...tab} />);
 
@@ -206,11 +206,11 @@ type NavTabIconProps = {
 type NavTabProps = {
   name: string;
   path: string;
-  Icon: ComponentType<NavTabIconProps>;
+  icon: ComponentType<NavTabIconProps>;
   style?: CSSProperties;
 };
 
-function NavTab({ Icon: TabIcon, name, path, style }: NavTabProps) {
+function NavTab({ icon: TabIcon, name, path, style }: NavTabProps) {
   return (
     <NavLink
       to={path}

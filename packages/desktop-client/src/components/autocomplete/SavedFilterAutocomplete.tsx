@@ -43,8 +43,9 @@ function FilterList({
                 paddingLeft: 20,
                 borderRadius: embedded ? 4 : 0,
               }}
-              data-testid={`${item.name}-filter-item`}
-              data-highlighted={highlightedIndex === idx || undefined}
+              data-testid={
+                'filter-item' + (highlightedIndex === idx ? '-highlighted' : '')
+              }
             >
               {item.name}
             </div>,

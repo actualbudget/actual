@@ -430,13 +430,12 @@ describe('Transactions', () => {
   test('dropdown automatically opens and can be filtered', async () => {
     const { container } = renderTransactions();
 
-    let categories = categoryGroups.flatMap(group => group.categories);
     let input = await editField(container, 'category', 2);
     let tooltip = container.querySelector('[data-testid="autocomplete"]');
     expect(tooltip).toBeTruthy();
     expect(
       [...tooltip.querySelectorAll('[data-testid*="category-item"]')].length,
-    ).toBe(categoryGroups.length + categories.length);
+    ).toBe(9);
 
     await userEvent.clear(input);
     await userEvent.type(input, 'Gener');
@@ -447,13 +446,13 @@ describe('Transactions', () => {
     expect(items.length).toBe(2);
     expect(items[0].textContent).toBe('Usual Expenses');
     expect(items[1].textContent).toBe('General');
-    expect(items[1].dataset['highlighted']).toBeDefined();
+    expect(items[1].dataset['testid']).toBe('category-item-highlighted');
 
     // It should not allow filtering on group names
     await userEvent.clear(input);
     await userEvent.type(input, 'Usual Expenses');
 
-    items = tooltip.querySelectorAll('[data-testid$="category-item"]');
+    items = tooltip.querySelectorAll('[data-testid*="category-item"]');
     expect(items.length).toBe(0);
   });
 
@@ -464,14 +463,18 @@ describe('Transactions', () => {
     let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
     // No item should be highlighted
-    let highlighted = tooltip.querySelector('[data-highlighted]');
-    expect(highlighted).toBeNull();
+    let highlighted = tooltip.querySelector(
+      '[data-testid="category-item-highlighted"]',
+    );
+    expect(highlighted).toBe(null);
 
     await userEvent.keyboard('[ArrowDown][ArrowDown][ArrowDown][ArrowDown]');
 
     // The right item should be highlighted
-    highlighted = tooltip.querySelector('[data-highlighted]');
-    expect(highlighted).not.toBeNull();
+    highlighted = tooltip.querySelector(
+      '[data-testid="category-item-highlighted"]',
+    );
+    expect(highlighted).toBeTruthy();
     expect(highlighted.textContent).toBe('General');
 
     expect(getTransactions()[2].category).toBe(
@@ -504,16 +507,20 @@ describe('Transactions', () => {
     let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
     // Make sure none of the items are highlighted
-    let items = tooltip.querySelectorAll('[data-testid$="category-item"]');
-    let highlighted = tooltip.querySelector('[data-highlighted]');
-    expect(highlighted).toBeNull();
+    let items = tooltip.querySelectorAll('[data-testid="category-item"]');
+    let highlighted = tooltip.querySelector(
+      '[data-testid="category-item-highlighted"]',
+    );
+    expect(highlighted).toBe(null);
 
     // Hover over an item
     await userEvent.hover(items[2]);
 
     // Make sure the expected category is highlighted
-    highlighted = tooltip.querySelector('[data-highlighted]');
-    expect(highlighted).not.toBeNull();
+    highlighted = tooltip.querySelector(
+      '[data-testid="category-item-highlighted"]',
+    );
+    expect(highlighted).toBeTruthy();
     expect(highlighted.textContent).toBe('General');
 
     // Click the item and check the before/after values
@@ -539,15 +546,17 @@ describe('Transactions', () => {
     let oldCategory = getTransactions()[2].category;
     let tooltip = container.querySelector('[data-testid="autocomplete"]');
 
-    let items = tooltip.querySelectorAll('[data-testid$="category-item"]');
+    let items = tooltip.querySelectorAll('[data-testid="category-item"]');
 
     // Hover over a few of the items to highlight them
     await userEvent.hover(items[2]);
     await userEvent.hover(items[3]);
 
     // Make sure one of them is highlighted
-    let highlighted = tooltip.querySelectorAll('[data-highlighted]');
-    expect(highlighted).toHaveLength(1);
+    let highlighted = tooltip.querySelector(
+      '[data-testid="category-item-highlighted"]',
+    );
+    expect(highlighted).toBeTruthy();
 
     // Navigate away from the field with the keyboard
     await userEvent.type(input, '[Tab]');

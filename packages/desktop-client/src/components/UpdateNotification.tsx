@@ -77,7 +77,6 @@ export default function UpdateNotification() {
               )
               <Button
                 type="bare"
-                aria-label="Close"
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onClick={() => closeNotification(setAppState)}
               >

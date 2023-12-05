@@ -1,8 +1,8 @@
-import { type File } from '../../types/file';
 import type { AccountEntity, GoCardlessToken } from '../../types/models';
 import type { RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
+
 export type ModalType = keyof FinanceModals;
 
 export type OptionlessModal = {
@@ -69,16 +69,6 @@ type FinanceModals = {
     onClose?: () => void;
     onSuccess: (data: GoCardlessToken) => Promise<void>;
   };
-
-  'delete-budget': { file: File };
-
-  import: null;
-
-  'import-ynab4': null;
-
-  'import-ynab5': null;
-
-  'import-actual': null;
 
   'create-encryption-key': { recreate?: boolean };
   'fix-encryption-key': {

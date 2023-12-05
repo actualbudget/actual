@@ -12,7 +12,6 @@ import {
 import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
 import { fastSetMerge } from '../../shared/util';
-import { RuleConditionEntity } from '../../types/models';
 import { RuleError } from '../errors';
 import { Schedule as RSchedule } from '../util/rschedule';
 
@@ -638,11 +637,9 @@ export class RuleIndexer {
   }
 }
 
-const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
+const OP_SCORES = {
   is: 10,
-  isNot: 10,
   oneOf: 9,
-  notOneOf: 9,
   isapprox: 5,
   isbetween: 5,
   gt: 1,
@@ -650,7 +647,6 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   lt: 1,
   lte: 1,
   contains: 0,
-  doesNotContain: 0,
 };
 
 function computeScore(rule) {

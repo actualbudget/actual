@@ -33,7 +33,7 @@ function ChooseGraph({
   graphType,
   balanceType,
   groupBy,
-  empty,
+  showEmpty,
   scrollWidth,
   setScrollWidth,
   months,

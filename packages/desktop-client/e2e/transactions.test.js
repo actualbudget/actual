@@ -63,7 +63,7 @@ test.describe('Transactions', () => {
       await expect(autocomplete).toMatchThemeScreenshots();
 
       // Select the active item
-      await page.getByTestId('Clothing-category-item').click();
+      await page.getByRole('button', { name: 'Clothing' }).click();
       await filterTooltip.applyButton.click();
 
       // Assert that there are only clothing transactions

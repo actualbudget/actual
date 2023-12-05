@@ -188,7 +188,6 @@ export default function NotesButton({
     >
       <Button
         type="bare"
-        aria-label="View notes"
         className={!hasNotes && !tooltipOpen ? 'hover-visible' : ''}
         style={{
           color: defaultColor,

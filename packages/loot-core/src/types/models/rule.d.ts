@@ -9,26 +9,13 @@ export interface RuleEntity {
   tombstone?: boolean;
 }
 
-export interface RuleConditionEntity {
+interface RuleConditionEntity {
   field: unknown;
-  op:
-    | 'is'
-    | 'isNot'
-    | 'oneOf'
-    | 'notOneOf'
-    | 'isapprox'
-    | 'isbetween'
-    | 'gt'
-    | 'gte'
-    | 'lt'
-    | 'lte'
-    | 'contains'
-    | 'doesNotContain';
+  op: unknown;
   value: unknown;
   options?: unknown;
   conditionsOp?: unknown;
   type?: string;
-  customName?: string;
 }
 
 export type RuleActionEntity =

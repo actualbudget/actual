@@ -21,13 +21,7 @@ function CustomReportCard() {
   const groupBy = 'Category';
 
   const getGraphData = useMemo(() => {
-    return defaultSpreadsheet({
-      start,
-      end,
-      groupBy,
-      balanceTypeOp: 'totalDebts',
-      categories,
-    });
+    return defaultSpreadsheet(start, end, groupBy, 'totalDebts', categories);
   }, [start, end, categories]);
   const data = useReport('default', getGraphData);
 

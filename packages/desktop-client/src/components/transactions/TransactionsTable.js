@@ -663,7 +663,6 @@ function PayeeIcons({
       {transferAccount && (
         <Button
           type="bare"
-          aria-label="Transfer"
           style={buttonStyle}
           onClick={e => {
             e.stopPropagation();

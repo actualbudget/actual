@@ -1,10 +1,3 @@
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type PayeeEntity,
-} from 'loot-core/src/types/models';
-
 const balanceTypeOptions = [
   { description: 'Payment', format: 'totalDebts' },
   { description: 'Deposit', format: 'totalAssets' },
@@ -52,76 +45,44 @@ const intervalOptions = [
 { value: 5, description: 'Yearly', name: 5,
 ];
 */
-export type QueryDataEntity = {
-  date: string;
-  category: string;
-  categoryGroup: string;
-  account: string;
-  accountOffBudget: boolean;
-  payee: string;
-  transferAccount: string;
-  amount: number;
-};
 
-export type UncategorizedEntity = CategoryEntity & {
-  /*
-    When looking at uncategorized and hidden transactions we
-    need a way to group them. To do this we give them a unique
-    uncategorized_id. We also need a way to filter the
-    transctions from our query. For this we use the 3 variables
-    below.
-  */
-  uncategorized_id: string;
-  is_off_budget: boolean;
-  is_transfer: boolean;
-  has_category: boolean;
-};
-
-let uncategorizedCategory: UncategorizedEntity = {
+let uncategorizedCategory = {
   name: 'Uncategorized',
   id: null,
-  uncategorized_id: '1',
-  hidden: false,
-  is_off_budget: false,
-  is_transfer: false,
-  has_category: false,
+  uncat_id: '1',
+  hidden: 0,
+  offBudget: false,
+  transfer: false,
+  category: false,
 };
-let transferCategory: UncategorizedEntity = {
+let transferCategory = {
   name: 'Transfers',
   id: null,
-  uncategorized_id: '2',
-  hidden: false,
-  is_off_budget: false,
-  is_transfer: true,
-  has_category: false,
+  uncat_id: '2',
+  hidden: 0,
+  transfer: true,
+  offBudget: false,
+  category: false,
 };
-let offBudgetCategory: UncategorizedEntity = {
+let offBudgetCategory = {
   name: 'Off Budget',
   id: null,
-  uncategorized_id: '3',
-  hidden: false,
-  is_off_budget: true,
-  is_transfer: false,
-  has_category: true,
+  uncat_id: '3',
+  hidden: 0,
+  offBudget: true,
+  transfer: false,
+  category: true,
 };
 
-type UncategorizedGroupEntity = CategoryGroupEntity & {
-  categories?: UncategorizedEntity[];
-};
-
-let uncategouncatGrouprizedGroup: UncategorizedGroupEntity = {
+let uncategorizedGroup = {
   name: 'Uncategorized & Off Budget',
   id: null,
-  hidden: false,
+  hidden: 0,
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };
 
-export const categoryLists = (
-  hidden: boolean,
-  uncat: boolean,
-  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] },
-) => {
-  let categoryList = uncat
+export const categoryLists = (showUncategorized, categories) => {
+  let categoryList = showUncategorized
     ? [
         ...categories.list,
         uncategorizedCategory,
@@ -129,21 +90,18 @@ export const categoryLists = (
         offBudgetCategory,
       ]
     : categories.list;
-  let categoryGroup = uncat
-    ? [
-        ...categories.grouped.filter(f => hidden || !f.hidden),
-        uncategouncatGrouprizedGroup,
-      ]
+  let categoryGroup = showUncategorized
+    ? [...categories.grouped, uncategorizedGroup]
     : categories.grouped;
-  return [categoryList, categoryGroup] as const;
+  return [categoryList, categoryGroup];
 };
 
 export const groupBySelections = (
-  groupBy: string,
-  categoryList: CategoryEntity[],
-  categoryGroup: CategoryGroupEntity[],
-  payees: PayeeEntity[],
-  accounts: AccountEntity[],
+  groupBy,
+  categoryList,
+  categoryGroup,
+  payees,
+  accounts,
 ) => {
   let groupByList;
   let groupByLabel;
@@ -173,7 +131,6 @@ export const groupBySelections = (
       groupByLabel = 'category';
       break;
     default:
-      throw new Error('Error loading data into the spreadsheet.');
   }
   return [groupByList, groupByLabel];
 };

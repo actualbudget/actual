@@ -197,7 +197,6 @@ function Notification({
         {sticky && (
           <Button
             type="bare"
-            aria-label="Close"
             style={{ flexShrink: 0, color: 'currentColor' }}
             onClick={onRemove}
           >

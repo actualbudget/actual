@@ -674,7 +674,6 @@ class TransactionEditInner extends PureComponent {
                 <Button
                   onClick={() => this.onDelete()}
                   style={{
-                    height: 40,
                     borderWidth: 0,
                     paddingVertical: 5,
                     marginLeft: styles.mobileEditingPadding,
@@ -708,8 +707,8 @@ class TransactionEditInner extends PureComponent {
             style={{
               paddingLeft: styles.mobileEditingPadding,
               paddingRight: styles.mobileEditingPadding,
-              paddingTop: 10,
-              paddingBottom: 10,
+              paddingTop: 15,
+              paddingBottom: 15,
               backgroundColor: theme.tableHeaderBackground,
               borderTopWidth: 1,
               borderColor: theme.tableBorder,
@@ -718,7 +717,7 @@ class TransactionEditInner extends PureComponent {
             }}
           >
             {adding ? (
-              <Button style={{ height: 40 }} onClick={() => this.onAdd()}>
+              <Button onClick={() => this.onAdd()}>
                 <SvgAdd
                   width={17}
                   height={17}
@@ -735,7 +734,7 @@ class TransactionEditInner extends PureComponent {
                 </Text>
               </Button>
             ) : (
-              <Button style={{ height: 40 }} onClick={() => this.onSave()}>
+              <Button onClick={() => this.onSave()}>
                 <SvgPencilWriteAlternate
                   style={{ width: 16, height: 16, color: theme.formInputText }}
                 />

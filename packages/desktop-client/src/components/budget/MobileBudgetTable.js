@@ -349,7 +349,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
             <>
               <Button
                 type="bare"
-                aria-label="Menu"
                 style={{ padding: 10 }}
                 {...tooltip.getOpenEvents()}
               >
@@ -634,7 +633,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
             <>
               <Button
                 type="bare"
-                aria-label="Menu"
                 style={{ padding: 10 }}
                 {...tooltip.getOpenEvents()}
               >
@@ -889,7 +887,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             <>
               <Button
                 type="bare"
-                aria-label="Menu"
                 style={{ padding: 10 }}
                 {...tooltip.getOpenEvents()}
               >
@@ -1094,7 +1091,6 @@ const IncomeCategory = memo(function IncomeCategory({
             <>
               <Button
                 type="bare"
-                aria-label="Menu"
                 style={{ padding: 10 }}
                 {...tooltip.getOpenEvents()}
               >
@@ -2111,7 +2107,6 @@ function BudgetHeader({
           <>
             <Button
               type="bare"
-              aria-label="Menu"
               hoveredStyle={{
                 color: theme.mobileHeaderText,
                 background: theme.mobileHeaderTextHover,

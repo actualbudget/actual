@@ -243,7 +243,6 @@ function MonthlyPatterns({ config, dispatch }) {
           />
           <Button
             type="bare"
-            aria-label="Remove recurrence"
             style={{ padding: 7 }}
             onClick={() =>
               dispatch({
@@ -256,7 +255,6 @@ function MonthlyPatterns({ config, dispatch }) {
           </Button>
           <Button
             type="bare"
-            aria-label="Add recurrence"
             style={{ padding: 7, marginLeft: 5 }}
             onClick={() => dispatch({ type: 'add-recurrence' })}
           >
