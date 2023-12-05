@@ -108,28 +108,30 @@ export default function EditField({ modalProps, name, onSubmit }) {
               onSelect(value);
             }
           }}
-          renderAccountItemGroupHeader={props => (
-            <AccountItemGroupHeader
-              {...props}
-              style={{
-                ...styles.largeText,
-                color: theme.menuItemTextHeader,
-                paddingTop: 10,
-                paddingBottom: 10,
-              }}
-            />
-          )}
-          renderAccountItem={props => (
-            <AccountItem
-              {...props}
-              style={{
-                ...itemStyle,
-                color: theme.menuItemText,
-                borderRadius: 0,
-                borderTop: `1px solid ${theme.pillBorder}`,
-              }}
-            />
-          )}
+          {...(isNarrowWidth && {
+            renderAccountItemGroupHeader: props => (
+              <AccountItemGroupHeader
+                {...props}
+                style={{
+                  ...styles.largeText,
+                  color: theme.menuItemTextHeader,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                }}
+              />
+            ),
+            renderAccountItem: props => (
+              <AccountItem
+                {...props}
+                style={{
+                  ...itemStyle,
+                  color: theme.menuItemText,
+                  borderRadius: 0,
+                  borderTop: `1px solid ${theme.pillBorder}`,
+                }}
+              />
+            ),
+          })}
           {...autocompleteProps}
         />
       );
@@ -155,35 +157,37 @@ export default function EditField({ modalProps, name, onSubmit }) {
             onSelect(value);
           }}
           isCreatable
-          renderCreatePayeeButton={props => (
-            <CreatePayeeButton
-              {...props}
-              Icon={CreatePayeeIcon}
-              style={itemStyle}
-            />
-          )}
-          renderPayeeItemGroupHeader={props => (
-            <PayeeItemGroupHeader
-              {...props}
-              style={{
-                ...styles.largeText,
-                color: theme.menuItemTextHeader,
-                paddingTop: 10,
-                paddingBottom: 10,
-              }}
-            />
-          )}
-          renderPayeeItem={props => (
-            <PayeeItem
-              {...props}
-              style={{
-                ...itemStyle,
-                color: theme.menuItemText,
-                borderRadius: 0,
-                borderTop: `1px solid ${theme.pillBorder}`,
-              }}
-            />
-          )}
+          {...(isNarrowWidth && {
+            renderCreatePayeeButton: props => (
+              <CreatePayeeButton
+                {...props}
+                Icon={CreatePayeeIcon}
+                style={itemStyle}
+              />
+            ),
+            renderPayeeItemGroupHeader: props => (
+              <PayeeItemGroupHeader
+                {...props}
+                style={{
+                  ...styles.largeText,
+                  color: theme.menuItemTextHeader,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                }}
+              />
+            ),
+            renderPayeeItem: props => (
+              <PayeeItem
+                {...props}
+                style={{
+                  ...itemStyle,
+                  color: theme.menuItemText,
+                  borderRadius: 0,
+                  borderTop: `1px solid ${theme.pillBorder}`,
+                }}
+              />
+            ),
+          })}
           {...autocompleteProps}
         />
       );
@@ -214,28 +218,30 @@ export default function EditField({ modalProps, name, onSubmit }) {
           onSelect={value => {
             onSelect(value);
           }}
-          renderCategoryItemGroupHeader={props => (
-            <CategoryItemGroupHeader
-              {...props}
-              style={{
-                ...styles.largeText,
-                color: theme.menuItemTextHeader,
-                paddingTop: 10,
-                paddingBottom: 10,
-              }}
-            />
-          )}
-          renderCategoryItem={props => (
-            <CategoryItem
-              {...props}
-              style={{
-                ...itemStyle,
-                color: theme.menuItemText,
-                borderRadius: 0,
-                borderTop: `1px solid ${theme.pillBorder}`,
-              }}
-            />
-          )}
+          {...(isNarrowWidth && {
+            renderCategoryItemGroupHeader: props => (
+              <CategoryItemGroupHeader
+                {...props}
+                style={{
+                  ...styles.largeText,
+                  color: theme.menuItemTextHeader,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                }}
+              />
+            ),
+            renderCategoryItem: props => (
+              <CategoryItem
+                {...props}
+                style={{
+                  ...itemStyle,
+                  color: theme.menuItemText,
+                  borderRadius: 0,
+                  borderTop: `1px solid ${theme.pillBorder}`,
+                }}
+              />
+            ),
+          })}
           {...autocompleteProps}
         />
       );
