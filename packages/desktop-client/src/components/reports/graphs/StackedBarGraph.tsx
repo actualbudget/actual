@@ -120,7 +120,7 @@ type StackedBarGraphProps = {
 };
 
 function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
-  let privacyMode = usePrivacyMode();
+  const privacyMode = usePrivacyMode();
   const colorScale = getColorScale('qualitative');
 
   return (

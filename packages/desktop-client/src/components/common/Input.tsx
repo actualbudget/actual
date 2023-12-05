@@ -37,7 +37,7 @@ export default function Input({
   focused,
   ...nativeProps
 }: InputProps) {
-  let ref = useRef();
+  const ref = useRef();
   useProperFocus(ref, focused);
 
   return (

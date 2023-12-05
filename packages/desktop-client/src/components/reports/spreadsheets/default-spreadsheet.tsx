@@ -49,9 +49,9 @@ export default function createSpreadsheet({
   accounts,
   setDataCheck,
 }) {
-  let [catList, catGroup] = categoryLists(hidden, uncat, categories);
+  const [catList, catGroup] = categoryLists(hidden, uncat, categories);
 
-  let categoryFilter = (catList || []).filter(
+  const categoryFilter = (catList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -60,7 +60,7 @@ export default function createSpreadsheet({
       ),
   );
 
-  let [groupByList, groupByLabel] = groupBySelections(
+  const [groupByList, groupByLabel] = groupBySelections(
     groupBy,
     catList,
     catGroup,
@@ -73,7 +73,7 @@ export default function createSpreadsheet({
       return null;
     }
 
-    let { filters } = await send('make-filters-from-conditions', {
+    const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';

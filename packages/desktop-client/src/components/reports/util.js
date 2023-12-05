@@ -5,7 +5,7 @@ export function fromDateRepr(date) {
 }
 
 export async function runAll(queries, cb) {
-  let data = await Promise.all(
+  const data = await Promise.all(
     queries.map(q => {
       return runQuery(q).then(({ data }) => data);
     }),
@@ -24,12 +24,12 @@ export function index(data, field, mapper) {
 export function indexCashFlow(data, date, isTransfer) {
   const results = {};
   data.forEach(item => {
-    let findExisting = results[item.date]
+    const findExisting = results[item.date]
       ? results[item.date][item.isTransfer]
         ? results[item.date][item.isTransfer]
         : 0
       : 0;
-    let result = { [item[isTransfer]]: item.amount + findExisting };
+    const result = { [item[isTransfer]]: item.amount + findExisting };
     results[item[date]] = { ...results[item[date]], ...result };
   });
   return results;

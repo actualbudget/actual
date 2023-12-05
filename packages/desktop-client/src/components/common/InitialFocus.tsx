@@ -11,7 +11,7 @@ type InitialFocusProps = {
 };
 
 export default function InitialFocus({ children }: InitialFocusProps) {
-  let node = useRef(null);
+  const node = useRef(null);
 
   useEffect(() => {
     if (node.current && !global.IS_DESIGN_MODE) {

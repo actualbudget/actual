@@ -68,7 +68,7 @@ function App({
       // don't block on this in case they are offline or something)
       send('get-remote-files').then(files => {
         if (files) {
-          let remoteFile = files.find(f => f.fileId === cloudFileId);
+          const remoteFile = files.find(f => f.fileId === cloudFileId);
           if (remoteFile && remoteFile.deleted) {
             closeBudget();
           }
@@ -122,14 +122,14 @@ function ErrorFallback({ error }: FallbackProps) {
 }
 
 function AppWrapper() {
-  let budgetId = useSelector(
+  const budgetId = useSelector(
     state => state.prefs.local && state.prefs.local.id,
   );
-  let cloudFileId = useSelector(
+  const cloudFileId = useSelector(
     state => state.prefs.local && state.prefs.local.cloudFileId,
   );
-  let loadingText = useSelector(state => state.app.loadingText);
-  let { loadBudget, closeBudget, loadGlobalPrefs, sync } = useActions();
+  const loadingText = useSelector(state => state.app.loadingText);
+  const { loadBudget, closeBudget, loadGlobalPrefs, sync } = useActions();
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );

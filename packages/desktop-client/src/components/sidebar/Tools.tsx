@@ -12,9 +12,9 @@ import Item from './Item';
 import SecondaryItem from './SecondaryItem';
 
 function Tools() {
-  let [isOpen, setOpen] = useState(false);
-  let onToggle = useCallback(() => setOpen(open => !open), []);
-  let location = useLocation();
+  const [isOpen, setOpen] = useState(false);
+  const onToggle = useCallback(() => setOpen(open => !open), []);
+  const location = useLocation();
 
   const isActive = ['/payees', '/rules', '/settings', '/tools'].some(route =>
     location.pathname.startsWith(route),

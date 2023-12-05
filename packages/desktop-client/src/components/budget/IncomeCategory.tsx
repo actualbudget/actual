@@ -43,14 +43,14 @@ function IncomeCategory({
   onReorder,
   onShowActivity,
 }: IncomeCategoryProps) {
-  let { dragRef } = useDraggable({
+  const { dragRef } = useDraggable({
     type: 'income-category',
     onDragChange,
     item: cat,
     canDrag: editingCell === null,
   });
 
-  let { dropRef, dropPos } = useDroppable({
+  const { dropRef, dropPos } = useDroppable({
     types: 'income-category',
     id: cat.id,
     onDrop: onReorder,

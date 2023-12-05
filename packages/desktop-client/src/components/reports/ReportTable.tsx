@@ -17,7 +17,7 @@ export default function ReportTable({
   style,
   children,
 }: ReportTableProps) {
-  let contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     if (contentRef.current && saveScrollWidth) {

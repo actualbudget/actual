@@ -142,7 +142,7 @@ export default function DiscoverSchedules({
     const selected = schedules.filter(s => selectedInst.items.has(s.id));
     setCreating(true);
 
-    for (let schedule of selected) {
+    for (const schedule of selected) {
       const scheduleId = await send('schedule/create', {
         conditions: schedule._conditions,
         schedule: {},

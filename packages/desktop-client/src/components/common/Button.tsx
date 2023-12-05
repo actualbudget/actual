@@ -149,7 +149,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    let typeWithDisabled = disabled ? type + 'Disabled' : type;
+    const typeWithDisabled = disabled ? type + 'Disabled' : type;
 
     hoveredStyle = {
       ...(type !== 'bare' && styles.shadow),
@@ -163,8 +163,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ...activeStyle,
     };
 
-    let Component = as;
-    let buttonStyle = {
+    const Component = as;
+    const buttonStyle = {
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
@@ -211,7 +211,7 @@ export const ButtonWithLoading = forwardRef<
   HTMLButtonElement,
   ButtonWithLoadingProps
 >((props, ref) => {
-  let { loading, children, ...buttonProps } = props;
+  const { loading, children, ...buttonProps } = props;
   return (
     <Button
       {...buttonProps}
