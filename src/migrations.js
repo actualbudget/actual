@@ -1,4 +1,5 @@
 import migrate from 'migrate';
+import path from 'node:path';
 import config from './load-config.js';
 
 export default function run(direction = 'up') {
@@ -9,7 +10,9 @@ export default function run(direction = 'up') {
   return new Promise((resolve) =>
     migrate.load(
       {
-        stateStore: `.migrate${config.mode === 'test' ? '-test' : ''}`,
+        stateStore: `${path.join(config.dataDir, '.migrate')}${
+          config.mode === 'test' ? '-test' : ''
+        }`,
       },
       (err, set) => {
         if (err) {
