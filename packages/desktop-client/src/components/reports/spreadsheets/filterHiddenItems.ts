@@ -3,21 +3,22 @@ import {
   type UncategorizedEntity,
 } from '../ReportOptions';
 
-type filterHiddenItemsProps = {
-  item: UncategorizedEntity;
-  data: QueryDataEntity[];
-};
+function filterHiddenItems(item: UncategorizedEntity, data: QueryDataEntity[]) {
+  return data.filter(asset => {
+    if (!item.uncategorized_id) {
+      return true;
+    }
 
-function filterHiddenItems({ item, data }: filterHiddenItemsProps) {
-  let filtered = data.filter(asset =>
-    item.uncat_id
-      ? (item.transfer ? asset.transferAccount : !asset.transferAccount) &&
-        (item.category ? true : !asset.category) &&
-        (item.offBudget ? asset.accountOffBudget : !asset.accountOffBudget)
-      : true,
-  );
+    const isTransfer = item.is_transfer
+      ? asset.transferAccount
+      : !asset.transferAccount;
+    const isHidden = item.has_category ? true : !asset.category;
+    const isOffBudget = item.is_off_budget
+      ? asset.accountOffBudget
+      : !asset.accountOffBudget;
 
-  return filtered;
+    return isTransfer && isHidden && isOffBudget;
+  });
 }
 
 export default filterHiddenItems;

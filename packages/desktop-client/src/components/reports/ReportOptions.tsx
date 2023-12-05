@@ -62,49 +62,50 @@ export type QueryDataEntity = {
   amount: number;
 };
 
-export type UncategorizedEntity = {
-  id?: string;
-  name: string;
-  hidden?: boolean;
-  uncat_id: string;
-  offBudget: boolean;
-  transfer: boolean;
-  category: boolean;
-};
-
-export type UncategorizedGroupEntity = {
-  id?: string;
-  name: string;
-  hidden?: boolean;
-  categories?: UncategorizedEntity[];
+export type UncategorizedEntity = CategoryEntity & {
+  /*
+    When looking at uncategorized and hidden transactions we
+    need a way to group them. To do this we give them a unique
+    uncategorized_id. We also need a way to filter the
+    transctions from our query. For this we use the 3 variables
+    below.
+  */
+  uncategorized_id: string;
+  is_off_budget: boolean;
+  is_transfer: boolean;
+  has_category: boolean;
 };
 
 let uncategorizedCategory: UncategorizedEntity = {
   name: 'Uncategorized',
   id: null,
-  uncat_id: '1',
+  uncategorized_id: '1',
   hidden: false,
-  offBudget: false,
-  transfer: false,
-  category: false,
+  is_off_budget: false,
+  is_transfer: false,
+  has_category: false,
 };
 let transferCategory: UncategorizedEntity = {
   name: 'Transfers',
   id: null,
-  uncat_id: '2',
+  uncategorized_id: '2',
   hidden: false,
-  transfer: true,
-  offBudget: false,
-  category: false,
+  is_off_budget: false,
+  is_transfer: true,
+  has_category: false,
 };
 let offBudgetCategory: UncategorizedEntity = {
   name: 'Off Budget',
   id: null,
-  uncat_id: '3',
+  uncategorized_id: '3',
   hidden: false,
-  offBudget: true,
-  transfer: false,
-  category: true,
+  is_off_budget: true,
+  is_transfer: false,
+  has_category: true,
+};
+
+type UncategorizedGroupEntity = CategoryGroupEntity & {
+  categories?: UncategorizedEntity[];
 };
 
 let uncategouncatGrouprizedGroup: UncategorizedGroupEntity = {
@@ -114,16 +115,11 @@ let uncategouncatGrouprizedGroup: UncategorizedGroupEntity = {
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };
 
-type categoryListsProps = {
-  hidden: boolean;
-  uncat: boolean;
-  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
-};
-export const categoryLists = ({
-  hidden,
-  uncat,
-  categories,
-}: categoryListsProps) => {
+export const categoryLists = (
+  hidden: boolean,
+  uncat: boolean,
+  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] },
+) => {
   let categoryList = uncat
     ? [
         ...categories.list,
@@ -138,7 +134,7 @@ export const categoryLists = ({
         uncategouncatGrouprizedGroup,
       ]
     : categories.grouped;
-  return [categoryList, categoryGroup];
+  return [categoryList, categoryGroup] as const;
 };
 
 export const groupBySelections = (

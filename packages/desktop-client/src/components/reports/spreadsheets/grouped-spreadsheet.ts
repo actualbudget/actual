@@ -2,16 +2,8 @@ import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
-} from 'loot-core/src/types/models';
 
-import {
-  categoryLists,
-  type UncategorizedEntity,
-  type UncategorizedGroupEntity,
-} from '../ReportOptions';
+import { categoryLists } from '../ReportOptions';
 
 import { type createSpreadsheetProps } from './default-spreadsheet';
 import filterHiddenItems from './filterHiddenItems';
@@ -28,10 +20,7 @@ function createGroupedSpreadsheet({
   hidden,
   uncat,
 }: createSpreadsheetProps) {
-  let catList: CategoryEntity[] | UncategorizedEntity[];
-  let catGroup: CategoryGroupEntity[] | UncategorizedGroupEntity[];
-
-  [catList, catGroup] = categoryLists({ hidden, uncat, categories });
+  let [catList, catGroup] = categoryLists(hidden, uncat, categories);
 
   let categoryFilter = (catList || []).filter(
     category =>
@@ -91,14 +80,14 @@ function createGroupedSpreadsheet({
           let groupedDebts = 0;
 
           group.categories.map(item => {
-            let monthAssets = filterHiddenItems({ item, data: assets })
+            let monthAssets = filterHiddenItems(item, assets)
               .filter(
                 asset => asset.date === month && asset.category === item.id,
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedAssets += monthAssets;
 
-            let monthDebts = filterHiddenItems({ item, data: debts })
+            let monthDebts = filterHiddenItems(item, debts)
               .filter(
                 debts => debts.date === month && debts.category === item.id,
               )

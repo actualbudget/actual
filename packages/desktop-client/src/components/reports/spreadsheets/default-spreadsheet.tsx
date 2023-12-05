@@ -12,13 +12,7 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import {
-  categoryLists,
-  groupBySelections,
-  type UncategorizedEntity,
-  type UncategorizedGroupEntity,
-  type QueryDataEntity,
-} from '../ReportOptions';
+import { categoryLists, groupBySelections } from '../ReportOptions';
 
 import filterHiddenItems from './filterHiddenItems';
 import makeQuery from './makeQuery';
@@ -55,10 +49,7 @@ export default function createSpreadsheet({
   accounts,
   setDataCheck,
 }) {
-  let catList: CategoryEntity[] | UncategorizedEntity[];
-  let catGroup: CategoryGroupEntity[] | UncategorizedGroupEntity[];
-
-  [catList, catGroup] = categoryLists({ hidden, uncat, categories });
+  let [catList, catGroup] = categoryLists(hidden, uncat, categories);
 
   let categoryFilter = (catList || []).filter(
     category =>
@@ -87,10 +78,7 @@ export default function createSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    let assets: QueryDataEntity[];
-    let debts: QueryDataEntity[];
-
-    [assets, debts] = await Promise.all([
+    const [assets, debts] = await Promise.all([
       runQuery(
         makeQuery(
           'assets',
@@ -130,14 +118,14 @@ export default function createSpreadsheet({
       groupByList.map(item => {
         let stackAmounts = 0;
 
-        let monthAssets = filterHiddenItems({ item, data: assets })
+        let monthAssets = filterHiddenItems(item, assets)
           .filter(
             asset => asset.date === month && asset[groupByLabel] === item.id,
           )
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthAssets += monthAssets;
 
-        let monthDebts = filterHiddenItems({ item, data: debts })
+        let monthDebts = filterHiddenItems(item, debts)
           .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthDebts += monthDebts;
