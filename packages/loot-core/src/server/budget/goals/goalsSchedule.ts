@@ -79,12 +79,15 @@ export async function goalsSchedule(
             monthUtils._parse(current_month),
             true,
           );
-          let nextDate = monthUtils.dayFromDate(
-            getDateWithSkippedWeekend(
-              monthUtils._parse(nextBaseDate),
-              dateConditions.value.weekendSolveMode,
-            ),
-          );
+
+          let nextDate = dateConditions.value.skipWeekend
+            ? monthUtils.dayFromDate(
+                getDateWithSkippedWeekend(
+                  monthUtils._parse(nextBaseDate),
+                  dateConditions.value.weekendSolveMode,
+                ),
+              )
+            : nextBaseDate;
 
           while (nextDate < nextMonth) {
             monthlyTarget += -target;
@@ -95,12 +98,14 @@ export async function goalsSchedule(
               monthUtils._parse(oneDayLater),
               true,
             );
-            nextDate = monthUtils.dayFromDate(
-              getDateWithSkippedWeekend(
-                monthUtils._parse(nextBaseDate),
-                dateConditions.value.weekendSolveMode,
-              ),
-            );
+            nextDate = dateConditions.value.skipWeekend
+              ? monthUtils.dayFromDate(
+                  getDateWithSkippedWeekend(
+                    monthUtils._parse(nextBaseDate),
+                    dateConditions.value.weekendSolveMode,
+                  ),
+                )
+              : nextBaseDate;
             const diffDays = monthUtils.differenceInCalendarDays(
               nextBaseDate,
               currentDate,
