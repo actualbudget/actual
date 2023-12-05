@@ -47,7 +47,7 @@ export default function ReportTableTotals({
   });
 
   const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
-  return (
+  return 
     <Row
       collapsed={true}
       height={32 + scrollWidthTotals}

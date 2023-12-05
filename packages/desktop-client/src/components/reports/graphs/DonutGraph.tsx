@@ -106,7 +106,7 @@ function DonutGraph({
   style,
   data,
   groupBy,
-  showEmpty,
+  empty,
   balanceTypeOp,
   compact,
 }: DonutGraphProps) {
@@ -148,7 +148,7 @@ function DonutGraph({
                   nameKey={yAxis}
                   isAnimationActive={false}
                   data={data[splitData].filter(i =>
-                    !showEmpty ? i[balanceTypeOp] !== 0 : true,
+                    !empty ? i[balanceTypeOp] !== 0 : true,
                   )}
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"

@@ -104,6 +104,7 @@ export default function CustomReport() {
     run();
   }, []);
 
+  let balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   let payees = useCachedPayees();
   let accounts = useCachedAccounts();
 
@@ -115,9 +116,9 @@ export default function CustomReport() {
       selectedCategories,
       filters,
       conditionsOp,
-      showOffBudgetHidden,
-      showUncategorized,
-    );
+      hidden,
+      uncat,
+    });
   }, [
     startDate,
     endDate,
@@ -125,27 +126,27 @@ export default function CustomReport() {
     selectedCategories,
     filters,
     conditionsOp,
-    showOffBudgetHidden,
-    showUncategorized,
+    hidden,
+    uncat,
   ]);
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
-    return defaultSpreadsheet(
+    return defaultSpreadsheet({
       startDate,
       endDate,
-      groupBy,
-      ReportOptions.balanceTypeMap.get(balanceType),
       categories,
       selectedCategories,
-      payees,
-      accounts,
       filters,
       conditionsOp,
-      showOffBudgetHidden,
-      showUncategorized,
+      hidden,
+      uncat,
+      groupBy,
+      balanceTypeOp,
+      payees,
+      accounts,
       setDataCheck,
-    );
+    });
   }, [
     startDate,
     endDate,
@@ -157,8 +158,8 @@ export default function CustomReport() {
     accounts,
     filters,
     conditionsOp,
-    showOffBudgetHidden,
-    showUncategorized,
+    hidden,
+    uncat,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -297,15 +298,7 @@ export default function CustomReport() {
                         right={
                           <Text>
                             <PrivacyFilter blurIntensity={5}>
-                              {amountToCurrency(
-                                Math.abs(
-                                  data[
-                                    ReportOptions.balanceTypeMap.get(
-                                      balanceType,
-                                    )
-                                  ],
-                                ),
-                              )}
+                              {amountToCurrency(Math.abs(data[balanceTypeOp]))}
                             </PrivacyFilter>
                           </Text>
                         }
@@ -321,7 +314,7 @@ export default function CustomReport() {
                     graphType={graphType}
                     balanceType={balanceType}
                     groupBy={groupBy}
-                    showEmpty={showEmpty}
+                    empty={empty}
                     scrollWidth={scrollWidth}
                     setScrollWidth={setScrollWidth}
                     months={months}
@@ -345,9 +338,7 @@ export default function CustomReport() {
                     <ReportSummary
                       startDate={startDate}
                       endDate={endDate}
-                      balanceTypeOp={ReportOptions.balanceTypeMap.get(
-                        balanceType,
-                      )}
+                      balanceTypeOp={balanceTypeOp}
                       data={data}
                       monthsCount={months.length}
                     />

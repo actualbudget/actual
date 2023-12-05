@@ -11,11 +11,13 @@ export type FileState =
 export type LocalFile = Omit<Budget, 'cloudFileId' | 'groupId'> & {
   state: 'local';
 };
+
 export type SyncableLocalFile = Budget & {
   cloudFileId: string;
   groupId: string;
   state: 'broken' | 'unknown';
 };
+
 export type SyncedLocalFile = Budget & {
   cloudFileId: string;
   groupId: string;
@@ -23,6 +25,7 @@ export type SyncedLocalFile = Budget & {
   hasKey: boolean;
   state: 'synced' | 'detached';
 };
+
 export type RemoteFile = {
   cloudFileId: string;
   groupId: string;
