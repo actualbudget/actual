@@ -21,6 +21,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import Add from '../../icons/v1/Add';
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
 import Button from '../common/Button';
 import View from '../common/View';
@@ -373,19 +374,21 @@ export function CreatePayeeButton({
   style,
   ...props
 }: CreatePayeeButtonProps) {
+  const { isNarrowWidth } = useResponsive();
   return (
     <View
       data-testid="create-payee-button"
       style={{
         display: 'block',
         flexShrink: 0,
-        color: embedded ? theme.menuItemText : theme.noticeTextMenu,
+        color:
+          embedded && isNarrowWidth ? theme.menuItemText : theme.noticeTextMenu,
         borderRadius: embedded ? 4 : 0,
         fontSize: 11,
         fontWeight: 500,
         padding: '6px 9px',
         backgroundColor: highlighted
-          ? embedded
+          ? embedded && isNarrowWidth
             ? theme.menuItemBackgroundHover
             : theme.menuAutoCompleteBackgroundHover
           : 'transparent',
@@ -462,6 +465,7 @@ export function PayeeItem({
   embedded,
   ...props
 }: PayeeItemProps) {
+  const { isNarrowWidth } = useResponsive();
   return (
     <div
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
@@ -489,7 +493,7 @@ export function PayeeItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? embedded
+            ? embedded && isNarrowWidth
               ? theme.menuItemBackgroundHover
               : theme.menuAutoCompleteBackgroundHover
             : 'transparent',

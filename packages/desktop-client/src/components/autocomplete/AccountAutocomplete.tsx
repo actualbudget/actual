@@ -5,6 +5,7 @@ import { css } from 'glamor';
 import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
 import View from '../common/View';
 
@@ -168,6 +169,7 @@ export function AccountItem({
   embedded,
   ...props
 }: AccountItemProps) {
+  const { isNarrowWidth } = useResponsive();
   return (
     <div
       // List each account up to a max
@@ -196,7 +198,7 @@ export function AccountItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? embedded
+            ? embedded && isNarrowWidth
               ? theme.menuItemBackgroundHover
               : theme.menuAutoCompleteBackgroundHover
             : 'transparent',
