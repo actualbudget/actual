@@ -26,7 +26,7 @@ type BudgetSummaryProps = {
   month?: string;
 };
 export default function BudgetSummary({ month }: BudgetSummaryProps) {
-  let {
+  const {
     currentMonth,
     summaryCollapsed: collapsed,
     onBudgetAction,
@@ -35,7 +35,7 @@ export default function BudgetSummary({ month }: BudgetSummaryProps) {
 
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   function onMenuOpen() {
     setMenuOpen(true);
   }
@@ -44,7 +44,7 @@ export default function BudgetSummary({ month }: BudgetSummaryProps) {
     setMenuOpen(false);
   }
 
-  let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
+  const ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
 
   return (
     <View

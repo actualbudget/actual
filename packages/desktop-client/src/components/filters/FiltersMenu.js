@@ -40,7 +40,7 @@ import CompactFiltersButton from './CompactFiltersButton';
 import FiltersButton from './FiltersButton';
 import { CondOpMenu } from './SavedFilters';
 
-let filterFields = [
+const filterFields = [
   'date',
   'account',
   'payee',
@@ -119,7 +119,7 @@ function OpButton({ op, selected, style, onClick }) {
 function updateFilterReducer(state, action) {
   switch (action.type) {
     case 'set-op': {
-      let type = FIELD_TYPES.get(state.field);
+      const type = FIELD_TYPES.get(state.field);
       let value = state.value;
       if (
         (type === 'id' || type === 'string') &&
@@ -135,7 +135,7 @@ function updateFilterReducer(state, action) {
       return { ...state, op: action.op, value };
     }
     case 'set-value': {
-      let { value } = makeValue(action.value, {
+      const { value } = makeValue(action.value, {
         type: FIELD_TYPES.get(state.field),
       });
       return { ...state, value };
@@ -153,9 +153,10 @@ function ConfigureField({
   dispatch,
   onApply,
 }) {
-  let [subfield, setSubfield] = useState(initialSubfield);
-  let inputRef = useRef();
-  let prevOp = useRef(null);
+  const [subfield, setSubfield] = useState(initialSubfield);
+  const inputRef = useRef();
+  const prevOp = useRef(null);
+
   useEffect(() => {
     if (prevOp.current !== op && inputRef.current) {
       inputRef.current.focus();
@@ -163,7 +164,7 @@ function ConfigureField({
     prevOp.current = op;
   }, [op]);
 
-  let type = FIELD_TYPES.get(field);
+  const type = FIELD_TYPES.get(field);
   let ops = TYPE_INFO[type].ops.filter(op => op !== 'isbetween');
 
   // Month and year fields are quite hacky right now! Figure out how
@@ -337,23 +338,23 @@ function ConfigureField({
 }
 
 export function FilterButton({ onApply, compact, hover }) {
-  let filters = useFilters();
+  const filters = useFilters();
 
-  let { dateFormat } = useSelector(state => {
+  const { dateFormat } = useSelector(state => {
     return {
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
 
-  let [state, dispatch] = useReducer(
+  const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
         case 'select-field':
           return { ...state, fieldsOpen: true, condOpen: false };
         case 'configure': {
-          let { field } = deserializeField(action.field);
-          let type = FIELD_TYPES.get(field);
-          let ops = TYPE_INFO[type].ops;
+          const { field } = deserializeField(action.field);
+          const type = FIELD_TYPES.get(field);
+          const ops = TYPE_INFO[type].ops;
           return {
             ...state,
             fieldsOpen: false,
@@ -377,7 +378,7 @@ export function FilterButton({ onApply, compact, hover }) {
 
     if (cond.type === 'date' && cond.options) {
       if (cond.options.month) {
-        let date = parseDate(
+        const date = parseDate(
           cond.value,
           getMonthYearFormat(dateFormat),
           new Date(),
@@ -389,7 +390,7 @@ export function FilterButton({ onApply, compact, hover }) {
           return;
         }
       } else if (cond.options.year) {
-        let date = parseDate(cond.value, 'yyyy', new Date());
+        const date = parseDate(cond.value, 'yyyy', new Date());
         if (isDateValid(date)) {
           cond.value = formatDate(date, 'yyyy');
         } else {
@@ -399,17 +400,17 @@ export function FilterButton({ onApply, compact, hover }) {
       }
     }
 
-    let { error } =
+    const { error } =
       cond.field !== 'saved' &&
       (await send('rule-validate', {
         conditions: [cond],
         actions: [],
       }));
 
-    let saved = filters.find(f => cond.value === f.id);
+    const saved = filters.find(f => cond.value === f.id);
 
     if (error && error.conditionErrors.length > 0) {
-      let field = titleFirst(mapField(cond.field));
+      const field = titleFirst(mapField(cond.field));
       alert(field + ': ' + getFieldError(error.conditionErrors[0]));
     } else {
       onApply(saved ? saved : cond);
@@ -477,7 +478,7 @@ export function FilterButton({ onApply, compact, hover }) {
 }
 
 function FilterEditor({ field, op, value, options, onSave, onClose }) {
-  let [state, dispatch] = useReducer(
+  const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
         case 'close':
@@ -518,9 +519,10 @@ function FilterExpression({
   onChange,
   onDelete,
 }) {
-  let [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(false);
 
-  let field = subfieldFromFilter({ field: originalField, value });
+  const field = subfieldFromFilter({ field: originalField, value });
+
   return (
     <View
       style={{

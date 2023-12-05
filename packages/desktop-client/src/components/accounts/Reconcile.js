@@ -20,13 +20,13 @@ export function ReconcilingMessage({
   onDone,
   onCreateTransaction,
 }) {
-  let cleared = useSheetValue({
+  const cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
     value: 0,
     query: balanceQuery.query.filter({ cleared: true }),
   });
-  let format = useFormat();
-  let targetDiff = targetBalance - cleared;
+  const format = useFormat();
+  const targetDiff = targetBalance - cleared;
 
   return (
     <View
@@ -96,18 +96,18 @@ export function ReconcilingMessage({
 }
 
 export function ReconcileTooltip({ account, onReconcile, onClose }) {
-  let balanceQuery = queries.accountBalance(account);
-  let clearedBalance = useSheetValue({
+  const balanceQuery = queries.accountBalance(account);
+  const clearedBalance = useSheetValue({
     name: balanceQuery.name + '-cleared',
     value: null,
     query: balanceQuery.query.filter({ cleared: true }),
   });
-  let format = useFormat();
+  const format = useFormat();
 
   function onSubmit(e) {
     e.preventDefault();
-    let input = e.target.elements[0];
-    let amount = currencyToInteger(input.value);
+    const input = e.target.elements[0];
+    const amount = currencyToInteger(input.value);
     if (amount != null) {
       onReconcile(amount == null ? clearedBalance : amount);
       onClose();

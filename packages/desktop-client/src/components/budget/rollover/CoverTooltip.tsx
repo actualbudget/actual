@@ -22,7 +22,7 @@ export default function CoverTooltip({
   categoryGroups = addToBeBudgetedGroup(
     categoryGroups.filter(g => !g.is_income),
   );
-  let [category, setCategory] = useState(null);
+  const [category, setCategory] = useState(null);
 
   function submit() {
     if (category) {

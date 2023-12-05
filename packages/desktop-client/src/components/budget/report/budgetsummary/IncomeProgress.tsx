@@ -16,7 +16,7 @@ export default function IncomeProgress({
   target,
 }: IncomeProgressProps) {
   let totalIncome = useSheetValue(current) || 0;
-  let totalBudgeted = useSheetValue(target) || 0;
+  const totalBudgeted = useSheetValue(target) || 0;
 
   let over = false;
 
@@ -25,7 +25,7 @@ export default function IncomeProgress({
     totalIncome = -totalIncome;
   }
 
-  let frac = fraction(totalIncome, totalBudgeted);
+  const frac = fraction(totalIncome, totalBudgeted);
 
   return (
     <PieProgress

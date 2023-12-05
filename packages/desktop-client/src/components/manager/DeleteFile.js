@@ -7,7 +7,7 @@ import Text from '../common/Text';
 import View from '../common/View';
 
 export default function DeleteMenu({ modalProps, actions, file }) {
-  let [loadingState, setLoadingState] = useState(null);
+  const [loadingState, setLoadingState] = useState(null);
 
   async function onDeleteCloud() {
     setLoadingState('cloud');
@@ -28,7 +28,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
   // If the state is "broken" that means it was created by another
   // user. The current user should be able to delete the local file,
   // but not the remote one
-  let isRemote = file.cloudFileId && file.state !== 'broken';
+  const isRemote = file.cloudFileId && file.state !== 'broken';
 
   return (
     <Modal

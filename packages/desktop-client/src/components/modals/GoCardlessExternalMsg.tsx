@@ -93,16 +93,16 @@ export default function GoCardlessExternalMsg({
 }: GoCardlessExternalMsgProps) {
   const dispatch = useDispatch();
 
-  let [waiting, setWaiting] = useState<string | null>(null);
-  let [success, setSuccess] = useState<boolean>(false);
-  let [institutionId, setInstitutionId] = useState<string>();
-  let [country, setCountry] = useState<string>();
-  let [error, setError] = useState<'unknown' | 'timeout' | null>(null);
-  let [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
+  const [waiting, setWaiting] = useState<string | null>(null);
+  const [success, setSuccess] = useState<boolean>(false);
+  const [institutionId, setInstitutionId] = useState<string>();
+  const [country, setCountry] = useState<string>();
+  const [error, setError] = useState<'unknown' | 'timeout' | null>(null);
+  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
   >(null);
-  let [menuOpen, setMenuOpen] = useState<boolean>(false);
-  let data = useRef<GoCardlessToken | null>(null);
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const data = useRef<GoCardlessToken | null>(null);
 
   const {
     data: bankOptions,
@@ -116,7 +116,7 @@ export default function GoCardlessExternalMsg({
     setError(null);
     setWaiting('browser');
 
-    let res = await onMoveExternal({ institutionId });
+    const res = await onMoveExternal({ institutionId });
     if (res.error) {
       setError(res.error);
       setWaiting(null);

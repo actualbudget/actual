@@ -85,13 +85,13 @@ export function findSortDown(
   if (pos === 'top') {
     return { targetId };
   } else {
-    let idx = arr.findIndex(item => item.id === targetId);
+    const idx = arr.findIndex(item => item.id === targetId);
 
     if (idx === -1) {
       throw new Error('findSort: item not found: ' + targetId);
     }
 
-    let newIdx = idx + 1;
+    const newIdx = idx + 1;
     if (newIdx < arr.length - 1) {
       return { targetId: arr[newIdx].id };
     } else {
@@ -109,13 +109,13 @@ export function findSortUp(
   if (pos === 'bottom') {
     return { targetId };
   } else {
-    let idx = arr.findIndex(item => item.id === targetId);
+    const idx = arr.findIndex(item => item.id === targetId);
 
     if (idx === -1) {
       throw new Error('findSort: item not found: ' + targetId);
     }
 
-    let newIdx = idx - 1;
+    const newIdx = idx - 1;
     if (newIdx >= 0) {
       return { targetId: arr[newIdx].id };
     } else {
@@ -134,12 +134,12 @@ export async function prewarmMonth(
   spreadsheet: ReturnType<typeof useSpreadsheet>,
   month: string,
 ) {
-  let method: keyof Handlers =
+  const method: keyof Handlers =
     budgetType === 'report' ? 'report-budget-month' : 'rollover-budget-month';
 
-  let values = await send(method, { month });
+  const values = await send(method, { month });
 
-  for (let value of values) {
+  for (const value of values) {
     spreadsheet.prewarmCache(value.name, value);
   }
 }
@@ -150,14 +150,14 @@ export async function prewarmAllMonths(
   bounds: { start: string; end: string },
   startMonth: string,
 ) {
-  let numMonths = 3;
+  const numMonths = 3;
 
   bounds = getValidMonthBounds(
     bounds,
     monthUtils.subMonths(startMonth, 1),
     monthUtils.addMonths(startMonth, numMonths + 1),
   );
-  let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
+  const months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
   await Promise.all(
     months.map(month => prewarmMonth(budgetType, spreadsheet, month)),

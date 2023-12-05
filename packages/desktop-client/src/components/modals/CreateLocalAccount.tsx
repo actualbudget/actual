@@ -23,15 +23,15 @@ type CreateLocalAccountProps = {
 };
 
 function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
-  let navigate = useNavigate();
-  let [name, setName] = useState('');
-  let [offbudget, setOffbudget] = useState(false);
-  let [balance, setBalance] = useState('0');
+  const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [offbudget, setOffbudget] = useState(false);
+  const [balance, setBalance] = useState('0');
 
-  let [nameError, setNameError] = useState(false);
-  let [balanceError, setBalanceError] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [balanceError, setBalanceError] = useState(false);
 
-  let validateBalance = balance => !isNaN(parseFloat(balance));
+  const validateBalance = balance => !isNaN(parseFloat(balance));
 
   return (
     <Modal title="Create Local Account" {...modalProps}>
@@ -41,15 +41,15 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
             onSubmit={async event => {
               event.preventDefault();
 
-              let nameError = !name;
+              const nameError = !name;
               setNameError(nameError);
 
-              let balanceError = !validateBalance(balance);
+              const balanceError = !validateBalance(balance);
               setBalanceError(balanceError);
 
               if (!nameError && !balanceError) {
                 actions.closeModal();
-                let id = await actions.createAccount(
+                const id = await actions.createAccount(
                   name,
                   toRelaxedNumber(balance),
                   offbudget,
@@ -65,7 +65,7 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
                   value={name}
                   onChange={event => setName(event.target.value)}
                   onBlur={event => {
-                    let name = event.target.value.trim();
+                    const name = event.target.value.trim();
                     setName(name);
                     if (name && nameError) {
                       setNameError(false);
@@ -139,7 +139,7 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
                 value={balance}
                 onChange={event => setBalance(event.target.value)}
                 onBlur={event => {
-                  let balance = event.target.value.trim();
+                  const balance = event.target.value.trim();
                   setBalance(balance);
                   if (validateBalance(balance) && balanceError) {
                     setBalanceError(false);

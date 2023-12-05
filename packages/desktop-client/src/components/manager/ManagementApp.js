@@ -48,13 +48,13 @@ function Version() {
 }
 
 export default function ManagementApp({ isLoading }) {
-  let files = useSelector(state => state.budgets.allFiles);
-  let userData = useSelector(state => state.user.data);
-  let managerHasInitialized = useSelector(
+  const files = useSelector(state => state.budgets.allFiles);
+  const userData = useSelector(state => state.user.data);
+  const managerHasInitialized = useSelector(
     state => state.app.managerHasInitialized,
   );
 
-  let { setAppState, getUserData, loadAllFiles } = useActions();
+  const { setAppState, getUserData, loadAllFiles } = useActions();
 
   // runs on mount only
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function ManagementApp({ isLoading }) {
     }
 
     async function fetchData() {
-      let userData = await getUserData();
+      const userData = await getUserData();
       if (userData) {
         await loadAllFiles();
       }

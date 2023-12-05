@@ -89,11 +89,11 @@ function AllTransactions({
   children,
 }) {
   const { id: accountId } = account;
-  let scheduleData = useCachedSchedules();
+  const scheduleData = useCachedSchedules();
 
   transactions ??= [];
 
-  let schedules = useMemo(
+  const schedules = useMemo(
     () =>
       scheduleData
         ? scheduleData.schedules.filter(
@@ -107,7 +107,7 @@ function AllTransactions({
     [scheduleData],
   );
 
-  let prependTransactions = useMemo(() => {
+  const prependTransactions = useMemo(() => {
     return schedules.map(schedule => ({
       id: `preview/${schedule.id}`,
       payee: schedule._payee,
@@ -130,16 +130,16 @@ function AllTransactions({
       : 0;
   }, [showBalances, balances, transactions]);
 
-  let prependBalances = useMemo(() => {
+  const prependBalances = useMemo(() => {
     if (!showBalances) {
       return null;
     }
 
     // Reverse so we can calculate from earliest upcoming schedule.
-    let scheduledBalances = [...prependTransactions]
+    const scheduledBalances = [...prependTransactions]
       .reverse()
       .map(scheduledTransaction => {
-        let amount =
+        const amount =
           (scheduledTransaction._inverse ? -1 : 1) *
           getScheduledAmount(scheduledTransaction.amount);
         return {
@@ -150,7 +150,7 @@ function AllTransactions({
     return groupById(scheduledBalances);
   }, [showBalances, prependTransactions, runningBalance]);
 
-  let allTransactions = useMemo(() => {
+  const allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
     if (!filtered && prependTransactions.length > 0) {
       return prependTransactions.concat(transactions);
@@ -158,7 +158,7 @@ function AllTransactions({
     return transactions;
   }, [filtered, prependTransactions, transactions]);
 
-  let allBalances = useMemo(() => {
+  const allBalances = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
     if (!filtered && prependBalances && balances) {
       return { ...prependBalances, ...balances };
@@ -217,7 +217,7 @@ class AccountInternal extends PureComponent {
   }
 
   async componentDidMount() {
-    let maybeRefetch = tables => {
+    const maybeRefetch = tables => {
       if (
         tables.includes('transactions') ||
         tables.includes('category_mapping') ||
@@ -227,7 +227,7 @@ class AccountInternal extends PureComponent {
       }
     };
 
-    let onUndo = async ({ tables, messages, undoTag }) => {
+    const onUndo = async ({ tables, messages, undoTag }) => {
       await maybeRefetch(tables);
 
       // If all the messages are dealing with transactions, find the
@@ -239,7 +239,7 @@ class AccountInternal extends PureComponent {
         messages.every(msg => msg.dataset === 'transactions') &&
         !messages.find(msg => msg.column === 'tombstone')
       ) {
-        let focusableMsgs = messages.filter(
+        const focusableMsgs = messages.filter(
           msg =>
             msg.dataset === 'transactions' && !(msg.column === 'tombstone'),
         );
@@ -265,7 +265,7 @@ class AccountInternal extends PureComponent {
       this.props.setLastUndoState(null);
     };
 
-    let unlistens = [listen('undo-event', onUndo)];
+    const unlistens = [listen('undo-event', onUndo)];
 
     this.unlisten = () => {
       unlistens.forEach(unlisten => unlisten());
@@ -317,7 +317,7 @@ class AccountInternal extends PureComponent {
   }
 
   fetchAllIds = async () => {
-    let { data } = await runQuery(this.paged.getQuery().select('id'));
+    const { data } = await runQuery(this.paged.getQuery().select('id'));
     // Remember, this is the `grouped` split type so we need to deal
     // with the `subtransactions` property
     return data.reduce((arr, t) => {
@@ -332,7 +332,7 @@ class AccountInternal extends PureComponent {
   };
 
   fetchTransactions = () => {
-    let query = this.makeRootQuery();
+    const query = this.makeRootQuery();
     this.rootQuery = this.currentQuery = query;
     this.updateQuery(query);
 
@@ -342,8 +342,8 @@ class AccountInternal extends PureComponent {
   };
 
   makeRootQuery = () => {
-    let locationState = this.props.location.state;
-    let accountId = this.props.accountId;
+    const locationState = this.props.location.state;
+    const accountId = this.props.accountId;
 
     if (locationState && locationState.filter) {
       return q('transactions')
@@ -488,12 +488,12 @@ class AccountInternal extends PureComponent {
   };
 
   onExport = async accountName => {
-    let exportedTransactions = await send('transactions-export-query', {
+    const exportedTransactions = await send('transactions-export-query', {
       query: this.currentQuery.serialize(),
     });
-    let normalizedName =
+    const normalizedName =
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
-    let filename = `${normalizedName || 'transactions'}.csv`;
+    const filename = `${normalizedName || 'transactions'}.csv`;
 
     window.Actual.saveFile(
       exportedTransactions,
@@ -523,8 +523,10 @@ class AccountInternal extends PureComponent {
   };
 
   canCalculateBalance = () => {
-    let accountId = this.props.accountId;
-    let account = this.props.accounts.find(account => account.id === accountId);
+    const accountId = this.props.accountId;
+    const account = this.props.accounts.find(
+      account => account.id === accountId,
+    );
     return (
       account &&
       this.state.search === '' &&
@@ -540,7 +542,7 @@ class AccountInternal extends PureComponent {
       return null;
     }
 
-    let { data } = await runQuery(
+    const { data } = await runQuery(
       this.paged
         .getQuery()
         .options({ splits: 'none' })
@@ -570,8 +572,8 @@ class AccountInternal extends PureComponent {
   };
 
   onToggleExtraBalances = () => {
-    let { accountId, showExtraBalances } = this.props;
-    let key = 'show-extra-balances-' + accountId || 'all-accounts';
+    const { accountId, showExtraBalances } = this.props;
+    const key = 'show-extra-balances-' + accountId || 'all-accounts';
 
     this.props.savePrefs({ [key]: !showExtraBalances });
   };
@@ -622,7 +624,7 @@ class AccountInternal extends PureComponent {
         break;
       case 'remove-sorting': {
         this.setState({ sort: [] }, () => {
-          let filters = this.state.filters;
+          const filters = this.state.filters;
           if (filters.length > 0) {
             this.applyFilters([...filters]);
           } else {
@@ -648,7 +650,7 @@ class AccountInternal extends PureComponent {
   };
 
   getAccountTitle(account, id) {
-    let { filterName } = this.props.location.state || {};
+    const { filterName } = this.props.location.state || {};
 
     if (filterName) {
       return filterName;
@@ -686,7 +688,7 @@ class AccountInternal extends PureComponent {
   };
 
   onCreatePayee = name => {
-    let trimmed = name.trim();
+    const trimmed = name.trim();
     if (trimmed !== '') {
       return this.props.createPayee(name);
     }
@@ -696,9 +698,9 @@ class AccountInternal extends PureComponent {
   lockTransactions = async () => {
     this.setState({ workingHard: true });
 
-    let { accountId } = this.props;
+    const { accountId } = this.props;
 
-    let { data } = await runQuery(
+    const { data } = await runQuery(
       q('transactions')
         .filter({ cleared: true, reconciled: false, account: accountId })
         .select('*')
@@ -706,10 +708,10 @@ class AccountInternal extends PureComponent {
     );
     let transactions = ungroupTransactions(data);
 
-    let changes = { updated: [] };
+    const changes = { updated: [] };
 
     transactions.forEach(trans => {
-      let { diff } = updateTransaction(transactions, {
+      const { diff } = updateTransaction(transactions, {
         ...trans,
         reconciled: true,
       });
@@ -730,16 +732,16 @@ class AccountInternal extends PureComponent {
   };
 
   onDoneReconciling = async () => {
-    let { accountId } = this.props;
-    let { reconcileAmount } = this.state;
+    const { accountId } = this.props;
+    const { reconcileAmount } = this.state;
 
-    let { data } = await runQuery(
+    const { data } = await runQuery(
       q('transactions')
         .filter({ cleared: true, account: accountId })
         .select('*')
         .options({ splits: 'grouped' }),
     );
-    let transactions = ungroupTransactions(data);
+    const transactions = ungroupTransactions(data);
 
     let cleared = 0;
 
@@ -749,7 +751,7 @@ class AccountInternal extends PureComponent {
       }
     });
 
-    let targetDiff = reconcileAmount - cleared;
+    const targetDiff = reconcileAmount - cleared;
 
     if (targetDiff === 0) {
       await this.lockTransactions();
@@ -792,10 +794,10 @@ class AccountInternal extends PureComponent {
   };
 
   onBatchEdit = async (name, ids) => {
-    let onChange = async (name, value) => {
+    const onChange = async (name, value) => {
       this.setState({ workingHard: true });
 
-      let { data } = await runQuery(
+      const { data } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })
           .select('*')
@@ -803,7 +805,7 @@ class AccountInternal extends PureComponent {
       );
       let transactions = ungroupTransactions(data);
 
-      let changes = { deleted: [], updated: [] };
+      const changes = { deleted: [], updated: [] };
 
       // Cleared is a special case right now
       if (name === 'cleared') {
@@ -826,7 +828,7 @@ class AccountInternal extends PureComponent {
           return;
         }
 
-        let transaction = {
+        const transaction = {
           ...trans,
           [name]: value,
         };
@@ -835,7 +837,7 @@ class AccountInternal extends PureComponent {
           transaction.reconciled = false;
         }
 
-        let { diff } = updateTransaction(transactions, transaction);
+        const { diff } = updateTransaction(transactions, transaction);
 
         // TODO: We need to keep an updated list of transactions so
         // the logic in `updateTransaction`, particularly about
@@ -863,13 +865,13 @@ class AccountInternal extends PureComponent {
     };
 
     if (name === 'amount' || name === 'payee' || name === 'account') {
-      let { data } = await runQuery(
+      const { data } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids }, reconciled: true })
           .select('*')
           .options({ splits: 'grouped' }),
       );
-      let transactions = ungroupTransactions(data);
+      const transactions = ungroupTransactions(data);
 
       if (transactions.length > 0) {
         this.props.pushModal('confirm-transaction-edit', {
@@ -892,17 +894,17 @@ class AccountInternal extends PureComponent {
   };
 
   onBatchDuplicate = async ids => {
-    let onConfirmDuplicate = async ids => {
+    const onConfirmDuplicate = async ids => {
       this.setState({ workingHard: true });
 
-      let { data } = await runQuery(
+      const { data } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })
           .select('*')
           .options({ splits: 'grouped' }),
       );
 
-      let changes = {
+      const changes = {
         added: data
           .reduce((newTransactions, trans) => {
             return newTransactions.concat(
@@ -925,10 +927,10 @@ class AccountInternal extends PureComponent {
   };
 
   onBatchDelete = async ids => {
-    let onConfirmDelete = async ids => {
+    const onConfirmDelete = async ids => {
       this.setState({ workingHard: true });
 
-      let { data } = await runQuery(
+      const { data } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })
           .select('*')
@@ -936,11 +938,11 @@ class AccountInternal extends PureComponent {
       );
       let transactions = ungroupTransactions(data);
 
-      let idSet = new Set(ids);
-      let changes = { deleted: [], updated: [] };
+      const idSet = new Set(ids);
+      const changes = { deleted: [], updated: [] };
 
       transactions.forEach(trans => {
-        let parentId = trans.parent_id;
+        const parentId = trans.parent_id;
 
         // First, check if we're actually deleting this transaction by
         // checking `idSet`. Then, we don't need to do anything if it's
@@ -949,7 +951,7 @@ class AccountInternal extends PureComponent {
           return;
         }
 
-        let { diff } = deleteTransaction(transactions, trans.id);
+        const { diff } = deleteTransaction(transactions, trans.id);
 
         // TODO: We need to keep an updated list of transactions so
         // the logic in `updateTransaction`, particularly about
@@ -977,13 +979,13 @@ class AccountInternal extends PureComponent {
   };
 
   checkForReconciledTransactions = async (ids, confirmReason, onConfirm) => {
-    let { data } = await runQuery(
+    const { data } = await runQuery(
       q('transactions')
         .filter({ id: { $oneof: ids }, reconciled: true })
         .select('*')
         .options({ splits: 'grouped' }),
     );
-    let transactions = ungroupTransactions(data);
+    const transactions = ungroupTransactions(data);
     if (transactions.length > 0) {
       this.props.pushModal('confirm-transaction-edit', {
         onConfirm: () => {
@@ -1005,14 +1007,14 @@ class AccountInternal extends PureComponent {
   };
 
   onCreateRule = async ids => {
-    let { data } = await runQuery(
+    const { data } = await runQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
         .options({ splits: 'grouped' }),
     );
-    let transactions = ungroupTransactions(data);
-    let payeeCondition = transactions[0].imported_payee
+    const transactions = ungroupTransactions(data);
+    const payeeCondition = transactions[0].imported_payee
       ? {
           field: 'imported_payee',
           op: 'is',
@@ -1026,7 +1028,7 @@ class AccountInternal extends PureComponent {
           type: 'id',
         };
 
-    let rule = {
+    const rule = {
       stage: null,
       conditionsOp: 'and',
       conditions: [payeeCondition],
@@ -1054,7 +1056,7 @@ class AccountInternal extends PureComponent {
 
   onReloadSavedFilter = (savedFilter, item) => {
     if (item === 'reload') {
-      let [getFilter] = this.props.filtersList.filter(
+      const [getFilter] = this.props.filtersList.filter(
         f => f.id === this.state.filterId.id,
       );
       this.setState({ conditionsOp: getFilter.conditionsOp });
@@ -1136,15 +1138,15 @@ class AccountInternal extends PureComponent {
   onScheduleAction = async (name, ids) => {
     switch (name) {
       case 'post-transaction':
-        for (let id of ids) {
-          let parts = id.split('/');
+        for (const id of ids) {
+          const parts = id.split('/');
           await send('schedule/post-transaction', { id: parts[1] });
         }
         this.refetchTransactions();
         break;
       case 'skip':
-        for (let id of ids) {
-          let parts = id.split('/');
+        for (const id of ids) {
+          const parts = id.split('/');
           await send('schedule/skip-next-date', { id: parts[1] });
         }
         break;
@@ -1154,10 +1156,10 @@ class AccountInternal extends PureComponent {
 
   applyFilters = async conditions => {
     if (conditions.length > 0) {
-      let customFilters = conditions
+      const customFilters = conditions
         .filter(cond => !!cond.customName)
         .map(f => f.filter);
-      let { filters } = await send('make-filters-from-conditions', {
+      const { filters } = await send('make-filters-from-conditions', {
         conditions: conditions.filter(cond => !cond.customName),
       });
       const conditionsOpKey = this.state.conditionsOp === 'or' ? '$or' : '$and';
@@ -1187,13 +1189,13 @@ class AccountInternal extends PureComponent {
   };
 
   applySort = (field, ascDesc, prevField, prevAscDesc) => {
-    let filters = this.state.filters;
-    let sortField = getField(!field ? this.state.sort.field : field);
-    let sortAscDesc = !ascDesc ? this.state.sort.ascDesc : ascDesc;
-    let sortPrevField = getField(
+    const filters = this.state.filters;
+    const sortField = getField(!field ? this.state.sort.field : field);
+    const sortAscDesc = !ascDesc ? this.state.sort.ascDesc : ascDesc;
+    const sortPrevField = getField(
       !prevField ? this.state.sort.prevField : prevField,
     );
-    let sortPrevAscDesc = !prevField
+    const sortPrevAscDesc = !prevField
       ? this.state.sort.prevAscDesc
       : prevAscDesc;
 
@@ -1263,7 +1265,7 @@ class AccountInternal extends PureComponent {
   };
 
   render() {
-    let {
+    const {
       accounts,
       categoryGroups,
       payees,
@@ -1277,7 +1279,7 @@ class AccountInternal extends PureComponent {
       accountId,
       categoryId,
     } = this.props;
-    let {
+    const {
       transactions,
       loading,
       workingHard,
@@ -1290,7 +1292,7 @@ class AccountInternal extends PureComponent {
       showCleared,
     } = this.state;
 
-    let account = accounts.find(account => account.id === accountId);
+    const account = accounts.find(account => account.id === accountId);
     const accountName = this.getAccountTitle(account, accountId);
 
     if (!accountName && !loading) {
@@ -1299,19 +1301,19 @@ class AccountInternal extends PureComponent {
       return <Navigate to="/accounts" replace />;
     }
 
-    let category = categoryGroups
+    const category = categoryGroups
       .flatMap(g => g.categories)
       .find(category => category.id === categoryId);
 
-    let showEmptyMessage = !loading && !accountId && accounts.length === 0;
+    const showEmptyMessage = !loading && !accountId && accounts.length === 0;
 
-    let isNameEditable =
+    const isNameEditable =
       accountId &&
       accountId !== 'budgeted' &&
       accountId !== 'offbudget' &&
       accountId !== 'uncategorized';
 
-    let balanceQuery = this.getBalanceQuery(account, accountId);
+    const balanceQuery = this.getBalanceQuery(account, accountId);
 
     return (
       <AllTransactions
@@ -1459,8 +1461,8 @@ class AccountInternal extends PureComponent {
 }
 
 function AccountHack(props) {
-  let { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
-  let match = useMatch(props.location.pathname);
+  const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  const match = useMatch(props.location.pathname);
 
   return (
     <AccountInternal
@@ -1472,11 +1474,11 @@ function AccountHack(props) {
 }
 
 export default function Account() {
-  let params = useParams();
-  let location = useLocation();
+  const params = useParams();
+  const location = useLocation();
 
-  let { grouped: categoryGroups } = useCategories();
-  let state = useSelector(state => ({
+  const { grouped: categoryGroups } = useCategories();
+  const state = useSelector(state => ({
     newTransactions: state.queries.newTransactions,
     matchedTransactions: state.queries.matchedTransactions,
     accounts: state.queries.accounts,
@@ -1494,14 +1496,14 @@ export default function Account() {
     lastUndoState: state.app.lastUndoState,
   }));
 
-  let dispatch = useDispatch();
-  let filtersList = useFilters();
-  let actionCreators = useMemo(
+  const dispatch = useDispatch();
+  const filtersList = useFilters();
+  const actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
     [dispatch],
   );
 
-  let transform = useMemo(() => {
+  const transform = useMemo(() => {
     let filterByAccount = queries.getAccountFilter(params.id, '_account');
     let filterByPayee = queries.getAccountFilter(
       params.id,

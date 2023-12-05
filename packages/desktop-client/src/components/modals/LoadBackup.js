@@ -54,7 +54,7 @@ function LoadBackup({
   actions,
   modalProps,
 }) {
-  let [backups, setBackups] = useState([]);
+  const [backups, setBackups] = useState([]);
 
   useEffect(() => {
     send('backups-get', { id: budgetId }).then(setBackups);

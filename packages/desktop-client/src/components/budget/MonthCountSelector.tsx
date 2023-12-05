@@ -29,7 +29,7 @@ export function MonthCountSelector({
   maxMonths,
   onChange,
 }: MonthCountSelectorProps) {
-  let { displayMax } = useBudgetMonthCount();
+  const { displayMax } = useBudgetMonthCount();
 
   // It doesn't make sense to show anything if we can only fit one
   // month
@@ -37,7 +37,7 @@ export function MonthCountSelector({
     return null;
   }
 
-  let calendars = [];
+  const calendars = [];
   for (let i = 1; i <= displayMax; i++) {
     calendars.push(
       <Calendar

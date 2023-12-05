@@ -18,7 +18,7 @@ export default function AnchorLink({
   activeStyle,
   children,
 }: AnchorLinkProps) {
-  let match = useMatch({ path: to });
+  const match = useMatch({ path: to });
 
   return (
     <NavLink

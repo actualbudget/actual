@@ -75,7 +75,7 @@ export default function AccountDetails({
   onSelectTransaction,
   pushModal,
 }) {
-  let allTransactions = useMemo(() => {
+  const allTransactions = useMemo(() => {
     return prependTransactions.concat(transactions);
   }, [prependTransactions, transactions]);
 

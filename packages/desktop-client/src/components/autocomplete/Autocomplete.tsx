@@ -24,7 +24,7 @@ const inst: { lastChangeType? } = {};
 
 function findItem(strict, suggestions, value) {
   if (strict) {
-    let idx = suggestions.findIndex(item => item.id === value);
+    const idx = suggestions.findIndex(item => item.id === value);
     return idx === -1 ? null : suggestions[idx];
   }
 
@@ -70,7 +70,7 @@ function fireUpdate(onUpdate, strict, suggestions, index, value) {
   } else {
     if (index == null) {
       // If passing in a value directly, validate the id
-      let sug = suggestions.find(sug => sug.id === value);
+      const sug = suggestions.find(sug => sug.id === value);
       if (sug) {
         selected = sug.id;
       }
@@ -90,7 +90,7 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
   return (
     <div>
       {items.map((item, index) => {
-        let name = getItemName(item);
+        const name = getItemName(item);
         return (
           <div
             {...getItemProps({ item })}
@@ -222,7 +222,7 @@ function SingleAutocomplete({
 
   function resetState(newValue) {
     const val = newValue === undefined ? initialValue : newValue;
-    let selectedItem = findItem(strict, suggestions, val);
+    const selectedItem = findItem(strict, suggestions, val);
 
     setSelectedItem(selectedItem);
     setValue(selectedItem ? getItemName(selectedItem) : '');
@@ -311,10 +311,10 @@ function SingleAutocomplete({
 
           setHighlightedIndex(null);
         } else {
-          let defaultGetHighlightedIndex = filteredSuggestions => {
+          const defaultGetHighlightedIndex = filteredSuggestions => {
             return highlightFirst && filteredSuggestions.length ? 0 : null;
           };
-          let highlightedIndex = (
+          const highlightedIndex = (
             getHighlightedIndex || defaultGetHighlightedIndex
           )(filteredSuggestions);
           // @ts-expect-error Types say there is no type
@@ -415,7 +415,7 @@ function SingleAutocomplete({
 
                   // If not using table behavior, reset the input on blur. Tables
                   // handle saving the value on blur.
-                  let value = selectedItem ? getItemId(selectedItem) : null;
+                  const value = selectedItem ? getItemId(selectedItem) : null;
 
                   resetState(value);
                 } else {
@@ -423,7 +423,7 @@ function SingleAutocomplete({
                 }
               },
               onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
-                let { onKeyDown } = inputProps || {};
+                const { onKeyDown } = inputProps || {};
 
                 // If the dropdown is open, an item is highlighted, and the user
                 // pressed enter, always capture that and handle it ourselves
@@ -561,15 +561,15 @@ function MultiAutocomplete({
   strict,
   ...props
 }: MultiAutocompleteProps) {
-  let [focused, setFocused] = useState(false);
-  let lastSelectedItems = useRef<unknown[]>();
+  const [focused, setFocused] = useState(false);
+  const lastSelectedItems = useRef<unknown[]>();
 
   useEffect(() => {
     lastSelectedItems.current = selectedItems;
   });
 
   function onRemoveItem(id) {
-    let items = selectedItems.filter(i => i !== id);
+    const items = selectedItems.filter(i => i !== id);
     onSelect(items);
   }
 

@@ -14,11 +14,11 @@ import ImportYNAB4 from './ImportYNAB4';
 import ImportYNAB5 from './ImportYNAB5';
 
 export default function Modals() {
-  let modalStack = useSelector(state => state.modals.modalStack);
-  let isHidden = useSelector(state => state.modals.isHidden);
-  let actions = useActions();
+  const modalStack = useSelector(state => state.modals.modalStack);
+  const isHidden = useSelector(state => state.modals.isHidden);
+  const actions = useActions();
 
-  let stack = modalStack.map(({ name, options = {} }, idx) => {
+  const stack = modalStack.map(({ name, options = {} }, idx) => {
     const modalProps = {
       onClose: actions.popModal,
       onPush: actions.pushModal,

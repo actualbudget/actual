@@ -33,16 +33,16 @@ export default function PlaidExternalMsg({
   onSuccess,
   onClose: originalOnClose,
 }: PlainExternalMsgProps) {
-  let [waiting, setWaiting] = useState(null);
-  let [success, setSuccess] = useState(false);
-  let [error, setError] = useState(null);
-  let data = useRef(null);
+  const [waiting, setWaiting] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+  const data = useRef(null);
 
   async function onJump() {
     setError(null);
     setWaiting('browser');
 
-    let res = await onMoveExternal();
+    const res = await onMoveExternal();
     if (res.error) {
       setError(res.error);
       setWaiting(null);
