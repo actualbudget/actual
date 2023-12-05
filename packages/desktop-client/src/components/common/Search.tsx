@@ -1,7 +1,7 @@
 import { type ChangeEvent, type Ref } from 'react';
 
 import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 
 import { Button } from './Button';
 import { InputWithContent } from './InputWithContent';
@@ -12,8 +12,10 @@ type SearchProps = {
   onChange: (value: string) => unknown;
   placeholder: string;
   isInModal?: boolean;
-  width?: number;
+  style?: CSSProperties;
 };
+
+const DEFAULT_WIDTH = 250;
 
 export function Search({
   inputRef,
@@ -21,16 +23,17 @@ export function Search({
   onChange,
   placeholder,
   isInModal = false,
-  width = 250,
+  style,
 }: SearchProps) {
   return (
     <InputWithContent
       inputRef={inputRef}
       style={{
-        width,
+        width: style?.width || DEFAULT_WIDTH,
         flex: '',
         borderColor: isInModal ? null : 'transparent',
         backgroundColor: isInModal ? null : theme.formInputBackground,
+        ...style,
       }}
       focusStyle={
         isInModal

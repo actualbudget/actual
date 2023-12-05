@@ -21,6 +21,7 @@ import {
 } from '../../hooks/useSelected';
 import { useStableCallback } from '../../hooks/useStableCallback';
 import { SvgExpandArrow } from '../../icons/v0';
+import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Search } from '../common/Search';
@@ -219,8 +220,8 @@ export const ManagePayees = forwardRef(
     );
 
     const payeesById = getPayeesById(payees);
-
     const [menuOpen, setMenuOpen] = useState(false);
+    const { isNarrowWidth } = useResponsive();
 
     return (
       <View style={{ height: '100%' }}>
@@ -229,9 +230,16 @@ export const ManagePayees = forwardRef(
             flexDirection: 'row',
             alignItems: 'center',
             padding: '0 0 15px',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap-reverse',
           }}
         >
-          <View style={{ flexShrink: 0 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifySelf: 'flex-start',
+            }}
+          >
             <Button
               type="bare"
               style={{ marginRight: 10 }}
@@ -254,12 +262,6 @@ export const ManagePayees = forwardRef(
                 onMerge={onMerge}
               />
             )}
-          </View>
-          <View
-            style={{
-              flexShrink: 0,
-            }}
-          >
             {(orphanedOnly ||
               (orphanedPayees && orphanedPayees.length > 0)) && (
               <Button
@@ -281,12 +283,15 @@ export const ManagePayees = forwardRef(
               </Button>
             )}
           </View>
-          <View style={{ flex: 1 }} />
           <Search
             id="filter-input"
             placeholder="Filter payees..."
             value={filter}
             onChange={applyFilter}
+            style={{
+              justifySelf: 'flex-end',
+              ...(isNarrowWidth && { flexBasis: '100%', marginBottom: 10 }),
+            }}
           />
         </View>
 

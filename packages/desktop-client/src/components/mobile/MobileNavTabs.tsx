@@ -58,14 +58,14 @@ export function MobileNavTabs() {
       Icon: SvgCalendar,
     },
     {
-      name: 'Payees (Soon)',
-      path: '/payees/soon',
+      name: 'Payees',
+      path: '/payees',
       style: navTabStyle,
       Icon: SvgStoreFront,
     },
     {
-      name: 'Rules (Soon)',
-      path: '/rules/soon',
+      name: 'Rules',
+      path: '/rules',
       style: navTabStyle,
       Icon: SvgTuning,
     },

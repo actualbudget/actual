@@ -18,6 +18,7 @@ import { type RuleEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../hooks/useCategories';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
+import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
 
 import { Button } from './common/Button';
@@ -241,6 +242,12 @@ function ManageRulesContent({
     setHoveredRule(id);
   }, []);
 
+  const { isNarrowWidth } = useResponsive();
+
+  if (allRules === null) {
+    return null;
+  }
+
   return (
     <SelectedProvider instance={selectedInst}>
       <View>
@@ -250,6 +257,8 @@ function ManageRulesContent({
             alignItems: 'center',
             padding: isModal ? '0 13px 15px' : '0 0 15px',
             flexShrink: 0,
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
           }}
         >
           <View
@@ -257,7 +266,7 @@ function ManageRulesContent({
               color: theme.pageTextLight,
               flexDirection: 'row',
               alignItems: 'center',
-              width: '50%',
+              justifySelf: 'flex-start',
             }}
           >
             <Text>
@@ -270,11 +279,14 @@ function ManageRulesContent({
               </ExternalLink>
             </Text>
           </View>
-          <View style={{ flex: 1 }} />
           <Search
             placeholder="Filter rules..."
             value={filter}
             onChange={onSearchChange}
+            style={{
+              justifySelf: 'flex-end',
+              ...(isNarrowWidth && { flexBasis: '100%', marginTop: 10 }),
+            }}
           />
         </View>
         <View style={{ flex: 1 }}>

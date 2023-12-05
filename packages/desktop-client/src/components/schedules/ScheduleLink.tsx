@@ -64,7 +64,9 @@ export function ScheduleLink({
         <Search
           inputRef={searchInput}
           isInModal
-          width={300}
+          style={{
+            width: 300,
+          }}
           placeholder="Filter schedules…"
           value={filter}
           onChange={setFilter}
