@@ -76,7 +76,7 @@ export type UncategorizedEntity = CategoryEntity & {
   has_category: boolean;
 };
 
-let uncategorizedCategory: UncategorizedEntity = {
+const uncategorizedCategory: UncategorizedEntity = {
   name: 'Uncategorized',
   id: null,
   uncategorized_id: '1',
@@ -85,7 +85,7 @@ let uncategorizedCategory: UncategorizedEntity = {
   is_transfer: false,
   has_category: false,
 };
-let transferCategory: UncategorizedEntity = {
+const transferCategory: UncategorizedEntity = {
   name: 'Transfers',
   id: null,
   uncategorized_id: '2',
@@ -94,7 +94,7 @@ let transferCategory: UncategorizedEntity = {
   is_transfer: true,
   has_category: false,
 };
-let offBudgetCategory: UncategorizedEntity = {
+const offBudgetCategory: UncategorizedEntity = {
   name: 'Off Budget',
   id: null,
   uncategorized_id: '3',
@@ -108,7 +108,7 @@ type UncategorizedGroupEntity = CategoryGroupEntity & {
   categories?: UncategorizedEntity[];
 };
 
-let uncategouncatGrouprizedGroup: UncategorizedGroupEntity = {
+const uncategouncatGrouprizedGroup: UncategorizedGroupEntity = {
   name: 'Uncategorized & Off Budget',
   id: null,
   hidden: false,
@@ -120,7 +120,7 @@ export const categoryLists = (
   showUncategorized: boolean,
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] },
 ) => {
-  let categoryList = showUncategorized
+  const categoryList = showUncategorized
     ? [
         ...categories.list,
         uncategorizedCategory,
@@ -128,7 +128,7 @@ export const categoryLists = (
         offBudgetCategory,
       ]
     : categories.list;
-  let categoryGroup = showUncategorized
+  const categoryGroup = showUncategorized
     ? [
         ...categories.grouped.filter(f => showOffBudgetHidden || !f.hidden),
         uncategouncatGrouprizedGroup,

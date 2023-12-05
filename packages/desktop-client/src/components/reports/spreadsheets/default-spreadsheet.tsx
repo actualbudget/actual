@@ -113,19 +113,19 @@ export default function createSpreadsheet({
     const monthData = months.reduce((arr, month) => {
       let perMonthAssets = 0;
       let perMonthDebts = 0;
-      let stacked = {};
+      const stacked = {};
 
       groupByList.map(item => {
         let stackAmounts = 0;
 
-        let monthAssets = filterHiddenItems(item, assets)
+        const monthAssets = filterHiddenItems(item, assets)
           .filter(
             asset => asset.date === month && asset[groupByLabel] === item.id,
           )
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthAssets += monthAssets;
 
-        let monthDebts = filterHiddenItems(item, debts)
+        const monthDebts = filterHiddenItems(item, debts)
           .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthDebts += monthDebts;
@@ -157,9 +157,7 @@ export default function createSpreadsheet({
       return arr;
     }, []);
 
-    let calcData;
-
-    calcData = groupByList.map(item => {
+    const calcData = groupByList.map(item => {
       const calc = recalculate({ item, months, assets, debts, groupByLabel });
       return { ...calc };
     });

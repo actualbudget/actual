@@ -20,9 +20,9 @@ function createGroupedSpreadsheet({
   hidden,
   uncat,
 }: createSpreadsheetProps) {
-  let [catList, catGroup] = categoryLists(hidden, uncat, categories);
+  const [catList, catGroup] = categoryLists(hidden, uncat, categories);
 
-  let categoryFilter = (catList || []).filter(
+  const categoryFilter = (catList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -36,7 +36,7 @@ function createGroupedSpreadsheet({
       return null;
     }
 
-    let { filters } = await send('make-filters-from-conditions', {
+    const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
@@ -80,14 +80,14 @@ function createGroupedSpreadsheet({
           let groupedDebts = 0;
 
           group.categories.map(item => {
-            let monthAssets = filterHiddenItems(item, assets)
+            const monthAssets = filterHiddenItems(item, assets)
               .filter(
                 asset => asset.date === month && asset.category === item.id,
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedAssets += monthAssets;
 
-            let monthDebts = filterHiddenItems(item, debts)
+            const monthDebts = filterHiddenItems(item, debts)
               .filter(
                 debts => debts.date === month && debts.category === item.id,
               )

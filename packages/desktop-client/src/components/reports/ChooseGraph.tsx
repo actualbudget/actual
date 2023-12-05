@@ -29,9 +29,9 @@ export function ChooseGraph({
     setScrollWidth(!value ? 0 : value);
   };
 
-  let headerScrollRef = useRef<HTMLDivElement>(null);
-  let listScrollRef = useRef<HTMLDivElement>(null);
-  let totalScrollRef = useRef<HTMLDivElement>(null);
+  const headerScrollRef = useRef<HTMLDivElement>(null);
+  const listScrollRef = useRef<HTMLDivElement>(null);
+  const totalScrollRef = useRef<HTMLDivElement>(null);
 
   const handleScrollTotals = scroll => {
     headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;

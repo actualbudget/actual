@@ -26,12 +26,12 @@ function recalculate({
   const monthData = months.reduce((arr, month) => {
     const last = arr.length === 0 ? null : arr[arr.length - 1];
 
-    let monthAssets = filterHiddenItems(item, assets)
+    const monthAssets = filterHiddenItems(item, assets)
       .filter(asset => asset.date === month && asset[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
     totalAssets += monthAssets;
 
-    let monthDebts = filterHiddenItems(item, debts)
+    const monthDebts = filterHiddenItems(item, debts)
       .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
     totalDebts += monthDebts;

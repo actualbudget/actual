@@ -11,7 +11,7 @@ function makeQuery(
   conditionsOpKey: string,
   filters: unknown[],
 ) {
-  let query = q('transactions')
+  const query = q('transactions')
     .filter(
       //Show Offbudget and hidden categories
       !hidden && {
