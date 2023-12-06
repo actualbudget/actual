@@ -112,8 +112,8 @@ export const chartTheme = {
   },
 };
 
-export function getColorScale(name) {
-  const scales = {
+export function getColorScale(name: string): string[] {
+  const scales: Record<string, string[]> = {
     grayscale: ['#cccccc', '#969696', '#636363', '#252525'],
     qualitative: [
       '#45B29D', //Dark Teal
