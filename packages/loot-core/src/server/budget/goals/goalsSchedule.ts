@@ -92,7 +92,7 @@ export async function goalsSchedule(
           while (nextDate < nextMonth) {
             monthlyTarget += -target;
             const currentDate = nextBaseDate;
-            const oneDayLater = monthUtils.addDays(nextDate, 1);
+            const oneDayLater = monthUtils.addDays(nextBaseDate, 1);
             nextBaseDate = getNextDate(
               dateConditions,
               monthUtils._parse(oneDayLater),
