@@ -25,6 +25,7 @@ import { ReportSidebar } from '../ReportSidebar';
 import { ReportLegend, ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
+import groupedSpreadsheet from '../spreadsheets/grouped-spreadsheet';
 import useReport from '../useReport';
 import { fromDateRepr } from '../util';
 
@@ -100,27 +101,49 @@ export default function CustomReport() {
     }
     run();
   }, []);
-
+  const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const payees = useCachedPayees();
   const accounts = useCachedAccounts();
 
-  const getGraphData = useMemo(() => {
-    setDataCheck(false);
-    return defaultSpreadsheet(
+  const getGroupData = useMemo(() => {
+    return groupedSpreadsheet({
       start,
       end,
-      groupBy,
-      ReportOptions.balanceTypeMap.get(balanceType),
       categories,
       selectedCategories,
-      payees,
-      accounts,
       filters,
       conditionsOp,
       hidden,
       uncat,
+    });
+  }, [
+    start,
+    end,
+    categories,
+    selectedCategories,
+    filters,
+    conditionsOp,
+    hidden,
+    uncat,
+  ]);
+
+  const getGraphData = useMemo(() => {
+    setDataCheck(false);
+    return defaultSpreadsheet({
+      start,
+      end,
+      categories,
+      selectedCategories,
+      filters,
+      conditionsOp,
+      hidden,
+      uncat,
+      groupBy,
+      balanceTypeOp,
+      payees,
+      accounts,
       setDataCheck,
-    );
+    });
   }, [
     start,
     end,
@@ -135,7 +158,10 @@ export default function CustomReport() {
     hidden,
     uncat,
   ]);
-  const data = useReport('default', getGraphData);
+  const graphData = useReport('default', getGraphData);
+  const groupedData = useReport('grouped', getGroupData);
+
+  const data = { ...graphData, groupedData };
 
   const [scrollWidth, setScrollWidth] = useState(0);
 
@@ -267,15 +293,7 @@ export default function CustomReport() {
                         right={
                           <Text>
                             <PrivacyFilter blurIntensity={5}>
-                              {amountToCurrency(
-                                Math.abs(
-                                  data[
-                                    ReportOptions.balanceTypeMap.get(
-                                      balanceType,
-                                    )
-                                  ],
-                                ),
-                              )}
+                              {amountToCurrency(Math.abs(data[balanceTypeOp]))}
                             </PrivacyFilter>
                           </Text>
                         }
@@ -317,9 +335,7 @@ export default function CustomReport() {
                     <ReportSummary
                       start={start}
                       end={end}
-                      balanceTypeOp={ReportOptions.balanceTypeMap.get(
-                        balanceType,
-                      )}
+                      balanceTypeOp={balanceTypeOp}
                       data={data}
                       monthsCount={months.length}
                     />

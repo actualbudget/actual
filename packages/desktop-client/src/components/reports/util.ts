@@ -29,17 +29,6 @@ export function index<
   return result;
 }
 
-export function indexStack<
-  T extends Record<string, string | number>,
-  K extends keyof T,
->(data: T[], fieldName: K, field: K) {
-  const result: Record<string | number, T[K]> = {};
-  data.forEach(item => {
-    result[item[fieldName]] = item[field];
-  });
-  return result;
-}
-
 export function indexCashFlow<
   T extends { date: string; isTransfer: boolean; amount: number },
 >(data: T[], date: string, isTransfer: string) {
