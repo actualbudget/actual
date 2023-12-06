@@ -71,13 +71,10 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 type LineGraphProps = {
   style?: CSSProperties;
   graphData;
-  compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
+  compact?: boolean;
 };
 
-function LineGraph({ style, graphData, compact, domain }: LineGraphProps) {
+function LineGraph({ style, graphData, compact }: LineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };

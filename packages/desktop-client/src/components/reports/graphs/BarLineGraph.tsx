@@ -72,18 +72,10 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 type BarLineGraphProps = {
   style?: CSSProperties;
   graphData;
-  compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
+  compact?: boolean;
 };
 
-function BarLineGraph({
-  style,
-  graphData,
-  compact,
-  domain,
-}: BarLineGraphProps) {
+function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };

@@ -93,8 +93,8 @@ const CustomTooltip = ({
 type AreaGraphProps = {
   style?: CSSProperties;
   data;
-  balanceTypeOp;
-  compact: boolean;
+  balanceTypeOp: string;
+  compact?: boolean;
 };
 
 function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
@@ -151,7 +151,7 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
                 )}
                 {compact ? null : (
                   <YAxis
-                    dataKey={...balanceTypeOp}
+                    dataKey={balanceTypeOp}
                     domain={['auto', 'auto']}
                     tickFormatter={tickFormatter}
                     tick={{ fill: theme.pageText }}
@@ -183,7 +183,7 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
-                  dataKey={...balanceTypeOp}
+                  dataKey={balanceTypeOp}
                   stroke={theme.reportsBlue}
                   fill="url(#splitColor)"
                   fillOpacity={1}
