@@ -23,7 +23,7 @@ export default function PayeeMenu({
   onClose,
 }: PayeeMenuProps) {
   // Transfer accounts are never editable
-  let isDisabled = [...selectedPayees].some(
+  const isDisabled = [...selectedPayees].some(
     id => payeesById[id] == null || payeesById[id].transfer_acct,
   );
 

@@ -2,7 +2,7 @@ import React, { type ReactNode, createContext, useContext } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-let Context = createContext(null);
+const Context = createContext(null);
 
 type RolloverContextProps = {
   categoryGroups: unknown[];
@@ -18,7 +18,7 @@ export function RolloverContext({
   onToggleSummaryCollapse,
   children,
 }: RolloverContextProps) {
-  let currentMonth = monthUtils.currentMonth();
+  const currentMonth = monthUtils.currentMonth();
 
   return (
     <Context.Provider
@@ -29,8 +29,9 @@ export function RolloverContext({
         onBudgetAction,
         onToggleSummaryCollapse,
       }}
-      children={children}
-    />
+    >
+      {children}
+    </Context.Provider>
   );
 }
 

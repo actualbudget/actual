@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { type TransactionEntity } from '../types/models';
+
 import { last, diffItems, applyChanges } from './util';
 
 export function isPreviewId(id) {
@@ -80,8 +82,8 @@ function getSplit(transactions, parentIndex) {
   return split;
 }
 
-export function ungroupTransactions(transactions) {
-  const x = transactions.reduce((list, parent) => {
+export function ungroupTransactions(transactions: TransactionEntity[]) {
+  return transactions.reduce<TransactionEntity[]>((list, parent) => {
     const { subtransactions, ...trans } = parent;
     const _subtransactions = subtransactions || [];
 
@@ -92,25 +94,31 @@ export function ungroupTransactions(transactions) {
     }
     return list;
   }, []);
-  return x;
 }
 
 function groupTransaction(split) {
   return { ...split[0], subtransactions: split.slice(1) };
 }
 
-export function ungroupTransaction(split) {
+export function ungroupTransaction(split: TransactionEntity | null) {
   if (split == null) {
     return null;
   }
   return ungroupTransactions([split]);
 }
 
-export function applyTransactionDiff(groupedTrans, diff) {
+export function applyTransactionDiff(
+  groupedTrans: Parameters<typeof ungroupTransaction>[0],
+  diff: Parameters<typeof applyChanges>[0],
+) {
   return groupTransaction(applyChanges(diff, ungroupTransaction(groupedTrans)));
 }
 
-function replaceTransactions(transactions, id, func) {
+function replaceTransactions(
+  transactions: TransactionEntity[],
+  id: string,
+  func: (transaction: TransactionEntity) => TransactionEntity,
+) {
   const idx = transactions.findIndex(t => t.id === id);
   const trans = transactions[idx];
   const transactionsCopy = [...transactions];
@@ -127,7 +135,9 @@ function replaceTransactions(transactions, id, func) {
     }
 
     const split = getSplit(transactions, parentIndex);
-    let grouped = func(groupTransaction(split));
+    let grouped: TransactionEntity | { id: string; _deleted: boolean } = func(
+      groupTransaction(split),
+    );
     const newSplit = ungroupTransaction(grouped);
 
     let diff;
@@ -159,7 +169,10 @@ function replaceTransactions(transactions, id, func) {
   }
 }
 
-export function addSplitTransaction(transactions, id) {
+export function addSplitTransaction(
+  transactions: TransactionEntity[],
+  id: string,
+) {
   return replaceTransactions(transactions, id, trans => {
     if (!trans.is_parent) {
       return trans;

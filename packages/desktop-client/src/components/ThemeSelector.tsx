@@ -13,14 +13,15 @@ type ThemeSelectorProps = {
 };
 
 export function ThemeSelector({ style }: ThemeSelectorProps) {
-  let theme = useTheme();
-  let { saveGlobalPrefs } = useActions();
+  const theme = useTheme();
+  const { saveGlobalPrefs } = useActions();
 
-  let { isNarrowWidth } = useResponsive();
+  const { isNarrowWidth } = useResponsive();
 
   return isNarrowWidth ? null : (
     <Button
       type="bare"
+      aria-label="Switch theme"
       onClick={() => {
         saveGlobalPrefs({
           theme: theme === 'dark' ? 'light' : 'dark',

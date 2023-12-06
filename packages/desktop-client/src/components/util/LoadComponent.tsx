@@ -22,7 +22,7 @@ function LoadComponentInner<K extends string>({
   message,
   importer,
 }: LoadComponentProps<K>) {
-  let [Component, setComponent] = useState<ProplessComponent | null>(null);
+  const [Component, setComponent] = useState<ProplessComponent | null>(null);
   useEffect(() => {
     importer().then(module => setComponent(() => module[name]));
   }, [name, importer]);

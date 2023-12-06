@@ -15,6 +15,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import Split from '../../icons/v0/Split';
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -116,7 +117,7 @@ export default function CategoryAutocomplete({
   renderCategoryItem,
   ...props
 }: CategoryAutocompleteProps) {
-  let categorySuggestions: Array<
+  const categorySuggestions: Array<
     CategoryEntity & { group?: CategoryGroupEntity }
   > = useMemo(
     () =>
@@ -220,6 +221,7 @@ export function SplitTransactionButton({
   style,
   ...props
 }: SplitTransactionButtonProps) {
+  const { isNarrowWidth } = useResponsive();
   return (
     <View
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
@@ -246,7 +248,7 @@ export function SplitTransactionButton({
       role="button"
       style={{
         backgroundColor: highlighted
-          ? embedded
+          ? embedded && isNarrowWidth
             ? theme.menuItemBackgroundHover
             : theme.menuAutoCompleteBackgroundHover
           : 'transparent',
@@ -299,6 +301,7 @@ export function CategoryItem({
   embedded,
   ...props
 }: CategoryItemProps) {
+  const { isNarrowWidth } = useResponsive();
   return (
     <div
       // See comment above.
@@ -306,7 +309,7 @@ export function CategoryItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? embedded
+            ? embedded && isNarrowWidth
               ? theme.menuItemBackgroundHover
               : theme.menuAutoCompleteBackgroundHover
             : 'transparent',

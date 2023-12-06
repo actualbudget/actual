@@ -22,18 +22,18 @@ export default function ScheduleLink({
   modalProps?: CommonModalProps;
   transactionIds: string[];
 }) {
-  let [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState('');
 
-  let scheduleData = useSchedules({
+  const scheduleData = useSchedules({
     transform: useCallback((q: Query) => q.filter({ completed: false }), []),
   });
 
-  let searchInput = useRef(null);
+  const searchInput = useRef(null);
   if (scheduleData == null) {
     return null;
   }
 
-  let { schedules, statuses } = scheduleData;
+  const { schedules, statuses } = scheduleData;
 
   async function onSelect(scheduleId: string) {
     if (ids?.length > 0) {

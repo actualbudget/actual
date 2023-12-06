@@ -98,6 +98,7 @@ function OverflowMenu({
     <View>
       <Button
         type="bare"
+        aria-label="Menu"
         onClick={e => {
           e.stopPropagation();
           setOpen(true);

@@ -33,7 +33,7 @@ import { Tooltip } from '../tooltips';
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
-let pickerStyles = {
+const pickerStyles = {
   '& .pika-single.actual-date-picker': {
     color: theme.calendarText,
     background: theme.calendarBackground,
@@ -89,10 +89,10 @@ type DatePickerProps = {
 type DatePickerForwardedRef = {
   handleInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
 };
-let DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
+const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
   ({ value, firstDayOfWeekIdx, dateFormat, onUpdate, onSelect }, ref) => {
-    let picker = useRef(null);
-    let mountPoint = useRef(null);
+    const picker = useRef(null);
+    const mountPoint = useRef(null);
 
     useImperativeHandle(
       ref,
@@ -200,9 +200,9 @@ export default function DateSelect({
   onUpdate,
   onSelect,
 }: DateSelectProps) {
-  let parsedDefaultValue = useMemo(() => {
+  const parsedDefaultValue = useMemo(() => {
     if (defaultValue) {
-      let date = parseISO(defaultValue);
+      const date = parseISO(defaultValue);
       if (isValid(date)) {
         return format(date, dateFormat);
       }
@@ -210,10 +210,10 @@ export default function DateSelect({
     return '';
   }, [defaultValue, dateFormat]);
 
-  let picker = useRef(null);
-  let [value, setValue] = useState(parsedDefaultValue);
-  let [open, setOpen] = useState(embedded || isOpen || false);
-  let inputRef = useRef(null);
+  const picker = useRef(null);
+  const [value, setValue] = useState(parsedDefaultValue);
+  const [open, setOpen] = useState(embedded || isOpen || false);
+  const inputRef = useRef(null);
 
   useLayoutEffect(() => {
     if (originalInputRef) {
@@ -227,8 +227,8 @@ export default function DateSelect({
   // around. `userSelectedValue` represents the last value that the
   // user actually selected (with enter or click). Having both allows
   // us to make various UX decisions
-  let [selectedValue, setSelectedValue] = useState(value);
-  let userSelectedValue = useRef(selectedValue);
+  const [selectedValue, setSelectedValue] = useState(value);
+  const userSelectedValue = useRef(selectedValue);
 
   const firstDayOfWeekIdx = useSelector(state =>
     state.prefs.local?.firstDayOfWeekIdx
@@ -247,22 +247,22 @@ export default function DateSelect({
       // Support only entering the month and day (4/5). This is complex
       // because of the various date formats - we need to derive
       // the right day/month format from it
-      let test = parse(value, getDayMonthFormat(dateFormat), new Date());
+      const test = parse(value, getDayMonthFormat(dateFormat), new Date());
       if (isValid(test)) {
         onUpdate?.(format(test, 'yyyy-MM-dd'));
         setSelectedValue(format(test, dateFormat));
       }
     } else if (getShortYearRegex(dateFormat).test(value)) {
       // Support entering the year as only two digits (4/5/19)
-      let test = parse(value, getShortYearFormat(dateFormat), new Date());
+      const test = parse(value, getShortYearFormat(dateFormat), new Date());
       if (isValid(test)) {
         onUpdate?.(format(test, 'yyyy-MM-dd'));
         setSelectedValue(format(test, dateFormat));
       }
     } else {
-      let test = parse(value, dateFormat, new Date());
+      const test = parse(value, dateFormat, new Date());
       if (isValid(test)) {
-        let date = format(test, 'yyyy-MM-dd');
+        const date = format(test, 'yyyy-MM-dd');
         onUpdate?.(date);
         setSelectedValue(value);
       }
@@ -298,7 +298,7 @@ export default function DateSelect({
       setValue(selectedValue);
       setOpen(false);
 
-      let date = parse(selectedValue, dateFormat, new Date());
+      const date = parse(selectedValue, dateFormat, new Date());
       onSelect(format(date, 'yyyy-MM-dd'));
 
       if (open && e.key === 'Enter') {
@@ -307,7 +307,7 @@ export default function DateSelect({
         e.preventDefault();
       }
 
-      let { onKeyDown } = inputProps || {};
+      const { onKeyDown } = inputProps || {};
       onKeyDown?.(e);
     } else if (!open) {
       setOpen(true);
@@ -321,7 +321,7 @@ export default function DateSelect({
     setValue(e.target.value);
   }
 
-  let maybeWrapTooltip = content => {
+  const maybeWrapTooltip = content => {
     return embedded ? (
       content
     ) : (
@@ -372,7 +372,7 @@ export default function DateSelect({
             } else {
               setValue(selectedValue || '');
 
-              let date = parse(selectedValue, dateFormat, new Date());
+              const date = parse(selectedValue, dateFormat, new Date());
               if (date instanceof Date && !isNaN(date.valueOf())) {
                 onSelect(format(date, 'yyyy-MM-dd'));
               }

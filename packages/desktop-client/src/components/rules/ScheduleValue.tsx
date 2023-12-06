@@ -13,9 +13,9 @@ type ScheduleValueProps = {
 };
 
 export default function ScheduleValue({ value }: ScheduleValueProps) {
-  let payees = useSelector(state => state.queries.payees);
-  let byId = getPayeesById(payees);
-  let { data: schedules } = SchedulesQuery.useQuery();
+  const payees = useSelector(state => state.queries.payees);
+  const byId = getPayeesById(payees);
+  const { data: schedules } = SchedulesQuery.useQuery();
 
   return (
     <Value

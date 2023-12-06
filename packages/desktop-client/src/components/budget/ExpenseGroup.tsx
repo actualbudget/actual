@@ -48,22 +48,22 @@ function ExpenseGroup({
   onToggleCollapse,
   onShowNewCategory,
 }: ExpenseGroupProps) {
-  let dragging = dragState && dragState.item === group;
+  const dragging = dragState && dragState.item === group;
 
-  let { dragRef } = useDraggable({
+  const { dragRef } = useDraggable({
     type: 'group',
     onDragChange,
     item: group,
     canDrag: editingCell === null,
   });
 
-  let { dropRef, dropPos } = useDroppable({
+  const { dropRef, dropPos } = useDroppable({
     types: 'group',
     id: group.id,
     onDrop: onReorderGroup,
   });
 
-  let { dropRef: catDropRef, dropPos: catDropPos } = useDroppable({
+  const { dropRef: catDropRef, dropPos: catDropPos } = useDroppable({
     types: 'category',
     id: group.id,
     onDrop: onReorderCategory,

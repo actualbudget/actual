@@ -148,7 +148,7 @@ function BarGraph({
   compact,
   domain,
 }: BarGraphProps) {
-  let privacyMode = usePrivacyMode();
+  const privacyMode = usePrivacyMode();
 
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';

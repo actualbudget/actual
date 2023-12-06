@@ -5,10 +5,10 @@ import { BigInput } from '../../common/Input';
 import View from '../../common/View';
 
 export function ConfirmPasswordForm({ buttons, onSetPassword, onError }) {
-  let [password1, setPassword1] = useState('');
-  let [password2, setPassword2] = useState('');
-  let [showPassword, setShowPassword] = useState(false);
-  let [loading, setLoading] = useState(false);
+  const [password1, setPassword1] = useState('');
+  const [password2, setPassword2] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();

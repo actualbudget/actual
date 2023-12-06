@@ -43,16 +43,16 @@ export default function ToBudget({
   holdTooltipProps,
   transferTooltipProps,
 }: ToBudgetProps) {
-  let [menuOpen, setMenuOpen] = useState(null);
-  let sheetName = useSheetName(rolloverBudget.toBudget);
-  let sheetValue = useSheetValue({
+  const [menuOpen, setMenuOpen] = useState(null);
+  const sheetName = useSheetName(rolloverBudget.toBudget);
+  const sheetValue = useSheetValue({
     name: rolloverBudget.toBudget,
     value: 0,
   });
-  let format = useFormat();
-  let availableValue = parseInt(sheetValue);
-  let num = isNaN(availableValue) ? 0 : availableValue;
-  let isNegative = num < 0;
+  const format = useFormat();
+  const availableValue = parseInt(sheetValue);
+  const num = isNaN(availableValue) ? 0 : availableValue;
+  const isNegative = num < 0;
 
   return (
     <View style={{ alignItems: 'center', ...style }}>

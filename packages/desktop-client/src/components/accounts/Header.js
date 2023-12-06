@@ -78,9 +78,9 @@ export function AccountHeader({
   onDeleteFilter,
   onScheduleAction,
 }) {
-  let [menuOpen, setMenuOpen] = useState(false);
-  let searchInput = useRef(null);
-  let splitsExpanded = useSplitsExpanded();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const searchInput = useRef(null);
+  const splitsExpanded = useSplitsExpanded();
 
   let canSync = account && account.account_id;
   if (!account) {
@@ -168,6 +168,7 @@ export function AccountHeader({
                 )}
                 <Button
                   type="bare"
+                  aria-label="Edit account name"
                   className="hover-visible"
                   onClick={() => onExposeName(true)}
                 >
@@ -358,7 +359,7 @@ function AccountMenu({
   onReconcile,
   onMenuSelect,
 }) {
-  let [tooltip, setTooltip] = useState('default');
+  const [tooltip, setTooltip] = useState('default');
   const syncServerStatus = useSyncServerStatus();
 
   return tooltip === 'reconcile' ? (

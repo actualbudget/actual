@@ -164,8 +164,8 @@ export default class FixedSizeList extends PureComponent<
 
   getAnchoredScrollPos() {
     if (this.anchored && this.props.indexForKey && this._outerRef != null) {
-      let index = this.props.indexForKey(this.anchored.key);
-      let baseOffset = this.getOffsetForIndexAndAlignment(index, 'start');
+      const index = this.props.indexForKey(this.anchored.key);
+      const baseOffset = this.getOffsetForIndexAndAlignment(index, 'start');
       return baseOffset + this.anchored.offset;
     }
     return null;
@@ -174,7 +174,7 @@ export default class FixedSizeList extends PureComponent<
   componentDidUpdate() {
     const { scrollOffset, scrollUpdateWasRequested } = this.state;
 
-    let anchoredPos = this.getAnchoredScrollPos();
+    const anchoredPos = this.getAnchoredScrollPos();
     if (anchoredPos != null) {
       const outerRef = this._outerRef;
       outerRef.scrollTop = anchoredPos;
@@ -224,9 +224,9 @@ export default class FixedSizeList extends PureComponent<
     const items = [];
     if (itemCount > 0) {
       for (let index = startIndex; index <= stopIndex; index++) {
-        let key = itemKey(index);
+        const key = itemKey(index);
         let style = this._getItemStyle(index);
-        let lastPosition = this.lastPositions.current.get(key);
+        const lastPosition = this.lastPositions.current.get(key);
         let animating = false;
         positions.set(key, style.top);
 
@@ -258,7 +258,7 @@ export default class FixedSizeList extends PureComponent<
 
     // Read this value AFTER items have been created,
     // So their actual sizes (if variable) are taken into consideration.
-    let estimatedTotalSize = this.getEstimatedTotalSize();
+    const estimatedTotalSize = this.getEstimatedTotalSize();
 
     return (
       <ResizeObserver onResize={this.onHeaderResize}>
@@ -294,7 +294,7 @@ export default class FixedSizeList extends PureComponent<
   setRowAnimation = (flag: boolean) => {
     this.animationEnabled = flag;
 
-    let outerRef = this._outerRef;
+    const outerRef = this._outerRef;
     if (outerRef) {
       if (this.animationEnabled) {
         outerRef.classList.add('animated');
@@ -309,12 +309,12 @@ export default class FixedSizeList extends PureComponent<
   };
 
   anchor() {
-    let itemKey = this.props.itemKey || defaultItemKey;
+    const itemKey = this.props.itemKey || defaultItemKey;
 
-    let outerRef = this._outerRef;
-    let scrollOffset = outerRef ? outerRef.scrollTop : 0;
-    let index = this.getStartIndexForOffset(scrollOffset);
-    let key = itemKey(index);
+    const outerRef = this._outerRef;
+    const scrollOffset = outerRef ? outerRef.scrollTop : 0;
+    const index = this.getStartIndexForOffset(scrollOffset);
+    const key = itemKey(index);
 
     this.anchored = {
       key,
@@ -501,10 +501,15 @@ export default class FixedSizeList extends PureComponent<
   _getItemStyleCache = memoizeOne((_, __, ___) => ({}));
 
   _getRangeToRender() {
-    let { itemCount, overscanCount } = this.props;
-    let { isScrolling, scrollDirection, scrollOffset } = this.state;
+    const { itemCount, overscanCount } = this.props;
+    const {
+      isScrolling,
+      scrollDirection,
+      scrollOffset: originalScrollOffset,
+    } = this.state;
 
-    let anchoredPos = this.getAnchoredScrollPos();
+    const anchoredPos = this.getAnchoredScrollPos();
+    let scrollOffset = originalScrollOffset;
     if (anchoredPos != null) {
       scrollOffset = anchoredPos;
     }
@@ -536,7 +541,7 @@ export default class FixedSizeList extends PureComponent<
   }
 
   _onScrollVertical = (event: UIEvent<HTMLDivElement>) => {
-    let { scrollTop } = event.currentTarget;
+    const { scrollTop } = event.currentTarget;
 
     this.setState(prevState => {
       if (prevState.scrollOffset === scrollTop) {
@@ -546,7 +551,7 @@ export default class FixedSizeList extends PureComponent<
         return null;
       }
 
-      let scrollOffset = scrollTop;
+      const scrollOffset = scrollTop;
 
       return {
         isScrolling: true,

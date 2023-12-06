@@ -62,7 +62,7 @@ export default function CustomReport() {
   const [viewSummary, setViewSummary] = useState(false);
   const [viewLabels, setViewLabels] = useState(false);
   //const [legend, setLegend] = useState([]);
-  let legend = [];
+  const legend = [];
   const dateRangeLine = ReportOptions.dateRange.length - 3;
   const months = monthUtils.rangeInclusive(start, end);
 
@@ -101,8 +101,8 @@ export default function CustomReport() {
     run();
   }, []);
 
-  let payees = useCachedPayees();
-  let accounts = useCachedAccounts();
+  const payees = useCachedPayees();
+  const accounts = useCachedAccounts();
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
@@ -137,7 +137,7 @@ export default function CustomReport() {
   ]);
   const data = useReport('default', getGraphData);
 
-  let [scrollWidth, setScrollWidth] = useState(0);
+  const [scrollWidth, setScrollWidth] = useState(0);
 
   if (!allMonths || !data) {
     return null;

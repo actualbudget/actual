@@ -3,15 +3,14 @@ import type { CategoryEntity } from './category';
 import type { PayeeEntity } from './payee';
 import type { ScheduleEntity } from './schedule';
 
-export interface TransactionEntity {
-  id?: string;
+export interface NewTransactionEntity {
   is_parent?: boolean;
   is_child?: boolean;
   parent_id?: string;
-  account: AccountEntity;
-  category?: CategoryEntity;
+  account: string;
+  category?: string;
   amount: number;
-  payee?: PayeeEntity;
+  payee?: string;
   notes?: string;
   date: string;
   imported_id?: string;
@@ -22,6 +21,15 @@ export interface TransactionEntity {
   cleared?: boolean;
   reconciled?: boolean;
   tombstone?: boolean;
+  schedule?: string;
+  subtransactions?: Omit<NewTransactionEntity, 'account' | 'date'>[];
+}
+
+export interface TransactionEntity extends NewTransactionEntity {
+  id: string;
+  account: AccountEntity;
+  category?: CategoryEntity;
+  payee?: PayeeEntity;
   schedule?: ScheduleEntity;
   subtransactions?: TransactionEntity[];
 }

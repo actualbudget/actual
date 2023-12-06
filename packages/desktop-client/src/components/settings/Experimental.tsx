@@ -26,8 +26,8 @@ function FeatureToggle({
   error,
   children,
 }: FeatureToggleProps) {
-  let { savePrefs } = useActions();
-  let enabled = useFeatureFlag(flag);
+  const { savePrefs } = useActions();
+  const enabled = useFeatureFlag(flag);
 
   return (
     <label style={{ display: 'flex' }}>
@@ -61,9 +61,9 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  let budgetType = useSelector(state => state.prefs.local?.budgetType);
-  let enabled = useFeatureFlag('reportBudget');
-  let blockToggleOff = budgetType === 'report' && enabled;
+  const budgetType = useSelector(state => state.prefs.local?.budgetType);
+  const enabled = useFeatureFlag('reportBudget');
+  const blockToggleOff = budgetType === 'report' && enabled;
   return (
     <FeatureToggle
       flag="reportBudget"
@@ -76,7 +76,7 @@ function ReportBudgetFeature() {
 }
 
 export default function ExperimentalFeatures() {
-  let [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <Setting

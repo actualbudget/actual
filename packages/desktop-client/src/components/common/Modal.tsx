@@ -64,7 +64,7 @@ const Modal = ({
     // This deactivates any key handlers in the "app" scope. Ideally
     // each modal would have a name so they could each have their own
     // key handlers, but we'll do that later
-    let prevScope = hotkeys.getScope();
+    const prevScope = hotkeys.getScope();
     hotkeys.setScope('modal');
     return () => hotkeys.setScope(prevScope);
   }, []);
@@ -243,9 +243,9 @@ const ModalContent = ({
   stackIndex,
   children,
 }: ModalContentProps) => {
-  let contentRef = useRef(null);
-  let mounted = useRef(false);
-  let rotateFactor = useRef(Math.random() * 10 - 5);
+  const contentRef = useRef(null);
+  const mounted = useRef(false);
+  const rotateFactor = useRef(Math.random() * 10 - 5);
 
   useLayoutEffect(() => {
     if (contentRef.current == null) {
@@ -319,11 +319,11 @@ export const ModalButtons = ({
   focusButton = false,
   children,
 }: ModalButtonsProps) => {
-  let containerRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     if (focusButton && containerRef.current) {
-      let button = containerRef.current.querySelector(
+      const button = containerRef.current.querySelector(
         'button:not([data-hidden])',
       );
 

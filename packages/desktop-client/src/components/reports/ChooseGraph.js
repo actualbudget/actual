@@ -28,7 +28,7 @@ export function ChooseGraph({
   months,
 }) {
   function saveScrollWidth(parent, child) {
-    let width = parent > 0 && child > 0 && parent - child;
+    const width = parent > 0 && child > 0 && parent - child;
 
     setScrollWidth(!width ? 0 : width);
   }

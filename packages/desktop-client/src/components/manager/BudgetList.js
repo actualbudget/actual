@@ -51,18 +51,19 @@ function FileMenu({ onDelete, onClose }) {
     }
   }
 
-  let items = [{ name: 'delete', text: 'Delete' }];
+  const items = [{ name: 'delete', text: 'Delete' }];
 
   return <Menu onMenuSelect={onMenuSelect} items={items} />;
 }
 
 function DetailButton({ state, onDelete }) {
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <View>
       <Button
         type="bare"
+        aria-label="Menu"
         onClick={e => {
           e.stopPropagation();
           setMenuOpen(true);
@@ -136,7 +137,7 @@ function FileState({ file }) {
 }
 
 function File({ file, onSelect, onDelete }) {
-  let selecting = useRef(false);
+  const selecting = useRef(false);
 
   async function _onSelect(file) {
     // Never allow selecting the file while uploading/downloading, and
@@ -222,7 +223,7 @@ function BudgetTable({ files, onSelect, onDelete }) {
 }
 
 function RefreshButton({ onRefresh }) {
-  let [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function _onRefresh() {
     setLoading(true);
@@ -230,11 +231,12 @@ function RefreshButton({ onRefresh }) {
     setLoading(false);
   }
 
-  let Icon = loading ? Loading : RefreshArrow;
+  const Icon = loading ? Loading : RefreshArrow;
 
   return (
     <Button
       type="bare"
+      aria-label="Refresh"
       style={{ padding: 10, marginRight: 5 }}
       onClick={_onRefresh}
     >
@@ -244,9 +246,9 @@ function RefreshButton({ onRefresh }) {
 }
 
 export default function BudgetList() {
-  let files = useSelector(state => state.budgets.allFiles || []);
+  const files = useSelector(state => state.budgets.allFiles || []);
 
-  let {
+  const {
     getUserData,
     loadAllFiles,
     pushModal,

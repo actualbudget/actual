@@ -42,10 +42,10 @@ const TransactionRow = memo(function TransactionRow({
   selected,
 }) {
   // TODO: Convert these to use fetched queries
-  let c = getCategoriesById(categories)[transaction.category];
-  let a = getAccountsById(accounts)[transaction.account];
+  const c = getCategoriesById(categories)[transaction.category];
+  const a = getAccountsById(accounts)[transaction.account];
 
-  let dispatchSelected = useSelectedDispatch();
+  const dispatchSelected = useSelectedDispatch();
 
   return (
     <Row style={{ color: theme.tableText }}>
@@ -142,23 +142,23 @@ export default function SimpleTransactionsTable({
   fields = ['date', 'payee', 'amount'],
   style,
 }) {
-  let { grouped: categories } = useCategories();
-  let { payees, accounts, dateFormat } = useSelector(state => {
+  const { grouped: categories } = useCategories();
+  const { payees, accounts, dateFormat } = useSelector(state => {
     return {
       payees: state.queries.payees,
       accounts: state.queries.accounts,
       dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
     };
   });
-  let selectedItems = useSelectedItems();
-  let dispatchSelected = useSelectedDispatch();
-  let memoFields = useMemo(() => fields, [JSON.stringify(fields)]);
+  const selectedItems = useSelectedItems();
+  const dispatchSelected = useSelectedDispatch();
+  const memoFields = useMemo(() => fields, [JSON.stringify(fields)]);
 
-  let serializedTransactions = useMemo(() => {
+  const serializedTransactions = useMemo(() => {
     return transactions.map(trans => serializeTransaction(trans, dateFormat));
   }, [transactions]);
 
-  let renderItem = useCallback(
+  const renderItem = useCallback(
     ({ item }) => {
       return (
         <TransactionRow

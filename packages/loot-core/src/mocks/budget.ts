@@ -12,24 +12,26 @@ import q from '../shared/query';
 import type {
   CategoryGroupEntity,
   PayeeEntity,
-  TransactionEntity,
+  NewTransactionEntity,
 } from '../types/models';
 
 import random from './random';
 
-function pickRandom(list) {
+type MockPayeeEntity = PayeeEntity & { bill?: boolean };
+
+function pickRandom<T>(list: T[]): T {
   return list[Math.floor(random() * list.length) % list.length];
 }
 
-function number(start, end) {
+function number(start: number, end: number) {
   return start + (end - start) * random();
 }
 
-function integer(start, end) {
+function integer(start: number, end: number) {
   return Math.round(number(start, end));
 }
 
-function findMin(items, field) {
+function findMin<T, K extends keyof T>(items: T[], field: K) {
   let item = items[0];
   for (let i = 0; i < items.length; i++) {
     if (items[i][field] < item[field]) {
@@ -39,17 +41,20 @@ function findMin(items, field) {
   return item;
 }
 
-function getStartingBalanceCat(categories) {
+function getStartingBalanceCat(categories: CategoryGroupEntity[]) {
   return categories.find(c => c.name === 'Starting Balances').id;
 }
 
-function extractCommonThings(payees, groups) {
+function extractCommonThings(
+  payees: MockPayeeEntity[],
+  groups: CategoryGroupEntity[],
+) {
   const incomePayee = payees.find(p => p.name === 'Deposit');
   const expensePayees = payees.filter(
     p => p.name !== 'Deposit' && p.name !== 'Starting Balance',
   );
-  const expenseGroup = groups.find(g => g.is_income === 0);
-  const incomeGroup = groups.find(g => g.is_income === 1);
+  const expenseGroup = groups.find(g => !g.is_income);
+  const incomeGroup = groups.find(g => g.is_income);
   const categories = expenseGroup.categories.filter(
     c =>
       [
@@ -73,7 +78,12 @@ function extractCommonThings(payees, groups) {
   };
 }
 
-async function fillPrimaryChecking(handlers, account, payees, groups) {
+async function fillPrimaryChecking(
+  handlers,
+  account,
+  payees: MockPayeeEntity[],
+  groups: CategoryGroupEntity[],
+) {
   const {
     incomePayee,
     expensePayees,
@@ -107,7 +117,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
       amount = integer(0, random() < 0.05 ? -8000 : -700);
     }
 
-    const transaction: TransactionEntity = {
+    const transaction: NewTransactionEntity = {
       amount,
       payee: payee.id,
       account: account.id,
@@ -129,7 +139,7 @@ async function fillPrimaryChecking(handlers, account, payees, groups) {
           amount: transaction.amount - a * 2,
           category: pick(),
         },
-      ] as TransactionEntity[];
+      ];
     }
   }
 
@@ -391,7 +401,7 @@ async function fillOther(handlers, account, payees, groups) {
   const numTransactions = integer(3, 6);
   const category = incomeGroup.categories.find(c => c.name === 'Income');
 
-  const transactions: TransactionEntity[] = [
+  const transactions: NewTransactionEntity[] = [
     {
       amount: integer(3250, 3700) * 100 * 100,
       payee: payees.find(p => p.name === 'Starting Balance').id,
@@ -585,7 +595,7 @@ export async function createTestBudget(handlers) {
     }),
   );
 
-  const payees: Array<PayeeEntity & { bill?: boolean }> = [
+  const payees: Array<MockPayeeEntity> = [
     { name: 'Starting Balance' },
     { name: 'Kroger' },
     { name: 'Publix' },
