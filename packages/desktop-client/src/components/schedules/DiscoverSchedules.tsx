@@ -36,7 +36,7 @@ function DiscoverSchedulesTable({
 }) {
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
-  let dateFormat = useSelector(
+  const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
 
