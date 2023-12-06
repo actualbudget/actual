@@ -26,7 +26,7 @@ import {
   categoryGroupModel,
   payeeModel,
 } from '../models';
-import { sendMessages, batchMessages } from '../sync';
+import { sendMessages, batchMessages, type Message } from '../sync';
 
 import { shoveSortOrders, SORT_INCREMENT } from './sort';
 
@@ -166,7 +166,17 @@ export async function run(sql, params?: (string | number)[]) {
   return runQuery(sql, params);
 }
 
-export async function select(table, id) {
+// Generic row type for generic database interactions
+type NascentDatabaseRow = { id: string | undefined | null } & Record<
+  string,
+  Message['value']
+>;
+type DatabaseRow = { id: string } & NascentDatabaseRow;
+
+export async function select<T = DatabaseRow>(
+  table: string,
+  id: string,
+): Promise<T> {
   const rows = await runQuery(
     'SELECT * FROM ' + table + ' WHERE id = ?',
     [id],
@@ -175,60 +185,57 @@ export async function select(table, id) {
   return rows[0];
 }
 
-export async function update(table, params) {
-  let fields = Object.keys(params).filter(k => k !== 'id');
-
-  if (params.id == null) {
+export async function update(table: string, row: DatabaseRow): Promise<void> {
+  if (!row.id) {
     throw new Error('update: id is required');
   }
 
+  const fields = Object.keys(row).filter(k => k !== 'id');
+
   await sendMessages(
-    fields.map(k => {
-      return {
-        dataset: table,
-        row: params.id,
-        column: k,
-        value: params[k],
-        timestamp: Timestamp.send(),
-      };
-    }),
+    fields.map(k => ({
+      dataset: table,
+      row: row.id,
+      column: k,
+      value: row[k],
+      timestamp: Timestamp.send(),
+    })),
   );
 }
 
-export async function insertWithUUID(table, row) {
-  if (!row.id) {
-    row = { ...row, id: uuidv4() };
-  }
+export async function insertWithUUID(
+  table: string,
+  row: NascentDatabaseRow,
+): Promise<DatabaseRow['id']> {
+  const newRow = !!row.id ? row : { ...row, id: uuidv4() };
 
-  await insert(table, row);
+  await insert(table, newRow);
 
   // We can't rely on the return value of insert because if the
   // primary key is text, sqlite returns the internal row id which we
   // don't care about. We want to return the generated UUID.
-  return row.id;
+  return newRow.id;
 }
 
-export async function insert(table, row) {
-  let fields = Object.keys(row).filter(k => k !== 'id');
-
-  if (row.id == null) {
+export async function insert(table: string, row: DatabaseRow): Promise<void> {
+  if (!row.id) {
     throw new Error('insert: id is required');
   }
 
+  const fields = Object.keys(row).filter(k => k !== 'id');
+
   await sendMessages(
-    fields.map(k => {
-      return {
-        dataset: table,
-        row: row.id,
-        column: k,
-        value: row[k],
-        timestamp: Timestamp.send(),
-      };
-    }),
+    fields.map(k => ({
+      dataset: table,
+      row: row.id,
+      column: k,
+      value: row[k],
+      timestamp: Timestamp.send(),
+    })),
   );
 }
 
-export async function delete_(table, id) {
+export async function delete_(table: string, id: string): Promise<void> {
   await sendMessages([
     {
       dataset: table,
@@ -240,32 +247,33 @@ export async function delete_(table, id) {
   ]);
 }
 
-export async function selectWithSchema(table, sql, params) {
+export async function selectWithSchema(table: string, sql: string, params) {
   let rows = await runQuery(sql, params, true);
   return rows
     .map(row => convertFromSelect(schema, schemaConfig, table, row))
     .filter(Boolean);
 }
 
-export async function selectFirstWithSchema(table, sql, params) {
+export async function selectFirstWithSchema(table: string, sql, params) {
   let rows = await selectWithSchema(table, sql, params);
   return rows.length > 0 ? rows[0] : null;
 }
 
-export function insertWithSchema(table, row) {
+export function insertWithSchema(
+  table: string,
+  row: NascentDatabaseRow,
+): ReturnType<typeof insertWithUUID> {
   // Even though `insertWithUUID` does this, we need to do it here so
   // the schema validation passes
-  if (!row.id) {
-    row = { ...row, id: uuidv4() };
-  }
+  const newRow = !!row.id ? row : { ...row, id: uuidv4() };
 
   return insertWithUUID(
     table,
-    convertForInsert(schema, schemaConfig, table, row),
+    convertForInsert(schema, schemaConfig, table, newRow),
   );
 }
 
-export function updateWithSchema(table, fields) {
+export function updateWithSchema(table: string, fields) {
   return update(table, convertForUpdate(schema, schemaConfig, table, fields));
 }
 
