@@ -3,7 +3,9 @@ import React, {
   useState,
   useMemo,
   type ComponentProps,
-  type CSSProperties,
+  type ReactNode,
+  type ComponentType,
+  type SVGProps,
 } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -20,7 +22,7 @@ import {
 
 import Add from '../../icons/v1/Add';
 import { useResponsive } from '../../ResponsiveProvider';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import Button from '../common/Button';
 import View from '../common/View';
 
@@ -61,11 +63,12 @@ function PayeeList({
   highlightedIndex,
   embedded,
   inputValue,
-  groupHeaderStyle,
+  renderCreatePayeeButton = defaultRenderCreatePayeeButton,
+  renderPayeeItemGroupHeader = defaultRenderPayeeItemGroupHeader,
+  renderPayeeItem = defaultRenderPayeeItem,
   footer,
 }) {
-  const { isNarrowWidth } = useResponsive();
-  let isFiltered = items.filtered;
+  const isFiltered = items.filtered;
   let createNew = null;
   items = [...items];
 
@@ -73,12 +76,12 @@ function PayeeList({
   // with the value of the input so it always shows whatever the user
   // entered
   if (items[0].id === 'new') {
-    let [first, ...rest] = items;
+    const [first, ...rest] = items;
     createNew = first;
     items = rest;
   }
 
-  let offset = createNew ? 1 : 0;
+  const offset = createNew ? 1 : 0;
   let lastType = null;
 
   return (
@@ -90,111 +93,45 @@ function PayeeList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {createNew && (
-          <View
-            {...(getItemProps ? getItemProps({ item: createNew }) : null)}
-            style={{
-              flexShrink: 0,
-              padding: '6px 9px',
-              backgroundColor:
-                highlightedIndex === 0
-                  ? theme.menuAutoCompleteBackgroundHover
-                  : 'transparent',
-              borderRadius: embedded ? 4 : 0,
-              ':active': {
-                backgroundColor: 'rgba(100, 100, 100, .25)',
-              },
-            }}
-          >
-            <View
-              style={{
-                display: 'block',
-                color: theme.noticeTextMenu,
-                borderRadius: 4,
-                fontSize: isNarrowWidth ? 'inherit' : 11,
-                fontWeight: 500,
-              }}
-            >
-              <Add
-                width={8}
-                height={8}
-                style={{ marginRight: 5, display: 'inline-block' }}
-              />
-              Create Payee “{inputValue}”
-            </View>
-          </View>
-        )}
+        {createNew &&
+          renderCreatePayeeButton({
+            ...(getItemProps ? getItemProps({ item: createNew }) : null),
+            payeeName: inputValue,
+            highlighted: highlightedIndex === 0,
+            embedded,
+          })}
 
         {items.map((item, idx) => {
-          let type = item.transfer_acct ? 'account' : 'payee';
+          const type = item.transfer_acct ? 'account' : 'payee';
           let title;
           if (type === 'payee' && lastType !== type) {
             title = 'Payees';
           } else if (type === 'account' && lastType !== type) {
             title = 'Transfer To/From';
           }
-          let showMoreMessage = idx === items.length - 1 && isFiltered;
+          const showMoreMessage = idx === items.length - 1 && isFiltered;
           lastType = type;
 
           return (
             <Fragment key={item.id}>
               {title && (
-                <div
-                  key={'title-' + idx}
-                  style={{
-                    color: theme.menuAutoCompleteTextHeader,
-                    padding: '4px 9px',
-                    ...groupHeaderStyle,
-                  }}
-                >
-                  {title}
-                </div>
+                <Fragment key={`title-${idx}`}>
+                  {renderPayeeItemGroupHeader({ title })}
+                </Fragment>
               )}
-
-              <div
-                {...(getItemProps ? getItemProps({ item }) : null)}
-                // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
-                // event handler they set on this element. When this code runs
-                // in WebKit on touch-enabled devices, taps on this element end
-                // up not triggering the `onClick` event (and therefore delaying
-                // response to user input) until after the `setTimeout` callback
-                // finishes executing. This is caused by content observation code
-                // that implements various strategies to prevent the user from
-                // accidentally clicking content that changed as a result of code
-                // run in the `onMouseMove` event.
-                //
-                // Long story short, we don't want any delay here between the user
-                // tapping and the resulting action being performed. It turns out
-                // there's some "fast path" logic that can be triggered in various
-                // ways to force WebKit to bail on the content observation process.
-                // One of those ways is setting `role="button"` (or a number of
-                // other aria roles) on the element, which is what we're doing here.
-                //
-                // ref:
-                // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
-                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
-                // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
-                role="button"
-                key={item.id}
-                className={`${css([
-                  {
-                    backgroundColor:
-                      highlightedIndex === idx + offset
-                        ? theme.menuAutoCompleteBackgroundHover
-                        : 'transparent',
-                    borderRadius: embedded ? 4 : 0,
-                    padding: 4,
-                    paddingLeft: 20,
-                  },
-                ])}`}
-              >
-                {item.name}
-              </div>
+              <Fragment key={item.id}>
+                {renderPayeeItem({
+                  ...(getItemProps ? getItemProps({ item }) : null),
+                  item,
+                  highlighted: highlightedIndex === idx + offset,
+                  embedded,
+                })}
+              </Fragment>
 
               {showMoreMessage && (
                 <div
                   style={{
-                    fontSize: isNarrowWidth ? 'inherit' : 11,
+                    fontSize: 11,
                     padding: 5,
                     color: theme.pageTextLight,
                     textAlign: 'center',
@@ -223,7 +160,9 @@ type PayeeAutocompleteProps = {
   onUpdate?: (value: string) => void;
   onSelect?: (value: string) => void;
   onManagePayees: () => void;
-  groupHeaderStyle: CSSProperties;
+  renderCreatePayeeButton?: (props: CreatePayeeButtonProps) => ReactNode;
+  renderPayeeItemGroupHeader?: (props: PayeeItemGroupHeaderProps) => ReactNode;
+  renderPayeeItem?: (props: PayeeItemProps) => ReactNode;
   accounts?: AccountEntity[];
   payees?: PayeeEntity[];
 };
@@ -239,25 +178,27 @@ export default function PayeeAutocomplete({
   onUpdate,
   onSelect,
   onManagePayees,
-  groupHeaderStyle,
+  renderCreatePayeeButton = defaultRenderCreatePayeeButton,
+  renderPayeeItemGroupHeader = defaultRenderPayeeItemGroupHeader,
+  renderPayeeItem = defaultRenderPayeeItem,
   accounts,
   payees,
   ...props
 }: PayeeAutocompleteProps) {
-  let cachedPayees = useCachedPayees();
+  const cachedPayees = useCachedPayees();
   if (!payees) {
     payees = cachedPayees;
   }
 
-  let cachedAccounts = useCachedAccounts();
+  const cachedAccounts = useCachedAccounts();
   if (!accounts) {
     accounts = cachedAccounts;
   }
 
-  let [focusTransferPayees, setFocusTransferPayees] = useState(false);
-  let [rawPayee, setRawPayee] = useState('');
-  let hasPayeeInput = !!rawPayee;
-  let payeeSuggestions = useMemo(() => {
+  const [focusTransferPayees, setFocusTransferPayees] = useState(false);
+  const [rawPayee, setRawPayee] = useState('');
+  const hasPayeeInput = !!rawPayee;
+  const payeeSuggestions = useMemo(() => {
     const suggestions = getPayeeSuggestions(
       payees,
       focusTransferPayees,
@@ -270,13 +211,13 @@ export default function PayeeAutocomplete({
     return [{ id: 'new', name: '' }, ...suggestions];
   }, [payees, focusTransferPayees, accounts, hasPayeeInput]);
 
-  let dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   async function handleSelect(value, rawInputValue) {
     if (tableBehavior) {
       onSelect?.(makeNew(value, rawInputValue));
     } else {
-      let create = () => dispatch(createPayee(rawInputValue));
+      const create = () => dispatch(createPayee(rawInputValue));
 
       if (Array.isArray(value)) {
         value = await Promise.all(value.map(v => (v === 'new' ? create() : v)));
@@ -338,10 +279,10 @@ export default function PayeeAutocomplete({
         });
 
         filtered.sort((p1, p2) => {
-          let r1 = p1.name.toLowerCase().startsWith(value.toLowerCase());
-          let r2 = p2.name.toLowerCase().startsWith(value.toLowerCase());
-          let r1exact = p1.name.toLowerCase() === value.toLowerCase();
-          let r2exact = p2.name.toLowerCase() === value.toLowerCase();
+          const r1 = p1.name.toLowerCase().startsWith(value.toLowerCase());
+          const r2 = p2.name.toLowerCase().startsWith(value.toLowerCase());
+          const r1exact = p1.name.toLowerCase() === value.toLowerCase();
+          const r2exact = p2.name.toLowerCase() === value.toLowerCase();
 
           // (maniacal laughter) mwahaHAHAHAHAH
           if (p1.id === 'new') {
@@ -365,7 +306,7 @@ export default function PayeeAutocomplete({
           }
         });
 
-        let isf = filtered.length > 100;
+        const isf = filtered.length > 100;
         filtered = filtered.slice(0, 100);
         filtered.filtered = isf;
 
@@ -386,7 +327,9 @@ export default function PayeeAutocomplete({
           highlightedIndex={highlightedIndex}
           inputValue={inputValue}
           embedded={embedded}
-          groupHeaderStyle={groupHeaderStyle}
+          renderCreatePayeeButton={renderCreatePayeeButton}
+          renderPayeeItemGroupHeader={renderPayeeItemGroupHeader}
+          renderPayeeItem={renderPayeeItem}
           footer={
             <AutocompleteFooter embedded={embedded}>
               {showMakeTransfer && (
@@ -413,4 +356,161 @@ export default function PayeeAutocomplete({
       {...props}
     />
   );
+}
+
+type CreatePayeeButtonProps = {
+  Icon?: ComponentType<SVGProps<SVGElement>>;
+  payeeName: string;
+  highlighted?: boolean;
+  embedded?: boolean;
+  style?: CSSProperties;
+};
+
+export function CreatePayeeButton({
+  Icon,
+  payeeName,
+  highlighted,
+  embedded,
+  style,
+  ...props
+}: CreatePayeeButtonProps) {
+  const { isNarrowWidth } = useResponsive();
+  return (
+    <View
+      data-testid="create-payee-button"
+      style={{
+        display: 'block',
+        flexShrink: 0,
+        color:
+          embedded && isNarrowWidth ? theme.menuItemText : theme.noticeTextMenu,
+        borderRadius: embedded ? 4 : 0,
+        fontSize: 11,
+        fontWeight: 500,
+        padding: '6px 9px',
+        backgroundColor: highlighted
+          ? embedded && isNarrowWidth
+            ? theme.menuItemBackgroundHover
+            : theme.menuAutoCompleteBackgroundHover
+          : 'transparent',
+        ':active': {
+          backgroundColor: 'rgba(100, 100, 100, .25)',
+        },
+        ...style,
+      }}
+      {...props}
+    >
+      {Icon ? (
+        <Icon style={{ marginRight: 5, display: 'inline-block' }} />
+      ) : (
+        <Add
+          width={8}
+          height={8}
+          style={{ marginRight: 5, display: 'inline-block' }}
+        />
+      )}
+      Create Payee “{payeeName}”
+    </View>
+  );
+}
+
+function defaultRenderCreatePayeeButton(
+  props: CreatePayeeButtonProps,
+): ReactNode {
+  return <CreatePayeeButton {...props} />;
+}
+
+type PayeeItemGroupHeaderProps = {
+  title: string;
+  style?: CSSProperties;
+};
+
+export function PayeeItemGroupHeader({
+  title,
+  style,
+  ...props
+}: PayeeItemGroupHeaderProps) {
+  return (
+    <div
+      style={{
+        color: theme.menuAutoCompleteTextHeader,
+        padding: '4px 9px',
+        ...style,
+      }}
+      data-testid={`${title}-payee-item-group`}
+      {...props}
+    >
+      {title}
+    </div>
+  );
+}
+
+function defaultRenderPayeeItemGroupHeader(
+  props: PayeeItemGroupHeaderProps,
+): ReactNode {
+  return <PayeeItemGroupHeader {...props} />;
+}
+
+type PayeeItemProps = {
+  item: PayeeEntity;
+  className?: string;
+  style?: CSSProperties;
+  highlighted?: boolean;
+  embedded?: boolean;
+};
+
+export function PayeeItem({
+  item,
+  className,
+  highlighted,
+  embedded,
+  ...props
+}: PayeeItemProps) {
+  const { isNarrowWidth } = useResponsive();
+  return (
+    <div
+      // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
+      // event handler they set on this element. When this code runs
+      // in WebKit on touch-enabled devices, taps on this element end
+      // up not triggering the `onClick` event (and therefore delaying
+      // response to user input) until after the `setTimeout` callback
+      // finishes executing. This is caused by content observation code
+      // that implements various strategies to prevent the user from
+      // accidentally clicking content that changed as a result of code
+      // run in the `onMouseMove` event.
+      //
+      // Long story short, we don't want any delay here between the user
+      // tapping and the resulting action being performed. It turns out
+      // there's some "fast path" logic that can be triggered in various
+      // ways to force WebKit to bail on the content observation process.
+      // One of those ways is setting `role="button"` (or a number of
+      // other aria roles) on the element, which is what we're doing here.
+      //
+      // ref:
+      // * https://github.com/WebKit/WebKit/blob/447d90b0c52b2951a69df78f06bb5e6b10262f4b/LayoutTests/fast/events/touch/ios/content-observation/400ms-hover-intent.html
+      // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebCore/page/ios/ContentChangeObserver.cpp
+      // * https://github.com/WebKit/WebKit/blob/58956cf59ba01267644b5e8fe766efa7aa6f0c5c/Source/WebKit/WebProcess/WebPage/ios/WebPageIOS.mm#L783
+      role="button"
+      className={`${className} ${css([
+        {
+          backgroundColor: highlighted
+            ? embedded && isNarrowWidth
+              ? theme.menuItemBackgroundHover
+              : theme.menuAutoCompleteBackgroundHover
+            : 'transparent',
+          borderRadius: embedded ? 4 : 0,
+          padding: 4,
+          paddingLeft: 20,
+        },
+      ])}`}
+      data-testid={`${item.name}-payee-item`}
+      data-highlighted={highlighted || undefined}
+      {...props}
+    >
+      {item.name}
+    </div>
+  );
+}
+
+function defaultRenderPayeeItem(props: PayeeItemProps): ReactNode {
+  return <PayeeItem {...props} />;
 }

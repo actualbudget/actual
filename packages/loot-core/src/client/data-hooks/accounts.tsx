@@ -13,7 +13,9 @@ const AccountsContext = createContext<AccountEntity[]>(null);
 
 export function AccountsProvider({ children }) {
   const data = useAccounts();
-  return <AccountsContext.Provider value={data} children={children} />;
+  return (
+    <AccountsContext.Provider value={data}>{children}</AccountsContext.Provider>
+  );
 }
 
 export function CachedAccounts({ children, idKey }) {

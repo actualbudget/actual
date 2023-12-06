@@ -59,11 +59,11 @@ function ChooseGraph({
     setScrollWidth(!value ? 0 : value);
   };
 
-  let headerScrollRef = useRef<HTMLDivElement>(null);
-  let listScrollRef = useRef<HTMLDivElement>(null);
-  let totalScrollRef = useRef<HTMLDivElement>(null);
-  let indexScrollRef = useRef<HTMLDivElement>(null);
-  let scrollScrollRef = useRef<HTMLDivElement>(null);
+  const headerScrollRef = useRef<HTMLDivElement>(null);
+  const listScrollRef = useRef<HTMLDivElement>(null);
+  const totalScrollRef = useRef<HTMLDivElement>(null);
+  const indexScrollRef = useRef<HTMLDivElement>(null);
+  const scrollScrollRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = scroll => {
     if (scroll.target.id === 'total') {

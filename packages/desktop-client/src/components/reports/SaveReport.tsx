@@ -38,7 +38,7 @@ function SaveReportMenu({ setMenuOpen }) {
 }
 
 export function SaveReportMenuButton() {
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <View

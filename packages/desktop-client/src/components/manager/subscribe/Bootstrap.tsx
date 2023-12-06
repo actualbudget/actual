@@ -16,10 +16,10 @@ import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
 export default function Bootstrap() {
-  let dispatch = useDispatch();
-  let [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const [error, setError] = useState(null);
 
-  let { checked } = useBootstrapped();
+  const { checked } = useBootstrapped();
 
   function getErrorMessage(error) {
     switch (error) {
@@ -36,7 +36,7 @@ export default function Bootstrap() {
 
   async function onSetPassword(password) {
     setError(null);
-    let { error } = await send('subscribe-bootstrap', { password });
+    const { error } = await send('subscribe-bootstrap', { password });
 
     if (error) {
       setError(error);

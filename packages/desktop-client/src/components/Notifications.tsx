@@ -29,17 +29,17 @@ function compileMessage(
   return (
     <Stack spacing={2}>
       {message.split(/\n\n/).map((paragraph, idx) => {
-        let parts = paragraph.split(/(\[[^\]]*\]\([^)]*\))/g);
+        const parts = paragraph.split(/(\[[^\]]*\]\([^)]*\))/g);
 
         return (
           <Text key={idx} style={{ lineHeight: '1.4em' }}>
             {parts.map((part, idx) => {
-              let match = part.match(/\[([^\]]*)\]\(([^)]*)\)/);
+              const match = part.match(/\[([^\]]*)\]\(([^)]*)\)/);
               if (match) {
-                let [_, text, href] = match;
+                const [_, text, href] = match;
 
                 if (href[0] === '#') {
-                  let actionName = href.slice(1);
+                  const actionName = href.slice(1);
                   return (
                     <LinkButton
                       key={idx}
@@ -79,11 +79,19 @@ function Notification({
   notification: NotificationWithId;
   onRemove: () => void;
 }) {
-  let { type, title, message, pre, messageActions, sticky, internal, button } =
-    notification;
+  const {
+    type,
+    title,
+    message,
+    pre,
+    messageActions,
+    sticky,
+    internal,
+    button,
+  } = notification;
 
-  let [loading, setLoading] = useState(false);
-  let [overlayLoading, setOverlayLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [overlayLoading, setOverlayLoading] = useState(false);
 
   useEffect(() => {
     if (type === 'error' && internal) {
@@ -95,10 +103,10 @@ function Notification({
     }
   }, []);
 
-  let positive = type === 'message';
-  let error = type === 'error';
+  const positive = type === 'message';
+  const error = type === 'error';
 
-  let processedMessage = useMemo(
+  const processedMessage = useMemo(
     () => compileMessage(message, messageActions, setOverlayLoading, onRemove),
     [message, messageActions],
   );
@@ -227,8 +235,8 @@ function Notification({
 }
 
 export default function Notifications({ style }: { style?: CSSProperties }) {
-  let { removeNotification } = useActions();
-  let notifications = useSelector(state => state.notifications.notifications);
+  const { removeNotification } = useActions();
+  const notifications = useSelector(state => state.notifications.notifications);
   return (
     <View
       style={{

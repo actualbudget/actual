@@ -27,14 +27,14 @@ export default function BudgetSummary({
   month,
   isGoalTemplatesEnabled,
 }: BudgetSummaryProps) {
-  let {
+  const {
     currentMonth,
     summaryCollapsed: collapsed,
     onBudgetAction,
     onToggleSummaryCollapse,
   } = useRollover();
 
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   function onMenuOpen(e) {
     setMenuOpen(true);
   }
@@ -43,9 +43,9 @@ export default function BudgetSummary({
     setMenuOpen(false);
   }
 
-  let prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
+  const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
 
-  let ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
+  const ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
 
   return (
     <View

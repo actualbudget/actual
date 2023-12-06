@@ -99,7 +99,7 @@ type AreaGraphProps = {
 };
 
 function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
-  let privacyMode = usePrivacyMode();
+  const privacyMode = usePrivacyMode();
 
   const tickFormatter = tick => {
     if (!privacyMode) return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas

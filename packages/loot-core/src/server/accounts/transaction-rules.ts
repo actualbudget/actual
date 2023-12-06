@@ -11,7 +11,11 @@ import {
   getApproxNumberThreshold,
 } from '../../shared/rules';
 import { partitionByField, fastSetMerge } from '../../shared/util';
-import { type RuleActionEntity, type RuleEntity } from '../../types/models';
+import {
+  type TransactionEntity,
+  type RuleActionEntity,
+  type RuleEntity,
+} from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
 import { getMappings } from '../db/mappings';
@@ -682,7 +686,7 @@ export async function updateCategoryRules(transactions) {
 
   // Also look 180 days in the future to get any future transactions
   // (this might change when we think about scheduled transactions)
-  let register = await db.all(
+  let register: TransactionEntity[] = await db.all(
     `SELECT t.* FROM v_transactions t
      LEFT JOIN accounts a ON a.id = t.account
      WHERE date >= ? AND date <= ? AND is_parent = 0 AND a.closed = 0

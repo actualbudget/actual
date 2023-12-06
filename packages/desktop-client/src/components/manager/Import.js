@@ -34,7 +34,7 @@ function Import({ modalProps, actions }) {
     }
   }
 
-  let itemStyle = {
+  const itemStyle = {
     padding: 10,
     border: '1px solid ' + theme.tableBorder,
     borderRadius: 6,

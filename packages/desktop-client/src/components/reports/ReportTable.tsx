@@ -73,7 +73,11 @@ export default function ReportTable({
 
   return (
     <View
+      innerRef={listScrollRef}
       style={{
+        overflowY: 'auto',
+        scrollbarWidth: 'none',
+        '::-webkit-scrollbar': { display: 'none' },
         flex: 1,
         flexDirection: 'row',
         outline: 'none',

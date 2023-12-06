@@ -49,24 +49,24 @@ function getErrorMessage(type, code) {
 }
 
 export default function AccountSyncCheck() {
-  let accounts = useSelector(state => state.queries.accounts);
-  let failedAccounts = useSelector(state => state.account.failedAccounts);
-  let { unlinkAccount, pushModal } = useActions();
+  const accounts = useSelector(state => state.queries.accounts);
+  const failedAccounts = useSelector(state => state.account.failedAccounts);
+  const { unlinkAccount, pushModal } = useActions();
 
-  let { id } = useParams();
-  let [open, setOpen] = useState(false);
+  const { id } = useParams();
+  const [open, setOpen] = useState(false);
   if (!failedAccounts) {
     return null;
   }
 
-  let error = failedAccounts.get(id);
+  const error = failedAccounts.get(id);
   if (!error) {
     return null;
   }
 
-  let account = accounts.find(account => account.id === id);
-  let { type, code } = error;
-  let showAuth =
+  const account = accounts.find(account => account.id === id);
+  const { type, code } = error;
+  const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
 

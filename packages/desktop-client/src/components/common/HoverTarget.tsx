@@ -19,7 +19,7 @@ export default function HoverTarget({
   renderContent,
   disabled,
 }: HoverTargetProps) {
-  let [hovered, setHovered] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   const onPointerEnter = useCallback(() => {
     if (!disabled) {

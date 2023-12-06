@@ -14,12 +14,12 @@ import View from '../../common/View';
 import { useBootstrapped, Title } from './common';
 
 export default function Login() {
-  let dispatch = useDispatch();
-  let [password, setPassword] = useState('');
-  let [loading, setLoading] = useState(false);
-  let [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  let { checked } = useBootstrapped();
+  const { checked } = useBootstrapped();
 
   function getErrorMessage(error) {
     switch (error) {
@@ -40,7 +40,7 @@ export default function Login() {
 
     setError(null);
     setLoading(true);
-    let { error } = await send('subscribe-sign-in', { password });
+    const { error } = await send('subscribe-sign-in', { password });
     setLoading(false);
 
     if (error) {

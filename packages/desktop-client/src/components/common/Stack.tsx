@@ -66,7 +66,7 @@ const Stack = forwardRef<HTMLDivElement, StackProps>(
         {...props}
       >
         {validChildren.map(({ key, child }, index) => {
-          let isLastChild = validChildren.length === index + 1;
+          const isLastChild = validChildren.length === index + 1;
 
           let marginProp;
           if (isHorizontal) {

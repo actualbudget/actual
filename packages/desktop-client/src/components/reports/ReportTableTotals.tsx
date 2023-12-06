@@ -32,11 +32,11 @@ export default function ReportTableTotals({
   totalScrollRef,
   handleScroll,
 }: ReportTableTotalsProps) {
-  let [scrollWidthTotals, setScrollWidthTotals] = useState(0);
+  const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
 
   useLayoutEffect(() => {
     if (totalScrollRef.current) {
-      let [parent, child] = [
+      const [parent, child] = [
         totalScrollRef.current.offsetParent
           ? totalScrollRef.current.parentElement.scrollHeight
           : 0,
@@ -52,9 +52,10 @@ export default function ReportTableTotals({
       collapsed={true}
       height={32 + scrollWidthTotals}
       style={{
-        color: theme.tableHeaderText,
-        backgroundColor: theme.tableHeaderBackground,
-        fontWeight: 600,
+        overflowX: 'auto',
+        borderTopWidth: 1,
+        borderColor: theme.tableBorder,
+        justifyContent: 'center',
       }}
     >
       <View

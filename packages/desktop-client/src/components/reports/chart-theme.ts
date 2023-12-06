@@ -1,6 +1,6 @@
 import { theme } from '../../style';
 
-let colorFades = {
+const colorFades = {
   blueFadeStart: 'rgba(229, 245, 255, 1)',
   blueFadeEnd: 'rgba(229, 245, 255, 0)',
   redFadeStart: 'rgba(255, 243, 242, 1)',
@@ -112,8 +112,8 @@ export const chartTheme = {
   },
 };
 
-export function getColorScale(name) {
-  const scales = {
+export function getColorScale(name: string): string[] {
+  const scales: Record<string, string[]> = {
     grayscale: ['#cccccc', '#969696', '#636363', '#252525'],
     qualitative: [
       '#45B29D', //Dark Teal

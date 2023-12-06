@@ -122,17 +122,17 @@ function Budget(props: BudgetProps) {
   );
 
   async function loadCategories() {
-    let result = await props.getCategories();
+    const result = await props.getCategories();
     setCategoryGroups(result.grouped);
   }
 
   useEffect(() => {
-    let { titlebar, budgetType } = props;
+    const { titlebar, budgetType } = props;
 
     async function run() {
       loadCategories();
 
-      let { start, end } = await send('get-budget-bounds');
+      const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
 
       await prewarmAllMonths(
@@ -147,7 +147,7 @@ function Budget(props: BudgetProps) {
 
     run();
 
-    let unlistens = [
+    const unlistens = [
       listen('sync-event', ({ type, tables }) => {
         if (
           type === 'success' &&
@@ -255,7 +255,7 @@ function Budget(props: BudgetProps) {
   };
 
   const onSaveCategory = async category => {
-    let exists =
+    const exists =
       (await props.getCategories()).grouped
         .filter(g => g.id === category.cat_group)[0]
         .categories.filter(
@@ -270,7 +270,7 @@ function Budget(props: BudgetProps) {
     }
 
     if (category.id === 'new') {
-      let id = await props.createCategory(
+      const id = await props.createCategory(
         category.name,
         category.cat_group,
         category.is_income,
@@ -313,7 +313,7 @@ function Budget(props: BudgetProps) {
 
   const onSaveGroup = async group => {
     if (group.id === 'new') {
-      let id = await props.createGroup(group.name);
+      const id = await props.createGroup(group.name);
       setIsAddingGroup(false);
       setCategoryGroups(state =>
         addGroup(state, {
@@ -330,10 +330,10 @@ function Budget(props: BudgetProps) {
   };
 
   const onDeleteGroup = async id => {
-    let group = categoryGroups.find(g => g.id === id);
+    const group = categoryGroups.find(g => g.id === id);
 
     let mustTransfer = false;
-    for (let category of group.categories) {
+    for (const category of group.categories) {
       if (await send('must-category-transfer', { id: category.id })) {
         mustTransfer = true;
         break;
@@ -377,9 +377,9 @@ function Budget(props: BudgetProps) {
   };
 
   const onReorderCategory = async sortInfo => {
-    let cats = await props.getCategories();
-    let moveCandidate = cats.list.filter(c => c.id === sortInfo.id)[0];
-    let exists =
+    const cats = await props.getCategories();
+    const moveCandidate = cats.list.filter(c => c.id === sortInfo.id)[0];
+    const exists =
       cats.grouped
         .filter(g => g.id === sortInfo.groupId)[0]
         .categories.filter(
@@ -406,7 +406,7 @@ function Budget(props: BudgetProps) {
   };
 
   const onToggleCollapse = () => {
-    let collapsed = !summaryCollapsed;
+    const collapsed = !summaryCollapsed;
     setSummaryCollapsed(collapsed);
     props.savePrefs({ 'budget.summaryCollapsed': collapsed });
   };
@@ -427,14 +427,14 @@ function Budget(props: BudgetProps) {
     }
   };
 
-  let {
-    maxMonths,
+  const {
+    maxMonths: originalMaxMonths,
     budgetType: type,
     reportComponents,
     rolloverComponents,
   } = props;
 
-  maxMonths = maxMonths || 1;
+  const maxMonths = originalMaxMonths || 1;
 
   if (!initialized || !categoryGroups) {
     return null;
@@ -532,27 +532,29 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
 });
 
 export default function BudgetWrapper(props) {
-  let startMonth = useSelector(state => state.prefs.local['budget.startMonth']);
-  let collapsedPrefs = useSelector(
+  const startMonth = useSelector(
+    state => state.prefs.local['budget.startMonth'],
+  );
+  const collapsedPrefs = useSelector(
     state => state.prefs.local['budget.collapsed'],
   );
-  let summaryCollapsed = useSelector(
+  const summaryCollapsed = useSelector(
     state => state.prefs.local['budget.summaryCollapsed'],
   );
-  let budgetType = useSelector(
+  const budgetType = useSelector(
     state => state.prefs.local.budgetType || 'rollover',
   );
-  let maxMonths = useSelector(state => state.prefs.global.maxMonths);
-  let { grouped: categoryGroups } = useCategories();
+  const maxMonths = useSelector(state => state.prefs.global.maxMonths);
+  const { grouped: categoryGroups } = useCategories();
 
-  let actions = useActions();
-  let spreadsheet = useSpreadsheet();
-  let titlebar = useContext(TitlebarContext);
-  let location = useLocation();
-  let match = useMatch(location.pathname);
-  let navigate = useNavigate();
+  const actions = useActions();
+  const spreadsheet = useSpreadsheet();
+  const titlebar = useContext(TitlebarContext);
+  const location = useLocation();
+  const match = useMatch(location.pathname);
+  const navigate = useNavigate();
 
-  let reportComponents = useMemo<ReportComponents>(
+  const reportComponents = useMemo<ReportComponents>(
     () => ({
       SummaryComponent: report.BudgetSummary,
       ExpenseCategoryComponent: report.ExpenseCategoryMonth,
@@ -565,7 +567,7 @@ export default function BudgetWrapper(props) {
     [report],
   );
 
-  let rolloverComponents = useMemo<RolloverComponents>(
+  const rolloverComponents = useMemo<RolloverComponents>(
     () => ({
       SummaryComponent: RolloverBudgetSummary,
       ExpenseCategoryComponent: rollover.ExpenseCategoryMonth,

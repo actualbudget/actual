@@ -19,15 +19,15 @@ function closeNotification(setAppState) {
 }
 
 export default function UpdateNotification() {
-  let updateInfo = useSelector(state => state.app.updateInfo);
-  let showUpdateNotification = useSelector(
+  const updateInfo = useSelector(state => state.app.updateInfo);
+  const showUpdateNotification = useSelector(
     state => state.app.showUpdateNotification,
   );
 
-  let { updateApp, setAppState } = useActions();
+  const { updateApp, setAppState } = useActions();
 
   if (updateInfo && showUpdateNotification) {
-    let notes = updateInfo.releaseNotes;
+    const notes = updateInfo.releaseNotes;
 
     return (
       <View

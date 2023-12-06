@@ -17,8 +17,8 @@ type BudgetPageHeaderProps = {
 const BudgetPageHeader = memo<BudgetPageHeaderProps>(
   ({ startMonth, onMonthSelect, numMonths, monthBounds }) => {
     function getValidMonth(month) {
-      let start = monthBounds.start;
-      let end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
+      const start = monthBounds.start;
+      const end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
 
       if (month < start) {
         return start;

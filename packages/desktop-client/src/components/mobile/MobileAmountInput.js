@@ -132,7 +132,7 @@ class AmountInput extends PureComponent {
   };
 
   onChangeText = text => {
-    let { onChange } = this.props;
+    const { onChange } = this.props;
 
     this.setState({ text });
     onChange(text);
@@ -142,7 +142,7 @@ class AmountInput extends PureComponent {
     const { style, textStyle } = this.props;
     const { editing, value, text } = this.state;
 
-    let input = (
+    const input = (
       <input
         type="text"
         ref={el => (this.input = el)}

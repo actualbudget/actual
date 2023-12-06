@@ -9,7 +9,7 @@ import Text from '../common/Text';
 import View from '../common/View';
 
 export default function WelcomeScreen() {
-  let { createBudget, pushModal } = useActions();
+  const { createBudget, pushModal } = useActions();
 
   return (
     <View

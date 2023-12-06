@@ -64,7 +64,7 @@ export default function SavedFilterAutocomplete({
   embedded,
   ...props
 }: SavedFilterAutocompleteProps) {
-  let filters = useFilters() || [];
+  const filters = useFilters() || [];
 
   return (
     <Autocomplete

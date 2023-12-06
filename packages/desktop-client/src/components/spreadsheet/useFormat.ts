@@ -20,7 +20,7 @@ function format(
     case 'number':
       return '' + value;
     case 'financial-with-sign':
-      let formatted = format(value, 'financial', formatter);
+      const formatted = format(value, 'financial', formatter);
       if (typeof value === 'number' && value >= 0) {
         return '+' + formatted;
       }

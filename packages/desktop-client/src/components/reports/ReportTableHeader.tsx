@@ -27,15 +27,19 @@ export default function ReportTableHeader({
   handleScroll,
 }: ReportTableHeaderProps) {
   return (
-    <Row
-      collapsed={true}
+    <View
+      innerRef={headerScrollRef}
       style={{
-        color: theme.tableHeaderText,
-        backgroundColor: theme.tableHeaderBackground,
-        fontWeight: 600,
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        '::-webkit-scrollbar': { display: 'none' },
+        justifyContent: 'center',
+        borderTopWidth: 1,
+        borderColor: theme.tableBorder,
       }}
     >
-      <Cell
+      <Row
+        collapsed={true}
         style={{
           width: 150,
           flexShrink: 0,

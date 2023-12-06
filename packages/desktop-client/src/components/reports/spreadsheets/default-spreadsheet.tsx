@@ -11,6 +11,22 @@ import filterHiddenItems from './filterHiddenItems';
 import makeQuery from './makeQuery';
 import recalculate from './recalculate';
 
+export type createSpreadsheetProps = {
+  startDat: string;
+  endDate: string;
+  categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  selectedCategories: CategoryEntity[];
+  conditions: RuleConditionEntity[];
+  conditionsOp: string;
+  showOffBudgetHidden: boolean;
+  showUncategorized: boolean;
+  groupBy?: string;
+  balanceTypeOp?: string;
+  payees?: PayeeEntity[];
+  accounts?: AccountEntity[];
+  setDataCheck?: (value: boolean) => void;
+};
+
 export default function createSpreadsheet(
   startDate,
   endDate,
@@ -18,17 +34,15 @@ export default function createSpreadsheet(
   balanceTypeOp,
   categories,
   selectedCategories,
-  payees,
-  accounts,
   conditions = [],
   conditionsOp,
   showOffBudgetHidden,
   showUncategorized,
   setDataCheck,
 ) {
-  let [catList, catGroup] = categoryLists(showUncategorized, categories);
+  const [catList, catGroup] = categoryLists(hidden, uncat, categories);
 
-  let categoryFilter = (catList || []).filter(
+  const categoryFilter = (catList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -37,7 +51,7 @@ export default function createSpreadsheet(
       ),
   );
 
-  let [groupByList, groupByLabel] = groupBySelections(
+  const [groupByList, groupByLabel] = groupBySelections(
     groupBy,
     catList,
     catGroup,
@@ -50,7 +64,7 @@ export default function createSpreadsheet(
       return null;
     }
 
-    let { filters } = await send('make-filters-from-conditions', {
+    const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
@@ -90,19 +104,19 @@ export default function createSpreadsheet(
     const monthData = months.reduce((arr, month) => {
       let perMonthAssets = 0;
       let perMonthDebts = 0;
-      let stacked = {};
+      const stacked = {};
 
       groupByList.map(item => {
         let stackAmounts = 0;
 
-        let monthAssets = filterHiddenItems(item, assets)
+        const monthAssets = filterHiddenItems(item, assets)
           .filter(
             asset => asset.date === month && asset[groupByLabel] === item.id,
           )
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthAssets += monthAssets;
 
-        let monthDebts = filterHiddenItems(item, debts)
+        const monthDebts = filterHiddenItems(item, debts)
           .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthDebts += monthDebts;
@@ -134,10 +148,8 @@ export default function createSpreadsheet(
       return arr;
     }, []);
 
-    let calcData;
-
-    calcData = groupByList.map(item => {
-      const calc = recalculate(item, months, assets, debts, groupByLabel);
+    const calcData = groupByList.map(item => {
+      const calc = recalculate({ item, months, assets, debts, groupByLabel });
       return { ...calc };
     });
 

@@ -58,14 +58,14 @@ export type TitlebarContextValue = {
   subscribe: (listener: Listener) => () => void;
 };
 
-export let TitlebarContext = createContext<TitlebarContextValue>(null);
+export const TitlebarContext = createContext<TitlebarContextValue>(null);
 
 type TitlebarProviderProps = {
   children?: ReactNode;
 };
 
 export function TitlebarProvider({ children }: TitlebarProviderProps) {
-  let listeners = useRef<Listener[]>([]);
+  const listeners = useRef<Listener[]>([]);
 
   function sendEvent(msg: TitlebarMessage) {
     listeners.current.forEach(func => func(msg));
@@ -78,15 +78,14 @@ export function TitlebarProvider({ children }: TitlebarProviderProps) {
   }
 
   return (
-    <TitlebarContext.Provider
-      value={{ sendEvent, subscribe }}
-      children={children}
-    />
+    <TitlebarContext.Provider value={{ sendEvent, subscribe }}>
+      {children}
+    </TitlebarContext.Provider>
   );
 }
 
 function UncategorizedButton() {
-  let count = useSheetValue(queries.uncategorizedCount());
+  const count = useSheetValue(queries.uncategorizedCount());
   return (
     count !== 0 && (
       <Link
@@ -104,12 +103,12 @@ function UncategorizedButton() {
 }
 
 function PrivacyButton({ style }) {
-  let isPrivacyEnabled = useSelector(
+  const isPrivacyEnabled = useSelector(
     state => state.prefs.local.isPrivacyEnabled,
   );
-  let { savePrefs } = useActions();
+  const { savePrefs } = useActions();
 
-  let privacyIconStyle = { width: 15, height: 15 };
+  const privacyIconStyle = { width: 15, height: 15 };
 
   return (
     <Button
@@ -130,15 +129,15 @@ type SyncButtonProps = {
   style?: CSSProperties;
   isMobile?: boolean;
 };
-export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
-  let cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
-  let { sync } = useActions();
+function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+  const cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
+  const { sync } = useActions();
 
-  let [syncing, setSyncing] = useState(false);
-  let [syncState, setSyncState] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncState, setSyncState] = useState(null);
 
   useEffect(() => {
-    let unlisten = listen('sync-event', ({ type, subtype, syncDisabled }) => {
+    const unlisten = listen('sync-event', ({ type, subtype, syncDisabled }) => {
       if (type === 'start') {
         setSyncing(true);
         setSyncState(null);
@@ -268,13 +267,13 @@ export function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 }
 
 function BudgetTitlebar() {
-  let maxMonths = useSelector(state => state.prefs.global.maxMonths);
-  let budgetType = useSelector(state => state.prefs.local.budgetType);
-  let { saveGlobalPrefs } = useActions();
-  let { sendEvent } = useContext(TitlebarContext);
+  const maxMonths = useSelector(state => state.prefs.global.maxMonths);
+  const budgetType = useSelector(state => state.prefs.local.budgetType);
+  const { saveGlobalPrefs } = useActions();
+  const { sendEvent } = useContext(TitlebarContext);
 
-  let [loading, setLoading] = useState(false);
-  let [showTooltip, setShowTooltip] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const reportBudgetEnabled = useFeatureFlag('reportBudget');
 
@@ -363,12 +362,12 @@ function BudgetTitlebar() {
 }
 
 export default function Titlebar({ style }) {
-  let navigate = useNavigate();
-  let location = useLocation();
-  let sidebar = useSidebar();
-  let { isNarrowWidth } = useResponsive();
-  let serverURL = useServerURL();
-  let floatingSidebar = useSelector(
+  const navigate = useNavigate();
+  const location = useLocation();
+  const sidebar = useSidebar();
+  const { isNarrowWidth } = useResponsive();
+  const serverURL = useServerURL();
+  const floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
 
