@@ -109,18 +109,16 @@ const CustomTooltip = ({
 };
 
 const renderCustomLabel = props => {
-  return props.height > 20 ? (
+  return (
     <text
       x={props.x + props.width / 2}
-      y={props.y + props.height / 2}
-      fill="white"
+      y={props.y - (props.value > 0 ? 15 : -15)}
+      fill={theme.pageText}
       textAnchor="middle"
       dominantBaseline="middle"
     >
       {props.value.toFixed(0)}
     </text>
-  ) : (
-    <text />
   );
 };
 
@@ -264,7 +262,7 @@ function BarGraph({
                   <Bar dataKey={'totalDebts'} stackId="a">
                     {viewLabels && (
                       <LabelList
-                        dataKey={val => getVal(val)}
+                        dataKey={'totalDebts'}
                         content={renderCustomLabel}
                       />
                     )}

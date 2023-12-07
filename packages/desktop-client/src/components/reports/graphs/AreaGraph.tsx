@@ -8,6 +8,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  LabelList,
   ResponsiveContainer,
 } from 'recharts';
 
@@ -88,6 +89,20 @@ const CustomTooltip = ({
       </div>
     );
   }
+};
+
+const renderCustomLabel = props => {
+  return (
+    <text
+      x={props.x}
+      y={props.y}
+      fill={theme.pageText}
+      textAnchor="middle"
+      dominantBaseline="middle"
+    >
+      {props.value.toFixed(0)}
+    </text>
+  );
 };
 
 type AreaGraphProps = {
@@ -187,7 +202,6 @@ function AreaGraph({
 
                 <Area
                   type="linear"
-                  label={{ stroke: theme.pageText }}
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
@@ -195,7 +209,14 @@ function AreaGraph({
                   stroke={theme.reportsBlue}
                   fill="url(#splitColor)"
                   fillOpacity={1}
-                />
+                >
+                  {viewLabels && (
+                    <LabelList
+                      dataKey={balanceTypeOp}
+                      content={renderCustomLabel}
+                    />
+                  )}
+                </Area>
               </AreaChart>
             </div>
           </ResponsiveContainer>

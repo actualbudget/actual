@@ -84,13 +84,14 @@ const ActiveShape = props => {
     percent,
     value,
   } = props;
+  const yAxis = payload.name ?? payload.date;
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
   const sx = cx + (innerRadius - 10) * cos;
   const sy = cy + (innerRadius - 10) * sin;
   const mx = cx + (innerRadius - 30) * cos;
   const my = cy + (innerRadius - 30) * sin;
-  const ex = cx + (cos >= 0 ? 1 : -1) * payload.name.length * 4;
+  const ex = cx + (cos >= 0 ? 1 : -1) * yAxis.length * 4;
   const ey = cy + 8;
   //const ex = mx + (cos <= 0 ? 1 : -1) * 40;
   //const ey = my + (sin <= 0 ? 1 : -1) * 40;
@@ -127,7 +128,7 @@ const ActiveShape = props => {
         y={ey}
         textAnchor={textAnchor}
         fill={fill}
-      >{`${payload.name}`}</text>
+      >{`${yAxis}`}</text>
       <text
         x={ex + (cos <= 0 ? 1 : -1) * 16}
         y={ey}
