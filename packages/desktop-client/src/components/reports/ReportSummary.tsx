@@ -27,7 +27,7 @@ function ReportSummary({
   balanceTypeOp,
   monthsCount,
 }: ReportSummaryProps) {
-  let net =
+  const net =
     Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
       ? 'PAYMENT'
       : 'DEPOSIT';

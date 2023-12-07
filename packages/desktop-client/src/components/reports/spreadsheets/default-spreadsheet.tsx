@@ -4,6 +4,13 @@ import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
+import {
+  type AccountEntity,
+  type CategoryEntity,
+  type CategoryGroupEntity,
+  type PayeeEntity,
+  type RuleConditionEntity,
+} from 'loot-core/src/types/models';
 
 import { categoryLists, groupBySelections } from '../ReportOptions';
 
@@ -12,18 +19,18 @@ import makeQuery from './makeQuery';
 import recalculate from './recalculate';
 
 export type createSpreadsheetProps = {
-  startDat: string;
+  startDate: string;
   endDate: string;
+  groupBy?: string;
+  balanceTypeOp?: string;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   selectedCategories: CategoryEntity[];
+  payees?: PayeeEntity[];
+  accounts?: AccountEntity[];
   conditions: RuleConditionEntity[];
   conditionsOp: string;
   showOffBudgetHidden: boolean;
   showUncategorized: boolean;
-  groupBy?: string;
-  balanceTypeOp?: string;
-  payees?: PayeeEntity[];
-  accounts?: AccountEntity[];
   setDataCheck?: (value: boolean) => void;
 };
 
@@ -34,13 +41,19 @@ export default function createSpreadsheet(
   balanceTypeOp,
   categories,
   selectedCategories,
+  payees,
+  accounts,
   conditions = [],
   conditionsOp,
   showOffBudgetHidden,
   showUncategorized,
   setDataCheck,
 ) {
-  const [catList, catGroup] = categoryLists(hidden, uncat, categories);
+  const [catList, catGroup] = categoryLists(
+    showOffBudgetHidden,
+    showUncategorized,
+    categories,
+  );
 
   const categoryFilter = (catList || []).filter(
     category =>

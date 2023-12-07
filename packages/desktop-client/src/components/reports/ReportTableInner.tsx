@@ -42,7 +42,7 @@ function ReportTableInner({
       item = data[parent_index].categories[index];
     }
 
-    let rendered_row = renderItem({
+    const rendered_row = renderItem({
       item,
       groupByItem,
       mode,

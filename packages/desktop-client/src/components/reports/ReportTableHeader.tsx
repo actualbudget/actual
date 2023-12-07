@@ -112,6 +112,6 @@ export default function ReportTableHeader({
         />
         {scrollWidth > 0 && <Cell width={scrollWidth} />}
       </View>
-    </Row>
+    </View>
   );
 }

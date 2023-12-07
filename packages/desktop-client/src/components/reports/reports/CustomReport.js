@@ -107,9 +107,6 @@ export default function CustomReport() {
   const payees = useCachedPayees();
   const accounts = useCachedAccounts();
 
-  let payees = useCachedPayees();
-  let accounts = useCachedAccounts();
-
   const getGroupData = useMemo(() => {
     return groupedSpreadsheet(
       startDate,
@@ -138,15 +135,17 @@ export default function CustomReport() {
       startDate,
       endDate,
       groupBy,
-      ReportOptions.balanceTypeMap.get(balanceType),
+      balanceTypeOp,
       categories,
       selectedCategories,
+      payees,
+      accounts,
       filters,
       conditionsOp,
       showOffBudgetHidden,
       showUncategorized,
       setDataCheck,
-    });
+    );
   }, [
     startDate,
     endDate,
