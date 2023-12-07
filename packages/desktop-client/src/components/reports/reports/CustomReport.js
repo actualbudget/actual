@@ -114,8 +114,10 @@ export default function CustomReport() {
       selectedCategories,
       filters,
       conditionsOp,
+      showEmpty,
       showOffBudgetHidden,
       showUncategorized,
+      balanceTypeOp,
     });
   }, [
     startDate,
@@ -137,6 +139,7 @@ export default function CustomReport() {
       selectedCategories,
       filters,
       conditionsOp,
+      showEmpty,
       showOffBudgetHidden,
       showUncategorized,
       groupBy,

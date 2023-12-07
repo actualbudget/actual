@@ -17,8 +17,10 @@ function createGroupedSpreadsheet({
   selectedCategories,
   conditions = [],
   conditionsOp,
+  showEmpty,
   showOffBudgetHidden,
   showUncategorized,
+  balanceTypeOp,
 }: createSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(
     showOffBudgetHidden,
@@ -140,7 +142,9 @@ function createGroupedSpreadsheet({
         [startDate, endDate],
       );
 
-    setData(groupedData);
+    setData(
+      groupedData.filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true)),
+    );
   };
 }
 

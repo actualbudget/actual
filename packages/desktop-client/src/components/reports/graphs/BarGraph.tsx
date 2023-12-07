@@ -133,7 +133,6 @@ type BarGraphProps = {
   data: DataEntity;
   groupBy: string;
   balanceTypeOp: string;
-  showEmpty: boolean;
   compact?: boolean;
 };
 
@@ -141,7 +140,6 @@ function BarGraph({
   style,
   data,
   groupBy,
-  showEmpty,
   balanceTypeOp,
   compact,
 }: BarGraphProps) {
@@ -179,9 +177,7 @@ function BarGraph({
                 width={width}
                 height={height}
                 stackOffset="sign"
-                data={data[splitData].filter(i =>
-                  !showEmpty ? i[balanceTypeOp] !== 0 : true,
-                )}
+                data={data[splitData]}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 {
@@ -219,33 +215,29 @@ function BarGraph({
                   <ReferenceLine y={0} stroke={theme.pageTextLight} />
                 )}
                 <Bar dataKey={val => getVal(val)} stackId="a">
-                  {data[splitData]
-                    .filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true))
-                    .map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          yAxis === 'date'
-                            ? balanceTypeOp === 'totalDebts'
-                              ? theme.reportsRed
-                              : theme.reportsBlue
-                            : colorScale[index % colorScale.length]
-                        }
-                        name={entry[yAxis]}
-                      />
-                    ))}
+                  {data[splitData].map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={
+                        yAxis === 'date'
+                          ? balanceTypeOp === 'totalDebts'
+                            ? theme.reportsRed
+                            : theme.reportsBlue
+                          : colorScale[index % colorScale.length]
+                      }
+                      name={entry[yAxis]}
+                    />
+                  ))}
                 </Bar>
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
                   <Bar dataKey={'totalDebts'} stackId="a">
-                    {data[splitData]
-                      .filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true))
-                      .map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={theme.reportsRed}
-                          name={entry.name}
-                        />
-                      ))}
+                    {data[splitData].map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={theme.reportsRed}
+                        name={entry.name}
+                      />
+                    ))}
                   </Bar>
                 )}
               </BarChart>

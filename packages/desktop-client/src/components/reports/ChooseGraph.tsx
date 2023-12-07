@@ -68,7 +68,6 @@ function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        showEmpty={showEmpty}
         balanceTypeOp={balanceTypeOp}
       />
     );
@@ -82,7 +81,6 @@ function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        showEmpty={showEmpty}
         balanceTypeOp={balanceTypeOp}
       />
     );

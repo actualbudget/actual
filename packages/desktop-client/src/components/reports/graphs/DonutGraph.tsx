@@ -98,7 +98,6 @@ type DonutGraphProps = {
   data: DataEntity;
   groupBy: string;
   balanceTypeOp: string;
-  showEmpty: boolean;
   compact?: boolean;
 };
 
@@ -106,7 +105,6 @@ function DonutGraph({
   style,
   data,
   groupBy,
-  showEmpty,
   balanceTypeOp,
   compact,
 }: DonutGraphProps) {
@@ -147,9 +145,7 @@ function DonutGraph({
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   isAnimationActive={false}
-                  data={data[splitData].filter(i =>
-                    !showEmpty ? i[balanceTypeOp] !== 0 : true,
-                  )}
+                  data={data[splitData]}
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                 >
