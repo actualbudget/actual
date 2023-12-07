@@ -52,3 +52,21 @@ curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.youneedabudget.com/v1
 ![](/img/migrating/actual-import-2.png)
 
 - Choose the exported json file
+
+### Optional: Cleanup
+nYNAB calculates its `Ready to Assign` value differently than Actual's `To Budget` value.
+There is no need to worry, we can make them match exactly with a simple change.
+This is purely a visual change and doesn't affect the budget itself.
+
+You will likely see money leftover in each of the imported months in your `To Budget`.
+This extra comes from nYNAB including funds budgeted in future months when calculating its `Ready to Assign` value.
+Actual does not include those funds by default, but offers a way to manually reserve funds for use if future months.
+This is affectively the same thing nYNAB does, but in a manual form.
+To `hold` the leftover funds for the next month follow these steps:
+1. Click on your `To Budget` value for the month.
+2. Select `Hold for next month`.
+3. Fill in how much you would like to reserve for the future.  By default the current `To Budget` value is filled in.  Using this value will bring your `To Budget` to zero.
+4. Click `Hold`.
+4. Repeat for all desired months.
+
+A full description of how funds rollover and the `hold` feature can be found in [this article.](../budgeting/#how-money-rolls-over)
