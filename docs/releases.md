@@ -1,5 +1,19 @@
 # Release Notes
 
+## 23.12.1
+
+This release does not have any UI changes or feature improvements. It features only `actual-server` fix for Synology NAS users.
+
+Bug report: https://github.com/actualbudget/actual/issues/2011
+
+### Actual Server
+
+Version: 23.12.1
+
+#### Bugfix
+
+- [#289](https://github.com/actualbudget/actual-server/pull/289) Store the migrations statestore in the datadir instead of the application root. — thanks @bjw-s
+
 ## 23.12.0
 
 The release has the following notable improvements:

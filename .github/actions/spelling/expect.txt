@@ -5,6 +5,7 @@ cashflow
 crt
 Danske
 darkmode
+datadir
 Fintro
 gocardless
 INVSTMTMSGSRS
@@ -16,8 +17,10 @@ overbudgeting
 Paribas
 prefs
 qfx
+statestore
 SVGR
 swc
+Synology
 ubuntu
 VRT
 websecure
