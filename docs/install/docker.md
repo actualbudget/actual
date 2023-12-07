@@ -42,7 +42,7 @@ You can optionally configure the container using environment variables — see t
 ### Update Docker Compose container
 
 ```bash
-$ docker-compose pull && docker-compose up -d
+$ docker-compose down && docker-compose pull && docker-compose up -d
 ```
 
 ## Launch container using docker command
