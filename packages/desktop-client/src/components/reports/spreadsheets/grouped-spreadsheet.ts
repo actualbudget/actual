@@ -76,71 +76,69 @@ function createGroupedSpreadsheet({
 
     const months = monthUtils.rangeInclusive(startDate, endDate);
 
-    const groupedData = categoryGroup
-      .filter(f => (showOffBudgetHidden || f.hidden === false) && f)
-      .map(
-        group => {
-          let totalAssets = 0;
-          let totalDebts = 0;
+    const groupedData = categoryGroup.map(
+      group => {
+        let totalAssets = 0;
+        let totalDebts = 0;
 
-          const monthData = months.reduce((arr, month) => {
-            let groupedAssets = 0;
-            let groupedDebts = 0;
+        const monthData = months.reduce((arr, month) => {
+          let groupedAssets = 0;
+          let groupedDebts = 0;
 
-            group.categories.map(item => {
-              const monthAssets = filterHiddenItems(item, assets)
-                .filter(
-                  asset => asset.date === month && asset.category === item.id,
-                )
-                .reduce((a, v) => (a = a + v.amount), 0);
-              groupedAssets += monthAssets;
+          group.categories.map(item => {
+            const monthAssets = filterHiddenItems(item, assets)
+              .filter(
+                asset => asset.date === month && asset.category === item.id,
+              )
+              .reduce((a, v) => (a = a + v.amount), 0);
+            groupedAssets += monthAssets;
 
-              const monthDebts = filterHiddenItems(item, debts)
-                .filter(
-                  debts => debts.date === month && debts.category === item.id,
-                )
-                .reduce((a, v) => (a = a + v.amount), 0);
-              groupedDebts += monthDebts;
+            const monthDebts = filterHiddenItems(item, debts)
+              .filter(
+                debts => debts.date === month && debts.category === item.id,
+              )
+              .reduce((a, v) => (a = a + v.amount), 0);
+            groupedDebts += monthDebts;
 
-              return null;
-            });
-
-            totalAssets += groupedAssets;
-            totalDebts += groupedDebts;
-
-            arr.push({
-              date: month,
-              totalAssets: integerToAmount(groupedAssets),
-              totalDebts: integerToAmount(groupedDebts),
-              totalTotals: integerToAmount(groupedDebts + groupedAssets),
-            });
-
-            return arr;
-          }, []);
-
-          const stackedCategories = group.categories.map(item => {
-            const calc = recalculate({
-              item,
-              months,
-              assets,
-              debts,
-              groupByLabel: 'category',
-            });
-            return { ...calc };
+            return null;
           });
 
-          return {
-            id: group.id,
-            name: group.name,
-            totalAssets: integerToAmount(totalAssets),
-            totalDebts: integerToAmount(totalDebts),
-            totalTotals: integerToAmount(totalAssets + totalDebts),
-            monthData,
-            categories: stackedCategories,
-          };
-        },
-        [startDate, endDate],
-      );
+          totalAssets += groupedAssets;
+          totalDebts += groupedDebts;
+
+          arr.push({
+            date: month,
+            totalAssets: integerToAmount(groupedAssets),
+            totalDebts: integerToAmount(groupedDebts),
+            totalTotals: integerToAmount(groupedDebts + groupedAssets),
+          });
+
+          return arr;
+        }, []);
+
+        const stackedCategories = group.categories.map(item => {
+          const calc = recalculate({
+            item,
+            months,
+            assets,
+            debts,
+            groupByLabel: 'category',
+          });
+          return { ...calc };
+        });
+
+        return {
+          id: group.id,
+          name: group.name,
+          totalAssets: integerToAmount(totalAssets),
+          totalDebts: integerToAmount(totalDebts),
+          totalTotals: integerToAmount(totalAssets + totalDebts),
+          monthData,
+          categories: stackedCategories,
+        };
+      },
+      [startDate, endDate],
+    );
 
     setData(
       groupedData.filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true)),

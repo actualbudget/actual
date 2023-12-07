@@ -123,7 +123,7 @@ export const categoryLists = (
 ) => {
   const categoryList = showUncategorized
     ? [
-        ...categories.list,
+        ...categories.list.filter(f => showOffBudgetHidden || !f.hidden),
         uncategorizedCategory,
         transferCategory,
         offBudgetCategory,

@@ -51,13 +51,13 @@ export default function createSpreadsheet({
   accounts,
   setDataCheck,
 }: createSpreadsheetProps) {
-  const [catList, catGroup] = categoryLists(
+  const [categoryList, categoryGroup] = categoryLists(
     showOffBudgetHidden,
     showUncategorized,
     categories,
   );
 
-  const categoryFilter = (catList || []).filter(
+  const categoryFilter = (categoryList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -68,8 +68,8 @@ export default function createSpreadsheet({
 
   const [groupByList, groupByLabel] = groupBySelections(
     groupBy,
-    catList,
-    catGroup,
+    categoryList,
+    categoryGroup,
     payees,
     accounts,
   );
