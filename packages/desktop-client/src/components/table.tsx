@@ -1137,7 +1137,7 @@ export const Table: <T extends TableItem>(
                         itemCount={count || items.length}
                         itemSize={rowHeight - 1}
                         itemKey={
-                          getItemKey || ((index, data) => items[index].id)
+                          getItemKey || ((index: number) => items[index].id)
                         }
                         indexForKey={key =>
                           items.findIndex(item => item.id === key)
