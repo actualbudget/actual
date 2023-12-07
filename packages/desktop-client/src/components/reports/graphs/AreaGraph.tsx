@@ -95,9 +95,16 @@ type AreaGraphProps = {
   data;
   balanceTypeOp: string;
   compact?: boolean;
+  viewLabels: boolean;
 };
 
-function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
+function AreaGraph({
+  style,
+  data,
+  balanceTypeOp,
+  compact,
+  viewLabels,
+}: AreaGraphProps) {
   const privacyMode = usePrivacyMode();
 
   const tickFormatter = tick => {
@@ -180,6 +187,7 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
 
                 <Area
                   type="linear"
+                  label={{ stroke: theme.pageText }}
                   dot={false}
                   activeDot={false}
                   animationDuration={0}

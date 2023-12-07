@@ -139,7 +139,6 @@ export function ReportTopbar({
         }}
         style={{ marginRight: 15 }}
         title="Show labels"
-        disabled={true}
       >
         <Tag width={15} height={15} />
       </GraphButton>

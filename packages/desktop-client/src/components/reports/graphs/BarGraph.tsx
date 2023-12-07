@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  LabelList,
   ResponsiveContainer,
 } from 'recharts';
 
@@ -106,6 +107,23 @@ const CustomTooltip = ({
     );
   }
 };
+
+const renderCustomLabel = props => {
+  return props.height > 20 ? (
+    <text
+      x={props.x + props.width / 2}
+      y={props.y + props.height / 2}
+      fill="white"
+      textAnchor="middle"
+      dominantBaseline="middle"
+    >
+      {props.value.toFixed(0)}
+    </text>
+  ) : (
+    <text />
+  );
+};
+
 /* Descoped for future PR
 type CustomLegendProps = {
   active?: boolean;
@@ -134,6 +152,7 @@ type BarGraphProps = {
   balanceTypeOp;
   empty: boolean;
   compact?: boolean;
+  viewLabels: boolean;
 };
 
 function BarGraph({
@@ -143,6 +162,7 @@ function BarGraph({
   empty,
   balanceTypeOp,
   compact,
+  viewLabels,
 }: BarGraphProps) {
   const privacyMode = usePrivacyMode();
 
@@ -218,6 +238,12 @@ function BarGraph({
                   <ReferenceLine y={0} stroke={theme.pageTextLight} />
                 )}
                 <Bar dataKey={val => getVal(val)} stackId="a">
+                  {viewLabels && (
+                    <LabelList
+                      dataKey={val => getVal(val)}
+                      content={renderCustomLabel}
+                    />
+                  )}
                   {data[splitData]
                     .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
                     .map((entry, index) => (
@@ -236,6 +262,12 @@ function BarGraph({
                 </Bar>
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
                   <Bar dataKey={'totalDebts'} stackId="a">
+                    {viewLabels && (
+                      <LabelList
+                        dataKey={val => getVal(val)}
+                        content={renderCustomLabel}
+                      />
+                    )}
                     {data[splitData]
                       .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
                       .map((entry, index) => (

@@ -24,6 +24,7 @@ export function ChooseGraph({
   scrollWidth,
   setScrollWidth,
   months,
+  viewLabels,
 }) {
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -44,6 +45,7 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        viewLabels={viewLabels}
       />
     );
   }
@@ -55,6 +57,7 @@ export function ChooseGraph({
         groupBy={groupBy}
         empty={empty}
         balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        viewLabels={viewLabels}
       />
     );
   }
@@ -69,6 +72,7 @@ export function ChooseGraph({
         groupBy={groupBy}
         empty={empty}
         balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        viewLabels={viewLabels}
       />
     );
   }
@@ -76,7 +80,14 @@ export function ChooseGraph({
     return <LineGraph style={{ flexGrow: 1 }} graphData={data.graphData} />;
   }
   if (graphType === 'StackedBarGraph') {
-    return <StackedBarGraph style={{ flexGrow: 1 }} data={data} />;
+    return (
+      <StackedBarGraph
+        style={{ flexGrow: 1 }}
+        data={data}
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        viewLabels={viewLabels}
+      />
+    );
   }
   if (graphType === 'TableGraph') {
     return (

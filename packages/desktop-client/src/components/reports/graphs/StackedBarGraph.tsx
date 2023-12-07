@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  LabelList,
   ResponsiveContainer,
 } from 'recharts';
 
@@ -92,7 +93,25 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   }
 };
 
+const renderCustomLabel = props => {
+  return props.height > 20 ? (
+    <text
+      x={props.x + props.width / 2}
+      y={props.y + props.height / 2}
+      fill="white"
+      textAnchor="middle"
+      dominantBaseline="middle"
+    >
+      {props.value.toFixed(0)}
+    </text>
+  ) : (
+    <text />
+  );
+};
+
 /* Descoped for future PR
+
+
 type CustomLegendProps = {
   active?: boolean;
   payload?: PayloadItem[];
@@ -117,9 +136,17 @@ type StackedBarGraphProps = {
   style?: CSSProperties;
   data;
   compact?: boolean;
+  balanceTypeOp: string;
+  viewLabels: boolean;
 };
 
-function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
+function StackedBarGraph({
+  style,
+  data,
+  compact,
+  balanceTypeOp,
+  viewLabels,
+}: StackedBarGraphProps) {
   const privacyMode = usePrivacyMode();
   const colorScale = getColorScale('qualitative');
 
@@ -164,11 +191,15 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
                 )}
                 {data.data.reverse().map((c, index) => (
                   <Bar
-                    key={c.date}
+                    key={c.name}
                     dataKey={c.name}
                     stackId="a"
                     fill={colorScale[index % colorScale.length]}
-                  />
+                  >
+                    {viewLabels && (
+                      <LabelList dataKey={c.name} content={renderCustomLabel} />
+                    )}
+                  </Bar>
                 ))}
               </BarChart>
             </div>
