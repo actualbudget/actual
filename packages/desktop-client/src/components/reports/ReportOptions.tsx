@@ -6,8 +6,8 @@ import {
 } from 'loot-core/src/types/models';
 
 const balanceTypeOptions = [
-  { description: 'Expense', format: 'totalDebts' },
-  { description: 'Income', format: 'totalAssets' },
+  { description: 'Payment', format: 'totalDebts' },
+  { description: 'Deposit', format: 'totalAssets' },
   { description: 'Net', format: 'totalTotals' },
 ];
 
@@ -21,10 +21,11 @@ const groupByOptions = [
 ];
 
 const dateRangeOptions = [
-  { description: '1 month', name: 1 },
-  { description: '3 months', name: 2 },
-  { description: '6 months', name: 5 },
-  { description: '1 year', name: 11 },
+  { description: 'This month', name: 0 },
+  { description: 'Last month', name: 1 },
+  { description: 'Last 3 months', name: 2 },
+  { description: 'Last 6 months', name: 5 },
+  { description: 'Last 12 months', name: 11 },
   { description: 'Year to date', name: 'yearToDate' },
   { description: 'Last year', name: 'lastYear' },
   { description: 'All time', name: 'allMonths' },
@@ -108,7 +109,7 @@ type UncategorizedGroupEntity = CategoryGroupEntity & {
   categories?: UncategorizedEntity[];
 };
 
-const uncategouncatGrouprizedGroup: UncategorizedGroupEntity = {
+const uncategorizedGroup: UncategorizedGroupEntity = {
   name: 'Uncategorized & Off Budget',
   id: null,
   hidden: false,
@@ -131,7 +132,7 @@ export const categoryLists = (
   const categoryGroup = showUncategorized
     ? [
         ...categories.grouped.filter(f => showOffBudgetHidden || !f.hidden),
-        uncategouncatGrouprizedGroup,
+        uncategorizedGroup,
       ]
     : categories.grouped;
   return [categoryList, categoryGroup] as const;
