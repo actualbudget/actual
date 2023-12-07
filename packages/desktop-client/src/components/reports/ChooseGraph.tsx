@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 
 import View from '../common/View';
 
+import { type DataEntity, type Month } from './entities';
 import AreaGraph from './graphs/AreaGraph';
 import BarGraph from './graphs/BarGraph';
 import BarLineGraph from './graphs/BarLineGraph';
@@ -11,20 +12,49 @@ import StackedBarGraph from './graphs/StackedBarGraph';
 import { ReportOptions } from './ReportOptions';
 import ReportTable from './ReportTable';
 import ReportTableHeader from './ReportTableHeader';
-import ReportTableList from './ReportTableList';
 import ReportTableTotals from './ReportTableTotals';
 
-export function ChooseGraph({
+type ChooseGraphProps = {
+  data: DataEntity;
+  mode: string;
+  graphType: string;
+  balanceType: string;
+  groupBy: string;
+  showEmpty: boolean;
+  scrollWidth: number;
+  setScrollWidth: (value: number) => void;
+  months: Month[];
+};
+
+function ChooseGraph({
   data,
   mode,
   graphType,
   balanceType,
   groupBy,
-  empty,
+  showEmpty,
   scrollWidth,
   setScrollWidth,
   months,
-}) {
+}: ChooseGraphProps) {
+  const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
+  const groupByData =
+    groupBy === 'Category'
+      ? 'groupedData'
+      : ['Month', 'Year'].includes(groupBy)
+      ? 'monthData'
+      : 'data';
+
+  const filteredData =
+    data[groupByData] &&
+    data[groupByData].filter(i =>
+      !showEmpty
+        ? balanceTypeOp === 'totalTotals'
+          ? i.totalAssets !== 0 || i.totalDebts !== 0 || i.totalTotals !== 0
+          : i[balanceTypeOp] !== 0
+        : true,
+    );
+
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
   };
@@ -32,10 +62,31 @@ export function ChooseGraph({
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef<HTMLDivElement>(null);
   const totalScrollRef = useRef<HTMLDivElement>(null);
+  const indexScrollRef = useRef<HTMLDivElement>(null);
+  const scrollScrollRef = useRef<HTMLDivElement>(null);
 
-  const handleScrollTotals = scroll => {
-    headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-    listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+  const handleScroll = scroll => {
+    if (scroll.target.id === 'total') {
+      headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    }
+    if (scroll.target.id === 'header') {
+      totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    }
+    if (scroll.target.id === 'list') {
+      if (headerScrollRef.current.scrollLeft !== scroll.target.scrollLeft) {
+        headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+        totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+      } else {
+        indexScrollRef.current.scrollTop = scroll.target.scrollTop;
+        scrollScrollRef.current.scrollTop = scroll.target.scrollTop;
+      }
+    }
+    if (scroll.target.id === 'index') {
+      listScrollRef.current.scrollTop = scroll.target.scrollTop;
+      scrollScrollRef.current.scrollTop = scroll.target.scrollTop;
+    }
   };
 
   if (graphType === 'AreaGraph') {
@@ -43,7 +94,7 @@ export function ChooseGraph({
       <AreaGraph
         style={{ flexGrow: 1 }}
         data={data}
-        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        balanceTypeOp={balanceTypeOp}
       />
     );
   }
@@ -53,13 +104,13 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        empty={empty}
-        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        showEmpty={showEmpty}
+        balanceTypeOp={balanceTypeOp}
       />
     );
   }
   if (graphType === 'BarLineGraph') {
-    return <BarLineGraph style={{ flexGrow: 1 }} graphData={data.graphData} />;
+    return <BarLineGraph style={{ flexGrow: 1 }} graphData={data} />;
   }
   if (graphType === 'DonutGraph') {
     return (
@@ -67,13 +118,13 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        empty={empty}
-        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        showEmpty={showEmpty}
+        balanceTypeOp={balanceTypeOp}
       />
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={{ flexGrow: 1 }} graphData={data.graphData} />;
+    return <LineGraph style={{ flexGrow: 1 }} graphData={data} />;
   }
   if (graphType === 'StackedBarGraph') {
     return <StackedBarGraph style={{ flexGrow: 1 }} data={data} />;
@@ -83,6 +134,7 @@ export function ChooseGraph({
       <View>
         <ReportTableHeader
           headerScrollRef={headerScrollRef}
+          handleScroll={handleScroll}
           interval={mode === 'time' && months}
           scrollWidth={scrollWidth}
           groupBy={groupBy}
@@ -91,26 +143,28 @@ export function ChooseGraph({
         <ReportTable
           saveScrollWidth={saveScrollWidth}
           listScrollRef={listScrollRef}
-        >
-          <ReportTableList
-            data={data}
-            empty={empty}
-            monthsCount={months.length}
-            balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
-            mode={mode}
-            groupBy={groupBy}
-          />
-        </ReportTable>
+          indexScrollRef={indexScrollRef}
+          scrollScrollRef={scrollScrollRef}
+          handleScroll={handleScroll}
+          balanceTypeOp={balanceTypeOp}
+          groupBy={groupBy}
+          data={filteredData}
+          showEmpty={showEmpty}
+          mode={mode}
+          monthsCount={months.length}
+        />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
-          handleScrollTotals={handleScrollTotals}
+          handleScroll={handleScroll}
           scrollWidth={scrollWidth}
           data={data}
           mode={mode}
-          balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+          balanceTypeOp={balanceTypeOp}
           monthsCount={months.length}
         />
       </View>
     );
   }
 }
+
+export default ChooseGraph;

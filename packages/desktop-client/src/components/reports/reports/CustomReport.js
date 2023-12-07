@@ -17,12 +17,13 @@ import Text from '../../common/Text';
 import View from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
 import PrivacyFilter from '../../PrivacyFilter';
-import { ChooseGraph } from '../ChooseGraph';
+import ChooseGraph from '../ChooseGraph';
 import Header from '../Header';
 import LoadingIndicator from '../LoadingIndicator';
+import ReportLegend from '../ReportLegend';
 import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
-import { ReportLegend, ReportSummary } from '../ReportSummary';
+import ReportSummary from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
 import groupedSpreadsheet from '../spreadsheets/grouped-spreadsheet';
@@ -44,18 +45,19 @@ export default function CustomReport() {
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);
-  const [start, setStart] = useState(
+  const [startDate, setStartDate] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
-  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [endDate, setEndDate] = useState(monthUtils.currentMonth());
 
   const [mode, setMode] = useState('total');
+  const [datePaused, setDatePaused] = useState('live');
   const [groupBy, setGroupBy] = useState('Category');
-  const [balanceType, setBalanceType] = useState('Expense');
-  const [empty, setEmpty] = useState(false);
-  const [hidden, setHidden] = useState(false);
-  const [uncat, setUncat] = useState(false);
-  const [dateRange, setDateRange] = useState('6 months');
+  const [balanceType, setBalanceType] = useState('Payment');
+  const [showEmpty, setShowEmpty] = useState(false);
+  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(false);
+  const [showUncategorized, setShowUncategorized] = useState(false);
+  const [dateRange, setDateRange] = useState('Last 6 months');
   const [dataCheck, setDataCheck] = useState(false);
 
   const [graphType, setGraphType] = useState('BarGraph');
@@ -65,7 +67,7 @@ export default function CustomReport() {
   //const [legend, setLegend] = useState([]);
   const legend = [];
   const dateRangeLine = ReportOptions.dateRange.length - 3;
-  const months = monthUtils.rangeInclusive(start, end);
+  const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
     if (selectedCategories === null && categories.list.length !== 0) {
@@ -106,47 +108,47 @@ export default function CustomReport() {
   const accounts = useCachedAccounts();
 
   const getGroupData = useMemo(() => {
-    return groupedSpreadsheet({
-      start,
-      end,
+    return groupedSpreadsheet(
+      startDate,
+      endDate,
       categories,
       selectedCategories,
       filters,
       conditionsOp,
-      hidden,
-      uncat,
-    });
+      showOffBudgetHidden,
+      showUncategorized,
+    );
   }, [
-    start,
-    end,
+    startDate,
+    endDate,
     categories,
     selectedCategories,
     filters,
     conditionsOp,
-    hidden,
-    uncat,
+    showOffBudgetHidden,
+    showUncategorized,
   ]);
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
-    return defaultSpreadsheet({
-      start,
-      end,
-      categories,
-      selectedCategories,
-      filters,
-      conditionsOp,
-      hidden,
-      uncat,
+    return defaultSpreadsheet(
+      startDate,
+      endDate,
       groupBy,
       balanceTypeOp,
+      categories,
+      selectedCategories,
       payees,
       accounts,
+      filters,
+      conditionsOp,
+      showOffBudgetHidden,
+      showUncategorized,
       setDataCheck,
-    });
+    );
   }, [
-    start,
-    end,
+    startDate,
+    endDate,
     groupBy,
     balanceType,
     categories,
@@ -155,8 +157,8 @@ export default function CustomReport() {
     accounts,
     filters,
     conditionsOp,
-    hidden,
-    uncat,
+    showOffBudgetHidden,
+    showUncategorized,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -169,9 +171,9 @@ export default function CustomReport() {
     return null;
   }
 
-  const onChangeDates = (start, end) => {
-    setStart(start);
-    setEnd(end);
+  const onChangeDates = (startDate, endDate) => {
+    setStartDate(startDate);
+    setEndDate(endDate);
   };
 
   return (
@@ -187,8 +189,8 @@ export default function CustomReport() {
         }}
       >
         <ReportSidebar
-          start={start}
-          end={end}
+          startDate={startDate}
+          endDate={endDate}
           onChangeDates={onChangeDates}
           dateRange={dateRange}
           setDateRange={setDateRange}
@@ -205,12 +207,14 @@ export default function CustomReport() {
           setBalanceType={setBalanceType}
           mode={mode}
           setMode={setMode}
-          empty={empty}
-          setEmpty={setEmpty}
-          hidden={hidden}
-          setHidden={setHidden}
-          uncat={uncat}
-          setUncat={setUncat}
+          datePaused={datePaused}
+          setDatePaused={setDatePaused}
+          showEmpty={showEmpty}
+          setShowEmpty={setShowEmpty}
+          showOffBudgetHidden={showOffBudgetHidden}
+          setShowOffBudgetHidden={setShowOffBudgetHidden}
+          showUncategorized={showUncategorized}
+          setShowUncategorized={setShowUncategorized}
           categories={categories}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
@@ -304,14 +308,12 @@ export default function CustomReport() {
 
                 {dataCheck ? (
                   <ChooseGraph
-                    start={start}
-                    end={end}
                     data={data}
                     mode={mode}
                     graphType={graphType}
                     balanceType={balanceType}
                     groupBy={groupBy}
-                    empty={empty}
+                    showEmpty={showEmpty}
                     scrollWidth={scrollWidth}
                     setScrollWidth={setScrollWidth}
                     months={months}
@@ -333,8 +335,8 @@ export default function CustomReport() {
                 >
                   {viewSummary && (
                     <ReportSummary
-                      start={start}
-                      end={end}
+                      startDate={startDate}
+                      endDate={endDate}
                       balanceTypeOp={balanceTypeOp}
                       data={data}
                       monthsCount={months.length}
