@@ -33,7 +33,6 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
       <View
         style={{
           marginBottom: primaryAction ? 10 : 0,
-          maxWidth: 500,
           lineHeight: 1.5,
           gap: 10,
         }}
@@ -50,8 +49,8 @@ type AdvancedToggleProps = {
 };
 
 export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
-  let location = useLocation();
-  let [expanded, setExpanded] = useState(location.hash === '#advanced');
+  const location = useLocation();
+  const [expanded, setExpanded] = useState(location.hash === '#advanced');
 
   return expanded ? (
     <View

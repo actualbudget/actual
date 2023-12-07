@@ -95,13 +95,10 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 type DonutGraphProps = {
   style?: CSSProperties;
   data;
-  groupBy;
-  balanceTypeOp;
-  empty;
-  compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
+  groupBy: string;
+  balanceTypeOp: string;
+  empty: boolean;
+  compact?: boolean;
 };
 
 function DonutGraph({
@@ -111,7 +108,6 @@ function DonutGraph({
   empty,
   balanceTypeOp,
   compact,
-  domain,
 }: DonutGraphProps) {
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';

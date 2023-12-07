@@ -130,13 +130,10 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 type BarGraphProps = {
   style?: CSSProperties;
   data;
-  groupBy;
+  groupBy: string;
   balanceTypeOp;
-  empty;
-  compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
+  empty: boolean;
+  compact?: boolean;
 };
 
 function BarGraph({
@@ -146,9 +143,8 @@ function BarGraph({
   empty,
   balanceTypeOp,
   compact,
-  domain,
 }: BarGraphProps) {
-  let privacyMode = usePrivacyMode();
+  const privacyMode = usePrivacyMode();
 
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';

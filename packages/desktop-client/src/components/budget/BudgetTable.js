@@ -33,16 +33,20 @@ class BudgetTable extends Component {
   };
 
   onReorderCategory = (id, dropPos, targetId) => {
-    let { categoryGroups } = this.props;
+    const { categoryGroups } = this.props;
 
-    let isGroup = !!categoryGroups.find(g => g.id === targetId);
+    const isGroup = !!categoryGroups.find(g => g.id === targetId);
 
     if (isGroup) {
-      let { targetId: groupId } = findSortUp(categoryGroups, dropPos, targetId);
-      let group = categoryGroups.find(g => g.id === groupId);
+      const { targetId: groupId } = findSortUp(
+        categoryGroups,
+        dropPos,
+        targetId,
+      );
+      const group = categoryGroups.find(g => g.id === groupId);
 
       if (group) {
-        let { categories } = group;
+        const { categories } = group;
         this.props.onReorderCategory({
           id,
           groupId: group.id,
@@ -55,7 +59,7 @@ class BudgetTable extends Component {
     } else {
       let targetGroup;
 
-      for (let group of categoryGroups) {
+      for (const group of categoryGroups) {
         if (group.categories.find(cat => cat.id === targetId)) {
           targetGroup = group;
           break;
@@ -71,7 +75,7 @@ class BudgetTable extends Component {
   };
 
   onReorderGroup = (id, dropPos, targetId) => {
-    let { categoryGroups } = this.props;
+    const { categoryGroups } = this.props;
 
     this.props.onReorderGroup({
       id,
@@ -80,8 +84,8 @@ class BudgetTable extends Component {
   };
 
   moveVertically = dir => {
-    let { editing } = this.state;
-    let { type, categoryGroups, collapsed } = this.props;
+    const { editing } = this.state;
+    const { type, categoryGroups, collapsed } = this.props;
 
     const flattened = categoryGroups.reduce((all, group) => {
       if (collapsed.includes(group.id)) {
@@ -151,12 +155,12 @@ class BudgetTable extends Component {
   };
 
   collapseAllCategories = () => {
-    let { setCollapsed, categoryGroups } = this.props;
+    const { setCollapsed, categoryGroups } = this.props;
     setCollapsed(categoryGroups.map(g => g.id));
   };
 
   render() {
-    let {
+    const {
       type,
       categoryGroups,
       prewarmStartMonth,
@@ -177,7 +181,7 @@ class BudgetTable extends Component {
       onShowNewGroup,
       onHideNewGroup,
     } = this.props;
-    let { editing, draggingState, showHiddenCategories } = this.state;
+    const { editing, draggingState, showHiddenCategories } = this.state;
 
     return (
       <View

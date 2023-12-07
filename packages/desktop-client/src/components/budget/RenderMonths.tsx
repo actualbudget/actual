@@ -25,10 +25,10 @@ function RenderMonths({
   args,
   style,
 }: RenderMonthsProps) {
-  let { months } = useContext(MonthsContext);
+  const { months } = useContext(MonthsContext);
 
   return months.map((month, index) => {
-    let editing = editingIndex === index;
+    const editing = editingIndex === index;
 
     return (
       <NamespaceContext.Provider

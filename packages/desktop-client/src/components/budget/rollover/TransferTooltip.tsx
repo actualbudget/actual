@@ -34,8 +34,8 @@ export default function TransferTooltip({
   position = 'bottom-right',
   ...props
 }: TransferTooltipProps) {
-  let spreadsheet = useSpreadsheet();
-  let sheetName = useContext(NamespaceContext);
+  const spreadsheet = useSpreadsheet();
+  const sheetName = useContext(NamespaceContext);
   let { grouped: categoryGroups } = useCategories();
 
   categoryGroups = categoryGroups.filter(g => !g.is_income);
@@ -43,8 +43,8 @@ export default function TransferTooltip({
     categoryGroups = addToBeBudgetedGroup(categoryGroups);
   }
 
-  let [amount, setAmount] = useState(null);
-  let [category, setCategory] = useState(null);
+  const [amount, setAmount] = useState(null);
+  const [category, setCategory] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -58,7 +58,7 @@ export default function TransferTooltip({
   }, []);
 
   function submit() {
-    let parsedAmount = evalArithmetic(amount, null);
+    const parsedAmount = evalArithmetic(amount, null);
     if (parsedAmount && category) {
       onSubmit(amountToInteger(parsedAmount), category);
       onClose();

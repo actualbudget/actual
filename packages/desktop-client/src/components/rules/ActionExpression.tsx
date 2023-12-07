@@ -14,7 +14,7 @@ import View from '../common/View';
 import ScheduleValue from './ScheduleValue';
 import Value from './Value';
 
-let valueStyle = {
+const valueStyle = {
   color: theme.pageTextPositive,
 };
 

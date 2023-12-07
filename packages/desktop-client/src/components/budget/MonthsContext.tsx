@@ -23,7 +23,7 @@ type MonthsContextProps = {
   type: string;
 };
 
-export let MonthsContext = createContext<MonthsContextProps>(null);
+export const MonthsContext = createContext<MonthsContextProps>(null);
 
 type MonthsProviderProps = {
   startMonth: string | undefined;
@@ -40,9 +40,9 @@ export function MonthsProvider({
   type,
   children,
 }: MonthsProviderProps) {
-  let endMonth = monthUtils.addMonths(startMonth, numMonths - 1);
-  let bounds = getValidMonthBounds(monthBounds, startMonth, endMonth);
-  let months = monthUtils.rangeInclusive(bounds.start, bounds.end);
+  const endMonth = monthUtils.addMonths(startMonth, numMonths - 1);
+  const bounds = getValidMonthBounds(monthBounds, startMonth, endMonth);
+  const months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
   return (
     <MonthsContext.Provider value={{ months, type }}>

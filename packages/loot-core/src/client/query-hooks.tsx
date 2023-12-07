@@ -46,7 +46,7 @@ function makeContext(queryState, opts, QueryClass) {
       };
     }, []);
 
-    return <Context.Provider value={value} children={children} />;
+    return <Context.Provider value={value}>{children}</Context.Provider>;
   }
 
   function useQuery() {

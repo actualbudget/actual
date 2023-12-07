@@ -23,8 +23,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
+    "@swc/core": "npm:^1.3.82"
+    "@swc/jest": "npm:^0.2.29"
+    "@types/jest": "npm:^27.5.0"
     "@types/uuid": "npm:^9.0.2"
     better-sqlite3: "npm:^9.1.1"
+    compare-versions: "npm:^6.1.0"
+    jest: "npm:^27.0.0"
     node-fetch: "npm:^3.3.2"
     typescript: "npm:^5.0.2"
     uuid: "npm:^9.0.0"
@@ -7166,6 +7171,13 @@ __metadata:
   version: 0.1.2
   resolution: "compare-version@npm:0.1.2"
   checksum: 0ceaf50b5f912c8eb8eeca19375e617209d200abebd771e9306510166462e6f91ad764f33f210a3058ee27c83f2f001a7a4ca32f509da2d207d0143a3438a020
+  languageName: node
+  linkType: hard
+
+"compare-versions@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "compare-versions@npm:6.1.0"
+  checksum: 20f349e7f8ad784704c68265f4e660e2abbe2c3d5c75793184fccb85f0c5c0263260e01fdd4488376f6b74b0f069e16c9684463f7316b075716fb1581eb36b77
   languageName: node
   linkType: hard
 

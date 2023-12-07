@@ -18,11 +18,11 @@ type ThemeSelectorProps = {
 };
 
 export function ThemeSelector({ style }: ThemeSelectorProps) {
-  let theme = useTheme();
-  let { saveGlobalPrefs } = useActions();
-  let [menuOpen, setMenuOpen] = useState(false);
+  const theme = useTheme();
+  const { saveGlobalPrefs } = useActions();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  let { isNarrowWidth } = useResponsive();
+  const { isNarrowWidth } = useResponsive();
 
   const themeIcons = { light: Sun, dark: MoonStars, auto: System } as const;
 
@@ -37,7 +37,12 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
   const Icon = themeIcons?.[theme] || Sun;
 
   return isNarrowWidth ? null : (
-    <Button type="bare" onClick={() => setMenuOpen(true)} style={style}>
+    <Button
+      type="bare"
+      aria-label="Switch theme"
+      onClick={() => setMenuOpen(true)}
+      style={style}
+    >
       <Icon style={{ width: 13, height: 13, color: 'inherit' }} />
       {menuOpen && (
         <Tooltip

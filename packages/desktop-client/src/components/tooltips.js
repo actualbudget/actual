@@ -8,7 +8,7 @@ import { styles, theme } from '../style';
 export const IntersectionBoundary = createContext();
 
 export function useTooltip() {
-  let [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return {
     getOpenEvents: (events = {}) => ({
@@ -37,7 +37,7 @@ export class Tooltip extends Component {
   setup() {
     this.layout();
 
-    let pointerDownHandler = e => {
+    const pointerDownHandler = e => {
       let node = e.target;
 
       while (node && node !== document.documentElement) {
@@ -56,7 +56,7 @@ export class Tooltip extends Component {
       }
     };
 
-    let escHandler = e => {
+    const escHandler = e => {
       if (e.key === 'Escape') {
         this.props.onClose?.();
       }
@@ -108,7 +108,7 @@ export class Tooltip extends Component {
   }
 
   getContainer() {
-    let { ignoreBoundary = false } = this.props;
+    const { ignoreBoundary = false } = this.props;
 
     if (!ignoreBoundary && this.context) {
       return this.context.current;
@@ -119,7 +119,7 @@ export class Tooltip extends Component {
   getBoundsContainer() {
     // If the container is a scrollable element, we want to do all the
     // bounds checking on the parent DOM element instead
-    let container = this.getContainer();
+    const container = this.getContainer();
 
     if (
       container.parentNode &&
@@ -131,14 +131,14 @@ export class Tooltip extends Component {
   }
 
   layout() {
-    let { targetRect, offset = 0 } = this.props;
-    let contentEl = this.contentRef.current;
+    const { targetRect, offset = 0 } = this.props;
+    const contentEl = this.contentRef.current;
     if (!contentEl) {
       return;
     }
 
-    let box = contentEl.getBoundingClientRect();
-    let anchorEl = this.target.parentNode;
+    const box = contentEl.getBoundingClientRect();
+    const anchorEl = this.target.parentNode;
 
     let anchorRect = targetRect || anchorEl.getBoundingClientRect();
 
@@ -150,12 +150,12 @@ export class Tooltip extends Component {
       height: anchorRect.height,
     };
 
-    let container = this.getBoundsContainer();
+    const container = this.getBoundsContainer();
     if (!container) {
       return;
     }
 
-    let containerRect = container.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
     anchorRect.left -= containerRect.left;
     anchorRect.top -= containerRect.top;
 
@@ -165,9 +165,9 @@ export class Tooltip extends Component {
     if (this.props.forceTop) {
       anchorRect.top = this.props.forceTop;
     } else {
-      let boxHeight = box.height + offset;
-      let testTop = anchorRect.top - boxHeight;
-      let testBottom = anchorRect.top + anchorRect.height + boxHeight;
+      const boxHeight = box.height + offset;
+      const testTop = anchorRect.top - boxHeight;
+      const testBottom = anchorRect.top + anchorRect.height + boxHeight;
 
       if (
         // If it doesn't fit above it, switch it to below

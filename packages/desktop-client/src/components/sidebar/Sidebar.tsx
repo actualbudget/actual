@@ -61,7 +61,7 @@ function Sidebar({
   onToggleClosedAccounts,
   onReorder,
 }: SidebarProps) {
-  let hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
+  const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
   const sidebar = useSidebar();
 

@@ -4,8 +4,8 @@ import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import { SelectCell, Cell, TableHeader } from '../table';
 
 export default function RulesHeader() {
-  let selectedItems = useSelectedItems();
-  let dispatchSelected = useSelectedDispatch();
+  const selectedItems = useSelectedItems();
+  const dispatchSelected = useSelectedDispatch();
 
   return (
     <TableHeader version="v2" style={{}}>

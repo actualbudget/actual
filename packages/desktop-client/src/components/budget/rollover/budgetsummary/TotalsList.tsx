@@ -75,7 +75,7 @@ export default function TotalsList({ prevMonthName, style }: TotalsListProps) {
           binding={rolloverBudget.lastMonthOverspent}
           type="financial"
           formatter={value => {
-            let v = format(value, 'financial');
+            const v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
           style={{ fontWeight: 600, ...styles.tnum }}
@@ -85,7 +85,7 @@ export default function TotalsList({ prevMonthName, style }: TotalsListProps) {
           binding={rolloverBudget.totalBudgeted}
           type="financial"
           formatter={value => {
-            let v = format(value, 'financial');
+            const v = format(value, 'financial');
             return value > 0 ? '+' + v : value === 0 ? '-' + v : v;
           }}
           style={{ fontWeight: 600, ...styles.tnum }}
@@ -95,8 +95,8 @@ export default function TotalsList({ prevMonthName, style }: TotalsListProps) {
           binding={rolloverBudget.forNextMonth}
           type="financial"
           formatter={value => {
-            let n = parseInt(value) || 0;
-            let v = format(Math.abs(n), 'financial');
+            const n = parseInt(value) || 0;
+            const v = format(Math.abs(n), 'financial');
             return n >= 0 ? '-' + v : '+' + v;
           }}
           style={{ fontWeight: 600, ...styles.tnum }}

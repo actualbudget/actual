@@ -88,8 +88,8 @@ function IDName({ children }: { children: ReactNode }) {
 }
 
 function AdvancedAbout() {
-  let budgetId = useSelector(state => state.prefs.local.id);
-  let groupId = useSelector(state => state.prefs.local.groupId);
+  const budgetId = useSelector(state => state.prefs.local.id);
+  const groupId = useSelector(state => state.prefs.local.groupId);
 
   return (
     <Setting>
@@ -117,15 +117,15 @@ function AdvancedAbout() {
 }
 
 export default function Settings() {
-  let floatingSidebar = useSelector(
+  const floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
-  let budgetName = useSelector(state => state.prefs.local.budgetName);
+  const budgetName = useSelector(state => state.prefs.local.budgetName);
 
-  let { loadPrefs, closeBudget } = useActions();
+  const { loadPrefs, closeBudget } = useActions();
 
   useEffect(() => {
-    let unlisten = listen('prefs-updated', () => {
+    const unlisten = listen('prefs-updated', () => {
       loadPrefs();
     });
 
@@ -137,61 +137,48 @@ export default function Settings() {
 
   useSetThemeColor(theme.mobileViewTheme);
   return (
-    <View
+    <Page
+      title="Settings"
       style={{
         backgroundColor: isNarrowWidth && theme.mobilePageBackground,
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
       }}
     >
-      <Page
-        title="Settings"
-        titleStyle={
-          isNarrowWidth
-            ? {
-                backgroundColor: theme.mobileHeaderBackground,
-                color: theme.mobileHeaderText,
-                fontSize: 16,
-                fontWeight: 500,
-              }
-            : undefined
-        }
-      >
-        <View style={{ flexShrink: 0, gap: 30 }}>
-          {isNarrowWidth && (
-            <View
-              style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
-            >
-              {/* The only spot to close a budget on mobile */}
-              <FormField>
-                <FormLabel title="Budget Name" />
-                <Input
-                  value={budgetName}
-                  disabled
-                  style={{ color: theme.buttonNormalDisabledText }}
-                />
-              </FormField>
-              <Button onClick={closeBudget}>Close Budget</Button>
-            </View>
-          )}
+      <View style={{ flexShrink: 0, maxWidth: 530, gap: 30 }}>
+        {isNarrowWidth && (
+          <View
+            style={{ gap: 10, flexDirection: 'row', alignItems: 'flex-end' }}
+          >
+            {/* The only spot to close a budget on mobile */}
+            <FormField>
+              <FormLabel title="Budget Name" />
+              <Input
+                value={budgetName}
+                disabled
+                style={{ color: theme.buttonNormalDisabledText }}
+              />
+            </FormField>
+            <Button onClick={closeBudget}>Close Budget</Button>
+          </View>
+        )}
 
-          <About />
+        <About />
 
-          {!Platform.isBrowser && <GlobalSettings />}
+        {!Platform.isBrowser && <GlobalSettings />}
 
-          <ThemeSettings />
-          <FormatSettings />
-          <EncryptionSettings />
-          <ExportBudget />
+        <ThemeSettings />
+        <FormatSettings />
+        <EncryptionSettings />
+        <ExportBudget />
 
-          <AdvancedToggle>
-            <AdvancedAbout />
-            <ResetCache />
-            <ResetSync />
-            <FixSplitsTool />
-            <ExperimentalFeatures />
-          </AdvancedToggle>
-        </View>
-      </Page>
-    </View>
+        <AdvancedToggle>
+          <AdvancedAbout />
+          <ResetCache />
+          <ResetSync />
+          <FixSplitsTool />
+          <ExperimentalFeatures />
+        </AdvancedToggle>
+      </View>
+    </Page>
   );
 }

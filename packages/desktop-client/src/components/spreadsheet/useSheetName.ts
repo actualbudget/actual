@@ -5,7 +5,7 @@ import NamespaceContext from './NamespaceContext';
 import { type Binding } from '.';
 
 function unresolveName(name) {
-  let idx = name.indexOf('!');
+  const idx = name.indexOf('!');
   if (idx !== -1) {
     return {
       sheet: name.slice(0, idx),
@@ -35,7 +35,7 @@ export default function useSheetName(binding: Binding) {
   // Get the current sheet name, and unresolve the binding name if
   // necessary (you might pass a fully resolved name like foo!name)
   let sheetName = useContext(NamespaceContext) || '__global';
-  let unresolved = unresolveName(bindingName);
+  const unresolved = unresolveName(bindingName);
   if (unresolved.sheet) {
     sheetName = unresolved.sheet;
     bindingName = unresolved.name;

@@ -38,6 +38,21 @@ describe('Database', () => {
     expect((await db.getCategories()).length).toBe(1);
   });
 
+  test('using a deleted category name works', async () => {
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    const id = await db.insertCategory({
+      name: 'foo',
+      cat_group: 'group1',
+    });
+    await db.deleteCategory({ id });
+    expect((await db.getCategories()).length).toBe(0);
+    await db.insertCategory({
+      name: 'foo',
+      cat_group: 'group1',
+    });
+    expect((await db.getCategories()).length).toBe(1);
+  });
+
   test('transactions are sorted by date', async () => {
     await insertTransactions([
       { date: '2018-01-05', account: 'foo', amount: -23 },

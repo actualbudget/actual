@@ -17,27 +17,27 @@ export function SelectedTransactionsButton({
   onScheduleAction,
   pushModal,
 }) {
-  let selectedItems = useSelectedItems();
+  const selectedItems = useSelectedItems();
 
-  let types = useMemo(() => {
-    let items = [...selectedItems];
+  const types = useMemo(() => {
+    const items = [...selectedItems];
     return {
       preview: !!items.find(id => isPreviewId(id)),
       trans: !!items.find(id => !isPreviewId(id)),
     };
   }, [selectedItems]);
 
-  let ambiguousDuplication = useMemo(() => {
-    let transactions = [...selectedItems].map(id => getTransaction(id));
+  const ambiguousDuplication = useMemo(() => {
+    const transactions = [...selectedItems].map(id => getTransaction(id));
 
     return transactions.some(t => t && t.is_child);
   }, [selectedItems]);
 
-  let linked = useMemo(() => {
+  const linked = useMemo(() => {
     return (
       !types.preview &&
       [...selectedItems].every(id => {
-        let t = getTransaction(id);
+        const t = getTransaction(id);
         return t && t.schedule;
       })
     );
@@ -118,13 +118,13 @@ export function SelectedTransactionsButton({
             onScheduleAction(name, selectedItems);
             break;
           case 'view-schedule':
-            let firstId = [...selectedItems][0];
+            const firstId = [...selectedItems][0];
             let scheduleId;
             if (isPreviewId(firstId)) {
-              let parts = firstId.split('/');
+              const parts = firstId.split('/');
               scheduleId = parts[1];
             } else {
-              let trans = getTransaction(firstId);
+              const trans = getTransaction(firstId);
               scheduleId = trans && trans.schedule;
             }
 

@@ -9,8 +9,8 @@ import Text from '../common/Text';
 import { Setting } from './UI';
 
 export default function ThemeSettings() {
-  let theme = useTheme();
-  let { saveGlobalPrefs } = useActions();
+  const theme = useTheme();
+  const { saveGlobalPrefs } = useActions();
 
   return (
     <Setting

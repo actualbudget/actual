@@ -35,16 +35,16 @@ export function AmountInput({
   textStyle,
   focused,
 }: AmountInputProps) {
-  let format = useFormat();
-  let [negative, setNegative] = useState(
+  const format = useFormat();
+  const [negative, setNegative] = useState(
     (initialValue === 0 && zeroSign === '-') || initialValue < 0,
   );
 
-  let initialValueAbsolute = format(Math.abs(initialValue), 'financial');
-  let [value, setValue] = useState(initialValueAbsolute);
+  const initialValueAbsolute = format(Math.abs(initialValue), 'financial');
+  const [value, setValue] = useState(initialValueAbsolute);
   useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
 
-  let buttonRef = useRef();
+  const buttonRef = useRef();
 
   function onSwitch() {
     setNegative(!negative);
@@ -52,10 +52,10 @@ export function AmountInput({
   }
 
   function fireChange(val, neg) {
-    let valueOrInitial = Math.abs(
+    const valueOrInitial = Math.abs(
       amountToInteger(evalArithmetic(val, initialValueAbsolute)),
     );
-    let amount = neg ? valueOrInitial * -1 : valueOrInitial;
+    const amount = neg ? valueOrInitial * -1 : valueOrInitial;
 
     onChange?.(amount);
   }
@@ -64,8 +64,8 @@ export function AmountInput({
     setValue(value ? value : '');
   }
 
-  let ref = useRef<HTMLInputElement>();
-  let mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
+  const ref = useRef<HTMLInputElement>();
+  const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
 
   useEffect(() => {
     if (focused) {
@@ -88,8 +88,8 @@ export function AmountInput({
       leftContent={
         <Button
           type="bare"
+          aria-label={`Make ${negative ? 'positive' : 'negative'}`}
           style={{ padding: '0 7px' }}
-          disabled={!focused}
           onPointerUp={onSwitch}
           onPointerDown={e => e.preventDefault()}
           ref={buttonRef}
@@ -118,8 +118,8 @@ export function AmountInput({
 }
 
 export function BetweenAmountInput({ defaultValue, onChange }) {
-  let [num1, setNum1] = useState(defaultValue.num1);
-  let [num2, setNum2] = useState(defaultValue.num2);
+  const [num1, setNum1] = useState(defaultValue.num1);
+  const [num2, setNum2] = useState(defaultValue.num2);
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>

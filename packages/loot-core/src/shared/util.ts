@@ -1,4 +1,4 @@
-export function last(arr) {
+export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
 
@@ -33,7 +33,14 @@ export function hasFieldsChanged(obj1, obj2, fields) {
   return changed;
 }
 
-export function applyChanges(changes, items) {
+export function applyChanges<T extends { id: string }>(
+  changes: {
+    added?: T[];
+    updated?: T[];
+    deleted?: T[];
+  },
+  items: T[],
+) {
   items = [...items];
 
   if (changes.added) {
@@ -64,7 +71,7 @@ export function applyChanges(changes, items) {
   return items;
 }
 
-export function partitionByField(data, field) {
+export function partitionByField<T, K extends keyof T>(data: T[], field: K) {
   const res = new Map();
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
@@ -93,7 +100,7 @@ export function groupBy<T, K extends keyof T>(data: T[], field: K) {
 // `Map` is better, but we can't swap it out because `Map` has a
 // different API and we need to go through and update everywhere that
 // uses it.
-function _groupById(data) {
+function _groupById<T extends { id: string }>(data: T[]) {
   const res = new Map();
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
@@ -102,7 +109,7 @@ function _groupById(data) {
   return res;
 }
 
-export function diffItems(items, newItems) {
+export function diffItems<T extends { id: string }>(items: T[], newItems: T[]) {
   const grouped = _groupById(items);
   const newGrouped = _groupById(newItems);
   const added = [];
@@ -127,7 +134,7 @@ export function diffItems(items, newItems) {
   return { added, updated, deleted };
 }
 
-export function groupById(data) {
+export function groupById<T extends { id: string }>(data: T[]) {
   const res = {};
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
@@ -168,7 +175,7 @@ export function getIn(map, keys) {
   return item;
 }
 
-export function fastSetMerge(set1, set2) {
+export function fastSetMerge<T>(set1: Set<T>, set2: Set<T>) {
   const finalSet = new Set(set1);
   const iter = set2.values();
   let value = iter.next();
@@ -214,7 +221,13 @@ export function setNumberFormat(config: typeof numberFormatConfig) {
   numberFormatConfig = config;
 }
 
-export function getNumberFormat({ format, hideFraction } = numberFormatConfig) {
+export function getNumberFormat({
+  format,
+  hideFraction,
+}: {
+  format: NumberFormats;
+  hideFraction: boolean;
+} = numberFormatConfig) {
   let locale, regex, separator;
 
   switch (format) {
@@ -282,11 +295,14 @@ export function safeNumber(value: number) {
   return value;
 }
 
-export function toRelaxedNumber(value) {
+export function toRelaxedNumber(value: string) {
   return integerToAmount(currencyToInteger(value) || 0);
 }
 
-export function integerToCurrency(n, formatter = getNumberFormat().formatter) {
+export function integerToCurrency(
+  n: number,
+  formatter = getNumberFormat().formatter,
+) {
   return formatter.format(safeNumber(n) / 100);
 }
 
@@ -294,7 +310,7 @@ export function amountToCurrency(n) {
   return getNumberFormat().formatter.format(n);
 }
 
-export function currencyToAmount(str) {
+export function currencyToAmount(str: string) {
   const amount = parseFloat(
     str
       .replace(getNumberFormat().regex, '')
@@ -303,12 +319,12 @@ export function currencyToAmount(str) {
   return isNaN(amount) ? null : amount;
 }
 
-export function currencyToInteger(str) {
+export function currencyToInteger(str: string) {
   const amount = currencyToAmount(str);
   return amount == null ? null : amountToInteger(amount);
 }
 
-export function stringToInteger(str) {
+export function stringToInteger(str: string) {
   const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
   if (!isNaN(amount)) {
     return amount;
@@ -316,7 +332,7 @@ export function stringToInteger(str) {
   return null;
 }
 
-export function amountToInteger(n) {
+export function amountToInteger(n: number) {
   return Math.round(n * 100);
 }
 
@@ -328,12 +344,12 @@ export function integerToAmount(n) {
 // financial files and we don't want to parse based on the user's
 // number format, because the user could be importing from many
 // currencies. We extract out the numbers and just ignore separators.
-export function looselyParseAmount(amount) {
-  function safeNumber(v) {
+export function looselyParseAmount(amount: string) {
+  function safeNumber(v: number): null | number {
     return isNaN(v) ? null : v;
   }
 
-  function extractNumbers(v) {
+  function extractNumbers(v: string): string {
     return v.replace(/[^0-9-]/g, '');
   }
 

@@ -116,12 +116,11 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data;
-  balanceTypeOp;
-  compact: boolean;
+  compact?: boolean;
 };
 
 function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
-  let privacyMode = usePrivacyMode();
+  const privacyMode = usePrivacyMode();
   const colorScale = getColorScale('qualitative');
 
   return (
@@ -132,14 +131,14 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
       }}
     >
       {(width, height, portalHost) =>
-        data.stackedData && (
+        data.monthData && (
           <ResponsiveContainer>
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <BarChart
                 width={width}
                 height={height}
-                data={data.stackedData}
+                data={data.monthData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 {
@@ -163,7 +162,7 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
                     tickLine={{ stroke: theme.pageText }}
                   />
                 )}
-                {data.groupBy.reverse().map((c, index) => (
+                {data.data.reverse().map((c, index) => (
                   <Bar
                     key={c.date}
                     dataKey={c.name}

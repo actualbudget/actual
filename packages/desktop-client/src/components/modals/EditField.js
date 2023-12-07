@@ -8,26 +8,41 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
+import { Add } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
-import { theme } from '../../style';
-import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
-import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import { styles, theme } from '../../style';
+import AccountAutocomplete, {
+  AccountItemGroupHeader,
+  AccountItem,
+} from '../autocomplete/AccountAutocomplete';
+import CategoryAutocomplete, {
+  CategoryItemGroupHeader,
+  CategoryItem,
+} from '../autocomplete/CategoryAutocomplete';
+import PayeeAutocomplete, {
+  CreatePayeeButton,
+  PayeeItemGroupHeader,
+  PayeeItem,
+} from '../autocomplete/PayeeAutocomplete';
 import Input from '../common/Input';
 import Modal from '../common/Modal';
 import View from '../common/View';
 import { SectionLabel } from '../forms';
 import DateSelect from '../select/DateSelect';
 
+function CreatePayeeIcon(props) {
+  return <Add {...props} width={14} height={14} />;
+}
+
 export default function EditField({ modalProps, name, onSubmit }) {
-  let dateFormat = useSelector(
+  const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-  let { grouped: categoryGroups } = useCategories();
-  let accounts = useSelector(state => state.queries.accounts);
-  let payees = useSelector(state => state.queries.payees);
+  const { grouped: categoryGroups } = useCategories();
+  const accounts = useSelector(state => state.queries.accounts);
+  const payees = useSelector(state => state.queries.payees);
 
-  let { createPayee } = useActions();
+  const { createPayee } = useActions();
 
   function onSelect(value) {
     if (value != null) {
@@ -41,17 +56,27 @@ export default function EditField({ modalProps, name, onSubmit }) {
     modalProps.onClose();
   }
 
+  const itemStyle = {
+    fontSize: 17,
+    fontWeight: 400,
+    paddingTop: 8,
+    paddingBottom: 8,
+  };
+
   const { isNarrowWidth } = useResponsive();
   let label, editor, minWidth;
-  let inputStyle = { ':focus': { boxShadow: 0 } };
-  let autocompleteProps = {
+  const inputStyle = {
+    ':focus': { boxShadow: 0 },
+    ...(isNarrowWidth && itemStyle),
+  };
+  const autocompleteProps = {
     inputProps: { style: inputStyle },
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
   switch (name) {
     case 'date': {
-      let today = currentDay();
+      const today = currentDay();
       label = 'Date';
       minWidth = 350;
       editor = (
@@ -83,13 +108,30 @@ export default function EditField({ modalProps, name, onSubmit }) {
               onSelect(value);
             }
           }}
-          groupHeaderStyle={
-            isNarrowWidth
-              ? {
-                  color: theme.tableTextLight,
-                }
-              : undefined
-          }
+          {...(isNarrowWidth && {
+            renderAccountItemGroupHeader: props => (
+              <AccountItemGroupHeader
+                {...props}
+                style={{
+                  ...styles.largeText,
+                  color: theme.menuItemTextHeader,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                }}
+              />
+            ),
+            renderAccountItem: props => (
+              <AccountItem
+                {...props}
+                style={{
+                  ...itemStyle,
+                  color: theme.menuItemText,
+                  borderRadius: 0,
+                  borderTop: `1px solid ${theme.pillBorder}`,
+                }}
+              />
+            ),
+          })}
           {...autocompleteProps}
         />
       );
@@ -115,13 +157,37 @@ export default function EditField({ modalProps, name, onSubmit }) {
             onSelect(value);
           }}
           isCreatable
-          groupHeaderStyle={
-            isNarrowWidth
-              ? {
-                  color: theme.tableTextLight,
-                }
-              : undefined
-          }
+          {...(isNarrowWidth && {
+            renderCreatePayeeButton: props => (
+              <CreatePayeeButton
+                {...props}
+                Icon={CreatePayeeIcon}
+                style={itemStyle}
+              />
+            ),
+            renderPayeeItemGroupHeader: props => (
+              <PayeeItemGroupHeader
+                {...props}
+                style={{
+                  ...styles.largeText,
+                  color: theme.menuItemTextHeader,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                }}
+              />
+            ),
+            renderPayeeItem: props => (
+              <PayeeItem
+                {...props}
+                style={{
+                  ...itemStyle,
+                  color: theme.menuItemText,
+                  borderRadius: 0,
+                  borderTop: `1px solid ${theme.pillBorder}`,
+                }}
+              />
+            ),
+          })}
           {...autocompleteProps}
         />
       );
@@ -152,13 +218,30 @@ export default function EditField({ modalProps, name, onSubmit }) {
           onSelect={value => {
             onSelect(value);
           }}
-          groupHeaderStyle={
-            isNarrowWidth
-              ? {
-                  color: theme.tableTextLight,
-                }
-              : undefined
-          }
+          {...(isNarrowWidth && {
+            renderCategoryItemGroupHeader: props => (
+              <CategoryItemGroupHeader
+                {...props}
+                style={{
+                  ...styles.largeText,
+                  color: theme.menuItemTextHeader,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                }}
+              />
+            ),
+            renderCategoryItem: props => (
+              <CategoryItem
+                {...props}
+                style={{
+                  ...itemStyle,
+                  color: theme.menuItemText,
+                  borderRadius: 0,
+                  borderTop: `1px solid ${theme.pillBorder}`,
+                }}
+              />
+            ),
+          })}
           {...autocompleteProps}
         />
       );
