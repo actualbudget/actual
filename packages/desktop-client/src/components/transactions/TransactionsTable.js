@@ -1091,7 +1091,7 @@ const Transaction = memo(function Transaction(props) {
                     ? theme.warningText
                     : selected
                     ? theme.formLabelText
-                    : theme.tableTextLight,
+                    : theme.upcomingText,
                 backgroundColor:
                   notes === 'missed'
                     ? theme.errorBackground
@@ -1099,7 +1099,7 @@ const Transaction = memo(function Transaction(props) {
                     ? theme.warningBackground
                     : selected
                     ? theme.formLabelBackground
-                    : theme.pageBackground,
+                    : theme.upcomingBackground,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
