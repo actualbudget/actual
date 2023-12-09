@@ -56,10 +56,10 @@ export const menuItemTextHeader = colorPalette.purple500;
 export const menuBorder = colorPalette.navy800;
 export const menuBorderHover = colorPalette.purple400;
 export const menuKeybindingText = colorPalette.navy500;
-export const menuAutoCompleteBackground = colorPalette.navy400;
-export const menuAutoCompleteBackgroundHover = colorPalette.navy300;
-export const menuAutoCompleteText = colorPalette.navy900;
-export const menuAutoCompleteTextHeader = menuItemTextHeader;
+export const menuAutoCompleteBackground = colorPalette.navy900;
+export const menuAutoCompleteBackgroundHover = colorPalette.navy600;
+export const menuAutoCompleteText = colorPalette.navy200;
+export const menuAutoCompleteTextHeader = colorPalette.purple200;
 
 export const modalBackground = colorPalette.gray800;
 export const modalBorder = colorPalette.navy600;
@@ -85,7 +85,7 @@ export const markdownDark = colorPalette.purple500;
 export const markdownLight = colorPalette.purple800;
 
 // Button
-export const buttonMenuText = colorPalette.navy900;
+export const buttonMenuText = colorPalette.navy200;
 export const buttonMenuTextHover = buttonMenuText;
 export const buttonMenuBackground = 'transparent';
 export const buttonMenuBackgroundHover = 'rgba(200, 200, 200, .25)';
@@ -138,7 +138,7 @@ export const noticeBackgroundDark = colorPalette.green500;
 export const noticeText = colorPalette.green300;
 export const noticeTextLight = colorPalette.green500;
 export const noticeTextDark = colorPalette.green150;
-export const noticeTextMenu = colorPalette.green800;
+export const noticeTextMenu = colorPalette.green500;
 export const noticeBorder = colorPalette.green800;
 export const warningBackground = colorPalette.orange800;
 export const warningText = colorPalette.orange300;
