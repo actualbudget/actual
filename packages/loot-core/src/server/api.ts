@@ -47,10 +47,10 @@ function withMutation(handler) {
   return args => {
     return runMutator(
       async () => {
-        let latestTimestamp = getClock().timestamp.toString();
-        let result = await handler(args);
+        const latestTimestamp = getClock().timestamp.toString();
+        const result = await handler(args);
 
-        let rows = await db.all(
+        const rows = await db.all(
           'SELECT DISTINCT dataset FROM messages_crdt WHERE timestamp > ?',
           [latestTimestamp],
         );
@@ -78,8 +78,8 @@ async function validateMonth(month) {
   }
 
   if (!IMPORT_MODE) {
-    let { start, end } = await handlers['get-budget-bounds']();
-    let range = monthUtils.range(start, end);
+    const { start, end } = await handlers['get-budget-bounds']();
+    const range = monthUtils.range(start, end);
     if (!range.includes(month)) {
       throw APIError('No budget exists for month: ' + month);
     }
@@ -91,7 +91,7 @@ async function validateExpenseCategory(debug, id) {
     throw APIError(`${debug}: category id is required`);
   }
 
-  let row = await db.first('SELECT is_income FROM categories WHERE id = ?', [
+  const row = await db.first('SELECT is_income FROM categories WHERE id = ?', [
     id,
   ]);
 
@@ -145,11 +145,11 @@ handlers['api/batch-budget-end'] = async function () {
 };
 
 handlers['api/load-budget'] = async function ({ id }) {
-  let { id: currentId } = prefs.getPrefs() || {};
+  const { id: currentId } = prefs.getPrefs() || {};
 
   if (currentId !== id) {
     connection.send('start-load');
-    let { error } = await handlers['load-budget']({ id });
+    const { error } = await handlers['load-budget']({ id });
 
     if (!error) {
       connection.send('finish-load');
@@ -162,26 +162,26 @@ handlers['api/load-budget'] = async function ({ id }) {
 };
 
 handlers['api/download-budget'] = async function ({ syncId, password }) {
-  let { id: currentId } = prefs.getPrefs() || {};
+  const { id: currentId } = prefs.getPrefs() || {};
   if (currentId) {
     await handlers['close-budget']();
   }
 
-  let localBudget = (await handlers['get-budgets']()).find(
+  const localBudget = (await handlers['get-budgets']()).find(
     b => b.groupId === syncId,
   );
   if (localBudget) {
     await handlers['load-budget']({ id: localBudget.id });
-    let result = await handlers['sync-budget']();
+    const result = await handlers['sync-budget']();
     if (result.error) {
       throw new Error(getSyncError(result.error, localBudget.id));
     }
   } else {
-    let files = await handlers['get-remote-files']();
+    const files = await handlers['get-remote-files']();
     if (!files) {
       throw new Error('Could not get remote files');
     }
-    let file = files.find(f => f.groupId === syncId);
+    const file = files.find(f => f.groupId === syncId);
     if (!file) {
       throw new Error(
         `Budget “${syncId}” not found. Check the sync id of your budget in the Advanced section of the settings page.`,
@@ -193,7 +193,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
       );
     }
     if (password) {
-      let result = await handlers['key-test']({
+      const result = await handlers['key-test']({
         fileId: file.fileId,
         password,
       });
@@ -202,7 +202,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
       }
     }
 
-    let result = await handlers['download-budget']({ fileId: file.fileId });
+    const result = await handlers['download-budget']({ fileId: file.fileId });
     if (result.error) {
       console.log('Full error details', result.error);
       throw new Error(getDownloadError(result.error));
@@ -212,8 +212,8 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 };
 
 handlers['api/sync'] = async function () {
-  let { id } = prefs.getPrefs();
-  let result = await handlers['sync-budget']();
+  const { id } = prefs.getPrefs();
+  const result = await handlers['sync-budget']();
   if (result.error) {
     throw new Error(getSyncError(result.error, id));
   }
@@ -245,7 +245,7 @@ handlers['api/finish-import'] = async function () {
   // We always need to fully reload the app. Importing doesn't touch
   // the spreadsheet, but we can't just recreate the spreadsheet
   // either; there is other internal state that isn't created
-  let { id } = prefs.getPrefs();
+  const { id } = prefs.getPrefs();
   await handlers['close-budget']();
   await handlers['load-budget']({ id });
 
@@ -262,7 +262,7 @@ handlers['api/abort-import'] = async function () {
   if (IMPORT_MODE) {
     checkFileOpen();
 
-    let { id } = prefs.getPrefs();
+    const { id } = prefs.getPrefs();
 
     await handlers['close-budget']();
     await handlers['delete-budget']({ id });
@@ -279,7 +279,7 @@ handlers['api/query'] = async function ({ query }) {
 
 handlers['api/budget-months'] = async function () {
   checkFileOpen();
-  let { start, end } = await handlers['get-budget-bounds']();
+  const { start, end } = await handlers['get-budget-bounds']();
   return monthUtils.range(start, end);
 };
 
@@ -287,11 +287,11 @@ handlers['api/budget-month'] = async function ({ month }) {
   checkFileOpen();
   await validateMonth(month);
 
-  let groups = await db.getCategoriesGrouped();
-  let sheetName = monthUtils.sheetForMonth(month);
+  const groups = await db.getCategoriesGrouped();
+  const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
-    let v = sheet.get().getCellValue(sheetName, name);
+    const v = sheet.get().getCellValue(sheetName, name);
     return v === '' ? 0 : v;
   }
 
@@ -410,7 +410,7 @@ handlers['api/transactions-get'] = async function ({
   endDate,
 }) {
   checkFileOpen();
-  let { data } = await aqlQuery(
+  const { data } = await aqlQuery(
     q('transactions')
       .filter({
         $and: [
@@ -434,37 +434,37 @@ handlers['api/transaction-update'] = withMutation(async function ({
   fields,
 }) {
   checkFileOpen();
-  let { data } = await aqlQuery(
+  const { data } = await aqlQuery(
     q('transactions').filter({ id }).select('*').options({ splits: 'grouped' }),
   );
-  let transactions = ungroupTransactions(data);
+  const transactions = ungroupTransactions(data);
 
   if (transactions.length === 0) {
     return [];
   }
 
-  let { diff } = updateTransaction(transactions, fields);
+  const { diff } = updateTransaction(transactions, fields);
   return handlers['transactions-batch-update'](diff);
 });
 
 handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
   checkFileOpen();
-  let { data } = await aqlQuery(
+  const { data } = await aqlQuery(
     q('transactions').filter({ id }).select('*').options({ splits: 'grouped' }),
   );
-  let transactions = ungroupTransactions(data);
+  const transactions = ungroupTransactions(data);
 
   if (transactions.length === 0) {
     return [];
   }
 
-  let { diff } = deleteTransaction(transactions, id);
+  const { diff } = deleteTransaction(transactions, id);
   return handlers['transactions-batch-update'](diff);
 });
 
 handlers['api/accounts-get'] = async function () {
   checkFileOpen();
-  let accounts = await db.getAccounts();
+  const accounts = await db.getAccounts();
   return accounts.map(account => accountModel.toExternal(account));
 };
 
@@ -515,7 +515,7 @@ handlers['api/categories-get'] = async function ({
   grouped,
 }: { grouped? } = {}) {
   checkFileOpen();
-  let result = await handlers['get-categories']();
+  const result = await handlers['get-categories']();
   return grouped
     ? result.grouped.map(categoryGroupModel.toExternal)
     : result.list.map(categoryModel.toExternal);
@@ -580,7 +580,7 @@ handlers['api/category-delete'] = withMutation(async function ({
 
 handlers['api/payees-get'] = async function () {
   checkFileOpen();
-  let payees = await handlers['payees-get']();
+  const payees = await handlers['payees-get']();
   return payees.map(payeeModel.toExternal);
 };
 
@@ -602,7 +602,7 @@ handlers['api/payee-delete'] = withMutation(async function ({ id }) {
 });
 
 export default function installAPI(serverHandlers: ServerHandlers) {
-  let merged = Object.assign({}, serverHandlers, handlers);
+  const merged = Object.assign({}, serverHandlers, handlers);
   handlers = merged as Handlers;
   return merged;
 }

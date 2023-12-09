@@ -60,8 +60,8 @@ export async function createCategory(cat, sheetName, prevSheetName) {
 }
 
 export function createSummary(groups, categories, sheetName) {
-  let incomeGroup = groups.filter(group => group.is_income)[0];
-  let expenseCategories = categories.filter(cat => !cat.is_income);
+  const incomeGroup = groups.filter(group => group.is_income)[0];
+  const expenseCategories = categories.filter(cat => !cat.is_income);
 
   sheet.get().createDynamic(sheetName, 'total-budgeted', {
     initialValue: 0,

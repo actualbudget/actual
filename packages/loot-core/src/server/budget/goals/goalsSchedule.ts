@@ -16,39 +16,39 @@ export async function goalsSchedule(
 ) {
   if (!scheduleFlag) {
     scheduleFlag = true;
-    let template = template_lines.filter(t => t.type === 'schedule');
+    const template = template_lines.filter(t => t.type === 'schedule');
     //in the case of multiple templates per category, schedules may have wrong priority level
     let t = [];
     let totalScheduledGoal = 0;
 
     for (let ll = 0; ll < template.length; ll++) {
-      let { id: sid, completed: complete } = await db.first(
+      const { id: sid, completed: complete } = await db.first(
         'SELECT * FROM schedules WHERE name = ?',
         [template[ll].name],
       );
       console.log(complete);
-      let rule = await getRuleForSchedule(sid);
-      let conditions = rule.serialize().conditions;
-      let { date: dateConditions, amount: amountCondition } =
+      const rule = await getRuleForSchedule(sid);
+      const conditions = rule.serialize().conditions;
+      const { date: dateConditions, amount: amountCondition } =
         extractScheduleConds(conditions);
-      let target =
+      const target =
         amountCondition.op === 'isbetween'
           ? -Math.round(
               amountCondition.value.num1 + amountCondition.value.num2,
             ) / 2
           : -amountCondition.value;
-      let next_date_string = getNextDate(
+      const next_date_string = getNextDate(
         dateConditions,
         monthUtils._parse(current_month),
       );
-      let target_interval = dateConditions.value.interval
+      const target_interval = dateConditions.value.interval
         ? dateConditions.value.interval
         : 1;
-      let target_frequency = dateConditions.value.frequency;
-      let isRepeating =
+      const target_frequency = dateConditions.value.frequency;
+      const isRepeating =
         Object(dateConditions.value) === dateConditions.value &&
         'frequency' in dateConditions.value;
-      let num_months = monthUtils.differenceInCalendarMonths(
+      const num_months = monthUtils.differenceInCalendarMonths(
         next_date_string,
         current_month,
       );
@@ -64,7 +64,7 @@ export async function goalsSchedule(
       if (!complete) {
         if (isRepeating) {
           let monthlyTarget = 0;
-          let next_month = monthUtils.addMonths(
+          const next_month = monthUtils.addMonths(
             current_month,
             t[ll].num_months + 1,
           );
@@ -74,13 +74,13 @@ export async function goalsSchedule(
           );
           while (next_date < next_month) {
             monthlyTarget += -target;
-            let current_date = next_date;
+            const current_date = next_date;
             next_date = monthUtils.addDays(next_date, 1);
             next_date = getNextDate(
               dateConditions,
               monthUtils._parse(next_date),
             );
-            let diffDays = monthUtils.differenceInCalendarDays(
+            const diffDays = monthUtils.differenceInCalendarDays(
               next_date,
               current_date,
             );

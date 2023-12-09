@@ -9,7 +9,7 @@ function sqlLines(str) {
     .map(line => line.trim());
 }
 
-let basicSchema = {
+const basicSchema = {
   transactions: {
     id: { type: 'id' },
     date: { type: 'date' },
@@ -20,7 +20,7 @@ let basicSchema = {
   },
 };
 
-let schemaWithRefs = {
+const schemaWithRefs = {
   transactions: {
     id: { type: 'id' },
     payee: { type: 'id', ref: 'payees' },
@@ -40,7 +40,7 @@ let schemaWithRefs = {
   },
 };
 
-let schemaWithTombstone = {
+const schemaWithTombstone = {
   transactions: {
     id: { type: 'id' },
     payee: { type: 'id', ref: 'payees' },
@@ -123,7 +123,7 @@ describe('sheet language', () => {
   });
 
   it('`select` allows nested functions', () => {
-    let result = generateSQLWithState(
+    const result = generateSQLWithState(
       query('transactions')
         .select([{ num: { $idiv: [{ $neg: '$amount' }, 2] } }])
         .serialize(),
@@ -302,7 +302,7 @@ describe('sheet language', () => {
   });
 
   it('avoids unnecessary joins when deeply joining', () => {
-    let { state, sql } = generateSQLWithState(
+    const { state, sql } = generateSQLWithState(
       query('transactions')
         .filter({
           'payee.account.trans1.amount': 1,
@@ -631,7 +631,7 @@ describe('sheet language', () => {
         .serialize(),
       schemaWithRefs,
     );
-    let monthParam = result.state.namedParameters.find(
+    const monthParam = result.state.namedParameters.find(
       p => p.paramName === 'month',
     );
     expect(monthParam.paramType).toBe('date-month');
@@ -693,7 +693,7 @@ describe('sheet language', () => {
   });
 
   it('raw mode avoids any internal filters', () => {
-    let result = generateSQLWithState(
+    const result = generateSQLWithState(
       query('transactions').select(['amount']).raw().serialize(),
       schemaWithRefs,
       {
@@ -781,7 +781,7 @@ describe('sheet language', () => {
   });
 
   it('$oneof creates template for executor to run', () => {
-    let result = generateSQLWithState(
+    const result = generateSQLWithState(
       query('transactions')
         .filter({ id: { $oneof: ['one', 'two', 'three'] } })
         .select(['amount'])

@@ -20,7 +20,7 @@ function importAccounts(data: YNAB5.Budget, entityIdMap: Map<string, string>) {
   return Promise.all(
     data.accounts.map(async account => {
       if (!account.deleted) {
-        let id = await actual.createAccount({
+        const id = await actual.createAccount({
           name: account.name,
           offbudget: account.on_budget ? false : true,
           closed: account.closed,
@@ -65,7 +65,7 @@ async function importCategories(
   // Can't be done in parallel to have
   // correct sort order.
 
-  for (let group of data.category_groups) {
+  for (const group of data.category_groups) {
     if (!group.deleted) {
       let groupId;
       // Ignores internal category and credit cards
@@ -80,18 +80,18 @@ async function importCategories(
         entityIdMap.set(group.id, groupId);
       }
 
-      let cats = data.categories.filter(
+      const cats = data.categories.filter(
         cat => cat.category_group_id === group.id,
       );
 
-      for (let cat of cats.reverse()) {
+      for (const cat of cats.reverse()) {
         if (!cat.deleted) {
           // Handles special categories. Starting balance is a payee
           // in YNAB so it's handled in importTransactions
           switch (checkSpecialCat(cat)) {
             case 'income': {
               // doesn't create new category, only assigns id
-              let id = incomeCatId;
+              const id = incomeCatId;
               entityIdMap.set(cat.id, id);
               break;
             }
@@ -99,7 +99,7 @@ async function importCategories(
             case 'internal': // uncategorized is ignored too, handled by actual
               break;
             default: {
-              let id = await actual.createCategory({
+              const id = await actual.createCategory({
                 name: cat.name,
                 group_id: groupId,
               });
@@ -117,7 +117,7 @@ function importPayees(data: YNAB5.Budget, entityIdMap: Map<string, string>) {
   return Promise.all(
     data.payees.map(async payee => {
       if (!payee.deleted) {
-        let id = await actual.createPayee({
+        const id = await actual.createPayee({
           name: payee.name,
         });
         entityIdMap.set(payee.id, id);
@@ -140,8 +140,11 @@ async function importTransactions(
     payee => payee.name === 'Starting Balance',
   ).id;
 
-  let transactionsGrouped = groupBy(data.transactions, 'account_id');
-  let subtransactionsGrouped = groupBy(data.subtransactions, 'transaction_id');
+  const transactionsGrouped = groupBy(data.transactions, 'account_id');
+  const subtransactionsGrouped = groupBy(
+    data.subtransactions,
+    'transaction_id',
+  );
 
   const payeesByTransferAcct = payees
     .filter((payee: YNAB5.Payee) => payee?.transfer_acct)
@@ -152,27 +155,27 @@ async function importTransactions(
 
   // Go ahead and generate ids for all of the transactions so we can
   // reliably resolve transfers
-  for (let transaction of data.transactions) {
+  for (const transaction of data.transactions) {
     entityIdMap.set(transaction.id, uuidv4());
   }
-  for (let transaction of data.subtransactions) {
+  for (const transaction of data.subtransactions) {
     entityIdMap.set(transaction.id, uuidv4());
   }
 
   await Promise.all(
     [...transactionsGrouped.keys()].map(async accountId => {
-      let transactions = transactionsGrouped.get(accountId);
+      const transactions = transactionsGrouped.get(accountId);
 
-      let toImport = transactions
+      const toImport = transactions
         .map(transaction => {
           if (transaction.deleted) {
             return null;
           }
 
-          let subtransactions = subtransactionsGrouped.get(transaction.id);
+          const subtransactions = subtransactionsGrouped.get(transaction.id);
 
           // Add transaction
-          let newTransaction = {
+          const newTransaction = {
             id: entityIdMap.get(transaction.id),
             account: entityIdMap.get(transaction.account_id),
             date: transaction.date,
@@ -253,7 +256,7 @@ async function importBudgets(
   // Also, there could be a way to set rollover using
   // Deferred Income Subcat and Immediate Income Subcat
 
-  let budgets = sortByKey(data.months, 'month');
+  const budgets = sortByKey(data.months, 'month');
 
   const internalCatIdYnab = data.category_groups.find(
     group => group.name === 'Internal Master Category',
@@ -263,13 +266,13 @@ async function importBudgets(
   ).id;
 
   await actual.batchBudgetUpdates(async () => {
-    for (let budget of budgets) {
-      let month = monthUtils.monthFromDate(budget.month);
+    for (const budget of budgets) {
+      const month = monthUtils.monthFromDate(budget.month);
 
       await Promise.all(
         budget.categories.map(async catBudget => {
-          let catId = entityIdMap.get(catBudget.id);
-          let amount = Math.round(catBudget.budgeted / 10);
+          const catId = entityIdMap.get(catBudget.id);
+          const amount = Math.round(catBudget.budgeted / 10);
 
           if (
             !catId ||
