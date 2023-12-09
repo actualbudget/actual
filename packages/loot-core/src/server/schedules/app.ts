@@ -84,7 +84,7 @@ export function getNextDate(
   if (value.type === 'date') {
     return value.date;
   } else if (value.type === 'recur') {
-    const dates = value.schedule.occurrences({ start, take: 1 }).toArray();
+    let dates = value.schedule.occurrences({ start, take: 1 }).toArray();
 
     if (dates.length === 0) {
       // Could be a schedule with limited occurrences, so we try to
