@@ -142,7 +142,7 @@ export default class Spreadsheet {
     this.running = true;
 
     while (idx < this.computeQueue.length) {
-      let name = this.computeQueue[idx];
+      const name = this.computeQueue[idx];
       let node;
       let result;
 
@@ -150,7 +150,7 @@ export default class Spreadsheet {
         node = this.getNode(name);
 
         if (node._run) {
-          let args = node._dependencies.map(dep => {
+          const args = node._dependencies.map(dep => {
             return this.getNode(dep).value;
           });
 
@@ -240,7 +240,7 @@ export default class Spreadsheet {
   endCacheBarrier() {
     this.cacheBarrier = false;
 
-    let pendingChange = this.running || this.computeQueue.length > 0;
+    const pendingChange = this.running || this.computeQueue.length > 0;
     if (!pendingChange) {
       this.markCacheSafe();
     }
@@ -264,7 +264,7 @@ export default class Spreadsheet {
       return () => {};
     }
 
-    let remove = this.addEventListener('change', (...args) => {
+    const remove = this.addEventListener('change', (...args) => {
       remove();
       return func(...args);
     });
@@ -292,7 +292,7 @@ export default class Spreadsheet {
   }
 
   getCellValueLoose(sheetName, cellName) {
-    let name = resolveName(sheetName, cellName);
+    const name = resolveName(sheetName, cellName);
     if (this.nodes.has(name)) {
       return this.getNode(name).value;
     }
@@ -338,12 +338,16 @@ export default class Spreadsheet {
   }
 
   createQuery(sheetName: string, cellName: string, query: string): void {
-    let name = resolveName(sheetName, cellName);
-    let node = this._getNode(name);
+    const name = resolveName(sheetName, cellName);
+    const node = this._getNode(name);
 
     if (node.query !== query) {
       node.query = query;
-      let { sqlPieces, state } = compileQuery(node.query, schema, schemaConfig);
+      const { sqlPieces, state } = compileQuery(
+        node.query,
+        schema,
+        schemaConfig,
+      );
       node.sql = { sqlPieces, state };
 
       this.transaction(() => {
@@ -357,8 +361,8 @@ export default class Spreadsheet {
     cellName: string,
     initialValue: number | boolean,
   ): void {
-    let name = resolveName(sheetName, cellName);
-    let exists = this.nodes.has(name);
+    const name = resolveName(sheetName, cellName);
+    const exists = this.nodes.has(name);
     if (!exists) {
       this.create(name, initialValue);
     }
@@ -379,8 +383,8 @@ export default class Spreadsheet {
       refresh?: boolean;
     },
   ): void {
-    let name = resolveName(sheetName, cellName);
-    let node = this._getNode(name);
+    const name = resolveName(sheetName, cellName);
+    const node = this._getNode(name);
 
     if (node.dynamic) {
       // If it already exists, do nothing
@@ -418,7 +422,7 @@ export default class Spreadsheet {
   }
 
   clearSheet(sheetName: string): void {
-    for (let [name, node] of this.nodes.entries()) {
+    for (const [name, node] of this.nodes.entries()) {
       if (node.sheet === sheetName) {
         this.nodes.delete(name);
       }
@@ -426,7 +430,7 @@ export default class Spreadsheet {
   }
 
   voidCell(sheetName: string, name: string, voidValue = null): void {
-    let node = this.getNode(resolveName(sheetName, name));
+    const node = this.getNode(resolveName(sheetName, name));
     node._run = null;
     node.dynamic = false;
     node.value = voidValue;
@@ -438,7 +442,7 @@ export default class Spreadsheet {
   }
 
   addDependencies(sheetName: string, cellName: string, deps: string[]): void {
-    let name = resolveName(sheetName, cellName);
+    const name = resolveName(sheetName, cellName);
 
     deps = deps.map(dep => {
       if (!unresolveName(dep).sheet) {
@@ -447,8 +451,8 @@ export default class Spreadsheet {
       return dep;
     });
 
-    let node = this.getNode(name);
-    let newDeps = deps.filter(
+    const node = this.getNode(name);
+    const newDeps = deps.filter(
       dep => (node._dependencies || []).indexOf(dep) === -1,
     );
 
@@ -466,7 +470,7 @@ export default class Spreadsheet {
     cellName: string,
     deps: string[],
   ): void {
-    let name = resolveName(sheetName, cellName);
+    const name = resolveName(sheetName, cellName);
 
     deps = deps.map(dep => {
       if (!unresolveName(dep).sheet) {
@@ -475,7 +479,7 @@ export default class Spreadsheet {
       return dep;
     });
 
-    let node = this.getNode(name);
+    const node = this.getNode(name);
 
     node._dependencies = (node._dependencies || []).filter(
       dep => deps.indexOf(dep) === -1,
@@ -492,7 +496,7 @@ export default class Spreadsheet {
   }
 
   triggerDatabaseChanges(oldValues, newValues) {
-    let tables = new Set([...oldValues.keys(), ...newValues.keys()]);
+    const tables = new Set([...oldValues.keys(), ...newValues.keys()]);
 
     this.startTransaction();
     // TODO: Create an index of deps so we don't have to iterate

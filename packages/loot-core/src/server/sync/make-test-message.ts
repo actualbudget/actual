@@ -7,12 +7,12 @@ async function randomString() {
 }
 
 export default async function makeTestMessage(keyId) {
-  let messagePb = new SyncProtoBuf.Message();
+  const messagePb = new SyncProtoBuf.Message();
   messagePb.setDataset(await randomString());
   messagePb.setRow(await randomString());
   messagePb.setColumn(await randomString());
   messagePb.setValue(await randomString());
-  let binaryMsg = messagePb.serializeBinary();
+  const binaryMsg = messagePb.serializeBinary();
 
   return await encryption.encrypt(binaryMsg, keyId);
 }

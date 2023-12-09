@@ -8,7 +8,7 @@ import {
   RuleIndexer,
 } from './rules';
 
-let fieldTypes = new Map(
+const fieldTypes = new Map(
   Object.entries({
     id: 'id',
     date: 'date',
@@ -49,7 +49,7 @@ describe('Condition', () => {
     expect(cond.eval({ name: null })).toBe(false);
 
     ['gt', 'gte', 'lt', 'lte', 'isapprox'].forEach(op => {
-      let cond = new Condition(op, 'date', '2020-01-01', null, fieldTypes);
+      const cond = new Condition(op, 'date', '2020-01-01', null, fieldTypes);
       expect(cond.eval({ date: null })).toBe(false);
     });
 
@@ -308,8 +308,8 @@ describe('Condition', () => {
 
 describe('Action', () => {
   test('`set` operator sets a field', () => {
-    let action = new Action('set', 'name', 'James', null, fieldTypes);
-    let item = { name: 'Sarah' };
+    const action = new Action('set', 'name', 'James', null, fieldTypes);
+    const item = { name: 'Sarah' };
     action.exec(item);
     expect(item.name).toBe('James');
 
@@ -361,7 +361,7 @@ describe('Rule', () => {
   });
 
   test('rule with `and` conditionsOp evaluates conditions as AND', () => {
-    let rule = new Rule({
+    const rule = new Rule({
       conditionsOp: 'and',
       conditions: [
         { op: 'is', field: 'name', value: 'James' },
@@ -390,7 +390,7 @@ describe('Rule', () => {
   });
 
   test('rule with `or` conditionsOp evaluates conditions as OR', () => {
-    let rule = new Rule({
+    const rule = new Rule({
       conditionsOp: 'or',
       conditions: [
         { op: 'is', field: 'name', value: 'James' },
@@ -423,7 +423,7 @@ describe('Rule', () => {
   });
 
   test('rules are deterministically ranked', () => {
-    let rule = (id, conditions) =>
+    const rule = (id, conditions) =>
       new Rule({
         id,
         conditionsOp: 'and',
@@ -431,7 +431,7 @@ describe('Rule', () => {
         actions: [],
         fieldTypes,
       });
-    let expectOrder = (rules, ids) =>
+    const expectOrder = (rules, ids) =>
       expect(rules.map(r => r.getId())).toEqual(ids);
 
     let rules = [
@@ -460,10 +460,10 @@ describe('Rule', () => {
   });
 
   test('iterateIds finds all the ids', () => {
-    let rule = (id, conditions, actions = []) =>
+    const rule = (id, conditions, actions = []) =>
       new Rule({ id, conditionsOp: 'and', conditions, actions, fieldTypes });
 
-    let rules = [
+    const rules = [
       rule(
         'first',
         [{ op: 'is', field: 'description', value: 'id1' }],
@@ -488,7 +488,7 @@ describe('Rule', () => {
       ]),
     ];
 
-    let foundRules = [];
+    const foundRules = [];
     iterateIds(rules, 'description', (rule, value) => {
       foundRules.push(rule.getId());
     });
@@ -498,9 +498,9 @@ describe('Rule', () => {
 
 describe('RuleIndexer', () => {
   test('indexing a single field works', () => {
-    let indexer = new RuleIndexer({ field: 'name' });
+    const indexer = new RuleIndexer({ field: 'name' });
 
-    let rule = new Rule({
+    const rule = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'James' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
@@ -508,7 +508,7 @@ describe('RuleIndexer', () => {
     });
     indexer.index(rule);
 
-    let rule2 = new Rule({
+    const rule2 = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'foo' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
@@ -531,8 +531,8 @@ describe('RuleIndexer', () => {
 
   test('indexing using the firstchar method works', () => {
     // A condition that references both of the fields
-    let indexer = new RuleIndexer({ field: 'category', method: 'firstchar' });
-    let rule = new Rule({
+    const indexer = new RuleIndexer({ field: 'category', method: 'firstchar' });
+    const rule = new Rule({
       conditionsOp: 'and',
       conditions: [
         { op: 'is', field: 'name', value: 'James' },
@@ -543,7 +543,7 @@ describe('RuleIndexer', () => {
     });
     indexer.index(rule);
 
-    let rule2 = new Rule({
+    const rule2 = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'category', value: 'bars' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
@@ -551,7 +551,7 @@ describe('RuleIndexer', () => {
     });
     indexer.index(rule2);
 
-    let rule3 = new Rule({
+    const rule3 = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'date', value: '2020-01-20' }],
       actions: [{ op: 'set', field: 'name', value: 'Sarah' }],
@@ -582,7 +582,7 @@ describe('RuleIndexer', () => {
   });
 
   test('re-indexing a field works', () => {
-    let indexer = new RuleIndexer({ field: 'category', method: 'firstchar' });
+    const indexer = new RuleIndexer({ field: 'category', method: 'firstchar' });
 
     let rule = new Rule({
       id: 'id1',
@@ -619,9 +619,9 @@ describe('RuleIndexer', () => {
   });
 
   test('indexing works with the oneOf operator', () => {
-    let indexer = new RuleIndexer({ field: 'name', method: 'firstchar' });
+    const indexer = new RuleIndexer({ field: 'name', method: 'firstchar' });
 
-    let rule = new Rule({
+    const rule = new Rule({
       conditionsOp: 'and',
       conditions: [
         { op: 'oneOf', field: 'name', value: ['James', 'Sarah', 'Evy'] },
@@ -631,7 +631,7 @@ describe('RuleIndexer', () => {
     });
     indexer.index(rule);
 
-    let rule2 = new Rule({
+    const rule2 = new Rule({
       conditionsOp: 'and',
       conditions: [{ op: 'is', field: 'name', value: 'Georgia' }],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],

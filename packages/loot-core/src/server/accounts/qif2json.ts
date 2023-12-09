@@ -19,10 +19,10 @@ type QIFTransaction = {
 };
 
 export default function parse(qif, options: { dateFormat?: string } = {}) {
-  let lines = qif.split('\n');
+  const lines = qif.split('\n');
   let line = lines.shift();
-  let type = /!Type:([^$]*)$/.exec(line.trim());
-  let data: {
+  const type = /!Type:([^$]*)$/.exec(line.trim());
+  const data: {
     dateFormat: string | undefined;
     type?;
     transactions: QIFTransaction[];
@@ -30,7 +30,7 @@ export default function parse(qif, options: { dateFormat?: string } = {}) {
     dateFormat: options.dateFormat,
     transactions: [],
   };
-  let transactions = data.transactions;
+  const transactions = data.transactions;
   let transaction: QIFTransaction = {};
 
   if (!type || !type.length) {
@@ -69,7 +69,7 @@ export default function parse(qif, options: { dateFormat?: string } = {}) {
         transaction.payee = line.substring(1).replace(/&amp;/g, '&');
         break;
       case 'L':
-        let lArray = line.substring(1).split(':');
+        const lArray = line.substring(1).split(':');
         transaction.category = lArray[0];
         if (lArray[1] !== undefined) {
           transaction.subcategory = lArray[1];
@@ -79,7 +79,7 @@ export default function parse(qif, options: { dateFormat?: string } = {}) {
         transaction.clearedStatus = line.substring(1);
         break;
       case 'S':
-        let sArray = line.substring(1).split(':');
+        const sArray = line.substring(1).split(':');
         division.category = sArray[0];
         if (sArray[1] !== undefined) {
           division.subcategory = sArray[1];

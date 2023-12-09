@@ -271,7 +271,7 @@ module.exports = {
         './packages/loot-core/src/client/**/*',
         './packages/loot-core/src/mocks/**/*',
         './packages/loot-core/src/platform/**/*',
-        // './packages/loot-core/src/server/**/*',
+        './packages/loot-core/src/server/**/*',
         './packages/loot-core/src/shared/**/*',
         './packages/loot-core/src/types/**/*',
         './packages/loot-core/webpack/**/*',

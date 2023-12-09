@@ -63,9 +63,9 @@ async function getLatestBackup(id: string): Promise<LatestBackup | null> {
 }
 
 export async function getAvailableBackups(id: string): Promise<Backup[]> {
-  let backups = await getBackups(id);
+  const backups = await getBackups(id);
 
-  let latestBackup = await getLatestBackup(id);
+  const latestBackup = await getLatestBackup(id);
   if (latestBackup) {
     backups.unshift(latestBackup);
   }
@@ -85,13 +85,13 @@ export async function updateBackups(backups) {
   }, {});
 
   const removed = [];
-  for (let day of Object.keys(byDay)) {
+  for (const day of Object.keys(byDay)) {
     const dayBackups = byDay[day];
     const isToday = day === monthUtils.currentDay();
     // Allow 3 backups of the current day (so fine-grained edits are
     // kept around). Otherwise only keep around one backup per day.
     // And only keep a total of 10 backups.
-    for (let backup of dayBackups.slice(isToday ? 3 : 1)) {
+    for (const backup of dayBackups.slice(isToday ? 3 : 1)) {
       removed.push(backup.id);
     }
   }
@@ -111,8 +111,8 @@ export async function makeBackup(id: string) {
     await fs.removeFile(fs.join(fs.getBudgetDir(id), LATEST_BACKUP_FILENAME));
   }
 
-  let backupId = `${uuidv4()}.sqlite`;
-  let backupPath = fs.join(budgetDir, 'backups', backupId);
+  const backupId = `${uuidv4()}.sqlite`;
+  const backupPath = fs.join(budgetDir, 'backups', backupId);
 
   if (!(await fs.exists(fs.join(budgetDir, 'backups')))) {
     await fs.mkdir(fs.join(budgetDir, 'backups'));
@@ -127,7 +127,7 @@ export async function makeBackup(id: string) {
   sqlite.closeDatabase(db);
 
   const toRemove = await updateBackups(await getBackups(id));
-  for (let id of toRemove) {
+  for (const id of toRemove) {
     await fs.removeFile(fs.join(budgetDir, 'backups', id));
   }
 
