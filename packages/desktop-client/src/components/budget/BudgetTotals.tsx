@@ -12,6 +12,7 @@ import { getScrollbarWidth } from './util';
 
 type BudgetTotalsProps = {
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
+  showNewCategoryGroup: () => void;
   toggleHiddenCategories: () => void;
   expandAllCategories: () => void;
   collapseAllCategories: () => void;
@@ -19,6 +20,7 @@ type BudgetTotalsProps = {
 
 const BudgetTotals = memo(function BudgetTotals({
   MonthComponent,
+  showNewCategoryGroup,
   toggleHiddenCategories,
   expandAllCategories,
   collapseAllCategories,
@@ -77,7 +79,9 @@ const BudgetTotals = memo(function BudgetTotals({
             >
               <Menu
                 onMenuSelect={type => {
-                  if (type === 'toggle-visibility') {
+                  if (type === 'add-category-group') {
+                    showNewCategoryGroup();
+                  } else if (type === 'toggle-visibility') {
                     toggleHiddenCategories();
                   } else if (type === 'expandAllCategories') {
                     expandAllCategories();
@@ -87,6 +91,10 @@ const BudgetTotals = memo(function BudgetTotals({
                   setMenuOpen(false);
                 }}
                 items={[
+                  {
+                    name: 'add-category-group',
+                    text: 'Add category group',
+                  },
                   {
                     name: 'toggle-visibility',
                     text: 'Toggle hidden categories',

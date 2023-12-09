@@ -242,7 +242,6 @@ const BudgetCategories = memo(
                 >
                   <IncomeHeader
                     MonthComponent={dataComponents.IncomeHeaderComponent}
-                    onShowNewGroup={onShowNewGroup}
                   />
                 </View>
               );

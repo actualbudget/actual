@@ -1579,17 +1579,6 @@ function BudgetGroups({
           );
         })}
 
-      <View
-        style={{
-          alignItems: 'flex-start',
-          justifyContent: 'flex-start',
-        }}
-      >
-        <Button onPointerUp={onAddGroup} style={{ fontSize: 12, margin: 10 }}>
-          Add Group
-        </Button>
-      </View>
-
       {incomeGroup && (
         <IncomeGroup
           type={type}
@@ -1750,6 +1739,7 @@ export function BudgetTable(props) {
           !editMode ? (
             <BudgetMenu
               onEditMode={onEditMode}
+              onAddGroup={onAddGroup}
               onToggleHiddenCategories={onToggleHiddenCategories}
               onSwitchBudgetType={_onSwitchBudgetType}
             />
@@ -1992,6 +1982,7 @@ export function BudgetTable(props) {
 
 function BudgetMenu({
   onEditMode,
+  onAddGroup,
   onToggleHiddenCategories,
   onSwitchBudgetType,
 }) {
@@ -2003,6 +1994,9 @@ function BudgetMenu({
     switch (name) {
       case 'edit-mode':
         onEditMode?.(true);
+        break;
+      case 'add-category-group':
+        onAddGroup?.();
         break;
       case 'toggle-hidden-categories':
         onToggleHiddenCategories?.();
@@ -2045,6 +2039,7 @@ function BudgetMenu({
             onMenuSelect={onMenuSelect}
             items={[
               { name: 'edit-mode', text: 'Edit mode' },
+              { name: 'add-category-group', text: 'Add category group' },
               {
                 name: 'toggle-hidden-categories',
                 text: 'Toggle hidden categories',

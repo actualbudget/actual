@@ -230,6 +230,7 @@ class BudgetTable extends Component {
         >
           <BudgetTotals
             MonthComponent={dataComponents.BudgetTotalsComponent}
+            showNewCategoryGroup={onShowNewGroup}
             toggleHiddenCategories={this.toggleHiddenCategories}
             expandAllCategories={this.expandAllCategories}
             collapseAllCategories={this.collapseAllCategories}
