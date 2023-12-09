@@ -36,7 +36,6 @@ const BudgetCategories = memo(
     onReorderGroup,
     onShowNewCategory,
     onHideNewCategory,
-    onShowNewGroup,
     onHideNewGroup,
   }) => {
     const items = useMemo(() => {

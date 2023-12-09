@@ -273,7 +273,6 @@ class BudgetTable extends Component {
                   onReorderGroup={this.onReorderGroup}
                   onShowNewCategory={onShowNewCategory}
                   onHideNewCategory={onHideNewCategory}
-                  onShowNewGroup={onShowNewGroup}
                   onHideNewGroup={onHideNewGroup}
                   onBudgetAction={this.onBudgetAction}
                   onShowActivity={this.onShowActivity}
