@@ -69,6 +69,8 @@ export default function AccountDetails({
   categories,
   payees,
   balance,
+  balanceCleared,
+  balanceUncleared,
   isNewTransaction,
   onLoadMore,
   onSearch,
@@ -120,19 +122,60 @@ export default function AccountDetails({
           marginTop: 10,
         }}
       >
-        <Label title="BALANCE" />
-        <CellValue
-          binding={balance}
-          type="financial"
+        <View
           style={{
-            fontSize: 18,
-            fontWeight: '500',
+            flexDirection: 'row',
+            boxSizing: 'content-box',
+            width: '100%',
+            justifyContent: 'space-evenly',
           }}
-          getStyle={value => ({
-            color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
-          })}
-          data-testid="account-balance"
-        />
+        >
+          <View>
+            <Label title="BALANCE" style={{ textAlign: 'center' }} />
+            <CellValue
+              binding={balance}
+              type="financial"
+              style={{
+                fontSize: 18,
+                fontWeight: '500',
+              }}
+              getStyle={value => ({
+                color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
+              })}
+              data-testid="account-balance"
+            />
+          </View>
+          <View>
+            <Label title="CLEARED" style={{ textAlign: 'center' }} />
+            <CellValue
+              binding={balanceCleared}
+              type="financial"
+              style={{
+                fontSize: 18,
+                fontWeight: '500',
+              }}
+              getStyle={value => ({
+                color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
+              })}
+              data-testid="account-balance-cleared"
+            />
+          </View>
+          <View>
+            <Label title="UNCLEARED" style={{ textAlign: 'center' }} />
+            <CellValue
+              binding={balanceUncleared}
+              type="financial"
+              style={{
+                fontSize: 18,
+                fontWeight: '500',
+              }}
+              getStyle={value => ({
+                color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
+              })}
+              data-testid="account-balance-uncleared"
+            />
+          </View>
+        </View>
         <TransactionSearchInput
           accountName={account.name}
           onSearch={onSearch}

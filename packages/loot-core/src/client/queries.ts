@@ -103,6 +103,26 @@ export function accountBalance(acct) {
   };
 }
 
+export function accountBalanceCleared(acct) {
+  return {
+    name: `balanceCleared-${acct.id}`,
+    query: q('transactions')
+      .filter({ account: acct.id, cleared: true })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$amount' }),
+  };
+}
+
+export function accountBalanceUncleared(acct) {
+  return {
+    name: `balanceUncleared-${acct.id}`,
+    query: q('transactions')
+      .filter({ account: acct.id, cleared: false })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$amount' }),
+  };
+}
+
 export function allAccountBalance() {
   return {
     query: q('transactions')

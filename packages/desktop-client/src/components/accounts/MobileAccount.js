@@ -190,6 +190,8 @@ export default function Account(props) {
   };
 
   const balance = queries.accountBalance(account);
+  const balanceCleared = queries.accountBalanceCleared(account);
+  const balanceUncleared = queries.accountBalanceUncleared(account);
   const numberFormat = state.prefs.numberFormat || 'comma-dot';
   const hideFraction = state.prefs.hideFraction || false;
 
@@ -213,6 +215,8 @@ export default function Account(props) {
               transactions={transactions}
               prependTransactions={prependTransactions || []}
               balance={balance}
+              balanceCleared={balanceCleared}
+              balanceUncleared={balanceUncleared}
               isNewTransaction={isNewTransaction}
               onLoadMore={() => {
                 paged?.fetchNext();
