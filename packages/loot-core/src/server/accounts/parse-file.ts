@@ -24,11 +24,11 @@ export async function parseFile(
   filepath: string,
   options?: ParseFileOptions,
 ): Promise<ParseFileResult> {
-  let errors = Array<ParseError>();
-  let m = filepath.match(/\.[^.]*$/);
+  const errors = Array<ParseError>();
+  const m = filepath.match(/\.[^.]*$/);
 
   if (m) {
-    let ext = m[0];
+    const ext = m[0];
 
     switch (ext.toLowerCase()) {
       case '.qif':
@@ -54,8 +54,8 @@ async function parseCSV(
   filepath: string,
   options?: ParseFileOptions,
 ): Promise<ParseFileResult> {
-  let errors = Array<ParseError>();
-  let contents = await fs.readFile(filepath);
+  const errors = Array<ParseError>();
+  const contents = await fs.readFile(filepath);
 
   let data;
   try {
@@ -81,8 +81,8 @@ async function parseCSV(
 }
 
 async function parseQIF(filepath: string): Promise<ParseFileResult> {
-  let errors = Array<ParseError>();
-  let contents = await fs.readFile(filepath);
+  const errors = Array<ParseError>();
+  const contents = await fs.readFile(filepath);
 
   let data;
   try {
@@ -131,7 +131,7 @@ async function parseOFX(
 
   // Banks don't always implement the OFX standard properly
   // If no payee is available try and fallback to memo
-  let useMemoFallback = options.fallbackMissingPayeeToMemo;
+  const useMemoFallback = options.fallbackMissingPayeeToMemo;
 
   return {
     errors,
@@ -152,13 +152,13 @@ async function parseOFXNodeLibOFX(
   filepath: string,
   options: ParseFileOptions,
 ): Promise<ParseFileResult> {
-  let { getOFXTransactions, initModule } = await import(
+  const { getOFXTransactions, initModule } = await import(
     /* webpackChunkName: 'xfo' */ 'node-libofx'
   );
   await initModule();
 
-  let errors = Array<ParseError>();
-  let contents = await fs.readFile(filepath, 'binary');
+  const errors = Array<ParseError>();
+  const contents = await fs.readFile(filepath, 'binary');
 
   let data;
   try {
@@ -173,7 +173,7 @@ async function parseOFXNodeLibOFX(
 
   // Banks don't always implement the OFX standard properly
   // If no payee is available try and fallback to memo
-  let useMemoFallback = options.fallbackMissingPayeeToMemo;
+  const useMemoFallback = options.fallbackMissingPayeeToMemo;
 
   return {
     errors,

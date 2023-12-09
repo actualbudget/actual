@@ -153,7 +153,7 @@ export const schemaConfig = {
           return 'v_transactions_internal_alive';
         }
 
-        let splitType = tableOptions.splits || 'inline';
+        const splitType = tableOptions.splits || 'inline';
         // Use the view to exclude dead transactions if using `inline` or `none`
         if (!withDead && (splitType === 'inline' || splitType === 'none')) {
           return 'v_transactions_internal_alive';
@@ -179,7 +179,7 @@ export const schemaConfig = {
   },
 
   customizeQuery(queryState) {
-    let { table: tableName } = queryState;
+    const { table: tableName } = queryState;
 
     function orderBy(orders) {
       // If order was specified, always add id as the last sort to make
@@ -221,7 +221,7 @@ export const schemaConfig = {
   views: {
     payees: {
       v_payees: internalFields => {
-        let fields = internalFields({
+        const fields = internalFields({
           name: 'COALESCE(__accounts.name, _.name)',
         });
 
@@ -241,7 +241,7 @@ export const schemaConfig = {
       },
 
       v_categories: internalFields => {
-        let fields = internalFields({ group: 'cat_group' });
+        const fields = internalFields({ group: 'cat_group' });
         return `SELECT ${fields} FROM categories _`;
       },
     },
@@ -249,7 +249,7 @@ export const schemaConfig = {
     schedules: {
       v_schedules: internalFields => {
         /* eslint-disable rulesdir/typography */
-        let fields = internalFields({
+        const fields = internalFields({
           next_date: `
             CASE
               WHEN _nd.local_next_date_ts = _nd.base_next_date_ts THEN _nd.local_next_date
@@ -289,7 +289,7 @@ export const schemaConfig = {
 
       v_transactions_internal: internalFields => {
         // Override some fields to make custom stuff
-        let fields = internalFields({
+        const fields = internalFields({
           payee: 'pm.targetId',
           category: `CASE WHEN _.isParent = 1 THEN NULL ELSE cm.transferId END`,
           amount: `IFNULL(_.amount, 0)`,
@@ -317,7 +317,7 @@ export const schemaConfig = {
       `,
 
       v_transactions: (_, publicFields) => {
-        let fields = publicFields({
+        const fields = publicFields({
           payee: 'p.id',
           category: 'c.id',
           account: 'a.id',

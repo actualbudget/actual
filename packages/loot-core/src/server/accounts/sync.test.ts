@@ -112,7 +112,7 @@ async function getAllPayees() {
 
 describe('Account sync', () => {
   test('reconcile creates payees correctly', async () => {
-    let { id } = await prepareDatabase();
+    const { id } = await prepareDatabase();
 
     let payees = await getAllPayees();
     expect(payees.length).toBe(0);
@@ -125,7 +125,7 @@ describe('Account sync', () => {
     payees = await getAllPayees();
     expect(payees.length).toBe(2);
 
-    let transactions = await getAllTransactions();
+    const transactions = await getAllTransactions();
     expect(transactions.length).toBe(2);
     expect(transactions.find(t => t.amount === 4133).payee).toBe(
       payees.find(p => p.name === 'Bakkerij').id,
@@ -136,16 +136,16 @@ describe('Account sync', () => {
   });
 
   test('reconcile matches single transaction', async () => {
-    let mockTransactions = prepMockTransactions();
+    const mockTransactions = prepMockTransactions();
     const { id, account_id } = await prepareDatabase();
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
 
     // The payee can be anything, all that matters is the amount is the same
-    let mockTransaction = mockTransactions.find(t => t.date === '2017-10-17');
+    const mockTransaction = mockTransactions.find(t => t.date === '2017-10-17');
     mockTransaction.amount = 29.47;
 
-    let payeeId = await db.insertPayee({ name: 'macy' });
+    const payeeId = await db.insertPayee({ name: 'macy' });
     await db.insertTransaction({
       id: 'one',
       account: id,
@@ -154,7 +154,7 @@ describe('Account sync', () => {
       payee: payeeId,
     });
 
-    let { added, updated } = await reconcileTransactions(
+    const { added, updated } = await reconcileTransactions(
       id,
       mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid),
     );
@@ -162,18 +162,18 @@ describe('Account sync', () => {
     expect(added.length).toBe(3);
     expect(updated.length).toBe(1);
 
-    let transactions = await getAllTransactions();
-    let transaction = transactions.find(t => t.amount === -2947);
+    const transactions = await getAllTransactions();
+    const transaction = transactions.find(t => t.amount === -2947);
     expect(transaction.id).toBe(updated[0]);
 
     // The payee has not been updated - it's still the payee that the original transaction had
-    let payees = await getAllPayees();
+    const payees = await getAllPayees();
     expect(payees.length).toBe(18);
     expect(transaction.payee).toBe(payeeId);
   });
 
   test('reconcile matches multiple transactions', async () => {
-    let mockTransactions = prepMockTransactions();
+    const mockTransactions = prepMockTransactions();
     const { id, account_id } = await prepareDatabase();
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
@@ -183,7 +183,7 @@ describe('Account sync', () => {
     // name. This should happen even though other transactions with
     // the same amount are imported first, i.e. high fidelity matches
     // always win
-    let mocked = mockTransactions.filter(t => t.date === '2017-10-17');
+    const mocked = mockTransactions.filter(t => t.date === '2017-10-17');
     mocked[0].name = papaJohns;
     mocked[0].amount = 29.47;
     mocked[1].name = 'Lowe’s Store';
@@ -216,12 +216,12 @@ describe('Account sync', () => {
       payee: await db.insertPayee({ name: 'macy' }),
     });
 
-    let { added, updated } = await reconcileTransactions(
+    const { added, updated } = await reconcileTransactions(
       id,
       mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid),
     );
 
-    let transactions = await getAllTransactions();
+    const transactions = await getAllTransactions();
     expect(updated.length).toBe(3);
     expect(added.length).toBe(1);
 
@@ -237,12 +237,12 @@ describe('Account sync', () => {
   });
 
   test('reconcile matches multiple transactions (imported_id wins)', async () => {
-    let mockTransactions = prepMockTransactions();
+    const mockTransactions = prepMockTransactions();
     const { id, account_id } = await prepareDatabase();
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
 
-    let mocked = mockTransactions.filter(t => t.date === '2017-10-17');
+    const mocked = mockTransactions.filter(t => t.date === '2017-10-17');
     mocked[0].name = papaJohns;
     mocked[0].amount = 29.47;
     mocked[1].name = lowes;
@@ -267,12 +267,12 @@ describe('Account sync', () => {
       payee: await db.insertPayee({ name: 'lowes' }),
     });
 
-    let { added, updated } = await reconcileTransactions(
+    const { added, updated } = await reconcileTransactions(
       id,
       mockTransactions.filter(t => t.date >= '2017-10-15').map(fromPlaid),
     );
 
-    let transactions = await getAllTransactions();
+    const transactions = await getAllTransactions();
     expect(updated).toEqual(['two', 'one']);
     expect(added.length).toBe(2);
 
@@ -286,7 +286,7 @@ describe('Account sync', () => {
     const { id, account_id } = await prepareDatabase();
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
-    let differ = expectSnapshotWithDiffer(await getAllTransactions());
+    const differ = expectSnapshotWithDiffer(await getAllTransactions());
 
     mockTransactions = mockTransactions.filter(t => t.date === '2017-10-17');
     mockTransactions[0].name = 'foo';
@@ -323,7 +323,7 @@ describe('Account sync', () => {
   });
 
   test('import updates transfers when matched', async () => {
-    let mockTransactions = prepMockTransactions();
+    const mockTransactions = prepMockTransactions();
     const { id, account_id } = await prepareDatabase();
     await db.insertAccount({ id: 'two', name: 'two' });
     await db.insertPayee({
@@ -333,7 +333,7 @@ describe('Account sync', () => {
     });
 
     await syncAccount('userId', 'userKey', id, account_id, 'bank');
-    let differ = expectSnapshotWithDiffer(await getAllTransactions());
+    const differ = expectSnapshotWithDiffer(await getAllTransactions());
 
     const mockTransaction = mockTransactions.find(t => t.date === '2017-10-17');
     mockTransaction.name = '#001 fenn st Macy’s 33333 EMX';
@@ -373,12 +373,12 @@ describe('Account sync', () => {
       { date: '2020-01-01', amount: 2948 },
     ]);
 
-    let transactions = await getAllTransactions();
+    const transactions = await getAllTransactions();
     expect(transactions.length).toBe(2);
     expect(transactions).toMatchSnapshot();
 
     // No payees should be created
-    let payees = await getAllPayees();
+    const payees = await getAllPayees();
     expect(payees.length).toBe(0);
 
     // Make _at least_ the date is required
@@ -393,12 +393,12 @@ describe('Account sync', () => {
       id: 'group2',
       name: 'group2',
     });
-    let catId = await db.insertCategory({
+    const catId = await db.insertCategory({
       name: 'Food',
       cat_group: 'group2',
     });
 
-    let payeeId = await db.insertPayee({ name: 'bakkerij' });
+    const payeeId = await db.insertPayee({ name: 'bakkerij' });
 
     await insertRule({
       stage: null,
@@ -411,7 +411,7 @@ describe('Account sync', () => {
       { date: '2020-01-02', payee_name: 'Bakkerij', amount: 4133 },
     ]);
 
-    let transactions = await getAllTransactions();
+    const transactions = await getAllTransactions();
     // Even though the payee was inferred from the string name (no
     // renaming rules ran), it should match the above rule and set the
     // category
@@ -420,7 +420,7 @@ describe('Account sync', () => {
     expect(transactions[0].category).toBe(catId);
 
     // It also should not have created a payee
-    let payees = await getAllPayees();
+    const payees = await getAllPayees();
     expect(payees.length).toBe(1);
     expect(payees[0].id).toBe(payeeId);
   });
@@ -432,7 +432,7 @@ describe('Account sync', () => {
       { date: '2020-01-02', payee_name: '     ', amount: 4133 },
     ]);
 
-    let transactions = await getAllTransactions();
+    const transactions = await getAllTransactions();
     // Even though the payee was inferred from the string name (no
     // renaming rules ran), it should match the above rule and set the
     // category
@@ -442,14 +442,14 @@ describe('Account sync', () => {
     expect(transactions[0].date).toBe(20200102);
 
     // It also should not have created a payee
-    let payees = await getAllPayees();
+    const payees = await getAllPayees();
     expect(payees.length).toBe(0);
   });
 
   test('reconcile run rules dont create unnecessary payees', async () => {
     const { id: acctId } = await prepareDatabase();
 
-    let payeeId = await db.insertPayee({ name: 'bakkerij-renamed' });
+    const payeeId = await db.insertPayee({ name: 'bakkerij-renamed' });
 
     await insertRule({
       stage: null,
@@ -462,16 +462,16 @@ describe('Account sync', () => {
       { date: '2020-01-02', payee_name: 'bakkerij', amount: 4133 },
     ]);
 
-    let payees = await getAllPayees();
+    const payees = await getAllPayees();
     expect(payees.length).toBe(1);
     expect(payees[0].id).toBe(payeeId);
 
-    let transactions = await getAllTransactions();
+    const transactions = await getAllTransactions();
     expect(transactions.length).toBe(1);
     expect(transactions[0].payee).toBe(payeeId);
   });
 
-  let testMapped = version => {
+  const testMapped = version => {
     test(`reconcile matches unmapped and mapped payees (${version})`, async () => {
       const { id: acctId } = await prepareDatabase();
 
@@ -487,8 +487,8 @@ describe('Account sync', () => {
         // to
       }
 
-      let payeeId1 = await db.insertPayee({ name: 'bakkerij2' });
-      let payeeId2 = await db.insertPayee({ name: 'bakkerij-renamed' });
+      const payeeId1 = await db.insertPayee({ name: 'bakkerij2' });
+      const payeeId2 = await db.insertPayee({ name: 'bakkerij-renamed' });
 
       // Insert a rule *before* payees are merged. Not that v2 would
       // fail if we inserted this rule after, because the rule would
@@ -528,7 +528,7 @@ describe('Account sync', () => {
         payee: null,
       });
 
-      let { updated } = await reconcileTransactions(acctId, [
+      const { updated } = await reconcileTransactions(acctId, [
         {
           date: '2017-10-17',
           payee_name: 'bakkerij',
@@ -537,14 +537,14 @@ describe('Account sync', () => {
         },
       ]);
 
-      let payees = await getAllPayees();
+      const payees = await getAllPayees();
       expect(payees.length).toBe(1);
       expect(payees[0].id).toBe(version === 'v1' ? payeeId2 : payeeId1);
 
       expect(updated.length).toBe(1);
       expect(updated[0]).toBe('one');
 
-      let transactions = await getAllTransactions();
+      const transactions = await getAllTransactions();
       expect(transactions.length).toBe(2);
       expect(transactions.find(t => t.id === 'one').imported_id).toBe(
         'imported1',
@@ -558,7 +558,7 @@ describe('Account sync', () => {
   test('addTransactions simply adds transactions', async () => {
     const { id: acctId } = await prepareDatabase();
 
-    let payeeId = await db.insertPayee({ name: 'bakkerij-renamed' });
+    const payeeId = await db.insertPayee({ name: 'bakkerij-renamed' });
 
     // Make sure it still runs rules
     await insertRule({
@@ -568,7 +568,7 @@ describe('Account sync', () => {
       actions: [{ op: 'set', field: 'payee', value: payeeId }],
     });
 
-    let transactions = [
+    const transactions = [
       {
         date: '2017-10-17',
         payee_name: 'BAKKerij',
@@ -591,15 +591,15 @@ describe('Account sync', () => {
       },
     ];
 
-    let added = await addTransactions(acctId, transactions);
+    const added = await addTransactions(acctId, transactions);
     expect(added.length).toBe(transactions.length);
 
-    let payees = await getAllPayees();
+    const payees = await getAllPayees();
     expect(payees.length).toBe(3);
 
-    let getName = id => payees.find(p => p.id === id).name;
+    const getName = id => payees.find(p => p.id === id).name;
 
-    let allTransactions = await getAllTransactions();
+    const allTransactions = await getAllTransactions();
     expect(allTransactions.length).toBe(4);
     expect(allTransactions.map(t => getName(t.payee))).toEqual([
       'bakkerij3',

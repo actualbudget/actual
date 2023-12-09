@@ -13,7 +13,7 @@ export const accountModel = {
   },
 
   fromExternal(account) {
-    let result = { ...account };
+    const result = { ...account };
     if ('offbudget' in account) {
       result.offbudget = account.offbudget ? 1 : 0;
     }
@@ -37,7 +37,7 @@ export const categoryModel = {
   },
 
   fromExternal(category) {
-    let { group_id: _, ...result } = category;
+    const { group_id: _, ...result } = category;
     if ('is_income' in category) {
       result.is_income = category.is_income ? 1 : 0;
     }
@@ -61,7 +61,7 @@ export const categoryGroupModel = {
   },
 
   fromExternal(group) {
-    let result = { ...group };
+    const result = { ...group };
     if ('is_income' in group) {
       result.is_income = group.is_income ? 1 : 0;
     }

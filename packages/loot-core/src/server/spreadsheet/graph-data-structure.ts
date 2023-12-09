@@ -1,5 +1,5 @@
 function Graph() {
-  let graph = {
+  const graph = {
     addNode,
     removeNode,
     adjacent,
@@ -12,8 +12,8 @@ function Graph() {
     getEdges,
   };
 
-  let edges = new Map();
-  let incomingEdges = new Map();
+  const edges = new Map();
+  const incomingEdges = new Map();
 
   function getEdges() {
     return { edges, incomingEdges };
@@ -29,7 +29,7 @@ function Graph() {
     const incoming = adjacentIncoming(node);
     incomingEdges.set(node, new Set());
 
-    let iter = incoming.values();
+    const iter = incoming.values();
     let cur = iter.next();
     while (!cur.done) {
       removeEdge(cur.value, node);
@@ -78,7 +78,7 @@ function Graph() {
   function topologicalSortUntil(name, visited, sorted) {
     visited.add(name);
 
-    let iter = adjacent(name).values();
+    const iter = adjacent(name).values();
     let cur = iter.next();
     while (!cur.done) {
       if (!visited.has(cur.value)) {
@@ -104,7 +104,7 @@ function Graph() {
   }
 
   function generateDOT() {
-    let edgeStrings = [];
+    const edgeStrings = [];
     edges.forEach(function (adj, edge) {
       if (adj.length !== 0) {
         edgeStrings.push(`${edge} -> {${adj.join(',')}}`);
