@@ -95,6 +95,7 @@ function SidebarGroup({
           <View style={{ marginLeft: 5, flexShrink: 0 }}>
             <Button
               type="bare"
+              className="hover-visible"
               onClick={e => {
                 e.stopPropagation();
                 setMenuOpen(true);
@@ -137,7 +138,11 @@ function SidebarGroup({
             )}
           </View>
           <View style={{ flex: 1 }} />
-          <NotesButton id={group.id} />
+          <NotesButton
+            id={group.id}
+            style={dragPreview && { color: 'currentColor' }}
+            defaultColor={theme.pageTextLight}
+          />
         </>
       )}
     </View>
@@ -150,8 +155,15 @@ function SidebarGroup({
         ...style,
         width: 200,
         backgroundColor: theme.tableRowHeaderBackground,
-        '& button': { display: 'none' },
-        '&:hover button': { display: 'flex', color: theme.tableTextHover },
+        overflow: 'hidden',
+        '& .hover-visible': {
+          display: 'none',
+        },
+        ...(!dragPreview && {
+          '&:hover .hover-visible': {
+            display: 'flex',
+          },
+        }),
         ...(dragPreview && {
           paddingLeft: 10,
           zIndex: 10000,
