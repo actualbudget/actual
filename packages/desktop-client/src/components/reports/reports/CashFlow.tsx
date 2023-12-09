@@ -170,8 +170,6 @@ export default function CashFlow(): JSX.Element {
         </View>
 
         <CashFlowGraph
-          start={start}
-          end={end}
           graphData={graphData}
           isConcise={isConcise}
         />

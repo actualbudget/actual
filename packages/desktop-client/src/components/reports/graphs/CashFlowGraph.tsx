@@ -16,14 +16,10 @@ import Container from '../Container';
 import Tooltip from '../Tooltip';
 
 type CashFlowGraphProps = {
-  start: string;
-  end: string;
   graphData: { expenses; income; balances };
   isConcise: boolean;
 };
 function CashFlowGraph({
-  start,
-  end,
   graphData,
   isConcise,
 }: CashFlowGraphProps) {
