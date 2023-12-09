@@ -146,12 +146,16 @@ export default function AccountDetails({
             />
           </View>
           <View>
-            <Label title="CLEARED" style={{ textAlign: 'center' }} />
+            <Label
+              title="CLEARED"
+              style={{ textAlign: 'center', fontSize: 12 }}
+            />
             <CellValue
               binding={balanceCleared}
               type="financial"
               style={{
-                fontSize: 18,
+                fontSize: 12,
+                textAlign: 'center',
                 fontWeight: '500',
               }}
               getStyle={value => ({
@@ -161,12 +165,16 @@ export default function AccountDetails({
             />
           </View>
           <View>
-            <Label title="UNCLEARED" style={{ textAlign: 'center' }} />
+            <Label
+              title="UNCLEARED"
+              style={{ textAlign: 'center', fontSize: 12 }}
+            />
             <CellValue
               binding={balanceUncleared}
               type="financial"
               style={{
-                fontSize: 18,
+                fontSize: 12,
+                textAlign: 'center',
                 fontWeight: '500',
               }}
               getStyle={value => ({
