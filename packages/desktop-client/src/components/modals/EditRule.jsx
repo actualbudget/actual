@@ -768,8 +768,11 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   }
 
   function onApply() {
+    const selectedTransactions = transactions.filter(({ id }) =>
+      selectedInst.items.has(id),
+    );
     send('rule-apply-actions', {
-      transactionIds: [...selectedInst.items],
+      transactions: selectedTransactions,
       actions: actionSplits.flat().map(unparse),
     }).then(() => {
       // This makes it refetch the transactions

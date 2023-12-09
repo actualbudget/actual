@@ -11,6 +11,7 @@ import {
   sortNumbers,
   getApproxNumberThreshold,
 } from '../../shared/rules';
+import { ungroupTransaction } from '../../shared/transactions';
 import { partitionByField, fastSetMerge } from '../../shared/util';
 import {
   type TransactionEntity,
@@ -32,6 +33,7 @@ import {
   rankRules,
   migrateIds,
   iterateIds,
+  execActions,
 } from './rules';
 import { batchUpdateTransactions } from './transactions';
 
@@ -492,8 +494,8 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
   return { filters, errors };
 }
 
-export function applyActions(
-  transactionIds: string[],
+export async function applyActions(
+  transactions: TransactionEntity[],
   actions: Array<Action | RuleActionEntity>,
 ) {
   const parsedActions = actions
@@ -526,12 +528,14 @@ export function applyActions(
     return null;
   }
 
-  const updated = transactionIds.map(id => {
-    const update = { id };
-    for (const action of parsedActions) {
-      action.exec(update);
-    }
-    return update;
+  const splitCount =
+    parsedActions.reduce(
+      (prev, cur) => Math.max(prev, cur.options?.splitIndex ?? 0),
+      0,
+    ) + 1;
+
+  const updated = transactions.flatMap(trans => {
+    return ungroupTransaction(execActions(parsedActions, trans, splitCount));
   });
 
   return batchUpdateTransactions({ updated });
