@@ -12,6 +12,7 @@ import MobileBackButton from '../MobileBackButton';
 import { Page } from '../Page';
 import PullToRefresh from '../responsive/PullToRefresh';
 import CellValue from '../spreadsheet/CellValue';
+import useSheetValue from '../spreadsheet/useSheetValue';
 import { TransactionList } from '../transactions/MobileTransaction';
 
 function TransactionSearchInput({ accountName, onSearch }) {
@@ -130,6 +131,27 @@ export default function AccountDetails({
             justifyContent: 'space-evenly',
           }}
         >
+          <View
+            style={{
+              visibility:
+                useSheetValue(balanceUncleared) === 0 ? 'hidden' : 'visible',
+            }}
+          >
+            <Label
+              title="CLEARED"
+              style={{ textAlign: 'center', fontSize: 12 }}
+            />
+            <CellValue
+              binding={balanceCleared}
+              type="financial"
+              style={{
+                fontSize: 12,
+                textAlign: 'center',
+                fontWeight: '500',
+              }}
+              data-testid="account-balance-cleared"
+            />
+          </View>
           <View>
             <Label title="BALANCE" style={{ textAlign: 'center' }} />
             <CellValue
@@ -145,26 +167,12 @@ export default function AccountDetails({
               data-testid="account-balance"
             />
           </View>
-          <View>
-            <Label
-              title="CLEARED"
-              style={{ textAlign: 'center', fontSize: 12 }}
-            />
-            <CellValue
-              binding={balanceCleared}
-              type="financial"
-              style={{
-                fontSize: 12,
-                textAlign: 'center',
-                fontWeight: '500',
-              }}
-              getStyle={value => ({
-                color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
-              })}
-              data-testid="account-balance-cleared"
-            />
-          </View>
-          <View>
+          <View
+            style={{
+              visibility:
+                useSheetValue(balanceUncleared) === 0 ? 'hidden' : 'visible',
+            }}
+          >
             <Label
               title="UNCLEARED"
               style={{ textAlign: 'center', fontSize: 12 }}
@@ -177,9 +185,6 @@ export default function AccountDetails({
                 textAlign: 'center',
                 fontWeight: '500',
               }}
-              getStyle={value => ({
-                color: value < 0 ? theme.errorText : theme.pillTextHighlighted,
-              })}
               data-testid="account-balance-uncleared"
             />
           </View>
