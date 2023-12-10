@@ -135,6 +135,7 @@ export default function AccountDetails({
             style={{
               visibility:
                 useSheetValue(balanceUncleared) === 0 ? 'hidden' : 'visible',
+              width: '33%',
             }}
           >
             <Label
@@ -152,13 +153,14 @@ export default function AccountDetails({
               data-testid="account-balance-cleared"
             />
           </View>
-          <View>
+          <View style={{ width: '33%' }}>
             <Label title="BALANCE" style={{ textAlign: 'center' }} />
             <CellValue
               binding={balance}
               type="financial"
               style={{
                 fontSize: 18,
+                textAlign: 'center',
                 fontWeight: '500',
               }}
               getStyle={value => ({
@@ -171,6 +173,7 @@ export default function AccountDetails({
             style={{
               visibility:
                 useSheetValue(balanceUncleared) === 0 ? 'hidden' : 'visible',
+              width: '33%',
             }}
           >
             <Label
