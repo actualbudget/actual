@@ -28,7 +28,6 @@ export const categoryModel = {
   ...models.categoryModel,
 
   toExternal(category) {
-    console.log(category.hidden)
     return {
       id: category.id,
       name: category.name,
