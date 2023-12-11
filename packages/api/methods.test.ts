@@ -117,12 +117,12 @@ describe('API CRUD operations', () => {
     });
     const categoryId = await api.createCategory({
       name: 'test-budget',
-      group_id: mainGroupId
+      group_id: mainGroupId,
     });
     const categoryIdHidden = await api.createCategory({
       name: 'test-budget-hidden',
       group_id: mainGroupId,
-      hidden: true
+      hidden: true,
     });
 
     let categories = await api.getCategories();
