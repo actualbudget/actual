@@ -274,6 +274,7 @@ function Budget(props: BudgetProps) {
         category.name,
         category.cat_group,
         category.is_income,
+        category.hidden,
       );
 
       setNewCategoryForGroup(null);
