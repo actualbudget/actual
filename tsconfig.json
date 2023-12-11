@@ -15,6 +15,7 @@
     "downlevelIteration": true,
     // TODO: enable once every file is ts
     // "strict": true,
+    "strictFunctionTypes": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "jsx": "preserve",

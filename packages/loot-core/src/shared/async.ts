@@ -1,6 +1,11 @@
-export function sequential<T extends (...args: unknown[]) => unknown>(
+import {
+  type FunctionParameters,
+  type FunctionReturnType,
+} from '../types/util';
+
+export function sequential<T extends Function>(
   fn: T,
-): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
+): (...args: FunctionParameters<T>) => Promise<Awaited<FunctionReturnType<T>>> {
   const sequenceState = {
     running: null,
     queue: [],
@@ -43,11 +48,13 @@ export function sequential<T extends (...args: unknown[]) => unknown>(
   };
 }
 
-export function once<T extends (...args: unknown[]) => Promise<unknown>>(
+export function once<T extends Function>(
   fn: T,
-): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
+): (...args: FunctionParameters<T>) => Promise<Awaited<FunctionReturnType<T>>> {
   let promise = null;
-  const onceFn = (...args: Parameters<T>): Promise<Awaited<ReturnType<T>>> => {
+  const onceFn = (
+    ...args: FunctionParameters<T>
+  ): Promise<Awaited<FunctionReturnType<T>>> => {
     if (!promise) {
       promise = fn(...args).finally(() => {
         promise = null;

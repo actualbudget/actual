@@ -93,7 +93,7 @@ let baseTime = 1565374471903;
 let clientId1 = '80dd7da215247293';
 let clientId2 = '90xU1sd5124329ac';
 
-function makeGen({
+function makeGen<T extends Arbitrary<any>>({
   table,
   row,
   field,
@@ -102,7 +102,7 @@ function makeGen({
   table: string;
   row?: Arbitrary<string>;
   field: string;
-  value: Arbitrary<unknown>;
+  value: T;
 }) {
   return jsc.record({
     dataset: jsc.constant(table),
@@ -127,7 +127,7 @@ function makeGen({
   });
 }
 
-let generators = [];
+let generators: Array<ReturnType<typeof makeGen>> = [];
 Object.keys(schema).forEach(table => {
   Object.keys(schema[table]).reduce((obj, field) => {
     if (table === 'spreadsheet_cells' && field === 'expr') {

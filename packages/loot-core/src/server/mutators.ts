@@ -9,9 +9,7 @@ let globalMutationsEnabled = false;
 
 let _latestHandlerNames = [];
 
-export function mutator<T extends (...args: unknown[]) => unknown>(
-  handler: T,
-): T {
+export function mutator<T extends Function>(handler: T): T {
   mutatingMethods.set(handler, true);
   return handler;
 }

@@ -2,6 +2,10 @@ import { Timestamp } from '@actual-app/crdt';
 
 import * as connection from '../platform/server/connection';
 import { getIn } from '../shared/util';
+import {
+  type FunctionParameters,
+  type FunctionReturnType,
+} from '../types/util';
 
 import { withMutatorContext, getMutatorContext } from './mutators';
 import { Message, sendMessages } from './sync';
@@ -89,17 +93,9 @@ export function withUndo<T>(
   );
 }
 
-// for some reason `void` is not inferred properly without this overload
-export function undoable<Args extends unknown[]>(
-  func: (...args: Args) => Promise<void>,
-): (...args: Args) => Promise<void>;
-export function undoable<
-  Args extends unknown[],
-  Return extends Promise<unknown>,
->(func: (...args: Args) => Return): (...args: Args) => Return;
-export function undoable(func: (...args: unknown[]) => Promise<unknown>) {
-  return (...args: unknown[]) => {
-    return withUndo(() => {
+export function undoable<T extends Function>(func: T) {
+  return (...args: FunctionParameters<T>) => {
+    return withUndo<Awaited<FunctionReturnType<T>>>(() => {
       return func(...args);
     });
   };
