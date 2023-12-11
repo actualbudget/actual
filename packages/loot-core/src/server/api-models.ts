@@ -28,11 +28,12 @@ export const categoryModel = {
   ...models.categoryModel,
 
   toExternal(category) {
+    console.log(category.hidden)
     return {
       id: category.id,
       name: category.name,
       is_income: category.is_income ? true : false,
-      is_hidden: category.is_hidden ? true : false,
+      hidden: category.hidden ? true : false,
       group_id: category.cat_group,
     };
   },
@@ -42,8 +43,8 @@ export const categoryModel = {
     if ('is_income' in category) {
       result.is_income = category.is_income ? 1 : 0;
     }
-    if ('is_hidden' in category) {
-      result.hidden = category.is_hidden ? 1 : 0;
+    if ('hidden' in category) {
+      result.hidden = category.hidden ? 1 : 0;
     }
     if ('group_id' in category) {
       result.cat_group = category.group_id;
@@ -60,7 +61,7 @@ export const categoryGroupModel = {
       id: group.id,
       name: group.name,
       is_income: group.is_income ? true : false,
-      is_hidden: group.is_hidden ? true : false,
+      hidden: group.hidden ? true : false,
       categories: group.categories.map(categoryModel.toExternal),
     };
   },
@@ -70,8 +71,8 @@ export const categoryGroupModel = {
     if ('is_income' in group) {
       result.is_income = group.is_income ? 1 : 0;
     }
-    if ('is_hidden' in group) {
-      result.hidden = group.is_hidden ? 1 : 0;
+    if ('hidden' in group) {
+      result.hidden = group.hidden ? 1 : 0;
     }
     if ('categories' in group) {
       result.categories = group.categories.map(categoryModel.fromExternal);

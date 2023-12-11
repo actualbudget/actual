@@ -556,6 +556,7 @@ handlers['api/category-create'] = withMutation(async function ({ category }) {
     name: category.name,
     groupId: category.group_id,
     isIncome: category.is_income,
+    hidden: category.hidden
   });
 });
 
