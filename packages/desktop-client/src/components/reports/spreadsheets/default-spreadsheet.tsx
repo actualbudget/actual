@@ -19,15 +19,15 @@ import makeQuery from './makeQuery';
 import recalculate from './recalculate';
 
 export type createSpreadsheetProps = {
-  startDate: string;
-  endDate: string;
+  start: string;
+  end: string;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   selectedCategories: CategoryEntity[];
   conditions: RuleConditionEntity[];
   conditionsOp: string;
-  showEmpty: boolean;
-  showOffBudgetHidden: boolean;
-  showUncategorized: boolean;
+  empty: boolean;
+  hidden: boolean;
+  uncat: boolean;
   groupBy?: string;
   balanceTypeOp?: string;
   payees?: PayeeEntity[];
@@ -36,28 +36,24 @@ export type createSpreadsheetProps = {
 };
 
 export default function createSpreadsheet({
-  startDate,
-  endDate,
+  start,
+  end,
   categories,
   selectedCategories,
   conditions = [],
   conditionsOp,
-  showEmpty,
-  showOffBudgetHidden,
-  showUncategorized,
+  empty,
+  hidden,
+  uncat,
   groupBy,
   balanceTypeOp,
   payees,
   accounts,
   setDataCheck,
-}: createSpreadsheetProps) {
-  const [categoryList, categoryGroup] = categoryLists(
-    showOffBudgetHidden,
-    showUncategorized,
-    categories,
-  );
+}) {
+  const [catList, catGroup] = categoryLists(hidden, uncat, categories);
 
-  const categoryFilter = (categoryList || []).filter(
+  const categoryFilter = (catList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -68,8 +64,8 @@ export default function createSpreadsheet({
 
   const [groupByList, groupByLabel] = groupBySelections(
     groupBy,
-    categoryList,
-    categoryGroup,
+    catList,
+    catGroup,
     payees,
     accounts,
   );
@@ -88,9 +84,9 @@ export default function createSpreadsheet({
       runQuery(
         makeQuery(
           'assets',
-          startDate,
-          endDate,
-          showOffBudgetHidden,
+          start,
+          end,
+          hidden,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -100,9 +96,9 @@ export default function createSpreadsheet({
       runQuery(
         makeQuery(
           'debts',
-          startDate,
-          endDate,
-          showOffBudgetHidden,
+          start,
+          end,
+          hidden,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -111,7 +107,7 @@ export default function createSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
-    const months = monthUtils.rangeInclusive(startDate, endDate);
+    const months = monthUtils.rangeInclusive(start, end);
 
     let totalAssets = 0;
     let totalDebts = 0;
@@ -169,12 +165,12 @@ export default function createSpreadsheet({
     });
 
     setData({
-      data: calcData.filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true)),
+      data: calcData.filter(i => (!empty ? i[balanceTypeOp] !== 0 : true)),
       monthData: monthData.filter(i =>
-        !showEmpty ? i[balanceTypeOp] !== 0 : true,
+        !empty ? i[balanceTypeOp] !== 0 : true,
       ),
-      startDate,
-      endDate,
+      start,
+      end,
       totalDebts: integerToAmount(totalDebts),
       totalAssets: integerToAmount(totalAssets),
       totalTotals: integerToAmount(totalAssets + totalDebts),

@@ -60,7 +60,7 @@ export function cashFlowByDate(
     function makeQuery(where) {
       const query = q('transactions')
         .filter({
-          [conditionsOpKey]: filters,
+          [conditionsOpKey]: [...filters],
         })
         .filter({
           $and: [

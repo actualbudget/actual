@@ -3,6 +3,7 @@ import React from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
+import Button from '../common/Button';
 import Select from '../common/Select';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -16,12 +17,37 @@ import {
   getFullRange,
   validateRange,
 } from './Header';
-import ModeButton from './ModeButton';
 import { ReportOptions } from './ReportOptions';
 
+function ModeButton({ selected, children, style, onSelect }) {
+  return (
+    <Button
+      type="bare"
+      style={{
+        padding: '5px 10px',
+        backgroundColor: theme.menuBackground,
+        marginRight: 5,
+        fontSize: 'inherit',
+        ...(selected && {
+          backgroundColor: theme.buttonPrimaryBackground,
+          color: theme.buttonPrimaryText,
+          ':hover': {
+            backgroundColor: theme.buttonPrimaryBackgroundHover,
+            color: theme.buttonPrimaryTextHover,
+          },
+        }),
+        ...style,
+      }}
+      onClick={onSelect}
+    >
+      {children}
+    </Button>
+  );
+}
+
 export function ReportSidebar({
-  startDate,
-  endDate,
+  start,
+  end,
   onChangeDates,
   dateRange,
   setDateRange,
@@ -38,12 +64,12 @@ export function ReportSidebar({
   setBalanceType,
   mode,
   setMode,
-  showEmpty,
-  setShowEmpty,
-  showOffBudgetHidden,
-  setShowOffBudgetHidden,
-  showUncategorized,
-  setShowUncategorized,
+  empty,
+  setEmpty,
+  hidden,
+  setHidden,
+  uncat,
+  setUncat,
   categories,
   selectedCategories,
   setSelectedCategories,
@@ -88,7 +114,7 @@ export function ReportSidebar({
       } else {
         setTypeDisabled(['Net']);
         if (['Net'].includes(balanceType)) {
-          setBalanceType('Payment');
+          setBalanceType('Expense');
         }
       }
       if (graphType === 'BarGraph') {
@@ -118,7 +144,7 @@ export function ReportSidebar({
       }
     }
     if (['Net'].includes(balanceType) && graphType !== 'TableGraph') {
-      setBalanceType('Payment');
+      setBalanceType('Expense');
     }
   };
 
@@ -248,9 +274,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-empty-columns"
-            checked={showEmpty}
-            value={showEmpty}
-            onChange={() => setShowEmpty(!showEmpty)}
+            checked={empty}
+            value={empty}
+            onChange={() => setEmpty(!empty)}
           />
           <label
             htmlFor="show-empty-columns"
@@ -271,9 +297,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-hidden-columns"
-            checked={showOffBudgetHidden}
-            value={showOffBudgetHidden}
-            onChange={() => setShowOffBudgetHidden(!showOffBudgetHidden)}
+            checked={hidden}
+            value={hidden}
+            onChange={() => setHidden(!hidden)}
           />
           <label
             htmlFor="show-hidden-columns"
@@ -294,9 +320,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-uncategorized"
-            checked={showUncategorized}
-            value={showUncategorized}
-            onChange={() => setShowUncategorized(!showUncategorized)}
+            checked={uncat}
+            value={uncat}
+            onChange={() => setUncat(!uncat)}
           />
           <label
             htmlFor="show-uncategorized"
@@ -361,10 +387,10 @@ export function ReportSidebar({
           </Text>
           <Select
             onChange={newValue =>
-              onChangeDates(...validateStart(allMonths, newValue, endDate))
+              onChangeDates(...validateStart(allMonths, newValue, end))
             }
-            value={startDate}
-            defaultLabel={monthUtils.format(startDate, 'MMMM, yyyy')}
+            value={start}
+            defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
             options={allMonths.map(({ name, pretty }) => [name, pretty])}
           />
         </View>
@@ -380,9 +406,9 @@ export function ReportSidebar({
           </Text>
           <Select
             onChange={newValue =>
-              onChangeDates(...validateEnd(allMonths, startDate, newValue))
+              onChangeDates(...validateEnd(allMonths, start, newValue))
             }
-            value={endDate}
+            value={end}
             options={allMonths.map(({ name, pretty }) => [name, pretty])}
           />
         </View>

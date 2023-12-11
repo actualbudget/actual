@@ -73,7 +73,7 @@ export default function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Deposits'}
+                  value={'Assets'}
                   width="flex"
                 />
                 <Cell
@@ -81,7 +81,7 @@ export default function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Payments'}
+                  value={'Debts'}
                   width="flex"
                 />
               </>

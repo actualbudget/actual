@@ -59,13 +59,13 @@ export function ReportTopbar({
           if (mode === 'total') {
             setGraphType('BarGraph');
             if (['Net'].includes(balanceType)) {
-              setBalanceType('Payment');
+              setBalanceType('Expense');
             }
             setTypeDisabled(['Month', 'Year'].includes(groupBy) ? [] : ['Net']);
           } else {
             setGraphType('StackedBarGraph');
             setTypeDisabled(['Net']);
-            setBalanceType('Payment');
+            setBalanceType('Expense');
           }
         }}
         style={{ marginRight: 15 }}
@@ -92,7 +92,7 @@ export function ReportTopbar({
         onSelect={() => {
           setGraphType('DonutGraph');
           setTypeDisabled(['Net']);
-          setBalanceType('Payment');
+          setBalanceType('Expense');
         }}
         style={{ marginRight: 15 }}
         disabled={mode === 'total' ? false : true}

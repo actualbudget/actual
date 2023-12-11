@@ -21,25 +21,22 @@ type ChooseGraphProps = {
   graphType: string;
   balanceType: string;
   groupBy: string;
-  showEmpty: boolean;
+  empty: boolean;
   scrollWidth: number;
   setScrollWidth: (value: number) => void;
   months: Month[];
 };
-
-function ChooseGraph({
+export function ChooseGraph({
   data,
   mode,
   graphType,
   balanceType,
   groupBy,
-  showEmpty,
+  empty,
   scrollWidth,
   setScrollWidth,
   months,
 }: ChooseGraphProps) {
-  const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
-
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
   };
@@ -58,7 +55,7 @@ function ChooseGraph({
       <AreaGraph
         style={{ flexGrow: 1 }}
         data={data}
-        balanceTypeOp={balanceTypeOp}
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -68,7 +65,7 @@ function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        balanceTypeOp={balanceTypeOp}
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -81,7 +78,7 @@ function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        balanceTypeOp={balanceTypeOp}
+        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
@@ -107,9 +104,9 @@ function ChooseGraph({
         >
           <ReportTableList
             data={data}
-            empty={showEmpty}
+            empty={empty}
             monthsCount={months.length}
-            balanceTypeOp={balanceTypeOp}
+            balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
             mode={mode}
             groupBy={groupBy}
           />
@@ -120,12 +117,10 @@ function ChooseGraph({
           scrollWidth={scrollWidth}
           data={data}
           mode={mode}
-          balanceTypeOp={balanceTypeOp}
+          balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
           monthsCount={months.length}
         />
       </View>
     );
   }
 }
-
-export default ChooseGraph;

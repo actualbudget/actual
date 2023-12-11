@@ -16,19 +16,19 @@ import useReport from '../useReport';
 function CustomReportCard() {
   const categories = useCategories();
 
-  const endDate = monthUtils.currentMonth();
-  const startDate = monthUtils.subMonths(endDate, 3);
+  const end = monthUtils.currentMonth();
+  const start = monthUtils.subMonths(end, 3);
   const groupBy = 'Category';
 
   const getGraphData = useMemo(() => {
     return defaultSpreadsheet({
-      startDate,
-      endDate,
+      start,
+      end,
       groupBy,
       balanceTypeOp: 'totalDebts',
       categories,
     });
-  }, [startDate, endDate, categories]);
+  }, [start, end, categories]);
   const data = useReport('default', getGraphData);
 
   return (
@@ -42,16 +42,19 @@ function CustomReportCard() {
             >
               Custom Report
             </Block>
-            <DateRange start={startDate} end={endDate} />
+            <DateRange start={start} end={end} />
           </View>
         </View>
       </View>
 
       {data ? (
         <BarGraph
+          start={start}
+          end={end}
           data={data}
           compact={true}
           groupBy={groupBy}
+          empty={true}
           balanceTypeOp={'totalDebts'}
           style={{ height: 'auto', flex: 1 }}
         />
