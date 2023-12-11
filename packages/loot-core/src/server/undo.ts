@@ -93,7 +93,7 @@ export function withUndo<T>(
 export function undoable<T extends HandlerFunctions>(func: T) {
   return (...args: Parameters<T>) => {
     return withUndo<Awaited<ReturnType<T>>>(() => {
-      return func.apply(null, ...args);
+      return func.apply(null, args);
     });
   };
 }
