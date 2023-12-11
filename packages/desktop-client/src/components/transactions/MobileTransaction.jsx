@@ -433,17 +433,17 @@ class TransactionEditInner extends PureComponent {
                 }
               >
                 <Split
+                  width={17}
+                  height={17}
                   style={{
-                    width: 17,
-                    height: 17,
-                    color: theme.formInputText,
+                    color: theme.formLabelText,
                   }}
                 />
                 <Text
                   style={{
                     ...styles.text,
                     marginLeft: 6,
-                    color: theme.formInputText,
+                    color: theme.formLabelText,
                   }}
                 >
                   Amount left:{' '}
@@ -459,12 +459,12 @@ class TransactionEditInner extends PureComponent {
                 <Add
                   width={17}
                   height={17}
-                  style={{ color: theme.formInputText }}
+                  style={{ color: theme.formLabelText }}
                 />
                 <Text
                   style={{
                     ...styles.text,
-                    color: theme.formInputText,
+                    color: theme.formLabelText,
                     marginLeft: 5,
                   }}
                 >
@@ -474,17 +474,17 @@ class TransactionEditInner extends PureComponent {
             ) : (
               <Button style={{ height: 40 }} onPointerUp={() => this.onSave()}>
                 <PencilWriteAlternate
+                  width={16}
+                  height={16}
                   style={{
-                    width: 16,
-                    height: 16,
-                    color: theme.formInputText,
+                    color: theme.formLabelText,
                   }}
                 />
                 <Text
                   style={{
                     ...styles.text,
                     marginLeft: 6,
-                    color: theme.formInputText,
+                    color: theme.formLabelText,
                   }}
                 >
                   Save changes
@@ -673,11 +673,16 @@ class TransactionEditInner extends PureComponent {
                 onClick={() => this.onSplit(transaction.id)}
                 type="bare"
               >
-                <Split width={17} height={17} />
+                <Split
+                  width={17}
+                  height={17}
+                  style={{ color: theme.formLabelText }}
+                />
                 <Text
                   style={{
                     marginLeft: 5,
                     userSelect: 'none',
+                    color: theme.formLabelText,
                   }}
                 >
                   Split
