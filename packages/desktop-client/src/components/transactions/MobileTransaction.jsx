@@ -32,6 +32,9 @@ import {
   ungroupTransactions,
   updateTransaction,
   realizeTempTransactions,
+  splitTransaction,
+  addSplitTransaction,
+  deleteTransaction,
 } from 'loot-core/src/shared/transactions';
 import {
   titleFirst,
@@ -47,12 +50,13 @@ import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import useNavigate from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import SvgAdd from '../../icons/v1/Add';
-import SvgTrash from '../../icons/v1/Trash';
+import Split from '../../icons/v0/Split';
+import Add from '../../icons/v1/Add';
+import Trash from '../../icons/v1/Trash';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import Lock from '../../icons/v2/LockClosed';
-import SvgPencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
+import PencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
 import { styles, theme } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
@@ -67,7 +71,6 @@ import {
 } from '../mobile/MobileForms';
 import MobileBackButton from '../MobileBackButton';
 import { Page } from '../Page';
-
 const zIndices = { SECTION_HEADING: 10 };
 
 const getPayeesById = memoizeOne(payees => groupById(payees));
@@ -172,7 +175,6 @@ class TransactionEditInner extends PureComponent {
     super(props);
     this.state = {
       transactions: props.transactions,
-      editingChild: null,
     };
   }
 
@@ -193,10 +195,6 @@ class TransactionEditInner extends PureComponent {
       .querySelector('meta[name="theme-color"]')
       .setAttribute('content', '#ffffff');
   }
-
-  openChildEdit = child => {
-    this.setState({ editingChild: child.id });
-  };
 
   onAdd = () => {
     this.onSave();
@@ -249,10 +247,6 @@ class TransactionEditInner extends PureComponent {
     }
   };
 
-  onSaveChild = childTransaction => {
-    this.setState({ editingChild: null });
-  };
-
   onEdit = async (transaction, name, value) => {
     const { transactions } = this.state;
 
@@ -296,12 +290,20 @@ class TransactionEditInner extends PureComponent {
     });
   };
 
-  onDelete = () => {
+  onDelete = id => {
     const onConfirmDelete = () => {
-      this.props.onDelete();
-
       const { transactions } = this.state;
+
+      this.props.onDelete(id);
+
       const [transaction, ..._childTransactions] = transactions;
+      if (transaction.id !== id) {
+        // Only the child transaction was deleted.
+        const changes = deleteTransaction(transactions, id);
+        this.setState({ transactions: changes.data });
+        return;
+      }
+
       const { account: accountId } = transaction;
       if (accountId) {
         this.props.navigate(`/accounts/${accountId}`, { replace: true });
@@ -323,30 +325,65 @@ class TransactionEditInner extends PureComponent {
     }
   };
 
+  onAddSplit = id => {
+    const changes = addSplitTransaction(this.state.transactions, id);
+    this.setState({ transactions: changes.data });
+    this.props.onAddSplit(id);
+  };
+
+  onSplit = id => {
+    const changes = splitTransaction(this.state.transactions, id);
+    this.setState({ transactions: changes.data });
+    this.props.onSplit(id);
+  };
+
   render() {
     const { adding, categories, accounts, payees } = this.props;
     const transactions = this.serializeTransactions(
       this.state.transactions || [],
     );
     const [transaction, ..._childTransactions] = transactions;
-    const { payee: payeeId, category, account: accountId } = transaction;
 
     // Child transactions should always default to the signage
     // of the parent transaction
     // const forcedSign = transaction.amount < 0 ? 'negative' : 'positive';
 
-    const account = getAccountsById(accounts)[accountId];
+    const getAccount = trans => {
+      return trans && accounts && getAccountsById(accounts)[trans.account];
+    };
+
+    const getPayee = trans => {
+      return (
+        trans && payees && trans.payee && getPayeesById(payees)[trans.payee]
+      );
+    };
+
+    const getTransferAcct = trans => {
+      const payee = trans && getPayee(trans);
+      return (
+        payee &&
+        payee.transfer_acct &&
+        getAccountsById(accounts)[payee.transfer_acct]
+      );
+    };
+
+    const getPrettyPayee = trans => {
+      const transPayee = trans && getPayee(trans);
+      const transTransferAcct = trans && getTransferAcct(trans);
+      return getDescriptionPretty(trans, transPayee, transTransferAcct);
+    };
+
+    const isBudgetTransfer = trans => {
+      const transferAcct = trans && getTransferAcct(trans);
+      return transferAcct && !transferAcct.offbudget;
+    };
+
+    const account = getAccount(transaction);
     const isOffBudget = account && !!account.offbudget;
-    const payee = payees && payeeId && getPayeesById(payees)[payeeId];
-    const transferAcct =
-      payee &&
-      payee.transfer_acct &&
-      getAccountsById(accounts)[payee.transfer_acct];
-    const isBudgetTransfer = transferAcct && !transferAcct.offbudget;
-    const descriptionPretty = getDescriptionPretty(
+    const title = getDescriptionPretty(
       transaction,
-      payee,
-      transferAcct,
+      getPayee(transaction),
+      getTransferAcct(transaction),
     );
 
     const transactionDate = parseDate(
@@ -359,11 +396,11 @@ class TransactionEditInner extends PureComponent {
     return (
       <Page
         title={
-          payeeId == null
+          transaction.payee == null
             ? adding
               ? 'New Transaction'
               : 'Transaction'
-            : descriptionPretty
+            : title
         }
         titleStyle={{
           fontSize: 16,
@@ -386,17 +423,48 @@ class TransactionEditInner extends PureComponent {
               borderColor: theme.tableBorder,
             }}
           >
-            {adding ? (
-              <Button style={{ height: 40 }} onClick={() => this.onAdd()}>
-                <SvgAdd
-                  width={17}
-                  height={17}
-                  style={{ color: theme.formLabelText }}
+            {transaction.error?.type === 'SplitTransactionError' ? (
+              <Button
+                style={{ height: 40 }}
+                onPointerUp={() =>
+                  _childTransactions.length === 0
+                    ? this.onSplit(transaction.id)
+                    : this.onAddSplit(transaction.id)
+                }
+              >
+                <Split
+                  style={{
+                    width: 17,
+                    height: 17,
+                    color: theme.formInputText,
+                  }}
                 />
                 <Text
                   style={{
                     ...styles.text,
-                    color: theme.formLabelText,
+                    marginLeft: 6,
+                    color: theme.formInputText,
+                  }}
+                >
+                  Amount left:{' '}
+                  {integerToCurrency(
+                    transaction.amount > 0
+                      ? transaction.error.difference
+                      : -transaction.error.difference,
+                  )}
+                </Text>
+              </Button>
+            ) : adding ? (
+              <Button style={{ height: 40 }} onPointerUp={() => this.onAdd()}>
+                <Add
+                  width={17}
+                  height={17}
+                  style={{ color: theme.formInputText }}
+                />
+                <Text
+                  style={{
+                    ...styles.text,
+                    color: theme.formInputText,
                     marginLeft: 5,
                   }}
                 >
@@ -404,8 +472,8 @@ class TransactionEditInner extends PureComponent {
                 </Text>
               </Button>
             ) : (
-              <Button style={{ height: 40 }} onClick={() => this.onSave()}>
-                <SvgPencilWriteAlternate
+              <Button style={{ height: 40 }} onPointerUp={() => this.onSave()}>
+                <PencilWriteAlternate
                   style={{
                     width: 16,
                     height: 16,
@@ -464,20 +532,18 @@ class TransactionEditInner extends PureComponent {
           <View>
             <FieldLabel title="Payee" />
             <TapField
-              value={descriptionPretty}
+              value={getPrettyPayee(transaction)}
               onClick={() => this.onClick(transaction.id, 'payee')}
-              data-testid="payee-field"
+              data-testid={`payee-field-${transaction.id}`}
             />
           </View>
 
-          <View>
-            <FieldLabel
-              title={transaction.is_parent ? 'Categories (split)' : 'Category'}
-            />
-            {!transaction.is_parent ? (
+          {!transaction.is_parent && (
+            <View>
+              <FieldLabel title="Category" />
               <TapField
                 style={{
-                  ...((isBudgetTransfer || isOffBudget) && {
+                  ...((isOffBudget || isBudgetTransfer(transaction)) && {
                     fontStyle: 'italic',
                     color: theme.pageTextSubdued,
                     fontWeight: 300,
@@ -486,40 +552,139 @@ class TransactionEditInner extends PureComponent {
                 value={
                   isOffBudget
                     ? 'Off Budget'
-                    : isBudgetTransfer
+                    : isBudgetTransfer(transaction)
                     ? 'Transfer'
-                    : lookupName(categories, category)
+                    : lookupName(categories, transaction.category)
                 }
-                disabled={isBudgetTransfer || isOffBudget}
-                // TODO: the button to turn this transaction into a split
-                // transaction was on top of the category button in the native
-                // app, on the right-hand side
-                //
-                // On the web this doesn't work well and react gets upset if
-                // nest a button in a button.
-                //
-                // rightContent={
-                //   <Button
-                //     contentStyle={{
-                //       paddingVertical: 4,
-                //       paddingHorizontal: 15,
-                //       margin: 0,
-                //     }}
-                //     onPress={this.onSplit}
-                //   >
-                //     Split
-                //   </Button>
-                // }
+                disabled={isOffBudget || isBudgetTransfer(transaction)}
                 onClick={() => this.onClick(transaction.id, 'category')}
-                data-testid="category-field"
+                data-testid={`category-field-${transaction.id}`}
               />
-            ) : (
-              <Text style={{ paddingLeft: styles.mobileEditingPadding }}>
-                Split transaction editing is not supported on mobile at this
-                time.
-              </Text>
-            )}
-          </View>
+            </View>
+          )}
+
+          {_childTransactions.map(childTrans => (
+            <View
+              key={childTrans.id}
+              style={{
+                borderColor: theme.tableBorder,
+                borderWidth: '1px',
+                borderRadius: '5px',
+                padding: '5px',
+                margin: '10px',
+              }}
+            >
+              <View style={{ flexDirection: 'row' }}>
+                <View style={{ flexBasis: '70%' }}>
+                  <FieldLabel title="Payee" />
+                  <TapField
+                    value={getPrettyPayee(childTrans)}
+                    onClick={() => this.onClick(childTrans.id, 'payee')}
+                    data-testid={`payee-field-${childTrans.id}`}
+                  />
+                </View>
+                <View style={{ flexBasis: '30%' }}>
+                  <FieldLabel title="Amount" />
+                  <InputField
+                    defaultValue={childTrans.amount}
+                    onUpdate={value => this.onEdit(childTrans, 'amount', value)}
+                    onChange={e =>
+                      this.onQueueChange(childTrans, 'amount', e.target.value)
+                    }
+                  />
+                  {/* <AmountInput
+                      initialValue={amountToInteger(trans.amount)}
+                      zeroSign="-"
+                      textStyle={{ ...styles.smallText }}
+                      onChange={value =>
+                        this.onQueueChange(trans.amount, 'amount', value)
+                      }
+                      onBlur={() => this.onEdit(trans.amount, 'amount', trans.amount)}
+                    /> */}
+                </View>
+              </View>
+
+              <View>
+                <FieldLabel title={'Category'} />
+                <TapField
+                  style={{
+                    ...((isOffBudget || isBudgetTransfer(childTrans)) && {
+                      fontStyle: 'italic',
+                      color: theme.pageTextSubdued,
+                      fontWeight: 300,
+                    }),
+                  }}
+                  value={
+                    isOffBudget
+                      ? 'Off Budget'
+                      : isBudgetTransfer(childTrans)
+                      ? 'Transfer'
+                      : lookupName(categories, childTrans.category)
+                  }
+                  disabled={isOffBudget || isBudgetTransfer(childTrans)}
+                  onClick={() => this.onClick(childTrans.id, 'category')}
+                  data-testid={`category-field-${childTrans.id}`}
+                />
+              </View>
+
+              <View style={{ alignItems: 'center' }}>
+                <Button
+                  onClick={() => this.onDelete(childTrans.id)}
+                  style={{
+                    height: 40,
+                    borderWidth: 0,
+                    marginLeft: styles.mobileEditingPadding,
+                    marginRight: styles.mobileEditingPadding,
+                    marginTop: 10,
+                    backgroundColor: 'transparent',
+                  }}
+                  type="bare"
+                >
+                  <Trash
+                    width={17}
+                    height={17}
+                    style={{ color: theme.errorText }}
+                  />
+                  <Text
+                    style={{
+                      color: theme.errorText,
+                      marginLeft: 5,
+                      userSelect: 'none',
+                    }}
+                  >
+                    Delete split
+                  </Text>
+                </Button>
+              </View>
+            </View>
+          ))}
+
+          {_childTransactions.length === 0 && (
+            <View style={{ alignItems: 'center' }}>
+              <Button
+                style={{
+                  height: 40,
+                  borderWidth: 0,
+                  marginLeft: styles.mobileEditingPadding,
+                  marginRight: styles.mobileEditingPadding,
+                  marginTop: 10,
+                  backgroundColor: 'transparent',
+                }}
+                onClick={() => this.onSplit(transaction.id)}
+                type="bare"
+              >
+                <Split width={17} height={17} />
+                <Text
+                  style={{
+                    marginLeft: 5,
+                    userSelect: 'none',
+                  }}
+                >
+                  Split
+                </Text>
+              </Button>
+            </View>
+          )}
 
           <View>
             <FieldLabel title="Account" />
@@ -600,7 +765,7 @@ class TransactionEditInner extends PureComponent {
           {!adding && (
             <View style={{ alignItems: 'center' }}>
               <Button
-                onClick={() => this.onDelete()}
+                onClick={() => this.onDelete(transaction.id)}
                 style={{
                   height: 40,
                   borderWidth: 0,
@@ -611,7 +776,7 @@ class TransactionEditInner extends PureComponent {
                 }}
                 type="bare"
               >
-                <SvgTrash
+                <Trash
                   width={17}
                   height={17}
                   style={{ color: theme.errorText }}
@@ -654,10 +819,9 @@ function TransactionEditUnconnected(props) {
   const { categories, accounts, payees, lastTransaction, dateFormat } = props;
   const { id: accountId, transactionId } = useParams();
   const navigate = useNavigate();
-  const [fetchedTransactions, setFetchedTransactions] = useState(null);
-  let transactions = [];
-  let adding = false;
-  let deleted = false;
+  const [transactions, setTransactions] = useState([]);
+  const adding = useRef(false);
+  const deleted = useRef(false);
   useSetThemeColor(theme.mobileViewTheme);
 
   useEffect(() => {
@@ -667,46 +831,47 @@ function TransactionEditUnconnected(props) {
     props.getPayees();
 
     async function fetchTransaction() {
-      let transactions = [];
-      if (transactionId) {
-        // Query for the transaction based on the ID with grouped splits.
-        //
-        // This means if the transaction in question is a split transaction, its
-        // subtransactions will be returned in the `substransactions` property on
-        // the parent transaction.
-        //
-        // The edit item components expect to work with a flat array of
-        // transactions when handling splits, so we call ungroupTransactions to
-        // flatten parent and children into one array.
-        const { data } = await runQuery(
-          q('transactions')
-            .filter({ id: transactionId })
-            .select('*')
-            .options({ splits: 'grouped' }),
-        );
-        transactions = ungroupTransactions(data);
-        setFetchedTransactions(transactions);
-      }
+      // Query for the transaction based on the ID with grouped splits.
+      //
+      // This means if the transaction in question is a split transaction, its
+      // subtransactions will be returned in the `substransactions` property on
+      // the parent transaction.
+      //
+      // The edit item components expect to work with a flat array of
+      // transactions when handling splits, so we call ungroupTransactions to
+      // flatten parent and children into one array.
+      const { data } = await runQuery(
+        q('transactions')
+          .filter({ id: transactionId })
+          .select('*')
+          .options({ splits: 'grouped' }),
+      );
+      setTransactions(ungroupTransactions(data));
     }
-    fetchTransaction();
+    if (transactionId) {
+      fetchTransaction();
+    } else {
+      adding.current = true;
+    }
   }, [transactionId]);
+
+  useEffect(() => {
+    if (adding.current) {
+      setTransactions(
+        makeTemporaryTransactions(
+          accountId || lastTransaction?.account || null,
+          lastTransaction?.date,
+        ),
+      );
+    }
+  }, [adding.current, accountId, lastTransaction]);
 
   if (
     categories.length === 0 ||
     accounts.length === 0 ||
-    (transactionId && !fetchedTransactions)
+    transactions.length === 0
   ) {
     return null;
-  }
-
-  if (!transactionId) {
-    transactions = makeTemporaryTransactions(
-      accountId || (lastTransaction && lastTransaction.account) || null,
-      lastTransaction && lastTransaction.date,
-    );
-    adding = true;
-  } else {
-    transactions = fetchedTransactions;
   }
 
   const onEdit = async transaction => {
@@ -731,7 +896,7 @@ function TransactionEditUnconnected(props) {
   };
 
   const onSave = async newTransactions => {
-    if (deleted) {
+    if (deleted.current) {
       return;
     }
 
@@ -755,24 +920,38 @@ function TransactionEditUnconnected(props) {
       // }
     }
 
-    if (adding) {
+    if (adding.current) {
       // The first one is always the "parent" and the only one we care
       // about
       props.setLastTransaction(newTransactions[0]);
     }
   };
 
-  const onDelete = async () => {
-    if (adding) {
+  const onDelete = async id => {
+    if (adding.current) {
       // Adding a new transactions, this disables saving when the component unmounts
-      deleted = true;
+      deleted.current = true;
     } else {
-      const changes = { deleted: transactions };
+      const changes = {
+        deleted: transactions.filter(t => t.id === id),
+      };
       const _remoteUpdates = await send('transactions-batch-update', changes);
       // if (onTransactionsChange) {
       //   onTransactionsChange({ ...changes, updated: remoteUpdates });
       // }
     }
+  };
+
+  const onAddSplit = id => {
+    const changes = addSplitTransaction(transactions, id);
+    setTransactions(changes.data);
+    // onSave(changes.data);
+  };
+
+  const onSplit = id => {
+    const changes = splitTransaction(transactions, id);
+    setTransactions(changes.data);
+    // this.props.onSave(changes.data);
   };
 
   return (
@@ -784,7 +963,7 @@ function TransactionEditUnconnected(props) {
     >
       <TransactionEditInner
         transactions={transactions}
-        adding={adding}
+        adding={adding.current}
         categories={categories}
         accounts={accounts}
         payees={payees}
@@ -799,6 +978,8 @@ function TransactionEditUnconnected(props) {
         onEdit={onEdit}
         onSave={onSave}
         onDelete={onDelete}
+        onSplit={onSplit}
+        onAddSplit={onAddSplit}
       />
     </View>
   );
@@ -843,9 +1024,9 @@ class Transaction extends PureComponent {
       id,
       payee: payeeId,
       amount: originalAmount,
-      category,
+      category: categoryId,
       cleared,
-      is_parent,
+      is_parent: isParent,
       notes,
       schedule,
     } = transaction;
@@ -855,7 +1036,7 @@ class Transaction extends PureComponent {
       amount = getScheduledAmount(amount);
     }
 
-    const categoryName = lookupName(categories, category);
+    const categoryName = lookupName(categories, categoryId);
 
     const payee = payees && payeeId && getPayeesById(payees)[payeeId];
     const transferAcct =
@@ -870,7 +1051,7 @@ class Transaction extends PureComponent {
     );
     const prettyCategory = transferAcct
       ? 'Transfer'
-      : is_parent
+      : isParent
       ? 'Split'
       : categoryName;
 
