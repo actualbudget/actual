@@ -66,6 +66,10 @@ jobs:
           name: desktop-client-test-results
           path: packages/desktop-client/test-results/
           retention-days: 30
+      - uses: actions-ecosystem/action-add-labels@v1
+        if: failure()
+        with:
+          labels: ':red_circle: VRT failing'
       - name: Find Comment
         uses: peter-evans/find-comment@v2
         if: failure()

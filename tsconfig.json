@@ -1,9 +1,4 @@
 {
-  "references": [
-    // TODO: enable once every project is ts
-    // { "path": "./packages/api" },
-    // { "path": "./packages/desktop-client" }
-  ],
   "compilerOptions": {
     // "composite": true,
     "target": "ES2022",
