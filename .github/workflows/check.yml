@@ -26,7 +26,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Typecheck
-        uses: andoshin11/typescript-error-reporter-action@v1.0.2
+        uses: gozala/typescript-error-reporter-action@v1.0.5
   test:
     runs-on: ubuntu-latest
     steps:
