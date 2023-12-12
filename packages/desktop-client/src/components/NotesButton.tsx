@@ -145,7 +145,7 @@ export default function NotesButton({
   id,
   width = 12,
   height = 12,
-  defaultColor = theme.pageBackgroundModalActive,
+  defaultColor = theme.buttonNormalText,
   tooltipPosition,
   style,
 }: NotesButtonProps) {

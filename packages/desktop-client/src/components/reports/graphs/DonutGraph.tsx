@@ -50,8 +50,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           pointerEvents: 'none',
           borderRadius: 2,
           boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuAutoCompleteBackground,
-          color: theme.menuAutoCompleteText,
+          backgroundColor: theme.menuBackground,
+          color: theme.menuItemText,
           padding: 10,
         })}`}
       >
@@ -98,7 +98,6 @@ type DonutGraphProps = {
   data: DataEntity;
   groupBy: string;
   balanceTypeOp: string;
-  showEmpty: boolean;
   compact?: boolean;
 };
 
@@ -106,7 +105,6 @@ function DonutGraph({
   style,
   data,
   groupBy,
-  showEmpty,
   balanceTypeOp,
   compact,
 }: DonutGraphProps) {
@@ -147,9 +145,7 @@ function DonutGraph({
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   isAnimationActive={false}
-                  data={data[splitData].filter(i =>
-                    !showEmpty ? i[balanceTypeOp] !== 0 : true,
-                  )}
+                  data={data[splitData]}
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                 >

@@ -1,10 +1,10 @@
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import { sequential } from '../shared/async';
 
-let runningMethods = new Set();
+const runningMethods = new Set();
 
 let currentContext = null;
-let mutatingMethods = new WeakMap();
+const mutatingMethods = new WeakMap();
 let globalMutationsEnabled = false;
 
 let _latestHandlerNames = [];
@@ -62,7 +62,7 @@ export async function runHandler(
     await flushRunningMethods();
   }
 
-  let promise = handler(args);
+  const promise = handler(args);
   runningMethods.add(promise);
   promise.then(() => {
     runningMethods.delete(promise);
@@ -108,7 +108,7 @@ export function withMutatorContext<T>(
     return func();
   }
 
-  let prevContext = currentContext;
+  const prevContext = currentContext;
   currentContext = { ...currentContext, ...context };
   return func().finally(() => {
     currentContext = prevContext;

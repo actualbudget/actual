@@ -12,8 +12,8 @@ beforeEach(global.emptyDatabase(true));
 
 describe('Migrations', () => {
   test('gets the latest migrations', async () => {
-    let applied = await getAppliedMigrations(db.getDatabase());
-    let available = await getMigrationList(
+    const applied = await getAppliedMigrations(db.getDatabase());
+    const available = await getMigrationList(
       __dirname + '/../../mocks/migrations',
     );
 
@@ -28,9 +28,9 @@ describe('Migrations', () => {
       async () => {
         await migrate(db.getDatabase());
 
-        let migrations = await getAppliedMigrations(db.getDatabase());
-        let last = 0;
-        for (let migration of migrations) {
+        const migrations = await getAppliedMigrations(db.getDatabase());
+        const last = 0;
+        for (const migration of migrations) {
           if (migration <= last) {
             throw new Error('Found older migration out of order');
           }

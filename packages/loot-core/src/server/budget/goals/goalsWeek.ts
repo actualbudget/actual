@@ -11,8 +11,8 @@ export async function goalsWeek(
   errors,
 ) {
   // week has 'amount', 'starting', 'weeks' and optional 'limit' params
-  let amount = amountToInteger(template.amount);
-  let weeks = template.weeks != null ? Math.round(template.weeks) : 1;
+  const amount = amountToInteger(template.amount);
+  const weeks = template.weeks != null ? Math.round(template.weeks) : 1;
   if (template.limit != null) {
     if (limit > 0) {
       errors.push(`More than one “up to” limit found.`);
@@ -24,7 +24,7 @@ export async function goalsWeek(
     }
   }
   let w = template.starting;
-  let next_month = monthUtils.addMonths(current_month, 1);
+  const next_month = monthUtils.addMonths(current_month, 1);
 
   while (w < next_month) {
     if (w >= current_month) {

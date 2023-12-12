@@ -5,12 +5,11 @@ import Text from '../common/Text';
 import View from '../common/View';
 
 type ReportLegendProps = {
-  data?;
-  legend;
+  legend: Array<{ name: string; color: string }>;
   groupBy: string;
 };
 
-function ReportLegend({ data, legend, groupBy }: ReportLegendProps) {
+function ReportLegend({ legend, groupBy }: ReportLegendProps) {
   return (
     <View
       style={{

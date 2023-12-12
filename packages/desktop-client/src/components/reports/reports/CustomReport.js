@@ -108,16 +108,18 @@ export default function CustomReport() {
   const accounts = useCachedAccounts();
 
   const getGroupData = useMemo(() => {
-    return groupedSpreadsheet(
+    return groupedSpreadsheet({
       startDate,
       endDate,
       categories,
       selectedCategories,
-      filters,
+      conditions: filters,
       conditionsOp,
+      showEmpty,
       showOffBudgetHidden,
       showUncategorized,
-    );
+      balanceTypeOp,
+    });
   }, [
     startDate,
     endDate,
@@ -125,15 +127,23 @@ export default function CustomReport() {
     selectedCategories,
     filters,
     conditionsOp,
+    showEmpty,
     showOffBudgetHidden,
     showUncategorized,
   ]);
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
-    return defaultSpreadsheet(
+    return defaultSpreadsheet({
       startDate,
       endDate,
+      categories,
+      selectedCategories,
+      conditions: filters,
+      conditionsOp,
+      showEmpty,
+      showOffBudgetHidden,
+      showUncategorized,
       groupBy,
       balanceTypeOp,
       categories,
@@ -157,6 +167,7 @@ export default function CustomReport() {
     accounts,
     filters,
     conditionsOp,
+    showEmpty,
     showOffBudgetHidden,
     showUncategorized,
   ]);
@@ -343,11 +354,7 @@ export default function CustomReport() {
                     />
                   )}
                   {viewLegend && (
-                    <ReportLegend
-                      data={data}
-                      legend={legend}
-                      groupBy={groupBy}
-                    />
+                    <ReportLegend legend={legend} groupBy={groupBy} />
                   )}
                 </View>
               )}

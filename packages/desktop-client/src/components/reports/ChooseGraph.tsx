@@ -104,7 +104,6 @@ function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        showEmpty={showEmpty}
         balanceTypeOp={balanceTypeOp}
       />
     );
@@ -118,7 +117,6 @@ function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        showEmpty={showEmpty}
         balanceTypeOp={balanceTypeOp}
       />
     );
@@ -153,6 +151,16 @@ function ChooseGraph({
           mode={mode}
           monthsCount={months.length}
         />
+        >
+          <ReportTableList
+            data={data}
+            empty={showEmpty}
+            monthsCount={months.length}
+            balanceTypeOp={balanceTypeOp}
+            mode={mode}
+            groupBy={groupBy}
+          />
+        </ReportTable>
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
           handleScroll={handleScroll}

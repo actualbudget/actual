@@ -12,10 +12,12 @@ import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
+import { type DataEntity } from './entities';
+
 type ReportSummaryProps = {
   startDate: string;
   endDate: string;
-  data;
+  data: DataEntity;
   balanceTypeOp: string;
   monthsCount: number;
 };
