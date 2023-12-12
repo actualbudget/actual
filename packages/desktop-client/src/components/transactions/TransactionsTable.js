@@ -1722,7 +1722,7 @@ function TransactionTableInner({
       >
         <Table
           navigator={tableNavigator}
-          ref={tableRef}
+          tableRef={tableRef}
           items={props.transactions}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
