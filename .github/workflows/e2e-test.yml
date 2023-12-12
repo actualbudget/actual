@@ -100,3 +100,4 @@ jobs:
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           body: The VRT tests have passed! Thank you!
+          edit-mode: replace
