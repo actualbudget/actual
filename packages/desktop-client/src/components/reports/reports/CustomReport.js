@@ -159,6 +159,7 @@ export default function CustomReport() {
     accounts,
     filters,
     conditionsOp,
+    showEmpty,
     showOffBudgetHidden,
     showUncategorized,
   ]);

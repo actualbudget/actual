@@ -139,7 +139,6 @@ function createGroupedSpreadsheet({
       },
       [startDate, endDate],
     );
-
     setData(
       groupedData.filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true)),
     );

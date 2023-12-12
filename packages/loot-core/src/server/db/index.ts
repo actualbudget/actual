@@ -74,15 +74,15 @@ export function getDatabase() {
 }
 
 export async function loadClock() {
-  let row = await first('SELECT * FROM messages_clock');
+  const row = await first('SELECT * FROM messages_clock');
   if (row) {
-    let clock = deserializeClock(row.clock);
+    const clock = deserializeClock(row.clock);
     setClock(clock);
   } else {
     // No clock exists yet (first run of the app), so create a default
     // one.
-    let timestamp = new Timestamp(0, 0, makeClientId());
-    let clock = makeClock(timestamp);
+    const timestamp = new Timestamp(0, 0, makeClientId());
+    const clock = makeClock(timestamp);
     setClock(clock);
 
     await runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
@@ -118,12 +118,12 @@ export function execQuery(sql) {
 // only needed in hot spots when you are running lots of queries.
 let _queryCache = new LRU({ max: 100 });
 export function cache(sql) {
-  let cached = _queryCache.get(sql);
+  const cached = _queryCache.get(sql);
   if (cached) {
     return cached;
   }
 
-  let prepared = sqlite.prepare(db, sql);
+  const prepared = sqlite.prepare(db, sql);
   _queryCache.set(sql, prepared);
   return prepared;
 }
@@ -176,7 +176,7 @@ export async function select(table, id) {
 }
 
 export async function update(table, params) {
-  let fields = Object.keys(params).filter(k => k !== 'id');
+  const fields = Object.keys(params).filter(k => k !== 'id');
 
   if (params.id == null) {
     throw new Error('update: id is required');
@@ -209,7 +209,7 @@ export async function insertWithUUID(table, row) {
 }
 
 export async function insert(table, row) {
-  let fields = Object.keys(row).filter(k => k !== 'id');
+  const fields = Object.keys(row).filter(k => k !== 'id');
 
   if (row.id == null) {
     throw new Error('insert: id is required');
@@ -241,14 +241,14 @@ export async function delete_(table, id) {
 }
 
 export async function selectWithSchema(table, sql, params) {
-  let rows = await runQuery(sql, params, true);
+  const rows = await runQuery(sql, params, true);
   return rows
     .map(row => convertFromSelect(schema, schemaConfig, table, row))
     .filter(Boolean);
 }
 
 export async function selectFirstWithSchema(table, sql, params) {
-  let rows = await selectWithSchema(table, sql, params);
+  const rows = await selectWithSchema(table, sql, params);
   return rows.length > 0 ? rows[0] : null;
 }
 
@@ -322,7 +322,7 @@ export async function moveCategoryGroup(id, targetId) {
   );
 
   const { updates, sort_order } = shoveSortOrders(groups, targetId);
-  for (let info of updates) {
+  for (const info of updates) {
     await update('category_groups', info);
   }
   await update('category_groups', { id, sort_order });
@@ -374,7 +374,7 @@ export async function insertCategory(
         categories,
         categories.length > 0 ? categories[0].id : null,
       );
-      for (let info of updates) {
+      for (const info of updates) {
         await update('categories', info);
       }
       sort_order = order;
@@ -409,7 +409,7 @@ export async function moveCategory(id, groupId, targetId?: string) {
   );
 
   const { updates, sort_order } = shoveSortOrders(categories, targetId);
-  for (let info of updates) {
+  for (const info of updates) {
     await update('categories', info);
   }
   await update('categories', { id, sort_order, cat_group: groupId });
@@ -424,7 +424,7 @@ export async function deleteCategory(category, transferId?: string) {
       'SELECT * FROM category_mapping WHERE transferId = ?',
       [category.id],
     );
-    for (let mapping of existingTransfers) {
+    for (const mapping of existingTransfers) {
       await update('category_mapping', { id: mapping.id, transferId });
     }
 
@@ -450,7 +450,7 @@ export async function insertPayee(payee) {
 }
 
 export async function deletePayee(payee) {
-  let { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
+  const { transfer_acct } = await first('SELECT * FROM payees WHERE id = ?', [
     payee.id,
   ]);
   if (transfer_acct) {
@@ -480,7 +480,7 @@ export function updatePayee(payee) {
 
 export async function mergePayees(target, ids) {
   // Load in payees so we can check some stuff
-  let payees = groupById(await all('SELECT * FROM payees'));
+  const payees = groupById(await all('SELECT * FROM payees'));
 
   // Filter out any transfer payees
   if (payees[target].transfer_acct != null) {
@@ -491,7 +491,7 @@ export async function mergePayees(target, ids) {
   await batchMessages(async () => {
     await Promise.all(
       ids.map(async id => {
-        let mappings = await all(
+        const mappings = await all(
           'SELECT id FROM payee_mapping WHERE targetId = ?',
           [id],
         );
@@ -533,7 +533,7 @@ export function syncGetOrphanedPayees() {
 }
 
 export async function getOrphanedPayees() {
-  let rows = await all(`
+  const rows = await all(`
     SELECT p.id FROM payees p
     LEFT JOIN payee_mapping pm ON pm.id = p.id
     LEFT JOIN v_transactions_internal_alive t ON t.payee = pm.targetId
@@ -565,7 +565,7 @@ export async function insertAccount(account) {
   );
 
   // Don't pass a target in, it will default to appending at the end
-  let { sort_order } = shoveSortOrders(accounts);
+  const { sort_order } = shoveSortOrders(accounts);
 
   account = accountModel.validate({ ...account, sort_order });
   return insertWithUUID('accounts', account);
@@ -581,7 +581,7 @@ export function deleteAccount(account) {
 }
 
 export async function moveAccount(id, targetId) {
-  let account = await first('SELECT * FROM accounts WHERE id = ?', [id]);
+  const account = await first('SELECT * FROM accounts WHERE id = ?', [id]);
   let accounts;
   if (account.closed) {
     accounts = await all(
@@ -596,7 +596,7 @@ export async function moveAccount(id, targetId) {
 
   const { updates, sort_order } = shoveSortOrders(accounts, targetId);
   await batchMessages(async () => {
-    for (let info of updates) {
+    for (const info of updates) {
       update('accounts', info);
     }
     update('accounts', { id, sort_order });
@@ -604,7 +604,7 @@ export async function moveAccount(id, targetId) {
 }
 
 export async function getTransaction(id) {
-  let rows = await selectWithSchema(
+  const rows = await selectWithSchema(
     'transactions',
     'SELECT * FROM v_transactions WHERE id = ?',
     [id],

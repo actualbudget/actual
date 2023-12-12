@@ -11,8 +11,8 @@ export async function goalsSpend(
   category,
 ) {
   // spend has 'amount' and 'from' and 'month' params
-  let from_month = `${template.from}-01`;
-  let to_month = `${template.month}-01`;
+  const from_month = `${template.from}-01`;
+  const to_month = `${template.month}-01`;
   let already_budgeted = last_month_balance;
   let first_month = true;
   for (
@@ -20,23 +20,23 @@ export async function goalsSpend(
     monthUtils.differenceInCalendarMonths(current_month, m) > 0;
     m = monthUtils.addMonths(m, 1)
   ) {
-    let sheetName = monthUtils.sheetForMonth(monthUtils.format(m, 'yyyy-MM'));
+    const sheetName = monthUtils.sheetForMonth(monthUtils.format(m, 'yyyy-MM'));
 
     if (first_month) {
-      let spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
-      let balance = await getSheetValue(sheetName, `leftover-${category.id}`);
+      const spent = await getSheetValue(sheetName, `sum-amount-${category.id}`);
+      const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
       already_budgeted = balance - spent;
       first_month = false;
     } else {
-      let budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
+      const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
       already_budgeted += budgeted;
     }
   }
-  let num_months = monthUtils.differenceInCalendarMonths(
+  const num_months = monthUtils.differenceInCalendarMonths(
     to_month,
     monthUtils._parse(current_month),
   );
-  let target = amountToInteger(template.amount);
+  const target = amountToInteger(template.amount);
 
   let increment = 0;
   if (num_months < 0) {

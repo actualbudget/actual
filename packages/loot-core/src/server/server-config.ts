@@ -11,7 +11,7 @@ type ServerConfig = {
 let config: ServerConfig | null = null;
 
 function joinURL(base: string | URL, ...paths: string[]): string {
-  let url = new URL(base);
+  const url = new URL(base);
   url.pathname = fs.join(...paths);
   return url.toString();
 }

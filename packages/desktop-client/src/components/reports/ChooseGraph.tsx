@@ -26,8 +26,7 @@ type ChooseGraphProps = {
   setScrollWidth: (value: number) => void;
   months: Month[];
 };
-
-function ChooseGraph({
+export function ChooseGraph({
   data,
   mode,
   graphType,

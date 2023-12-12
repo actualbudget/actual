@@ -9,9 +9,9 @@ function throwIfNot200(res, text) {
       throw new PostError(res.status === 500 ? 'internal' : text);
     }
 
-    let contentType = res.headers.get('Content-Type');
+    const contentType = res.headers.get('Content-Type');
     if (contentType.toLowerCase().indexOf('application/json') !== -1) {
-      let json = JSON.parse(text);
+      const json = JSON.parse(text);
       throw new PostError(json.reason);
     }
     throw new PostError(text);
