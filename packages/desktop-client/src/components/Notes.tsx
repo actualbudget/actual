@@ -128,10 +128,7 @@ export default function Notes({
     />
   ) : (
     <Text {...markdownStyles} style={{ ...getStyle?.(editable) }}>
-      <ReactMarkdown
-        remarkPlugins={remarkPlugins}
-        linkTarget="_blank"
-      >
+      <ReactMarkdown remarkPlugins={remarkPlugins} linkTarget="_blank">
         {notes}
       </ReactMarkdown>
     </Text>
