@@ -40,12 +40,14 @@ export function ReportSummary({
         }}
       >
         <Text
-          style={{
-            ...styles.largeText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 600,
-          }}
+          style={[
+            styles.largeText,
+            {
+              alignItems: 'center',
+              marginBottom: 2,
+              fontWeight: 600,
+            },
+          ]}
         >
           {monthUtils.format(startDate, 'MMM yyyy')} -{' '}
           {monthUtils.format(endDate, 'MMM yyyy')}
@@ -61,12 +63,14 @@ export function ReportSummary({
         }}
       >
         <Text
-          style={{
-            ...styles.mediumText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 400,
-          }}
+          style={[
+            styles.mediumText,
+            {
+              alignItems: 'center',
+              marginBottom: 2,
+              fontWeight: 400,
+            },
+          ]}
         >
           {balanceTypeOp === 'totalDebts'
             ? 'TOTAL SPENDING'
@@ -75,12 +79,14 @@ export function ReportSummary({
             : 'NET ' + net}
         </Text>
         <Text
-          style={{
-            ...styles.veryLargeText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 800,
-          }}
+          style={[
+            styles.veryLargeText,
+            {
+              alignItems: 'center',
+              marginBottom: 2,
+              fontWeight: 800,
+            },
+          ]}
         >
           <PrivacyFilter blurIntensity={7}>
             {amountToCurrency(data[balanceTypeOp])}
@@ -98,12 +104,14 @@ export function ReportSummary({
         }}
       >
         <Text
-          style={{
-            ...styles.mediumText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 400,
-          }}
+          style={[
+            styles.mediumText,
+            {
+              alignItems: 'center',
+              marginBottom: 2,
+              fontWeight: 400,
+            },
+          ]}
         >
           {balanceTypeOp === 'totalDebts'
             ? 'AVERAGE SPENDING'
@@ -112,12 +120,14 @@ export function ReportSummary({
             : 'AVERAGE NET'}
         </Text>
         <Text
-          style={{
-            ...styles.veryLargeText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 800,
-          }}
+          style={[
+            styles.veryLargeText,
+            {
+              alignItems: 'center',
+              marginBottom: 2,
+              fontWeight: 800,
+            },
+          ]}
         >
           <PrivacyFilter blurIntensity={7}>
             {integerToCurrency(Math.round(average))}
@@ -140,13 +150,15 @@ export function ReportLegend({ legend, groupBy }) {
       }}
     >
       <Text
-        style={{
-          ...styles.largeText,
-          alignItems: 'center',
-          marginBottom: 2,
-          fontWeight: 400,
-          paddingTop: 10,
-        }}
+        style={[
+          styles.largeText,
+          {
+            alignItems: 'center',
+            marginBottom: 2,
+            fontWeight: 400,
+            paddingTop: 10,
+          },
+        ]}
       >
         {groupBy}
       </Text>
