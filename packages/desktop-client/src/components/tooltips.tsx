@@ -4,13 +4,13 @@ import {
   createRef,
   useState,
   RefObject,
+  ReactNode,
 } from 'react';
 import ReactDOM from 'react-dom';
 import { css } from 'glamor';
-import { styles, theme } from '../style';
+import { CSSProperties, styles, theme } from '../style';
 
-// TODO: workout type
-export const IntersectionBoundary = createContext({});
+export const IntersectionBoundary = createContext<any>(null);
 
 export function useTooltip() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -47,18 +47,27 @@ type TooltipProps = {
   position: TooltipPosition;
   onClose: () => void;
   forceLayout: boolean;
+  forceTop: number;
+  ignoreBoundary: boolean;
+  targetRect: any;
+  offset: number;
+  style: CSSProperties;
+  width: number;
+  children: ReactNode;
 };
 
 export class Tooltip extends Component<TooltipProps> {
   static contextType = IntersectionBoundary;
+  declare context: React.ContextType<typeof IntersectionBoundary>;
   position: TooltipPosition;
-  contentRef: RefObject<HTMLElement>;
+  contentRef: RefObject<HTMLDivElement>;
   cleanup: () => void;
+  target: HTMLDivElement;
 
-  constructor(props: TooltipProps) {
+  constructor(props) {
     super(props);
     this.position = props.position || 'bottom-right';
-    this.contentRef = createRef<HTMLElement>();
+    this.contentRef = createRef<HTMLDivElement>();
   }
 
   setup() {
@@ -165,7 +174,7 @@ export class Tooltip extends Component<TooltipProps> {
     }
 
     const box = contentEl.getBoundingClientRect();
-    const anchorEl = this.target.parentNode;
+    const anchorEl = this.target.parentNode as any;
 
     let anchorRect = targetRect || anchorEl.getBoundingClientRect();
 
@@ -260,7 +269,13 @@ export class Tooltip extends Component<TooltipProps> {
   }
 
   getStyleForPosition(position, boxRect, anchorRect, containerRect, offset) {
-    const style = {
+    const style: {
+      top?: string;
+      bottom?: string;
+      left?: string;
+      right?: string;
+      width?: string;
+    } = {
       top: 'inherit',
       bottom: 'inherit',
       left: 'inherit',
