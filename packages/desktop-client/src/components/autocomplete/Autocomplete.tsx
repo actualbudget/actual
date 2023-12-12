@@ -10,7 +10,7 @@ import React, {
   type ChangeEvent,
 } from 'react';
 
-import Downshift from 'downshift';
+import Downshift, { type StateChangeTypes } from 'downshift';
 import { css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
@@ -20,18 +20,31 @@ import Input from '../common/Input';
 import View from '../common/View';
 import { Tooltip } from '../tooltips';
 
-const inst: { lastChangeType? } = {};
+type Item = {
+  id?: string;
+  name: string;
+};
 
-function findItem(strict, suggestions, value) {
+const inst: { lastChangeType?: StateChangeTypes } = {};
+
+function findItem<T extends Item>(
+  strict: boolean,
+  suggestions: T[],
+  value: T | T['id'],
+): T | null {
   if (strict) {
     const idx = suggestions.findIndex(item => item.id === value);
     return idx === -1 ? null : suggestions[idx];
   }
 
+  if (typeof value === 'string') {
+    throw new Error('value can be string only if strict = false');
+  }
+
   return value;
 }
 
-function getItemName(item) {
+function getItemName(item: null | string | Item): string {
   if (item == null) {
     return '';
   } else if (typeof item === 'string') {
@@ -40,24 +53,36 @@ function getItemName(item) {
   return item.name || '';
 }
 
-function getItemId(item) {
+function getItemId(item: Item | Item['id']) {
   if (typeof item === 'string') {
     return item;
   }
   return item ? item.id : null;
 }
 
-export function defaultFilterSuggestion(suggestion, value) {
+export function defaultFilterSuggestion<T extends Item>(
+  suggestion: T,
+  value: string,
+) {
   return getItemName(suggestion).toLowerCase().includes(value.toLowerCase());
 }
 
-function defaultFilterSuggestions(suggestions, value) {
+function defaultFilterSuggestions<T extends Item>(
+  suggestions: T[],
+  value: string,
+) {
   return suggestions.filter(suggestion =>
     defaultFilterSuggestion(suggestion, value),
   );
 }
 
-function fireUpdate(onUpdate, strict, suggestions, index, value) {
+function fireUpdate<T extends Item>(
+  onUpdate: ((selected: string | null, value: string) => void) | undefined,
+  strict: boolean,
+  suggestions: T[],
+  index: number,
+  value: string,
+) {
   // If the index is null, look up the id in the suggestions. If the
   // value is empty it will select nothing (as expected). If it's not
   // empty but nothing is selected, it still resolves to an id. It
@@ -82,11 +107,15 @@ function fireUpdate(onUpdate, strict, suggestions, index, value) {
   onUpdate?.(selected, value);
 }
 
-function defaultRenderInput(props) {
+function defaultRenderInput(props: ComponentProps<typeof Input>) {
   return <Input {...props} />;
 }
 
-function defaultRenderItems(items, getItemProps, highlightedIndex) {
+function defaultRenderItems<T extends Item>(
+  items: T[],
+  getItemProps: (arg: { item: T }) => ComponentProps<typeof View>,
+  highlightedIndex: number,
+) {
   return (
     <div>
       {items.map((item, index) => {
@@ -134,15 +163,15 @@ function defaultRenderItems(items, getItemProps, highlightedIndex) {
   );
 }
 
-function defaultShouldSaveFromKey(e) {
+function defaultShouldSaveFromKey(e: KeyboardEvent) {
   return e.code === 'Enter';
 }
 
-function defaultItemToString(item) {
+function defaultItemToString<T extends Item>(item?: T) {
   return item ? getItemName(item) : '';
 }
 
-type SingleAutocompleteProps = {
+type SingleAutocompleteProps<T extends Item> = {
   focused?: boolean;
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
@@ -150,31 +179,31 @@ type SingleAutocompleteProps = {
   inputProps?: Omit<ComponentProps<typeof Input>, 'onChange'> & {
     onChange?: (value: string) => void;
   };
-  suggestions?: unknown[];
+  suggestions?: T[];
   tooltipStyle?: CSSProperties;
   tooltipProps?: ComponentProps<typeof Tooltip>;
   renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
   renderItems?: (
-    items,
-    getItemProps: (arg: { item: unknown }) => ComponentProps<typeof View>,
+    items: T[],
+    getItemProps: (arg: { item: T }) => ComponentProps<typeof View>,
     idx: number,
-    value?: unknown,
+    value?: string,
   ) => ReactNode;
-  itemToString?: (item) => string;
+  itemToString?: (item: T) => string;
   shouldSaveFromKey?: (e: KeyboardEvent) => boolean;
-  filterSuggestions?: (suggestions, value: string) => unknown[];
+  filterSuggestions?: (suggestions: T[], value: string) => T[];
   openOnFocus?: boolean;
-  getHighlightedIndex?: (suggestions) => number | null;
+  getHighlightedIndex?: (suggestions: T[]) => number | null;
   highlightFirst?: boolean;
-  onUpdate?: (id: unknown, value: string) => void;
+  onUpdate?: (id: T['id'], value: string) => void;
   strict?: boolean;
-  onSelect: (id: unknown, value: string) => void;
+  onSelect: (id: T['id'], value: string) => void;
   tableBehavior?: boolean;
   closeOnBlur?: boolean;
-  value: unknown[] | string;
+  value: T | T['id'];
   isMulti?: boolean;
 };
-function SingleAutocomplete({
+function SingleAutocomplete<T extends Item>({
   focused,
   embedded = false,
   containerProps,
@@ -198,7 +227,7 @@ function SingleAutocomplete({
   closeOnBlur = true,
   value: initialValue,
   isMulti = false,
-}: SingleAutocompleteProps) {
+}: SingleAutocompleteProps<T>) {
   const [selectedItem, setSelectedItem] = useState(() =>
     findItem(strict, suggestions, initialValue),
   );
@@ -220,9 +249,9 @@ function SingleAutocomplete({
     setSelectedItem(findItem(strict, suggestions, initialValue));
   }, [initialValue, suggestions, strict]);
 
-  function resetState(newValue) {
+  function resetState(newValue?: string) {
     const val = newValue === undefined ? initialValue : newValue;
-    const selectedItem = findItem(strict, suggestions, val);
+    const selectedItem = findItem<T>(strict, suggestions, val);
 
     setSelectedItem(selectedItem);
     setValue(selectedItem ? getItemName(selectedItem) : '');
@@ -527,7 +556,12 @@ function SingleAutocomplete({
   );
 }
 
-function MultiItem({ name, onRemove }) {
+type MultiItemProps = {
+  name: string;
+  onRemove: () => void;
+};
+
+function MultiItem({ name, onRemove }: MultiItemProps) {
   return (
     <View
       style={{
@@ -547,40 +581,44 @@ function MultiItem({ name, onRemove }) {
   );
 }
 
-type MultiAutocompleteProps = Omit<
-  SingleAutocompleteProps,
-  'value' | 'onSelect'
-> & {
-  value: unknown[];
-  onSelect: (ids: unknown[], id?: string) => void;
+type MultiAutocompleteProps<
+  T extends Item,
+  Value = SingleAutocompleteProps<T>['value'],
+> = Omit<SingleAutocompleteProps<T>, 'value' | 'onSelect'> & {
+  value: Value[];
+  onSelect: (ids: Value[], id?: string) => void;
 };
-function MultiAutocomplete({
+function MultiAutocomplete<T extends Item>({
   value: selectedItems,
   onSelect,
   suggestions,
   strict,
   ...props
-}: MultiAutocompleteProps) {
+}: MultiAutocompleteProps<T>) {
   const [focused, setFocused] = useState(false);
-  const lastSelectedItems = useRef<unknown[]>();
+  const lastSelectedItems = useRef<typeof selectedItems>();
 
   useEffect(() => {
     lastSelectedItems.current = selectedItems;
   });
 
-  function onRemoveItem(id) {
+  function onRemoveItem(id: (typeof selectedItems)[0]) {
     const items = selectedItems.filter(i => i !== id);
     onSelect(items);
   }
 
-  function onAddItem(id) {
+  function onAddItem(id: string) {
     if (id) {
       id = id.trim();
       onSelect([...selectedItems, id], id);
     }
   }
 
-  function onKeyDown(e, prevOnKeyDown) {
+  function onKeyDown(
+    e: KeyboardEvent<HTMLInputElement>,
+    prevOnKeyDown?: ComponentProps<typeof Input>['onKeyDown'],
+  ) {
+    // @ts-expect-error We're missing `target.value` on KeyboardEvent
     if (e.key === 'Backspace' && e.target.value === '') {
       onRemoveItem(selectedItems[selectedItems.length - 1]);
     }
@@ -680,31 +718,24 @@ export function AutocompleteFooter({
   );
 }
 
-type AutocompleteProps =
-  | ComponentProps<typeof SingleAutocomplete>
-  | ComponentProps<typeof MultiAutocomplete>;
+type AutocompleteProps<T extends Item> =
+  | ComponentProps<typeof SingleAutocomplete<T>>
+  | ComponentProps<typeof MultiAutocomplete<T>>;
 
-function isMultiAutocomplete(
-  props: AutocompleteProps,
+function isMultiAutocomplete<T extends Item>(
+  _props: AutocompleteProps<T>,
   multi?: boolean,
-): props is ComponentProps<typeof MultiAutocomplete> {
+): _props is ComponentProps<typeof MultiAutocomplete<T>> {
   return multi;
 }
 
-function isSingleAutocomplete(
-  props: AutocompleteProps,
-  multi?: boolean,
-): props is ComponentProps<typeof SingleAutocomplete> {
-  return !multi;
-}
-
-export default function Autocomplete({
+export default function Autocomplete<T extends Item>({
   multi,
   ...props
-}: AutocompleteProps & { multi?: boolean }) {
+}: AutocompleteProps<T> & { multi?: boolean }) {
   if (isMultiAutocomplete(props, multi)) {
     return <MultiAutocomplete {...props} />;
-  } else if (isSingleAutocomplete(props, multi)) {
-    return <SingleAutocomplete {...props} />;
   }
+
+  return <SingleAutocomplete {...props} />;
 }
