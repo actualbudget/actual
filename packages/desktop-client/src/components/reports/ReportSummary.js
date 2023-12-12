@@ -139,7 +139,7 @@ export function ReportSummary({
   );
 }
 
-export function ReportLegend({ legend, groupBy }) {
+export function ReportLegend({ data, legend, groupBy }) {
   return (
     <View
       style={{
