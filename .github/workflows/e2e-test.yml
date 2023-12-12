@@ -70,9 +70,12 @@ jobs:
         if: failure()
         with:
           labels: ':red_circle: VRT failing'
+      - uses: actions-ecosystem/action-remove-labels@v1
+        if: success()
+        with:
+          labels: ':red_circle: VRT failing'
       - name: Find Comment
         uses: peter-evans/find-comment@v2
-        if: failure()
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -92,7 +95,7 @@ jobs:
             We look forward to reviewing this PR once all the CI jobs have passed successfully!
           edit-mode: replace
       - name: Update comment when CI job passes
-        if: ${{ success() && steps.fc.outputs.comment-id != '' }}
+        if: success() && steps.fc.outputs.comment-id != ''
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
