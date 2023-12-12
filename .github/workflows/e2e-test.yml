@@ -73,7 +73,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: visual regression tests
+          body-includes: VRT
       - name: Create comment if failed
         if: failure()
         uses: peter-evans/create-or-update-comment@v3
@@ -81,9 +81,15 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            :wave: Looks like VRT (visual regression tests) are failing in this PR. This indicates a visual regression in the app. It could be either a bug in this PR or a visual change introduced by changing something.
+            :wave: Looks like VRT (visual regression tests) are failing in this PR. This indicates a problem in the app. It could be either a bug in this PR or a visual change introduced by changing something.
 
-            To fix this: please follow [these instructions](https://github.com/actualbudget/actual/blob/master/packages/desktop-client/README.md#visual-regression).
+            To fix this: please follow [these instructions](https://github.com/actualbudget/actual/blob/master/packages/desktop-client/README.md#visual-regression) and review the output of the failing CI job to see the generated screenshots.
 
             We look forward to reviewing this PR once all the CI jobs have passed successfully!
           edit-mode: replace
+      - name: Update comment when CI job passes
+        if: success() && steps.fc.outputs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body: The VRT tests have passed! Thank you!
