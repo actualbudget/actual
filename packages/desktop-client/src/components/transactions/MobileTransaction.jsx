@@ -71,6 +71,7 @@ import {
 } from '../mobile/MobileForms';
 import MobileBackButton from '../MobileBackButton';
 import { Page } from '../Page';
+import { AmountInput } from '../util/AmountInput';
 const zIndices = { SECTION_HEADING: 10 };
 
 const getPayeesById = memoizeOne(payees => groupById(payees));
@@ -171,13 +172,6 @@ function Status({ status }) {
 }
 
 class TransactionEditInner extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      transactions: props.transactions,
-    };
-  }
-
   serializeTransactions = memoizeOne(transactions => {
     return transactions.map(t =>
       serializeTransaction(t, this.props.dateFormat),
@@ -190,19 +184,13 @@ class TransactionEditInner extends PureComponent {
     }
   }
 
-  componentWillUnmount() {
-    document
-      .querySelector('meta[name="theme-color"]')
-      .setAttribute('content', '#ffffff');
-  }
-
   onAdd = () => {
     this.onSave();
   };
 
   onSave = async () => {
     const onConfirmSave = async () => {
-      let { transactions } = this.state;
+      let { transactions } = this.props;
       const [transaction, ..._childTransactions] = transactions;
       const { account: accountId } = transaction;
       const account = getAccountsById(this.props.accounts)[accountId];
@@ -213,15 +201,6 @@ class TransactionEditInner extends PureComponent {
         return;
       }
 
-      // Since we don't own the state, we have to handle the case where
-      // the user saves while editing an input. We won't have the
-      // updated value so we "apply" a queued change. Maybe there's a
-      // better way to do this (lift the state?)
-      if (this._queuedChange) {
-        const [transaction, name, value] = this._queuedChange;
-        transactions = await this.onEdit(transaction, name, value);
-      }
-
       if (this.props.adding) {
         transactions = realizeTempTransactions(transactions);
       }
@@ -230,7 +209,7 @@ class TransactionEditInner extends PureComponent {
       this.props.navigate(`/accounts/${account.id}`, { replace: true });
     };
 
-    const { transactions } = this.state;
+    const { transactions } = this.props;
     const [transaction] = transactions;
 
     if (transaction.reconciled) {
@@ -248,30 +227,10 @@ class TransactionEditInner extends PureComponent {
   };
 
   onEdit = async (transaction, name, value) => {
-    const { transactions } = this.state;
-
-    let newTransaction = { ...transaction, [name]: value };
+    const newTransaction = { ...transaction, [name]: value };
     if (this.props.onEdit) {
-      newTransaction = await this.props.onEdit(newTransaction);
+      await this.props.onEdit(newTransaction);
     }
-
-    const { data: newTransactions } = updateTransaction(
-      transactions,
-      deserializeTransaction(newTransaction, null, this.props.dateFormat),
-    );
-
-    this._queuedChange = null;
-    this.setState({ transactions: newTransactions });
-    return newTransactions;
-  };
-
-  onQueueChange = (transaction, name, value) => {
-    // This is an ugly hack to solve the problem that input's blur
-    // events are not fired when unmounting. If the user has focused
-    // an input and swipes back, it should still save, but because the
-    // blur event is not fired we need to manually track the latest
-    // change and apply it ourselves when unmounting
-    this._queuedChange = [transaction, name, value];
   };
 
   onClick = (transactionId, name) => {
@@ -280,7 +239,7 @@ class TransactionEditInner extends PureComponent {
     this.props.pushModal('edit-field', {
       name,
       onSubmit: (name, value) => {
-        const { transactions } = this.state;
+        const { transactions } = this.props;
         const transaction = transactions.find(t => t.id === transactionId);
         // This is a deficiency of this API, need to fix. It
         // assumes that it receives a serialized transaction,
@@ -292,15 +251,12 @@ class TransactionEditInner extends PureComponent {
 
   onDelete = id => {
     const onConfirmDelete = () => {
-      const { transactions } = this.state;
+      const { transactions } = this.props;
 
       this.props.onDelete(id);
 
       const [transaction, ..._childTransactions] = transactions;
       if (transaction.id !== id) {
-        // Only the child transaction was deleted.
-        const changes = deleteTransaction(transactions, id);
-        this.setState({ transactions: changes.data });
         return;
       }
 
@@ -312,7 +268,7 @@ class TransactionEditInner extends PureComponent {
       }
     };
 
-    const { transactions } = this.state;
+    const { transactions } = this.props;
     const [transaction] = transactions;
 
     if (transaction.reconciled) {
@@ -326,22 +282,22 @@ class TransactionEditInner extends PureComponent {
   };
 
   onAddSplit = id => {
-    const changes = addSplitTransaction(this.state.transactions, id);
-    this.setState({ transactions: changes.data });
     this.props.onAddSplit(id);
   };
 
   onSplit = id => {
-    const changes = splitTransaction(this.state.transactions, id);
-    this.setState({ transactions: changes.data });
     this.props.onSplit(id);
   };
 
   render() {
-    const { adding, categories, accounts, payees } = this.props;
-    const transactions = this.serializeTransactions(
-      this.state.transactions || [],
-    );
+    const {
+      adding,
+      categories,
+      accounts,
+      payees,
+      transactions: originalTransactions,
+    } = this.props;
+    const transactions = this.serializeTransactions(originalTransactions || []);
     const [transaction, ..._childTransactions] = transactions;
 
     // Child transactions should always default to the signage
@@ -426,7 +382,7 @@ class TransactionEditInner extends PureComponent {
             {transaction.error?.type === 'SplitTransactionError' ? (
               <Button
                 style={{ height: 40 }}
-                onPointerUp={() =>
+                onClick={() =>
                   _childTransactions.length === 0
                     ? this.onSplit(transaction.id)
                     : this.onAddSplit(transaction.id)
@@ -455,7 +411,7 @@ class TransactionEditInner extends PureComponent {
                 </Text>
               </Button>
             ) : adding ? (
-              <Button style={{ height: 40 }} onPointerUp={() => this.onAdd()}>
+              <Button style={{ height: 40 }} onClick={() => this.onAdd()}>
                 <Add
                   width={17}
                   height={17}
@@ -472,7 +428,7 @@ class TransactionEditInner extends PureComponent {
                 </Text>
               </Button>
             ) : (
-              <Button style={{ height: 40 }} onPointerUp={() => this.onSave()}>
+              <Button style={{ height: 40 }} onClick={() => this.onSave()}>
                 <PencilWriteAlternate
                   width={16}
                   height={16}
@@ -512,9 +468,6 @@ class TransactionEditInner extends PureComponent {
               zeroIsNegative={true}
               onBlur={value =>
                 this.onEdit(transaction, 'amount', value.toString())
-              }
-              onChange={value =>
-                this.onQueueChange(transaction, 'amount', value)
               }
               style={{ transform: [] }}
               focusedStyle={{
@@ -575,7 +528,7 @@ class TransactionEditInner extends PureComponent {
               }}
             >
               <View style={{ flexDirection: 'row' }}>
-                <View style={{ flexBasis: '70%' }}>
+                <View style={{ flexBasis: '75%' }}>
                   <FieldLabel title="Payee" />
                   <TapField
                     value={getPrettyPayee(childTrans)}
@@ -583,24 +536,20 @@ class TransactionEditInner extends PureComponent {
                     data-testid={`payee-field-${childTrans.id}`}
                   />
                 </View>
-                <View style={{ flexBasis: '30%' }}>
+                <View style={{ flexBasis: '25%' }}>
                   <FieldLabel title="Amount" />
-                  <InputField
-                    defaultValue={childTrans.amount}
-                    onUpdate={value => this.onEdit(childTrans, 'amount', value)}
-                    onChange={e =>
-                      this.onQueueChange(childTrans, 'amount', e.target.value)
+                  <AmountInput
+                    initialValue={amountToInteger(childTrans.amount)}
+                    zeroSign="-"
+                    textStyle={{ ...styles.smallText, textAlign: 'right' }}
+                    onChange={value =>
+                      this.onEdit(
+                        childTrans,
+                        'amount',
+                        integerToCurrency(value),
+                      )
                     }
                   />
-                  {/* <AmountInput
-                      initialValue={amountToInteger(trans.amount)}
-                      zeroSign="-"
-                      textStyle={{ ...styles.smallText }}
-                      onChange={value =>
-                        this.onQueueChange(trans.amount, 'amount', value)
-                      }
-                      onBlur={() => this.onEdit(trans.amount, 'amount', trans.amount)}
-                    /> */}
                 </View>
               </View>
 
@@ -670,7 +619,7 @@ class TransactionEditInner extends PureComponent {
                   marginTop: 10,
                   backgroundColor: 'transparent',
                 }}
-                onClick={() => this.onSplit(transaction.id)}
+                onPointerUp={() => this.onSplit(transaction.id)}
                 type="bare"
               >
                 <Split
@@ -716,13 +665,6 @@ class TransactionEditInner extends PureComponent {
                     formatDate(parseISO(value), this.props.dateFormat),
                   )
                 }
-                onChange={e =>
-                  this.onQueueChange(
-                    transaction,
-                    'date',
-                    formatDate(parseISO(e.target.value), this.props.dateFormat),
-                  )
-                }
               />
             </View>
             {transaction.reconciled ? (
@@ -761,9 +703,6 @@ class TransactionEditInner extends PureComponent {
             <InputField
               defaultValue={transaction.notes}
               onUpdate={value => this.onEdit(transaction, 'notes', value)}
-              onChange={e =>
-                this.onQueueChange(transaction, 'notes', e.target.value)
-              }
             />
           </View>
 
@@ -825,6 +764,7 @@ function TransactionEditUnconnected(props) {
   const { id: accountId, transactionId } = useParams();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
+  const [fetchedTransactions, setFetchedTransactions] = useState([]);
   const adding = useRef(false);
   const deleted = useRef(false);
   useSetThemeColor(theme.mobileViewTheme);
@@ -851,7 +791,7 @@ function TransactionEditUnconnected(props) {
           .select('*')
           .options({ splits: 'grouped' }),
       );
-      setTransactions(ungroupTransactions(data));
+      setFetchedTransactions(ungroupTransactions(data));
     }
     if (transactionId) {
       fetchTransaction();
@@ -859,6 +799,10 @@ function TransactionEditUnconnected(props) {
       adding.current = true;
     }
   }, [transactionId]);
+
+  useEffect(() => {
+    setTransactions(fetchedTransactions);
+  }, [fetchedTransactions]);
 
   useEffect(() => {
     if (adding.current) {
@@ -880,13 +824,14 @@ function TransactionEditUnconnected(props) {
   }
 
   const onEdit = async transaction => {
+    let newTransaction = transaction;
     // Run the rules to auto-fill in any data. Right now we only do
     // this on new transactions because that's how desktop works.
     if (isTemporary(transaction)) {
       const afterRules = await send('rules-run', { transaction });
       const diff = getChangedValues(transaction, afterRules);
 
-      const newTransaction = { ...transaction };
+      newTransaction = { ...transaction };
       if (diff) {
         Object.keys(diff).forEach(field => {
           if (newTransaction[field] == null) {
@@ -894,10 +839,13 @@ function TransactionEditUnconnected(props) {
           }
         });
       }
-      return newTransaction;
     }
 
-    return transaction;
+    const { data: newTransactions } = updateTransaction(
+      transactions,
+      deserializeTransaction(newTransaction, null, dateFormat),
+    );
+    setTransactions(newTransactions);
   };
 
   const onSave = async newTransactions => {
@@ -905,7 +853,7 @@ function TransactionEditUnconnected(props) {
       return;
     }
 
-    const changes = diffItems(transactions || [], newTransactions);
+    const changes = diffItems(fetchedTransactions || [], newTransactions);
     if (
       changes.added.length > 0 ||
       changes.updated.length > 0 ||
@@ -933,18 +881,22 @@ function TransactionEditUnconnected(props) {
   };
 
   const onDelete = async id => {
+    const changes = deleteTransaction(transactions, id);
+
     if (adding.current) {
       // Adding a new transactions, this disables saving when the component unmounts
       deleted.current = true;
     } else {
-      const changes = {
-        deleted: transactions.filter(t => t.id === id),
-      };
-      const _remoteUpdates = await send('transactions-batch-update', changes);
+      const _remoteUpdates = await send('transactions-batch-update', {
+        deleted: changes.diff.deleted,
+      });
+
       // if (onTransactionsChange) {
       //   onTransactionsChange({ ...changes, updated: remoteUpdates });
       // }
     }
+
+    setTransactions(changes.data);
   };
 
   const onAddSplit = id => {
@@ -956,7 +908,7 @@ function TransactionEditUnconnected(props) {
   const onSplit = id => {
     const changes = splitTransaction(transactions, id);
     setTransactions(changes.data);
-    // this.props.onSave(changes.data);
+    // onSave(changes.data);
   };
 
   return (
