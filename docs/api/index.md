@@ -54,6 +54,16 @@ let api = require('@actual-app/api');
 
 Heads up! You probably don’t want to hard-code the passwords like that, especially if you’ll be using Git to track your code. You can use environment variables to store the passwords instead, or read them in from a file, or request them interactively when running the script instead.
 
+### Self-signed https certificates
+
+If the serverURL is using [self-signed or custom CA certificates](../config/https.md), additional Node.js configuration is be needed for the connections to succeed.
+
+The API communicates with the server using `node-fetch`, assigned to the `global.fetch` function. There are a few ways to get Node.js to trust the self-signed certificate.
+
+- Option 1: Point environment variable [NODE_EXTRA_CA_CERTS](https://nodejs.org/api/cli.html#node_extra_ca_certsfile) to the path of a file containing the public certificate.
+- Option 2: Set environment variable [NODE_TLS_REJECT_UNAUTHORIZED](https://nodejs.org/api/cli.html#node_tls_reject_unauthorizedvalue) to `0`. Not recommended if your program reaches out to any other endpoints other than the Actual server.
+- Options 3: Use OpenSSL CA certificates configuration for Node and add your certificate to the OpenSSL SSL_CERT_DIR. What this requires depends on your build of Node.js, and the configuration details are beyond the scope of this documentation. See the [Node.js OpenSSL Strategy](https://github.com/nodejs/TSC/blob/main/OpenSSL-Strategy.md) page for a starting point.
+
 ## Writing data importers
 
 If you are using another app, like YNAB or Mint, you might want to migrate your data. Right now only officially support [importing YNAB4 data](../migration/ynab4.md) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.
