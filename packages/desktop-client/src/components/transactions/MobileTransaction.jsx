@@ -576,6 +576,14 @@ class TransactionEditInner extends PureComponent {
                 />
               </View>
 
+              <View>
+                <FieldLabel title="Notes" />
+                <InputField
+                  defaultValue={childTrans.notes}
+                  onUpdate={value => this.onEdit(childTrans, 'notes', value)}
+                />
+              </View>
+
               <View style={{ alignItems: 'center' }}>
                 <Button
                   onClick={() => this.onDelete(childTrans.id)}
