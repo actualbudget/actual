@@ -1,18 +1,23 @@
-import React, { Component, createContext, createRef, useState } from 'react';
+import {
+  Component,
+  createContext,
+  createRef,
+  useState,
+  RefObject,
+} from 'react';
 import ReactDOM from 'react-dom';
-
 import { css } from 'glamor';
-
 import { styles, theme } from '../style';
 
-export const IntersectionBoundary = createContext();
+// TODO: workout type
+export const IntersectionBoundary = createContext({});
 
 export function useTooltip() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return {
-    getOpenEvents: (events = {}) => ({
-      onClick: e => {
+    getOpenEvents: (events: { onClick?: (e: Event) => void } = {}) => ({
+      onClick: (e: Event) => {
         e.stopPropagation();
         events.onClick?.(e);
         setIsOpen(true);
@@ -24,14 +29,36 @@ export function useTooltip() {
   };
 }
 
-export class Tooltip extends Component {
-  static contextType = IntersectionBoundary;
-  state = { position: null };
+type TooltipPosition =
+  | 'top'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'bottom-stretch'
+  | 'top-stretch'
+  | 'bottom-center'
+  | 'top-center'
+  | 'left-center'
+  | 'right';
 
-  constructor(props) {
+type TooltipProps = {
+  position: TooltipPosition;
+  onClose: () => void;
+  forceLayout: boolean;
+};
+
+export class Tooltip extends Component<TooltipProps> {
+  static contextType = IntersectionBoundary;
+  position: TooltipPosition;
+  contentRef: RefObject<HTMLElement>;
+  cleanup: () => void;
+
+  constructor(props: TooltipProps) {
     super(props);
     this.position = props.position || 'bottom-right';
-    this.contentRef = createRef();
+    this.contentRef = createRef<HTMLElement>();
   }
 
   setup() {
