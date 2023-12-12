@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '@theme/Layout';
+import ThemedImage from '@theme/ThemedImage';
 import Link from '@docusaurus/Link';
 
 import Button from '../components/Button';
@@ -43,8 +44,11 @@ export default function Hello() {
           </div>
         </div>
         <div class={classes.heroImage}>
-          <Image
-            img={require('../../static/img/homepage/actual-main-budget.png')}
+          <ThemedImage
+            sources={{
+              light: "/img/homepage/actual-main-budget.png",
+              dark: "/img/homepage/actual-main-budget-dark.png",
+            }}
             alt="Actual Budget"
           />
           <Button
@@ -103,7 +107,8 @@ export default function Hello() {
         <div id="features" />
         <BigFeature
           title="Powerful budgeting made simple"
-          src="/img/homepage/actual-main-budget.png"
+          srcLight="/img/homepage/actual-main-budget.png"
+          srcDark="/img/homepage/actual-main-budget-dark.png"
         >
           <strong>
             Save hundreds of dollars a year (at least!) by tracking your
@@ -118,17 +123,20 @@ export default function Hello() {
 
         <BigFeature
           title="The fastest way to manage transactions"
-          src="/img/homepage/actual-main-transaction.png"
+          srcLight="/img/homepage/actual-main-transaction.png"
+          srcDark="/img/homepage/actual-main-transaction-dark.png"
         >
           Breeze through your transactions and update them easily with a
           streamlined, minimal interface. Categorizing your transactions
           correctly is important and we’ve optimized this process. Manage split
           transactions and transfers all in the same editor.
         </BigFeature>
+        
 
         <BigFeature
           title="Oh my, the reports"
-          src="/img/homepage/actual-report-cash-flow.png"
+          srcLight="/img/homepage/actual-report-cash-flow.png"
+          srcDark="/img/homepage/actual-report-cash-flow-dark.png"
         >
           Intuitive reports give you a quick way to learn about your finances.
           By default, we include net worth and cash flow reports, but soon
@@ -233,6 +241,13 @@ export default function Hello() {
             history. There are many more available from the Actual Community.
           </SmallFeature>
           <SmallFeature
+            title="Dark Mode"
+            icon={icons.moon}
+          >
+            Choose your own style with a built in dark mode and dynamic theming
+            using your system default.
+          </SmallFeature>
+          <SmallFeature
             title="API"
             icon={icons.hierarchy1}
             learnMore="/docs/api/"
@@ -312,7 +327,8 @@ function MediumFeature({ title, media, src, flip, children }) {
   );
 }
 
-function BigFeature({ title, media, src, flip, children }) {
+function BigFeature({ title, media, srcLight, srcDark=null, flip, children }) {
+  const imgDark = srcDark ? srcDark : srcLight;
   return (
     <div class={classes.bigFeature}>
       <h2 class="serif-header">{title}</h2>
@@ -320,7 +336,13 @@ function BigFeature({ title, media, src, flip, children }) {
       {media ? (
         <div class={classes.bigFeatureMedia}>{media}</div>
       ) : (
-        <img src={src} alt="" class={classes.bigFeatureMedia} />
+        <ThemedImage 
+          alt="" class={classes.bigFeatureMedia} 
+          sources={{
+            light: srcLight,
+            dark: imgDark,
+          }}
+        />
       )}
     </div>
   );
@@ -412,6 +434,11 @@ const icons = {
       <path d="M11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V11C13 10.4477 12.5523 10 12 10C11.4477 10 11 10.4477 11 11V19Z"/>
       <path d="M6 20C5.44772 20 5 19.5523 5 19L5 11C5 10.4477 5.44771 10 6 10C6.55228 10 7 10.4477 7 11L7 19C7 19.5523 6.55229 20 6 20Z"/>
       <path d="M17 19C17 19.5523 17.4477 20 18 20C18.5523 20 19 19.5523 19 19V11C19 10.4477 18.5523 10 18 10C17.4477 10 17 10.4477 17 11V19Z"/>
+    </svg>
+  ),
+  moon: (
+    <svg viewBox="0 0 24 24" >
+      <path d="M21.0672 11.8568L20.4253 11.469L21.0672 11.8568ZM12.1432 2.93276L11.7553 2.29085V2.29085L12.1432 2.93276ZM21.25 12C21.25 17.1086 17.1086 21.25 12 21.25V22.75C17.9371 22.75 22.75 17.9371 22.75 12H21.25ZM12 21.25C6.89137 21.25 2.75 17.1086 2.75 12H1.25C1.25 17.9371 6.06294 22.75 12 22.75V21.25ZM2.75 12C2.75 6.89137 6.89137 2.75 12 2.75V1.25C6.06294 1.25 1.25 6.06294 1.25 12H2.75ZM15.5 14.25C12.3244 14.25 9.75 11.6756 9.75 8.5H8.25C8.25 12.5041 11.4959 15.75 15.5 15.75V14.25ZM20.4253 11.469C19.4172 13.1373 17.5882 14.25 15.5 14.25V15.75C18.1349 15.75 20.4407 14.3439 21.7092 12.2447L20.4253 11.469ZM9.75 8.5C9.75 6.41182 10.8627 4.5828 12.531 3.57467L11.7553 2.29085C9.65609 3.5593 8.25 5.86509 8.25 8.5H9.75ZM12 2.75C11.9115 2.75 11.8077 2.71008 11.7324 2.63168C11.6686 2.56527 11.6538 2.50244 11.6503 2.47703C11.6461 2.44587 11.6482 2.35557 11.7553 2.29085L12.531 3.57467C13.0342 3.27065 13.196 2.71398 13.1368 2.27627C13.0754 1.82126 12.7166 1.25 12 1.25V2.75ZM21.7092 12.2447C21.6444 12.3518 21.5541 12.3539 21.523 12.3497C21.4976 12.3462 21.4347 12.3314 21.3683 12.2676C21.2899 12.1923 21.25 12.0885 21.25 12H22.75C22.75 11.2834 22.1787 10.9246 21.7237 10.8632C21.286 10.804 20.7293 10.9658 20.4253 11.469L21.7092 12.2447Z"/> 
     </svg>
   ),
 };
