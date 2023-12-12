@@ -131,8 +131,9 @@ export default function Notes({
       <ReactMarkdown
         remarkPlugins={remarkPlugins}
         linkTarget="_blank"
-        children={notes}
-      />
+      >
+        {notes}
+      </ReactMarkdown>
     </Text>
   );
 }
