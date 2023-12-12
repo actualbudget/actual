@@ -39,8 +39,8 @@ const BudgetCategories = memo(
     onShowNewGroup,
     onHideNewGroup,
   }) => {
-    let items = useMemo(() => {
-      let [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
+    const items = useMemo(() => {
+      const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
       let items = Array.prototype.concat.apply(
         [],
@@ -53,7 +53,7 @@ const BudgetCategories = memo(
             cat => showHiddenCategories || !cat.hidden,
           );
 
-          let items = [{ type: 'expense-group', value: { ...group } }];
+          const items = [{ type: 'expense-group', value: { ...group } }];
 
           if (newCategoryForGroup === group.id) {
             items.push({ type: 'new-category' });
@@ -103,13 +103,13 @@ const BudgetCategories = memo(
       showHiddenCategories,
     ]);
 
-    let [dragState, setDragState] = useState(null);
-    let [savedCollapsed, setSavedCollapsed] = useState(null);
+    const [dragState, setDragState] = useState(null);
+    const [savedCollapsed, setSavedCollapsed] = useState(null);
 
     // TODO: If we turn this into a reducer, we could probably memoize
     // each item in the list for better perf
     function onDragChange(newDragState) {
-      let { state } = newDragState;
+      const { state } = newDragState;
 
       if (state === 'start-preview') {
         setDragState({
@@ -283,7 +283,7 @@ const BudgetCategories = memo(
               throw new Error('Unknown item type: ' + item.type);
           }
 
-          let pos =
+          const pos =
             idx === 0 ? 'first' : idx === items.length - 1 ? 'last' : null;
 
           return (

@@ -162,8 +162,8 @@ export function Cell({
   privacyFilter,
   ...viewProps
 }: CellProps) {
-  let mouseCoords = useRef(null);
-  let viewRef = useRef(null);
+  const mouseCoords = useRef(null);
+  const viewRef = useRef(null);
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
@@ -179,7 +179,7 @@ export function Cell({
     alignItems,
   };
 
-  let conditionalPrivacyFilter = useMemo(
+  const conditionalPrivacyFilter = useMemo(
     () => (
       <ConditionalPrivacyFilter
         privacyFilter={mergeConditionalPrivacyFilterProps(
@@ -315,7 +315,7 @@ function InputValue({
   onBlur,
   ...props
 }: InputValueProps) {
-  let [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(defaultValue);
 
   function onBlur_(e) {
     onUpdate?.(value);
@@ -428,8 +428,8 @@ export function CustomCell({
   onBlur,
   ...props
 }: CustomCellProps) {
-  let [value, setValue] = useState(defaultValue);
-  let [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
+  const [value, setValue] = useState(defaultValue);
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
 
   if (prevDefaultValue !== defaultValue) {
     setValue(defaultValue);
@@ -689,13 +689,13 @@ export function SheetCell({
     privacyFilter,
   } = valueProps;
 
-  let sheetValue = useSheetValue(binding, e => {
+  const sheetValue = useSheetValue(binding, e => {
     // "close" the cell if it's editing
     if (props.exposed && inputProps && inputProps.onBlur) {
       inputProps.onBlur(e);
     }
   });
-  let format = useFormat();
+  const format = useFormat();
 
   return (
     <Cell
@@ -783,8 +783,8 @@ export function TableHeader({
 }
 
 export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
-  let selectedItems = useSelectedItems();
-  let [menuOpen, setMenuOpen] = useState(null);
+  const selectedItems = useSelectedItems();
+  const [menuOpen, setMenuOpen] = useState(null);
 
   if (selectedItems.size === 0) {
     return null;
@@ -827,7 +827,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
   );
 }
 
-let rowStyle: CSSProperties = {
+const rowStyle: CSSProperties = {
   position: 'absolute',
   willChange: 'transform',
   width: '100%',
@@ -851,7 +851,7 @@ export const TableWithNavigator = forwardRef<
   TableHandleRef<TableItem>,
   TableWithNavigatorProps
 >(({ fields, ...props }, ref) => {
-  let navigator = useTableNavigator(props.items, fields);
+  const navigator = useTableNavigator(props.items, fields);
   return <Table {...props} navigator={navigator} />;
 });
 
@@ -922,16 +922,16 @@ export const Table: <T extends TableItem>(
       };
     }
 
-    let { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
-    let list = useRef(null);
-    let listContainer = useRef(null);
-    let scrollContainer = useRef(null);
-    let initialScrollTo = useRef(null);
-    let listInitialized = useRef(false);
+    const { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
+    const list = useRef(null);
+    const listContainer = useRef(null);
+    const scrollContainer = useRef(null);
+    const initialScrollTo = useRef(null);
+    const listInitialized = useRef(false);
 
     useImperativeHandle(ref, () => ({
       scrollTo: (id, alignment = 'smart') => {
-        let index = items.findIndex(item => item.id === id);
+        const index = items.findIndex(item => item.id === id);
         if (index !== -1) {
           if (!list.current) {
             // If the table hasn't been laid out yet, we need to wait for
@@ -949,8 +949,8 @@ export const Table: <T extends TableItem>(
 
       getScrolledItem: () => {
         if (scrollContainer.current) {
-          let offset = scrollContainer.current.scrollTop;
-          let index = list.current.getStartIndexForOffset(offset);
+          const offset = scrollContainer.current.scrollTop;
+          const index = list.current.getStartIndexForOffset(offset);
           return items[index].id;
         }
         return 0;
@@ -1002,11 +1002,11 @@ export const Table: <T extends TableItem>(
     });
 
     function renderRow({ index, style, key }) {
-      let item = items[index];
-      let editing = editingId === item.id;
-      let selected = isSelected && isSelected(item.id);
+      const item = items[index];
+      const editing = editingId === item.id;
+      const selected = isSelected && isSelected(item.id);
 
-      let row = renderItem({
+      const row = renderItem({
         item,
         editing,
         focusedField: editing && focusedField,
@@ -1087,7 +1087,7 @@ export const Table: <T extends TableItem>(
       );
     }
 
-    let isEmpty = (count || items.length) === 0;
+    const isEmpty = (count || items.length) === 0;
 
     return (
       <View
@@ -1137,7 +1137,7 @@ export const Table: <T extends TableItem>(
                         itemCount={count || items.length}
                         itemSize={rowHeight - 1}
                         itemKey={
-                          getItemKey || ((index, data) => items[index].id)
+                          getItemKey || ((index: number) => items[index].id)
                         }
                         indexForKey={key =>
                           items.findIndex(item => item.id === key)
@@ -1174,17 +1174,17 @@ export function useTableNavigator<T extends TableItem>(
   data: T[],
   fields: string[] | ((item?: T) => string[]),
 ): TableNavigator<T> {
-  let getFields = typeof fields !== 'function' ? () => fields : fields;
-  let [editingId, setEditingId] = useState<T['id']>(null);
-  let [focusedField, setFocusedField] = useState<string>(null);
-  let containerRef = useRef<HTMLDivElement>();
+  const getFields = typeof fields !== 'function' ? () => fields : fields;
+  const [editingId, setEditingId] = useState<T['id']>(null);
+  const [focusedField, setFocusedField] = useState<string>(null);
+  const containerRef = useRef<HTMLDivElement>();
 
   // See `onBlur` for why we need this
-  let store = useStore();
-  let modalStackLength = useRef(0);
+  const store = useStore();
+  const modalStackLength = useRef(0);
 
   // onEdit is passed to children, so make sure it maintains identity
-  let onEdit = useCallback((id: T['id'], field?: string) => {
+  const onEdit = useCallback((id: T['id'], field?: string) => {
     setEditingId(id);
     setFocusedField(id ? field : null);
   }, []);
@@ -1210,10 +1210,10 @@ export function useTableNavigator<T extends TableItem>(
   }
 
   function onFocusPrevious() {
-    let idx = data.findIndex(item => item.id === editingId);
+    const idx = data.findIndex(item => item.id === editingId);
     if (idx > 0) {
-      let item = data[idx - 1];
-      let fields = getFields(item);
+      const item = data[idx - 1];
+      const fields = getFields(item);
       onEdit(item.id, fields[fields.length - 1]);
     } else {
       flashInput();
@@ -1221,10 +1221,10 @@ export function useTableNavigator<T extends TableItem>(
   }
 
   function onFocusNext() {
-    let idx = data.findIndex(item => item.id === editingId);
+    const idx = data.findIndex(item => item.id === editingId);
     if (idx < data.length - 1) {
-      let item = data[idx + 1];
-      let fields = getFields(item);
+      const item = data[idx + 1];
+      const fields = getFields(item);
       onEdit(item.id, fields[0]);
     } else {
       flashInput();
@@ -1233,8 +1233,8 @@ export function useTableNavigator<T extends TableItem>(
 
   function moveHorizontally(dir) {
     if (editingId) {
-      let fields = getFields(data.find(item => item.id === editingId));
-      let idx = fields.indexOf(focusedField) + dir;
+      const fields = getFields(data.find(item => item.id === editingId));
+      const idx = fields.indexOf(focusedField) + dir;
 
       if (idx < 0) {
         onFocusPrevious();
@@ -1248,7 +1248,7 @@ export function useTableNavigator<T extends TableItem>(
 
   function moveVertically(dir) {
     if (editingId) {
-      let idx = data.findIndex(item => item.id === editingId);
+      const idx = data.findIndex(item => item.id === editingId);
       let nextIdx = idx;
 
       while (true) {
@@ -1346,8 +1346,8 @@ export function useTableNavigator<T extends TableItem>(
         // The last tricky edge case: we don't want to blur if a new
         // modal just opened. This way the field still shows an
         // input, and it will be refocused when the modal closes.
-        let prevNumModals = modalStackLength.current;
-        let numModals = store.getState().modals.modalStack.length;
+        const prevNumModals = modalStackLength.current;
+        const numModals = store.getState().modals.modalStack.length;
 
         if (
           document.hasFocus() &&

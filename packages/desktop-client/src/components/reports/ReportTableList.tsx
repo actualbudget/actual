@@ -6,7 +6,7 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
-import { styles, theme } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 import View from '../common/View';
 import { Row, Cell } from '../table';
 
@@ -18,11 +18,11 @@ type TableRowProps = {
     totalAssets: number;
     totalDebts: number;
   };
-  balanceTypeOp?: string | null;
+  balanceTypeOp?: string;
   groupByItem: string;
   mode: string;
   monthsCount: number;
-  style?: object | null;
+  style?: CSSProperties;
 };
 
 const TableRow = memo(
@@ -197,7 +197,7 @@ export default function ReportTableList({
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const groupByData =
     groupBy === 'Category'
-      ? 'groupData'
+      ? 'groupedData'
       : ['Month', 'Year'].includes(groupBy)
       ? 'monthData'
       : 'data';

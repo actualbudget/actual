@@ -10,12 +10,12 @@ export async function goalsPercentage(
   to_budget,
   errors,
 ) {
-  let percent = template.percent;
+  const percent = template.percent;
   let monthlyIncome = 0;
 
   if (template.category.toLowerCase() === 'all income') {
     if (template.previous) {
-      let sheetName_lastmonth = monthUtils.sheetForMonth(
+      const sheetName_lastmonth = monthUtils.sheetForMonth(
         monthUtils.addMonths(month, -1),
       );
       monthlyIncome = await getSheetValue(sheetName_lastmonth, 'total-income');
@@ -25,7 +25,7 @@ export async function goalsPercentage(
   } else if (template.category.toLowerCase() === 'available funds') {
     monthlyIncome = available_start;
   } else {
-    let income_category = (await db.getCategories()).find(
+    const income_category = (await db.getCategories()).find(
       c =>
         c.is_income && c.name.toLowerCase() === template.category.toLowerCase(),
     );
@@ -34,7 +34,7 @@ export async function goalsPercentage(
       return { to_budget, errors };
     }
     if (template.previous) {
-      let sheetName_lastmonth = monthUtils.sheetForMonth(
+      const sheetName_lastmonth = monthUtils.sheetForMonth(
         monthUtils.addMonths(month, -1),
       );
       monthlyIncome = await getSheetValue(
@@ -49,7 +49,7 @@ export async function goalsPercentage(
     }
   }
 
-  let increment = Math.max(0, Math.round(monthlyIncome * (percent / 100)));
+  const increment = Math.max(0, Math.round(monthlyIncome * (percent / 100)));
   to_budget += increment;
   return { to_budget, errors };
 }

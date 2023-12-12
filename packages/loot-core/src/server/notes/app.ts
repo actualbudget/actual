@@ -3,7 +3,7 @@ import * as db from '../db';
 
 import { NotesHandlers } from './types/handlers';
 
-let app = createApp<NotesHandlers>();
+const app = createApp<NotesHandlers>();
 
 app.method('notes-save', async ({ id, note }) => {
   await db.update('notes', { id, note });

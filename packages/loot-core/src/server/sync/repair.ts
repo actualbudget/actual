@@ -6,7 +6,7 @@ export function rebuildMerkleHash(): {
   numMessages: number;
   trie: merkle.TrieNode;
 } {
-  let rows: { timestamp: string }[] = db.runQuery(
+  const rows: { timestamp: string }[] = db.runQuery(
     'SELECT timestamp FROM messages_crdt',
     [],
     true,
@@ -24,8 +24,8 @@ export function rebuildMerkleHash(): {
 }
 
 export default async function repairSync(): Promise<void> {
-  let rebuilt = rebuildMerkleHash();
-  let clock = getClock();
+  const rebuilt = rebuildMerkleHash();
+  const clock = getClock();
 
   // Save it locally
   clock.merkle = rebuilt.trie;

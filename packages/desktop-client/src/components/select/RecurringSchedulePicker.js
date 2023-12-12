@@ -202,7 +202,7 @@ function validInterval(interval) {
 }
 
 function MonthlyPatterns({ config, dispatch }) {
-  let updateRecurrence = (recurrence, field, value) =>
+  const updateRecurrence = (recurrence, field, value) =>
     dispatch({ type: 'update-recurrence', recurrence, field, value });
 
   return (
@@ -243,6 +243,7 @@ function MonthlyPatterns({ config, dispatch }) {
           />
           <Button
             type="bare"
+            aria-label="Remove recurrence"
             style={{ padding: 7 }}
             onClick={() =>
               dispatch({
@@ -255,6 +256,7 @@ function MonthlyPatterns({ config, dispatch }) {
           </Button>
           <Button
             type="bare"
+            aria-label="Add recurrence"
             style={{ padding: 7, marginLeft: 5 }}
             onClick={() => dispatch({ type: 'add-recurrence' })}
           >
@@ -267,16 +269,16 @@ function MonthlyPatterns({ config, dispatch }) {
 }
 
 function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
-  let [previewDates, setPreviewDates] = useState(null);
+  const [previewDates, setPreviewDates] = useState(null);
 
-  let [state, dispatch] = useReducer(reducer, {
+  const [state, dispatch] = useReducer(reducer, {
     config: parseConfig(currentConfig),
   });
 
-  let skipWeekend = state.config.hasOwnProperty('skipWeekend')
+  const skipWeekend = state.config.hasOwnProperty('skipWeekend')
     ? state.config.skipWeekend
     : false;
-  let dateFormat = useSelector(
+  const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
 
@@ -287,14 +289,14 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
     });
   }, [currentConfig]);
 
-  let { config } = state;
+  const { config } = state;
 
-  let updateField = (field, value) =>
+  const updateField = (field, value) =>
     dispatch({ type: 'change-field', field, value });
 
   useEffect(() => {
     async function run() {
-      let { data, error } = await sendCatch('schedule/get-upcoming-dates', {
+      const { data, error } = await sendCatch('schedule/get-upcoming-dates', {
         config: unparseConfig(config),
         count: 4,
       });
@@ -438,7 +440,7 @@ export default function RecurringSchedulePicker({
   buttonStyle,
   onChange,
 }) {
-  let { isOpen, close, getOpenEvents } = useTooltip();
+  const { isOpen, close, getOpenEvents } = useTooltip();
 
   function onSave(config) {
     onChange(config);

@@ -23,14 +23,14 @@ export default function createSpreadsheet(
       return null;
     }
 
-    let { filters } = await send('make-filters-from-conditions', {
+    const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     const data = await Promise.all(
       accounts.map(async acct => {
-        let [starting, balances] = await Promise.all([
+        const [starting, balances] = await Promise.all([
           runQuery(
             q('transactions')
               .filter({

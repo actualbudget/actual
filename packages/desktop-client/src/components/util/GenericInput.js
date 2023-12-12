@@ -25,9 +25,9 @@ export default function GenericInput({
   style,
   onChange,
 }) {
-  let { grouped: categoryGroups } = useCategories();
-  let saved = useSelector(state => state.queries.saved);
-  let dateFormat = useSelector(
+  const { grouped: categoryGroups } = useCategories();
+  const saved = useSelector(state => state.queries.saved);
+  const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
 
@@ -38,7 +38,7 @@ export default function GenericInput({
     return null;
   }
 
-  let showPlaceholder = multi ? value.length === 0 : true;
+  const showPlaceholder = multi ? value.length === 0 : true;
 
   let content;
   switch (type) {

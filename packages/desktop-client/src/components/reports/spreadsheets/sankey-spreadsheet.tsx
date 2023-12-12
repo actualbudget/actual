@@ -11,7 +11,7 @@ export default function createSpreadsheet(
 ) {
   return async (spreadsheet, setData) => {
     // gather filters user has set
-    let { filters } = await send('make-filters-from-conditions', {
+    const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
@@ -28,7 +28,7 @@ export default function createSpreadsheet(
       try {
         return await Promise.all(
           categories.map(async mainCategory => {
-            let subcategoryBalances = await Promise.all(
+            const subcategoryBalances = await Promise.all(
               mainCategory.categories
                 .filter(subcategory => subcategory.is_income !== 1)
                 .map(async subcategory => {
@@ -91,7 +91,7 @@ export default function createSpreadsheet(
       const resultsArrays = await Promise.all(promises);
 
       // unravel the results
-      let payeesDict = {};
+      const payeesDict = {};
       resultsArrays.forEach(item => {
         item.data.forEach(innerItem => {
           payeesDict[innerItem.payee] = innerItem.amount;
@@ -99,7 +99,7 @@ export default function createSpreadsheet(
       });
 
       // First, collect all unique IDs from payeesDict
-      let payeeIds = Object.keys(payeesDict);
+      const payeeIds = Object.keys(payeesDict);
 
       const results = await runQuery(
         q('payees')
@@ -108,7 +108,7 @@ export default function createSpreadsheet(
       );
 
       // Convert the resulting array to a payee-name-map
-      let payeeNames = {};
+      const payeeNames = {};
       results.data.forEach(item => {
         if (item.name && payeesDict[item.id]) {
           payeeNames[item.name] = payeesDict[item.id];
@@ -146,10 +146,10 @@ function transformToSankeyData(categoryData, incomeData) {
   });
 
   // add all category expenses that have valid subcategories and a balance
-  for (let mainCategory of categoryData) {
+  for (const mainCategory of categoryData) {
     if (!nodeNames.has(mainCategory.name) && mainCategory.balances.length > 0) {
       let mainCategorySum = 0;
-      for (let subCategory of mainCategory.balances) {
+      for (const subCategory of mainCategory.balances) {
         if (!nodeNames.has(subCategory.subcategory) && subCategory.value > 0) {
           mainCategorySum += subCategory.value;
         }
@@ -166,7 +166,7 @@ function transformToSankeyData(categoryData, incomeData) {
       });
 
       // add the subcategories of the main category
-      for (let subCategory of mainCategory.balances) {
+      for (const subCategory of mainCategory.balances) {
         if (!nodeNames.has(subCategory.subcategory) && subCategory.value > 0) {
           data.nodes.push({ name: subCategory.subcategory });
           nodeNames.add(subCategory.subcategory);

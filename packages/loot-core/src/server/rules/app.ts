@@ -32,7 +32,7 @@ function validateRule(rule: Partial<RuleEntity>) {
     return result.length ? result : null;
   }
 
-  let conditionErrors = runValidation(
+  const conditionErrors = runValidation(
     rule.conditions,
     cond =>
       new Condition(
@@ -44,7 +44,7 @@ function validateRule(rule: Partial<RuleEntity>) {
       ),
   );
 
-  let actionErrors = runValidation(rule.actions, action =>
+  const actionErrors = runValidation(rule.actions, action =>
     action.op === 'link-schedule'
       ? new Action(action.op, null, action.value, null, ruleFieldTypes)
       : new Action(
@@ -67,22 +67,22 @@ function validateRule(rule: Partial<RuleEntity>) {
 }
 
 // Expose functions to the client
-let app = createApp<RulesHandlers>();
+const app = createApp<RulesHandlers>();
 
 app.method('rule-validate', async function (rule) {
-  let error = validateRule(rule);
+  const error = validateRule(rule);
   return { error };
 });
 
 app.method(
   'rule-add',
   mutator(async function (rule) {
-    let error = validateRule(rule);
+    const error = validateRule(rule);
     if (error) {
       return { error };
     }
 
-    let id = await rules.insertRule(rule);
+    const id = await rules.insertRule(rule);
     return { id };
   }),
 );
@@ -90,7 +90,7 @@ app.method(
 app.method(
   'rule-update',
   mutator(async function (rule) {
-    let error = validateRule(rule);
+    const error = validateRule(rule);
     if (error) {
       return { error };
     }
@@ -113,8 +113,8 @@ app.method(
     let someDeletionsFailed = false;
 
     await batchMessages(async () => {
-      for (let id of ids) {
-        let res = await rules.deleteRule({ id });
+      for (const id of ids) {
+        const res = await rules.deleteRule({ id });
         if (res === false) {
           someDeletionsFailed = true;
         }
@@ -146,7 +146,7 @@ app.method('rules-get', async function () {
 });
 
 app.method('rule-get', async function ({ id }) {
-  let rule = rules.getRules().find(rule => rule.id === id);
+  const rule = rules.getRules().find(rule => rule.id === id);
   return rule ? rule.serialize() : null;
 });
 

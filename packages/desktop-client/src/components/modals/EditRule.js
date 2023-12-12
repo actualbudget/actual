@@ -54,7 +54,7 @@ function applyErrors(array, errorsArray) {
 }
 
 function getTransactionFields(conditions, actions) {
-  let fields = ['date'];
+  const fields = ['date'];
 
   if (conditions.find(c => c.field === 'imported_payee')) {
     fields.push('imported_payee');
@@ -191,8 +191,9 @@ function ConditionEditor({
   onDelete,
   onAdd,
 }) {
-  let { field, op, value, type, options, error } = condition;
+  const { field: originalField, op, value, type, options, error } = condition;
 
+  let field = originalField;
   if (field === 'amount' && options) {
     if (options.inflow) {
       field = 'amount-inflow';
@@ -251,10 +252,10 @@ function formatAmount(amount) {
 }
 
 function ScheduleDescription({ id }) {
-  let dateFormat = useSelector(state => {
+  const dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
-  let scheduleData = useSchedules({
+  const scheduleData = useSchedules({
     transform: useCallback(q => q.filter({ id }), []),
   });
 
@@ -266,8 +267,8 @@ function ScheduleDescription({ id }) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
-  let [schedule] = scheduleData.schedules;
-  let status = schedule && scheduleData.statuses.get(schedule.id);
+  const [schedule] = scheduleData.schedules;
+  const status = schedule && scheduleData.statuses.get(schedule.id);
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
@@ -300,7 +301,7 @@ function ScheduleDescription({ id }) {
   );
 }
 
-let actionFields = [
+const actionFields = [
   'category',
   'payee',
   'notes',
@@ -310,7 +311,7 @@ let actionFields = [
   'amount',
 ].map(field => [field, mapField(field)]);
 function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
-  let { field, op, value, type, error, inputKey = 'initial' } = action;
+  const { field, op, value, type, error, inputKey = 'initial' } = action;
 
   return (
     <Editor style={editorStyle} error={error}>
@@ -364,7 +365,7 @@ function ActionEditor({ ops, action, editorStyle, onChange, onDelete, onAdd }) {
 }
 
 function StageInfo() {
-  let [open, setOpen] = useState();
+  const [open, setOpen] = useState();
 
   return (
     <View style={{ position: 'relative', marginLeft: 5 }}>
@@ -439,9 +440,9 @@ function ConditionsList({
         f => !conditions.some(c => c.field.includes(f) || f.includes(c.field)),
       );
     }
-    let field = fields[0] || 'payee';
+    const field = fields[0] || 'payee';
 
-    let copy = [...conditions];
+    const copy = [...conditions];
     copy.splice(index + 1, 0, {
       type: FIELD_TYPES.get(field),
       field,
@@ -463,7 +464,7 @@ function ConditionsList({
     onChangeConditions(
       updateValue(conditions, cond, () => {
         if (field === 'field') {
-          let newCond = { field: value };
+          const newCond = { field: value };
 
           if (value === 'amount-inflow') {
             newCond.field = 'amount';
@@ -475,7 +476,7 @@ function ConditionsList({
 
           newCond.type = FIELD_TYPES.get(newCond.field);
 
-          let prevType = FIELD_TYPES.get(cond.field);
+          const prevType = FIELD_TYPES.get(cond.field);
           if (
             (prevType === 'string' || prevType === 'number') &&
             prevType === newCond.type &&
@@ -490,7 +491,7 @@ function ConditionsList({
             return newInput(makeValue(null, newCond));
           }
         } else if (field === 'op') {
-          let op = value;
+          const op = value;
 
           // Switching between oneOf and other operators is a
           // special-case. It changes the input type, so we need to
@@ -589,7 +590,7 @@ function ConditionsList({
 // TODO:
 // * Dont touch child transactions?
 
-let conditionFields = [
+const conditionFields = [
   'imported_payee',
   'account',
   'category',
@@ -609,15 +610,17 @@ export default function EditRule({
   defaultRule,
   onSave: originalOnSave,
 }) {
-  let [conditions, setConditions] = useState(defaultRule.conditions.map(parse));
-  let [actions, setActions] = useState(defaultRule.actions.map(parse));
-  let [stage, setStage] = useState(defaultRule.stage);
-  let [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
-  let [transactions, setTransactions] = useState([]);
-  let dispatch = useDispatch();
-  let scrollableEl = useRef();
+  const [conditions, setConditions] = useState(
+    defaultRule.conditions.map(parse),
+  );
+  const [actions, setActions] = useState(defaultRule.actions.map(parse));
+  const [stage, setStage] = useState(defaultRule.stage);
+  const [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
+  const [transactions, setTransactions] = useState([]);
+  const dispatch = useDispatch();
+  const scrollableEl = useRef();
 
-  let isSchedule = actions.some(action => action.op === 'link-schedule');
+  const isSchedule = actions.some(action => action.op === 'link-schedule');
 
   useEffect(() => {
     dispatch(initiallyLoadPayees());
@@ -630,21 +633,21 @@ export default function EditRule({
   useEffect(() => {
     // Flash the scrollbar
     if (scrollableEl.current) {
-      let el = scrollableEl.current;
-      let top = el.scrollTop;
+      const el = scrollableEl.current;
+      const top = el.scrollTop;
       el.scrollTop = top + 1;
       el.scrollTop = top;
     }
 
     // Run it here
     async function run() {
-      let { filters } = await send('make-filters-from-conditions', {
+      const { filters } = await send('make-filters-from-conditions', {
         conditions: conditions.map(unparse),
       });
 
       if (filters.length > 0) {
         const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-        let { data: transactions } = await runQuery(
+        const { data: transactions } = await runQuery(
           q('transactions')
             .filter({ [conditionsOpKey]: filters })
             .select('*'),
@@ -657,7 +660,7 @@ export default function EditRule({
     run();
   }, [actions, conditions, conditionsOp]);
 
-  let selectedInst = useSelected('transactions', transactions, []);
+  const selectedInst = useSelected('transactions', transactions, []);
 
   function addInitialAction() {
     addAction(-1);
@@ -665,12 +668,12 @@ export default function EditRule({
 
   function addAction(index) {
     let fields = actionFields.map(f => f[0]);
-    for (let action of actions) {
+    for (const action of actions) {
       fields = fields.filter(f => f !== action.field);
     }
-    let field = fields[0] || 'category';
+    const field = fields[0] || 'category';
 
-    let copy = [...actions];
+    const copy = [...actions];
     copy.splice(index + 1, 0, {
       type: FIELD_TYPES.get(field),
       field,
@@ -683,7 +686,7 @@ export default function EditRule({
   function onChangeAction(action, field, value) {
     setActions(
       updateValue(actions, action, () => {
-        let a = { ...action };
+        const a = { ...action };
         a[field] = value;
 
         if (field === 'field') {
@@ -724,7 +727,7 @@ export default function EditRule({
   }
 
   async function onSave() {
-    let rule = {
+    const rule = {
       ...defaultRule,
       stage,
       conditionsOp,
@@ -732,8 +735,8 @@ export default function EditRule({
       actions: actions.map(unparse),
     };
 
-    let method = rule.id ? 'rule-update' : 'rule-add';
-    let { error, id: newId } = await send(method, rule);
+    const method = rule.id ? 'rule-update' : 'rule-add';
+    const { error, id: newId } = await send(method, rule);
 
     if (error) {
       if (error.conditionErrors) {
@@ -754,7 +757,7 @@ export default function EditRule({
     }
   }
 
-  let editorStyle = {
+  const editorStyle = {
     color: theme.pillText,
     backgroundColor: theme.pillBackground,
     borderRadius: 4,

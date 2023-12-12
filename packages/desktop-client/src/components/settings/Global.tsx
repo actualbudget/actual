@@ -11,11 +11,11 @@ import View from '../common/View';
 import { Setting } from './UI';
 
 export default function GlobalSettings() {
-  let documentDir = useSelector(state => state.prefs.global.documentDir);
-  let { saveGlobalPrefs } = useActions();
+  const documentDir = useSelector(state => state.prefs.global.documentDir);
+  const { saveGlobalPrefs } = useActions();
 
-  let [documentDirChanged, setDirChanged] = useState(false);
-  let dirScrolled = useRef<HTMLSpanElement>(null);
+  const [documentDirChanged, setDirChanged] = useState(false);
+  const dirScrolled = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (dirScrolled.current) {
@@ -24,7 +24,7 @@ export default function GlobalSettings() {
   }, []);
 
   async function onChooseDocumentDir() {
-    let res = await window.Actual.openFileDialog({
+    const res = await window.Actual.openFileDialog({
       properties: ['openDirectory'],
     });
     if (res) {

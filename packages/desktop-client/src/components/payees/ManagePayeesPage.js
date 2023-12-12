@@ -6,7 +6,7 @@ import { Page } from '../Page';
 import ManagePayeesWithData from './ManagePayeesWithData';
 
 export function ManagePayeesPage() {
-  let location = useLocation();
+  const location = useLocation();
   return (
     <Page title="Payees">
       <ManagePayeesWithData

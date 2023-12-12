@@ -25,9 +25,9 @@ type RuleRowProps = {
 
 const RuleRow = memo(
   ({ rule, hovered, selected, onHover, onEditRule }: RuleRowProps) => {
-    let dispatchSelected = useSelectedDispatch();
-    let borderColor = selected ? theme.tableBorderSelected : 'none';
-    let backgroundFocus = hovered;
+    const dispatchSelected = useSelectedDispatch();
+    const borderColor = selected ? theme.tableBorderSelected : 'none';
+    const backgroundFocus = hovered;
 
     return (
       <Row

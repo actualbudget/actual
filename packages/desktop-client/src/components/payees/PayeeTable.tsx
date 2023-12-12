@@ -36,18 +36,18 @@ const PayeeTable = forwardRef<
     { payees, ruleCounts, navigator, onUpdate, onViewRules, onCreateRule },
     ref,
   ) => {
-    let [hovered, setHovered] = useState(null);
-    let selectedItems = useSelectedItems();
+    const [hovered, setHovered] = useState(null);
+    const selectedItems = useSelectedItems();
 
     useLayoutEffect(() => {
-      let firstSelected = [...selectedItems][0] as string;
+      const firstSelected = [...selectedItems][0] as string;
       if (typeof ref !== 'function') {
         ref.current.scrollTo(firstSelected, 'center');
       }
       navigator.onEdit(firstSelected, 'select');
     }, []);
 
-    let onHover = useCallback(id => {
+    const onHover = useCallback(id => {
       setHovered(id);
     }, []);
 

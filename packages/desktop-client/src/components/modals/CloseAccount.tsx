@@ -51,12 +51,12 @@ function CloseAccount({
   actions,
   modalProps,
 }: CloseAccountProps) {
-  let [loading, setLoading] = useState(false);
-  let [transfer, setTransfer] = useState('');
-  let [category, setCategory] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [transfer, setTransfer] = useState('');
+  const [category, setCategory] = useState('');
 
-  let [transferError, setTransferError] = useState(false);
-  let [categoryError, setCategoryError] = useState(false);
+  const [transferError, setTransferError] = useState(false);
+  const [categoryError, setCategoryError] = useState(false);
 
   return (
     <Modal
@@ -84,10 +84,10 @@ function CloseAccount({
             onSubmit={event => {
               event.preventDefault();
 
-              let transferError = balance !== 0 && transfer === '';
+              const transferError = balance !== 0 && transfer === '';
               setTransferError(transferError);
 
-              let categoryError =
+              const categoryError =
                 needsCategory(account, transfer, accounts) && category === '';
               setCategoryError(categoryError);
 

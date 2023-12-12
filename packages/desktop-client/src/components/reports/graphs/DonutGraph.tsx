@@ -18,6 +18,7 @@ import Text from '../../common/Text';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import { type DataEntity } from '../entities';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadItem = {
@@ -94,24 +95,18 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 
 type DonutGraphProps = {
   style?: CSSProperties;
-  data;
-  groupBy;
-  balanceTypeOp;
-  empty;
-  compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
+  data: DataEntity;
+  groupBy: string;
+  balanceTypeOp: string;
+  compact?: boolean;
 };
 
 function DonutGraph({
   style,
   data,
   groupBy,
-  empty,
   balanceTypeOp,
   compact,
-  domain,
 }: DonutGraphProps) {
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
@@ -150,9 +145,7 @@ function DonutGraph({
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   isAnimationActive={false}
-                  data={data[splitData].filter(i =>
-                    !empty ? i[balanceTypeOp] !== 0 : true,
-                  )}
+                  data={data[splitData]}
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                 >

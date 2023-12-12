@@ -29,16 +29,16 @@ import { TableHeader, Cell, SelectCell, useTableNavigator } from '../table';
 import PayeeMenu from './PayeeMenu';
 import PayeeTable from './PayeeTable';
 
-let getPayeesById = memoizeOne(payees => groupById(payees));
+const getPayeesById = memoizeOne(payees => groupById(payees));
 
 function plural(count, singleText, pluralText) {
   return count === 1 ? singleText : pluralText;
 }
 
 function PayeeTableHeader() {
-  let borderColor = theme.tableborder;
-  let dispatchSelected = useSelectedDispatch();
-  let selectedItems = useSelectedItems();
+  const borderColor = theme.tableborder;
+  const dispatchSelected = useSelectedDispatch();
+  const selectedItems = useSelectedItems();
 
   return (
     <View>
@@ -97,14 +97,14 @@ export const ManagePayees = forwardRef(
     },
     ref,
   ) => {
-    let [highlightedRows, setHighlightedRows] = useState(null);
-    let [filter, setFilter] = useState('');
-    let table = useRef(null);
-    let scrollTo = useRef(null);
-    let resetAnimation = useRef(false);
+    const [highlightedRows, setHighlightedRows] = useState(null);
+    const [filter, setFilter] = useState('');
+    const table = useRef(null);
+    const scrollTo = useRef(null);
+    const resetAnimation = useRef(false);
     const [orphanedOnly, setOrphanedOnly] = useState(false);
 
-    let filteredPayees = useMemo(() => {
+    const filteredPayees = useMemo(() => {
       let filtered = payees;
       if (filter) {
         filtered = filtered.filter(p =>
@@ -119,7 +119,7 @@ export const ManagePayees = forwardRef(
       return filtered;
     }, [payees, filter, orphanedOnly]);
 
-    let selected = useSelected('payees', filteredPayees, initialSelectedIds);
+    const selected = useSelected('payees', filteredPayees, initialSelectedIds);
 
     function applyFilter(f) {
       if (filter !== f) {
@@ -179,14 +179,14 @@ export const ManagePayees = forwardRef(
       }
     });
 
-    let onUpdate = useStableCallback((id, name, value) => {
-      let payee = payees.find(p => p.id === id);
+    const onUpdate = useStableCallback((id, name, value) => {
+      const payee = payees.find(p => p.id === id);
       if (payee[name] !== value) {
         onBatchChange({ updated: [{ id, [name]: value }] });
       }
     });
 
-    let getSelectableIds = useCallback(() => {
+    const getSelectableIds = useCallback(() => {
       return filteredPayees.filter(p => p.transfer_acct == null).map(p => p.id);
     }, [filteredPayees]);
 
@@ -196,7 +196,7 @@ export const ManagePayees = forwardRef(
     }
 
     async function onMerge() {
-      let ids = [...selected.items];
+      const ids = [...selected.items];
       await props.onMerge(ids);
 
       tableNavigator.onEdit(ids[0], 'name');
@@ -204,9 +204,9 @@ export const ManagePayees = forwardRef(
       _scrollTo(ids[0]);
     }
 
-    let buttonsDisabled = selected.items.size === 0;
+    const buttonsDisabled = selected.items.size === 0;
 
-    let tableNavigator = useTableNavigator(filteredPayees, item =>
+    const tableNavigator = useTableNavigator(filteredPayees, item =>
       ['select', 'name', 'rule-count'].filter(name => {
         switch (name) {
           case 'select':
@@ -217,9 +217,9 @@ export const ManagePayees = forwardRef(
       }),
     );
 
-    let payeesById = getPayeesById(payees);
+    const payeesById = getPayeesById(payees);
 
-    let [menuOpen, setMenuOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     return (
       <View style={{ height: '100%' }}>

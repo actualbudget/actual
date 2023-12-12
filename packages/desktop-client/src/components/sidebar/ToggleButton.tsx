@@ -15,7 +15,12 @@ type ToggleButtonProps = {
 function ToggleButton({ style, isFloating, onFloat }: ToggleButtonProps) {
   return (
     <View className="float" style={{ ...style, flexShrink: 0 }}>
-      <Button type="bare" onClick={onFloat} color={theme.buttonMenuBorder}>
+      <Button
+        type="bare"
+        aria-label={`${isFloating ? 'Pin' : 'Unpin'} sidebar`}
+        onClick={onFloat}
+        color={theme.buttonMenuBorder}
+      >
         {isFloating ? (
           <Pin
             style={{

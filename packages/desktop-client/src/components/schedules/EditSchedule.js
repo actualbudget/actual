@@ -27,9 +27,9 @@ import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import GenericInput from '../util/GenericInput';
 
 function updateScheduleConditions(schedule, fields) {
-  let conds = extractScheduleConds(schedule._conditions);
+  const conds = extractScheduleConds(schedule._conditions);
 
-  let updateCond = (cond, op, field, value) => {
+  const updateCond = (cond, op, field, value) => {
     if (cond) {
       return { ...cond, value };
     }
@@ -67,23 +67,23 @@ function updateScheduleConditions(schedule, fields) {
 }
 
 export default function ScheduleDetails({ modalProps, actions, id }) {
-  let adding = id == null;
-  let payees = useCachedPayees({ idKey: true });
-  let globalDispatch = useDispatch();
-  let dateFormat = useSelector(state => {
+  const adding = id == null;
+  const payees = useCachedPayees({ idKey: true });
+  const globalDispatch = useDispatch();
+  const dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
 
-  let [state, dispatch] = useReducer(
+  const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
         case 'set-schedule': {
-          let schedule = action.schedule;
+          const schedule = action.schedule;
 
           // See if there are custom rules
-          let conds = extractScheduleConds(schedule._conditions);
-          let condsSet = new Set(Object.values(conds));
-          let isCustom =
+          const conds = extractScheduleConds(schedule._conditions);
+          const condsSet = new Set(Object.values(conds));
+          const isCustom =
             schedule._conditions.find(c => !condsSet.has(c)) ||
             schedule._actions.find(a => a.op !== 'link-schedule');
 
@@ -107,7 +107,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
             throw new Error('Unknown field: ' + action.field);
           }
 
-          let fields = { [action.field]: action.value };
+          const fields = { [action.field]: action.value };
 
           // If we are changing the amount operator either to or
           // away from the `isbetween` operator, the amount value is
@@ -192,21 +192,21 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
   );
 
   async function loadSchedule() {
-    let { data } = await runQuery(q('schedules').filter({ id }).select('*'));
+    const { data } = await runQuery(q('schedules').filter({ id }).select('*'));
     return data[0];
   }
 
   useEffect(() => {
     async function run() {
       if (adding) {
-        let date = {
+        const date = {
           start: monthUtils.currentDay(),
           frequency: 'monthly',
           patterns: [],
           skipWeekend: false,
           weekendSolveMode: 'after',
         };
-        let schedule = {
+        const schedule = {
           posts_transaction: false,
           _date: date,
           _conditions: [{ op: 'isapprox', field: 'date', value: date }],
@@ -215,7 +215,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
         dispatch({ type: 'set-schedule', schedule });
       } else {
-        let schedule = await loadSchedule();
+        const schedule = await loadSchedule();
 
         if (schedule && state.schedule == null) {
           dispatch({ type: 'set-schedule', schedule });
@@ -227,19 +227,19 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
 
   useEffect(() => {
     async function run() {
-      let date = state.fields.date;
+      const date = state.fields.date;
 
       if (date == null) {
         dispatch({ type: 'set-upcoming-dates', dates: null });
       } else {
         if (date.frequency) {
-          let { data } = await sendCatch('schedule/get-upcoming-dates', {
+          const { data } = await sendCatch('schedule/get-upcoming-dates', {
             config: date,
             count: 3,
           });
           dispatch({ type: 'set-upcoming-dates', dates: data });
         } else {
-          let today = monthUtils.currentDay();
+          const today = monthUtils.currentDay();
           if (date === today || monthUtils.isAfter(date, today)) {
             dispatch({ type: 'set-upcoming-dates', dates: [date] });
           } else {
@@ -257,7 +257,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       state.schedule.id &&
       state.transactionsMode === 'linked'
     ) {
-      let live = liveQuery(
+      const live = liveQuery(
         q('transactions')
           .filter({ schedule: state.schedule.id })
           .select('*')
@@ -273,10 +273,8 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
     let unsubscribe;
 
     if (state.schedule && state.transactionsMode === 'matched') {
-      let { error, conditions } = updateScheduleConditions(
-        state.schedule,
-        state.fields,
-      );
+      const { error, conditions: originalConditions } =
+        updateScheduleConditions(state.schedule, state.fields);
 
       if (error) {
         dispatch({ type: 'form-error', error });
@@ -286,7 +284,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       // *Extremely* gross hack because the rules are not mapped to
       // public names automatically. We really should be doing that
       // at the database layer
-      conditions = conditions.map(cond => {
+      const conditions = originalConditions.map(cond => {
         if (cond.field === 'description') {
           return { ...cond, field: 'payee' };
         } else if (cond.field === 'acct') {
@@ -299,7 +297,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
         conditions,
       }).then(({ filters }) => {
         if (current) {
-          let live = liveQuery(
+          const live = liveQuery(
             q('transactions')
               .filter({ $and: filters })
               .select('*')
@@ -319,12 +317,12 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
     };
   }, [state.schedule, state.transactionsMode, state.fields]);
 
-  let selectedInst = useSelected('transactions', state.transactions, []);
+  const selectedInst = useSelected('transactions', state.transactions, []);
 
   async function onSave() {
     dispatch({ type: 'form-error', error: null });
     if (state.fields.name) {
-      let { data: sameName } = await runQuery(
+      const { data: sameName } = await runQuery(
         q('schedules').filter({ name: state.fields.name }).select('id'),
       );
       if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
@@ -336,7 +334,7 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       }
     }
 
-    let { error, conditions } = updateScheduleConditions(
+    const { error, conditions } = updateScheduleConditions(
       state.schedule,
       state.fields,
     );
@@ -346,14 +344,17 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
       return;
     }
 
-    let res = await sendCatch(adding ? 'schedule/create' : 'schedule/update', {
-      schedule: {
-        id: state.schedule.id,
-        posts_transaction: state.fields.posts_transaction,
-        name: state.fields.name,
+    const res = await sendCatch(
+      adding ? 'schedule/create' : 'schedule/update',
+      {
+        schedule: {
+          id: state.schedule.id,
+          posts_transaction: state.fields.posts_transaction,
+          name: state.fields.name,
+        },
+        conditions,
       },
-      conditions,
-    });
+    );
 
     if (res.error) {
       dispatch({
@@ -370,13 +371,13 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
   }
 
   async function onEditRule(ruleId) {
-    let rule = await send('rule-get', { id: ruleId || state.schedule.rule });
+    const rule = await send('rule-get', { id: ruleId || state.schedule.rule });
 
     globalDispatch(
       pushModal('edit-rule', {
         rule,
         onSave: async () => {
-          let schedule = await loadSchedule();
+          const schedule = await loadSchedule();
           dispatch({ type: 'set-schedule', schedule });
         },
       }),
@@ -409,10 +410,10 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
     selectedInst.dispatch({ type: 'select-none' });
   }
 
-  let payee = payees ? payees[state.fields.payee] : null;
+  const payee = payees ? payees[state.fields.payee] : null;
 
   // This is derived from the date
-  let repeats = state.fields.date ? !!state.fields.date.frequency : false;
+  const repeats = state.fields.date ? !!state.fields.date.frequency : false;
   return (
     <Modal
       title={payee ? `Schedule: ${payee.name}` : 'Schedule'}

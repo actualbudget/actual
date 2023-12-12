@@ -40,9 +40,9 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
 }
 
 function SelectedBalance({ selectedItems, account }) {
-  let name = `selected-balance-${[...selectedItems].join('-')}`;
+  const name = `selected-balance-${[...selectedItems].join('-')}`;
 
-  let rows = useSheetValue({
+  const rows = useSheetValue({
     name,
     query: q('transactions')
       .filter({
@@ -51,9 +51,9 @@ function SelectedBalance({ selectedItems, account }) {
       })
       .select('id'),
   });
-  let ids = new Set((rows || []).map(r => r.id));
+  const ids = new Set((rows || []).map(r => r.id));
 
-  let finalIds = [...selectedItems].filter(id => !ids.has(id));
+  const finalIds = [...selectedItems].filter(id => !ids.has(id));
   let balance = useSheetValue({
     name: name + '-sum',
     query: q('transactions')
@@ -63,14 +63,14 @@ function SelectedBalance({ selectedItems, account }) {
   });
 
   let scheduleBalance = null;
-  let scheduleData = useCachedSchedules();
-  let schedules = scheduleData ? scheduleData.schedules : [];
-  let previewIds = [...selectedItems]
+  const scheduleData = useCachedSchedules();
+  const schedules = scheduleData ? scheduleData.schedules : [];
+  const previewIds = [...selectedItems]
     .filter(id => isPreviewId(id))
     .map(id => id.slice(8));
   let isExactBalance = true;
 
-  for (let s of schedules) {
+  for (const s of schedules) {
     if (previewIds.includes(s.id)) {
       // If a schedule is `between X and Y` then we calculate the average
       if (s._amountOp === 'isbetween') {
@@ -105,11 +105,11 @@ function SelectedBalance({ selectedItems, account }) {
 }
 
 function MoreBalances({ balanceQuery }) {
-  let cleared = useSheetValue({
+  const cleared = useSheetValue({
     name: balanceQuery.name + '-cleared',
     query: balanceQuery.query.filter({ cleared: true }),
   });
-  let uncleared = useSheetValue({
+  const uncleared = useSheetValue({
     name: balanceQuery.name + '-uncleared',
     query: balanceQuery.query.filter({ cleared: false }),
   });
@@ -128,7 +128,7 @@ export function Balances({
   onToggleExtraBalances,
   account,
 }) {
-  let selectedItems = useSelectedItems();
+  const selectedItems = useSelectedItems();
 
   return (
     <View

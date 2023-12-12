@@ -158,32 +158,28 @@ function AccountList({
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}>
-      <Page
-        title="Accounts"
-        titleStyle={{
-          backgroundColor: theme.mobileHeaderBackground,
-          color: theme.mobileHeaderText,
-          fontSize: 16,
-        }}
-        headerRightContent={
-          <Button
-            type="bare"
-            style={{
-              paddingLeft: 12,
-              paddingRight: 12,
-              ...noBackgroundColorStyle,
-            }}
-            activeStyle={noBackgroundColorStyle}
-            hoveredStyle={noBackgroundColorStyle}
-            onClick={onAddAccount}
-          >
-            <Add width={20} height={20} />
-          </Button>
-        }
-      >
-        {accounts.length === 0 && <EmptyMessage />}
-        <PullToRefresh onRefresh={onSync}>
+    <Page
+      title="Accounts"
+      headerRightContent={
+        <Button
+          type="bare"
+          style={{
+            ...noBackgroundColorStyle,
+            margin: 10,
+          }}
+          activeStyle={noBackgroundColorStyle}
+          hoveredStyle={noBackgroundColorStyle}
+          onClick={onAddAccount}
+        >
+          <Add width={20} height={20} />
+        </Button>
+      }
+      padding={0}
+      style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}
+    >
+      {accounts.length === 0 && <EmptyMessage />}
+      <PullToRefresh onRefresh={onSync}>
+        <View style={{ margin: 10 }}>
           {budgetedAccounts.length > 0 && (
             <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
           )}
@@ -213,25 +209,25 @@ function AccountList({
               onSelect={onSelectAccount}
             />
           ))}
-        </PullToRefresh>
-      </Page>
-    </View>
+        </View>
+      </PullToRefresh>
+    </Page>
   );
 }
 
 export default function Accounts() {
-  let accounts = useSelector(state => state.queries.accounts);
-  let newTransactions = useSelector(state => state.queries.newTransactions);
-  let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  let numberFormat = useSelector(
+  const accounts = useSelector(state => state.queries.accounts);
+  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+  const numberFormat = useSelector(
     state => state.prefs.local.numberFormat || 'comma-dot',
   );
-  let hideFraction = useSelector(
+  const hideFraction = useSelector(
     state => state.prefs.local.hideFraction || false,
   );
 
   const { list: categories } = useCategories();
-  let { getAccounts, replaceModal, syncAndDownload } = useActions();
+  const { getAccounts, replaceModal, syncAndDownload } = useActions();
 
   const transactions = useState({});
   const navigate = useNavigate();

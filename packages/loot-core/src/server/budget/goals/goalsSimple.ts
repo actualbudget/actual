@@ -21,7 +21,7 @@ export async function goalsSimple(
   }
   let increment = 0;
   if (template.monthly != null) {
-    let monthly = amountToInteger(template.monthly);
+    const monthly = amountToInteger(template.monthly);
     increment = monthly;
   } else {
     increment = limit;

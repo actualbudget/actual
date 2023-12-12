@@ -71,7 +71,7 @@ function WideNotSupported({ children, redirectTo = '/budget' }) {
 }
 
 function RouterBehaviors({ getAccounts }) {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   useEffect(() => {
     // Get the accounts and check if any exist. If there are no
     // accounts, we want to redirect the user to the All Accounts
@@ -83,8 +83,8 @@ function RouterBehaviors({ getAccounts }) {
     });
   }, []);
 
-  let location = useLocation();
-  let href = useHref(location);
+  const location = useLocation();
+  const href = useHref(location);
   useEffect(() => {
     undo.setUndoState('url', href);
   }, [href]);
@@ -93,7 +93,7 @@ function RouterBehaviors({ getAccounts }) {
 }
 
 function FinancesApp() {
-  let actions = useActions();
+  const actions = useActions();
   useEffect(() => {
     // The default key handler scope
     hotkeys.setScope('app');
@@ -251,7 +251,7 @@ function FinancesApp() {
 }
 
 export default function FinancesAppWithContext() {
-  let app = useMemo(() => <FinancesApp />, []);
+  const app = useMemo(() => <FinancesApp />, []);
 
   return (
     <SpreadsheetProvider>

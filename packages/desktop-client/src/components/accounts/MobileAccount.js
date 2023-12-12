@@ -41,13 +41,13 @@ const getSchedulesTransform = memoizeOne((id, hasSearch) => {
 });
 
 function PreviewTransactions({ accountId, children }) {
-  let scheduleData = useCachedSchedules();
+  const scheduleData = useCachedSchedules();
 
   if (scheduleData == null) {
     return children(null);
   }
 
-  let schedules = scheduleData.schedules.filter(
+  const schedules = scheduleData.schedules.filter(
     s =>
       !s.completed &&
       ['due', 'upcoming', 'missed'].includes(scheduleData.statuses.get(s.id)),
@@ -76,15 +76,15 @@ export default function Account(props) {
   const [searchText, setSearchText] = useState('');
   const [currentQuery, setCurrentQuery] = useState();
 
-  let state = useSelector(state => ({
+  const state = useSelector(state => ({
     payees: state.queries.payees,
     newTransactions: state.queries.newTransactions,
     prefs: state.prefs.local,
     dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
   }));
 
-  let dispatch = useDispatch();
-  let actionCreators = useMemo(
+  const dispatch = useDispatch();
+  const actionCreators = useMemo(
     () => bindActionCreators(actions, dispatch),
     [dispatch],
   );
@@ -106,7 +106,7 @@ export default function Account(props) {
   };
 
   const fetchTransactions = async () => {
-    let query = makeRootQuery();
+    const query = makeRootQuery();
     setCurrentQuery(query);
     updateQuery(query);
   };
@@ -189,9 +189,9 @@ export default function Account(props) {
     }
   };
 
-  let balance = queries.accountBalance(account);
-  let numberFormat = state.prefs.numberFormat || 'comma-dot';
-  let hideFraction = state.prefs.hideFraction || false;
+  const balance = queries.accountBalance(account);
+  const numberFormat = state.prefs.numberFormat || 'comma-dot';
+  const hideFraction = state.prefs.hideFraction || false;
 
   return (
     <SchedulesProvider

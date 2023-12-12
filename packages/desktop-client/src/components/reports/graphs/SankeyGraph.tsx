@@ -79,7 +79,7 @@ function convertToCondensed(data) {
 }
 
 function SankeyGraph({ style, data, compact }: SankeyProps) {
-  let sankeyData = compact ? convertToCondensed(data) : data;
+  const sankeyData = compact ? convertToCondensed(data) : data;
 
   if (!data.links || data.links.length === 0) return null;
   const margin = {

@@ -21,6 +21,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import Add from '../../icons/v1/Add';
+import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
 import Button from '../common/Button';
 import View from '../common/View';
@@ -67,7 +68,7 @@ function PayeeList({
   renderPayeeItem = defaultRenderPayeeItem,
   footer,
 }) {
-  let isFiltered = items.filtered;
+  const isFiltered = items.filtered;
   let createNew = null;
   items = [...items];
 
@@ -75,12 +76,12 @@ function PayeeList({
   // with the value of the input so it always shows whatever the user
   // entered
   if (items[0].id === 'new') {
-    let [first, ...rest] = items;
+    const [first, ...rest] = items;
     createNew = first;
     items = rest;
   }
 
-  let offset = createNew ? 1 : 0;
+  const offset = createNew ? 1 : 0;
   let lastType = null;
 
   return (
@@ -101,14 +102,14 @@ function PayeeList({
           })}
 
         {items.map((item, idx) => {
-          let type = item.transfer_acct ? 'account' : 'payee';
+          const type = item.transfer_acct ? 'account' : 'payee';
           let title;
           if (type === 'payee' && lastType !== type) {
             title = 'Payees';
           } else if (type === 'account' && lastType !== type) {
             title = 'Transfer To/From';
           }
-          let showMoreMessage = idx === items.length - 1 && isFiltered;
+          const showMoreMessage = idx === items.length - 1 && isFiltered;
           lastType = type;
 
           return (
@@ -184,20 +185,20 @@ export default function PayeeAutocomplete({
   payees,
   ...props
 }: PayeeAutocompleteProps) {
-  let cachedPayees = useCachedPayees();
+  const cachedPayees = useCachedPayees();
   if (!payees) {
     payees = cachedPayees;
   }
 
-  let cachedAccounts = useCachedAccounts();
+  const cachedAccounts = useCachedAccounts();
   if (!accounts) {
     accounts = cachedAccounts;
   }
 
-  let [focusTransferPayees, setFocusTransferPayees] = useState(false);
-  let [rawPayee, setRawPayee] = useState('');
-  let hasPayeeInput = !!rawPayee;
-  let payeeSuggestions = useMemo(() => {
+  const [focusTransferPayees, setFocusTransferPayees] = useState(false);
+  const [rawPayee, setRawPayee] = useState('');
+  const hasPayeeInput = !!rawPayee;
+  const payeeSuggestions = useMemo(() => {
     const suggestions = getPayeeSuggestions(
       payees,
       focusTransferPayees,
@@ -210,13 +211,13 @@ export default function PayeeAutocomplete({
     return [{ id: 'new', name: '' }, ...suggestions];
   }, [payees, focusTransferPayees, accounts, hasPayeeInput]);
 
-  let dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   async function handleSelect(value, rawInputValue) {
     if (tableBehavior) {
       onSelect?.(makeNew(value, rawInputValue));
     } else {
-      let create = () => dispatch(createPayee(rawInputValue));
+      const create = () => dispatch(createPayee(rawInputValue));
 
       if (Array.isArray(value)) {
         value = await Promise.all(value.map(v => (v === 'new' ? create() : v)));
@@ -278,10 +279,10 @@ export default function PayeeAutocomplete({
         });
 
         filtered.sort((p1, p2) => {
-          let r1 = p1.name.toLowerCase().startsWith(value.toLowerCase());
-          let r2 = p2.name.toLowerCase().startsWith(value.toLowerCase());
-          let r1exact = p1.name.toLowerCase() === value.toLowerCase();
-          let r2exact = p2.name.toLowerCase() === value.toLowerCase();
+          const r1 = p1.name.toLowerCase().startsWith(value.toLowerCase());
+          const r2 = p2.name.toLowerCase().startsWith(value.toLowerCase());
+          const r1exact = p1.name.toLowerCase() === value.toLowerCase();
+          const r2exact = p2.name.toLowerCase() === value.toLowerCase();
 
           // (maniacal laughter) mwahaHAHAHAHAH
           if (p1.id === 'new') {
@@ -305,7 +306,7 @@ export default function PayeeAutocomplete({
           }
         });
 
-        let isf = filtered.length > 100;
+        const isf = filtered.length > 100;
         filtered = filtered.slice(0, 100);
         filtered.filtered = isf;
 
@@ -373,19 +374,21 @@ export function CreatePayeeButton({
   style,
   ...props
 }: CreatePayeeButtonProps) {
+  const { isNarrowWidth } = useResponsive();
   return (
     <View
       data-testid="create-payee-button"
       style={{
         display: 'block',
         flexShrink: 0,
-        color: embedded ? theme.menuItemText : theme.noticeTextMenu,
+        color:
+          embedded && isNarrowWidth ? theme.menuItemText : theme.noticeTextMenu,
         borderRadius: embedded ? 4 : 0,
         fontSize: 11,
         fontWeight: 500,
         padding: '6px 9px',
         backgroundColor: highlighted
-          ? embedded
+          ? embedded && isNarrowWidth
             ? theme.menuItemBackgroundHover
             : theme.menuAutoCompleteBackgroundHover
           : 'transparent',
@@ -462,6 +465,7 @@ export function PayeeItem({
   embedded,
   ...props
 }: PayeeItemProps) {
+  const { isNarrowWidth } = useResponsive();
   return (
     <div
       // Downshift calls `setTimeout(..., 250)` in the `onMouseMove`
@@ -489,7 +493,7 @@ export function PayeeItem({
       className={`${className} ${css([
         {
           backgroundColor: highlighted
-            ? embedded
+            ? embedded && isNarrowWidth
               ? theme.menuItemBackgroundHover
               : theme.menuAutoCompleteBackgroundHover
             : 'transparent',

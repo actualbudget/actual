@@ -12,10 +12,10 @@ import Text from '../common/Text';
 import DisplayId from '../util/DisplayId';
 
 export default function PostsOfflineNotification({ modalProps, actions }) {
-  let location = useLocation();
+  const location = useLocation();
 
-  let payees = (location.state && location.state.payees) || [];
-  let plural = payees.length > 1;
+  const payees = (location.state && location.state.payees) || [];
+  const plural = payees.length > 1;
 
   async function onPost() {
     await send('schedule/force-run-service');
