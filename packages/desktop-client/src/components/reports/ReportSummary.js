@@ -12,21 +12,13 @@ import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
-type ReportSummaryProps = {
-  startDate: string;
-  endDate: string;
-  data;
-  balanceTypeOp: string;
-  monthsCount: number;
-};
-
-function ReportSummary({
+export function ReportSummary({
   startDate,
   endDate,
   data,
   balanceTypeOp,
   monthsCount,
-}: ReportSummaryProps) {
+}) {
   const net =
     Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
       ? 'PAYMENT'
@@ -137,4 +129,60 @@ function ReportSummary({
   );
 }
 
-export default ReportSummary;
+export function ReportLegend({ legend, groupBy }) {
+  return (
+    <View
+      style={{
+        backgroundColor: theme.pageBackground,
+        alignItems: 'center',
+        flex: 1,
+        overflowY: 'auto',
+      }}
+    >
+      <Text
+        style={{
+          ...styles.largeText,
+          alignItems: 'center',
+          marginBottom: 2,
+          fontWeight: 400,
+          paddingTop: 10,
+        }}
+      >
+        {groupBy}
+      </Text>
+      <View>
+        {legend.map(item => {
+          return (
+            <View
+              key={item.name}
+              style={{
+                padding: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <View
+                style={{
+                  marginRight: 5,
+                  borderRadius: 1000,
+                  width: 14,
+                  height: 14,
+                  backgroundColor: item.color,
+                }}
+              />
+              <Text
+                style={{
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  flexShrink: 0,
+                }}
+              >
+                {item.name}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}

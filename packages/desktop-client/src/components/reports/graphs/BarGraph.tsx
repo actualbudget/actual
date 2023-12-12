@@ -132,7 +132,7 @@ type BarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
   groupBy: string;
-  balanceTypeOp: string;
+  balanceTypeOp;
   compact?: boolean;
 };
 

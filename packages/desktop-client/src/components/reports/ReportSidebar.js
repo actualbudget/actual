@@ -3,6 +3,7 @@ import React from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
+import Button from '../common/Button';
 import Select from '../common/Select';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -16,8 +17,33 @@ import {
   getFullRange,
   validateRange,
 } from './Header';
-import ModeButton from './ModeButton';
 import { ReportOptions } from './ReportOptions';
+
+function ModeButton({ selected, children, style, onSelect }) {
+  return (
+    <Button
+      type="bare"
+      style={{
+        padding: '5px 10px',
+        backgroundColor: theme.menuBackground,
+        marginRight: 5,
+        fontSize: 'inherit',
+        ...(selected && {
+          backgroundColor: theme.buttonPrimaryBackground,
+          color: theme.buttonPrimaryText,
+          ':hover': {
+            backgroundColor: theme.buttonPrimaryBackgroundHover,
+            color: theme.buttonPrimaryTextHover,
+          },
+        }),
+        ...style,
+      }}
+      onClick={onSelect}
+    >
+      {children}
+    </Button>
+  );
+}
 
 export function ReportSidebar({
   startDate,

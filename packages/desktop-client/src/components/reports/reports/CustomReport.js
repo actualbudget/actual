@@ -17,13 +17,12 @@ import Text from '../../common/Text';
 import View from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
 import PrivacyFilter from '../../PrivacyFilter';
-import ChooseGraph from '../ChooseGraph';
+import { ChooseGraph } from '../ChooseGraph';
 import Header from '../Header';
 import LoadingIndicator from '../LoadingIndicator';
-import ReportLegend from '../ReportLegend';
 import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
-import ReportSummary from '../ReportSummary';
+import { ReportLegend, ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
 import groupedSpreadsheet from '../spreadsheets/grouped-spreadsheet';
@@ -112,7 +111,7 @@ export default function CustomReport() {
       endDate,
       categories,
       selectedCategories,
-      conditions: filters,
+      filters,
       conditionsOp,
       showEmpty,
       showOffBudgetHidden,
@@ -137,7 +136,7 @@ export default function CustomReport() {
       endDate,
       categories,
       selectedCategories,
-      conditions: filters,
+      filters,
       conditionsOp,
       showEmpty,
       showOffBudgetHidden,
@@ -309,6 +308,8 @@ export default function CustomReport() {
 
                 {dataCheck ? (
                   <ChooseGraph
+                    startDate={startDate}
+                    endDate={endDate}
                     data={data}
                     mode={mode}
                     graphType={graphType}
@@ -344,7 +345,11 @@ export default function CustomReport() {
                     />
                   )}
                   {viewLegend && (
-                    <ReportLegend legend={legend} groupBy={groupBy} />
+                    <ReportLegend
+                      data={data}
+                      legend={legend}
+                      groupBy={groupBy}
+                    />
                   )}
                 </View>
               )}
