@@ -54,7 +54,7 @@ export interface ServerHandlers {
     list: Array<CategoryEntity>;
   }>;
 
-  'get-earliest-transaction': () => Promise<unknown>;
+  'get-earliest-transaction': () => Promise<{ date: string }>;
 
   'get-budget-bounds': () => Promise<{ start: string; end: string }>;
 

@@ -20,7 +20,7 @@ import Header from '../Header';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import useReport from '../useReport';
 
-function CashFlow() {
+export default function CashFlow(): JSX.Element {
   const {
     filters,
     conditionsOp,
@@ -108,8 +108,9 @@ function CashFlow() {
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
         onCondOpChange={onCondOpChange}
+        headerPrefixItems={undefined}
+        selectGraph={undefined}
       />
-
       <View
         style={{
           backgroundColor: theme.tableBackground,
@@ -167,12 +168,7 @@ function CashFlow() {
           </Text>
         </View>
 
-        <CashFlowGraph
-          start={start}
-          end={end}
-          graphData={graphData}
-          isConcise={isConcise}
-        />
+        <CashFlowGraph graphData={graphData} isConcise={isConcise} />
 
         <View style={{ marginTop: 30 }}>
           <Paragraph>
@@ -189,5 +185,3 @@ function CashFlow() {
     </View>
   );
 }
-
-export default CashFlow;
