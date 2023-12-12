@@ -21,6 +21,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
@@ -115,7 +116,7 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 
 type StackedBarGraphProps = {
   style?: CSSProperties;
-  data;
+  data: DataEntity;
   compact?: boolean;
 };
 
@@ -164,7 +165,7 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
                 )}
                 {data.data.reverse().map((c, index) => (
                   <Bar
-                    key={c.date}
+                    key={c.name}
                     dataKey={c.name}
                     stackId="a"
                     fill={colorScale[index % colorScale.length]}

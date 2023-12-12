@@ -108,7 +108,7 @@ type UncategorizedGroupEntity = CategoryGroupEntity & {
   categories?: UncategorizedEntity[];
 };
 
-const uncategouncatGrouprizedGroup: UncategorizedGroupEntity = {
+const uncategorizedGroup: UncategorizedGroupEntity = {
   name: 'Uncategorized & Off Budget',
   id: null,
   hidden: false,
@@ -122,7 +122,7 @@ export const categoryLists = (
 ) => {
   const categoryList = showUncategorized
     ? [
-        ...categories.list,
+        ...categories.list.filter(f => showOffBudgetHidden || !f.hidden),
         uncategorizedCategory,
         transferCategory,
         offBudgetCategory,
@@ -131,7 +131,7 @@ export const categoryLists = (
   const categoryGroup = showUncategorized
     ? [
         ...categories.grouped.filter(f => showOffBudgetHidden || !f.hidden),
-        uncategouncatGrouprizedGroup,
+        uncategorizedGroup,
       ]
     : categories.grouped;
   return [categoryList, categoryGroup] as const;
