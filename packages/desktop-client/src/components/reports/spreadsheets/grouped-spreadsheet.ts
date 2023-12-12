@@ -17,8 +17,10 @@ function createGroupedSpreadsheet({
   selectedCategories,
   conditions = [],
   conditionsOp,
+  empty,
   hidden,
   uncat,
+  balanceTypeOp,
 }: createSpreadsheetProps) {
   const [catList, catGroup] = categoryLists(hidden, uncat, categories);
 
@@ -134,7 +136,7 @@ function createGroupedSpreadsheet({
       [start, end],
     );
 
-    setData(groupedData);
+    setData(groupedData.filter(i => (!empty ? i[balanceTypeOp] !== 0 : true)));
   };
 }
 

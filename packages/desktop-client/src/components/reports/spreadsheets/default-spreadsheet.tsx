@@ -25,6 +25,7 @@ export type createSpreadsheetProps = {
   selectedCategories: CategoryEntity[];
   conditions: RuleConditionEntity[];
   conditionsOp: string;
+  empty: boolean;
   hidden: boolean;
   uncat: boolean;
   groupBy?: string;
@@ -41,6 +42,7 @@ export default function createSpreadsheet({
   selectedCategories,
   conditions = [],
   conditionsOp,
+  empty,
   hidden,
   uncat,
   groupBy,
@@ -163,8 +165,10 @@ export default function createSpreadsheet({
     });
 
     setData({
-      data: calcData,
-      monthData,
+      data: calcData.filter(i => (!empty ? i[balanceTypeOp] !== 0 : true)),
+      monthData: monthData.filter(i =>
+        !empty ? i[balanceTypeOp] !== 0 : true,
+      ),
       start,
       end,
       totalDebts: integerToAmount(totalDebts),
