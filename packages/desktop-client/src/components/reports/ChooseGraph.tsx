@@ -26,7 +26,8 @@ type ChooseGraphProps = {
   setScrollWidth: (value: number) => void;
   months: Month[];
 };
-export function ChooseGraph({
+
+function ChooseGraph({
   data,
   mode,
   graphType,
@@ -37,6 +38,8 @@ export function ChooseGraph({
   setScrollWidth,
   months,
 }: ChooseGraphProps) {
+  const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
+
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
   };
@@ -55,7 +58,7 @@ export function ChooseGraph({
       <AreaGraph
         style={{ flexGrow: 1 }}
         data={data}
-        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        balanceTypeOp={balanceTypeOp}
       />
     );
   }
@@ -65,7 +68,7 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        balanceTypeOp={balanceTypeOp}
       />
     );
   }
@@ -78,7 +81,7 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+        balanceTypeOp={balanceTypeOp}
       />
     );
   }
@@ -106,7 +109,7 @@ export function ChooseGraph({
             data={data}
             empty={showEmpty}
             monthsCount={months.length}
-            balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+            balanceTypeOp={balanceTypeOp}
             mode={mode}
             groupBy={groupBy}
           />
@@ -117,10 +120,12 @@ export function ChooseGraph({
           scrollWidth={scrollWidth}
           data={data}
           mode={mode}
-          balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
+          balanceTypeOp={balanceTypeOp}
           monthsCount={months.length}
         />
       </View>
     );
   }
 }
+
+export default ChooseGraph;
