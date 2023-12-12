@@ -5,7 +5,7 @@ import Text from '../common/Text';
 import View from '../common/View';
 
 type ReportLegendProps = {
-  legend;
+  legend: Array<{ name: string; color: string }>;
   groupBy: string;
 };
 
