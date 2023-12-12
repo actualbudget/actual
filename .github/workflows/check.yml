@@ -26,7 +26,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Typecheck
-        run: yarn typecheck
+        uses: andoshin11/typescript-error-reporter-action@v1.0.2
   test:
     runs-on: ubuntu-latest
     steps:

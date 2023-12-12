@@ -29,7 +29,7 @@ test.describe('Accounts', () => {
     });
 
     const transaction = accountPage.getNthTransaction(0);
-    await expect(transaction.payee).toHaveText('Starting Balance xxxx');
+    await expect(transaction.payee).toHaveText('Starting Balance');
     await expect(transaction.notes).toHaveText('');
     await expect(transaction.category).toHaveText('Starting Balances');
     await expect(transaction.debit).toHaveText('');
