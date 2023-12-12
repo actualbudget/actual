@@ -21,7 +21,7 @@ type ChooseGraphProps = {
   graphType: string;
   balanceType: string;
   groupBy: string;
-  empty: boolean;
+  showEmpty: boolean;
   scrollWidth: number;
   setScrollWidth: (value: number) => void;
   months: Month[];
@@ -32,7 +32,7 @@ export function ChooseGraph({
   graphType,
   balanceType,
   groupBy,
-  empty,
+  showEmpty,
   scrollWidth,
   setScrollWidth,
   months,
@@ -104,7 +104,7 @@ export function ChooseGraph({
         >
           <ReportTableList
             data={data}
-            empty={empty}
+            empty={showEmpty}
             monthsCount={months.length}
             balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
             mode={mode}

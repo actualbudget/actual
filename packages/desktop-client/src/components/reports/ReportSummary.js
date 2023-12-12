@@ -13,13 +13,16 @@ import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
 export function ReportSummary({
-  start,
-  end,
+  startDate,
+  endDate,
   data,
   balanceTypeOp,
   monthsCount,
 }) {
-  const net = data.totalDebts > data.totalAssets ? 'EXPENSE' : 'INCOME';
+  const net =
+    Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
+      ? 'PAYMENT'
+      : 'DEPOSIT';
   const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
   return (
     <View
@@ -46,8 +49,8 @@ export function ReportSummary({
             },
           ]}
         >
-          {monthUtils.format(start, 'MMM yyyy')} -{' '}
-          {monthUtils.format(end, 'MMM yyyy')}
+          {monthUtils.format(startDate, 'MMM yyyy')} -{' '}
+          {monthUtils.format(endDate, 'MMM yyyy')}
         </Text>
       </View>
       <View
@@ -72,7 +75,7 @@ export function ReportSummary({
           {balanceTypeOp === 'totalDebts'
             ? 'TOTAL SPENDING'
             : balanceTypeOp === 'totalAssets'
-            ? 'TOTAL INCOME'
+            ? 'TOTAL DEPOSITS'
             : 'NET ' + net}
         </Text>
         <Text
@@ -113,7 +116,7 @@ export function ReportSummary({
           {balanceTypeOp === 'totalDebts'
             ? 'AVERAGE SPENDING'
             : balanceTypeOp === 'totalAssets'
-            ? 'AVERAGE INCOME'
+            ? 'AVERAGE DEPOSIT'
             : 'AVERAGE NET'}
         </Text>
         <Text

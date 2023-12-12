@@ -66,6 +66,7 @@ function SidebarCategory({
       <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
           type="bare"
+          className="hover-visible"
           onClick={e => {
             e.stopPropagation();
             setMenuOpen(true);
@@ -112,6 +113,7 @@ function SidebarCategory({
       <NotesButton
         id={category.id}
         style={dragging && { color: 'currentColor' }}
+        defaultColor={theme.pageTextLight}
       />
     </View>
   );
@@ -121,10 +123,15 @@ function SidebarCategory({
       innerRef={innerRef}
       style={{
         width: 200,
-        '& button': { display: 'none' },
+        overflow: 'hidden',
+        '& .hover-visible': {
+          display: 'none',
+        },
         ...(!dragging &&
           !dragPreview && {
-            '&:hover button': { display: 'flex', color: theme.tableTextHover },
+            '&:hover .hover-visible': {
+              display: 'flex',
+            },
           }),
         ...(dragging && { color: theme.formInputTextPlaceholderSelected }),
         // The zIndex here forces the the view on top of a row below
