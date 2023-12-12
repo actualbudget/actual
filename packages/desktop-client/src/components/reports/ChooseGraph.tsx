@@ -45,16 +45,6 @@ function ChooseGraph({
       ? 'monthData'
       : 'data';
 
-  const filteredData =
-    data[groupByData] &&
-    data[groupByData].filter(i =>
-      !showEmpty
-        ? balanceTypeOp === 'totalTotals'
-          ? i.totalAssets !== 0 || i.totalDebts !== 0 || i.totalTotals !== 0
-          : i[balanceTypeOp] !== 0
-        : true,
-    );
-
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
   };
@@ -146,21 +136,11 @@ function ChooseGraph({
           handleScroll={handleScroll}
           balanceTypeOp={balanceTypeOp}
           groupBy={groupBy}
-          data={filteredData}
+          data={data[groupByData]}
           showEmpty={showEmpty}
           mode={mode}
           monthsCount={months.length}
         />
-        >
-          <ReportTableList
-            data={data}
-            empty={showEmpty}
-            monthsCount={months.length}
-            balanceTypeOp={balanceTypeOp}
-            mode={mode}
-            groupBy={groupBy}
-          />
-        </ReportTable>
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
           handleScroll={handleScroll}

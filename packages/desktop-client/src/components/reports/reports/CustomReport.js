@@ -146,16 +146,10 @@ export default function CustomReport() {
       showUncategorized,
       groupBy,
       balanceTypeOp,
-      categories,
-      selectedCategories,
       payees,
       accounts,
-      filters,
-      conditionsOp,
-      showOffBudgetHidden,
-      showUncategorized,
       setDataCheck,
-    );
+    });
   }, [
     startDate,
     endDate,
