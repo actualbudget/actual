@@ -66,3 +66,24 @@ jobs:
           name: desktop-client-test-results
           path: packages/desktop-client/test-results/
           retention-days: 30
+      - name: Find Comment
+        uses: peter-evans/find-comment@v2
+        if: failure()
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: visual regression tests
+      - name: Create comment if failed
+        if: failure()
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            :wave: Looks like VRT (visual regression tests) are failing in this PR. This indicates a visual regression in the app. It could be either a bug in this PR or a visual change introduced by changing something.
+
+            To fix this: please follow [these instructions](https://github.com/actualbudget/actual/blob/master/packages/desktop-client/README.md#visual-regression).
+
+            We look forward to reviewing this PR once all the CI jobs have passed successfully!
+          edit-mode: replace
