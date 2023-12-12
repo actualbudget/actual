@@ -7,6 +7,7 @@ import {
   type ReactNode,
   type MouseEventHandler,
   type MouseEvent,
+  type ContextType,
 } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -14,7 +15,7 @@ import { css } from 'glamor';
 
 import { type CSSProperties, styles, theme } from '../style';
 
-export const IntersectionBoundary = createContext<any>(null);
+export const IntersectionBoundary = createContext<RefObject<HTMLElement>>(null);
 
 export function useTooltip() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -53,17 +54,23 @@ type TooltipProps = {
   forceLayout?: boolean;
   forceTop?: number;
   ignoreBoundary?: boolean;
-  targetRect?: any;
+  targetRect?: DOMRect;
   offset?: number;
   style?: CSSProperties;
   width?: number;
   children: ReactNode;
   targetHeight?: number;
 };
+type MutableDomRect = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
 
 export class Tooltip extends Component<TooltipProps> {
   static contextType = IntersectionBoundary;
-  declare context: React.ContextType<typeof IntersectionBoundary>;
+  declare context: ContextType<typeof IntersectionBoundary>;
   position: TooltipPosition;
   contentRef: RefObject<HTMLDivElement>;
   cleanup: () => void;
@@ -164,11 +171,11 @@ export class Tooltip extends Component<TooltipProps> {
 
     if (
       container.parentNode &&
-      container.parentNode.style.overflow === 'auto'
+      (container.parentNode as HTMLElement).style.overflow === 'auto'
     ) {
-      return container.parentNode;
+      return container.parentNode as HTMLElement;
     }
-    return container;
+    return container as HTMLElement;
   }
 
   layout() {
@@ -179,9 +186,10 @@ export class Tooltip extends Component<TooltipProps> {
     }
 
     const box = contentEl.getBoundingClientRect();
-    const anchorEl = this.target.parentNode as any;
+    const anchorEl = this.target.parentNode as HTMLElement;
 
-    let anchorRect = targetRect || anchorEl.getBoundingClientRect();
+    let anchorRect: MutableDomRect =
+      targetRect || anchorEl.getBoundingClientRect();
 
     // Copy it so we can mutate it
     anchorRect = {

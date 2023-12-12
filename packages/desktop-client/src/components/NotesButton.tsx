@@ -15,7 +15,7 @@ import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 import Button from './common/Button';
 import Text from './common/Text';
 import View from './common/View';
-import { Tooltip, TooltipPosition, useTooltip } from './tooltips';
+import { Tooltip, type TooltipPosition, useTooltip } from './tooltips';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
