@@ -19,6 +19,7 @@ import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import Container from '../Container';
+import { type DataEntity } from '../entities';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadItem = {
@@ -92,7 +93,7 @@ const CustomTooltip = ({
 
 type AreaGraphProps = {
   style?: CSSProperties;
-  data;
+  data: DataEntity;
   balanceTypeOp: string;
   compact?: boolean;
 };

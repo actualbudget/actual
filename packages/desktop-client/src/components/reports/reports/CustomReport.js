@@ -113,8 +113,10 @@ export default function CustomReport() {
       selectedCategories,
       filters,
       conditionsOp,
+      empty,
       hidden,
       uncat,
+      balanceTypeOp,
     });
   }, [
     start,
@@ -136,6 +138,7 @@ export default function CustomReport() {
       selectedCategories,
       filters,
       conditionsOp,
+      empty,
       hidden,
       uncat,
       groupBy,
@@ -155,6 +158,7 @@ export default function CustomReport() {
     accounts,
     filters,
     conditionsOp,
+    empty,
     hidden,
     uncat,
   ]);

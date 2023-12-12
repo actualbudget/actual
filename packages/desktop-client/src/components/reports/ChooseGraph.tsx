@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 
 import View from '../common/View';
 
+import { type DataEntity, type Month } from './entities';
 import AreaGraph from './graphs/AreaGraph';
 import BarGraph from './graphs/BarGraph';
 import BarLineGraph from './graphs/BarLineGraph';
@@ -14,6 +15,17 @@ import ReportTableHeader from './ReportTableHeader';
 import ReportTableList from './ReportTableList';
 import ReportTableTotals from './ReportTableTotals';
 
+type ChooseGraphProps = {
+  data: DataEntity;
+  mode: string;
+  graphType: string;
+  balanceType: string;
+  groupBy: string;
+  empty: boolean;
+  scrollWidth: number;
+  setScrollWidth: (value: number) => void;
+  months: Month[];
+};
 export function ChooseGraph({
   data,
   mode,
@@ -24,7 +36,7 @@ export function ChooseGraph({
   scrollWidth,
   setScrollWidth,
   months,
-}) {
+}: ChooseGraphProps) {
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
   };
@@ -53,13 +65,12 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        empty={empty}
         balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
   if (graphType === 'BarLineGraph') {
-    return <BarLineGraph style={{ flexGrow: 1 }} graphData={data.graphData} />;
+    return <BarLineGraph style={{ flexGrow: 1 }} graphData={data} />;
   }
   if (graphType === 'DonutGraph') {
     return (
@@ -67,13 +78,12 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        empty={empty}
         balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
       />
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={{ flexGrow: 1 }} graphData={data.graphData} />;
+    return <LineGraph style={{ flexGrow: 1 }} graphData={data} />;
   }
   if (graphType === 'StackedBarGraph') {
     return <StackedBarGraph style={{ flexGrow: 1 }} data={data} />;
