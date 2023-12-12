@@ -534,7 +534,7 @@ class TransactionEditInner extends PureComponent {
             <TapField
               value={getPrettyPayee(transaction)}
               onClick={() => this.onClick(transaction.id, 'payee')}
-              data-testid={`payee-field-${transaction.id}`}
+              data-testid="payee-field"
             />
           </View>
 
@@ -558,7 +558,7 @@ class TransactionEditInner extends PureComponent {
                 }
                 disabled={isOffBudget || isBudgetTransfer(transaction)}
                 onClick={() => this.onClick(transaction.id, 'category')}
-                data-testid={`category-field-${transaction.id}`}
+                data-testid="category-field"
               />
             </View>
           )}
