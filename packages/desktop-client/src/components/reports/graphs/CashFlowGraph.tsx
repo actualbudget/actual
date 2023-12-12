@@ -19,10 +19,7 @@ type CashFlowGraphProps = {
   graphData: { expenses; income; balances };
   isConcise: boolean;
 };
-function CashFlowGraph({
-  graphData,
-  isConcise,
-}: CashFlowGraphProps) {
+function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
   return (
     <Container>
       {(width, height, portalHost) =>

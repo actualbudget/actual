@@ -52,8 +52,7 @@ export default function CashFlow(): JSX.Element {
 
   useEffect(() => {
     async function run() {
-      let trans;
-      trans = await send('get-earliest-transaction');
+      const trans = await send('get-earliest-transaction');
       const earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(trans.date))
         : monthUtils.currentMonth();
@@ -169,10 +168,7 @@ export default function CashFlow(): JSX.Element {
           </Text>
         </View>
 
-        <CashFlowGraph
-          graphData={graphData}
-          isConcise={isConcise}
-        />
+        <CashFlowGraph graphData={graphData} isConcise={isConcise} />
 
         <View style={{ marginTop: 30 }}>
           <Paragraph>
