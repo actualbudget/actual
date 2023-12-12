@@ -1,27 +1,24 @@
 BEGIN TRANSACTION;
 
-CREATE TABLE reports
+CREATE TABLE custom_reports
   (id TEXT PRIMARY KEY,
    name TEXT,
-   start TEXT,
-   end TEXT, 
+   start_date TEXT,
+   end_date TEXT,
+   date_paused INTEGER DEFAULT 0,
    mode TEXT DEFAULT 'total',
-   groupBy TEXT DEFAULT 'Category',
-   balanceType TEXT DEFAULT 'Expense',
+   group_by TEXT DEFAULT 'Category',
+   balance_type TEXT DEFAULT 'Expense',
    interval TEXT DEFAULT 'Monthly',
-   empty INTEGER DEFAULT 0,
-   hidden INTEGER DEFAULT 0,
-   uncat INTEGER DEFAULT 0,
-   selectedCategories TEXT,
-   graphType TEXT DEFAULT 'BarGraph',
-   viewLegend INTEGER DEFAULT 0,
-   viewSummary INTEGER DEFAULT 0,
-   viewLabels INTEGER DEFAULT 0,
+   show_empty INTEGER DEFAULT 0,
+   show_offbudgethidden INTEGER DEFAULT 0,
+   show_uncategorized INTEGER DEFAULT 0,
+   selected_categories TEXT,
+   graph_type TEXT DEFAULT 'BarGraph',
    conditions TEXT,
    conditions_op TEXT DEFAULT 'and',
-   sort_order REAL,
-   data TEXT,
-   colors TEXT,
+   metadata TEXT,
+   color_scheme TEXT,
    tombstone INTEGER DEFAULT 0);
 
 COMMIT;
