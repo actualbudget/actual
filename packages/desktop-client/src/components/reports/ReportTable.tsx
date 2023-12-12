@@ -96,7 +96,7 @@ export default function ReportTable({
           flexShrink: 0,
           overflowY: 'auto',
           scrollbarWidth: 'none',
-          //'::-webkit-scrollbar': { display: 'none' },
+          '::-webkit-scrollbar': { display: 'none' },
           justifyContent: 'center',
         }}
       >
@@ -117,7 +117,7 @@ export default function ReportTable({
           overflowY: 'auto',
           flex: 1,
           scrollbarWidth: 'none',
-          //'::-webkit-scrollbar': { display: 'none' },
+          '::-webkit-scrollbar': { display: 'none' },
         }}
         id={'list'}
         innerRef={listScrollRef}

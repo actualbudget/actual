@@ -27,7 +27,8 @@ function ReportTableHeader({
   handleScroll,
 }: ReportTableHeaderProps) {
   return (
-    <View
+    <Row
+      collapsed={true}
       innerRef={headerScrollRef}
       style={{
         overflowX: 'auto',
@@ -38,8 +39,7 @@ function ReportTableHeader({
         borderColor: theme.tableBorder,
       }}
     >
-      <Row
-        collapsed={true}
+      <Cell
         style={{
           width: 150,
           flexShrink: 0,
@@ -112,7 +112,7 @@ function ReportTableHeader({
         />
         {scrollWidth > 0 && <Cell width={scrollWidth} />}
       </View>
-    </View>
+    </Row>
   );
 }
 

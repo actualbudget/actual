@@ -52,7 +52,6 @@ function ReportTableTotals({
       collapsed={true}
       height={32 + scrollWidthTotals}
       style={{
-        overflowX: 'auto',
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
         justifyContent: 'center',
