@@ -3,12 +3,16 @@ import {
   createContext,
   createRef,
   useState,
-  RefObject,
-  ReactNode,
+  type RefObject,
+  type ReactNode,
+  type MouseEventHandler,
+  type MouseEvent,
 } from 'react';
 import ReactDOM from 'react-dom';
+
 import { css } from 'glamor';
-import { CSSProperties, styles, theme } from '../style';
+
+import { type CSSProperties, styles, theme } from '../style';
 
 export const IntersectionBoundary = createContext<any>(null);
 
@@ -16,8 +20,8 @@ export function useTooltip() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return {
-    getOpenEvents: (events: { onClick?: (e: Event) => void } = {}) => ({
-      onClick: (e: Event) => {
+    getOpenEvents: (events: { onClick?: MouseEventHandler } = {}) => ({
+      onClick: (e: MouseEvent) => {
         e.stopPropagation();
         events.onClick?.(e);
         setIsOpen(true);
@@ -29,7 +33,7 @@ export function useTooltip() {
   };
 }
 
-type TooltipPosition =
+export type TooltipPosition =
   | 'top'
   | 'top-left'
   | 'top-right'
@@ -44,16 +48,17 @@ type TooltipPosition =
   | 'right';
 
 type TooltipProps = {
-  position: TooltipPosition;
-  onClose: () => void;
-  forceLayout: boolean;
-  forceTop: number;
-  ignoreBoundary: boolean;
-  targetRect: any;
-  offset: number;
-  style: CSSProperties;
-  width: number;
+  position?: TooltipPosition;
+  onClose?: () => void;
+  forceLayout?: boolean;
+  forceTop?: number;
+  ignoreBoundary?: boolean;
+  targetRect?: any;
+  offset?: number;
+  style?: CSSProperties;
+  width?: number;
   children: ReactNode;
+  targetHeight?: number;
 };
 
 export class Tooltip extends Component<TooltipProps> {
