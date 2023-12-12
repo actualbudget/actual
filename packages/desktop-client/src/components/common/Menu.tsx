@@ -33,19 +33,19 @@ type MenuItem = {
   key?: string;
 };
 
-type MenuProps = {
+type MenuProps<T extends MenuItem = MenuItem> = {
   header?: ReactNode;
   footer?: ReactNode;
-  items: Array<MenuItem | typeof Menu.line>;
-  onMenuSelect: (itemName: MenuItem['name']) => void;
+  items: Array<T | typeof Menu.line>;
+  onMenuSelect: (itemName: T['name']) => void;
 };
 
-export default function Menu({
+export default function Menu<T extends MenuItem>({
   header,
   footer,
   items: allItems,
   onMenuSelect,
-}: MenuProps) {
+}: MenuProps<T>) {
   const elRef = useRef(null);
   const items = allItems.filter(x => x);
   const [hoveredIndex, setHoveredIndex] = useState(null);

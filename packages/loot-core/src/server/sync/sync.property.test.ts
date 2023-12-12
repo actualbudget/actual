@@ -93,7 +93,8 @@ const baseTime = 1565374471903;
 const clientId1 = '80dd7da215247293';
 const clientId2 = '90xU1sd5124329ac';
 
-function makeGen<T extends Arbitrary<unknown>>({
+// @typescript-eslint/no-explicit-any
+function makeGen<T extends Arbitrary<any>>({
   table,
   row,
   field,
@@ -111,7 +112,7 @@ function makeGen<T extends Arbitrary<unknown>>({
     value,
     timestamp: jsc.integer(1000, 10000).smap(
       x => {
-        let clientId;
+        let clientId: string;
         switch (jsc.random(0, 1)) {
           case 0:
             clientId = clientId1;
