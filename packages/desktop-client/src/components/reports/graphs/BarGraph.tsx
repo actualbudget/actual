@@ -5,7 +5,7 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-  //Legend,
+  Legend,
   Cell,
   ReferenceLine,
   XAxis,
@@ -107,14 +107,13 @@ const CustomTooltip = ({
     );
   }
 };
-/* Descoped for future PR
+
 type CustomLegendProps = {
-  active?: boolean;
   payload?: PayloadItem[];
-  label?: string;
+  OnChangeLegend;
 };
 
-const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
+const CustomLegend = ({ payload, OnChangeLegend }: CustomLegendProps) => {
   const agg = payload[0].payload.children.map(leg => {
     return {
       name: leg.props.name,
@@ -126,7 +125,6 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 
   return <div />;
 };
-*/
 
 type BarGraphProps = {
   style?: CSSProperties;
@@ -134,6 +132,7 @@ type BarGraphProps = {
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
+  OnChangeLegend;
 };
 
 function BarGraph({
@@ -142,6 +141,7 @@ function BarGraph({
   groupBy,
   balanceTypeOp,
   compact,
+  OnChangeLegend,
 }: BarGraphProps) {
   const privacyMode = usePrivacyMode();
 
@@ -180,9 +180,11 @@ function BarGraph({
                 data={data[splitData]}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {
-                  //!compact && <Legend content={<CustomLegend />} />
-                }
+                {!compact && (
+                  <Legend
+                    content={<CustomLegend OnChangeLegend={OnChangeLegend} />}
+                  />
+                )}
                 <Tooltip
                   content={
                     <CustomTooltip

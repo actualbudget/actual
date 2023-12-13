@@ -45,7 +45,7 @@ export function ReportTopbar({
         title="Data Table"
         onSelect={() => {
           setGraphType('TableGraph');
-          //setViewLegend(false);
+          setViewLegend(false);
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}
@@ -78,7 +78,7 @@ export function ReportTopbar({
         onSelect={() => {
           setGraphType('AreaGraph');
           setGroupBy('Month');
-          //setViewLegend(false);
+          setViewLegend(false);
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}
@@ -116,8 +116,7 @@ export function ReportTopbar({
         style={{ marginRight: 15 }}
         title="Show Legend"
         disabled={
-          true //descoping for future PR
-          //graphType === 'TableGraph' || graphType === 'AreaGraph' ? true : false
+          graphType === 'TableGraph' || graphType === 'AreaGraph' ? true : false
         }
       >
         <ListBullet width={15} height={15} />

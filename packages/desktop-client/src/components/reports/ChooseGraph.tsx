@@ -25,6 +25,7 @@ type ChooseGraphProps = {
   scrollWidth: number;
   setScrollWidth: (value: number) => void;
   months: Month[];
+  OnChangeLegend;
 };
 
 function ChooseGraph({
@@ -37,6 +38,7 @@ function ChooseGraph({
   scrollWidth,
   setScrollWidth,
   months,
+  OnChangeLegend,
 }: ChooseGraphProps) {
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
 
@@ -69,6 +71,7 @@ function ChooseGraph({
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
+        OnChangeLegend={OnChangeLegend}
       />
     );
   }
@@ -82,6 +85,7 @@ function ChooseGraph({
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
+        OnChangeLegend={OnChangeLegend}
       />
     );
   }
@@ -89,7 +93,13 @@ function ChooseGraph({
     return <LineGraph style={{ flexGrow: 1 }} graphData={data} />;
   }
   if (graphType === 'StackedBarGraph') {
-    return <StackedBarGraph style={{ flexGrow: 1 }} data={data} />;
+    return (
+      <StackedBarGraph
+        style={{ flexGrow: 1 }}
+        data={data}
+        OnChangeLegend={OnChangeLegend}
+      />
+    );
   }
   if (graphType === 'TableGraph') {
     return (

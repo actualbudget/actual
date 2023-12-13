@@ -5,7 +5,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  //Legend,
+  Legend,
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
@@ -72,14 +72,12 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   }
 };
 
-/* Descoped for future PR
 type CustomLegendProps = {
-  active?: boolean;
   payload?: PayloadItem[];
-  label?: string;
+  OnChangeLegend;
 };
 
-const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
+const CustomLegend = ({ payload, OnChangeLegend }: CustomLegendProps) => {
   const agg = payload.map(leg => {
     return {
       name: leg.value,
@@ -91,7 +89,6 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 
   return <div />;
 };
-*/
 
 type DonutGraphProps = {
   style?: CSSProperties;
@@ -99,6 +96,7 @@ type DonutGraphProps = {
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
+  OnChangeLegend;
 };
 
 function DonutGraph({
@@ -107,6 +105,7 @@ function DonutGraph({
   groupBy,
   balanceTypeOp,
   compact,
+  OnChangeLegend,
 }: DonutGraphProps) {
   const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
@@ -133,9 +132,11 @@ function DonutGraph({
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <PieChart width={width} height={height}>
-                {
-                  //<Legend content={<CustomLegend />} />
-                }
+                {!compact && (
+                  <Legend
+                    content={<CustomLegend OnChangeLegend={OnChangeLegend} />}
+                  />
+                )}
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}

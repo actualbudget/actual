@@ -5,7 +5,7 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-  //Legend,
+  Legend,
   XAxis,
   YAxis,
   Tooltip,
@@ -93,14 +93,12 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   }
 };
 
-/* Descoped for future PR
 type CustomLegendProps = {
-  active?: boolean;
   payload?: PayloadItem[];
-  label?: string;
+  OnChangeLegend;
 };
 
-const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
+const CustomLegend = ({ payload, OnChangeLegend }: CustomLegendProps) => {
   const agg = payload.map(leg => {
     return {
       name: leg.value,
@@ -112,15 +110,20 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 
   return <div />;
 };
-*/
 
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
   compact?: boolean;
+  OnChangeLegend;
 };
 
-function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
+function StackedBarGraph({
+  style,
+  data,
+  compact,
+  OnChangeLegend,
+}: StackedBarGraphProps) {
   const privacyMode = usePrivacyMode();
   const colorScale = getColorScale('qualitative');
 
@@ -142,9 +145,11 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
                 data={data.monthData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {
-                  //<Legend content={<CustomLegend />} />
-                }
+                {!compact && (
+                  <Legend
+                    content={<CustomLegend OnChangeLegend={OnChangeLegend} />}
+                  />
+                )}
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}

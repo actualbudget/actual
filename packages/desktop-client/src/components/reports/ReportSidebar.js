@@ -96,7 +96,7 @@ export function ReportSidebar({
       }
       if (['AreaGraph', 'DonutGraph'].includes(graphType)) {
         setGraphType('TableGraph');
-        //setViewLegend(false);
+        setViewLegend(false);
       }
       if (['Month', 'Year'].includes(groupBy)) {
         setGroupBy('Category');
