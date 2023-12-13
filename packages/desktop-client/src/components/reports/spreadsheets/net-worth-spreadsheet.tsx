@@ -44,7 +44,7 @@ export default function createSpreadsheet(
           runQuery(
             q('transactions')
               .filter({
-                [conditionsOpKey]: [...filters],
+                [conditionsOpKey]: filters,
               })
               .filter({
                 account: acct.id,
