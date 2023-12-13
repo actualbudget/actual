@@ -126,7 +126,7 @@ export default function BudgetSummary({ month }: BudgetSummaryProps) {
                 width={15}
                 height={15}
                 tooltipPosition="bottom-right"
-                defaultColor={theme.pageTextSubdued} // notes page color
+                defaultColor={theme.pageTextLight}
               />
             </View>
             <View style={{ userSelect: 'none' }}>

@@ -12,13 +12,23 @@ import Text from '../common/Text';
 import View from '../common/View';
 import PrivacyFilter from '../PrivacyFilter';
 
-export function ReportSummary({
+import { type DataEntity } from './entities';
+
+type ReportSummaryProps = {
+  startDate: string;
+  endDate: string;
+  data: DataEntity;
+  balanceTypeOp: string;
+  monthsCount: number;
+};
+
+function ReportSummary({
   startDate,
   endDate,
   data,
   balanceTypeOp,
   monthsCount,
-}) {
+}: ReportSummaryProps) {
   const net =
     Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
       ? 'PAYMENT'
@@ -40,14 +50,12 @@ export function ReportSummary({
         }}
       >
         <Text
-          style={[
-            styles.largeText,
-            {
-              alignItems: 'center',
-              marginBottom: 2,
-              fontWeight: 600,
-            },
-          ]}
+          style={{
+            ...styles.largeText,
+            alignItems: 'center',
+            marginBottom: 2,
+            fontWeight: 600,
+          }}
         >
           {monthUtils.format(startDate, 'MMM yyyy')} -{' '}
           {monthUtils.format(endDate, 'MMM yyyy')}
@@ -63,14 +71,12 @@ export function ReportSummary({
         }}
       >
         <Text
-          style={[
-            styles.mediumText,
-            {
-              alignItems: 'center',
-              marginBottom: 2,
-              fontWeight: 400,
-            },
-          ]}
+          style={{
+            ...styles.mediumText,
+            alignItems: 'center',
+            marginBottom: 2,
+            fontWeight: 400,
+          }}
         >
           {balanceTypeOp === 'totalDebts'
             ? 'TOTAL SPENDING'
@@ -79,14 +85,12 @@ export function ReportSummary({
             : 'NET ' + net}
         </Text>
         <Text
-          style={[
-            styles.veryLargeText,
-            {
-              alignItems: 'center',
-              marginBottom: 2,
-              fontWeight: 800,
-            },
-          ]}
+          style={{
+            ...styles.veryLargeText,
+            alignItems: 'center',
+            marginBottom: 2,
+            fontWeight: 800,
+          }}
         >
           <PrivacyFilter blurIntensity={7}>
             {amountToCurrency(data[balanceTypeOp])}
@@ -104,14 +108,12 @@ export function ReportSummary({
         }}
       >
         <Text
-          style={[
-            styles.mediumText,
-            {
-              alignItems: 'center',
-              marginBottom: 2,
-              fontWeight: 400,
-            },
-          ]}
+          style={{
+            ...styles.mediumText,
+            alignItems: 'center',
+            marginBottom: 2,
+            fontWeight: 400,
+          }}
         >
           {balanceTypeOp === 'totalDebts'
             ? 'AVERAGE SPENDING'
@@ -120,14 +122,12 @@ export function ReportSummary({
             : 'AVERAGE NET'}
         </Text>
         <Text
-          style={[
-            styles.veryLargeText,
-            {
-              alignItems: 'center',
-              marginBottom: 2,
-              fontWeight: 800,
-            },
-          ]}
+          style={{
+            ...styles.veryLargeText,
+            alignItems: 'center',
+            marginBottom: 2,
+            fontWeight: 800,
+          }}
         >
           <PrivacyFilter blurIntensity={7}>
             {integerToCurrency(Math.round(average))}
@@ -139,62 +139,4 @@ export function ReportSummary({
   );
 }
 
-export function ReportLegend({ data, legend, groupBy }) {
-  return (
-    <View
-      style={{
-        backgroundColor: theme.pageBackground,
-        alignItems: 'center',
-        flex: 1,
-        overflowY: 'auto',
-      }}
-    >
-      <Text
-        style={[
-          styles.largeText,
-          {
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 400,
-            paddingTop: 10,
-          },
-        ]}
-      >
-        {groupBy}
-      </Text>
-      <View>
-        {legend.map(item => {
-          return (
-            <View
-              key={item.name}
-              style={{
-                padding: 10,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
-              <View
-                style={{
-                  marginRight: 5,
-                  borderRadius: 1000,
-                  width: 14,
-                  height: 14,
-                  backgroundColor: item.color,
-                }}
-              />
-              <Text
-                style={{
-                  whiteSpace: 'nowrap',
-                  textOverflow: 'ellipsis',
-                  flexShrink: 0,
-                }}
-              >
-                {item.name}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
-    </View>
-  );
-}
+export default ReportSummary;
