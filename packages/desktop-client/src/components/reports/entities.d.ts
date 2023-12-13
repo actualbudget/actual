@@ -1,7 +1,7 @@
 export type DataEntity = {
-  data: GroupedEntity[];
-  monthData: GroupedEntity[];
-  groupedData: GroupedEntity[];
+  data: Array<ItemEntity>;
+  monthData: Array<MonthData>;
+  groupedData: Array<GroupedEntity>;
   startDate: string;
   endDate: string;
   totalDebts: number;
@@ -25,16 +25,19 @@ type MonthData = {
   totalTotals: number;
 };
 
+/* this will be used in a future PR
+
 export type GroupedEntity = {
   id: string;
   name: string;
   date?: string;
-  monthData: MonthData[];
-  categories?: ItemEntity[];
+  monthData: Array<MonthData>;
+  categories?: Array<ItemEntity>;
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
 };
+*/
 
 export type Month = {
   month: string;

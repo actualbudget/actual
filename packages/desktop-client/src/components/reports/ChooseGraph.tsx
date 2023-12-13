@@ -12,6 +12,7 @@ import StackedBarGraph from './graphs/StackedBarGraph';
 import { ReportOptions } from './ReportOptions';
 import ReportTable from './ReportTable';
 import ReportTableHeader from './ReportTableHeader';
+import ReportTableList from './ReportTableList';
 import ReportTableTotals from './ReportTableTotals';
 
 type ChooseGraphProps = {
@@ -38,12 +39,6 @@ function ChooseGraph({
   months,
 }: ChooseGraphProps) {
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
-  const groupByData =
-    groupBy === 'Category'
-      ? 'groupedData'
-      : ['Month', 'Year'].includes(groupBy)
-      ? 'monthData'
-      : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -52,39 +47,10 @@ function ChooseGraph({
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const listScrollRef = useRef<HTMLDivElement>(null);
   const totalScrollRef = useRef<HTMLDivElement>(null);
-  const indexScrollRef = useRef<HTMLDivElement>(null);
-  const scrollScrollRef = useRef<HTMLDivElement>(null);
 
-  const handleScroll = scroll => {
-    if (scroll.target.id === 'total') {
-      headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-    }
-    if (scroll.target.id === 'header') {
-      totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-    }
-    if (scroll.target.id === 'list') {
-      if (indexScrollRef.current.scrollTop !== scroll.target.scrollTop) {
-        indexScrollRef.current.scrollTop = scroll.target.scrollTop;
-        scrollScrollRef.current.scrollTop = scroll.target.scrollTop;
-      } else {
-        if (headerScrollRef.current) {
-          headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-        }
-        if (totalScrollRef.current) {
-          totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-        }
-      }
-    }
-    if (scroll.target.id === 'index') {
-      listScrollRef.current.scrollTop = scroll.target.scrollTop;
-      scrollScrollRef.current.scrollTop = scroll.target.scrollTop;
-    }
-    if (scroll.target.id === 'scroll') {
-      listScrollRef.current.scrollTop = scroll.target.scrollTop;
-      indexScrollRef.current.scrollTop = scroll.target.scrollTop;
-    }
+  const handleScrollTotals = scroll => {
+    headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
   };
 
   if (graphType === 'AreaGraph') {
@@ -130,8 +96,7 @@ function ChooseGraph({
       <View>
         <ReportTableHeader
           headerScrollRef={headerScrollRef}
-          handleScroll={handleScroll}
-          interval={mode === 'time' && data.monthData}
+          interval={mode === 'time' && months}
           scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
@@ -139,19 +104,19 @@ function ChooseGraph({
         <ReportTable
           saveScrollWidth={saveScrollWidth}
           listScrollRef={listScrollRef}
-          indexScrollRef={indexScrollRef}
-          scrollScrollRef={scrollScrollRef}
-          handleScroll={handleScroll}
-          balanceTypeOp={balanceTypeOp}
-          groupBy={groupBy}
-          data={data[groupByData]}
-          showEmpty={showEmpty}
-          mode={mode}
-          monthsCount={months.length}
-        />
+        >
+          <ReportTableList
+            data={data}
+            empty={showEmpty}
+            monthsCount={months.length}
+            balanceTypeOp={balanceTypeOp}
+            mode={mode}
+            groupBy={groupBy}
+          />
+        </ReportTable>
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
-          handleScroll={handleScroll}
+          handleScrollTotals={handleScrollTotals}
           scrollWidth={scrollWidth}
           data={data}
           mode={mode}

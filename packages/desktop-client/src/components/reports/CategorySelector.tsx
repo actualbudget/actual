@@ -225,7 +225,6 @@ export default function CategorySelector({
             );
           })}
       </ul>
-      <View />
     </View>
   );
 }
