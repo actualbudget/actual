@@ -259,10 +259,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
 }) {
   const opacity = blank ? 0 : 1;
   const showEditables = editMode || isEditing;
-
-  const [categoryName, setCategoryName] = useState(category.name);
-  const [isHidden, setIsHidden] = useState(!!category.hidden);
-
   const tooltip = useTooltip();
   const balanceTooltip = useTooltip();
 
@@ -278,14 +274,12 @@ const ExpenseCategory = memo(function ExpenseCategory({
     }
   }, [isEditing, tooltip]);
 
-  const onSubmit = () => {
-    if (categoryName) {
+  const onCategoryNameChange = newCategoryName => {
+    if (category.name !== newCategoryName) {
       onSave?.({
         ...category,
-        name: categoryName,
+        name: newCategoryName,
       });
-    } else {
-      setCategoryName(category.name);
     }
     onEdit?.(null);
   };
@@ -295,25 +289,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
       ...category,
       hidden: !isHidden,
     });
-    setIsHidden(!isHidden);
-  };
-
-  const onMenuSelect = type => {
-    onEdit?.(null);
-    switch (type) {
-      case 'toggle-visibility':
-        onToggleVisibility(isHidden);
-        break;
-      case 'delete':
-        onDelete?.(category.id);
-        break;
-      default:
-        throw new Error(`Unrecognized category menu type: ${type}`);
-    }
   };
 
   const listItemRef = useRef();
-  const inputRef = useRef();
 
   const _onBudgetAction = (monthIndex, action, arg) => {
     onBudgetAction?.(
@@ -348,6 +326,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
     });
   };
 
+  const [categoryName, setCategoryName] = useState(category.name);
   const content = (
     <ListItem
       style={{
@@ -356,7 +335,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
           : 'transparent',
         borderBottomWidth: 0,
         borderTopWidth: index > 0 ? 1 : 0,
-        opacity: isHidden ? 0.5 : undefined,
+        opacity: !!category.hidden ? 0.5 : undefined,
         ...style,
       }}
       data-testid="row"
@@ -374,52 +353,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
       >
         <InputWithContent
           focused={isEditing}
-          inputRef={inputRef}
-          rightContent={
-            <>
-              <Button
-                type="bare"
-                aria-label="Menu"
-                style={{ padding: 10 }}
-                {...tooltip.getOpenEvents()}
-              >
-                <DotsHorizontalTriple width={12} height={12} />
-              </Button>
-              {tooltip.isOpen && (
-                <Tooltip
-                  position="bottom-stretch"
-                  offset={1}
-                  style={{ padding: 0 }}
-                  onClose={() => {
-                    tooltip.close();
-                    inputRef.current?.focus();
-                  }}
-                >
-                  <Menu
-                    onMenuSelect={onMenuSelect}
-                    items={[
-                      {
-                        name: 'toggle-visibility',
-                        text: isHidden ? 'Show' : 'Hide',
-                      },
-                      {
-                        name: 'delete',
-                        text: 'Delete',
-                      },
-                    ]}
-                  />
-                </Tooltip>
-              )}
-            </>
-          }
           style={{ width: '100%' }}
           placeholder="Category Name"
           value={categoryName}
           onUpdate={setCategoryName}
-          onEnter={onSubmit}
+          onEnter={e => onCategoryNameChange(categoryName)}
           onBlur={e => {
             if (!listItemRef.current?.contains(e.relatedTarget)) {
-              onSubmit();
+              onCategoryNameChange(categoryName);
             }
           }}
         />
@@ -590,10 +531,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
 }) {
   const opacity = blank ? 0 : 1;
   const showEditables = editMode || isEditing;
-
-  const [groupName, setGroupName] = useState(group.name);
-  const [isHidden, setIsHidden] = useState(group.hidden);
-
   const tooltip = useTooltip();
 
   useEffect(() => {
@@ -602,14 +539,12 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
     }
   }, [isEditing]);
 
-  const onSubmit = () => {
-    if (groupName) {
+  const onGroupNameChange = newGroupName => {
+    if (group.name !== newGroupName) {
       onSave?.({
         ...group,
-        name: groupName,
+        name: newGroupName,
       });
-    } else {
-      setGroupName(group.name);
     }
     onEdit?.(null);
   };
@@ -619,24 +554,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       ...group,
       hidden: !isHidden,
     });
-    setIsHidden(!isHidden);
-  };
-
-  const onMenuSelect = type => {
-    onEdit?.(null);
-    switch (type) {
-      case 'add-category':
-        onAddCategory?.(group.id, group.is_income);
-        break;
-      case 'toggle-visibility':
-        onToggleVisibility(isHidden);
-        break;
-      case 'delete':
-        onDelete?.(group.id);
-        break;
-      default:
-        throw new Error(`Unrecognized group menu type: ${type}`);
-    }
   };
 
   const onSaveNotes = async (id, notes) => {
@@ -666,7 +583,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   };
 
   const listItemRef = useRef();
-  const inputRef = useRef();
+  const [groupName, setGroupName] = useState(group.name);
 
   const content = (
     <ListItem
@@ -674,7 +591,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: theme.tableRowHeaderBackground,
-        opacity: isHidden ? 0.5 : undefined,
+        opacity: !!group.hidden ? 0.5 : undefined,
       }}
       data-testid="totals"
       innerRef={listItemRef}
@@ -691,56 +608,14 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       >
         <InputWithContent
           focused={isEditing}
-          inputRef={inputRef}
-          rightContent={
-            <>
-              <Button
-                type="bare"
-                aria-label="Menu"
-                style={{ padding: 10 }}
-                {...tooltip.getOpenEvents()}
-              >
-                <DotsHorizontalTriple width={12} height={12} />
-              </Button>
-              {tooltip.isOpen && (
-                <Tooltip
-                  position="bottom-stretch"
-                  offset={1}
-                  style={{ padding: 0 }}
-                  onClose={() => {
-                    tooltip.close();
-                    inputRef.current?.focus();
-                  }}
-                >
-                  <Menu
-                    onMenuSelect={onMenuSelect}
-                    items={[
-                      {
-                        name: 'add-category',
-                        text: 'Add category',
-                      },
-                      {
-                        name: 'toggle-visibility',
-                        text: isHidden ? 'Show' : 'Hide',
-                      },
-                      {
-                        name: 'delete',
-                        text: 'Delete',
-                      },
-                    ]}
-                  />
-                </Tooltip>
-              )}
-            </>
-          }
           style={{ width: '100%' }}
           placeholder="Category Group Name"
           value={groupName}
           onUpdate={setGroupName}
-          onEnter={onSubmit}
+          onEnter={e => onGroupNameChange(groupName)}
           onBlur={e => {
             if (!listItemRef.current?.contains(e.relatedTarget)) {
-              onSubmit();
+              onGroupNameChange(groupName);
             }
           }}
         />
@@ -875,10 +750,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   onEdit,
   pushModal,
 }) {
-  const [groupName, setGroupName] = useState(group.name);
-  const [isHidden, setIsHidden] = useState(!!group.hidden);
   const showEditables = editMode || isEditing;
-
   const tooltip = useTooltip();
 
   useEffect(() => {
@@ -887,14 +759,12 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
     }
   }, [isEditing]);
 
-  const onSubmit = () => {
-    if (groupName) {
+  const onGroupNameChange = newGroupName => {
+    if (group.name !== newGroupName) {
       onSave?.({
         ...group,
-        name: groupName,
+        name: newGroupName,
       });
-    } else {
-      setGroupName(group.name);
     }
     onEdit?.(null);
   };
@@ -904,24 +774,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       ...group,
       hidden: !isHidden,
     });
-    setIsHidden(!isHidden);
-  };
-
-  const onMenuSelect = type => {
-    onEdit?.(null);
-    switch (type) {
-      case 'add-category':
-        onAddCategory?.(group.id, group.is_income);
-        break;
-      case 'toggle-visibility':
-        onToggleVisibility(isHidden);
-        break;
-      case 'delete':
-        onDelete?.(group.id);
-        break;
-      default:
-        throw new Error(`Unrecognized group menu type: ${type}`);
-    }
   };
 
   const onSaveNotes = async (id, notes) => {
@@ -951,7 +803,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   };
 
   const listItemRef = useRef();
-  const inputRef = useRef();
+  const [groupName, setGroupName] = useState(group.name);
 
   return (
     <ListItem
@@ -960,7 +812,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
         alignItems: 'center',
         padding: 10,
         backgroundColor: theme.tableRowHeaderBackground,
-        opacity: isHidden ? 0.5 : undefined,
+        opacity: !!group.hidden ? 0.5 : undefined,
         ...style,
       }}
       innerRef={listItemRef}
@@ -977,56 +829,14 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       >
         <InputWithContent
           focused={isEditing}
-          inputRef={inputRef}
-          rightContent={
-            <>
-              <Button
-                type="bare"
-                aria-label="Menu"
-                style={{ padding: 10 }}
-                {...tooltip.getOpenEvents()}
-              >
-                <DotsHorizontalTriple width={12} height={12} />
-              </Button>
-              {tooltip.isOpen && (
-                <Tooltip
-                  position="bottom-stretch"
-                  offset={1}
-                  style={{ padding: 0 }}
-                  onClose={() => {
-                    tooltip.close();
-                    inputRef.current?.focus();
-                  }}
-                >
-                  <Menu
-                    onMenuSelect={onMenuSelect}
-                    items={[
-                      {
-                        name: 'add-category',
-                        text: 'Add category',
-                      },
-                      {
-                        name: 'toggle-visibility',
-                        text: isHidden ? 'Show' : 'Hide',
-                      },
-                      {
-                        name: 'delete',
-                        text: 'Delete',
-                      },
-                    ]}
-                  />
-                </Tooltip>
-              )}
-            </>
-          }
           style={{ width: '100%' }}
           placeholder="Category Group Name"
           value={groupName}
           onUpdate={setGroupName}
-          onEnter={onSubmit}
+          onEnter={e => onGroupNameChange(groupName)}
           onBlur={e => {
             if (!listItemRef.current?.contains(e.relatedTarget)) {
-              onSubmit();
+              onGroupNameChange(groupName);
             }
           }}
         />
@@ -1114,10 +924,7 @@ const IncomeCategory = memo(function IncomeCategory({
   onEditBudget,
   pushModal,
 }) {
-  const [categoryName, setCategoryName] = useState(category.name);
-  const [isHidden, setIsHidden] = useState(!!category.hidden);
   const showEditables = editMode || isEditing;
-
   const tooltip = useTooltip();
 
   useEffect(() => {
@@ -1126,14 +933,12 @@ const IncomeCategory = memo(function IncomeCategory({
     }
   }, [isEditing]);
 
-  const onSubmit = () => {
-    if (categoryName) {
+  const onCategoryNameChange = newCategoryName => {
+    if (category.name !== newCategoryName) {
       onSave?.({
         ...category,
-        name: categoryName,
+        name: newCategoryName,
       });
-    } else {
-      setCategoryName(category.name);
     }
     onEdit?.(null);
   };
@@ -1143,21 +948,6 @@ const IncomeCategory = memo(function IncomeCategory({
       ...category,
       hidden: !isHidden,
     });
-    setIsHidden(!isHidden);
-  };
-
-  const onMenuSelect = type => {
-    onEdit?.(null);
-    switch (type) {
-      case 'toggle-visibility':
-        onToggleVisibility(isHidden);
-        break;
-      case 'delete':
-        onDelete?.(category.id);
-        break;
-      default:
-        throw new Error(`Unrecognized category menu type: ${type}`);
-    }
   };
 
   const onSaveNotes = async (id, notes) => {
@@ -1186,7 +976,7 @@ const IncomeCategory = memo(function IncomeCategory({
   };
 
   const listItemRef = useRef();
-  const inputRef = useRef();
+  const [categoryName, setCategoryName] = useState(category.name);
 
   return (
     <ListItem
@@ -1195,7 +985,7 @@ const IncomeCategory = memo(function IncomeCategory({
         alignItems: 'center',
         padding: 10,
         backgroundColor: 'transparent',
-        opacity: isHidden ? 0.5 : undefined,
+        opacity: !!category.hidden ? 0.5 : undefined,
         ...style,
       }}
       innerRef={listItemRef}
@@ -1212,52 +1002,14 @@ const IncomeCategory = memo(function IncomeCategory({
       >
         <InputWithContent
           focused={isEditing}
-          inputRef={inputRef}
-          rightContent={
-            <>
-              <Button
-                type="bare"
-                aria-label="Menu"
-                style={{ padding: 10 }}
-                {...tooltip.getOpenEvents()}
-              >
-                <DotsHorizontalTriple width={12} height={12} />
-              </Button>
-              {tooltip.isOpen && (
-                <Tooltip
-                  position="bottom-stretch"
-                  offset={1}
-                  style={{ padding: 0 }}
-                  onClose={() => {
-                    tooltip.close();
-                    inputRef.current?.focus();
-                  }}
-                >
-                  <Menu
-                    onMenuSelect={onMenuSelect}
-                    items={[
-                      {
-                        name: 'toggle-visibility',
-                        text: isHidden ? 'Show' : 'Hide',
-                      },
-                      {
-                        name: 'delete',
-                        text: 'Delete',
-                      },
-                    ]}
-                  />
-                </Tooltip>
-              )}
-            </>
-          }
           style={{ width: '100%' }}
           placeholder="Category Name"
           value={categoryName}
           onUpdate={setCategoryName}
-          onEnter={onSubmit}
+          onEnter={() => onCategoryNameChange(categoryName)}
           onBlur={e => {
             if (!listItemRef.current?.contains(e.relatedTarget)) {
-              onSubmit();
+              onCategoryNameChange(categoryName);
             }
           }}
         />
@@ -1473,7 +1225,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
 
       {group.categories
         .filter(category => !category.hidden || showHiddenCategories)
-        .map((category, index) => {
+        .map(category => {
           const isEditingCategory = editingCategoryId === category.id;
           const isEditingCategoryBudget =
             editingBudgetCategoryId === category.id;
@@ -1483,7 +1235,6 @@ const ExpenseGroup = memo(function ExpenseGroup({
               key={category.id}
               show3Cols={show3Cols}
               type={type}
-              index={index}
               category={category}
               goal={
                 type === 'report'
