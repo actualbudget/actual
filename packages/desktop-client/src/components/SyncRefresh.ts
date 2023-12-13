@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import React, { type ReactNode, useState } from 'react';
 
 type ChildrenProps = {
   refreshing: boolean;
@@ -17,5 +17,5 @@ export function SyncRefresh({ onSync, children }: SyncRefreshProps) {
     setSyncing(false);
   }
 
-  return children({ refreshing: syncing, onRefresh: onSync_ });
+  return <>{children({ refreshing: syncing, onRefresh: onSync_ })}</>;
 }
