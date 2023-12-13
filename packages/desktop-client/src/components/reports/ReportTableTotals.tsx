@@ -81,91 +81,114 @@ function ReportTableTotals({
           />
         )}
       </View>
+      {mode === 'time' ? (
+        <View
+          innerRef={totalScrollRef}
+          onScroll={handleScroll}
+          id={'total'}
+          style={{
+            overflowX: 'auto',
+            flexDirection: 'row',
+            flex: 1,
+          }}
+        >
+          {data.monthData.map(item => {
+            return (
+              <Cell
+                style={{
+                  minWidth: 85,
+                  ...styles.tnum,
+                }}
+                key={amountToCurrency(item[balanceTypeOp])}
+                value={amountToCurrency(item[balanceTypeOp])}
+                title={
+                  Math.abs(item[balanceTypeOp]) > 100000 &&
+                  amountToCurrency(item[balanceTypeOp])
+                }
+                width="flex"
+                privacyFilter
+              />
+            );
+          })}
+        </View>
+      ) : (
+        <Cell width="flex" />
+      )}
       <View
-        innerRef={totalScrollRef}
-        onScroll={handleScroll}
-        id={'total'}
         style={{
-          overflowX: 'auto',
-          flexDirection: 'row',
-          flex: 1,
+          flexShrink: 0,
+          ...styles.tnum,
         }}
       >
-        {mode === 'time'
-          ? data.monthData.map(item => {
-              return (
-                <Cell
-                  style={{
-                    minWidth: 85,
-                    ...styles.tnum,
-                  }}
-                  key={amountToCurrency(item[balanceTypeOp])}
-                  value={amountToCurrency(item[balanceTypeOp])}
-                  title={
-                    Math.abs(item[balanceTypeOp]) > 100000 &&
-                    amountToCurrency(item[balanceTypeOp])
-                  }
-                  width="flex"
-                  privacyFilter
-                />
-              );
-            })
-          : balanceTypeOp === 'totalTotals' && (
-              <>
-                <Cell
-                  style={{
-                    minWidth: 85,
-                    ...styles.tnum,
-                  }}
-                  value={amountToCurrency(data.totalAssets)}
-                  title={
-                    Math.abs(data.totalAssets) > 100000 &&
-                    amountToCurrency(data.totalAssets)
-                  }
-                  width="flex"
-                />
-                <Cell
-                  style={{
-                    minWidth: 85,
-                    ...styles.tnum,
-                  }}
-                  value={amountToCurrency(data.totalDebts)}
-                  title={
-                    Math.abs(data.totalDebts) > 100000 &&
-                    amountToCurrency(data.totalDebts)
-                  }
-                  width="flex"
-                />
-              </>
-            )}
-        <Cell
+        <View
           style={{
-            minWidth: 85,
-            ...styles.tnum,
+            flexDirection: 'row',
+            height: 32,
           }}
-          value={amountToCurrency(data[balanceTypeOp])}
-          title={
-            Math.abs(data[balanceTypeOp]) > 100000 &&
-            amountToCurrency(data[balanceTypeOp])
-          }
-          width="flex"
-          privacyFilter
-        />
-        <Cell
-          style={{
-            minWidth: 85,
-            ...styles.tnum,
-          }}
-          value={integerToCurrency(Math.round(average))}
-          title={
-            Math.abs(Math.round(average / 100)) > 100000 &&
-            integerToCurrency(Math.round(average))
-          }
-          width="flex"
-          privacyFilter
-        />
+        >
+          {balanceTypeOp === 'totalTotals' && (
+            <>
+              <Cell
+                style={{
+                  width: 85,
+                  ...styles.tnum,
+                }}
+                value={amountToCurrency(data.totalAssets)}
+                title={
+                  Math.abs(data.totalAssets) > 100000 &&
+                  amountToCurrency(data.totalAssets)
+                }
+              />
+              <Cell
+                style={{
+                  width: 85,
+                  ...styles.tnum,
+                }}
+                value={amountToCurrency(data.totalDebts)}
+                title={
+                  Math.abs(data.totalDebts) > 100000 &&
+                  amountToCurrency(data.totalDebts)
+                }
+              />
+            </>
+          )}
+          <Cell
+            style={{
+              width: 85,
+              ...styles.tnum,
+            }}
+            value={amountToCurrency(data[balanceTypeOp])}
+            title={
+              Math.abs(data[balanceTypeOp]) > 100000 &&
+              amountToCurrency(data[balanceTypeOp])
+            }
+            privacyFilter
+          />
+          <Cell
+            style={{
+              width: 85,
+              ...styles.tnum,
+            }}
+            value={integerToCurrency(Math.round(average))}
+            title={
+              Math.abs(Math.round(average / 100)) > 100000 &&
+              integerToCurrency(Math.round(average))
+            }
+            privacyFilter
+          />
 
-        {scrollWidth > 0 && <Cell width={scrollWidth} />}
+          {scrollWidth > 0 && <Cell width={scrollWidth} />}
+        </View>
+        {scrollWidthTotals > 0 && (
+          <Cell
+            style={{
+              height: scrollWidthTotals,
+              color: theme.tableText,
+              backgroundColor: theme.tableBackground,
+              border: 'none',
+            }}
+          />
+        )}
       </View>
     </Row>
   );

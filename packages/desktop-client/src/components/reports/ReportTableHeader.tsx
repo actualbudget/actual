@@ -1,18 +1,16 @@
 import React, { type UIEventHandler } from 'react';
 import { type RefProp } from 'react-spring';
 
-import * as d from 'date-fns';
-
 import { styles, theme } from '../../style';
 import View from '../common/View';
 import { Row, Cell } from '../table';
 
-import { type Month } from './entities';
+import { type GroupedEntity } from './entities';
 
 type ReportTableHeaderProps = {
   scrollWidth?: number;
   groupBy: string;
-  interval?: Month[];
+  interval?: GroupedEntity[];
   balanceType: string;
   headerScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
@@ -29,11 +27,7 @@ function ReportTableHeader({
   return (
     <Row
       collapsed={true}
-      innerRef={headerScrollRef}
       style={{
-        overflowX: 'auto',
-        scrollbarWidth: 'none',
-        '::-webkit-scrollbar': { display: 'none' },
         justifyContent: 'center',
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
@@ -47,68 +41,74 @@ function ReportTableHeader({
         }}
         value={groupBy}
       />
+      {interval ? (
+        <View
+          innerRef={headerScrollRef}
+          onScroll={handleScroll}
+          id={'header'}
+          style={{
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            '::-webkit-scrollbar': { display: 'none' },
+            flexDirection: 'row',
+            flex: 1,
+            flexShrink: 1,
+          }}
+        >
+          {interval.map((header, index) => {
+            return (
+              <Cell
+                style={{
+                  minWidth: 85,
+                  ...styles.tnum,
+                }}
+                key={index}
+                value={header.date}
+                width="flex"
+              />
+            );
+          })}
+        </View>
+      ) : (
+        <Cell width="flex" />
+      )}
       <View
-        innerRef={headerScrollRef}
-        onScroll={handleScroll}
-        id={'header'}
         style={{
-          overflowX: 'auto',
-          scrollbarWidth: 'none',
-          '::-webkit-scrollbar': { display: 'none' },
           flexDirection: 'row',
-          flex: 1,
+          flexShrink: 0,
         }}
       >
-        {interval
-          ? interval.map((header, index) => {
-              return (
-                <Cell
-                  style={{
-                    minWidth: 85,
-                    ...styles.tnum,
-                  }}
-                  key={index}
-                  // eslint-disable-next-line rulesdir/typography
-                  value={d.format(d.parseISO(`${header}-01`), "MMM ''yy")}
-                  width="flex"
-                />
-              );
-            })
-          : balanceType === 'Net' && (
-              <>
-                <Cell
-                  style={{
-                    minWidth: 85,
-                    ...styles.tnum,
-                  }}
-                  value={'Deposits'}
-                  width="flex"
-                />
-                <Cell
-                  style={{
-                    minWidth: 85,
-                    ...styles.tnum,
-                  }}
-                  value={'Payments'}
-                  width="flex"
-                />
-              </>
-            )}
+        {balanceType === 'Net' && (
+          <>
+            <Cell
+              style={{
+                width: 85,
+                ...styles.tnum,
+              }}
+              value={'Deposits'}
+            />
+            <Cell
+              style={{
+                width: 85,
+                ...styles.tnum,
+              }}
+              value={'Payments'}
+            />
+          </>
+        )}
         <Cell
           style={{
-            minWidth: 85,
+            width: 85,
             ...styles.tnum,
           }}
           value={'Totals'}
-          width="flex"
         />
         <Cell
           style={{
-            minWidth: 85,
+            width: 85,
             ...styles.tnum,
           }}
           value={'Average'}
-          width="flex"
         />
         {scrollWidth > 0 && <Cell width={scrollWidth} />}
       </View>

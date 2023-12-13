@@ -5,13 +5,13 @@ import React, {
 } from 'react';
 import { type RefProp } from 'react-spring';
 
-import { type CSSProperties } from '../../style';
+import { theme, type CSSProperties } from '../../style';
 import Block from '../common/Block';
 import View from '../common/View';
 
-import ColumnPrimary from './ColumnPrimary';
-import ColumnScrollbar from './ColumnScrollbar';
 import { type GroupedEntity } from './entities';
+import ReportTableColumnIndex from './ReportTableColumnIndex';
+import ReportTableColumnTotals from './ReportTableColumTotals';
 import ReportTableInner from './ReportTableInner';
 import ReportTableRow from './ReportTableRow';
 
@@ -48,22 +48,25 @@ export default function ReportTable({
 
   useLayoutEffect(() => {
     if (scrollScrollRef.current && saveScrollWidth) {
-      saveScrollWidth(
-        scrollScrollRef.current ? scrollScrollRef.current.offsetWidth : 0,
-      );
+      const [parent, child] = [
+        scrollScrollRef.current.offsetWidth,
+        scrollScrollRef.current.clientWidth,
+      ];
+
+      saveScrollWidth(parent > 0 && child > 0 && parent - child);
     }
   });
 
-  const renderItem = useCallback(
-    ({ item, groupByItem, mode, monthsCount, style, key }) => {
+  const renderItemTotal = useCallback(
+    ({ item, groupByItem, monthsCount, style, key }) => {
       return (
-        <ReportTableRow
+        <ReportTableColumnTotals
           key={key}
           item={item}
           balanceTypeOp={balanceTypeOp}
+          monthsCount={monthsCount}
           groupByItem={groupByItem}
           mode={mode}
-          monthsCount={monthsCount}
           style={style}
         />
       );
@@ -71,13 +74,22 @@ export default function ReportTable({
     [],
   );
 
+  const renderItem = useCallback(({ item, groupByItem, mode, style, key }) => {
+    return (
+      <ReportTableRow
+        key={key}
+        item={item}
+        balanceTypeOp={balanceTypeOp}
+        groupByItem={groupByItem}
+        mode={mode}
+        style={style}
+      />
+    );
+  }, []);
+
   return (
     <View
-      innerRef={listScrollRef}
       style={{
-        overflowY: 'auto',
-        scrollbarWidth: 'none',
-        '::-webkit-scrollbar': { display: 'none' },
         flex: 1,
         flexDirection: 'row',
         outline: 'none',
@@ -102,19 +114,24 @@ export default function ReportTable({
       >
         {data.map(item => {
           return (
-            <ColumnPrimary
+            <ReportTableColumnIndex
               key={item.id}
               item={item}
-              balanceTypeOp={balanceTypeOp}
               groupByItem={groupByItem}
-              showEmpty={showEmpty}
+              headerStyle={
+                item.categories && {
+                  color: theme.tableRowHeaderText,
+                  backgroundColor: theme.tableRowHeaderBackground,
+                  fontWeight: 600,
+                }
+              }
             />
           );
         })}
       </Block>
       <Block
         style={{
-          overflowY: 'auto',
+          overflow: 'auto',
           flex: 1,
           scrollbarWidth: 'none',
           '::-webkit-scrollbar': { display: 'none' },
@@ -125,9 +142,7 @@ export default function ReportTable({
       >
         <ReportTableInner
           data={data}
-          showEmpty={showEmpty}
           monthsCount={monthsCount}
-          balanceTypeOp={balanceTypeOp}
           mode={mode}
           groupBy={groupBy}
           renderItem={renderItem}
@@ -139,18 +154,16 @@ export default function ReportTable({
         onScroll={handleScroll}
         style={{
           overflowY: 'auto',
+          flexShrink: 0,
         }}
       >
-        {data.map(item => {
-          return (
-            <ColumnScrollbar
-              key={item.id}
-              item={item}
-              balanceTypeOp={balanceTypeOp}
-              showEmpty={showEmpty}
-            />
-          );
-        })}
+        <ReportTableInner
+          data={data}
+          monthsCount={monthsCount}
+          mode={mode}
+          groupBy={groupBy}
+          renderItem={renderItemTotal}
+        />
       </Block>
     </View>
   );

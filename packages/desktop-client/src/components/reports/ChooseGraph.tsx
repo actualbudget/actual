@@ -65,17 +65,25 @@ function ChooseGraph({
       listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
     }
     if (scroll.target.id === 'list') {
-      if (headerScrollRef.current.scrollLeft !== scroll.target.scrollLeft) {
-        headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-        totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-      } else {
+      if (indexScrollRef.current.scrollTop !== scroll.target.scrollTop) {
         indexScrollRef.current.scrollTop = scroll.target.scrollTop;
         scrollScrollRef.current.scrollTop = scroll.target.scrollTop;
+      } else {
+        if (headerScrollRef.current) {
+          headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+        }
+        if (totalScrollRef.current) {
+          totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+        }
       }
     }
     if (scroll.target.id === 'index') {
       listScrollRef.current.scrollTop = scroll.target.scrollTop;
       scrollScrollRef.current.scrollTop = scroll.target.scrollTop;
+    }
+    if (scroll.target.id === 'scroll') {
+      listScrollRef.current.scrollTop = scroll.target.scrollTop;
+      indexScrollRef.current.scrollTop = scroll.target.scrollTop;
     }
   };
 
@@ -123,7 +131,7 @@ function ChooseGraph({
         <ReportTableHeader
           headerScrollRef={headerScrollRef}
           handleScroll={handleScroll}
-          interval={mode === 'time' && months}
+          interval={mode === 'time' && data.monthData}
           scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
