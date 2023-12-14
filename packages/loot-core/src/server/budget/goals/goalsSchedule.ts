@@ -57,6 +57,12 @@ export async function goalsSchedule(
       );
       const startDate = dateConditions.value.start ?? dateConditions.value;
       const started = startDate <= monthUtils.addMonths(current_month, 1);
+      template[ll].full =
+        template[ll].full === null &&
+        target_frequency === 'monthly' &&
+        target_interval === 1
+          ? true
+          : false;
       t.push({
         template: template[ll],
         target,
