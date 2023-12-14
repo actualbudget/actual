@@ -39,7 +39,7 @@ export default function Notes({ modalProps, id, name, onSave }: NotesProps) {
   return (
     <Modal
       title={`Notes: ${name}`}
-      showHeader={true}
+      showHeader
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}

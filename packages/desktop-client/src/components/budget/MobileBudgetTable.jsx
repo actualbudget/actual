@@ -243,18 +243,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
   style,
   month,
   editMode,
-  isEditing,
   onEdit,
   isEditingBudget,
   onEditBudget,
-  onSave,
-  onDelete,
   isBudgetActionMenuOpen,
   onOpenBudgetActionMenu,
   onBudgetAction,
   show3Cols,
   showBudgetedCol,
-  pushModal,
 }) {
   const opacity = blank ? 0 : 1;
   const balanceTooltip = useTooltip();
@@ -294,7 +290,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             ...styles.underlinedText,
             ...styles.lineClamp(2),
           }}
-          onPointerUp={() => onEdit?.(category.id)}
+          onClick={() => onEdit?.(category.id)}
           data-testid="category-name"
         >
           {category.name}
@@ -436,15 +432,10 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   spent,
   balance,
   editMode,
-  isEditing,
   onEdit,
   blank,
-  onAddCategory,
-  onSave,
-  onDelete,
   show3Cols,
   showBudgetedCol,
-  pushModal,
 }) {
   const opacity = blank ? 0 : 1;
   const listItemRef = useRef();
@@ -468,7 +459,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
             ...styles.lineClamp(2),
             fontWeight: '500',
           }}
-          onPointerUp={() => onEdit?.(group.id)}
+          onClick={() => onEdit?.(group.id)}
           data-testid="name"
         >
           {group.name}
@@ -577,13 +568,8 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   budgeted,
   balance,
   style,
-  onAddCategory,
-  onSave,
-  onDelete,
   editMode,
-  isEditing,
   onEdit,
-  pushModal,
 }) {
   const listItemRef = useRef();
 
@@ -615,7 +601,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             ...styles.lineClamp(2),
             fontWeight: '500',
           }}
-          onPointerUp={() => onEdit?.(group.id)}
+          onClick={() => onEdit?.(group.id)}
           data-testid="name"
         >
           {group.name}
@@ -670,15 +656,11 @@ const IncomeCategory = memo(function IncomeCategory({
   balance,
   month,
   style,
-  onSave,
-  onDelete,
   editMode,
-  isEditing,
   onEdit,
   onBudgetAction,
   isEditingBudget,
   onEditBudget,
-  pushModal,
 }) {
   const listItemRef = useRef();
 
@@ -711,7 +693,7 @@ const IncomeCategory = memo(function IncomeCategory({
             ...styles.underlinedText,
             ...styles.lineClamp(2),
           }}
-          onPointerUp={() => onEdit?.(category.id)}
+          onClick={() => onEdit?.(category.id)}
           data-testid="name"
         >
           {category.name}
@@ -813,9 +795,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
   type,
   group,
   editMode,
-  editingGroupId,
   onEditGroup,
-  editingCategoryId,
   onEditCategory,
   editingBudgetCategoryId,
   onEditCategoryBudget,
@@ -823,18 +803,13 @@ const ExpenseGroup = memo(function ExpenseGroup({
   onOpenBudgetActionMenu,
   // gestures,
   month,
-  onSaveCategory,
-  onDeleteCategory,
   // onReorderCategory,
   // onReorderGroup,
   onAddCategory,
-  onSave,
-  onDelete,
   onBudgetAction,
   showBudgetedCol,
   show3Cols,
   showHiddenCategories,
-  pushModal,
 }) {
   function editable(content) {
     if (!editMode) {
@@ -893,18 +868,13 @@ const ExpenseGroup = memo(function ExpenseGroup({
         show3Cols={show3Cols}
         editMode={editMode}
         onAddCategory={onAddCategory}
-        onSave={onSave}
-        onDelete={onDelete}
-        isEditing={editingGroupId === group.id}
         onEdit={onEditGroup}
-        pushModal={pushModal}
         // onReorderCategory={onReorderCategory}
       />
 
       {group.categories
         .filter(category => !category.hidden || showHiddenCategories)
         .map((category, index) => {
-          const isEditingCategory = editingCategoryId === category.id;
           const isEditingCategoryBudget =
             editingBudgetCategoryId === category.id;
           const isBudgetActionMenuOpen = openBudgetActionMenuId === category.id;
@@ -940,9 +910,11 @@ const ExpenseGroup = memo(function ExpenseGroup({
                   ? reportBudget.catCarryover(category.id)
                   : rolloverBudget.catCarryover(category.id)
               }
+              style={{
+                backgroundColor: theme.tableBackground,
+              }}
               showBudgetedCol={showBudgetedCol}
               editMode={editMode}
-              isEditing={isEditingCategory}
               onEdit={onEditCategory}
               isEditingBudget={isEditingCategoryBudget}
               onEditBudget={onEditCategoryBudget}
@@ -950,14 +922,8 @@ const ExpenseGroup = memo(function ExpenseGroup({
               onOpenBudgetActionMenu={onOpenBudgetActionMenu}
               // gestures={gestures}
               month={month}
-              onSave={onSaveCategory}
-              onDelete={onDeleteCategory}
               // onReorder={onReorderCategory}
               onBudgetAction={onBudgetAction}
-              style={{
-                backgroundColor: theme.tableBackground,
-              }}
-              pushModal={pushModal}
             />
           );
         })}
@@ -969,21 +935,14 @@ function IncomeGroup({
   type,
   group,
   month,
-  onSave,
-  onDelete,
   onAddCategory,
-  onSaveCategory,
-  onDeleteCategory,
   showHiddenCategories,
   editMode,
-  editingGroupId,
   onEditGroup,
-  editingCategoryId,
   onEditCategory,
   editingBudgetCategoryId,
   onEditCategoryBudget,
   onBudgetAction,
-  pushModal,
 }) {
   return (
     <View>
@@ -1016,12 +975,8 @@ function IncomeGroup({
             backgroundColor: theme.tableRowHeaderBackground,
           }}
           onAddCategory={onAddCategory}
-          onSave={onSave}
-          onDelete={onDelete}
           editMode={editMode}
-          isEditing={editingGroupId === group.id}
           onEdit={onEditGroup}
-          pushModal={pushModal}
         />
 
         {group.categories
@@ -1030,6 +985,7 @@ function IncomeGroup({
             return (
               <IncomeCategory
                 key={category.id}
+                index={index}
                 category={category}
                 month={month}
                 type={type}
@@ -1043,19 +999,14 @@ function IncomeGroup({
                     ? reportBudget.catSumAmount(category.id)
                     : rolloverBudget.catSumAmount(category.id)
                 }
-                index={index}
-                onSave={onSaveCategory}
-                onDelete={onDeleteCategory}
-                editMode={editMode}
-                isEditing={editingCategoryId === category.id}
-                onEdit={onEditCategory}
                 style={{
                   backgroundColor: theme.tableBackground,
                 }}
+                editMode={editMode}
+                onEdit={onEditCategory}
                 onBudgetAction={onBudgetAction}
                 isEditingBudget={editingBudgetCategoryId === category.id}
                 onEditBudget={onEditCategoryBudget}
-                pushModal={pushModal}
               />
             );
           })}
@@ -1082,8 +1033,6 @@ function BudgetGroups({
   onDeleteCategory,
   onAddCategory,
   onAddGroup,
-  onSaveGroup,
-  onDeleteGroup,
   onReorderCategory,
   onReorderGroup,
   onBudgetAction,
@@ -1129,8 +1078,6 @@ function BudgetGroups({
               onSaveCategory={onSaveCategory}
               onDeleteCategory={onDeleteCategory}
               onAddCategory={onAddCategory}
-              onSave={onSaveGroup}
-              onDelete={onDeleteGroup}
               onReorderCategory={onReorderCategory}
               onReorderGroup={onReorderGroup}
               onBudgetAction={onBudgetAction}
@@ -1157,8 +1104,6 @@ function BudgetGroups({
           type={type}
           group={incomeGroup}
           month={month}
-          onSave={onSaveGroup}
-          onDelete={onDeleteGroup}
           onAddCategory={onAddCategory}
           onSaveCategory={onSaveCategory}
           onDeleteCategory={onDeleteCategory}

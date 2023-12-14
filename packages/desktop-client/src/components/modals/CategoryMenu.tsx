@@ -79,6 +79,7 @@ export default function CategoryMenu({
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
+    borderRadius: 0,
     flexBasis: '50%',
     height: BUTTON_HEIGHT,
   };
@@ -87,7 +88,7 @@ export default function CategoryMenu({
     <Modal
       title={name}
       titleStyle={styles.underlinedText}
-      showHeader={true}
+      showHeader
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
@@ -134,15 +135,14 @@ export default function CategoryMenu({
               flexWrap: 'wrap',
               justifyContent: 'space-between',
               alignContent: 'space-between',
-              paddingTop: 10,
-              paddingBottom: 10,
+              margin: '10px 0',
             }}
           >
-            <Button style={buttonStyle} onPointerUp={_onEditNotes}>
+            <Button style={buttonStyle} onClick={_onEditNotes}>
               <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
               Edit notes
             </Button>
-            <Button style={buttonStyle} onPointerUp={_onToggleVisibility}>
+            <Button style={buttonStyle} onClick={_onToggleVisibility}>
               {category.hidden ? (
                 <ViewShow width={20} height={20} style={{ paddingRight: 5 }} />
               ) : (
@@ -150,7 +150,7 @@ export default function CategoryMenu({
               )}
               {category.hidden ? 'Unhide' : 'Hide'}
             </Button>
-            <Button style={buttonStyle} onPointerUp={_onDelete}>
+            <Button style={buttonStyle} onClick={_onDelete}>
               <Trash width={17} height={17} style={{ paddingRight: 5 }} />
               Delete
             </Button>

@@ -84,8 +84,8 @@ export default function CategoryGroupMenu({
   }
 
   const buttonStyle: CSSProperties = {
-    fontSize: 17,
-    fontWeight: 400,
+    ...styles.mediumText,
+    borderRadius: 0,
     flexBasis: '50%',
     height: BUTTON_HEIGHT,
   };
@@ -93,7 +93,7 @@ export default function CategoryGroupMenu({
   return (
     <Modal
       title={name}
-      showHeader={true}
+      showHeader
       focusAfterClose={false}
       {...modalProps}
       onClose={_onClose}
@@ -146,15 +146,15 @@ export default function CategoryGroupMenu({
               paddingBottom: 10,
             }}
           >
-            <Button style={buttonStyle} onPointerUp={_onAddCategory}>
+            <Button style={buttonStyle} onClick={_onAddCategory}>
               <Add width={17} height={17} style={{ paddingRight: 5 }} />
               Add category
             </Button>
-            <Button style={buttonStyle} onPointerUp={_onEditNotes}>
+            <Button style={buttonStyle} onClick={_onEditNotes}>
               <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
               Edit notes
             </Button>
-            <Button style={buttonStyle} onPointerUp={_onToggleVisibility}>
+            <Button style={buttonStyle} onClick={_onToggleVisibility}>
               {hidden ? (
                 <ViewShow width={20} height={20} style={{ paddingRight: 5 }} />
               ) : (
@@ -162,7 +162,7 @@ export default function CategoryGroupMenu({
               )}
               {hidden ? 'Unhide' : 'Hide'}
             </Button>
-            <Button style={buttonStyle} onPointerUp={_onDelete}>
+            <Button style={buttonStyle} onClick={_onDelete}>
               <Trash width={20} height={20} style={{ paddingRight: 5 }} />
               Delete
             </Button>

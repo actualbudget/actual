@@ -24,7 +24,7 @@ export type ModalProps = {
   isCurrent?: boolean;
   isHidden?: boolean;
   children: ReactNode | (() => ReactNode);
-  size?: { width?: number; height?: number };
+  size?: { width?: CSSProperties['width']; height?: CSSProperties['height'] };
   padding?: CSSProperties['padding'];
   showHeader?: boolean;
   showTitle?: boolean;
@@ -92,18 +92,21 @@ const Modal = ({
     <ReactModal
       isOpen={true}
       onRequestClose={onClose}
-      shouldCloseOnOverlayClick={false}
+      shouldCloseOnOverlayClick={true}
       shouldFocusAfterRender={!global.IS_DESIGN_MODE}
       shouldReturnFocusAfterClose={focusAfterClose}
       appElement={document.querySelector('#root') as HTMLElement}
       parentSelector={parent && (() => parent)}
       style={{
         content: {
+          display: 'flex',
+          height: 'fit-content',
+          width: 'fit-content',
+          position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           overflow: 'visible',
@@ -112,10 +115,11 @@ const Modal = ({
           backgroundColor: 'transparent',
           padding: 0,
           pointerEvents: 'auto',
-          margin: '0 10px',
+          margin: 'auto',
           ...contentStyle,
         },
         overlay: {
+          display: 'flex',
           zIndex: 3000,
           backgroundColor:
             showOverlay && stackIndex === 0 ? 'rgba(0, 0, 0, .1)' : 'none',
@@ -139,7 +143,8 @@ const Modal = ({
         size={size}
         style={{
           willChange: 'opacity, transform',
-          minWidth: '100%',
+          maxWidth: '90vw',
+          minWidth: '90vw',
           minHeight: 0,
           borderRadius: 4,
           //border: '1px solid ' + theme.modalBorder,
