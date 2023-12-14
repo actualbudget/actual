@@ -121,8 +121,8 @@ export default function CustomReportListCards({ reports }) {
                             {report.props.data.name}
                           </Block>
                           <DateRange
-                            start={report.props.data.start}
-                            end={report.props.data.end}
+                            start={report.props.data.start_date}
+                            end={report.props.data.end_date}
                           />
                         </View>
                       </View>
@@ -130,14 +130,14 @@ export default function CustomReportListCards({ reports }) {
                       {report.props.data.data ? (
                         <ChooseGraph
                           mode={report.props.data.mode}
-                          graphType={report.props.data.graphType}
-                          start={report.props.data.start}
-                          end={report.props.data.end}
+                          graphType={report.props.data.graph_type}
+                          start={report.props.data.start_date}
+                          end={report.props.data.end_date}
                           data={report.props.data.data}
                           compact={true}
-                          groupBy={report.props.data.groupBy}
-                          empty={Convert(report.props.data.empty)}
-                          balanceType={report.props.data.balanceType}
+                          groupBy={report.props.data.group_by}
+                          empty={Convert(report.props.data.show_empty)}
+                          balanceType={report.props.data.balance_type}
                           style={{ height: 'auto', flex: 1 }}
                         />
                       ) : (
