@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
@@ -10,6 +11,7 @@ import * as lightTheme from './themes/light';
 const themes = {
   light: { name: 'Light', colors: lightTheme },
   dark: { name: 'Dark', colors: darkTheme },
+  auto: { name: 'System default', colors: darkTheme },
   ...(isNonProductionEnvironment() && {
     development: { name: 'Development', colors: developmentTheme },
   }),
@@ -25,7 +27,47 @@ export function useTheme() {
 
 export function ThemeStyle() {
   const theme = useTheme();
-  const themeColors = themes[theme].colors;
+  const [themeColors, setThemeColors] = useState<
+    typeof lightTheme | typeof darkTheme | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (theme === 'auto') {
+      function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
+        if (event.matches) {
+          setThemeColors(themes['dark'].colors);
+        } else {
+          setThemeColors(themes['light'].colors);
+        }
+      }
+      const darkThemeMediaQuery = window.matchMedia(
+        '(prefers-color-scheme: dark)',
+      );
+
+      darkThemeMediaQuery.addEventListener(
+        'change',
+        darkThemeMediaQueryListener,
+      );
+
+      if (darkThemeMediaQuery.matches) {
+        setThemeColors(themes['dark'].colors);
+      } else {
+        setThemeColors(themes['light'].colors);
+      }
+
+      return () => {
+        darkThemeMediaQuery.removeEventListener(
+          'change',
+          darkThemeMediaQueryListener,
+        );
+      };
+    } else {
+      setThemeColors(themes[theme].colors);
+    }
+  }, [theme]);
+
+  if (!themeColors) return null;
+
   const css = Object.keys(themeColors)
     .map(key => `  --color-${key}: ${themeColors[key]};`)
     .join('\n');

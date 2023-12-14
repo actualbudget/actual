@@ -205,6 +205,9 @@ export default function ScheduleDetails({ modalProps, actions, id }) {
           patterns: [],
           skipWeekend: false,
           weekendSolveMode: 'after',
+          endMode: 'never',
+          endOccurrences: '1',
+          endDate: monthUtils.currentDay(),
         };
         const schedule = {
           posts_transaction: false,

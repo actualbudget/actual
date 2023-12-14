@@ -49,7 +49,7 @@ function makeQuery(
     )
     //Apply filters and split by "Group By"
     .filter({
-      [conditionsOpKey]: [...filters],
+      [conditionsOpKey]: filters,
     })
     //Apply month range filters
     .filter({
