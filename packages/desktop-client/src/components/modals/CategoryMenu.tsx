@@ -15,6 +15,8 @@ import Modal from '../common/Modal';
 import View from '../common/View';
 import Notes from '../Notes';
 
+const BUTTON_HEIGHT = 40;
+
 type CategoryMenuProps = {
   modalProps: CommonModalProps;
   category: CategoryEntity;
@@ -72,10 +74,10 @@ export default function CategoryMenu({
     setName(newName);
   }
 
-  const menuItemStyle: CSSProperties = {
-    fontSize: 17,
-    fontWeight: 400,
-    width: '100%',
+  const buttonStyle: CSSProperties = {
+    ...styles.mediumText,
+    flexBasis: '50%',
+    height: BUTTON_HEIGHT,
   };
 
   return (
@@ -89,7 +91,7 @@ export default function CategoryMenu({
       padding={0}
       style={{
         flex: 1,
-        height: '60vh',
+        height: '50vh',
         padding: '0 10px',
         borderRadius: '6px',
       }}
@@ -125,33 +127,19 @@ export default function CategoryMenu({
           </View>
           <View
             style={{
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyItems: 'center',
-              width: '100%',
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignContent: 'space-between',
               paddingTop: 10,
               paddingBottom: 10,
             }}
           >
-            <Button
-              type="primary"
-              style={{
-                ...menuItemStyle,
-                marginBottom: 10,
-              }}
-              onPointerUp={_onEditNotes}
-            >
+            <Button style={buttonStyle} onPointerUp={_onEditNotes}>
               <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
               Edit notes
             </Button>
-            <Button
-              type="primary"
-              style={{
-                ...menuItemStyle,
-                marginBottom: 10,
-              }}
-              onPointerUp={_onToggleVisibility}
-            >
+            <Button style={buttonStyle} onPointerUp={_onToggleVisibility}>
               {category.hidden ? (
                 <ViewShow width={20} height={20} style={{ paddingRight: 5 }} />
               ) : (
@@ -159,11 +147,7 @@ export default function CategoryMenu({
               )}
               {category.hidden ? 'Unhide' : 'Hide'}
             </Button>
-            <Button
-              type="primary"
-              style={menuItemStyle}
-              onPointerUp={_onDelete}
-            >
+            <Button style={buttonStyle} onPointerUp={_onDelete}>
               <Trash width={17} height={17} style={{ paddingRight: 5 }} />
               Delete
             </Button>

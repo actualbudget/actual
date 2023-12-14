@@ -9,12 +9,14 @@ import Trash from '../../icons/v1/Trash';
 import NotesPaper from '../../icons/v2/NotesPaper';
 import ViewHide from '../../icons/v2/ViewHide';
 import ViewShow from '../../icons/v2/ViewShow';
-import { styles, theme } from '../../style';
+import { type CSSProperties, styles, theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import View from '../common/View';
 import Notes from '../Notes';
+
+const BUTTON_HEIGHT = 40;
 
 type CategoryGroupMenuProps = {
   modalProps: CommonModalProps;
@@ -78,10 +80,11 @@ export default function CategoryGroupMenu({
     setName(newName);
   }
 
-  const menuItemStyle = {
+  const buttonStyle: CSSProperties = {
     fontSize: 17,
     fontWeight: 400,
-    width: '100%',
+    flexBasis: '50%',
+    height: BUTTON_HEIGHT,
   };
 
   return (
@@ -94,7 +97,7 @@ export default function CategoryGroupMenu({
       padding={0}
       style={{
         flex: 1,
-        height: '70vh',
+        height: '50vh',
         padding: '0 10px',
         borderRadius: '6px',
       }}
@@ -132,44 +135,23 @@ export default function CategoryGroupMenu({
           </View>
           <View
             style={{
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyItems: 'center',
-              width: '100%',
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignContent: 'space-between',
               paddingTop: 10,
               paddingBottom: 10,
             }}
           >
-            <Button
-              type="primary"
-              style={{
-                ...menuItemStyle,
-                marginBottom: 10,
-              }}
-              onPointerUp={_onAddCategory}
-            >
+            <Button style={buttonStyle} onPointerUp={_onAddCategory}>
               <Add width={17} height={17} style={{ paddingRight: 5 }} />
               Add category
             </Button>
-            <Button
-              type="primary"
-              style={{
-                ...menuItemStyle,
-                marginBottom: 10,
-              }}
-              onPointerUp={_onEditNotes}
-            >
+            <Button style={buttonStyle} onPointerUp={_onEditNotes}>
               <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
               Edit notes
             </Button>
-            <Button
-              type="primary"
-              style={{
-                ...menuItemStyle,
-                marginBottom: 10,
-              }}
-              onPointerUp={_onToggleVisibility}
-            >
+            <Button style={buttonStyle} onPointerUp={_onToggleVisibility}>
               {hidden ? (
                 <ViewShow width={20} height={20} style={{ paddingRight: 5 }} />
               ) : (
@@ -177,11 +159,7 @@ export default function CategoryGroupMenu({
               )}
               {hidden ? 'Unhide' : 'Hide'}
             </Button>
-            <Button
-              type="primary"
-              style={menuItemStyle}
-              onPointerUp={_onDelete}
-            >
+            <Button style={buttonStyle} onPointerUp={_onDelete}>
               <Trash width={20} height={20} style={{ paddingRight: 5 }} />
               Delete
             </Button>
