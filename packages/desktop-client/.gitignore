@@ -10,11 +10,13 @@ test-results
 # production
 build
 build-stats
+stats.json
 
 # misc
 .DS_Store
 .env
 npm-debug.log
+.swc
 
 *kcab.*
 public/kcab

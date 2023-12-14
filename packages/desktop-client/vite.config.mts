@@ -1,5 +1,6 @@
 import * as path from 'path';
 
+import inject from '@rollup/plugin-inject';
 import react from '@vitejs/plugin-react-swc';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
@@ -22,8 +23,44 @@ const addWatchers = (): Plugin => ({
   },
 });
 
+const injectShims = (): Plugin[] => {
+  const buildShims = path.resolve('./src/build-shims.js');
+  const commonInject = {
+    exclude: ['src/setupTests.jsx'],
+    global: [buildShims, 'global'],
+  };
+
+  return [
+    {
+      name: 'inject-build-process',
+      config: () => ({
+        define: {
+          'process.env': `_process.env`,
+        },
+      }),
+      apply: 'build',
+    },
+    {
+      ...inject({
+        ...commonInject,
+        process: [buildShims, 'process'],
+      }),
+      enforce: 'post',
+      apply: 'serve',
+    },
+    {
+      ...inject({
+        ...commonInject,
+        _process: [buildShims, 'process'],
+      }),
+      enforce: 'post',
+      apply: 'build',
+    },
+  ];
+};
+
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const devHeaders = {
     'Cross-Origin-Opener-Policy': 'same-origin',
@@ -120,6 +157,7 @@ export default defineConfig(({ mode }) => {
       extensions: resolveExtensions,
     },
     plugins: [
+      injectShims(),
       addWatchers(),
       visualizer({ template: 'raw-data' }),
       react({
