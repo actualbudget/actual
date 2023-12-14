@@ -7,7 +7,6 @@ import {
   type ReactNode,
   type MouseEventHandler,
   type MouseEvent,
-  type ContextType,
 } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -70,7 +69,6 @@ type MutableDomRect = {
 
 export class Tooltip extends Component<TooltipProps> {
   static contextType = IntersectionBoundary;
-  declare context: ContextType<typeof IntersectionBoundary>;
   position: TooltipPosition;
   contentRef: RefObject<HTMLDivElement>;
   cleanup: () => void;
@@ -159,7 +157,7 @@ export class Tooltip extends Component<TooltipProps> {
     const { ignoreBoundary = false } = this.props;
 
     if (!ignoreBoundary && this.context) {
-      return this.context.current;
+      return (this.context as RefObject<HTMLElement>).current;
     }
     return document.body;
   }
