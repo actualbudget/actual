@@ -1,4 +1,9 @@
-import React, { useLayoutEffect, useRef, type ReactNode } from 'react';
+import React, {
+  type UIEventHandler,
+  useLayoutEffect,
+  useRef,
+  type ReactNode,
+} from 'react';
 import { type RefProp } from 'react-spring';
 
 import { type CSSProperties } from '../../style';
@@ -9,6 +14,7 @@ type ReportTableProps = {
   listScrollRef?: RefProp<HTMLDivElement>;
   style?: CSSProperties;
   children?: ReactNode;
+  handleScroll?: UIEventHandler<HTMLDivElement>;
 };
 
 export default function ReportTable({
@@ -16,6 +22,7 @@ export default function ReportTable({
   listScrollRef,
   style,
   children,
+  handleScroll,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -28,6 +35,8 @@ export default function ReportTable({
   return (
     <View
       innerRef={listScrollRef}
+      onScroll={handleScroll}
+      id={'list'}
       style={{
         overflowY: 'auto',
         scrollbarWidth: 'none',
@@ -38,7 +47,6 @@ export default function ReportTable({
         ...style,
       }}
       tabIndex={1}
-      data-testid="table"
     >
       <View>
         <div ref={contentRef}>{children}</div>

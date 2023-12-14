@@ -47,10 +47,10 @@ const TableRow = memo(
       >
         <Cell
           value={item[groupByItem]}
-          width="flex"
           title={item[groupByItem].length > 12 && item[groupByItem]}
           style={{
-            minWidth: 125,
+            width: 150,
+            flexShrink: 0,
             ...styles.tnum,
           }}
         />

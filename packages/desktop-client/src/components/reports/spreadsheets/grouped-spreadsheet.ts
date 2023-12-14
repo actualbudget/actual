@@ -134,7 +134,9 @@ function createGroupedSpreadsheet({
           totalDebts: integerToAmount(totalDebts),
           totalTotals: integerToAmount(totalAssets + totalDebts),
           monthData,
-          categories: stackedCategories,
+          categories: stackedCategories.filter(i =>
+            !showEmpty ? i[balanceTypeOp] !== 0 : true,
+          ),
         };
       },
       [startDate, endDate],
