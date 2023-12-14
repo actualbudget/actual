@@ -78,7 +78,7 @@ export interface ServerHandlers {
     name;
     groupId;
     isIncome;
-    hidden;
+    hidden: boolean;
   }) => Promise<unknown>;
 
   'category-update': (category) => Promise<unknown>;
