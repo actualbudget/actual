@@ -278,9 +278,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const content = (
     <ListItem
       style={{
-        backgroundColor: isEditingBudget
-          ? theme.tableTextEditing
-          : 'transparent',
+        backgroundColor: 'transparent',
         borderBottomWidth: 0,
         borderTopWidth: index > 0 ? 1 : 0,
         opacity: !!category.hidden ? 0.5 : undefined,
@@ -666,6 +664,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
 });
 
 const IncomeCategory = memo(function IncomeCategory({
+  index,
   category,
   budgeted,
   balance,
@@ -690,6 +689,8 @@ const IncomeCategory = memo(function IncomeCategory({
         alignItems: 'center',
         padding: 10,
         backgroundColor: 'transparent',
+        borderBottomWidth: 0,
+        borderTopWidth: index > 0 ? 1 : 0,
         opacity: !!category.hidden ? 0.5 : undefined,
         ...style,
       }}
@@ -902,7 +903,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
 
       {group.categories
         .filter(category => !category.hidden || showHiddenCategories)
-        .map(category => {
+        .map((category, index) => {
           const isEditingCategory = editingCategoryId === category.id;
           const isEditingCategoryBudget =
             editingBudgetCategoryId === category.id;
@@ -910,6 +911,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
           return (
             <ExpenseCategory
               key={category.id}
+              index={index}
               show3Cols={show3Cols}
               type={type}
               category={category}
