@@ -113,19 +113,19 @@ type FinanceModals = {
   'category-menu': {
     category: CategoryEntity;
     onSave: (category: CategoryEntity) => void;
-    onToggleVisibility: (isHidden: boolean) => void;
     onEditNotes: (id: string) => void;
     onSaveNotes: (id: string, notes: string) => void;
     onDelete: (categoryId: string) => void;
     onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+    onClose?: () => void;
   };
   'category-group-menu': {
     group: CategoryGroupEntity;
     onSave: (group: CategoryGroupEntity) => void;
     onAddCategory: (groupId: string, isIncome: boolean) => void;
     onEditNotes: (id: string) => void;
-    onToggleVisibility: (isHidden: boolean) => void;
     onDelete: (groupId: string) => void;
+    onClose?: () => void;
   };
   notes: {
     id: string;
@@ -150,6 +150,7 @@ export type PopModalAction = {
 
 export type CloseModalAction = {
   type: typeof constants.CLOSE_MODAL;
+  name?: string;
 };
 
 export type ModalsActions =

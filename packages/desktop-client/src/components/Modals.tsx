@@ -337,9 +337,9 @@ export default function Modals() {
               category={options?.category}
               onSave={options?.onSave}
               onEditNotes={options?.onEditNotes}
-              onToggleVisibility={options?.onToggleVisibility}
               onDelete={options?.onDelete}
               onBudgetAction={options?.onBudgetAction}
+              onClose={options?.onClose}
             />
           );
 
@@ -353,8 +353,8 @@ export default function Modals() {
               onAddCategory={options?.onAddCategory}
               onEditNotes={options?.onEditNotes}
               onSaveNotes={options?.onSaveNotes}
-              onToggleVisibility={options?.onToggleVisibility}
               onDelete={options?.onDelete}
+              onClose={options?.onClose}
             />
           );
 

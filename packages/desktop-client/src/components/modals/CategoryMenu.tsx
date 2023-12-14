@@ -21,22 +21,22 @@ type CategoryMenuProps = {
   modalProps: CommonModalProps;
   category: CategoryEntity;
   onSave: (category: CategoryEntity) => void;
-  onToggleVisibility: (isHidden: boolean) => void;
   onEditNotes: (id: string) => void;
   onDelete: (categoryId: string) => void;
   onBudgetAction: (idx: number, action: string, arg: unknown) => void;
+  onClose?: () => void;
 };
 
 export default function CategoryMenu({
   modalProps,
   category,
   onSave,
-  onToggleVisibility,
   onEditNotes,
   onDelete,
   onBudgetAction,
+  onClose,
 }: CategoryMenuProps) {
-  const { id, hidden } = category;
+  const { id } = category;
   const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 
@@ -44,6 +44,7 @@ export default function CategoryMenu({
 
   function _onClose() {
     modalProps?.onClose();
+    onClose?.();
   }
 
   function _onRename(newName) {
@@ -56,7 +57,10 @@ export default function CategoryMenu({
   }
 
   function _onToggleVisibility() {
-    onToggleVisibility?.(!!hidden);
+    onSave?.({
+      ...category,
+      hidden: !!!category.hidden,
+    });
     _onClose();
   }
 
@@ -66,7 +70,6 @@ export default function CategoryMenu({
 
   function _onDelete() {
     onDelete?.(id);
-    _onClose();
   }
 
   function onNameChange(newName) {

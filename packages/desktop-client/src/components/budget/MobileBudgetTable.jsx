@@ -15,7 +15,6 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Card from '../common/Card';
-import InputWithContent from '../common/InputWithContent';
 import Label from '../common/Label';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
@@ -258,8 +257,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
   pushModal,
 }) {
   const opacity = blank ? 0 : 1;
-  const showEditables = editMode || isEditing;
-  const tooltip = useTooltip();
   const balanceTooltip = useTooltip();
 
   useEffect(() => {
@@ -267,29 +264,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
       balanceTooltip.open();
     }
   }, [isBudgetActionMenuOpen, balanceTooltip]);
-
-  useEffect(() => {
-    if (!isEditing && tooltip.isOpen) {
-      tooltip.close();
-    }
-  }, [isEditing, tooltip]);
-
-  const onCategoryNameChange = newCategoryName => {
-    if (category.name !== newCategoryName) {
-      onSave?.({
-        ...category,
-        name: newCategoryName,
-      });
-    }
-    onEdit?.(null);
-  };
-
-  const onToggleVisibility = isHidden => {
-    onSave?.({
-      ...category,
-      hidden: !isHidden,
-    });
-  };
 
   const listItemRef = useRef();
 
@@ -301,32 +275,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
     );
   };
 
-  const onSaveNotes = async (id, notes) => {
-    await send('notes-save', { id, note: notes });
-  };
-
-  const onEditNotes = id => {
-    if (id === category.id) {
-      pushModal('notes', {
-        id,
-        name: category.name,
-        onSave: onSaveNotes,
-      });
-    }
-  };
-
-  const onCategoryNameClick = () => {
-    pushModal('category-menu', {
-      category,
-      onSave,
-      onToggleVisibility,
-      onEditNotes,
-      onDelete,
-      onBudgetAction,
-    });
-  };
-
-  const [categoryName, setCategoryName] = useState(category.name);
   const content = (
     <ListItem
       style={{
@@ -341,42 +289,14 @@ const ExpenseCategory = memo(function ExpenseCategory({
       data-testid="row"
       innerRef={listItemRef}
     >
-      <View
-        style={{
-          ...(!showEditables && { display: 'none' }),
-          flexDirection: 'row',
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: ROW_HEIGHT,
-        }}
-      >
-        <InputWithContent
-          focused={isEditing}
-          style={{ width: '100%' }}
-          placeholder="Category Name"
-          value={categoryName}
-          onUpdate={setCategoryName}
-          onEnter={e => onCategoryNameChange(categoryName)}
-          onBlur={e => {
-            if (!listItemRef.current?.contains(e.relatedTarget)) {
-              onCategoryNameChange(categoryName);
-            }
-          }}
-        />
-      </View>
-      <View
-        role="button"
-        style={{ ...(showEditables && { display: 'none' }), flex: 1 }}
-      >
+      <View role="button" style={{ flex: 1 }}>
         <Text
           style={{
             ...styles.smallText,
             ...styles.underlinedText,
             ...styles.lineClamp(2),
           }}
-          // onPointerUp={() => onEdit?.(category.id)}
-          onPointerUp={onCategoryNameClick}
+          onPointerUp={() => onEdit?.(category.id)}
           data-testid="category-name"
         >
           {category.name}
@@ -384,7 +304,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
       </View>
       <View
         style={{
-          ...(showEditables && { display: 'none' }),
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'row',
@@ -530,60 +449,7 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
   pushModal,
 }) {
   const opacity = blank ? 0 : 1;
-  const showEditables = editMode || isEditing;
-  const tooltip = useTooltip();
-
-  useEffect(() => {
-    if (!isEditing && tooltip.isOpen) {
-      tooltip.close();
-    }
-  }, [isEditing]);
-
-  const onGroupNameChange = newGroupName => {
-    if (group.name !== newGroupName) {
-      onSave?.({
-        ...group,
-        name: newGroupName,
-      });
-    }
-    onEdit?.(null);
-  };
-
-  const onToggleVisibility = isHidden => {
-    onSave?.({
-      ...group,
-      hidden: !isHidden,
-    });
-  };
-
-  const onSaveNotes = async (id, notes) => {
-    await send('notes-save', { id, note: notes });
-  };
-
-  const onEditNotes = id => {
-    if (id === group.id) {
-      pushModal('notes', {
-        id,
-        name: group.name,
-        onSave: onSaveNotes,
-      });
-    }
-  };
-
-  const onGroupNameClick = () => {
-    pushModal('category-group-menu', {
-      group,
-      onSave,
-      onAddCategory,
-      onToggleVisibility,
-      onEditNotes,
-      onSaveNotes,
-      onDelete,
-    });
-  };
-
   const listItemRef = useRef();
-  const [groupName, setGroupName] = useState(group.name);
 
   const content = (
     <ListItem
@@ -596,43 +462,15 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       data-testid="totals"
       innerRef={listItemRef}
     >
-      <View
-        style={{
-          ...(!showEditables && { display: 'none' }),
-          flexDirection: 'row',
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: ROW_HEIGHT,
-        }}
-      >
-        <InputWithContent
-          focused={isEditing}
-          style={{ width: '100%' }}
-          placeholder="Category Group Name"
-          value={groupName}
-          onUpdate={setGroupName}
-          onEnter={e => onGroupNameChange(groupName)}
-          onBlur={e => {
-            if (!listItemRef.current?.contains(e.relatedTarget)) {
-              onGroupNameChange(groupName);
-            }
-          }}
-        />
-      </View>
-      <View
-        role="button"
-        style={{ ...(showEditables && { display: 'none' }), flex: 1 }}
-      >
+      <View role="button" style={{ flex: 1 }}>
         <Text
-          tabIndex={-1}
           style={{
             ...styles.smallText,
             ...styles.underlinedText,
             ...styles.lineClamp(2),
             fontWeight: '500',
           }}
-          onPointerUp={onGroupNameClick}
+          onPointerUp={() => onEdit?.(group.id)}
           data-testid="name"
         >
           {group.name}
@@ -640,7 +478,6 @@ const ExpenseGroupTotals = memo(function ExpenseGroupTotals({
       </View>
       <View
         style={{
-          ...(showEditables && { display: 'none' }),
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
@@ -750,60 +587,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   onEdit,
   pushModal,
 }) {
-  const showEditables = editMode || isEditing;
-  const tooltip = useTooltip();
-
-  useEffect(() => {
-    if (!isEditing && tooltip.isOpen) {
-      tooltip.close();
-    }
-  }, [isEditing]);
-
-  const onGroupNameChange = newGroupName => {
-    if (group.name !== newGroupName) {
-      onSave?.({
-        ...group,
-        name: newGroupName,
-      });
-    }
-    onEdit?.(null);
-  };
-
-  const onToggleVisibility = isHidden => {
-    onSave?.({
-      ...group,
-      hidden: !isHidden,
-    });
-  };
-
-  const onSaveNotes = async (id, notes) => {
-    await send('notes-save', { id, note: notes });
-  };
-
-  const onEditNotes = id => {
-    if (id === group.id) {
-      pushModal('notes', {
-        id,
-        name: group.name,
-        onSave: onSaveNotes,
-      });
-    }
-  };
-
-  const onGroupNameClick = () => {
-    pushModal('category-group-menu', {
-      group,
-      onSave,
-      onAddCategory,
-      onToggleVisibility,
-      onEditNotes,
-      onSaveNotes,
-      onDelete,
-    });
-  };
-
   const listItemRef = useRef();
-  const [groupName, setGroupName] = useState(group.name);
 
   return (
     <ListItem
@@ -818,33 +602,8 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       innerRef={listItemRef}
     >
       <View
-        style={{
-          ...(!showEditables && { display: 'none' }),
-          flexDirection: 'row',
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: ROW_HEIGHT,
-        }}
-      >
-        <InputWithContent
-          focused={isEditing}
-          style={{ width: '100%' }}
-          placeholder="Category Group Name"
-          value={groupName}
-          onUpdate={setGroupName}
-          onEnter={e => onGroupNameChange(groupName)}
-          onBlur={e => {
-            if (!listItemRef.current?.contains(e.relatedTarget)) {
-              onGroupNameChange(groupName);
-            }
-          }}
-        />
-      </View>
-      <View
         role="button"
         style={{
-          ...(showEditables && { display: 'none' }),
           flex: 1,
           justifyContent: 'center',
           alignItems: 'flex-start',
@@ -858,7 +617,7 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
             ...styles.lineClamp(2),
             fontWeight: '500',
           }}
-          onPointerUp={onGroupNameClick}
+          onPointerUp={() => onEdit?.(group.id)}
           data-testid="name"
         >
           {group.name}
@@ -867,7 +626,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       {budgeted && (
         <View
           style={{
-            ...(showEditables && { display: 'none' }),
             justifyContent: 'center',
             alignItems: 'flex-end',
             width: 90,
@@ -887,7 +645,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
       )}
       <View
         style={{
-          ...(showEditables && { display: 'none' }),
           justifyContent: 'center',
           alignItems: 'flex-end',
           width: 90,
@@ -924,59 +681,7 @@ const IncomeCategory = memo(function IncomeCategory({
   onEditBudget,
   pushModal,
 }) {
-  const showEditables = editMode || isEditing;
-  const tooltip = useTooltip();
-
-  useEffect(() => {
-    if (!isEditing && tooltip.isOpen) {
-      tooltip.close();
-    }
-  }, [isEditing]);
-
-  const onCategoryNameChange = newCategoryName => {
-    if (category.name !== newCategoryName) {
-      onSave?.({
-        ...category,
-        name: newCategoryName,
-      });
-    }
-    onEdit?.(null);
-  };
-
-  const onToggleVisibility = isHidden => {
-    onSave?.({
-      ...category,
-      hidden: !isHidden,
-    });
-  };
-
-  const onSaveNotes = async (id, notes) => {
-    await send('notes-save', { id, note: notes });
-  };
-
-  const onEditNotes = id => {
-    if (id === category.id) {
-      pushModal('notes', {
-        id,
-        name: category.name,
-        onSave: onSaveNotes,
-      });
-    }
-  };
-
-  const onCategoryNameClick = () => {
-    pushModal('category-menu', {
-      category,
-      onSave,
-      onToggleVisibility,
-      onEditNotes,
-      onDelete,
-      onBudgetAction,
-    });
-  };
-
   const listItemRef = useRef();
-  const [categoryName, setCategoryName] = useState(category.name);
 
   return (
     <ListItem
@@ -991,33 +696,8 @@ const IncomeCategory = memo(function IncomeCategory({
       innerRef={listItemRef}
     >
       <View
-        style={{
-          ...(!showEditables && { display: 'none' }),
-          flexDirection: 'row',
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: ROW_HEIGHT,
-        }}
-      >
-        <InputWithContent
-          focused={isEditing}
-          style={{ width: '100%' }}
-          placeholder="Category Name"
-          value={categoryName}
-          onUpdate={setCategoryName}
-          onEnter={() => onCategoryNameChange(categoryName)}
-          onBlur={e => {
-            if (!listItemRef.current?.contains(e.relatedTarget)) {
-              onCategoryNameChange(categoryName);
-            }
-          }}
-        />
-      </View>
-      <View
         role="button"
         style={{
-          ...(showEditables && { display: 'none' }),
           flex: 1,
           justifyContent: 'center',
           alignItems: 'flex-start',
@@ -1025,13 +705,12 @@ const IncomeCategory = memo(function IncomeCategory({
         }}
       >
         <Text
-          tabIndex={-1}
           style={{
             ...styles.smallText,
             ...styles.underlinedText,
             ...styles.lineClamp(2),
           }}
-          onPointerUp={onCategoryNameClick}
+          onPointerUp={() => onEdit?.(category.id)}
           data-testid="name"
         >
           {category.name}
@@ -1040,7 +719,6 @@ const IncomeCategory = memo(function IncomeCategory({
       {budgeted && (
         <View
           style={{
-            ...(showEditables && { display: 'none' }),
             justifyContent: 'center',
             alignItems: 'flex-end',
             width: 90,
@@ -1072,7 +750,6 @@ const IncomeCategory = memo(function IncomeCategory({
       )}
       <View
         style={{
-          ...(showEditables && { display: 'none' }),
           justifyContent: 'center',
           alignItems: 'flex-end',
           width: 90,
@@ -1503,6 +1180,7 @@ export function BudgetTable(props) {
   const {
     type,
     categoryGroups,
+    categories,
     month,
     monthBounds,
     editMode,
@@ -1527,31 +1205,74 @@ export function BudgetTable(props) {
     pushModal,
   } = props;
 
+  const onSaveNotes = async (id, notes) => {
+    await send('notes-save', { id, note: notes });
+  };
+
+  const onEditGroupNotes = id => {
+    const group = categoryGroups.find(g => g.id === id);
+    pushModal('notes', {
+      id,
+      name: group.name,
+      onSave: onSaveNotes,
+    });
+  };
+
+  const onEditCategoryNotes = id => {
+    const category = categories.find(c => c.id === id);
+    pushModal('notes', {
+      id,
+      name: category.name,
+      onSave: onSaveNotes,
+    });
+  };
+
   const GROUP_EDIT_ACTION = 'group';
   const [editingGroupId, setEditingGroupId] = useState(null);
-  function onEditGroup(id) {
-    onEdit(GROUP_EDIT_ACTION, id);
-  }
+  const onEditGroup = id => {
+    const { editingId } = onEdit(GROUP_EDIT_ACTION, id);
+    if (id && editingId === id) {
+      const group = categoryGroups.find(g => g.id === editingId);
+      pushModal('category-group-menu', {
+        group,
+        onSave: onSaveGroup,
+        onAddCategory,
+        onEditNotes: onEditGroupNotes,
+        onDelete: onDeleteGroup,
+        onClose: () => onEditGroup(null),
+      });
+    }
+  };
 
   const CATEGORY_EDIT_ACTION = 'category';
   const [editingCategoryId, setEditingCategoryId] = useState(null);
-  function onEditCategory(id) {
-    onEdit(CATEGORY_EDIT_ACTION, id);
-  }
+  const onEditCategory = id => {
+    const { editingId } = onEdit(CATEGORY_EDIT_ACTION, id);
+    if (id && id === editingId) {
+      const category = categories.find(c => c.id === editingId);
+      pushModal('category-menu', {
+        category,
+        onSave: onSaveCategory,
+        onEditNotes: onEditCategoryNotes,
+        onDelete: onDeleteCategory,
+        onClose: () => onEditCategory(null),
+      });
+    }
+  };
 
   const CATEGORY_BUDGET_EDIT_ACTION = 'category-budget';
   const [editingBudgetCategoryId, setEditingBudgetCategoryId] = useState(null);
-  function onEditCategoryBudget(id) {
+  const onEditCategoryBudget = id => {
     onEdit(CATEGORY_BUDGET_EDIT_ACTION, id);
-  }
+  };
 
   const BUDGET_MENU_OPEN_ACTION = 'budget-menu';
   const [openBudgetActionMenuId, setOpenBudgetActionMenuId] = useState(null);
-  function onOpenBudgetActionMenu(id) {
+  const onOpenBudgetActionMenu = id => {
     onEdit(BUDGET_MENU_OPEN_ACTION, id);
-  }
+  };
 
-  function onEdit(action, id) {
+  const onEdit = (action, id) => {
     // Do not allow editing if another field is currently being edited.
     // Cancel the currently editing field in that case.
     const currentlyEditing =
@@ -1572,7 +1293,9 @@ export function BudgetTable(props) {
     setOpenBudgetActionMenuId(
       action === BUDGET_MENU_OPEN_ACTION && !currentlyEditing ? id : null,
     );
-  }
+
+    return { action, editingId: !currentlyEditing ? id : null };
+  };
 
   const { width } = useResponsive();
   const show3Cols = width >= 360;
@@ -1930,7 +1653,8 @@ function BudgetMenu({
           <Menu
             onMenuSelect={onMenuSelect}
             items={[
-              { name: 'edit-mode', text: 'Edit mode' },
+              // Removing for now until we work on mobile category drag and drop.
+              // { name: 'edit-mode', text: 'Edit mode' },
               {
                 name: 'toggle-hidden-categories',
                 text: 'Toggle hidden categories',

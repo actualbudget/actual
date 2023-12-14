@@ -23,10 +23,10 @@ type CategoryGroupMenuProps = {
   group: CategoryGroupEntity;
   onSave: (group: CategoryGroupEntity) => void;
   onAddCategory: (groupId: string, isIncome: boolean) => void;
-  onToggleVisibility: (isHidden: boolean) => void;
   onEditNotes: (id: string) => void;
   onSaveNotes: (id: string, notes: string) => void;
   onDelete: (groupId: string) => void;
+  onClose?: () => void;
 };
 
 export default function CategoryGroupMenu({
@@ -34,9 +34,9 @@ export default function CategoryGroupMenu({
   group,
   onSave,
   onAddCategory,
-  onToggleVisibility,
   onEditNotes,
   onDelete,
+  onClose,
 }: CategoryGroupMenuProps) {
   const { id, hidden } = group;
   const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
@@ -46,6 +46,7 @@ export default function CategoryGroupMenu({
 
   function _onClose() {
     modalProps?.onClose();
+    onClose?.();
   }
 
   function _onRename(newName) {
@@ -66,13 +67,15 @@ export default function CategoryGroupMenu({
   }
 
   function _onToggleVisibility() {
-    onToggleVisibility?.(!!hidden);
+    onSave?.({
+      ...group,
+      hidden: !!!group.hidden,
+    });
     _onClose();
   }
 
   function _onDelete() {
     onDelete?.(id);
-    _onClose();
   }
 
   function onNameChange(newName) {

@@ -45,6 +45,8 @@ export function popModal(): PopModalAction {
   return { type: constants.POP_MODAL };
 }
 
-export function closeModal(): CloseModalAction {
-  return { type: constants.CLOSE_MODAL };
+export function closeModal<M extends keyof ModalWithOptions>(
+  name: M,
+): CloseModalAction {
+  return { type: constants.CLOSE_MODAL, name };
 }
