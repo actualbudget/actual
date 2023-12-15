@@ -74,7 +74,12 @@ export interface ServerHandlers {
 
   'budget-set-type': (arg: { type }) => Promise<unknown>;
 
-  'category-create': (arg: { name; groupId; isIncome }) => Promise<unknown>;
+  'category-create': (arg: {
+    name;
+    groupId;
+    isIncome;
+    hidden: boolean;
+  }) => Promise<unknown>;
 
   'category-update': (category) => Promise<unknown>;
 
@@ -321,7 +326,7 @@ export interface ServerHandlers {
     error?: { message: string; reason: string; meta: unknown };
   }>;
 
-  'load-budget': (arg: { id }) => Promise<{ error }>;
+  'load-budget': (arg: { id: string }) => Promise<{ error }>;
 
   'create-demo-budget': () => Promise<unknown>;
 

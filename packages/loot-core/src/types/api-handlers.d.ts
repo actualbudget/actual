@@ -1,3 +1,5 @@
+import { type ServerHandlers } from './server-handlers';
+
 export interface ApiHandlers {
   'api/batch-budget-start': () => Promise<unknown>;
 
@@ -5,7 +7,7 @@ export interface ApiHandlers {
 
   'api/load-budget': (
     ...args: Parameters<ServerHandlers['load-budget']>
-  ) => Promise<unknown>;
+  ) => Promise<void>;
 
   'api/download-budget': (arg: { syncId; password }) => Promise<unknown>;
 
