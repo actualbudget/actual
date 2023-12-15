@@ -43,6 +43,7 @@ app.use(
 
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
+app.use('/nordigen', goCardlessApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/secret', secretApp.handlers);
 
