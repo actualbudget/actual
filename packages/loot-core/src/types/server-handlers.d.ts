@@ -74,7 +74,12 @@ export interface ServerHandlers {
 
   'budget-set-type': (arg: { type }) => Promise<unknown>;
 
-  'category-create': (arg: { name; groupId; isIncome }) => Promise<unknown>;
+  'category-create': (arg: {
+    name;
+    groupId;
+    isIncome;
+    hidden: boolean;
+  }) => Promise<unknown>;
 
   'category-update': (category) => Promise<unknown>;
 
