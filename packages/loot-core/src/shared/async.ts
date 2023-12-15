@@ -1,4 +1,6 @@
-export function sequential<T extends (...args: unknown[]) => unknown>(
+import { type HandlerFunctions } from '../types/handlers';
+
+export function sequential<T extends HandlerFunctions>(
   fn: T,
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
   const sequenceState = {
@@ -16,7 +18,7 @@ export function sequential<T extends (...args: unknown[]) => unknown>(
   }
 
   function run(args, resolve, reject) {
-    sequenceState.running = fn(...args);
+    sequenceState.running = fn.apply(null, args);
 
     sequenceState.running.then(
       val => {
@@ -43,13 +45,13 @@ export function sequential<T extends (...args: unknown[]) => unknown>(
   };
 }
 
-export function once<T extends (...args: unknown[]) => Promise<unknown>>(
+export function once<T extends HandlerFunctions>(
   fn: T,
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
   let promise = null;
-  const onceFn = (...args: Parameters<T>): Promise<Awaited<ReturnType<T>>> => {
+  return (...args) => {
     if (!promise) {
-      promise = fn(...args).finally(() => {
+      promise = fn.apply(null, args).finally(() => {
         promise = null;
       });
       return promise;
@@ -57,6 +59,4 @@ export function once<T extends (...args: unknown[]) => Promise<unknown>>(
 
     return promise;
   };
-
-  return onceFn;
 }
