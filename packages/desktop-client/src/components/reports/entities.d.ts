@@ -9,6 +9,11 @@ export type DataEntity = {
   totalTotals: number;
 };
 
+export type LegendEntity = {
+  name: string;
+  color: string;
+};
+
 type ItemEntity = {
   id: string;
   name: string;

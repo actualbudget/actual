@@ -23,7 +23,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
-import { type DataEntity } from '../entities';
+import { type LegendEntity, type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
@@ -110,7 +110,7 @@ const CustomTooltip = ({
 
 type CustomLegendProps = {
   payload?: PayloadItem[];
-  OnChangeLegend;
+  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
 const CustomLegend = ({ payload, OnChangeLegend }: CustomLegendProps) => {
@@ -132,7 +132,7 @@ type BarGraphProps = {
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
-  OnChangeLegend;
+  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
 function BarGraph({

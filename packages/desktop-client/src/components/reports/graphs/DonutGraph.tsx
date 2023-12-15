@@ -18,7 +18,7 @@ import Text from '../../common/Text';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
-import { type DataEntity } from '../entities';
+import { type LegendEntity, type DataEntity } from '../entities';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadItem = {
@@ -74,7 +74,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 
 type CustomLegendProps = {
   payload?: PayloadItem[];
-  OnChangeLegend;
+  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
 const CustomLegend = ({ payload, OnChangeLegend }: CustomLegendProps) => {
@@ -96,7 +96,7 @@ type DonutGraphProps = {
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
-  OnChangeLegend;
+  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
 function DonutGraph({

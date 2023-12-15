@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 
 import View from '../common/View';
 
-import { type DataEntity, type Month } from './entities';
+import { type LegendEntity, type DataEntity, type Month } from './entities';
 import AreaGraph from './graphs/AreaGraph';
 import BarGraph from './graphs/BarGraph';
 import BarLineGraph from './graphs/BarLineGraph';
@@ -25,7 +25,7 @@ type ChooseGraphProps = {
   scrollWidth: number;
   setScrollWidth: (value: number) => void;
   months: Month[];
-  OnChangeLegend;
+  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
 function ChooseGraph({

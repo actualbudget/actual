@@ -21,7 +21,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
-import { type DataEntity } from '../entities';
+import { type LegendEntity, type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
@@ -95,13 +95,13 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 
 type CustomLegendProps = {
   payload?: PayloadItem[];
-  OnChangeLegend;
+  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
 const CustomLegend = ({ payload, OnChangeLegend }: CustomLegendProps) => {
   const agg = payload.map(leg => {
     return {
-      name: leg.value,
+      name: leg.value.toString(),
       color: leg.color,
     };
   });
@@ -115,7 +115,7 @@ type StackedBarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
   compact?: boolean;
-  OnChangeLegend;
+  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
 function StackedBarGraph({
