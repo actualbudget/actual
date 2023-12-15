@@ -7,8 +7,8 @@ import getAccountDb from '../account-db.js';
  * @enum {string}
  */
 export const SecretName = {
-  nordigen_secretId: 'nordigen_secretId',
-  nordigen_secretKey: 'nordigen_secretKey',
+  gocardless_secretId: 'gocardless_secretId',
+  gocardless_secretKey: 'gocardless_secretKey',
 };
 
 class SecretsDb {
