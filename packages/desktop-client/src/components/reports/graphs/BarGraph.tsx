@@ -5,7 +5,6 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-  Legend,
   Cell,
   ReferenceLine,
   XAxis,
@@ -21,9 +20,8 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
-import { getColorScale } from '../chart-theme';
 import Container from '../Container';
-import { type LegendEntity, type DataEntity } from '../entities';
+import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
@@ -108,31 +106,12 @@ const CustomTooltip = ({
   }
 };
 
-type CustomLegendProps = {
-  payload?: PayloadItem[];
-  OnChangeLegend: (legend: LegendEntity[]) => void;
-};
-
-const CustomLegend = ({ payload, OnChangeLegend }: CustomLegendProps) => {
-  const agg = payload[0].payload.children.map(leg => {
-    return {
-      name: leg.props.name,
-      color: leg.props.fill,
-    };
-  });
-
-  OnChangeLegend(agg);
-
-  return <div />;
-};
-
 type BarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
-  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
 function BarGraph({
@@ -141,11 +120,9 @@ function BarGraph({
   groupBy,
   balanceTypeOp,
   compact,
-  OnChangeLegend,
 }: BarGraphProps) {
   const privacyMode = usePrivacyMode();
 
-  const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
 
@@ -180,11 +157,6 @@ function BarGraph({
                 data={data[splitData]}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {!compact && (
-                  <Legend
-                    content={<CustomLegend OnChangeLegend={OnChangeLegend} />}
-                  />
-                )}
                 <Tooltip
                   content={
                     <CustomTooltip
@@ -217,17 +189,11 @@ function BarGraph({
                   <ReferenceLine y={0} stroke={theme.pageTextLight} />
                 )}
                 <Bar dataKey={val => getVal(val)} stackId="a">
-                  {data[splitData].map((entry, index) => (
+                  {data.legend.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={
-                        yAxis === 'date'
-                          ? balanceTypeOp === 'totalDebts'
-                            ? theme.reportsRed
-                            : theme.reportsBlue
-                          : colorScale[index % colorScale.length]
-                      }
-                      name={entry[yAxis]}
+                      fill={entry.color}
+                      name={entry.name}
                     />
                   ))}
                 </Bar>

@@ -63,7 +63,6 @@ export default function CustomReport() {
   const [viewLegend, setViewLegend] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
   const [viewLabels, setViewLabels] = useState(false);
-  const [legendData, setLegendData] = useState([]);
   const dateRangeLine = ReportOptions.dateRange.length - 3;
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
@@ -101,12 +100,6 @@ export default function CustomReport() {
     }
     run();
   }, []);
-
-  const OnChangeLegend = legend => {
-    useEffect(() => {
-      setLegendData(legend);
-    }, []);
-  };
 
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const payees = useCachedPayees();
@@ -153,6 +146,7 @@ export default function CustomReport() {
       payees,
       accounts,
       setDataCheck,
+      graphType,
     });
   }, [
     startDate,
@@ -168,6 +162,7 @@ export default function CustomReport() {
     showEmpty,
     showOffBudgetHidden,
     showUncategorized,
+    graphType,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -324,7 +319,6 @@ export default function CustomReport() {
                     scrollWidth={scrollWidth}
                     setScrollWidth={setScrollWidth}
                     months={months}
-                    OnChangeLegend={OnChangeLegend}
                   />
                 ) : (
                   <LoadingIndicator message={'Loading report...'} />
@@ -351,7 +345,7 @@ export default function CustomReport() {
                     />
                   )}
                   {viewLegend && (
-                    <ReportLegend legend={legendData} groupBy={groupBy} />
+                    <ReportLegend legend={data.legend} groupBy={groupBy} />
                   )}
                 </View>
               )}

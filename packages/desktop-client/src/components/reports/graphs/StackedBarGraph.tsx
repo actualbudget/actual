@@ -5,7 +5,6 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-  Legend,
   XAxis,
   YAxis,
   Tooltip,
@@ -19,9 +18,8 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
-import { getColorScale } from '../chart-theme';
 import Container from '../Container';
-import { type LegendEntity, type DataEntity } from '../entities';
+import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
@@ -93,39 +91,14 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   }
 };
 
-type CustomLegendProps = {
-  payload?: PayloadItem[];
-  OnChangeLegend: (legend: LegendEntity[]) => void;
-};
-
-const CustomLegend = ({ payload, OnChangeLegend }: CustomLegendProps) => {
-  const agg = payload.map(leg => {
-    return {
-      name: leg.value.toString(),
-      color: leg.color,
-    };
-  });
-
-  OnChangeLegend(agg.slice(0).reverse());
-
-  return <div />;
-};
-
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
   compact?: boolean;
-  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
-function StackedBarGraph({
-  style,
-  data,
-  compact,
-  OnChangeLegend,
-}: StackedBarGraphProps) {
+function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
   const privacyMode = usePrivacyMode();
-  const colorScale = getColorScale('qualitative');
 
   return (
     <Container
@@ -145,11 +118,6 @@ function StackedBarGraph({
                 data={data.monthData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {!compact && (
-                  <Legend
-                    content={<CustomLegend OnChangeLegend={OnChangeLegend} />}
-                  />
-                )}
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
@@ -168,14 +136,17 @@ function StackedBarGraph({
                     tickLine={{ stroke: theme.pageText }}
                   />
                 )}
-                {data.data.reverse().map((c, index) => (
-                  <Bar
-                    key={c.name}
-                    dataKey={c.name}
-                    stackId="a"
-                    fill={colorScale[index % colorScale.length]}
-                  />
-                ))}
+                {data.legend
+                  .slice(0)
+                  .reverse()
+                  .map(entry => (
+                    <Bar
+                      key={entry.name}
+                      dataKey={entry.name}
+                      stackId="a"
+                      fill={entry.color}
+                    />
+                  ))}
               </BarChart>
             </div>
           </ResponsiveContainer>

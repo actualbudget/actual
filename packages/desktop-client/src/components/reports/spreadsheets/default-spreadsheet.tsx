@@ -12,6 +12,8 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
+import { theme } from '../../../style';
+import { getColorScale } from '../chart-theme';
 import { categoryLists, groupBySelections } from '../ReportOptions';
 
 import filterHiddenItems from './filterHiddenItems';
@@ -33,6 +35,7 @@ export type createSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   setDataCheck?: (value: boolean) => void;
+  graphType: string;
 };
 
 export default function createSpreadsheet({
@@ -50,6 +53,7 @@ export default function createSpreadsheet({
   payees,
   accounts,
   setDataCheck,
+  graphType,
 }: createSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(
     showOffBudgetHidden,
@@ -167,12 +171,32 @@ export default function createSpreadsheet({
       const calc = recalculate({ item, months, assets, debts, groupByLabel });
       return { ...calc };
     });
+    const calcDataFiltered = calcData.filter(i =>
+      !showEmpty ? i[balanceTypeOp] !== 0 : true,
+    );
+
+    const colorScale = getColorScale('qualitative');
+    const chooseData = ['Month', 'Year'].includes(groupBy)
+      ? monthData
+      : calcDataFiltered;
+    const legend = chooseData.map((c, index) => {
+      return {
+        name: ['Month', 'Year'].includes(groupBy) ? c.date : c.name,
+        color:
+          graphType === 'DonutGraph'
+            ? colorScale[index % colorScale.length]
+            : ['Month', 'Year'].includes(groupBy)
+            ? balanceTypeOp === 'totalDebts'
+              ? theme.reportsRed
+              : theme.reportsBlue
+            : colorScale[index % colorScale.length],
+      };
+    });
 
     setData({
-      data: calcData.filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true)),
-      monthData: monthData.filter(i =>
-        !showEmpty ? i[balanceTypeOp] !== 0 : true,
-      ),
+      data: calcDataFiltered,
+      monthData,
+      legend,
       startDate,
       endDate,
       totalDebts: integerToAmount(totalDebts),

@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 
 import View from '../common/View';
 
-import { type LegendEntity, type DataEntity, type Month } from './entities';
+import { type DataEntity, type Month } from './entities';
 import AreaGraph from './graphs/AreaGraph';
 import BarGraph from './graphs/BarGraph';
 import BarLineGraph from './graphs/BarLineGraph';
@@ -25,7 +25,6 @@ type ChooseGraphProps = {
   scrollWidth: number;
   setScrollWidth: (value: number) => void;
   months: Month[];
-  OnChangeLegend: (legend: LegendEntity[]) => void;
 };
 
 function ChooseGraph({
@@ -38,7 +37,6 @@ function ChooseGraph({
   scrollWidth,
   setScrollWidth,
   months,
-  OnChangeLegend,
 }: ChooseGraphProps) {
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
 
@@ -71,7 +69,6 @@ function ChooseGraph({
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
-        OnChangeLegend={OnChangeLegend}
       />
     );
   }
@@ -85,7 +82,6 @@ function ChooseGraph({
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
-        OnChangeLegend={OnChangeLegend}
       />
     );
   }
@@ -93,13 +89,7 @@ function ChooseGraph({
     return <LineGraph style={{ flexGrow: 1 }} graphData={data} />;
   }
   if (graphType === 'StackedBarGraph') {
-    return (
-      <StackedBarGraph
-        style={{ flexGrow: 1 }}
-        data={data}
-        OnChangeLegend={OnChangeLegend}
-      />
-    );
+    return <StackedBarGraph style={{ flexGrow: 1 }} data={data} />;
   }
   if (graphType === 'TableGraph') {
     return (
