@@ -1,6 +1,12 @@
-# Supercharge your Budget
+# Rules Examples
 
 This page has examples of custom rules that some of our users have found useful for their own budgets. If you have any custom rules you're proud of, click the “Edit this page” button below to propose adding them to this page [tell us about them](/contact)!
+
+### Q: How do I set the payee when the payee name changes between transactions
+
+**A:** Sometimes the payee shows up slightly differently from transaction to transaction.  To set the same payee every time and not create a new one every time a new transaction is imported, use a **Pre** rule that reads the imported payee field and finds the merchant name using a "contains" condition.
+
+![](/img/rules-custom/custom-rules-imported-payee.png)
 
 ### Q: How do I set a default account when I add transactions?
 
