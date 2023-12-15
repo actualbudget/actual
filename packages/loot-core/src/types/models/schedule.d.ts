@@ -25,6 +25,9 @@ export interface ScheduleEntity {
     }[];
     skipWeekend: boolean;
     start: string;
+    endMode: 'never' | 'after_n_occurrences' | 'on_date';
+    endOccurrences: number;
+    endDate: string;
     weekendSolveMode: 'before' | 'after';
     frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
   };

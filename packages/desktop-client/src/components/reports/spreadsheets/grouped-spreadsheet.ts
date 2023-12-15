@@ -11,18 +11,24 @@ import makeQuery from './makeQuery';
 import recalculate from './recalculate';
 
 function createGroupedSpreadsheet({
-  start,
-  end,
+  startDate,
+  endDate,
   categories,
   selectedCategories,
   conditions = [],
   conditionsOp,
-  hidden,
-  uncat,
+  showEmpty,
+  showOffBudgetHidden,
+  showUncategorized,
+  balanceTypeOp,
 }: createSpreadsheetProps) {
-  const [catList, catGroup] = categoryLists(hidden, uncat, categories);
+  const [categoryList, categoryGroup] = categoryLists(
+    showOffBudgetHidden,
+    showUncategorized,
+    categories,
+  );
 
-  const categoryFilter = (catList || []).filter(
+  const categoryFilter = (categoryList || []).filter(
     category =>
       !category.hidden &&
       selectedCategories &&
@@ -32,7 +38,7 @@ function createGroupedSpreadsheet({
   );
 
   return async (spreadsheet, setData) => {
-    if (catList.length === 0) {
+    if (categoryList.length === 0) {
       return null;
     }
 
@@ -45,9 +51,9 @@ function createGroupedSpreadsheet({
       runQuery(
         makeQuery(
           'assets',
-          start,
-          end,
-          hidden,
+          startDate,
+          endDate,
+          showOffBudgetHidden,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -57,9 +63,9 @@ function createGroupedSpreadsheet({
       runQuery(
         makeQuery(
           'debts',
-          start,
-          end,
-          hidden,
+          startDate,
+          endDate,
+          showOffBudgetHidden,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -68,9 +74,9 @@ function createGroupedSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
-    const months = monthUtils.rangeInclusive(start, end);
+    const months = monthUtils.rangeInclusive(startDate, endDate);
 
-    const groupedData = catGroup.map(
+    const groupedData = categoryGroup.map(
       group => {
         let totalAssets = 0;
         let totalDebts = 0;
@@ -131,10 +137,11 @@ function createGroupedSpreadsheet({
           categories: stackedCategories,
         };
       },
-      [start, end],
+      [startDate, endDate],
     );
-
-    setData(groupedData);
+    setData(
+      groupedData.filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true)),
+    );
   };
 }
 

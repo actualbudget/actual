@@ -21,6 +21,7 @@ import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
@@ -50,8 +51,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           pointerEvents: 'none',
           borderRadius: 2,
           boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuAutoCompleteBackground,
-          color: theme.menuAutoCompleteText,
+          backgroundColor: theme.menuBackground,
+          color: theme.menuItemText,
           padding: 10,
         })}`}
       >
@@ -115,7 +116,7 @@ const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
 
 type StackedBarGraphProps = {
   style?: CSSProperties;
-  data;
+  data: DataEntity;
   compact?: boolean;
 };
 
@@ -164,7 +165,7 @@ function StackedBarGraph({ style, data, compact }: StackedBarGraphProps) {
                 )}
                 {data.data.reverse().map((c, index) => (
                   <Bar
-                    key={c.date}
+                    key={c.name}
                     dataKey={c.name}
                     stackId="a"
                     fill={colorScale[index % colorScale.length]}

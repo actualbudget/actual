@@ -429,8 +429,8 @@ export function FilterButton({ onApply, compact, hover }) {
               style={{
                 lineHeight: 1.5,
                 padding: '6px 10px',
-                backgroundColor: theme.menuAutoCompleteBackground,
-                color: theme.menuAutoCompleteText,
+                backgroundColor: theme.menuBackground,
+                color: theme.menuItemText,
               }}
             >
               <Text>Filters</Text>
