@@ -38,8 +38,8 @@ export function ReportSidebar({
   setBalanceType,
   mode,
   setMode,
-  datePaused,
-  setDatePaused,
+  isDateStatic,
+  setIsDateStatic,
   showEmpty,
   setShowEmpty,
   showOffBudgetHidden,
@@ -51,6 +51,7 @@ export function ReportSidebar({
   setSelectedCategories,
 }) {
   const onSelectRange = cond => {
+    setDateRange(cond);
     switch (cond) {
       case 'All time':
         onChangeDates(...getFullRange(allMonths));
@@ -79,15 +80,6 @@ export function ReportSidebar({
         break;
       default:
         onChangeDates(...getLatestRange(ReportOptions.dateRangeMap.get(cond)));
-    }
-  };
-
-  const onChangeDatePaused = cond => {
-    setDatePaused(cond);
-    if (cond === 'live') {
-      onSelectRange(dateRange);
-    } else {
-      onChangeDates(startDate, endDate);
     }
   };
 
@@ -338,19 +330,25 @@ export function ReportSidebar({
           </Text>
           <View style={{ flex: 1 }} />
           <ModeButton
-            selected={datePaused === 'live'}
-            onSelect={() => onChangeDatePaused('live')}
+            selected={!isDateStatic}
+            onSelect={() => {
+              setIsDateStatic(false);
+              onSelectRange(dateRange);
+            }}
           >
             Live
           </ModeButton>
           <ModeButton
-            selected={datePaused === 'static'}
-            onSelect={() => onChangeDatePaused('static')}
+            selected={isDateStatic}
+            onSelect={() => {
+              setIsDateStatic(true);
+              onChangeDates(startDate, endDate);
+            }}
           >
             Static
           </ModeButton>
         </View>
-        {datePaused === 'live' ? (
+        {!isDateStatic ? (
           <View
             style={{
               flexDirection: 'row',
@@ -364,7 +362,6 @@ export function ReportSidebar({
             <Select
               value={dateRange}
               onChange={e => {
-                setDateRange(e);
                 onSelectRange(e);
               }}
               options={ReportOptions.dateRange.map(option => [
