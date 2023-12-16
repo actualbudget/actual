@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
@@ -18,6 +18,10 @@ import {
 } from './Header';
 import ModeButton from './ModeButton';
 import { ReportOptions } from './ReportOptions';
+import ToggleMenu from '../common/ToggleMenu';
+import { Tooltip } from '../tooltips';
+import { DotsHorizontalTriple } from '../../icons/v1';
+import Button from '../common/Button';
 
 export function ReportSidebar({
   startDate,
@@ -48,6 +52,8 @@ export function ReportSidebar({
   selectedCategories,
   setSelectedCategories,
 }) {
+  const [isOn, setIsOn] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
     switch (cond) {
       case 'All time':
@@ -306,6 +312,61 @@ export function ReportSidebar({
             Uncategorized
           </label>
         </View>
+        <Button
+          type="bare"
+          aria-label="Menu"
+          onClick={() => {
+            setMenuOpen(true);
+          }}
+          style={{ color: 'currentColor', padding: 3 }}
+        >
+          <DotsHorizontalTriple
+            width={15}
+            height={15}
+            style={{ color: theme.pageTextLight }}
+          />
+          {menuOpen && (
+            <Tooltip
+              position="bottom-right"
+              style={{ padding: 0 }}
+              onClose={() => {
+                setMenuOpen(false);
+              }}
+            >
+              <ToggleMenu
+                onMenuSelect={type => {
+                  if (type === 'show-hidden-columns') {
+                    setShowOffBudgetHidden(!showOffBudgetHidden);
+                  } else if (type === 'show-empty-columns') {
+                    setShowEmpty(!showEmpty);
+                  } else if (type === 'show-uncategorized') {
+                    setShowUncategorized(!showUncategorized);
+                  }
+                }}
+                items={[
+                  {
+                    name: 'show-hidden-columns',
+                    text: 'Show hidden',
+                    isOn: showOffBudgetHidden,
+                    toggle: true,
+                  },
+                  {
+                    name: 'show-empty-columns',
+                    text: 'Expand all',
+                    isOn: showEmpty,
+                    toggle: true,
+                  },
+                  {
+                    name: 'show-uncategorized',
+                    text: 'Collapse all',
+                    isOn: showUncategorized,
+                    toggle: true,
+                  },
+                ]}
+              />
+            </Tooltip>
+          )}
+        </Button>
         <View
           style={{
             height: 1,
