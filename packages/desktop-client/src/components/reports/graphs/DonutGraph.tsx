@@ -1,14 +1,7 @@
 import React from 'react';
 
 import { css } from 'glamor';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  //Legend,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
@@ -16,7 +9,6 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import Text from '../../common/Text';
 import PrivacyFilter from '../../PrivacyFilter';
-import { getColorScale } from '../chart-theme';
 import Container from '../Container';
 import { type DataEntity } from '../entities';
 import numberFormatterTooltip from '../numberFormatter';
@@ -72,27 +64,6 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   }
 };
 
-/* Descoped for future PR
-type CustomLegendProps = {
-  active?: boolean;
-  payload?: PayloadItem[];
-  label?: string;
-};
-
-const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
-  const agg = payload.map(leg => {
-    return {
-      name: leg.value,
-      color: leg.color,
-    };
-  });
-
-  OnChangeLegend(agg);
-
-  return <div />;
-};
-*/
-
 type DonutGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -108,7 +79,6 @@ function DonutGraph({
   balanceTypeOp,
   compact,
 }: DonutGraphProps) {
-  const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
 
@@ -133,9 +103,6 @@ function DonutGraph({
             <div>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <PieChart width={width} height={height}>
-                {
-                  //<Legend content={<CustomLegend />} />
-                }
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
@@ -149,11 +116,8 @@ function DonutGraph({
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                 >
-                  {data[splitData].map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={colorScale[index % colorScale.length]}
-                    />
+                  {data.legend.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
               </PieChart>
