@@ -7,6 +7,7 @@ import {
   type ReactNode,
   type MouseEventHandler,
   type MouseEvent,
+  type ContextType,
 } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -73,6 +74,7 @@ export class Tooltip extends Component<TooltipProps> {
   contentRef: RefObject<HTMLDivElement>;
   cleanup: () => void;
   target: HTMLDivElement;
+  context: ContextType<typeof IntersectionBoundary> = this.context; // assign type to context without using declare.
 
   constructor(props) {
     super(props);
@@ -153,11 +155,11 @@ export class Tooltip extends Component<TooltipProps> {
     }
   }
 
-  getContainer() {
+  getContainer(): HTMLElement {
     const { ignoreBoundary = false } = this.props;
 
     if (!ignoreBoundary && this.context) {
-      return (this.context as RefObject<HTMLElement>).current;
+      return this.context.current;
     }
     return document.body;
   }
@@ -173,7 +175,7 @@ export class Tooltip extends Component<TooltipProps> {
     ) {
       return container.parentNode as HTMLElement;
     }
-    return container as HTMLElement;
+    return container;
   }
 
   layout() {
@@ -280,17 +282,12 @@ export class Tooltip extends Component<TooltipProps> {
   }
 
   getStyleForPosition(position, boxRect, anchorRect, containerRect, offset) {
-    const style: {
-      top?: string;
-      bottom?: string;
-      left?: string;
-      right?: string;
-      width?: string;
-    } = {
+    const style = {
       top: 'inherit',
       bottom: 'inherit',
       left: 'inherit',
       right: 'inherit',
+      width: undefined as string | undefined,
     };
 
     if (
