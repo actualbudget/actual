@@ -12,10 +12,9 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import { theme } from '../../../style';
-import { getColorScale } from '../chart-theme';
 import { categoryLists, groupBySelections } from '../ReportOptions';
 
+import calculateLegend from './calculateLegend';
 import filterHiddenItems from './filterHiddenItems';
 import makeQuery from './makeQuery';
 import recalculate from './recalculate';
@@ -175,23 +174,13 @@ export default function createSpreadsheet({
       !showEmpty ? i[balanceTypeOp] !== 0 : true,
     );
 
-    const colorScale = getColorScale('qualitative');
-    const chooseData = ['Month', 'Year'].includes(groupBy)
-      ? monthData
-      : calcDataFiltered;
-    const legend = chooseData.map((c, index) => {
-      return {
-        name: ['Month', 'Year'].includes(groupBy) ? c.date : c.name,
-        color:
-          graphType === 'DonutGraph'
-            ? colorScale[index % colorScale.length]
-            : ['Month', 'Year'].includes(groupBy)
-            ? balanceTypeOp === 'totalDebts'
-              ? theme.reportsRed
-              : theme.reportsBlue
-            : colorScale[index % colorScale.length],
-      };
-    });
+    const legend = calculateLegend(
+      monthData,
+      calcDataFiltered,
+      groupBy,
+      graphType,
+      balanceTypeOp,
+    );
 
     setData({
       data: calcDataFiltered,

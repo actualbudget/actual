@@ -15,7 +15,7 @@ type LegendEntity = {
   color: string;
 };
 
-type ItemEntity = {
+export type ItemEntity = {
   id: string;
   name: string;
   monthData: MonthData[];
@@ -24,7 +24,7 @@ type ItemEntity = {
   totalTotals: number;
 };
 
-type MonthData = {
+export type MonthData = {
   date: string;
   totalAssets: number;
   totalDebts: number;
