@@ -64,8 +64,6 @@ export default function CustomReport() {
   const [viewLegend, setViewLegend] = useState(false);
   const [viewSummary, setViewSummary] = useState(false);
   const [viewLabels, setViewLabels] = useState(false);
-  //const [legend, setLegend] = useState([]);
-  const legend = [];
   const dateRangeLine = ReportOptions.dateRange.length - 3;
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
@@ -103,6 +101,7 @@ export default function CustomReport() {
     }
     run();
   }, []);
+
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const payees = useCachedPayees();
   const accounts = useCachedAccounts();
@@ -149,6 +148,7 @@ export default function CustomReport() {
       payees,
       accounts,
       setDataCheck,
+      graphType,
     });
   }, [
     startDate,
@@ -164,6 +164,7 @@ export default function CustomReport() {
     showEmpty,
     showOffBudgetHidden,
     showUncategorized,
+    graphType,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -348,7 +349,7 @@ export default function CustomReport() {
                     />
                   )}
                   {viewLegend && (
-                    <ReportLegend legend={legend} groupBy={groupBy} />
+                    <ReportLegend legend={data.legend} groupBy={groupBy} />
                   )}
                 </View>
               )}

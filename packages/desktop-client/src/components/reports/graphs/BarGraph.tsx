@@ -5,7 +5,6 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-  //Legend,
   Cell,
   ReferenceLine,
   XAxis,
@@ -21,7 +20,6 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
-import { getColorScale } from '../chart-theme';
 import Container from '../Container';
 import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
@@ -107,26 +105,6 @@ const CustomTooltip = ({
     );
   }
 };
-/* Descoped for future PR
-type CustomLegendProps = {
-  active?: boolean;
-  payload?: PayloadItem[];
-  label?: string;
-};
-
-const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
-  const agg = payload[0].payload.children.map(leg => {
-    return {
-      name: leg.props.name,
-      color: leg.props.fill,
-    };
-  });
-
-  OnChangeLegend(agg);
-
-  return <div />;
-};
-*/
 
 type BarGraphProps = {
   style?: CSSProperties;
@@ -145,7 +123,6 @@ function BarGraph({
 }: BarGraphProps) {
   const privacyMode = usePrivacyMode();
 
-  const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
 
@@ -180,9 +157,6 @@ function BarGraph({
                 data={data[splitData]}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {
-                  //!compact && <Legend content={<CustomLegend />} />
-                }
                 <Tooltip
                   content={
                     <CustomTooltip
@@ -215,17 +189,11 @@ function BarGraph({
                   <ReferenceLine y={0} stroke={theme.pageTextLight} />
                 )}
                 <Bar dataKey={val => getVal(val)} stackId="a">
-                  {data[splitData].map((entry, index) => (
+                  {data.legend.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={
-                        yAxis === 'date'
-                          ? balanceTypeOp === 'totalDebts'
-                            ? theme.reportsRed
-                            : theme.reportsBlue
-                          : colorScale[index % colorScale.length]
-                      }
-                      name={entry[yAxis]}
+                      fill={entry.color}
+                      name={entry.name}
                     />
                   ))}
                 </Bar>
