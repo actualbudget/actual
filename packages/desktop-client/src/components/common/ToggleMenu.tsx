@@ -32,7 +32,7 @@ type MenuItem = {
   iconSize?: number;
   text: string;
   key?: string;
-  isOn;
+  isOn?;
 };
 
 type ToggleMenuProps = {

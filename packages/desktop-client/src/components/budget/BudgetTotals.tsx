@@ -4,6 +4,7 @@ import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { theme, styles } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
+import ToggleMenu from '../common/ToggleMenu';
 import View from '../common/View';
 import { Tooltip } from '../tooltips';
 
@@ -75,7 +76,7 @@ const BudgetTotals = memo(function BudgetTotals({
                 setMenuOpen(false);
               }}
             >
-              <Menu
+              <ToggleMenu
                 onMenuSelect={type => {
                   if (type === 'toggle-visibility') {
                     toggleHiddenCategories();
@@ -89,7 +90,9 @@ const BudgetTotals = memo(function BudgetTotals({
                 items={[
                   {
                     name: 'toggle-visibility',
-                    text: 'Toggle hidden categories',
+                    text: 'Show hidden',
+                    isOn: true,
+                    toggle: true,
                   },
                   {
                     name: 'expandAllCategories',
