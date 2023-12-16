@@ -171,9 +171,10 @@ export class Tooltip extends Component<TooltipProps> {
 
     if (
       container.parentNode &&
+      container.parentNode instanceof HTMLElement &&
       (container.parentNode as HTMLElement).style.overflow === 'auto'
     ) {
-      return container.parentNode as HTMLElement;
+      return container.parentNode;
     }
     return container;
   }
@@ -186,10 +187,18 @@ export class Tooltip extends Component<TooltipProps> {
     }
 
     const box = contentEl.getBoundingClientRect();
-    const anchorEl = this.target.parentNode as HTMLElement;
 
-    let anchorRect: MutableDomRect =
-      targetRect || anchorEl.getBoundingClientRect();
+    let anchorEl: HTMLElement | undefined;
+    if (this.target.parentNode instanceof HTMLElement) {
+      anchorEl = this.target.parentNode;
+    }
+
+    let anchorRect: MutableDomRect | undefined =
+      targetRect || anchorEl?.getBoundingClientRect();
+
+    if (!anchorRect) {
+      return;
+    }
 
     // Copy it so we can mutate it
     anchorRect = {
