@@ -31,7 +31,7 @@ function ReportLegend({ legend, groupBy }: ReportLegendProps) {
         {groupBy}
       </Text>
       <View>
-        {legend &&
+        {legend !=undefined &&
           legend.map(item => {
             return (
               <View
