@@ -50,6 +50,9 @@ export type LocalPrefs = Partial<
     userId: string;
     resetClock: boolean;
     lastScheduleRun: string;
+    reportsViewLegend: boolean;
+    reportsViewSummary: boolean;
+    reportsViewLabel: boolean;
   } & Record<`flags.${FeatureFlag}`, boolean>
 >;
 
