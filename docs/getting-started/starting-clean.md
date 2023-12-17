@@ -20,10 +20,10 @@ That way you can use the budget categories to view where you plan to use those s
 In some situations it may make sense to put a credit card account off budget. This is generally not recommended unless you are not using that card for any spending and are exclusively paying it off.
 
 ### How to Setup Accounts
-The process of adding an account is detailed in [the adding a new account page](../accounts/#adding-a-new-account).
+The process of adding an account is detailed in [the adding a new account page](../accounts/index.md#adding-a-new-account).
 
-For bank syncing, Actual has built-in support for [GoCardless](../advanced/bank-sync) which works for most EU/UK banks.
-For other bank syncing option see the [community projects page](../community-repos).
+For bank syncing, Actual has built-in support for [GoCardless](../advanced/bank-sync.md) which works for most EU/UK banks.
+For other bank syncing option see the [community projects page](../community-repos.md).
 
 ## 2. Setting up your Budget Categories
 
@@ -44,7 +44,7 @@ You may also want a category for interest and dividends.
 ### How to Setup Categories
 While making these categories, remember that all money entering or leaving your budget needs a category.
 
-The process for adding and working with categories is found in [the category guide](../budgeting/categories/#add-a-category).
+The process for adding and working with categories is found in [the category guide](../budgeting/categories.md#add-a-category).
 
 ## 3. Assign Available Funds
 Now that you have your accounts and categories set up, you're at the fun part.
@@ -70,11 +70,11 @@ If you don't like how things are going, make changes.
 If you're happy, great!
 Keep budgeting to keep track of your progress on your goals.
 
-A more detailed breakdown of how budgeting in Actual works is provided in [the budgeting page](../budgeting/)
+A more detailed breakdown of how budgeting in Actual works is provided in [the budgeting page](../budgeting/index.md)
 
 ### Credit Cards
 If you currently are carrying credit card debt in an on budget account you will need to capture that debt in a category.
-A guide on how to handle that can be found in [the credit card guide](../budgeting/credit-cards)
+A guide on how to handle that can be found in [the credit card guide](../budgeting/credit-cards/index.md)
 
 ### The Month Ahead Method
 It can be hard to know where to budget your funds when you get paid in the middle of the month, or get multiple paychecks per month.
@@ -86,7 +86,7 @@ Actual makes this easy by allowing you to hold your available funds for the next
 
 ## 4. Keep Budgeting
 Now that you have set up your budget, you can start importing transactions and tracking your spending and saving.
-The best next step is to read through the "Using Actual" section of the documentation.  This section has detailed explainers on the features of Actual and how to use them.  Some of the most useful features are [Rules](../budgeting/rules), [Schedules](../budgeting/schedules), [Reconciliation](../accounts/reconciliation), and [Reports](../reports-filters/reports).
+The best next step is to read through the "Using Actual" section of the documentation.  This section has detailed explainers on the features of Actual and how to use them.  Some of the most useful features are [Rules](../budgeting/rules/index.md), [Schedules](../budgeting/schedules.md), [Reconciliation](../accounts/reconciliation.md), and [Reports](../reports-filters/reports.md).
 
 If you feel a bit overwhelmed, don't worry.
 Starting budgeting is confusing, especially if you are new to zero-sum budgeting.
