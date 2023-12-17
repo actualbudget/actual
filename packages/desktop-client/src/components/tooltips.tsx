@@ -192,13 +192,10 @@ if (parentNode && isHTMLElement(parentNode) && parentNode.style.overflow === 'au
 
     const box = contentEl.getBoundingClientRect();
 
-    let anchorEl: HTMLElement | undefined;
-    if (this.target.parentNode instanceof HTMLElement) {
-      anchorEl = this.target.parentNode;
-    }
+    const anchorEl = this.target.parentNode;
 
     let anchorRect: MutableDomRect | undefined =
-      targetRect || anchorEl?.getBoundingClientRect();
+      targetRect || isHTMLElement(anchorEl) ? anchorEl.getBoundingClientRect() : undefined;
 
     if (!anchorRect) {
       return;
