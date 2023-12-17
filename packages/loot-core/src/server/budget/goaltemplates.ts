@@ -157,6 +157,7 @@ async function processTemplate(
   let priority_list = [];
 
   const categories = await getCategories();
+  let categories_remove = [];
 
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
@@ -175,21 +176,34 @@ async function processTemplate(
         priority_list.push(template[l].priority);
       }
     }
-    if (budgeted) {
-      originalCategoryBalance.push({
-        category: category.id,
-        amount: budgeted,
-        isIncome: category.is_income,
-        isTemplate: template ? true : false,
-      });
-      setToZero.push({
-        category: category.id,
-        amount: 0,
-        isIncome: category.is_income,
-        isTemplate: template ? true : false,
-      });
+    if (budgeted) { 
+      if (!force) {// if not overwritting ignore these categories
+        categories_remove.push(category);
+      } else { // if we are overwritting add this category to list to zero
+        setToZero.push({
+          category: category.id,
+          amount: 0,
+          isIncome: category.is_income,
+          isTemplate: template ? true : false,
+        });
+        //originalCategoryBalance.push({
+        //  category: category.id,
+        //  amount: budgeted,
+        //  isIncome: category.is_income,
+        //  isTemplate: template ? true : false,
+        //});
+      }
     }
   }
+
+  // remove the categories we are skipping because of not force
+  for (let i = 0; i < categories_remove.length; i++) {
+    const c = categories_remove[i];
+    const index = categories.indexOf(c);
+    categories.splice(index,1);
+  }
+
+  // zero out the categories that need it
   await setGoalBudget({
     month,
     templateBudget: setToZero.filter(f => f.isTemplate === true),
@@ -339,33 +353,6 @@ async function processTemplate(
     await setGoalBudget({ month, templateBudget });
   }
   await setCategoryTargets({ month, idealTemplate });
-  if (!force) {
-    //if overwrite is not preferred, set cell to original value;
-    originalCategoryBalance = originalCategoryBalance.filter(
-      c => c.isIncome === 0 && c.isTemplate,
-    );
-    for (let l = 0; l < originalCategoryBalance.length; l++) {
-      await setBudget({
-        category: originalCategoryBalance[l].category,
-        month,
-        amount: originalCategoryBalance[l].amount,
-      });
-      //if overwrite is not preferred, remove template errors for category
-      let j = errors.length;
-      for (let k = 0; k < j; k++) {
-        if (
-          errors[k].includes(
-            categories.filter(
-              c => c.id === originalCategoryBalance[l].category,
-            )[0].name,
-          )
-        ) {
-          errors.splice(k, 1);
-          j--;
-        }
-      }
-    }
-  }
   if (num_applied === 0) {
     if (errors.length) {
       return {
