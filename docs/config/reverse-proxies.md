@@ -13,6 +13,42 @@ In our examples, the Actual Server should be published under the domain **budget
 The **basic configurations** provided here are only suggestions for implementing a reverse proxy configuration. Additional security mechanisms should then be activated/implemented for the tool selected in each case.
 :::
 
+## CADDY
+
+Below is an example `Caddyfile` that you can use to configure Caddy and Actual Server using Docker. Caddy is an easy reverse proxy to use since it automatically obtains and renews SSL certificates for you.
+
+```yaml title="docker-compose.yml"
+services:
+  caddy:
+    container_name: caddy
+    image: caddy:alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/data:/data
+      - ./caddy/config:/config 
+    ports:
+      - "80:80"
+      - '443:443'
+
+  actual-server:
+    image: actualbudget/actual-server:latest
+    container_name: actual_server
+    restart: unless-stopped
+    volumes:
+      - ./actual-data:/data
+    restart: unless-stopped
+    ports:
+      - '5006:5006'
+```
+Caddyfile:
+```
+budget.example.org {
+    encode gzip zstd
+    reverse_proxy actual_server:5006
+}
+```
+
+
 ## Traefik
 
 Our example shows a working configuration for Traefik and Actual Server using Docker - as documented in [Install Actual/Docker](../install/docker.md)

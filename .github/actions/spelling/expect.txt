@@ -13,6 +13,8 @@ lightmode
 modals
 murmurhash
 nginx
+caddy
+Caddyfile
 overbudgeting
 Paribas
 prefs
