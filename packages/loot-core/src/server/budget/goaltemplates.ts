@@ -151,7 +151,6 @@ async function processTemplate(
 ): Promise<Notification> {
   let num_applied = 0;
   let errors = [];
-  let originalCategoryBalance = [];
   const idealTemplate = [];
   const setToZero = [];
   let priority_list = [];
@@ -186,12 +185,6 @@ async function processTemplate(
           isIncome: category.is_income,
           isTemplate: template ? true : false,
         });
-        //originalCategoryBalance.push({
-        //  category: category.id,
-        //  amount: budgeted,
-        //  isIncome: category.is_income,
-        //  isTemplate: template ? true : false,
-        //});
       }
     }
   }
