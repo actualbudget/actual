@@ -82,6 +82,10 @@ export class Tooltip extends Component<TooltipProps> {
     this.contentRef = createRef<HTMLDivElement>();
   }
 
+  isHTMLElement(element: unknown): element is HTMLElement {
+    return element instanceof HTMLElement;
+  }
+
   setup() {
     this.layout();
 
@@ -171,12 +175,8 @@ export class Tooltip extends Component<TooltipProps> {
 
     if (
       container.parentNode &&
-function isHTMLElement(element: unknown): element is HTMLElement {
-  return element instanceof HTMLElement;
-}
-
-const { parentNode } = container;
-if (parentNode && isHTMLElement(parentNode) && parentNode.style.overflow === 'auto') {
+      this.isHTMLElement(container.parentNode) &&
+      container.parentNode.style.overflow === 'auto'
     ) {
       return container.parentNode;
     }
@@ -195,7 +195,10 @@ if (parentNode && isHTMLElement(parentNode) && parentNode.style.overflow === 'au
     const anchorEl = this.target.parentNode;
 
     let anchorRect: MutableDomRect | undefined =
-      targetRect || isHTMLElement(anchorEl) ? anchorEl.getBoundingClientRect() : undefined;
+      targetRect ||
+      (this.isHTMLElement(anchorEl)
+        ? anchorEl?.getBoundingClientRect()
+        : undefined);
 
     if (!anchorRect) {
       return;
