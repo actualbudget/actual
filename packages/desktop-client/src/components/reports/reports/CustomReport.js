@@ -189,9 +189,9 @@ export default function CustomReport() {
     setEndDate(endDate);
   };
 
-  const onChangeViews = viewType => {
+  const onChangeViews = (viewType, status) => {
     if (viewType === 'viewLegend') {
-      savePrefs({ reportsViewLegend: !viewLegend });
+      savePrefs({ reportsViewLegend: status ?? !viewLegend });
     }
     if (viewType === 'viewSummary') {
       savePrefs({ reportsViewSummary: !viewSummary });
@@ -242,6 +242,7 @@ export default function CustomReport() {
           categories={categories}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
+          onChangeViews={onChangeViews}
         />
         <View
           style={{
