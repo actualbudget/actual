@@ -29,7 +29,6 @@ export function ReportSidebar({
   allMonths,
   graphType,
   setGraphType,
-  setViewLegend,
   typeDisabled,
   setTypeDisabled,
   groupBy,

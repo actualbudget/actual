@@ -130,7 +130,7 @@ function ReportSummary({
           }}
         >
           <PrivacyFilter blurIntensity={7}>
-            {integerToCurrency(Math.round(average))}
+            {average && integerToCurrency(Math.round(average))}
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>Per month</Text>
