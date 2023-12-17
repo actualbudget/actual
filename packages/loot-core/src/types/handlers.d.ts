@@ -17,3 +17,5 @@ export interface Handlers
     RulesHandlers,
     SchedulesHandlers,
     ToolsHandlers {}
+
+export type HandlerFunctions = Handlers[keyof Handlers];

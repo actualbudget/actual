@@ -43,7 +43,7 @@ export function ReportTopbar({
         title="Data Table"
         onSelect={() => {
           setGraphType('TableGraph');
-          //setViewLegend(false);
+          setViewLegend(false);
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}
@@ -76,7 +76,7 @@ export function ReportTopbar({
         onSelect={() => {
           setGraphType('AreaGraph');
           setGroupBy('Month');
-          //setViewLegend(false);
+          setViewLegend(false);
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}

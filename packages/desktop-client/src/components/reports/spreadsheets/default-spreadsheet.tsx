@@ -14,6 +14,7 @@ import {
 
 import { categoryLists, groupBySelections } from '../ReportOptions';
 
+import calculateLegend from './calculateLegend';
 import filterHiddenItems from './filterHiddenItems';
 import makeQuery from './makeQuery';
 import recalculate from './recalculate';
@@ -33,6 +34,7 @@ export type createSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   setDataCheck?: (value: boolean) => void;
+  graphType: string;
 };
 
 export default function createSpreadsheet({
@@ -50,6 +52,7 @@ export default function createSpreadsheet({
   payees,
   accounts,
   setDataCheck,
+  graphType,
 }: createSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(
     showOffBudgetHidden,
@@ -167,12 +170,22 @@ export default function createSpreadsheet({
       const calc = recalculate({ item, months, assets, debts, groupByLabel });
       return { ...calc };
     });
+    const calcDataFiltered = calcData.filter(i =>
+      !showEmpty ? i[balanceTypeOp] !== 0 : true,
+    );
+
+    const legend = calculateLegend(
+      monthData,
+      calcDataFiltered,
+      groupBy,
+      graphType,
+      balanceTypeOp,
+    );
 
     setData({
-      data: calcData.filter(i => (!showEmpty ? i[balanceTypeOp] !== 0 : true)),
-      monthData: monthData.filter(i =>
-        !showEmpty ? i[balanceTypeOp] !== 0 : true,
-      ),
+      data: calcDataFiltered,
+      monthData,
+      legend,
       startDate,
       endDate,
       totalDebts: integerToAmount(totalDebts),
