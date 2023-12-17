@@ -5,7 +5,7 @@ import Text from '../common/Text';
 import View from '../common/View';
 
 type ReportLegendProps = {
-  legend: Array<{ name: string; color: string }>;
+  legend?: Array<{ name: string; color: string }>;
   groupBy: string;
 };
 
@@ -31,7 +31,7 @@ function ReportLegend({ legend, groupBy }: ReportLegendProps) {
         {groupBy}
       </Text>
       <View>
-        {legend !== undefined &&
+        {legend &&
           legend.map(item => {
             return (
               <View
