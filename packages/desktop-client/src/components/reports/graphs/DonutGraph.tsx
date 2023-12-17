@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Sector,
-  ResponsiveContainer,
-} from 'recharts';
+import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { type CSSProperties } from '../../../style';
 import Container from '../Container';
-import { DataEntity } from '../entities';
+import { type DataEntity } from '../entities';
 
 const RADIAN = Math.PI / 180;
 const ActiveShape = props => {
