@@ -171,8 +171,12 @@ export class Tooltip extends Component<TooltipProps> {
 
     if (
       container.parentNode &&
-      container.parentNode instanceof HTMLElement &&
-      (container.parentNode as HTMLElement).style.overflow === 'auto'
+function isHTMLElement(element: unknown): element is HTMLElement {
+  return element instanceof HTMLElement;
+}
+
+const { parentNode } = container;
+if (parentNode && isHTMLElement(parentNode) && parentNode.style.overflow === 'auto') {
     ) {
       return container.parentNode;
     }
