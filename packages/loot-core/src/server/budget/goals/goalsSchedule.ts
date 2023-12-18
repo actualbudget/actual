@@ -13,8 +13,6 @@ async function createScheduleList(template, current_month) {
   const errors = [];
 
   for (let ll = 0; ll < template.length; ll++) {
-    console.log(template[ll].name);
-    console.log(ll);
     const { id: sid, completed: complete } = await db.first(
       'SELECT * FROM schedules WHERE name = ? AND tombstone = 0',
       [template[ll].name],
