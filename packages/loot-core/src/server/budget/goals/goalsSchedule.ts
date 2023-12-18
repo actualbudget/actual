@@ -13,6 +13,8 @@ async function createScheduleList(template, current_month) {
   const errors = [];
 
   for (let ll = 0; ll < template.length; ll++) {
+    console.log(template[ll].name);
+    console.log(ll);
     const { id: sid, completed: complete } = await db.first(
       'SELECT * FROM schedules WHERE name = ? AND tombstone = 0',
       [template[ll].name],
@@ -53,8 +55,9 @@ async function createScheduleList(template, current_month) {
       started,
       full: template[ll].full === null ? false : template[ll].full,
       repeat: isRepeating,
+      name: template[ll].name,
     });
-    if (!complete && started) {
+    if (!complete) {
       if (isRepeating) {
         let monthlyTarget = 0;
         const nextMonth = monthUtils.addMonths(
@@ -104,7 +107,7 @@ async function createScheduleList(template, current_month) {
       }
     } else {
       errors.push(
-        `Schedule ${t[ll].template.name} is not active during the month in question.`,
+        `Schedule ${t[ll].name} is not active during the month in question.`,
       );
     }
   }
@@ -112,6 +115,7 @@ async function createScheduleList(template, current_month) {
 }
 
 async function getPayMonthOfTotal(t) {
+  //return the contribution amounts of full or every month type schedules
   let total = 0;
   const schedules = t.filter(c => c.num_months === 0);
   for (let ll = 0; ll < schedules.length; ll++) {
@@ -121,6 +125,7 @@ async function getPayMonthOfTotal(t) {
 }
 
 async function getSinkingContributionTotal(t, remainder, last_month_balance) {
+  //return the contribution amount if there is a balance carried in the category
   let total = 0;
   for (let ll = 0; ll < t.length; ll++) {
     remainder =
@@ -134,16 +139,12 @@ async function getSinkingContributionTotal(t, remainder, last_month_balance) {
       remainder = Math.abs(remainder);
     }
     total += tg / (t[ll].num_months + 1);
-
-    // total +=
-    //   remainder > 0
-    //     ? 0
-    //     : (t[ll].target - Math.abs(remainder)) / (t[ll].num_months + 1);
   }
   return total;
 }
 
 async function getSinkingBaseContributionTotal(t) {
+  //return only the base contribution of each schedule
   let total = 0;
   for (let ll = 0; ll < t.length; ll++) {
     total += t[ll].target / t[ll].target_interval;
@@ -152,6 +153,7 @@ async function getSinkingBaseContributionTotal(t) {
 }
 
 async function getSinkingTotal(t) {
+  //sum the total of all upcoming schedules
   let total = 0;
   for (let ll = 0; ll < t.length; ll++) {
     total += t[ll].target;
@@ -195,9 +197,14 @@ export async function goalsSchedule(
           (!c.full &&
             c.target_frequency === 'monthly' &&
             c.target_interval > 1) ||
-          (!c.full && c.target_frequency === 'yearly'),
+          (!c.full &&
+            c.target_frequency === 'monthly' &&
+            c.num_months > 0 &&
+            c.target_interval === 1) ||
+          (c.full && c.target_frequency === 'yearly') ||
+          (!c.full && c.target_frequency === undefined),
       )
-      .sort((a, b) => b.next_date_string - a.next_date_string);
+      .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
 
     const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
 
@@ -212,87 +219,10 @@ export async function goalsSchedule(
       const totalSinkingContribution = await getSinkingContributionTotal(
         t_sinking,
         remainder,
-        balance,
+        last_month_balance,
       );
       to_budget = Math.round(totalPayMonthOf + totalSinkingContribution);
     }
-
-    //   t = t.filter(t => t.completed === 0 && t.started);
-    //   t = t.sort((a, b) => b.target - a.target);
-
-    //   let increment = 0;
-    //   if (balance >= totalScheduledGoal) {
-    //     for (let ll = 0; ll < t.length; ll++) {
-    //       if (t[ll].num_months < 0) {
-    //         errors.push(
-    //           `Non-repeating schedule ${t[ll].template.name} was due on ${t[ll].next_date_string}, which is in the past.`,
-    //         );
-    //         break;
-    //       }
-    //       if (
-    //         (t[ll].template.full && t[ll].num_months === 0) ||
-    //         t[ll].target_frequency === 'weekly' ||
-    //         t[ll].target_frequency === 'daily'
-    //       ) {
-    //         increment += t[ll].target;
-    //       } else if (t[ll].template.full && t[ll].num_months > 0) {
-    //         increment += 0;
-    //       } else {
-    //         increment += t[ll].target / t[ll].target_interval;
-    //       }
-    //     }
-    //   } else if (balance < totalScheduledGoal) {
-    //     for (let ll = 0; ll < t.length; ll++) {
-    //       if (isReflectBudget()) {
-    //         if (!t[ll].template.full) {
-    //           errors.push(
-    //             `Report budgets require the full option for Schedules.`,
-    //           );
-    //           break;
-    //         }
-    //         if (t[ll].template.full && t[ll].num_months === 0) {
-    //           to_budget += t[ll].target;
-    //         }
-    //       }
-    //       if (!isReflectBudget()) {
-    //         if (t[ll].num_months < 0) {
-    //           errors.push(
-    //             `Non-repeating schedule ${t[ll].template.name} was due on ${t[ll].next_date_string}, which is in the past.`,
-    //           );
-    //           break;
-    //         }
-    //         if (t[ll].template.full && t[ll].num_months > 0) {
-    //           remainder = 0;
-    //         } else if (ll === 0 && !t[ll].template.full) {
-    //           remainder = t[ll].target - last_month_balance;
-    //         } else {
-    //           remainder = t[ll].target - remainder;
-    //         }
-    //         let tg = 0;
-    //         if (remainder >= 0) {
-    //           tg = remainder;
-    //           remainder = 0;
-    //         } else {
-    //           tg = 0;
-    //           remainder = Math.abs(remainder);
-    //         }
-    //         if (
-    //           t[ll].template.full ||
-    //           t[ll].num_months === 0 ||
-    //           t[ll].target_frequency === 'weekly' ||
-    //           t[ll].target_frequency === 'daily'
-    //         ) {
-    //           increment += tg;
-    //         } else if (t[ll].template.full && t[ll].num_months > 0) {
-    //           increment += 0;
-    //         } else {
-    //           increment += tg / (t[ll].num_months + 1);
-    //         }
-    //       }
-    //     }
-    //   }
-    //   increment = Math.round(increment);
-    //   to_budget += increment;
   }
   return { to_budget, errors, remainder, scheduleFlag };
 }
