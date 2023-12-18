@@ -219,14 +219,14 @@ export async function goalsSchedule(
     );
 
     if (balance >= totalSinking + totalPayMonthOf) {
-      to_budget = Math.round(totalPayMonthOf + totalSinkingBaseContribution);
+      to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
     } else {
       const totalSinkingContribution = await getSinkingContributionTotal(
         t_sinking,
         remainder,
         last_month_balance,
       );
-      to_budget = Math.round(totalPayMonthOf + totalSinkingContribution);
+      to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
     }
   }
   return { to_budget, errors, remainder, scheduleFlag };
