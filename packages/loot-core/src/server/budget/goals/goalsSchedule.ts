@@ -1,3 +1,4 @@
+import { Paste } from '../../../../../desktop-client/src/icons/v1';
 import * as monthUtils from '../../../shared/months';
 import { extractScheduleConds } from '../../../shared/schedules';
 import * as db from '../../db';
@@ -43,48 +44,33 @@ async function createScheduleList(template, current_month) {
     );
     // const startDate = dateConditions.value.start ?? dateConditions.value;
     // const started = startDate <= monthUtils.addMonths(current_month, 1);
-    t.push({
-      target,
-      next_date_string,
-      target_interval,
-      target_frequency,
-      num_months,
-      completed: complete,
-      //started,
-      full: template[ll].full === null ? false : template[ll].full,
-      repeat: isRepeating,
-      name: template[ll].name,
-    });
-    if (!complete) {
-      if (isRepeating) {
-        let monthlyTarget = 0;
-        const nextMonth = monthUtils.addMonths(
-          current_month,
-          t[ll].num_months + 1,
-        );
-        let nextBaseDate = getNextDate(
-          dateConditions,
-          monthUtils._parse(current_month),
-          true,
-        );
-        let nextDate = dateConditions.value.skipWeekend
-          ? monthUtils.dayFromDate(
-              getDateWithSkippedWeekend(
-                monthUtils._parse(nextBaseDate),
-                dateConditions.value.weekendSolveMode,
-              ),
-            )
-          : nextBaseDate;
-        while (nextDate < nextMonth) {
-          monthlyTarget += -target;
-          const currentDate = nextBaseDate;
-          const oneDayLater = monthUtils.addDays(nextBaseDate, 1);
-          nextBaseDate = getNextDate(
+    if (num_months >= 0) {
+      //non-repeating schedules could be negative
+      t.push({
+        target,
+        next_date_string,
+        target_interval,
+        target_frequency,
+        num_months,
+        completed: complete,
+        //started,
+        full: template[ll].full === null ? false : template[ll].full,
+        repeat: isRepeating,
+        name: template[ll].name,
+      });
+      if (!complete) {
+        if (isRepeating) {
+          let monthlyTarget = 0;
+          const nextMonth = monthUtils.addMonths(
+            current_month,
+            t[ll].num_months + 1,
+          );
+          let nextBaseDate = getNextDate(
             dateConditions,
-            monthUtils._parse(oneDayLater),
+            monthUtils._parse(current_month),
             true,
           );
-          nextDate = dateConditions.value.skipWeekend
+          let nextDate = dateConditions.value.skipWeekend
             ? monthUtils.dayFromDate(
                 getDateWithSkippedWeekend(
                   monthUtils._parse(nextBaseDate),
@@ -92,21 +78,41 @@ async function createScheduleList(template, current_month) {
                 ),
               )
             : nextBaseDate;
-          const diffDays = monthUtils.differenceInCalendarDays(
-            nextBaseDate,
-            currentDate,
-          );
-          if (!diffDays) {
-            // This can happen if the schedule has an end condition.
-            break;
+          while (nextDate < nextMonth) {
+            monthlyTarget += -target;
+            const currentDate = nextBaseDate;
+            const oneDayLater = monthUtils.addDays(nextBaseDate, 1);
+            nextBaseDate = getNextDate(
+              dateConditions,
+              monthUtils._parse(oneDayLater),
+              true,
+            );
+            nextDate = dateConditions.value.skipWeekend
+              ? monthUtils.dayFromDate(
+                  getDateWithSkippedWeekend(
+                    monthUtils._parse(nextBaseDate),
+                    dateConditions.value.weekendSolveMode,
+                  ),
+                )
+              : nextBaseDate;
+            const diffDays = monthUtils.differenceInCalendarDays(
+              nextBaseDate,
+              currentDate,
+            );
+            if (!diffDays) {
+              // This can happen if the schedule has an end condition.
+              break;
+            }
           }
+          t[ll].target = -monthlyTarget;
         }
-        t[ll].target = -monthlyTarget;
+      } else {
+        errors.push(
+          `Schedule ${t[ll].name} is not active during the month in question.`,
+        );
       }
     } else {
-      errors.push(
-        `Schedule ${t[ll].name} is not active during the month in question.`,
-      );
+      errors.push(`Schedule ${template[ll].name} is in the Past.`);
     }
   }
   return { t: t.filter(c => c.completed === 0), errors };
