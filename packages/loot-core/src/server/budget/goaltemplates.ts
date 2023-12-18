@@ -156,7 +156,7 @@ async function processTemplate(
   let priority_list = [];
 
   const categories = await getCategories();
-  let categories_remove = [];
+  const categories_remove = [];
 
   //clears templated categories
   for (let c = 0; c < categories.length; c++) {
@@ -175,10 +175,12 @@ async function processTemplate(
         priority_list.push(template[l].priority);
       }
     }
-    if (budgeted) { 
-      if (!force) {// if not overwritting ignore these categories
-        categories_remove.push(category);
-      } else { // if we are overwritting add this category to list to zero
+    if (budgeted) {
+      if (!force) {
+        // save index of category to remove
+        categories_remove.push(c);
+      } else {
+        // if we are overwritting add this category to list to zero
         setToZero.push({
           category: category.id,
           amount: 0,
@@ -189,11 +191,11 @@ async function processTemplate(
     }
   }
 
-  // remove the categories we are skipping because of not force
-  for (let i = 0; i < categories_remove.length; i++) {
-    const c = categories_remove[i];
-    const index = categories.indexOf(c);
-    categories.splice(index,1);
+  // remove the categories we are skipping
+  // Go backwards through the list so the indexes don't change
+  // on the categories we need
+  for (let i = categories_remove.length - 1; i >= 0; i--) {
+    categories.splice(categories_remove[i], 1);
   }
 
   // zero out the categories that need it
