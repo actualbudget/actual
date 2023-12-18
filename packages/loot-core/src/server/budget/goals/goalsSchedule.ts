@@ -44,8 +44,10 @@ async function createScheduleList(template, current_month) {
     );
     // const startDate = dateConditions.value.start ?? dateConditions.value;
     // const started = startDate <= monthUtils.addMonths(current_month, 1);
-    if (num_months >= 0) {
+    if (num_months < 0) {
       //non-repeating schedules could be negative
+      errors.push(`Schedule ${template[ll].name} is in the Past.`);
+    } else {
       t.push({
         target,
         next_date_string,
@@ -111,8 +113,6 @@ async function createScheduleList(template, current_month) {
           `Schedule ${t[ll].name} is not active during the month in question.`,
         );
       }
-    } else {
-      errors.push(`Schedule ${template[ll].name} is in the Past.`);
     }
   }
   return { t: t.filter(c => c.completed === 0), errors };
