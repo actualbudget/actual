@@ -125,8 +125,20 @@ async function getSinkingContributionTotal(t, remainder, last_month_balance) {
   for (let ll = 0; ll < t.length; ll++) {
     remainder =
       ll === 0 ? t[ll].target - last_month_balance : t[ll].target - remainder;
-    total +=
-      remainder > 0 ? 0 : (t[ll].target - remainder) / (t[ll].num_months + 1);
+    let tg = 0;
+    if (remainder >= 0) {
+      tg = remainder;
+      remainder = 0;
+    } else {
+      tg = 0;
+      remainder = Math.abs(remainder);
+    }
+    total += tg / (t[ll].num_months + 1);
+
+    // total +=
+    //   remainder > 0
+    //     ? 0
+    //     : (t[ll].target - Math.abs(remainder)) / (t[ll].num_months + 1);
   }
   return total;
 }
@@ -194,15 +206,15 @@ export async function goalsSchedule(
       t_sinking,
     );
 
-    if (totalSinking + totalPayMonthOf < last_month_balance) {
+    if (balance >= totalSinking + totalPayMonthOf) {
+      to_budget = Math.round(totalPayMonthOf + totalSinkingBaseContribution);
+    } else {
       const totalSinkingContribution = await getSinkingContributionTotal(
         t_sinking,
         remainder,
-        last_month_balance - totalPayMonthOf,
+        balance,
       );
       to_budget = Math.round(totalPayMonthOf + totalSinkingContribution);
-    } else {
-      to_budget = Math.round(totalPayMonthOf + totalSinkingBaseContribution);
     }
 
     //   t = t.filter(t => t.completed === 0 && t.started);
