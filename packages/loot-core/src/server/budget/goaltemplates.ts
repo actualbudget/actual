@@ -49,7 +49,7 @@ async function getCategories() {
     INNER JOIN category_groups on categories.cat_group = category_groups.id 
     WHERE categories.tombstone = 0 AND categories.hidden = 0 
     AND category_groups.hidden = 0
-    `
+    `,
   );
 }
 
