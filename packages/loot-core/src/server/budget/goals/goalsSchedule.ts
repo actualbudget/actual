@@ -192,6 +192,7 @@ export async function goalsSchedule(
         (c.target_frequency === 'weekly' &&
           c.target_interval >= 0 &&
           c.num_months === 0) ||
+        c.target_frequency === 'daily' ||
         isReflectBudget(),
     );
 
