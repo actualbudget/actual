@@ -43,8 +43,8 @@ async function createScheduleList(template, current_month) {
       next_date_string,
       current_month,
     );
-    const startDate = dateConditions.value.start ?? dateConditions.value;
-    const started = startDate <= monthUtils.addMonths(current_month, 1);
+    // const startDate = dateConditions.value.start ?? dateConditions.value;
+    // const started = startDate <= monthUtils.addMonths(current_month, 1);
     t.push({
       target,
       next_date_string,
@@ -52,7 +52,7 @@ async function createScheduleList(template, current_month) {
       target_frequency,
       num_months,
       completed: complete,
-      started,
+      //started,
       full: template[ll].full === null ? false : template[ll].full,
       repeat: isRepeating,
       name: template[ll].name,
@@ -201,7 +201,7 @@ export async function goalsSchedule(
             c.target_frequency === 'monthly' &&
             c.num_months > 0 &&
             c.target_interval === 1) ||
-          (c.full && c.target_frequency === 'yearly') ||
+          (!c.full && c.target_frequency === 'yearly') ||
           (!c.full && c.target_frequency === undefined),
       )
       .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
