@@ -1,18 +1,28 @@
-import React, { Component, createContext, createRef, useState } from 'react';
+import {
+  Component,
+  createContext,
+  createRef,
+  useState,
+  type RefObject,
+  type ReactNode,
+  type MouseEventHandler,
+  type MouseEvent,
+  type ContextType,
+} from 'react';
 import ReactDOM from 'react-dom';
 
 import { css } from 'glamor';
 
-import { styles, theme } from '../style';
+import { type CSSProperties, styles, theme } from '../style';
 
-export const IntersectionBoundary = createContext();
+export const IntersectionBoundary = createContext<RefObject<HTMLElement>>(null);
 
 export function useTooltip() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return {
-    getOpenEvents: (events = {}) => ({
-      onClick: e => {
+    getOpenEvents: (events: { onClick?: MouseEventHandler } = {}) => ({
+      onClick: (e: MouseEvent) => {
         e.stopPropagation();
         events.onClick?.(e);
         setIsOpen(true);
@@ -24,14 +34,56 @@ export function useTooltip() {
   };
 }
 
-export class Tooltip extends Component {
+export type TooltipPosition =
+  | 'top'
+  | 'top-left'
+  | 'top-right'
+  | 'bottom'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'bottom-stretch'
+  | 'top-stretch'
+  | 'bottom-center'
+  | 'top-center'
+  | 'left-center'
+  | 'right';
+
+type TooltipProps = {
+  position?: TooltipPosition;
+  onClose?: () => void;
+  forceLayout?: boolean;
+  forceTop?: number;
+  ignoreBoundary?: boolean;
+  targetRect?: DOMRect;
+  offset?: number;
+  style?: CSSProperties;
+  width?: number;
+  children: ReactNode;
+  targetHeight?: number;
+};
+type MutableDomRect = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
+
+export class Tooltip extends Component<TooltipProps> {
   static contextType = IntersectionBoundary;
-  state = { position: null };
+  position: TooltipPosition;
+  contentRef: RefObject<HTMLDivElement>;
+  cleanup: () => void;
+  target: HTMLDivElement;
+  context: ContextType<typeof IntersectionBoundary> = this.context; // assign type to context without using declare.
 
   constructor(props) {
     super(props);
     this.position = props.position || 'bottom-right';
-    this.contentRef = createRef();
+    this.contentRef = createRef<HTMLDivElement>();
+  }
+
+  isHTMLElement(element: unknown): element is HTMLElement {
+    return element instanceof HTMLElement;
   }
 
   setup() {
@@ -107,7 +159,7 @@ export class Tooltip extends Component {
     }
   }
 
-  getContainer() {
+  getContainer(): HTMLElement {
     const { ignoreBoundary = false } = this.props;
 
     if (!ignoreBoundary && this.context) {
@@ -123,6 +175,7 @@ export class Tooltip extends Component {
 
     if (
       container.parentNode &&
+      this.isHTMLElement(container.parentNode) &&
       container.parentNode.style.overflow === 'auto'
     ) {
       return container.parentNode;
@@ -138,9 +191,18 @@ export class Tooltip extends Component {
     }
 
     const box = contentEl.getBoundingClientRect();
+
     const anchorEl = this.target.parentNode;
 
-    let anchorRect = targetRect || anchorEl.getBoundingClientRect();
+    let anchorRect: MutableDomRect | undefined =
+      targetRect ||
+      (this.isHTMLElement(anchorEl)
+        ? anchorEl?.getBoundingClientRect()
+        : undefined);
+
+    if (!anchorRect) {
+      return;
+    }
 
     // Copy it so we can mutate it
     anchorRect = {
@@ -238,6 +300,7 @@ export class Tooltip extends Component {
       bottom: 'inherit',
       left: 'inherit',
       right: 'inherit',
+      width: undefined as string | undefined,
     };
 
     if (

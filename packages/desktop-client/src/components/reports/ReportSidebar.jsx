@@ -29,7 +29,6 @@ export function ReportSidebar({
   allMonths,
   graphType,
   setGraphType,
-  setViewLegend,
   typeDisabled,
   setTypeDisabled,
   groupBy,
@@ -49,6 +48,7 @@ export function ReportSidebar({
   categories,
   selectedCategories,
   setSelectedCategories,
+  onChangeViews,
 }) {
   const onSelectRange = cond => {
     setDateRange(cond);
@@ -99,7 +99,7 @@ export function ReportSidebar({
       }
       if (['AreaGraph', 'DonutGraph'].includes(graphType)) {
         setGraphType('TableGraph');
-        //setViewLegend(false);
+        onChangeViews('viewLegend', false);
       }
       if (['Month', 'Year'].includes(groupBy)) {
         setGroupBy('Category');
