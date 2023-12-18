@@ -44,7 +44,12 @@ export function runCheckTemplates() {
 
 async function getCategories() {
   return await db.all(
-    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
+    `
+    SELECT categories.* FROM categories 
+    INNER JOIN category_groups on categories.cat_group = category_groups.id 
+    WHERE categories.tombstone = 0 AND categories.hidden = 0 
+    AND category_groups.hidden = 0
+    `
   );
 }
 
