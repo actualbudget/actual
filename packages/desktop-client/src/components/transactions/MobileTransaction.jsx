@@ -1,10 +1,10 @@
 import React, {
-  PureComponent,
-  Component,
   forwardRef,
   useEffect,
   useState,
   useRef,
+  memo,
+  useMemo,
 } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -21,7 +21,6 @@ import {
   isValid as isValidDate,
 } from 'date-fns';
 import { css } from 'glamor';
-import memoizeOne from 'memoize-one';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -72,10 +71,8 @@ import {
 import MobileBackButton from '../MobileBackButton';
 import { Page } from '../Page';
 import { AmountInput } from '../util/AmountInput';
-const zIndices = { SECTION_HEADING: 10 };
 
-const getPayeesById = memoizeOne(payees => groupById(payees));
-const getAccountsById = memoizeOne(accounts => groupById(accounts));
+const zIndices = { SECTION_HEADING: 10 };
 
 function getDescriptionPretty(transaction, payee, transferAcct) {
   const { amount } = transaction;
@@ -171,53 +168,318 @@ function Status({ status }) {
   );
 }
 
-class TransactionEditInner extends PureComponent {
-  serializeTransactions = memoizeOne(transactions => {
-    return transactions.map(t =>
-      serializeTransaction(t, this.props.dateFormat),
-    );
-  });
-
-  componentDidMount() {
-    if (this.props.adding) {
-      this.amount.focus();
+function Footer({
+  transactions,
+  adding,
+  onAdd,
+  onSave,
+  onSplit,
+  onAddSplit,
+  onEmptySplitFound,
+}) {
+  const [transaction, ...childTransactions] = transactions;
+  const onClickRemainingSplit = () => {
+    if (childTransactions.length === 0) {
+      onSplit(transaction.id);
+    } else {
+      const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
+      if (!emptySplitTransaction) {
+        onAddSplit(transaction.id);
+      } else {
+        onEmptySplitFound?.(emptySplitTransaction.id);
+      }
     }
-  }
-
-  onAdd = () => {
-    this.onSave();
   };
 
-  onSave = async () => {
-    const onConfirmSave = async () => {
-      let { transactions } = this.props;
-      const [transaction, ..._childTransactions] = transactions;
-      const { account: accountId } = transaction;
-      const account = getAccountsById(this.props.accounts)[accountId];
+  return (
+    <View
+      style={{
+        paddingLeft: styles.mobileEditingPadding,
+        paddingRight: styles.mobileEditingPadding,
+        paddingTop: 10,
+        paddingBottom: 10,
+        backgroundColor: theme.tableHeaderBackground,
+        borderTopWidth: 1,
+        borderColor: theme.tableBorder,
+      }}
+    >
+      {transaction.error?.type === 'SplitTransactionError' ? (
+        <Button
+          type="primary"
+          style={{ height: 40 }}
+          onClick={onClickRemainingSplit}
+          onPointerDown={e => e.preventDefault()}
+        >
+          <Split width={17} height={17} />
+          <Text
+            style={{
+              ...styles.text,
+              marginLeft: 6,
+            }}
+          >
+            Amount left:{' '}
+            {integerToCurrency(
+              transaction.amount > 0
+                ? transaction.error.difference
+                : -transaction.error.difference,
+            )}
+          </Text>
+        </Button>
+      ) : adding ? (
+        <Button
+          style={{ height: 40 }}
+          onClick={onAdd}
+          onPointerDown={e => e.preventDefault()}
+        >
+          <Add width={17} height={17} style={{ color: theme.formLabelText }} />
+          <Text
+            style={{
+              ...styles.text,
+              color: theme.formLabelText,
+              marginLeft: 5,
+            }}
+          >
+            Add transaction
+          </Text>
+        </Button>
+      ) : (
+        <Button
+          style={{ height: 40 }}
+          onClick={onSave}
+          onPointerDown={e => e.preventDefault()}
+        >
+          <PencilWriteAlternate
+            width={16}
+            height={16}
+            style={{
+              color: theme.formLabelText,
+            }}
+          />
+          <Text
+            style={{
+              ...styles.text,
+              marginLeft: 6,
+              color: theme.formLabelText,
+            }}
+          >
+            Save changes
+          </Text>
+        </Button>
+      )}
+    </View>
+  );
+}
 
-      if (transactions.find(t => t.account == null)) {
+const ChildTransactionEdit = forwardRef(
+  (
+    {
+      transaction,
+      amountSign,
+      amountRef,
+      getCategory,
+      getPrettyPayee,
+      isOffBudget,
+      isBudgetTransfer,
+      onClick,
+      onEdit,
+      onDelete,
+    },
+    ref,
+  ) => {
+    return (
+      <View
+        innerRef={ref}
+        style={{
+          backgroundColor: theme.tableBackground,
+          borderColor:
+            transaction.amount === 0
+              ? theme.tableBorderSelected
+              : theme.tableBorder,
+          borderWidth: '1px',
+          borderRadius: '5px',
+          padding: '5px',
+          margin: '10px',
+        }}
+      >
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ flexBasis: '75%' }}>
+            <FieldLabel title="Payee" />
+            <TapField
+              value={getPrettyPayee(transaction)}
+              onClick={() => onClick(transaction.id, 'payee')}
+              data-testid={`payee-field-${transaction.id}`}
+            />
+          </View>
+          <View
+            style={{
+              flexBasis: '25%',
+            }}
+          >
+            <FieldLabel title="Amount" style={{ padding: 0 }} />
+            <AmountInput
+              inputRef={amountRef}
+              initialValue={amountToInteger(transaction.amount)}
+              zeroSign={amountSign}
+              style={{ marginRight: 8 }}
+              textStyle={{ ...styles.smallText, textAlign: 'right' }}
+              onChange={value =>
+                onEdit(transaction, 'amount', integerToAmount(value))
+              }
+            />
+          </View>
+        </View>
+
+        <View>
+          <FieldLabel title={'Category'} />
+          <TapField
+            style={{
+              ...((isOffBudget || isBudgetTransfer(transaction)) && {
+                fontStyle: 'italic',
+                color: theme.pageTextSubdued,
+                fontWeight: 300,
+              }),
+            }}
+            value={getCategory(transaction, isOffBudget)}
+            disabled={isOffBudget || isBudgetTransfer(transaction)}
+            onClick={() => onClick(transaction.id, 'category')}
+            data-testid={`category-field-${transaction.id}`}
+          />
+        </View>
+
+        <View>
+          <FieldLabel title="Notes" />
+          <InputField
+            defaultValue={transaction.notes}
+            onUpdate={value => onEdit(transaction, 'notes', value)}
+          />
+        </View>
+
+        <View style={{ alignItems: 'center' }}>
+          <Button
+            onClick={() => onDelete(transaction.id)}
+            onPointerDown={e => e.preventDefault()}
+            style={{
+              height: 40,
+              borderWidth: 0,
+              marginLeft: styles.mobileEditingPadding,
+              marginRight: styles.mobileEditingPadding,
+              marginTop: 10,
+              backgroundColor: 'transparent',
+            }}
+            type="bare"
+          >
+            <Trash width={17} height={17} style={{ color: theme.errorText }} />
+            <Text
+              style={{
+                color: theme.errorText,
+                marginLeft: 5,
+                userSelect: 'none',
+              }}
+            >
+              Delete split
+            </Text>
+          </Button>
+        </View>
+      </View>
+    );
+  },
+);
+
+const TransactionEditInner = memo(function TransactionEditInner({
+  adding,
+  accounts,
+  categories,
+  payees,
+  dateFormat,
+  transactions: unserializedTransactions,
+  navigate,
+  pushModal,
+  ...props
+}) {
+  const [totalAmountFocused, setTotalAmountFocused] = useState(false);
+  const amountElementMap = useRef({});
+  const childTransactionElementRefMap = useRef({});
+
+  const payeesById = useMemo(() => groupById(payees), [payees]);
+  const accountsById = useMemo(() => groupById(accounts), [accounts]);
+
+  const getAccount = trans => {
+    return trans?.account && accountsById?.[trans.account];
+  };
+
+  const getPayee = trans => {
+    return trans?.payee && payeesById?.[trans.payee];
+  };
+
+  const getTransferAcct = trans => {
+    const payee = trans && getPayee(trans);
+    return payee?.transfer_acct && accountsById?.[payee.transfer_acct];
+  };
+
+  const getPrettyPayee = trans => {
+    const transPayee = trans && getPayee(trans);
+    const transTransferAcct = trans && getTransferAcct(trans);
+    return getDescriptionPretty(trans, transPayee, transTransferAcct);
+  };
+
+  const isBudgetTransfer = trans => {
+    const transferAcct = trans && getTransferAcct(trans);
+    return transferAcct && !transferAcct.offbudget;
+  };
+
+  const getCategory = (trans, isOffBudget) => {
+    return isOffBudget
+      ? 'Off Budget'
+      : isBudgetTransfer(trans)
+      ? 'Transfer'
+      : lookupName(categories, trans.category);
+  };
+
+  useEffect(() => {
+    if (adding) {
+      setTotalAmountFocused(true);
+    }
+  }, [adding]);
+
+  const onTotalAmountBlur = value => {
+    if (transaction.amount !== value) {
+      onEdit(transaction, 'amount', value.toString());
+    }
+    setTotalAmountFocused(false);
+  };
+
+  const onTotalAmountFocus = () => {
+    setTotalAmountFocused(true);
+  };
+
+  const onSave = async () => {
+    const [transaction] = unserializedTransactions;
+
+    const onConfirmSave = async () => {
+      const { account: accountId } = transaction;
+      const account = accountsById[accountId];
+
+      if (unserializedTransactions.find(t => t.account == null)) {
         // Ignore transactions if any of them don't have an account
         // TODO: Should we display validation error?
         return;
       }
 
-      if (this.props.adding) {
-        transactions = realizeTempTransactions(transactions);
+      let transactionsToSave = unserializedTransactions;
+      if (adding) {
+        transactionsToSave = realizeTempTransactions(unserializedTransactions);
       }
 
-      this.props.onSave(transactions);
-      this.props.navigate(`/accounts/${account.id}`, { replace: true });
+      props.onSave(transactionsToSave);
+      navigate(`/accounts/${account.id}`, { replace: true });
     };
-
-    const { transactions } = this.props;
-    const [transaction] = transactions;
 
     if (transaction.reconciled) {
       // On mobile any save gives the warning.
       // On the web only certain changes trigger a warning.
       // Should we bring that here as well? Or does the nature of the editing form
       // make this more appropriate?
-      this.props.pushModal('confirm-transaction-edit', {
+      pushModal('confirm-transaction-edit', {
         onConfirm: onConfirmSave,
         confirmReason: 'editReconciled',
       });
@@ -226,53 +488,51 @@ class TransactionEditInner extends PureComponent {
     }
   };
 
-  onEdit = async (transaction, name, value) => {
-    const newTransaction = { ...transaction, [name]: value };
-    if (this.props.onEdit) {
-      await this.props.onEdit(newTransaction);
-    }
+  const onAdd = () => {
+    onSave();
   };
 
-  onClick = (transactionId, name) => {
-    const { dateFormat } = this.props;
+  const onEdit = async (transaction, name, value) => {
+    const newTransaction = { ...transaction, [name]: value };
+    await props.onEdit(newTransaction);
+  };
 
-    this.props.pushModal('edit-field', {
+  const onClick = (transactionId, name) => {
+    pushModal('edit-field', {
       name,
       onSubmit: (name, value) => {
-        const { transactions } = this.props;
-        const transaction = transactions.find(t => t.id === transactionId);
+        const transaction = unserializedTransactions.find(
+          t => t.id === transactionId,
+        );
         // This is a deficiency of this API, need to fix. It
         // assumes that it receives a serialized transaction,
         // but we only have access to the raw transaction
-        this.onEdit(serializeTransaction(transaction, dateFormat), name, value);
+        onEdit(serializeTransaction(transaction, dateFormat), name, value);
       },
     });
   };
 
-  onDelete = id => {
+  const onDelete = id => {
+    const [transaction, ..._childTransactions] = unserializedTransactions;
+
     const onConfirmDelete = () => {
-      const { transactions } = this.props;
+      props.onDelete(id);
 
-      this.props.onDelete(id);
-
-      const [transaction, ..._childTransactions] = transactions;
       if (transaction.id !== id) {
+        // Only a child transaction was deleted.
         return;
       }
 
       const { account: accountId } = transaction;
       if (accountId) {
-        this.props.navigate(`/accounts/${accountId}`, { replace: true });
+        navigate(`/accounts/${accountId}`, { replace: true });
       } else {
-        this.props.navigate(-1);
+        navigate(-1);
       }
     };
 
-    const { transactions } = this.props;
-    const [transaction] = transactions;
-
     if (transaction.reconciled) {
-      this.props.pushModal('confirm-transaction-edit', {
+      pushModal('confirm-transaction-edit', {
         onConfirm: onConfirmDelete,
         confirmReason: 'deleteReconciled',
       });
@@ -281,475 +541,307 @@ class TransactionEditInner extends PureComponent {
     }
   };
 
-  onAddSplit = id => {
-    this.props.onAddSplit(id);
+  const scrollChildTransactionIntoView = id => {
+    const emptyAmountElement = amountElementMap.current?.[id];
+    emptyAmountElement?.select();
+
+    const childTransactionEditElement =
+      childTransactionElementRefMap.current?.[id];
+    childTransactionEditElement?.scrollIntoView({
+      behavior: 'smooth',
+    });
   };
 
-  onSplit = id => {
-    this.props.onSplit(id);
+  const onAddSplit = id => {
+    props.onAddSplit(id);
   };
 
-  render() {
-    const {
-      adding,
-      categories,
-      accounts,
-      payees,
-      transactions: originalTransactions,
-    } = this.props;
-    const transactions = this.serializeTransactions(originalTransactions || []);
-    const [transaction, ..._childTransactions] = transactions;
+  const onSplit = id => {
+    props.onSplit(id);
+  };
 
-    // Child transactions should always default to the signage
-    // of the parent transaction
-    // const forcedSign = transaction.amount < 0 ? 'negative' : 'positive';
+  const onEmptySplitFound = id => {
+    scrollChildTransactionIntoView(id);
+  };
 
-    const getAccount = trans => {
-      return trans && accounts && getAccountsById(accounts)[trans.account];
-    };
+  const transactions = useMemo(
+    () =>
+      unserializedTransactions.map(t => serializeTransaction(t, dateFormat)) ||
+      [],
+    [unserializedTransactions, dateFormat],
+  );
 
-    const getPayee = trans => {
-      return (
-        trans && payees && trans.payee && getPayeesById(payees)[trans.payee]
-      );
-    };
+  const [transaction, ...childTransactions] = transactions;
 
-    const getTransferAcct = trans => {
-      const payee = trans && getPayee(trans);
-      return (
-        payee &&
-        payee.transfer_acct &&
-        getAccountsById(accounts)[payee.transfer_acct]
-      );
-    };
+  useEffect(() => {
+    const noAmountTransaction = transactions.find(t => t.amount === 0);
+    if (noAmountTransaction) {
+      scrollChildTransactionIntoView(noAmountTransaction.id);
+    }
+  }, [transactions]);
 
-    const getPrettyPayee = trans => {
-      const transPayee = trans && getPayee(trans);
-      const transTransferAcct = trans && getTransferAcct(trans);
-      return getDescriptionPretty(trans, transPayee, transTransferAcct);
-    };
+  // Child transactions should always default to the signage
+  // of the parent transaction
+  const childAmountSign = transaction.amount <= 0 ? '-' : '+';
 
-    const isBudgetTransfer = trans => {
-      const transferAcct = trans && getTransferAcct(trans);
-      return transferAcct && !transferAcct.offbudget;
-    };
+  const account = getAccount(transaction);
+  const isOffBudget = account && !!account.offbudget;
+  const title = getDescriptionPretty(
+    transaction,
+    getPayee(transaction),
+    getTransferAcct(transaction),
+  );
 
-    const account = getAccount(transaction);
-    const isOffBudget = account && !!account.offbudget;
-    const title = getDescriptionPretty(
-      transaction,
-      getPayee(transaction),
-      getTransferAcct(transaction),
-    );
+  const transactionDate = parseDate(transaction.date, dateFormat, new Date());
+  const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
 
-    const transactionDate = parseDate(
-      transaction.date,
-      this.props.dateFormat,
-      new Date(),
-    );
-    const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
-
-    return (
-      <Page
-        title={
-          transaction.payee == null
-            ? adding
-              ? 'New Transaction'
-              : 'Transaction'
-            : title
-        }
-        titleStyle={{
-          fontSize: 16,
-          fontWeight: 500,
-        }}
-        style={{
-          flex: 1,
-          backgroundColor: theme.mobilePageBackground,
-        }}
-        headerLeftContent={<MobileBackButton />}
-        footer={
-          <View
-            style={{
-              paddingLeft: styles.mobileEditingPadding,
-              paddingRight: styles.mobileEditingPadding,
-              paddingTop: 10,
-              paddingBottom: 10,
-              backgroundColor: theme.tableHeaderBackground,
-              borderTopWidth: 1,
-              borderColor: theme.tableBorder,
+  return (
+    <Page
+      title={
+        transaction.payee == null
+          ? adding
+            ? 'New Transaction'
+            : 'Transaction'
+          : title
+      }
+      titleStyle={{
+        fontSize: 16,
+        fontWeight: 500,
+      }}
+      style={{
+        flex: 1,
+        backgroundColor: theme.mobilePageBackground,
+      }}
+      headerLeftContent={<MobileBackButton />}
+      footer={
+        <Footer
+          transactions={transactions}
+          adding={adding}
+          onAdd={onAdd}
+          onSave={onSave}
+          onSplit={onSplit}
+          onAddSplit={onAddSplit}
+          onEmptySplitFound={onEmptySplitFound}
+        />
+      }
+      padding={0}
+    >
+      <View style={{ flexShrink: 0, marginTop: 20, marginBottom: 20 }}>
+        <View
+          style={{
+            alignItems: 'center',
+          }}
+        >
+          <FieldLabel
+            title="Amount"
+            flush
+            style={{ marginBottom: 0, paddingLeft: 0 }}
+          />
+          <FocusableAmountInput
+            value={transaction.amount}
+            zeroIsNegative={true}
+            focused={totalAmountFocused}
+            onBlur={onTotalAmountBlur}
+            onFocus={onTotalAmountFocus}
+            style={{ transform: [] }}
+            focusedStyle={{
+              width: 'auto',
+              padding: '5px',
+              paddingLeft: '20px',
+              paddingRight: '20px',
+              minWidth: 120,
+              transform: [{ translateY: -0.5 }],
             }}
-          >
-            {transaction.error?.type === 'SplitTransactionError' ? (
-              <Button
-                style={{ height: 40 }}
-                onClick={() =>
-                  _childTransactions.length === 0
-                    ? this.onSplit(transaction.id)
-                    : this.onAddSplit(transaction.id)
-                }
-              >
-                <Split
-                  width={17}
-                  height={17}
-                  style={{
-                    color: theme.formLabelText,
-                  }}
-                />
-                <Text
-                  style={{
-                    ...styles.text,
-                    marginLeft: 6,
-                    color: theme.formLabelText,
-                  }}
-                >
-                  Amount left:{' '}
-                  {integerToCurrency(
-                    transaction.amount > 0
-                      ? transaction.error.difference
-                      : -transaction.error.difference,
-                  )}
-                </Text>
-              </Button>
-            ) : adding ? (
-              <Button style={{ height: 40 }} onClick={() => this.onAdd()}>
-                <Add
-                  width={17}
-                  height={17}
-                  style={{ color: theme.formLabelText }}
-                />
-                <Text
-                  style={{
-                    ...styles.text,
-                    color: theme.formLabelText,
-                    marginLeft: 5,
-                  }}
-                >
-                  Add transaction
-                </Text>
-              </Button>
-            ) : (
-              <Button style={{ height: 40 }} onClick={() => this.onSave()}>
-                <PencilWriteAlternate
-                  width={16}
-                  height={16}
-                  style={{
-                    color: theme.formLabelText,
-                  }}
-                />
-                <Text
-                  style={{
-                    ...styles.text,
-                    marginLeft: 6,
-                    color: theme.formLabelText,
-                  }}
-                >
-                  Save changes
-                </Text>
-              </Button>
-            )}
-          </View>
-        }
-        padding={0}
-      >
-        <View style={{ flexShrink: 0, marginTop: 20, marginBottom: 20 }}>
-          <View
-            style={{
-              alignItems: 'center',
-            }}
-          >
-            <FieldLabel
-              title="Amount"
-              flush
-              style={{ marginBottom: 0, paddingLeft: 0 }}
-            />
-            <FocusableAmountInput
-              ref={el => (this.amount = el)}
-              value={transaction.amount}
-              zeroIsNegative={true}
-              onBlur={value =>
-                this.onEdit(transaction, 'amount', value.toString())
-              }
-              style={{ transform: [] }}
-              focusedStyle={{
-                width: 'auto',
-                padding: '5px',
-                paddingLeft: '20px',
-                paddingRight: '20px',
-                minWidth: 120,
-                transform: [{ translateY: -0.5 }],
-              }}
-              textStyle={{ fontSize: 30, textAlign: 'center' }}
-            />
-          </View>
+            textStyle={{ fontSize: 30, textAlign: 'center' }}
+          />
+        </View>
 
+        <View>
+          <FieldLabel title="Payee" />
+          <TapField
+            value={getPrettyPayee(transaction)}
+            onClick={() => onClick(transaction.id, 'payee')}
+            data-testid="payee-field"
+          />
+        </View>
+
+        {!transaction.is_parent && (
           <View>
-            <FieldLabel title="Payee" />
+            <FieldLabel title="Category" />
             <TapField
-              value={getPrettyPayee(transaction)}
-              onClick={() => this.onClick(transaction.id, 'payee')}
-              data-testid="payee-field"
-            />
-          </View>
-
-          {!transaction.is_parent && (
-            <View>
-              <FieldLabel title="Category" />
-              <TapField
-                style={{
-                  ...((isOffBudget || isBudgetTransfer(transaction)) && {
-                    fontStyle: 'italic',
-                    color: theme.pageTextSubdued,
-                    fontWeight: 300,
-                  }),
-                }}
-                value={
-                  isOffBudget
-                    ? 'Off Budget'
-                    : isBudgetTransfer(transaction)
-                    ? 'Transfer'
-                    : lookupName(categories, transaction.category)
-                }
-                disabled={isOffBudget || isBudgetTransfer(transaction)}
-                onClick={() => this.onClick(transaction.id, 'category')}
-                data-testid="category-field"
-              />
-            </View>
-          )}
-
-          {_childTransactions.map(childTrans => (
-            <View
-              key={childTrans.id}
               style={{
-                borderColor: theme.tableBorder,
-                borderWidth: '1px',
-                borderRadius: '5px',
-                padding: '5px',
-                margin: '10px',
+                ...((isOffBudget || isBudgetTransfer(transaction)) && {
+                  fontStyle: 'italic',
+                  color: theme.pageTextSubdued,
+                  fontWeight: 300,
+                }),
               }}
-            >
-              <View style={{ flexDirection: 'row' }}>
-                <View style={{ flexBasis: '75%' }}>
-                  <FieldLabel title="Payee" />
-                  <TapField
-                    value={getPrettyPayee(childTrans)}
-                    onClick={() => this.onClick(childTrans.id, 'payee')}
-                    data-testid={`payee-field-${childTrans.id}`}
-                  />
-                </View>
-                <View style={{ flexBasis: '25%' }}>
-                  <FieldLabel title="Amount" />
-                  <AmountInput
-                    initialValue={amountToInteger(childTrans.amount)}
-                    zeroSign="-"
-                    textStyle={{ ...styles.smallText, textAlign: 'right' }}
-                    onChange={value =>
-                      this.onEdit(
-                        childTrans,
-                        'amount',
-                        integerToCurrency(value),
-                      )
-                    }
-                  />
-                </View>
-              </View>
-
-              <View>
-                <FieldLabel title={'Category'} />
-                <TapField
-                  style={{
-                    ...((isOffBudget || isBudgetTransfer(childTrans)) && {
-                      fontStyle: 'italic',
-                      color: theme.pageTextSubdued,
-                      fontWeight: 300,
-                    }),
-                  }}
-                  value={
-                    isOffBudget
-                      ? 'Off Budget'
-                      : isBudgetTransfer(childTrans)
-                      ? 'Transfer'
-                      : lookupName(categories, childTrans.category)
-                  }
-                  disabled={isOffBudget || isBudgetTransfer(childTrans)}
-                  onClick={() => this.onClick(childTrans.id, 'category')}
-                  data-testid={`category-field-${childTrans.id}`}
-                />
-              </View>
-
-              <View>
-                <FieldLabel title="Notes" />
-                <InputField
-                  defaultValue={childTrans.notes}
-                  onUpdate={value => this.onEdit(childTrans, 'notes', value)}
-                />
-              </View>
-
-              <View style={{ alignItems: 'center' }}>
-                <Button
-                  onClick={() => this.onDelete(childTrans.id)}
-                  style={{
-                    height: 40,
-                    borderWidth: 0,
-                    marginLeft: styles.mobileEditingPadding,
-                    marginRight: styles.mobileEditingPadding,
-                    marginTop: 10,
-                    backgroundColor: 'transparent',
-                  }}
-                  type="bare"
-                >
-                  <Trash
-                    width={17}
-                    height={17}
-                    style={{ color: theme.errorText }}
-                  />
-                  <Text
-                    style={{
-                      color: theme.errorText,
-                      marginLeft: 5,
-                      userSelect: 'none',
-                    }}
-                  >
-                    Delete split
-                  </Text>
-                </Button>
-              </View>
-            </View>
-          ))}
-
-          {_childTransactions.length === 0 && (
-            <View style={{ alignItems: 'center' }}>
-              <Button
-                style={{
-                  height: 40,
-                  borderWidth: 0,
-                  marginLeft: styles.mobileEditingPadding,
-                  marginRight: styles.mobileEditingPadding,
-                  marginTop: 10,
-                  backgroundColor: 'transparent',
-                }}
-                onPointerUp={() => this.onSplit(transaction.id)}
-                type="bare"
-              >
-                <Split
-                  width={17}
-                  height={17}
-                  style={{ color: theme.formLabelText }}
-                />
-                <Text
-                  style={{
-                    marginLeft: 5,
-                    userSelect: 'none',
-                    color: theme.formLabelText,
-                  }}
-                >
-                  Split
-                </Text>
-              </Button>
-            </View>
-          )}
-
-          <View>
-            <FieldLabel title="Account" />
-            <TapField
-              disabled={!adding}
-              value={account ? account.name : null}
-              onClick={() => this.onClick(transaction.id, 'account')}
-              data-testid="account-field"
+              value={getCategory(transaction, isOffBudget)}
+              disabled={isOffBudget || isBudgetTransfer(transaction)}
+              onClick={() => onClick(transaction.id, 'category')}
+              data-testid="category-field"
             />
           </View>
+        )}
 
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1 }}>
-              <FieldLabel title="Date" />
-              <InputField
-                type="date"
-                required
-                style={{ color: theme.tableText, minWidth: '150px' }}
-                defaultValue={dateDefaultValue}
-                onUpdate={value =>
-                  this.onEdit(
-                    transaction,
-                    'date',
-                    formatDate(parseISO(value), this.props.dateFormat),
-                  )
-                }
+        {childTransactions.map(childTrans => (
+          <ChildTransactionEdit
+            key={childTrans.id}
+            transaction={childTrans}
+            amountSign={childAmountSign}
+            ref={r => {
+              childTransactionElementRefMap.current = {
+                ...childTransactionElementRefMap.current,
+                [childTrans.id]: r,
+              };
+            }}
+            amountRef={r => {
+              amountElementMap.current = {
+                ...amountElementMap.current,
+                [childTrans.id]: r,
+              };
+            }}
+            isOffBudget={isOffBudget}
+            getCategory={getCategory}
+            getPrettyPayee={getPrettyPayee}
+            isBudgetTransfer={isBudgetTransfer}
+            onEdit={onEdit}
+            onClick={onClick}
+            onDelete={onDelete}
+          />
+        ))}
+
+        {transaction.amount !== 0 && childTransactions.length === 0 && (
+          <View style={{ alignItems: 'center' }}>
+            <Button
+              style={{
+                height: 40,
+                borderWidth: 0,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
+                marginTop: 10,
+                backgroundColor: 'transparent',
+              }}
+              onClick={() => onSplit(transaction.id)}
+              type="bare"
+            >
+              <Split
+                width={17}
+                height={17}
+                style={{ color: theme.formLabelText }}
+              />
+              <Text
+                style={{
+                  marginLeft: 5,
+                  userSelect: 'none',
+                  color: theme.formLabelText,
+                }}
+              >
+                Split
+              </Text>
+            </Button>
+          </View>
+        )}
+
+        <View>
+          <FieldLabel title="Account" />
+          <TapField
+            disabled={!adding}
+            value={account ? account.name : null}
+            onClick={() => onClick(transaction.id, 'account')}
+            data-testid="account-field"
+          />
+        </View>
+
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ flex: 1 }}>
+            <FieldLabel title="Date" />
+            <InputField
+              type="date"
+              required
+              style={{ color: theme.tableText, minWidth: '150px' }}
+              defaultValue={dateDefaultValue}
+              onUpdate={value =>
+                onEdit(
+                  transaction,
+                  'date',
+                  formatDate(parseISO(value), dateFormat),
+                )
+              }
+            />
+          </View>
+          {transaction.reconciled ? (
+            <View style={{ marginLeft: 0, marginRight: 8 }}>
+              <FieldLabel title="Reconciled" />
+              <BooleanField
+                checked
+                style={{
+                  margin: 'auto',
+                  width: 22,
+                  height: 22,
+                }}
+                disabled
               />
             </View>
-            {transaction.reconciled ? (
-              <View style={{ marginLeft: 0, marginRight: 8 }}>
-                <FieldLabel title="Reconciled" />
-                <BooleanField
-                  checked
-                  style={{
-                    margin: 'auto',
-                    width: 22,
-                    height: 22,
-                  }}
-                  disabled
-                />
-              </View>
-            ) : (
-              <View style={{ marginLeft: 0, marginRight: 8 }}>
-                <FieldLabel title="Cleared" />
-                <BooleanField
-                  checked={transaction.cleared}
-                  onUpdate={checked =>
-                    this.onEdit(transaction, 'cleared', checked)
-                  }
-                  style={{
-                    margin: 'auto',
-                    width: 22,
-                    height: 22,
-                  }}
-                />
-              </View>
-            )}
-          </View>
-
-          <View>
-            <FieldLabel title="Notes" />
-            <InputField
-              defaultValue={transaction.notes}
-              onUpdate={value => this.onEdit(transaction, 'notes', value)}
-            />
-          </View>
-
-          {!adding && (
-            <View style={{ alignItems: 'center' }}>
-              <Button
-                onClick={() => this.onDelete(transaction.id)}
+          ) : (
+            <View style={{ marginLeft: 0, marginRight: 8 }}>
+              <FieldLabel title="Cleared" />
+              <BooleanField
+                checked={transaction.cleared}
+                onUpdate={checked => onEdit(transaction, 'cleared', checked)}
                 style={{
-                  height: 40,
-                  borderWidth: 0,
-                  marginLeft: styles.mobileEditingPadding,
-                  marginRight: styles.mobileEditingPadding,
-                  marginTop: 10,
-                  backgroundColor: 'transparent',
+                  margin: 'auto',
+                  width: 22,
+                  height: 22,
                 }}
-                type="bare"
-              >
-                <Trash
-                  width={17}
-                  height={17}
-                  style={{ color: theme.errorText }}
-                />
-                <Text
-                  style={{
-                    color: theme.errorText,
-                    marginLeft: 5,
-                    userSelect: 'none',
-                  }}
-                >
-                  Delete transaction
-                </Text>
-              </Button>
+              />
             </View>
           )}
         </View>
-      </Page>
-    );
-  }
-}
+
+        <View>
+          <FieldLabel title="Notes" />
+          <InputField
+            defaultValue={transaction.notes}
+            onUpdate={value => onEdit(transaction, 'notes', value)}
+          />
+        </View>
+
+        {!adding && (
+          <View style={{ alignItems: 'center' }}>
+            <Button
+              onClick={() => onDelete(transaction.id)}
+              style={{
+                height: 40,
+                borderWidth: 0,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
+                marginTop: 10,
+                backgroundColor: 'transparent',
+              }}
+              type="bare"
+            >
+              <Trash
+                width={17}
+                height={17}
+                style={{ color: theme.errorText }}
+              />
+              <Text
+                style={{
+                  color: theme.errorText,
+                  marginLeft: 5,
+                  userSelect: 'none',
+                }}
+              >
+                Delete transaction
+              </Text>
+            </Button>
+          </View>
+        )}
+      </View>
+    </Page>
+  );
+});
 
 function isTemporary(transaction) {
   return transaction.id.indexOf('temp') === 0;
@@ -910,13 +1002,11 @@ function TransactionEditUnconnected(props) {
   const onAddSplit = id => {
     const changes = addSplitTransaction(transactions, id);
     setTransactions(changes.data);
-    // onSave(changes.data);
   };
 
   const onSplit = id => {
     const changes = splitTransaction(transactions, id);
     setTransactions(changes.data);
-    // onSave(changes.data);
   };
 
   return (
@@ -934,12 +1024,7 @@ function TransactionEditUnconnected(props) {
         payees={payees}
         pushModal={props.pushModal}
         navigate={navigate}
-        // TODO: ChildEdit is complicated and heavily relies on RN
-        // renderChildEdit={props => <ChildEdit {...props} />}
-        renderChildEdit={props => {}}
         dateFormat={dateFormat}
-        // TODO: was this a mistake in the original code?
-        // onTapField={this.onTapField}
         onEdit={onEdit}
         onSave={onSave}
         onDelete={onDelete}
@@ -973,176 +1058,184 @@ export const TransactionEdit = props => {
   );
 };
 
-class Transaction extends PureComponent {
-  render() {
-    const {
-      transaction,
-      accounts,
-      categories,
-      payees,
-      showCategory,
-      added,
-      onSelect,
-      style,
-    } = this.props;
-    const {
-      id,
-      payee: payeeId,
-      amount: originalAmount,
-      category: categoryId,
-      cleared,
-      is_parent: isParent,
-      notes,
-      schedule,
-    } = transaction;
+const Transaction = memo(function Transaction({
+  transaction,
+  accounts,
+  categories,
+  payees,
+  showCategory,
+  added,
+  onSelect,
+  style,
+}) {
+  const accountsById = useMemo(() => groupById(accounts), [accounts]);
+  const payeesById = useMemo(() => groupById(payees), [payees]);
 
-    let amount = originalAmount;
-    if (isPreviewId(id)) {
-      amount = getScheduledAmount(amount);
-    }
+  const {
+    id,
+    payee: payeeId,
+    amount: originalAmount,
+    category: categoryId,
+    cleared,
+    is_parent: isParent,
+    notes,
+    schedule,
+  } = transaction;
 
-    const categoryName = lookupName(categories, categoryId);
+  let amount = originalAmount;
+  if (isPreviewId(id)) {
+    amount = getScheduledAmount(amount);
+  }
 
-    const payee = payees && payeeId && getPayeesById(payees)[payeeId];
-    const transferAcct =
-      payee &&
-      payee.transfer_acct &&
-      getAccountsById(accounts)[payee.transfer_acct];
+  const categoryName = lookupName(categories, categoryId);
 
-    const prettyDescription = getDescriptionPretty(
-      transaction,
-      payee,
-      transferAcct,
-    );
-    const prettyCategory = transferAcct
-      ? 'Transfer'
-      : isParent
-      ? 'Split'
-      : categoryName;
+  const payee = payeesById && payeeId && payeesById[payeeId];
+  const transferAcct =
+    payee && payee.transfer_acct && accountsById[payee.transfer_acct];
 
-    const isPreview = isPreviewId(id);
-    const isReconciled = transaction.reconciled;
-    const textStyle = isPreview && {
-      fontStyle: 'italic',
-      color: theme.pageTextLight,
-    };
+  const prettyDescription = getDescriptionPretty(
+    transaction,
+    payee,
+    transferAcct,
+  );
+  const prettyCategory = transferAcct
+    ? 'Transfer'
+    : isParent
+    ? 'Split'
+    : categoryName;
 
-    return (
-      <Button
-        onClick={() => onSelect(transaction)}
+  const isPreview = isPreviewId(id);
+  const isReconciled = transaction.reconciled;
+  const textStyle = isPreview && {
+    fontStyle: 'italic',
+    color: theme.pageTextLight,
+  };
+
+  return (
+    <Button
+      onClick={() => onSelect(transaction)}
+      style={{
+        backgroundColor: theme.tableBackground,
+        border: 'none',
+        width: '100%',
+      }}
+    >
+      <ListItem
         style={{
-          backgroundColor: theme.tableBackground,
-          border: 'none',
-          width: '100%',
+          flex: 1,
+          height: 60,
+          padding: '5px 10px', // remove padding when Button is back
+          ...(isPreview && {
+            backgroundColor: theme.tableRowHeaderBackground,
+          }),
+          ...style,
         }}
       >
-        <ListItem
-          style={{
-            flex: 1,
-            height: 60,
-            padding: '5px 10px', // remove padding when Button is back
-            ...(isPreview && {
-              backgroundColor: theme.tableRowHeaderBackground,
-            }),
-            ...style,
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {schedule && (
-                <ArrowsSynchronize
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {schedule && (
+              <ArrowsSynchronize
+                style={{
+                  width: 12,
+                  height: 12,
+                  marginRight: 5,
+                  color: textStyle.color || theme.menuItemText,
+                }}
+              />
+            )}
+            <TextOneLine
+              style={{
+                ...styles.text,
+                ...textStyle,
+                fontSize: 14,
+                fontWeight: added ? '600' : '400',
+                ...(prettyDescription === '' && {
+                  color: theme.tableTextLight,
+                  fontStyle: 'italic',
+                }),
+              }}
+            >
+              {prettyDescription || 'Empty'}
+            </TextOneLine>
+          </View>
+          {isPreview ? (
+            <Status status={notes} />
+          ) : (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 3,
+              }}
+            >
+              {isReconciled ? (
+                <Lock
                   style={{
-                    width: 12,
-                    height: 12,
+                    width: 11,
+                    height: 11,
+                    color: theme.noticeTextLight,
                     marginRight: 5,
-                    color: textStyle.color || theme.menuItemText,
+                  }}
+                />
+              ) : (
+                <CheckCircle1
+                  style={{
+                    width: 11,
+                    height: 11,
+                    color: cleared
+                      ? theme.noticeTextLight
+                      : theme.pageTextSubdued,
+                    marginRight: 5,
                   }}
                 />
               )}
-              <TextOneLine
-                style={{
-                  ...styles.text,
-                  ...textStyle,
-                  fontSize: 14,
-                  fontWeight: added ? '600' : '400',
-                  ...(prettyDescription === '' && {
-                    color: theme.tableTextLight,
-                    fontStyle: 'italic',
-                  }),
-                }}
-              >
-                {prettyDescription || 'Empty'}
-              </TextOneLine>
+              {showCategory && (
+                <TextOneLine
+                  style={{
+                    fontSize: 11,
+                    marginTop: 1,
+                    fontWeight: '400',
+                    color: prettyCategory
+                      ? theme.tableTextSelected
+                      : theme.menuItemTextSelected,
+                    fontStyle: prettyCategory ? null : 'italic',
+                    textAlign: 'left',
+                  }}
+                >
+                  {prettyCategory || 'Uncategorized'}
+                </TextOneLine>
+              )}
             </View>
-            {isPreview ? (
-              <Status status={notes} />
-            ) : (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: 3,
-                }}
-              >
-                {isReconciled ? (
-                  <Lock
-                    style={{
-                      width: 11,
-                      height: 11,
-                      color: theme.noticeTextLight,
-                      marginRight: 5,
-                    }}
-                  />
-                ) : (
-                  <CheckCircle1
-                    style={{
-                      width: 11,
-                      height: 11,
-                      color: cleared
-                        ? theme.noticeTextLight
-                        : theme.pageTextSubdued,
-                      marginRight: 5,
-                    }}
-                  />
-                )}
-                {showCategory && (
-                  <TextOneLine
-                    style={{
-                      fontSize: 11,
-                      marginTop: 1,
-                      fontWeight: '400',
-                      color: prettyCategory
-                        ? theme.tableTextSelected
-                        : theme.menuItemTextSelected,
-                      fontStyle: prettyCategory ? null : 'italic',
-                      textAlign: 'left',
-                    }}
-                  >
-                    {prettyCategory || 'Uncategorized'}
-                  </TextOneLine>
-                )}
-              </View>
-            )}
-          </View>
-          <Text
-            style={{
-              ...styles.text,
-              ...textStyle,
-              marginLeft: 25,
-              marginRight: 5,
-              fontSize: 14,
-            }}
-          >
-            {integerToCurrency(amount)}
-          </Text>
-        </ListItem>
-      </Button>
-    );
-  }
-}
+          )}
+        </View>
+        <Text
+          style={{
+            ...styles.text,
+            ...textStyle,
+            marginLeft: 25,
+            marginRight: 5,
+            fontSize: 14,
+          }}
+        >
+          {integerToCurrency(amount)}
+        </Text>
+      </ListItem>
+    </Button>
+  );
+});
 
-export class TransactionList extends Component {
-  makeData = memoizeOne(transactions => {
+export function TransactionList({
+  accounts,
+  categories,
+  payees,
+  transactions,
+  showCategory,
+  isNew,
+  onSelect,
+  scrollProps = {},
+  onLoadMore,
+}) {
+  const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
     const sections = [];
     transactions.forEach(transaction => {
@@ -1172,78 +1265,70 @@ export class TransactionList extends Component {
       }
     });
     return sections;
-  });
+  }, [transactions]);
 
-  render() {
-    const { transactions, scrollProps = {}, onLoadMore } = this.props;
-
-    const sections = this.makeData(transactions);
-
-    return (
-      <>
-        {scrollProps.ListHeaderComponent}
-        <ListBox
-          {...scrollProps}
-          aria-label="transaction list"
-          label=""
-          loadMore={onLoadMore}
-          selectionMode="none"
-        >
-          {sections.length === 0 ? (
-            <Section>
-              <Item textValue="No transactions">
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    width: '100%',
-                    backgroundColor: theme.mobilePageBackground,
-                  }}
-                >
-                  <Text style={{ fontSize: 15 }}>No transactions</Text>
-                </div>
-              </Item>
-            </Section>
-          ) : null}
-          {sections.map(section => {
-            return (
-              <Section
-                title={
-                  <span>
-                    {monthUtils.format(section.date, 'MMMM dd, yyyy')}
-                  </span>
-                }
-                key={section.id}
+  return (
+    <>
+      {scrollProps.ListHeaderComponent}
+      <ListBox
+        {...scrollProps}
+        aria-label="transaction list"
+        label=""
+        loadMore={onLoadMore}
+        selectionMode="none"
+      >
+        {sections.length === 0 ? (
+          <Section>
+            <Item textValue="No transactions">
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  width: '100%',
+                  backgroundColor: theme.mobilePageBackground,
+                }}
               >
-                {section.data.map((transaction, index, transactions) => {
-                  return (
-                    <Item
-                      key={transaction.id}
-                      style={{
-                        fontSize:
-                          index === transactions.length - 1 ? 98 : 'inherit',
-                      }}
-                      textValue={transaction.id}
-                    >
-                      <Transaction
-                        transaction={transaction}
-                        categories={this.props.categories}
-                        accounts={this.props.accounts}
-                        payees={this.props.payees}
-                        showCategory={this.props.showCategory}
-                        added={this.props.isNew(transaction.id)}
-                        onSelect={this.props.onSelect} // onSelect(transaction)}
-                      />
-                    </Item>
-                  );
-                })}
-              </Section>
-            );
-          })}
-        </ListBox>
-      </>
-    );
-  }
+                <Text style={{ fontSize: 15 }}>No transactions</Text>
+              </div>
+            </Item>
+          </Section>
+        ) : null}
+        {sections.map(section => {
+          return (
+            <Section
+              title={
+                <span>{monthUtils.format(section.date, 'MMMM dd, yyyy')}</span>
+              }
+              key={section.id}
+            >
+              {section.data.map((transaction, index, transactions) => {
+                return (
+                  <Item
+                    key={transaction.id}
+                    style={{
+                      fontSize:
+                        index === transactions.length - 1 ? 98 : 'inherit',
+                    }}
+                    textValue={transaction.id}
+                  >
+                    <Transaction
+                      transaction={transaction}
+                      categories={categories}
+                      accounts={accounts}
+                      payees={payees}
+                      showCategory={showCategory}
+                      added={isNew(transaction.id)}
+                      onSelect={onSelect} // onSelect(transaction)}
+                    />
+                  </Item>
+                );
+              })}
+            </Section>
+          );
+        })}
+      </ListBox>
+    </>
+  );
 }
 
 function ListBox(props) {
@@ -1349,7 +1434,6 @@ function Option({ isLast, item, state }) {
   const { optionProps, isSelected } = useOption({ key: item.key }, state, ref);
 
   // Determine whether we should show a keyboard
-  // focus ring for accessibility
   const { isFocusVisible, focusProps } = useFocusRing();
 
   return (

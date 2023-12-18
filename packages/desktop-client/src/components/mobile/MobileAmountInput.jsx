@@ -1,4 +1,4 @@
-import { PureComponent } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 
 import {
   toRelaxedNumber,
@@ -11,302 +11,221 @@ import Button from '../common/Button';
 import Text from '../common/Text';
 import View from '../common/View';
 
-function getValue(state) {
-  const { value } = state;
-  return value;
-}
+const AmountInput = memo(function AmountInput({
+  focused,
+  style,
+  textStyle,
+  ...props
+}) {
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState('');
+  const [value, setValue] = useState(0);
+  const inputRef = useRef();
 
-class AmountInput extends PureComponent {
-  static getDerivedStateFromProps(props, state) {
-    return { editing: state.text !== '' || state.editing };
-  }
+  const getInitialValue = () => Math.abs(props.value);
 
-  constructor(props) {
-    super(props);
-    // this.backgroundValue = new Animated.Value(0);
-    this.backgroundValue = 0;
-
-    this.id = Math.random().toString().slice(0, 5);
-    this.state = {
-      editing: false,
-      text: '',
-      // These are actually set from the props when the field is
-      // focused
-      value: 0,
-    };
-  }
-
-  componentDidMount() {
-    if (this.props.focused) {
-      this.focus();
+  useEffect(() => {
+    if (focused) {
+      focus();
     }
-  }
+  }, []);
 
-  componentWillUnmount() {
-    if (this.removeListeners) {
-      this.removeListeners();
+  useEffect(() => {
+    setEditing(text !== '');
+  }, [text]);
+
+  useEffect(() => {
+    if (focused) {
+      focus();
     }
-  }
+  }, [focused]);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (!prevProps.focused && this.props.focused) {
-      this.focus();
-    }
+  useEffect(() => {
+    setEditing(false);
+    setText('');
+    setValue(getInitialValue());
+  }, [props.value]);
 
-    if (prevProps.value !== this.props.value) {
-      this.setState({
-        editing: false,
-        text: '',
-        ...this.getInitialValue(),
-      });
-    }
-  }
+  const parseText = () => {
+    return toRelaxedNumber(text.replace(/[,.]/, getNumberFormat().separator));
+  };
 
-  parseText() {
-    return toRelaxedNumber(
-      this.state.text.replace(/[,.]/, getNumberFormat().separator),
-    );
-  }
-
-  // animate() {
-  //   this.animation = Animated.sequence([
-  //     Animated.timing(this.backgroundValue, {
-  //       toValue: 1,
-  //       duration: 1200,
-  //       useNativeDriver: true,
-  //     }),
-  //     Animated.timing(this.backgroundValue, {
-  //       toValue: 0,
-  //       duration: 1200,
-  //       useNativeDriver: true,
-  //     }),
-  //   ]);
-
-  //   this.animation.start(({ finished }) => {
-  //     if (finished) {
-  //       this.animate();
-  //     }
-  //   });
-  // }
-
-  onKeyPress = e => {
-    if (e.nativeEvent.key === 'Backspace' && this.state.text === '') {
-      this.setState({ editing: true });
+  const onKeyPress = e => {
+    if (e.key === 'Backspace' && text === '') {
+      setEditing(true);
     }
   };
 
-  getInitialValue() {
-    return {
-      value: Math.abs(this.props.value),
-    };
-  }
+  const focus = () => {
+    inputRef.current?.focus();
+    setValue(getInitialValue());
+  };
 
-  focus() {
-    this.input.focus();
+  const applyText = () => {
+    const parsed = parseText();
+    const newValue = editing ? parsed : value;
 
-    const initialState = this.getInitialValue();
-    this.setState(initialState);
-  }
-
-  applyText = () => {
-    const { editing } = this.state;
-
-    const parsed = this.parseText();
-    const newValue = editing ? parsed : getValue(this.state);
-
-    this.setState({
-      value: Math.abs(newValue),
-      editing: false,
-      text: '',
-    });
+    setValue(Math.abs(newValue));
+    setEditing(false);
+    setText('');
 
     return newValue;
   };
 
-  onBlur = () => {
-    const value = this.applyText();
-    this.props.onBlur?.(value);
-    if (this.removeListeners) {
-      this.removeListeners();
-    }
+  const onBlur = () => {
+    const value = applyText();
+    props.onBlur?.(value);
   };
 
-  onChangeText = text => {
-    const { onChange } = this.props;
-
-    this.setState({ text });
-    onChange(text);
+  const onChangeText = text => {
+    setText(text);
+    props.onChange?.(text);
   };
 
-  render() {
-    const { style, textStyle } = this.props;
-    const { editing, value, text } = this.state;
+  const input = (
+    <input
+      type="text"
+      ref={inputRef}
+      value={text}
+      inputMode="decimal"
+      autoCapitalize="none"
+      onChange={e => onChangeText(e.target.value)}
+      onBlur={onBlur}
+      onKeyUp={onKeyPress}
+      data-testid="amount-input"
+      style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
+    />
+  );
 
-    const input = (
-      <input
-        type="text"
-        ref={el => (this.input = el)}
-        value={text}
-        inputMode="decimal"
-        autoCapitalize="none"
-        onChange={e => this.onChangeText(e.target.value)}
-        onBlur={this.onBlur}
-        onKeyPress={this.onKeyPress}
-        data-testid="amount-input"
-        style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
-      />
-    );
-
-    return (
-      <View
-        style={{
-          justifyContent: 'center',
-          borderWidth: 1,
-          borderColor: theme.pillBorderSelected,
-          borderRadius: 4,
-          padding: 5,
-          backgroundColor: theme.tableBackground,
-          ...style,
-        }}
+  return (
+    <View
+      style={{
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: theme.pillBorderSelected,
+        borderRadius: 4,
+        padding: 5,
+        backgroundColor: theme.tableBackground,
+        ...style,
+      }}
+    >
+      <View style={{ overflowY: 'auto', overflowX: 'hidden' }}>{input}</View>
+      <Text
+        style={textStyle}
+        data-testid="amount-fake-input"
+        pointerEvents="none"
       >
-        <View style={{ overflowY: 'auto', overflowX: 'hidden' }}>{input}</View>
+        {editing ? text : amountToCurrency(value)}
+      </Text>
+    </View>
+  );
+});
 
-        {/* <Animated.View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: 0,
+export const FocusableAmountInput = memo(function FocusableAmountInput({
+  value,
+  sign,
+  zeroIsNegative,
+  focused,
+  textStyle,
+  style,
+  focusedStyle,
+  buttonProps,
+  onFocus,
+  ...props
+}) {
+  const [isNegative, setIsNegative] = useState(true);
 
-            backgroundColor: animationColor || colors.p10,
-            opacity: this.backgroundValue,
-            borderRadius: 2,
-          }}
-          pointerEvents="none"
-        /> */}
-        <Text
-          style={textStyle}
-          data-testid="amount-fake-input"
-          pointerEvents="none"
-        >
-          {editing ? text : amountToCurrency(value)}
-        </Text>
-      </View>
-    );
-  }
-}
-
-export class FocusableAmountInput extends PureComponent {
-  state = { focused: false, isNegative: true };
-
-  componentDidMount() {
-    if (this.props.sign) {
-      this.setState({ isNegative: this.props.sign === 'negative' });
-    } else if (
-      this.props.value > 0 ||
-      (!this.props.zeroIsNegative && this.props.value === 0)
-    ) {
-      this.setState({ isNegative: false });
+  useEffect(() => {
+    if (sign) {
+      setIsNegative(sign === 'negative');
+    } else if (value > 0 || (!zeroIsNegative && value === 0)) {
+      setIsNegative(false);
     }
-  }
+  }, []);
 
-  focus = () => {
-    this.setState({ focused: true });
+  const toggleIsNegative = () => {
+    setIsNegative(!isNegative);
   };
 
-  onFocus = () => {
-    this.focus();
+  useEffect(() => {
+    onBlur(value);
+  }, [isNegative]);
+
+  const maybeApplyNegative = val => {
+    const absValue = Math.abs(val);
+    return isNegative ? -absValue : absValue;
   };
 
-  toggleIsNegative = () => {
-    this.setState({ isNegative: !this.state.isNegative }, () => {
-      this.onBlur(this.props.value);
-    });
+  const onBlur = val => {
+    props.onBlur?.(maybeApplyNegative(val));
   };
 
-  maybeApplyNegative = value => {
-    const absValue = Math.abs(value);
-    return this.state.isNegative ? -absValue : absValue;
+  const onChange = val => {
+    props.onChange?.(maybeApplyNegative(val));
   };
 
-  onBlur = value => {
-    this.setState({ focused: false, reallyFocused: false });
-    this.props.onBlur?.(this.maybeApplyNegative(value));
-  };
+  return (
+    <View>
+      <AmountInput
+        {...props}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        focused={focused}
+        style={{
+          width: 80,
+          justifyContent: 'center',
+          ...style,
+          ...focusedStyle,
+          ...(!focused && {
+            display: 'none',
+          }),
+        }}
+        textStyle={{ fontSize: 15, textAlign: 'right', ...textStyle }}
+      />
 
-  onChange = value => this.props.onChange?.(this.maybeApplyNegative(value));
-
-  render() {
-    const { textStyle, style, focusedStyle, buttonProps } = this.props;
-    const { focused } = this.state;
-
-    return (
       <View>
-        <AmountInput
-          {...this.props}
-          ref={el => (this.amount = el)}
-          onChange={this.onChange}
-          onBlur={this.onBlur}
-          focused={focused}
-          style={{
-            width: 80,
-            transform: [{ translateX: 6 }],
-            justifyContent: 'center',
-            ...style,
-            ...focusedStyle,
-            ...(!focused && {
-              opacity: 0,
-              position: 'absolute',
-              top: 0,
-            }),
-          }}
-          textStyle={{ fontSize: 15, textAlign: 'right', ...textStyle }}
-        />
-
-        <View>
-          {!focused && (
-            <Button
-              style={{
-                position: 'absolute',
-                right: 'calc(100% + 5px)',
-                top: '8px',
-              }}
-              onClick={this.toggleIsNegative}
-            >
-              {this.state.isNegative ? '−' : '+'}
-            </Button>
-          )}
+        {!focused && (
           <Button
-            onClick={this.onFocus}
-            // Defines how far touch can start away from the button
-            // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
-            {...buttonProps}
             style={{
-              ...(buttonProps && buttonProps.style),
-              ...(focused && { display: 'none' }),
-              ':hover': {
-                backgroundColor: 'transparent',
-              },
+              position: 'absolute',
+              right: 'calc(100% + 5px)',
+              top: '8px',
             }}
-            type="bare"
+            onClick={toggleIsNegative}
           >
-            <View
-              style={{
-                borderBottomWidth: 1,
-                borderColor: '#e0e0e0',
-                justifyContent: 'center',
-                transform: [{ translateY: 0.5 }],
-                ...style,
-              }}
-            >
-              <Text style={{ fontSize: 15, userSelect: 'none', ...textStyle }}>
-                {amountToCurrency(Math.abs(this.props.value))}
-              </Text>
-            </View>
+            {isNegative ? '-' : '+'}
           </Button>
-        </View>
+        )}
+        <Button
+          onClick={onFocus}
+          // Defines how far touch can start away from the button
+          // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+          {...buttonProps}
+          style={{
+            ...(buttonProps && buttonProps.style),
+            ...(focused && { display: 'none' }),
+            ':hover': {
+              backgroundColor: 'transparent',
+            },
+          }}
+          type="bare"
+        >
+          <View
+            style={{
+              borderBottomWidth: 1,
+              borderColor: '#e0e0e0',
+              justifyContent: 'center',
+              transform: [{ translateY: 0.5 }],
+              ...style,
+            }}
+          >
+            <Text style={{ fontSize: 15, userSelect: 'none', ...textStyle }}>
+              {amountToCurrency(Math.abs(value))}
+            </Text>
+          </View>
+        </Button>
       </View>
-    );
-  }
-}
+    </View>
+  );
+});
