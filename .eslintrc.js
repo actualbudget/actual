@@ -39,6 +39,7 @@ module.exports = {
     'react-app',
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:import/typescript',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: { project: [path.join(__dirname, './tsconfig.json')] },
@@ -63,6 +64,10 @@ module.exports = {
       require('confusing-browser-globals').filter(g => g !== 'self'),
     ),
 
+    'react/jsx-filename-extension': [
+      'warn',
+      { extensions: ['.jsx', '.tsx'], allow: 'as-needed' },
+    ],
     'react/jsx-no-useless-fragment': 'warn',
     'react/self-closing-comp': 'warn',
     'react/no-unstable-nested-components': [
@@ -282,9 +287,6 @@ module.exports = {
     },
   ],
   settings: {
-    'import/parsers': {
-      '@typescript-eslint/parser': ['.ts', '.tsx'],
-    },
     'import/resolver': {
       typescript: {
         alwaysTryTypes: true,

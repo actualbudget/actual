@@ -3,7 +3,6 @@ import React from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
-import Button from '../common/Button';
 import Select from '../common/Select';
 import Text from '../common/Text';
 import View from '../common/View';
@@ -17,37 +16,12 @@ import {
   getFullRange,
   validateRange,
 } from './Header';
+import ModeButton from './ModeButton';
 import { ReportOptions } from './ReportOptions';
 
-function ModeButton({ selected, children, style, onSelect }) {
-  return (
-    <Button
-      type="bare"
-      style={{
-        padding: '5px 10px',
-        backgroundColor: theme.menuBackground,
-        marginRight: 5,
-        fontSize: 'inherit',
-        ...(selected && {
-          backgroundColor: theme.buttonPrimaryBackground,
-          color: theme.buttonPrimaryText,
-          ':hover': {
-            backgroundColor: theme.buttonPrimaryBackgroundHover,
-            color: theme.buttonPrimaryTextHover,
-          },
-        }),
-        ...style,
-      }}
-      onClick={onSelect}
-    >
-      {children}
-    </Button>
-  );
-}
-
 export function ReportSidebar({
-  start,
-  end,
+  startDate,
+  endDate,
   onChangeDates,
   dateRange,
   setDateRange,
@@ -55,7 +29,6 @@ export function ReportSidebar({
   allMonths,
   graphType,
   setGraphType,
-  setViewLegend,
   typeDisabled,
   setTypeDisabled,
   groupBy,
@@ -64,17 +37,21 @@ export function ReportSidebar({
   setBalanceType,
   mode,
   setMode,
-  empty,
-  setEmpty,
-  hidden,
-  setHidden,
-  uncat,
-  setUncat,
+  isDateStatic,
+  setIsDateStatic,
+  showEmpty,
+  setShowEmpty,
+  showOffBudgetHidden,
+  setShowOffBudgetHidden,
+  showUncategorized,
+  setShowUncategorized,
   categories,
   selectedCategories,
   setSelectedCategories,
+  onChangeViews,
 }) {
   const onSelectRange = cond => {
+    setDateRange(cond);
     switch (cond) {
       case 'All time':
         onChangeDates(...getFullRange(allMonths));
@@ -114,7 +91,7 @@ export function ReportSidebar({
       } else {
         setTypeDisabled(['Net']);
         if (['Net'].includes(balanceType)) {
-          setBalanceType('Expense');
+          setBalanceType('Payment');
         }
       }
       if (graphType === 'BarGraph') {
@@ -122,7 +99,7 @@ export function ReportSidebar({
       }
       if (['AreaGraph', 'DonutGraph'].includes(graphType)) {
         setGraphType('TableGraph');
-        //setViewLegend(false);
+        onChangeViews('viewLegend', false);
       }
       if (['Month', 'Year'].includes(groupBy)) {
         setGroupBy('Category');
@@ -144,7 +121,7 @@ export function ReportSidebar({
       }
     }
     if (['Net'].includes(balanceType) && graphType !== 'TableGraph') {
-      setBalanceType('Expense');
+      setBalanceType('Payment');
     }
   };
 
@@ -274,9 +251,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-empty-columns"
-            checked={empty}
-            value={empty}
-            onChange={() => setEmpty(!empty)}
+            checked={showEmpty}
+            value={showEmpty}
+            onChange={() => setShowEmpty(!showEmpty)}
           />
           <label
             htmlFor="show-empty-columns"
@@ -297,9 +274,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-hidden-columns"
-            checked={hidden}
-            value={hidden}
-            onChange={() => setHidden(!hidden)}
+            checked={showOffBudgetHidden}
+            value={showOffBudgetHidden}
+            onChange={() => setShowOffBudgetHidden(!showOffBudgetHidden)}
           />
           <label
             htmlFor="show-hidden-columns"
@@ -320,9 +297,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-uncategorized"
-            checked={uncat}
-            value={uncat}
-            onChange={() => setUncat(!uncat)}
+            checked={showUncategorized}
+            value={showUncategorized}
+            onChange={() => setShowUncategorized(!showUncategorized)}
           />
           <label
             htmlFor="show-uncategorized"
@@ -351,67 +328,90 @@ export function ReportSidebar({
           <Text>
             <strong>Date filters</strong>
           </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-            Range:
-          </Text>
-          <Select
-            value={dateRange}
-            onChange={e => {
-              setDateRange(e);
-              onSelectRange(e);
+          <View style={{ flex: 1 }} />
+          <ModeButton
+            selected={!isDateStatic}
+            onSelect={() => {
+              setIsDateStatic(false);
+              onSelectRange(dateRange);
             }}
-            options={ReportOptions.dateRange.map(option => [
-              option.description,
-              option.description,
-            ])}
-            line={dateRangeLine}
-          />
+          >
+            Live
+          </ModeButton>
+          <ModeButton
+            selected={isDateStatic}
+            onSelect={() => {
+              setIsDateStatic(true);
+              onChangeDates(startDate, endDate);
+            }}
+          >
+            Static
+          </ModeButton>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-            From:
-          </Text>
-          <Select
-            onChange={newValue =>
-              onChangeDates(...validateStart(allMonths, newValue, end))
-            }
-            value={start}
-            defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
-            options={allMonths.map(({ name, pretty }) => [name, pretty])}
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
-            To:
-          </Text>
-          <Select
-            onChange={newValue =>
-              onChangeDates(...validateEnd(allMonths, start, newValue))
-            }
-            value={end}
-            options={allMonths.map(({ name, pretty }) => [name, pretty])}
-          />
-        </View>
+        {!isDateStatic ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+              Range:
+            </Text>
+            <Select
+              value={dateRange}
+              onChange={e => {
+                onSelectRange(e);
+              }}
+              options={ReportOptions.dateRange.map(option => [
+                option.description,
+                option.description,
+              ])}
+              line={dateRangeLine}
+            />
+          </View>
+        ) : (
+          <>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                From:
+              </Text>
+              <Select
+                onChange={newValue =>
+                  onChangeDates(...validateStart(allMonths, newValue, endDate))
+                }
+                value={startDate}
+                defaultLabel={monthUtils.format(startDate, 'MMMM, yyyy')}
+                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }}>
+                To:
+              </Text>
+              <Select
+                onChange={newValue =>
+                  onChangeDates(...validateEnd(allMonths, startDate, newValue))
+                }
+                value={endDate}
+                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+              />
+            </View>
+          </>
+        )}
         <View
           style={{
             height: 1,

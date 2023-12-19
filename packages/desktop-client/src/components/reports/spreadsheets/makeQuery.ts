@@ -3,9 +3,9 @@ import { type CategoryEntity } from 'loot-core/src/types/models';
 
 function makeQuery(
   name: string,
-  start: string,
-  end: string,
-  hidden: boolean,
+  startDate: string,
+  endDate: string,
+  showOffBudgetHidden: boolean,
   selectedCategories: CategoryEntity[],
   categoryFilter: CategoryEntity[],
   conditionsOpKey: string,
@@ -14,7 +14,7 @@ function makeQuery(
   const query = q('transactions')
     .filter(
       //Show Offbudget and hidden categories
-      !hidden && {
+      !showOffBudgetHidden && {
         $and: [
           {
             'account.offbudget': false,
@@ -49,13 +49,13 @@ function makeQuery(
     )
     //Apply filters and split by "Group By"
     .filter({
-      [conditionsOpKey]: [...filters],
+      [conditionsOpKey]: filters,
     })
     //Apply month range filters
     .filter({
       $and: [
-        { date: { $transform: '$month', $gte: start } },
-        { date: { $transform: '$month', $lte: end } },
+        { date: { $transform: '$month', $gte: startDate } },
+        { date: { $transform: '$month', $lte: endDate } },
       ],
     })
     //Show assets or debts

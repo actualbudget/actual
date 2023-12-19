@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { type UIEventHandler } from 'react';
+import { type RefProp } from 'react-spring';
 
 import {
   amountToCurrency,
@@ -10,6 +11,18 @@ import { styles, theme } from '../../style';
 import View from '../common/View';
 import { Row, Cell } from '../table';
 
+import { type DataEntity } from './entities';
+
+type ReportTableTotalsProps = {
+  data: DataEntity;
+  scrollWidth?: number;
+  balanceTypeOp: string;
+  mode: string;
+  monthsCount: number;
+  totalScrollRef: RefProp<HTMLDivElement>;
+  handleScrollTotals: UIEventHandler<HTMLDivElement>;
+};
+
 export default function ReportTableTotals({
   data,
   scrollWidth,
@@ -18,7 +31,7 @@ export default function ReportTableTotals({
   monthsCount,
   totalScrollRef,
   handleScrollTotals,
-}) {
+}: ReportTableTotalsProps) {
   const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
   return (
     <View

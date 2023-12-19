@@ -119,6 +119,11 @@ describe('API CRUD operations', () => {
       name: 'test-budget',
       group_id: mainGroupId,
     });
+    const categoryIdHidden = await api.createCategory({
+      name: 'test-budget-hidden',
+      group_id: mainGroupId,
+      hidden: true,
+    });
 
     let categories = await api.getCategories();
     expect(categories).toEqual(
@@ -126,6 +131,13 @@ describe('API CRUD operations', () => {
         expect.objectContaining({
           id: categoryId,
           name: 'test-budget',
+          hidden: false,
+          group_id: mainGroupId,
+        }),
+        expect.objectContaining({
+          id: categoryIdHidden,
+          name: 'test-budget-hidden',
+          hidden: true,
           group_id: mainGroupId,
         }),
       ]),
@@ -137,12 +149,25 @@ describe('API CRUD operations', () => {
       group_id: secondaryGroupId,
     });
 
+    await api.updateCategory(categoryIdHidden, {
+      name: 'updated-budget-hidden',
+      group_id: secondaryGroupId,
+      hidden: false,
+    });
+
     categories = await api.getCategories();
     expect(categories).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           id: categoryId,
           name: 'updated-budget',
+          hidden: false,
+          group_id: secondaryGroupId,
+        }),
+        expect.objectContaining({
+          id: categoryIdHidden,
+          name: 'updated-budget-hidden',
+          hidden: false,
           group_id: secondaryGroupId,
         }),
       ]),

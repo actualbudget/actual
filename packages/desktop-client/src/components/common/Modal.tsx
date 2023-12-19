@@ -23,7 +23,7 @@ export type ModalProps = {
   isHidden?: boolean;
   children: ReactNode | (() => ReactNode);
   size?: { width?: number; height?: number };
-  padding?: number;
+  padding?: CSSProperties['padding'];
   showHeader?: boolean;
   showTitle?: boolean;
   showClose?: boolean;
@@ -93,6 +93,7 @@ const Modal = ({
           backgroundColor: 'transparent',
           padding: 0,
           pointerEvents: 'auto',
+          margin: '0 10px',
           ...contentStyle,
         },
         overlay: {
