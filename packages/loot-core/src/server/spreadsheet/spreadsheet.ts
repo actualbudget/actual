@@ -113,7 +113,12 @@ export default class Spreadsheet {
       const cells = this.dirtyCells;
       this.dirtyCells = [];
 
-      this.queueComputation(this.graph.topologicalSort(cells));
+      try {
+        this.queueComputation(this.graph.topologicalSort(cells));
+      } catch (e) {
+        console.error('Failed sorting cells. Falling back to unsorted list.');
+        this.queueComputation(cells);
+      }
     }
 
     return [];
