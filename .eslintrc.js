@@ -278,6 +278,5 @@ module.exports = {
         alwaysTryTypes: true,
       },
     },
-    'import/extensions': ['.js', '.jsx', '.ts', '.tsx'],
   },
 };
