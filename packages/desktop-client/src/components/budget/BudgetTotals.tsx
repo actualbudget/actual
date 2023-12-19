@@ -1,4 +1,5 @@
 import React, { type ComponentProps, memo, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { theme, styles } from '../../style';
@@ -9,7 +10,6 @@ import View from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import RenderMonths from './RenderMonths';
-import { getScrollbarWidth } from './util';
 
 type BudgetTotalsProps = {
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
@@ -25,6 +25,8 @@ const BudgetTotals = memo(function BudgetTotals({
   collapseAllCategories,
 }: BudgetTotalsProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  //const showHiddenCategories = useSelector(state => state.prefs.local?.['budget.showHiddenCategories']) || false;
+
   return (
     <View
       data-testid="budget-totals"
@@ -34,7 +36,7 @@ const BudgetTotals = memo(function BudgetTotals({
         flexShrink: 0,
         boxShadow: styles.cardShadow,
         marginLeft: 5,
-        marginRight: 5 + getScrollbarWidth(),
+        marginRight: 5,
         borderRadius: '4px 4px 0 0',
         borderBottom: '1px solid ' + theme.tableBorder,
       }}
@@ -82,10 +84,11 @@ const BudgetTotals = memo(function BudgetTotals({
                     toggleHiddenCategories();
                   } else if (type === 'expandAllCategories') {
                     expandAllCategories();
+                    setMenuOpen(false);
                   } else if (type === 'collapseAllCategories') {
                     collapseAllCategories();
+                    setMenuOpen(false);
                   }
-                  setMenuOpen(false);
                 }}
                 items={[
                   {
@@ -93,6 +96,7 @@ const BudgetTotals = memo(function BudgetTotals({
                     text: 'Show hidden',
                     isOn: true,
                     toggle: true,
+                    //disabled: true,
                   },
                   {
                     name: 'expandAllCategories',
@@ -108,7 +112,6 @@ const BudgetTotals = memo(function BudgetTotals({
           )}
         </Button>
       </View>
-      <RenderMonths component={MonthComponent} />
     </View>
   );
 });

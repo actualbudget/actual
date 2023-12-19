@@ -352,15 +352,13 @@ export function ReportSidebar({
                   },
                   {
                     name: 'show-empty-columns',
-                    text: 'Expand all',
+                    text: 'Show Empty Rows',
                     isOn: showEmpty,
                     toggle: true,
                   },
                   {
                     name: 'show-uncategorized',
-                    text: 'Collapse all',
-                    isOn: showUncategorized,
-                    toggle: true,
+                    text: 'Uncategorized',
                   },
                 ]}
               />

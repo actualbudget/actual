@@ -4,6 +4,8 @@ import {
   useEffect,
   useRef,
   useState,
+  createRef,
+  type MouseEventHandler,
 } from 'react';
 
 import { theme } from '../../style';
@@ -11,6 +13,8 @@ import { theme } from '../../style';
 import Text from './Text';
 import View from './View';
 import Toggle from './Toggle';
+import { FormLabel } from '../forms';
+import ToggleSwitch from './ToggleSwitch';
 
 type KeybindingProps = {
   keyName: ReactNode;
@@ -23,7 +27,31 @@ function Keybinding({ keyName }: KeybindingProps) {
     </Text>
   );
 }
+function Blanket({
+  children,
+  onClick,
+}) {
+  const blanketRef = createRef<HTMLDivElement>();
 
+  const handleCloseClick: MouseEventHandler<HTMLDivElement> = (event) => {
+    //if (typeof onClick !== "function") return;
+
+    // begin type narrowing
+    if (event.target !== blanketRef.current) return;
+
+    event.stopPropagation();
+    onClick();
+  };
+
+  return (
+    <div
+      ref={blanketRef}
+      onClick={handleCloseClick}
+    >
+      {children}
+    </div>
+  );
+}
 type MenuItem = {
   type?: string | symbol;
   name: string;
@@ -51,56 +79,18 @@ export default function ToggleMenu({
   const elRef = useRef(null);
   const items = allItems.filter(x => x);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const clickRef = createRef<HTMLInputElement>();
+  const blanketRef = createRef<HTMLDivElement>();
 
-  //control menu with keyboard
-  useEffect(() => {
-    const el = elRef.current;
-    el.focus();
+  const handleCloseClick = (item, event) => {
+    //if (typeof onClick !== "function") return;
 
-    const onKeyDown = e => {
-      const filteredItems = items.filter(
-        item => item && item !== ToggleMenu.line && item.type !== ToggleMenu.label,
-      );
-      const currentIndex = filteredItems.indexOf(items[hoveredIndex]);
+    // begin type narrowing
+    //if (event.currentTarget !== blanketRef.current) return;
 
-      const transformIndex = idx => items.indexOf(filteredItems[idx]);
-
-      switch (e.key) {
-        case 'ArrowUp':
-          e.preventDefault();
-          setHoveredIndex(
-            hoveredIndex === null
-              ? 0
-              : transformIndex(Math.max(currentIndex - 1, 0)),
-          );
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          setHoveredIndex(
-            hoveredIndex === null
-              ? 0
-              : transformIndex(
-                  Math.min(currentIndex + 1, filteredItems.length - 1),
-                ),
-          );
-          break;
-        case 'Enter':
-          e.preventDefault();
-          const item = items[hoveredIndex];
-          if (hoveredIndex !== null && item !== ToggleMenu.line) {
-            onMenuSelect?.(item.name);
-          }
-          break;
-        default:
-      }
-    };
-
-    el.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      el.removeEventListener('keydown', onKeyDown);
-    };
-  }, [hoveredIndex]);
+    //event.stopPropagation();
+    if (event === "parent") {onMenuSelect(item)};
+  };
 
   return (
     <View
@@ -138,7 +128,6 @@ export default function ToggleMenu({
 
         return (
           <View
-            role="button"
             key={item.name}
             style={{
               cursor: 'default',
@@ -152,7 +141,6 @@ export default function ToggleMenu({
               flexDirection: 'row',
               alignItems: 'center',
               justifyItems: 'center',
-              justifyContent: 'center',
               color: theme.menuItemText,
               ...(item.disabled && { color: theme.buttonBareDisabledText }),
               ...(!item.disabled &&
@@ -163,21 +151,27 @@ export default function ToggleMenu({
             }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
-            onClick={e =>
-              !item.disabled && onMenuSelect && onMenuSelect(item.name)
+            onClick={(e) =>
+              !item.disabled && onMenuSelect && handleCloseClick(item.name, "parent")
             }
           >
             {/* Force it to line up evenly */}
+            {!item.toggle &&
+            <>
             <Text>{item.text}</Text>
             <View style={{ flex: 1 }} />
+            </>
+            }
             {item.toggle && 
-              <View style={{ marginLeft: 7, paddingBottom: 10,}}>
+              <>
+                <Text>{item.text}</Text>
+                <View style={{ flex: 1 }} />
                 <Toggle
+                  id={item.name}
                   isOn={item.isOn}
                   onColor={theme.pageTextPositive}
-                  handleToggle={() => onMenuSelect(item.name)}
                 />
-              </View>
+              </>
             }
             {item.key && <Keybinding keyName={item.key} />}
           </View>

@@ -8,9 +8,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
+  cursor: 'pointer';
   width: 32px;
   height: 16px;
+  margin-top: -10px;
   background: grey;
   border-radius: 100px;
   position: relative;
