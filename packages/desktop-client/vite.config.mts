@@ -117,7 +117,7 @@ export default defineConfig(async ({ mode }) => {
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
               extType = 'img';
             } else if (/woff|woff2/.test(extType)) {
-              extType = 'css';
+              extType = 'media';
             }
             return `static/${extType}/[name]-[hash][extname]`;
           },

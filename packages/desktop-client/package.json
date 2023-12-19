@@ -66,7 +66,7 @@
     "terser-webpack-plugin": "^5.3.9",
     "uuid": "^9.0.0",
     "victory": "^36.6.8",
-    "vite": "^5.0.7",
+    "vite": "^5.0.10",
     "vite-tsconfig-paths": "^4.2.2",
     "vitest": "^1.0.4",
     "webpack-bundle-analyzer": "^4.9.1",
