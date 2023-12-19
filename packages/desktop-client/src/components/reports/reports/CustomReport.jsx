@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
@@ -8,6 +9,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../../hooks/useActions';
 import useCategories from '../../../hooks/useCategories';
 import useFilters from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
@@ -32,6 +34,14 @@ import { fromDateRepr } from '../util';
 
 export default function CustomReport() {
   const categories = useCategories();
+
+  const viewLegend =
+    useSelector(state => state.prefs.local?.reportsViewLegend) || false;
+  const viewSummary =
+    useSelector(state => state.prefs.local?.reportsViewSummary) || false;
+  const viewLabels =
+    useSelector(state => state.prefs.local?.reportsViewLabel) || false;
+  const { savePrefs } = useActions();
 
   const {
     filters,
@@ -61,9 +71,6 @@ export default function CustomReport() {
   const [dataCheck, setDataCheck] = useState(false);
 
   const [graphType, setGraphType] = useState('BarGraph');
-  const [viewLegend, setViewLegend] = useState(false);
-  const [viewSummary, setViewSummary] = useState(false);
-  const [viewLabels, setViewLabels] = useState(false);
   const dateRangeLine = ReportOptions.dateRange.length - 3;
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
@@ -182,6 +189,18 @@ export default function CustomReport() {
     setEndDate(endDate);
   };
 
+  const onChangeViews = (viewType, status) => {
+    if (viewType === 'viewLegend') {
+      savePrefs({ reportsViewLegend: status ?? !viewLegend });
+    }
+    if (viewType === 'viewSummary') {
+      savePrefs({ reportsViewSummary: !viewSummary });
+    }
+    if (viewType === 'viewLabels') {
+      savePrefs({ reportsViewLabels: !viewLabels });
+    }
+  };
+
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header title="Custom Reports" />
@@ -204,7 +223,6 @@ export default function CustomReport() {
           allMonths={allMonths}
           graphType={graphType}
           setGraphType={setGraphType}
-          setViewLegend={setViewLegend}
           typeDisabled={typeDisabled}
           setTypeDisabled={setTypeDisabled}
           groupBy={groupBy}
@@ -224,6 +242,7 @@ export default function CustomReport() {
           categories={categories}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
+          onChangeViews={onChangeViews}
         />
         <View
           style={{
@@ -235,17 +254,15 @@ export default function CustomReport() {
             setGraphType={setGraphType}
             mode={mode}
             viewLegend={viewLegend}
-            setViewLegend={setViewLegend}
             setTypeDisabled={setTypeDisabled}
             balanceType={balanceType}
             setBalanceType={setBalanceType}
             groupBy={groupBy}
             setGroupBy={setGroupBy}
             viewSummary={viewSummary}
-            setViewSummary={setViewSummary}
             viewLabels={viewLabels}
-            setViewLabels={setViewLabels}
             onApplyFilter={onApplyFilter}
+            onChangeViews={onChangeViews}
           />
           {filters && filters.length > 0 && (
             <View
@@ -328,7 +345,7 @@ export default function CustomReport() {
                   <LoadingIndicator message={'Loading report...'} />
                 )}
               </View>
-              {(viewLegend || viewSummary) && (
+              {(viewLegend || viewSummary) && data && (
                 <View
                   style={{
                     padding: 10,

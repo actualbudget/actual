@@ -19,17 +19,15 @@ export function ReportTopbar({
   setGraphType,
   mode,
   viewLegend,
-  setViewLegend,
   setTypeDisabled,
   balanceType,
   setBalanceType,
   groupBy,
   setGroupBy,
   viewSummary,
-  setViewSummary,
   viewLabels,
-  setViewLabels,
   onApplyFilter,
+  onChangeViews,
 }) {
   return (
     <View
@@ -45,7 +43,7 @@ export function ReportTopbar({
         title="Data Table"
         onSelect={() => {
           setGraphType('TableGraph');
-          setViewLegend(false);
+          onChangeViews('viewLegend', false);
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}
@@ -78,7 +76,7 @@ export function ReportTopbar({
         onSelect={() => {
           setGraphType('AreaGraph');
           setGroupBy('Month');
-          setViewLegend(false);
+          onChangeViews('viewLegend', false);
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}
@@ -111,7 +109,7 @@ export function ReportTopbar({
       <GraphButton
         selected={viewLegend}
         onSelect={() => {
-          setViewLegend(!viewLegend);
+          onChangeViews('viewLegend');
         }}
         style={{ marginRight: 15 }}
         title="Show Legend"
@@ -124,7 +122,7 @@ export function ReportTopbar({
       <GraphButton
         selected={viewSummary}
         onSelect={() => {
-          setViewSummary(!viewSummary);
+          onChangeViews('viewSummary');
         }}
         style={{ marginRight: 15 }}
         title="Show Summary"
@@ -134,7 +132,7 @@ export function ReportTopbar({
       <GraphButton
         selected={viewLabels}
         onSelect={() => {
-          setViewLabels(!viewLabels);
+          onChangeViews('viewLabels');
         }}
         style={{ marginRight: 15 }}
         title="Show labels"

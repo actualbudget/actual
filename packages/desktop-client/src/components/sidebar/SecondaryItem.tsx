@@ -16,7 +16,9 @@ const fontWeight = 600;
 type SecondaryItemProps = {
   title: string;
   to?: string;
-  Icon?: ComponentType<SVGProps<SVGElement>>;
+  Icon?:
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
   style?: CSSProperties;
   onClick?: MouseEventHandler<HTMLDivElement>;
   bold?: boolean;
