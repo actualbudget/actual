@@ -16,7 +16,7 @@ import categorySpendingSpreadsheet from '../spreadsheets/category-spending-sprea
 import useReport from '../useReport';
 import { fromDateRepr } from '../util';
 
-function CategoryAverage() {
+function CategorySpending() {
   const categories = useCategories();
 
   const [selectedCategories, setSelectedCategories] = useState(null);
@@ -144,6 +144,7 @@ function CategoryAverage() {
       >
         <View style={{ width: 200 }}>
           <CategorySelector
+            categories={categories.list}
             categoryGroups={categories.grouped.filter(
               categoryGroup => !categoryGroup.is_income,
             )}
@@ -173,4 +174,4 @@ function CategoryAverage() {
   );
 }
 
-export default CategoryAverage;
+export default CategorySpending;
