@@ -1,4 +1,3 @@
-import { Paste } from '../../../../../desktop-client/src/icons/v1';
 import * as monthUtils from '../../../shared/months';
 import { extractScheduleConds } from '../../../shared/schedules';
 import * as db from '../../db';
