@@ -80,16 +80,13 @@ export default function ToggleMenu({
   const items = allItems.filter(x => x);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const clickRef = createRef<HTMLInputElement>();
-  const blanketRef = createRef<HTMLDivElement>();
+  let blanketRef = [];
 
   const handleCloseClick = (item, event) => {
-    //if (typeof onClick !== "function") return;
+    const [ref] = blanketRef.filter(ref => ref.current === event.currentTarget);
+    if (ref && event.target.id !== item) return;
 
-    // begin type narrowing
-    //if (event.currentTarget !== blanketRef.current) return;
-
-    //event.stopPropagation();
-    if (event === "parent") {onMenuSelect(item)};
+    onMenuSelect(item);
   };
 
   return (
@@ -100,6 +97,7 @@ export default function ToggleMenu({
     >
       {header}
       {items.map((item, idx) => {
+        blanketRef[idx] = createRef<HTMLDivElement>();
         if (item === ToggleMenu.line) {
           return (
             <View key={idx} style={{ margin: '3px 0px' }}>
@@ -128,7 +126,9 @@ export default function ToggleMenu({
 
         return (
           <View
+            innerRef={blanketRef[idx]}
             key={item.name}
+            id={item.name}
             style={{
               cursor: 'default',
               padding: '9px 10px',
@@ -152,7 +152,7 @@ export default function ToggleMenu({
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
             onClick={(e) =>
-              !item.disabled && onMenuSelect && handleCloseClick(item.name, "parent")
+              !item.disabled && onMenuSelect && handleCloseClick(item.name, e)
             }
           >
             {/* Force it to line up evenly */}
@@ -164,12 +164,15 @@ export default function ToggleMenu({
             }
             {item.toggle && 
               <>
-                <Text>{item.text}</Text>
+                <FormLabel htmlFor={item.name} title={item.text} />
                 <View style={{ flex: 1 }} />
                 <Toggle
                   id={item.name}
                   isOn={item.isOn}
                   onColor={theme.pageTextPositive}
+                  handleToggle={e =>
+                    !item.disabled && onMenuSelect && handleCloseClick(item.name, e)
+                  }
                 />
               </>
             }

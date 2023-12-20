@@ -359,6 +359,8 @@ export function ReportSidebar({
                   {
                     name: 'show-uncategorized',
                     text: 'Uncategorized',
+                    isOn: showUncategorized,
+                    toggle: true,
                   },
                 ]}
               />

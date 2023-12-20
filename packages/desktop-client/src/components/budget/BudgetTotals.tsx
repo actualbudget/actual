@@ -1,5 +1,6 @@
 import React, { type ComponentProps, memo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { Filter, ViewHide } from '../../icons/v1';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { theme, styles } from '../../style';
@@ -25,7 +26,7 @@ const BudgetTotals = memo(function BudgetTotals({
   collapseAllCategories,
 }: BudgetTotalsProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  //const showHiddenCategories = useSelector(state => state.prefs.local?.['budget.showHiddenCategories']) || false;
+  const showHiddenCategories = useSelector(state => state.prefs.local?.['budget.showHiddenCategories']) || false;
 
   return (
     <View
@@ -78,7 +79,7 @@ const BudgetTotals = memo(function BudgetTotals({
                 setMenuOpen(false);
               }}
             >
-              <ToggleMenu
+              <Menu
                 onMenuSelect={type => {
                   if (type === 'toggle-visibility') {
                     toggleHiddenCategories();
@@ -94,9 +95,7 @@ const BudgetTotals = memo(function BudgetTotals({
                   {
                     name: 'toggle-visibility',
                     text: 'Show hidden',
-                    isOn: true,
-                    toggle: true,
-                    //disabled: true,
+                    icon: ViewHide,
                   },
                   {
                     name: 'expandAllCategories',
