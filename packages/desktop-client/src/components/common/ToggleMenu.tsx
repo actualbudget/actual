@@ -121,7 +121,7 @@ export default function ToggleMenu({
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
             onClick={e =>
-              !item.disabled && onMenuSelect && handleCloseClick(item.name, e)
+              !item.disabled && onMenuSelect && onMenuSelect(item.name)
             }
           >
             {/* Force it to line up evenly */}
@@ -139,11 +139,6 @@ export default function ToggleMenu({
                   id={item.name}
                   checked={item.isOn}
                   onColor={theme.pageTextPositive}
-                  onChange={e =>
-                    !item.disabled &&
-                    onMenuSelect &&
-                    handleCloseClick(item.name, e)
-                  }
                   style={{ marginLeft: 5 }}
                 />
               </>

@@ -334,9 +334,9 @@ export function ReportSidebar({
             >
               <ToggleMenu
                 onMenuSelect={type => {
-                  if (type === 'show-hidden-columns') {
+                  if (type === 'show-hidden-categories') {
                     setShowOffBudgetHidden(!showOffBudgetHidden);
-                  } else if (type === 'show-empty-columns') {
+                  } else if (type === 'show-empty-rows') {
                     setShowEmpty(!showEmpty);
                   } else if (type === 'show-uncategorized') {
                     setShowUncategorized(!showUncategorized);
@@ -344,15 +344,15 @@ export function ReportSidebar({
                 }}
                 items={[
                   {
-                    name: 'show-hidden-columns',
-                    text: 'Show hidden',
-                    isOn: showOffBudgetHidden,
+                    name: 'show-empty-rows',
+                    text: 'Show Empty Rows',
+                    isOn: showEmpty,
                     toggle: true,
                   },
                   {
-                    name: 'show-empty-columns',
-                    text: 'Show Empty Rows',
-                    isOn: showEmpty,
+                    name: 'show-hidden-categories',
+                    text: 'Show hidden',
+                    isOn: showOffBudgetHidden,
                     toggle: true,
                   },
                   {
