@@ -24,16 +24,16 @@ function update(state = initialState, action: Action): ModalsState {
     case constants.CLOSE_MODAL:
       return {
         ...state,
-        modalStack: []
+        modalStack: [],
       };
-      case constants.COLLAPSE_MODALS:
-        const idx = state.modalStack.findIndex(m => m.name === action.rootModalName);
-        return {
-          ...state,
-          modalStack: idx < 0
-            ? state.modalStack
-            : state.modalStack.slice(0, idx),
-        };
+    case constants.COLLAPSE_MODALS:
+      const idx = state.modalStack.findIndex(
+        m => m.name === action.rootModalName,
+      );
+      return {
+        ...state,
+        modalStack: idx < 0 ? state.modalStack : state.modalStack.slice(0, idx),
+      };
     case constants.SET_APP_STATE:
       if ('loadingText' in action.state) {
         return {
