@@ -1,20 +1,16 @@
 import {
   type ReactNode,
-  createElement,
-  useEffect,
   useRef,
   useState,
   createRef,
-  type MouseEventHandler,
 } from 'react';
 
 import { theme } from '../../style';
+import { FormLabel } from '../forms';
 
 import Text from './Text';
-import View from './View';
 import Toggle from './Toggle';
-import { FormLabel } from '../forms';
-import ToggleSwitch from './ToggleSwitch';
+import View from './View';
 
 type KeybindingProps = {
   keyName: ReactNode;
@@ -27,31 +23,7 @@ function Keybinding({ keyName }: KeybindingProps) {
     </Text>
   );
 }
-function Blanket({
-  children,
-  onClick,
-}) {
-  const blanketRef = createRef<HTMLDivElement>();
 
-  const handleCloseClick: MouseEventHandler<HTMLDivElement> = (event) => {
-    //if (typeof onClick !== "function") return;
-
-    // begin type narrowing
-    if (event.target !== blanketRef.current) return;
-
-    event.stopPropagation();
-    onClick();
-  };
-
-  return (
-    <div
-      ref={blanketRef}
-      onClick={handleCloseClick}
-    >
-      {children}
-    </div>
-  );
-}
 type MenuItem = {
   type?: string | symbol;
   name: string;
@@ -79,14 +51,16 @@ export default function ToggleMenu({
   const elRef = useRef(null);
   const items = allItems.filter(x => x);
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const clickRef = createRef<HTMLInputElement>();
-  let blanketRef = [];
+
+  const blanketRef = [];
 
   const handleCloseClick = (item, event) => {
     const [ref] = blanketRef.filter(ref => ref.current === event.currentTarget);
-    if (ref && event.target.id !== item) return;
-
-    onMenuSelect(item);
+    if (ref && event.target.id !== item) {
+      return;
+    } else {
+      onMenuSelect(item);
+    }
   };
 
   return (
@@ -151,31 +125,37 @@ export default function ToggleMenu({
             }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
-            onClick={(e) =>
-              !item.disabled && onMenuSelect && handleCloseClick(item.name, e)
+            onClick={e =>
+              !item.toggle &&
+              !item.disabled &&
+              onMenuSelect &&
+              onMenuSelect(item.name)
             }
           >
             {/* Force it to line up evenly */}
-            {!item.toggle &&
-            <>
-            <Text>{item.text}</Text>
-            <View style={{ flex: 1 }} />
-            </>
-            }
-            {item.toggle && 
+            {!item.toggle && (
+              <>
+                <Text>{item.text}</Text>
+                <View style={{ flex: 1 }} />
+              </>
+            )}
+            {item.toggle && (
               <>
                 <FormLabel htmlFor={item.name} title={item.text} />
                 <View style={{ flex: 1 }} />
                 <Toggle
                   id={item.name}
-                  isOn={item.isOn}
+                  checked={item.isOn}
                   onColor={theme.pageTextPositive}
-                  handleToggle={e =>
-                    !item.disabled && onMenuSelect && handleCloseClick(item.name, e)
+                  onChange={e =>
+                    item.toggle &&
+                    !item.disabled &&
+                    onMenuSelect &&
+                    onMenuSelect(item.name)
                   }
                 />
               </>
-            }
+            )}
             {item.key && <Keybinding keyName={item.key} />}
           </View>
         );

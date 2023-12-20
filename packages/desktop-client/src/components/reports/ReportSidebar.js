@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
+import { DotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
+import Button from '../common/Button';
 import Select from '../common/Select';
 import Text from '../common/Text';
+import ToggleMenu from '../common/ToggleMenu';
 import View from '../common/View';
 import { Checkbox } from '../forms';
+import { Tooltip } from '../tooltips';
 
 import CategorySelector from './CategorySelector';
 import {
@@ -18,10 +22,6 @@ import {
 } from './Header';
 import ModeButton from './ModeButton';
 import { ReportOptions } from './ReportOptions';
-import ToggleMenu from '../common/ToggleMenu';
-import { Tooltip } from '../tooltips';
-import { DotsHorizontalTriple } from '../../icons/v1';
-import Button from '../common/Button';
 
 export function ReportSidebar({
   startDate,
@@ -52,7 +52,6 @@ export function ReportSidebar({
   selectedCategories,
   setSelectedCategories,
 }) {
-  const [isOn, setIsOn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
     switch (cond) {

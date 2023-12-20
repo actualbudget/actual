@@ -1,34 +1,31 @@
-import React, { type HTMLProps } from 'react';
+import React from 'react';
 import './Toggle.css';
 
-import { css } from 'glamor';
+type ToggleProps = {
+  id: string;
+  checked: boolean;
+  onChange?: (boolean) => void;
+  onColor?: string;
+};
 
-import { type CSSProperties, theme } from '../../style';
-type ToggleProps ={
-  id?: string
-  isOn;
-  handleToggle?;
-  onColor?;
-}
-
-const Toggle = ({id, isOn, handleToggle, onColor}: ToggleProps) => {
+const Toggle = ({ id, checked, onChange, onColor }: ToggleProps) => {
   return (
-    <>
-    <input
-      checked={isOn}
-      onChange={handleToggle}
-      className="react-switch-checkbox"
-      id={`react-switch-new`}
-      type="checkbox"
-    />
-    <label
-      style={{ background: isOn && onColor }}
-      className="react-switch-label"
-      htmlFor={`react-switch-new`}
-    >
-      <span className={`react-switch-button`} />
-    </label>
-    </>
+    <div style={{ marginTop: -20 }}>
+      <input
+        checked={checked}
+        onChange={onChange}
+        className="react-switch-checkbox"
+        id={id}
+        type="checkbox"
+      />
+      <label
+        style={{ background: checked && onColor }}
+        className="react-switch-label"
+        htmlFor={id}
+      >
+        <span className={`react-switch-button`} />
+      </label>
+    </div>
   );
 };
 
