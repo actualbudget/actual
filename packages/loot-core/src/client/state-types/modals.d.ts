@@ -150,14 +150,19 @@ export type PopModalAction = {
 
 export type CloseModalAction = {
   type: typeof constants.CLOSE_MODAL;
-  name?: string;
+};
+
+export type CollapseModalsAction = {
+  type: typeof constants.COLLAPSE_MODALS;
+  rootModalName: string;
 };
 
 export type ModalsActions =
   | PushModalAction
   | ReplaceModalAction
   | PopModalAction
-  | CloseModalAction;
+  | CloseModalAction
+  | CollapseModalsAction;
 
 export type ModalsState = {
   modalStack: Modal[];

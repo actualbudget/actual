@@ -124,7 +124,7 @@ class Budget extends Component {
     this.props.pushModal('new-category', {
       onValidate: name => (!name ? 'Name is required.' : null),
       onSubmit: async name => {
-        this.props.closeModal('category-group-menu');
+        this.props.collapseModals('category-group-menu');
         const id = await this.props.createCategory(name, groupId, isIncome);
         this.setState(state => ({
           categoryGroups: addCategory(state.categoryGroups, {
@@ -164,7 +164,7 @@ class Budget extends Component {
       this.props.pushModal('confirm-category-delete', {
         group: groupId,
         onDelete: transferCategory => {
-          this.props.closeModal('category-group-menu');
+          this.props.collapseModals('category-group-menu');
           this.props.deleteGroup(groupId, transferCategory);
           this.setState(state => ({
             categoryGroups: deleteGroup(state.categoryGroups, groupId),
@@ -172,7 +172,7 @@ class Budget extends Component {
         },
       });
     } else {
-      this.props.closeModal('category-group-menu');
+      this.props.collapseModals('category-group-menu');
       this.props.deleteGroup(groupId);
       this.setState(state => ({
         categoryGroups: deleteGroup(state.categoryGroups, groupId),
@@ -197,7 +197,7 @@ class Budget extends Component {
         category: categoryId,
         onDelete: transferCategory => {
           if (categoryId !== transferCategory) {
-            this.props.closeModal('category-menu');
+            this.props.collapseModals('category-menu');
             this.props.deleteCategory(categoryId, transferCategory);
             this.setState(state => ({
               categoryGroups: deleteCategory(state.categoryGroups, categoryId),
@@ -206,7 +206,7 @@ class Budget extends Component {
         },
       });
     } else {
-      this.props.closeModal('category-menu');
+      this.props.collapseModals('category-menu');
       this.props.deleteCategory(categoryId);
       this.setState(state => ({
         categoryGroups: deleteCategory(state.categoryGroups, categoryId),

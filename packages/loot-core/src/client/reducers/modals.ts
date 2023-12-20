@@ -22,15 +22,18 @@ function update(state = initialState, action: Action): ModalsState {
     case constants.POP_MODAL:
       return { ...state, modalStack: state.modalStack.slice(0, -1) };
     case constants.CLOSE_MODAL:
-      const idx = state.modalStack.findIndex(m => m.name === action.name);
       return {
         ...state,
-        modalStack: !action.name
-          ? []
-          : idx < 0
-          ? state.modalStack
-          : state.modalStack.slice(0, idx),
+        modalStack: []
       };
+      case constants.COLLAPSE_MODALS:
+        const idx = state.modalStack.findIndex(m => m.name === action.rootModalName);
+        return {
+          ...state,
+          modalStack: idx < 0
+            ? state.modalStack
+            : state.modalStack.slice(0, idx),
+        };
     case constants.SET_APP_STATE:
       if ('loadingText' in action.state) {
         return {
