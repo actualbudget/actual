@@ -1,4 +1,6 @@
 import React from 'react';
+
+import { type CSSProperties } from '../../style';
 import './Toggle.css';
 
 type ToggleProps = {
@@ -6,11 +8,12 @@ type ToggleProps = {
   checked: boolean;
   onChange?: (boolean) => void;
   onColor?: string;
+  style?: CSSProperties;
 };
 
-const Toggle = ({ id, checked, onChange, onColor }: ToggleProps) => {
+const Toggle = ({ id, checked, onChange, onColor, style }: ToggleProps) => {
   return (
-    <div style={{ marginTop: -20 }}>
+    <div style={{ marginTop: -20, ...style }}>
       <input
         checked={checked}
         onChange={onChange}
