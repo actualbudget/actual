@@ -232,6 +232,7 @@ export default function Modals() {
               modalProps={modalProps}
               name={options.name}
               onSubmit={options.onSubmit}
+              onClose={options.onClose}
             />
           );
 

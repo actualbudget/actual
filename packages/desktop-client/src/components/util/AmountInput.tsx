@@ -15,25 +15,31 @@ import useFormat from '../spreadsheet/useFormat';
 type AmountInputProps = {
   id?: string;
   inputRef?: Ref<HTMLInputElement>;
-  initialValue: number;
+  value: number;
   zeroSign?: '-' | '+';
-  onChange?: (value: number) => void;
-  onBlur?: () => void;
+  onToggleSign?: (value: number) => void;
+  onChange?: (text: string) => void;
+  onFocus?: () => void;
+  onUpdate?: (value: number) => void;
   style?: CSSProperties;
   textStyle?: CSSProperties;
   focused?: boolean;
+  disabled?: boolean;
 };
 
 export function AmountInput({
   id,
   inputRef,
-  initialValue,
+  value: initialValue,
   zeroSign = '-', // + or -
-  onChange,
-  onBlur,
+  onToggleSign,
+  onFocus,
+  onUpdate,
   style,
   textStyle,
   focused,
+  disabled = false,
+  ...props
 }: AmountInputProps) {
   const format = useFormat();
   const [negative, setNegative] = useState(
@@ -45,25 +51,6 @@ export function AmountInput({
   useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
 
   const buttonRef = useRef();
-
-  function onSwitch() {
-    setNegative(!negative);
-    fireChange(value, !negative);
-  }
-
-  function fireChange(val, neg) {
-    const valueOrInitial = Math.abs(
-      amountToInteger(evalArithmetic(val, initialValueAbsolute)),
-    );
-    const amount = neg ? valueOrInitial * -1 : valueOrInitial;
-
-    onChange?.(amount);
-  }
-
-  function onInputAmountChange(value) {
-    setValue(value ? value : '');
-  }
-
   const ref = useRef<HTMLInputElement>();
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
 
@@ -73,10 +60,30 @@ export function AmountInput({
     }
   }, [focused]);
 
+  function onSwitch() {
+    setNegative(!negative);
+    onToggleSign?.(getAmount(!negative));
+  }
+
+  function getAmount(neg) {
+    const valueOrInitial = Math.abs(
+      amountToInteger(evalArithmetic(value, initialValueAbsolute)),
+    );
+    return neg ? valueOrInitial * -1 : valueOrInitial;
+  }
+
+  function onInputTextChange(val) {
+    setValue(val ? val : '');
+    props.onChange?.(val);
+  }
+
+  function fireUpdate(neg) {
+    onUpdate?.(getAmount(neg));
+  }
+
   function onInputAmountBlur(e) {
-    fireChange(value, negative);
     if (!ref.current?.contains(e.relatedTarget)) {
-      onBlur?.();
+      fireUpdate(negative);
     }
   }
 
@@ -88,6 +95,7 @@ export function AmountInput({
       leftContent={
         <Button
           type="bare"
+          disabled={disabled}
           aria-label={`Make ${negative ? 'positive' : 'negative'}`}
           style={{ padding: '0 7px' }}
           onPointerUp={onSwitch}
@@ -102,17 +110,18 @@ export function AmountInput({
         </Button>
       }
       value={value}
+      disabled={disabled}
       focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
       inputStyle={{ paddingLeft: 0, ...textStyle }}
       onKeyUp={e => {
         if (e.key === 'Enter') {
-          fireChange(value, negative);
-          onBlur?.();
+          fireUpdate(negative);
         }
       }}
-      onUpdate={onInputAmountChange}
+      onUpdate={onInputTextChange}
       onBlur={onInputAmountBlur}
+      onFocus={onFocus}
     />
   );
 }
@@ -124,8 +133,8 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <AmountInput
-        initialValue={num1}
-        onChange={value => {
+        value={num1}
+        onUpdate={value => {
           setNum1(value);
           onChange({ num1: value, num2 });
         }}
@@ -133,8 +142,8 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
       />
       <View style={{ margin: '0 5px' }}>and</View>
       <AmountInput
-        initialValue={num2}
-        onChange={value => {
+        value={num2}
+        onUpdate={value => {
           setNum2(value);
           onChange({ num1, num2: value });
         }}

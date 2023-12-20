@@ -49,6 +49,10 @@ import { useActions } from '../../hooks/useActions';
 import useCategories from '../../hooks/useCategories';
 import useNavigate from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
+import {
+  SingleActiveEditFormProvider,
+  useSingleActiveEditForm,
+} from '../../hooks/useSingleActiveEditForm';
 import Split from '../../icons/v0/Split';
 import Add from '../../icons/v1/Add';
 import Trash from '../../icons/v1/Trash';
@@ -73,6 +77,10 @@ import { Page } from '../Page';
 import { AmountInput } from '../util/AmountInput';
 
 const zIndices = { SECTION_HEADING: 10 };
+
+function getFieldName(transactionId, field) {
+  return `${field}-${transactionId}`;
+}
 
 function getDescriptionPretty(transaction, payee, transferAcct) {
   const { amount } = transaction;
@@ -275,7 +283,6 @@ const ChildTransactionEdit = forwardRef(
     {
       transaction,
       amountSign,
-      amountRef,
       getCategory,
       getPrettyPayee,
       isOffBudget,
@@ -286,6 +293,8 @@ const ChildTransactionEdit = forwardRef(
     },
     ref,
   ) => {
+    const { editingField, onRequestActiveEdit, onClearActiveEdit } =
+      useSingleActiveEditForm();
     return (
       <View
         innerRef={ref}
@@ -305,6 +314,10 @@ const ChildTransactionEdit = forwardRef(
           <View style={{ flexBasis: '75%' }}>
             <FieldLabel title="Payee" />
             <TapField
+              disabled={
+                editingField &&
+                editingField !== getFieldName(transaction.id, 'payee')
+              }
               value={getPrettyPayee(transaction)}
               onClick={() => onClick(transaction.id, 'payee')}
               data-testid={`payee-field-${transaction.id}`}
@@ -317,20 +330,32 @@ const ChildTransactionEdit = forwardRef(
           >
             <FieldLabel title="Amount" style={{ padding: 0 }} />
             <AmountInput
-              inputRef={amountRef}
-              initialValue={amountToInteger(transaction.amount)}
+              disabled={
+                editingField &&
+                editingField !== getFieldName(transaction.id, 'amount')
+              }
+              focused={transaction.amount === 0}
+              value={amountToInteger(transaction.amount)}
               zeroSign={amountSign}
               style={{ marginRight: 8 }}
               textStyle={{ ...styles.smallText, textAlign: 'right' }}
-              onChange={value =>
-                onEdit(transaction, 'amount', integerToAmount(value))
+              onFocus={() =>
+                onRequestActiveEdit(getFieldName(transaction.id, 'amount'))
               }
+              onUpdate={value => {
+                const amount = integerToAmount(value);
+                if (transaction.amount !== amount) {
+                  onEdit(transaction, 'amount', amount);
+                } else {
+                  onClearActiveEdit();
+                }
+              }}
             />
           </View>
         </View>
 
         <View>
-          <FieldLabel title={'Category'} />
+          <FieldLabel title="Category" />
           <TapField
             style={{
               ...((isOffBudget || isBudgetTransfer(transaction)) && {
@@ -340,7 +365,12 @@ const ChildTransactionEdit = forwardRef(
               }),
             }}
             value={getCategory(transaction, isOffBudget)}
-            disabled={isOffBudget || isBudgetTransfer(transaction)}
+            disabled={
+              (editingField &&
+                editingField !== getFieldName(transaction.id, 'category')) ||
+              isOffBudget ||
+              isBudgetTransfer(transaction)
+            }
             onClick={() => onClick(transaction.id, 'category')}
             data-testid={`category-field-${transaction.id}`}
           />
@@ -349,7 +379,14 @@ const ChildTransactionEdit = forwardRef(
         <View>
           <FieldLabel title="Notes" />
           <InputField
+            disabled={
+              editingField &&
+              editingField !== getFieldName(transaction.id, 'notes')
+            }
             defaultValue={transaction.notes}
+            onFocus={() =>
+              onRequestActiveEdit(getFieldName(transaction.id, 'notes'))
+            }
             onUpdate={value => onEdit(transaction, 'notes', value)}
           />
         </View>
@@ -396,8 +433,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
   pushModal,
   ...props
 }) {
+  const { editingField, onRequestActiveEdit, onClearActiveEdit } =
+    useSingleActiveEditForm();
   const [totalAmountFocused, setTotalAmountFocused] = useState(false);
-  const amountElementMap = useRef({});
   const childTransactionElementRefMap = useRef({});
 
   const payeesById = useMemo(() => groupById(payees), [payees]);
@@ -435,21 +473,25 @@ const TransactionEditInner = memo(function TransactionEditInner({
       : lookupName(categories, trans.category);
   };
 
-  useEffect(() => {
-    if (adding) {
+  const onTotalAmountEdit = () => {
+    onRequestActiveEdit?.(getFieldName(transaction.id, 'amount'), () => {
       setTotalAmountFocused(true);
-    }
-  }, [adding]);
-
-  const onTotalAmountBlur = value => {
-    if (transaction.amount !== value) {
-      onEdit(transaction, 'amount', value.toString());
-    }
-    setTotalAmountFocused(false);
+      return () => setTotalAmountFocused(false);
+    });
   };
 
-  const onTotalAmountFocus = () => {
-    setTotalAmountFocused(true);
+  useEffect(() => {
+    if (adding) {
+      onTotalAmountEdit();
+    }
+  }, []);
+
+  const onTotalAmountUpdate = value => {
+    if (transaction.amount !== value) {
+      onEdit(transaction, 'amount', value.toString());
+    } else {
+      onClearActiveEdit();
+    }
   };
 
   const onSave = async () => {
@@ -495,20 +537,26 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const onEdit = async (transaction, name, value) => {
     const newTransaction = { ...transaction, [name]: value };
     await props.onEdit(newTransaction);
+    onClearActiveEdit();
   };
 
   const onClick = (transactionId, name) => {
-    pushModal('edit-field', {
-      name,
-      onSubmit: (name, value) => {
-        const transaction = unserializedTransactions.find(
-          t => t.id === transactionId,
-        );
-        // This is a deficiency of this API, need to fix. It
-        // assumes that it receives a serialized transaction,
-        // but we only have access to the raw transaction
-        onEdit(serializeTransaction(transaction, dateFormat), name, value);
-      },
+    onRequestActiveEdit?.(getFieldName(transaction.id, 'payee'), () => {
+      pushModal('edit-field', {
+        name,
+        onSubmit: (name, value) => {
+          const transaction = unserializedTransactions.find(
+            t => t.id === transactionId,
+          );
+          // This is a deficiency of this API, need to fix. It
+          // assumes that it receives a serialized transaction,
+          // but we only have access to the raw transaction
+          onEdit(serializeTransaction(transaction, dateFormat), name, value);
+        },
+        onClose: () => {
+          onClearActiveEdit();
+        },
+      });
     });
   };
 
@@ -520,6 +568,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
       if (transaction.id !== id) {
         // Only a child transaction was deleted.
+        onClearActiveEdit();
         return;
       }
 
@@ -542,9 +591,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
   };
 
   const scrollChildTransactionIntoView = id => {
-    const emptyAmountElement = amountElementMap.current?.[id];
-    emptyAmountElement?.select();
-
     const childTransactionEditElement =
       childTransactionElementRefMap.current?.[id];
     childTransactionEditElement?.scrollIntoView({
@@ -574,11 +620,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const [transaction, ...childTransactions] = transactions;
 
   useEffect(() => {
-    const noAmountTransaction = transactions.find(t => t.amount === 0);
+    const noAmountTransaction = childTransactions.find(t => t.amount === 0);
     if (noAmountTransaction) {
       scrollChildTransactionIntoView(noAmountTransaction.id);
     }
-  }, [transactions]);
+  }, [childTransactions]);
 
   // Child transactions should always default to the signage
   // of the parent transaction
@@ -632,18 +678,13 @@ const TransactionEditInner = memo(function TransactionEditInner({
             alignItems: 'center',
           }}
         >
-          <FieldLabel
-            title="Amount"
-            flush
-            style={{ marginBottom: 0, paddingLeft: 0 }}
-          />
+          <FieldLabel title="Amount" flush style={{ marginBottom: 0 }} />
           <FocusableAmountInput
             value={transaction.amount}
-            zeroIsNegative={true}
+            zeroSign="-"
             focused={totalAmountFocused}
-            onBlur={onTotalAmountBlur}
-            onFocus={onTotalAmountFocus}
-            style={{ transform: [] }}
+            onFocus={onTotalAmountEdit}
+            onUpdate={onTotalAmountUpdate}
             focusedStyle={{
               width: 'auto',
               padding: '5px',
@@ -659,6 +700,10 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title="Payee" />
           <TapField
+            disabled={
+              editingField &&
+              editingField !== getFieldName(transaction.id, 'payee')
+            }
             value={getPrettyPayee(transaction)}
             onClick={() => onClick(transaction.id, 'payee')}
             data-testid="payee-field"
@@ -677,7 +722,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 }),
               }}
               value={getCategory(transaction, isOffBudget)}
-              disabled={isOffBudget || isBudgetTransfer(transaction)}
+              disabled={
+                (editingField &&
+                  editingField !== getFieldName(transaction.id, 'category')) ||
+                isOffBudget ||
+                isBudgetTransfer(transaction)
+              }
               onClick={() => onClick(transaction.id, 'category')}
               data-testid="category-field"
             />
@@ -695,12 +745,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 [childTrans.id]: r,
               };
             }}
-            amountRef={r => {
-              amountElementMap.current = {
-                ...amountElementMap.current,
-                [childTrans.id]: r,
-              };
-            }}
             isOffBudget={isOffBudget}
             getCategory={getCategory}
             getPrettyPayee={getPrettyPayee}
@@ -714,6 +758,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         {transaction.amount !== 0 && childTransactions.length === 0 && (
           <View style={{ alignItems: 'center' }}>
             <Button
+              disabled={editingField}
               style={{
                 height: 40,
                 borderWidth: 0,
@@ -746,8 +791,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title="Account" />
           <TapField
-            disabled={!adding}
-            value={account ? account.name : null}
+            disabled={
+              !adding ||
+              (editingField &&
+                editingField !== getFieldName(transaction.id, 'account'))
+            }
+            value={account?.name}
             onClick={() => onClick(transaction.id, 'account')}
             data-testid="account-field"
           />
@@ -758,9 +807,16 @@ const TransactionEditInner = memo(function TransactionEditInner({
             <FieldLabel title="Date" />
             <InputField
               type="date"
+              disabled={
+                editingField &&
+                editingField !== getFieldName(transaction.id, 'date')
+              }
               required
               style={{ color: theme.tableText, minWidth: '150px' }}
               defaultValue={dateDefaultValue}
+              onFocus={() =>
+                onRequestActiveEdit(getFieldName(transaction.id, 'date'))
+              }
               onUpdate={value =>
                 onEdit(
                   transaction,
@@ -774,19 +830,20 @@ const TransactionEditInner = memo(function TransactionEditInner({
             <View style={{ marginLeft: 0, marginRight: 8 }}>
               <FieldLabel title="Reconciled" />
               <BooleanField
+                disabled
                 checked
                 style={{
                   margin: 'auto',
                   width: 22,
                   height: 22,
                 }}
-                disabled
               />
             </View>
           ) : (
             <View style={{ marginLeft: 0, marginRight: 8 }}>
               <FieldLabel title="Cleared" />
               <BooleanField
+                disabled={editingField}
                 checked={transaction.cleared}
                 onUpdate={checked => onEdit(transaction, 'cleared', checked)}
                 style={{
@@ -802,7 +859,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title="Notes" />
           <InputField
+            disabled={
+              editingField &&
+              editingField !== getFieldName(transaction.id, 'notes')
+            }
             defaultValue={transaction.notes}
+            onFocus={() => {
+              onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
+            }}
             onUpdate={value => onEdit(transaction, 'notes', value)}
           />
         </View>
@@ -1046,15 +1110,17 @@ export const TransactionEdit = props => {
   const actions = useActions();
 
   return (
-    <TransactionEditUnconnected
-      {...props}
-      {...actions}
-      categories={categories}
-      payees={payees}
-      lastTransaction={lastTransaction}
-      accounts={accounts}
-      dateFormat={dateFormat}
-    />
+    <SingleActiveEditFormProvider formName="mobile-transaction">
+      <TransactionEditUnconnected
+        {...props}
+        {...actions}
+        categories={categories}
+        payees={payees}
+        lastTransaction={lastTransaction}
+        accounts={accounts}
+        dateFormat={dateFormat}
+      />
+    </SingleActiveEditFormProvider>
   );
 };
 

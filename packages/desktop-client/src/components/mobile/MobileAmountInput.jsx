@@ -74,7 +74,7 @@ const AmountInput = memo(function AmountInput({
 
   const onBlur = () => {
     const value = applyText();
-    props.onBlur?.(value);
+    props.onUpdate?.(value);
   };
 
   const onChangeText = text => {
@@ -123,8 +123,8 @@ const AmountInput = memo(function AmountInput({
 
 export const FocusableAmountInput = memo(function FocusableAmountInput({
   value,
-  sign,
-  zeroIsNegative,
+  sign, // + or -
+  zeroSign, // + or -
   focused,
   textStyle,
   style,
@@ -137,31 +137,28 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
 
   useEffect(() => {
     if (sign) {
-      setIsNegative(sign === 'negative');
-    } else if (value > 0 || (!zeroIsNegative && value === 0)) {
+      setIsNegative(sign === '-');
+    } else if (value > 0 || (zeroSign !== '-' && value === 0)) {
       setIsNegative(false);
     }
   }, []);
 
   const toggleIsNegative = () => {
     setIsNegative(!isNegative);
+    props.onUpdate?.(maybeApplyNegative(value, !isNegative));
   };
 
-  useEffect(() => {
-    onBlur(value);
-  }, [isNegative]);
-
-  const maybeApplyNegative = val => {
+  const maybeApplyNegative = (val, negative) => {
     const absValue = Math.abs(val);
-    return isNegative ? -absValue : absValue;
+    return negative ? -absValue : absValue;
   };
 
-  const onBlur = val => {
-    props.onBlur?.(maybeApplyNegative(val));
+  const onUpdate = val => {
+    props.onUpdate?.(maybeApplyNegative(val, isNegative));
   };
 
   const onChange = val => {
-    props.onChange?.(maybeApplyNegative(val));
+    props.onChange?.(maybeApplyNegative(val, isNegative));
   };
 
   return (
@@ -170,7 +167,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         {...props}
         value={value}
         onChange={onChange}
-        onBlur={onBlur}
+        onUpdate={onUpdate}
         focused={focused}
         style={{
           width: 80,
