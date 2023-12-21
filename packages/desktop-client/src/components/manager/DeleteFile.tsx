@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
-import { theme } from '../../style';
-import { type BoundActions } from '../../hooks/useActions';
 import { type File } from 'loot-core/src/types/file';
+
+import { type BoundActions } from '../../hooks/useActions';
+import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
 import Modal from '../common/Modal';
