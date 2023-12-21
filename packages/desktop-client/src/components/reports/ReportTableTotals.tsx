@@ -57,7 +57,7 @@ export default function ReportTableTotals({
             minWidth: 125,
             ...styles.tnum,
           }}
-          value={'Totals'}
+          value="Totals"
           width="flex"
         />
         {mode === 'time'
