@@ -160,11 +160,8 @@ function BudgetCell({
         }}
         focused={isEditing}
         textStyle={{ ...styles.smallText, ...textStyle }}
-        onToggleSign={updateBudgetAmount}
-        onUpdate={value => {
-          updateBudgetAmount(value);
-          onEdit?.(null);
-        }}
+        onUpdate={updateBudgetAmount}
+        onBlur={() => onEdit?.(null)}
       />
       <View
         role="button"

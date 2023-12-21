@@ -1,4 +1,10 @@
-import React, { type Ref, useRef, useState, useEffect } from 'react';
+import React, {
+  type Ref,
+  useRef,
+  useState,
+  useEffect,
+  type FocusEventHandler,
+} from 'react';
 
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { amountToInteger } from 'loot-core/src/shared/util';
@@ -17,10 +23,10 @@ type AmountInputProps = {
   inputRef?: Ref<HTMLInputElement>;
   value: number;
   zeroSign?: '-' | '+';
-  onToggleSign?: (value: number) => void;
-  onChange?: (text: string) => void;
-  onFocus?: () => void;
-  onUpdate?: (value: number) => void;
+  onChange?: (value: string) => void;
+  onFocus?: FocusEventHandler<HTMLInputElement>;
+  onBlur?: FocusEventHandler<HTMLInputElement>;
+  onUpdate?: (amount: number) => void;
   style?: CSSProperties;
   textStyle?: CSSProperties;
   focused?: boolean;
@@ -32,8 +38,9 @@ export function AmountInput({
   inputRef,
   value: initialValue,
   zeroSign = '-', // + or -
-  onToggleSign,
   onFocus,
+  onBlur,
+  onChange,
   onUpdate,
   style,
   textStyle,
@@ -46,7 +53,7 @@ export function AmountInput({
     (initialValue === 0 && zeroSign === '-') || initialValue < 0,
   );
 
-  const initialValueAbsolute = format(Math.abs(initialValue), 'financial');
+  const initialValueAbsolute = format(Math.abs(initialValue || 0), 'financial');
   const [value, setValue] = useState(initialValueAbsolute);
   useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
 
@@ -62,7 +69,7 @@ export function AmountInput({
 
   function onSwitch() {
     setNegative(!negative);
-    onToggleSign?.(getAmount(!negative));
+    fireUpdate(!negative);
   }
 
   function getAmount(neg) {
@@ -74,7 +81,7 @@ export function AmountInput({
 
   function onInputTextChange(val) {
     setValue(val ? val : '');
-    props.onChange?.(val);
+    onChange?.(val);
   }
 
   function fireUpdate(neg) {
@@ -85,6 +92,7 @@ export function AmountInput({
     if (!ref.current?.contains(e.relatedTarget)) {
       fireUpdate(negative);
     }
+    onBlur?.(e);
   }
 
   return (
