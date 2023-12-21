@@ -49,9 +49,7 @@ export function AmountInput({
   ...props
 }: AmountInputProps) {
   const format = useFormat();
-  const [negative, setNegative] = useState(
-    (initialValue === 0 && zeroSign === '-') || initialValue < 0,
-  );
+  const negative = (initialValue === 0 && zeroSign === '-') || initialValue < 0;
 
   const initialValueAbsolute = format(Math.abs(initialValue || 0), 'financial');
   const [value, setValue] = useState(initialValueAbsolute);
@@ -68,15 +66,14 @@ export function AmountInput({
   }, [focused]);
 
   function onSwitch() {
-    setNegative(!negative);
     fireUpdate(!negative);
   }
 
-  function getAmount(neg) {
+  function getAmount(negate) {
     const valueOrInitial = Math.abs(
       amountToInteger(evalArithmetic(value, initialValueAbsolute)),
     );
-    return neg ? valueOrInitial * -1 : valueOrInitial;
+    return negate ? valueOrInitial * -1 : valueOrInitial;
   }
 
   function onInputTextChange(val) {
@@ -84,8 +81,8 @@ export function AmountInput({
     onChange?.(val);
   }
 
-  function fireUpdate(neg) {
-    onUpdate?.(getAmount(neg));
+  function fireUpdate(negate) {
+    onUpdate?.(getAmount(negate));
   }
 
   function onInputAmountBlur(e) {
