@@ -332,7 +332,10 @@ export interface ServerHandlers {
 
   'close-budget': () => Promise<'ok'>;
 
-  'delete-budget': (arg: { id; cloudFileId? }) => Promise<'ok'>;
+  'delete-budget': (arg: {
+    id?: string;
+    cloudFileId?: string;
+  }) => Promise<'ok'>;
 
   'create-budget': (arg: {
     budgetName?;
