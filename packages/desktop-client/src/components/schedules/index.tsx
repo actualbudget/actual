@@ -7,7 +7,7 @@ import { type ScheduleEntity } from 'loot-core/src/types/models';
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
-import Search from '../common/Search';
+import { Search } from '../common/Search';
 import View from '../common/View';
 import { Page } from '../Page';
 

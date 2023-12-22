@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Modal from '../common/Modal';
-import Paragraph from '../common/Paragraph';
+import { Modal } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
 import View from '../common/View';
 
 export default function GoCardlessLink() {

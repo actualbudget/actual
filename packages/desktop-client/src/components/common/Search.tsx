@@ -16,7 +16,7 @@ type SearchProps = {
   width?: number;
 };
 
-export default function Search({
+export function Search({
   inputRef,
   value,
   onChange,

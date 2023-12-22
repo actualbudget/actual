@@ -38,7 +38,7 @@ type SelectProps<Value extends string> = {
  * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
  */
 
-export default function Select<Value extends string>({
+export function Select<Value extends string>({
   bare,
   options,
   value,

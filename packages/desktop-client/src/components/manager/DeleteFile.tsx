@@ -6,7 +6,7 @@ import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
-import Modal from '../common/Modal';
+import { Modal } from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
 
