@@ -6,10 +6,12 @@ import { styles, theme } from '../../style';
 import View from '../common/View';
 import { Row, Cell } from '../table';
 
+import { type Month } from './entities';
+
 type ReportTableHeaderProps = {
   scrollWidth?: number;
   groupBy: string;
-  interval?: Array<string>;
+  interval?: Month[];
   balanceType: string;
   headerScrollRef?: Ref<HTMLDivElement>;
 };
@@ -50,14 +52,14 @@ export default function ReportTableHeader({
           width="flex"
         />
         {interval
-          ? interval.map(header => {
+          ? interval.map((header, index) => {
               return (
                 <Cell
                   style={{
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  key={header}
+                  key={index}
                   // eslint-disable-next-line rulesdir/typography
                   value={d.format(d.parseISO(`${header}-01`), "MMM ''yy")}
                   width="flex"
@@ -71,7 +73,7 @@ export default function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Assets'}
+                  value="Deposits"
                   width="flex"
                 />
                 <Cell
@@ -79,7 +81,7 @@ export default function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Debts'}
+                  value="Payments"
                   width="flex"
                 />
               </>
@@ -89,7 +91,7 @@ export default function ReportTableHeader({
             minWidth: 85,
             ...styles.tnum,
           }}
-          value={'Totals'}
+          value="Totals"
           width="flex"
         />
         <Cell
@@ -97,7 +99,7 @@ export default function ReportTableHeader({
             minWidth: 85,
             ...styles.tnum,
           }}
-          value={'Average'}
+          value="Average"
           width="flex"
         />
         {scrollWidth > 0 && <Cell width={scrollWidth} />}

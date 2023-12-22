@@ -15,7 +15,7 @@ import ScheduleValue from './ScheduleValue';
 import Value from './Value';
 
 const valueStyle = {
-  color: theme.pageTextPositive,
+  color: theme.pillTextHighlighted,
 };
 
 type ActionExpressionProps = RuleActionEntity & {
@@ -61,7 +61,7 @@ function SetActionExpression({
       <Text>{friendlyOp(op)}</Text>{' '}
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
       <Text>to </Text>
-      <Value value={value} field={field} />
+      <Value style={valueStyle} value={value} field={field} />
     </>
   );
 }

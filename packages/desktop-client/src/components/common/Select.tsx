@@ -19,6 +19,7 @@ type SelectProps<Value extends string> = {
   style?: CSSProperties;
   wrapperStyle?: CSSProperties;
   line?: number;
+  disabled?: boolean;
   disabledKeys?: Value[];
 };
 
@@ -46,6 +47,7 @@ export default function Select<Value extends string>({
   style,
   wrapperStyle,
   line,
+  disabled,
   disabledKeys = [],
 }: SelectProps<Value>) {
   const arrowSize = 7;
@@ -55,6 +57,7 @@ export default function Select<Value extends string>({
     <ListboxInput
       value={value}
       onChange={onChange}
+      disabled={disabled}
       style={{
         color: bare ? 'inherit' : theme.formInputText,
         backgroundColor: bare ? 'transparent' : theme.cardBackground,

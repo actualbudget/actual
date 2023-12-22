@@ -1,7 +1,11 @@
 import * as monthUtils from '../../../shared/months';
 import { extractScheduleConds } from '../../../shared/schedules';
 import * as db from '../../db';
-import { getRuleForSchedule, getNextDate } from '../../schedules/app';
+import {
+  getRuleForSchedule,
+  getNextDate,
+  getDateWithSkippedWeekend,
+} from '../../schedules/app';
 import { isReflectBudget } from '../actions';
 
 export async function goalsSchedule(
@@ -26,7 +30,6 @@ export async function goalsSchedule(
         'SELECT * FROM schedules WHERE name = ?',
         [template[ll].name],
       );
-      console.log(complete);
       const rule = await getRuleForSchedule(sid);
       const conditions = rule.serialize().conditions;
       const { date: dateConditions, amount: amountCondition } =
@@ -52,6 +55,8 @@ export async function goalsSchedule(
         next_date_string,
         current_month,
       );
+      const startDate = dateConditions.value.start ?? dateConditions.value;
+      const started = startDate <= monthUtils.addMonths(current_month, 1);
       t.push({
         template: template[ll],
         target,
@@ -60,47 +65,67 @@ export async function goalsSchedule(
         target_frequency,
         num_months,
         completed: complete,
+        started,
       });
-      if (!complete) {
+      if (!complete && started) {
         if (isRepeating) {
           let monthlyTarget = 0;
-          const next_month = monthUtils.addMonths(
+          const nextMonth = monthUtils.addMonths(
             current_month,
             t[ll].num_months + 1,
           );
-          let next_date = getNextDate(
+          let nextBaseDate = getNextDate(
             dateConditions,
             monthUtils._parse(current_month),
+            true,
           );
-          while (next_date < next_month) {
+
+          let nextDate = dateConditions.value.skipWeekend
+            ? monthUtils.dayFromDate(
+                getDateWithSkippedWeekend(
+                  monthUtils._parse(nextBaseDate),
+                  dateConditions.value.weekendSolveMode,
+                ),
+              )
+            : nextBaseDate;
+
+          while (nextDate < nextMonth) {
             monthlyTarget += -target;
-            const current_date = next_date;
-            next_date = monthUtils.addDays(next_date, 1);
-            next_date = getNextDate(
+            const currentDate = nextBaseDate;
+            const oneDayLater = monthUtils.addDays(nextBaseDate, 1);
+            nextBaseDate = getNextDate(
               dateConditions,
-              monthUtils._parse(next_date),
+              monthUtils._parse(oneDayLater),
+              true,
             );
+            nextDate = dateConditions.value.skipWeekend
+              ? monthUtils.dayFromDate(
+                  getDateWithSkippedWeekend(
+                    monthUtils._parse(nextBaseDate),
+                    dateConditions.value.weekendSolveMode,
+                  ),
+                )
+              : nextBaseDate;
             const diffDays = monthUtils.differenceInCalendarDays(
-              next_date,
-              current_date,
+              nextBaseDate,
+              currentDate,
             );
             if (!diffDays) {
-              next_date = monthUtils.addDays(next_date, 3);
-              next_date = getNextDate(
-                dateConditions,
-                monthUtils._parse(next_date),
-              );
+              // This can happen if the schedule has an end condition.
+              break;
             }
           }
           t[ll].target = -monthlyTarget;
           totalScheduledGoal += target;
         }
       } else {
-        errors.push(`Schedule ${t[ll].template.name} is a completed schedule.`);
+        errors.push(
+          `Schedule ${t[ll].template.name} is not active during the month in question.`,
+        );
       }
     }
 
-    t = t.filter(t => t.completed === 0);
+    t = t.filter(t => t.completed === 0 && t.started);
     t = t.sort((a, b) => b.target - a.target);
 
     let increment = 0;

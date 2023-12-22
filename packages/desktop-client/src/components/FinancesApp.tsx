@@ -121,7 +121,13 @@ function FinancesApp() {
       <View style={{ height: '100%' }}>
         <GlobalKeys />
 
-        <View style={{ flexDirection: 'row', flex: 1 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            backgroundColor: theme.pageBackground,
+            flex: 1,
+          }}
+        >
           <FloatableSidebar />
 
           <View
