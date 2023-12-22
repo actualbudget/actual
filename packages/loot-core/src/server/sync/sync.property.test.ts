@@ -93,7 +93,8 @@ const baseTime = 1565374471903;
 const clientId1 = '80dd7da215247293';
 const clientId2 = '90xU1sd5124329ac';
 
-function makeGen<T extends Arbitrary<number>| Arbitrary<string>>({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function makeGen<T extends Arbitrary<any>>({
   table,
   row,
   field,
