@@ -27,6 +27,7 @@ export type ModalProps = {
   size?: { width?: CSSProperties['width']; height?: CSSProperties['height'] };
   padding?: CSSProperties['padding'];
   showHeader?: boolean;
+  leftHeaderContent?: ReactNode;
   showTitle?: boolean;
   editableTitle?: boolean;
   showClose?: boolean;
@@ -41,7 +42,7 @@ export type ModalProps = {
   contentStyle?: CSSProperties;
   overlayStyle?: CSSProperties;
   onClose?: () => void;
-  onTitleChange?: (title: string) => void;
+  onTitleUpdate?: (title: string) => void;
 };
 
 const Modal = ({
@@ -51,6 +52,7 @@ const Modal = ({
   size,
   padding = 20,
   showHeader = true,
+  leftHeaderContent,
   showTitle = true,
   editableTitle = false,
   showClose = true,
@@ -66,7 +68,7 @@ const Modal = ({
   overlayStyle,
   children,
   onClose,
-  onTitleChange,
+  onTitleUpdate,
 }: ModalProps) => {
   useEffect(() => {
     // This deactivates any key handlers in the "app" scope. Ideally
@@ -78,13 +80,16 @@ const Modal = ({
   }, []);
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [_title, _setTitle] = useState(title);
+  const [_title, setTitle] = useState(title);
+
   const onTitleClick = () => {
     setIsEditingTitle(true);
   };
 
-  const _onTitleChange = newTitle => {
-    onTitleChange?.(newTitle);
+  const _onTitleUpdate = newTitle => {
+    if (newTitle !== title) {
+      onTitleUpdate?.(newTitle);
+    }
     setIsEditingTitle(false);
   };
 
@@ -167,6 +172,28 @@ const Modal = ({
               flexShrink: 0,
             }}
           >
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  marginLeft: 15,
+                }}
+              >
+                {leftHeaderContent && !isEditingTitle
+                  ? leftHeaderContent
+                  : null}
+              </View>
+            </View>
+
             {showTitle && (
               <View
                 style={{
@@ -187,14 +214,14 @@ const Modal = ({
                       textAlign: 'center',
                     }}
                     value={_title}
-                    onChange={e => _setTitle(e.target.value)}
+                    onChange={e => setTitle(e.target.value)}
                     onKeyDown={e => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
-                        _onTitleChange(e.currentTarget.value);
+                        _onTitleUpdate(e.currentTarget.value);
                       }
                     }}
-                    onBlur={e => _onTitleChange(e.target.value)}
+                    onBlur={e => _onTitleUpdate(e.target.value)}
                   />
                 ) : (
                   <Text
@@ -208,7 +235,7 @@ const Modal = ({
                     }}
                     {...(editableTitle && { onPointerUp: onTitleClick })}
                   >
-                    {title}
+                    {_title}
                   </Text>
                 )}
               </View>

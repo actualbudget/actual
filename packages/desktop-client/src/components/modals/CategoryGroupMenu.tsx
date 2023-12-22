@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { type ComponentProps, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import q from 'loot-core/src/shared/query';
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
+import useCategories from '../../hooks/useCategories';
+import { DotsHorizontalTriple } from '../../icons/v1';
 import Add from '../../icons/v1/Add';
 import Trash from '../../icons/v1/Trash';
 import NotesPaper from '../../icons/v2/NotesPaper';
@@ -12,15 +14,17 @@ import ViewShow from '../../icons/v2/ViewShow';
 import { type CSSProperties, styles, theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import Button from '../common/Button';
+import Menu from '../common/Menu';
 import Modal from '../common/Modal';
 import View from '../common/View';
 import Notes from '../Notes';
+import { Tooltip } from '../tooltips';
 
 const BUTTON_HEIGHT = 40;
 
 type CategoryGroupMenuProps = {
   modalProps: CommonModalProps;
-  group: CategoryGroupEntity;
+  groupId: string;
   onSave: (group: CategoryGroupEntity) => void;
   onAddCategory: (groupId: string, isIncome: boolean) => void;
   onEditNotes: (id: string) => void;
@@ -31,18 +35,20 @@ type CategoryGroupMenuProps = {
 
 export default function CategoryGroupMenu({
   modalProps,
-  group,
+  groupId,
   onSave,
   onAddCategory,
   onEditNotes,
   onDelete,
   onClose,
 }: CategoryGroupMenuProps) {
-  const { id, hidden } = group;
-  const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
+  const { grouped: categoryGroups } = useCategories();
+  const group = categoryGroups.find(g => g.id === groupId);
+  const data = useLiveQuery(
+    () => q('notes').filter({ id: group.id }).select('*'),
+    [group.id],
+  );
   const originalNotes = data && data.length > 0 ? data[0].note : null;
-
-  const [name, setName] = useState(group.name);
 
   function _onClose() {
     modalProps?.onClose();
@@ -50,7 +56,7 @@ export default function CategoryGroupMenu({
   }
 
   function _onRename(newName) {
-    if (newName !== name) {
+    if (newName !== group.name) {
       onSave?.({
         ...group,
         name: newName,
@@ -63,7 +69,7 @@ export default function CategoryGroupMenu({
   }
 
   function _onEditNotes() {
-    onEditNotes?.(id);
+    onEditNotes?.(group.id);
   }
 
   function _onToggleVisibility() {
@@ -75,24 +81,25 @@ export default function CategoryGroupMenu({
   }
 
   function _onDelete() {
-    onDelete?.(id);
+    onDelete?.(group.id);
   }
 
-  function onNameChange(newName) {
+  function onNameUpdate(newName) {
     _onRename(newName);
-    setName(newName);
   }
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
     borderRadius: 0,
+    // Adjust based on desired number of buttons per row.
     flexBasis: '50%',
     height: BUTTON_HEIGHT,
+    color: theme.formLabelText,
   };
 
   return (
     <Modal
-      title={name}
+      title={group.name}
       showHeader
       focusAfterClose={false}
       {...modalProps}
@@ -100,13 +107,20 @@ export default function CategoryGroupMenu({
       padding={0}
       style={{
         flex: 1,
-        height: '50vh',
+        height: '45vh',
         padding: '0 10px',
         borderRadius: '6px',
       }}
       editableTitle={true}
       titleStyle={styles.underlinedText}
-      onTitleChange={onNameChange}
+      onTitleUpdate={onNameUpdate}
+      leftHeaderContent={
+        <AdditionalCategoryGroupMenu
+          group={group}
+          onDelete={_onDelete}
+          onToggleVisibility={_onToggleVisibility}
+        />
+      }
     >
       {() => (
         <View
@@ -154,21 +168,80 @@ export default function CategoryGroupMenu({
               <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
               Edit notes
             </Button>
-            <Button style={buttonStyle} onClick={_onToggleVisibility}>
-              {hidden ? (
-                <ViewShow width={20} height={20} style={{ paddingRight: 5 }} />
-              ) : (
-                <ViewHide width={20} height={20} style={{ paddingRight: 5 }} />
-              )}
-              {hidden ? 'Unhide' : 'Hide'}
-            </Button>
-            <Button style={buttonStyle} onClick={_onDelete}>
-              <Trash width={20} height={20} style={{ paddingRight: 5 }} />
-              Delete
-            </Button>
           </View>
         </View>
       )}
     </Modal>
+  );
+}
+
+function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const itemStyle: CSSProperties = {
+    ...styles.mediumText,
+    height: BUTTON_HEIGHT,
+  };
+
+  return (
+    <View>
+      <Button
+        type="bare"
+        aria-label="Menu"
+        onClick={() => {
+          setMenuOpen(true);
+        }}
+      >
+        <DotsHorizontalTriple
+          width={17}
+          height={17}
+          style={{ color: 'currentColor' }}
+        />
+        {menuOpen && (
+          <Tooltip
+            position="bottom-left"
+            style={{ padding: 0 }}
+            onClose={() => {
+              setMenuOpen(false);
+            }}
+          >
+            <Menu
+              style={{
+                ...styles.mediumText,
+                color: theme.formLabelText,
+              }}
+              items={
+                [
+                  {
+                    name: 'toggleVisibility',
+                    text: group.hidden ? 'Show' : 'Hide',
+                    icon: group.hidden ? ViewShow : ViewHide,
+                    iconSize: 16,
+                    style: itemStyle,
+                  },
+                  ...(!group.is_income && [
+                    Menu.line,
+                    {
+                      name: 'delete',
+                      text: 'Delete',
+                      icon: Trash,
+                      iconSize: 15,
+                      style: itemStyle,
+                    },
+                  ]),
+                ].filter(i => i != null) as ComponentProps<typeof Menu>['items']
+              }
+              onMenuSelect={itemName => {
+                setMenuOpen(false);
+                if (itemName === 'delete') {
+                  onDelete();
+                } else if (itemName === 'toggleVisibility') {
+                  onToggleVisibility();
+                }
+              }}
+            />
+          </Tooltip>
+        )}
+      </Button>
+    </View>
   );
 }

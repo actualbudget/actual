@@ -116,7 +116,6 @@ type FinanceModals = {
     onEditNotes: (id: string) => void;
     onSaveNotes: (id: string, notes: string) => void;
     onDelete: (categoryId: string) => void;
-    onBudgetAction: (idx: number, action: string, arg: unknown) => void;
     onClose?: () => void;
   };
   'category-group-menu': {

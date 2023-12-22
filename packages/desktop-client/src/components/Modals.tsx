@@ -334,12 +334,11 @@ export default function Modals() {
             <CategoryMenu
               key={name}
               modalProps={modalProps}
-              category={options?.category}
-              onSave={options?.onSave}
-              onEditNotes={options?.onEditNotes}
-              onDelete={options?.onDelete}
-              onBudgetAction={options?.onBudgetAction}
-              onClose={options?.onClose}
+              categoryId={options.categoryId}
+              onSave={options.onSave}
+              onEditNotes={options.onEditNotes}
+              onDelete={options.onDelete}
+              onClose={options.onClose}
             />
           );
 
@@ -348,13 +347,13 @@ export default function Modals() {
             <CategoryGroupMenu
               key={name}
               modalProps={modalProps}
-              group={options?.group}
-              onSave={options?.onSave}
-              onAddCategory={options?.onAddCategory}
-              onEditNotes={options?.onEditNotes}
-              onSaveNotes={options?.onSaveNotes}
-              onDelete={options?.onDelete}
-              onClose={options?.onClose}
+              groupId={options.groupId}
+              onSave={options.onSave}
+              onAddCategory={options.onAddCategory}
+              onEditNotes={options.onEditNotes}
+              onSaveNotes={options.onSaveNotes}
+              onDelete={options.onDelete}
+              onClose={options.onClose}
             />
           );
 
@@ -363,9 +362,9 @@ export default function Modals() {
             <Notes
               key={name}
               modalProps={modalProps}
-              id={options?.id}
-              name={options?.name}
-              onSave={options?.onSave}
+              id={options.id}
+              name={options.name}
+              onSave={options.onSave}
             />
           );
 

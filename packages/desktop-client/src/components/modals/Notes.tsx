@@ -86,7 +86,7 @@ export default function Notes({ modalProps, id, name, onSave }: NotesProps) {
                 fontWeight: 400,
                 width: '100%',
               }}
-              onPointerUp={_onSave}
+              onClick={_onSave}
             >
               <Check width={17} height={17} style={{ paddingRight: 5 }} />
               Save notes
