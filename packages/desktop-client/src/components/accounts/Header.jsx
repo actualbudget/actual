@@ -9,7 +9,7 @@ import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
 import Pencil1 from '../../icons/v2/Pencil1';
 import { theme, styles } from '../../style';
 import { AnimatedRefresh } from '../AnimatedRefresh';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import InitialFocus from '../common/InitialFocus';
 import Input from '../common/Input';
 import Menu from '../common/Menu';

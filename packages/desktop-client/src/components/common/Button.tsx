@@ -130,7 +130,7 @@ const _getActiveStyles = (type, bounce) => {
   }
 };
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
@@ -245,5 +245,3 @@ export const ButtonWithLoading = forwardRef<
     </Button>
   );
 });
-
-export default Button;

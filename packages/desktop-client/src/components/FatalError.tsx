@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import Block from './common/Block';
-import Button from './common/Button';
+import { Button } from './common/Button';
 import ExternalLink from './common/ExternalLink';
 import LinkButton from './common/LinkButton';
 import Modal from './common/Modal';

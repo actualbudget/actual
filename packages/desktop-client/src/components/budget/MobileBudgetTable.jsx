@@ -12,7 +12,7 @@ import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Card from '../common/Card';
 import Label from '../common/Label';
 import Menu from '../common/Menu';

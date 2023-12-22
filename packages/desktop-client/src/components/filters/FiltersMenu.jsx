@@ -25,7 +25,7 @@ import { titleFirst, integerToCurrency } from 'loot-core/src/shared/util';
 
 import DeleteIcon from '../../icons/v0/Delete';
 import { theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import HoverTarget from '../common/HoverTarget';
 import Menu from '../common/Menu';
 import Select from '../common/Select';

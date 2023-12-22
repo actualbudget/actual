@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Menu from '../common/Menu';
 import MenuTooltip from '../common/MenuTooltip';
 import Text from '../common/Text';

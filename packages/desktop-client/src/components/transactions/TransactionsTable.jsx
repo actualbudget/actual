@@ -57,7 +57,7 @@ import { styles, theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Text from '../common/Text';
 import View from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';

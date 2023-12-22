@@ -4,7 +4,7 @@ import SvgRemove from '../../icons/v2/Remove';
 import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { theme } from '../../style';
 
-import Button from './Button';
+import { Button } from './Button';
 import InputWithContent from './InputWithContent';
 
 type SearchProps = {

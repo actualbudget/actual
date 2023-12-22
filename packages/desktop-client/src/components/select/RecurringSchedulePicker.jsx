@@ -8,7 +8,7 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import { theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Input from '../common/Input';
 import Select from '../common/Select';
 import Stack from '../common/Stack';

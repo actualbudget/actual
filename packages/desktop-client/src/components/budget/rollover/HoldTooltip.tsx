@@ -10,7 +10,7 @@ import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import Button from '../../common/Button';
+import { Button } from '../../common/Button';
 import InitialFocus from '../../common/InitialFocus';
 import Input from '../../common/Input';
 import View from '../../common/View';
