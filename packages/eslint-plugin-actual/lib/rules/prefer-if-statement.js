@@ -4,7 +4,8 @@
 // Rule Definition
 //------------------------------------------------------------------------------
 
-let suggestion = 'Consider using an if statement or optional chaining instead.';
+const suggestion =
+  'Consider using an if statement or optional chaining instead.';
 
 /** @type {import('eslint').Rule.RuleModule} */
 module.exports = {
@@ -23,7 +24,7 @@ module.exports = {
   },
 
   create(context) {
-    let sourceCode = context.getSourceCode();
+    const sourceCode = context.getSourceCode();
 
     //----------------------------------------------------------------------
     // Helpers
