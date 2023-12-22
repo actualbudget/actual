@@ -342,7 +342,7 @@ export default function CustomReport() {
                     months={months}
                   />
                 ) : (
-                  <LoadingIndicator message={'Loading report...'} />
+                  <LoadingIndicator message="Loading report..." />
                 )}
               </View>
               {(viewLegend || viewSummary) && data && (
