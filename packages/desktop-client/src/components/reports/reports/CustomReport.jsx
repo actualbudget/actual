@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
@@ -8,6 +9,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../../hooks/useActions';
 import useCategories from '../../../hooks/useCategories';
 import useFilters from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
@@ -17,12 +19,13 @@ import Text from '../../common/Text';
 import View from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
 import PrivacyFilter from '../../PrivacyFilter';
-import { ChooseGraph } from '../ChooseGraph';
+import ChooseGraph from '../ChooseGraph';
 import Header from '../Header';
 import LoadingIndicator from '../LoadingIndicator';
+import ReportLegend from '../ReportLegend';
 import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
-import { ReportLegend, ReportSummary } from '../ReportSummary';
+import ReportSummary from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
 import groupedSpreadsheet from '../spreadsheets/grouped-spreadsheet';
@@ -31,6 +34,14 @@ import { fromDateRepr } from '../util';
 
 export default function CustomReport() {
   const categories = useCategories();
+
+  const viewLegend =
+    useSelector(state => state.prefs.local?.reportsViewLegend) || false;
+  const viewSummary =
+    useSelector(state => state.prefs.local?.reportsViewSummary) || false;
+  const viewLabels =
+    useSelector(state => state.prefs.local?.reportsViewLabel) || false;
+  const { savePrefs } = useActions();
 
   const {
     filters,
@@ -44,28 +55,24 @@ export default function CustomReport() {
   const [selectedCategories, setSelectedCategories] = useState(null);
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);
-  const [start, setStart] = useState(
+  const [startDate, setStartDate] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
-  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [endDate, setEndDate] = useState(monthUtils.currentMonth());
 
   const [mode, setMode] = useState('total');
+  const [isDateStatic, setIsDateStatic] = useState(false);
   const [groupBy, setGroupBy] = useState('Category');
-  const [balanceType, setBalanceType] = useState('Expense');
-  const [empty, setEmpty] = useState(false);
-  const [hidden, setHidden] = useState(false);
-  const [uncat, setUncat] = useState(false);
-  const [dateRange, setDateRange] = useState('6 months');
+  const [balanceType, setBalanceType] = useState('Payment');
+  const [showEmpty, setShowEmpty] = useState(false);
+  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(false);
+  const [showUncategorized, setShowUncategorized] = useState(false);
+  const [dateRange, setDateRange] = useState('Last 6 months');
   const [dataCheck, setDataCheck] = useState(false);
 
   const [graphType, setGraphType] = useState('BarGraph');
-  const [viewLegend, setViewLegend] = useState(false);
-  const [viewSummary, setViewSummary] = useState(false);
-  const [viewLabels, setViewLabels] = useState(false);
-  //const [legend, setLegend] = useState([]);
-  const legend = [];
   const dateRangeLine = ReportOptions.dateRange.length - 3;
-  const months = monthUtils.rangeInclusive(start, end);
+  const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
     if (selectedCategories === null && categories.list.length !== 0) {
@@ -101,52 +108,58 @@ export default function CustomReport() {
     }
     run();
   }, []);
+
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const payees = useCachedPayees();
   const accounts = useCachedAccounts();
 
   const getGroupData = useMemo(() => {
     return groupedSpreadsheet({
-      start,
-      end,
+      startDate,
+      endDate,
       categories,
       selectedCategories,
-      filters,
+      conditions: filters,
       conditionsOp,
-      hidden,
-      uncat,
+      showEmpty,
+      showOffBudgetHidden,
+      showUncategorized,
+      balanceTypeOp,
     });
   }, [
-    start,
-    end,
+    startDate,
+    endDate,
     categories,
     selectedCategories,
     filters,
     conditionsOp,
-    hidden,
-    uncat,
+    showEmpty,
+    showOffBudgetHidden,
+    showUncategorized,
   ]);
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
     return defaultSpreadsheet({
-      start,
-      end,
+      startDate,
+      endDate,
       categories,
       selectedCategories,
-      filters,
+      conditions: filters,
       conditionsOp,
-      hidden,
-      uncat,
+      showEmpty,
+      showOffBudgetHidden,
+      showUncategorized,
       groupBy,
       balanceTypeOp,
       payees,
       accounts,
       setDataCheck,
+      graphType,
     });
   }, [
-    start,
-    end,
+    startDate,
+    endDate,
     groupBy,
     balanceType,
     categories,
@@ -155,8 +168,10 @@ export default function CustomReport() {
     accounts,
     filters,
     conditionsOp,
-    hidden,
-    uncat,
+    showEmpty,
+    showOffBudgetHidden,
+    showUncategorized,
+    graphType,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -169,9 +184,21 @@ export default function CustomReport() {
     return null;
   }
 
-  const onChangeDates = (start, end) => {
-    setStart(start);
-    setEnd(end);
+  const onChangeDates = (startDate, endDate) => {
+    setStartDate(startDate);
+    setEndDate(endDate);
+  };
+
+  const onChangeViews = (viewType, status) => {
+    if (viewType === 'viewLegend') {
+      savePrefs({ reportsViewLegend: status ?? !viewLegend });
+    }
+    if (viewType === 'viewSummary') {
+      savePrefs({ reportsViewSummary: !viewSummary });
+    }
+    if (viewType === 'viewLabels') {
+      savePrefs({ reportsViewLabels: !viewLabels });
+    }
   };
 
   return (
@@ -187,8 +214,8 @@ export default function CustomReport() {
         }}
       >
         <ReportSidebar
-          start={start}
-          end={end}
+          startDate={startDate}
+          endDate={endDate}
           onChangeDates={onChangeDates}
           dateRange={dateRange}
           setDateRange={setDateRange}
@@ -196,7 +223,6 @@ export default function CustomReport() {
           allMonths={allMonths}
           graphType={graphType}
           setGraphType={setGraphType}
-          setViewLegend={setViewLegend}
           typeDisabled={typeDisabled}
           setTypeDisabled={setTypeDisabled}
           groupBy={groupBy}
@@ -205,15 +231,18 @@ export default function CustomReport() {
           setBalanceType={setBalanceType}
           mode={mode}
           setMode={setMode}
-          empty={empty}
-          setEmpty={setEmpty}
-          hidden={hidden}
-          setHidden={setHidden}
-          uncat={uncat}
-          setUncat={setUncat}
+          isDateStatic={isDateStatic}
+          setIsDateStatic={setIsDateStatic}
+          showEmpty={showEmpty}
+          setShowEmpty={setShowEmpty}
+          showOffBudgetHidden={showOffBudgetHidden}
+          setShowOffBudgetHidden={setShowOffBudgetHidden}
+          showUncategorized={showUncategorized}
+          setShowUncategorized={setShowUncategorized}
           categories={categories}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
+          onChangeViews={onChangeViews}
         />
         <View
           style={{
@@ -225,17 +254,15 @@ export default function CustomReport() {
             setGraphType={setGraphType}
             mode={mode}
             viewLegend={viewLegend}
-            setViewLegend={setViewLegend}
             setTypeDisabled={setTypeDisabled}
             balanceType={balanceType}
             setBalanceType={setBalanceType}
             groupBy={groupBy}
             setGroupBy={setGroupBy}
             viewSummary={viewSummary}
-            setViewSummary={setViewSummary}
             viewLabels={viewLabels}
-            setViewLabels={setViewLabels}
             onApplyFilter={onApplyFilter}
+            onChangeViews={onChangeViews}
           />
           {filters && filters.length > 0 && (
             <View
@@ -304,14 +331,12 @@ export default function CustomReport() {
 
                 {dataCheck ? (
                   <ChooseGraph
-                    start={start}
-                    end={end}
                     data={data}
                     mode={mode}
                     graphType={graphType}
                     balanceType={balanceType}
                     groupBy={groupBy}
-                    empty={empty}
+                    showEmpty={showEmpty}
                     scrollWidth={scrollWidth}
                     setScrollWidth={setScrollWidth}
                     months={months}
@@ -320,7 +345,7 @@ export default function CustomReport() {
                   <LoadingIndicator message={'Loading report...'} />
                 )}
               </View>
-              {(viewLegend || viewSummary) && (
+              {(viewLegend || viewSummary) && data && (
                 <View
                   style={{
                     padding: 10,
@@ -333,19 +358,15 @@ export default function CustomReport() {
                 >
                   {viewSummary && (
                     <ReportSummary
-                      start={start}
-                      end={end}
+                      startDate={startDate}
+                      endDate={endDate}
                       balanceTypeOp={balanceTypeOp}
                       data={data}
                       monthsCount={months.length}
                     />
                   )}
                   {viewLegend && (
-                    <ReportLegend
-                      data={data}
-                      legend={legend}
-                      groupBy={groupBy}
-                    />
+                    <ReportLegend legend={data.legend} groupBy={groupBy} />
                   )}
                 </View>
               )}

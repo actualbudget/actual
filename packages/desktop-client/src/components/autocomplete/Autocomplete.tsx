@@ -618,8 +618,7 @@ function MultiAutocomplete<T extends Item>({
     e: KeyboardEvent<HTMLInputElement>,
     prevOnKeyDown?: ComponentProps<typeof Input>['onKeyDown'],
   ) {
-    // @ts-expect-error We're missing `target.value` on KeyboardEvent
-    if (e.key === 'Backspace' && e.target.value === '') {
+    if (e.key === 'Backspace' && e.currentTarget.value === '') {
       onRemoveItem(selectedItems[selectedItems.length - 1]);
     }
 

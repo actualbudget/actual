@@ -15,7 +15,7 @@ import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 import Button from './common/Button';
 import Text from './common/Text';
 import View from './common/View';
-import { Tooltip, useTooltip } from './tooltips';
+import { Tooltip, type TooltipPosition, useTooltip } from './tooltips';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
@@ -86,7 +86,7 @@ const markdownStyles = css({
 type NotesTooltipProps = {
   editable?: boolean;
   defaultNotes?: string;
-  position?: string;
+  position?: TooltipPosition;
   onClose?: (notes: string) => void;
 };
 function NotesTooltip({
@@ -138,14 +138,14 @@ type NotesButtonProps = {
   width?: number;
   height?: number;
   defaultColor?: string;
-  tooltipPosition?: string;
+  tooltipPosition?: TooltipPosition;
   style?: CSSProperties;
 };
 export default function NotesButton({
   id,
   width = 12,
   height = 12,
-  defaultColor = theme.pageBackgroundModalActive,
+  defaultColor = theme.buttonNormalText,
   tooltipPosition,
   style,
 }: NotesButtonProps) {

@@ -8,13 +8,9 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useCategories from '../../hooks/useCategories';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import LinkButton from '../common/LinkButton';
 import Text from '../common/Text';
-
-const valueStyle = {
-  color: theme.pageTextPositive,
-};
 
 type ValueProps<T> = {
   value: T;
@@ -23,6 +19,7 @@ type ValueProps<T> = {
   inline?: boolean;
   data?: unknown;
   describe?: (item: T) => string;
+  style?: CSSProperties;
 };
 
 export default function Value<T>({
@@ -33,6 +30,7 @@ export default function Value<T>({
   data: dataProp,
   // @ts-expect-error fix this later
   describe = x => x.name,
+  style,
 }: ValueProps<T>) {
   const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
@@ -40,6 +38,10 @@ export default function Value<T>({
   const payees = useSelector(state => state.queries.payees);
   const { list: categories } = useCategories();
   const accounts = useSelector(state => state.queries.accounts);
+  const valueStyle = {
+    color: theme.pageTextPositive,
+    ...style,
+  };
 
   const data =
     dataProp ||
@@ -70,7 +72,7 @@ export default function Value<T>({
         case 'date':
           if (value) {
             if (value.frequency) {
-              return getRecurringDescription(value);
+              return getRecurringDescription(value, dateFormat);
             }
             return formatDate(parseISO(value), dateFormat);
           }

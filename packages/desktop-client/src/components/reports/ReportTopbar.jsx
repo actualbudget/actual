@@ -19,17 +19,15 @@ export function ReportTopbar({
   setGraphType,
   mode,
   viewLegend,
-  setViewLegend,
   setTypeDisabled,
   balanceType,
   setBalanceType,
   groupBy,
   setGroupBy,
   viewSummary,
-  setViewSummary,
   viewLabels,
-  setViewLabels,
   onApplyFilter,
+  onChangeViews,
 }) {
   return (
     <View
@@ -45,7 +43,7 @@ export function ReportTopbar({
         title="Data Table"
         onSelect={() => {
           setGraphType('TableGraph');
-          //setViewLegend(false);
+          onChangeViews('viewLegend', false);
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}
@@ -59,13 +57,13 @@ export function ReportTopbar({
           if (mode === 'total') {
             setGraphType('BarGraph');
             if (['Net'].includes(balanceType)) {
-              setBalanceType('Expense');
+              setBalanceType('Payment');
             }
             setTypeDisabled(['Month', 'Year'].includes(groupBy) ? [] : ['Net']);
           } else {
             setGraphType('StackedBarGraph');
             setTypeDisabled(['Net']);
-            setBalanceType('Expense');
+            setBalanceType('Payment');
           }
         }}
         style={{ marginRight: 15 }}
@@ -78,7 +76,7 @@ export function ReportTopbar({
         onSelect={() => {
           setGraphType('AreaGraph');
           setGroupBy('Month');
-          //setViewLegend(false);
+          onChangeViews('viewLegend', false);
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}
@@ -92,7 +90,7 @@ export function ReportTopbar({
         onSelect={() => {
           setGraphType('DonutGraph');
           setTypeDisabled(['Net']);
-          setBalanceType('Expense');
+          setBalanceType('Payment');
         }}
         style={{ marginRight: 15 }}
         disabled={mode === 'total' ? false : true}
@@ -111,13 +109,12 @@ export function ReportTopbar({
       <GraphButton
         selected={viewLegend}
         onSelect={() => {
-          setViewLegend(!viewLegend);
+          onChangeViews('viewLegend');
         }}
         style={{ marginRight: 15 }}
         title="Show Legend"
         disabled={
-          true //descoping for future PR
-          //graphType === 'TableGraph' || graphType === 'AreaGraph' ? true : false
+          graphType === 'TableGraph' || graphType === 'AreaGraph' ? true : false
         }
       >
         <ListBullet width={15} height={15} />
@@ -125,7 +122,7 @@ export function ReportTopbar({
       <GraphButton
         selected={viewSummary}
         onSelect={() => {
-          setViewSummary(!viewSummary);
+          onChangeViews('viewSummary');
         }}
         style={{ marginRight: 15 }}
         title="Show Summary"
@@ -135,7 +132,7 @@ export function ReportTopbar({
       <GraphButton
         selected={viewLabels}
         onSelect={() => {
-          setViewLabels(!viewLabels);
+          onChangeViews('viewLabels');
         }}
         style={{ marginRight: 15 }}
         title="Show labels"
