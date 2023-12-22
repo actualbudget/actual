@@ -7,7 +7,7 @@ import { theme } from '../../style';
 import Button from '../common/Button';
 import Menu from '../common/Menu';
 import View from '../common/View';
-import NotesButton from '../NotesButton';
+import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
 

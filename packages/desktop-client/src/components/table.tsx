@@ -33,12 +33,11 @@ import Input from './common/Input';
 import Menu from './common/Menu';
 import Text from './common/Text';
 import View from './common/View';
-import FixedSizeList from './FixedSizeList';
+import { FixedSizeList } from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
-  type ConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 import { type Binding } from './spreadsheet';
 import useFormat from './spreadsheet/useFormat';
@@ -142,7 +141,9 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
-  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
+  privacyFilter?: ComponentProps<
+    typeof ConditionalPrivacyFilter
+  >['privacyFilter'];
 };
 export function Cell({
   width,
@@ -663,7 +664,9 @@ type SheetCellValueProps = {
   getValueStyle?: (value: string | number) => CSSProperties;
   formatExpr?: (value) => string;
   unformatExpr?: (value: string) => unknown;
-  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
+  privacyFilter?: ComponentProps<
+    typeof ConditionalPrivacyFilter
+  >['privacyFilter'];
 };
 
 type SheetCellProps = ComponentProps<typeof Cell> & {

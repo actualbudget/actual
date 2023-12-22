@@ -26,7 +26,7 @@ import reducers from 'loot-core/src/client/reducers';
 import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import App from './components/App';
+import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
 import { type BoundActions } from './hooks/useActions';

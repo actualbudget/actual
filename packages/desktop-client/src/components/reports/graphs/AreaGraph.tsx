@@ -17,7 +17,7 @@ import { amountToCurrency } from 'loot-core/src/shared/util';
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
-import PrivacyFilter from '../../PrivacyFilter';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import Container from '../Container';
 import { type DataEntity } from '../entities';
 import numberFormatterTooltip from '../numberFormatter';

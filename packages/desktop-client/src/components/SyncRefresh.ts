@@ -8,7 +8,7 @@ type SyncRefreshProps = {
   onSync: () => Promise<void>;
   children: (props: ChildrenProps) => ReactNode;
 };
-export default function SyncRefresh({ onSync, children }: SyncRefreshProps) {
+export function SyncRefresh({ onSync, children }: SyncRefreshProps) {
   const [syncing, setSyncing] = useState(false);
 
   async function onSync_() {

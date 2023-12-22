@@ -73,7 +73,7 @@ type FixedSizeListState = {
   scrollUpdateWasRequested: boolean;
 };
 
-export default class FixedSizeList extends PureComponent<
+export class FixedSizeList extends PureComponent<
   FixedSizeListProps,
   FixedSizeListState
 > {

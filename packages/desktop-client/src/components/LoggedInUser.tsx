@@ -16,7 +16,7 @@ type LoggedInUserProps = {
   style?: CSSProperties;
   color?: string;
 };
-export default function LoggedInUser({
+export function LoggedInUser({
   hideIfNoServer,
   style,
   color,

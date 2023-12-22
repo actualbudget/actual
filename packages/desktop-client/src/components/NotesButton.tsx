@@ -45,7 +45,7 @@ type NotesButtonProps = {
   tooltipPosition?: TooltipPosition;
   style?: CSSProperties;
 };
-export default function NotesButton({
+export function NotesButton({
   id,
   width = 12,
   height = 12,

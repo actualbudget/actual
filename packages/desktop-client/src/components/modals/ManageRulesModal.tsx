@@ -5,7 +5,7 @@ import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { type CommonModalProps } from '../../types/modals';
 import Modal from '../common/Modal';
-import ManageRules from '../ManageRules';
+import { ManageRules } from '../ManageRules';
 
 type ManageRulesModalProps = {
   modalProps: CommonModalProps;

@@ -9,7 +9,7 @@ import Block from '../../../common/Block';
 import HoverTarget from '../../../common/HoverTarget';
 import Menu from '../../../common/Menu';
 import View from '../../../common/View';
-import PrivacyFilter from '../../../PrivacyFilter';
+import { PrivacyFilter } from '../../../PrivacyFilter';
 import useFormat from '../../../spreadsheet/useFormat';
 import useSheetName from '../../../spreadsheet/useSheetName';
 import useSheetValue from '../../../spreadsheet/useSheetValue';

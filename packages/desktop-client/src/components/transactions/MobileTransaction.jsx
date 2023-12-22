@@ -72,7 +72,7 @@ import {
   InputField,
   BooleanField,
 } from '../mobile/MobileForms';
-import MobileBackButton from '../MobileBackButton';
+import { MobileBackButton } from '../MobileBackButton';
 import { Page } from '../Page';
 import { AmountInput } from '../util/AmountInput';
 
