@@ -23,7 +23,7 @@ import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Search } from '../common/Search';
-import View from '../common/View';
+import { View } from '../common/View';
 import { TableHeader, Cell, SelectCell, useTableNavigator } from '../table';
 
 import PayeeMenu from './PayeeMenu';

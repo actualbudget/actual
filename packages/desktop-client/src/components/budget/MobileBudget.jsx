@@ -10,7 +10,7 @@ import useCategories from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { SyncRefresh } from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';

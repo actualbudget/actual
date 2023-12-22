@@ -18,7 +18,7 @@ import { ExternalLink } from './common/ExternalLink';
 import { LinkButton } from './common/LinkButton';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
-import View from './common/View';
+import { View } from './common/View';
 
 function compileMessage(
   message: string,

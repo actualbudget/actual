@@ -14,7 +14,7 @@ import Wallet from '../../icons/v1/Wallet';
 import Calendar from '../../icons/v2/Calendar';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles, type CSSProperties } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { useScroll } from '../ScrollProvider';
 
 const ROW_HEIGHT = 70;

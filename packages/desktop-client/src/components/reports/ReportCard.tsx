@@ -2,7 +2,7 @@ import React from 'react';
 
 import { theme } from '../../style';
 import { AnchorLink } from '../common/AnchorLink';
-import View from '../common/View';
+import { View } from '../common/View';
 
 export default function ReportCard({ flex, to, style, children }) {
   const containerProps = { flex, margin: 15 };

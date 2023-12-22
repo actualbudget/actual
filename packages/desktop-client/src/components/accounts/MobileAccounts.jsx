@@ -12,7 +12,7 @@ import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { TextOneLine } from '../common/TextOneLine';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Page } from '../Page';
 import PullToRefresh from '../responsive/PullToRefresh';
 import CellValue from '../spreadsheet/CellValue';

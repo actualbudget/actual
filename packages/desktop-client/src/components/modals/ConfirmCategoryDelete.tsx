@@ -9,7 +9,7 @@ import { Block } from '../common/Block';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 
 type ConfirmCategoryDeleteProps = {
   modalProps: CommonModalProps;

@@ -32,7 +32,7 @@ import { Button } from './common/Button';
 import { Input } from './common/Input';
 import { Menu } from './common/Menu';
 import { Text } from './common/Text';
-import View from './common/View';
+import { View } from './common/View';
 import { FixedSizeList } from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import {

@@ -12,7 +12,7 @@ import { theme, styles } from '../../../../style';
 import { Button } from '../../../common/Button';
 import { Menu } from '../../../common/Menu';
 import { Stack } from '../../../common/Stack';
-import View from '../../../common/View';
+import { View } from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
 import NamespaceContext from '../../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../../tooltips';

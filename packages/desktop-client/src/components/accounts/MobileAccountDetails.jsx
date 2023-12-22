@@ -7,7 +7,7 @@ import { theme } from '../../style';
 import { ButtonLink } from '../common/ButtonLink';
 import { InputWithContent } from '../common/InputWithContent';
 import { Label } from '../common/Label';
-import View from '../common/View';
+import { View } from '../common/View';
 import { MobileBackButton } from '../MobileBackButton';
 import { Page } from '../Page';
 import PullToRefresh from '../responsive/PullToRefresh';

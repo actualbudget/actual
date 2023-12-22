@@ -6,7 +6,7 @@ import CheveronRight from '../../icons/v1/CheveronRight';
 import Cog from '../../icons/v1/Cog';
 import StoreFrontIcon from '../../icons/v1/StoreFront';
 import TuningIcon from '../../icons/v1/Tuning';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import Item from './Item';
 import SecondaryItem from './SecondaryItem';

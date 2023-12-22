@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { useActions } from '../../hooks/useActions';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import BudgetPageHeader from './BudgetPageHeader';

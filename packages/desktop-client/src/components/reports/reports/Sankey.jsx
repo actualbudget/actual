@@ -9,7 +9,7 @@ import useCategories from '../../../hooks/useCategories';
 import useFilters from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import { Paragraph } from '../../common/Paragraph';
-import View from '../../common/View';
+import { View } from '../../common/View';
 import SankeyGraph from '../graphs/SankeyGraph';
 import Header from '../Header';
 import sankeySpreadsheet from '../spreadsheets/sankey-spreadsheet';

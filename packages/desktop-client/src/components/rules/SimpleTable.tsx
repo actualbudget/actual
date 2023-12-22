@@ -1,7 +1,7 @@
 import React, { type ReactNode, type UIEvent, useRef } from 'react';
 
 import { type CSSProperties } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 type SimpleTableProps = {
   loadMore?: () => void;

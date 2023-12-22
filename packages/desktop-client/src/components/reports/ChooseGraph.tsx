@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { type DataEntity, type Month } from './entities';
 import AreaGraph from './graphs/AreaGraph';

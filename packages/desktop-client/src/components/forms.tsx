@@ -5,7 +5,7 @@ import { css } from 'glamor';
 import { type CSSProperties, theme } from '../style';
 
 import { Text } from './common/Text';
-import View from './common/View';
+import { View } from './common/View';
 
 type SectionLabelProps = {
   title?: string;

@@ -6,7 +6,7 @@ import React, {
 
 import { theme, type CSSProperties } from '../../style';
 import { Block } from '../common/Block';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { accountNameStyle } from './Account';
 import ItemContent from './ItemContent';

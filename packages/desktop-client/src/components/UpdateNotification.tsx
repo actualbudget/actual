@@ -8,7 +8,7 @@ import { theme } from '../style';
 import { Button } from './common/Button';
 import { LinkButton } from './common/LinkButton';
 import { Text } from './common/Text';
-import View from './common/View';
+import { View } from './common/View';
 
 function closeNotification(setAppState) {
   // Set a flag to never show an update notification again for this session

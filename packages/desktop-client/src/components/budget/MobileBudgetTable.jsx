@@ -17,7 +17,7 @@ import { Card } from '../common/Card';
 import { Label } from '../common/Label';
 import { Menu } from '../common/Menu';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Page } from '../Page';
 import PullToRefresh from '../responsive/PullToRefresh';
 import CellValue from '../spreadsheet/CellValue';

@@ -7,7 +7,7 @@ import Reports from '../../icons/v1/Reports';
 import Wallet from '../../icons/v1/Wallet';
 import CalendarIcon from '../../icons/v2/Calendar';
 import { type CSSProperties, theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
 
