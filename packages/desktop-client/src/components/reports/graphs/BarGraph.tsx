@@ -198,7 +198,7 @@ function BarGraph({
                   ))}
                 </Bar>
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
-                  <Bar dataKey={'totalDebts'} stackId="a">
+                  <Bar dataKey="totalDebts" stackId="a">
                     {data[splitData].map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}

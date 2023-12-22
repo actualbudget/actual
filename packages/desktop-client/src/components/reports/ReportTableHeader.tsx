@@ -73,7 +73,7 @@ export default function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Deposits'}
+                  value="Deposits"
                   width="flex"
                 />
                 <Cell
@@ -81,7 +81,7 @@ export default function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Payments'}
+                  value="Payments"
                   width="flex"
                 />
               </>
@@ -91,7 +91,7 @@ export default function ReportTableHeader({
             minWidth: 85,
             ...styles.tnum,
           }}
-          value={'Totals'}
+          value="Totals"
           width="flex"
         />
         <Cell
@@ -99,7 +99,7 @@ export default function ReportTableHeader({
             minWidth: 85,
             ...styles.tnum,
           }}
-          value={'Average'}
+          value="Average"
           width="flex"
         />
         {scrollWidth > 0 && <Cell width={scrollWidth} />}
