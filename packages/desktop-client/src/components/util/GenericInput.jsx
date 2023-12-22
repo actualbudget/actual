@@ -136,7 +136,7 @@ export default function GenericInput({
             <Input
               inputRef={inputRef}
               defaultValue={value || ''}
-              placeholder={'yyyy'}
+              placeholder="yyyy"
               onEnter={e => onChange(e.target.value)}
               onBlur={e => onChange(e.target.value)}
             />
