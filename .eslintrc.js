@@ -97,6 +97,7 @@ module.exports = {
     // ],
 
     'no-var': 'warn',
+    'react/jsx-curly-brace-presence': 'warn',
     'object-shorthand': ['warn', 'properties'],
 
     'import/extensions': [

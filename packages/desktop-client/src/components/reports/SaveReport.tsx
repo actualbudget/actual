@@ -62,7 +62,7 @@ export function SaveReportMenuButton() {
             flexShrink: 0,
           }}
         >
-          {'Unsaved Report'}&nbsp;
+          Unsaved Report&nbsp;
         </Text>
         <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
