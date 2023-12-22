@@ -82,11 +82,10 @@ export default function CategoryMenu({
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
-    borderRadius: 0,
-    // Adjust based on desired number of buttons per row.
-    flexBasis: '100%',
     height: BUTTON_HEIGHT,
     color: theme.formLabelText,
+    // Adjust based on desired number of buttons per row.
+    flexBasis: '100%',
   };
 
   return (

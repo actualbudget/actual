@@ -90,11 +90,12 @@ export default function CategoryGroupMenu({
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
-    borderRadius: 0,
-    // Adjust based on desired number of buttons per row.
-    flexBasis: '50%',
     height: BUTTON_HEIGHT,
     color: theme.formLabelText,
+    // Adjust based on desired number of buttons per row.
+    flexBasis: '48%',
+    marginLeft: '1%',
+    marginRight: '1%',
   };
 
   return (
