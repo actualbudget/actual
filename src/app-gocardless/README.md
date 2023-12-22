@@ -2,23 +2,9 @@
 
 Find in [doc](https://docs.google.com/spreadsheets/d/1ogpzydzotOltbssrc3IQ8rhBLlIZbQgm5QCiiNJrkyA/edit#gid=489769432) what is id of bank which you want to integrate
 
-Add the `institution_id` and your name to list of possible options in the frontend
-project `actual` in file `GoCardlessExternalMsg.js`
-
-```jsx
-<Strong>Choose your banks:</Strong>
-<CustomSelect
-  options={[
-    ['default', 'Choose your bank'],
-    ['ING_PL_INGBPLPW', 'ING PL'],
-    ['MBANK_RETAIL_BREXPLPW', 'MBANK'],
-    ['SANDBOXFINANCE_SFIN0000', 'DEMO - TEST']
-  ]}
-```
-
 Launch frontend and backend server
 
-Create new linked account selecting the institution which you added recently.
+Create new linked account selecting the institution which you are interested in.
 
 In the server logs you can find all required information to create class for
 your bank.
