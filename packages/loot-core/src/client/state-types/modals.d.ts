@@ -90,6 +90,7 @@ type FinanceModals = {
   'edit-field': {
     name: string;
     onSubmit: (name: string, value: string) => void;
+    onClose: () => void;
   };
 
   'budget-summary': {

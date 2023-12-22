@@ -151,7 +151,7 @@ function BudgetCell({
   return (
     <View style={style}>
       <AmountInput
-        initialValue={sheetValue}
+        value={sheetValue}
         zeroSign="+"
         style={{
           ...(!isEditing && { display: 'none' }),
@@ -160,7 +160,7 @@ function BudgetCell({
         }}
         focused={isEditing}
         textStyle={{ ...styles.smallText, ...textStyle }}
-        onChange={updateBudgetAmount}
+        onUpdate={updateBudgetAmount}
         onBlur={() => onEdit?.(null)}
       />
       <View

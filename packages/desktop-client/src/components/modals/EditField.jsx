@@ -34,7 +34,7 @@ function CreatePayeeIcon(props) {
   return <Add {...props} width={14} height={14} />;
 }
 
-export default function EditField({ modalProps, name, onSubmit }) {
+export default function EditField({ modalProps, name, onSubmit, onClose }) {
   const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
@@ -43,6 +43,11 @@ export default function EditField({ modalProps, name, onSubmit }) {
   const payees = useSelector(state => state.queries.payees);
 
   const { createPayee } = useActions();
+
+  const onCloseInner = () => {
+    modalProps.onClose();
+    onClose?.();
+  };
 
   function onSelect(value) {
     if (value != null) {
@@ -53,7 +58,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
 
       onSubmit(name, value);
     }
-    modalProps.onClose();
+    onCloseInner();
   }
 
   const itemStyle = {
@@ -268,6 +273,7 @@ export default function EditField({ modalProps, name, onSubmit }) {
       showHeader={isNarrowWidth}
       focusAfterClose={false}
       {...modalProps}
+      onClose={onCloseInner}
       padding={0}
       style={{
         flex: 0,
