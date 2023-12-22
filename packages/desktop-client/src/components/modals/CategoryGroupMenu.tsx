@@ -48,7 +48,7 @@ export default function CategoryGroupMenu({
     () => q('notes').filter({ id: group.id }).select('*'),
     [group.id],
   );
-  const originalNotes = data && data.length > 0 ? data[0].note : null;
+  const notes = data && data.length > 0 ? data[0].note : null;
 
   function _onClose() {
     modalProps?.onClose();
@@ -122,7 +122,7 @@ export default function CategoryGroupMenu({
         />
       }
     >
-      {() => (
+      {({ isEditingTitle }) => (
         <View
           style={{
             flex: 1,
@@ -136,13 +136,13 @@ export default function CategoryGroupMenu({
             }}
           >
             <Notes
-              notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
+              notes={notes?.length > 0 ? notes : 'No notes'}
               editable={false}
               focused={false}
               getStyle={editable => ({
                 ...styles.mediumText,
                 borderRadius: 6,
-                ...((!originalNotes || originalNotes.length === 0) && {
+                ...((!notes || notes.length === 0) && {
                   justifySelf: 'center',
                   alignSelf: 'center',
                   color: theme.pageTextSubdued,
@@ -160,11 +160,24 @@ export default function CategoryGroupMenu({
               paddingBottom: 10,
             }}
           >
-            <Button style={buttonStyle} onClick={_onAddCategory}>
+            <Button
+              disabled={isEditingTitle}
+              style={{
+                ...buttonStyle,
+                display: isEditingTitle ? 'none' : undefined,
+              }}
+              onClick={_onAddCategory}
+            >
               <Add width={17} height={17} style={{ paddingRight: 5 }} />
               Add category
             </Button>
-            <Button style={buttonStyle} onClick={_onEditNotes}>
+            <Button
+              style={{
+                ...buttonStyle,
+                display: isEditingTitle ? 'none' : undefined,
+              }}
+              onClick={_onEditNotes}
+            >
               <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
               Edit notes
             </Button>

@@ -19,11 +19,15 @@ import Input from './Input';
 import Text from './Text';
 import View from './View';
 
+type ModalChildrenProps = {
+  isEditingTitle: boolean;
+};
+
 export type ModalProps = {
   title?: string;
   isCurrent?: boolean;
   isHidden?: boolean;
-  children: ReactNode | (() => ReactNode);
+  children: ReactNode | ((props: ModalChildrenProps) => ReactNode);
   size?: { width?: CSSProperties['width']; height?: CSSProperties['height'] };
   padding?: CSSProperties['padding'];
   showHeader?: boolean;
@@ -272,7 +276,9 @@ const Modal = ({
           </View>
         )}
         <View style={{ padding, paddingTop: 0, flex: 1 }}>
-          {typeof children === 'function' ? children() : children}
+          {typeof children === 'function'
+            ? children({ isEditingTitle })
+            : children}
         </View>
         {loading && (
           <View

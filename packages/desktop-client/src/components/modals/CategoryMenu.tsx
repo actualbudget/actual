@@ -114,7 +114,7 @@ export default function CategoryMenu({
         />
       }
     >
-      {() => (
+      {({ isEditingTitle }) => (
         <View
           style={{
             flex: 1,
@@ -150,7 +150,13 @@ export default function CategoryMenu({
               margin: '10px 0',
             }}
           >
-            <Button style={buttonStyle} onClick={_onEditNotes}>
+            <Button
+              style={{
+                ...buttonStyle,
+                display: isEditingTitle ? 'none' : undefined,
+              }}
+              onClick={_onEditNotes}
+            >
               <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
               Edit notes
             </Button>

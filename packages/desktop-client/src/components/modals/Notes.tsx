@@ -59,7 +59,7 @@ export default function Notes({ modalProps, id, name, onSave }: NotesProps) {
           }}
         >
           <NotesComponent
-            notes={originalNotes}
+            notes={notes}
             editable={true}
             focused={true}
             getStyle={editable => ({

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import { css } from 'glamor';
 import remarkGfm from 'remark-gfm';
 
+import { useResponsive } from '../ResponsiveProvider';
 import { type CSSProperties, theme } from '../style';
 import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
@@ -85,18 +86,15 @@ type NotesProps = {
 };
 
 export default function Notes({
-  notes: originalNotes,
+  notes,
   editable,
   focused,
   onChange,
   onBlur,
   getStyle,
 }: NotesProps) {
-  const [notes, setNotes] = useState(originalNotes);
-  useEffect(() => setNotes(originalNotes), [originalNotes]);
-
+  const { isNarrowWidth } = useResponsive();
   const _onChange = value => {
-    setNotes(value);
     onChange?.(value);
   };
 
@@ -114,8 +112,7 @@ export default function Notes({
       className={`${css({
         border: '1px solid ' + theme.buttonNormalBorder,
         padding: 7,
-        minWidth: 350,
-        minHeight: 120,
+        ...(!isNarrowWidth && { minWidth: 350, minHeight: 120 }),
         outline: 'none',
         backgroundColor: theme.tableBackground,
         color: theme.tableText,
