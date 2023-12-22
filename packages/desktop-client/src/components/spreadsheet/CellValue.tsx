@@ -1,7 +1,7 @@
 import React, { type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties, styles } from '../../style';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import { ConditionalPrivacyFilter } from '../PrivacyFilter';
 
 import useFormat from './useFormat';

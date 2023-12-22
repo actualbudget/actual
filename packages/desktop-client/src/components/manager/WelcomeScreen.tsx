@@ -5,7 +5,7 @@ import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
 import { Paragraph } from '../common/Paragraph';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 
 export default function WelcomeScreen() {

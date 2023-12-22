@@ -8,7 +8,7 @@ import { type BoundActions } from '../../hooks/useActions';
 import { type CommonModalProps } from '../../types/modals';
 import { Modal } from '../common/Modal';
 import { Search } from '../common/Search';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';

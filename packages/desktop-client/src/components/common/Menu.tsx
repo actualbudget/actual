@@ -8,7 +8,7 @@ import {
 
 import { type CSSProperties, theme } from '../../style';
 
-import Text from './Text';
+import { Text } from './Text';
 import View from './View';
 
 type KeybindingProps = {

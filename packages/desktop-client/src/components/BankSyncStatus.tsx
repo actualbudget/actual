@@ -5,7 +5,7 @@ import { useTransition, animated } from 'react-spring';
 import { theme, styles } from '../style';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
-import Text from './common/Text';
+import { Text } from './common/Text';
 import View from './common/View';
 
 export function BankSyncStatus() {

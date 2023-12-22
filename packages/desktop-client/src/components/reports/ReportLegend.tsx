@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { theme, styles } from '../../style';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 
 type ReportLegendProps = {

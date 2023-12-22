@@ -5,7 +5,7 @@ import { type PayeeEntity } from 'loot-core/src/types/models';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { type CSSProperties, theme } from '../../style';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import { Cell, CellButton, InputCell, Row, SelectCell } from '../table';
 
 type RuleButtonProps = {

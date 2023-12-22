@@ -18,7 +18,7 @@ import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';

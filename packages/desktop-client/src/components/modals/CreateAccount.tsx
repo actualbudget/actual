@@ -10,7 +10,7 @@ import { Button, ButtonWithLoading } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 
 type CreateAccountProps = {

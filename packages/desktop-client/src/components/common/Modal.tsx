@@ -16,7 +16,7 @@ import { tokens } from '../../tokens';
 
 import { Button } from './Button';
 import { Input } from './Input';
-import Text from './Text';
+import { Text } from './Text';
 import View from './View';
 
 type ModalChildrenProps = {

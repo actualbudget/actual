@@ -9,7 +9,7 @@ import React, {
 
 import { type CSSProperties } from '../../style';
 
-import Text from './Text';
+import { Text } from './Text';
 import View from './View';
 
 function getChildren(key, children) {

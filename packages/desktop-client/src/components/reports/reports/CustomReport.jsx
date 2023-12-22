@@ -15,7 +15,7 @@ import useFilters from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
-import Text from '../../common/Text';
+import { Text } from '../../common/Text';
 import View from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
 import { PrivacyFilter } from '../../PrivacyFilter';

@@ -30,7 +30,7 @@ import { HoverTarget } from '../common/HoverTarget';
 import { Menu } from '../common/Menu';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 import Value from '../rules/Value';
 import { Tooltip } from '../tooltips';

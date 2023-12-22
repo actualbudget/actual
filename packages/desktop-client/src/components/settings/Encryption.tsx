@@ -5,7 +5,7 @@ import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
