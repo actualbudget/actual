@@ -5,7 +5,7 @@ import React, {
 } from 'react';
 
 import { theme, type CSSProperties } from '../../style';
-import Block from '../common/Block';
+import { Block } from '../common/Block';
 import View from '../common/View';
 
 import { accountNameStyle } from './Account';

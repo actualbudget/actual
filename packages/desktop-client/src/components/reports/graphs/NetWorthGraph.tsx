@@ -13,7 +13,7 @@ import {
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
-import AlignedText from '../../common/AlignedText';
+import { AlignedText } from '../../common/AlignedText';
 import Container from '../Container';
 import numberFormatterTooltip from '../numberFormatter';
 

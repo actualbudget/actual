@@ -2,7 +2,7 @@ import React, { type HTMLProps } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
 import { Button } from '../common/Button';
-import HoverTarget from '../common/HoverTarget';
+import { HoverTarget } from '../common/HoverTarget';
 import Text from '../common/Text';
 import { Tooltip } from '../tooltips';
 

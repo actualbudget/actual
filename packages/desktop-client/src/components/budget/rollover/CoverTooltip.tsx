@@ -3,7 +3,7 @@ import React, { type ComponentProps, useState } from 'react';
 import useCategories from '../../../hooks/useCategories';
 import CategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
 import { Button } from '../../common/Button';
-import InitialFocus from '../../common/InitialFocus';
+import { InitialFocus } from '../../common/InitialFocus';
 import View from '../../common/View';
 import { Tooltip } from '../../tooltips';
 import { addToBeBudgetedGroup } from '../util';

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { useSelectedItems } from '../../hooks/useSelected';
-import Menu from '../common/Menu';
+import { Menu } from '../common/Menu';
 import { SelectedItemsButton } from '../table';
 
 import { isPreviewId } from './TransactionsTable';

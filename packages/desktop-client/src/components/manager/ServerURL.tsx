@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Link from '../common/Link';
+import { Link } from '../common/Link';
 import Text from '../common/Text';
 import View from '../common/View';
 import { useServerURL } from '../ServerContext';

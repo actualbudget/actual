@@ -21,7 +21,7 @@ import useSelected, { SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
 import { Button } from './common/Button';
-import ExternalLink from './common/ExternalLink';
+import { ExternalLink } from './common/ExternalLink';
 import Search from './common/Search';
 import Stack from './common/Stack';
 import Text from './common/Text';

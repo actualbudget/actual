@@ -6,7 +6,7 @@ import View from './View';
 
 type CardProps = ComponentProps<typeof View>;
 
-const Card = forwardRef<HTMLDivElement, CardProps>(
+export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ children, ...props }, ref) => {
     return (
       <View
@@ -35,5 +35,3 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     );
   },
 );
-
-export default Card;

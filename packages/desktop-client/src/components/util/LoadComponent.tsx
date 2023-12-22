@@ -2,7 +2,7 @@ import { type ComponentType, useEffect, useState } from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
-import Block from '../common/Block';
+import { Block } from '../common/Block';
 import View from '../common/View';
 
 type ProplessComponent = ComponentType<Record<string, never>>;

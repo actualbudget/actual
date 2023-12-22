@@ -9,7 +9,7 @@ import ArrowButtonDown1 from '../../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../../icons/v2/ArrowButtonUp1';
 import { theme, styles } from '../../../../style';
 import { Button } from '../../../common/Button';
-import Menu from '../../../common/Menu';
+import { Menu } from '../../../common/Menu';
 import View from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
 import NamespaceContext from '../../../spreadsheet/NamespaceContext';

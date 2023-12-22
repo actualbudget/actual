@@ -9,7 +9,7 @@ type LabelProps = {
   style?: CSSProperties;
 };
 
-export default function Label({ title, style }: LabelProps) {
+export function Label({ title, style }: LabelProps) {
   return (
     <Text
       style={{

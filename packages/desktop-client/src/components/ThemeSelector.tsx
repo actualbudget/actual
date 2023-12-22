@@ -10,7 +10,7 @@ import { useResponsive } from '../ResponsiveProvider';
 import { type CSSProperties, themeOptions, useTheme } from '../style';
 
 import { Button } from './common/Button';
-import Menu from './common/Menu';
+import { Menu } from './common/Menu';
 import { Tooltip } from './tooltips';
 
 type ThemeSelectorProps = {
