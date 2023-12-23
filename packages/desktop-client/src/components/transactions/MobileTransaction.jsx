@@ -992,19 +992,23 @@ function TransactionEditUnconnected(props) {
     return null;
   }
 
-  const onEdit = async transaction => {
-    let newTransaction = transaction;
+  const onEdit = async serializedTransaction => {
+    const transaction = deserializeTransaction(
+      serializedTransaction,
+      null,
+      dateFormat,
+    );
+
     // Run the rules to auto-fill in any data. Right now we only do
     // this on new transactions because that's how desktop works.
     if (isTemporary(transaction)) {
       const afterRules = await send('rules-run', { transaction });
       const diff = getChangedValues(transaction, afterRules);
 
-      newTransaction = { ...transaction };
       if (diff) {
         Object.keys(diff).forEach(field => {
-          if (newTransaction[field] == null) {
-            newTransaction[field] = diff[field];
+          if (transaction[field] == null) {
+            transaction[field] = diff[field];
           }
         });
       }
@@ -1012,7 +1016,7 @@ function TransactionEditUnconnected(props) {
 
     const { data: newTransactions } = updateTransaction(
       transactions,
-      deserializeTransaction(newTransaction, null, dateFormat),
+      transaction,
     );
     setTransactions(newTransactions);
   };
