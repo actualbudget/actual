@@ -71,7 +71,8 @@ function ReportTableTotals({
           style={{
             height: 32,
           }}
-          value={'Totals'}
+          value="Totals"
+          width="flex"
         />
         {scrollWidthTotals > 0 && (
           <Cell

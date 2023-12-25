@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 
 import * as d from 'date-fns';
 
@@ -8,6 +9,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
+import { useActions } from '../../../hooks/useActions';
 import useCategories from '../../../hooks/useCategories';
 import useFilters from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
@@ -33,6 +35,14 @@ import { fromDateRepr } from '../util';
 export default function CustomReport() {
   const categories = useCategories();
 
+  const viewLegend =
+    useSelector(state => state.prefs.local?.reportsViewLegend) || false;
+  const viewSummary =
+    useSelector(state => state.prefs.local?.reportsViewSummary) || false;
+  const viewLabels =
+    useSelector(state => state.prefs.local?.reportsViewLabel) || false;
+  const { savePrefs } = useActions();
+
   const {
     filters,
     conditionsOp,
@@ -51,6 +61,7 @@ export default function CustomReport() {
   const [endDate, setEndDate] = useState(monthUtils.currentMonth());
 
   const [mode, setMode] = useState('total');
+  const [isDateStatic, setIsDateStatic] = useState(false);
   const [groupBy, setGroupBy] = useState('Category');
   const [balanceType, setBalanceType] = useState('Payment');
   const [showEmpty, setShowEmpty] = useState(false);
@@ -60,11 +71,6 @@ export default function CustomReport() {
   const [dataCheck, setDataCheck] = useState(false);
 
   const [graphType, setGraphType] = useState('BarGraph');
-  const [viewLegend, setViewLegend] = useState(false);
-  const [viewSummary, setViewSummary] = useState(false);
-  const [viewLabels, setViewLabels] = useState(false);
-  //const [legend, setLegend] = useState([]);
-  const legend = [];
   const dateRangeLine = ReportOptions.dateRange.length - 3;
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
@@ -102,6 +108,7 @@ export default function CustomReport() {
     }
     run();
   }, []);
+
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const payees = useCachedPayees();
   const accounts = useCachedAccounts();
@@ -126,6 +133,7 @@ export default function CustomReport() {
     selectedCategories,
     filters,
     conditionsOp,
+    showEmpty,
     showOffBudgetHidden,
     showUncategorized,
   ]);
@@ -147,6 +155,7 @@ export default function CustomReport() {
       payees,
       accounts,
       setDataCheck,
+      graphType,
     });
   }, [
     startDate,
@@ -162,6 +171,7 @@ export default function CustomReport() {
     showEmpty,
     showOffBudgetHidden,
     showUncategorized,
+    graphType,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
@@ -177,6 +187,18 @@ export default function CustomReport() {
   const onChangeDates = (startDate, endDate) => {
     setStartDate(startDate);
     setEndDate(endDate);
+  };
+
+  const onChangeViews = (viewType, status) => {
+    if (viewType === 'viewLegend') {
+      savePrefs({ reportsViewLegend: status ?? !viewLegend });
+    }
+    if (viewType === 'viewSummary') {
+      savePrefs({ reportsViewSummary: !viewSummary });
+    }
+    if (viewType === 'viewLabels') {
+      savePrefs({ reportsViewLabels: !viewLabels });
+    }
   };
 
   return (
@@ -201,7 +223,6 @@ export default function CustomReport() {
           allMonths={allMonths}
           graphType={graphType}
           setGraphType={setGraphType}
-          setViewLegend={setViewLegend}
           typeDisabled={typeDisabled}
           setTypeDisabled={setTypeDisabled}
           groupBy={groupBy}
@@ -210,6 +231,8 @@ export default function CustomReport() {
           setBalanceType={setBalanceType}
           mode={mode}
           setMode={setMode}
+          isDateStatic={isDateStatic}
+          setIsDateStatic={setIsDateStatic}
           showEmpty={showEmpty}
           setShowEmpty={setShowEmpty}
           showOffBudgetHidden={showOffBudgetHidden}
@@ -219,6 +242,7 @@ export default function CustomReport() {
           categories={categories}
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
+          onChangeViews={onChangeViews}
         />
         <View
           style={{
@@ -230,17 +254,15 @@ export default function CustomReport() {
             setGraphType={setGraphType}
             mode={mode}
             viewLegend={viewLegend}
-            setViewLegend={setViewLegend}
             setTypeDisabled={setTypeDisabled}
             balanceType={balanceType}
             setBalanceType={setBalanceType}
             groupBy={groupBy}
             setGroupBy={setGroupBy}
             viewSummary={viewSummary}
-            setViewSummary={setViewSummary}
             viewLabels={viewLabels}
-            setViewLabels={setViewLabels}
             onApplyFilter={onApplyFilter}
+            onChangeViews={onChangeViews}
           />
           {filters && filters.length > 0 && (
             <View
@@ -320,10 +342,10 @@ export default function CustomReport() {
                     months={months}
                   />
                 ) : (
-                  <LoadingIndicator message={'Loading report...'} />
+                  <LoadingIndicator message="Loading report..." />
                 )}
               </View>
-              {(viewLegend || viewSummary) && (
+              {(viewLegend || viewSummary) && data && (
                 <View
                   style={{
                     padding: 10,
@@ -344,7 +366,7 @@ export default function CustomReport() {
                     />
                   )}
                   {viewLegend && (
-                    <ReportLegend legend={legend} groupBy={groupBy} />
+                    <ReportLegend legend={data.legend} groupBy={groupBy} />
                   )}
                 </View>
               )}

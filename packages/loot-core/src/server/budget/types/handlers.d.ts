@@ -5,13 +5,13 @@ export interface BudgetHandlers {
     category: string /* category id */;
     month: string;
     amount: number;
-  }) => Promise<unknown>;
+  }) => Promise<void>;
 
-  'budget/copy-previous-month': (...args: unknown[]) => Promise<unknown>;
+  'budget/copy-previous-month': (arg: { month: string }) => Promise<void>;
 
-  'budget/set-zero': (...args: unknown[]) => Promise<unknown>;
+  'budget/set-zero': (arg: { month: string }) => Promise<void>;
 
-  'budget/set-3month-avg': (...args: unknown[]) => Promise<unknown>;
+  'budget/set-3month-avg': (arg: { month: string }) => Promise<void>;
 
   'budget/check-templates': () => Promise<Notification>;
 
@@ -27,17 +27,37 @@ export interface BudgetHandlers {
     month: string;
   }) => Promise<Notification>;
 
-  'budget/hold-for-next-month': (...args: unknown[]) => Promise<unknown>;
+  'budget/hold-for-next-month': (arg: {
+    month: string;
+    amount: number;
+  }) => Promise<boolean>;
 
-  'budget/reset-hold': (...args: unknown[]) => Promise<unknown>;
+  'budget/reset-hold': (arg: { month: string }) => Promise<void>;
 
-  'budget/cover-overspending': (...args: unknown[]) => Promise<unknown>;
+  'budget/cover-overspending': (arg: {
+    month: string;
+    to: string;
+    from: string;
+  }) => Promise<void>;
 
-  'budget/transfer-available': (...args: unknown[]) => Promise<unknown>;
+  'budget/transfer-available': (arg: {
+    month: string;
+    amount: number;
+    category: string;
+  }) => Promise<void>;
 
-  'budget/transfer-category': (...args: unknown[]) => Promise<unknown>;
+  'budget/transfer-category': (arg: {
+    month: string;
+    amount: number;
+    to: string;
+    from: string;
+  }) => Promise<void>;
 
-  'budget/set-carryover': (...args: unknown[]) => Promise<unknown>;
+  'budget/set-carryover': (arg: {
+    startMonth: string;
+    category: string;
+    flag: boolean;
+  }) => Promise<void>;
 
   'budget/apply-single-template': (arg: {
     month: string;
@@ -48,10 +68,10 @@ export interface BudgetHandlers {
     month: string;
     N: number;
     category: string; //category id
-  }) => Promise<unknown>;
+  }) => Promise<void>;
 
   'budget/copy-single-month': (arg: {
     month: string;
     category: string; //category id
-  }) => Promise<unknown>;
+  }) => Promise<void>;
 }

@@ -768,7 +768,7 @@ export default function EditRule({
       title="Rule"
       padding={0}
       {...modalProps}
-      style={{ ...modalProps.style, flex: 'inherit', maxWidth: '90%' }}
+      style={{ ...modalProps.style, flex: 'inherit' }}
     >
       {() => (
         <View

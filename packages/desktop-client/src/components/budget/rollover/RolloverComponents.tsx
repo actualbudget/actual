@@ -188,6 +188,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               paddingLeft: 3,
               justifyContent: 'center',
               borderTopWidth: 1,
+              borderBottomWidth: 1,
               borderColor: theme.tableBorder,
             }}
           >

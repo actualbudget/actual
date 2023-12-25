@@ -5,7 +5,7 @@ import Text from '../common/Text';
 import View from '../common/View';
 
 type ReportLegendProps = {
-  legend: Array<{ name: string; color: string }>;
+  legend?: Array<{ name: string; color: string }>;
   groupBy: string;
 };
 
@@ -31,37 +31,38 @@ function ReportLegend({ legend, groupBy }: ReportLegendProps) {
         {groupBy}
       </Text>
       <View>
-        {legend.map(item => {
-          return (
-            <View
-              key={item.name}
-              style={{
-                padding: 10,
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}
-            >
+        {legend &&
+          legend.map(item => {
+            return (
               <View
+                key={item.name}
                 style={{
-                  marginRight: 5,
-                  borderRadius: 1000,
-                  width: 14,
-                  height: 14,
-                  backgroundColor: item.color,
-                }}
-              />
-              <Text
-                style={{
-                  whiteSpace: 'nowrap',
-                  textOverflow: 'ellipsis',
-                  flexShrink: 0,
+                  padding: 10,
+                  flexDirection: 'row',
+                  alignItems: 'center',
                 }}
               >
-                {item.name}
-              </Text>
-            </View>
-          );
-        })}
+                <View
+                  style={{
+                    marginRight: 5,
+                    borderRadius: 1000,
+                    width: 14,
+                    height: 14,
+                    backgroundColor: item.color,
+                  }}
+                />
+                <Text
+                  style={{
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                    flexShrink: 0,
+                  }}
+                >
+                  {item.name}
+                </Text>
+              </View>
+            );
+          })}
       </View>
     </View>
   );

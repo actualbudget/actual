@@ -1,5 +1,10 @@
 import { type File } from '../../types/file';
-import type { AccountEntity, GoCardlessToken } from '../../types/models';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  GoCardlessToken,
+} from '../../types/models';
 import type { RuleEntity } from '../../types/models/rule';
 import type { EmptyObject, StripNever } from '../../types/util';
 import type * as constants from '../constants';
@@ -90,6 +95,7 @@ type FinanceModals = {
   'edit-field': {
     name: string;
     onSubmit: (name: string, value: string) => void;
+    onClose: () => void;
   };
 
   'budget-summary': {
@@ -104,6 +110,27 @@ type FinanceModals = {
 
   'schedule-posts-offline-notification': null;
   'switch-budget-type': { onSwitch: () => void };
+  'category-menu': {
+    category: CategoryEntity;
+    onSave: (category: CategoryEntity) => void;
+    onEditNotes: (id: string) => void;
+    onSaveNotes: (id: string, notes: string) => void;
+    onDelete: (categoryId: string) => void;
+    onClose?: () => void;
+  };
+  'category-group-menu': {
+    group: CategoryGroupEntity;
+    onSave: (group: CategoryGroupEntity) => void;
+    onAddCategory: (groupId: string, isIncome: boolean) => void;
+    onEditNotes: (id: string) => void;
+    onDelete: (groupId: string) => void;
+    onClose?: () => void;
+  };
+  notes: {
+    id: string;
+    name: string;
+    onSave: (id: string, notes: string) => void;
+  };
 };
 
 export type PushModalAction = {
@@ -124,11 +151,17 @@ export type CloseModalAction = {
   type: typeof constants.CLOSE_MODAL;
 };
 
+export type CollapseModalsAction = {
+  type: typeof constants.COLLAPSE_MODALS;
+  rootModalName: string;
+};
+
 export type ModalsActions =
   | PushModalAction
   | ReplaceModalAction
   | PopModalAction
-  | CloseModalAction;
+  | CloseModalAction
+  | CollapseModalsAction;
 
 export type ModalsState = {
   modalStack: Modal[];

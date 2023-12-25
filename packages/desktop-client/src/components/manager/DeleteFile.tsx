@@ -1,34 +1,45 @@
 import React, { useState } from 'react';
 
+import { type File } from 'loot-core/src/types/file';
+
+import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
+import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
 import Modal from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
 
-export default function DeleteMenu({ modalProps, actions, file }) {
-  const [loadingState, setLoadingState] = useState(null);
+type DeleteFileProps = {
+  modalProps: CommonModalProps;
+  actions: BoundActions;
+  file: File;
+};
 
-  async function onDeleteCloud() {
-    setLoadingState('cloud');
-    await actions.deleteBudget(file.id, file.cloudFileId);
-    setLoadingState(null);
-
-    modalProps.onBack();
-  }
-
-  async function onDeleteLocal() {
-    setLoadingState('local');
-    await actions.deleteBudget(file.id);
-    setLoadingState(null);
-
-    modalProps.onBack();
-  }
-
+export default function DeleteFile({
+  modalProps,
+  actions,
+  file,
+}: DeleteFileProps) {
   // If the state is "broken" that means it was created by another
   // user. The current user should be able to delete the local file,
   // but not the remote one
-  const isRemote = file.cloudFileId && file.state !== 'broken';
+  const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
+
+  const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
+    null,
+  );
+
+  async function onDelete() {
+    setLoadingState(isCloudFile ? 'cloud' : 'local');
+    await actions.deleteBudget(
+      'id' in file ? file.id : undefined,
+      isCloudFile ? file.cloudFileId : undefined,
+    );
+    setLoadingState(null);
+
+    modalProps.onBack();
+  }
 
   return (
     <Modal
@@ -49,7 +60,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
             lineHeight: '1.5em',
           }}
         >
-          {isRemote && (
+          {isCloudFile && (
             <>
               <Text>
                 This is a <strong>hosted file</strong> which means it is stored
@@ -68,16 +79,16 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                   padding: '10px 30px',
                   fontSize: 14,
                 }}
-                onClick={onDeleteCloud}
+                onClick={onDelete}
               >
                 Delete file from all devices
               </ButtonWithLoading>
             </>
           )}
 
-          {file.id && (
+          {'id' in file && (
             <>
-              {isRemote ? (
+              {isCloudFile ? (
                 <Text>
                   You can also delete just the local copy. This will remove all
                   local data and the file will be listed as available for
@@ -101,14 +112,14 @@ export default function DeleteMenu({ modalProps, actions, file }) {
               )}
 
               <ButtonWithLoading
-                type={isRemote ? 'normal' : 'primary'}
+                type={isCloudFile ? 'normal' : 'primary'}
                 loading={loadingState === 'local'}
                 style={{
                   alignSelf: 'center',
                   marginTop: 10,
                   padding: '10px 30px',
                   fontSize: 14,
-                  ...(isRemote
+                  ...(isCloudFile
                     ? {
                         color: theme.errorText,
                         borderColor: theme.errorText,
@@ -118,7 +129,7 @@ export default function DeleteMenu({ modalProps, actions, file }) {
                         backgroundColor: theme.errorText,
                       }),
                 }}
-                onClick={onDeleteLocal}
+                onClick={onDelete}
               >
                 Delete file locally
               </ButtonWithLoading>

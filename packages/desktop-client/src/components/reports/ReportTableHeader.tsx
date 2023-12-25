@@ -77,7 +77,7 @@ function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Deposits'}
+                  value="Deposits"
                   width="flex"
                 />
                 <Cell
@@ -85,7 +85,7 @@ function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Payments'}
+                  value="Payments"
                   width="flex"
                 />
               </>
@@ -95,7 +95,7 @@ function ReportTableHeader({
             minWidth: 85,
             ...styles.tnum,
           }}
-          value={'Totals'}
+          value="Totals"
           width="flex"
         />
         <Cell
@@ -103,7 +103,7 @@ function ReportTableHeader({
             minWidth: 85,
             ...styles.tnum,
           }}
-          value={'Average'}
+          value="Average"
           width="flex"
         />
       </View>
