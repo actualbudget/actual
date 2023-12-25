@@ -109,6 +109,7 @@ export default defineConfig(async ({ mode }) => {
       assetsDir: 'static',
       manifest: true,
       assetsInlineLimit: 0,
+      chunkSizeWarningLimit: 1500,
       rollupOptions: {
         output: {
           assetFileNames: assetInfo => {
@@ -123,24 +124,6 @@ export default defineConfig(async ({ mode }) => {
           },
           chunkFileNames: 'static/js/[name]-[hash].js',
           entryFileNames: 'static/js/[name]-[hash].js',
-          manualChunks: {
-            react: [
-              'react',
-              'react-router-dom',
-              'react-redux',
-              'react-spring',
-              'react-dnd',
-              'react-dom',
-              'react-modal',
-              'react-dnd-html5-backend',
-              '@react-aria/listbox',
-              '@reach/listbox',
-              'downshift',
-            ],
-            recharts: ['recharts'],
-            dates: ['date-fns', 'pikaday'],
-            glamor: ['glamor'],
-          },
         },
       },
     },
