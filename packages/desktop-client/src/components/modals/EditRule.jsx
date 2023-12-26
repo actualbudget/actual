@@ -773,7 +773,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
     );
     send('rule-apply-actions', {
       transactions: selectedTransactions,
-      actions: actionSplits.flat().map(unparse),
+      actions: getActions(actionSplits).map(unparse),
     }).then(() => {
       // This makes it refetch the transactions
       setActionSplits([...actionSplits]);
