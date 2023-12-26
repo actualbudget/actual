@@ -43,7 +43,7 @@ export function validateRange(allMonths, start, end) {
   return [start, end];
 }
 
-function boundedRange(earliest, start, end) {
+function boundedRange(earliest, start, end, forecast) {
   const latest = monthUtils.currentMonth();
   if (end > latest) {
     end = latest;
@@ -51,19 +51,22 @@ function boundedRange(earliest, start, end) {
   if (start < earliest) {
     start = earliest;
   }
-  return [start, end];
+  if (end != latest) {
+    forecast = latest;
+  }
+  return [start, end, forecast];
 }
 
 export function getLatestRange(offset, forecast) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, offset);
-  return [start, end];
+  return [start, end, forecast];
 }
 
 export function getFullRange(allMonths, forecast) {
   const start = allMonths[allMonths.length - 1].name;
   const end = monthUtils.currentMonth();
-  return [start, end];
+  return [start, end, forecast];
 }
 
 function Header({

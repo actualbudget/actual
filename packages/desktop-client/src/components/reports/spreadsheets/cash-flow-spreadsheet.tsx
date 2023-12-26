@@ -90,11 +90,18 @@ export function cashFlowByDate(
         ]);
     }
 
-    type Filter = {
+    let scheduleQuery = q('schedules').select([
+      '*', 
+      { isTransfer: '_payee.transfer_acct' }, 
+      { isAccountOffBudget: '_account.offbudget' }, 
+      { isPayeeOffBudget: '_payee.transfer_acct.offbudget' }
+    ]);
+
+    type ScheduleFilter = {
       account: string;
       payee: string;
     }
-    let scheduleFilters = filters.map((obj: Filter) => {
+    const scheduleFilters = filters.map((obj: ScheduleFilter) => {
       if (obj.hasOwnProperty("account")) {
         const { account, ...rest } = obj;
         return [{ _account: account }, { '_payee.transfer_acct': account }];
@@ -103,12 +110,17 @@ export function cashFlowByDate(
         const { payee, ...rest } = obj;
         return { _payee: payee };
       }
-    }).flat();;
+    }).flat();
 
-    let { data } = await runQuery(q('schedules').select(['*', { isTransfer: '_payee.transfer_acct' }])
-    .filter({
-      ['$or']: [...scheduleFilters],
-    }));
+    if (scheduleFilters.length > 0) {
+      scheduleQuery = scheduleQuery.filter({
+        ['$or']: [...scheduleFilters],
+      });
+    }
+
+    let { data } = await runQuery(scheduleQuery);
+
+
 
     let schedules = await Promise.all(
       data.map((schedule) => {
@@ -135,13 +147,13 @@ export function cashFlowByDate(
         makeQuery('amount < 0').filter({ amount: { $lt: 0 } }),
       ],
       data => {
-        setData(recalculate(data, start, end, forecast, isConcise, schedules));
+        setData(recalculate(data, start, end, forecast, isConcise, schedules, filters));
       },
     );
   };
 }
 
-function recalculate(data, start, end, forecast, isConcise, schedules) {
+function recalculate(data, start, end, forecast, isConcise, schedules, filters) {
   const [startingBalance, income, expense] = data;
   const convIncome = income.map(t => {
     return { ...t, isTransfer: t.isTransfer !== null };
@@ -154,31 +166,32 @@ function recalculate(data, start, end, forecast, isConcise, schedules) {
   let futureExpense = [];
   schedules.forEach(schedule => {
     schedule._dates.forEach(date => {
-      let futureTx = { 
+      const futureTx = { 
         date: isConcise ? monthUtils.monthFromDate(date) : date,
-        isTransfer: schedule.isTransfer != null,
+        isTransfer: (schedule.isTransfer != null),
         trasferAccount: schedule.isTransfer,
-        amount: schedule._amount,
+        amount: schedule._amountOp === 'isbetween' ? (schedule._amount.num1 + schedule._amount.num2) / 2 : schedule._amount,
       };
+
+      const includeFutureTx = filters.reduce((include, filter) => {
+        return include || (filter.hasOwnProperty("account") ? filter.account.$eq == schedule._account : true);
+      }, filters.length == 0) && !schedule.isAccountOffBudget;
+
+      const includeTransfer = filters.reduce((include, filter) => {
+        return include || (filter.hasOwnProperty("account") ? filter.account.$eq == futureTx.trasferAccount : true);
+      }, filters.length == 0);
       
-      if (futureTx.isTransfer) {
-        let futureTxTranser = {
+      if (futureTx.isTransfer && !schedule.isPayeeOffBudget && includeTransfer) {
+        const futureTxTransfer = {
           date: isConcise ? monthUtils.monthFromDate(date) : date,
           isTransfer: schedule.isTransfer != null,
           amount: -schedule._amount,
         }
-        if (futureTxTranser.amount < 0) {
-          futureExpense.push(futureTxTranser);
-        } else {
-          futureIncome.push(futureTxTranser);
-        }
-      } else {
-        if (futureTx.amount < 0) {
-          futureExpense.push(futureTx);
-        } else {
-          futureIncome.push(futureTx);
-        }
+        futureTxTransfer.amount < 0 ? futureExpense.push(futureTxTransfer) : futureIncome.push(futureTxTransfer);
       }
+
+      if (includeFutureTx) futureTx.amount < 0 ? futureExpense.push(futureTx) : futureIncome.push(futureTx);
+
     });
   });
   
@@ -284,9 +297,9 @@ function recalculate(data, start, end, forecast, isConcise, schedules) {
   return {
     graphData,
     balance: balances[balances.length - 1].amount,
-    totalExpenses,
-    totalIncome,
-    totalTransfers,
+    totalExpenses: totalExpenses + futureTotalExpenses,
+    totalIncome: totalIncome + futureTotalIncome,
+    totalTransfers: totalTransfers + futureTotalTransfers,
     totalChange: balances[balances.length - 1].amount - balances[0].amount,
   };
 }
