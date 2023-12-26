@@ -591,7 +591,7 @@ async function applyCategoryTemplate(
           to_budget,
           errors,
         );
-        to_budget = goalsReturn.to_budget;
+        to_budget = category.is_income ? -goalsReturn.to_budget : goalsReturn.to_budget;
         errors = goalsReturn.errors;
         remainder = goalsReturn.remainder;
         scheduleFlag = goalsReturn.scheduleFlag;
