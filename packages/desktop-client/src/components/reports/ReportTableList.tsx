@@ -49,7 +49,7 @@ const TableRow = memo(
           value={item[groupByItem]}
           title={item[groupByItem].length > 12 && item[groupByItem]}
           style={{
-            width: 150,
+            width: 120,
             flexShrink: 0,
             ...styles.tnum,
           }}

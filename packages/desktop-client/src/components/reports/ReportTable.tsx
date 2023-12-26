@@ -36,7 +36,7 @@ export default function ReportTable({
     <View
       innerRef={listScrollRef}
       onScroll={handleScroll}
-      id={'list'}
+      id="list"
       style={{
         overflowY: 'auto',
         scrollbarWidth: 'none',

@@ -36,18 +36,10 @@ function ReportTableHeader({
         fontWeight: 600,
       }}
     >
-      <Cell
-        style={{
-          width: 150,
-          flexShrink: 0,
-          ...styles.tnum,
-        }}
-        value={groupBy}
-      />
       <View
         innerRef={headerScrollRef}
         onScroll={handleScroll}
-        id={'header'}
+        id="header"
         style={{
           overflowX: 'auto',
           scrollbarWidth: 'none',
@@ -56,6 +48,14 @@ function ReportTableHeader({
           flex: 1,
         }}
       >
+        <Cell
+          style={{
+            width: 120,
+            flexShrink: 0,
+            ...styles.tnum,
+          }}
+          value={groupBy}
+        />
         {interval
           ? interval.map((header, index) => {
               return (

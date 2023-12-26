@@ -61,40 +61,23 @@ function ReportTableTotals({
       }}
     >
       <View
-        style={{
-          width: 150,
-          flexShrink: 0,
-          ...styles.tnum,
-        }}
-      >
-        <Cell
-          style={{
-            height: 32,
-          }}
-          value="Totals"
-          width="flex"
-        />
-        {scrollWidthTotals > 0 && (
-          <Cell
-            style={{
-              height: scrollWidthTotals,
-              color: theme.tableText,
-              backgroundColor: theme.tableBackground,
-              border: 'none',
-            }}
-          />
-        )}
-      </View>
-      <View
         innerRef={totalScrollRef}
         onScroll={handleScroll}
-        id={'total'}
+        id="total"
         style={{
           overflowX: 'auto',
           flexDirection: 'row',
           flex: 1,
         }}
       >
+        <Cell
+          style={{
+            width: 120,
+            flexShrink: 0,
+            ...styles.tnum,
+          }}
+          value="Totals"
+        />
         {mode === 'time'
           ? data.monthData.map(item => {
               return (
