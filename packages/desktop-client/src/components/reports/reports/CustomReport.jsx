@@ -197,7 +197,7 @@ export default function CustomReport() {
       savePrefs({ reportsViewSummary: !viewSummary });
     }
     if (viewType === 'viewLabels') {
-      savePrefs({ reportsViewLabels: !viewLabels });
+      savePrefs({ reportsViewLabel: !viewLabels });
     }
   };
 
