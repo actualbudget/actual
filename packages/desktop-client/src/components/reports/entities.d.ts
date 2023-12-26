@@ -31,7 +31,7 @@ export type MonthData = {
   totalTotals: number;
 };
 
-export type GroupedEntity = {
+type GroupedEntity = {
   id: string;
   name: string;
   date?: string;

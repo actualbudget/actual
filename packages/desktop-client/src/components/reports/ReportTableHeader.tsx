@@ -5,12 +5,12 @@ import { styles, theme } from '../../style';
 import View from '../common/View';
 import { Row, Cell } from '../table';
 
-import { type GroupedEntity } from './entities';
+import { type MonthData } from './entities';
 
 type ReportTableHeaderProps = {
   scrollWidth?: number;
   groupBy: string;
-  interval?: GroupedEntity[];
+  interval?: MonthData[];
   balanceType: string;
   headerScrollRef: RefProp<HTMLDivElement>;
   handleScroll?: UIEventHandler<HTMLDivElement>;
