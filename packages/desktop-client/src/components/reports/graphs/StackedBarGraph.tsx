@@ -98,7 +98,6 @@ type StackedBarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
   compact?: boolean;
-  balanceTypeOp: string;
   viewLabels: boolean;
 };
 
@@ -106,7 +105,6 @@ export function StackedBarGraph({
   style,
   data,
   compact,
-  balanceTypeOp,
   viewLabels,
 }: StackedBarGraphProps) {
   const privacyMode = usePrivacyMode();

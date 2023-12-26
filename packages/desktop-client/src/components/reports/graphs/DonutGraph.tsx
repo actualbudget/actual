@@ -32,8 +32,6 @@ const ActiveShape = props => {
   const my = cy + (innerRadius - 30) * sin;
   const ex = cx + (cos >= 0 ? 1 : -1) * yAxis.length * 4;
   const ey = cy + 8;
-  //const ex = mx + (cos <= 0 ? 1 : -1) * 40;
-  //const ey = my + (sin <= 0 ? 1 : -1) * 40;
   const textAnchor = cos <= 0 ? 'start' : 'end';
 
   return (

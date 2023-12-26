@@ -98,7 +98,6 @@ export function ChooseGraph({
       <StackedBarGraph
         style={{ flexGrow: 1 }}
         data={data}
-        balanceTypeOp={ReportOptions.balanceTypeMap.get(balanceType)}
         viewLabels={viewLabels}
       />
     );
