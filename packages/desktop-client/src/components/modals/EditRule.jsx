@@ -590,7 +590,7 @@ function ConditionsList({
   );
 }
 
-const getActions = splits => splits.map(s => s.actions).flat();
+const getActions = splits => splits.flatMap(s => s.actions);
 
 // TODO:
 // * Dont touch child transactions?
