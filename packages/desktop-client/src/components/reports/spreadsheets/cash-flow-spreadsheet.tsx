@@ -2,8 +2,8 @@ import React from 'react';
 
 import * as d from 'date-fns';
 
-import q from 'loot-core/src/client/query-helpers';
-import { send } from 'loot-core/src/platform/client/fetch';
+import q, { liveQuery, runQuery } from 'loot-core/src/client/query-helpers';
+import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
 
@@ -47,6 +47,7 @@ export function simpleCashFlow(start, end) {
 export function cashFlowByDate(
   start,
   end,
+  forecast,
   isConcise,
   conditions = [],
   conditionsOp,
@@ -89,6 +90,38 @@ export function cashFlowByDate(
         ]);
     }
 
+    type Filter = {
+      account: string;
+      payee: string;
+    }
+    let scheduleFilters = filters.map((obj: Filter) => {
+      if (obj.hasOwnProperty("account")) {
+        const { account, ...rest } = obj;
+        return [{ _account: account }, { '_payee.transfer_acct': account }];
+      }
+      if (obj.hasOwnProperty("payee")) {
+        const { payee, ...rest } = obj;
+        return { _payee: payee };
+      }
+    }).flat();;
+
+    let { data } = await runQuery(q('schedules').select(['*', { isTransfer: '_payee.transfer_acct' }])
+    .filter({
+      ['$or']: [...scheduleFilters],
+    }));
+
+    let schedules = await Promise.all(
+      data.map((schedule) => {
+        return sendCatch('schedule/get-occurrences-to-date', {
+          config: schedule._date,
+          end: forecast,
+        }).then(({ data }) => {
+          schedule._dates = data;
+          return schedule;
+        })
+      })
+    );
+
     return runAll(
       [
         q('transactions')
@@ -102,13 +135,13 @@ export function cashFlowByDate(
         makeQuery('amount < 0').filter({ amount: { $lt: 0 } }),
       ],
       data => {
-        setData(recalculate(data, start, end, isConcise));
+        setData(recalculate(data, start, end, forecast, isConcise, schedules));
       },
     );
   };
 }
 
-function recalculate(data, start, end, isConcise) {
+function recalculate(data, start, end, forecast, isConcise, schedules) {
   const [startingBalance, income, expense] = data;
   const convIncome = income.map(t => {
     return { ...t, isTransfer: t.isTransfer !== null };
@@ -116,81 +149,137 @@ function recalculate(data, start, end, isConcise) {
   const convExpense = expense.map(t => {
     return { ...t, isTransfer: t.isTransfer !== null };
   });
+
+  let futureIncome = [];
+  let futureExpense = [];
+  schedules.forEach(schedule => {
+    schedule._dates.forEach(date => {
+      let futureTx = { 
+        date: isConcise ? monthUtils.monthFromDate(date) : date,
+        isTransfer: schedule.isTransfer != null,
+        trasferAccount: schedule.isTransfer,
+        amount: schedule._amount,
+      };
+      
+      if (futureTx.isTransfer) {
+        let futureTxTranser = {
+          date: isConcise ? monthUtils.monthFromDate(date) : date,
+          isTransfer: schedule.isTransfer != null,
+          amount: -schedule._amount,
+        }
+        if (futureTxTranser.amount < 0) {
+          futureExpense.push(futureTxTranser);
+        } else {
+          futureIncome.push(futureTxTranser);
+        }
+      } else {
+        if (futureTx.amount < 0) {
+          futureExpense.push(futureTx);
+        } else {
+          futureIncome.push(futureTx);
+        }
+      }
+    });
+  });
+  
   const dates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(start),
         monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
+  const forecastDates = isConcise
+    ? monthUtils.rangeInclusive(
+        monthUtils.getMonth(end),
+        monthUtils.getMonth(forecast),
+      )
+    : monthUtils.dayRangeInclusive(end, forecast);
   const incomes = indexCashFlow(convIncome, 'date', 'isTransfer');
   const expenses = indexCashFlow(convExpense, 'date', 'isTransfer');
+  const futureIncomes = indexCashFlow(futureIncome, 'date', 'isTransfer');
+  const futureExpenses = indexCashFlow(futureExpense, 'date', 'isTransfer');
 
-  let balance = startingBalance;
-  let totalExpenses = 0;
-  let totalIncome = 0;
-  let totalTransfers = 0;
+  function calculate(dates, startingBalance, incomes, expenses) {
+    let balance = startingBalance;
+    let totalExpenses = 0;
+    let totalIncome = 0;
+    let totalTransfers = 0;
 
-  const graphData = dates.reduce(
-    (res, date) => {
-      let income = 0;
-      let expense = 0;
-      let creditTransfers = 0;
-      let debitTransfers = 0;
+    const graphData = dates.reduce(
+      (res, date) => {
+        let income = 0;
+        let expense = 0;
+        let creditTransfers = 0;
+        let debitTransfers = 0;
 
-      if (incomes[date]) {
-        income = !incomes[date].false ? 0 : incomes[date].false;
-        creditTransfers = !incomes[date].true ? 0 : incomes[date].true;
-      }
-      if (expenses[date]) {
-        expense = !expenses[date].false ? 0 : expenses[date].false;
-        debitTransfers = !expenses[date].true ? 0 : expenses[date].true;
-      }
+        if (incomes[date]) {
+          income = !incomes[date].false ? 0 : incomes[date].false;
+          creditTransfers = !incomes[date].true ? 0 : incomes[date].true;
+        }
+        if (expenses[date]) {
+          expense = !expenses[date].false ? 0 : expenses[date].false;
+          debitTransfers = !expenses[date].true ? 0 : expenses[date].true;
+        }
 
-      totalExpenses += expense;
-      totalIncome += income;
-      balance += income + expense + creditTransfers + debitTransfers;
-      totalTransfers += creditTransfers + debitTransfers;
-      const x = d.parseISO(date);
+        totalExpenses += expense;
+        totalIncome += income;
+        balance += income + expense + creditTransfers + debitTransfers;
+        totalTransfers += creditTransfers + debitTransfers;
+        const x = d.parseISO(date);
 
-      const label = (
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <strong>
-              {d.format(x, isConcise ? 'MMMM yyyy' : 'MMMM d, yyyy')}
-            </strong>
-          </div>
-          <div style={{ lineHeight: 1.5 }}>
-            <AlignedText left="Income:" right={integerToCurrency(income)} />
-            <AlignedText left="Expenses:" right={integerToCurrency(expense)} />
-            <AlignedText
-              left="Change:"
-              right={<strong>{integerToCurrency(income + expense)}</strong>}
-            />
-            {creditTransfers + debitTransfers !== 0 && (
+        const label = (
+          <div>
+            <div style={{ marginBottom: 10 }}>
+              <strong>
+                {d.format(x, isConcise ? 'MMMM yyyy' : 'MMMM d, yyyy')}
+              </strong>
+            </div>
+            <div style={{ lineHeight: 1.5 }}>
+              <AlignedText left="Income:" right={integerToCurrency(income)} />
+              <AlignedText left="Expenses:" right={integerToCurrency(expense)} />
               <AlignedText
-                left="Transfers:"
-                right={integerToCurrency(creditTransfers + debitTransfers)}
+                left="Change:"
+                right={<strong>{integerToCurrency(income + expense)}</strong>}
               />
-            )}
-            <AlignedText left="Balance:" right={integerToCurrency(balance)} />
+              {creditTransfers + debitTransfers !== 0 && (
+                <AlignedText
+                  left="Transfers:"
+                  right={integerToCurrency(creditTransfers + debitTransfers)}
+                />
+              )}
+              <AlignedText left="Balance:" right={integerToCurrency(balance)} />
+            </div>
           </div>
-        </div>
-      );
+        );
 
-      res.income.push({ x, y: integerToAmount(income) });
-      res.expenses.push({ x, y: integerToAmount(expense) });
-      res.balances.push({
-        x,
-        y: integerToAmount(balance),
-        premadeLabel: label,
-        amount: balance,
-      });
-      return res;
-    },
-    { expenses: [], income: [], balances: [] },
-  );
+        res.income.push({ x, y: integerToAmount(income) });
+        res.expenses.push({ x, y: integerToAmount(expense) });
+        res.balances.push({
+          x,
+          y: integerToAmount(balance),
+          premadeLabel: label,
+          amount: balance,
+        });
+        return res;
+      },
+      { expenses: [], income: [], balances: [] },
+    );
+    return {graphData, totalExpenses, totalIncome, totalTransfers}
+  }
+
+  const {graphData, totalExpenses, totalIncome, totalTransfers} = calculate(dates, startingBalance, incomes, expenses);
 
   const { balances } = graphData;
+  
+  const {graphData: futureGraphData, 
+    totalExpenses: futureTotalExpenses, 
+    totalIncome: futureTotalIncome, 
+    totalTransfers: futureTotalTransfers
+  } = calculate(forecastDates, balances[balances.length - 1].amount, futureIncomes, futureExpenses);
+
+  graphData.futureBalances = futureGraphData.balances;
+  graphData.futureIncome = futureGraphData.income;
+  graphData.futureExpenses = futureGraphData.expenses;
 
   return {
     graphData,

@@ -31,10 +31,13 @@ export default function CashFlow(): JSX.Element {
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
+  const [allForecasts, setAllForecasts] = useState(null);
+  const [disabled, setDisabled] = useState([]);
   const [start, setStart] = useState(
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
+  const [forecast, setForecast] = useState(monthUtils.addDays(monthUtils.currentDay(), 31));
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -45,10 +48,19 @@ export default function CashFlow(): JSX.Element {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, isConcise, filters, conditionsOp),
-    [start, end, isConcise, filters, conditionsOp],
+    () => cashFlowByDate(start, end, forecast, isConcise, filters, conditionsOp),
+    [start, end, forecast, isConcise, filters, conditionsOp],
   );
   const data = useReport('cash_flow', params);
+
+  const forecastMonths = [
+    {name: monthUtils.currentMonth(), pretty: "None"},
+    {name: monthUtils.addDays(monthUtils.currentDay(), 31), pretty: "1 Month"},
+    {name: monthUtils.addDays(monthUtils.currentDay(), 3*31), pretty: "3 Months"},
+    {name: monthUtils.addDays(monthUtils.currentDay(), 6*31), pretty: "6 Months"},
+    {name: monthUtils.addDays(monthUtils.currentDay(), 12*31), pretty: "12 Months"},
+    {name: monthUtils.addDays(monthUtils.currentDay(), 24*31), pretty: "24 Months"},
+  ]
 
   useEffect(() => {
     async function run() {
@@ -66,11 +78,12 @@ export default function CashFlow(): JSX.Element {
         .reverse();
 
       setAllMonths(allMonths);
+      setAllForecasts(forecastMonths);
     }
     run();
   }, []);
 
-  function onChangeDates(start, end) {
+  function onChangeDates(start, end, forecast) {
     const numDays = d.differenceInCalendarDays(
       d.parseISO(end),
       d.parseISO(start),
@@ -84,10 +97,14 @@ export default function CashFlow(): JSX.Element {
 
     setStart(start + '-01');
     setEnd(endDay);
+    setForecast(forecast);
     setIsConcise(isConcise);
+    end != monthUtils.currentMonth() ? setDisabled(forecastMonths.slice(1).map(forecast => (
+      forecast.name
+    ))) : setDisabled([]);
   }
 
-  if (!allMonths || !data) {
+  if (!allMonths || !data || !allForecasts) {
     return null;
   }
 
@@ -98,9 +115,12 @@ export default function CashFlow(): JSX.Element {
       <Header
         title="Cash Flow"
         allMonths={allMonths}
+        allForecasts={allForecasts}
+        disabled={disabled}
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
         show1Month
+        forecast={forecast}
         onChangeDates={onChangeDates}
         onApply={onApplyFilter}
         filters={filters}
