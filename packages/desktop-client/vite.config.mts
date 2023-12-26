@@ -145,12 +145,12 @@ export default defineConfig(async ({ mode }) => {
     plugins: [
       injectShims(),
       addWatchers(),
-      visualizer({ template: 'raw-data' }),
       react({
         plugins: [['@swc/plugin-remove-console', {}]],
         devTarget: 'es2022',
       }),
       viteTsconfigPaths({ root: '../..' }),
+      visualizer({ template: 'raw-data' }),
     ],
     test: {
       include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
