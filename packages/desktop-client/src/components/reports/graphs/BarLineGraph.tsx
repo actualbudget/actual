@@ -75,7 +75,7 @@ type BarLineGraphProps = {
   compact?: boolean;
 };
 
-function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
+export function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -116,5 +116,3 @@ function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
     </Container>
   );
 }
-
-export default BarLineGraph;

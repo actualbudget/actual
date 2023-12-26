@@ -1,4 +1,4 @@
-const adjustTextSize = size => {
+export const adjustTextSize = size => {
   if (size <= 200) {
     return '12px';
   } else if (size <= 233) {
@@ -11,5 +11,3 @@ const adjustTextSize = size => {
     return '20px';
   }
 };
-
-export default adjustTextSize;

@@ -130,7 +130,7 @@ type BarGraphProps = {
   viewLabels: boolean;
 };
 
-function BarGraph({
+export function BarGraph({
   style,
   data,
   groupBy,
@@ -224,7 +224,7 @@ function BarGraph({
                   <Bar dataKey="totalDebts" stackId="a">
                     {viewLabels && (
                       <LabelList
-                        dataKey={'totalDebts'}
+                        dataKey="totalDebts"
                         content={renderCustomLabel}
                       />
                     )}
@@ -245,5 +245,3 @@ function BarGraph({
     </Container>
   );
 }
-
-export default BarGraph;

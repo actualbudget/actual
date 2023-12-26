@@ -114,7 +114,7 @@ type AreaGraphProps = {
   viewLabels: boolean;
 };
 
-function AreaGraph({
+export function AreaGraph({
   style,
   data,
   balanceTypeOp,
@@ -226,5 +226,3 @@ function AreaGraph({
     </Container>
   );
 }
-
-export default AreaGraph;

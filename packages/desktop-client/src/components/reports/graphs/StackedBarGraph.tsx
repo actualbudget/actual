@@ -116,7 +116,7 @@ type StackedBarGraphProps = {
   viewLabels: boolean;
 };
 
-function StackedBarGraph({
+export function StackedBarGraph({
   style,
   data,
   compact,
@@ -170,11 +170,14 @@ function StackedBarGraph({
                       dataKey={entry.name}
                       stackId="a"
                       fill={entry.color}
-					  >
-						{viewLabels && (
-						  <LabelList dataKey={.name} content={renderCustomLabel} />
-						)}
-					  </Bar>
+                    >
+                      {viewLabels && (
+                        <LabelList
+                          dataKey={entry.name}
+                          content={renderCustomLabel}
+                        />
+                      )}
+                    </Bar>
                   ))}
               </BarChart>
             </div>
@@ -184,5 +187,3 @@ function StackedBarGraph({
     </Container>
   );
 }
-
-export default StackedBarGraph;

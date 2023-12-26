@@ -3,12 +3,12 @@ import React, { useRef } from 'react';
 import View from '../common/View';
 
 import { type DataEntity, type Month } from './entities';
-import AreaGraph from './graphs/AreaGraph';
-import BarGraph from './graphs/BarGraph';
-import BarLineGraph from './graphs/BarLineGraph';
-import DonutGraph from './graphs/DonutGraph';
-import LineGraph from './graphs/LineGraph';
-import StackedBarGraph from './graphs/StackedBarGraph';
+import { AreaGraph } from './graphs/AreaGraph';
+import { BarGraph } from './graphs/BarGraph';
+import { BarLineGraph } from './graphs/BarLineGraph';
+import { DonutGraph } from './graphs/DonutGraph';
+import { LineGraph } from './graphs/LineGraph';
+import { StackedBarGraph } from './graphs/StackedBarGraph';
 import { ReportOptions } from './ReportOptions';
 import ReportTable from './ReportTable';
 import ReportTableHeader from './ReportTableHeader';
@@ -25,9 +25,10 @@ type ChooseGraphProps = {
   scrollWidth: number;
   setScrollWidth: (value: number) => void;
   months: Month[];
+  viewLabels: boolean;
 };
 
-function ChooseGraph({
+export function ChooseGraph({
   data,
   mode,
   graphType,
@@ -38,7 +39,6 @@ function ChooseGraph({
   setScrollWidth,
   months,
   viewLabels,
-}) {
 }: ChooseGraphProps) {
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
 
@@ -71,7 +71,6 @@ function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        empty={empty}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
       />
@@ -86,7 +85,6 @@ function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         groupBy={groupBy}
-        empty={empty}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
       />
@@ -141,5 +139,3 @@ function ChooseGraph({
     );
   }
 }
-
-export default ChooseGraph;

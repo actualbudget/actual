@@ -74,7 +74,7 @@ type LineGraphProps = {
   compact?: boolean;
 };
 
-function LineGraph({ style, graphData, compact }: LineGraphProps) {
+export function LineGraph({ style, graphData, compact }: LineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -114,5 +114,3 @@ function LineGraph({ style, graphData, compact }: LineGraphProps) {
     </Container>
   );
 }
-
-export default LineGraph;
