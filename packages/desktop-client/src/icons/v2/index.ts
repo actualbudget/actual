@@ -38,6 +38,7 @@ export { default as SearchAlternate } from './SearchAlternate';
 export { default as SettingsSliderAlternate } from './SettingsSliderAlternate';
 export { default as Subtract } from './Subtract';
 export { default as Sun } from './Sun';
+export { default as System } from './System';
 export { default as UncheckAll } from './UncheckAll';
 export { default as UploadThickBottom } from './UploadThickBottom';
 export { default as ValidationCheck } from './ValidationCheck';

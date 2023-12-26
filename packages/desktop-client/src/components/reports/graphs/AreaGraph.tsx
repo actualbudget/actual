@@ -20,6 +20,7 @@ import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
 import Container from '../Container';
+import { type DataEntity } from '../entities';
 import numberFormatterTooltip from '../numberFormatter';
 
 type PayloadItem = {
@@ -50,8 +51,8 @@ const CustomTooltip = ({
           pointerEvents: 'none',
           borderRadius: 2,
           boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuAutoCompleteBackground,
-          color: theme.menuAutoCompleteText,
+          backgroundColor: theme.menuBackground,
+          color: theme.menuItemText,
           padding: 10,
         })}`}
       >
@@ -107,7 +108,7 @@ const renderCustomLabel = props => {
 
 type AreaGraphProps = {
   style?: CSSProperties;
-  data;
+  data: DataEntity;
   balanceTypeOp: string;
   compact?: boolean;
   viewLabels: boolean;

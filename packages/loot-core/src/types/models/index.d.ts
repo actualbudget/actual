@@ -6,3 +6,4 @@ export type * from './payee';
 export type * from './rule';
 export type * from './schedule';
 export type * from './transaction';
+export type * from './transaction-filter';

@@ -54,7 +54,7 @@ export interface ServerHandlers {
     list: Array<CategoryEntity>;
   }>;
 
-  'get-earliest-transaction': () => Promise<unknown>;
+  'get-earliest-transaction': () => Promise<{ date: string }>;
 
   'get-budget-bounds': () => Promise<{ start: string; end: string }>;
 
@@ -74,7 +74,12 @@ export interface ServerHandlers {
 
   'budget-set-type': (arg: { type }) => Promise<unknown>;
 
-  'category-create': (arg: { name; groupId; isIncome }) => Promise<unknown>;
+  'category-create': (arg: {
+    name;
+    groupId;
+    isIncome;
+    hidden: boolean;
+  }) => Promise<unknown>;
 
   'category-update': (category) => Promise<unknown>;
 
@@ -321,13 +326,16 @@ export interface ServerHandlers {
     error?: { message: string; reason: string; meta: unknown };
   }>;
 
-  'load-budget': (arg: { id }) => Promise<{ error }>;
+  'load-budget': (arg: { id: string }) => Promise<{ error }>;
 
   'create-demo-budget': () => Promise<unknown>;
 
   'close-budget': () => Promise<'ok'>;
 
-  'delete-budget': (arg: { id; cloudFileId? }) => Promise<'ok'>;
+  'delete-budget': (arg: {
+    id?: string;
+    cloudFileId?: string;
+  }) => Promise<'ok'>;
 
   'create-budget': (arg: {
     budgetName?;

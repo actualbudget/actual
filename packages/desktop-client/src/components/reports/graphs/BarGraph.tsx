@@ -5,7 +5,6 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-  //Legend,
   Cell,
   ReferenceLine,
   XAxis,
@@ -22,8 +21,8 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
-import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
@@ -67,8 +66,8 @@ const CustomTooltip = ({
           pointerEvents: 'none',
           borderRadius: 2,
           boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuAutoCompleteBackground,
-          color: theme.menuAutoCompleteText,
+          backgroundColor: theme.menuBackground,
+          color: theme.menuItemText,
           padding: 10,
         })}`}
       >
@@ -122,33 +121,11 @@ const renderCustomLabel = props => {
   );
 };
 
-/* Descoped for future PR
-type CustomLegendProps = {
-  active?: boolean;
-  payload?: PayloadItem[];
-  label?: string;
-};
-
-const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
-  const agg = payload[0].payload.children.map(leg => {
-    return {
-      name: leg.props.name,
-      color: leg.props.fill,
-    };
-  });
-
-  OnChangeLegend(agg);
-
-  return <div />;
-};
-*/
-
 type BarGraphProps = {
   style?: CSSProperties;
-  data;
+  data: DataEntity;
   groupBy: string;
-  balanceTypeOp;
-  empty: boolean;
+  balanceTypeOp: string;
   compact?: boolean;
   viewLabels: boolean;
 };
@@ -157,14 +134,12 @@ function BarGraph({
   style,
   data,
   groupBy,
-  empty,
   balanceTypeOp,
   compact,
   viewLabels,
 }: BarGraphProps) {
   const privacyMode = usePrivacyMode();
 
-  const colorScale = getColorScale('qualitative');
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
 
@@ -196,14 +171,9 @@ function BarGraph({
                 width={width}
                 height={height}
                 stackOffset="sign"
-                data={data[splitData].filter(i =>
-                  !empty ? i[balanceTypeOp] !== 0 : true,
-                )}
+                data={data[splitData]}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {
-                  //!compact && <Legend content={<CustomLegend />} />
-                }
                 <Tooltip
                   content={
                     <CustomTooltip
@@ -242,39 +212,29 @@ function BarGraph({
                       content={renderCustomLabel}
                     />
                   )}
-                  {data[splitData]
-                    .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
-                    .map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          yAxis === 'date'
-                            ? balanceTypeOp === 'totalDebts'
-                              ? theme.reportsRed
-                              : theme.reportsBlue
-                            : colorScale[index % colorScale.length]
-                        }
-                        name={entry[yAxis]}
-                      />
-                    ))}
+                  {data.legend.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
+                      name={entry.name}
+                    />
+                  ))}
                 </Bar>
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
-                  <Bar dataKey={'totalDebts'} stackId="a">
+                  <Bar dataKey="totalDebts" stackId="a">
                     {viewLabels && (
                       <LabelList
                         dataKey={'totalDebts'}
                         content={renderCustomLabel}
                       />
                     )}
-                    {data[splitData]
-                      .filter(i => (!empty ? i[balanceTypeOp] !== 0 : true))
-                      .map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={theme.reportsRed}
-                          name={entry.name}
-                        />
-                      ))}
+                    {data[splitData].map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={theme.reportsRed}
+                        name={entry.name}
+                      />
+                    ))}
                   </Bar>
                 )}
               </BarChart>

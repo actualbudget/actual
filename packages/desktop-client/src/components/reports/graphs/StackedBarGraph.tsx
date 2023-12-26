@@ -5,7 +5,6 @@ import {
   BarChart,
   Bar,
   CartesianGrid,
-  //Legend,
   XAxis,
   YAxis,
   Tooltip,
@@ -20,8 +19,8 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import AlignedText from '../../common/AlignedText';
 import PrivacyFilter from '../../PrivacyFilter';
-import { getColorScale } from '../chart-theme';
 import Container from '../Container';
+import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
@@ -51,8 +50,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           pointerEvents: 'none',
           borderRadius: 2,
           boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuAutoCompleteBackground,
-          color: theme.menuAutoCompleteText,
+          backgroundColor: theme.menuBackground,
+          color: theme.menuItemText,
           padding: 10,
         })}`}
       >
@@ -79,7 +78,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
                   );
                 })}
               <AlignedText
-                left={'Total'}
+                left="Total"
                 right={amountToCurrency(sumTotals)}
                 style={{
                   fontWeight: 600,
@@ -109,32 +108,9 @@ const renderCustomLabel = props => {
   );
 };
 
-/* Descoped for future PR
-
-
-type CustomLegendProps = {
-  active?: boolean;
-  payload?: PayloadItem[];
-  label?: string;
-};
-
-const CustomLegend = ({ active, payload, label }: CustomLegendProps) => {
-  const agg = payload.map(leg => {
-    return {
-      name: leg.value,
-      color: leg.color,
-    };
-  });
-
-  OnChangeLegend(agg.slice(0).reverse());
-
-  return <div />;
-};
-*/
-
 type StackedBarGraphProps = {
   style?: CSSProperties;
-  data;
+  data: DataEntity;
   compact?: boolean;
   balanceTypeOp: string;
   viewLabels: boolean;
@@ -148,7 +124,6 @@ function StackedBarGraph({
   viewLabels,
 }: StackedBarGraphProps) {
   const privacyMode = usePrivacyMode();
-  const colorScale = getColorScale('qualitative');
 
   return (
     <Container
@@ -168,9 +143,6 @@ function StackedBarGraph({
                 data={data.monthData}
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
-                {
-                  //<Legend content={<CustomLegend />} />
-                }
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
@@ -189,18 +161,21 @@ function StackedBarGraph({
                     tickLine={{ stroke: theme.pageText }}
                   />
                 )}
-                {data.data.reverse().map((c, index) => (
-                  <Bar
-                    key={c.name}
-                    dataKey={c.name}
-                    stackId="a"
-                    fill={colorScale[index % colorScale.length]}
-                  >
-                    {viewLabels && (
-                      <LabelList dataKey={c.name} content={renderCustomLabel} />
-                    )}
-                  </Bar>
-                ))}
+                {data.legend
+                  .slice(0)
+                  .reverse()
+                  .map(entry => (
+                    <Bar
+                      key={entry.name}
+                      dataKey={entry.name}
+                      stackId="a"
+                      fill={entry.color}
+					  >
+						{viewLabels && (
+						  <LabelList dataKey={.name} content={renderCustomLabel} />
+						)}
+					  </Bar>
+                  ))}
               </BarChart>
             </div>
           </ResponsiveContainer>

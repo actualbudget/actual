@@ -76,7 +76,6 @@ __metadata:
     "@types/react-dom": "npm:^18.2.1"
     "@types/react-modal": "npm:^3.16.0"
     "@types/react-redux": "npm:^7.1.25"
-    "@types/react-router-dom": "npm:^5.3.3"
     "@types/uuid": "npm:^9.0.2"
     "@types/webpack-bundle-analyzer": "npm:^4.6.0"
     "@use-gesture/react": "npm:^10.3.0"
@@ -4300,12 +4299,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/better-sqlite3@npm:^7.6.7":
-  version: 7.6.7
-  resolution: "@types/better-sqlite3@npm:7.6.7"
+"@types/better-sqlite3@npm:^7.6.8":
+  version: 7.6.8
+  resolution: "@types/better-sqlite3@npm:7.6.8"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 5021c1bae4a494408c1a77d84bc31dc15e373b8a1cf8880acba6517f63bc5c2dbf032c81938641346fb967600dbebc1475033c2458b5a5b93eb8f2c53bdbcbf8
+  checksum: 404e9b7210564866b0f8878353cc6a16c6ffb313077cbb5aec6176ad2b0a30f64236f03f0a40d36d86bf4eab7658bdcd6d6a8a65dc377de7910fc9e9932885a4
   languageName: node
   linkType: hard
 
@@ -4526,13 +4525,6 @@ __metadata:
   dependencies:
     "@types/unist": "npm:^2"
   checksum: e435e9fbf6afc616ade377d2246a632fb75f4064be4bfd619b67a1ba0d9935d75968a18fbdb66535dfb5e77ef81f4b9b56fd8f35c1cffa34b48ddb0287fec91e
-  languageName: node
-  linkType: hard
-
-"@types/history@npm:^4.7.11":
-  version: 4.7.11
-  resolution: "@types/history@npm:4.7.11"
-  checksum: 1da529a3485f3015daf794effa3185493bf7dd2551c26932389c614f5a0aab76ab97645897d1eef9c74ead216a3848fcaa019f165bbd6e4b71da6eff164b4c68
   languageName: node
   linkType: hard
 
@@ -4776,27 +4768,6 @@ __metadata:
     hoist-non-react-statics: "npm:^3.3.0"
     redux: "npm:^4.0.0"
   checksum: 1c5780ff46b9a2bba3b68b26645ce9704cd3ef387141240c1369fcbef51370a84b8a5fc6ca27966f96f6e5b41618c88f498fedc7056870b207cbafbb4da34e91
-  languageName: node
-  linkType: hard
-
-"@types/react-router-dom@npm:^5.3.3":
-  version: 5.3.3
-  resolution: "@types/react-router-dom@npm:5.3.3"
-  dependencies:
-    "@types/history": "npm:^4.7.11"
-    "@types/react": "npm:*"
-    "@types/react-router": "npm:*"
-  checksum: 28c4ea48909803c414bf5a08502acbb8ba414669b4b43bb51297c05fe5addc4df0b8fd00e0a9d1e3535ec4073ef38aaafac2c4a2b95b787167d113bc059beff3
-  languageName: node
-  linkType: hard
-
-"@types/react-router@npm:*":
-  version: 5.1.20
-  resolution: "@types/react-router@npm:5.1.20"
-  dependencies:
-    "@types/history": "npm:^4.7.11"
-    "@types/react": "npm:*"
-  checksum: 72d78d2f4a4752ec40940066b73d7758a0824c4d0cbeb380ae24c8b1cdacc21a6fc835a99d6849b5b295517a3df5466fc28be038f1040bd870f8e39e5ded43a4
   languageName: node
   linkType: hard
 
@@ -13385,7 +13356,7 @@ __metadata:
     "@swc/helpers": "npm:^0.5.1"
     "@swc/jest": "npm:^0.2.29"
     "@types/adm-zip": "npm:^0.5.0"
-    "@types/better-sqlite3": "npm:^7.6.7"
+    "@types/better-sqlite3": "npm:^7.6.8"
     "@types/jest": "npm:^27.5.0"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/pegjs": "npm:^0.10.3"

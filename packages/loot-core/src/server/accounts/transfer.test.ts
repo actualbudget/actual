@@ -58,12 +58,12 @@ describe('Transfer', () => {
     await db.insertTransaction(transaction);
     await transfer.onInsert(transaction);
 
-    let differ = expectSnapshotWithDiffer(await getAllTransactions());
+    const differ = expectSnapshotWithDiffer(await getAllTransactions());
 
-    let transferTwo = await db.first(
+    const transferTwo = await db.first(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    let transferThree = await db.first(
+    const transferThree = await db.first(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
@@ -130,10 +130,10 @@ describe('Transfer', () => {
   test('transfers are properly de-categorized', async () => {
     await prepareDatabase();
 
-    let transferTwo = await db.first(
+    const transferTwo = await db.first(
       "SELECT * FROM payees WHERE transfer_acct = 'two'",
     );
-    let transferThree = await db.first(
+    const transferThree = await db.first(
       "SELECT * FROM payees WHERE transfer_acct = 'three'",
     );
 
@@ -147,7 +147,7 @@ describe('Transfer', () => {
     transaction.id = await db.insertTransaction(transaction);
     await transfer.onInsert(transaction);
 
-    let differ = expectSnapshotWithDiffer(await getAllTransactions());
+    const differ = expectSnapshotWithDiffer(await getAllTransactions());
 
     transaction = {
       ...(await db.getTransaction(transaction.id)),

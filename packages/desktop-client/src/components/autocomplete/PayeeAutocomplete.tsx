@@ -308,6 +308,7 @@ export default function PayeeAutocomplete({
 
         const isf = filtered.length > 100;
         filtered = filtered.slice(0, 100);
+        // @ts-expect-error TODO: solve this somehow
         filtered.filtered = isf;
 
         if (filtered.length >= 2 && filtered[0].id === 'new') {
