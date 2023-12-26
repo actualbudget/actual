@@ -24,6 +24,8 @@ import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
+import { renderCustomLabel } from './renderCustomLabel';
+
 type PayloadItem = {
   name: string;
   value: number;
@@ -92,22 +94,6 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   }
 };
 
-const renderCustomLabel = props => {
-  return props.height > 20 ? (
-    <text
-      x={props.x + props.width / 2}
-      y={props.y + props.height / 2}
-      fill="white"
-      textAnchor="middle"
-      dominantBaseline="middle"
-    >
-      {props.value.toFixed(0)}
-    </text>
-  ) : (
-    <text />
-  );
-};
-
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -174,7 +160,9 @@ export function StackedBarGraph({
                       {viewLabels && (
                         <LabelList
                           dataKey={entry.name}
-                          content={renderCustomLabel}
+                          content={e =>
+                            renderCustomLabel(e, 'height', 20, width)
+                          }
                         />
                       )}
                     </Bar>

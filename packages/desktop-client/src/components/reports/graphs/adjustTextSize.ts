@@ -1,4 +1,14 @@
 export const adjustTextSize = size => {
+  if (size <= 400) {
+    return '12px';
+  } else if (size <= 600) {
+    return '14px';
+  } else {
+    return '16px';
+  }
+};
+
+export const adjustDonutTextSize = size => {
   if (size <= 200) {
     return '12px';
   } else if (size <= 233) {

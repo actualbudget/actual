@@ -6,7 +6,7 @@ import { type CSSProperties } from '../../../style';
 import Container from '../Container';
 import { type DataEntity } from '../entities';
 
-import { adjustTextSize } from './adjustTextSize';
+import { renderCustomLabel } from './renderCustomLabel';
 
 const RADIAN = Math.PI / 180;
 const ActiveShape = props => {
@@ -88,36 +88,6 @@ const ActiveShape = props => {
   );
 };
 
-const CustomLabel = ({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percent,
-  index,
-}) => {
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-  const size = cx > cy ? cy : cx;
-
-  return percent > 0.05 ? (
-    <text
-      x={x}
-      y={y}
-      fill="white"
-      textAnchor={x > cx ? 'start' : 'end'}
-      dominantBaseline="central"
-      fontSize={adjustTextSize(size)}
-    >
-      {`${(percent * 100).toFixed(0)}%`}
-    </text>
-  ) : (
-    <text />
-  );
-};
-
 type DonutGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -175,7 +145,9 @@ export function DonutGraph({
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                   labelLine={false}
-                  label={viewLabels && CustomLabel}
+                  label={e =>
+                    viewLabels && renderCustomLabel(e, 'percent', 0.05)
+                  }
                   onMouseEnter={onPieEnter}
                 >
                   {data.legend.map((entry, index) => (
