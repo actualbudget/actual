@@ -20,6 +20,8 @@ import Header from '../Header';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import useReport from '../useReport';
 
+import useFeatureFlag from '../../../hooks/useFeatureFlag';
+
 export default function CashFlow(): JSX.Element {
   const {
     filters,
@@ -37,7 +39,8 @@ export default function CashFlow(): JSX.Element {
     monthUtils.subMonths(monthUtils.currentMonth(), 5),
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
-  const [forecast, setForecast] = useState(monthUtils.addDays(monthUtils.currentDay(), 31));
+  const forecastFeatureFlag = useFeatureFlag('cashflowForecast');
+  const [forecast, setForecast] = useState(forecastFeatureFlag ? monthUtils.addDays(monthUtils.currentDay(), 31) : monthUtils.currentMonth());
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -97,7 +100,7 @@ export default function CashFlow(): JSX.Element {
 
     setStart(start + '-01');
     setEnd(endDay);
-    setForecast(forecast);
+    setForecast(forecastFeatureFlag ? (end == monthUtils.currentMonth() ? forecast : monthUtils.currentMonth()) : monthUtils.currentMonth());
     setIsConcise(isConcise);
     end != monthUtils.currentMonth() ? setDisabled(forecastMonths.slice(1).map(forecast => (
       forecast.name
@@ -120,7 +123,7 @@ export default function CashFlow(): JSX.Element {
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
         show1Month
-        forecast={forecast}
+        forecast={forecastFeatureFlag ? forecast : null}
         onChangeDates={onChangeDates}
         onApply={onApplyFilter}
         filters={filters}

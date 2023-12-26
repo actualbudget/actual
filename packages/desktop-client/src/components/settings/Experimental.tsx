@@ -98,6 +98,10 @@ export default function ExperimentalFeatures() {
             <FeatureToggle flag="experimentalOfxParser">
               Experimental OFX parser
             </FeatureToggle>
+
+            <FeatureToggle flag="cashflowForecast">
+              Cashflow Forecast
+            </FeatureToggle>
           </View>
         ) : (
           <LinkButton

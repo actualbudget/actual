@@ -10,25 +10,20 @@ import Select from '../common/Select';
 import View from '../common/View';
 import { FilterButton, AppliedFilters } from '../filters/FiltersMenu';
 
-export function validateStart(allMonths, start, end, forecast) {
+export function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
   if (end < start) {
     end = monthUtils.addMonths(start, 6);
   }
-  return boundedRange(earliest, start, end, forecast);
+  return boundedRange(earliest, start, end);
 }
 
-export function validateEnd(allMonths, start, end, forecast) {
+export function validateEnd(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;
   if (start > end) {
     start = monthUtils.subMonths(end, 6);
   }
   return boundedRange(earliest, start, end);
-}
-
-function validateForecast(allMonths, start, end, forecast) {
-  const earliest = allMonths[allMonths.length - 1].name;
-  return boundedRange(earliest, start, end, forecast);
 }
 
 export function validateRange(allMonths, start, end) {
@@ -43,7 +38,7 @@ export function validateRange(allMonths, start, end) {
   return [start, end];
 }
 
-function boundedRange(earliest, start, end, forecast) {
+function boundedRange(earliest, start, end) {
   const latest = monthUtils.currentMonth();
   if (end > latest) {
     end = latest;
@@ -51,22 +46,19 @@ function boundedRange(earliest, start, end, forecast) {
   if (start < earliest) {
     start = earliest;
   }
-  if (end != latest) {
-    forecast = latest;
-  }
-  return [start, end, forecast];
+  return [start, end];
 }
 
-export function getLatestRange(offset, forecast) {
+export function getLatestRange(offset) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, offset);
-  return [start, end, forecast];
+  return [start, end];
 }
 
-export function getFullRange(allMonths, forecast) {
+export function getFullRange(allMonths) {
   const start = allMonths[allMonths.length - 1].name;
   const end = monthUtils.currentMonth();
-  return [start, end, forecast];
+  return [start, end];
 }
 
 function Header({
@@ -128,7 +120,7 @@ function Header({
           >
             <Select
               onChange={newValue =>
-                onChangeDates(...validateStart(allMonths, newValue, end, forecast))
+                onChangeDates(...validateStart(allMonths, newValue, end), forecast)
               }
               value={start}
               defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
@@ -137,7 +129,7 @@ function Header({
             <View>to</View>
             <Select
               onChange={newValue =>
-                onChangeDates(...validateEnd(allMonths, start, newValue, forecast))
+                onChangeDates(...validateEnd(allMonths, start, newValue), forecast)
               }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
@@ -146,7 +138,7 @@ function Header({
             {forecast && <Select
               style={{ backgroundColor: 'white' }}
               onChange={newValue =>
-                onChangeDates(...validateForecast(allMonths, start, end, newValue))
+                onChangeDates(...validateStart(allMonths, start, end), newValue)
               }
               value={forecast}
               options={allForecasts.map(({ name, pretty }) => [name, pretty])}
@@ -159,32 +151,32 @@ function Header({
           {show1Month && (
             <Button
               type="bare"
-              onClick={() => onChangeDates(...getLatestRange(1, forecast))}
+              onClick={() => onChangeDates(...getLatestRange(1), forecast)}
             >
               1 month
             </Button>
           )}
           <Button
             type="bare"
-            onClick={() => onChangeDates(...getLatestRange(2, forecast))}
+            onClick={() => onChangeDates(...getLatestRange(2), forecast)}
           >
             3 months
           </Button>
           <Button
             type="bare"
-            onClick={() => onChangeDates(...getLatestRange(5, forecast))}
+            onClick={() => onChangeDates(...getLatestRange(5), forecast)}
           >
             6 months
           </Button>
           <Button
             type="bare"
-            onClick={() => onChangeDates(...getLatestRange(11, forecast))}
+            onClick={() => onChangeDates(...getLatestRange(11), forecast)}
           >
             1 Year
           </Button>
           <Button
             type="bare"
-            onClick={() => onChangeDates(...getFullRange(allMonths, forecast))}
+            onClick={() => onChangeDates(...getFullRange(allMonths), forecast)}
           >
             All Time
           </Button>

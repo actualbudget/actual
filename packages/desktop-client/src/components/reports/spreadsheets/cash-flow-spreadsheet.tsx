@@ -201,12 +201,19 @@ function recalculate(data, start, end, forecast, isConcise, schedules, filters) 
         monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
-  const forecastDates = isConcise
+  
+  let forecastDates;
+  if (forecast == monthUtils.currentMonth()) { 
+    forecastDates = []
+  } else {
+    forecastDates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(end),
         monthUtils.getMonth(forecast),
       )
     : monthUtils.dayRangeInclusive(end, forecast);
+  }
+  
   const incomes = indexCashFlow(convIncome, 'date', 'isTransfer');
   const expenses = indexCashFlow(convExpense, 'date', 'isTransfer');
   const futureIncomes = indexCashFlow(futureIncome, 'date', 'isTransfer');

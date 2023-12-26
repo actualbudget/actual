@@ -6,7 +6,8 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'customReports'
-  | 'experimentalOfxParser';
+  | 'experimentalOfxParser'
+  | 'cashflowForecast';
 
 export type LocalPrefs = Partial<
   {
