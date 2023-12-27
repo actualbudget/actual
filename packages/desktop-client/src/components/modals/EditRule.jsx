@@ -738,7 +738,10 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
 
   function onRemoveAction(action) {
     setActionSplits(splits =>
-      splits.map(actions => actions.filter(a => a !== action)),
+      splits.map(({ id, actions }) => ({
+        id,
+        actions: actions.filter(a => a !== action),
+      })),
     );
   }
 
