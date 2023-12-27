@@ -125,13 +125,18 @@ export function cashFlowByDate(
 
     const schedules = await Promise.all(
       data.map(schedule => {
-        return sendCatch('schedule/get-occurrences-to-date', {
-          config: schedule._date,
-          end: forecast,
-        }).then(({ data }) => {
-          schedule._dates = data;
+        if (typeof schedule._date !== 'string') {
+          return sendCatch('schedule/get-occurrences-to-date', {
+            config: schedule._date,
+            end: forecast,
+          }).then(({ data }) => {
+            schedule._dates = data;
+            return schedule;
+          });
+        } else {
+          schedule._dates = [schedule._date];
           return schedule;
-        });
+        }
       }),
     );
 
@@ -184,7 +189,7 @@ function recalculate(
   const futureIncome = [];
   const futureExpense = [];
   schedules.forEach(schedule => {
-    schedule._dates.forEach(date => {
+    schedule._dates?.forEach(date => {
       const futureTx = {
         date: isConcise ? monthUtils.monthFromDate(date) : date,
         isTransfer: schedule.isTransfer != null,
