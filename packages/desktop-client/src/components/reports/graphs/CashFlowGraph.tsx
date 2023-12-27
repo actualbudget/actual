@@ -10,13 +10,20 @@ import {
   VictoryGroup,
 } from 'victory';
 
-import { theme, colors } from '../../../style';
+import { theme } from '../../../style';
 import { chartTheme } from '../chart-theme';
 import Container from '../Container';
 import Tooltip from '../Tooltip';
 
 type CashFlowGraphProps = {
-  graphData: { expenses; income; balances; futureBalances; futureExpenses; futureIncome };
+  graphData: {
+    expenses;
+    income;
+    balances;
+    futureBalances;
+    futureExpenses;
+    futureIncome;
+  };
   isConcise: boolean;
 };
 function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
@@ -42,11 +49,11 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
               <VictoryBar data={graphData.income} />
               <VictoryBar
                 data={graphData.futureExpenses}
-                style={{ data: { fill: colors.r8 } }}
+                style={{ data: { fill: theme.reportsRedFaded } }}
               />
               <VictoryBar
                 data={graphData.futureIncome}
-                style={{ data: { fill: colors.b8 } }}
+                style={{ data: { fill: theme.reportsBlueFaded } }}
               />
             </VictoryGroup>
             <VictoryLine
@@ -62,13 +69,15 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
               labelComponent={<Tooltip portalHost={portalHost} />}
               labels={x => x.premadeLabel}
               style={{
-                data: { stroke: colors.n8 },
+                data: { stroke: theme.pageTextSubdued },
               }}
             />
             <VictoryAxis
               // eslint-disable-next-line rulesdir/typography
               tickFormat={x => d.format(x, isConcise ? "MMM ''yy" : 'MMM d')}
-              tickValues={graphData.balances.map(item => item.x).concat(graphData.futureBalances.map(item => item.x))}
+              tickValues={graphData.balances
+                .map(item => item.x)
+                .concat(graphData.futureBalances.map(item => item.x))}
               tickCount={Math.min(5, graphData.balances.length)}
               offsetY={50}
             />

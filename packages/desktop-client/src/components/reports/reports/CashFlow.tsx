@@ -6,6 +6,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
+import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import useFilters from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import AlignedText from '../../common/AlignedText';
@@ -19,8 +20,6 @@ import CashFlowGraph from '../graphs/CashFlowGraph';
 import Header from '../Header';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import useReport from '../useReport';
-
-import useFeatureFlag from '../../../hooks/useFeatureFlag';
 
 export default function CashFlow(): JSX.Element {
   const {
@@ -40,7 +39,11 @@ export default function CashFlow(): JSX.Element {
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
   const forecastFeatureFlag = useFeatureFlag('cashflowForecast');
-  const [forecast, setForecast] = useState(forecastFeatureFlag ? monthUtils.addDays(monthUtils.currentDay(), 31) : monthUtils.currentMonth());
+  const [forecast, setForecast] = useState(
+    forecastFeatureFlag
+      ? monthUtils.addDays(monthUtils.currentDay(), 31)
+      : monthUtils.currentMonth(),
+  );
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -51,19 +54,35 @@ export default function CashFlow(): JSX.Element {
   });
 
   const params = useMemo(
-    () => cashFlowByDate(start, end, forecast, isConcise, filters, conditionsOp),
+    () =>
+      cashFlowByDate(start, end, forecast, isConcise, filters, conditionsOp),
     [start, end, forecast, isConcise, filters, conditionsOp],
   );
   const data = useReport('cash_flow', params);
 
   const forecastMonths = [
-    {name: monthUtils.currentMonth(), pretty: "None"},
-    {name: monthUtils.addDays(monthUtils.currentDay(), 31), pretty: "1 Month"},
-    {name: monthUtils.addDays(monthUtils.currentDay(), 3*31), pretty: "3 Months"},
-    {name: monthUtils.addDays(monthUtils.currentDay(), 6*31), pretty: "6 Months"},
-    {name: monthUtils.addDays(monthUtils.currentDay(), 12*31), pretty: "12 Months"},
-    {name: monthUtils.addDays(monthUtils.currentDay(), 24*31), pretty: "24 Months"},
-  ]
+    { name: monthUtils.currentMonth(), pretty: 'None' },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 31),
+      pretty: '1 Month',
+    },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 3 * 31),
+      pretty: '3 Months',
+    },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 6 * 31),
+      pretty: '6 Months',
+    },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 12 * 31),
+      pretty: '12 Months',
+    },
+    {
+      name: monthUtils.addDays(monthUtils.currentDay(), 24 * 31),
+      pretty: '24 Months',
+    },
+  ];
 
   useEffect(() => {
     async function run() {
@@ -100,11 +119,19 @@ export default function CashFlow(): JSX.Element {
 
     setStart(start + '-01');
     setEnd(endDay);
-    setForecast(forecastFeatureFlag ? (end == monthUtils.currentMonth() ? forecast : monthUtils.currentMonth()) : monthUtils.currentMonth());
+    setForecast(
+      forecastFeatureFlag
+        ? end === monthUtils.currentMonth()
+          ? forecast
+          : monthUtils.currentMonth()
+        : monthUtils.currentMonth(),
+    );
     setIsConcise(isConcise);
-    end != monthUtils.currentMonth() ? setDisabled(forecastMonths.slice(1).map(forecast => (
-      forecast.name
-    ))) : setDisabled([]);
+    if (end !== monthUtils.currentMonth()) {
+      setDisabled(forecastMonths.slice(1).map(forecast => forecast.name));
+    } else {
+      setDisabled([]);
+    }
   }
 
   if (!allMonths || !data || !allForecasts) {

@@ -120,7 +120,10 @@ function Header({
           >
             <Select
               onChange={newValue =>
-                onChangeDates(...validateStart(allMonths, newValue, end), forecast)
+                onChangeDates(
+                  ...validateStart(allMonths, newValue, end),
+                  forecast,
+                )
               }
               value={start}
               defaultLabel={monthUtils.format(start, 'MMMM, yyyy')}
@@ -129,21 +132,29 @@ function Header({
             <View>to</View>
             <Select
               onChange={newValue =>
-                onChangeDates(...validateEnd(allMonths, start, newValue), forecast)
+                onChangeDates(
+                  ...validateEnd(allMonths, start, newValue),
+                  forecast,
+                )
               }
               value={end}
               options={allMonths.map(({ name, pretty }) => [name, pretty])}
             />
             {forecast && <View>+</View>}
-            {forecast && <Select
-              style={{ backgroundColor: 'white' }}
-              onChange={newValue =>
-                onChangeDates(...validateStart(allMonths, start, end), newValue)
-              }
-              value={forecast}
-              options={allForecasts.map(({ name, pretty }) => [name, pretty])}
-              disabledKeys={disabled}
-            />}
+            {forecast && (
+              <Select
+                style={{ backgroundColor: 'white' }}
+                onChange={newValue =>
+                  onChangeDates(
+                    ...validateStart(allMonths, start, end),
+                    newValue,
+                  )
+                }
+                value={forecast}
+                options={allForecasts.map(({ name, pretty }) => [name, pretty])}
+                disabledKeys={disabled}
+              />
+            )}
           </View>
 
           {filters && <FilterButton onApply={onApply} type="accounts" />}

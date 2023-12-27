@@ -9,7 +9,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   goalTemplatesEnabled: false,
   customReports: false,
   experimentalOfxParser: true,
-  cashflowForecast: false
+  cashflowForecast: false,
 };
 
 export default function useFeatureFlag(name: FeatureFlag): boolean {

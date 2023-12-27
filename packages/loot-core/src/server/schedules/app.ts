@@ -391,13 +391,13 @@ async function getUpcomingDates({ config, count }) {
 }
 
 async function getOccurrencesToDate({ config, end }) {
-  let rules = recurConfigToRSchedule(config);
+  const rules = recurConfigToRSchedule(config);
 
   try {
-    let schedule = new RSchedule({ rrules: rules });
+    const schedule = new RSchedule({ rrules: rules });
 
     return schedule
-      .occurrences({ start: d.startOfDay(new Date()), end: end })
+      .occurrences({ start: d.startOfDay(new Date()), end })
       .toArray()
       .map(date => dayFromDate(date.date));
   } catch (err) {

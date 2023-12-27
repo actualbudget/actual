@@ -2,7 +2,7 @@ import React from 'react';
 
 import * as d from 'date-fns';
 
-import q, { liveQuery, runQuery } from 'loot-core/src/client/query-helpers';
+import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
@@ -91,47 +91,48 @@ export function cashFlowByDate(
     }
 
     let scheduleQuery = q('schedules').select([
-      '*', 
-      { isTransfer: '_payee.transfer_acct' }, 
-      { isAccountOffBudget: '_account.offbudget' }, 
-      { isPayeeOffBudget: '_payee.transfer_acct.offbudget' }
+      '*',
+      { isTransfer: '_payee.transfer_acct' },
+      { isAccountOffBudget: '_account.offbudget' },
+      { isPayeeOffBudget: '_payee.transfer_acct.offbudget' },
     ]);
 
     type ScheduleFilter = {
       account: string;
       payee: string;
-    }
-    const scheduleFilters = filters.map((obj: ScheduleFilter) => {
-      if (obj.hasOwnProperty("account")) {
-        const { account, ...rest } = obj;
-        return [{ _account: account }, { '_payee.transfer_acct': account }];
-      }
-      if (obj.hasOwnProperty("payee")) {
-        const { payee, ...rest } = obj;
-        return { _payee: payee };
-      }
-    }).flat();
+    };
+    const scheduleFilters = filters
+      .map((filter: ScheduleFilter) => {
+        if (filter.hasOwnProperty('account')) {
+          const { account } = filter;
+          return [{ _account: account }, { '_payee.transfer_acct': account }];
+        }
+        if (filter.hasOwnProperty('payee')) {
+          const { payee } = filter;
+          return { _payee: payee };
+        }
+        return filter;
+      })
+      .flat();
 
     if (scheduleFilters.length > 0) {
       scheduleQuery = scheduleQuery.filter({
-        ['$or']: [...scheduleFilters],
+        $or: [...scheduleFilters],
       });
     }
 
-    let { data } = await runQuery(scheduleQuery);
+    const { data } = await runQuery(scheduleQuery);
 
-
-
-    let schedules = await Promise.all(
-      data.map((schedule) => {
+    const schedules = await Promise.all(
+      data.map(schedule => {
         return sendCatch('schedule/get-occurrences-to-date', {
           config: schedule._date,
           end: forecast,
         }).then(({ data }) => {
           schedule._dates = data;
           return schedule;
-        })
-      })
+        });
+      }),
     );
 
     return runAll(
@@ -147,13 +148,31 @@ export function cashFlowByDate(
         makeQuery('amount < 0').filter({ amount: { $lt: 0 } }),
       ],
       data => {
-        setData(recalculate(data, start, end, forecast, isConcise, schedules, filters));
+        setData(
+          recalculate(
+            data,
+            start,
+            end,
+            forecast,
+            isConcise,
+            schedules,
+            filters,
+          ),
+        );
       },
     );
   };
 }
 
-function recalculate(data, start, end, forecast, isConcise, schedules, filters) {
+function recalculate(
+  data,
+  start,
+  end,
+  forecast,
+  isConcise,
+  schedules,
+  filters,
+) {
   const [startingBalance, income, expense] = data;
   const convIncome = income.map(t => {
     return { ...t, isTransfer: t.isTransfer !== null };
@@ -162,58 +181,85 @@ function recalculate(data, start, end, forecast, isConcise, schedules, filters) 
     return { ...t, isTransfer: t.isTransfer !== null };
   });
 
-  let futureIncome = [];
-  let futureExpense = [];
+  const futureIncome = [];
+  const futureExpense = [];
   schedules.forEach(schedule => {
     schedule._dates.forEach(date => {
-      const futureTx = { 
+      const futureTx = {
         date: isConcise ? monthUtils.monthFromDate(date) : date,
-        isTransfer: (schedule.isTransfer != null),
+        isTransfer: schedule.isTransfer != null,
         trasferAccount: schedule.isTransfer,
-        amount: schedule._amountOp === 'isbetween' ? (schedule._amount.num1 + schedule._amount.num2) / 2 : schedule._amount,
+        amount:
+          schedule._amountOp === 'isbetween'
+            ? (schedule._amount.num1 + schedule._amount.num2) / 2
+            : schedule._amount,
       };
 
-      const includeFutureTx = filters.reduce((include, filter) => {
-        return include || (filter.hasOwnProperty("account") ? filter.account.$eq == schedule._account : true);
-      }, filters.length == 0) && !schedule.isAccountOffBudget;
+      const includeFutureTx =
+        filters.reduce((include, filter) => {
+          return (
+            include ||
+            (filter.hasOwnProperty('account')
+              ? filter.account.$eq === schedule._account
+              : true)
+          );
+        }, filters.length === 0) && !schedule.isAccountOffBudget;
 
       const includeTransfer = filters.reduce((include, filter) => {
-        return include || (filter.hasOwnProperty("account") ? filter.account.$eq == futureTx.trasferAccount : true);
-      }, filters.length == 0);
-      
-      if (futureTx.isTransfer && !schedule.isPayeeOffBudget && includeTransfer) {
+        return (
+          include ||
+          (filter.hasOwnProperty('account')
+            ? filter.account.$eq === futureTx.trasferAccount
+            : true)
+        );
+      }, filters.length === 0);
+
+      if (
+        futureTx.isTransfer &&
+        !schedule.isPayeeOffBudget &&
+        includeTransfer
+      ) {
         const futureTxTransfer = {
           date: isConcise ? monthUtils.monthFromDate(date) : date,
           isTransfer: schedule.isTransfer != null,
           amount: -schedule._amount,
+        };
+        if (futureTxTransfer.amount < 0) {
+          futureExpense.push(futureTxTransfer);
+        } else {
+          futureIncome.push(futureTxTransfer);
         }
-        futureTxTransfer.amount < 0 ? futureExpense.push(futureTxTransfer) : futureIncome.push(futureTxTransfer);
       }
 
-      if (includeFutureTx) futureTx.amount < 0 ? futureExpense.push(futureTx) : futureIncome.push(futureTx);
-
+      if (includeFutureTx) {
+        if (futureTx.amount < 0) {
+          futureExpense.push(futureTx);
+        } else {
+          futureIncome.push(futureTx);
+        }
+      }
     });
   });
-  
+
   const dates = isConcise
     ? monthUtils.rangeInclusive(
         monthUtils.getMonth(start),
         monthUtils.getMonth(end),
       )
     : monthUtils.dayRangeInclusive(start, end);
-  
+
   let forecastDates;
-  if (forecast == monthUtils.currentMonth()) { 
-    forecastDates = []
+  if (forecast === monthUtils.currentMonth()) {
+    forecastDates = [];
   } else {
     forecastDates = isConcise
-    ? monthUtils.rangeInclusive(
-        monthUtils.getMonth(end),
-        monthUtils.getMonth(forecast),
-      )
-    : monthUtils.dayRangeInclusive(end, forecast);
+      ? monthUtils.rangeInclusive(
+          monthUtils.getMonth(end),
+          monthUtils.getMonth(forecast),
+        )
+      : monthUtils.dayRangeInclusive(end, forecast);
   }
-  
+
   const incomes = indexCashFlow(convIncome, 'date', 'isTransfer');
   const expenses = indexCashFlow(convExpense, 'date', 'isTransfer');
   const futureIncomes = indexCashFlow(futureIncome, 'date', 'isTransfer');
@@ -256,7 +302,10 @@ function recalculate(data, start, end, forecast, isConcise, schedules, filters) 
             </div>
             <div style={{ lineHeight: 1.5 }}>
               <AlignedText left="Income:" right={integerToCurrency(income)} />
-              <AlignedText left="Expenses:" right={integerToCurrency(expense)} />
+              <AlignedText
+                left="Expenses:"
+                right={integerToCurrency(expense)}
+              />
               <AlignedText
                 left="Change:"
                 right={<strong>{integerToCurrency(income + expense)}</strong>}
@@ -284,18 +333,29 @@ function recalculate(data, start, end, forecast, isConcise, schedules, filters) 
       },
       { expenses: [], income: [], balances: [] },
     );
-    return {graphData, totalExpenses, totalIncome, totalTransfers}
+    return { graphData, totalExpenses, totalIncome, totalTransfers };
   }
 
-  const {graphData, totalExpenses, totalIncome, totalTransfers} = calculate(dates, startingBalance, incomes, expenses);
+  const { graphData, totalExpenses, totalIncome, totalTransfers } = calculate(
+    dates,
+    startingBalance,
+    incomes,
+    expenses,
+  );
 
   const { balances } = graphData;
-  
-  const {graphData: futureGraphData, 
-    totalExpenses: futureTotalExpenses, 
-    totalIncome: futureTotalIncome, 
-    totalTransfers: futureTotalTransfers
-  } = calculate(forecastDates, balances[balances.length - 1].amount, futureIncomes, futureExpenses);
+
+  const {
+    graphData: futureGraphData,
+    totalExpenses: futureTotalExpenses,
+    totalIncome: futureTotalIncome,
+    totalTransfers: futureTotalTransfers,
+  } = calculate(
+    forecastDates,
+    balances[balances.length - 1].amount,
+    futureIncomes,
+    futureExpenses,
+  );
 
   graphData.futureBalances = futureGraphData.balances;
   graphData.futureIncome = futureGraphData.income;
