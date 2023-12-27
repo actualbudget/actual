@@ -38,9 +38,11 @@ export async function goalsSchedule(
       const sign = category.is_income ? 1 : -1;
       const target =
         amountCondition.op === 'isbetween'
-          ? sign * Math.round(
-              amountCondition.value.num1 + amountCondition.value.num2,
-            ) / 2
+          ? (sign *
+              Math.round(
+                amountCondition.value.num1 + amountCondition.value.num2,
+              )) /
+            2
           : sign * amountCondition.value;
       const next_date_string = getNextDate(
         dateConditions,
