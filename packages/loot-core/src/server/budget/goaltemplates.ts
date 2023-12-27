@@ -590,8 +590,9 @@ async function applyCategoryTemplate(
           last_month_balance,
           to_budget,
           errors,
+          category,
         );
-        to_budget = category.is_income ? -goalsReturn.to_budget : goalsReturn.to_budget;
+        to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;
         remainder = goalsReturn.remainder;
         scheduleFlag = goalsReturn.scheduleFlag;
