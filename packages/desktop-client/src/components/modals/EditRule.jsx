@@ -591,6 +591,13 @@ function ConditionsList({
 }
 
 const getActions = splits => splits.flatMap(s => s.actions);
+const getUnparsedActions = splits =>
+  splits
+    .flatMap((s, splitIndex) => [
+      { op: 'no-op', options: { splitIndex } },
+      ...s.actions,
+    ])
+    .map(unparse);
 
 // TODO:
 // * Dont touch child transactions?
@@ -619,7 +626,10 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
     return parsedActions.reduce((acc, action) => {
       const splitIndex = action.options?.splitIndex ?? 0;
       acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
-      acc[splitIndex].actions.push(action);
+      if (action.op !== 'no-op') {
+        acc[splitIndex].actions.push(action);
+      }
+
       return acc;
     }, []);
   });
@@ -748,6 +758,12 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   function onRemoveSplit(splitIndexToRemove) {
     setActionSplits(splits => {
       const copy = [];
+      splits.forEach(({ id }, index) => {
+        if (index === splitIndexToRemove) {
+          return;
+        }
+        copy.push({ id, actions: [] });
+      });
       getActions(splits).forEach(action => {
         const currentSplitIndex = action.options?.splitIndex ?? 0;
         if (currentSplitIndex === splitIndexToRemove) {
@@ -757,10 +773,6 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
           currentSplitIndex > splitIndexToRemove
             ? currentSplitIndex - 1
             : currentSplitIndex;
-        copy[newSplitIndex] = copy[newSplitIndex] ?? {
-          id: splits[currentSplitIndex].id,
-          actions: [],
-        };
         copy[newSplitIndex].actions.push({
           ...action,
           options: { ...action.options, splitIndex: newSplitIndex },
@@ -776,7 +788,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
     );
     send('rule-apply-actions', {
       transactions: selectedTransactions,
-      actions: getActions(actionSplits).map(unparse),
+      actions: getUnparsedActions(actionSplits),
     }).then(() => {
       // This makes it refetch the transactions
       setActionSplits([...actionSplits]);
@@ -789,7 +801,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
       stage,
       conditionsOp,
       conditions: conditions.map(unparse),
-      actions: getActions(actionSplits).map(unparse),
+      actions: getUnparsedActions(actionSplits),
     };
 
     const method = rule.id ? 'rule-update' : 'rule-add';
@@ -1029,7 +1041,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                     </View>
                   ))}
                 </Stack>
-                {getActions(actionSplits).length > 0 && (
+                {actionSplits.length > 0 && (
                   <Button
                     style={{ alignSelf: 'flex-start', marginTop: 15 }}
                     onClick={() => {

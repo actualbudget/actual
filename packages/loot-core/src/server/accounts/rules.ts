@@ -423,9 +423,8 @@ export class Condition {
   }
 }
 
-type ActionOperator = 'set' | 'link-schedule';
-
-const ACTION_OPS: ActionOperator[] = ['set', 'link-schedule'];
+const ACTION_OPS = ['set', 'link-schedule', 'no-op'] as const;
+type ActionOperator = (typeof ACTION_OPS)[number];
 
 export class Action {
   field;
