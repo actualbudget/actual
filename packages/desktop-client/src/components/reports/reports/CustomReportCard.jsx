@@ -7,7 +7,7 @@ import { styles } from '../../../style';
 import Block from '../../common/Block';
 import View from '../../common/View';
 import DateRange from '../DateRange';
-import BarGraph from '../graphs/BarGraph';
+import { BarGraph } from '../graphs/BarGraph';
 import LoadingIndicator from '../LoadingIndicator';
 import ReportCard from '../ReportCard';
 import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
