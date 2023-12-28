@@ -758,7 +758,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
             ? currentSplitIndex - 1
             : currentSplitIndex;
         copy[newSplitIndex] = copy[newSplitIndex] ?? {
-          id: uuid(),
+          id: splits[currentSplitIndex].id,
           actions: [],
         };
         copy[newSplitIndex].actions.push({
