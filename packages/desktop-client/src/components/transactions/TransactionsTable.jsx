@@ -754,7 +754,8 @@ const Transaction = memo(function Transaction(props) {
         (name === 'credit' ||
           name === 'debit' ||
           name === 'payee' ||
-          name === 'account')
+          name === 'account' ||
+          name === 'date')
       ) {
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
