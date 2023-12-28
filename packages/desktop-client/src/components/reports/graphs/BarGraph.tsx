@@ -26,6 +26,7 @@ import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
+import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
 type PayloadChild = {
@@ -109,6 +110,16 @@ const CustomTooltip = ({
   }
 };
 
+const customLabel = (props, width) => {
+  const calcX = props.x + props.width / 2;
+  const calcY = props.y - (props.value > 0 ? 15 : -15);
+  const textAnchor = 'middle';
+  const display = props.value !== 0 && `${props.value.toFixed(0)}`;
+  const textSize = adjustTextSize(width);
+
+  return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
+};
+
 type BarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -163,6 +174,7 @@ export function BarGraph({
                 margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               >
                 <Tooltip
+                  cursor={{ fill: 'transparent' }}
                   content={
                     <CustomTooltip
                       balanceTypeOp={balanceTypeOp}
@@ -197,7 +209,7 @@ export function BarGraph({
                   {viewLabels && (
                     <LabelList
                       dataKey={val => getVal(val)}
-                      content={e => renderCustomLabel(e, 'height', 0, width)}
+                      content={e => customLabel(e, width)}
                     />
                   )}
                   {data.legend.map((entry, index) => (
@@ -213,7 +225,7 @@ export function BarGraph({
                     {viewLabels && (
                       <LabelList
                         dataKey="totalDebts"
-                        content={e => renderCustomLabel(e, 'height', 0, width)}
+                        content={e => customLabel(e, width)}
                       />
                     )}
                     {data[splitData].map((entry, index) => (

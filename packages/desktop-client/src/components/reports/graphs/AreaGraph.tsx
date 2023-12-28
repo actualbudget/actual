@@ -23,6 +23,7 @@ import Container from '../Container';
 import { type DataEntity } from '../entities';
 import numberFormatterTooltip from '../numberFormatter';
 
+import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
 type PayloadItem = {
@@ -92,6 +93,16 @@ const CustomTooltip = ({
       </div>
     );
   }
+};
+
+const customLabel = (props, width) => {
+  const calcX = props.x;
+  const calcY = props.y - (props.value > 0 ? 15 : -15);
+  const textAnchor = 'middle';
+  const display = props.value !== 0 && `${props.value.toFixed(0)}`;
+  const textSize = adjustTextSize(width);
+
+  return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
 
 type AreaGraphProps = {
@@ -202,7 +213,7 @@ export function AreaGraph({
                   {viewLabels && (
                     <LabelList
                       dataKey={balanceTypeOp}
-                      content={e => renderCustomLabel(e, 'value', 0, width)}
+                      content={e => customLabel(e, width)}
                     />
                   )}
                 </Area>

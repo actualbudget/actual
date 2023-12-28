@@ -94,6 +94,28 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   }
 };
 
+const customLabel = props => {
+  const calcX = props.x + props.width / 2;
+  const calcY = props.y + props.height / 2;
+  const textAnchor = 'middle';
+  const display = props.value && `${props.value.toFixed(0)}`;
+  const textSize = '12px';
+  const showLabel = props.height;
+  const showLabelThreshold = 20;
+  const fill = theme.reportsInnerLabel;
+
+  return renderCustomLabel(
+    calcX,
+    calcY,
+    textAnchor,
+    display,
+    textSize,
+    showLabel,
+    showLabelThreshold,
+    fill,
+  );
+};
+
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -131,6 +153,7 @@ export function StackedBarGraph({
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
+                  cursor={{ fill: 'transparent' }}
                 />
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
@@ -156,12 +179,7 @@ export function StackedBarGraph({
                       fill={entry.color}
                     >
                       {viewLabels && (
-                        <LabelList
-                          dataKey={entry.name}
-                          content={e =>
-                            renderCustomLabel(e, 'height', 20, width)
-                          }
-                        />
+                        <LabelList dataKey={entry.name} content={customLabel} />
                       )}
                     </Bar>
                   ))}

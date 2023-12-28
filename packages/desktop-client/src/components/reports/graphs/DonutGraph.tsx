@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
-import { type CSSProperties } from '../../../style';
+import { theme, type CSSProperties } from '../../../style';
 import Container from '../Container';
 import { type DataEntity } from '../entities';
 
+import { adjustDonutTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
 const RADIAN = Math.PI / 180;
@@ -86,6 +87,32 @@ const ActiveShape = props => {
   );
 };
 
+const customLabel = props => {
+  const radius =
+    props.innerRadius + (props.outerRadius - props.innerRadius) * 0.5;
+  const size = props.cx > props.cy ? props.cy : props.cx;
+
+  const calcX = props.cx + radius * Math.cos(-props.midAngle * RADIAN);
+  const calcY = props.cy + radius * Math.sin(-props.midAngle * RADIAN);
+  const textAnchor = calcX > props.cx ? 'start' : 'end';
+  const display = props.value !== 0 && `${(props.percent * 100).toFixed(0)}%`;
+  const textSize = adjustDonutTextSize(size);
+  const showLabel = props.percent;
+  const showLabelThreshold = 0.05;
+  const fill = theme.reportsInnerLabel;
+
+  return renderCustomLabel(
+    calcX,
+    calcY,
+    textAnchor,
+    display,
+    textSize,
+    showLabel,
+    showLabelThreshold,
+    fill,
+  );
+};
+
 type DonutGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -143,9 +170,7 @@ export function DonutGraph({
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                   labelLine={false}
-                  label={e =>
-                    viewLabels && renderCustomLabel(e, 'percent', 0.05)
-                  }
+                  label={e => (viewLabels ? customLabel(e) : <div />)}
                   onMouseEnter={onPieEnter}
                 >
                   {data.legend.map((entry, index) => (
