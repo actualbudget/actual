@@ -126,22 +126,20 @@ function NetWorthGraph({
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 )}
-                {compact ? null : (
-                  <XAxis
-                    dataKey="x"
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {compact ? null : (
-                  <YAxis
-                    dataKey="y"
-                    domain={['auto', 'auto']}
-                    tickFormatter={tickFormatter}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
+                <XAxis
+                  dataKey="x"
+                  hide={compact}
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                />
+                <YAxis
+                  dataKey="y"
+                  domain={['auto', 'auto']}
+                  hide={compact}
+                  tickFormatter={tickFormatter}
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                />
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
