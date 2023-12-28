@@ -822,12 +822,19 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
 
   const splitsWithAmounts = Object.fromEntries(
     getActions(actionSplits)
-      .filter(action => action.field === 'amount')
+      .filter(
+        action =>
+          action.field === 'amount' &&
+          // Don't count the first split
+          action.options?.splitIndex,
+      )
       .map(action => [
-        action.options?.splitIndex ?? 0,
+        action.options.splitIndex,
         formatCurrency(Number(action.value ?? 0) * 100, 'financial-with-sign'),
       ]),
   );
+  const numberOfSplitsWithPercentAmounts =
+    actionSplits.length - 1 - Object.keys(splitsWithAmounts).length;
 
   return (
     <Modal
@@ -957,28 +964,34 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                               marginBottom: '10px',
                             }}
                           >
-                            Split {splitIndex + 1} (
-                            {splitsWithAmounts[splitIndex] ??
-                              `${(
-                                100 /
-                                (actionSplits.length -
-                                  Object.keys(splitsWithAmounts).length)
-                              ).toFixed(1)}% of remaining total`}
-                            )
+                            {splitIndex === 0
+                              ? 'Before split'
+                              : `Split ${splitIndex} (` +
+                                (splitsWithAmounts[splitIndex] ??
+                                  `${(
+                                    100 / numberOfSplitsWithPercentAmounts
+                                  ).toFixed(1)}% of remaining total`) +
+                                ')'}
                           </Text>
-                          <Button
-                            type="bare"
-                            onClick={() => onRemoveSplit(splitIndex)}
-                            style={{
-                              width: 20,
-                              height: 20,
-                            }}
-                            aria-label="Delete split"
-                          >
-                            <Delete
-                              style={{ width: 8, height: 8, color: 'inherit' }}
-                            />
-                          </Button>
+                          {splitIndex && (
+                            <Button
+                              type="bare"
+                              onClick={() => onRemoveSplit(splitIndex)}
+                              style={{
+                                width: 20,
+                                height: 20,
+                              }}
+                              aria-label="Delete split"
+                            >
+                              <Delete
+                                style={{
+                                  width: 8,
+                                  height: 8,
+                                  color: 'inherit',
+                                }}
+                              />
+                            </Button>
+                          )}
                         </Stack>
                       )}
                       {actions.length === 0 ? (

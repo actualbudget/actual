@@ -481,23 +481,34 @@ export class Action {
   }
 }
 
-export function execActions(
-  actions: Action[],
-  transaction,
-  totalSplitCount: number,
-) {
+function execNonSplitActions(actions: Action[], transaction) {
+  const update = transaction;
+  actions.forEach(action => action.exec(update));
+  return update;
+}
+
+export function execActions(actions: Action[], transaction) {
+  const parentActions = actions.filter(action => !action.options?.splitIndex);
+  const childActions = actions.filter(action => action.options?.splitIndex);
+  const totalSplitCount =
+    actions.reduce(
+      (prev, cur) => Math.max(prev, cur.options?.splitIndex ?? 0),
+      0,
+    ) + 1;
+
+  let update = execNonSplitActions(parentActions, transaction);
   if (totalSplitCount === 1) {
-    const update = transaction;
-    actions.forEach(action => action.exec(update));
     return update;
   }
 
-  if (transaction.is_child) {
+  if (update.is_child) {
     // Rules with splits can't be applied to child transactions.
-    return transaction;
+    return update;
   }
 
-  const actionsWithAmount = actions.filter(action => action.field === 'amount');
+  const actionsWithAmount = childActions.filter(
+    action => action.field === 'amount',
+  );
   const amountsBySplit = {};
   actionsWithAmount.forEach(action => {
     const splitIndex = action.options?.splitIndex ?? 0;
@@ -516,17 +527,12 @@ export function execActions(
     return transaction;
   }
 
-  let newTransactions = [transaction];
-  let update = transaction;
-  const { data, newTransaction } = splitTransaction(
-    newTransactions,
-    transaction.id,
-  );
+  const { data, newTransaction } = splitTransaction([update], transaction.id);
   update = recalculateSplit(newTransaction);
   data[0] = update;
-  newTransactions = data;
+  let newTransactions = data;
 
-  for (const action of actions) {
+  for (const action of childActions) {
     const splitIndex = action.options?.splitIndex ?? 0;
     if (splitIndex >= update.subtransactions.length) {
       const { data, newTransaction } = addSplitTransaction(
@@ -609,16 +615,10 @@ export class Rule {
   }
 
   execActions(object) {
-    const splitCount =
-      this.actions.reduce(
-        (prev, cur) => Math.max(prev, cur.options?.splitIndex ?? 0),
-        0,
-      ) + 1;
-    const result = execActions(
-      this.actions,
-      { ...object, subtransactions: object.subtransactions },
-      splitCount,
-    );
+    const result = execActions(this.actions, {
+      ...object,
+      subtransactions: object.subtransactions,
+    });
     const changes = Object.keys(result).reduce((prev, cur) => {
       if (result[cur] !== object[cur]) {
         prev[cur] = result[cur];

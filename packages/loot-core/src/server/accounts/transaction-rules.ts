@@ -528,14 +528,8 @@ export async function applyActions(
     return null;
   }
 
-  const splitCount =
-    parsedActions.reduce(
-      (prev, cur) => Math.max(prev, cur.options?.splitIndex ?? 0),
-      0,
-    ) + 1;
-
   const updated = transactions.flatMap(trans => {
-    return ungroupTransaction(execActions(parsedActions, trans, splitCount));
+    return ungroupTransaction(execActions(parsedActions, trans));
   });
 
   return batchUpdateTransactions({ updated });
