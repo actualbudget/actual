@@ -102,7 +102,7 @@ const customLabel = (props, width, end) => {
   //Add margin to first and last object
   const calcX =
     props.x + (props.index === end ? -10 : props.index === 0 ? 5 : 0);
-  const calcY = props.y - (props.value > 0 ? 15 : -15);
+  const calcY = props.y - (props.value > 0 ? 10 : -10);
   const textAnchor = props.index === 0 ? 'left' : 'middle';
   const display =
     props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
