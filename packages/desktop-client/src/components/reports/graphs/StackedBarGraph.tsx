@@ -13,7 +13,10 @@ import {
 } from 'recharts';
 
 import usePrivacyMode from 'loot-core/src/client/privacy';
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
@@ -98,7 +101,7 @@ const customLabel = props => {
   const calcX = props.x + props.width / 2;
   const calcY = props.y + props.height / 2;
   const textAnchor = 'middle';
-  const display = props.value && `${props.value.toFixed(0)}`;
+  const display = props.value && `${amountToCurrencyNoDecimal(props.value)}`;
   const textSize = '12px';
   const showLabel = props.height;
   const showLabelThreshold = 20;

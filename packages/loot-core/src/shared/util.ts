@@ -269,6 +269,49 @@ export function getNumberFormat({
   };
 }
 
+function getNumberFormatNoDecimal(decimalNumber: number) {
+  const { format, hideFraction } = { ...numberFormatConfig };
+  let locale, regex, separator;
+
+  switch (format) {
+    case 'space-comma':
+      locale = 'en-SE';
+      regex = /[^-0-9,]/g;
+      separator = ',';
+      break;
+    case 'dot-comma':
+      locale = 'de-DE';
+      regex = /[^-0-9,]/g;
+      separator = ',';
+      break;
+    case 'space-dot':
+      locale = 'dje';
+      regex = /[^-0-9.]/g;
+      separator = '.';
+      break;
+    case 'comma-dot-in':
+      locale = 'en-IN';
+      regex = /[^-0-9.]/g;
+      separator = '.';
+      break;
+    case 'comma-dot':
+    default:
+      locale = 'en-US';
+      regex = /[^-0-9.]/g;
+      separator = '.';
+  }
+
+  return {
+    value: format,
+    separator,
+    formatter: new Intl.NumberFormat(locale, {
+      minimumFractionDigits: hideFraction ? 0 : decimalNumber,
+      maximumFractionDigits: hideFraction ? 0 : decimalNumber,
+    }),
+    regex,
+  };
+}
+
 // Number utilities
 
 // We dont use `Number.MAX_SAFE_NUMBER` and such here because those
@@ -308,6 +351,10 @@ export function integerToCurrency(
 
 export function amountToCurrency(n) {
   return getNumberFormat().formatter.format(n);
+}
+
+export function amountToCurrencyNoDecimal(n) {
+  return getNumberFormatNoDecimal(0).formatter.format(n);
 }
 
 export function currencyToAmount(str: string) {

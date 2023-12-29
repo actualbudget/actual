@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
+import { amountToCurrency } from 'loot-core/src/shared/util';
+
 import { theme, type CSSProperties } from '../../../style';
 import Container from '../Container';
 import { type DataEntity } from '../entities';
@@ -73,7 +75,7 @@ const ActiveShape = props => {
         dy={18}
         textAnchor={textAnchor}
         fill={fill}
-      >{`${value.toFixed(2)}`}</text>
+      >{`${amountToCurrency(value)}`}</text>
       <text
         x={ex + (cos <= 0 ? 1 : -1) * 16}
         y={ey}

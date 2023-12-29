@@ -15,7 +15,10 @@ import {
 } from 'recharts';
 
 import usePrivacyMode from 'loot-core/src/client/privacy';
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
@@ -26,7 +29,7 @@ import { type DataEntity } from '../entities';
 import getCustomTick from '../getCustomTick';
 import numberFormatterTooltip from '../numberFormatter';
 
-import { adjustTextSize } from './adjustTextSize';
+import { variableTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
 type PayloadChild = {
@@ -110,12 +113,13 @@ const CustomTooltip = ({
   }
 };
 
-const customLabel = (props, width) => {
+const customLabel = props => {
   const calcX = props.x + props.width / 2;
   const calcY = props.y - (props.value > 0 ? 15 : -15);
   const textAnchor = 'middle';
-  const display = props.value !== 0 && `${props.value.toFixed(0)}`;
-  const textSize = adjustTextSize(width);
+  const display =
+    props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
+  const textSize = variableTextSize(props.width, props.value);
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
@@ -141,6 +145,7 @@ export function BarGraph({
 
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
+  const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
     if (balanceTypeOp === 'totalDebts') {
@@ -171,7 +176,7 @@ export function BarGraph({
                 height={height}
                 stackOffset="sign"
                 data={data[splitData]}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                margin={{ top: labelsMargin, right: 0, left: 0, bottom: 0 }}
               >
                 <Tooltip
                   cursor={{ fill: 'transparent' }}
@@ -209,7 +214,7 @@ export function BarGraph({
                   {viewLabels && (
                     <LabelList
                       dataKey={val => getVal(val)}
-                      content={e => customLabel(e, width)}
+                      content={customLabel}
                     />
                   )}
                   {data.legend.map((entry, index) => (
@@ -223,10 +228,7 @@ export function BarGraph({
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
                   <Bar dataKey="totalDebts" stackId="a">
                     {viewLabels && (
-                      <LabelList
-                        dataKey="totalDebts"
-                        content={e => customLabel(e, width)}
-                      />
+                      <LabelList dataKey="totalDebts" content={customLabel} />
                     )}
                     {data[splitData].map((entry, index) => (
                       <Cell

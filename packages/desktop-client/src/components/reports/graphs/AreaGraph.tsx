@@ -13,7 +13,10 @@ import {
 } from 'recharts';
 
 import usePrivacyMode from 'loot-core/src/client/privacy';
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
@@ -95,11 +98,14 @@ const CustomTooltip = ({
   }
 };
 
-const customLabel = (props, width) => {
-  const calcX = props.x;
+const customLabel = (props, width, end) => {
+  //Add margin to first and last object
+  const calcX =
+    props.x + (props.index === end ? -10 : props.index === 0 ? 5 : 0);
   const calcY = props.y - (props.value > 0 ? 15 : -15);
-  const textAnchor = 'middle';
-  const display = props.value !== 0 && `${props.value.toFixed(0)}`;
+  const textAnchor = props.index === 0 ? 'left' : 'middle';
+  const display =
+    props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
   const textSize = adjustTextSize(width);
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
@@ -121,6 +127,25 @@ export function AreaGraph({
   viewLabels,
 }: AreaGraphProps) {
   const privacyMode = usePrivacyMode();
+  const dataMax = Math.max(...data.monthData.map(i => i[balanceTypeOp]));
+  const dataMin = Math.min(...data.monthData.map(i => i[balanceTypeOp]));
+
+  const labelsMargin = viewLabels ? 30 : 0;
+  const dataDiff = dataMax - dataMin;
+  //Calculate how much to add to max and min values for graph range
+  const extendRangeAmount = Math.floor(dataDiff / 20);
+  const labelsMin =
+    //If min is zero or graph range passes zero then set it to zero
+    dataMin === 0 || Math.abs(dataMin) <= extendRangeAmount
+      ? 0
+      : //Else add the range and round to nearest 100s
+        Math.floor((dataMin - extendRangeAmount) / 100) * 100;
+  //Same as above but for max
+  const labelsMax =
+    dataMax === 0 || Math.abs(dataMax) <= extendRangeAmount
+      ? 0
+      : Math.ceil((dataMax + extendRangeAmount) / 100) * 100;
+  const lastLabel = data.monthData.length - 1;
 
   const tickFormatter = tick => {
     if (!privacyMode) return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
@@ -128,9 +153,6 @@ export function AreaGraph({
   };
 
   const gradientOffset = () => {
-    const dataMax = Math.max(...data.monthData.map(i => i[balanceTypeOp]));
-    const dataMin = Math.min(...data.monthData.map(i => i[balanceTypeOp]));
-
     if (dataMax <= 0) {
       return 0;
     }
@@ -159,7 +181,7 @@ export function AreaGraph({
                 width={width}
                 height={height}
                 data={data.monthData}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                margin={{ top: 0, right: labelsMargin, left: 0, bottom: 0 }}
               >
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -174,7 +196,10 @@ export function AreaGraph({
                 {compact ? null : (
                   <YAxis
                     dataKey={balanceTypeOp}
-                    domain={['auto', 'auto']}
+                    domain={[
+                      viewLabels ? labelsMin : 'auto',
+                      viewLabels ? labelsMax : 'auto',
+                    ]}
                     tickFormatter={tickFormatter}
                     tick={{ fill: theme.pageText }}
                     tickLine={{ stroke: theme.pageText }}
@@ -213,7 +238,7 @@ export function AreaGraph({
                   {viewLabels && (
                     <LabelList
                       dataKey={balanceTypeOp}
-                      content={e => customLabel(e, width)}
+                      content={e => customLabel(e, width, lastLabel)}
                     />
                   )}
                 </Area>
