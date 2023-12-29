@@ -118,7 +118,7 @@ function OverflowMenu({
           onClose={() => setOpen(false)}
         >
           <Menu
-            onMenuSelect={name => {
+            onMenuSelect={(name: ScheduleItemAction) => {
               onAction(name, schedule.id);
               setOpen(false);
             }}
