@@ -443,7 +443,7 @@ handlers['api/transaction-update'] = withMutation(async function ({
     return [];
   }
 
-  const { diff } = updateTransaction(transactions, fields);
+  const { diff } = updateTransaction(transactions, { id, ...fields });
   return handlers['transactions-batch-update'](diff);
 });
 

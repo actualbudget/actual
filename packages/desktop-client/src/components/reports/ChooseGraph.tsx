@@ -50,9 +50,19 @@ export function ChooseGraph({
   const listScrollRef = useRef<HTMLDivElement>(null);
   const totalScrollRef = useRef<HTMLDivElement>(null);
 
-  const handleScrollTotals = scroll => {
-    headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-    listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+  const handleScroll = scroll => {
+    if (scroll.target.id === 'header') {
+      totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    }
+    if (scroll.target.id === 'total') {
+      headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    }
+    if (scroll.target.id === 'list') {
+      headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+      totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    }
   };
 
   if (graphType === 'AreaGraph') {
@@ -107,7 +117,8 @@ export function ChooseGraph({
       <View>
         <ReportTableHeader
           headerScrollRef={headerScrollRef}
-          interval={mode === 'time' && months}
+          handleScroll={handleScroll}
+          interval={mode === 'time' && data.monthData}
           scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
@@ -115,6 +126,7 @@ export function ChooseGraph({
         <ReportTable
           saveScrollWidth={saveScrollWidth}
           listScrollRef={listScrollRef}
+          handleScroll={handleScroll}
         >
           <ReportTableList
             data={data}
@@ -127,7 +139,7 @@ export function ChooseGraph({
         </ReportTable>
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
-          handleScrollTotals={handleScrollTotals}
+          handleScroll={handleScroll}
           scrollWidth={scrollWidth}
           data={data}
           mode={mode}
