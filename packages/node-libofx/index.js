@@ -5,7 +5,7 @@ let _libofxPromise;
 let _libofx;
 let ffi;
 
-let parser = {
+const parser = {
   ctx: null,
   transactions: [],
 
@@ -61,7 +61,7 @@ export async function initModule() {
 
 export function getOFXTransactions(data) {
   ffi.parse_data(parser.ctx, data);
-  let transactions = parser.transactions;
+  const transactions = parser.transactions;
   parser.reset();
   return transactions;
 }
