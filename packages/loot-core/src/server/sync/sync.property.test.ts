@@ -111,7 +111,7 @@ function makeGen<T extends Arbitrary<unknown>>({
     value,
     timestamp: jsc.integer(1000, 10000).smap(
       x => {
-        let clientId: string;
+        let clientId;
         switch (jsc.random(0, 1)) {
           case 0:
             clientId = clientId1;
