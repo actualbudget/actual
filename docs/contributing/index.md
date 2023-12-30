@@ -35,7 +35,7 @@ Here are some initial guidelines for how contributions will be treated:
 - @MatissJanis
 - @shaankhosla
 - @shall0pass
-- @trevdor
+- @twk3
 - @youngcw
 
 ### Alumni
@@ -44,6 +44,7 @@ Here are some initial guidelines for how contributions will be treated:
 
 - @albertogasparin
 - @rich-howell
+- @trevdor
 
 ### The Project Layout
 
