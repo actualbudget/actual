@@ -125,6 +125,20 @@ export default defineConfig(async ({ mode }) => {
           chunkFileNames: 'static/js/[name]-[hash].js',
           entryFileNames: 'static/js/[name]-[hash].js',
         },
+        // warning filter to suppress some expected noise
+        onwarn(wrn, defaultHandler) {
+          // ignore victory PURE warnings: https://github.com/rollup/rollup/issues/5324
+          if (
+            wrn.message.includes('victory-core') &&
+            wrn.message.includes('__PURE__') &&
+            wrn.message.includes(
+              'contains an annotation that Rollup cannot interpret',
+            )
+          ) {
+            return;
+          }
+          defaultHandler(wrn);
+        },
       },
     },
     server: {
