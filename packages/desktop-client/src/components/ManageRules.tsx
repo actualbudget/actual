@@ -95,8 +95,8 @@ function ManageRulesContent({
   payeeId,
   setLoading,
 }: ManageRulesContentProps) {
-  const [allRules, setAllRules] = useState(null);
-  const [rules, setRules] = useState(null);
+  const [allRules, setAllRules] = useState([]);
+  const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
 
@@ -117,17 +117,26 @@ function ManageRulesContent({
 
   const filteredRules = useMemo(
     () =>
-      filter === '' || !rules
-        ? rules
-        : rules.filter(rule =>
+      (filter === ''
+        ? allRules
+        : allRules.filter(rule =>
             ruleToString(rule, filterData)
               .toLowerCase()
               .includes(filter.toLowerCase()),
-          ),
-    [rules, filter, filterData],
+          )
+      ).slice(0, 100 + page * 50),
+    [allRules, filter, filterData, page],
   );
   const selectedInst = useSelected('manage-rules', allRules, []);
   const [hoveredRule, setHoveredRule] = useState(null);
+
+  const onSearchChange = useCallback(
+    (value: string) => {
+      setFilter(value);
+      setPage(0);
+    },
+    [setFilter],
+  );
 
   async function loadRules() {
     setLoading(true);
@@ -147,8 +156,7 @@ function ManageRulesContent({
 
   useEffect(() => {
     async function loadData() {
-      const loadedRules = await loadRules();
-      setRules(loadedRules.slice(0, 100));
+      await loadRules();
       setLoading(false);
 
       await dispatch(initiallyLoadPayees());
@@ -166,7 +174,7 @@ function ManageRulesContent({
   }, []);
 
   function loadMore() {
-    setRules(rules.concat(allRules.slice(rules.length, rules.length + 50)));
+    setPage(page => page + 1);
   }
 
   async function onDeleteSelected() {
@@ -179,10 +187,7 @@ function ManageRulesContent({
       alert('Some rules were not deleted because they are linked to schedules');
     }
 
-    const newRules = await loadRules();
-    setRules(rules => {
-      return newRules.slice(0, rules.length);
-    });
+    await loadRules();
     selectedInst.dispatch({ type: 'select-none' });
     setLoading(false);
   }
@@ -191,19 +196,8 @@ function ManageRulesContent({
     dispatch(
       pushModal('edit-rule', {
         rule,
-        onSave: async newRule => {
-          const newRules = await loadRules();
-
-          setRules(rules => {
-            const newIdx = newRules.findIndex(rule => rule.id === newRule.id);
-
-            if (newIdx > rules.length) {
-              return newRules.slice(0, newIdx + 75);
-            } else {
-              return newRules.slice(0, rules.length);
-            }
-          });
-
+        onSave: async () => {
+          await loadRules();
           setLoading(false);
         },
       }),
@@ -236,13 +230,7 @@ function ManageRulesContent({
       pushModal('edit-rule', {
         rule,
         onSave: async newRule => {
-          const newRules = await loadRules();
-
-          setRules(rules => {
-            const newIdx = newRules.findIndex(rule => rule.id === newRule.id);
-            return newRules.slice(0, newIdx + 75);
-          });
-
+          await loadRules();
           setLoading(false);
         },
       }),
@@ -253,7 +241,7 @@ function ManageRulesContent({
     setHoveredRule(id);
   }, []);
 
-  if (rules === null) {
+  if (allRules.length === 0) {
     return null;
   }
 
@@ -290,7 +278,7 @@ function ManageRulesContent({
           <Search
             placeholder="Filter rules..."
             value={filter}
-            onChange={setFilter}
+            onChange={onSearchChange}
           />
         </View>
         <View style={{ flex: 1 }}>
