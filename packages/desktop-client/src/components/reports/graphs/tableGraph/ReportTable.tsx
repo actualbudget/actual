@@ -6,8 +6,8 @@ import React, {
 } from 'react';
 import { type RefProp } from 'react-spring';
 
-import { type CSSProperties } from '../../style';
-import View from '../common/View';
+import { type CSSProperties } from '../../../../style';
+import View from '../../../common/View';
 
 type ReportTableProps = {
   saveScrollWidth?: (value: number) => void;

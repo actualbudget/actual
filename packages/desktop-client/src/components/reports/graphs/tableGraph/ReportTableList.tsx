@@ -6,9 +6,9 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
-import { type CSSProperties, styles, theme } from '../../style';
-import View from '../common/View';
-import { Row, Cell } from '../table';
+import { type CSSProperties, styles, theme } from '../../../../style';
+import View from '../../../common/View';
+import { Row, Cell } from '../../../table';
 
 type TableRowProps = {
   item: {
