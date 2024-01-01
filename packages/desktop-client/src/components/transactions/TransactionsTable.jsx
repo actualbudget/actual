@@ -1347,7 +1347,7 @@ const Transaction = memo(function Transaction(props) {
   );
 });
 
-function TransactionError({ error, isDeposit, onAddSplit, style }) {
+function TransactionError({ error, isDeposit, onAddSplit, onDistributeRemainder, style }) {
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {
@@ -1371,8 +1371,15 @@ function TransactionError({ error, isDeposit, onAddSplit, style }) {
             </Text>
             <View style={{ flex: 1 }} />
             <Button
+              type="normal"
+              style={{ marginLeft: 15 }}
+              onClick={onDistributeRemainder}
+            >
+              Distribute
+            </Button>
+            <Button
               type="primary"
-              style={{ marginLeft: 15, padding: '4px 10px' }}
+              style={{ marginLeft: 10, padding: '4px 10px' }}
               onClick={onAddSplit}
             >
               Add Split
@@ -1431,6 +1438,7 @@ function NewTransaction({
   onSave,
   onAdd,
   onAddSplit,
+  onDistributeRemainder,
   onManagePayees,
   onCreatePayee,
   onNavigateToTransferAccount,
@@ -1506,6 +1514,7 @@ function NewTransaction({
             error={error}
             isDeposit={isDeposit}
             onAddSplit={() => onAddSplit(transactions[0].id)}
+            onDistributeRemainder={() => onDistributeRemainder(transactions[0].id)}
           />
         ) : (
           <Button
@@ -1602,7 +1611,7 @@ function TransactionTableInner({
           error.type === 'SplitTransactionError' && (
             <Tooltip
               position="bottom-right"
-              width={250}
+              width={350}
               forceTop={position}
               forceLayout={true}
               style={{ transform: 'translate(-5px, 2px)' }}
@@ -1611,6 +1620,7 @@ function TransactionTableInner({
                 error={error}
                 isDeposit={isChildDeposit}
                 onAddSplit={() => props.onAddSplit(trans.id)}
+                onDistributeRemainder={() => props.onDistributeRemainder(trans.id)}
               />
             </Tooltip>
           )}
@@ -1704,6 +1714,7 @@ function TransactionTableInner({
               onCreatePayee={props.onCreatePayee}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
+              onDistributeRemainder={props.onDistributeRemainder}
               balance={
                 props.transactions?.length > 0
                   ? props.balances?.[props.transactions[0]?.id]?.balance
@@ -2079,6 +2090,62 @@ export const TransactionTable = forwardRef((props, ref) => {
     [props.onAddSplit],
   );
 
+  const onDistributeRemainder = useCallback(
+    async id => {
+      const { transactions, tableNavigator, newTransactions } =
+        latestState.current;
+
+      const targetTransactions = isTemporaryId(id) ? newTransactions : transactions
+      const transaction = targetTransactions.find(t => t.id === id);
+
+      const parentTransaction = transaction.is_parent ? transaction : targetTransactions.find(
+        t => t.id === transaction.parent_id
+      )
+
+      const siblingTransactions = targetTransactions.filter(
+        t => t.parent_id === (transaction.is_parent ? transaction.id : transaction.parent_id)
+      )
+
+      const emptyTransactions = siblingTransactions.filter(t => t.amount === 0);
+
+      const remainingAmount =
+        parentTransaction.amount -
+        siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
+
+      const amountPerTransaction = Math.floor(
+        remainingAmount / emptyTransactions.length,
+      );
+      let remainingCents =
+        remainingAmount - amountPerTransaction * emptyTransactions.length;
+
+      let amounts = new Array(emptyTransactions.length).fill(
+        amountPerTransaction,
+      );
+
+      for (let amountIndex in amounts) {
+        if (remainingCents === 0) break;
+
+        amounts[amountIndex] += 1;
+        remainingCents--;
+      }
+
+      if (isTemporaryId(id)) {
+        newNavigator.onEdit(null)
+      } else {
+        tableNavigator.onEdit(null)
+      }
+
+      for (const transactionIndex in emptyTransactions) {
+        await onSave({
+          ...emptyTransactions[transactionIndex],
+          amount: amounts[transactionIndex],
+        });
+      }
+    },
+    [latestState],
+  );
+
+
   function onCloseAddTransaction() {
     setNewTransactions(
       makeTemporaryTransactions(
@@ -2109,6 +2176,7 @@ export const TransactionTable = forwardRef((props, ref) => {
       onCheckEnter={onCheckEnter}
       onAddTemporary={onAddTemporary}
       onAddSplit={onAddSplit}
+      onDistributeRemainder={onDistributeRemainder}
       onCloseAddTransaction={onCloseAddTransaction}
       onToggleSplit={onToggleSplit}
       newTransactions={newTransactions}
