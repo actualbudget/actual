@@ -4,15 +4,15 @@ import { type RefProp } from 'react-spring';
 import { styles, theme } from '../../../../style';
 import View from '../../../common/View';
 import { Row, Cell } from '../../../table';
-import { type MonthData } from '../../entities';
+import { type GroupedEntity } from '../../entities';
 
 type ReportTableHeaderProps = {
   scrollWidth?: number;
   groupBy: string;
-  interval?: MonthData[];
+  interval?: GroupedEntity[];
   balanceType: string;
   headerScrollRef: RefProp<HTMLDivElement>;
-  handleScroll?: UIEventHandler<HTMLDivElement>;
+  handleScroll: UIEventHandler<HTMLDivElement>;
 };
 
 function ReportTableHeader({

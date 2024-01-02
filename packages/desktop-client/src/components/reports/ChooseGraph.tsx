@@ -11,7 +11,6 @@ import LineGraph from './graphs/LineGraph';
 import StackedBarGraph from './graphs/StackedBarGraph';
 import ReportTable from './graphs/tableGraph/ReportTable';
 import ReportTableHeader from './graphs/tableGraph/ReportTableHeader';
-import ReportTableList from './graphs/tableGraph/ReportTableList';
 import ReportTableTotals from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
@@ -39,6 +38,12 @@ function ChooseGraph({
   months,
 }: ChooseGraphProps) {
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
+  const groupByData =
+    groupBy === 'Category'
+      ? 'groupedData'
+      : ['Month', 'Year'].includes(groupBy)
+      ? 'monthData'
+      : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -116,16 +121,12 @@ function ChooseGraph({
           saveScrollWidth={saveScrollWidth}
           listScrollRef={listScrollRef}
           handleScroll={handleScroll}
-        >
-          <ReportTableList
-            data={data}
-            empty={showEmpty}
-            monthsCount={months.length}
-            balanceTypeOp={balanceTypeOp}
-            mode={mode}
-            groupBy={groupBy}
-          />
-        </ReportTable>
+          balanceTypeOp={balanceTypeOp}
+          groupBy={groupBy}
+          data={data[groupByData]}
+          mode={mode}
+          monthsCount={months.length}
+        />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
           handleScroll={handleScroll}
