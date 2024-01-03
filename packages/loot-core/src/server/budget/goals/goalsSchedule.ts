@@ -8,7 +8,7 @@ import {
 } from '../../schedules/app';
 import { isReflectBudget } from '../actions';
 
-async function createScheduleList(template, current_month) {
+async function createScheduleList(template, current_month, category) {
   const t = [];
   const errors = [];
 
@@ -21,11 +21,15 @@ async function createScheduleList(template, current_month) {
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
+    const sign = category.is_income ? 1 : -1;
     const target =
       amountCondition.op === 'isbetween'
-        ? -Math.round(amountCondition.value.num1 + amountCondition.value.num2) /
+        ? (sign *
+            Math.round(
+              amountCondition.value.num1 + amountCondition.value.num2,
+            )) /
           2
-        : -amountCondition.value;
+        : sign * amountCondition.value;
     const next_date_string = getNextDate(
       dateConditions,
       monthUtils._parse(current_month),
@@ -41,8 +45,6 @@ async function createScheduleList(template, current_month) {
       next_date_string,
       current_month,
     );
-    // const startDate = dateConditions.value.start ?? dateConditions.value;
-    // const started = startDate <= monthUtils.addMonths(current_month, 1);
     if (num_months < 0) {
       //non-repeating schedules could be negative
       errors.push(`Schedule ${template[ll].name} is in the Past.`);
@@ -64,7 +66,7 @@ async function createScheduleList(template, current_month) {
           let monthlyTarget = 0;
           const nextMonth = monthUtils.addMonths(
             current_month,
-            t[ll].num_months + 1,
+            t[t.length - 1].num_months + 1,
           );
           let nextBaseDate = getNextDate(
             dateConditions,
@@ -105,7 +107,7 @@ async function createScheduleList(template, current_month) {
               break;
             }
           }
-          t[ll].target = -monthlyTarget;
+          t[t.length - 1].target = -monthlyTarget;
         }
       } else {
         errors.push(
@@ -173,13 +175,14 @@ export async function goalsSchedule(
   last_month_balance,
   to_budget,
   errors,
+  category,
 ) {
   if (!scheduleFlag) {
     scheduleFlag = true;
     const template = template_lines.filter(t => t.type === 'schedule');
     //in the case of multiple templates per category, schedules may have wrong priority level
 
-    const t = await createScheduleList(template, current_month);
+    const t = await createScheduleList(template, current_month, category);
     errors = errors.concat(t.errors);
 
     const t_payMonthOf = t.t.filter(
