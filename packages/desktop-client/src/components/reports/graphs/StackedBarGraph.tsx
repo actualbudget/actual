@@ -77,7 +77,7 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
                   );
                 })}
               <AlignedText
-                left={'Total'}
+                left="Total"
                 right={amountToCurrency(sumTotals)}
                 style={{
                   fontWeight: 600,

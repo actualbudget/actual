@@ -34,8 +34,6 @@ export default function ManageRulesModal({
       {...modalProps}
       style={{
         flex: 1,
-        maxWidth: '90%',
-        maxHeight: '90%',
       }}
     >
       {() => <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />}

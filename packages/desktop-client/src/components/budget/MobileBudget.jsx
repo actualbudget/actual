@@ -3,16 +3,6 @@ import { useSelector } from 'react-redux';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
-import {
-  addCategory,
-  addGroup,
-  deleteCategory,
-  deleteGroup,
-  moveCategory,
-  moveCategoryGroup,
-  updateCategory,
-  updateGroup,
-} from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useActions } from '../../hooks/useActions';
@@ -26,6 +16,9 @@ import SyncRefresh from '../SyncRefresh';
 import { BudgetTable } from './MobileBudgetTable';
 import { prewarmMonth, switchBudgetType } from './util';
 
+const CATEGORY_BUDGET_EDIT_ACTION = 'category-budget';
+const BALANCE_MENU_OPEN_ACTION = 'balance-menu';
+
 class Budget extends Component {
   constructor(props) {
     super(props);
@@ -36,13 +29,13 @@ class Budget extends Component {
       currentMonth,
       initialized: false,
       editMode: false,
-      categoryGroups: [],
+      editingBudgetCategoryId: null,
+      openBalanceActionMenuId: null,
     };
   }
 
   async loadCategories() {
-    const result = await this.props.getCategories();
-    this.setState({ categoryGroups: result.grouped });
+    await this.props.getCategories();
   }
 
   async componentDidMount() {
@@ -50,18 +43,17 @@ class Budget extends Component {
     //   this.setState({ editMode: false });
     // });
 
-    this.loadCategories();
-
     const { start, end } = await send('get-budget-bounds');
-    this.setState({ bounds: { start, end } });
-
     await prewarmMonth(
       this.props.budgetType,
       this.props.spreadsheet,
       this.state.currentMonth,
     );
 
-    this.setState({ initialized: true });
+    this.setState({
+      bounds: { start, end },
+      initialized: true,
+    });
 
     const unlisten = listen('sync-event', ({ type, tables }) => {
       if (
@@ -107,15 +99,7 @@ class Budget extends Component {
     this.props.pushModal('new-category-group', {
       onValidate: name => (!name ? 'Name is required.' : null),
       onSubmit: async name => {
-        const id = await this.props.createGroup(name);
-        this.setState(state => ({
-          categoryGroups: addGroup(state.categoryGroups, {
-            id,
-            name,
-            categories: [],
-            is_income: 0,
-          }),
-        }));
+        await this.props.createGroup(name);
       },
     });
   };
@@ -124,28 +108,19 @@ class Budget extends Component {
     this.props.pushModal('new-category', {
       onValidate: name => (!name ? 'Name is required.' : null),
       onSubmit: async name => {
-        const id = await this.props.createCategory(name, groupId, isIncome);
-        this.setState(state => ({
-          categoryGroups: addCategory(state.categoryGroups, {
-            id,
-            name,
-            cat_group: groupId,
-            is_income: isIncome ? 1 : 0,
-          }),
-        }));
+        this.props.collapseModals('category-group-menu');
+        await this.props.createCategory(name, groupId, isIncome);
       },
     });
   };
 
   onSaveGroup = group => {
     this.props.updateGroup(group);
-    this.setState(state => ({
-      categoryGroups: updateGroup(state.categoryGroups, group),
-    }));
   };
 
   onDeleteGroup = async groupId => {
-    const group = this.state.categoryGroups?.find(g => g.id === groupId);
+    const { categoryGroups } = this.props;
+    const group = categoryGroups?.find(g => g.id === groupId);
 
     if (!group) {
       return;
@@ -163,25 +138,18 @@ class Budget extends Component {
       this.props.pushModal('confirm-category-delete', {
         group: groupId,
         onDelete: transferCategory => {
+          this.props.collapseModals('category-group-menu');
           this.props.deleteGroup(groupId, transferCategory);
-          this.setState(state => ({
-            categoryGroups: deleteGroup(state.categoryGroups, groupId),
-          }));
         },
       });
     } else {
+      this.props.collapseModals('category-group-menu');
       this.props.deleteGroup(groupId);
-      this.setState(state => ({
-        categoryGroups: deleteGroup(state.categoryGroups, groupId),
-      }));
     }
   };
 
   onSaveCategory = category => {
     this.props.updateCategory(category);
-    this.setState(state => ({
-      categoryGroups: updateCategory(state.categoryGroups, category),
-    }));
   };
 
   onDeleteCategory = async categoryId => {
@@ -194,23 +162,19 @@ class Budget extends Component {
         category: categoryId,
         onDelete: transferCategory => {
           if (categoryId !== transferCategory) {
+            this.props.collapseModals('category-menu');
             this.props.deleteCategory(categoryId, transferCategory);
-            this.setState(state => ({
-              categoryGroups: deleteCategory(state.categoryGroups, categoryId),
-            }));
           }
         },
       });
     } else {
+      this.props.collapseModals('category-menu');
       this.props.deleteCategory(categoryId);
-      this.setState(state => ({
-        categoryGroups: deleteCategory(state.categoryGroups, categoryId),
-      }));
     }
   };
 
   onReorderCategory = (id, { inGroup, aroundCategory }) => {
-    const { categoryGroups } = this.state;
+    const { categoryGroups } = this.props;
     let groupId, targetId;
 
     if (inGroup) {
@@ -234,14 +198,10 @@ class Budget extends Component {
     }
 
     this.props.moveCategory(id, groupId, targetId);
-
-    this.setState({
-      categoryGroups: moveCategory(categoryGroups, id, groupId, targetId),
-    });
   };
 
   onReorderGroup = (id, targetId, position) => {
-    const { categoryGroups } = this.state;
+    const { categoryGroups } = this.props;
 
     if (position === 'bottom') {
       const idx = categoryGroups.findIndex(group => group.id === targetId);
@@ -250,10 +210,6 @@ class Budget extends Component {
     }
 
     this.props.moveCategoryGroup(id, targetId);
-
-    this.setState({
-      categoryGroups: moveCategoryGroup(categoryGroups, id, targetId),
-    });
   };
 
   sync = async () => {
@@ -280,16 +236,14 @@ class Budget extends Component {
     this.setState({ currentMonth: month, initialized: true });
   };
 
-  onOpenActionSheet = () => {
+  onOpenMonthActionMenu = () => {
     const { budgetType } = this.props;
 
     const options = [
-      'Edit Categories',
       'Copy last month’s budget',
       'Set budgets to zero',
       'Set budgets to 3 month average',
       budgetType === 'report' && 'Apply to all future budgets',
-      'Cancel',
     ].filter(Boolean);
 
     this.props.showActionSheetWithOptions(
@@ -341,11 +295,90 @@ class Budget extends Component {
     this.setState({ initialized: true });
   };
 
+  onSaveNotes = async (id, notes) => {
+    await send('notes-save', { id, note: notes });
+  };
+
+  onEditGroupNotes = id => {
+    const { categoryGroups } = this.props;
+    const group = categoryGroups.find(g => g.id === id);
+    this.props.pushModal('notes', {
+      id,
+      name: group.name,
+      onSave: this.onSaveNotes,
+    });
+  };
+
+  onEditCategoryNotes = id => {
+    const { categories } = this.props;
+    const category = categories.find(c => c.id === id);
+    this.props.pushModal('notes', {
+      id,
+      name: category.name,
+      onSave: this.onSaveNotes,
+    });
+  };
+
+  onEditGroup = id => {
+    const { categoryGroups } = this.props;
+    const group = categoryGroups.find(g => g.id === id);
+    this.props.pushModal('category-group-menu', {
+      groupId: group.id,
+      onSave: this.onSaveGroup,
+      onAddCategory: this.onAddCategory,
+      onEditNotes: this.onEditGroupNotes,
+      onDelete: this.onDeleteGroup,
+    });
+  };
+
+  onEditCategory = id => {
+    const { categories } = this.props;
+    const category = categories.find(c => c.id === id);
+    this.props.pushModal('category-menu', {
+      categoryId: category.id,
+      onSave: this.onSaveCategory,
+      onEditNotes: this.onEditCategoryNotes,
+      onDelete: this.onDeleteCategory,
+    });
+  };
+
+  onEditCategoryBudget = id => {
+    this.onEdit(CATEGORY_BUDGET_EDIT_ACTION, id);
+  };
+
+  onOpenBalanceActionMenu = id => {
+    this.onEdit(BALANCE_MENU_OPEN_ACTION, id);
+  };
+
+  onEdit = (action, id) => {
+    const { editingBudgetCategoryId, openBalanceActionMenuId } = this.state;
+
+    // Do not allow editing if another field is currently being edited.
+    // Cancel the currently editing field in that case.
+    const currentlyEditing = editingBudgetCategoryId || openBalanceActionMenuId;
+
+    this.setState({
+      editingBudgetCategoryId:
+        action === CATEGORY_BUDGET_EDIT_ACTION && !currentlyEditing ? id : null,
+      openBalanceActionMenuId:
+        action === BALANCE_MENU_OPEN_ACTION && !currentlyEditing ? id : null,
+    });
+
+    return { action, editingId: !currentlyEditing ? id : null };
+  };
+
   render() {
-    const { currentMonth, bounds, editMode, initialized } = this.state;
     const {
-      categories,
+      currentMonth,
+      bounds,
+      editMode,
+      initialized,
+      editingBudgetCategoryId,
+      openBalanceActionMenuId,
+    } = this.state;
+    const {
       categoryGroups,
+      categories,
       prefs,
       savePrefs,
       budgetType,
@@ -379,8 +412,8 @@ class Budget extends Component {
             // This key forces the whole table rerender when the number
             // format changes
             key={numberFormat + hideFraction}
-            categories={categories}
             categoryGroups={categoryGroups}
+            categories={categories}
             type={budgetType}
             month={currentMonth}
             monthBounds={bounds}
@@ -401,12 +434,21 @@ class Budget extends Component {
             onDeleteCategory={this.onDeleteCategory}
             onReorderCategory={this.onReorderCategory}
             onReorderGroup={this.onReorderGroup}
-            onOpenActionSheet={() => {}} //this.onOpenActionSheet}
+            onOpenMonthActionMenu={this.onOpenMonthActionMenu}
             onBudgetAction={applyBudgetAction}
             onRefresh={onRefresh}
             onSwitchBudgetType={this.onSwitchBudgetType}
+            onSaveNotes={this.onSaveNotes}
+            onEditGroupNotes={this.onEditGroupNotes}
+            onEditCategoryNotes={this.onEditCategoryNotes}
             savePrefs={savePrefs}
             pushModal={pushModal}
+            onEditGroup={this.onEditGroup}
+            onEditCategory={this.onEditCategory}
+            editingBudgetCategoryId={editingBudgetCategoryId}
+            onEditCategoryBudget={this.onEditCategoryBudget}
+            openBalanceActionMenuId={openBalanceActionMenuId}
+            onOpenBalanceActionMenu={this.onOpenBalanceActionMenu}
           />
         )}
       </SyncRefresh>

@@ -1,8 +1,4 @@
-import React, { createRef, useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-
-import { css } from 'glamor';
-import remarkGfm from 'remark-gfm';
+import React, { useState } from 'react';
 
 import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
@@ -10,78 +6,11 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
 import { type CSSProperties, theme } from '../style';
-import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
 import Button from './common/Button';
-import Text from './common/Text';
 import View from './common/View';
+import Notes from './Notes';
 import { Tooltip, type TooltipPosition, useTooltip } from './tooltips';
-
-const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
-
-const markdownStyles = css({
-  display: 'block',
-  maxWidth: 350,
-  padding: 8,
-  overflowWrap: 'break-word',
-  '& p': {
-    margin: 0,
-    ':not(:first-child)': {
-      marginTop: '0.25rem',
-    },
-  },
-  '& ul, & ol': {
-    listStylePosition: 'inside',
-    margin: 0,
-    paddingLeft: 0,
-  },
-  '&>* ul, &>* ol': {
-    marginLeft: '1.5rem',
-  },
-  '& li>p': {
-    display: 'contents',
-  },
-  '& blockquote': {
-    paddingLeft: '0.75rem',
-    borderLeft: '3px solid ' + theme.markdownDark,
-    margin: 0,
-  },
-  '& hr': {
-    borderTop: 'none',
-    borderLeft: 'none',
-    borderRight: 'none',
-    borderBottom: '1px solid ' + theme.markdownNormal,
-  },
-  '& code': {
-    backgroundColor: theme.markdownLight,
-    padding: '0.1rem 0.5rem',
-    borderRadius: '0.25rem',
-  },
-  '& pre': {
-    padding: '0.5rem',
-    backgroundColor: theme.markdownLight,
-    borderRadius: '0.5rem',
-    margin: 0,
-    ':not(:first-child)': {
-      marginTop: '0.25rem',
-    },
-    '& code': {
-      background: 'inherit',
-      padding: 0,
-      borderRadius: 0,
-    },
-  },
-  '& table, & th, & td': {
-    border: '1px solid ' + theme.markdownNormal,
-  },
-  '& table': {
-    borderCollapse: 'collapse',
-    wordBreak: 'break-word',
-  },
-  '& td': {
-    padding: '0.25rem 0.75rem',
-  },
-});
 
 type NotesTooltipProps = {
   editable?: boolean;
@@ -96,39 +25,14 @@ function NotesTooltip({
   onClose,
 }: NotesTooltipProps) {
   const [notes, setNotes] = useState<string>(defaultNotes);
-  const inputRef = createRef<HTMLTextAreaElement>();
-
-  useEffect(() => {
-    if (editable) {
-      inputRef.current.focus();
-    }
-  }, [inputRef, editable]);
-
   return (
     <Tooltip position={position} onClose={() => onClose(notes)}>
-      {editable ? (
-        <textarea
-          ref={inputRef}
-          className={`${css({
-            border: '1px solid ' + theme.buttonNormalBorder,
-            padding: 7,
-            minWidth: 350,
-            minHeight: 120,
-            outline: 'none',
-            backgroundColor: theme.tableBackground,
-            color: theme.tableText,
-          })}`}
-          value={notes || ''}
-          onChange={e => setNotes(e.target.value)}
-          placeholder="Notes (markdown supported)"
-        />
-      ) : (
-        <Text {...markdownStyles}>
-          <ReactMarkdown remarkPlugins={remarkPlugins} linkTarget="_blank">
-            {notes}
-          </ReactMarkdown>
-        </Text>
-      )}
+      <Notes
+        notes={notes}
+        editable={editable}
+        focused={editable}
+        onChange={setNotes}
+      />
     </Tooltip>
   );
 }

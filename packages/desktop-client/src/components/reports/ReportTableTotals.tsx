@@ -1,4 +1,4 @@
-import React, { type UIEventHandler } from 'react';
+import React, { type UIEventHandler, useLayoutEffect, useState } from 'react';
 import { type RefProp } from 'react-spring';
 
 import {
@@ -20,45 +20,63 @@ type ReportTableTotalsProps = {
   mode: string;
   monthsCount: number;
   totalScrollRef: RefProp<HTMLDivElement>;
-  handleScrollTotals: UIEventHandler<HTMLDivElement>;
+  handleScroll: UIEventHandler<HTMLDivElement>;
 };
 
-export default function ReportTableTotals({
+function ReportTableTotals({
   data,
   scrollWidth,
   balanceTypeOp,
   mode,
   monthsCount,
   totalScrollRef,
-  handleScrollTotals,
+  handleScroll,
 }: ReportTableTotalsProps) {
+  const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
+
+  useLayoutEffect(() => {
+    if (totalScrollRef.current) {
+      const [parent, child] = [
+        totalScrollRef.current.offsetParent
+          ? totalScrollRef.current.parentElement.scrollHeight
+          : 0,
+        totalScrollRef.current ? totalScrollRef.current.scrollHeight : 0,
+      ];
+      setScrollWidthTotals(parent > 0 && child > 0 && parent - child);
+    }
+  });
+
   const average = amountToInteger(data[balanceTypeOp]) / monthsCount;
   return (
-    <View
-      innerRef={totalScrollRef}
-      onScroll={handleScrollTotals}
+    <Row
+      collapsed={true}
+      height={32 + scrollWidthTotals}
       style={{
-        overflowX: 'auto',
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
         justifyContent: 'center',
+        color: theme.tableHeaderText,
+        backgroundColor: theme.tableHeaderBackground,
+        fontWeight: 600,
       }}
     >
-      <Row
-        collapsed={true}
+      <View
+        innerRef={totalScrollRef}
+        onScroll={handleScroll}
+        id="total"
         style={{
-          color: theme.tableHeaderText,
-          backgroundColor: theme.tableHeaderBackground,
-          fontWeight: 600,
+          overflowX: 'auto',
+          flexDirection: 'row',
+          flex: 1,
         }}
       >
         <Cell
           style={{
-            minWidth: 125,
+            width: 120,
+            flexShrink: 0,
             ...styles.tnum,
           }}
-          value={'Totals'}
-          width="flex"
+          value="Totals"
         />
         {mode === 'time'
           ? data.monthData.map(item => {
@@ -133,9 +151,9 @@ export default function ReportTableTotals({
           width="flex"
           privacyFilter
         />
-
-        {scrollWidth > 0 && <Cell width={scrollWidth} />}
-      </Row>
-    </View>
+      </View>
+    </Row>
   );
 }
+
+export default ReportTableTotals;

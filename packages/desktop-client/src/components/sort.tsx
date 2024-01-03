@@ -72,7 +72,7 @@ export function useDraggable<T>({
 }
 
 export type OnDropCallback = (
-  id: unknown,
+  id: string,
   dropPos: DropPosition,
   targetId: unknown,
 ) => Promise<void> | void;
@@ -86,7 +86,7 @@ type UseDroppableArgs = {
   onLongHover?: OnLongHoverCallback;
 };
 
-export function useDroppable({
+export function useDroppable<T extends { id: string }>({
   types,
   id,
   onDrop,
@@ -95,7 +95,11 @@ export function useDroppable({
   const ref = useRef(null);
   const [dropPos, setDropPos] = useState<DropPosition>(null);
 
-  const [{ isOver }, dropRef] = useDrop({
+  const [{ isOver }, dropRef] = useDrop<
+    { item: T },
+    unknown,
+    { isOver: boolean }
+  >({
     accept: types,
     drop({ item }) {
       onDrop(item.id, dropPos, id);
