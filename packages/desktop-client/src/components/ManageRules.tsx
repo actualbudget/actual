@@ -284,7 +284,6 @@ function ManageRulesContent({
         <View style={{ flex: 1 }}>
           <RulesHeader />
           <SimpleTable
-            data={filteredRules}
             loadMore={loadMore}
             // Hide the last border of the item in the table
             style={{ marginBottom: -1 }}
