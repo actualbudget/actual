@@ -6,6 +6,7 @@ import {
   getNumberFormat,
 } from 'loot-core/src/shared/util';
 
+import { useMergedRefs } from '../../hooks/useMergedRefs';
 import usePrevious from '../../hooks/usePrevious';
 import { theme } from '../../style';
 import Button from '../common/Button';
@@ -23,6 +24,7 @@ const AmountInput = memo(function AmountInput({
   const [value, setValue] = useState(0);
   const inputRef = useRef();
   const prevFocused = usePrevious(focused);
+  const mergedInputRef = useMergedRefs(props.inputRef, inputRef);
 
   const getInitialValue = () => Math.abs(props.value);
 
@@ -89,7 +91,7 @@ const AmountInput = memo(function AmountInput({
   const input = (
     <input
       type="text"
-      ref={inputRef}
+      ref={mergedInputRef}
       value={text}
       inputMode="decimal"
       autoCapitalize="none"
