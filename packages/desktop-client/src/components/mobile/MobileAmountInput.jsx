@@ -72,9 +72,14 @@ const AmountInput = memo(function AmountInput({
     return newValue;
   };
 
-  const onBlur = () => {
+  const onFocus = e => {
+    props.onFocus?.(e);
+  };
+
+  const onBlur = e => {
     const value = applyText();
     props.onUpdate?.(value);
+    props.onBlur?.(e);
   };
 
   const onChangeText = text => {
@@ -90,6 +95,7 @@ const AmountInput = memo(function AmountInput({
       inputMode="decimal"
       autoCapitalize="none"
       onChange={e => onChangeText(e.target.value)}
+      onFocus={onFocus}
       onBlur={onBlur}
       onKeyUp={onKeyPress}
       data-testid="amount-input"
@@ -131,6 +137,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   focusedStyle,
   buttonProps,
   onFocus,
+  onBlur,
   ...props
 }) {
   const [isNegative, setIsNegative] = useState(true);
@@ -166,6 +173,8 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
       <AmountInput
         {...props}
         value={value}
+        onFocus={onFocus}
+        onBlur={onBlur}
         onChange={onChange}
         onUpdate={onUpdate}
         focused={focused}
