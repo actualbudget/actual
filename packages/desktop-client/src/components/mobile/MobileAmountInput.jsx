@@ -7,7 +7,6 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
-import usePrevious from '../../hooks/usePrevious';
 import { theme } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
@@ -23,7 +22,6 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef();
-  const prevFocused = usePrevious(focused);
   const mergedInputRef = useMergedRefs(props.inputRef, inputRef);
 
   const getInitialValue = () => Math.abs(props.value);
@@ -35,7 +33,7 @@ const AmountInput = memo(function AmountInput({
   }, []);
 
   useEffect(() => {
-    if (!prevFocused && focused) {
+    if (focused) {
       focus();
     }
   }, [focused]);

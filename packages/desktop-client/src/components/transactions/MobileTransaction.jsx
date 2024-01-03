@@ -437,7 +437,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
     useSingleActiveEditForm();
   const [totalAmountFocused, setTotalAmountFocused] = useState(false);
   const childTransactionElementRefMap = useRef({});
-  const totalAmountRef = useRef();
 
   const payeesById = useMemo(() => groupById(payees), [payees]);
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
@@ -480,12 +479,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
       return () => setTotalAmountFocused(false);
     });
   };
-
-  useEffect(() => {
-    if (totalAmountFocused) {
-      totalAmountRef.current?.focus();
-    }
-  }, [totalAmountFocused]);
 
   useEffect(() => {
     if (adding) {
@@ -687,7 +680,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
         >
           <FieldLabel title="Amount" flush style={{ marginBottom: 0 }} />
           <FocusableAmountInput
-            inputRef={totalAmountRef}
             value={transaction.amount}
             zeroSign="-"
             focused={totalAmountFocused}
