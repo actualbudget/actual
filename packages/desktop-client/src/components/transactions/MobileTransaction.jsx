@@ -476,14 +476,16 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const onTotalAmountEdit = () => {
     onRequestActiveEdit?.(getFieldName(transaction.id, 'amount'), () => {
-      totalAmountRef.current?.focus();
       setTotalAmountFocused(true);
-      return () => {
-        totalAmountRef.current?.blur();
-        setTotalAmountFocused(false);
-      };
+      return () => setTotalAmountFocused(false);
     });
   };
+
+  useEffect(() => {
+    if (totalAmountFocused) {
+      totalAmountRef.current?.focus();
+    }
+  }, [totalAmountFocused]);
 
   useEffect(() => {
     if (adding) {
