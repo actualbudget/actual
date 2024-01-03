@@ -194,14 +194,24 @@ function getInitialMappings(transactions) {
       fields.find(([name, value]) => value.match(/^-?[.,\d]+$/)),
   );
 
+  const categoryField = key(
+    fields.find(([name, value]) => name.toLowerCase().includes('category')),
+  );
+
   const payeeField = key(
-    fields.find(([name, value]) => name !== dateField && name !== amountField),
+    fields.find(
+      ([name, value]) =>
+        name !== dateField && name !== amountField && name !== categoryField,
+    ),
   );
 
   const notesField = key(
     fields.find(
       ([name, value]) =>
-        name !== dateField && name !== amountField && name !== payeeField,
+        name !== dateField &&
+        name !== amountField &&
+        name !== categoryField &&
+        name !== payeeField,
     ),
   );
 
@@ -221,6 +231,7 @@ function getInitialMappings(transactions) {
     payee: payeeField,
     notes: notesField,
     inOut: inOutField,
+    category: categoryField,
   };
 }
 
@@ -290,6 +301,19 @@ function parseAmountFields(
   };
 }
 
+function parseCategoryFields(trans, categories) {
+  let match = null;
+  for (category of categories) {
+    if (category.id === trans.category) {
+      return null;
+    }
+    if (category.name === trans.category) {
+      match = category.id;
+    }
+  }
+  return match;
+}
+
 function Transaction({
   transaction: rawTransaction,
   fieldMappings,
@@ -301,7 +325,9 @@ function Transaction({
   outValue,
   flipAmount,
   multiplierAmount,
+  categories,
 }) {
+  const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
     () =>
       fieldMappings
@@ -347,6 +373,9 @@ function Transaction({
       </Field>
       <Field width="flex" title={transaction.notes}>
         {transaction.notes}
+      </Field>
+      <Field width="flex" title={categoryList.includes(transaction.category) && transaction.category}>
+        {categoryList.includes(transaction.category) && transaction.category}
       </Field>
       {splitMode ? (
         <>
@@ -602,6 +631,17 @@ function FieldMappings({
             firstTransaction={transactions[0]}
           />
         </View>
+        <View style={{ flex: 1 }}>
+          <SubLabel title="Category" />
+          <SelectField
+            options={options}
+            value={mappings.category}
+            style={{ marginRight: 5 }}
+            onChange={name => onChange('category', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
+          />
+        </View>
         {splitMode ? (
           <>
             <View style={{ flex: 0.5 }}>
@@ -676,7 +716,7 @@ export default function ImportTransactions({ modalProps, options }) {
   const [outValue, setOutValue] = useState('');
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
-  const { accountId, onImported } = options;
+  const { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -866,6 +906,11 @@ export default function ImportTransactions({ modalProps, options }) {
         break;
       }
 
+      const category_id = parseCategoryFields(trans, categories.list);
+      if (category_id != null) {
+        trans.category = category_id;
+      }
+
       const { inflow, outflow, inOut, ...finalTransaction } = trans;
       finalTransactions.push({
         ...finalTransaction,
@@ -919,6 +964,7 @@ export default function ImportTransactions({ modalProps, options }) {
     { name: 'Date', width: 200 },
     { name: 'Payee', width: 'flex' },
     { name: 'Notes', width: 'flex' },
+    { name: 'Category', width: 'flex' },
   ];
 
   if (inOutMode) {
@@ -959,7 +1005,7 @@ export default function ImportTransactions({ modalProps, options }) {
 
           <TableWithNavigator
             items={transactions}
-            fields={['payee', 'amount']}
+            fields={['payee', 'category', 'amount']}
             style={{ backgroundColor: theme.tableHeaderBackground }}
             getItemKey={index => index}
             renderEmpty={() => {
@@ -989,6 +1035,7 @@ export default function ImportTransactions({ modalProps, options }) {
                   outValue={outValue}
                   flipAmount={flipAmount}
                   multiplierAmount={multiplierAmount}
+                  categories={categories.list}
                 />
               </View>
             )}
