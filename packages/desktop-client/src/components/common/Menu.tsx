@@ -34,21 +34,21 @@ type MenuItem = {
   style?: CSSProperties;
 };
 
-type MenuProps<T extends MenuItem = MenuItem> = {
+type MenuProps = {
   header?: ReactNode;
   footer?: ReactNode;
-  items: Array<T | typeof Menu.line>;
-  onMenuSelect: (itemName: T['name']) => void;
+  items: Array<MenuItem | typeof Menu.line>;
+  onMenuSelect: (itemName: MenuItem['name']) => void;
   style?: CSSProperties;
 };
 
-export default function Menu<T extends MenuItem>({
+export default function Menu({
   header,
   footer,
   items: allItems,
   onMenuSelect,
   style,
-}: MenuProps<T>) {
+}: MenuProps) {
   const elRef = useRef(null);
   const items = allItems.filter(x => x);
   const [hoveredIndex, setHoveredIndex] = useState(null);

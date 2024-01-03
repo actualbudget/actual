@@ -11,6 +11,7 @@ import React, {
   type ReactNode,
   type KeyboardEvent,
   type UIEvent,
+  type ReactElement,
   type Ref,
 } from 'react';
 import { useStore } from 'react-redux';
@@ -846,18 +847,17 @@ type TableHandleRef<T extends TableItem = TableItem> = {
 type TableWithNavigatorProps = TableProps & {
   fields;
 };
-export const TableWithNavigator = ({
-  fields,
-  ...props
-}: TableWithNavigatorProps) => {
+export const TableWithNavigator = forwardRef<
+  TableHandleRef<TableItem>,
+  TableWithNavigatorProps
+>(({ fields, ...props }, ref) => {
   const navigator = useTableNavigator(props.items, fields);
   return <Table {...props} navigator={navigator} />;
-};
+});
 
 type TableItem = { id: number | string };
 
 type TableProps<T extends TableItem = TableItem> = {
-  tableRef?: Ref<TableHandleRef<T>>;
   items: T[];
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
@@ -886,276 +886,282 @@ type TableProps<T extends TableItem = TableItem> = {
   saveScrollWidth?: (parent, child) => void;
 };
 
-export const Table = <T extends TableItem>({
-  tableRef,
-  items,
-  count,
-  headers,
-  contentHeader,
-  loading,
-  rowHeight = ROW_HEIGHT,
-  backgroundColor = theme.tableHeaderBackground,
-  renderItem,
-  renderEmpty,
-  getItemKey,
-  loadMore,
-  style,
-  navigator,
-  onScroll,
-  version = 'v1',
-  allowPopupsEscape,
-  isSelected,
-  saveScrollWidth,
-  ...props
-}: TableProps<T>) => {
-  if (!navigator) {
-    navigator = {
-      onEdit: () => {},
-      editingId: null,
-      focusedField: null,
-      getNavigatorProps: props => props,
-    };
-  }
+export const Table: <T extends TableItem>(
+  props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
+) => ReactElement = forwardRef<TableHandleRef, TableProps>(
+  (
+    {
+      items,
+      count,
+      headers,
+      contentHeader,
+      loading,
+      rowHeight = ROW_HEIGHT,
+      backgroundColor = theme.tableHeaderBackground,
+      renderItem,
+      renderEmpty,
+      getItemKey,
+      loadMore,
+      style,
+      navigator,
+      onScroll,
+      version = 'v1',
+      allowPopupsEscape,
+      isSelected,
+      saveScrollWidth,
+      ...props
+    },
+    ref,
+  ) => {
+    if (!navigator) {
+      navigator = {
+        onEdit: () => {},
+        editingId: null,
+        focusedField: null,
+        getNavigatorProps: props => props,
+      };
+    }
 
-  const { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
-  const list = useRef(null);
-  const listContainer = useRef(null);
-  const scrollContainer = useRef(null);
-  const initialScrollTo = useRef(null);
-  const listInitialized = useRef(false);
+    const { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
+    const list = useRef(null);
+    const listContainer = useRef(null);
+    const scrollContainer = useRef(null);
+    const initialScrollTo = useRef(null);
+    const listInitialized = useRef(false);
 
-  useImperativeHandle(tableRef, () => ({
-    scrollTo: (id, alignment = 'smart') => {
-      const index = items.findIndex(item => item.id === id);
-      if (index !== -1) {
-        if (!list.current) {
-          // If the table hasn't been laid out yet, we need to wait for
-          // that to happen before we can scroll to something
-          initialScrollTo.current = index;
-        } else {
-          list.current.scrollToItem(index, alignment);
+    useImperativeHandle(ref, () => ({
+      scrollTo: (id, alignment = 'smart') => {
+        const index = items.findIndex(item => item.id === id);
+        if (index !== -1) {
+          if (!list.current) {
+            // If the table hasn't been laid out yet, we need to wait for
+            // that to happen before we can scroll to something
+            initialScrollTo.current = index;
+          } else {
+            list.current.scrollToItem(index, alignment);
+          }
         }
+      },
+
+      scrollToTop: () => {
+        list.current?.scrollTo(0);
+      },
+
+      getScrolledItem: () => {
+        if (scrollContainer.current) {
+          const offset = scrollContainer.current.scrollTop;
+          const index = list.current.getStartIndexForOffset(offset);
+          return items[index].id;
+        }
+        return 0;
+      },
+
+      setRowAnimation: flag => {
+        list.current?.setRowAnimation(flag);
+      },
+
+      edit(id, field, shouldScroll) {
+        onEdit(id, field);
+
+        if (id && shouldScroll) {
+          // @ts-expect-error this should not be possible
+          ref.scrollTo(id);
+        }
+      },
+
+      anchor() {
+        list.current?.anchor();
+      },
+
+      unanchor() {
+        list.current?.unanchor();
+      },
+
+      isAnchored() {
+        return list.current && list.current.isAnchored();
+      },
+    }));
+
+    useLayoutEffect(() => {
+      // We wait for the list to mount because AutoSizer needs to run
+      // before it's mounted
+      if (!listInitialized.current && listContainer.current) {
+        // Animation is on by default
+        list.current?.setRowAnimation(true);
+        listInitialized.current = true;
       }
-    },
 
-    scrollToTop: () => {
-      list.current?.scrollTo(0);
-    },
-
-    getScrolledItem: () => {
-      if (scrollContainer.current) {
-        const offset = scrollContainer.current.scrollTop;
-        const index = list.current.getStartIndexForOffset(offset);
-        return items[index].id;
+      if (scrollContainer.current && saveScrollWidth) {
+        saveScrollWidth(
+          scrollContainer.current.offsetParent
+            ? scrollContainer.current.offsetParent.clientWidth
+            : 0,
+          scrollContainer.current ? scrollContainer.current.clientWidth : 0,
+        );
       }
-      return 0;
-    },
-
-    setRowAnimation: flag => {
-      list.current?.setRowAnimation(flag);
-    },
-
-    edit(id, field, shouldScroll) {
-      onEdit(id, field);
-
-      if (id && shouldScroll) {
-        // @ts-expect-error this should not be possible
-        ref.scrollTo(id);
-      }
-    },
-
-    anchor() {
-      list.current?.anchor();
-    },
-
-    unanchor() {
-      list.current?.unanchor();
-    },
-
-    isAnchored() {
-      return list.current && list.current.isAnchored();
-    },
-  }));
-
-  useLayoutEffect(() => {
-    // We wait for the list to mount because AutoSizer needs to run
-    // before it's mounted
-    if (!listInitialized.current && listContainer.current) {
-      // Animation is on by default
-      list.current?.setRowAnimation(true);
-      listInitialized.current = true;
-    }
-
-    if (scrollContainer.current && saveScrollWidth) {
-      saveScrollWidth(
-        scrollContainer.current.offsetParent
-          ? scrollContainer.current.offsetParent.clientWidth
-          : 0,
-        scrollContainer.current ? scrollContainer.current.clientWidth : 0,
-      );
-    }
-  });
-
-  function renderRow({ index, style, key }) {
-    const item = items[index];
-    const editing = editingId === item.id;
-    const selected = isSelected && isSelected(item.id);
-
-    const row = renderItem({
-      item,
-      editing,
-      focusedField: editing && focusedField,
-      onEdit,
-      index,
-      position: style.top,
     });
 
-    // TODO: Need to also apply zIndex if item is selected
-    // * Port over ListAnimation to Table
-    // * Move highlighted functionality into here
-    return (
-      <View
-        key={key}
-        style={{
-          ...rowStyle,
-          zIndex: editing || selected ? 101 : 'auto',
-          transform: 'translateY(var(--pos))',
-        }}
-        // @ts-expect-error not a recognised style attribute
-        nativeStyle={{ '--pos': `${style.top - 1}px` }}
-        data-focus-key={item.id}
-      >
-        {row}
-      </View>
-    );
-  }
+    function renderRow({ index, style, key }) {
+      const item = items[index];
+      const editing = editingId === item.id;
+      const selected = isSelected && isSelected(item.id);
 
-  function getScrollOffset(height, index) {
-    return (
-      index * (rowHeight - 1) +
-      (rowHeight - 1) / 2 -
-      height / 2 +
-      (rowHeight - 1) * 2
-    );
-  }
+      const row = renderItem({
+        item,
+        editing,
+        focusedField: editing && focusedField,
+        onEdit,
+        index,
+        position: style.top,
+      });
 
-  function onItemsRendered({ overscanStartIndex, overscanStopIndex }) {
-    if (loadMore && overscanStopIndex > items.length - 100) {
-      loadMore();
-    }
-  }
-
-  function getEmptyContent(empty) {
-    if (empty == null) {
-      return null;
-    } else if (typeof empty === 'function') {
-      return empty();
+      // TODO: Need to also apply zIndex if item is selected
+      // * Port over ListAnimation to Table
+      // * Move highlighted functionality into here
+      return (
+        <View
+          key={key}
+          style={{
+            ...rowStyle,
+            zIndex: editing || selected ? 101 : 'auto',
+            transform: 'translateY(var(--pos))',
+          }}
+          // @ts-expect-error not a recognised style attribute
+          nativeStyle={{ '--pos': `${style.top - 1}px` }}
+          data-focus-key={item.id}
+        >
+          {row}
+        </View>
+      );
     }
 
+    function getScrollOffset(height, index) {
+      return (
+        index * (rowHeight - 1) +
+        (rowHeight - 1) / 2 -
+        height / 2 +
+        (rowHeight - 1) * 2
+      );
+    }
+
+    function onItemsRendered({ overscanStartIndex, overscanStopIndex }) {
+      if (loadMore && overscanStopIndex > items.length - 100) {
+        loadMore();
+      }
+    }
+
+    function getEmptyContent(empty) {
+      if (empty == null) {
+        return null;
+      } else if (typeof empty === 'function') {
+        return empty();
+      }
+
+      return (
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontStyle: 'italic',
+            color: theme.tableText,
+            flex: 1,
+          }}
+        >
+          {empty}
+        </View>
+      );
+    }
+
+    if (loading) {
+      return (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor,
+          }}
+        >
+          <AnimatedLoading width={25} color={theme.tableText} />
+        </View>
+      );
+    }
+
+    const isEmpty = (count || items.length) === 0;
+
     return (
       <View
         style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          fontStyle: 'italic',
-          color: theme.tableText,
           flex: 1,
+          outline: 'none',
+          ...style,
         }}
+        tabIndex={1}
+        {...getNavigatorProps(props)}
+        data-testid="table"
       >
-        {empty}
-      </View>
-    );
-  }
-
-  if (loading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor,
-        }}
-      >
-        <AnimatedLoading width={25} color={theme.tableText} />
-      </View>
-    );
-  }
-
-  const isEmpty = (count || items.length) === 0;
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        outline: 'none',
-        ...style,
-      }}
-      tabIndex={1}
-      {...getNavigatorProps(props)}
-      data-testid="table"
-    >
-      {headers && (
-        <TableHeader
-          height={rowHeight}
-          {...(Array.isArray(headers) ? { headers } : { children: headers })}
-        />
-      )}
-      <View
-        style={{
-          flex: `1 1 ${rowHeight * Math.max(2, items.length)}px`,
-          backgroundColor,
-        }}
-      >
-        {isEmpty ? (
-          getEmptyContent(renderEmpty)
-        ) : (
-          <AutoSizer>
-            {({ width, height }) => {
-              if (width === 0 || height === 0) {
-                return null;
-              }
-
-              return (
-                <IntersectionBoundary.Provider
-                  value={!allowPopupsEscape && listContainer}
-                >
-                  <AvoidRefocusScrollProvider>
-                    <FixedSizeList
-                      ref={list}
-                      header={contentHeader}
-                      innerRef={listContainer}
-                      outerRef={scrollContainer}
-                      width={width}
-                      height={height}
-                      renderRow={renderRow}
-                      itemCount={count || items.length}
-                      itemSize={rowHeight - 1}
-                      itemKey={
-                        getItemKey || ((index: number) => items[index].id)
-                      }
-                      indexForKey={key =>
-                        items.findIndex(item => item.id === key)
-                      }
-                      initialScrollOffset={
-                        initialScrollTo.current
-                          ? getScrollOffset(height, initialScrollTo.current)
-                          : 0
-                      }
-                      overscanCount={5}
-                      onItemsRendered={onItemsRendered}
-                      onScroll={onScroll}
-                    />
-                  </AvoidRefocusScrollProvider>
-                </IntersectionBoundary.Provider>
-              );
-            }}
-          </AutoSizer>
+        {headers && (
+          <TableHeader
+            height={rowHeight}
+            {...(Array.isArray(headers) ? { headers } : { children: headers })}
+          />
         )}
+        <View
+          style={{
+            flex: `1 1 ${rowHeight * Math.max(2, items.length)}px`,
+            backgroundColor,
+          }}
+        >
+          {isEmpty ? (
+            getEmptyContent(renderEmpty)
+          ) : (
+            <AutoSizer>
+              {({ width, height }) => {
+                if (width === 0 || height === 0) {
+                  return null;
+                }
+
+                return (
+                  <IntersectionBoundary.Provider
+                    value={!allowPopupsEscape && listContainer}
+                  >
+                    <AvoidRefocusScrollProvider>
+                      <FixedSizeList
+                        ref={list}
+                        header={contentHeader}
+                        innerRef={listContainer}
+                        outerRef={scrollContainer}
+                        width={width}
+                        height={height}
+                        renderRow={renderRow}
+                        itemCount={count || items.length}
+                        itemSize={rowHeight - 1}
+                        itemKey={
+                          getItemKey || ((index: number) => items[index].id)
+                        }
+                        indexForKey={key =>
+                          items.findIndex(item => item.id === key)
+                        }
+                        initialScrollOffset={
+                          initialScrollTo.current
+                            ? getScrollOffset(height, initialScrollTo.current)
+                            : 0
+                        }
+                        overscanCount={5}
+                        onItemsRendered={onItemsRendered}
+                        onScroll={onScroll}
+                      />
+                    </AvoidRefocusScrollProvider>
+                  </IntersectionBoundary.Provider>
+                );
+              }}
+            </AutoSizer>
+          )}
+        </View>
       </View>
-    </View>
-  );
-};
+    );
+  },
+);
 
 export type TableNavigator<T extends TableItem> = {
   onEdit: (id: T['id'], field?: string) => void;
