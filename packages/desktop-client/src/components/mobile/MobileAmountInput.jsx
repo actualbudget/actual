@@ -6,6 +6,7 @@ import {
   getNumberFormat,
 } from 'loot-core/src/shared/util';
 
+import usePrevious from '../../hooks/usePrevious';
 import { theme } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
@@ -21,6 +22,7 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef();
+  const prevFocused = usePrevious(focused);
 
   const getInitialValue = () => Math.abs(props.value);
 
@@ -31,11 +33,7 @@ const AmountInput = memo(function AmountInput({
   }, []);
 
   useEffect(() => {
-    setEditing(text !== '');
-  }, [text]);
-
-  useEffect(() => {
-    if (focused) {
+    if (!prevFocused && focused) {
       focus();
     }
   }, [focused]);
@@ -83,6 +81,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = text => {
+    setEditing(true);
     setText(text);
     props.onChange?.(text);
   };
