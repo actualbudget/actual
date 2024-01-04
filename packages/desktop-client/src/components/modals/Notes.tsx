@@ -6,7 +6,7 @@ import q from 'loot-core/src/shared/query';
 import Check from '../../icons/v2/Check';
 import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';
-import Modal from '../common/Modal';
+import { Modal } from '../common/Modal';
 import View from '../common/View';
 import { Notes as NotesComponent } from '../Notes';
 
