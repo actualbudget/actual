@@ -16,14 +16,14 @@ import NamespaceContext from '../../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../../tooltips';
 import { useRollover } from '../RolloverContext';
 
-import ToBudget from './ToBudget';
-import TotalsList from './TotalsList';
+import { ToBudget } from './ToBudget';
+import { TotalsList } from './TotalsList';
 
 type BudgetSummaryProps = {
   month: string;
   isGoalTemplatesEnabled?: boolean;
 };
-export default function BudgetSummary({
+export function BudgetSummary({
   month,
   isGoalTemplatesEnabled,
 }: BudgetSummaryProps) {

@@ -1473,7 +1473,7 @@ function AccountHack(props) {
   );
 }
 
-export default function Account() {
+export function Account() {
   const params = useParams();
   const location = useLocation();
 

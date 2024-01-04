@@ -61,7 +61,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
   );
 }
 
-export default function AccountDetails({
+export function AccountDetails({
   account,
   prependTransactions,
   transactions,

@@ -18,14 +18,14 @@ import NamespaceContext from '../../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../../tooltips';
 import { useReport } from '../ReportContext';
 
-import ExpenseTotal from './ExpenseTotal';
-import IncomeTotal from './IncomeTotal';
-import Saved from './Saved';
+import { ExpenseTotal } from './ExpenseTotal';
+import { IncomeTotal } from './IncomeTotal';
+import { Saved } from './Saved';
 
 type BudgetSummaryProps = {
   month?: string;
 };
-export default function BudgetSummary({ month }: BudgetSummaryProps) {
+export function BudgetSummary({ month }: BudgetSummaryProps) {
   const {
     currentMonth,
     summaryCollapsed: collapsed,

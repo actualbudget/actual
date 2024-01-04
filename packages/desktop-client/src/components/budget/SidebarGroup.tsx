@@ -36,7 +36,7 @@ type SidebarGroupProps = {
   onToggleCollapse?: (id: string) => void;
 };
 
-function SidebarGroup({
+export function SidebarGroup({
   group,
   editing,
   collapsed,
@@ -204,5 +204,3 @@ function SidebarGroup({
     </View>
   );
 }
-
-export default SidebarGroup;

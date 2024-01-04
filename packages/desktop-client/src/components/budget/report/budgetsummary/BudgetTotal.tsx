@@ -17,7 +17,7 @@ type BudgetTotalProps = {
   ProgressComponent: ComponentType<{ current; target }>;
   style?: CSSProperties;
 };
-export default function BudgetTotal({
+export function BudgetTotal({
   title,
   current,
   target,

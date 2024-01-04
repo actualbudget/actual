@@ -43,7 +43,7 @@ import {
   type TitlebarMessage,
 } from '../Titlebar';
 
-import DynamicBudgetTable from './DynamicBudgetTable';
+import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as report from './report/ReportComponents';
 import { ReportProvider } from './report/ReportContext';
 import * as rollover from './rollover/RolloverComponents';
@@ -100,7 +100,7 @@ type BudgetProps = {
   addNotification: BoundActions['addNotification'];
 };
 
-function Budget(props: BudgetProps) {
+function BudgetInner(props: BudgetProps) {
   const currentMonth = monthUtils.currentMonth();
   const tableRef = useRef(null);
 
@@ -532,7 +532,7 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
   );
 });
 
-export default function BudgetWrapper(props) {
+export function Budget(props) {
   const startMonth = useSelector(
     state => state.prefs.local['budget.startMonth'],
   );
@@ -594,7 +594,7 @@ export default function BudgetWrapper(props) {
         overflow: 'hidden',
       }}
     >
-      <Budget
+      <BudgetInner
         startMonth={startMonth}
         collapsedPrefs={collapsedPrefs}
         summaryCollapsed={summaryCollapsed}

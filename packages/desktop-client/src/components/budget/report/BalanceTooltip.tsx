@@ -14,7 +14,7 @@ type BalanceTooltipProps = {
   onClose?: () => void;
 };
 
-export default function BalanceTooltip({
+export function BalanceTooltip({
   categoryId,
   tooltip,
   monthIndex,

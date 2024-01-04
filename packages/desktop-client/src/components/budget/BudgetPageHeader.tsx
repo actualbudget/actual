@@ -14,7 +14,7 @@ type BudgetPageHeaderProps = {
   monthBounds: ComponentProps<typeof MonthPicker>['monthBounds'];
 };
 
-const BudgetPageHeader = memo<BudgetPageHeaderProps>(
+export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
   ({ startMonth, onMonthSelect, numMonths, monthBounds }) => {
     function getValidMonth(month) {
       const start = monthBounds.start;
@@ -43,5 +43,3 @@ const BudgetPageHeader = memo<BudgetPageHeaderProps>(
     );
   },
 );
-
-export default BudgetPageHeader;

@@ -10,7 +10,7 @@ import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import useCategories from '../../../hooks/useCategories';
-import CategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
+import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { Button } from '../../common/Button';
 import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
@@ -25,7 +25,7 @@ type TransferTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
   showToBeBudgeted?: boolean;
   onSubmit: (amount: number, category: unknown) => void;
 };
-export default function TransferTooltip({
+export function TransferTooltip({
   initialAmount,
   initialAmountName,
   showToBeBudgeted,

@@ -32,10 +32,10 @@ import { AmountInput } from '../util/AmountInput';
 // } from '../mobile/AmountInput';
 
 // import { DragDrop, Draggable, Droppable, DragDropHighlight } from './dragdrop';
-import BalanceWithCarryover from './BalanceWithCarryover';
+import { BalanceWithCarryover } from './BalanceWithCarryover';
 import { ListItem, ROW_HEIGHT } from './MobileTable';
-import ReportBudgetBalanceTooltip from './report/BalanceTooltip';
-import RolloverBudgetBalanceTooltip from './rollover/BalanceTooltip';
+import { BalanceTooltip as ReportBudgetBalanceTooltip } from './report/BalanceTooltip';
+import { BalanceTooltip as RolloverBudgetBalanceTooltip } from './rollover/BalanceTooltip';
 import { makeAmountGrey } from './util';
 
 function ToBudget({ toBudget, onClick }) {

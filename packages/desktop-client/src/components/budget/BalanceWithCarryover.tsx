@@ -19,7 +19,7 @@ type BalanceWithCarryoverProps = {
   balanceStyle?: CSSProperties;
   carryoverStyle?: CSSProperties;
 };
-export default function BalanceWithCarryover({
+export function BalanceWithCarryover({
   carryover,
   balance,
   goal,

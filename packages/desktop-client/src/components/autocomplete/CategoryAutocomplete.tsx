@@ -20,7 +20,7 @@ import { type CSSProperties, theme } from '../../style';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';
+import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 
 export type CategoryListProps = {
   items: Array<CategoryEntity & { group?: CategoryGroupEntity }>;
@@ -107,7 +107,7 @@ type CategoryAutocompleteProps = ComponentProps<typeof Autocomplete> & {
   renderCategoryItem?: (props: CategoryItemProps) => ReactNode;
 };
 
-export default function CategoryAutocomplete({
+export function CategoryAutocomplete({
   categoryGroups,
   showSplitOption,
   embedded,

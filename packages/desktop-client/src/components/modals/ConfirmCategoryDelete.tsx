@@ -4,7 +4,7 @@ import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
+import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Block } from '../common/Block';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';

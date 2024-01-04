@@ -19,7 +19,7 @@ type SavedProps = {
   projected: boolean;
   style?: CSSProperties;
 };
-export default function Saved({ projected, style }: SavedProps) {
+export function Saved({ projected, style }: SavedProps) {
   const budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
   const totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
   const format = useFormat();
