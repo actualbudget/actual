@@ -1,7 +1,6 @@
 import { type ChangeEvent, type Ref } from 'react';
 
-import SvgRemove from '../../icons/v2/Remove';
-import SearchAlternate from '../../icons/v2/SearchAlternate';
+import { SvgRemove, SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
 
 import { Button } from './Button';
@@ -42,7 +41,7 @@ export function Search({
             }
       }
       leftContent={
-        <SearchAlternate
+        <SvgSearchAlternate
           style={{
             width: 13,
             height: 13,

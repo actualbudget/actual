@@ -1,7 +1,7 @@
 import React, { type MouseEventHandler } from 'react';
 
-import Pin from '../../icons/v1/Pin';
-import ArrowButtonLeft1 from '../../icons/v2/ArrowButtonLeft1';
+import { SvgPin } from '../../icons/v1';
+import { SvgArrowButtonLeft1 } from '../../icons/v2';
 import { type CSSProperties, theme } from '../../style';
 import { Button } from '../common/Button';
 import { View } from '../common/View';
@@ -26,7 +26,7 @@ export function ToggleButton({
         color={theme.buttonMenuBorder}
       >
         {isFloating ? (
-          <Pin
+          <SvgPin
             style={{
               margin: -2,
               width: 15,
@@ -35,7 +35,7 @@ export function ToggleButton({
             }}
           />
         ) : (
-          <ArrowButtonLeft1 style={{ width: 13, height: 13 }} />
+          <SvgArrowButtonLeft1 style={{ width: 13, height: 13 }} />
         )}
       </Button>
     </View>

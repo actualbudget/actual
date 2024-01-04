@@ -12,8 +12,8 @@ import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
-import Check from '../../icons/v2/Check';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
+import { SvgCheck } from '../../icons/v2';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
@@ -104,7 +104,7 @@ function OverflowMenu({
           setOpen(true);
         }}
       >
-        <DotsHorizontalTriple
+        <SvgDotsHorizontalTriple
           width={15}
           height={15}
           style={{ transform: 'rotateZ(90deg)' }}
@@ -297,7 +297,7 @@ export function SchedulesTable({
         {!minimal && (
           <Field width={80} style={{ textAlign: 'center' }}>
             {schedule._date && schedule._date.frequency && (
-              <Check style={{ width: 13, height: 13 }} />
+              <SvgCheck style={{ width: 13, height: 13 }} />
             )}
           </Field>
         )}

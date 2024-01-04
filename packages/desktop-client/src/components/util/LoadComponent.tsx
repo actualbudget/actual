@@ -1,6 +1,6 @@
 import { type ComponentType, useEffect, useState } from 'react';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
 import { Block } from '../common/Block';
 import { View } from '../common/View';

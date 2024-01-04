@@ -9,8 +9,8 @@ import ReactModal from 'react-modal';
 
 import hotkeys from 'hotkeys-js';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
-import Delete from '../../icons/v0/Delete';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, styles, theme } from '../../style';
 import { tokens } from '../../tokens';
 
@@ -268,7 +268,7 @@ export const Modal = ({
                     style={{ padding: '10px 10px' }}
                     aria-label="Close"
                   >
-                    <Delete width={10} style={{ color: 'inherit' }} />
+                    <SvgDelete width={10} style={{ color: 'inherit' }} />
                   </Button>
                 )}
               </View>

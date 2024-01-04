@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import q from 'loot-core/src/shared/query';
 
-import Check from '../../icons/v2/Check';
+import { SvgCheck } from '../../icons/v2';
 import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
@@ -88,7 +88,7 @@ export function Notes({ modalProps, id, name, onSave }: NotesProps) {
               }}
               onClick={_onSave}
             >
-              <Check width={17} height={17} style={{ paddingRight: 5 }} />
+              <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />
               Save notes
             </Button>
           </View>
