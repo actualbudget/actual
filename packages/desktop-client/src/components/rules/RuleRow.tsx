@@ -4,7 +4,7 @@ import { friendlyOp } from 'loot-core/src/shared/rules';
 import { type RuleEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
-import { SvgArrowRight } from '../../icons/v0';
+import { SvgRightArrow2 } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Stack } from '../common/Stack';
@@ -93,7 +93,7 @@ export const RuleRow = memo(
             </View>
 
             <Text>
-              <SvgArrowRight
+              <SvgRightArrow2
                 style={{ width: 12, height: 12, color: theme.tableText }}
               />
             </Text>

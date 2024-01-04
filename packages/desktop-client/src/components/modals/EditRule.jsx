@@ -26,9 +26,8 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
-import AddIcon from '../../icons/v0/Add';
-import SubtractIcon from '../../icons/v0/Subtract';
-import InformationOutline from '../../icons/v1/InformationOutline';
+import { SvgAdd, SvgSubtract } from '../../icons/v0';
+import { SvgInformationOutline } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
@@ -132,7 +131,7 @@ function EditorButtons({ onAdd, onDelete, style }) {
           style={{ padding: 7 }}
           aria-label="Delete entry"
         >
-          <SubtractIcon style={{ width: 8, height: 8, color: 'inherit' }} />
+          <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
         </Button>
       )}
       {onAdd && (
@@ -142,7 +141,7 @@ function EditorButtons({ onAdd, onDelete, style }) {
           style={{ padding: 7 }}
           aria-label="Add entry"
         >
-          <AddIcon style={{ width: 10, height: 10, color: 'inherit' }} />
+          <SvgAdd style={{ width: 10, height: 10, color: 'inherit' }} />
         </Button>
       )}
     </>
@@ -373,7 +372,7 @@ function StageInfo() {
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
       >
-        <InformationOutline
+        <SvgInformationOutline
           style={{ width: 11, height: 11, color: theme.pageTextLight }}
         />
       </View>

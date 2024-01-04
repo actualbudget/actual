@@ -23,7 +23,7 @@ import {
 } from 'loot-core/src/shared/rules';
 import { titleFirst, integerToCurrency } from 'loot-core/src/shared/util';
 
-import DeleteIcon from '../../icons/v0/Delete';
+import { SvgDelete } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { HoverTarget } from '../common/HoverTarget';
@@ -562,7 +562,7 @@ function FilterExpression({
         </div>
       </Button>
       <Button type="bare" onClick={onDelete} aria-label="Delete filter">
-        <DeleteIcon
+        <SvgDelete
           style={{
             width: 8,
             height: 8,

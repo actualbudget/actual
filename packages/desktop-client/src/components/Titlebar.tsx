@@ -17,7 +17,7 @@ import { type LocalPrefs } from 'loot-core/src/types/prefs';
 import { useActions } from '../hooks/useActions';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useNavigate } from '../hooks/useNavigate';
-import { SvgArrowLeft } from '../icons/v1/ArrowLeft';
+import { SvgArrowLeft } from '../icons/v1';
 import {
   SvgAlertTriangle,
   SvgNavigationMenu,
