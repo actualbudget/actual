@@ -18,7 +18,7 @@ type SingleInputProps = {
   inputPlaceholder?: string;
 };
 
-function SingleInput({
+export function SingleInput({
   modalProps,
   title,
   buttonText,
@@ -90,5 +90,3 @@ function SingleInput({
     </Modal>
   );
 }
-
-export default SingleInput;

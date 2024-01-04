@@ -25,7 +25,7 @@ type CreateEncryptionKeyProps = {
   };
 };
 
-export default function CreateEncryptionKey({
+export function CreateEncryptionKey({
   modalProps,
   actions,
   options = {},

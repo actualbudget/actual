@@ -9,7 +9,7 @@ import useCategories from '../../hooks/useCategories';
 
 import { ManagePayees } from './ManagePayees';
 
-export default function ManagePayeesWithData({ initialSelectedIds }) {
+export function ManagePayeesWithData({ initialSelectedIds }) {
   const initialPayees = useSelector(state => state.queries.payees);
   const lastUndoState = useSelector(state => state.app.lastUndoState);
   const { grouped: categoryGroups } = useCategories();

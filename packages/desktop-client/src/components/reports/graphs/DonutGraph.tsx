@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { type CSSProperties } from '../../../style';
-import Container from '../Container';
+import { Container } from '../Container';
 import { type DataEntity } from '../entities';
 
 const RADIAN = Math.PI / 180;
@@ -92,7 +92,7 @@ type DonutGraphProps = {
   compact?: boolean;
 };
 
-function DonutGraph({
+export function DonutGraph({
   style,
   data,
   groupBy,
@@ -153,5 +153,3 @@ function DonutGraph({
     </Container>
   );
 }
-
-export default DonutGraph;

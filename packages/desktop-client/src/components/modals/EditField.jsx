@@ -37,7 +37,7 @@ function CreatePayeeIcon(props) {
   return <Add {...props} width={14} height={14} />;
 }
 
-export default function EditField({ modalProps, name, onSubmit, onClose }) {
+export function EditField({ modalProps, name, onSubmit, onClose }) {
   const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );

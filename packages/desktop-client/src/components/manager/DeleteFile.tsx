@@ -16,11 +16,7 @@ type DeleteFileProps = {
   file: File;
 };
 
-export default function DeleteFile({
-  modalProps,
-  actions,
-  file,
-}: DeleteFileProps) {
+export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
   // If the state is "broken" that means it was created by another
   // user. The current user should be able to delete the local file,
   // but not the remote one

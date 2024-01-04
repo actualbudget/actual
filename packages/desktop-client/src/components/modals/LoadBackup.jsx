@@ -47,7 +47,7 @@ class BackupTable extends Component {
   }
 }
 
-function LoadBackup({
+export function LoadBackup({
   budgetId,
   watchUpdates,
   backupDisabled,
@@ -133,5 +133,3 @@ function LoadBackup({
     </Modal>
   );
 }
-
-export default LoadBackup;

@@ -31,7 +31,7 @@ type ImportProps = {
   modalProps?: ModalProps;
 };
 
-function Import({ modalProps }: ImportProps) {
+export function ImportActual({ modalProps }: ImportProps) {
   const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
@@ -95,5 +95,3 @@ function Import({ modalProps }: ImportProps) {
     </Modal>
   );
 }
-
-export default Import;

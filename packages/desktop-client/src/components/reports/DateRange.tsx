@@ -10,7 +10,7 @@ type DateRangeProps = {
   end: string;
 };
 
-function DateRange({
+export function DateRange({
   start: startProp,
   end: endProp,
 }: DateRangeProps): ReactElement {
@@ -36,5 +36,3 @@ function DateRange({
 
   return <Block style={{ color: theme.pageTextSubdued }}>{content}</Block>;
 }
-
-export default DateRange;

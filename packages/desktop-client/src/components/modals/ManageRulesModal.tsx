@@ -12,7 +12,7 @@ type ManageRulesModalProps = {
   payeeId?: string;
 };
 
-export default function ManageRulesModal({
+export function ManageRulesModal({
   modalProps,
   payeeId,
 }: ManageRulesModalProps) {

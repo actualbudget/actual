@@ -85,7 +85,7 @@ type GoCardlessExternalMsgProps = {
   onClose: () => void;
 };
 
-export default function GoCardlessExternalMsg({
+export function GoCardlessExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,

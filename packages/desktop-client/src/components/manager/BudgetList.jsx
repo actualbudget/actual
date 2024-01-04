@@ -245,7 +245,7 @@ function RefreshButton({ onRefresh }) {
   );
 }
 
-export default function BudgetList() {
+export function BudgetList() {
   const files = useSelector(state => state.budgets.allFiles || []);
 
   const {

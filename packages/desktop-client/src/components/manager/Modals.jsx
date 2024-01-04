@@ -3,17 +3,17 @@ import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
 import { View } from '../common/View';
-import CreateEncryptionKey from '../modals/CreateEncryptionKey';
-import FixEncryptionKey from '../modals/FixEncryptionKey';
-import LoadBackup from '../modals/LoadBackup';
+import { CreateEncryptionKey } from '../modals/CreateEncryptionKey';
+import { FixEncryptionKey } from '../modals/FixEncryptionKey';
+import { LoadBackup } from '../modals/LoadBackup';
 
-import DeleteFile from './DeleteFile';
-import Import from './Import';
-import ImportActual from './ImportActual';
-import ImportYNAB4 from './ImportYNAB4';
-import ImportYNAB5 from './ImportYNAB5';
+import { DeleteFile } from './DeleteFile';
+import { Import } from './Import';
+import { ImportActual } from './ImportActual';
+import { ImportYNAB4 } from './ImportYNAB4';
+import { ImportYNAB5 } from './ImportYNAB5';
 
-export default function Modals() {
+export function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);
   const isHidden = useSelector(state => state.modals.isHidden);
   const actions = useActions();

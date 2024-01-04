@@ -20,10 +20,10 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import Container from '../Container';
+import { Container } from '../Container';
 import { type DataEntity } from '../entities';
-import getCustomTick from '../getCustomTick';
-import numberFormatterTooltip from '../numberFormatter';
+import { getCustomTick } from '../getCustomTick';
+import { numberFormatterTooltip } from '../numberFormatter';
 
 type PayloadChild = {
   props: {
@@ -114,7 +114,7 @@ type BarGraphProps = {
   compact?: boolean;
 };
 
-function BarGraph({
+export function BarGraph({
   style,
   data,
   groupBy,
@@ -216,5 +216,3 @@ function BarGraph({
     </Container>
   );
 }
-
-export default BarGraph;

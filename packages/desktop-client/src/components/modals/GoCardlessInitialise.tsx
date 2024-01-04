@@ -17,7 +17,7 @@ type GoCardlessInitialiseProps = {
   onSuccess: () => void;
 };
 
-const GoCardlessInitialise = ({
+export const GoCardlessInitialise = ({
   modalProps,
   onSuccess,
 }: GoCardlessInitialiseProps) => {
@@ -104,5 +104,3 @@ const GoCardlessInitialise = ({
     </Modal>
   );
 };
-
-export default GoCardlessInitialise;

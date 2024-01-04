@@ -30,7 +30,7 @@ type CategoryMenuProps = {
   onClose?: () => void;
 };
 
-export default function CategoryMenu({
+export function CategoryMenu({
   modalProps,
   categoryId,
   onSave,

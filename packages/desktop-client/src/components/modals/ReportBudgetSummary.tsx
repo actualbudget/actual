@@ -17,7 +17,7 @@ type ReportBudgetSummaryProps = {
   month: string;
 };
 
-export default function ReportBudgetSummary({
+export function ReportBudgetSummary({
   month,
   modalProps,
 }: ReportBudgetSummaryProps) {

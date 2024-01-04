@@ -12,7 +12,7 @@ type ConfirmTransactionEditProps = {
   confirmReason: string;
 };
 
-function ConfirmTransactionEdit({
+export function ConfirmTransactionEdit({
   modalProps,
   onConfirm,
   confirmReason,
@@ -83,5 +83,3 @@ function ConfirmTransactionEdit({
     </Modal>
   );
 }
-
-export default ConfirmTransactionEdit;

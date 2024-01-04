@@ -16,7 +16,7 @@ type ReportTableHeaderProps = {
   handleScroll?: UIEventHandler<HTMLDivElement>;
 };
 
-function ReportTableHeader({
+export function ReportTableHeader({
   scrollWidth,
   groupBy,
   interval,
@@ -110,5 +110,3 @@ function ReportTableHeader({
     </Row>
   );
 }
-
-export default ReportTableHeader;

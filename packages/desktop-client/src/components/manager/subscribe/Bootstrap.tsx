@@ -15,7 +15,7 @@ import { View } from '../../common/View';
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
-export default function Bootstrap() {
+export function Bootstrap() {
   const dispatch = useDispatch();
   const [error, setError] = useState(null);
 

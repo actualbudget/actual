@@ -16,7 +16,7 @@ function getErrorMessage(reason) {
   }
 }
 
-export default function Error() {
+export function Error() {
   const navigate = useNavigate();
   const location = useLocation();
   const { error } = (location.state || {}) as { error? };

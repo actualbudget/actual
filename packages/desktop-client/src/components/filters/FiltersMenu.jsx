@@ -36,8 +36,8 @@ import Value from '../rules/Value';
 import { Tooltip } from '../tooltips';
 import GenericInput from '../util/GenericInput';
 
-import CompactFiltersButton from './CompactFiltersButton';
-import FiltersButton from './FiltersButton';
+import { CompactFiltersButton } from './CompactFiltersButton';
+import { FiltersButton } from './FiltersButton';
 import { CondOpMenu } from './SavedFilters';
 
 const filterFields = [

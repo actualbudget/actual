@@ -17,7 +17,7 @@ type NotesProps = {
   onSave: (id: string, notes: string) => void;
 };
 
-export default function Notes({ modalProps, id, name, onSave }: NotesProps) {
+export function Notes({ modalProps, id, name, onSave }: NotesProps) {
   const data = useLiveQuery(() => q('notes').filter({ id }).select('*'), [id]);
   const originalNotes = data && data.length > 0 ? data[0].note : null;
 

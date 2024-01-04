@@ -605,7 +605,7 @@ const conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export default function EditRule({
+export function EditRule({
   modalProps,
   defaultRule,
   onSave: originalOnSave,
