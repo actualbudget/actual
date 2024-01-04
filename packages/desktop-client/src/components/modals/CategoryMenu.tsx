@@ -15,7 +15,7 @@ import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
 
