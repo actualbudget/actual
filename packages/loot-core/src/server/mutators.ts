@@ -1,5 +1,6 @@
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import { sequential } from '../shared/async';
+import { type HandlerFunctions } from '../types/handlers';
 
 const runningMethods = new Set();
 
@@ -9,9 +10,7 @@ let globalMutationsEnabled = false;
 
 let _latestHandlerNames = [];
 
-export function mutator<T extends (...args: unknown[]) => unknown>(
-  handler: T,
-): T {
+export function mutator<T extends HandlerFunctions>(handler: T): T {
   mutatingMethods.set(handler, true);
   return handler;
 }

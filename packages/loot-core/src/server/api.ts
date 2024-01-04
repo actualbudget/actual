@@ -443,7 +443,7 @@ handlers['api/transaction-update'] = withMutation(async function ({
     return [];
   }
 
-  const { diff } = updateTransaction(transactions, fields);
+  const { diff } = updateTransaction(transactions, { id, ...fields });
   return handlers['transactions-batch-update'](diff);
 });
 
@@ -556,6 +556,7 @@ handlers['api/category-create'] = withMutation(async function ({ category }) {
     name: category.name,
     groupId: category.group_id,
     isIncome: category.is_income,
+    hidden: category.hidden,
   });
 });
 

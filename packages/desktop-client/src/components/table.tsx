@@ -660,7 +660,7 @@ export function SelectCell({
 type SheetCellValueProps = {
   binding: Binding;
   type: string;
-  getValueStyle?: (value: unknown) => CSSProperties;
+  getValueStyle?: (value: string | number) => CSSProperties;
   formatExpr?: (value) => string;
   unformatExpr?: (value: string) => unknown;
   privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];

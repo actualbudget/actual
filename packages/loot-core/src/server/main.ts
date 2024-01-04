@@ -278,6 +278,7 @@ handlers['category-create'] = mutator(async function ({
   name,
   groupId,
   isIncome,
+  hidden,
 }) {
   return withUndo(async () => {
     if (!groupId) {
@@ -288,6 +289,7 @@ handlers['category-create'] = mutator(async function ({
       name,
       cat_group: groupId,
       is_income: isIncome ? 1 : 0,
+      hidden: hidden ? 1 : 0,
     });
   });
 });
@@ -1384,7 +1386,10 @@ handlers['load-global-prefs'] = async function () {
     autoUpdate: autoUpdate == null || autoUpdate === 'true' ? true : false,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,
-    theme: theme === 'light' || theme === 'dark' ? theme : 'light',
+    theme:
+      theme === 'light' || theme === 'dark' || theme === 'auto'
+        ? theme
+        : 'light',
   };
 };
 

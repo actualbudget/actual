@@ -13,7 +13,9 @@ import ItemContent from './ItemContent';
 
 type ItemProps = {
   title: string;
-  Icon: ComponentType<SVGProps<SVGElement>>;
+  Icon:
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
   to?: string;
   children?: ReactNode;
   style?: CSSProperties;

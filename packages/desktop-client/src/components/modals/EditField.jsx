@@ -1,0 +1,307 @@
+import React from 'react';
+import { useSelector } from 'react-redux';
+
+import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
+
+import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
+import { amountToInteger } from 'loot-core/src/shared/util';
+
+import { useActions } from '../../hooks/useActions';
+import useCategories from '../../hooks/useCategories';
+import { Add } from '../../icons/v1';
+import { useResponsive } from '../../ResponsiveProvider';
+import { styles, theme } from '../../style';
+import AccountAutocomplete, {
+  AccountItemGroupHeader,
+  AccountItem,
+} from '../autocomplete/AccountAutocomplete';
+import CategoryAutocomplete, {
+  CategoryItemGroupHeader,
+  CategoryItem,
+} from '../autocomplete/CategoryAutocomplete';
+import PayeeAutocomplete, {
+  CreatePayeeButton,
+  PayeeItemGroupHeader,
+  PayeeItem,
+} from '../autocomplete/PayeeAutocomplete';
+import Input from '../common/Input';
+import Modal from '../common/Modal';
+import View from '../common/View';
+import { SectionLabel } from '../forms';
+import DateSelect from '../select/DateSelect';
+
+function CreatePayeeIcon(props) {
+  return <Add {...props} width={14} height={14} />;
+}
+
+export default function EditField({ modalProps, name, onSubmit, onClose }) {
+  const dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
+  const { grouped: categoryGroups } = useCategories();
+  const accounts = useSelector(state => state.queries.accounts);
+  const payees = useSelector(state => state.queries.payees);
+
+  const { createPayee } = useActions();
+
+  const onCloseInner = () => {
+    modalProps.onClose();
+    onClose?.();
+  };
+
+  function onSelect(value) {
+    if (value != null) {
+      // Process the value if needed
+      if (name === 'amount') {
+        value = amountToInteger(value);
+      }
+
+      onSubmit(name, value);
+    }
+    onCloseInner();
+  }
+
+  const itemStyle = {
+    fontSize: 17,
+    fontWeight: 400,
+    paddingTop: 8,
+    paddingBottom: 8,
+  };
+
+  const { isNarrowWidth } = useResponsive();
+  let label, editor, minWidth;
+  const inputStyle = {
+    ':focus': { boxShadow: 0 },
+    ...(isNarrowWidth && itemStyle),
+  };
+  const autocompleteProps = {
+    inputProps: { style: inputStyle },
+    containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
+  };
+
+  switch (name) {
+    case 'date': {
+      const today = currentDay();
+      label = 'Date';
+      minWidth = 350;
+      editor = (
+        <DateSelect
+          value={formatDate(parseISO(today), dateFormat)}
+          dateFormat={dateFormat}
+          focused={true}
+          embedded={true}
+          onUpdate={() => {}}
+          onSelect={date => {
+            onSelect(dayFromDate(parseDate(date, 'yyyy-MM-dd', new Date())));
+          }}
+        />
+      );
+      break;
+    }
+
+    case 'account':
+      label = 'Account';
+      editor = (
+        <AccountAutocomplete
+          value={null}
+          accounts={accounts}
+          focused={true}
+          embedded={true}
+          closeOnBlur={false}
+          onSelect={value => {
+            if (value) {
+              onSelect(value);
+            }
+          }}
+          {...(isNarrowWidth && {
+            renderAccountItemGroupHeader: props => (
+              <AccountItemGroupHeader
+                {...props}
+                style={{
+                  ...styles.largeText,
+                  color: theme.menuItemTextHeader,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                }}
+              />
+            ),
+            renderAccountItem: props => (
+              <AccountItem
+                {...props}
+                style={{
+                  ...itemStyle,
+                  color: theme.menuItemText,
+                  borderRadius: 0,
+                  borderTop: `1px solid ${theme.pillBorder}`,
+                }}
+              />
+            ),
+          })}
+          {...autocompleteProps}
+        />
+      );
+      break;
+
+    case 'payee':
+      label = 'Payee';
+      editor = (
+        <PayeeAutocomplete
+          payees={payees}
+          accounts={accounts}
+          value={null}
+          focused={true}
+          embedded={true}
+          closeOnBlur={false}
+          showManagePayees={false}
+          showMakeTransfer={!isNarrowWidth}
+          onSelect={async value => {
+            if (value && value.startsWith('new:')) {
+              value = await createPayee(value.slice('new:'.length));
+            }
+
+            onSelect(value);
+          }}
+          isCreatable
+          {...(isNarrowWidth && {
+            renderCreatePayeeButton: props => (
+              <CreatePayeeButton
+                {...props}
+                Icon={CreatePayeeIcon}
+                style={itemStyle}
+              />
+            ),
+            renderPayeeItemGroupHeader: props => (
+              <PayeeItemGroupHeader
+                {...props}
+                style={{
+                  ...styles.largeText,
+                  color: theme.menuItemTextHeader,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                }}
+              />
+            ),
+            renderPayeeItem: props => (
+              <PayeeItem
+                {...props}
+                style={{
+                  ...itemStyle,
+                  color: theme.menuItemText,
+                  borderRadius: 0,
+                  borderTop: `1px solid ${theme.pillBorder}`,
+                }}
+              />
+            ),
+          })}
+          {...autocompleteProps}
+        />
+      );
+      break;
+
+    case 'notes':
+      label = 'Notes';
+      editor = (
+        <Input
+          focused={true}
+          onEnter={e => onSelect(e.target.value)}
+          style={inputStyle}
+        />
+      );
+      break;
+
+    case 'category':
+      label = 'Category';
+      editor = (
+        <CategoryAutocomplete
+          categoryGroups={categoryGroups}
+          value={null}
+          focused={true}
+          embedded={true}
+          closeOnBlur={false}
+          showSplitOption={false}
+          onUpdate={() => {}}
+          onSelect={value => {
+            onSelect(value);
+          }}
+          {...(isNarrowWidth && {
+            renderCategoryItemGroupHeader: props => (
+              <CategoryItemGroupHeader
+                {...props}
+                style={{
+                  ...styles.largeText,
+                  color: theme.menuItemTextHeader,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                }}
+              />
+            ),
+            renderCategoryItem: props => (
+              <CategoryItem
+                {...props}
+                style={{
+                  ...itemStyle,
+                  color: theme.menuItemText,
+                  borderRadius: 0,
+                  borderTop: `1px solid ${theme.pillBorder}`,
+                }}
+              />
+            ),
+          })}
+          {...autocompleteProps}
+        />
+      );
+      break;
+
+    case 'amount':
+      label = 'Amount';
+      editor = (
+        <Input
+          focused={true}
+          onEnter={e => onSelect(e.target.value)}
+          style={inputStyle}
+        />
+      );
+      break;
+
+    default:
+  }
+
+  return (
+    <Modal
+      title={label}
+      noAnimation={!isNarrowWidth}
+      showHeader={isNarrowWidth}
+      focusAfterClose={false}
+      {...modalProps}
+      onClose={onCloseInner}
+      padding={0}
+      style={{
+        flex: 0,
+        height: isNarrowWidth ? '85vh' : 275,
+        padding: '15px 10px',
+        borderRadius: '6px',
+        ...(minWidth && { minWidth }),
+        ...(!isNarrowWidth && {
+          backgroundColor: theme.mobileModalBackground,
+          color: theme.mobileModalText,
+        }),
+      }}
+    >
+      {() => (
+        <View>
+          {!isNarrowWidth && (
+            <SectionLabel
+              title={label}
+              style={{
+                alignSelf: 'center',
+                color: theme.mobileModalText,
+                marginBottom: 10,
+              }}
+            />
+          )}
+          <View style={{ flex: 1 }}>{editor}</View>
+        </View>
+      )}
+    </Modal>
+  );
+}

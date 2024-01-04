@@ -1,55 +1,60 @@
-import React, { type Ref } from 'react';
-
-import * as d from 'date-fns';
+import React, { type UIEventHandler } from 'react';
+import { type RefProp } from 'react-spring';
 
 import { styles, theme } from '../../style';
 import View from '../common/View';
 import { Row, Cell } from '../table';
 
-import { type Month } from './entities';
+import { type MonthData } from './entities';
 
 type ReportTableHeaderProps = {
   scrollWidth?: number;
   groupBy: string;
-  interval?: Month[];
+  interval?: MonthData[];
   balanceType: string;
-  headerScrollRef?: Ref<HTMLDivElement>;
+  headerScrollRef: RefProp<HTMLDivElement>;
+  handleScroll?: UIEventHandler<HTMLDivElement>;
 };
 
-export default function ReportTableHeader({
+function ReportTableHeader({
   scrollWidth,
   groupBy,
   interval,
   balanceType,
   headerScrollRef,
+  handleScroll,
 }: ReportTableHeaderProps) {
   return (
-    <View
-      innerRef={headerScrollRef}
+    <Row
+      collapsed={true}
       style={{
-        overflowX: 'auto',
-        scrollbarWidth: 'none',
-        '::-webkit-scrollbar': { display: 'none' },
         justifyContent: 'center',
-        borderTopWidth: 1,
+        borderBottomWidth: 1,
         borderColor: theme.tableBorder,
+        color: theme.tableHeaderText,
+        backgroundColor: theme.tableHeaderBackground,
+        fontWeight: 600,
       }}
     >
-      <Row
-        collapsed={true}
+      <View
+        innerRef={headerScrollRef}
+        onScroll={handleScroll}
+        id="header"
         style={{
-          color: theme.tableHeaderText,
-          backgroundColor: theme.tableHeaderBackground,
-          fontWeight: 600,
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
+          '::-webkit-scrollbar': { display: 'none' },
+          flexDirection: 'row',
+          flex: 1,
         }}
       >
         <Cell
           style={{
-            minWidth: 125,
+            width: 120,
+            flexShrink: 0,
             ...styles.tnum,
           }}
           value={groupBy}
-          width="flex"
         />
         {interval
           ? interval.map((header, index) => {
@@ -60,8 +65,7 @@ export default function ReportTableHeader({
                     ...styles.tnum,
                   }}
                   key={index}
-                  // eslint-disable-next-line rulesdir/typography
-                  value={d.format(d.parseISO(`${header}-01`), "MMM ''yy")}
+                  value={header.date}
                   width="flex"
                 />
               );
@@ -73,7 +77,7 @@ export default function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Deposits'}
+                  value="Deposits"
                   width="flex"
                 />
                 <Cell
@@ -81,7 +85,7 @@ export default function ReportTableHeader({
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  value={'Payments'}
+                  value="Payments"
                   width="flex"
                 />
               </>
@@ -91,7 +95,7 @@ export default function ReportTableHeader({
             minWidth: 85,
             ...styles.tnum,
           }}
-          value={'Totals'}
+          value="Totals"
           width="flex"
         />
         <Cell
@@ -99,11 +103,12 @@ export default function ReportTableHeader({
             minWidth: 85,
             ...styles.tnum,
           }}
-          value={'Average'}
+          value="Average"
           width="flex"
         />
-        {scrollWidth > 0 && <Cell width={scrollWidth} />}
-      </Row>
-    </View>
+      </View>
+    </Row>
   );
 }
+
+export default ReportTableHeader;

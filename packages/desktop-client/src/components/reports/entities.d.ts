@@ -2,6 +2,7 @@ export type DataEntity = {
   data: Array<ItemEntity>;
   monthData: Array<MonthData>;
   groupedData: Array<GroupedEntity>;
+  legend: LegendEntity[];
   startDate: string;
   endDate: string;
   totalDebts: number;
@@ -9,7 +10,12 @@ export type DataEntity = {
   totalTotals: number;
 };
 
-type ItemEntity = {
+type LegendEntity = {
+  name: string;
+  color: string;
+};
+
+export type ItemEntity = {
   id: string;
   name: string;
   monthData: MonthData[];
@@ -18,26 +24,23 @@ type ItemEntity = {
   totalTotals: number;
 };
 
-type MonthData = {
+export type MonthData = {
   date: string;
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
 };
 
-/* this will be used in a future PR
-
-export type GroupedEntity = {
+type GroupedEntity = {
   id: string;
   name: string;
   date?: string;
-  monthData: Array<MonthData>;
-  categories?: Array<ItemEntity>;
+  monthData: MonthData[];
+  categories?: ItemEntity[];
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
 };
-*/
 
 export type Month = {
   month: string;

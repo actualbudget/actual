@@ -9,7 +9,7 @@ type FiltersButtonProps = {
 
 function FiltersButton({ onClick }: FiltersButtonProps) {
   return (
-    <Button type="bare" onClick={onClick} title={'Filters'}>
+    <Button type="bare" onClick={onClick} title="Filters">
       <SettingsSliderAlternate
         style={{ width: 16, height: 16, marginRight: 5 }}
       />{' '}
