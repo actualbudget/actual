@@ -1,4 +1,4 @@
-import { type ReactNode, useRef, useState, createRef } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 
 import { theme } from '../../style';
 import { FormLabel } from '../forms';
@@ -107,7 +107,10 @@ export default function ToggleMenu({
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
             onClick={e =>
-              !item.disabled && onMenuSelect && !item.toggle && onMenuSelect(item.name)
+              !item.disabled &&
+              onMenuSelect &&
+              !item.toggle &&
+              onMenuSelect(item.name)
             }
           >
             {/* Force it to line up evenly */}

@@ -6,7 +6,7 @@ import './Toggle.css';
 type ToggleProps = {
   id: string;
   checked: boolean;
-  onChange?: (any) =>void;
+  onChange?: (any) => void;
   onColor?: string;
   style?: CSSProperties;
 };
@@ -26,7 +26,7 @@ const Toggle = ({ id, checked, onChange, onColor, style }: ToggleProps) => {
         className="react-switch-label"
         htmlFor={id}
       >
-        <span className={`react-switch-button`} />
+        <span className="react-switch-button" />
       </label>
     </div>
   );
