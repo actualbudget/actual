@@ -4,10 +4,7 @@ import React, {
   useContext,
   useState,
   useRef,
-  useEffect,
 } from 'react';
-
-import usePrevious from './usePrevious';
 
 type ActiveEditCleanup = () => void;
 type ActiveEditAction = () => void | ActiveEditCleanup;
@@ -39,14 +36,7 @@ export function SingleActiveEditFormProvider({
   children,
 }: SingleActiveEditFormProviderProps) {
   const [editingField, setEditingField] = useState(null);
-  const prevEditingField = usePrevious(editingField);
   const cleanupRef = useRef<ActiveEditCleanup | void>(null);
-
-  useEffect(() => {
-    if (prevEditingField != null && prevEditingField !== editingField) {
-      runCleanup();
-    }
-  }, [editingField]);
 
   const runCleanup = () => {
     const editCleanup = cleanupRef.current;
@@ -57,7 +47,10 @@ export function SingleActiveEditFormProvider({
   };
 
   const onClearActiveEdit = (delayMs?: number) => {
-    setTimeout(() => setEditingField(null), delayMs);
+    setTimeout(() => {
+      runCleanup();
+      setEditingField(null);
+    }, delayMs);
   };
 
   const onRequestActiveEdit = (
