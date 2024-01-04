@@ -14,7 +14,7 @@ import { useServerVersion } from '../ServerContext';
 
 import BudgetList from './BudgetList';
 import ConfigServer from './ConfigServer';
-import Modals from './Modals';
+import { Modals } from './Modals';
 import ServerURL from './ServerURL';
 import Bootstrap from './subscribe/Bootstrap';
 import ChangePassword from './subscribe/ChangePassword';
