@@ -53,6 +53,11 @@ export function SingleActiveEditFormProvider({
     }, delayMs);
   };
 
+  const onActiveEdit = (field: string, action: ActiveEditAction) => {
+    cleanupRef.current = action?.();
+    setEditingField(field);
+  };
+
   const onRequestActiveEdit = (
     field: string,
     action: ActiveEditAction,
@@ -68,8 +73,7 @@ export function SingleActiveEditFormProvider({
     if (editingField) {
       onClearActiveEdit(options?.clearActiveEditDelayMs);
     } else {
-      cleanupRef.current = action?.();
-      setEditingField(field);
+      onActiveEdit(field, action);
     }
   };
 
