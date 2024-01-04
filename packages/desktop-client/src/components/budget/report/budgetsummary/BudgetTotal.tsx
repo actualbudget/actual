@@ -8,7 +8,7 @@ import React, {
 import { theme, styles } from '../../../../style';
 import { Text } from '../../../common/Text';
 import { View } from '../../../common/View';
-import CellValue from '../../../spreadsheet/CellValue';
+import { CellValue } from '../../../spreadsheet/CellValue';
 
 type BudgetTotalProps = {
   title: ReactNode;

@@ -10,7 +10,7 @@ import { View } from '../common/View';
 
 import { Setting } from './UI';
 
-export default function GlobalSettings() {
+export function GlobalSettings() {
   const documentDir = useSelector(state => state.prefs.global.documentDir);
   const { saveGlobalPrefs } = useActions();
 

@@ -8,7 +8,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
 import { View } from '../common/View';
-import NamespaceContext from '../spreadsheet/NamespaceContext';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 import { MonthsContext } from './MonthsContext';
 

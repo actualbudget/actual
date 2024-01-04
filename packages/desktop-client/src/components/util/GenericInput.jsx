@@ -12,10 +12,10 @@ import { SavedFilterAutocomplete } from '../autocomplete/SavedFilterAutocomplete
 import { Input } from '../common/Input';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
-import DateSelect from '../select/DateSelect';
-import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
+import { DateSelect } from '../select/DateSelect';
+import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 
-export default function GenericInput({
+export function GenericInput({
   field,
   subfield,
   type,

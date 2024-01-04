@@ -21,14 +21,14 @@ import { FormField, FormLabel } from '../forms';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
-import EncryptionSettings from './Encryption';
-import ExperimentalFeatures from './Experimental';
-import ExportBudget from './Export';
-import FixSplitsTool from './FixSplits';
-import FormatSettings from './Format';
-import GlobalSettings from './Global';
+import { EncryptionSettings } from './Encryption';
+import { ExperimentalFeatures } from './Experimental';
+import { ExportBudget } from './Export';
+import { FixSplits } from './FixSplits';
+import { FormatSettings } from './Format';
+import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
-import ThemeSettings from './Themes';
+import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
@@ -116,7 +116,7 @@ function AdvancedAbout() {
   );
 }
 
-export default function Settings() {
+export function Settings() {
   const floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
@@ -175,7 +175,7 @@ export default function Settings() {
           <AdvancedAbout />
           <ResetCache />
           <ResetSync />
-          <FixSplitsTool />
+          <FixSplits />
           <ExperimentalFeatures />
         </AdvancedToggle>
       </View>

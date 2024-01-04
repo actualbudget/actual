@@ -18,7 +18,7 @@ import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import { theme, styles } from '../../style';
 import { Table, Row, Field, Cell, SelectCell } from '../table';
-import DisplayId from '../util/DisplayId';
+import { DisplayId } from '../util/DisplayId';
 
 function serializeTransaction(transaction, dateFormat) {
   let { date } = transaction;
@@ -135,7 +135,7 @@ const TransactionRow = memo(function TransactionRow({
   );
 });
 
-export default function SimpleTransactionsTable({
+export function SimpleTransactionsTable({
   transactions,
   schedules,
   renderEmpty,

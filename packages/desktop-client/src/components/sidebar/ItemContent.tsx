@@ -13,7 +13,7 @@ type ItemContentProps = {
   forceActive?: boolean;
 };
 
-function ItemContent({
+export function ItemContent({
   style,
   to,
   onClick,
@@ -43,5 +43,3 @@ function ItemContent({
     </AnchorLink>
   );
 }
-
-export default ItemContent;

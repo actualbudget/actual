@@ -31,7 +31,7 @@ import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
-import DateSelect from '../select/DateSelect';
+import { DateSelect } from '../select/DateSelect';
 
 function CreatePayeeIcon(props) {
   return <Add {...props} width={14} height={14} />;

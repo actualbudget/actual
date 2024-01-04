@@ -54,7 +54,7 @@ async function saveDiffAndApply(diff, changes, onChange) {
   );
 }
 
-export default function TransactionList({
+export function TransactionList({
   tableRef,
   transactions,
   allTransactions,

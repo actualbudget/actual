@@ -12,7 +12,7 @@ type DisplayIdProps = {
   noneColor?: string;
 };
 
-export default function DisplayId({
+export function DisplayId({
   type,
   id,
   noneColor = theme.pageTextSubdued,

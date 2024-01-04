@@ -22,7 +22,7 @@ type ValueProps<T> = {
   style?: CSSProperties;
 };
 
-export default function Value<T>({
+export function Value<T>({
   value,
   field,
   valueIsRaw,

@@ -38,7 +38,7 @@ import { KeyHandlers } from './KeyHandlers';
 import { LoggedInUser } from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar';
-import useSheetValue from './spreadsheet/useSheetValue';
+import { useSheetValue } from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 import { Tooltip } from './tooltips';
 

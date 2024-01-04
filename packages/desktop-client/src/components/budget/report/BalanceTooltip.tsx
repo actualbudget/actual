@@ -3,7 +3,7 @@ import React from 'react';
 import { reportBudget } from 'loot-core/src/client/queries';
 
 import { Menu } from '../../common/Menu';
-import useSheetValue from '../../spreadsheet/useSheetValue';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
 
 type BalanceTooltipProps = {

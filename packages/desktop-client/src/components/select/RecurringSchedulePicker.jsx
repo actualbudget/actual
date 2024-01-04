@@ -17,7 +17,7 @@ import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { useTooltip, Tooltip } from '../tooltips';
 
-import DateSelect from './DateSelect';
+import { DateSelect } from './DateSelect';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -479,7 +479,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
   );
 }
 
-export default function RecurringSchedulePicker({
+export function RecurringSchedulePicker({
   value,
   buttonStyle,
   onChange,

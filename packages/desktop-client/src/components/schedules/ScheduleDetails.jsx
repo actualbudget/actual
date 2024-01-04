@@ -19,12 +19,12 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRule';
-import DateSelect from '../select/DateSelect';
-import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
+import { DateSelect } from '../select/DateSelect';
+import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '../table';
-import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
+import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
-import GenericInput from '../util/GenericInput';
+import { GenericInput } from '../util/GenericInput';
 
 function updateScheduleConditions(schedule, fields) {
   const conds = extractScheduleConds(schedule._conditions);

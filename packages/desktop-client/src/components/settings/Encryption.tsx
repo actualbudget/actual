@@ -10,7 +10,7 @@ import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
 
-export default function EncryptionSettings() {
+export function EncryptionSettings() {
   const { pushModal } = useActions();
   const serverURL = useServerURL();
   const encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);

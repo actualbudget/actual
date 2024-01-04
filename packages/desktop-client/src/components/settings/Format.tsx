@@ -52,7 +52,7 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export default function FormatSettings() {
+export function FormatSettings() {
   const { savePrefs } = useActions();
 
   const sidebar = useSidebar();
