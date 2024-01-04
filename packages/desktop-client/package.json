@@ -28,6 +28,7 @@
     "@types/uuid": "^9.0.2",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@use-gesture/react": "^10.3.0",
+    "@vitejs/plugin-basic-ssl": "^1.0.2",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "chokidar": "^3.5.3",
     "cross-env": "^7.0.3",

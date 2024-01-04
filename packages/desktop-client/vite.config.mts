@@ -1,6 +1,7 @@
 import * as path from 'path';
 
 import inject from '@rollup/plugin-inject';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import react from '@vitejs/plugin-react-swc';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
@@ -165,6 +166,7 @@ export default defineConfig(async ({ mode }) => {
       }),
       viteTsconfigPaths({ root: '../..' }),
       visualizer({ template: 'raw-data' }),
+      !!env.HTTPS && basicSsl(),
     ],
     test: {
       include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
