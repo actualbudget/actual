@@ -259,7 +259,7 @@ module.exports = {
         './packages/desktop-client/src/components/reports/**/*',
         // './packages/desktop-client/src/components/responsive/**/*',
         // './packages/desktop-client/src/components/rules/**/*',
-        // './packages/desktop-client/src/components/schedules/**/*',
+        './packages/desktop-client/src/components/schedules/**/*',
         // './packages/desktop-client/src/components/select/**/*',
         // './packages/desktop-client/src/components/settings/**/*',
         // './packages/desktop-client/src/components/sidebar/**/*',

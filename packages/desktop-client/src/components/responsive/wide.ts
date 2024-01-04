@@ -1,6 +1,6 @@
 export { Budget } from '../budget';
 
-export { default as Schedules } from '../schedules';
+export { Schedules } from '../schedules';
 
 export { GoCardlessLink } from '../gocardless/GoCardlessLink';
 

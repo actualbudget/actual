@@ -34,9 +34,9 @@ import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
 import { SingleInput } from './modals/SingleInput';
 import { SwitchBudgetType } from './modals/SwitchBudgetType';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
-import { ScheduleDetails } from './schedules/EditSchedule';
-import { ScheduleLink } from './schedules/LinkSchedule';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
+import { ScheduleDetails } from './schedules/ScheduleDetails';
+import { ScheduleLink } from './schedules/ScheduleLink';
 
 export function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);

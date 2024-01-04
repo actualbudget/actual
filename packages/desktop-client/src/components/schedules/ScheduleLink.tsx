@@ -13,7 +13,7 @@ import { View } from '../common/View';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
-export default function ScheduleLink({
+export function ScheduleLink({
   modalProps,
   actions,
   transactionIds: ids,
