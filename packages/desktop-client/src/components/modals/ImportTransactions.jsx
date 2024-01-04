@@ -11,7 +11,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
 import { Input } from '../common/Input';

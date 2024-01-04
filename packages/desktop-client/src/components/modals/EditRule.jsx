@@ -25,7 +25,7 @@ import {
   amountToInteger,
 } from 'loot-core/src/shared/util';
 
-import useSelected, { SelectedProvider } from '../../hooks/useSelected';
+import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import AddIcon from '../../icons/v0/Add';
 import SubtractIcon from '../../icons/v0/Subtract';
 import InformationOutline from '../../icons/v1/InformationOutline';

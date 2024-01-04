@@ -7,7 +7,7 @@ import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { type CSSProperties, theme } from '../../style';
 import { LinkButton } from '../common/LinkButton';
 import { Text } from '../common/Text';

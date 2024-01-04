@@ -1,6 +1,6 @@
 import React from 'react';
 
-import useNavigate from '../hooks/useNavigate';
+import { useNavigate } from '../hooks/useNavigate';
 import CheveronLeft from '../icons/v1/CheveronLeft';
 import { type CSSProperties, styles, theme } from '../style';
 

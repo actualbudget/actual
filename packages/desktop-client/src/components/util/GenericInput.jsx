@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';

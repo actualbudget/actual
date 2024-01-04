@@ -5,8 +5,8 @@ import { useLocation } from 'react-router-dom';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
-import useCategories from '../hooks/useCategories';
-import useSyncServerStatus from '../hooks/useSyncServerStatus';
+import { useCategories } from '../hooks/useCategories';
+import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 import { type CommonModalProps } from '../types/modals';
 
 import { CategoryGroupMenu } from './modals/CategoryGroupMenu';

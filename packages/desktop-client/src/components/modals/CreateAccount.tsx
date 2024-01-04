@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { authorizeBank } from '../../gocardless';
 import { useActions } from '../../hooks/useActions';
-import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
+import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';

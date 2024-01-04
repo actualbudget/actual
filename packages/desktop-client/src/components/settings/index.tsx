@@ -7,7 +7,7 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
-import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
+import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';

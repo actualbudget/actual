@@ -4,7 +4,7 @@ import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import q from 'loot-core/src/shared/query';
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { DotsHorizontalTriple } from '../../icons/v1';
 import Add from '../../icons/v1/Add';
 import Trash from '../../icons/v1/Trash';

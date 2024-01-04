@@ -46,8 +46,8 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
-import useNavigate from '../../hooks/useNavigate';
+import { useCategories } from '../../hooks/useCategories';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import {
   SingleActiveEditFormProvider,

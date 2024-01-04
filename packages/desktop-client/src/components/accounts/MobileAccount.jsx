@@ -19,8 +19,8 @@ import {
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
-import useCategories from '../../hooks/useCategories';
-import useNavigate from '../../hooks/useNavigate';
+import { useCategories } from '../../hooks/useCategories';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
 

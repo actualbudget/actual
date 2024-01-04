@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-import useSyncServerStatus from '../../hooks/useSyncServerStatus';
+import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import Add from '../../icons/v1/Add';
 import ArrowsExpand3 from '../../icons/v2/ArrowsExpand3';

@@ -13,7 +13,7 @@ import {
 } from 'loot-core/src/client/reducers/queries';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
 import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
 import { theme, styles } from '../../style';
