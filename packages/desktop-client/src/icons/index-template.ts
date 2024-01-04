@@ -1,4 +1,4 @@
-const path = require('path')
+import path from 'path';
 
 function indexTemplate(filePaths) {
   const exportEntries = filePaths.map(({ path: filePath }) => {
