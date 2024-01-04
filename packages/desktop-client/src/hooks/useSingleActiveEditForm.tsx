@@ -46,15 +46,18 @@ export function SingleActiveEditFormProvider({
     cleanupRef.current = null;
   };
 
+  const runAction = (action: ActiveEditAction) => {
+    cleanupRef.current = action?.();
+  };
+
   const onClearActiveEdit = (delayMs?: number) => {
     setTimeout(() => {
       runCleanup();
       setEditingField(null);
     }, delayMs);
   };
-
   const onActiveEdit = (field: string, action: ActiveEditAction) => {
-    cleanupRef.current = action?.();
+    runAction(action);
     setEditingField(field);
   };
 
