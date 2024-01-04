@@ -20,6 +20,7 @@ import EditRule from './modals/EditRule';
 import FixEncryptionKey from './modals/FixEncryptionKey';
 import GoCardlessExternalMsg from './modals/GoCardlessExternalMsg';
 import GoCardlessInitialise from './modals/GoCardlessInitialise';
+import SimpleFinInitialise from './modals/SimpleFinInitialise';
 import ImportTransactions from './modals/ImportTransactions';
 import LoadBackup from './modals/LoadBackup';
 import ManageRulesModal from './modals/ManageRulesModal';
@@ -187,6 +188,14 @@ export default function Modals() {
         case 'gocardless-init':
           return (
             <GoCardlessInitialise
+              modalProps={modalProps}
+              onSuccess={options.onSuccess}
+            />
+          );
+
+        case 'simplefin-init':
+          return (
+            <SimpleFinInitialise
               modalProps={modalProps}
               onSuccess={options.onSuccess}
             />

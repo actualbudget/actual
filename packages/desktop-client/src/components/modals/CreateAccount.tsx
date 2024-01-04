@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { authorizeBank } from '../../gocardless';
 import { useActions } from '../../hooks/useActions';
 import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
+import useSimpleFinStatus from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
@@ -25,10 +26,21 @@ export default function CreateAccount({
   const actions = useActions();
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
     useState(null);
+  const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] =
+    useState(null);
 
-  const onConnect = () => {
+  const onConnectGoCardless = () => {
     if (!isGoCardlessSetupComplete) {
       onGoCardlessInit();
+      return;
+    }
+
+    authorizeBank(actions.pushModal);
+  };
+
+  const onConnectSimpleFin = () => {
+    if (!isSimpleFinSetupComplete) {
+      onSimpleFinInit();
       return;
     }
 
@@ -41,14 +53,25 @@ export default function CreateAccount({
     });
   };
 
+  const onSimpleFinInit = () => {
+    actions.pushModal('simplefin-init', {
+      onSuccess: () => setIsSimpleFinSetupComplete(true),
+    });
+  };
+
   const onCreateLocalAccount = () => {
     actions.pushModal('add-local-account');
   };
 
-  const { configured } = useGoCardlessStatus();
+  const { configuredGoCardless } = useGoCardlessStatus();
   useEffect(() => {
-    setIsGoCardlessSetupComplete(configured);
-  }, [configured]);
+    setIsGoCardlessSetupComplete(configuredGoCardless);
+  }, [configuredGoCardless]);
+
+  const { configuredSimpleFin } = useSimpleFinStatus();
+  useEffect(() => {
+    setIsSimpleFinSetupComplete(configuredSimpleFin);
+  }, [configuredSimpleFin]);
 
   return (
     <Modal title="Add Account" {...modalProps}>
@@ -91,15 +114,35 @@ export default function CreateAccount({
                     fontWeight: 600,
                     flex: 1,
                   }}
-                  onClick={onConnect}
+                  onClick={onConnectGoCardless}
                 >
                   {isGoCardlessSetupComplete
                     ? 'Link bank account with GoCardless'
                     : 'Set up GoCardless for bank sync'}
                 </ButtonWithLoading>
                 <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                  <strong>Link a bank account</strong> to automatically download
+                  <strong>Link a <u>European</u> bank account</strong> to automatically download
                   transactions. GoCardless provides reliable, up-to-date
+                  information from hundreds of banks.
+                </Text>
+                <ButtonWithLoading
+                  disabled={syncServerStatus !== 'online'}
+                  style={{
+                    marginTop: '18px',
+                    padding: '10px 0',
+                    fontSize: 15,
+                    fontWeight: 600,
+                    flex: 1,
+                  }}
+                  onClick={onConnectSimpleFin}
+                >
+                  {isSimpleFinSetupComplete
+                    ? 'Link bank account with SimpleFIN'
+                    : 'Set up SimpleFIN for bank sync'}
+                </ButtonWithLoading>
+                <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                  <strong>Link an <u>American</u> bank account</strong> to automatically download
+                  transactions. SimpleFIN provides reliable, up-to-date
                   information from hundreds of banks.
                 </Text>
               </>
