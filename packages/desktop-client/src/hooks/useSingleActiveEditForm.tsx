@@ -56,6 +56,7 @@ export function SingleActiveEditFormProvider({
       setEditingField(null);
     }, delayMs);
   };
+
   const onActiveEdit = (field: string, action: ActiveEditAction) => {
     runAction(action);
     setEditingField(field);
