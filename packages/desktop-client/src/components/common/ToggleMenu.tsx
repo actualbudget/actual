@@ -47,17 +47,6 @@ export default function ToggleMenu({
   const items = allItems.filter(x => x);
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
-  const blanketRef = [];
-
-  const handleCloseClick = (item, event) => {
-    const [ref] = blanketRef.filter(ref => ref.current === event.currentTarget);
-    if (ref && event.target.id !== item) {
-      return;
-    } else {
-      onMenuSelect(item);
-    }
-  };
-
   return (
     <View
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
@@ -66,7 +55,6 @@ export default function ToggleMenu({
     >
       {header}
       {items.map((item, idx) => {
-        blanketRef[idx] = createRef<HTMLDivElement>();
         if (item === ToggleMenu.line) {
           return (
             <View key={idx} style={{ margin: '3px 0px' }}>
@@ -95,9 +83,7 @@ export default function ToggleMenu({
 
         return (
           <View
-            innerRef={blanketRef[idx]}
             key={item.name}
-            id={item.name}
             style={{
               cursor: 'default',
               padding: '9px 10px',
@@ -121,7 +107,7 @@ export default function ToggleMenu({
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
             onClick={e =>
-              !item.disabled && onMenuSelect && onMenuSelect(item.name)
+              !item.disabled && onMenuSelect && !item.toggle && onMenuSelect(item.name)
             }
           >
             {/* Force it to line up evenly */}
@@ -140,6 +126,7 @@ export default function ToggleMenu({
                   checked={item.isOn}
                   onColor={theme.pageTextPositive}
                   style={{ marginLeft: 5 }}
+                  onChange={() => item.toggle && onMenuSelect(item.name)}
                 />
               </>
             )}

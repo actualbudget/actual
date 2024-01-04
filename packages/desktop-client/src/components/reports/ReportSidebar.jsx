@@ -9,7 +9,6 @@ import Select from '../common/Select';
 import Text from '../common/Text';
 import ToggleMenu from '../common/ToggleMenu';
 import View from '../common/View';
-import { Checkbox } from '../forms';
 import { Tooltip } from '../tooltips';
 
 import CategorySelector from './CategorySelector';
@@ -245,75 +244,6 @@ export function ReportSidebar({
               />
             </View>
             */}
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-empty-columns"
-            checked={showEmpty}
-            value={showEmpty}
-            onChange={() => setShowEmpty(!showEmpty)}
-          />
-          <label
-            htmlFor="show-empty-columns"
-            title="Show rows that are zero or blank"
-            style={{ fontSize: 12 }}
-          >
-            Show Empty Rows
-          </label>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-hidden-columns"
-            checked={showOffBudgetHidden}
-            value={showOffBudgetHidden}
-            onChange={() => setShowOffBudgetHidden(!showOffBudgetHidden)}
-          />
-          <label
-            htmlFor="show-hidden-columns"
-            title="Show off budget accounts and hidden categories"
-            style={{ fontSize: 12 }}
-          >
-            Off Budget Items
-          </label>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-uncategorized"
-            checked={showUncategorized}
-            value={showUncategorized}
-            onChange={() => setShowUncategorized(!showUncategorized)}
-          />
-          <label
-            htmlFor="show-uncategorized"
-            title="Show uncategorized transactions"
-            style={{ fontSize: 12 }}
-          >
-            Uncategorized
-          </label>
-        </View>
         <Button
           type="bare"
           aria-label="Menu"

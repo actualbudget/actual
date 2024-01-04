@@ -6,7 +6,7 @@ import './Toggle.css';
 type ToggleProps = {
   id: string;
   checked: boolean;
-  onChange?: (boolean) => void;
+  onChange?: (any) =>void;
   onColor?: string;
   style?: CSSProperties;
 };
@@ -15,10 +15,10 @@ const Toggle = ({ id, checked, onChange, onColor, style }: ToggleProps) => {
   return (
     <div style={{ marginTop: -20, ...style }}>
       <input
+        id={id}
         checked={checked}
         onChange={onChange}
         className="react-switch-checkbox"
-        id={id}
         type="checkbox"
       />
       <label
