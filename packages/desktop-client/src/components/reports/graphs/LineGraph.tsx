@@ -43,8 +43,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           pointerEvents: 'none',
           borderRadius: 2,
           boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuAutoCompleteBackground,
-          color: theme.menuAutoCompleteText,
+          backgroundColor: theme.menuBackground,
+          color: theme.menuItemText,
           padding: 10,
         })}`}
       >
@@ -71,13 +71,10 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 type LineGraphProps = {
   style?: CSSProperties;
   graphData;
-  compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
+  compact?: boolean;
 };
 
-function LineGraph({ style, graphData, compact, domain }: LineGraphProps) {
+function LineGraph({ style, graphData, compact }: LineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };

@@ -38,7 +38,7 @@ function SaveReportMenu({ setMenuOpen }) {
 }
 
 export function SaveReportMenuButton() {
-  let [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <View
@@ -62,7 +62,7 @@ export function SaveReportMenuButton() {
             flexShrink: 0,
           }}
         >
-          {'Unsaved Report'}&nbsp;
+          Unsaved Report&nbsp;
         </Text>
         <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>

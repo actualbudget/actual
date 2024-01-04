@@ -51,14 +51,14 @@ function mapValue(field, value, { payees, categories, accounts }) {
 }
 
 function ruleToString(rule, data) {
-  let conditions = rule.conditions.flatMap(cond => [
+  const conditions = rule.conditions.flatMap(cond => [
     mapField(cond.field),
     friendlyOp(cond.op),
     cond.op === 'oneOf' || cond.op === 'notOneOf'
       ? cond.value.map(v => mapValue(cond.field, v, data)).join(', ')
       : mapValue(cond.field, cond.value, data),
   ]);
-  let actions = rule.actions.flatMap(action => {
+  const actions = rule.actions.flatMap(action => {
     if (action.op === 'set') {
       return [
         friendlyOp(action.op),
@@ -67,7 +67,7 @@ function ruleToString(rule, data) {
         mapValue(action.field, action.value, data),
       ];
     } else if (action.op === 'link-schedule') {
-      let schedule = data.schedules.find(s => s.id === action.value);
+      const schedule = data.schedules.find(s => s.id === action.value);
       return [
         friendlyOp(action.op),
         describeSchedule(
@@ -95,19 +95,19 @@ function ManageRulesContent({
   payeeId,
   setLoading,
 }: ManageRulesContentProps) {
-  let [allRules, setAllRules] = useState(null);
-  let [rules, setRules] = useState(null);
-  let [filter, setFilter] = useState('');
-  let dispatch = useDispatch();
+  const [allRules, setAllRules] = useState(null);
+  const [rules, setRules] = useState(null);
+  const [filter, setFilter] = useState('');
+  const dispatch = useDispatch();
 
-  let { data: schedules } = SchedulesQuery.useQuery();
-  let { list: categories } = useCategories();
-  let state = useSelector(state => ({
+  const { data: schedules } = SchedulesQuery.useQuery();
+  const { list: categories } = useCategories();
+  const state = useSelector(state => ({
     payees: state.queries.payees,
     accounts: state.queries.accounts,
     schedules,
   }));
-  let filterData = useMemo(
+  const filterData = useMemo(
     () => ({
       ...state,
       categories,
@@ -115,7 +115,7 @@ function ManageRulesContent({
     [state, categories],
   );
 
-  let filteredRules = useMemo(
+  const filteredRules = useMemo(
     () =>
       filter === '' || !rules
         ? rules
@@ -126,8 +126,8 @@ function ManageRulesContent({
           ),
     [rules, filter, filterData],
   );
-  let selectedInst = useSelected('manage-rules', allRules, []);
-  let [hoveredRule, setHoveredRule] = useState(null);
+  const selectedInst = useSelected('manage-rules', allRules, []);
+  const [hoveredRule, setHoveredRule] = useState(null);
 
   async function loadRules() {
     setLoading(true);
@@ -147,7 +147,7 @@ function ManageRulesContent({
 
   useEffect(() => {
     async function loadData() {
-      let loadedRules = await loadRules();
+      const loadedRules = await loadRules();
       setRules(loadedRules.slice(0, 100));
       setLoading(false);
 
@@ -171,7 +171,7 @@ function ManageRulesContent({
 
   async function onDeleteSelected() {
     setLoading(true);
-    let { someDeletionsFailed } = await send('rule-delete-all', [
+    const { someDeletionsFailed } = await send('rule-delete-all', [
       ...selectedInst.items,
     ]);
 
@@ -179,7 +179,7 @@ function ManageRulesContent({
       alert('Some rules were not deleted because they are linked to schedules');
     }
 
-    let newRules = await loadRules();
+    const newRules = await loadRules();
     setRules(rules => {
       return newRules.slice(0, rules.length);
     });
@@ -187,15 +187,15 @@ function ManageRulesContent({
     setLoading(false);
   }
 
-  let onEditRule = useCallback(rule => {
+  const onEditRule = useCallback(rule => {
     dispatch(
       pushModal('edit-rule', {
         rule,
         onSave: async newRule => {
-          let newRules = await loadRules();
+          const newRules = await loadRules();
 
           setRules(rules => {
-            let newIdx = newRules.findIndex(rule => rule.id === newRule.id);
+            const newIdx = newRules.findIndex(rule => rule.id === newRule.id);
 
             if (newIdx > rules.length) {
               return newRules.slice(0, newIdx + 75);
@@ -211,7 +211,7 @@ function ManageRulesContent({
   }, []);
 
   function onCreateRule() {
-    let rule: RuleEntity = {
+    const rule: RuleEntity = {
       stage: null,
       conditionsOp: 'and',
       conditions: [
@@ -236,10 +236,10 @@ function ManageRulesContent({
       pushModal('edit-rule', {
         rule,
         onSave: async newRule => {
-          let newRules = await loadRules();
+          const newRules = await loadRules();
 
           setRules(rules => {
-            let newIdx = newRules.findIndex(rule => rule.id === newRule.id);
+            const newIdx = newRules.findIndex(rule => rule.id === newRule.id);
             return newRules.slice(0, newIdx + 75);
           });
 
@@ -249,7 +249,7 @@ function ManageRulesContent({
     );
   }
 
-  let onHover = useCallback(id => {
+  const onHover = useCallback(id => {
     setHoveredRule(id);
   }, []);
 

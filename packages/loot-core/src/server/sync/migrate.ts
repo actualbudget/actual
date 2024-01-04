@@ -5,7 +5,7 @@ import { Message, addSyncListener, applyMessages } from './index';
 function migrateParentIds(_oldValues, newValues) {
   newValues.forEach((items, table) => {
     if (table === 'transactions') {
-      let toApply: Message[] = [];
+      const toApply: Message[] = [];
 
       items.forEach(newValue => {
         if (
@@ -13,7 +13,7 @@ function migrateParentIds(_oldValues, newValues) {
           newValue.parent_id == null &&
           newValue.id.includes('/')
         ) {
-          let parentId = newValue.id.split('/')[0];
+          const parentId = newValue.id.split('/')[0];
 
           toApply.push({
             dataset: 'transactions',

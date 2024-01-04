@@ -82,7 +82,7 @@ export function unloadAllKeys() {
 }
 
 export async function createKey({ id, password, salt }) {
-  let key = new Key({ id });
+  const key = new Key({ id });
   await key.createFromPassword({ password, salt });
   return key;
 }

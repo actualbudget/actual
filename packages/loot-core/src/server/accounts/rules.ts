@@ -24,7 +24,7 @@ function assert(test, type, msg) {
 
 function parseRecurDate(desc) {
   try {
-    let rules = recurConfigToRSchedule(desc);
+    const rules = recurConfigToRSchedule(desc);
 
     return {
       type: 'recur',
@@ -71,19 +71,19 @@ export function parseDateString(str) {
 }
 
 function parseBetweenAmount(between) {
-  let { num1, num2 } = between;
+  const { num1, num2 } = between;
   if (typeof num1 !== 'number' || typeof num2 !== 'number') {
     return null;
   }
   return { type: 'between', num1, num2 };
 }
 
-let CONDITION_TYPES = {
+const CONDITION_TYPES = {
   date: {
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
     parse(op, value, fieldName) {
-      let parsed =
+      const parsed =
         typeof value === 'string'
           ? parseDateString(value)
           : value.frequency != null
@@ -160,7 +160,7 @@ let CONDITION_TYPES = {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
     parse(op, value, fieldName) {
-      let parsed =
+      const parsed =
         typeof value === 'number'
           ? { type: 'literal', value }
           : parseBetweenAmount(value);
@@ -215,10 +215,10 @@ export class Condition {
   value;
 
   constructor(op, field, value, options, fieldTypes) {
-    let typeName = fieldTypes.get(field);
+    const typeName = fieldTypes.get(field);
     assert(typeName, 'internal', 'Invalid condition field: ' + field);
 
-    let type = CONDITION_TYPES[typeName];
+    const type = CONDITION_TYPES[typeName];
 
     // It's important to validate rules because a faulty rule might mess
     // up the user's transaction (and be very confusing)
@@ -261,7 +261,7 @@ export class Condition {
       fieldValue = fieldValue.toLowerCase();
     }
 
-    let type = this.type;
+    const type = this.type;
 
     if (type === 'number' && this.options) {
       if (this.options.outflow) {
@@ -277,7 +277,7 @@ export class Condition {
       }
     }
 
-    let extractValue = v => (type === 'number' ? v.value : v);
+    const extractValue = v => (type === 'number' ? v.value : v);
 
     switch (this.op) {
       case 'isapprox':
@@ -288,9 +288,9 @@ export class Condition {
           }
 
           if (this.value.type === 'recur') {
-            let { schedule } = this.value;
+            const { schedule } = this.value;
             if (this.op === 'isapprox') {
-              let fieldDate = parseDate(fieldValue);
+              const fieldDate = parseDate(fieldValue);
               return schedule.occursBetween(
                 dateFns.subDays(fieldDate, 2),
                 dateFns.addDays(fieldDate, 2),
@@ -299,12 +299,12 @@ export class Condition {
               return schedule.occursOn({ date: parseDate(fieldValue) });
             }
           } else {
-            let { date } = this.value;
+            const { date } = this.value;
 
             if (this.op === 'isapprox') {
-              let fullDate = parseDate(date);
-              let high = addDays(fullDate, 2);
-              let low = subDays(fullDate, 2);
+              const fullDate = parseDate(date);
+              const high = addDays(fullDate, 2);
+              const low = subDays(fullDate, 2);
 
               return fieldValue >= low && fieldValue <= high;
             } else {
@@ -320,9 +320,9 @@ export class Condition {
             }
           }
         } else if (type === 'number') {
-          let number = this.value.value;
+          const number = this.value.value;
           if (this.op === 'isapprox') {
-            let threshold = getApproxNumberThreshold(number);
+            const threshold = getApproxNumberThreshold(number);
             return (
               fieldValue >= number - threshold &&
               fieldValue <= number + threshold
@@ -337,7 +337,7 @@ export class Condition {
       case 'isbetween': {
         // The parsing logic already checks that the value is of the
         // right type (only numbers with high and low)
-        let [low, high] = sortNumbers(this.value.num1, this.value.num2);
+        const [low, high] = sortNumbers(this.value.num1, this.value.num2);
         return fieldValue >= low && fieldValue <= high;
       }
       case 'contains':
@@ -419,7 +419,7 @@ export class Condition {
 
 type ActionOperator = 'set' | 'link-schedule';
 
-let ACTION_OPS: ActionOperator[] = ['set', 'link-schedule'];
+const ACTION_OPS: ActionOperator[] = ['set', 'link-schedule'];
 
 export class Action {
   field;
@@ -437,7 +437,7 @@ export class Action {
     );
 
     if (op === 'set') {
-      let typeName = fieldTypes.get(field);
+      const typeName = fieldTypes.get(field);
       assert(typeName, 'internal', `Invalid field for action: ${field}`);
       this.field = field;
       this.type = typeName;
@@ -520,7 +520,7 @@ export class Rule {
   }
 
   execActions(object) {
-    let changes = {};
+    const changes = {};
     this.actions.forEach(action => action.exec(changes));
     return changes;
   }
@@ -534,7 +534,7 @@ export class Rule {
 
   // Apply is similar to exec but applies the changes for you
   apply(object) {
-    let changes = this.exec(object);
+    const changes = this.exec(object);
     return Object.assign({}, object, changes);
   }
 
@@ -586,8 +586,8 @@ export class RuleIndexer {
   }
 
   getIndexes(rule) {
-    let cond = rule.conditions.find(cond => cond.field === this.field);
-    let indexes = [];
+    const cond = rule.conditions.find(cond => cond.field === this.field);
+    const indexes = [];
 
     if (
       cond &&
@@ -609,14 +609,14 @@ export class RuleIndexer {
   }
 
   index(rule) {
-    let indexes = this.getIndexes(rule);
+    const indexes = this.getIndexes(rule);
     indexes.forEach(index => {
       index.add(rule);
     });
   }
 
   remove(rule) {
-    let indexes = this.getIndexes(rule);
+    const indexes = this.getIndexes(rule);
     indexes.forEach(index => {
       index.delete(rule);
     });
@@ -625,7 +625,7 @@ export class RuleIndexer {
   getApplicableRules(object) {
     let indexedRules;
     if (this.field in object) {
-      let key = this.getKey(object[this.field]);
+      const key = this.getKey(object[this.field]);
       if (key) {
         indexedRules = this.rules.get(key);
       }
@@ -654,7 +654,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
 };
 
 function computeScore(rule) {
-  let initialScore = rule.conditions.reduce((score, condition) => {
+  const initialScore = rule.conditions.reduce((score, condition) => {
     if (OP_SCORES[condition.op] == null) {
       console.log(`Found invalid operation while ranking: ${condition.op}`);
       return 0;
@@ -679,7 +679,7 @@ function computeScore(rule) {
 }
 
 function _rankRules(rules) {
-  let scores = new Map();
+  const scores = new Map();
   rules.forEach(rule => {
     scores.set(rule, computeScore(rule));
   });
@@ -688,15 +688,15 @@ function _rankRules(rules) {
   // order. That's why rules have ids: if two rules have the same score, it
   // sorts by id
   return [...rules].sort((r1, r2) => {
-    let score1 = scores.get(r1);
-    let score2 = scores.get(r2);
+    const score1 = scores.get(r1);
+    const score2 = scores.get(r2);
     if (score1 < score2) {
       return -1;
     } else if (score1 > score2) {
       return 1;
     } else {
-      let id1 = r1.getId();
-      let id2 = r2.getId();
+      const id1 = r1.getId();
+      const id2 = r2.getId();
       return id1 < id2 ? -1 : id1 > id2 ? 1 : 0;
     }
   });
@@ -707,7 +707,7 @@ export function rankRules(rules) {
   let normal = [];
   let post = [];
 
-  for (let rule of rules) {
+  for (const rule of rules) {
     switch (rule.stage) {
       case 'pre':
         pre.push(rule);
@@ -744,7 +744,7 @@ export function migrateIds(rule, mappings) {
   // first id back to make [1, 2]. Keeping the original value around
   // solves this.
   for (let ci = 0; ci < rule.conditions.length; ci++) {
-    let cond = rule.conditions[ci];
+    const cond = rule.conditions[ci];
     if (cond.type === 'id') {
       switch (cond.op) {
         case 'is':
@@ -769,7 +769,7 @@ export function migrateIds(rule, mappings) {
   }
 
   for (let ai = 0; ai < rule.actions.length; ai++) {
-    let action = rule.actions[ai];
+    const action = rule.actions[ai];
     if (action.type === 'id') {
       if (action.op === 'set') {
         action.value = mappings.get(action.rawValue) || action.rawValue;
@@ -783,9 +783,9 @@ export function iterateIds(rules, fieldName, func) {
   let i;
 
   ruleiter: for (i = 0; i < rules.length; i++) {
-    let rule = rules[i];
+    const rule = rules[i];
     for (let ci = 0; ci < rule.conditions.length; ci++) {
-      let cond = rule.conditions[ci];
+      const cond = rule.conditions[ci];
       if (cond.type === 'id' && cond.field === fieldName) {
         switch (cond.op) {
           case 'is':
@@ -818,7 +818,7 @@ export function iterateIds(rules, fieldName, func) {
     }
 
     for (let ai = 0; ai < rule.actions.length; ai++) {
-      let action = rule.actions[ai];
+      const action = rule.actions[ai];
       if (action.type === 'id' && action.field === fieldName) {
         // Currently `set` is the only op, but if we add more this
         // will need to be extended

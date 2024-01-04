@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 
 import Text from './Text';
 import View from './View';
@@ -31,6 +31,7 @@ type MenuItem = {
   iconSize?: number;
   text: string;
   key?: string;
+  style?: CSSProperties;
 };
 
 type MenuProps = {
@@ -38,6 +39,7 @@ type MenuProps = {
   footer?: ReactNode;
   items: Array<MenuItem | typeof Menu.line>;
   onMenuSelect: (itemName: MenuItem['name']) => void;
+  style?: CSSProperties;
 };
 
 export default function Menu({
@@ -45,22 +47,23 @@ export default function Menu({
   footer,
   items: allItems,
   onMenuSelect,
+  style,
 }: MenuProps) {
-  let elRef = useRef(null);
-  let items = allItems.filter(x => x);
-  let [hoveredIndex, setHoveredIndex] = useState(null);
+  const elRef = useRef(null);
+  const items = allItems.filter(x => x);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   useEffect(() => {
     const el = elRef.current;
     el.focus();
 
-    let onKeyDown = e => {
-      let filteredItems = items.filter(
+    const onKeyDown = e => {
+      const filteredItems = items.filter(
         item => item && item !== Menu.line && item.type !== Menu.label,
       );
-      let currentIndex = filteredItems.indexOf(items[hoveredIndex]);
+      const currentIndex = filteredItems.indexOf(items[hoveredIndex]);
 
-      let transformIndex = idx => items.indexOf(filteredItems[idx]);
+      const transformIndex = idx => items.indexOf(filteredItems[idx]);
 
       switch (e.key) {
         case 'ArrowUp':
@@ -101,7 +104,7 @@ export default function Menu({
 
   return (
     <View
-      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
+      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
       tabIndex={1}
       innerRef={elRef}
     >
@@ -131,7 +134,7 @@ export default function Menu({
           );
         }
 
-        let lastItem = items[idx - 1];
+        const lastItem = items[idx - 1];
 
         return (
           <View
@@ -155,6 +158,7 @@ export default function Menu({
                   backgroundColor: theme.menuItemBackgroundHover,
                   color: theme.menuItemTextHover,
                 }),
+              ...item.style,
             }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
@@ -168,7 +172,10 @@ export default function Menu({
                 createElement(item.icon, {
                   width: item.iconSize || 10,
                   height: item.iconSize || 10,
-                  style: { marginRight: 7, width: 10 },
+                  style: {
+                    marginRight: 7,
+                    width: item.iconSize || 10,
+                  },
                 })}
             </Text>
             <Text>{item.text}</Text>

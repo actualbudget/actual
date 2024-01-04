@@ -134,12 +134,14 @@ export function createCategory(
   name: string,
   groupId: string,
   isIncome: boolean,
+  hidden: boolean,
 ) {
   return async (dispatch: Dispatch) => {
     const id = await send('category-create', {
       name,
       groupId,
       isIncome,
+      hidden,
     });
     dispatch(getCategories());
     return id;

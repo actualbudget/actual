@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
@@ -35,11 +36,14 @@ function DiscoverSchedulesTable({
 }) {
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
+  const dateFormat = useSelector(
+    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
+  );
 
   function renderItem({ item }: { item: DiscoverScheduleEntity }) {
     const selected = selectedItems.has(item.id);
     const amountOp = item._conditions.find(c => c.field === 'amount').op;
-    const recurDescription = getRecurringDescription(item.date);
+    const recurDescription = getRecurringDescription(item.date, dateFormat);
 
     return (
       <Row
@@ -142,7 +146,7 @@ export default function DiscoverSchedules({
     const selected = schedules.filter(s => selectedInst.items.has(s.id));
     setCreating(true);
 
-    for (let schedule of selected) {
+    for (const schedule of selected) {
       const scheduleId = await send('schedule/create', {
         conditions: schedule._conditions,
         schedule: {},

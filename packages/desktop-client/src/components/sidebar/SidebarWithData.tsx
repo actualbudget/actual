@@ -26,8 +26,8 @@ type EditableBudgetNameProps = {
 };
 
 function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
-  let dispatch = useDispatch();
-  let navigate = useNavigate();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -51,7 +51,7 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
     }
   }
 
-  let items = [
+  const items = [
     { name: 'rename', text: 'Rename budget' },
     { name: 'settings', text: 'Settings' },
     ...(Platform.isBrowser ? [{ name: 'help', text: 'Help' }] : []),
@@ -114,21 +114,22 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
 }
 
 function SidebarWithData() {
-  let accounts = useSelector(state => state.queries.accounts);
-  let failedAccounts = useSelector(state => state.account.failedAccounts);
-  let updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  let prefs = useSelector(state => state.prefs.local);
-  let floatingSidebar = useSelector(
+  const accounts = useSelector(state => state.queries.accounts);
+  const failedAccounts = useSelector(state => state.account.failedAccounts);
+  const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+  const prefs = useSelector(state => state.prefs.local);
+  const floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
 
-  let { getAccounts, replaceModal, savePrefs, saveGlobalPrefs } = useActions();
+  const { getAccounts, replaceModal, savePrefs, saveGlobalPrefs } =
+    useActions();
 
   useEffect(() => void getAccounts(), [getAccounts]);
 
   async function onReorder(id, dropPos, targetId) {
     if (dropPos === 'bottom') {
-      let idx = accounts.findIndex(a => a.id === targetId) + 1;
+      const idx = accounts.findIndex(a => a.id === targetId) + 1;
       targetId = idx < accounts.length ? accounts[idx].id : null;
     }
 

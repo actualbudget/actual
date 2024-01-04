@@ -12,10 +12,10 @@ export default function PieProgress({
   color,
   backgroundColor,
 }: PieProgressProps) {
-  let radius = 4;
-  let circum = 2 * Math.PI * radius;
-  let dash = progress * circum;
-  let gap = circum;
+  const radius = 4;
+  const circum = 2 * Math.PI * radius;
+  const dash = progress * circum;
+  const gap = circum;
 
   return (
     <svg viewBox="0 0 20 20" style={style}>

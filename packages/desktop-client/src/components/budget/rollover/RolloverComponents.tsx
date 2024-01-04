@@ -20,7 +20,7 @@ import { makeAmountGrey } from '../util';
 
 import BalanceTooltip from './BalanceTooltip';
 
-let headerLabelStyle: CSSProperties = {
+const headerLabelStyle: CSSProperties = {
   flex: 1,
   padding: '0 5px',
   textAlign: 'right',
@@ -89,7 +89,7 @@ type ExpenseGroupMonthProps = {
 export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   group,
 }: ExpenseGroupMonthProps) {
-  let { id } = group;
+  const { id } = group;
 
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -152,7 +152,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: ExpenseCategoryMonthProps) {
-  let balanceTooltip = useTooltip();
+  const balanceTooltip = useTooltip();
   const [menuOpen, setMenuOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
@@ -188,6 +188,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               paddingLeft: 3,
               justifyContent: 'center',
               borderTopWidth: 1,
+              borderBottomWidth: 1,
               borderColor: theme.tableBorder,
             }}
           >

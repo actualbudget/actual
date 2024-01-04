@@ -9,6 +9,8 @@ import useCategories from '../hooks/useCategories';
 import useSyncServerStatus from '../hooks/useSyncServerStatus';
 import { type CommonModalProps } from '../types/modals';
 
+import CategoryGroupMenu from './modals/CategoryGroupMenu';
+import CategoryMenu from './modals/CategoryMenu';
 import CloseAccount from './modals/CloseAccount';
 import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
 import ConfirmTransactionEdit from './modals/ConfirmTransactionEdit';
@@ -25,6 +27,7 @@ import ImportTransactions from './modals/ImportTransactions';
 import LoadBackup from './modals/LoadBackup';
 import ManageRulesModal from './modals/ManageRulesModal';
 import MergeUnusedPayees from './modals/MergeUnusedPayees';
+import Notes from './modals/Notes';
 import PlaidExternalMsg from './modals/PlaidExternalMsg';
 import ReportBudgetSummary from './modals/ReportBudgetSummary';
 import RolloverBudgetSummary from './modals/RolloverBudgetSummary';
@@ -55,7 +58,7 @@ export default function Modals() {
 
   const syncServerStatus = useSyncServerStatus();
 
-  let modals = modalStack
+  const modals = modalStack
     .map(({ name, options }, idx) => {
       const modalProps: CommonModalProps = {
         onClose: actions.popModal,
@@ -241,6 +244,7 @@ export default function Modals() {
               modalProps={modalProps}
               name={options.name}
               onSubmit={options.onSubmit}
+              onClose={options.onClose}
             />
           );
 
@@ -249,7 +253,7 @@ export default function Modals() {
             <SingleInput
               modalProps={modalProps}
               title="New Category"
-              inputPlaceholder="Name"
+              inputPlaceholder="Category name"
               buttonText="Add"
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
@@ -261,7 +265,7 @@ export default function Modals() {
             <SingleInput
               modalProps={modalProps}
               title="New Category Group"
-              inputPlaceholder="Name"
+              inputPlaceholder="Category group name"
               buttonText="Add"
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
@@ -331,6 +335,45 @@ export default function Modals() {
               key={name}
               modalProps={modalProps}
               onSwitch={options?.onSwitch}
+            />
+          );
+
+        case 'category-menu':
+          return (
+            <CategoryMenu
+              key={name}
+              modalProps={modalProps}
+              categoryId={options.categoryId}
+              onSave={options.onSave}
+              onEditNotes={options.onEditNotes}
+              onDelete={options.onDelete}
+              onClose={options.onClose}
+            />
+          );
+
+        case 'category-group-menu':
+          return (
+            <CategoryGroupMenu
+              key={name}
+              modalProps={modalProps}
+              groupId={options.groupId}
+              onSave={options.onSave}
+              onAddCategory={options.onAddCategory}
+              onEditNotes={options.onEditNotes}
+              onSaveNotes={options.onSaveNotes}
+              onDelete={options.onDelete}
+              onClose={options.onClose}
+            />
+          );
+
+        case 'notes':
+          return (
+            <Notes
+              key={name}
+              modalProps={modalProps}
+              id={options.id}
+              name={options.name}
+              onSave={options.onSave}
             />
           );
 

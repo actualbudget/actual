@@ -69,7 +69,11 @@ const SchedulesContext = createContext(null);
 
 export function SchedulesProvider({ transform, children }) {
   const data = useSchedules({ transform });
-  return <SchedulesContext.Provider value={data} children={children} />;
+  return (
+    <SchedulesContext.Provider value={data}>
+      {children}
+    </SchedulesContext.Provider>
+  );
 }
 
 export function useCachedSchedules() {

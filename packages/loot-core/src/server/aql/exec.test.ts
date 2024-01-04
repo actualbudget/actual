@@ -23,28 +23,28 @@ function runQuery(query, options?: unknown) {
 
 async function insertTransactions(repeatTimes = 1) {
   let transactions = [];
-  let group = await db.insertCategoryGroup({ name: 'group' });
+  const group = await db.insertCategoryGroup({ name: 'group' });
 
   for (let i = 0; i < repeatTimes; i++) {
-    let cat1 = await db.insertCategory({
+    const cat1 = await db.insertCategory({
       id: 'cat' + i + 'a',
       name: 'cat' + i + 'a',
       cat_group: group,
     });
-    let cat2 = await db.insertCategory({
+    const cat2 = await db.insertCategory({
       id: 'cat' + i + 'b',
       name: 'cat' + i + 'b',
       cat_group: group,
     });
 
-    let parent = {
+    const parent = {
       id: uuidv4(),
       account: 'acct',
       date: '2020-01-04',
       amount: -100,
       is_parent: true,
     };
-    let parent2 = {
+    const parent2 = {
       id: uuidv4(),
       account: 'acct',
       date: '2020-01-01',
@@ -65,7 +65,7 @@ async function insertTransactions(repeatTimes = 1) {
     ]);
   }
 
-  for (let trans of transactions) {
+  for (const trans of transactions) {
     await db.insertTransaction(trans);
   }
 }
@@ -116,7 +116,7 @@ describe('runQuery', () => {
   });
 
   it('provides named parameters and converts types', async () => {
-    let transId = uuidv4();
+    const transId = uuidv4();
     await db.insertTransaction({
       id: transId,
       account: 'acct',
@@ -171,20 +171,20 @@ describe('runQuery', () => {
   it('allows null as a parameter', async () => {
     await db.insertCategoryGroup({ id: 'group', name: 'group' });
     await db.insertCategory({ id: 'cat', name: 'cat', cat_group: 'group' });
-    let transNoCat = await db.insertTransaction({
+    const transNoCat = await db.insertTransaction({
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
       category: null,
     });
-    let transCat = await db.insertTransaction({
+    const transCat = await db.insertTransaction({
       account: 'acct',
       date: '2020-01-01',
       amount: -5001,
       category: 'cat',
     });
 
-    let queryState = query('transactions')
+    const queryState = query('transactions')
       .filter({ category: ':category' })
       .select()
       .serialize();
@@ -197,7 +197,7 @@ describe('runQuery', () => {
   });
 
   it('parameters have the correct order', async () => {
-    let transId = uuidv4();
+    const transId = uuidv4();
     await db.insertTransaction({
       id: transId,
       account: 'acct',
@@ -205,7 +205,7 @@ describe('runQuery', () => {
       amount: -5001,
     });
 
-    let { data } = await runQuery(
+    const { data } = await runQuery(
       query('transactions')
         .filter({
           amount: { $lt: { $neg: ':amount' } },
@@ -221,11 +221,11 @@ describe('runQuery', () => {
   it('fetches all data required for $oneof', async () => {
     await insertTransactions();
 
-    let rows = await db.all('SELECT id FROM transactions WHERE amount < -50');
-    let ids = rows.slice(0, 3).map(row => row.id);
+    const rows = await db.all('SELECT id FROM transactions WHERE amount < -50');
+    const ids = rows.slice(0, 3).map(row => row.id);
     ids.sort();
 
-    let { data } = await runQuery(
+    const { data } = await runQuery(
       query('transactions')
         .filter({ id: { $oneof: repeat(ids, 1000) }, amount: { $lt: 50 } })
         .select('id')

@@ -14,7 +14,7 @@ import { Setting } from './UI';
 type Results = Awaited<ReturnType<Handlers['tools/fix-split-transactions']>>;
 
 function renderResults(results: Results) {
-  let { numBlankPayees, numCleared, numDeleted } = results;
+  const { numBlankPayees, numCleared, numDeleted } = results;
   let result = '';
   if (numBlankPayees === 0 && numCleared === 0 && numDeleted === 0) {
     result = 'No split transactions found needing repair.';
@@ -52,12 +52,12 @@ function renderResults(results: Results) {
 }
 
 export default function FixSplitsTool() {
-  let [loading, setLoading] = useState(false);
-  let [results, setResults] = useState<Results>(null);
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<Results>(null);
 
   async function onFix() {
     setLoading(true);
-    let res = await send('tools/fix-split-transactions');
+    const res = await send('tools/fix-split-transactions');
     setResults(res);
     setLoading(false);
   }

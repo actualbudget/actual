@@ -39,6 +39,7 @@ module.exports = {
     'react-app',
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:import/typescript',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: { project: [path.join(__dirname, './tsconfig.json')] },
@@ -63,6 +64,10 @@ module.exports = {
       require('confusing-browser-globals').filter(g => g !== 'self'),
     ),
 
+    'react/jsx-filename-extension': [
+      'warn',
+      { extensions: ['.jsx', '.tsx'], allow: 'as-needed' },
+    ],
     'react/jsx-no-useless-fragment': 'warn',
     'react/self-closing-comp': 'warn',
     'react/no-unstable-nested-components': [
@@ -82,7 +87,6 @@ module.exports = {
 
     // TODO: re-enable these rules
     'react-hooks/exhaustive-deps': 'off',
-    'react/no-children-prop': 'off',
     'react/display-name': 'off',
     'react/react-in-jsx-scope': 'off',
     // 'react-hooks/exhaustive-deps': [
@@ -93,6 +97,7 @@ module.exports = {
     // ],
 
     'no-var': 'warn',
+    'react/jsx-curly-brace-presence': 'warn',
     'object-shorthand': ['warn', 'properties'],
 
     'import/extensions': [
@@ -157,7 +162,7 @@ module.exports = {
 
     // Rules disable during TS migration
     '@typescript-eslint/no-var-requires': 'off',
-    'prefer-const': 'off',
+    'prefer-const': 'warn',
     'prefer-spread': 'off',
     '@typescript-eslint/no-empty-function': 'off',
   },
@@ -233,39 +238,8 @@ module.exports = {
         'no-restricted-imports': ['off', { patterns: restrictedImportColors }],
       },
     },
-    // TODO: Remove this override once we addressed all warnings and enable the rule globally.
-    {
-      files: [
-        './packages/api/*',
-        './packages/api/app/**/*',
-        './packages/crdt/**/*',
-        './packages/desktop-client/src/*',
-        // './packages/desktop-client/src/components/**/*',
-        './packages/desktop-client/src/hooks/**/*',
-        './packages/desktop-client/src/icons/**/*',
-        './packages/desktop-client/src/style/**/*',
-        './packages/desktop-client/src/types/**/*',
-        './packages/desktop-client/src/util/**/*',
-        './packages/desktop-electron/**/*',
-        './packages/eslint-plugin-actual/**/*',
-        './packages/loot-core/*',
-        './packages/loot-core/src/client/**/*',
-        './packages/loot-core/src/mocks/**/*',
-        './packages/loot-core/src/platform/**/*',
-        // './packages/loot-core/src/server/**/*',
-        './packages/loot-core/src/shared/**/*',
-        './packages/loot-core/src/types/**/*',
-        './packages/loot-core/webpack/**/*',
-      ],
-      rules: {
-        'prefer-const': 'warn',
-      },
-    },
   ],
   settings: {
-    'import/parsers': {
-      '@typescript-eslint/parser': ['.ts', '.tsx'],
-    },
     'import/resolver': {
       typescript: {
         alwaysTryTypes: true,

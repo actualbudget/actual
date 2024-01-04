@@ -45,7 +45,7 @@ export async function exportToCSV(
 }
 
 export async function exportQueryToCSV(query) {
-  let { data: transactions } = await aqlQuery(
+  const { data: transactions } = await aqlQuery(
     query
       .select([
         { Id: 'id' },
@@ -61,18 +61,18 @@ export async function exportQueryToCSV(query) {
       .options({ splits: 'all' }),
   );
 
-  let parentsPayees = new Map();
-  for (let trans of transactions) {
+  const parentsPayees = new Map();
+  for (const trans of transactions) {
     if (trans.IsParent) {
       parentsPayees.set(trans.Id, trans.Payee);
     }
   }
 
   // filter out any parent transactions
-  let noParents = transactions.filter(t => !t.IsParent);
+  const noParents = transactions.filter(t => !t.IsParent);
 
   // map final properties for export and grab the payee for splits from their parent transaction
-  let transactionsForExport = noParents.map(trans => {
+  const transactionsForExport = noParents.map(trans => {
     return {
       Account: trans.Account,
       Date: trans.Date,

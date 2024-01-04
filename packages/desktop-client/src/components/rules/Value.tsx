@@ -8,13 +8,9 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import useCategories from '../../hooks/useCategories';
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import LinkButton from '../common/LinkButton';
 import Text from '../common/Text';
-
-let valueStyle = {
-  color: theme.pageTextPositive,
-};
 
 type ValueProps<T> = {
   value: T;
@@ -23,6 +19,7 @@ type ValueProps<T> = {
   inline?: boolean;
   data?: unknown;
   describe?: (item: T) => string;
+  style?: CSSProperties;
 };
 
 export default function Value<T>({
@@ -33,15 +30,20 @@ export default function Value<T>({
   data: dataProp,
   // @ts-expect-error fix this later
   describe = x => x.name,
+  style,
 }: ValueProps<T>) {
-  let dateFormat = useSelector(
+  const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-  let payees = useSelector(state => state.queries.payees);
-  let { list: categories } = useCategories();
-  let accounts = useSelector(state => state.queries.accounts);
+  const payees = useSelector(state => state.queries.payees);
+  const { list: categories } = useCategories();
+  const accounts = useSelector(state => state.queries.accounts);
+  const valueStyle = {
+    color: theme.pageTextPositive,
+    ...style,
+  };
 
-  let data =
+  const data =
     dataProp ||
     (field === 'payee'
       ? payees
@@ -51,7 +53,7 @@ export default function Value<T>({
       ? accounts
       : []);
 
-  let [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   function onExpand(e) {
     e.preventDefault();
@@ -70,7 +72,7 @@ export default function Value<T>({
         case 'date':
           if (value) {
             if (value.frequency) {
-              return getRecurringDescription(value);
+              return getRecurringDescription(value, dateFormat);
             }
             return formatDate(parseISO(value), dateFormat);
           }
@@ -92,7 +94,7 @@ export default function Value<T>({
             return value;
           }
           if (data && Array.isArray(data)) {
-            let item = data.find(item => item.id === value);
+            const item = data.find(item => item.id === value);
             if (item) {
               return describe(item);
             } else {
@@ -122,12 +124,12 @@ export default function Value<T>({
     if (!expanded && value.length > 4) {
       displayed = value.slice(0, 3);
     }
-    let numHidden = value.length - displayed.length;
+    const numHidden = value.length - displayed.length;
     return (
       <Text style={{ color: theme.tableText }}>
         [
         {displayed.map((v, i) => {
-          let text = <Text style={valueStyle}>{formatValue(v)}</Text>;
+          const text = <Text style={valueStyle}>{formatValue(v)}</Text>;
           let spacing;
           if (inline) {
             spacing = i !== 0 ? ' ' : '';

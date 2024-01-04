@@ -13,7 +13,9 @@ const PayeesContext = createContext<PayeeEntity[]>(null);
 
 export function PayeesProvider({ children }) {
   const data = usePayees();
-  return <PayeesContext.Provider value={data} children={children} />;
+  return (
+    <PayeesContext.Provider value={data}>{children}</PayeesContext.Provider>
+  );
 }
 
 export function CachedPayees({ children, idKey }) {

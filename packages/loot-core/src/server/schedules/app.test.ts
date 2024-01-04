@@ -23,12 +23,12 @@ beforeEach(async () => {
 describe('schedule app', () => {
   describe('utility', () => {
     it('conditions are updated when they exist', () => {
-      let conds = [
+      const conds = [
         { op: 'is', field: 'payee', value: 'FOO' },
         { op: 'is', field: 'date', value: '2020-01-01' },
       ];
 
-      let updated = updateConditions(conds, [
+      const updated = updateConditions(conds, [
         {
           op: 'is',
           field: 'payee',
@@ -41,12 +41,12 @@ describe('schedule app', () => {
     });
 
     it('conditions are added if they don’t exist', () => {
-      let conds = [
+      const conds = [
         { op: 'contains', field: 'payee', value: 'FOO' },
         { op: 'contains', field: 'notes', value: 'dflksjdflskdjf' },
       ];
 
-      let updated = updateConditions(conds, [
+      const updated = updateConditions(conds, [
         {
           op: 'is',
           field: 'payee',
@@ -81,7 +81,7 @@ describe('schedule app', () => {
 
   describe('methods', () => {
     it('createSchedule creates a schedule', async () => {
-      let id = await createSchedule({
+      const id = await createSchedule({
         conditions: [
           {
             op: 'is',
@@ -98,7 +98,7 @@ describe('schedule app', () => {
         ],
       });
 
-      let {
+      const {
         data: [row],
       } = await aqlQuery(q('schedules').filter({ id }).select('*'));
 
@@ -114,7 +114,7 @@ describe('schedule app', () => {
     });
 
     it('updateSchedule updates a schedule', async () => {
-      let id = await createSchedule({
+      const id = await createSchedule({
         conditions: [
           { op: 'is', field: 'payee', value: 'foo' },
           {
@@ -175,7 +175,7 @@ describe('schedule app', () => {
     });
 
     it('deleteSchedule deletes a schedule', async () => {
-      let id = await createSchedule({
+      const id = await createSchedule({
         conditions: [
           {
             op: 'is',
@@ -192,16 +192,16 @@ describe('schedule app', () => {
         ],
       });
 
-      let { data: schedules } = await aqlQuery(q('schedules').select('*'));
+      const { data: schedules } = await aqlQuery(q('schedules').select('*'));
       expect(schedules.length).toBe(1);
 
       await deleteSchedule({ id });
-      let { data: schedules2 } = await aqlQuery(q('schedules').select('*'));
+      const { data: schedules2 } = await aqlQuery(q('schedules').select('*'));
       expect(schedules2.length).toBe(0);
     });
 
     it('setNextDate sets `next_date`', async () => {
-      let id = await createSchedule({
+      const id = await createSchedule({
         conditions: [
           {
             op: 'is',
@@ -218,7 +218,7 @@ describe('schedule app', () => {
         ],
       });
 
-      let { data: ruleId } = await aqlQuery(
+      const { data: ruleId } = await aqlQuery(
         q('schedules').filter({ id }).calculate('rule'),
       );
 

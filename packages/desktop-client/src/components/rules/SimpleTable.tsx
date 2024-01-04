@@ -18,9 +18,9 @@ export default function SimpleTable({
   onHoverLeave,
   children,
 }: SimpleTableProps) {
-  let contentRef = useRef<HTMLDivElement>();
-  let contentHeight = useRef<number>();
-  let scrollRef = useRef<HTMLDivElement>();
+  const contentRef = useRef<HTMLDivElement>();
+  const contentHeight = useRef<number>();
+  const scrollRef = useRef<HTMLDivElement>();
 
   function onScroll(e) {
     if (contentHeight.current != null) {

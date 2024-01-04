@@ -16,8 +16,8 @@ export default function ManageRulesModal({
   modalProps,
   payeeId,
 }: ManageRulesModalProps) {
-  let [loading, setLoading] = useState(true);
-  let location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
   if (isNonProductionEnvironment()) {
     if (location.pathname !== '/payees') {
       throw new Error(
@@ -34,8 +34,6 @@ export default function ManageRulesModal({
       {...modalProps}
       style={{
         flex: 1,
-        maxWidth: '90%',
-        maxHeight: '90%',
       }}
     >
       {() => <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />}

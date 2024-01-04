@@ -8,8 +8,8 @@ import View from '../common/View';
 
 import Value from './Value';
 
-let valueStyle = {
-  color: theme.pageTextPositive,
+const valueStyle = {
+  color: theme.pillTextHighlighted,
 };
 
 type ConditionExpressionProps = {
@@ -49,7 +49,7 @@ export default function ConditionExpression({
       {prefix && <Text>{prefix} </Text>}
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
       <Text>{friendlyOp(op)}</Text>{' '}
-      <Value value={value} field={field} inline={inline} />
+      <Value style={valueStyle} value={value} field={field} inline={inline} />
     </View>
   );
 }

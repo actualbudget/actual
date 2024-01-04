@@ -40,7 +40,7 @@ export function useDraggable<T>({
   canDrag,
   onDragChange,
 }: UseDraggableArgs<T>) {
-  let _onDragChange = useRef(onDragChange);
+  const _onDragChange = useRef(onDragChange);
 
   const [, dragRef] = useDrag({
     type,
@@ -72,7 +72,7 @@ export function useDraggable<T>({
 }
 
 export type OnDropCallback = (
-  id: unknown,
+  id: string,
   dropPos: DropPosition,
   targetId: unknown,
 ) => Promise<void> | void;
@@ -86,26 +86,31 @@ type UseDroppableArgs = {
   onLongHover?: OnLongHoverCallback;
 };
 
-export function useDroppable({
+export function useDroppable<T extends { id: string }>({
   types,
   id,
   onDrop,
   onLongHover,
 }: UseDroppableArgs) {
-  let ref = useRef(null);
-  let [dropPos, setDropPos] = useState<DropPosition>(null);
+  const ref = useRef(null);
+  const [dropPos, setDropPos] = useState<DropPosition>(null);
 
-  let [{ isOver }, dropRef] = useDrop({
+  const [{ isOver }, dropRef] = useDrop<
+    { item: T },
+    unknown,
+    { isOver: boolean }
+  >({
     accept: types,
     drop({ item }) {
       onDrop(item.id, dropPos, id);
     },
     hover(_, monitor) {
-      let hoverBoundingRect = ref.current.getBoundingClientRect();
-      let hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      let clientOffset = monitor.getClientOffset();
-      let hoverClientY = clientOffset.y - hoverBoundingRect.top;
-      let pos: DropPosition = hoverClientY < hoverMiddleY ? 'top' : 'bottom';
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+      const pos: DropPosition = hoverClientY < hoverMiddleY ? 'top' : 'bottom';
 
       setDropPos(pos);
     },
@@ -141,16 +146,16 @@ type DropHighlightProps = {
   };
 };
 export function DropHighlight({ pos, offset }: DropHighlightProps) {
-  let itemPos = useContext(DropHighlightPosContext);
+  const itemPos = useContext(DropHighlightPosContext);
 
   if (pos == null) {
     return null;
   }
 
-  let topOffset = (itemPos === 'first' ? 2 : 0) + (offset?.top || 0);
-  let bottomOffset = (itemPos === 'last' ? 2 : 0) + (offset?.bottom || 0);
+  const topOffset = (itemPos === 'first' ? 2 : 0) + (offset?.top || 0);
+  const bottomOffset = (itemPos === 'last' ? 2 : 0) + (offset?.bottom || 0);
 
-  let posStyle =
+  const posStyle =
     pos === 'top' ? { top: -2 + topOffset } : { bottom: -1 + bottomOffset };
 
   return (

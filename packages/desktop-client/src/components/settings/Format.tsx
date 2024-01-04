@@ -17,17 +17,18 @@ import { Setting } from './UI';
 
 // Follows Pikaday 'firstDay' numbering
 // https://github.com/Pikaday/Pikaday
-let daysOfWeek: { value: LocalPrefs['firstDayOfWeekIdx']; label: string }[] = [
-  { value: '0', label: 'Sunday' },
-  { value: '1', label: 'Monday' },
-  { value: '2', label: 'Tuesday' },
-  { value: '3', label: 'Wednesday' },
-  { value: '4', label: 'Thursday' },
-  { value: '5', label: 'Friday' },
-  { value: '6', label: 'Saturday' },
-];
+const daysOfWeek: { value: LocalPrefs['firstDayOfWeekIdx']; label: string }[] =
+  [
+    { value: '0', label: 'Sunday' },
+    { value: '1', label: 'Monday' },
+    { value: '2', label: 'Tuesday' },
+    { value: '3', label: 'Wednesday' },
+    { value: '4', label: 'Thursday' },
+    { value: '5', label: 'Friday' },
+    { value: '6', label: 'Saturday' },
+  ];
 
-let dateFormats: { value: LocalPrefs['dateFormat']; label: string }[] = [
+const dateFormats: { value: LocalPrefs['dateFormat']; label: string }[] = [
   { value: 'MM/dd/yyyy', label: 'MM/DD/YYYY' },
   { value: 'dd/MM/yyyy', label: 'DD/MM/YYYY' },
   { value: 'yyyy-MM-dd', label: 'YYYY-MM-DD' },
@@ -52,19 +53,19 @@ function Column({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export default function FormatSettings() {
-  let { savePrefs } = useActions();
+  const { savePrefs } = useActions();
 
-  let sidebar = useSidebar();
-  let firstDayOfWeekIdx = useSelector(
+  const sidebar = useSidebar();
+  const firstDayOfWeekIdx = useSelector(
     state => state.prefs.local.firstDayOfWeekIdx || '0', // Sunday
   );
-  let dateFormat = useSelector(
+  const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
-  let numberFormat = useSelector(
+  const numberFormat = useSelector(
     state => state.prefs.local.numberFormat || 'comma-dot',
   );
-  let hideFraction = useSelector(state => state.prefs.local.hideFraction);
+  const hideFraction = useSelector(state => state.prefs.local.hideFraction);
 
   return (
     <Setting

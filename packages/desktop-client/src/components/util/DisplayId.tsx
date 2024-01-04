@@ -33,7 +33,7 @@ export default function DisplayId({
   return (
     <DataComponent idKey={true}>
       {data => {
-        let item = data[id];
+        const item = data[id];
 
         return (
           <Text

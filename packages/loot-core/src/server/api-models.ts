@@ -13,7 +13,7 @@ export const accountModel = {
   },
 
   fromExternal(account) {
-    let result = { ...account };
+    const result = { ...account };
     if ('offbudget' in account) {
       result.offbudget = account.offbudget ? 1 : 0;
     }
@@ -32,14 +32,18 @@ export const categoryModel = {
       id: category.id,
       name: category.name,
       is_income: category.is_income ? true : false,
+      hidden: category.hidden ? true : false,
       group_id: category.cat_group,
     };
   },
 
   fromExternal(category) {
-    let { group_id: _, ...result } = category;
+    const { group_id: _, ...result } = category;
     if ('is_income' in category) {
       result.is_income = category.is_income ? 1 : 0;
+    }
+    if ('hidden' in category) {
+      result.hidden = category.hidden ? 1 : 0;
     }
     if ('group_id' in category) {
       result.cat_group = category.group_id;
@@ -56,14 +60,18 @@ export const categoryGroupModel = {
       id: group.id,
       name: group.name,
       is_income: group.is_income ? true : false,
+      hidden: group.hidden ? true : false,
       categories: group.categories.map(categoryModel.toExternal),
     };
   },
 
   fromExternal(group) {
-    let result = { ...group };
+    const result = { ...group };
     if ('is_income' in group) {
       result.is_income = group.is_income ? 1 : 0;
+    }
+    if ('hidden' in group) {
+      result.hidden = group.hidden ? 1 : 0;
     }
     if ('categories' in group) {
       result.categories = group.categories.map(categoryModel.fromExternal);

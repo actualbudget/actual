@@ -17,9 +17,9 @@ function getErrorMessage(reason) {
 }
 
 export default function Error() {
-  let navigate = useNavigate();
-  let location = useLocation();
-  let { error } = (location.state || {}) as { error? };
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { error } = (location.state || {}) as { error? };
 
   function onTryAgain() {
     navigate('/');
