@@ -76,6 +76,7 @@ export const ReportTableRow = memo(
                     amountToCurrency(item.totalAssets)
                   }
                   width="flex"
+                  privacyFilter
                   style={{
                     minWidth: 85,
                     ...styles.tnum,
@@ -88,6 +89,7 @@ export const ReportTableRow = memo(
                     amountToCurrency(item.totalDebts)
                   }
                   width="flex"
+                  privacyFilter
                   style={{
                     minWidth: 85,
                     ...styles.tnum,
