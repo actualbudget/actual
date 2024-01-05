@@ -313,7 +313,7 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
           trans.debtorName ||
             trans.remittanceInformationUnstructured ||
             (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
-            trans.additionalInformation
+            trans.additionalInformation,
         ),
       );
       if (trans.debtorAccount && trans.debtorAccount.iban) {
@@ -333,7 +333,7 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
           trans.creditorName ||
             trans.remittanceInformationUnstructured ||
             (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
-            trans.additionalInformation
+            trans.additionalInformation,
         ),
       );
       if (trans.creditorAccount && trans.creditorAccount.iban) {
