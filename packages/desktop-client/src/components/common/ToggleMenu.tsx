@@ -3,7 +3,7 @@ import { type ReactNode, useRef, useState, useEffect } from 'react';
 import { type CSSProperties, theme } from '../../style';
 
 import Text from './Text';
-import Toggle from './Toggle';
+import { Toggle } from './Toggle';
 import View from './View';
 
 type KeybindingProps = {
@@ -38,7 +38,7 @@ type ToggleMenuProps = {
   style?: CSSProperties;
 };
 
-export default function ToggleMenu({
+export function ToggleMenu({
   header,
   footer,
   items: allItems,

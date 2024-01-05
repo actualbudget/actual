@@ -11,7 +11,13 @@ type ToggleProps = {
   style?: CSSProperties;
 };
 
-const Toggle = ({ id, checked, onChange, onColor, style }: ToggleProps) => {
+export const Toggle = ({
+  id,
+  checked,
+  onChange,
+  onColor,
+  style,
+}: ToggleProps) => {
   return (
     <div style={{ marginTop: -20, ...style }}>
       <input
@@ -31,5 +37,3 @@ const Toggle = ({ id, checked, onChange, onColor, style }: ToggleProps) => {
     </div>
   );
 };
-
-export default Toggle;

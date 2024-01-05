@@ -7,7 +7,7 @@ import { theme } from '../../style';
 import Button from '../common/Button';
 import Select from '../common/Select';
 import Text from '../common/Text';
-import ToggleMenu from '../common/ToggleMenu';
+import {ToggleMenu} from '../common/ToggleMenu';
 import View from '../common/View';
 import { Tooltip } from '../tooltips';
 
