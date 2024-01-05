@@ -4,11 +4,7 @@ import React, {
   useContext,
   useState,
   useRef,
-  useEffect,
 } from 'react';
-
-import usePrevious from './usePrevious';
-import useStableCallback from './useStableCallback';
 
 type ActiveEditCleanup = () => void;
 type ActiveEditAction = () => void | ActiveEditCleanup;
@@ -19,7 +15,9 @@ type SingleActiveEditFormContextValue = {
   onRequestActiveEdit: (
     field: string,
     action?: ActiveEditAction,
-    clearActiveEditDelayMs?: number,
+    options?: {
+      clearActiveEditDelayMs?: number;
+    },
   ) => void;
   onClearActiveEdit: (delayMs?: number) => void;
 };
@@ -38,21 +36,7 @@ export function SingleActiveEditFormProvider({
   children,
 }: SingleActiveEditFormProviderProps) {
   const [editingField, setEditingField] = useState(null);
-  const prevEditingField = usePrevious(editingField);
-  const actionRef = useRef<ActiveEditAction>(null);
   const cleanupRef = useRef<ActiveEditCleanup | void>(null);
-
-  useEffect(() => {
-    if (prevEditingField != null && prevEditingField !== editingField) {
-      runCleanup();
-    } else if (prevEditingField == null && editingField !== null) {
-      runAction();
-    }
-  }, [editingField]);
-
-  const runAction = () => {
-    cleanupRef.current = actionRef.current?.();
-  };
 
   const runCleanup = () => {
     const editCleanup = cleanupRef.current;
@@ -62,31 +46,40 @@ export function SingleActiveEditFormProvider({
     cleanupRef.current = null;
   };
 
-  const onClearActiveEdit = (delayMs?: number) => {
-    setTimeout(() => setEditingField(null), delayMs);
+  const runAction = (action: ActiveEditAction) => {
+    cleanupRef.current = action?.();
   };
 
-  const onRequestActiveEdit = useStableCallback(
-    (
-      field: string,
-      action: ActiveEditAction,
-      options: {
-        clearActiveEditDelayMs?: number;
-      },
-    ) => {
-      if (editingField === field) {
-        // Already active.
-        return;
-      }
+  const onClearActiveEdit = (delayMs?: number) => {
+    setTimeout(() => {
+      runCleanup();
+      setEditingField(null);
+    }, delayMs);
+  };
 
-      if (editingField) {
-        onClearActiveEdit(options?.clearActiveEditDelayMs);
-      } else {
-        actionRef.current = action;
-        setEditingField(field);
-      }
+  const onActiveEdit = (field: string, action: ActiveEditAction) => {
+    runAction(action);
+    setEditingField(field);
+  };
+
+  const onRequestActiveEdit = (
+    field: string,
+    action: ActiveEditAction,
+    options: {
+      clearActiveEditDelayMs?: number;
     },
-  );
+  ) => {
+    if (editingField === field) {
+      // Already active.
+      return;
+    }
+
+    if (editingField) {
+      onClearActiveEdit(options?.clearActiveEditDelayMs);
+    } else {
+      onActiveEdit(field, action);
+    }
+  };
 
   return (
     <SingleActiveEditFormContext.Provider
