@@ -182,7 +182,7 @@ export function ToggleMenu({
                   id={item.name}
                   checked={item.isOn}
                   onColor={theme.pageTextPositive}
-                  style={{ marginLeft: 5 }}
+                  style={{ marginLeft: 5, ...item.style }}
                   onChange={() => !item.disabled && item.toggle && onMenuSelect(item.name)}
                 />
               </>
