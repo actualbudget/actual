@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import { DotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
 import Button from '../common/Button';
 import Select from '../common/Select';
