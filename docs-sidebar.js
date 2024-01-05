@@ -30,54 +30,6 @@ const sidebars = {
     'releases',
     {
       type: 'category',
-      label: 'Contributing',
-      link: {
-        type: 'doc',
-        id: 'contributing/index',
-      },
-      collapsed: true,
-      items: [
-        {
-          type: 'link',
-          label: 'Open Bug Reports',
-          href: 'https://github.com/actualbudget/actual/issues',
-        },
-        {
-          type: 'link',
-          label: 'Feature Requests',
-          href: 'https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+',
-        },
-        {
-          type: 'category',
-          label: 'The Actual Project Structure',
-          link: {
-            type: 'doc',
-            id: 'contributing/project-details/index',
-          },
-          items: [
-            'contributing/project-details/database',
-            'contributing/project-details/architecture',
-            'contributing/project-details/electron',
-            'contributing/project-details/migrations',
-            'contributing/project-details/advice',
-          ],
-        },
-        'contributing/preview-builds',
-        'contributing/releasing',
-        'contributing/windows',
-        {
-          type: 'category',
-          label: 'Project Leadership',
-          collapsible: false,
-          items: [
-            'contributing/leadership/funding',
-            'contributing/leadership/new-core-contributors-guide',
-          ],
-        },
-      ],
-    },
-    {
-      type: 'category',
       label: 'Getting Started',
       collapsible: false,
       items: [
@@ -294,6 +246,54 @@ const sidebars = {
           ],
         },
         'community-repos',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Contributing',
+      link: {
+        type: 'doc',
+        id: 'contributing/index',
+      },
+      collapsed: true,
+      items: [
+        {
+          type: 'link',
+          label: 'Open Bug Reports',
+          href: 'https://github.com/actualbudget/actual/issues',
+        },
+        {
+          type: 'link',
+          label: 'Feature Requests',
+          href: 'https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+',
+        },
+        {
+          type: 'category',
+          label: 'The Actual Project Structure',
+          link: {
+            type: 'doc',
+            id: 'contributing/project-details/index',
+          },
+          items: [
+            'contributing/project-details/database',
+            'contributing/project-details/architecture',
+            'contributing/project-details/electron',
+            'contributing/project-details/migrations',
+            'contributing/project-details/advice',
+          ],
+        },
+        'contributing/preview-builds',
+        'contributing/releasing',
+        'contributing/windows',
+        {
+          type: 'category',
+          label: 'Project Leadership',
+          collapsible: false,
+          items: [
+            'contributing/leadership/funding',
+            'contributing/leadership/new-core-contributors-guide',
+          ],
+        },
       ],
     },
   ],
