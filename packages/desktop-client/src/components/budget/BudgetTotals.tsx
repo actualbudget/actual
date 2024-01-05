@@ -8,7 +8,8 @@ import ToggleMenu from '../common/ToggleMenu';
 import View from '../common/View';
 import { Tooltip } from '../tooltips';
 
-import type RenderMonths from './RenderMonths';
+import RenderMonths from './RenderMonths';
+import { getScrollbarWidth } from './util';
 
 type BudgetTotalsProps = {
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];
@@ -37,7 +38,7 @@ const BudgetTotals = memo(function BudgetTotals({
         flexShrink: 0,
         boxShadow: styles.cardShadow,
         marginLeft: 5,
-        marginRight: 5,
+        marginRight: 5 + getScrollbarWidth(),
         borderRadius: '4px 4px 0 0',
         borderBottom: '1px solid ' + theme.tableBorder,
       }}
@@ -95,6 +96,7 @@ const BudgetTotals = memo(function BudgetTotals({
                   {
                     name: 'toggle-visibility',
                     text: 'Show hidden',
+                    tooltip: 'Show hidden categories',
                     toggle: true,
                     isOn: showHiddenCategories,
                   },
@@ -112,6 +114,7 @@ const BudgetTotals = memo(function BudgetTotals({
           )}
         </Button>
       </View>
+      <RenderMonths component={MonthComponent} />
     </View>
   );
 });

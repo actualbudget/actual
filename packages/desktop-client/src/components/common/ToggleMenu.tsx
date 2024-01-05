@@ -1,7 +1,6 @@
-import { type ReactNode, useRef, useState } from 'react';
+import { type ReactNode, useRef, useState, useEffect } from 'react';
 
-import { theme } from '../../style';
-import { FormLabel } from '../forms';
+import { type CSSProperties, theme } from '../../style';
 
 import Text from './Text';
 import Toggle from './Toggle';
@@ -24,10 +23,11 @@ type MenuItem = {
   name: string;
   disabled?: boolean;
   toggle?: boolean;
-  iconSize?: number;
+  tooltip?: string;
   text: string;
   key?: string;
-  isOn?;
+  isOn?: boolean;
+  style?: CSSProperties;
 };
 
 type ToggleMenuProps = {
@@ -35,6 +35,7 @@ type ToggleMenuProps = {
   footer?: ReactNode;
   items: Array<MenuItem | typeof ToggleMenu.line>;
   onMenuSelect: (itemName: MenuItem['name']) => void;
+  style?: CSSProperties;
 };
 
 export default function ToggleMenu({
@@ -42,14 +43,65 @@ export default function ToggleMenu({
   footer,
   items: allItems,
   onMenuSelect,
+  style,
 }: ToggleMenuProps) {
   const elRef = useRef(null);
   const items = allItems.filter(x => x);
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
+  useEffect(() => {
+    const el = elRef.current;
+    el.focus();
+
+    const onKeyDown = e => {
+      const filteredItems = items.filter(
+        item =>
+          item && item !== ToggleMenu.line && item.type !== ToggleMenu.label,
+      );
+      const currentIndex = filteredItems.indexOf(items[hoveredIndex]);
+
+      const transformIndex = idx => items.indexOf(filteredItems[idx]);
+
+      switch (e.key) {
+        case 'ArrowUp':
+          e.preventDefault();
+          setHoveredIndex(
+            hoveredIndex === null
+              ? 0
+              : transformIndex(Math.max(currentIndex - 1, 0)),
+          );
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          setHoveredIndex(
+            hoveredIndex === null
+              ? 0
+              : transformIndex(
+                  Math.min(currentIndex + 1, filteredItems.length - 1),
+                ),
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          const item = items[hoveredIndex];
+          if (hoveredIndex !== null && item !== ToggleMenu.line) {
+            onMenuSelect?.(item.name);
+          }
+          break;
+        default:
+      }
+    };
+
+    el.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      el.removeEventListener('keydown', onKeyDown);
+    };
+  }, [hoveredIndex]);
+
   return (
     <View
-      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
+      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
       tabIndex={1}
       innerRef={elRef}
     >
@@ -116,13 +168,15 @@ export default function ToggleMenu({
             {/* Force it to line up evenly */}
             {!item.toggle && (
               <>
-                <Text>{item.text}</Text>
+                <Text title={item.tooltip}>{item.text}</Text>
                 <View style={{ flex: 1 }} />
               </>
             )}
             {item.toggle && (
               <>
-                <FormLabel htmlFor={item.name} title={item.text} />
+                <label htmlFor={item.name} title={item.tooltip}>
+                  {item.text}
+                </label>
                 <View style={{ flex: 1 }} />
                 <Toggle
                   id={item.name}

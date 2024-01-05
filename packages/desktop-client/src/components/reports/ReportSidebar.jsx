@@ -244,61 +244,70 @@ export function ReportSidebar({
               />
             </View>
             */}
-        <Button
-          type="bare"
-          aria-label="Menu"
-          onClick={() => {
-            setMenuOpen(true);
+        <View
+          style={{
+            flexDirection: 'row',
+            padding: 5,
+            alignItems: 'center',
           }}
-          style={{ color: 'currentColor', padding: 3 }}
         >
-          <DotsHorizontalTriple
-            width={15}
-            height={15}
-            style={{ color: theme.pageTextLight }}
-          />
-          {menuOpen && (
-            <Tooltip
-              position="bottom-right"
-              style={{ padding: 0 }}
-              onClose={() => {
-                setMenuOpen(false);
-              }}
-            >
-              <ToggleMenu
-                onMenuSelect={type => {
-                  if (type === 'show-hidden-categories') {
-                    setShowOffBudgetHidden(!showOffBudgetHidden);
-                  } else if (type === 'show-empty-rows') {
-                    setShowEmpty(!showEmpty);
-                  } else if (type === 'show-uncategorized') {
-                    setShowUncategorized(!showUncategorized);
-                  }
+          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+          <Button
+            onClick={() => {
+              setMenuOpen(true);
+            }}
+            style={{ 
+              color: 'currentColor', 
+              padding: '5px 10px',
+            }}
+          >
+            Options
+            {menuOpen && (
+              <Tooltip
+                position="bottom-left"
+                style={{ padding: 0 }}
+                onClose={() => {
+                  setMenuOpen(false);
                 }}
-                items={[
-                  {
-                    name: 'show-empty-rows',
-                    text: 'Show Empty Rows',
-                    isOn: showEmpty,
-                    toggle: true,
-                  },
-                  {
-                    name: 'show-hidden-categories',
-                    text: 'Show hidden',
-                    isOn: showOffBudgetHidden,
-                    toggle: true,
-                  },
-                  {
-                    name: 'show-uncategorized',
-                    text: 'Uncategorized',
-                    isOn: showUncategorized,
-                    toggle: true,
-                  },
-                ]}
-              />
-            </Tooltip>
-          )}
-        </Button>
+              >
+                <ToggleMenu
+                  onMenuSelect={type => {
+                    if (type === 'show-hidden-categories') {
+                      setShowOffBudgetHidden(!showOffBudgetHidden);
+                    } else if (type === 'show-empty-rows') {
+                      setShowEmpty(!showEmpty);
+                    } else if (type === 'show-uncategorized') {
+                      setShowUncategorized(!showUncategorized);
+                    }
+                  }}
+                  items={[
+                    {
+                      name: 'show-empty-rows',
+                      text: 'Show Empty Rows',
+                      tooltip: "Show rows that are zero or blank",
+                      isOn: showEmpty,
+                      toggle: true,
+                    },
+                    {
+                      name: 'show-hidden-categories',
+                      text: 'Show Off Budget',
+                      tooltip: "Show off budget accounts and hidden categories",
+                      isOn: showOffBudgetHidden,
+                      toggle: true,
+                    },
+                    {
+                      name: 'show-uncategorized',
+                      text: 'Show Uncategorized',
+                      tooltip: "Show uncategorized transactions",
+                      isOn: showUncategorized,
+                      toggle: true,
+                    },
+                  ]}
+                />
+              </Tooltip>
+            )}
+          </Button>
+        </View>
         <View
           style={{
             height: 1,
