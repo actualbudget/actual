@@ -12,7 +12,7 @@ test.describe('Budget', () => {
     configurationPage = new ConfigurationPage(page);
 
     await page.goto('/');
-    budgetPage = await configurationPage.createTestFile();
+    budgetPage = await configurationPage.createDemoFile();
 
     // Move mouse to corner of the screen;
     // sometimes the mouse hovers on a budget element thus rendering an input box

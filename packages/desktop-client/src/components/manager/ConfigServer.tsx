@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import {
-  isNonProductionEnvironment,
-  isElectron,
-} from 'loot-core/src/shared/environment';
+import { isElectron } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
@@ -197,15 +194,13 @@ export function ConfigServer() {
               Don’t use a server
             </Button>
 
-            {isNonProductionEnvironment() && (
-              <Button
-                type="primary"
-                style={{ marginLeft: 15 }}
-                onClick={onCreateTestFile}
-              >
-                Create test file
-              </Button>
-            )}
+            <Button
+              type="primary"
+              style={{ marginLeft: 15 }}
+              onClick={onCreateTestFile}
+            >
+              Create demo file
+            </Button>
           </>
         )}
       </View>

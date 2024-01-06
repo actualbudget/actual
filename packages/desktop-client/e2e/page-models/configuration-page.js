@@ -7,8 +7,8 @@ export class ConfigurationPage {
     this.heading = page.getByRole('heading');
   }
 
-  async createTestFile() {
-    await this.page.getByRole('button', { name: 'Create test file' }).click();
+  async createDemoFile() {
+    await this.page.getByRole('button', { name: 'Create demo file' }).click();
     return new BudgetPage(this.page);
   }
 
