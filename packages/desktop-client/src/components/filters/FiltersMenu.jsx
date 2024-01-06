@@ -48,6 +48,7 @@ const filterFields = [
   'category',
   'amount',
   'cleared',
+  'reconciled',
   'saved',
 ].map(field => [field, mapField(field)]);
 
