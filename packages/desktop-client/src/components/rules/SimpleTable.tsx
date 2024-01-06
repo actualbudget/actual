@@ -10,7 +10,7 @@ type SimpleTableProps = {
   children: ReactNode;
 };
 
-export default function SimpleTable({
+export function SimpleTable({
   loadMore,
   style,
   onHoverLeave,

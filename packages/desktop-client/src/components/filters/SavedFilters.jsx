@@ -12,7 +12,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { FieldSelect } from '../modals/EditRule';
-import GenericInput from '../util/GenericInput';
+import { GenericInput } from '../util/GenericInput';
 
 import { AppliedFilters } from './FiltersMenu';
 

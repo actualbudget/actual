@@ -11,9 +11,9 @@ import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
-import CellValue from '../spreadsheet/CellValue';
-import useFormat from '../spreadsheet/useFormat';
-import useSheetValue from '../spreadsheet/useSheetValue';
+import { CellValue } from '../spreadsheet/CellValue';
+import { useFormat } from '../spreadsheet/useFormat';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { isPreviewId } from '../transactions/TransactionsTable';
 
 function DetailedBalance({ name, balance, isExactBalance = true }) {

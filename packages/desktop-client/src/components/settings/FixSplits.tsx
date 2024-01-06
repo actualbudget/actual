@@ -51,7 +51,7 @@ function renderResults(results: Results) {
   );
 }
 
-export default function FixSplitsTool() {
+export function FixSplits() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Results>(null);
 

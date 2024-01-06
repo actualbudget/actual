@@ -10,7 +10,7 @@ import { IncomeTotal } from '../budget/report/budgetsummary/IncomeTotal';
 import { Saved } from '../budget/report/budgetsummary/Saved';
 import { Modal } from '../common/Modal';
 import { Stack } from '../common/Stack';
-import NamespaceContext from '../spreadsheet/NamespaceContext';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type ReportBudgetSummaryProps = {
   modalProps: CommonModalProps;

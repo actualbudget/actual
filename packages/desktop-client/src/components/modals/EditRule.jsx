@@ -38,10 +38,10 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { StatusBadge } from '../schedules/StatusBadge';
 import { Tooltip } from '../tooltips';
-import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
+import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
-import DisplayId from '../util/DisplayId';
-import GenericInput from '../util/GenericInput';
+import { DisplayId } from '../util/DisplayId';
+import { GenericInput } from '../util/GenericInput';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));

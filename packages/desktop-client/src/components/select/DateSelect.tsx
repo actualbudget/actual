@@ -184,7 +184,7 @@ type DateSelectProps = {
   onSelect: (selectedDate: string) => void;
 };
 
-export default function DateSelect({
+export function DateSelect({
   containerProps,
   inputProps,
   tooltipStyle,

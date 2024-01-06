@@ -9,7 +9,7 @@ import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
-import DisplayId from '../util/DisplayId';
+import { DisplayId } from '../util/DisplayId';
 
 export function PostsOfflineNotification({ modalProps, actions }) {
   const location = useLocation();

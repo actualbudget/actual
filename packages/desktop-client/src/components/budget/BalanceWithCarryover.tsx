@@ -4,8 +4,8 @@ import useFeatureFlag from '../../hooks/useFeatureFlag';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
-import CellValue from '../spreadsheet/CellValue';
-import useSheetValue from '../spreadsheet/useSheetValue';
+import { CellValue } from '../spreadsheet/CellValue';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { makeAmountStyle } from './util';
 

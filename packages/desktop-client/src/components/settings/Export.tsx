@@ -12,7 +12,7 @@ import { Text } from '../common/Text';
 
 import { Setting } from './UI';
 
-export default function ExportBudget() {
+export function ExportBudget() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const budgetId = useSelector(state => state.prefs.local.id);

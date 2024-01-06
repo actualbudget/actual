@@ -10,8 +10,8 @@ import { HoverTarget } from '../../../common/HoverTarget';
 import { Text } from '../../../common/Text';
 import { View } from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
-import useFormat from '../../../spreadsheet/useFormat';
-import useSheetValue from '../../../spreadsheet/useSheetValue';
+import { useFormat } from '../../../spreadsheet/useFormat';
+import { useSheetValue } from '../../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../../tooltips';
 import { makeAmountFullStyle } from '../../util';
 

@@ -7,8 +7,8 @@ import { View } from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
 
-import Account from './Account';
-import SecondaryItem from './SecondaryItem';
+import { Account } from './Account';
+import { SecondaryItem } from './SecondaryItem';
 
 const fontWeight = 600;
 
@@ -36,7 +36,7 @@ type AccountsProps = {
   onReorder: OnDropCallback;
 };
 
-function Accounts({
+export function Accounts({
   accounts,
   failedAccounts,
   updatedAccounts,
@@ -180,5 +180,3 @@ function Accounts({
     </View>
   );
 }
-
-export default Accounts;

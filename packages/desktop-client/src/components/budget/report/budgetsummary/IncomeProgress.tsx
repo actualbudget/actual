@@ -1,8 +1,8 @@
 import React, { type ComponentProps } from 'react';
 
 import { theme } from '../../../../style';
-import type CellValue from '../../../spreadsheet/CellValue';
-import useSheetValue from '../../../spreadsheet/useSheetValue';
+import { type CellValue } from '../../../spreadsheet/CellValue';
+import { useSheetValue } from '../../../spreadsheet/useSheetValue';
 
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';

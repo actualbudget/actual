@@ -61,7 +61,7 @@ import { Button } from '../common/Button';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
-import DateSelect from '../select/DateSelect';
+import { DateSelect } from '../select/DateSelect';
 import {
   Cell,
   Field,

@@ -16,7 +16,7 @@ import {
   type OnDropCallback,
 } from '../sort';
 import { type Binding } from '../spreadsheet';
-import CellValue from '../spreadsheet/CellValue';
+import { CellValue } from '../spreadsheet/CellValue';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -45,7 +45,7 @@ type AccountProps = {
   onDrop?: OnDropCallback;
 };
 
-function Account({
+export function Account({
   name,
   account,
   connected,
@@ -144,5 +144,3 @@ function Account({
     </View>
   );
 }
-
-export default Account;

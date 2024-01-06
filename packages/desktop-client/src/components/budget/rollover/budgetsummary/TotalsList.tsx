@@ -7,8 +7,8 @@ import { AlignedText } from '../../../common/AlignedText';
 import { Block } from '../../../common/Block';
 import { HoverTarget } from '../../../common/HoverTarget';
 import { View } from '../../../common/View';
-import CellValue from '../../../spreadsheet/CellValue';
-import useFormat from '../../../spreadsheet/useFormat';
+import { CellValue } from '../../../spreadsheet/CellValue';
+import { useFormat } from '../../../spreadsheet/useFormat';
 import { Tooltip } from '../../../tooltips';
 
 type TotalsListProps = {

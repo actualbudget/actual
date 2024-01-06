@@ -13,7 +13,7 @@ import { useResponsive } from '../../ResponsiveProvider';
 import { View } from '../common/View';
 
 import { SIDEBAR_WIDTH } from './Sidebar';
-import SidebarWithData from './SidebarWithData';
+import { SidebarWithData } from './SidebarWithData';
 
 type SidebarContextValue = {
   hidden: boolean;
@@ -28,7 +28,7 @@ type SidebarProviderProps = {
   children: ReactNode;
 };
 
-function SidebarProvider({ children }: SidebarProviderProps) {
+export function SidebarProvider({ children }: SidebarProviderProps) {
   const floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
@@ -46,7 +46,7 @@ function SidebarProvider({ children }: SidebarProviderProps) {
   );
 }
 
-function useSidebar() {
+export function useSidebar() {
   const { hidden, setHidden, floating, alwaysFloats } =
     useContext(SidebarContext);
 
@@ -56,7 +56,7 @@ function useSidebar() {
   );
 }
 
-function FloatableSidebar() {
+export function FloatableSidebar() {
   const floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
@@ -103,6 +103,3 @@ function FloatableSidebar() {
     </View>
   );
 }
-
-export { SidebarProvider, useSidebar };
-export default FloatableSidebar;
