@@ -1,4 +1,4 @@
-function create(libofx) {
+export function create(libofx) {
   return {
     init: libofx.cwrap('init', null, ['number']),
     debug: libofx.cwrap('debug', null, []),
@@ -34,5 +34,3 @@ function create(libofx) {
     ]),
   };
 }
-
-export default create;

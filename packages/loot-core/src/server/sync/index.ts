@@ -16,7 +16,7 @@ import { LocalPrefs } from '../../types/prefs';
 import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import * as db from '../db';
 import { PostError, SyncError } from '../errors';
-import app from '../main-app';
+import { app } from '../main-app';
 import { runMutator } from '../mutators';
 import { postBinary } from '../post';
 import * as prefs from '../prefs';
@@ -28,9 +28,9 @@ import * as encoder from './encoder';
 import { rebuildMerkleHash } from './repair';
 import { isError } from './utils';
 
-export { default as makeTestMessage } from './make-test-message';
-export { default as resetSync } from './reset';
-export { default as repairSync } from './repair';
+export { makeTestMessage } from './make-test-message';
+export { resetSync } from './reset';
+export { repairSync } from './repair';
 
 const FULL_SYNC_DELAY = 1000;
 let SYNCING_MODE = 'enabled';

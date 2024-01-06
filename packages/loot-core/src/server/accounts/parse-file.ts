@@ -4,8 +4,8 @@ import * as fs from '../../platform/server/fs';
 import { dayFromDate } from '../../shared/months';
 import { looselyParseAmount } from '../../shared/util';
 
-import ofx2json from './ofx2json';
-import qif2json from './qif2json';
+import { ofx2json } from './ofx2json';
+import { qif2json } from './qif2json';
 
 type ParseError = { message: string; internal: string };
 export type ParseFileResult = {
