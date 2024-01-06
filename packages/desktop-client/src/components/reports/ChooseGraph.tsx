@@ -9,7 +9,7 @@ import { BarLineGraph } from './graphs/BarLineGraph';
 import { DonutGraph } from './graphs/DonutGraph';
 import { LineGraph } from './graphs/LineGraph';
 import { StackedBarGraph } from './graphs/StackedBarGraph';
-import { ReportTable }  from './graphs/tableGraph/ReportTable';
+import { ReportTable } from './graphs/tableGraph/ReportTable';
 import { ReportTableHeader } from './graphs/tableGraph/ReportTableHeader';
 import { ReportTableList } from './graphs/tableGraph/ReportTableList';
 import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
