@@ -15,8 +15,8 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
-import useFeatureFlag from '../hooks/useFeatureFlag';
-import useNavigate from '../hooks/useNavigate';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
+import { useNavigate } from '../hooks/useNavigate';
 import ArrowLeft from '../icons/v1/ArrowLeft';
 import AlertTriangle from '../icons/v2/AlertTriangle';
 import NavigationMenu from '../icons/v2/NavigationMenu';

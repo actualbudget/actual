@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-import useFeatureFlag from '../../hooks/useFeatureFlag';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { styles } from '../../style';
 import { View } from '../common/View';
 

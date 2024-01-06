@@ -6,7 +6,7 @@ import memoizeOne from 'memoize-one';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useFeatureFlag from '../../hooks/useFeatureFlag';
+import  { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';

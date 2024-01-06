@@ -6,7 +6,7 @@ import {
 } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
-import useNavigate from '../../hooks/useNavigate';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';

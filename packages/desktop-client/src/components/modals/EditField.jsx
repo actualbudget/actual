@@ -7,7 +7,7 @@ import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { Add } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';

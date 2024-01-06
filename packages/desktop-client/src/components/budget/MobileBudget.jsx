@@ -6,7 +6,7 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme } from '../../style';

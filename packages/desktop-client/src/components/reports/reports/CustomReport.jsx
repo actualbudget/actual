@@ -10,8 +10,8 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../../hooks/useActions';
-import useCategories from '../../../hooks/useCategories';
-import useFilters from '../../../hooks/useFilters';
+import { useCategories } from '../../../hooks/useCategories';
+import { useFilters } from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';

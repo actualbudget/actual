@@ -6,7 +6,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import useFilters from '../../../hooks/useFilters';
+import { useFilters } from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';

@@ -13,12 +13,13 @@ import memoizeOne from 'memoize-one';
 
 import { groupById } from 'loot-core/src/shared/util';
 
-import useSelected, {
+import {
+  useSelected,
   SelectedProvider,
   useSelectedDispatch,
   useSelectedItems,
 } from '../../hooks/useSelected';
-import useStableCallback from '../../hooks/useStableCallback';
+import { useStableCallback } from '../../hooks/useStableCallback';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { theme } from '../../style';
 import { Button } from '../common/Button';

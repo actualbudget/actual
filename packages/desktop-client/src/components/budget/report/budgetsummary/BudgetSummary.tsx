@@ -4,7 +4,7 @@ import { css } from 'glamor';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useFeatureFlag from '../../../../hooks/useFeatureFlag';
+import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
 import DotsHorizontalTriple from '../../../../icons/v1/DotsHorizontalTriple';
 import ArrowButtonDown1 from '../../../../icons/v2/ArrowButtonDown1';
 import ArrowButtonUp1 from '../../../../icons/v2/ArrowButtonUp1';

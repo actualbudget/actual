@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import * as queries from 'loot-core/src/client/queries';
 
 import { useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
-import useNavigate from '../../hooks/useNavigate';
+import { useCategories } from '../../hooks/useCategories';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import Add from '../../icons/v1/Add';
 import { theme, styles } from '../../style';

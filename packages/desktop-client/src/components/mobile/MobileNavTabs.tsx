@@ -4,7 +4,7 @@ import { useSpring, animated, config } from 'react-spring';
 
 import { useDrag } from '@use-gesture/react';
 
-import usePrevious from '../../hooks/usePrevious';
+import { usePrevious } from '../../hooks/usePrevious';
 import Add from '../../icons/v1/Add';
 import Cog from '../../icons/v1/Cog';
 import PiggyBank from '../../icons/v1/PiggyBank';

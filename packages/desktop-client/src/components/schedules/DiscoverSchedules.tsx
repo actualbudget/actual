@@ -7,12 +7,13 @@ import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/src/types/models';
 
 import type { BoundActions } from '../../hooks/useActions';
-import useSelected, {
+import {
+  useSelected,
   useSelectedDispatch,
   useSelectedItems,
   SelectedProvider,
 } from '../../hooks/useSelected';
-import useSendPlatformRequest from '../../hooks/useSendPlatformRequest';
+import { useSendPlatformRequest } from '../../hooks/useSendPlatformRequest';
 import { theme } from '../../style';
 import type { CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';

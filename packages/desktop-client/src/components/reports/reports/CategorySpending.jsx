@@ -5,7 +5,7 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useCategories from '../../../hooks/useCategories';
+import { useCategories } from '../../../hooks/useCategories';
 import { styles } from '../../../style';
 import { Select } from '../../common/Select';
 import { View } from '../../common/View';

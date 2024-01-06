@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
 import { type BoundActions } from '../../hooks/useActions';
-import useNavigate from '../../hooks/useNavigate';
+import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';

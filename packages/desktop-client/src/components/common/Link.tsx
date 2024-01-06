@@ -3,7 +3,7 @@ import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from 'glamor';
 
-import useNavigate from '../../hooks/useNavigate';
+import { useNavigate } from '../../hooks/useNavigate';
 import { type CSSProperties, styles } from '../../style';
 
 import { Button } from './Button';
