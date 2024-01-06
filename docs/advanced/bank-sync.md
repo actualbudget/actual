@@ -24,7 +24,7 @@ GoCardless
 **Create SECRET and KEY for Actual**
 
 1. Create an account with GoCardless - https://bankaccountdata.gocardless.com/overview/
-2. Log into your account dashboard at the same URL and select **Project->User secrets** from the left side menu
+2. Log into your account dashboard at the same URL and select **Developers->User secrets** from the left side menu
 
 ![](/static/img/connecting-your-bank/connecting-your-bank-gocardless-01.png)
 
