@@ -6,7 +6,7 @@ import { Button } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 
 type SwitchBudgetTypeProps = {
   modalProps: CommonModalProps;

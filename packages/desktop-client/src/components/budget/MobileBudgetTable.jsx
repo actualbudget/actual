@@ -16,7 +16,7 @@ import { Button } from '../common/Button';
 import { Card } from '../common/Card';
 import { Label } from '../common/Label';
 import { Menu } from '../common/Menu';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 import { Page } from '../Page';
 import PullToRefresh from '../responsive/PullToRefresh';

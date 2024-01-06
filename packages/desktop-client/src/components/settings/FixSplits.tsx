@@ -6,7 +6,7 @@ import { type Handlers } from 'loot-core/src/types/handlers';
 import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button';
 import { Paragraph } from '../common/Paragraph';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 
 import { Setting } from './UI';

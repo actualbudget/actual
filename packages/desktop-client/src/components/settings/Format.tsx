@@ -8,7 +8,7 @@ import { useActions } from '../../hooks/useActions';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button';
 import { Select } from '../common/Select';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 import { Checkbox } from '../forms';
 import { useSidebar } from '../sidebar';

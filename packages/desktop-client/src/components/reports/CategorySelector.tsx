@@ -10,7 +10,7 @@ import ViewHide from '../../icons/v2/ViewHide';
 import ViewShow from '../../icons/v2/ViewShow';
 import { type CategoryListProps } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 import { Checkbox } from '../forms';
 

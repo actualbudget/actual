@@ -8,7 +8,7 @@ import {
 } from 'loot-core/src/types/models';
 
 import { type CSSProperties, theme } from '../../style';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 
 import ScheduleValue from './ScheduleValue';

@@ -1,6 +1,6 @@
 import { type ComponentProps } from 'react';
 
-import Text from './Text';
+import { Text } from './Text';
 
 type TextOneLineProps = ComponentProps<typeof Text>;
 

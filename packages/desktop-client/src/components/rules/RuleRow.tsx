@@ -8,7 +8,7 @@ import ArrowRight from '../../icons/v0/RightArrow2';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Stack } from '../common/Stack';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 import { SelectCell, Row, Field, Cell, CellButton } from '../table';
 
