@@ -53,7 +53,7 @@ const PayeeTable = forwardRef<
 
     return (
       <View style={{ flex: 1 }} onMouseLeave={() => setHovered(null)}>
-        <Table<PayeeWithId>
+        <Table
           ref={ref}
           items={payees}
           navigator={navigator}
