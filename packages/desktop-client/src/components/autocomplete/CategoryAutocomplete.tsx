@@ -17,7 +17,7 @@ import {
 import Split from '../../icons/v0/Split';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import View from '../common/View';
 
 import Autocomplete, { defaultFilterSuggestion } from './Autocomplete';

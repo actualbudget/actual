@@ -7,7 +7,7 @@ import { LinkButton } from './common/LinkButton';
 import { Modal } from './common/Modal';
 import { Paragraph } from './common/Paragraph';
 import { Stack } from './common/Stack';
-import Text from './common/Text';
+import { Text } from './common/Text';
 import View from './common/View';
 import { Checkbox } from './forms';
 

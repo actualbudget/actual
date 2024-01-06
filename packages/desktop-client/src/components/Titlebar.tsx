@@ -32,7 +32,7 @@ import { Button, ButtonWithLoading } from './common/Button';
 import { ExternalLink } from './common/ExternalLink';
 import { Link } from './common/Link';
 import { Paragraph } from './common/Paragraph';
-import Text from './common/Text';
+import { Text } from './common/Text';
 import View from './common/View';
 import { KeyHandlers } from './KeyHandlers';
 import { LoggedInUser } from './LoggedInUser';

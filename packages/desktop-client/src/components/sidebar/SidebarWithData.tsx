@@ -15,7 +15,7 @@ import { Button } from '../common/Button';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import { Tooltip } from '../tooltips';
 
 import Sidebar from './Sidebar';

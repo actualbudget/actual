@@ -273,7 +273,7 @@ module.exports = {
         './packages/desktop-client/src/components/common/Search.tsx',
         './packages/desktop-client/src/components/common/Select.tsx',
         './packages/desktop-client/src/components/common/Stack.tsx',
-        // './packages/desktop-client/src/components/common/Text.tsx',
+        './packages/desktop-client/src/components/common/Text.tsx',
         './packages/desktop-client/src/components/common/TextOneLine.tsx',
         // './packages/desktop-client/src/components/common/View.tsx',
         // './packages/desktop-client/src/components/common/**/*',

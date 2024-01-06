@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import useNavigate from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button';
-import Text from '../../common/Text';
+import { Text } from '../../common/Text';
 import View from '../../common/View';
 
 function getErrorMessage(reason) {
