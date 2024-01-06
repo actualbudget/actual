@@ -3,7 +3,7 @@ import React from 'react';
 import { useActions } from '../../hooks/useActions';
 import { themeOptions, useTheme } from '../../style';
 import { Button } from '../common/Button';
-import Select from '../common/Select';
+import { Select } from '../common/Select';
 import Text from '../common/Text';
 
 import { Setting } from './UI';

@@ -36,7 +36,7 @@ type StackProps = ComponentProps<typeof View> & {
   spacing?: number;
   debug?: boolean;
 };
-const Stack = forwardRef<HTMLDivElement, StackProps>(
+export const Stack = forwardRef<HTMLDivElement, StackProps>(
   (
     {
       direction = 'column',
@@ -91,5 +91,3 @@ const Stack = forwardRef<HTMLDivElement, StackProps>(
     );
   },
 );
-
-export default Stack;

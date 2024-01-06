@@ -49,7 +49,7 @@ export type ModalProps = {
   onTitleUpdate?: (title: string) => void;
 };
 
-const Modal = ({
+export const Modal = ({
   title,
   isCurrent,
   isHidden,
@@ -427,5 +427,3 @@ export const ModalButtons = ({
     </View>
   );
 };
-
-export default Modal;

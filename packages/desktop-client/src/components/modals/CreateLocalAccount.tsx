@@ -12,7 +12,7 @@ import { FormError } from '../common/FormError';
 import { InitialFocus } from '../common/InitialFocus';
 import { InlineField } from '../common/InlineField';
 import { Input } from '../common/Input';
-import Modal, { ModalButtons } from '../common/Modal';
+import { Modal, ModalButtons } from '../common/Modal';
 import Text from '../common/Text';
 import View from '../common/View';
 import { Checkbox } from '../forms';
