@@ -48,7 +48,7 @@ function getErrorMessage(type, code) {
   );
 }
 
-export default function AccountSyncCheck() {
+export function AccountSyncCheck() {
   const accounts = useSelector(state => state.queries.accounts);
   const failedAccounts = useSelector(state => state.account.failedAccounts);
   const { unlinkAccount, pushModal } = useActions();

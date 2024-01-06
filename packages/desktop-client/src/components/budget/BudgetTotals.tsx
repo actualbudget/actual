@@ -7,7 +7,7 @@ import { Menu } from '../common/Menu';
 import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
-import RenderMonths from './RenderMonths';
+import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
 type BudgetTotalsProps = {
@@ -17,7 +17,7 @@ type BudgetTotalsProps = {
   collapseAllCategories: () => void;
 };
 
-const BudgetTotals = memo(function BudgetTotals({
+export const BudgetTotals = memo(function BudgetTotals({
   MonthComponent,
   toggleHiddenCategories,
   expandAllCategories,
@@ -109,5 +109,3 @@ const BudgetTotals = memo(function BudgetTotals({
     </View>
   );
 });
-
-export default BudgetTotals;

@@ -9,8 +9,8 @@ import {
 import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
+import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button';
 import { FormError } from '../common/FormError';
 import { LinkButton } from '../common/LinkButton';

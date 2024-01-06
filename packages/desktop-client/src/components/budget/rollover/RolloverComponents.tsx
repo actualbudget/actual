@@ -15,10 +15,10 @@ import CellValue from '../../spreadsheet/CellValue';
 import useFormat from '../../spreadsheet/useFormat';
 import { Row, Field, SheetCell } from '../../table';
 import { Tooltip, useTooltip } from '../../tooltips';
-import BalanceWithCarryover from '../BalanceWithCarryover';
+import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
-import BalanceTooltip from './BalanceTooltip';
+import { BalanceTooltip } from './BalanceTooltip';
 
 const headerLabelStyle: CSSProperties = {
   flex: 1,
@@ -402,4 +402,4 @@ export function IncomeCategoryMonth({
   );
 }
 
-export { default as BudgetSummary } from './budgetsummary/BudgetSummary';
+export { BudgetSummary } from './budgetsummary/BudgetSummary';

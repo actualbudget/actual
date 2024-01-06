@@ -15,10 +15,10 @@ import CellValue from '../../spreadsheet/CellValue';
 import useFormat from '../../spreadsheet/useFormat';
 import { Field, SheetCell } from '../../table';
 import { Tooltip, useTooltip } from '../../tooltips';
-import BalanceWithCarryover from '../BalanceWithCarryover';
+import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
-import BalanceTooltip from './BalanceTooltip';
+import { BalanceTooltip } from './BalanceTooltip';
 
 const headerLabelStyle: CSSProperties = {
   flex: 1,
@@ -344,7 +344,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   );
 });
 
-export { default as BudgetSummary } from './budgetsummary/BudgetSummary';
+export { BudgetSummary } from './budgetsummary/BudgetSummary';
 
 export const ExpenseGroupMonth = GroupMonth;
 export const ExpenseCategoryMonth = CategoryMonth;

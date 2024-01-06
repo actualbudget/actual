@@ -25,7 +25,7 @@ import ViewShow from '../icons/v2/ViewShow';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, type CSSProperties, styles } from '../style';
 
-import AccountSyncCheck from './accounts/AccountSyncCheck';
+import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Button, ButtonWithLoading } from './common/Button';

@@ -19,7 +19,7 @@ type RenderMonthsProps = {
   style?: CSSProperties;
 };
 
-function RenderMonths({
+export function RenderMonths({
   component: Component,
   editingIndex,
   args,
@@ -48,5 +48,3 @@ function RenderMonths({
     );
   }) as unknown as JSX.Element;
 }
-
-export default RenderMonths;

@@ -215,7 +215,7 @@ function AccountList({
   );
 }
 
-export default function Accounts() {
+export function Accounts() {
   const accounts = useSelector(state => state.queries.accounts);
   const newTransactions = useSelector(state => state.queries.newTransactions);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);

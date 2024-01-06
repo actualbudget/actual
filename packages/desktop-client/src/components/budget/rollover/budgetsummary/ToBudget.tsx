@@ -14,10 +14,10 @@ import useFormat from '../../../spreadsheet/useFormat';
 import useSheetName from '../../../spreadsheet/useSheetName';
 import useSheetValue from '../../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../../tooltips';
-import HoldTooltip from '../HoldTooltip';
-import TransferTooltip from '../TransferTooltip';
+import { HoldTooltip } from '../HoldTooltip';
+import { TransferTooltip } from '../TransferTooltip';
 
-import TotalsList from './TotalsList';
+import { TotalsList } from './TotalsList';
 
 type ToBudgetProps = {
   month: string | number;
@@ -31,7 +31,7 @@ type ToBudgetProps = {
   holdTooltipProps?: ComponentPropsWithoutRef<typeof HoldTooltip>;
   transferTooltipProps?: ComponentPropsWithoutRef<typeof TransferTooltip>;
 };
-export default function ToBudget({
+export function ToBudget({
   month,
   prevMonthName,
   showTotalsTooltipOnHover,

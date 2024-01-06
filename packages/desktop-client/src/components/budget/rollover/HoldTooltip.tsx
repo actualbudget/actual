@@ -20,7 +20,7 @@ import { Tooltip } from '../../tooltips';
 type HoldTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
   onSubmit: (amount: number) => void;
 };
-export default function HoldTooltip({
+export function HoldTooltip({
   onSubmit,
   onClose,
   position = 'bottom-right',

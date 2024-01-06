@@ -15,7 +15,7 @@ type TotalsListProps = {
   prevMonthName: string;
   style?: CSSProperties;
 };
-export default function TotalsList({ prevMonthName, style }: TotalsListProps) {
+export function TotalsList({ prevMonthName, style }: TotalsListProps) {
   const format = useFormat();
   return (
     <View
