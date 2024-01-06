@@ -2,7 +2,7 @@ import * as d from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import { dayFromDate, parseDate } from '../../shared/months';
-import q from '../../shared/query';
+import { q } from '../../shared/query';
 import { getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
 import { groupBy } from '../../shared/util';

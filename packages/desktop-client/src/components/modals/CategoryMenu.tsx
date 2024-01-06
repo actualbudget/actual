@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import q from 'loot-core/src/shared/query';
+import { q } from 'loot-core/src/shared/query';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';

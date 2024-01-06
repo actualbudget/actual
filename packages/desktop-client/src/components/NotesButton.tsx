@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
-import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { q } from 'loot-core/src/shared/query';
 
 import { SvgCustomNotesPaper } from '../icons/v2';
 import { type CSSProperties, theme } from '../style';

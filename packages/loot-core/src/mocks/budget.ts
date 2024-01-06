@@ -8,14 +8,14 @@ import * as prefs from '../server/prefs';
 import * as sheet from '../server/sheet';
 import { batchMessages, setSyncingMode } from '../server/sync';
 import * as monthUtils from '../shared/months';
-import q from '../shared/query';
+import { q } from '../shared/query';
 import type {
   CategoryGroupEntity,
   PayeeEntity,
   NewTransactionEntity,
 } from '../types/models';
 
-import random from './random';
+import { random } from './random';
 
 type MockPayeeEntity = PayeeEntity & { bill?: boolean };
 

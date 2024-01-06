@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useCachedSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import q from 'loot-core/src/client/query-helpers';
+import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 
 import { useSelectedItems } from '../../hooks/useSelected';

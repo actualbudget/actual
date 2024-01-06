@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
 import { dayFromDate, currentDay, parseDate } from '../../shared/months';
-import q from '../../shared/query';
+import { q } from '../../shared/query';
 import {
   extractScheduleConds,
   recurConfigToRSchedule,

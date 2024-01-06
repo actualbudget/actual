@@ -9,7 +9,7 @@ import {
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
-import logger from '../../platform/server/log';
+import { logger } from '../../platform/server/log';
 import { sequential, once } from '../../shared/async';
 import { setIn, getIn } from '../../shared/util';
 import { LocalPrefs } from '../../types/prefs';
