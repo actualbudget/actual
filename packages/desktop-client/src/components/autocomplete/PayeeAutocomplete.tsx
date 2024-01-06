@@ -26,7 +26,8 @@ import { type CSSProperties, theme } from '../../style';
 import { Button } from '../common/Button';
 import { View } from '../common/View';
 
-import Autocomplete, {
+import {
+  Autocomplete,
   defaultFilterSuggestion,
   AutocompleteFooter,
 } from './Autocomplete';
@@ -167,7 +168,7 @@ type PayeeAutocompleteProps = {
   payees?: PayeeEntity[];
 };
 
-export default function PayeeAutocomplete({
+export function PayeeAutocomplete({
   value,
   inputProps,
   showMakeTransfer = true,

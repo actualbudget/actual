@@ -4,8 +4,8 @@ import { theme } from '../../../../style';
 import type CellValue from '../../../spreadsheet/CellValue';
 import useSheetValue from '../../../spreadsheet/useSheetValue';
 
-import fraction from './fraction';
-import PieProgress from './PieProgress';
+import { fraction } from './fraction';
+import { PieProgress } from './PieProgress';
 
 type ExpenseProgressProps = {
   current: ComponentProps<typeof CellValue>['binding'];

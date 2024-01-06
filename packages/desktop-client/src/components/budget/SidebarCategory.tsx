@@ -26,7 +26,7 @@ type SidebarCategoryProps = {
   onHideNewCategory?: () => void;
 };
 
-function SidebarCategory({
+export function SidebarCategory({
   innerRef,
   category,
   dragPreview,
@@ -178,5 +178,3 @@ function SidebarCategory({
     </View>
   );
 }
-
-export default SidebarCategory;

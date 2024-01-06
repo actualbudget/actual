@@ -6,7 +6,7 @@ import { type TransactionFilterEntity } from 'loot-core/src/types/models';
 import { theme } from '../../style';
 import { View } from '../common/View';
 
-import Autocomplete from './Autocomplete';
+import { Autocomplete } from './Autocomplete';
 
 type FilterListProps<T> = {
   items: T[];
@@ -60,7 +60,7 @@ type SavedFilterAutocompleteProps = {
   embedded?: boolean;
 } & ComponentProps<typeof Autocomplete<TransactionFilterEntity>>;
 
-export default function SavedFilterAutocomplete({
+export function SavedFilterAutocomplete({
   embedded,
   ...props
 }: SavedFilterAutocompleteProps) {

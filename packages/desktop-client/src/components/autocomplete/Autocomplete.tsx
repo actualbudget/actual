@@ -728,7 +728,7 @@ function isMultiAutocomplete<T extends Item>(
   return multi;
 }
 
-export default function Autocomplete<T extends Item>({
+export function Autocomplete<T extends Item>({
   multi,
   ...props
 }: AutocompleteProps<T> & { multi?: boolean }) {

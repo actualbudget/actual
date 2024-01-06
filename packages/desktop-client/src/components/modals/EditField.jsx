@@ -11,15 +11,18 @@ import useCategories from '../../hooks/useCategories';
 import { Add } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
-import AccountAutocomplete, {
+import {
+  AccountAutocomplete,
   AccountItemGroupHeader,
   AccountItem,
 } from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete, {
+import {
+  CategoryAutocomplete,
   CategoryItemGroupHeader,
   CategoryItem,
 } from '../autocomplete/CategoryAutocomplete';
-import PayeeAutocomplete, {
+import {
+  PayeeAutocomplete,
   CreatePayeeButton,
   PayeeItemGroupHeader,
   PayeeItem,
