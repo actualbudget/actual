@@ -7,7 +7,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
 
-import AlignedText from '../../common/AlignedText';
+import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
 
 export function simpleCashFlow(start, end) {

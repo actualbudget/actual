@@ -12,9 +12,9 @@ import useNavigate from '../../hooks/useNavigate';
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
-import InitialFocus from '../common/InitialFocus';
-import Input from '../common/Input';
-import Menu from '../common/Menu';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
+import { Menu } from '../common/Menu';
 import Text from '../common/Text';
 import { Tooltip } from '../tooltips';
 

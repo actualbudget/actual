@@ -8,7 +8,7 @@ import useFeatureFlag from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
 import { styles, theme, type CSSProperties } from '../../../style';
 import { Button } from '../../common/Button';
-import Menu from '../../common/Menu';
+import { Menu } from '../../common/Menu';
 import Text from '../../common/Text';
 import View from '../../common/View';
 import CellValue from '../../spreadsheet/CellValue';

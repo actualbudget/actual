@@ -42,7 +42,7 @@ type MenuProps<T extends MenuItem = MenuItem> = {
   style?: CSSProperties;
 };
 
-export default function Menu<T extends MenuItem>({
+export function Menu<T extends MenuItem>({
   header,
   footer,
   items: allItems,

@@ -24,7 +24,7 @@ import PayeeAutocomplete, {
   PayeeItemGroupHeader,
   PayeeItem,
 } from '../autocomplete/PayeeAutocomplete';
-import Input from '../common/Input';
+import { Input } from '../common/Input';
 import Modal from '../common/Modal';
 import View from '../common/View';
 import { SectionLabel } from '../forms';

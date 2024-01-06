@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { styles } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';
-import FormError from '../common/FormError';
-import InitialFocus from '../common/InitialFocus';
-import Input from '../common/Input';
+import { FormError } from '../common/FormError';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
 import Modal from '../common/Modal';
 import View from '../common/View';
 

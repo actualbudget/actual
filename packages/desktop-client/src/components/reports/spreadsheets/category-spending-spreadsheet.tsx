@@ -7,7 +7,7 @@ import q, { runQuery } from 'loot-core/src/client/query-helpers';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount, integerToCurrency } from 'loot-core/src/shared/util';
 
-import AlignedText from '../../common/AlignedText';
+import { AlignedText } from '../../common/AlignedText';
 
 type CategoryGraphDataForMonth = {
   x: number;

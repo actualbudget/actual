@@ -5,7 +5,7 @@ import { useActions } from '../hooks/useActions';
 import { theme, styles, type CSSProperties } from '../style';
 
 import { Button } from './common/Button';
-import Menu from './common/Menu';
+import { Menu } from './common/Menu';
 import Text from './common/Text';
 import View from './common/View';
 import { useServerURL } from './ServerContext';

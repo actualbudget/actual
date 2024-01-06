@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { importBudget } from 'loot-core/src/client/actions/budgets';
 
 import { styles, theme } from '../../style';
-import Block from '../common/Block';
+import { Block } from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
 import Modal, { type ModalProps } from '../common/Modal';
 import Paragraph from '../common/Paragraph';

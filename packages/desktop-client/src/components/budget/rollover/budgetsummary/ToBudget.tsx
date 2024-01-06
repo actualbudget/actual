@@ -5,9 +5,9 @@ import { css } from 'glamor';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
 import { theme, styles, type CSSProperties } from '../../../../style';
-import Block from '../../../common/Block';
-import HoverTarget from '../../../common/HoverTarget';
-import Menu from '../../../common/Menu';
+import { Block } from '../../../common/Block';
+import { HoverTarget } from '../../../common/HoverTarget';
+import { Menu } from '../../../common/Menu';
 import View from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import useFormat from '../../../spreadsheet/useFormat';

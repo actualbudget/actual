@@ -71,7 +71,7 @@ type LinkProps =
     } & ButtonLinkProps)
   | ({ variant?: 'anchor' } & AnchorLinkProps);
 
-export default function Link({ variant = 'anchor', ...props }: LinkProps) {
+export function Link({ variant = 'anchor', ...props }: LinkProps) {
   switch (variant) {
     case 'anchor':
       return <AnchorLink {...props} />;

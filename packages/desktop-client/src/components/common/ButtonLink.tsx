@@ -10,7 +10,7 @@ type ButtonLinkProps = ComponentProps<typeof Button> & {
   to: string;
   activeStyle?: CSSProperties;
 };
-export default function ButtonLink({
+export function ButtonLink({
   to,
   style,
   activeStyle,
