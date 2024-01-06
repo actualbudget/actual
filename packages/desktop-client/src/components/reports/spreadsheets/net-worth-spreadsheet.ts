@@ -11,7 +11,7 @@ import {
 
 import { index } from '../util';
 
-export default function createSpreadsheet(
+export function createSpreadsheet(
   start,
   end,
   accounts,

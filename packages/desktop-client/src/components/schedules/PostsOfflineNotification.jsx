@@ -11,7 +11,7 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import DisplayId from '../util/DisplayId';
 
-export default function PostsOfflineNotification({ modalProps, actions }) {
+export function PostsOfflineNotification({ modalProps, actions }) {
   const location = useLocation();
 
   const payees = (location.state && location.state.payees) || [];

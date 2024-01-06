@@ -8,7 +8,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
-import CategorySelector from './CategorySelector';
+import { CategorySelector } from './CategorySelector';
 import {
   validateStart,
   validateEnd,
@@ -16,7 +16,7 @@ import {
   getFullRange,
   validateRange,
 } from './Header';
-import ModeButton from './ModeButton';
+import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
 
 export function ReportSidebar({

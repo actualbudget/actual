@@ -39,7 +39,7 @@ type CategoryBudgetPerMonth = {
   [month: string]: CategoryBudgetForMonth;
 };
 
-export default function createSpreadsheet(
+export function createSpreadsheet(
   start: string | null,
   end: string | null,
   numberOfMonthsAverage: number,

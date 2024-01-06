@@ -11,7 +11,7 @@ import { theme } from '../../style';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 
-import GraphButton from './GraphButton';
+import { GraphButton } from './GraphButton';
 import { SaveReportMenuButton } from './SaveReport';
 
 export function ReportTopbar({

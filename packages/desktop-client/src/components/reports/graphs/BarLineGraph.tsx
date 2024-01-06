@@ -16,8 +16,8 @@ import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import Container from '../Container';
-import numberFormatterTooltip from '../numberFormatter';
+import { Container } from '../Container';
+import { numberFormatterTooltip } from '../numberFormatter';
 
 type PayloadItem = {
   payload: {
@@ -75,7 +75,7 @@ type BarLineGraphProps = {
   compact?: boolean;
 };
 
-function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
+export function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
   };
@@ -116,5 +116,3 @@ function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
     </Container>
   );
 }
-
-export default BarLineGraph;

@@ -15,7 +15,7 @@ type RolloverBudgetSummaryProps = {
   month: string;
 };
 
-export default function RolloverBudgetSummary({
+export function RolloverBudgetSummary({
   month,
   onBudgetAction,
   modalProps,

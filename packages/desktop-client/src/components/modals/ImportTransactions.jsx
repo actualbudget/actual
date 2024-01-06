@@ -656,7 +656,7 @@ function FieldMappings({
   );
 }
 
-export default function ImportTransactions({ modalProps, options }) {
+export function ImportTransactions({ modalProps, options }) {
   const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );

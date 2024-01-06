@@ -66,7 +66,7 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export default function ScheduleDetails({ modalProps, actions, id }) {
+export function ScheduleDetails({ modalProps, actions, id }) {
   const adding = id == null;
   const payees = useCachedPayees({ idKey: true });
   const globalDispatch = useDispatch();

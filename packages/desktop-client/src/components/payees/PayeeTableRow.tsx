@@ -72,7 +72,7 @@ type PayeeTableRowProps = {
   style?: CSSProperties;
 };
 
-const PayeeTableRow = memo(
+export const PayeeTableRow = memo(
   ({
     payee,
     ruleCount,
@@ -150,5 +150,3 @@ const PayeeTableRow = memo(
     );
   },
 );
-
-export default PayeeTableRow;

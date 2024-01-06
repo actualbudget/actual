@@ -8,7 +8,7 @@ type ContainerProps = {
   style?: CSSProperties;
   children: (width: number, height: number, host: HTMLDivElement) => ReactNode;
 };
-export default function Container({ style, children }: ContainerProps) {
+export function Container({ style, children }: ContainerProps) {
   const portalHost = useRef<HTMLDivElement>(null);
 
   return (

@@ -6,14 +6,14 @@ import useCategories from '../../../hooks/useCategories';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
-import DateRange from '../DateRange';
-import BarGraph from '../graphs/BarGraph';
-import LoadingIndicator from '../LoadingIndicator';
-import ReportCard from '../ReportCard';
-import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
-import useReport from '../useReport';
+import { DateRange } from '../DateRange';
+import { BarGraph } from '../graphs/BarGraph';
+import { LoadingIndicator } from '../LoadingIndicator';
+import { ReportCard } from '../ReportCard';
+import { createSpreadsheet as defaultSpreadsheet } from '../spreadsheets/default-spreadsheet';
+import { useReport } from '../useReport';
 
-function CustomReportCard() {
+export function CustomReportCard() {
   const categories = useCategories();
 
   const endDate = monthUtils.currentMonth();
@@ -61,5 +61,3 @@ function CustomReportCard() {
     </ReportCard>
   );
 }
-
-export default CustomReportCard;

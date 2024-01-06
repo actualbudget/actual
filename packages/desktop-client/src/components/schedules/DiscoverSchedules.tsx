@@ -123,7 +123,7 @@ function DiscoverSchedulesTable({
   );
 }
 
-export default function DiscoverSchedules({
+export function DiscoverSchedules({
   modalProps,
   actions,
 }: {

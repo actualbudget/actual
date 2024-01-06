@@ -23,7 +23,7 @@ type ReportTableTotalsProps = {
   handleScroll: UIEventHandler<HTMLDivElement>;
 };
 
-function ReportTableTotals({
+export function ReportTableTotals({
   data,
   scrollWidth,
   balanceTypeOp,
@@ -155,5 +155,3 @@ function ReportTableTotals({
     </Row>
   );
 }
-
-export default ReportTableTotals;

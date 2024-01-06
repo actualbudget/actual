@@ -12,14 +12,14 @@ import {
 
 import { theme } from '../../../style';
 import { chartTheme } from '../chart-theme';
-import Container from '../Container';
-import Tooltip from '../Tooltip';
+import { Container } from '../Container';
+import { Tooltip } from '../Tooltip';
 
 type CashFlowGraphProps = {
   graphData: { expenses; income; balances };
   isConcise: boolean;
 };
-function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
+export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
   return (
     <Container>
       {(width, height, portalHost) =>
@@ -63,5 +63,3 @@ function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
     </Container>
   );
 }
-
-export default CashFlowGraph;

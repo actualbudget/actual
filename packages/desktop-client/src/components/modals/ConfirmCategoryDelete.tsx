@@ -19,7 +19,7 @@ type ConfirmCategoryDeleteProps = {
   onDelete: (categoryId: string) => void;
 };
 
-export default function ConfirmCategoryDelete({
+export function ConfirmCategoryDelete({
   modalProps,
   category,
   group,

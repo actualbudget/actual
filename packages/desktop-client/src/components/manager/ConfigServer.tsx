@@ -17,7 +17,7 @@ import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
 
-export default function ConfigServer() {
+export function ConfigServer() {
   useSetThemeColor(theme.mobileConfigServerViewTheme);
   const { createBudget, signOut, loggedIn } = useActions();
   const navigate = useNavigate();

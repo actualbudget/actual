@@ -7,7 +7,7 @@ type FiltersButtonProps = {
   onClick: (newValue) => void;
 };
 
-function FiltersButton({ onClick }: FiltersButtonProps) {
+export function FiltersButton({ onClick }: FiltersButtonProps) {
   return (
     <Button type="bare" onClick={onClick} title="Filters">
       <SettingsSliderAlternate
@@ -17,5 +17,3 @@ function FiltersButton({ onClick }: FiltersButtonProps) {
     </Button>
   );
 }
-
-export default FiltersButton;

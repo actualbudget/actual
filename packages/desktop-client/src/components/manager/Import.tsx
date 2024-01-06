@@ -23,7 +23,7 @@ type ImportProps = {
   actions: BoundActions;
 };
 
-function Import({ modalProps, actions }: ImportProps) {
+export function Import({ modalProps, actions }: ImportProps) {
   const [error] = useState(false);
 
   function onSelectType(type: 'ynab4' | 'ynab5' | 'actual') {
@@ -87,5 +87,3 @@ function Import({ modalProps, actions }: ImportProps) {
     </Modal>
   );
 }
-
-export default Import;

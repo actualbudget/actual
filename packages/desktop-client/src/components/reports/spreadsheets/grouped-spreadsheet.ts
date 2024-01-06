@@ -6,11 +6,11 @@ import { integerToAmount } from 'loot-core/src/shared/util';
 import { categoryLists } from '../ReportOptions';
 
 import { type createSpreadsheetProps } from './default-spreadsheet';
-import filterHiddenItems from './filterHiddenItems';
-import makeQuery from './makeQuery';
-import recalculate from './recalculate';
+import { filterHiddenItems } from './filterHiddenItems';
+import { makeQuery } from './makeQuery';
+import { recalculate } from './recalculate';
 
-function createGroupedSpreadsheet({
+export function createGroupedSpreadsheet({
   startDate,
   endDate,
   categories,
@@ -146,5 +146,3 @@ function createGroupedSpreadsheet({
     );
   };
 }
-
-export default createGroupedSpreadsheet;

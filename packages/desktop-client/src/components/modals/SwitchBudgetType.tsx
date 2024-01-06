@@ -13,7 +13,7 @@ type SwitchBudgetTypeProps = {
   onSwitch: () => void;
 };
 
-export default function SwitchBudgetType({
+export function SwitchBudgetType({
   modalProps,
   onSwitch,
 }: SwitchBudgetTypeProps) {

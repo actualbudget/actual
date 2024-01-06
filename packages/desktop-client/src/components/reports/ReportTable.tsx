@@ -17,7 +17,7 @@ type ReportTableProps = {
   handleScroll?: UIEventHandler<HTMLDivElement>;
 };
 
-export default function ReportTable({
+export function ReportTable({
   saveScrollWidth,
   listScrollRef,
   style,

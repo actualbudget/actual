@@ -11,7 +11,7 @@ import { View } from '../../common/View';
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
-export default function ChangePassword() {
+export function ChangePassword() {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [msg, setMessage] = useState(null);

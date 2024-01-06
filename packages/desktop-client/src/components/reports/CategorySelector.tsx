@@ -14,7 +14,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
-import GraphButton from './GraphButton';
+import { GraphButton } from './GraphButton';
 
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroupEntity>;
@@ -23,7 +23,7 @@ type CategorySelectorProps = {
   setSelectedCategories: (selectedCategories: CategoryEntity[]) => null;
 };
 
-export default function CategorySelector({
+export function CategorySelector({
   categoryGroups,
   categories,
   selectedCategories,
