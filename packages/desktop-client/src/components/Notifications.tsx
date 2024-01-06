@@ -14,8 +14,8 @@ import Delete from '../icons/v0/Delete';
 import { styles, theme, type CSSProperties } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button';
-import ExternalLink from './common/ExternalLink';
-import LinkButton from './common/LinkButton';
+import { ExternalLink } from './common/ExternalLink';
+import { LinkButton } from './common/LinkButton';
 import Stack from './common/Stack';
 import Text from './common/Text';
 import View from './common/View';

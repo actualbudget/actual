@@ -5,8 +5,8 @@ import { css } from 'glamor';
 import { reportBudget } from 'loot-core/src/client/queries';
 
 import { theme, type CSSProperties, styles } from '../../../../style';
-import AlignedText from '../../../common/AlignedText';
-import HoverTarget from '../../../common/HoverTarget';
+import { AlignedText } from '../../../common/AlignedText';
+import { HoverTarget } from '../../../common/HoverTarget';
 import Text from '../../../common/Text';
 import View from '../../../common/View';
 import { PrivacyFilter } from '../../../PrivacyFilter';

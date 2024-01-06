@@ -1,7 +1,7 @@
 import React, { type MouseEventHandler, type ReactNode } from 'react';
 
 import { type CSSProperties } from '../../style';
-import AnchorLink from '../common/AnchorLink';
+import { AnchorLink } from '../common/AnchorLink';
 import View from '../common/View';
 
 type ItemContentProps = {

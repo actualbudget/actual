@@ -9,7 +9,7 @@ type FormErrorProps = {
   children?: ReactNode;
 };
 
-export default function FormError({ style, children }: FormErrorProps) {
+export function FormError({ style, children }: FormErrorProps) {
   return (
     <View style={{ color: 'red', fontSize: 13, ...style }}>{children}</View>
   );

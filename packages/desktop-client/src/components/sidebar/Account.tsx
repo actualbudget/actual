@@ -5,8 +5,8 @@ import { css } from 'glamor';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { styles, theme, type CSSProperties } from '../../style';
-import AlignedText from '../common/AlignedText';
-import AnchorLink from '../common/AnchorLink';
+import { AlignedText } from '../common/AlignedText';
+import { AnchorLink } from '../common/AnchorLink';
 import View from '../common/View';
 import {
   useDraggable,

@@ -3,7 +3,7 @@ import React, { type ReactElement } from 'react';
 import * as d from 'date-fns';
 
 import { theme } from '../../style';
-import Block from '../common/Block';
+import { Block } from '../common/Block';
 
 type DateRangeProps = {
   start: string;

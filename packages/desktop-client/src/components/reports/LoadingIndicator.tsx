@@ -2,7 +2,7 @@ import React from 'react';
 
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
-import Block from '../common/Block';
+import { Block } from '../common/Block';
 import View from '../common/View';
 
 type LoadingIndicatorProps = {

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { type CommonModalProps } from '../../types/modals';
-import Block from '../common/Block';
+import { Block } from '../common/Block';
 import { Button } from '../common/Button';
 import Modal from '../common/Modal';
 import View from '../common/View';

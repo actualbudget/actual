@@ -12,7 +12,7 @@ type HoverTargetProps = {
   disabled?: boolean;
 };
 
-export default function HoverTarget({
+export function HoverTarget({
   style,
   contentStyle,
   children,

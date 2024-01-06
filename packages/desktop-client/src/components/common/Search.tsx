@@ -5,7 +5,7 @@ import SearchAlternate from '../../icons/v2/SearchAlternate';
 import { theme } from '../../style';
 
 import { Button } from './Button';
-import InputWithContent from './InputWithContent';
+import { InputWithContent } from './InputWithContent';
 
 type SearchProps = {
   inputRef?: Ref<HTMLInputElement>;

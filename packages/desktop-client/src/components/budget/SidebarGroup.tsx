@@ -5,7 +5,7 @@ import ExpandArrow from '../../icons/v0/ExpandArrow';
 import CheveronDown from '../../icons/v1/CheveronDown';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
-import Menu from '../common/Menu';
+import { Menu } from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
 import { NotesButton } from '../NotesButton';

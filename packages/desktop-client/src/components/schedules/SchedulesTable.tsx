@@ -16,7 +16,7 @@ import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
-import Menu from '../common/Menu';
+import { Menu } from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
