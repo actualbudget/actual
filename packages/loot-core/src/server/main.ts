@@ -23,7 +23,7 @@ import { getStartingBalancePayee } from './accounts/payees';
 import * as bankSync from './accounts/sync';
 import * as rules from './accounts/transaction-rules';
 import { batchUpdateTransactions } from './accounts/transactions';
-import installAPI from './api';
+import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
 import {
   getAvailableBackups,
@@ -32,23 +32,23 @@ import {
   startBackupService,
   stopBackupService,
 } from './backups';
-import budgetApp from './budget/app';
+import { app as budgetApp } from './budget/app';
 import * as budget from './budget/base';
 import * as cloudStorage from './cloud-storage';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
 import { APIError, TransactionError, PostError } from './errors';
-import filtersApp from './filters/app';
+import { app as filtersApp } from './filters/app';
 import { handleBudgetImport } from './importers';
-import app from './main-app';
+import { app } from './main-app';
 import { mutator, runHandler } from './mutators';
-import notesApp from './notes/app';
+import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
 import * as prefs from './prefs';
-import rulesApp from './rules/app';
-import schedulesApp from './schedules/app';
+import { app as rulesApp } from './rules/app';
+import { app as schedulesApp } from './schedules/app';
 import { getServer, setServer } from './server-config';
 import * as sheet from './sheet';
 import { resolveName, unresolveName } from './spreadsheet/util';
@@ -63,7 +63,7 @@ import {
   repairSync,
 } from './sync';
 import * as syncMigrations from './sync/migrate';
-import toolsApp from './tools/app';
+import { app as toolsApp } from './tools/app';
 import { withUndo, clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import { uniqueFileName, idFromFileName } from './util/budget-name';

@@ -165,7 +165,7 @@ module.exports = {
     'prefer-const': 'warn',
     'prefer-spread': 'off',
     '@typescript-eslint/no-empty-function': 'off',
-    'import/no-default-export': 'off',
+    'import/no-default-export': 'warn',
   },
   overrides: [
     {
@@ -241,23 +241,11 @@ module.exports = {
     },
     {
       files: [
-        './packages/api/*',
-        './packages/api/app/**/*',
-        './packages/crdt/**/*',
-        './packages/desktop-client/**/*',
-        './packages/desktop-electron/**/*',
-        './packages/eslint-plugin-actual/**/*',
-        './packages/loot-core/*',
-        './packages/loot-core/src/*',
-        './packages/loot-core/src/client/**/*',
-        './packages/loot-core/src/mocks/**/*',
-        './packages/loot-core/src/platform/**/*',
-        // './packages/loot-core/src/server/**/*',
-        './packages/loot-core/src/shared/**/*',
-        './packages/loot-core/src/types/**/*',
+        './packages/api/migrations/*',
+        './packages/loot-core/migrations/*',
       ],
       rules: {
-        'import/no-default-export': 'warn',
+        'import/no-default-export': 'off',
       },
     },
   ],

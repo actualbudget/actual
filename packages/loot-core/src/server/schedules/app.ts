@@ -543,7 +543,7 @@ async function advanceSchedulesService(syncSuccess) {
 }
 
 // Expose functions to the client
-const app = createApp<SchedulesHandlers>();
+export const app = createApp<SchedulesHandlers>();
 
 app.method('schedule/create', mutator(undoable(createSchedule)));
 app.method('schedule/update', mutator(undoable(updateSchedule)));
@@ -592,5 +592,3 @@ export function getDateWithSkippedWeekend(
   }
   return date;
 }
-
-export default app;

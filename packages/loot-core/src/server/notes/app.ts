@@ -3,10 +3,8 @@ import * as db from '../db';
 
 import { NotesHandlers } from './types/handlers';
 
-const app = createApp<NotesHandlers>();
+export const app = createApp<NotesHandlers>();
 
 app.method('notes-save', async ({ id, note }) => {
   await db.update('notes', { id, note });
 });
-
-export default app;
