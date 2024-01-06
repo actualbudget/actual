@@ -1,13 +1,13 @@
 import React, { type ComponentProps, memo, useState } from 'react';
 
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme, styles } from '../../style';
-import Button from '../common/Button';
-import Menu from '../common/Menu';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
+import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
-import RenderMonths from './RenderMonths';
+import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
 type BudgetTotalsProps = {
@@ -17,7 +17,7 @@ type BudgetTotalsProps = {
   collapseAllCategories: () => void;
 };
 
-const BudgetTotals = memo(function BudgetTotals({
+export const BudgetTotals = memo(function BudgetTotals({
   MonthComponent,
   toggleHiddenCategories,
   expandAllCategories,
@@ -61,7 +61,7 @@ const BudgetTotals = memo(function BudgetTotals({
           }}
           style={{ color: 'currentColor', padding: 3 }}
         >
-          <DotsHorizontalTriple
+          <SvgDotsHorizontalTriple
             width={15}
             height={15}
             style={{ color: theme.pageTextLight }}
@@ -109,5 +109,3 @@ const BudgetTotals = memo(function BudgetTotals({
     </View>
   );
 });
-
-export default BudgetTotals;

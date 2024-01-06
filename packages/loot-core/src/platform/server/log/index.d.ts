@@ -6,5 +6,4 @@ export interface Logger {
   transports?: Transports;
 }
 
-const logger: Logger;
-export default logger;
+export const logger: Logger;

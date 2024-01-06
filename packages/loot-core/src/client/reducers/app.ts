@@ -11,7 +11,7 @@ export const initialState: AppState = {
   lastSplitState: { current: null },
 };
 
-export default function update(state = initialState, action: Action): AppState {
+export function update(state = initialState, action: Action): AppState {
   switch (action.type) {
     case constants.SET_APP_STATE:
       return {

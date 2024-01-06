@@ -41,6 +41,7 @@ export const FIELD_TYPES = new Map(
     category: 'id',
     account: 'id',
     cleared: 'boolean',
+    reconciled: 'boolean',
     saved: 'saved',
   }),
 );

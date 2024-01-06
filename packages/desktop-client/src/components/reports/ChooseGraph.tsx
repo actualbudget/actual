@@ -1,15 +1,15 @@
 import React, { useRef } from 'react';
 
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { type DataEntity, type Month } from './entities';
-import AreaGraph from './graphs/AreaGraph';
-import BarGraph from './graphs/BarGraph';
-import BarLineGraph from './graphs/BarLineGraph';
-import DonutGraph from './graphs/DonutGraph';
-import LineGraph from './graphs/LineGraph';
-import StackedBarGraph from './graphs/StackedBarGraph';
-import ReportTable from './graphs/tableGraph/ReportTable';
+import { AreaGraph } from './graphs/AreaGraph';
+import { BarGraph } from './graphs/BarGraph';
+import { BarLineGraph } from './graphs/BarLineGraph';
+import { DonutGraph } from './graphs/DonutGraph';
+import { LineGraph } from './graphs/LineGraph';
+import { StackedBarGraph } from './graphs/StackedBarGraph';
+import { ReportTable}  from './graphs/tableGraph/ReportTable';
 import ReportTableHeader from './graphs/tableGraph/ReportTableHeader';
 import ReportTableList from './graphs/tableGraph/ReportTableList';
 import ReportTableTotals from './graphs/tableGraph/ReportTableTotals';
@@ -27,7 +27,7 @@ type ChooseGraphProps = {
   months: Month[];
 };
 
-function ChooseGraph({
+export function ChooseGraph({
   data,
   mode,
   graphType,
@@ -139,5 +139,3 @@ function ChooseGraph({
     );
   }
 }
-
-export default ChooseGraph;

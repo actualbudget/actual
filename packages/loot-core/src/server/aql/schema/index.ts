@@ -1,3 +1,5 @@
+import { SchemaConfig } from '../compiler';
+
 function f(type: string, opts?: Record<string, unknown>) {
   return { type, ...opts };
 }
@@ -140,7 +142,7 @@ export const schema = {
   },
 };
 
-export const schemaConfig = {
+export const schemaConfig: SchemaConfig = {
   // Note: these views *must* represent the underlying table that we
   // are mapping here. The compiler makes optimizations with this
   // assumption

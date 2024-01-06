@@ -1,20 +1,17 @@
 import React, { type ComponentProps } from 'react';
 
 import { theme } from '../../../../style';
-import type CellValue from '../../../spreadsheet/CellValue';
-import useSheetValue from '../../../spreadsheet/useSheetValue';
+import { type CellValue } from '../../../spreadsheet/CellValue';
+import { useSheetValue } from '../../../spreadsheet/useSheetValue';
 
-import fraction from './fraction';
-import PieProgress from './PieProgress';
+import { fraction } from './fraction';
+import { PieProgress } from './PieProgress';
 
 type IncomeProgressProps = {
   current: ComponentProps<typeof CellValue>['binding'];
   target: ComponentProps<typeof CellValue>['binding'];
 };
-export default function IncomeProgress({
-  current,
-  target,
-}: IncomeProgressProps) {
+export function IncomeProgress({ current, target }: IncomeProgressProps) {
   let totalIncome = useSheetValue(current) || 0;
   const totalBudgeted = useSheetValue(target) || 0;
 

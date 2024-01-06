@@ -7,7 +7,7 @@ const initialState: ModalsState = {
   isHidden: false,
 };
 
-function update(state = initialState, action: Action): ModalsState {
+export function update(state = initialState, action: Action): ModalsState {
   switch (action.type) {
     case constants.PUSH_MODAL:
       return {
@@ -49,5 +49,3 @@ function update(state = initialState, action: Action): ModalsState {
 
   return state;
 }
-
-export default update;
