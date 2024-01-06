@@ -343,7 +343,7 @@ export default function BudgetList() {
             onClick={() => onCreate({ testMode: true })}
             style={{ marginLeft: 15 }}
           >
-            Create test file
+            Create demo file
           </Button>
       </View>
     </View>

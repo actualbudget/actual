@@ -18,7 +18,7 @@ test.describe('Mobile', () => {
       height: 600,
     });
     await page.goto('/');
-    await configurationPage.createTestFile();
+    await configurationPage.createDemoFile();
   });
 
   test.afterEach(async () => {
