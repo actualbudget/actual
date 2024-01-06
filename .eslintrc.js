@@ -240,9 +240,7 @@ module.exports = {
       },
     },
     {
-      files: [
-        './packages/loot-core/migrations/*',
-      ],
+      files: ['./packages/loot-core/migrations/*'],
       rules: {
         'import/no-default-export': 'off',
       },
