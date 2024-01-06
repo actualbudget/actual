@@ -590,6 +590,7 @@ async function applyCategoryTemplate(
           last_month_balance,
           to_budget,
           errors,
+          category,
         );
         to_budget = goalsReturn.to_budget;
         errors = goalsReturn.errors;

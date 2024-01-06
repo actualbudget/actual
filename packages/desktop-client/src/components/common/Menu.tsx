@@ -8,8 +8,8 @@ import {
 
 import { type CSSProperties, theme } from '../../style';
 
-import Text from './Text';
-import View from './View';
+import { Text } from './Text';
+import { View } from './View';
 
 type KeybindingProps = {
   keyName: ReactNode;
@@ -34,21 +34,21 @@ type MenuItem = {
   style?: CSSProperties;
 };
 
-type MenuProps = {
+type MenuProps<T extends MenuItem = MenuItem> = {
   header?: ReactNode;
   footer?: ReactNode;
-  items: Array<MenuItem | typeof Menu.line>;
-  onMenuSelect: (itemName: MenuItem['name']) => void;
+  items: Array<T | typeof Menu.line>;
+  onMenuSelect: (itemName: T['name']) => void;
   style?: CSSProperties;
 };
 
-export default function Menu({
+export function Menu<T extends MenuItem>({
   header,
   footer,
   items: allItems,
   onMenuSelect,
   style,
-}: MenuProps) {
+}: MenuProps<T>) {
   const elRef = useRef(null);
   const items = allItems.filter(x => x);
   const [hoveredIndex, setHoveredIndex] = useState(null);

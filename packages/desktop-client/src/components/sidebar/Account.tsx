@@ -5,9 +5,9 @@ import { css } from 'glamor';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { styles, theme, type CSSProperties } from '../../style';
-import AlignedText from '../common/AlignedText';
-import AnchorLink from '../common/AnchorLink';
-import View from '../common/View';
+import { AlignedText } from '../common/AlignedText';
+import { AnchorLink } from '../common/AnchorLink';
+import { View } from '../common/View';
 import {
   useDraggable,
   useDroppable,
@@ -16,7 +16,7 @@ import {
   type OnDropCallback,
 } from '../sort';
 import { type Binding } from '../spreadsheet';
-import CellValue from '../spreadsheet/CellValue';
+import { CellValue } from '../spreadsheet/CellValue';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -45,7 +45,7 @@ type AccountProps = {
   onDrop?: OnDropCallback;
 };
 
-function Account({
+export function Account({
   name,
   account,
   connected,
@@ -144,5 +144,3 @@ function Account({
     </View>
   );
 }
-
-export default Account;

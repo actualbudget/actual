@@ -1,14 +1,14 @@
 import React, { useState, useRef } from 'react';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { Error } from '../alerts';
-import Button from '../common/Button';
-import Modal, { ModalButtons } from '../common/Modal';
-import Paragraph from '../common/Paragraph';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Modal, ModalButtons } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 function renderError(error) {
   return (
@@ -27,7 +27,7 @@ type PlainExternalMsgProps = {
   onClose?: () => void;
 };
 
-export default function PlaidExternalMsg({
+export function PlaidExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,

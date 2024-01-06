@@ -5,7 +5,7 @@ import * as connection from '../connection';
 import * as idb from '../indexeddb';
 import { _getModule } from '../sqlite';
 
-import join from './path-join';
+import { join } from './path-join';
 
 let FS = null;
 let BFS = null;

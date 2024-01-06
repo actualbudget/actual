@@ -17,6 +17,7 @@ export async function goalsSchedule(
   last_month_balance,
   to_budget,
   errors,
+  category,
 ) {
   if (!scheduleFlag) {
     scheduleFlag = true;
@@ -34,12 +35,15 @@ export async function goalsSchedule(
       const conditions = rule.serialize().conditions;
       const { date: dateConditions, amount: amountCondition } =
         extractScheduleConds(conditions);
+      const sign = category.is_income ? 1 : -1;
       const target =
         amountCondition.op === 'isbetween'
-          ? -Math.round(
-              amountCondition.value.num1 + amountCondition.value.num2,
-            ) / 2
-          : -amountCondition.value;
+          ? (sign *
+              Math.round(
+                amountCondition.value.num1 + amountCondition.value.num2,
+              )) /
+            2
+          : sign * amountCondition.value;
       const next_date_string = getNextDate(
         dateConditions,
         monthUtils._parse(current_month),

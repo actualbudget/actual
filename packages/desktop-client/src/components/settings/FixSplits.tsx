@@ -5,9 +5,9 @@ import { type Handlers } from 'loot-core/src/types/handlers';
 
 import { theme } from '../../style';
 import { ButtonWithLoading } from '../common/Button';
-import Paragraph from '../common/Paragraph';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Paragraph } from '../common/Paragraph';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 import { Setting } from './UI';
 
@@ -51,7 +51,7 @@ function renderResults(results: Results) {
   );
 }
 
-export default function FixSplitsTool() {
+export function FixSplits() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Results>(null);
 

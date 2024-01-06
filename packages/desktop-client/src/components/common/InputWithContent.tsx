@@ -2,8 +2,8 @@ import { useState, type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
 
-import Input, { defaultInputStyle } from './Input';
-import View from './View';
+import { Input, defaultInputStyle } from './Input';
+import { View } from './View';
 
 type InputWithContentProps = ComponentProps<typeof Input> & {
   leftContent?: ReactNode;
@@ -13,7 +13,7 @@ type InputWithContentProps = ComponentProps<typeof Input> & {
   style?: CSSProperties;
   getStyle?: (focused: boolean) => CSSProperties;
 };
-export default function InputWithContent({
+export function InputWithContent({
   leftContent,
   rightContent,
   inputStyle,

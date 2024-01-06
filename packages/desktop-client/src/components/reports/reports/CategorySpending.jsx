@@ -5,18 +5,18 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useCategories from '../../../hooks/useCategories';
+import { useCategories } from '../../../hooks/useCategories';
 import { styles } from '../../../style';
-import Select from '../../common/Select';
-import View from '../../common/View';
-import CategorySelector from '../CategorySelector';
-import CategorySpendingGraph from '../graphs/CategorySpendingGraph';
-import Header from '../Header';
-import categorySpendingSpreadsheet from '../spreadsheets/category-spending-spreadsheet';
-import useReport from '../useReport';
+import { Select } from '../../common/Select';
+import { View } from '../../common/View';
+import { CategorySelector } from '../CategorySelector';
+import { CategorySpendingGraph } from '../graphs/CategorySpendingGraph';
+import { Header } from '../Header';
+import { createSpreadsheet as categorySpendingSpreadsheet } from '../spreadsheets/category-spending-spreadsheet';
+import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
-function CategorySpending() {
+export function CategorySpending() {
   const categories = useCategories();
 
   const [selectedCategories, setSelectedCategories] = useState(null);
@@ -173,5 +173,3 @@ function CategorySpending() {
     </View>
   );
 }
-
-export default CategorySpending;

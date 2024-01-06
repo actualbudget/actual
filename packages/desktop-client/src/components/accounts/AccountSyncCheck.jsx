@@ -4,11 +4,11 @@ import { useParams } from 'react-router-dom';
 
 import { authorizeBank } from '../../gocardless';
 import { useActions } from '../../hooks/useActions';
-import ExclamationOutline from '../../icons/v1/ExclamationOutline';
+import { SvgExclamationOutline } from '../../icons/v1';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { ExternalLink } from '../common/ExternalLink';
+import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 function getErrorMessage(type, code) {
@@ -48,7 +48,7 @@ function getErrorMessage(type, code) {
   );
 }
 
-export default function AccountSyncCheck() {
+export function AccountSyncCheck() {
   const accounts = useSelector(state => state.queries.accounts);
   const failedAccounts = useSelector(state => state.account.failedAccounts);
   const { unlinkAccount, pushModal } = useActions();
@@ -95,7 +95,9 @@ export default function AccountSyncCheck() {
         }}
         onClick={() => setOpen(true)}
       >
-        <ExclamationOutline style={{ width: 14, height: 14, marginRight: 5 }} />{' '}
+        <SvgExclamationOutline
+          style={{ width: 14, height: 14, marginRight: 5 }}
+        />{' '}
         This account is experiencing connection problems. Let’s fix it.
       </Button>
 

@@ -7,7 +7,7 @@ import React, {
 import { type RefProp } from 'react-spring';
 
 import { type CSSProperties } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 type ReportTableProps = {
   saveScrollWidth?: (value: number) => void;
@@ -17,7 +17,7 @@ type ReportTableProps = {
   handleScroll?: UIEventHandler<HTMLDivElement>;
 };
 
-export default function ReportTable({
+export function ReportTable({
   saveScrollWidth,
   listScrollRef,
   style,
