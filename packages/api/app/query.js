@@ -99,6 +99,6 @@ class Query {
   }
 }
 
-export default function q(table) {
+export function q(table) {
   return new Query({ table });
 }

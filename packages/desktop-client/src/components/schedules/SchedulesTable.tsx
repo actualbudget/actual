@@ -15,11 +15,11 @@ import { type ScheduleEntity } from 'loot-core/src/types/models';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import Check from '../../icons/v2/Check';
 import { theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
-import PrivacyFilter from '../PrivacyFilter';
+import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
 import { Tooltip } from '../tooltips';
 import DisplayId from '../util/DisplayId';
@@ -118,7 +118,7 @@ function OverflowMenu({
           onClose={() => setOpen(false)}
         >
           <Menu
-            onMenuSelect={(name: ScheduleItemAction) => {
+            onMenuSelect={name => {
               onAction(name, schedule.id);
               setOpen(false);
             }}

@@ -4,14 +4,14 @@ import useNavigate from '../hooks/useNavigate';
 import CheveronLeft from '../icons/v1/CheveronLeft';
 import { type CSSProperties, styles, theme } from '../style';
 
-import Button from './common/Button';
+import { Button } from './common/Button';
 import Text from './common/Text';
 
 type MobileBackButtonProps = {
   style?: CSSProperties;
 };
 
-export default function MobileBackButton({ style }: MobileBackButtonProps) {
+export function MobileBackButton({ style }: MobileBackButtonProps) {
   const navigate = useNavigate();
   return (
     <Button

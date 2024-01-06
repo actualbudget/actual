@@ -11,7 +11,7 @@ import useFilters from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import Paragraph from '../../common/Paragraph';
 import View from '../../common/View';
-import PrivacyFilter from '../../PrivacyFilter';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import Change from '../Change';
 import NetWorthGraph from '../graphs/NetWorthGraph';
 import Header from '../Header';

@@ -5,7 +5,7 @@ import { useActions } from '../hooks/useActions';
 import Close from '../icons/v1/Close';
 import { theme } from '../style';
 
-import Button from './common/Button';
+import { Button } from './common/Button';
 import LinkButton from './common/LinkButton';
 import Text from './common/Text';
 import View from './common/View';
@@ -18,7 +18,7 @@ function closeNotification(setAppState) {
   });
 }
 
-export default function UpdateNotification() {
+export function UpdateNotification() {
   const updateInfo = useSelector(state => state.app.updateInfo);
   const showUpdateNotification = useSelector(
     state => state.app.showUpdateNotification,

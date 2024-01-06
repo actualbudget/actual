@@ -5,8 +5,8 @@ import { numberFormats } from 'loot-core/src/shared/util';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
-import tokens from '../../tokens';
-import Button from '../common/Button';
+import { tokens } from '../../tokens';
+import { Button } from '../common/Button';
 import Select from '../common/Select';
 import Text from '../common/Text';
 import View from '../common/View';

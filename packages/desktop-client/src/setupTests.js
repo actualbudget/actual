@@ -1,6 +1,6 @@
 import { resetStore } from 'loot-core/src/mocks/redux';
 
-import installPolyfills from './polyfills';
+import { installPolyfills } from './polyfills';
 
 installPolyfills();
 

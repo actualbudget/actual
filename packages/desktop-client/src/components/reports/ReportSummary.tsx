@@ -10,7 +10,7 @@ import {
 import { theme, styles } from '../../style';
 import Text from '../common/Text';
 import View from '../common/View';
-import PrivacyFilter from '../PrivacyFilter';
+import { PrivacyFilter } from '../PrivacyFilter';
 
 import { type DataEntity } from './entities';
 

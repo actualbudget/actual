@@ -9,7 +9,7 @@ import AlignedText from '../../../common/AlignedText';
 import HoverTarget from '../../../common/HoverTarget';
 import Text from '../../../common/Text';
 import View from '../../../common/View';
-import PrivacyFilter from '../../../PrivacyFilter';
+import { PrivacyFilter } from '../../../PrivacyFilter';
 import useFormat from '../../../spreadsheet/useFormat';
 import useSheetValue from '../../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../../tooltips';

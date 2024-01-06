@@ -5,10 +5,10 @@ import q from 'loot-core/src/shared/query';
 
 import Check from '../../icons/v2/Check';
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Modal from '../common/Modal';
 import View from '../common/View';
-import NotesComponent from '../Notes';
+import { Notes as NotesComponent } from '../Notes';
 
 type NotesProps = {
   modalProps: CommonModalProps;

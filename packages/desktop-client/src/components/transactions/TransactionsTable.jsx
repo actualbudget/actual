@@ -57,7 +57,7 @@ import { styles, theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Text from '../common/Text';
 import View from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
@@ -754,7 +754,8 @@ const Transaction = memo(function Transaction(props) {
         (name === 'credit' ||
           name === 'debit' ||
           name === 'payee' ||
-          name === 'account')
+          name === 'account' ||
+          name === 'date')
       ) {
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
@@ -1967,7 +1968,9 @@ export const TransactionTable = forwardRef((props, ref) => {
       afterSave(() => {
         const transactions = latestState.current.transactions;
         const idx = transactions.findIndex(t => t.id === id);
-        const parent = transactionMap.get(transactions[idx]?.parent_id);
+        const parent = transactions.find(
+          t => t.id === transactions[idx]?.parent_id,
+        );
 
         if (
           isLastChild(transactions, idx) &&

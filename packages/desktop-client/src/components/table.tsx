@@ -28,17 +28,16 @@ import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
 import { type CSSProperties, styles, theme } from '../style';
 
-import Button from './common/Button';
+import { Button } from './common/Button';
 import Input from './common/Input';
 import Menu from './common/Menu';
 import Text from './common/Text';
 import View from './common/View';
-import FixedSizeList from './FixedSizeList';
+import { FixedSizeList } from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
-  type ConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 import { type Binding } from './spreadsheet';
 import useFormat from './spreadsheet/useFormat';
@@ -142,7 +141,9 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
-  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
+  privacyFilter?: ComponentProps<
+    typeof ConditionalPrivacyFilter
+  >['privacyFilter'];
 };
 export function Cell({
   width,
@@ -663,7 +664,9 @@ type SheetCellValueProps = {
   getValueStyle?: (value: string | number) => CSSProperties;
   formatExpr?: (value) => string;
   unformatExpr?: (value: string) => unknown;
-  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
+  privacyFilter?: ComponentProps<
+    typeof ConditionalPrivacyFilter
+  >['privacyFilter'];
 };
 
 type SheetCellProps = ComponentProps<typeof Cell> & {
@@ -886,9 +889,7 @@ type TableProps<T extends TableItem = TableItem> = {
   saveScrollWidth?: (parent, child) => void;
 };
 
-export const Table: <T extends TableItem>(
-  props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
-) => ReactElement = forwardRef<TableHandleRef, TableProps>(
+export const Table = forwardRef(
   (
     {
       items,
@@ -1161,7 +1162,9 @@ export const Table: <T extends TableItem>(
       </View>
     );
   },
-);
+) as <T extends TableItem>(
+  props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
+) => ReactElement;
 
 export type TableNavigator<T extends TableItem> = {
   onEdit: (id: T['id'], field?: string) => void;

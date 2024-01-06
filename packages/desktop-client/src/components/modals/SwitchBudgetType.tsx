@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
 import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';

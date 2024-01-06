@@ -15,7 +15,7 @@ import { css } from 'glamor';
 
 import Remove from '../../icons/v2/Remove';
 import { theme, type CSSProperties } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Input from '../common/Input';
 import View from '../common/View';
 import { Tooltip } from '../tooltips';

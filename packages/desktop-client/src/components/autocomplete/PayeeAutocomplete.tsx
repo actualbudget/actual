@@ -23,7 +23,7 @@ import {
 import Add from '../../icons/v1/Add';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import View from '../common/View';
 
 import Autocomplete, {

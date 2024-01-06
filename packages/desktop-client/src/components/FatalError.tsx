@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import Block from './common/Block';
-import Button from './common/Button';
+import { Button } from './common/Button';
 import ExternalLink from './common/ExternalLink';
 import LinkButton from './common/LinkButton';
 import Modal from './common/Modal';
@@ -151,7 +151,7 @@ function SharedArrayBufferOverride() {
   );
 }
 
-function FatalError({ buttonText, error }: FatalErrorProps) {
+export function FatalError({ buttonText, error }: FatalErrorProps) {
   const [showError, setShowError] = useState(false);
 
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
@@ -185,5 +185,3 @@ function FatalError({ buttonText, error }: FatalErrorProps) {
     </Modal>
   );
 }
-
-export default FatalError;

@@ -6,7 +6,7 @@ import { type BoundActions } from '../../hooks/useActions';
 import useNavigate from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
 import FormError from '../common/FormError';
 import InitialFocus from '../common/InitialFocus';

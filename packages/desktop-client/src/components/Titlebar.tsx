@@ -26,16 +26,16 @@ import { useResponsive } from '../ResponsiveProvider';
 import { theme, type CSSProperties, styles } from '../style';
 
 import AccountSyncCheck from './accounts/AccountSyncCheck';
-import AnimatedRefresh from './AnimatedRefresh';
+import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
-import Button, { ButtonWithLoading } from './common/Button';
+import { Button, ButtonWithLoading } from './common/Button';
 import ExternalLink from './common/ExternalLink';
 import Link from './common/Link';
 import Paragraph from './common/Paragraph';
 import Text from './common/Text';
 import View from './common/View';
 import { KeyHandlers } from './KeyHandlers';
-import LoggedInUser from './LoggedInUser';
+import { LoggedInUser } from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar';
 import useSheetValue from './spreadsheet/useSheetValue';
@@ -363,7 +363,7 @@ function BudgetTitlebar() {
   );
 }
 
-export default function Titlebar({ style }) {
+export function Titlebar({ style }) {
   const navigate = useNavigate();
   const location = useLocation();
   const sidebar = useSidebar();

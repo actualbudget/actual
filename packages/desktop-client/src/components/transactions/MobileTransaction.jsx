@@ -61,7 +61,7 @@ import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import Lock from '../../icons/v2/LockClosed';
 import PencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
 import { styles, theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Text from '../common/Text';
 import TextOneLine from '../common/TextOneLine';
 import View from '../common/View';
@@ -72,7 +72,7 @@ import {
   InputField,
   BooleanField,
 } from '../mobile/MobileForms';
-import MobileBackButton from '../MobileBackButton';
+import { MobileBackButton } from '../MobileBackButton';
 import { Page } from '../Page';
 import { AmountInput } from '../util/AmountInput';
 

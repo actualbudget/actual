@@ -29,7 +29,7 @@ import { authorizeBank } from '../../gocardless';
 import useCategories from '../../hooks/useCategories';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Text from '../common/Text';
 import View from '../common/View';
 import TransactionList from '../transactions/TransactionList';
@@ -864,7 +864,7 @@ class AccountInternal extends PureComponent {
       }
     };
 
-    if (name === 'amount' || name === 'payee' || name === 'account') {
+    if (name === 'amount' || name === 'payee' || name === 'account' || name === 'date') {
       const { data } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids }, reconciled: true })

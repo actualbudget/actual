@@ -2,7 +2,7 @@ import React from 'react';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 
-import Button from './Button';
+import { Button } from './Button';
 
 export default function MenuButton({ onClick }) {
   return (

@@ -1,7 +1,7 @@
 import React, { type MouseEventHandler, type ReactNode } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 
 type ModeButtonProps = {
   selected: boolean;
