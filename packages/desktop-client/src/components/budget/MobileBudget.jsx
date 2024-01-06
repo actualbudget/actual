@@ -6,12 +6,12 @@ import { send, listen } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import AnimatedLoading from '../../icons/AnimatedLoading';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
-import View from '../common/View';
-import SyncRefresh from '../SyncRefresh';
+import { View } from '../common/View';
+import { SyncRefresh } from '../SyncRefresh';
 
 import { BudgetTable } from './MobileBudgetTable';
 import { prewarmMonth, switchBudgetType } from './util';
@@ -19,7 +19,7 @@ import { prewarmMonth, switchBudgetType } from './util';
 const CATEGORY_BUDGET_EDIT_ACTION = 'category-budget';
 const BALANCE_MENU_OPEN_ACTION = 'balance-menu';
 
-class Budget extends Component {
+class BudgetInner extends Component {
   constructor(props) {
     super(props);
 
@@ -456,7 +456,7 @@ class Budget extends Component {
   }
 }
 
-export default function BudgetWrapper() {
+export function Budget() {
   const { list: categories, grouped: categoryGroups } = useCategories();
   const budgetType = useSelector(
     state => state.prefs.local.budgetType || 'rollover',
@@ -467,7 +467,7 @@ export default function BudgetWrapper() {
   const spreadsheet = useSpreadsheet();
   useSetThemeColor(theme.mobileViewTheme);
   return (
-    <Budget
+    <BudgetInner
       categoryGroups={categoryGroups}
       categories={categories}
       budgetType={budgetType}

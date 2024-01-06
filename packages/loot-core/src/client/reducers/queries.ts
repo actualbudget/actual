@@ -19,10 +19,7 @@ const initialState: QueriesState = {
   earliestTransaction: null,
 };
 
-export default function update(
-  state = initialState,
-  action: Action,
-): QueriesState {
+export function update(state = initialState, action: Action): QueriesState {
   switch (action.type) {
     case constants.SET_NEW_TRANSACTIONS:
       return {

@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import useSyncServerStatus from './useSyncServerStatus';
+import { useSyncServerStatus } from './useSyncServerStatus';
 
-export default function useGoCardlessStatus() {
+export function useGoCardlessStatus() {
   const [configured, setConfigured] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();

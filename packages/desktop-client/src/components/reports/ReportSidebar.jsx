@@ -3,14 +3,15 @@ import React, { useState } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Select from '../common/Select';
-import Text from '../common/Text';
+
+import { Button } from '../common/Button';
+import { Select } from '../common/Select';
+import { Text } from '../common/Text';
 import {ToggleMenu} from '../common/ToggleMenu';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
-import CategorySelector from './CategorySelector';
+import { CategorySelector } from './CategorySelector';
 import {
   validateStart,
   validateEnd,
@@ -18,7 +19,7 @@ import {
   getFullRange,
   validateRange,
 } from './Header';
-import ModeButton from './ModeButton';
+import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
 
 export function ReportSidebar({

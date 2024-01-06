@@ -1,6 +1,6 @@
 import { initServer, serverPush } from '../platform/client/fetch';
 import { subDays } from '../shared/months';
-import q from '../shared/query';
+import { q } from '../shared/query';
 import { tracer } from '../shared/test-helpers';
 
 import { runQuery, liveQuery, pagedQuery } from './query-helpers';

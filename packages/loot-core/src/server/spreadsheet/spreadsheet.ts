@@ -2,7 +2,7 @@ import mitt from 'mitt';
 
 import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
 
-import Graph from './graph-data-structure';
+import { Graph } from './graph-data-structure';
 import { unresolveName, resolveName } from './util';
 
 export type Node = {
@@ -17,7 +17,7 @@ export type Node = {
   _dependencies?: string[];
 };
 
-export default class Spreadsheet {
+export class Spreadsheet {
   _meta;
   cacheBarrier;
   computeQueue;

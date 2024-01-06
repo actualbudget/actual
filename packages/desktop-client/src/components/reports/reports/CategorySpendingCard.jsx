@@ -2,18 +2,18 @@ import React, { useMemo } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useCategories from '../../../hooks/useCategories';
+import { useCategories } from '../../../hooks/useCategories';
 import { styles } from '../../../style';
-import Block from '../../common/Block';
-import View from '../../common/View';
-import DateRange from '../DateRange';
-import CategorySpendingGraph from '../graphs/CategorySpendingGraph';
-import LoadingIndicator from '../LoadingIndicator';
-import ReportCard from '../ReportCard';
-import categorySpendingSpreadsheet from '../spreadsheets/category-spending-spreadsheet';
-import useReport from '../useReport';
+import { Block } from '../../common/Block';
+import { View } from '../../common/View';
+import { DateRange } from '../DateRange';
+import { CategorySpendingGraph } from '../graphs/CategorySpendingGraph';
+import { LoadingIndicator } from '../LoadingIndicator';
+import { ReportCard } from '../ReportCard';
+import { createSpreadsheet as categorySpendingSpreadsheet } from '../spreadsheets/category-spending-spreadsheet';
+import { useReport } from '../useReport';
 
-function CategorySpendingCard() {
+export function CategorySpendingCard() {
   const { list: categories = [] } = useCategories();
 
   const end = monthUtils.currentDay();
@@ -59,5 +59,3 @@ function CategorySpendingCard() {
     </ReportCard>
   );
 }
-
-export default CategorySpendingCard;

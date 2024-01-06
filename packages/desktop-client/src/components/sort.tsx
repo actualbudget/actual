@@ -12,7 +12,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { useMergedRefs } from '../hooks/useMergedRefs';
 import { theme } from '../style';
 
-import View from './common/View';
+import { View } from './common/View';
 
 export type DragState<T> = {
   state: 'start-preview' | 'start' | 'end';

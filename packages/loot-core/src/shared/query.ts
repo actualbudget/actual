@@ -132,6 +132,6 @@ export function getPrimaryOrderBy(query, defaultOrderBy) {
   return { field, order: firstOrder[field] };
 }
 
-export default function q(table) {
+export function q(table) {
   return new Query({ table });
 }

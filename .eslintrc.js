@@ -165,6 +165,7 @@ module.exports = {
     'prefer-const': 'warn',
     'prefer-spread': 'off',
     '@typescript-eslint/no-empty-function': 'off',
+    'import/no-default-export': 'warn',
   },
   overrides: [
     {
@@ -236,6 +237,15 @@ module.exports = {
       ],
       rules: {
         'no-restricted-imports': ['off', { patterns: restrictedImportColors }],
+      },
+    },
+    {
+      files: [
+        './packages/api/migrations/*',
+        './packages/loot-core/migrations/*',
+      ],
+      rules: {
+        'import/no-default-export': 'off',
       },
     },
   ],

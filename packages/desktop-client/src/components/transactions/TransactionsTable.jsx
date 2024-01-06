@@ -27,7 +27,7 @@ import {
   getPayeesById,
   getCategoriesById,
 } from 'loot-core/src/client/reducers/queries';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
@@ -43,25 +43,24 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
-import usePrevious from '../../hooks/usePrevious';
+import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
-import LeftArrow2 from '../../icons/v0/LeftArrow2';
-import RightArrow2 from '../../icons/v0/RightArrow2';
-import ArrowDown from '../../icons/v1/ArrowDown';
-import ArrowUp from '../../icons/v1/ArrowUp';
-import CheveronDown from '../../icons/v1/CheveronDown';
-import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
-import CalendarIcon from '../../icons/v2/Calendar';
-import Hyperlink2 from '../../icons/v2/Hyperlink2';
+import { SvgLeftArrow2, SvgRightArrow2 } from '../../icons/v0';
+import { SvgArrowDown, SvgArrowUp, SvgCheveronDown } from '../../icons/v1';
+import {
+  SvgArrowsSynchronize,
+  SvgCalendar,
+  SvgHyperlink2,
+} from '../../icons/v2';
 import { styles, theme } from '../../style';
-import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
-import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
+import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { getStatusProps } from '../schedules/StatusBadge';
-import DateSelect from '../select/DateSelect';
+import { DateSelect } from '../select/DateSelect';
 import {
   Cell,
   Field,
@@ -503,10 +502,10 @@ function HeaderCell({
         >
           <UnexposedCellContent value={value} />
           {icon === 'asc' && (
-            <ArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
+            <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
           )}
           {icon === 'desc' && (
-            <ArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
+            <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
           )}
         </Button>
       }
@@ -655,9 +654,9 @@ function PayeeIcons({
           }}
         >
           {recurring ? (
-            <ArrowsSynchronize style={scheduleIconStyle} />
+            <SvgArrowsSynchronize style={scheduleIconStyle} />
           ) : (
-            <CalendarIcon style={scheduleIconStyle} />
+            <SvgCalendar style={scheduleIconStyle} />
           )}
         </Button>
       )}
@@ -674,9 +673,9 @@ function PayeeIcons({
           }}
         >
           {(transaction._inverse ? -1 : 1) * transaction.amount > 0 ? (
-            <LeftArrow2 style={transferIconStyle} />
+            <SvgLeftArrow2 style={transferIconStyle} />
           ) : (
-            <RightArrow2 style={transferIconStyle} />
+            <SvgRightArrow2 style={transferIconStyle} />
           )}
         </Button>
       )}
@@ -754,7 +753,8 @@ const Transaction = memo(function Transaction(props) {
         (name === 'credit' ||
           name === 'debit' ||
           name === 'payee' ||
-          name === 'account')
+          name === 'account' ||
+          name === 'date')
       ) {
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
@@ -943,7 +943,9 @@ const Transaction = memo(function Transaction(props) {
           style={{ ...(isChild && { borderLeftWidth: 1 }) }}
           value={
             matched && (
-              <Hyperlink2 style={{ width: 13, height: 13, color: 'inherit' }} />
+              <SvgHyperlink2
+                style={{ width: 13, height: 13, color: 'inherit' }}
+              />
             )
           }
         />
@@ -1143,7 +1145,7 @@ const Transaction = memo(function Transaction(props) {
               }}
             >
               {isParent && (
-                <CheveronDown
+                <SvgCheveronDown
                   style={{
                     color: 'inherit',
                     width: 14,
@@ -1967,7 +1969,9 @@ export const TransactionTable = forwardRef((props, ref) => {
       afterSave(() => {
         const transactions = latestState.current.transactions;
         const idx = transactions.findIndex(t => t.id === id);
-        const parent = transactionMap.get(transactions[idx]?.parent_id);
+        const parent = transactions.find(
+          t => t.id === transactions[idx]?.parent_id,
+        );
 
         if (
           isLastChild(transactions, idx) &&

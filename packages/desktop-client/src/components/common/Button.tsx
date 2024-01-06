@@ -2,10 +2,10 @@ import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
 import { css } from 'glamor';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
 
-import View from './View';
+import { View } from './View';
 
 type ButtonProps = HTMLProps<HTMLButtonElement> & {
   pressed?: boolean;
@@ -130,7 +130,7 @@ const _getActiveStyles = (type, bounce) => {
   }
 };
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       children,
@@ -245,5 +245,3 @@ export const ButtonWithLoading = forwardRef<
     </Button>
   );
 });
-
-export default Button;

@@ -1,7 +1,7 @@
 import React, { type ComponentProps } from 'react';
 
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import {
   useDraggable,
   useDroppable,
@@ -12,8 +12,8 @@ import {
 } from '../sort';
 import { Row, ROW_HEIGHT } from '../table';
 
-import RenderMonths from './RenderMonths';
-import SidebarGroup from './SidebarGroup';
+import { RenderMonths } from './RenderMonths';
+import { SidebarGroup } from './SidebarGroup';
 
 type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];
@@ -33,7 +33,7 @@ type ExpenseGroupProps = {
   onShowNewCategory?: ComponentProps<typeof SidebarGroup>['onShowNewCategory'];
 };
 
-function ExpenseGroup({
+export function ExpenseGroup({
   group,
   collapsed,
   editingCell,
@@ -131,5 +131,3 @@ function ExpenseGroup({
     </Row>
   );
 }
-
-export default ExpenseGroup;
