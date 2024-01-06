@@ -22,9 +22,10 @@ import {
 } from 'date-fns';
 import { css } from 'glamor';
 
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   isPreviewId,

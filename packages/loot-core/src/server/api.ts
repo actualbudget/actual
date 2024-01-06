@@ -7,7 +7,7 @@ import {
   getTestKeyError,
 } from '../shared/errors';
 import * as monthUtils from '../shared/months';
-import q from '../shared/query';
+import { q } from '../shared/query';
 import {
   ungroupTransactions,
   updateTransaction,

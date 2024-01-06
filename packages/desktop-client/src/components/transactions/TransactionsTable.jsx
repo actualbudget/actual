@@ -27,7 +27,7 @@ import {
   getPayeesById,
   getCategoriesById,
 } from 'loot-core/src/client/reducers/queries';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { currentDay } from 'loot-core/src/shared/months';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
