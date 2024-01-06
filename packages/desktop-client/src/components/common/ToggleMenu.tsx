@@ -2,9 +2,9 @@ import { type ReactNode, useRef, useState, useEffect } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
 
-import Text from './Text';
+import { Text } from './Text';
 import { Toggle } from './Toggle';
-import View from './View';
+import { View } from './View';
 
 type KeybindingProps = {
   keyName: ReactNode;

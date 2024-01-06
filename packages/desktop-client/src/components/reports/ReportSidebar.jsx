@@ -3,11 +3,10 @@ import React, { useState } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
-
 import { Button } from '../common/Button';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
-import {ToggleMenu} from '../common/ToggleMenu';
+import { ToggleMenu } from '../common/ToggleMenu';
 import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
@@ -256,8 +255,8 @@ export function ReportSidebar({
             onClick={() => {
               setMenuOpen(true);
             }}
-            style={{ 
-              color: 'currentColor', 
+            style={{
+              color: 'currentColor',
               padding: '5px 10px',
             }}
           >
@@ -284,21 +283,21 @@ export function ReportSidebar({
                     {
                       name: 'show-empty-rows',
                       text: 'Show Empty Rows',
-                      tooltip: "Show rows that are zero or blank",
+                      tooltip: 'Show rows that are zero or blank',
                       isOn: showEmpty,
                       toggle: true,
                     },
                     {
                       name: 'show-hidden-categories',
                       text: 'Show Off Budget',
-                      tooltip: "Show off budget accounts and hidden categories",
+                      tooltip: 'Show off budget accounts and hidden categories',
                       isOn: showOffBudgetHidden,
                       toggle: true,
                     },
                     {
                       name: 'show-uncategorized',
                       text: 'Show Uncategorized',
-                      tooltip: "Show uncategorized transactions",
+                      tooltip: 'Show uncategorized transactions',
                       isOn: showUncategorized,
                       toggle: true,
                     },
