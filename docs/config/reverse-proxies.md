@@ -73,9 +73,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.actual-server.rule=Host(`budget.example.org`)"
       - "traefik.http.routers.actual-server.entrypoints=websecure"
+      - "traefik.http.services.actual-server.loadbalancer.server.port=5006"
     volumes:
       - ./actual-data:/data
-    restart: unless-stopped
 ```
 
 ```yaml title="traefik.yaml"
