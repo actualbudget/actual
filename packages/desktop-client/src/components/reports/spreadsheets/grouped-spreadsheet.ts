@@ -85,7 +85,7 @@ export function createGroupedSpreadsheet({
           let groupedAssets = 0;
           let groupedDebts = 0;
 
-          group.categories.map(item => {
+          group.categories.forEach(item => {
             const monthAssets = filterHiddenItems(item, assets)
               .filter(
                 asset => asset.date === month && asset.category === item.id,
@@ -99,8 +99,6 @@ export function createGroupedSpreadsheet({
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedDebts += monthDebts;
-
-            return null;
           });
 
           totalAssets += groupedAssets;
