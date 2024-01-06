@@ -259,7 +259,7 @@ function updateMenu(isBudgetOpen) {
   }
 }
 
-app.setAppUserModelId('com.shiftreset.actual');
+app.setAppUserModelId('com.actualbudget.actual');
 
 app.on('ready', async () => {
   // Install an `app://` protocol that always returns the base HTML

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 import {
-  isNonProductionEnvironment,
   isElectron,
 } from 'loot-core/src/shared/environment';
 
@@ -197,7 +196,6 @@ export default function ConfigServer() {
               Don’t use a server
             </Button>
 
-            {isNonProductionEnvironment() && (
               <Button
                 type="primary"
                 style={{ marginLeft: 15 }}
@@ -205,7 +203,6 @@ export default function ConfigServer() {
               >
                 Create test file
               </Button>
-            )}
           </>
         )}
       </View>
