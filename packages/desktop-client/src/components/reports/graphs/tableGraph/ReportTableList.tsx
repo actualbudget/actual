@@ -7,7 +7,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { type CSSProperties, styles, theme } from '../../../../style';
-import View from '../../../common/View';
+import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
 
 type TableRowProps = {
@@ -186,7 +186,7 @@ function GroupedTableRow({
   );
 }
 
-export default function ReportTableList({
+export function ReportTableList({
   data,
   empty,
   monthsCount,
