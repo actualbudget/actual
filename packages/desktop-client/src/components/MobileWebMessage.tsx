@@ -13,7 +13,7 @@ import { Checkbox } from './forms';
 
 const buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };
 
-export default function MobileWebMessage() {
+export function MobileWebMessage() {
   const hideMobileMessagePref = useSelector(state => {
     return (state.prefs.local && state.prefs.local.hideMobileMessage) || true;
   });

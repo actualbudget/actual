@@ -19,7 +19,7 @@ import Button from '../common/Button';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
-import PrivacyFilter from '../PrivacyFilter';
+import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
 import { Tooltip } from '../tooltips';
 import DisplayId from '../util/DisplayId';

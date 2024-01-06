@@ -18,7 +18,7 @@ function closeNotification(setAppState) {
   });
 }
 
-export default function UpdateNotification() {
+export function UpdateNotification() {
   const updateInfo = useSelector(state => state.app.updateInfo);
   const showUpdateNotification = useSelector(
     state => state.app.showUpdateNotification,

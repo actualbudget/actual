@@ -8,7 +8,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 import { theme, styles } from '../../../style';
 import Block from '../../common/Block';
 import View from '../../common/View';
-import PrivacyFilter from '../../PrivacyFilter';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import Change from '../Change';
 import { chartTheme } from '../chart-theme';
 import Container from '../Container';

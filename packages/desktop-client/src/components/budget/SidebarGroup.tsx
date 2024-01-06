@@ -8,7 +8,7 @@ import Button from '../common/Button';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';
-import NotesButton from '../NotesButton';
+import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
 

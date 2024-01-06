@@ -327,7 +327,7 @@ type ManageRulesProps = {
   setLoading?: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function ManageRules({
+export function ManageRules({
   isModal,
   payeeId,
   setLoading = () => {},

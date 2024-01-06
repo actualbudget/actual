@@ -151,7 +151,7 @@ function SharedArrayBufferOverride() {
   );
 }
 
-function FatalError({ buttonText, error }: FatalErrorProps) {
+export function FatalError({ buttonText, error }: FatalErrorProps) {
   const [showError, setShowError] = useState(false);
 
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
@@ -185,5 +185,3 @@ function FatalError({ buttonText, error }: FatalErrorProps) {
     </Modal>
   );
 }
-
-export default FatalError;
