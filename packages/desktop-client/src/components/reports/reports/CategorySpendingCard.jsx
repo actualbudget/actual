@@ -5,7 +5,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import useCategories from '../../../hooks/useCategories';
 import { styles } from '../../../style';
 import { Block } from '../../common/Block';
-import View from '../../common/View';
+import { View } from '../../common/View';
 import DateRange from '../DateRange';
 import CategorySpendingGraph from '../graphs/CategorySpendingGraph';
 import LoadingIndicator from '../LoadingIndicator';

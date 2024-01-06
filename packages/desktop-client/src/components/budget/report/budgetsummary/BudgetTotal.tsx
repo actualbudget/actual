@@ -7,7 +7,7 @@ import React, {
 
 import { theme, styles } from '../../../../style';
 import { Text } from '../../../common/Text';
-import View from '../../../common/View';
+import { View } from '../../../common/View';
 import CellValue from '../../../spreadsheet/CellValue';
 
 type BudgetTotalProps = {

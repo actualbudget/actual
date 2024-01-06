@@ -5,7 +5,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { theme } from '../../style';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import CategorySelector from './CategorySelector';

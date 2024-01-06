@@ -19,7 +19,7 @@ import { ButtonWithLoading } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import DisplayId from '../util/DisplayId';
 

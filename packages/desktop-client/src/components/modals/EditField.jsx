@@ -26,7 +26,7 @@ import PayeeAutocomplete, {
 } from '../autocomplete/PayeeAutocomplete';
 import { Input } from '../common/Input';
 import { Modal } from '../common/Modal';
-import View from '../common/View';
+import { View } from '../common/View';
 import { SectionLabel } from '../forms';
 import DateSelect from '../select/DateSelect';
 

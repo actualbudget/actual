@@ -8,7 +8,7 @@ import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Search } from '../common/Search';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Page } from '../Page';
 
 import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';

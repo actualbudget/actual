@@ -31,7 +31,7 @@ import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import TransactionList from '../transactions/TransactionList';
 import {
   SplitsExpandedProvider,

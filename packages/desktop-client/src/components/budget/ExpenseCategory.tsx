@@ -3,7 +3,7 @@ import React, { type ComponentProps } from 'react';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import {
   useDraggable,
   useDroppable,

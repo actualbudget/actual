@@ -3,7 +3,7 @@ import React, { createRef, Component } from 'react';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme, styles } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { IntersectionBoundary } from '../tooltips';
 
 import BudgetCategories from './BudgetCategories';

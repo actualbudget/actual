@@ -5,7 +5,7 @@ import InformationOutline from '../icons/v1/InformationOutline';
 import { styles, theme, type CSSProperties } from '../style';
 
 import { Text } from './common/Text';
-import View from './common/View';
+import { View } from './common/View';
 
 type AlertProps = {
   icon?: ComponentType<{ width?: number; style?: CSSProperties }>;

@@ -8,7 +8,7 @@ import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
 import { type CSSProperties, theme } from '../style';
 
 import { Button } from './common/Button';
-import View from './common/View';
+import { View } from './common/View';
 import { Notes } from './Notes';
 import { Tooltip, type TooltipPosition, useTooltip } from './tooltips';
 

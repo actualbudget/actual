@@ -4,7 +4,7 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
 import { styles, theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { type BoundsProps } from './MonthsContext';
 

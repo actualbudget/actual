@@ -4,7 +4,7 @@ import { useFilters } from 'loot-core/src/client/data-hooks/filters';
 import { type TransactionFilterEntity } from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import Autocomplete from './Autocomplete';
 

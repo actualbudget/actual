@@ -5,7 +5,7 @@ import useNavigate from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';
-import View from '../../common/View';
+import { View } from '../../common/View';
 
 function getErrorMessage(reason) {
   switch (reason) {

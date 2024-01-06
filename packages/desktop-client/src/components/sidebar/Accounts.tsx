@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import Add from '../../icons/v1/Add';
-import View from '../common/View';
+import { View } from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
 

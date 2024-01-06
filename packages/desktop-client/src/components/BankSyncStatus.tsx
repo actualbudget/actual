@@ -6,7 +6,7 @@ import { theme, styles } from '../style';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { Text } from './common/Text';
-import View from './common/View';
+import { View } from './common/View';
 
 export function BankSyncStatus() {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);

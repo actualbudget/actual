@@ -2,7 +2,7 @@ import { type ReactNode } from 'react';
 
 import { type CSSProperties } from '../../style';
 
-import View from './View';
+import { View } from './View';
 
 type FormErrorProps = {
   style?: CSSProperties;

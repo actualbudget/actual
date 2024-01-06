@@ -8,7 +8,7 @@ import { Block } from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
 import { Modal, type ModalProps } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
-import View from '../common/View';
+import { View } from '../common/View';
 
 function getErrorMessage(error: string): string {
   switch (error) {

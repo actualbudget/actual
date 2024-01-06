@@ -27,7 +27,7 @@ import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import { BankSyncStatus } from './BankSyncStatus';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import View from './common/View';
+import { View } from './common/View';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import MobileNavTabs from './mobile/MobileNavTabs';

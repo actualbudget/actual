@@ -1,7 +1,7 @@
 import React, { memo, useState, useMemo } from 'react';
 
 import { theme, styles } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { DropHighlightPosContext } from '../sort';
 import { Row } from '../table';
 

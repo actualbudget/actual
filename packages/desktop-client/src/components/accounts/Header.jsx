@@ -17,7 +17,7 @@ import { MenuButton } from '../common/MenuButton';
 import { MenuTooltip } from '../common/MenuTooltip';
 import { Search } from '../common/Search';
 import { Stack } from '../common/Stack';
-import View from '../common/View';
+import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/SavedFilters';
 import { KeyHandlers } from '../KeyHandlers';

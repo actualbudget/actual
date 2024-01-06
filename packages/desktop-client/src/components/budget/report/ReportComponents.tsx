@@ -10,7 +10,7 @@ import { styles, theme, type CSSProperties } from '../../../style';
 import { Button } from '../../common/Button';
 import { Menu } from '../../common/Menu';
 import { Text } from '../../common/Text';
-import View from '../../common/View';
+import { View } from '../../common/View';
 import CellValue from '../../spreadsheet/CellValue';
 import useFormat from '../../spreadsheet/useFormat';
 import { Field, SheetCell } from '../../table';

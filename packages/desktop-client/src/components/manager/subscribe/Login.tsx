@@ -9,7 +9,7 @@ import { theme } from '../../../style';
 import { Button, ButtonWithLoading } from '../../common/Button';
 import { BigInput } from '../../common/Input';
 import { Text } from '../../common/Text';
-import View from '../../common/View';
+import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 

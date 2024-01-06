@@ -3,7 +3,7 @@ import React, { type ComponentProps } from 'react';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import ArrowThinRight from '../../icons/v1/ArrowThinRight';
 import { type CSSProperties } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import CellValue from '../spreadsheet/CellValue';
 import useSheetValue from '../spreadsheet/useSheetValue';
 

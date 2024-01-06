@@ -5,7 +5,7 @@ import Autocomplete from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import { TableHeader, Table, Row, Field } from '../table';
 
 const addAccountOption = { id: 'new', name: 'Create new account' };

@@ -9,7 +9,7 @@ import {
 import { type CSSProperties, theme } from '../../style';
 
 import { Text } from './Text';
-import View from './View';
+import { View } from './View';
 
 type KeybindingProps = {
   keyName: ReactNode;

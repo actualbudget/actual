@@ -2,7 +2,7 @@ import React from 'react';
 
 import { type RuleEntity } from 'loot-core/src/types/models';
 
-import View from '../common/View';
+import { View } from '../common/View';
 
 import RuleRow from './RuleRow';
 

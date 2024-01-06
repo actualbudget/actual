@@ -8,7 +8,7 @@ import { theme, styles } from '../style';
 
 import { Button } from './common/Button';
 import { Text } from './common/Text';
-import View from './common/View';
+import { View } from './common/View';
 import { Checkbox } from './forms';
 
 const buttonStyle = { border: 0, fontSize: 15, padding: '10px 13px' };

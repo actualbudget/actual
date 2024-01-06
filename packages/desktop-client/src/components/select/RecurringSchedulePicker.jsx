@@ -13,7 +13,7 @@ import { Input } from '../common/Input';
 import { Select } from '../common/Select';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
 import { useTooltip, Tooltip } from '../tooltips';
 

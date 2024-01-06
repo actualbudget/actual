@@ -16,7 +16,7 @@ import { Button } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
 import { Input } from '../common/Input';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
