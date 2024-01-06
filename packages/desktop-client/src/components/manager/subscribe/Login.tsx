@@ -13,7 +13,7 @@ import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 
-export default function Login() {
+export function Login() {
   const dispatch = useDispatch();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

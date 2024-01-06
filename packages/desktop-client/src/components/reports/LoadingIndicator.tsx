@@ -9,7 +9,7 @@ type LoadingIndicatorProps = {
   message?: string;
 };
 
-const LoadingIndicator = ({ message }: LoadingIndicatorProps) => {
+export const LoadingIndicator = ({ message }: LoadingIndicatorProps) => {
   return (
     <View
       style={{
@@ -29,5 +29,3 @@ const LoadingIndicator = ({ message }: LoadingIndicatorProps) => {
     </View>
   );
 };
-
-export default LoadingIndicator;

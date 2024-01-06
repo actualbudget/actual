@@ -26,8 +26,8 @@ import { Search } from '../common/Search';
 import { View } from '../common/View';
 import { TableHeader, Cell, SelectCell, useTableNavigator } from '../table';
 
-import PayeeMenu from './PayeeMenu';
-import PayeeTable from './PayeeTable';
+import { PayeeMenu } from './PayeeMenu';
+import { PayeeTable } from './PayeeTable';
 
 const getPayeesById = memoizeOne(payees => groupById(payees));
 

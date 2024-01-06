@@ -22,7 +22,7 @@ type FixEncryptionKeyProps = {
   options: FinanceModals['fix-encryption-key'];
 };
 
-export default function FixEncryptionKey({
+export function FixEncryptionKey({
   modalProps,
   actions,
   options = {},

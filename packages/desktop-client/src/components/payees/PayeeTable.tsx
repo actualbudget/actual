@@ -13,7 +13,7 @@ import { useSelectedItems } from '../../hooks/useSelected';
 import { View } from '../common/View';
 import { Table, type TableNavigator } from '../table';
 
-import PayeeTableRow from './PayeeTableRow';
+import { PayeeTableRow } from './PayeeTableRow';
 
 // Table items require an ID to work, it's optional in the loot-core
 // model so would need to verify accuracy of that before changing there
@@ -28,7 +28,7 @@ type PayeeTableProps = {
   'onUpdate' | 'onViewRules' | 'onCreateRule'
 >;
 
-const PayeeTable = forwardRef<
+export const PayeeTable = forwardRef<
   ComponentRef<typeof Table<PayeeWithId>>,
   PayeeTableProps
 >(
@@ -79,5 +79,3 @@ const PayeeTable = forwardRef<
     );
   },
 );
-
-export default PayeeTable;

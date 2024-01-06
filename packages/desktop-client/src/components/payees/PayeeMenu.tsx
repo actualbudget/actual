@@ -15,7 +15,7 @@ type PayeeMenuProps = {
   onClose: () => void;
 };
 
-export default function PayeeMenu({
+export function PayeeMenu({
   payeesById,
   selectedPayees,
   onDelete,

@@ -7,15 +7,15 @@ import { theme, styles } from '../../../style';
 import { Block } from '../../common/Block';
 import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import Change from '../Change';
-import DateRange from '../DateRange';
-import NetWorthGraph from '../graphs/NetWorthGraph';
-import LoadingIndicator from '../LoadingIndicator';
-import ReportCard from '../ReportCard';
-import netWorthSpreadsheet from '../spreadsheets/net-worth-spreadsheet';
-import useReport from '../useReport';
+import { Change } from '../Change';
+import { DateRange } from '../DateRange';
+import { NetWorthGraph } from '../graphs/NetWorthGraph';
+import { LoadingIndicator } from '../LoadingIndicator';
+import { ReportCard } from '../ReportCard';
+import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
+import { useReport } from '../useReport';
 
-function NetWorthCard({ accounts }) {
+export function NetWorthCard({ accounts }) {
   const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, 5);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -83,5 +83,3 @@ function NetWorthCard({ accounts }) {
     </ReportCard>
   );
 }
-
-export default NetWorthCard;

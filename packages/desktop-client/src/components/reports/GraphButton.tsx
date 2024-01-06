@@ -14,7 +14,7 @@ type GraphButtonProps = HTMLProps<HTMLButtonElement> & {
   disabled?: boolean;
 };
 
-const GraphButton = ({
+export const GraphButton = ({
   selected,
   children,
   onSelect,
@@ -55,5 +55,3 @@ const GraphButton = ({
     </HoverTarget>
   );
 };
-
-export default GraphButton;

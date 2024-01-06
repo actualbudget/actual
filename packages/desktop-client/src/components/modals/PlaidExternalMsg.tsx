@@ -27,7 +27,7 @@ type PlainExternalMsgProps = {
   onClose?: () => void;
 };
 
-export default function PlaidExternalMsg({
+export function PlaidExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,

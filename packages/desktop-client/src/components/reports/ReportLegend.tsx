@@ -9,7 +9,7 @@ type ReportLegendProps = {
   groupBy: string;
 };
 
-function ReportLegend({ legend, groupBy }: ReportLegendProps) {
+export function ReportLegend({ legend, groupBy }: ReportLegendProps) {
   return (
     <View
       style={{
@@ -67,5 +67,3 @@ function ReportLegend({ legend, groupBy }: ReportLegendProps) {
     </View>
   );
 }
-
-export default ReportLegend;

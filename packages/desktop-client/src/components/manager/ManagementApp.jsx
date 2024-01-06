@@ -12,15 +12,15 @@ import { LoggedInUser } from '../LoggedInUser';
 import { Notifications } from '../Notifications';
 import { useServerVersion } from '../ServerContext';
 
-import BudgetList from './BudgetList';
-import ConfigServer from './ConfigServer';
-import Modals from './Modals';
-import ServerURL from './ServerURL';
-import Bootstrap from './subscribe/Bootstrap';
-import ChangePassword from './subscribe/ChangePassword';
-import Error from './subscribe/Error';
-import Login from './subscribe/Login';
-import WelcomeScreen from './WelcomeScreen';
+import { BudgetList } from './BudgetList';
+import { ConfigServer } from './ConfigServer';
+import { Modals } from './Modals';
+import { ServerURL } from './ServerURL';
+import { Bootstrap } from './subscribe/Bootstrap';
+import { ChangePassword } from './subscribe/ChangePassword';
+import { Error } from './subscribe/Error';
+import { Login } from './subscribe/Login';
+import { WelcomeScreen } from './WelcomeScreen';
 
 function Version() {
   const version = useServerVersion();
@@ -47,7 +47,7 @@ function Version() {
   );
 }
 
-export default function ManagementApp({ isLoading }) {
+export function ManagementApp({ isLoading }) {
   const files = useSelector(state => state.budgets.allFiles);
   const userData = useSelector(state => state.user.data);
   const managerHasInitialized = useSelector(

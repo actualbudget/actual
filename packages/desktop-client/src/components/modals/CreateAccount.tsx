@@ -18,7 +18,7 @@ type CreateAccountProps = {
   syncServerStatus: SyncServerStatus;
 };
 
-export default function CreateAccount({
+export function CreateAccount({
   modalProps,
   syncServerStatus,
 }: CreateAccountProps) {

@@ -42,7 +42,7 @@ type CloseAccountProps = {
   modalProps: CommonModalProps;
 };
 
-function CloseAccount({
+export function CloseAccount({
   account,
   accounts,
   categoryGroups,
@@ -203,5 +203,3 @@ function CloseAccount({
     </Modal>
   );
 }
-
-export default CloseAccount;

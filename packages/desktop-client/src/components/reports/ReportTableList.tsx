@@ -186,7 +186,7 @@ function GroupedTableRow({
   );
 }
 
-export default function ReportTableList({
+export function ReportTableList({
   data,
   empty,
   monthsCount,

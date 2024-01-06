@@ -22,7 +22,7 @@ type ReportSummaryProps = {
   monthsCount: number;
 };
 
-function ReportSummary({
+export function ReportSummary({
   startDate,
   endDate,
   data,
@@ -138,5 +138,3 @@ function ReportSummary({
     </View>
   );
 }
-
-export default ReportSummary;

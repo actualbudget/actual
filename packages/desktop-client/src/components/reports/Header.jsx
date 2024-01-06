@@ -61,7 +61,7 @@ export function getFullRange(allMonths) {
   return [start, end];
 }
 
-function Header({
+export function Header({
   title,
   start,
   end,
@@ -190,5 +190,3 @@ function Header({
     </View>
   );
 }
-
-export default Header;

@@ -14,7 +14,7 @@ import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 
-export default function MergeUnusedPayees({
+export function MergeUnusedPayees({
   modalProps,
   payeeIds,
   targetPayeeId,

@@ -10,13 +10,13 @@ import useFilters from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import { Paragraph } from '../../common/Paragraph';
 import { View } from '../../common/View';
-import SankeyGraph from '../graphs/SankeyGraph';
-import Header from '../Header';
-import sankeySpreadsheet from '../spreadsheets/sankey-spreadsheet';
-import useReport from '../useReport';
+import { SankeyGraph } from '../graphs/SankeyGraph';
+import { Header } from '../Header';
+import { createSpreadsheet as sankeySpreadsheet } from '../spreadsheets/sankey-spreadsheet';
+import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
-export default function Sankey() {
+export function Sankey() {
   const { grouped: categoryGroups } = useCategories();
   const {
     filters,

@@ -22,7 +22,10 @@ type CreateLocalAccountProps = {
   actions: BoundActions;
 };
 
-function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
+export function CreateLocalAccount({
+  modalProps,
+  actions,
+}: CreateLocalAccountProps) {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
@@ -166,5 +169,3 @@ function CreateLocalAccount({ modalProps, actions }: CreateLocalAccountProps) {
     </Modal>
   );
 }
-
-export default CreateLocalAccount;

@@ -20,7 +20,7 @@ import { useScroll } from '../ScrollProvider';
 const ROW_HEIGHT = 70;
 const COLUMN_COUNT = 3;
 
-export default function MobileNavTabs() {
+export function MobileNavTabs() {
   const { isNarrowWidth } = useResponsive();
   const { scrollY } = useScroll();
 
