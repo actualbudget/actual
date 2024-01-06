@@ -53,13 +53,14 @@ import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
 } from '../../hooks/useSingleActiveEditForm';
-import Split from '../../icons/v0/Split';
-import Add from '../../icons/v1/Add';
-import Trash from '../../icons/v1/Trash';
-import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
-import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import Lock from '../../icons/v2/LockClosed';
-import PencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
+import { SvgSplit } from '../../icons/v0';
+import { SvgAdd, SvgTrash } from '../../icons/v1';
+import {
+  SvgArrowsSynchronize,
+  SvgCheckCircle1,
+  SvgLockClosed,
+  SvgPencilWriteAlternate,
+} from '../../icons/v2';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
@@ -218,7 +219,7 @@ function Footer({
           onClick={onClickRemainingSplit}
           onPointerDown={e => e.preventDefault()}
         >
-          <Split width={17} height={17} />
+          <SvgSplit width={17} height={17} />
           <Text
             style={{
               ...styles.text,
@@ -239,7 +240,11 @@ function Footer({
           onClick={onAdd}
           onPointerDown={e => e.preventDefault()}
         >
-          <Add width={17} height={17} style={{ color: theme.formLabelText }} />
+          <SvgAdd
+            width={17}
+            height={17}
+            style={{ color: theme.formLabelText }}
+          />
           <Text
             style={{
               ...styles.text,
@@ -256,7 +261,7 @@ function Footer({
           onClick={onSave}
           onPointerDown={e => e.preventDefault()}
         >
-          <PencilWriteAlternate
+          <SvgPencilWriteAlternate
             width={16}
             height={16}
             style={{
@@ -405,7 +410,11 @@ const ChildTransactionEdit = forwardRef(
             }}
             type="bare"
           >
-            <Trash width={17} height={17} style={{ color: theme.errorText }} />
+            <SvgTrash
+              width={17}
+              height={17}
+              style={{ color: theme.errorText }}
+            />
             <Text
               style={{
                 color: theme.errorText,
@@ -770,7 +779,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               onClick={() => onSplit(transaction.id)}
               type="bare"
             >
-              <Split
+              <SvgSplit
                 width={17}
                 height={17}
                 style={{ color: theme.formLabelText }}
@@ -885,7 +894,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               }}
               type="bare"
             >
-              <Trash
+              <SvgTrash
                 width={17}
                 height={17}
                 style={{ color: theme.errorText }}
@@ -1200,7 +1209,7 @@ const Transaction = memo(function Transaction({
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {schedule && (
-              <ArrowsSynchronize
+              <SvgArrowsSynchronize
                 style={{
                   width: 12,
                   height: 12,
@@ -1235,7 +1244,7 @@ const Transaction = memo(function Transaction({
               }}
             >
               {isReconciled ? (
-                <Lock
+                <SvgLockClosed
                   style={{
                     width: 11,
                     height: 11,
@@ -1244,7 +1253,7 @@ const Transaction = memo(function Transaction({
                   }}
                 />
               ) : (
-                <CheckCircle1
+                <SvgCheckCircle1
                   style={{
                     width: 11,
                     height: 11,

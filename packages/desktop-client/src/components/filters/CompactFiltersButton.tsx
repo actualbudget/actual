@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Filter } from '../../icons/v1';
+import { SvgFilter } from '../../icons/v1';
 import { Button } from '../common/Button';
 
 type CompactFiltersButtonProps = {
@@ -10,7 +10,7 @@ type CompactFiltersButtonProps = {
 export function CompactFiltersButton({ onClick }: CompactFiltersButtonProps) {
   return (
     <Button type="bare" onClick={onClick}>
-      <Filter width={15} height={15} />
+      <SvgFilter width={15} height={15} />
     </Button>
   );
 }

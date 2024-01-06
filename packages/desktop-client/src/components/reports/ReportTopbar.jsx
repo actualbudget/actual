@@ -1,12 +1,14 @@
 import React from 'react';
 
-import Calculator from '../../icons/v1/Calculator';
-import Chart from '../../icons/v1/Chart';
-import ChartBar from '../../icons/v1/ChartBar';
-import ChartPie from '../../icons/v1/ChartPie';
-import ListBullet from '../../icons/v1/ListBullet';
-import Queue from '../../icons/v1/Queue';
-import Tag from '../../icons/v1/Tag';
+import {
+  SvgCalculator,
+  SvgChart,
+  SvgChartBar,
+  SvgChartPie,
+  SvgListBullet,
+  SvgQueue,
+  SvgTag,
+} from '../../icons/v1';
 import { theme } from '../../style';
 import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
@@ -48,7 +50,7 @@ export function ReportTopbar({
         }}
         style={{ marginRight: 15 }}
       >
-        <Queue width={15} height={15} />
+        <SvgQueue width={15} height={15} />
       </GraphButton>
       <GraphButton
         title={mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'}
@@ -68,7 +70,7 @@ export function ReportTopbar({
         }}
         style={{ marginRight: 15 }}
       >
-        <ChartBar width={15} height={15} />
+        <SvgChartBar width={15} height={15} />
       </GraphButton>
       <GraphButton
         title="Area Graph"
@@ -82,7 +84,7 @@ export function ReportTopbar({
         style={{ marginRight: 15 }}
         disabled={mode === 'total' ? false : true}
       >
-        <Chart width={15} height={15} />
+        <SvgChart width={15} height={15} />
       </GraphButton>
       <GraphButton
         title="Donut Graph"
@@ -95,7 +97,7 @@ export function ReportTopbar({
         style={{ marginRight: 15 }}
         disabled={mode === 'total' ? false : true}
       >
-        <ChartPie width={15} height={15} />
+        <SvgChartPie width={15} height={15} />
       </GraphButton>
       <View
         style={{
@@ -117,7 +119,7 @@ export function ReportTopbar({
           graphType === 'TableGraph' || graphType === 'AreaGraph' ? true : false
         }
       >
-        <ListBullet width={15} height={15} />
+        <SvgListBullet width={15} height={15} />
       </GraphButton>
       <GraphButton
         selected={viewSummary}
@@ -127,7 +129,7 @@ export function ReportTopbar({
         style={{ marginRight: 15 }}
         title="Show Summary"
       >
-        <Calculator width={15} height={15} />
+        <SvgCalculator width={15} height={15} />
       </GraphButton>
       <GraphButton
         selected={viewLabels}
@@ -138,7 +140,7 @@ export function ReportTopbar({
         title="Show labels"
         disabled={true}
       >
-        <Tag width={15} height={15} />
+        <SvgTag width={15} height={15} />
       </GraphButton>
       <View
         style={{

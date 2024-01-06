@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { Error } from '../alerts';

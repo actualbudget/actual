@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../hooks/useActions';
-import Close from '../icons/v1/Close';
+import { SvgClose } from '../icons/v1';
 import { theme } from '../style';
 
 import { Button } from './common/Button';
@@ -81,7 +81,10 @@ export function UpdateNotification() {
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onClick={() => closeNotification(setAppState)}
               >
-                <Close width={9} style={{ color: theme.buttonPrimaryText }} />
+                <SvgClose
+                  width={9}
+                  style={{ color: theme.buttonPrimaryText }}
+                />
               </Button>
             </Text>
           </View>

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useNavigate } from '../hooks/useNavigate';
-import CheveronLeft from '../icons/v1/CheveronLeft';
+import { SvgCheveronLeft } from '../icons/v1';
 import { type CSSProperties, styles, theme } from '../style';
 
 import { Button } from './common/Button';
@@ -30,7 +30,7 @@ export function MobileBackButton({ style }: MobileBackButtonProps) {
       }}
       onPointerUp={() => navigate(-1)}
     >
-      <CheveronLeft
+      <SvgCheveronLeft
         style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}
       />
       <Text

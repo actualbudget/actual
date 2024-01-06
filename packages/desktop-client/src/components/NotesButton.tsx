@@ -4,7 +4,7 @@ import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
+import { SvgCustomNotesPaper } from '../icons/v2';
 import { type CSSProperties, theme } from '../style';
 
 import { Button } from './common/Button';
@@ -100,7 +100,7 @@ export function NotesButton({
         }}
         {...tooltip.getOpenEvents()}
       >
-        <CustomNotesPaper style={{ width, height }} />
+        <SvgCustomNotesPaper style={{ width, height }} />
       </Button>
       {tooltipOpen && (
         <NotesTooltip

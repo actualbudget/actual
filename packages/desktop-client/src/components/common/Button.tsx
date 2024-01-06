@@ -2,7 +2,7 @@ import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
 import { css } from 'glamor';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { type CSSProperties, styles, theme } from '../../style';
 
 import { View } from './View';

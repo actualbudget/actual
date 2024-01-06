@@ -1,7 +1,6 @@
 import React, { type ComponentType, type ReactNode } from 'react';
 
-import ExclamationOutline from '../icons/v1/ExclamationOutline';
-import InformationOutline from '../icons/v1/InformationOutline';
+import { SvgExclamationOutline, SvgInformationOutline } from '../icons/v1';
 import { styles, theme, type CSSProperties } from '../style';
 
 import { Text } from './common/Text';
@@ -62,7 +61,7 @@ type ScopedAlertProps = {
 export const Information = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
-      icon={InformationOutline}
+      icon={SvgInformationOutline}
       color={theme.pageTextLight}
       backgroundColor="transparent"
       style={{
@@ -79,7 +78,7 @@ export const Information = ({ style, children }: ScopedAlertProps) => {
 export const Warning = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
-      icon={ExclamationOutline}
+      icon={SvgExclamationOutline}
       color={theme.warningText}
       backgroundColor={theme.warningBackground}
       style={style}
@@ -92,7 +91,7 @@ export const Warning = ({ style, children }: ScopedAlertProps) => {
 export const Error = ({ style, children }: ScopedAlertProps) => {
   return (
     <Alert
-      icon={ExclamationOutline}
+      icon={SvgExclamationOutline}
       color={theme.errorTextDarker}
       backgroundColor={theme.errorBackground}
       style={style}

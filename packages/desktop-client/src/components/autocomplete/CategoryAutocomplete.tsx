@@ -14,7 +14,7 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import Split from '../../icons/v0/Split';
+import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
 import { Text } from '../common/Text';
@@ -272,7 +272,7 @@ export function SplitTransactionButton({
         {Icon ? (
           <Icon style={{ marginRight: 5 }} />
         ) : (
-          <Split width={10} height={10} style={{ marginRight: 5 }} />
+          <SvgSplit width={10} height={10} style={{ marginRight: 5 }} />
         )}
       </Text>
       Split Transaction

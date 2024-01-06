@@ -8,7 +8,7 @@ import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
-import { Add } from '../../icons/v1';
+import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import {
@@ -34,7 +34,7 @@ import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 
 function CreatePayeeIcon(props) {
-  return <Add {...props} width={14} height={14} />;
+  return <SvgAdd {...props} width={14} height={14} />;
 }
 
 export function EditField({ modalProps, name, onSubmit, onClose }) {

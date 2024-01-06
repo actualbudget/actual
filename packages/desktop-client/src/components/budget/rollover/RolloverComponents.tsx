@@ -5,7 +5,7 @@ import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
-import CheveronDown from '../../../icons/v1/CheveronDown';
+import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
 import { Button } from '../../common/Button';
 import { Menu } from '../../common/Menu';
@@ -202,7 +202,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                 padding: 3,
               }}
             >
-              <CheveronDown
+              <SvgCheveronDown
                 width={14}
                 height={14}
                 className="hover-visible"
