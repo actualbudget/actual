@@ -591,13 +591,7 @@ function ConditionsList({
 }
 
 const getActions = splits => splits.flatMap(s => s.actions);
-const getUnparsedActions = splits =>
-  splits
-    .flatMap((s, splitIndex) => [
-      { op: 'no-op', options: { splitIndex } },
-      ...s.actions,
-    ])
-    .map(unparse);
+const getUnparsedActions = splits => getActions(splits).map(unparse);
 
 // TODO:
 // * Dont touch child transactions?
@@ -626,10 +620,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
     return parsedActions.reduce((acc, action) => {
       const splitIndex = action.options?.splitIndex ?? 0;
       acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
-      if (action.op !== 'no-op') {
-        acc[splitIndex].actions.push(action);
-      }
-
+      acc[splitIndex].actions.push(action);
       return acc;
     }, []);
   });

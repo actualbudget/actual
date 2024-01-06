@@ -33,8 +33,7 @@ export interface RuleConditionEntity {
 
 export type RuleActionEntity =
   | SetRuleActionEntity
-  | LinkScheduleRuleActionEntity
-  | NoOpRuleActionEntity;
+  | LinkScheduleRuleActionEntity;
 
 export interface SetRuleActionEntity {
   field: string;
@@ -49,11 +48,4 @@ export interface SetRuleActionEntity {
 export interface LinkScheduleRuleActionEntity {
   op: 'link-schedule';
   value: ScheduleEntity;
-}
-
-export interface NoOpRuleActionEntity {
-  op: 'no-op';
-  options: {
-    splitIndex: number;
-  };
 }

@@ -103,15 +103,13 @@ export const RuleRow = memo(
               style={{ flex: 1, alignItems: 'flex-start' }}
               data-testid="actions"
             >
-              {rule.actions
-                .filter(action => action.op !== 'no-op')
-                .map((action, i) => (
-                  <ActionExpression
-                    key={i}
-                    {...action}
-                    style={i !== 0 && { marginTop: 3 }}
-                  />
-                ))}
+              {rule.actions.map((action, i) => (
+                <ActionExpression
+                  key={i}
+                  {...action}
+                  style={i !== 0 && { marginTop: 3 }}
+                />
+              ))}
             </View>
           </Stack>
         </Field>
