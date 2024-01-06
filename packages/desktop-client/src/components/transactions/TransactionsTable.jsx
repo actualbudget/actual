@@ -1968,7 +1968,9 @@ export const TransactionTable = forwardRef((props, ref) => {
       afterSave(() => {
         const transactions = latestState.current.transactions;
         const idx = transactions.findIndex(t => t.id === id);
-        const parent = transactionMap.get(transactions[idx]?.parent_id);
+        const parent = transactions.find(
+          t => t.id === transactions[idx]?.parent_id,
+        );
 
         if (
           isLastChild(transactions, idx) &&
