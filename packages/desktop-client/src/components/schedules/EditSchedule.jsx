@@ -12,7 +12,7 @@ import useSelected, { SelectedProvider } from '../../hooks/useSelected';
 import { theme } from '../../style';
 import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
 import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Modal from '../common/Modal';
 import Stack from '../common/Stack';
 import Text from '../common/Text';

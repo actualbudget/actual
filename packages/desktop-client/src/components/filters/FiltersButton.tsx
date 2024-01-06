@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SettingsSliderAlternate } from '../../icons/v2';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 
 type FiltersButtonProps = {
   onClick: (newValue) => void;

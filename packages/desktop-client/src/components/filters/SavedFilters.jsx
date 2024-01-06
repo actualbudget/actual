@@ -4,7 +4,7 @@ import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 
 import ExpandArrow from '../../icons/v0/ExpandArrow';
 import { theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Menu from '../common/Menu';
 import MenuTooltip from '../common/MenuTooltip';
 import Stack from '../common/Stack';

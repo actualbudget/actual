@@ -15,7 +15,7 @@ import Key from '../../icons/v2/Key';
 import RefreshArrow from '../../icons/v2/RefreshArrow';
 import { styles, theme } from '../../style';
 import { tokens } from '../../tokens';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Menu from '../common/Menu';
 import Text from '../common/Text';
 import View from '../common/View';

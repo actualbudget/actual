@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Filter } from '../../icons/v1';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 
 type CompactFiltersButtonProps = {
   onClick: (newValue) => void;

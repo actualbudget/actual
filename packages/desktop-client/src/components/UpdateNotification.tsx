@@ -5,7 +5,7 @@ import { useActions } from '../hooks/useActions';
 import Close from '../icons/v1/Close';
 import { theme } from '../style';
 
-import Button from './common/Button';
+import { Button } from './common/Button';
 import LinkButton from './common/LinkButton';
 import Text from './common/Text';
 import View from './common/View';

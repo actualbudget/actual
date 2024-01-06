@@ -5,7 +5,7 @@ import { currencyToInteger } from 'loot-core/src/shared/util';
 
 import CheckCircle1 from '../../icons/v2/CheckCircle1';
 import { styles, theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import InitialFocus from '../common/InitialFocus';
 import Input from '../common/Input';
 import Text from '../common/Text';

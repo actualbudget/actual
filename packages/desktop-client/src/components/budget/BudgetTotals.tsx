@@ -2,7 +2,7 @@ import React, { type ComponentProps, memo, useState } from 'react';
 
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { theme, styles } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Menu from '../common/Menu';
 import View from '../common/View';
 import { Tooltip } from '../tooltips';

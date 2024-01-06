@@ -9,7 +9,7 @@ import System from '../icons/v2/System';
 import { useResponsive } from '../ResponsiveProvider';
 import { type CSSProperties, themeOptions, useTheme } from '../style';
 
-import Button from './common/Button';
+import { Button } from './common/Button';
 import Menu from './common/Menu';
 import { Tooltip } from './tooltips';
 

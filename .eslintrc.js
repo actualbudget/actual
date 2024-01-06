@@ -249,6 +249,7 @@ module.exports = {
         // './packages/desktop-client/src/components/accounts/**/*',
         // './packages/desktop-client/src/components/autocomplete/**/*',
         // './packages/desktop-client/src/components/budget/**/*',
+        './packages/desktop-client/src/components/common/Button.tsx',
         // './packages/desktop-client/src/components/common/**/*',
         // './packages/desktop-client/src/components/filters/**/*',
         // './packages/desktop-client/src/components/gocardless/**/*',

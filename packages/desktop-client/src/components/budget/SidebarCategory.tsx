@@ -4,7 +4,7 @@ import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import CheveronDown from '../../icons/v1/CheveronDown';
 import { theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Menu from '../common/Menu';
 import View from '../common/View';
 import { NotesButton } from '../NotesButton';

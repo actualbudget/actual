@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useActions } from '../hooks/useActions';
 import { theme, styles, type CSSProperties } from '../style';
 
-import Button from './common/Button';
+import { Button } from './common/Button';
 import Menu from './common/Menu';
 import Text from './common/Text';
 import View from './common/View';

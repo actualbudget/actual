@@ -13,7 +13,7 @@ import { useMergedRefs } from '../../hooks/useMergedRefs';
 import Add from '../../icons/v1/Add';
 import Subtract from '../../icons/v1/Subtract';
 import { type CSSProperties, theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import InputWithContent from '../common/InputWithContent';
 import View from '../common/View';
 import useFormat from '../spreadsheet/useFormat';
