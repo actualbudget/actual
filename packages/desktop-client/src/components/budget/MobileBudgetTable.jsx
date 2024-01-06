@@ -6,10 +6,12 @@ import memoizeOne from 'memoize-one';
 import { rolloverBudget, reportBudget } from 'loot-core/src/client/queries';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import  { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import ArrowThinLeft from '../../icons/v1/ArrowThinLeft';
-import ArrowThinRight from '../../icons/v1/ArrowThinRight';
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import {
+  SvgArrowThinLeft,
+  SvgArrowThinRight,
+  SvgDotsHorizontalTriple,
+} from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
@@ -1494,7 +1496,7 @@ function BudgetPageMenu({
         }}
         {...tooltip.getOpenEvents()}
       >
-        <DotsHorizontalTriple
+        <SvgDotsHorizontalTriple
           width="20"
           height="20"
           style={{ color: theme.mobileHeaderText }}
@@ -1560,7 +1562,7 @@ function MonthSelector({ month, monthBounds, onPrevMonth, onNextMonth }) {
           background: theme.mobileHeaderTextHover,
         }}
       >
-        <ArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
+        <SvgArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
       </Button>
       <Text
         style={{
@@ -1587,7 +1589,7 @@ function MonthSelector({ month, monthBounds, onPrevMonth, onNextMonth }) {
           background: theme.mobileHeaderTextHover,
         }}
       >
-        <ArrowThinRight width="15" height="15" style={{ margin: -5 }} />
+        <SvgArrowThinRight width="15" height="15" style={{ margin: -5 }} />
       </Button>
     </View>
   );

@@ -5,11 +5,8 @@ import q from 'loot-core/src/shared/query';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { DotsHorizontalTriple } from '../../icons/v1';
-import Trash from '../../icons/v1/Trash';
-import NotesPaper from '../../icons/v2/NotesPaper';
-import ViewHide from '../../icons/v2/ViewHide';
-import ViewShow from '../../icons/v2/ViewShow';
+import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
+import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';
@@ -156,7 +153,11 @@ export function CategoryMenu({
               }}
               onClick={_onEditNotes}
             >
-              <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
+              <SvgNotesPaper
+                width={20}
+                height={20}
+                style={{ paddingRight: 5 }}
+              />
               Edit notes
             </Button>
           </View>
@@ -182,7 +183,7 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
           setMenuOpen(true);
         }}
       >
-        <DotsHorizontalTriple
+        <SvgDotsHorizontalTriple
           width={17}
           height={17}
           style={{ color: 'currentColor' }}
@@ -200,7 +201,7 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
                 {
                   name: 'toggleVisibility',
                   text: category.hidden ? 'Show' : 'Hide',
-                  icon: category.hidden ? ViewShow : ViewHide,
+                  icon: category.hidden ? SvgViewShow : SvgViewHide,
                   iconSize: 16,
                   style: itemStyle,
                 },
@@ -208,7 +209,7 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
                 {
                   name: 'delete',
                   text: 'Delete',
-                  icon: Trash,
+                  icon: SvgTrash,
                   iconSize: 15,
                   style: itemStyle,
                 },

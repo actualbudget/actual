@@ -9,7 +9,7 @@ import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
-import ExpandArrow from '../../icons/v0/ExpandArrow';
+import { SvgExpandArrow } from '../../icons/v0';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { InitialFocus } from '../common/InitialFocus';
@@ -98,7 +98,7 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
           {prefs.budgetName || 'A budget has no name'}
         </Text>
-        <ExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
+        <SvgExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
         {menuOpen && (
           <Tooltip
             position="bottom-left"

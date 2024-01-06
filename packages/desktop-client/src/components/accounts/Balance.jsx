@@ -5,7 +5,7 @@ import q from 'loot-core/src/client/query-helpers';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 
 import { useSelectedItems } from '../../hooks/useSelected';
-import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
+import { SvgArrowButtonRight1 } from '../../icons/v2';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
@@ -167,7 +167,7 @@ export function Balances({
           }}
         />
 
-        <ArrowButtonRight1
+        <SvgArrowButtonRight1
           style={{
             width: 10,
             height: 10,

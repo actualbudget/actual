@@ -5,9 +5,12 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/src/types/models';
 
-import { CheckAll, UncheckAll } from '../../icons/v2';
-import ViewHide from '../../icons/v2/ViewHide';
-import ViewShow from '../../icons/v2/ViewShow';
+import {
+  SvgCheckAll,
+  SvgUncheckAll,
+  SvgViewHide,
+  SvgViewShow,
+} from '../../icons/v2';
 import { type CategoryListProps } from '../autocomplete/CategoryAutocomplete';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
@@ -66,12 +69,20 @@ export function CategorySelector({
           <View>
             {uncheckedHidden ? (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <ViewShow width={15} height={15} style={{ marginRight: 5 }} />
+                <SvgViewShow
+                  width={15}
+                  height={15}
+                  style={{ marginRight: 5 }}
+                />
                 <Text>Show unchecked</Text>
               </View>
             ) : (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <ViewHide width={15} height={15} style={{ marginRight: 5 }} />
+                <SvgViewHide
+                  width={15}
+                  height={15}
+                  style={{ marginRight: 5 }}
+                />
                 <Text>Hide unchecked</Text>
               </View>
             )}
@@ -87,7 +98,7 @@ export function CategorySelector({
             }}
             style={{ marginRight: 5, padding: 8 }}
           >
-            <CheckAll width={15} height={15} />
+            <SvgCheckAll width={15} height={15} />
           </GraphButton>
           <GraphButton
             selected={allCategoriesUnselected}
@@ -97,7 +108,7 @@ export function CategorySelector({
             }}
             style={{ padding: 8 }}
           >
-            <UncheckAll width={15} height={15} />
+            <SvgUncheckAll width={15} height={15} />
           </GraphButton>
         </View>
       </View>

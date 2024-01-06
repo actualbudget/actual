@@ -7,7 +7,7 @@ import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import Add from '../../icons/v1/Add';
+import { SvgAdd } from '../../icons/v1';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
@@ -171,7 +171,7 @@ function AccountList({
           hoveredStyle={noBackgroundColorStyle}
           onClick={onAddAccount}
         >
-          <Add width={20} height={20} />
+          <SvgAdd width={20} height={20} />
         </Button>
       }
       padding={0}

@@ -3,7 +3,7 @@ import React from 'react';
 import * as queries from 'loot-core/src/client/queries';
 import { currencyToInteger } from 'loot-core/src/shared/util';
 
-import CheckCircle1 from '../../icons/v2/CheckCircle1';
+import { SvgCheckCircle1 } from '../../icons/v2';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { InitialFocus } from '../common/InitialFocus';
@@ -52,7 +52,7 @@ export function ReconcilingMessage({
               justifyContent: 'center',
             }}
           >
-            <CheckCircle1
+            <SvgCheckCircle1
               style={{
                 width: 13,
                 height: 13,

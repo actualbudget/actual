@@ -5,9 +5,8 @@ import { css } from 'glamor';
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
-import DotsHorizontalTriple from '../../../../icons/v1/DotsHorizontalTriple';
-import ArrowButtonDown1 from '../../../../icons/v2/ArrowButtonDown1';
-import ArrowButtonUp1 from '../../../../icons/v2/ArrowButtonUp1';
+import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
+import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
 import { theme, styles } from '../../../../style';
 import { Button } from '../../../common/Button';
 import { Menu } from '../../../common/Menu';
@@ -44,7 +43,9 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     setMenuOpen(false);
   }
 
-  const ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
+  const ExpandOrCollapseIcon = collapsed
+    ? SvgArrowButtonDown1
+    : SvgArrowButtonUp1;
 
   return (
     <View
@@ -131,7 +132,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             </View>
             <View style={{ userSelect: 'none' }}>
               <Button type="bare" aria-label="Menu" onClick={onMenuOpen}>
-                <DotsHorizontalTriple
+                <SvgDotsHorizontalTriple
                   width={15}
                   height={15}
                   style={{ color: theme.pageTextLight }}

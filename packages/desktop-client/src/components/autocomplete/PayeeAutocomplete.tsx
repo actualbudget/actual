@@ -20,7 +20,7 @@ import {
   type PayeeEntity,
 } from 'loot-core/src/types/models';
 
-import Add from '../../icons/v1/Add';
+import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
 import { Button } from '../common/Button';
@@ -404,7 +404,7 @@ export function CreatePayeeButton({
       {Icon ? (
         <Icon style={{ marginRight: 5, display: 'inline-block' }} />
       ) : (
-        <Add
+        <SvgAdd
           width={8}
           height={8}
           style={{ marginRight: 5, display: 'inline-block' }}

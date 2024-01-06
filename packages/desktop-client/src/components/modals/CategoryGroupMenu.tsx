@@ -5,12 +5,8 @@ import q from 'loot-core/src/shared/query';
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
 import { useCategories } from '../../hooks/useCategories';
-import { DotsHorizontalTriple } from '../../icons/v1';
-import Add from '../../icons/v1/Add';
-import Trash from '../../icons/v1/Trash';
-import NotesPaper from '../../icons/v2/NotesPaper';
-import ViewHide from '../../icons/v2/ViewHide';
-import ViewShow from '../../icons/v2/ViewShow';
+import { SvgDotsHorizontalTriple, SvgAdd, SvgTrash } from '../../icons/v1';
+import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { Button } from '../common/Button';
@@ -169,7 +165,7 @@ export function CategoryGroupMenu({
               }}
               onClick={_onAddCategory}
             >
-              <Add width={17} height={17} style={{ paddingRight: 5 }} />
+              <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
               Add category
             </Button>
             <Button
@@ -179,7 +175,11 @@ export function CategoryGroupMenu({
               }}
               onClick={_onEditNotes}
             >
-              <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
+              <SvgNotesPaper
+                width={20}
+                height={20}
+                style={{ paddingRight: 5 }}
+              />
               Edit notes
             </Button>
           </View>
@@ -205,7 +205,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
           setMenuOpen(true);
         }}
       >
-        <DotsHorizontalTriple
+        <SvgDotsHorizontalTriple
           width={17}
           height={17}
           style={{ color: 'currentColor' }}
@@ -228,7 +228,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                   {
                     name: 'toggleVisibility',
                     text: group.hidden ? 'Show' : 'Hide',
-                    icon: group.hidden ? ViewShow : ViewHide,
+                    icon: group.hidden ? SvgViewShow : SvgViewHide,
                     iconSize: 16,
                     style: itemStyle,
                   },
@@ -237,7 +237,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                     {
                       name: 'delete',
                       text: 'Delete',
-                      icon: Trash,
+                      icon: SvgTrash,
                       iconSize: 15,
                       style: itemStyle,
                     },

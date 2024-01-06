@@ -9,8 +9,8 @@ import {
 } from 'loot-core/src/types/models';
 
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
-import AnimatedLoading from '../../icons/AnimatedLoading';
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { Error, Warning } from '../alerts';
@@ -227,7 +227,7 @@ export function GoCardlessExternalMsg({
             onClick={() => setMenuOpen(true)}
             aria-label="Menu"
           >
-            <DotsHorizontalTriple
+            <SvgDotsHorizontalTriple
               width={15}
               height={15}
               style={{ transform: 'rotateZ(90deg)' }}

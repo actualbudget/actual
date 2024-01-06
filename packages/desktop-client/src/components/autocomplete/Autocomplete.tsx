@@ -13,7 +13,7 @@ import React, {
 import Downshift, { type StateChangeTypes } from 'downshift';
 import { css } from 'glamor';
 
-import Remove from '../../icons/v2/Remove';
+import { SvgRemove } from '../../icons/v2';
 import { theme, type CSSProperties } from '../../style';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
@@ -575,7 +575,7 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
     >
       {name}
       <Button type="bare" style={{ marginLeft: 1 }} onClick={onRemove}>
-        <Remove style={{ width: 8, height: 8 }} />
+        <SvgRemove style={{ width: 8, height: 8 }} />
       </Button>
     </View>
   );

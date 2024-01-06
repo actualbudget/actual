@@ -2,7 +2,7 @@ import { useLocation } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import ArrowLeft from '../../icons/v1/ArrowLeft';
+import { SvgArrowLeft } from '../../icons/v1';
 import { styles } from '../../style';
 import { Button } from '../common/Button';
 import { ButtonLink } from '../common/ButtonLink';
@@ -93,7 +93,7 @@ export function Header({
         to="/reports"
         style={{ marginBottom: '15', alignSelf: 'flex-start' }}
       >
-        <ArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
+        <SvgArrowLeft width={10} height={10} style={{ marginRight: 5 }} /> Back
       </ButtonLink>
       <View style={styles.veryLargeText}>{title}</View>
 

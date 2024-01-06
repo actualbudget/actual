@@ -2,7 +2,7 @@ import React from 'react';
 
 import { css } from 'glamor';
 
-import AnimatedLoading from '../icons/AnimatedLoading';
+import { AnimatedLoading } from '../icons/AnimatedLoading';
 import { theme } from '../style';
 
 import { Background } from './Background';

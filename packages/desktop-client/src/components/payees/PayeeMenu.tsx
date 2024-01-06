@@ -1,7 +1,6 @@
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
-import Delete from '../../icons/v0/Delete';
-import Merge from '../../icons/v0/Merge';
+import { SvgDelete, SvgMerge } from '../../icons/v0';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
 import { View } from '../common/View';
@@ -64,13 +63,13 @@ export function PayeeMenu({
         }
         items={[
           {
-            icon: Delete,
+            icon: SvgDelete,
             name: 'delete',
             text: 'Delete',
             disabled: isDisabled,
           },
           {
-            icon: Merge,
+            icon: SvgMerge,
             iconSize: 9,
             name: 'merge',
             text: 'Merge',

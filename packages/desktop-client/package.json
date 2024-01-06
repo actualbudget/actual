@@ -74,7 +74,7 @@
     "watch": "cross-env BROWSER=none yarn start",
     "build": "cross-env INLINE_RUNTIME_CHUNK=false craco build",
     "build:browser": "cross-env ./bin/build-browser",
-    "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --typescript --expand-props start -d . .",
+    "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",
     "test": "craco test",
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium"

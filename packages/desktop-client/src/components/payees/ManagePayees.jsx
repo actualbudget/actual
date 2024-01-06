@@ -20,7 +20,7 @@ import {
   useSelectedItems,
 } from '../../hooks/useSelected';
 import { useStableCallback } from '../../hooks/useStableCallback';
-import ExpandArrow from '../../icons/v0/ExpandArrow';
+import { SvgExpandArrow } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Search } from '../common/Search';
@@ -243,7 +243,7 @@ export const ManagePayees = forwardRef(
                 : selected.items.size +
                   ' ' +
                   plural(selected.items.size, 'payee', 'payees')}
-              <ExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
+              <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
             </Button>
             {menuOpen && (
               <PayeeMenu

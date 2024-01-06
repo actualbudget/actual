@@ -15,7 +15,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
-import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
+import { SvgArrowsSynchronize } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { Table, Row, Field, Cell, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';
@@ -86,7 +86,7 @@ const TransactionRow = memo(function TransactionRow({
                 {() => (
                   <>
                     {transaction.schedule && (
-                      <ArrowsSynchronize
+                      <SvgArrowsSynchronize
                         style={{
                           width: 13,
                           height: 13,

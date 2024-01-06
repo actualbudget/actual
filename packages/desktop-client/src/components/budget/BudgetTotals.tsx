@@ -1,6 +1,6 @@
 import React, { type ComponentProps, memo, useState } from 'react';
 
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme, styles } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
@@ -61,7 +61,7 @@ export const BudgetTotals = memo(function BudgetTotals({
           }}
           style={{ color: 'currentColor', padding: 3 }}
         >
-          <DotsHorizontalTriple
+          <SvgDotsHorizontalTriple
             width={15}
             height={15}
             style={{ color: theme.pageTextLight }}

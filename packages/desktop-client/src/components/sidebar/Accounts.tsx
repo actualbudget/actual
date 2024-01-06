@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
-import Add from '../../icons/v1/Add';
+import { SvgAdd } from '../../icons/v1';
 import { View } from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
@@ -174,7 +174,7 @@ export function Accounts({
           marginBottom: 9,
         }}
         onClick={onAddAccount}
-        Icon={Add}
+        Icon={SvgAdd}
         title="Add account"
       />
     </View>
