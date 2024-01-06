@@ -74,7 +74,6 @@ export default function SavedFilterAutocomplete({
       suggestions={filters}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <FilterList
-          // @ts-expect-error This issue will go away when `strictFunctionTypes` is enabled
           items={items}
           getItemProps={getItemProps}
           highlightedIndex={highlightedIndex}
