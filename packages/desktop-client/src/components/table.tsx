@@ -886,9 +886,7 @@ type TableProps<T extends TableItem = TableItem> = {
   saveScrollWidth?: (parent, child) => void;
 };
 
-export const Table: <T extends TableItem>(
-  props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
-) => ReactElement = forwardRef<TableHandleRef, TableProps>(
+export const Table = forwardRef(
   (
     {
       items,
@@ -1161,7 +1159,9 @@ export const Table: <T extends TableItem>(
       </View>
     );
   },
-);
+) as <T extends TableItem>(
+  props: TableProps<T> & { ref?: Ref<TableHandleRef<T>> },
+) => ReactElement;
 
 export type TableNavigator<T extends TableItem> = {
   onEdit: (id: T['id'], field?: string) => void;
