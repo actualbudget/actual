@@ -22,10 +22,7 @@ import {
 import { useCategories } from '../../hooks/useCategories';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
-import { theme, styles } from '../../style';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
+import { theme } from '../../style';
 
 import { AccountDetails } from './MobileAccountDetails';
 
@@ -172,27 +169,6 @@ export function Account(props) {
 
   if (!accounts || !accounts.length) {
     return null;
-  }
-
-  if (
-    accountId === 'budgeted' ||
-    accountId === 'offbudget' ||
-    accountId === 'uncategorized'
-  ) {
-    return (
-      <View style={{ flex: 1, padding: 30 }}>
-        <Text style={(styles.text, { textAlign: 'center' })}>
-          There is no Mobile View at the moment
-        </Text>
-        <Button
-          type="normal"
-          style={{ fontSize: 15, marginLeft: 10, marginTop: 10 }}
-          onClick={() => navigate('/accounts')}
-        >
-          Go back to Mobile Accounts
-        </Button>
-      </View>
-    );
   }
 
   const account = accounts.find(acct => acct.id === accountId);
