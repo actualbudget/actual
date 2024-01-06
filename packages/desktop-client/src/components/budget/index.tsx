@@ -35,7 +35,7 @@ import useCategories from '../../hooks/useCategories';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import useNavigate from '../../hooks/useNavigate';
 import { styles } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import {
   SWITCH_BUDGET_MESSAGE_TYPE,
   TitlebarContext,

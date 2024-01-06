@@ -27,7 +27,7 @@ import { stringToInteger } from 'loot-core/src/shared/util';
 
 import { type CSSProperties, theme } from '../../style';
 import { Input, type InputProps } from '../common/Input';
-import View, { type ViewProps } from '../common/View';
+import { View, type ViewProps } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 import DateSelectLeft from './DateSelect.left.png';

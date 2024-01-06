@@ -13,7 +13,7 @@ import Lock from '../../icons/v2/LockClosed';
 import ValidationCheck from '../../icons/v2/ValidationCheck';
 import { theme } from '../../style';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 
 // Consists of Schedule Statuses + Transaction statuses
 type StatusTypes = ScheduleStatusType | 'cleared' | 'pending' | 'reconciled';

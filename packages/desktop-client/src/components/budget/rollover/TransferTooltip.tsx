@@ -14,7 +14,7 @@ import CategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
 import { Button } from '../../common/Button';
 import { InitialFocus } from '../../common/InitialFocus';
 import { Input } from '../../common/Input';
-import View from '../../common/View';
+import { View } from '../../common/View';
 import NamespaceContext from '../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../tooltips';
 import { addToBeBudgetedGroup } from '../util';

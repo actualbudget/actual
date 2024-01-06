@@ -8,7 +8,7 @@ import ExclamationOutline from '../../icons/v1/ExclamationOutline';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { ExternalLink } from '../common/ExternalLink';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 function getErrorMessage(type, code) {

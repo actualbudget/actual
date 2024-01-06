@@ -8,7 +8,7 @@ import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { theme } from '../../style';
 import { LinkButton } from '../common/LinkButton';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';

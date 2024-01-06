@@ -7,7 +7,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { useResponsive } from '../../ResponsiveProvider';
 import { type CSSProperties, theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import Autocomplete from './Autocomplete';
 

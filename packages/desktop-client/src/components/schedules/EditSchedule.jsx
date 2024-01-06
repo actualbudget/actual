@@ -16,7 +16,7 @@ import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRule';
 import DateSelect from '../select/DateSelect';

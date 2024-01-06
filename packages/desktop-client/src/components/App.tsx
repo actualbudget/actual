@@ -19,7 +19,7 @@ import { ResponsiveProvider } from '../ResponsiveProvider';
 import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 
 import { AppBackground } from './AppBackground';
-import View from './common/View';
+import { View } from './common/View';
 import { DevelopmentTopBar } from './DevelopmentTopBar';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';

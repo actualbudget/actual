@@ -3,7 +3,7 @@ import { useState, type ComponentProps, type ReactNode } from 'react';
 import { type CSSProperties, theme } from '../../style';
 
 import { Input, defaultInputStyle } from './Input';
-import View from './View';
+import { View } from './View';
 
 type InputWithContentProps = ComponentProps<typeof Input> & {
   leftContent?: ReactNode;

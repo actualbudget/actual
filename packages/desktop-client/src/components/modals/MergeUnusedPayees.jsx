@@ -10,7 +10,7 @@ import { Button } from '../common/Button';
 import { Modal, ModalButtons } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

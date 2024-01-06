@@ -7,7 +7,7 @@ import { theme } from '../style';
 
 import { Background } from './Background';
 import { Block } from './common/Block';
-import View from './common/View';
+import { View } from './common/View';
 
 type AppBackgroundProps = {
   initializing?: boolean;

@@ -17,7 +17,7 @@ import { LinkButton } from '../common/LinkButton';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 
 function needsCategory(
   account: AccountEntity,

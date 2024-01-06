@@ -9,7 +9,7 @@ import { Menu } from '../common/Menu';
 import { MenuTooltip } from '../common/MenuTooltip';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { FieldSelect } from '../modals/EditRule';
 import GenericInput from '../util/GenericInput';

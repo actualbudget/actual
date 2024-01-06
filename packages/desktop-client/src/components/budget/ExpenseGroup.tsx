@@ -1,7 +1,7 @@
 import React, { type ComponentProps } from 'react';
 
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import {
   useDraggable,
   useDroppable,

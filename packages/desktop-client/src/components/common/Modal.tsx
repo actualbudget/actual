@@ -17,7 +17,7 @@ import { tokens } from '../../tokens';
 import { Button } from './Button';
 import { Input } from './Input';
 import { Text } from './Text';
-import View from './View';
+import { View } from './View';
 
 type ModalChildrenProps = {
   isEditingTitle: boolean;

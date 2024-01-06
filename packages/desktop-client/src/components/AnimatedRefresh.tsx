@@ -5,7 +5,7 @@ import { keyframes } from 'glamor';
 import Refresh from '../icons/v1/Refresh';
 import { type CSSProperties } from '../style';
 
-import View from './common/View';
+import { View } from './common/View';
 
 const spin = keyframes({
   '0%': { transform: 'rotateZ(0deg)' },

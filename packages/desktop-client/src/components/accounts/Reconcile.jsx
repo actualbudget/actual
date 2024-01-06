@@ -9,7 +9,7 @@ import { Button } from '../common/Button';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';
 import { Tooltip } from '../tooltips';

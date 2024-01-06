@@ -10,7 +10,7 @@ import { Button } from '../../common/Button';
 import { ExternalLink } from '../../common/ExternalLink';
 import { Paragraph } from '../../common/Paragraph';
 import { Text } from '../../common/Text';
-import View from '../../common/View';
+import { View } from '../../common/View';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';

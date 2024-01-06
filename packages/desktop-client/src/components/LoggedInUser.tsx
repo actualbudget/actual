@@ -7,7 +7,7 @@ import { theme, styles, type CSSProperties } from '../style';
 import { Button } from './common/Button';
 import { Menu } from './common/Menu';
 import { Text } from './common/Text';
-import View from './common/View';
+import { View } from './common/View';
 import { useServerURL } from './ServerContext';
 import { Tooltip } from './tooltips';
 

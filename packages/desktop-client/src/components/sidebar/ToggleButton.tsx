@@ -4,7 +4,7 @@ import Pin from '../../icons/v1/Pin';
 import ArrowButtonLeft1 from '../../icons/v2/ArrowButtonLeft1';
 import { type CSSProperties, theme } from '../../style';
 import { Button } from '../common/Button';
-import View from '../common/View';
+import { View } from '../common/View';
 
 type ToggleButtonProps = {
   isFloating: boolean;

@@ -12,7 +12,7 @@ import { css } from 'glamor';
 import { addMonths, subMonths } from 'loot-core/src/shared/months';
 
 import useResizeObserver from '../../hooks/useResizeObserver';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { MonthsContext } from './MonthsContext';
 import type ReportBudgetSummary from './report/budgetsummary/BudgetSummary';

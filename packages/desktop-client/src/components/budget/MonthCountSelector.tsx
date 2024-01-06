@@ -2,7 +2,7 @@ import React from 'react';
 
 import CalendarIcon from '../../icons/v2/Calendar';
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 

@@ -3,7 +3,7 @@ import { type ComponentProps } from 'react';
 import { type CSSProperties } from '../../style';
 
 import { Block } from './Block';
-import View from './View';
+import { View } from './View';
 
 type AlignedTextProps = ComponentProps<typeof View> & {
   left;

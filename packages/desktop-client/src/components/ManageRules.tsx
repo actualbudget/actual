@@ -25,7 +25,7 @@ import { ExternalLink } from './common/ExternalLink';
 import { Search } from './common/Search';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
-import View from './common/View';
+import { View } from './common/View';
 import RulesHeader from './rules/RulesHeader';
 import RulesList from './rules/RulesList';
 import { SchedulesQuery } from './rules/SchedulesQuery';

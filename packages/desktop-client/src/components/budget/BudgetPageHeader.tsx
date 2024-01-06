@@ -2,7 +2,7 @@ import React, { type ComponentProps, memo } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { MonthPicker } from './MonthPicker';
 import { getScrollbarWidth } from './util';

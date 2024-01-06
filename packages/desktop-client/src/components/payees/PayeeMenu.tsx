@@ -4,7 +4,7 @@ import Delete from '../../icons/v0/Delete';
 import Merge from '../../icons/v0/Merge';
 import { theme } from '../../style';
 import { Menu } from '../common/Menu';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
 type PayeeMenuProps = {

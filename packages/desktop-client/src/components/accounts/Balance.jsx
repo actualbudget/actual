@@ -9,7 +9,7 @@ import ArrowButtonRight1 from '../../icons/v2/ArrowButtonRight1';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Text } from '../common/Text';
-import View from '../common/View';
+import { View } from '../common/View';
 import { PrivacyFilter } from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
 import useFormat from '../spreadsheet/useFormat';

@@ -21,7 +21,7 @@ import { LinkButton } from '../common/LinkButton';
 import { Menu } from '../common/Menu';
 import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
-import View from '../common/View';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { Tooltip } from '../tooltips';
 
