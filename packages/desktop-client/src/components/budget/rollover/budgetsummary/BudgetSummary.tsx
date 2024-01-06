@@ -12,7 +12,7 @@ import { Button } from '../../../common/Button';
 import { Menu } from '../../../common/Menu';
 import { View } from '../../../common/View';
 import { NotesButton } from '../../../NotesButton';
-import NamespaceContext from '../../../spreadsheet/NamespaceContext';
+import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../../tooltips';
 import { useRollover } from '../RolloverContext';
 

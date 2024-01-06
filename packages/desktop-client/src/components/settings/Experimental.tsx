@@ -75,7 +75,7 @@ function ReportBudgetFeature() {
   );
 }
 
-export default function ExperimentalFeatures() {
+export function ExperimentalFeatures() {
   const [expanded, setExpanded] = useState(false);
 
   return (

@@ -7,7 +7,7 @@ import { type CommonModalProps } from '../../types/modals';
 import { ToBudget } from '../budget/rollover/budgetsummary/ToBudget';
 import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
 import { Modal } from '../common/Modal';
-import NamespaceContext from '../spreadsheet/NamespaceContext';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type RolloverBudgetSummaryProps = {
   modalProps: CommonModalProps;

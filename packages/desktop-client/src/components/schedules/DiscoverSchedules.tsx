@@ -21,7 +21,7 @@ import { Paragraph } from '../common/Paragraph';
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
-import DisplayId from '../util/DisplayId';
+import { DisplayId } from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';
 

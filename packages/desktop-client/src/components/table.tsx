@@ -40,8 +40,8 @@ import {
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 import { type Binding } from './spreadsheet';
-import useFormat from './spreadsheet/useFormat';
-import useSheetValue from './spreadsheet/useSheetValue';
+import { useFormat } from './spreadsheet/useFormat';
+import { useSheetValue } from './spreadsheet/useSheetValue';
 import { Tooltip, IntersectionBoundary } from './tooltips';
 
 export const ROW_HEIGHT = 32;

@@ -26,10 +26,10 @@ import { Search } from './common/Search';
 import { Stack } from './common/Stack';
 import { Text } from './common/Text';
 import { View } from './common/View';
-import RulesHeader from './rules/RulesHeader';
-import RulesList from './rules/RulesList';
+import { RulesHeader } from './rules/RulesHeader';
+import { RulesList } from './rules/RulesList';
 import { SchedulesQuery } from './rules/SchedulesQuery';
-import SimpleTable from './rules/SimpleTable';
+import { SimpleTable } from './rules/SimpleTable';
 
 function mapValue(field, value, { payees, categories, accounts }) {
   if (!value) return '';

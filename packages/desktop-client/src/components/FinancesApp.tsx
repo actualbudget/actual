@@ -37,8 +37,8 @@ import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { ScrollProvider } from './ScrollProvider';
-import Settings from './settings';
-import FloatableSidebar, { SidebarProvider } from './sidebar';
+import { Settings } from './settings';
+import { FloatableSidebar, SidebarProvider } from './sidebar';
 import { Titlebar, TitlebarProvider } from './Titlebar';
 import { TransactionEdit } from './transactions/MobileTransaction';
 

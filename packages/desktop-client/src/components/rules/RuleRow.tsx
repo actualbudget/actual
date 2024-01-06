@@ -12,8 +12,8 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { SelectCell, Row, Field, Cell, CellButton } from '../table';
 
-import ActionExpression from './ActionExpression';
-import ConditionExpression from './ConditionExpression';
+import { ActionExpression } from './ActionExpression';
+import { ConditionExpression } from './ConditionExpression';
 
 type RuleRowProps = {
   rule: RuleEntity;
@@ -23,7 +23,7 @@ type RuleRowProps = {
   onEditRule?: (rule: RuleEntity) => void;
 };
 
-const RuleRow = memo(
+export const RuleRow = memo(
   ({ rule, hovered, selected, onHover, onEditRule }: RuleRowProps) => {
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
@@ -123,5 +123,3 @@ const RuleRow = memo(
     );
   },
 );
-
-export default RuleRow;
