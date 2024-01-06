@@ -48,3 +48,7 @@ export function popModal(): PopModalAction {
 export function closeModal(): CloseModalAction {
   return { type: constants.CLOSE_MODAL };
 }
+
+export function collapseModals(rootModalName: string) {
+  return { type: constants.COLLAPSE_MODALS, rootModalName };
+}

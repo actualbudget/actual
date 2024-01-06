@@ -83,6 +83,8 @@ test.describe('Mobile', () => {
     await expect(transactionEntryPage.header).toHaveText('New Transaction');
 
     await transactionEntryPage.amountField.fill('12.34');
+    // Click anywhere to cancel active edit.
+    await transactionEntryPage.header.click();
     await transactionEntryPage.fillField(
       page.getByTestId('payee-field'),
       'Kroger',
@@ -114,6 +116,8 @@ test.describe('Mobile', () => {
     await expect(page).toMatchThemeScreenshots();
 
     await transactionEntryPage.amountField.fill('12.34');
+    // Click anywhere to cancel active edit.
+    await transactionEntryPage.header.click();
     await transactionEntryPage.fillField(
       page.getByTestId('payee-field'),
       'Kroger',

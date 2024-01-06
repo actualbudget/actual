@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 
 import Text from './Text';
 import View from './View';
@@ -31,6 +31,7 @@ type MenuItem = {
   iconSize?: number;
   text: string;
   key?: string;
+  style?: CSSProperties;
 };
 
 type MenuProps<T extends MenuItem = MenuItem> = {
@@ -38,6 +39,7 @@ type MenuProps<T extends MenuItem = MenuItem> = {
   footer?: ReactNode;
   items: Array<T | typeof Menu.line>;
   onMenuSelect: (itemName: T['name']) => void;
+  style?: CSSProperties;
 };
 
 export default function Menu<T extends MenuItem>({
@@ -45,6 +47,7 @@ export default function Menu<T extends MenuItem>({
   footer,
   items: allItems,
   onMenuSelect,
+  style,
 }: MenuProps<T>) {
   const elRef = useRef(null);
   const items = allItems.filter(x => x);
@@ -101,7 +104,7 @@ export default function Menu<T extends MenuItem>({
 
   return (
     <View
-      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden' }}
+      style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
       tabIndex={1}
       innerRef={elRef}
     >
@@ -155,6 +158,7 @@ export default function Menu<T extends MenuItem>({
                   backgroundColor: theme.menuItemBackgroundHover,
                   color: theme.menuItemTextHover,
                 }),
+              ...item.style,
             }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
@@ -168,7 +172,10 @@ export default function Menu<T extends MenuItem>({
                 createElement(item.icon, {
                   width: item.iconSize || 10,
                   height: item.iconSize || 10,
-                  style: { marginRight: 7, width: 10 },
+                  style: {
+                    marginRight: 7,
+                    width: item.iconSize || 10,
+                  },
                 })}
             </Text>
             <Text>{item.text}</Text>
