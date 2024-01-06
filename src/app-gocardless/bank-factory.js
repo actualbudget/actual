@@ -1,4 +1,5 @@
 import AmericanExpressAesudef1 from './banks/american-express-aesudef1.js';
+import IngIngddeff from './banks/ing-ingddeff.js';
 import IngPlIngbplpw from './banks/ing-pl-ingbplpw.js';
 import IntegrationBank from './banks/integration-bank.js';
 import MbankRetailBrexplpw from './banks/mbank-retail-brexplpw.js';
@@ -11,6 +12,7 @@ import Belfius from './banks/belfius_gkccbebb.js';
 
 const banks = [
   AmericanExpressAesudef1,
+  IngIngddeff,
   IngPlIngbplpw,
   MbankRetailBrexplpw,
   SandboxfinanceSfin0000,
