@@ -10,7 +10,7 @@ import { theme } from '../../style';
 import Button from '../common/Button';
 import Text from '../common/Text';
 import View from '../common/View';
-import PrivacyFilter from '../PrivacyFilter';
+import { PrivacyFilter } from '../PrivacyFilter';
 import CellValue from '../spreadsheet/CellValue';
 import useFormat from '../spreadsheet/useFormat';
 import useSheetValue from '../spreadsheet/useSheetValue';

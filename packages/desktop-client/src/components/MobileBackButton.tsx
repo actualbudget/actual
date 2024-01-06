@@ -11,7 +11,7 @@ type MobileBackButtonProps = {
   style?: CSSProperties;
 };
 
-export default function MobileBackButton({ style }: MobileBackButtonProps) {
+export function MobileBackButton({ style }: MobileBackButtonProps) {
   const navigate = useNavigate();
   return (
     <Button

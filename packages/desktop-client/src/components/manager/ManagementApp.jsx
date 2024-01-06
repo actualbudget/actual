@@ -4,12 +4,12 @@ import { Navigate, BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
-import tokens from '../../tokens';
+import { tokens } from '../../tokens';
 import { ExposeNavigate } from '../../util/router-tools';
 import Text from '../common/Text';
 import View from '../common/View';
-import LoggedInUser from '../LoggedInUser';
-import Notifications from '../Notifications';
+import { LoggedInUser } from '../LoggedInUser';
+import { Notifications } from '../Notifications';
 import { useServerVersion } from '../ServerContext';
 
 import BudgetList from './BudgetList';

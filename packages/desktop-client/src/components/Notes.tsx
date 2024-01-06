@@ -85,7 +85,7 @@ type NotesProps = {
   getStyle?: (editable: boolean) => CSSProperties;
 };
 
-export default function Notes({
+export function Notes({
   notes,
   editable,
   focused,

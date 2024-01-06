@@ -235,7 +235,7 @@ function Notification({
   );
 }
 
-export default function Notifications({ style }: { style?: CSSProperties }) {
+export function Notifications({ style }: { style?: CSSProperties }) {
   const { removeNotification } = useActions();
   const notifications = useSelector(state => state.notifications.notifications);
   return (

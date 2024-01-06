@@ -8,7 +8,7 @@ import ArrowsShrink3 from '../../icons/v2/ArrowsShrink3';
 import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
 import Pencil1 from '../../icons/v2/Pencil1';
 import { theme, styles } from '../../style';
-import AnimatedRefresh from '../AnimatedRefresh';
+import { AnimatedRefresh } from '../AnimatedRefresh';
 import Button from '../common/Button';
 import InitialFocus from '../common/InitialFocus';
 import Input from '../common/Input';
@@ -21,7 +21,7 @@ import View from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/SavedFilters';
 import { KeyHandlers } from '../KeyHandlers';
-import NotesButton from '../NotesButton';
+import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
 import { useSplitsExpanded } from '../transactions/TransactionsTable';
 

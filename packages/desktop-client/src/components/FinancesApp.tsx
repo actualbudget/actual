@@ -25,21 +25,21 @@ import { theme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
-import BankSyncStatus from './BankSyncStatus';
+import { BankSyncStatus } from './BankSyncStatus';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
 import View from './common/View';
-import GlobalKeys from './GlobalKeys';
+import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import MobileNavTabs from './mobile/MobileNavTabs';
-import Modals from './Modals';
-import Notifications from './Notifications';
+import { Modals } from './Modals';
+import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import Reports from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
-import ScrollProvider from './ScrollProvider';
+import { ScrollProvider } from './ScrollProvider';
 import Settings from './settings';
 import FloatableSidebar, { SidebarProvider } from './sidebar';
-import Titlebar, { TitlebarProvider } from './Titlebar';
+import { Titlebar, TitlebarProvider } from './Titlebar';
 import { TransactionEdit } from './transactions/MobileTransaction';
 
 function NarrowNotSupported({
@@ -92,7 +92,7 @@ function RouterBehaviors({ getAccounts }) {
   return null;
 }
 
-function FinancesApp() {
+function FinancesAppWithoutContext() {
   const actions = useActions();
   useEffect(() => {
     // The default key handler scope
@@ -256,8 +256,8 @@ function FinancesApp() {
   );
 }
 
-export default function FinancesAppWithContext() {
-  const app = useMemo(() => <FinancesApp />, []);
+export function FinancesApp() {
+  const app = useMemo(() => <FinancesAppWithoutContext />, []);
 
   return (
     <SpreadsheetProvider>

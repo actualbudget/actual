@@ -11,7 +11,7 @@ import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
-import tokens from '../../tokens';
+import { tokens } from '../../tokens';
 import Button from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
 import Input from '../common/Input';

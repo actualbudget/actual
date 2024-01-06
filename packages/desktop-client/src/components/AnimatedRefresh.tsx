@@ -19,7 +19,7 @@ type AnimatedRefreshProps = {
   height?: number;
 };
 
-export default function AnimatedRefresh({
+export function AnimatedRefresh({
   animating,
   iconStyle,
   width,

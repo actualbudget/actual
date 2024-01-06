@@ -12,7 +12,7 @@ import hotkeys from 'hotkeys-js';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import Delete from '../../icons/v0/Delete';
 import { type CSSProperties, styles, theme } from '../../style';
-import tokens from '../../tokens';
+import { tokens } from '../../tokens';
 
 import Button from './Button';
 import Input from './Input';

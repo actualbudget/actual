@@ -18,7 +18,7 @@ import Block from '../../common/Block';
 import Text from '../../common/Text';
 import View from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
-import PrivacyFilter from '../../PrivacyFilter';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import ChooseGraph from '../ChooseGraph';
 import Header from '../Header';
 import LoadingIndicator from '../LoadingIndicator';

@@ -5,7 +5,7 @@ import { css } from 'glamor';
 import AnimatedLoading from '../icons/AnimatedLoading';
 import { theme } from '../style';
 
-import Background from './Background';
+import { Background } from './Background';
 import Block from './common/Block';
 import View from './common/View';
 
@@ -14,7 +14,10 @@ type AppBackgroundProps = {
   loadingText?: string;
 };
 
-function AppBackground({ initializing, loadingText }: AppBackgroundProps) {
+export function AppBackground({
+  initializing,
+  loadingText,
+}: AppBackgroundProps) {
   return (
     <>
       <Background />
@@ -41,5 +44,3 @@ function AppBackground({ initializing, loadingText }: AppBackgroundProps) {
     </>
   );
 }
-
-export default AppBackground;
