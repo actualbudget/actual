@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import q from 'loot-core/src/shared/query';
+import { q } from 'loot-core/src/shared/query';
 
 import { SvgCheck } from '../../icons/v2';
 import { type CommonModalProps } from '../../types/modals';

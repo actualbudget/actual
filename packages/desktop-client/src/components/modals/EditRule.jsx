@@ -6,9 +6,10 @@ import {
   setUndoEnabled,
 } from 'loot-core/src/client/actions/queries';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import {
   mapField,
   friendlyOp,

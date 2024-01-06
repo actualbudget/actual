@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
-import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';

@@ -8,11 +8,11 @@ import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import * as asyncStorage from '../platform/server/asyncStorage';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
-import logger from '../platform/server/log';
+import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { isNonProductionEnvironment } from '../shared/environment';
 import * as monthUtils from '../shared/months';
-import q, { Query } from '../shared/query';
+import { q, Query } from '../shared/query';
 import { amountToInteger, stringToInteger } from '../shared/util';
 import { Handlers } from '../types/handlers';
 

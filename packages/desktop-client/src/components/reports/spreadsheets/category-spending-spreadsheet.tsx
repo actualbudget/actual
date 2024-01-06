@@ -3,8 +3,9 @@ import React from 'react';
 import * as d from 'date-fns';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import { integerToAmount, integerToCurrency } from 'loot-core/src/shared/util';
 
 import { AlignedText } from '../../common/AlignedText';

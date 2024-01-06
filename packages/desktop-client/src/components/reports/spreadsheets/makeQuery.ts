@@ -1,4 +1,4 @@
-import q from 'loot-core/src/client/query-helpers';
+import { q } from 'loot-core/src/shared/query';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
 export function makeQuery(

@@ -1,5 +1,6 @@
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { q } from 'loot-core/src/shared/query';
 import { integerToAmount } from 'loot-core/src/shared/util';
 
 export function createSpreadsheet(

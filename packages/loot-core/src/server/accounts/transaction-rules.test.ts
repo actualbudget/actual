@@ -1,4 +1,4 @@
-import q from '../../shared/query';
+import { q } from '../../shared/query';
 import { runQuery } from '../aql';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';

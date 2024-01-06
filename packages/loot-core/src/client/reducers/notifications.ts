@@ -6,7 +6,7 @@ const initialState = {
   notifications: [],
 };
 
-export default function update(
+export function update(
   state = initialState,
   action: Action,
 ): NotificationsState {

@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';

@@ -7,7 +7,7 @@ import {
   getShortYearRegex,
   getShortYearFormat,
 } from '../shared/months';
-import q from '../shared/query';
+import { q } from '../shared/query';
 import { currencyToAmount, amountToInteger } from '../shared/util';
 
 export function getAccountFilter(accountId, field = 'account') {

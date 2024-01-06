@@ -12,9 +12,10 @@ import {
   useCachedSchedules,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
-import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   deleteTransaction,
@@ -864,7 +865,12 @@ class AccountInternal extends PureComponent {
       }
     };
 
-    if (name === 'amount' || name === 'payee' || name === 'account' || name === 'date') {
+    if (
+      name === 'amount' ||
+      name === 'payee' ||
+      name === 'account' ||
+      name === 'date'
+    ) {
       const { data } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids }, reconciled: true })

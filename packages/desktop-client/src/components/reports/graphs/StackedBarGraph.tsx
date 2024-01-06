@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import usePrivacyMode from 'loot-core/src/client/privacy';
+import { usePrivacyMode } from 'loot-core/src/client/privacy';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';

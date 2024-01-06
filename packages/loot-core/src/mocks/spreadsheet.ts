@@ -1,4 +1,4 @@
-function makeSpreadsheet() {
+export function makeSpreadsheet() {
   const cells = {};
   return {
     observers: [],
@@ -98,5 +98,3 @@ function makeSpreadsheet() {
     },
   };
 }
-
-export default makeSpreadsheet;
