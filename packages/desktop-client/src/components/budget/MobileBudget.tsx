@@ -78,10 +78,6 @@ function BudgetInner(props: BudgetInnerProps) {
   const [editingBudgetCategoryId, setEditingBudgetCategoryId] = useState(null);
   const [openBalanceActionMenuId, setOpenBalanceActionMenuId] = useState(null);
 
-  const loadCategories = async () => {
-    await props.getCategories();
-  };
-
   useEffect(() => {
     async function init() {
       const { start, end } = await send('get-budget-bounds');
@@ -102,7 +98,7 @@ function BudgetInner(props: BudgetInnerProps) {
           tables.includes('category_groups'))
       ) {
         // TODO: is this loading every time?
-        loadCategories();
+        props.getCategories();
       }
     });
 
