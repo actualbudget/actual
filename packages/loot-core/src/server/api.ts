@@ -602,7 +602,7 @@ handlers['api/payee-delete'] = withMutation(async function ({ id }) {
   return handlers['payees-batch-change']({ deleted: [{ id }] });
 });
 
-export default function installAPI(serverHandlers: ServerHandlers) {
+export function installAPI(serverHandlers: ServerHandlers) {
   const merged = Object.assign({}, serverHandlers, handlers);
   handlers = merged as Handlers;
   return merged;
