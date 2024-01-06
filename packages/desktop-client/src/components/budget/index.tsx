@@ -31,9 +31,9 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { type GlobalPrefs, type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { type BoundActions, useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
-import useNavigate from '../../hooks/useNavigate';
+import { useCategories } from '../../hooks/useCategories';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useNavigate } from '../../hooks/useNavigate';
 import { styles } from '../../style';
 import { View } from '../common/View';
 import {

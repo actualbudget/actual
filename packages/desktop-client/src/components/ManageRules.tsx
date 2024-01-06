@@ -16,8 +16,8 @@ import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type RuleEntity } from 'loot-core/src/types/models';
 
-import useCategories from '../hooks/useCategories';
-import useSelected, { SelectedProvider } from '../hooks/useSelected';
+import { useCategories } from '../hooks/useCategories';
+import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
 import { Button } from './common/Button';

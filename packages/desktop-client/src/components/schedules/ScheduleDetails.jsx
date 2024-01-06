@@ -8,7 +8,7 @@ import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
-import useSelected, { SelectedProvider } from '../../hooks/useSelected';
+import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';

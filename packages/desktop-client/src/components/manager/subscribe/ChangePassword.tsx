@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import useNavigate from '../../../hooks/useNavigate';
+import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { Text } from '../../common/Text';

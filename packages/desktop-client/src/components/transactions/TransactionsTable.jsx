@@ -43,7 +43,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
-import usePrevious from '../../hooks/usePrevious';
+import { usePrevious } from '../../hooks/usePrevious';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import LeftArrow2 from '../../icons/v0/LeftArrow2';
 import RightArrow2 from '../../icons/v0/RightArrow2';

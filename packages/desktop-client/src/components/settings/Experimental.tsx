@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { theme } from '../../style';
 import { LinkButton } from '../common/LinkButton';
 import { Text } from '../common/Text';

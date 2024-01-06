@@ -1,7 +1,7 @@
 import React, { type ComponentProps } from 'react';
 import { useMatch } from 'react-router-dom';
 
-import useNavigate from '../../hooks/useNavigate';
+import { useNavigate } from '../../hooks/useNavigate';
 import { type CSSProperties } from '../../style';
 
 import { Button } from './Button';

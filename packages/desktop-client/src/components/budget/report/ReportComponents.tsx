@@ -4,7 +4,7 @@ import { reportBudget } from 'loot-core/src/client/queries';
 import evalArithmetic from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import useFeatureFlag from '../../../hooks/useFeatureFlag';
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import CheveronDown from '../../../icons/v1/CheveronDown';
 import { styles, theme, type CSSProperties } from '../../../style';
 import { Button } from '../../common/Button';

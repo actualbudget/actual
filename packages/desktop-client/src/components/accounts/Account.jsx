@@ -26,7 +26,7 @@ import {
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
 import { authorizeBank } from '../../gocardless';
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';

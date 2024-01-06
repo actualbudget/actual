@@ -10,7 +10,7 @@ import {
 
 import memoizeOne from 'memoize-one';
 
-import useResizeObserver from '../hooks/useResizeObserver';
+import { useResizeObserver } from '../hooks/useResizeObserver';
 import { type CSSProperties } from '../style';
 
 import { View } from './common/View';

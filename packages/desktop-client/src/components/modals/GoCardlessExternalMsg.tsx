@@ -8,7 +8,7 @@ import {
   type GoCardlessToken,
 } from 'loot-core/src/types/models';
 
-import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
+import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import AnimatedLoading from '../../icons/AnimatedLoading';
 import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
 import { theme } from '../../style';
