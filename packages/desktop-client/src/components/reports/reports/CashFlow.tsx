@@ -10,7 +10,7 @@ import useFilters from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { Block } from '../../common/Block';
-import Paragraph from '../../common/Paragraph';
+import { Paragraph } from '../../common/Paragraph';
 import Text from '../../common/Text';
 import View from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';

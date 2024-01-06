@@ -6,8 +6,8 @@ import { importBudget } from 'loot-core/src/client/actions/budgets';
 import { styles, theme } from '../../style';
 import { Block } from '../common/Block';
 import { ButtonWithLoading } from '../common/Button';
-import Modal, { type ModalProps } from '../common/Modal';
-import Paragraph from '../common/Paragraph';
+import { Modal, type ModalProps } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
 import View from '../common/View';
 
 function getErrorMessage(error: string): string {

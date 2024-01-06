@@ -6,7 +6,7 @@ import { Button } from '../common/Button';
 import { FormError } from '../common/FormError';
 import { InitialFocus } from '../common/InitialFocus';
 import { Input } from '../common/Input';
-import Modal from '../common/Modal';
+import { Modal } from '../common/Modal';
 import View from '../common/View';
 
 type SingleInputProps = {

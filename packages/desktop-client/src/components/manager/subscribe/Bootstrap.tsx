@@ -8,7 +8,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { theme } from '../../../style';
 import { Button } from '../../common/Button';
 import { ExternalLink } from '../../common/ExternalLink';
-import Paragraph from '../../common/Paragraph';
+import { Paragraph } from '../../common/Paragraph';
 import Text from '../../common/Text';
 import View from '../../common/View';
 
