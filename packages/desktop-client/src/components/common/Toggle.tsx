@@ -2,7 +2,7 @@ import React from 'react';
 
 import { css } from 'glamor';
 
-import { type CSSProperties } from '../../style';
+import { theme, type CSSProperties } from '../../style';
 
 type ToggleProps = {
   id: string;
@@ -41,7 +41,7 @@ export const Toggle = ({
           cursor: 'pointer',
           width: '32px',
           height: '16px',
-          background: 'grey',
+          background: theme.checkboxToggleBackground,
           borderRadius: '100px',
           position: 'relative',
           transition: 'background-color .2s',
