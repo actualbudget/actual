@@ -64,6 +64,7 @@ const injectShims = (): Plugin[] => {
 };
 
 // https://vitejs.dev/config/
+// eslint-disable-next-line import/no-default-export
 export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const devHeaders = {
