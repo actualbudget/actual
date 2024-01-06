@@ -6,7 +6,7 @@ import { savePrefs } from 'loot-core/src/client/actions';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles } from '../style';
 
-import Button from './common/Button';
+import { Button } from './common/Button';
 import Text from './common/Text';
 import View from './common/View';
 import { Checkbox } from './forms';

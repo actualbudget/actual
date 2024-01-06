@@ -28,7 +28,7 @@ import { theme, type CSSProperties, styles } from '../style';
 import AccountSyncCheck from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
-import Button, { ButtonWithLoading } from './common/Button';
+import { Button, ButtonWithLoading } from './common/Button';
 import ExternalLink from './common/ExternalLink';
 import Link from './common/Link';
 import Paragraph from './common/Paragraph';

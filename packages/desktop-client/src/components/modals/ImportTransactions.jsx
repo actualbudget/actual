@@ -13,7 +13,7 @@ import {
 import { useActions } from '../../hooks/useActions';
 import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { theme, styles } from '../../style';
-import Button, { ButtonWithLoading } from '../common/Button';
+import { Button, ButtonWithLoading } from '../common/Button';
 import Input from '../common/Input';
 import Modal from '../common/Modal';
 import Select from '../common/Select';

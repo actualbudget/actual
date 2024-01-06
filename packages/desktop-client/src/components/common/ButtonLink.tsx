@@ -4,7 +4,7 @@ import { useMatch } from 'react-router-dom';
 import useNavigate from '../../hooks/useNavigate';
 import { type CSSProperties } from '../../style';
 
-import Button from './Button';
+import { Button } from './Button';
 
 type ButtonLinkProps = ComponentProps<typeof Button> & {
   to: string;

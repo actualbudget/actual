@@ -28,7 +28,7 @@ import ExpandArrow from '../icons/v0/ExpandArrow';
 import Checkmark from '../icons/v1/Checkmark';
 import { type CSSProperties, styles, theme } from '../style';
 
-import Button from './common/Button';
+import { Button } from './common/Button';
 import Input from './common/Input';
 import Menu from './common/Menu';
 import Text from './common/Text';

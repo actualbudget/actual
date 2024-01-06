@@ -6,7 +6,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../style';
 import { Information } from '../alerts';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import Modal, { ModalButtons } from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';

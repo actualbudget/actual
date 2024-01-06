@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import View from '../common/View';
 
 import RenderMonths from './RenderMonths';

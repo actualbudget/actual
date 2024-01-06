@@ -6,7 +6,7 @@ import { loggedIn } from 'loot-core/src/client/actions/user';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../../style';
-import Button, { ButtonWithLoading } from '../../common/Button';
+import { Button, ButtonWithLoading } from '../../common/Button';
 import { BigInput } from '../../common/Input';
 import Text from '../../common/Text';
 import View from '../../common/View';

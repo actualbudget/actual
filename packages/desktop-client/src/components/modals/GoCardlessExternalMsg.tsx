@@ -15,7 +15,7 @@ import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { Error, Warning } from '../alerts';
 import Autocomplete from '../autocomplete/Autocomplete';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 import ExternalLink from '../common/ExternalLink';
 import LinkButton from '../common/LinkButton';
 import Menu from '../common/Menu';
