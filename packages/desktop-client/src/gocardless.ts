@@ -46,6 +46,7 @@ export async function authorizeBank(
         accounts: data.accounts,
         requisitionId: data.id,
         upgradingAccountId,
+        syncSource: "goCardless",
       });
     },
   });

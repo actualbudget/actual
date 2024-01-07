@@ -109,7 +109,7 @@ export default function GoCardlessExternalMsg({
     isLoading: isBankOptionsLoading,
     isError: isBankOptionError,
   } = useAvailableBanks(country);
-  const { configured: isConfigured, isLoading: isConfigurationLoading } =
+  const { configuredGoCardless: isConfigured, isLoading: isConfigurationLoading } =
     useGoCardlessStatus();
 
   async function onJump() {

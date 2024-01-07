@@ -5,7 +5,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import useSyncServerStatus from './useSyncServerStatus';
 
 export default function useSimpleFinStatus() {
-  const [configured, setConfigured] = useState<boolean | null>(null);
+  const [configuredSimpleFin, setConfiguredSimpleFin] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 
@@ -15,8 +15,7 @@ export default function useSimpleFinStatus() {
 
       const results = await send('simplefin-status');
 
-      //setConfigured(results.configured || false);
-      setConfigured(true);
+      setConfiguredSimpleFin(results.configured || false);
       setIsLoading(false);
     }
 
@@ -26,7 +25,7 @@ export default function useSimpleFinStatus() {
   }, [status]);
 
   return {
-    configured,
+    configuredSimpleFin,
     isLoading,
   };
 }

@@ -160,6 +160,11 @@ export interface ServerHandlers {
     upgradingId;
   }) => Promise<'ok'>;
 
+  'simplefin-accounts-link': (arg: {
+    externalAccount;
+    upgradingId;
+  }) => Promise<'ok'>;
+
   'accounts-connect': (arg: {
     institution;
     publicToken;
@@ -214,6 +219,10 @@ export interface ServerHandlers {
   >;
 
   'gocardless-status': () => Promise<{ configured: boolean }>;
+
+  'simplefin-status': () => Promise<{ configured: boolean }>;
+
+  'simplefin-accounts': () => Promise<{ configured: boolean }>;
 
   'gocardless-get-banks': (country: string) => Promise<{
     data: GoCardlessInstitution[];

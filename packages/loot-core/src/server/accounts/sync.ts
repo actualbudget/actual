@@ -215,6 +215,41 @@ async function downloadGoCardlessTransactions(
   };
 }
 
+async function downloadSimpleFinTransactions(
+  acctId,
+  since,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  const res = await post(
+    getServer().SIMPLEFIN_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  }
+
+  const {
+    transactions: { all },
+    balances,
+    startingBalance,
+  } = res;
+
+  return {
+    transactions: all,
+    accountBalance: balances,
+    startingBalance,
+  };
+}
+
 async function resolvePayee(trans, payeeName, payeesToCreate) {
   if (trans.payee == null && payeeName) {
     // First check our registry of new payees (to avoid a db access)
@@ -773,6 +808,8 @@ export async function addTransactions(
   return newTransactions;
 }
 
+// TODO: This needs to be renamed to something more generic as it includes SimpleFin now.
+
 export async function syncGoCardlessAccount(
   userId,
   userKey,
@@ -809,14 +846,24 @@ export async function syncGoCardlessAccount(
       ]),
     );
 
-    const { transactions: originalTransactions, accountBalance } =
-      await downloadGoCardlessTransactions(
+    let download;
+
+    if (acctRow.account_sync_source === "simplefin") {
+      download = await downloadSimpleFinTransactions(
+        acctId,
+        startDate,
+      );
+    } else if (acctRow.account_sync_source === "gocardless" || acctRow.account_sync_source === null) {
+      download = await downloadGoCardlessTransactions(
         userId,
         userKey,
         acctId,
         bankId,
         startDate,
       );
+    }
+
+    const { transactions: originalTransactions, accountBalance } = download;
 
     if (originalTransactions.length === 0) {
       return { added: [], updated: [] };
@@ -836,20 +883,34 @@ export async function syncGoCardlessAccount(
     // Otherwise, download transaction for the past 90 days
     const startingDay = monthUtils.subDays(monthUtils.currentDay(), 90);
 
-    const { transactions, startingBalance } =
-      await downloadGoCardlessTransactions(
+    let download;
+
+    if (acctRow.account_sync_source === "simplefin") {
+      download = await downloadSimpleFinTransactions(
+        acctId,
+        startingDay,
+      );
+    } else if (acctRow.account_sync_source === "gocardless" || acctRow.account_sync_source === null) {
+      download = await downloadGoCardlessTransactions(
         userId,
         userKey,
         acctId,
         bankId,
         startingDay,
       );
+    }
 
-    // We need to add a transaction that represents the starting
-    // balance for everything to balance out. In order to get balance
-    // before the first imported transaction, we need to get the
-    // current balance from the accounts table and subtract all the
-    // imported transactions.
+    const { transactions, startingBalance } = download;
+
+    let balanceToUse = startingBalance;
+
+    if (acctRow.account_sync_source === "simplefin") {
+      const currentBalance = startingBalance;
+      const previousBalance = transactions.reduce((total, trans) => {
+        return total - parseInt(trans.transactionAmount.amount.replace('.', ''));
+      }, currentBalance);
+      balanceToUse = previousBalance;
+    }
 
     const oldestTransaction = transactions[transactions.length - 1];
 
@@ -863,7 +924,7 @@ export async function syncGoCardlessAccount(
     return runMutator(async () => {
       const initialId = await db.insertTransaction({
         account: id,
-        amount: startingBalance,
+        amount: balanceToUse,
         category: acctRow.offbudget === 0 ? payee.category : null,
         payee: payee.id,
         date: oldestDate,

@@ -109,6 +109,7 @@ export default function Modals() {
               requisitionId={options.requisitionId}
               localAccounts={accounts.filter(acct => acct.closed === 0)}
               actions={actions}
+              syncSource={options.syncSource}
             />
           );
 

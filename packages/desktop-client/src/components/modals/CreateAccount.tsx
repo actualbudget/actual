@@ -13,6 +13,7 @@ import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
+import { send } from 'loot-core/src/platform/client/fetch';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
@@ -38,13 +39,33 @@ export default function CreateAccount({
     authorizeBank(actions.pushModal);
   };
 
-  const onConnectSimpleFin = () => {
+  const onConnectSimpleFin = async () => {
     if (!isSimpleFinSetupComplete) {
       onSimpleFinInit();
       return;
     }
 
-    authorizeBank(actions.pushModal);
+    const results = await send('simplefin-accounts');
+
+    let newAccounts = [];
+
+    for (let i = 0; i < results.accounts.accounts.length; i++) {
+      let oldAccount = results.accounts.accounts[i];
+      
+      let newAccount = {};
+      newAccount.account_id = oldAccount.id;
+      newAccount.name = oldAccount.name;
+      newAccount.type = "checking";
+      newAccount.institution = {name: oldAccount.org.name};
+      newAccount.orgDomain = oldAccount.org.domain;
+
+      newAccounts.push(newAccount);
+    }
+
+    actions.pushModal('select-linked-accounts', {
+      accounts: newAccounts,
+      syncSource: "simpleFin",
+    });
   };
 
   const onGoCardlessInit = () => {

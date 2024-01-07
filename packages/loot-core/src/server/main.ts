@@ -702,6 +702,58 @@ handlers['gocardless-accounts-link'] = async function ({
   return 'ok';
 };
 
+handlers['simplefin-accounts-link'] = async function ({
+  externalAccount,
+  upgradingId,
+}) {
+  let id;
+
+  const bank = await link.findOrCreateBank(externalAccount.institution, externalAccount.orgDomain);
+
+  if (upgradingId) {
+    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
+      upgradingId,
+    ]);
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: "simplefin",
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      mask: "1234", //TODO: Do we have this?
+      name: externalAccount.name,
+      official_name: externalAccount.name, //TODO: Do we have this?
+      bank: bank.id,
+      account_sync_source: "simplefin",
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncGoCardlessAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+  );
+
+  await connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+};
+
 handlers['accounts-connect'] = async function ({
   institution,
   publicToken,
@@ -1110,6 +1162,38 @@ handlers['gocardless-status'] = async function () {
 
   return post(
     getServer().GOCARDLESS_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+};
+
+handlers['simplefin-status'] = async function () {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  return post(
+    getServer().SIMPLEFIN_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+};
+
+handlers['simplefin-accounts'] = async function () {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  return post(
+    getServer().SIMPLEFIN_SERVER + '/accounts',
     {},
     {
       'X-ACTUAL-TOKEN': userToken,

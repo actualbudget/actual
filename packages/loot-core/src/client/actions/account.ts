@@ -75,6 +75,19 @@ export function linkAccount(requisitionId, account, upgradingId) {
   };
 }
 
+// TODO: Need to impliment an unlink for simplefin.
+
+export function linkAccountSimpleFin(externalAccount, upgradingId) {
+  return async (dispatch: Dispatch) => {
+    await send('simplefin-accounts-link', {
+      externalAccount,
+      upgradingId,
+    });
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
+  };
+}
+
 // TODO: type correctly or remove (unused)
 export function connectAccounts(
   institution,
