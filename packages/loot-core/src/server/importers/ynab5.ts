@@ -136,8 +136,12 @@ async function importTransactions(
   const startingBalanceCatId = categories.find(
     cat => cat.name === 'Starting Balances',
   ).id; //better way to do it?
+
   const startingPayeeYNAB = data.payees.find(
-    payee => payee.name === 'Starting Balance',
+    payee =>
+      payee.name.localeCompare('Starting Balance', undefined, {
+        sensitivity: 'base',
+      }) === 0,
   ).id;
 
   const transactionsGrouped = groupBy(data.transactions, 'account_id');
