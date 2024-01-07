@@ -3,8 +3,8 @@ import React from 'react';
 import { theme } from '../../style';
 import { Row } from '../table';
 
-import RenderMonths from './RenderMonths';
-import SidebarGroup from './SidebarGroup';
+import { RenderMonths } from './RenderMonths';
+import { SidebarGroup } from './SidebarGroup';
 
 type IncomeGroupProps = {
   group: {
@@ -25,7 +25,7 @@ type IncomeGroupProps = {
   onShowNewCategory: (groupId: string) => void;
 };
 
-function IncomeGroup({
+export function IncomeGroup({
   group,
   editingCell,
   collapsed,
@@ -60,5 +60,3 @@ function IncomeGroup({
     </Row>
   );
 }
-
-export default IncomeGroup;

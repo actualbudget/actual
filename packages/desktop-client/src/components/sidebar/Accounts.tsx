@@ -2,13 +2,13 @@ import React, { useState, useMemo } from 'react';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
-import Add from '../../icons/v1/Add';
-import View from '../common/View';
+import { SvgAdd } from '../../icons/v1';
+import { View } from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
 
-import Account from './Account';
-import SecondaryItem from './SecondaryItem';
+import { Account } from './Account';
+import { SecondaryItem } from './SecondaryItem';
 
 const fontWeight = 600;
 
@@ -36,7 +36,7 @@ type AccountsProps = {
   onReorder: OnDropCallback;
 };
 
-function Accounts({
+export function Accounts({
   accounts,
   failedAccounts,
   updatedAccounts,
@@ -174,11 +174,9 @@ function Accounts({
           marginBottom: 9,
         }}
         onClick={onAddAccount}
-        Icon={Add}
+        Icon={SvgAdd}
         title="Add account"
       />
     </View>
   );
 }
-
-export default Accounts;

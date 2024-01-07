@@ -1,17 +1,18 @@
 import React, { useRef } from 'react';
 
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { type DataEntity, type Month } from './entities';
-import AreaGraph from './graphs/AreaGraph';
-import BarGraph from './graphs/BarGraph';
-import BarLineGraph from './graphs/BarLineGraph';
-import DonutGraph from './graphs/DonutGraph';
-import LineGraph from './graphs/LineGraph';
-import StackedBarGraph from './graphs/StackedBarGraph';
-import ReportTable from './graphs/tableGraph/ReportTable';
-import ReportTableHeader from './graphs/tableGraph/ReportTableHeader';
-import ReportTableTotals from './graphs/tableGraph/ReportTableTotals';
+import { AreaGraph } from './graphs/AreaGraph';
+import { BarGraph } from './graphs/BarGraph';
+import { BarLineGraph } from './graphs/BarLineGraph';
+import { DonutGraph } from './graphs/DonutGraph';
+import { LineGraph } from './graphs/LineGraph';
+import { StackedBarGraph } from './graphs/StackedBarGraph';
+import { ReportTable } from './graphs/tableGraph/ReportTable';
+import { ReportTableHeader } from './graphs/tableGraph/ReportTableHeader';
+import { ReportTableList } from './graphs/tableGraph/ReportTableList';
+import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
@@ -26,7 +27,7 @@ type ChooseGraphProps = {
   months: Month[];
 };
 
-function ChooseGraph({
+export function ChooseGraph({
   data,
   mode,
   graphType,
@@ -38,12 +39,6 @@ function ChooseGraph({
   months,
 }: ChooseGraphProps) {
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
-  const groupByData =
-    groupBy === 'Category'
-      ? 'groupedData'
-      : ['Month', 'Year'].includes(groupBy)
-      ? 'monthData'
-      : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -121,12 +116,16 @@ function ChooseGraph({
           saveScrollWidth={saveScrollWidth}
           listScrollRef={listScrollRef}
           handleScroll={handleScroll}
-          balanceTypeOp={balanceTypeOp}
-          groupBy={groupBy}
-          data={data[groupByData]}
-          mode={mode}
-          monthsCount={months.length}
-        />
+        >
+          <ReportTableList
+            data={data}
+            empty={showEmpty}
+            monthsCount={months.length}
+            balanceTypeOp={balanceTypeOp}
+            mode={mode}
+            groupBy={groupBy}
+          />
+        </ReportTable>
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
           handleScroll={handleScroll}
@@ -140,5 +139,3 @@ function ChooseGraph({
     );
   }
 }
-
-export default ChooseGraph;

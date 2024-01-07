@@ -24,11 +24,9 @@ type BreakpointsPx = {
 //   breakpoint_medium: '740px',
 //   breakpoint_wide: '1100px',
 // }
-const breakpointsInPx: BreakpointsPx = Object.entries(
+export const tokens: BreakpointsPx = Object.entries(
   breakpoints,
 ).reduce<BreakpointsPx>((acc, [key, val]) => {
   acc[`breakpoint_${key}`] = `${val}px`;
   return acc;
 }, {} as BreakpointsPx);
-
-export default breakpointsInPx;

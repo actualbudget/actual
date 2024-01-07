@@ -6,9 +6,15 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
+<<<<<<<< HEAD:packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableRow.tsx
 import { styles, theme } from '../../../../style';
 import { Row, Cell } from '../../../table';
 import { type GroupedEntity } from '../../entities';
+========
+import { type CSSProperties, styles, theme } from '../../../../style';
+import { View } from '../../../common/View';
+import { Row, Cell } from '../../../table';
+>>>>>>>> upstream/master:packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableList.tsx
 
 type ReportTableRowProps = {
   item: GroupedEntity;
@@ -129,3 +135,114 @@ export const ReportTableRow = memo(
     );
   },
 );
+<<<<<<<< HEAD:packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableRow.tsx
+========
+
+function GroupedTableRow({
+  item,
+  balanceTypeOp,
+  groupByItem,
+  mode,
+  monthsCount,
+  empty,
+}) {
+  return (
+    <>
+      <TableRow
+        key={item.id}
+        item={item}
+        balanceTypeOp={balanceTypeOp}
+        groupByItem={groupByItem}
+        mode={mode}
+        monthsCount={monthsCount}
+        style={{
+          color: theme.tableRowHeaderText,
+          backgroundColor: theme.tableRowHeaderBackground,
+          fontWeight: 600,
+        }}
+      />
+      <View>
+        {item.categories
+          .filter(i =>
+            !empty
+              ? balanceTypeOp === 'totalTotals'
+                ? i.totalAssets !== 0 ||
+                  i.totalDebts !== 0 ||
+                  i.totalTotals !== 0
+                : i[balanceTypeOp] !== 0
+              : true,
+          )
+          .map(cat => {
+            return (
+              <TableRow
+                key={cat.id}
+                item={cat}
+                balanceTypeOp={balanceTypeOp}
+                groupByItem={groupByItem}
+                mode={mode}
+                monthsCount={monthsCount}
+              />
+            );
+          })}
+      </View>
+      <Row height={20} />
+    </>
+  );
+}
+
+export function ReportTableList({
+  data,
+  empty,
+  monthsCount,
+  balanceTypeOp,
+  mode,
+  groupBy,
+}) {
+  const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
+  const groupByData =
+    groupBy === 'Category'
+      ? 'groupedData'
+      : ['Month', 'Year'].includes(groupBy)
+      ? 'monthData'
+      : 'data';
+
+  return (
+    <View>
+      {data[groupByData]
+        .filter(i =>
+          !empty
+            ? balanceTypeOp === 'totalTotals'
+              ? i.totalAssets !== 0 || i.totalDebts !== 0 || i.totalTotals !== 0
+              : i[balanceTypeOp] !== 0
+            : true,
+        )
+        .map(item => {
+          if (groupBy === 'Category') {
+            return (
+              <GroupedTableRow
+                key={item.id}
+                item={item}
+                balanceTypeOp={balanceTypeOp}
+                groupByItem={groupByItem}
+                mode={mode}
+                monthsCount={monthsCount}
+                empty={empty}
+              />
+            );
+          } else {
+            return (
+              <TableRow
+                key={item.id}
+                item={item}
+                balanceTypeOp={balanceTypeOp}
+                groupByItem={groupByItem}
+                mode={mode}
+                monthsCount={monthsCount}
+              />
+            );
+          }
+        })}
+    </View>
+  );
+}
+>>>>>>>> upstream/master:packages/desktop-client/src/components/reports/graphs/tableGraph/ReportTableList.tsx

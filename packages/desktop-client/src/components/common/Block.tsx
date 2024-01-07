@@ -9,7 +9,7 @@ type BlockProps = HTMLProps<HTMLDivElement> & {
   style?: CSSProperties;
 };
 
-export default function Block(props: BlockProps) {
+export function Block(props: BlockProps) {
   const { className = '', style, innerRef, ...restProps } = props;
   return (
     <div

@@ -2,13 +2,13 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../hooks/useActions';
-import Close from '../icons/v1/Close';
+import { SvgClose } from '../icons/v1';
 import { theme } from '../style';
 
-import Button from './common/Button';
-import LinkButton from './common/LinkButton';
-import Text from './common/Text';
-import View from './common/View';
+import { Button } from './common/Button';
+import { LinkButton } from './common/LinkButton';
+import { Text } from './common/Text';
+import { View } from './common/View';
 
 function closeNotification(setAppState) {
   // Set a flag to never show an update notification again for this session
@@ -18,7 +18,7 @@ function closeNotification(setAppState) {
   });
 }
 
-export default function UpdateNotification() {
+export function UpdateNotification() {
   const updateInfo = useSelector(state => state.app.updateInfo);
   const showUpdateNotification = useSelector(
     state => state.app.showUpdateNotification,
@@ -81,7 +81,10 @@ export default function UpdateNotification() {
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
                 onClick={() => closeNotification(setAppState)}
               >
-                <Close width={9} style={{ color: theme.buttonPrimaryText }} />
+                <SvgClose
+                  width={9}
+                  style={{ color: theme.buttonPrimaryText }}
+                />
               </Button>
             </Text>
           </View>
