@@ -15,30 +15,32 @@ import { listen } from 'loot-core/src/platform/client/fetch';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
-import useFeatureFlag from '../hooks/useFeatureFlag';
-import useNavigate from '../hooks/useNavigate';
-import ArrowLeft from '../icons/v1/ArrowLeft';
-import AlertTriangle from '../icons/v2/AlertTriangle';
-import NavigationMenu from '../icons/v2/NavigationMenu';
-import ViewHide from '../icons/v2/ViewHide';
-import ViewShow from '../icons/v2/ViewShow';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
+import { useNavigate } from '../hooks/useNavigate';
+import { SvgArrowLeft } from '../icons/v1';
+import {
+  SvgAlertTriangle,
+  SvgNavigationMenu,
+  SvgViewHide,
+  SvgViewShow,
+} from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, type CSSProperties, styles } from '../style';
 
-import AccountSyncCheck from './accounts/AccountSyncCheck';
+import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Button, ButtonWithLoading } from './common/Button';
-import ExternalLink from './common/ExternalLink';
-import Link from './common/Link';
-import Paragraph from './common/Paragraph';
-import Text from './common/Text';
-import View from './common/View';
+import { ExternalLink } from './common/ExternalLink';
+import { Link } from './common/Link';
+import { Paragraph } from './common/Paragraph';
+import { Text } from './common/Text';
+import { View } from './common/View';
 import { KeyHandlers } from './KeyHandlers';
 import { LoggedInUser } from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar';
-import useSheetValue from './spreadsheet/useSheetValue';
+import { useSheetValue } from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 import { Tooltip } from './tooltips';
 
@@ -118,9 +120,9 @@ function PrivacyButton({ style }) {
       style={style}
     >
       {isPrivacyEnabled ? (
-        <ViewHide style={privacyIconStyle} />
+        <SvgViewHide style={privacyIconStyle} />
       ) : (
-        <ViewShow style={privacyIconStyle} />
+        <SvgViewShow style={privacyIconStyle} />
       )}
     </Button>
   );
@@ -247,12 +249,12 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       >
         {isMobile ? (
           syncState === 'error' ? (
-            <AlertTriangle width={14} height={14} />
+            <SvgAlertTriangle width={14} height={14} />
           ) : (
             <AnimatedRefresh width={18} height={18} animating={syncing} />
           )
         ) : syncState === 'error' ? (
-          <AlertTriangle width={13} />
+          <SvgAlertTriangle width={13} />
         ) : (
           <AnimatedRefresh animating={syncing} />
         )}
@@ -410,7 +412,7 @@ export function Titlebar({ style }) {
             }
           }}
         >
-          <NavigationMenu
+          <SvgNavigationMenu
             className="menu"
             style={{ width: 15, height: 15, color: theme.pageText, left: 0 }}
           />
@@ -423,7 +425,7 @@ export function Titlebar({ style }) {
           element={
             location.state?.goBack ? (
               <Button type="bare" onClick={() => navigate(-1)}>
-                <ArrowLeft
+                <SvgArrowLeft
                   width={10}
                   height={10}
                   style={{ marginRight: 5, color: 'currentColor' }}

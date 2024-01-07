@@ -7,10 +7,7 @@ const initialState: AccountState = {
   accountsSyncing: null,
 };
 
-export default function update(
-  state = initialState,
-  action: Action,
-): AccountState {
+export function update(state = initialState, action: Action): AccountState {
   switch (action.type) {
     case constants.SET_ACCOUNTS_SYNCING:
       return {

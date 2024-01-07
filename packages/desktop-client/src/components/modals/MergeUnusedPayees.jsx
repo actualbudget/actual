@@ -7,14 +7,14 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { theme } from '../../style';
 import { Information } from '../alerts';
 import { Button } from '../common/Button';
-import Modal, { ModalButtons } from '../common/Modal';
-import Paragraph from '../common/Paragraph';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Modal, ModalButtons } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 const highlightStyle = { color: theme.pageTextPositive };
 
-export default function MergeUnusedPayees({
+export function MergeUnusedPayees({
   modalProps,
   payeeIds,
   targetPayeeId,

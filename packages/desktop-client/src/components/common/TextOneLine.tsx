@@ -1,10 +1,10 @@
 import { type ComponentProps } from 'react';
 
-import Text from './Text';
+import { Text } from './Text';
 
 type TextOneLineProps = ComponentProps<typeof Text>;
 
-export default function TextOneLine({ children, ...props }: TextOneLineProps) {
+export function TextOneLine({ children, ...props }: TextOneLineProps) {
   return (
     <Text
       {...props}

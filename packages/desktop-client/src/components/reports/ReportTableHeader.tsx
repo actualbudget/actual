@@ -2,7 +2,7 @@ import React, { type UIEventHandler } from 'react';
 import { type RefProp } from 'react-spring';
 
 import { styles, theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Row, Cell } from '../table';
 
 import { type MonthData } from './entities';
@@ -16,7 +16,7 @@ type ReportTableHeaderProps = {
   handleScroll?: UIEventHandler<HTMLDivElement>;
 };
 
-function ReportTableHeader({
+export function ReportTableHeader({
   scrollWidth,
   groupBy,
   interval,
@@ -110,5 +110,3 @@ function ReportTableHeader({
     </Row>
   );
 }
-
-export default ReportTableHeader;

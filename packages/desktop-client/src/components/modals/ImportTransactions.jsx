@@ -11,15 +11,15 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { theme, styles } from '../../style';
 import { Button, ButtonWithLoading } from '../common/Button';
-import Input from '../common/Input';
-import Modal from '../common/Modal';
-import Select from '../common/Select';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Input } from '../common/Input';
+import { Modal } from '../common/Modal';
+import { Select } from '../common/Select';
+import { Stack } from '../common/Stack';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 
@@ -656,7 +656,7 @@ function FieldMappings({
   );
 }
 
-export default function ImportTransactions({ modalProps, options }) {
+export function ImportTransactions({ modalProps, options }) {
   const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );

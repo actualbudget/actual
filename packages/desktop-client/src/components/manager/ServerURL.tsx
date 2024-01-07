@@ -1,11 +1,11 @@
 import React from 'react';
 
-import Link from '../common/Link';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Link } from '../common/Link';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { useServerURL } from '../ServerContext';
 
-export default function ServerURL() {
+export function ServerURL() {
   const url = useServerURL();
 
   return (

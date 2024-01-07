@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { type CommonModalProps } from '../../types/modals';
-import Modal from '../common/Modal';
+import { Modal } from '../common/Modal';
 import { ManageRules } from '../ManageRules';
 
 type ManageRulesModalProps = {
@@ -12,7 +12,7 @@ type ManageRulesModalProps = {
   payeeId?: string;
 };
 
-export default function ManageRulesModal({
+export function ManageRulesModal({
   modalProps,
   payeeId,
 }: ManageRulesModalProps) {

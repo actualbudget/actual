@@ -9,16 +9,16 @@ import { useSelector } from 'react-redux';
 import type { NotificationWithId } from 'loot-core/src/client/state-types/notifications';
 
 import { useActions } from '../hooks/useActions';
-import AnimatedLoading from '../icons/AnimatedLoading';
-import Delete from '../icons/v0/Delete';
+import { AnimatedLoading } from '../icons/AnimatedLoading';
+import { SvgDelete } from '../icons/v0';
 import { styles, theme, type CSSProperties } from '../style';
 
 import { Button, ButtonWithLoading } from './common/Button';
-import ExternalLink from './common/ExternalLink';
-import LinkButton from './common/LinkButton';
-import Stack from './common/Stack';
-import Text from './common/Text';
-import View from './common/View';
+import { ExternalLink } from './common/ExternalLink';
+import { LinkButton } from './common/LinkButton';
+import { Stack } from './common/Stack';
+import { Text } from './common/Text';
+import { View } from './common/View';
 
 function compileMessage(
   message: string,
@@ -209,7 +209,7 @@ function Notification({
             style={{ flexShrink: 0, color: 'currentColor' }}
             onClick={onRemove}
           >
-            <Delete style={{ width: 9, height: 9, color: 'currentColor' }} />
+            <SvgDelete style={{ width: 9, height: 9, color: 'currentColor' }} />
           </Button>
         )}
       </Stack>

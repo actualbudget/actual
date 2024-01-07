@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 
-import Block from './common/Block';
+import { Block } from './common/Block';
 import { Button } from './common/Button';
-import ExternalLink from './common/ExternalLink';
-import LinkButton from './common/LinkButton';
-import Modal from './common/Modal';
-import Paragraph from './common/Paragraph';
-import Stack from './common/Stack';
-import Text from './common/Text';
-import View from './common/View';
+import { ExternalLink } from './common/ExternalLink';
+import { LinkButton } from './common/LinkButton';
+import { Modal } from './common/Modal';
+import { Paragraph } from './common/Paragraph';
+import { Stack } from './common/Stack';
+import { Text } from './common/Text';
+import { View } from './common/View';
 import { Checkbox } from './forms';
 
 type AppError = Error & {

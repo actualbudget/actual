@@ -16,20 +16,20 @@ import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type RuleEntity } from 'loot-core/src/types/models';
 
-import useCategories from '../hooks/useCategories';
-import useSelected, { SelectedProvider } from '../hooks/useSelected';
+import { useCategories } from '../hooks/useCategories';
+import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { theme } from '../style';
 
 import { Button } from './common/Button';
-import ExternalLink from './common/ExternalLink';
-import Search from './common/Search';
-import Stack from './common/Stack';
-import Text from './common/Text';
-import View from './common/View';
-import RulesHeader from './rules/RulesHeader';
-import RulesList from './rules/RulesList';
+import { ExternalLink } from './common/ExternalLink';
+import { Search } from './common/Search';
+import { Stack } from './common/Stack';
+import { Text } from './common/Text';
+import { View } from './common/View';
+import { RulesHeader } from './rules/RulesHeader';
+import { RulesList } from './rules/RulesList';
 import { SchedulesQuery } from './rules/SchedulesQuery';
-import SimpleTable from './rules/SimpleTable';
+import { SimpleTable } from './rules/SimpleTable';
 
 function mapValue(field, value, { payees, categories, accounts }) {
   if (!value) return '';

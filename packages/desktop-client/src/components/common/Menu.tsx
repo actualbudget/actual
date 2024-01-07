@@ -8,8 +8,8 @@ import {
 
 import { type CSSProperties, theme } from '../../style';
 
-import Text from './Text';
-import View from './View';
+import { Text } from './Text';
+import { View } from './View';
 
 type KeybindingProps = {
   keyName: ReactNode;
@@ -42,7 +42,7 @@ type MenuProps<T extends MenuItem = MenuItem> = {
   style?: CSSProperties;
 };
 
-export default function Menu<T extends MenuItem>({
+export function Menu<T extends MenuItem>({
   header,
   footer,
   items: allItems,

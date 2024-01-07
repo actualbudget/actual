@@ -1,4 +1,4 @@
-import join from './path-join';
+import { join } from './path-join';
 
 let documentDir;
 export const _setDocumentDir = dir => (documentDir = dir);

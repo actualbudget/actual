@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 
 import { theme } from '../../style';
-import Autocomplete from '../autocomplete/Autocomplete';
+import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button';
-import Modal from '../common/Modal';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { TableHeader, Table, Row, Field } from '../table';
 
 const addAccountOption = { id: 'new', name: 'Create new account' };
 
-export default function SelectLinkedAccounts({
+export function SelectLinkedAccounts({
   modalProps,
   requisitionId,
   externalAccounts,

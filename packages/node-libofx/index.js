@@ -1,4 +1,4 @@
-import createFFI from './ffi';
+import { create as createFFI } from './ffi';
 import libofxWrapper from './libofx';
 
 let _libofxPromise;

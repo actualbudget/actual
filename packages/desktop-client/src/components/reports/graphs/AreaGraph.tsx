@@ -11,16 +11,16 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import usePrivacyMode from 'loot-core/src/client/privacy';
+import { usePrivacyMode } from 'loot-core/src/client/privacy';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
-import AlignedText from '../../common/AlignedText';
+import { AlignedText } from '../../common/AlignedText';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import Container from '../Container';
+import { Container } from '../Container';
 import { type DataEntity } from '../entities';
-import numberFormatterTooltip from '../numberFormatter';
+import { numberFormatterTooltip } from '../numberFormatter';
 
 type PayloadItem = {
   payload: {
@@ -98,7 +98,12 @@ type AreaGraphProps = {
   compact?: boolean;
 };
 
-function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
+export function AreaGraph({
+  style,
+  data,
+  balanceTypeOp,
+  compact,
+}: AreaGraphProps) {
   const privacyMode = usePrivacyMode();
 
   const tickFormatter = tick => {
@@ -197,5 +202,3 @@ function AreaGraph({ style, data, balanceTypeOp, compact }: AreaGraphProps) {
     </Container>
   );
 }
-
-export default AreaGraph;

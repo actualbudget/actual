@@ -3,9 +3,9 @@ import React from 'react';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { theme, styles } from '../../style';
-import Block from '../common/Block';
+import { Block } from '../common/Block';
 
-function Change({ amount }) {
+export function Change({ amount }) {
   return (
     <Block
       style={{
@@ -18,5 +18,3 @@ function Change({ amount }) {
     </Block>
   );
 }
-
-export default Change;

@@ -1,12 +1,12 @@
 import React, { type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties, styles } from '../../style';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import { ConditionalPrivacyFilter } from '../PrivacyFilter';
 
-import useFormat from './useFormat';
-import useSheetName from './useSheetName';
-import useSheetValue from './useSheetValue';
+import { useFormat } from './useFormat';
+import { useSheetName } from './useSheetName';
+import { useSheetValue } from './useSheetValue';
 
 import { type Binding } from '.';
 
@@ -22,7 +22,7 @@ type CellValueProps = {
   ['data-testid']?: string;
 };
 
-function CellValue({
+export function CellValue({
   binding,
   type,
   formatter,
@@ -61,5 +61,3 @@ function CellValue({
     </ConditionalPrivacyFilter>
   );
 }
-
-export default CellValue;

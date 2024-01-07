@@ -7,13 +7,13 @@ import { type ScheduleEntity } from 'loot-core/src/types/models';
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
-import Search from '../common/Search';
-import View from '../common/View';
+import { Search } from '../common/Search';
+import { View } from '../common/View';
 import { Page } from '../Page';
 
 import { SchedulesTable, type ScheduleItemAction } from './SchedulesTable';
 
-export default function Schedules() {
+export function Schedules() {
   const { pushModal } = useActions();
   const [filter, setFilter] = useState('');
 

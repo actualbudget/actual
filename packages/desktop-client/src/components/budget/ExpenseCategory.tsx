@@ -3,7 +3,7 @@ import React, { type ComponentProps } from 'react';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import {
   useDraggable,
   useDroppable,
@@ -14,8 +14,8 @@ import {
 } from '../sort';
 import { Row } from '../table';
 
-import RenderMonths from './RenderMonths';
-import SidebarCategory from './SidebarCategory';
+import { RenderMonths } from './RenderMonths';
+import { SidebarCategory } from './SidebarCategory';
 
 type ExpenseCategoryProps = {
   cat: CategoryEntity;
@@ -32,7 +32,7 @@ type ExpenseCategoryProps = {
   onReorder: OnDropCallback;
 };
 
-function ExpenseCategory({
+export function ExpenseCategory({
   cat,
   editingCell,
   dragState,
@@ -108,5 +108,3 @@ function ExpenseCategory({
     </Row>
   );
 }
-
-export default ExpenseCategory;

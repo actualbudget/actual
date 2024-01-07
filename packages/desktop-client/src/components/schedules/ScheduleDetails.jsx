@@ -3,28 +3,29 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { pushModal } from 'loot-core/src/client/actions/modals';
 import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
-import q, { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery, liveQuery } from 'loot-core/src/client/query-helpers';
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import { extractScheduleConds } from 'loot-core/src/shared/schedules';
 
-import useSelected, { SelectedProvider } from '../../hooks/useSelected';
+import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { theme } from '../../style';
-import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
+import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Button } from '../common/Button';
-import Modal from '../common/Modal';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Modal } from '../common/Modal';
+import { Stack } from '../common/Stack';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { FormField, FormLabel, Checkbox } from '../forms';
 import { OpSelect } from '../modals/EditRule';
-import DateSelect from '../select/DateSelect';
-import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
+import { DateSelect } from '../select/DateSelect';
+import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '../table';
-import SimpleTransactionsTable from '../transactions/SimpleTransactionsTable';
+import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
-import GenericInput from '../util/GenericInput';
+import { GenericInput } from '../util/GenericInput';
 
 function updateScheduleConditions(schedule, fields) {
   const conds = extractScheduleConds(schedule._conditions);
@@ -66,7 +67,7 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export default function ScheduleDetails({ modalProps, actions, id }) {
+export function ScheduleDetails({ modalProps, actions, id }) {
   const adding = id == null;
   const payees = useCachedPayees({ idKey: true });
   const globalDispatch = useDispatch();

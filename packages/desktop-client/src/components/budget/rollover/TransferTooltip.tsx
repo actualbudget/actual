@@ -6,16 +6,16 @@ import React, {
 } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import useCategories from '../../../hooks/useCategories';
-import CategoryAutocomplete from '../../autocomplete/CategoryAutocomplete';
+import { useCategories } from '../../../hooks/useCategories';
+import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { Button } from '../../common/Button';
-import InitialFocus from '../../common/InitialFocus';
-import Input from '../../common/Input';
-import View from '../../common/View';
-import NamespaceContext from '../../spreadsheet/NamespaceContext';
+import { InitialFocus } from '../../common/InitialFocus';
+import { Input } from '../../common/Input';
+import { View } from '../../common/View';
+import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../tooltips';
 import { addToBeBudgetedGroup } from '../util';
 
@@ -25,7 +25,7 @@ type TransferTooltipProps = ComponentPropsWithoutRef<typeof Tooltip> & {
   showToBeBudgeted?: boolean;
   onSubmit: (amount: number, category: unknown) => void;
 };
-export default function TransferTooltip({
+export function TransferTooltip({
   initialAmount,
   initialAmountName,
   showToBeBudgeted,

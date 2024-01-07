@@ -15,7 +15,7 @@ import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
 
 import { getStartingBalancePayee } from './payees';
-import title from './title';
+import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
 

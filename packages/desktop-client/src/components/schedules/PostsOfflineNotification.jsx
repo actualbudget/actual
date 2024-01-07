@@ -5,13 +5,13 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button';
-import Modal from '../common/Modal';
-import Paragraph from '../common/Paragraph';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
-import DisplayId from '../util/DisplayId';
+import { Modal } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
+import { Stack } from '../common/Stack';
+import { Text } from '../common/Text';
+import { DisplayId } from '../util/DisplayId';
 
-export default function PostsOfflineNotification({ modalProps, actions }) {
+export function PostsOfflineNotification({ modalProps, actions }) {
   const location = useLocation();
 
   const payees = (location.state && location.state.payees) || [];

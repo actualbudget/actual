@@ -6,11 +6,11 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import usePrivacyMode from 'loot-core/src/client/privacy';
+import { usePrivacyMode } from 'loot-core/src/client/privacy';
 
 import { useResponsive } from '../ResponsiveProvider';
 
-import View from './common/View';
+import { View } from './common/View';
 
 type ConditionalPrivacyFilterProps = {
   children: ReactNode;
