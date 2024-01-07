@@ -303,14 +303,14 @@ function parseAmountFields(
 
 function parseCategoryFields(trans, categories) {
   let match = null;
-  for (category of categories) {
+  categories.forEach(category => {
     if (category.id === trans.category) {
       return null;
     }
     if (category.name === trans.category) {
       match = category.id;
     }
-  }
+  });
   return match;
 }
 
@@ -374,7 +374,12 @@ function Transaction({
       <Field width="flex" title={transaction.notes}>
         {transaction.notes}
       </Field>
-      <Field width="flex" title={categoryList.includes(transaction.category) && transaction.category}>
+      <Field
+        width="flex"
+        title={
+          categoryList.includes(transaction.category) && transaction.category
+        }
+      >
         {categoryList.includes(transaction.category) && transaction.category}
       </Field>
       {splitMode ? (
