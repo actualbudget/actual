@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import usePrivacyMode from 'loot-core/src/client/privacy';
+import { usePrivacyMode } from 'loot-core/src/client/privacy';
 import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
@@ -20,11 +20,11 @@ import {
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
-import AlignedText from '../../common/AlignedText';
-import PrivacyFilter from '../../PrivacyFilter';
-import Container from '../Container';
+import { AlignedText } from '../../common/AlignedText';
+import { PrivacyFilter } from '../../PrivacyFilter';
+import { Container } from '../Container';
 import { type DataEntity } from '../entities';
-import numberFormatterTooltip from '../numberFormatter';
+import { numberFormatterTooltip } from '../numberFormatter';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';

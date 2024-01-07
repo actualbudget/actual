@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgMenu = (props: SVGProps<SVGSVGElement>) => (
+export const SvgMenu = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -13,4 +13,3 @@ const SvgMenu = (props: SVGProps<SVGSVGElement>) => (
     <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" fill="currentColor" />
   </svg>
 );
-export default SvgMenu;

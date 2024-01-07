@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgVolumeMute = (props: SVGProps<SVGSVGElement>) => (
+export const SvgVolumeMute = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -13,4 +13,3 @@ const SvgVolumeMute = (props: SVGProps<SVGSVGElement>) => (
     <path d="M9 7H5v6h4l5 5V2L9 7z" fill="currentColor" />
   </svg>
 );
-export default SvgVolumeMute;

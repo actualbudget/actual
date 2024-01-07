@@ -13,9 +13,9 @@ import {
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
-import AlignedText from '../../common/AlignedText';
-import Container from '../Container';
-import numberFormatterTooltip from '../numberFormatter';
+import { AlignedText } from '../../common/AlignedText';
+import { Container } from '../Container';
+import { numberFormatterTooltip } from '../numberFormatter';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -26,7 +26,7 @@ type NetWorthGraphProps = {
   };
 };
 
-function NetWorthGraph({
+export function NetWorthGraph({
   style,
   graphData,
   compact,
@@ -126,22 +126,20 @@ function NetWorthGraph({
                 {compact ? null : (
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 )}
-                {compact ? null : (
-                  <XAxis
-                    dataKey="x"
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {compact ? null : (
-                  <YAxis
-                    dataKey="y"
-                    domain={['auto', 'auto']}
-                    tickFormatter={tickFormatter}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
+                <XAxis
+                  dataKey="x"
+                  hide={compact}
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                />
+                <YAxis
+                  dataKey="y"
+                  domain={['auto', 'auto']}
+                  hide={compact}
+                  tickFormatter={tickFormatter}
+                  tick={{ fill: theme.pageText }}
+                  tickLine={{ stroke: theme.pageText }}
+                />
                 <Tooltip
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
@@ -180,5 +178,3 @@ function NetWorthGraph({
     </Container>
   );
 }
-
-export default NetWorthGraph;

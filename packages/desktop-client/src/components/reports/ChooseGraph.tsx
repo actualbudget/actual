@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { type DataEntity, type Month } from './entities';
 import { AreaGraph } from './graphs/AreaGraph';
@@ -10,10 +10,10 @@ import { DonutGraph } from './graphs/DonutGraph';
 import { LineGraph } from './graphs/LineGraph';
 import { StackedBarGraph } from './graphs/StackedBarGraph';
 import { ReportOptions } from './ReportOptions';
-import ReportTable from './ReportTable';
-import ReportTableHeader from './ReportTableHeader';
-import ReportTableList from './ReportTableList';
-import ReportTableTotals from './ReportTableTotals';
+import { ReportTable } from './ReportTable';
+import { ReportTableHeader } from './ReportTableHeader';
+import { ReportTableList } from './ReportTableList';
+import { ReportTableTotals } from './ReportTableTotals';
 
 type ChooseGraphProps = {
   data: DataEntity;

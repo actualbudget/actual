@@ -1,17 +1,17 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-import useFeatureFlag from '../../hooks/useFeatureFlag';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { styles } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
-import CashFlowCard from './reports/CashFlowCard';
-import CategorySpendingCard from './reports/CategorySpendingCard';
-import CustomReportCard from './reports/CustomReportCard';
-import NetWorthCard from './reports/NetWorthCard';
-import SankeyCard from './reports/SankeyCard';
+import { CashFlowCard } from './reports/CashFlowCard';
+import { CategorySpendingCard } from './reports/CategorySpendingCard';
+import { CustomReportCard } from './reports/CustomReportCard';
+import { NetWorthCard } from './reports/NetWorthCard';
+import { SankeyCard } from './reports/SankeyCard';
 
-export default function Overview() {
+export function Overview() {
   const categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );

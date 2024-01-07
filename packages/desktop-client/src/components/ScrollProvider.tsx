@@ -19,7 +19,7 @@ type ScrollProviderProps = {
   children?: ReactNode;
 };
 
-export default function ScrollProvider({ children }: ScrollProviderProps) {
+export function ScrollProvider({ children }: ScrollProviderProps) {
   const [scrollY, setScrollY] = useState(undefined);
   const [isBottomReached, setIsBottomReached] = useState(false);
 

@@ -23,7 +23,7 @@ export function rebuildMerkleHash(): {
   };
 }
 
-export default async function repairSync(): Promise<void> {
+export async function repairSync(): Promise<void> {
   const rebuilt = rebuildMerkleHash();
   const clock = getClock();
 

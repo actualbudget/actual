@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme, type CSSProperties } from '../../../style';
-import Container from '../Container';
+import { Container } from '../Container';
 import { type DataEntity } from '../entities';
 
 import { adjustDonutTextSize } from './adjustTextSize';

@@ -1,4 +1,4 @@
-function Graph() {
+export function Graph() {
   const graph = {
     addNode,
     removeNode,
@@ -120,5 +120,3 @@ function Graph() {
 
   return graph;
 }
-
-export default Graph;
