@@ -7,8 +7,8 @@ import React, {
 import { type RefProp } from 'react-spring';
 
 import { type CSSProperties } from '../../../../style';
-import Block from '../../../common/Block';
-import View from '../../../common/View';
+import { Block } from '../../../common/Block';
+import { View } from '../../../common/View';
 import { type GroupedEntity } from '../../entities';
 
 import { ReportTableList } from './ReportTableList';
@@ -26,7 +26,7 @@ type ReportTableProps = {
   monthsCount: number;
 };
 
-export default function ReportTable({
+export function ReportTable({
   saveScrollWidth,
   listScrollRef,
   handleScroll,

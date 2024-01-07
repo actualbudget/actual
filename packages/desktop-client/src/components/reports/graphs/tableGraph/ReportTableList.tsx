@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { type CSSProperties, theme } from '../../../../style';
-import View from '../../../common/View';
+import { View } from '../../../common/View';
 import { Cell, Row } from '../../../table';
 import { type GroupedEntity } from '../../entities';
 
