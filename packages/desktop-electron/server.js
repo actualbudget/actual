@@ -11,11 +11,9 @@ function getBackend() {
 
 if (process.argv[2] === '--subprocess') {
   const isDev = false;
-  // let version = process.argv[3];
-  const socketName = process.argv[4];
 
   // Start the app
-  getBackend().initApp(isDev, socketName);
+  getBackend().initApp(isDev);
 } else if (process.argv[2] === '--standalone') {
   require('source-map-support').install();
   getBackend().initApp(true, 'actual-standalone');
