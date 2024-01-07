@@ -10,7 +10,7 @@ import { DateRange } from '../DateRange';
 import { BarGraph } from '../graphs/BarGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
-import { defaultSpreadsheet } from '../spreadsheets/default-spreadsheet';
+import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { useReport } from '../useReport';
 
 export function CustomReportCard() {
@@ -21,7 +21,7 @@ export function CustomReportCard() {
   const groupBy = 'Category';
 
   const getGraphData = useMemo(() => {
-    return defaultSpreadsheet({
+    return createCustomSpreadsheet({
       startDate,
       endDate,
       groupBy,
