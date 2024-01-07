@@ -5,7 +5,7 @@ import { css } from 'glamor';
 
 type PullToRefreshProps = ComponentProps<typeof BasePullToRefresh>;
 
-export default function PullToRefresh(props: PullToRefreshProps) {
+export function PullToRefresh(props: PullToRefreshProps) {
   return (
     <div style={{ overflow: 'auto' }}>
       <BasePullToRefresh

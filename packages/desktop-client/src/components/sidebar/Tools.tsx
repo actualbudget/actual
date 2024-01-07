@@ -1,17 +1,19 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import CheveronDown from '../../icons/v1/CheveronDown';
-import CheveronRight from '../../icons/v1/CheveronRight';
-import Cog from '../../icons/v1/Cog';
-import StoreFrontIcon from '../../icons/v1/StoreFront';
-import TuningIcon from '../../icons/v1/Tuning';
-import View from '../common/View';
+import {
+  SvgCheveronDown,
+  SvgCheveronRight,
+  SvgCog,
+  SvgStoreFront,
+  SvgTuning,
+} from '../../icons/v1';
+import { View } from '../common/View';
 
-import Item from './Item';
-import SecondaryItem from './SecondaryItem';
+import { Item } from './Item';
+import { SecondaryItem } from './SecondaryItem';
 
-function Tools() {
+export function Tools() {
   const [isOpen, setOpen] = useState(false);
   const onToggle = useCallback(() => setOpen(open => !open), []);
   const location = useLocation();
@@ -30,7 +32,7 @@ function Tools() {
     <View style={{ flexShrink: 0 }}>
       <Item
         title="More"
-        Icon={isOpen ? CheveronDown : CheveronRight}
+        Icon={isOpen ? SvgCheveronDown : SvgCheveronRight}
         onClick={onToggle}
         style={{ marginBottom: isOpen ? 8 : 0 }}
         forceActive={!isOpen && isActive}
@@ -39,19 +41,19 @@ function Tools() {
         <>
           <SecondaryItem
             title="Payees"
-            Icon={StoreFrontIcon}
+            Icon={SvgStoreFront}
             to="/payees"
             indent={15}
           />
           <SecondaryItem
             title="Rules"
-            Icon={TuningIcon}
+            Icon={SvgTuning}
             to="/rules"
             indent={15}
           />
           <SecondaryItem
             title="Settings"
-            Icon={Cog}
+            Icon={SvgCog}
             to="/settings"
             indent={15}
           />
@@ -60,5 +62,3 @@ function Tools() {
     </View>
   );
 }
-
-export default Tools;

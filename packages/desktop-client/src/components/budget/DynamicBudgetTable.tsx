@@ -3,11 +3,11 @@ import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { useActions } from '../../hooks/useActions';
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
-import BudgetPageHeader from './BudgetPageHeader';
-import BudgetTable from './BudgetTable';
+import { BudgetPageHeader } from './BudgetPageHeader';
+import { BudgetTable } from './BudgetTable';
 
 function getNumPossibleMonths(width: number) {
   const estimatedTableWidth = width - 200;
@@ -100,19 +100,20 @@ const DynamicBudgetTableInner = forwardRef<
   },
 );
 
-export default forwardRef<BudgetTable, DynamicBudgetTableInnerProps>(
-  (props, ref) => {
-    return (
-      <AutoSizer>
-        {({ width, height }) => (
-          <DynamicBudgetTableInner
-            ref={ref}
-            width={width}
-            height={height}
-            {...props}
-          />
-        )}
-      </AutoSizer>
-    );
-  },
-);
+export const DynamicBudgetTable = forwardRef<
+  BudgetTable,
+  DynamicBudgetTableInnerProps
+>((props, ref) => {
+  return (
+    <AutoSizer>
+      {({ width, height }) => (
+        <DynamicBudgetTableInner
+          ref={ref}
+          width={width}
+          height={height}
+          {...props}
+        />
+      )}
+    </AutoSizer>
+  );
+});

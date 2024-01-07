@@ -2,7 +2,7 @@ import { theme } from '../../../style';
 import { getColorScale } from '../chart-theme';
 import { type ItemEntity, type MonthData } from '../entities';
 
-function calculateLegend(
+export function calculateLegend(
   monthData: MonthData[],
   calcDataFiltered: ItemEntity[],
   groupBy: string,
@@ -27,5 +27,3 @@ function calculateLegend(
     };
   });
 }
-
-export default calculateLegend;

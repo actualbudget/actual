@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
-export default function useFilters<T>(initialFilters: T[] = []) {
+export function useFilters<T>(initialFilters: T[] = []) {
   const [filters, setFilters] = useState<T[]>(initialFilters);
   const [conditionsOp, setConditionsOp] = useState('and');
   const [saved, setSaved] = useState<T[]>(null);
