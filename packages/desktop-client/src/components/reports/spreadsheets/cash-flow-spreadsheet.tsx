@@ -2,12 +2,12 @@ import React from 'react';
 
 import * as d from 'date-fns';
 
-import q from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import { integerToCurrency, integerToAmount } from 'loot-core/src/shared/util';
 
-import AlignedText from '../../common/AlignedText';
+import { AlignedText } from '../../common/AlignedText';
 import { runAll, indexCashFlow } from '../util';
 
 export function simpleCashFlow(start, end) {

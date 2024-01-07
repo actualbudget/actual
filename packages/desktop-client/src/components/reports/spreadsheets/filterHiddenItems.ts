@@ -3,7 +3,10 @@ import {
   type UncategorizedEntity,
 } from '../ReportOptions';
 
-function filterHiddenItems(item: UncategorizedEntity, data: QueryDataEntity[]) {
+export function filterHiddenItems(
+  item: UncategorizedEntity,
+  data: QueryDataEntity[],
+) {
   return data.filter(asset => {
     if (!item.uncategorized_id) {
       return true;
@@ -20,5 +23,3 @@ function filterHiddenItems(item: UncategorizedEntity, data: QueryDataEntity[]) {
     return isTransfer && isHidden && isOffBudget;
   });
 }
-
-export default filterHiddenItems;

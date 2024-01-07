@@ -131,6 +131,23 @@ type FinanceModals = {
     name: string;
     onSave: (id: string, notes: string) => void;
   };
+  'report-budget-summary': { month: string };
+  'rollover-budget-summary': {
+    month: string;
+    onBudgetAction: (
+      month: string,
+      type: string,
+      args: unknown,
+    ) => Promise<void>;
+  };
+  'new-category-group': {
+    onValidate?: (value: string) => string;
+    onSubmit: (value: string) => Promise<void>;
+  };
+  'new-category': {
+    onValidate?: (value: string) => string;
+    onSubmit: (value: string) => Promise<void>;
+  };
 };
 
 export type PushModalAction = {

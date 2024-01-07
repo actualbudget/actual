@@ -8,7 +8,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { styles, theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { Row, Cell } from '../table';
 
 import { type DataEntity } from './entities';
@@ -23,7 +23,7 @@ type ReportTableTotalsProps = {
   handleScroll: UIEventHandler<HTMLDivElement>;
 };
 
-function ReportTableTotals({
+export function ReportTableTotals({
   data,
   scrollWidth,
   balanceTypeOp,
@@ -155,5 +155,3 @@ function ReportTableTotals({
     </Row>
   );
 }
-
-export default ReportTableTotals;

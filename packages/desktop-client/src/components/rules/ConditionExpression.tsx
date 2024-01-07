@@ -3,10 +3,10 @@ import React from 'react';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 
 import { type CSSProperties, theme } from '../../style';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
-import Value from './Value';
+import { Value } from './Value';
 
 const valueStyle = {
   color: theme.pillTextHighlighted,
@@ -22,7 +22,7 @@ type ConditionExpressionProps = {
   inline?: boolean;
 };
 
-export default function ConditionExpression({
+export function ConditionExpression({
   field,
   op,
   value,

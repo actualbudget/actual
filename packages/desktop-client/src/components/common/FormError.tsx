@@ -2,14 +2,14 @@ import { type ReactNode } from 'react';
 
 import { type CSSProperties } from '../../style';
 
-import View from './View';
+import { View } from './View';
 
 type FormErrorProps = {
   style?: CSSProperties;
   children?: ReactNode;
 };
 
-export default function FormError({ style, children }: FormErrorProps) {
+export function FormError({ style, children }: FormErrorProps) {
   return (
     <View style={{ color: 'red', fontSize: 13, ...style }}>{children}</View>
   );

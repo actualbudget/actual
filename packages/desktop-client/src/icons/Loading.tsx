@@ -1,6 +1,6 @@
 import React, { type SVGProps, useState } from 'react';
 
-const SvgLoading = (props: SVGProps<SVGSVGElement>) => {
+export const SvgLoading = (props: SVGProps<SVGSVGElement>) => {
   const { color = 'currentColor' } = props;
   const [gradientId] = useState('gradient-' + Math.random());
 
@@ -31,5 +31,3 @@ const SvgLoading = (props: SVGProps<SVGSVGElement>) => {
     </svg>
   );
 };
-
-export default SvgLoading;

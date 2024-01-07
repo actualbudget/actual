@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgPencilWrite = (props: SVGProps<SVGSVGElement>) => (
+export const SvgPencilWrite = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -20,4 +20,3 @@ const SvgPencilWrite = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
-export default SvgPencilWrite;

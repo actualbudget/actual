@@ -45,7 +45,7 @@ function format(
   }
 }
 
-export default function useFormat() {
+export function useFormat() {
   const numberFormat = useSelector(selectNumberFormat);
 
   return useCallback(
