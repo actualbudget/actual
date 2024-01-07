@@ -37,7 +37,6 @@ jobs:
       - name: Build Electron
         run: ./bin/package-electron
         env:
-          CSC_FOR_PULL_REQUEST: ${{ secrets.CSC_FOR_PULL_REQUEST }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
