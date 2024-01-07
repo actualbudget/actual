@@ -2,6 +2,7 @@
 // (I have no idea why the imports are like this. Not touching them.)
 const isDev = require('electron-is-dev');
 const fs = require('fs');
+
 require('module').globalPaths.push(__dirname + '/..');
 
 const {
