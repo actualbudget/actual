@@ -6,7 +6,7 @@ import { VictoryTooltip } from 'victory';
 
 import { theme } from '../../style';
 
-class Tooltip extends Component {
+export class Tooltip extends Component {
   static defaultEvents = VictoryTooltip.defaultEvents;
 
   render() {
@@ -84,5 +84,3 @@ class Tooltip extends Component {
     );
   }
 }
-
-export default Tooltip;

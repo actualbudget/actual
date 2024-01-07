@@ -2,10 +2,10 @@ import React from 'react';
 
 import { keyframes } from 'glamor';
 
-import Refresh from '../icons/v1/Refresh';
+import { SvgRefresh } from '../icons/v1';
 import { type CSSProperties } from '../style';
 
-import View from './common/View';
+import { View } from './common/View';
 
 const spin = keyframes({
   '0%': { transform: 'rotateZ(0deg)' },
@@ -19,7 +19,7 @@ type AnimatedRefreshProps = {
   height?: number;
 };
 
-export default function AnimatedRefresh({
+export function AnimatedRefresh({
   animating,
   iconStyle,
   width,
@@ -29,7 +29,7 @@ export default function AnimatedRefresh({
     <View
       style={{ animation: animating ? `${spin} 1s infinite linear` : null }}
     >
-      <Refresh
+      <SvgRefresh
         width={width ? width : 14}
         height={height ? height : 14}
         style={iconStyle}

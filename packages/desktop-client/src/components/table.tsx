@@ -22,27 +22,25 @@ import {
   useProperFocus,
 } from '../hooks/useProperFocus';
 import { useSelectedItems } from '../hooks/useSelected';
-import AnimatedLoading from '../icons/AnimatedLoading';
-import DeleteIcon from '../icons/v0/Delete';
-import ExpandArrow from '../icons/v0/ExpandArrow';
-import Checkmark from '../icons/v1/Checkmark';
+import { AnimatedLoading } from '../icons/AnimatedLoading';
+import { SvgDelete, SvgExpandArrow } from '../icons/v0';
+import { SvgCheckmark } from '../icons/v1';
 import { type CSSProperties, styles, theme } from '../style';
 
-import Button from './common/Button';
-import Input from './common/Input';
-import Menu from './common/Menu';
-import Text from './common/Text';
-import View from './common/View';
-import FixedSizeList from './FixedSizeList';
+import { Button } from './common/Button';
+import { Input } from './common/Input';
+import { Menu } from './common/Menu';
+import { Text } from './common/Text';
+import { View } from './common/View';
+import { FixedSizeList } from './FixedSizeList';
 import { KeyHandlers } from './KeyHandlers';
 import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
-  type ConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 import { type Binding } from './spreadsheet';
-import useFormat from './spreadsheet/useFormat';
-import useSheetValue from './spreadsheet/useSheetValue';
+import { useFormat } from './spreadsheet/useFormat';
+import { useSheetValue } from './spreadsheet/useSheetValue';
 import { Tooltip, IntersectionBoundary } from './tooltips';
 
 export const ROW_HEIGHT = 32;
@@ -142,7 +140,9 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   value?: string;
   valueStyle?: CSSProperties;
   onExpose?: (name: string) => void;
-  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
+  privacyFilter?: ComponentProps<
+    typeof ConditionalPrivacyFilter
+  >['privacyFilter'];
 };
 export function Cell({
   width,
@@ -486,7 +486,7 @@ export function DeleteCell({ onDelete, style, ...props }: DeleteCellProps) {
         onDelete?.();
       }}
     >
-      {() => <DeleteIcon width={7} height={7} />}
+      {() => <SvgDelete width={7} height={7} />}
     </Cell>
   );
 }
@@ -650,7 +650,7 @@ export function SelectCell({
           clickBehavior="none"
           {...buttonProps}
         >
-          {selected && <Checkmark width={6} height={6} />}
+          {selected && <SvgCheckmark width={6} height={6} />}
         </CellButton>
       )}
     </Cell>
@@ -663,7 +663,9 @@ type SheetCellValueProps = {
   getValueStyle?: (value: string | number) => CSSProperties;
   formatExpr?: (value) => string;
   unformatExpr?: (value: string) => unknown;
-  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
+  privacyFilter?: ComponentProps<
+    typeof ConditionalPrivacyFilter
+  >['privacyFilter'];
 };
 
 type SheetCellProps = ComponentProps<typeof Cell> & {
@@ -799,7 +801,7 @@ export function SelectedItemsButton({ name, keyHandlers, items, onSelect }) {
         style={{ color: theme.pageTextPositive }}
         onClick={() => setMenuOpen(true)}
       >
-        <ExpandArrow
+        <SvgExpandArrow
           width={8}
           height={8}
           style={{ marginRight: 5, color: theme.pageText }}

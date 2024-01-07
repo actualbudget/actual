@@ -5,11 +5,11 @@ import React, {
 } from 'react';
 
 import { theme, type CSSProperties } from '../../style';
-import Block from '../common/Block';
-import View from '../common/View';
+import { Block } from '../common/Block';
+import { View } from '../common/View';
 
 import { accountNameStyle } from './Account';
-import ItemContent from './ItemContent';
+import { ItemContent } from './ItemContent';
 
 const fontWeight = 600;
 
@@ -25,7 +25,7 @@ type SecondaryItemProps = {
   indent?: number;
 };
 
-function SecondaryItem({
+export function SecondaryItem({
   Icon,
   title,
   style,
@@ -73,5 +73,3 @@ function SecondaryItem({
     </View>
   );
 }
-
-export default SecondaryItem;

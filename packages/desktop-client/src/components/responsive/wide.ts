@@ -1,8 +1,8 @@
-export { default as Budget } from '../budget';
+export { Budget } from '../budget';
 
-export { default as Schedules } from '../schedules';
+export { Schedules } from '../schedules';
 
-export { default as GoCardlessLink } from '../gocardless/GoCardlessLink';
+export { GoCardlessLink } from '../gocardless/GoCardlessLink';
 
-export { default as Accounts } from '../accounts/Account';
-export { default as Account } from '../accounts/Account';
+export { Account as Accounts } from '../accounts/Account';
+export { Account } from '../accounts/Account';

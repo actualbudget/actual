@@ -13,6 +13,4 @@ function pseudoRandom(): number {
   return pseudoRandomIterator;
 }
 
-const random = Platform.isPlaywright ? pseudoRandom : Math.random;
-
-export default random;
+export const random = Platform.isPlaywright ? pseudoRandom : Math.random;

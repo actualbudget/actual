@@ -8,9 +8,9 @@ import {
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 const AmountInput = memo(function AmountInput({
   focused,

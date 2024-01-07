@@ -67,7 +67,7 @@ function validateRule(rule: Partial<RuleEntity>) {
 }
 
 // Expose functions to the client
-const app = createApp<RulesHandlers>();
+export const app = createApp<RulesHandlers>();
 
 app.method('rule-validate', async function (rule) {
   const error = validateRule(rule);
@@ -153,5 +153,3 @@ app.method('rule-get', async function ({ id }) {
 app.method('rules-run', async function ({ transaction }) {
   return rules.runRules(transaction);
 });
-
-export default app;
