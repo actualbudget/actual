@@ -199,7 +199,7 @@ export function ConfigServer() {
               style={{ marginLeft: 15 }}
               onClick={oncreateDemoFile}
             >
-              Create test file
+              Create demo file
             </Button>
           </>
         )}
