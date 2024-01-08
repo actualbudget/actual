@@ -15,7 +15,7 @@ test.describe('Reports', () => {
     configurationPage = new ConfigurationPage(page);
 
     await page.goto('/');
-    await configurationPage.createDemoFile();
+    await configurationPage.createTestFile();
   });
 
   test.afterAll(async () => {

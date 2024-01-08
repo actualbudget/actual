@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-import { isElectron } from 'loot-core/src/shared/environment';
+import {
+  isNonProductionEnvironment,
+  isElectron,
+} from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
 import { useNavigate } from '../../hooks/useNavigate';
@@ -79,7 +82,7 @@ export function ConfigServer() {
     navigate('/');
   }
 
-  async function oncreateDemoFile() {
+  async function onCreateTestFile() {
     await setServerUrl(null);
     await createBudget({ testMode: true });
     window.__navigate('/');
@@ -194,13 +197,15 @@ export function ConfigServer() {
               Don’t use a server
             </Button>
 
-            <Button
-              type="primary"
-              style={{ marginLeft: 15 }}
-              onClick={oncreateDemoFile}
-            >
-              Create demo file
-            </Button>
+            {isNonProductionEnvironment() && (
+              <Button
+                type="primary"
+                style={{ marginLeft: 15 }}
+                onClick={onCreateTestFile}
+              >
+                Create test file
+              </Button>
+            )}
           </>
         )}
       </View>

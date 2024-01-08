@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 
 import * as actions from 'loot-core/src/client/actions';
+import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 import { useActions } from '../../hooks/useActions';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
@@ -337,14 +338,16 @@ export function BudgetList() {
           Create new file
         </Button>
 
+        {isNonProductionEnvironment() && (
           <Button
             type="primary"
             isSubmit={false}
             onClick={() => onCreate({ testMode: true })}
             style={{ marginLeft: 15 }}
           >
-            Create demo file
+            Create test file
           </Button>
+        )}
       </View>
     </View>
   );
