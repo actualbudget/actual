@@ -133,15 +133,12 @@ async function importTransactions(
   const payees = await actual.getPayees();
   const categories = await actual.getCategories();
   const incomeCatId = categories.find(cat => cat.name === 'Income').id;
-  const startingBalanceCatId = categories.find(
-    cat => cat.name === 'Starting Balances',
+  const startingBalanceCatId = categories.find(cat =>
+    equalsIgnoreCase(cat.name, 'Starting Balances'),
   ).id; //better way to do it?
 
-  const startingPayeeYNAB = data.payees.find(
-    payee =>
-      payee.name.localeCompare('Starting Balance', undefined, {
-        sensitivity: 'base',
-      }) === 0,
+  const startingPayeeYNAB = data.payees.find(payee =>
+    equalsIgnoreCase(payee.name, 'Starting Balance'),
   ).id;
 
   const transactionsGrouped = groupBy(data.transactions, 'account_id');
@@ -330,4 +327,12 @@ export function parseFile(buffer: Buffer): YNAB5.Budget {
 
 export function getBudgetName(_filepath: string, data: YNAB5.Budget) {
   return data.budget_name || data.name;
+}
+
+function equalsIgnoreCase(stringa: string, stringb: string): boolean {
+  return (
+    stringa.localeCompare(stringb, undefined, {
+      sensitivity: 'base',
+    }) === 0
+  );
 }
