@@ -1348,7 +1348,10 @@ handlers['save-global-prefs'] = async function (prefs) {
   }
   if ('autoUpdate' in prefs) {
     await asyncStorage.setItem('auto-update', '' + prefs.autoUpdate);
-    process.send({ type: 'shouldAutoUpdate', flag: prefs.autoUpdate });
+    process.parentPort.postMessage({
+      type: 'shouldAutoUpdate',
+      flag: prefs.autoUpdate,
+    });
   }
   if ('documentDir' in prefs) {
     if (await fs.exists(prefs.documentDir)) {
@@ -2235,7 +2238,7 @@ export async function initApp(isDev, socketName) {
 
   if (!isDev && !Platform.isMobile && !Platform.isWeb) {
     const autoUpdate = await asyncStorage.getItem('auto-update');
-    process.send({
+    process.parentPort.postMessage({
       type: 'shouldAutoUpdate',
       flag: autoUpdate == null || autoUpdate === 'true',
     });

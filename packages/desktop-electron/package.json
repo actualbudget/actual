@@ -50,11 +50,9 @@
     "electron-is-dev": "2.0.0",
     "electron-log": "4.4.8",
     "electron-updater": "6.1.7",
-    "get-port-please": "3.0.1",
     "loot-core": "*",
     "node-fetch": "^2.6.9",
-    "promise-retry": "^2.0.1",
-    "ws": "8.13.0"
+    "promise-retry": "^2.0.1"
   },
   "devDependencies": {
     "@electron/notarize": "2.2.0",
