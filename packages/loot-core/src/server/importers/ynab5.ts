@@ -39,16 +39,13 @@ async function importCategories(
   // so it's already handled.
 
   const categories = await actual.getCategories();
-  const incomeCatId = categories.find(cat =>
-    equalsIgnoreCase(cat.name, 'Income'),
-  ).id;
+  const incomeCatId = findIdByName(categories, 'Income');
   const ynabIncomeCategories = ['To be Budgeted', 'Inflow: Ready to Assign'];
 
   function checkSpecialCat(cat) {
     if (
-      data.category_groups.find(group =>
-        equalsIgnoreCase(group.name, 'Internal Master Category'),
-      ).id
+      cat.category_group_id ===
+      findIdByName(data.category_groups, 'Internal Master Category')
     ) {
       if (
         ynabIncomeCategories.some(ynabIncomeCategory =>
@@ -61,9 +58,7 @@ async function importCategories(
       }
     } else if (
       cat.category_group_id ===
-      data.category_groups.find(group =>
-        equalsIgnoreCase(group.name, 'Credit Card Payments'),
-      ).id
+      findIdByName(data.category_groups, 'Credit Card Payments')
     ) {
       return 'creditCard';
     }
@@ -138,16 +133,10 @@ async function importTransactions(
 ) {
   const payees = await actual.getPayees();
   const categories = await actual.getCategories();
-  const incomeCatId = categories.find(cat =>
-    equalsIgnoreCase(cat.name, 'Income'),
-  ).id;
-  const startingBalanceCatId = categories.find(cat =>
-    equalsIgnoreCase(cat.name, 'Starting Balances'),
-  ).id; //better way to do it?
+  const incomeCatId = findIdByName(categories, 'Income');
+  const startingBalanceCatId = findIdByName(categories, 'Starting Balances'); //better way to do it?
 
-  const startingPayeeYNAB = data.payees.find(payee =>
-    equalsIgnoreCase(payee.name, 'Starting Balance'),
-  ).id;
+  const startingPayeeYNAB = findIdByName(data.payees, 'Starting Balance');
 
   const transactionsGrouped = groupBy(data.transactions, 'account_id');
   const subtransactionsGrouped = groupBy(
@@ -267,12 +256,14 @@ async function importBudgets(
 
   const budgets = sortByKey(data.months, 'month');
 
-  const internalCatIdYnab = data.category_groups.find(group =>
-    equalsIgnoreCase(group.name, 'Internal Master Category'),
-  ).id;
-  const creditcardCatIdYnab = data.category_groups.find(group =>
-    equalsIgnoreCase(group.name, 'Credit Card Payments'),
-  ).id;
+  const internalCatIdYnab = findIdByName(
+    data.category_groups,
+    'Internal Master Category',
+  );
+  const creditcardCatIdYnab = findIdByName(
+    data.category_groups,
+    'Credit Card Payments',
+  );
 
   await actual.batchBudgetUpdates(async () => {
     for (const budget of budgets) {
@@ -343,4 +334,12 @@ function equalsIgnoreCase(stringa: string, stringb: string): boolean {
       sensitivity: 'base',
     }) === 0
   );
+}
+
+function findByNameIgnoreCase(categories: YNAB5.CategoryGroup[], name: string) {
+  return categories.find(cat => equalsIgnoreCase(cat.name, name));
+}
+
+function findIdByName(categories: YNAB5.CategoryGroup[], name: string) {
+  return findByNameIgnoreCase(categories, name).id;
 }
