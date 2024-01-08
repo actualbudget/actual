@@ -189,9 +189,11 @@ export const CategoryMonth = memo(function CategoryMonth({
           <View
             style={{
               flexShrink: 0,
-              marginRight: 0,
-              marginLeft: 3,
+              paddingLeft: 3,
               justifyContent: 'center',
+              borderTopWidth: 1,
+              borderBottomWidth: 1,
+              borderColor: theme.tableBorder,
             }}
           >
             <Button
