@@ -436,6 +436,11 @@ export type Transaction = {
   remittanceInformationStructured?: string;
 
   /**
+   * Reference as contained in the structured remittance array reference structure
+   */
+  remittanceInformationStructuredArray?: string[];
+
+  /**
    * Reference as contained in the unstructured remittance reference structure
    */
   remittanceInformationUnstructured?: string;
