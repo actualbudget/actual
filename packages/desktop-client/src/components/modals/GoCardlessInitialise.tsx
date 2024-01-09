@@ -36,11 +36,11 @@ export const GoCardlessInitialise = ({
 
     await Promise.all([
       send('secret-set', {
-        name: 'nordigen_secretId',
+        name: 'gocardless_secretId',
         value: secretId,
       }),
       send('secret-set', {
-        name: 'nordigen_secretKey',
+        name: 'gocardless_secretKey',
         value: secretKey,
       }),
     ]);
