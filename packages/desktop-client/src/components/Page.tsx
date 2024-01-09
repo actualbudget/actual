@@ -3,8 +3,8 @@ import React, { type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme, styles, type CSSProperties } from '../style';
 
-import Text from './common/Text';
-import View from './common/View';
+import { Text } from './common/Text';
+import { View } from './common/View';
 
 type PageHeaderProps = {
   title: ReactNode;

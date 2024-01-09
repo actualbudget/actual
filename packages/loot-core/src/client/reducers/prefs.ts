@@ -8,10 +8,7 @@ const initialState: PrefsState = {
   global: null,
 };
 
-export default function update(
-  state = initialState,
-  action: Action,
-): PrefsState {
+export function update(state = initialState, action: Action): PrefsState {
   switch (action.type) {
     case constants.SET_PREFS:
       if (action.prefs) {

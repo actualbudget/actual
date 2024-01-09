@@ -989,10 +989,21 @@ export function isAggregateQuery(queryState) {
   });
 }
 
-type SchemaConfig = {
-  tableViews?: Record<string, unknown> | ((...args: unknown[]) => unknown);
+export type SchemaConfig = {
+  tableViews?:
+    | Record<string, unknown>
+    | ((name: string, config: { withDead; isJoin; tableOptions }) => unknown);
   tableFilters?: (name: string) => unknown[];
-  customizeQuery?: <T>(queryString: T) => T;
+  customizeQuery?: <T extends { table: string; orderExpressions: unknown[] }>(
+    queryString: T,
+  ) => T;
+  views?: Record<
+    string,
+    {
+      fields?: Record<string, string>;
+      [key: `v_${string}`]: string | ((internalFields, publicFields) => string);
+    }
+  >;
 };
 export function compileQuery(
   queryState,

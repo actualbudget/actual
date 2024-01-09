@@ -12,9 +12,10 @@ import {
   useCachedSchedules,
 } from 'loot-core/src/client/data-hooks/schedules';
 import * as queries from 'loot-core/src/client/queries';
-import q, { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery, pagedQuery } from 'loot-core/src/client/query-helpers';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import { currentDay } from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   deleteTransaction,
@@ -26,13 +27,13 @@ import {
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
 import { authorizeBank } from '../../gocardless';
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, theme } from '../../style';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
-import TransactionList from '../transactions/TransactionList';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
+import { TransactionList } from '../transactions/TransactionList';
 import {
   SplitsExpandedProvider,
   useSplitsExpanded,
@@ -462,6 +463,7 @@ class AccountInternal extends PureComponent {
   onImport = async () => {
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
+    const categories = await this.props.getCategories();
 
     if (account) {
       const res = await window.Actual.openFileDialog({
@@ -476,6 +478,7 @@ class AccountInternal extends PureComponent {
       if (res) {
         this.props.pushModal('import-transactions', {
           accountId,
+          categories,
           filename: res[0],
           onImported: didChange => {
             if (didChange) {
@@ -864,7 +867,12 @@ class AccountInternal extends PureComponent {
       }
     };
 
-    if (name === 'amount' || name === 'payee' || name === 'account') {
+    if (
+      name === 'amount' ||
+      name === 'payee' ||
+      name === 'account' ||
+      name === 'date'
+    ) {
       const { data } = await runQuery(
         q('transactions')
           .filter({ id: { $oneof: ids }, reconciled: true })
@@ -1473,7 +1481,7 @@ function AccountHack(props) {
   );
 }
 
-export default function Account() {
+export function Account() {
   const params = useParams();
   const location = useLocation();
 

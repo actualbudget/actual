@@ -12,7 +12,7 @@ type AnchorLinkProps = {
   children?: ReactNode;
 };
 
-export default function AnchorLink({
+export function AnchorLink({
   to,
   style,
   activeStyle,

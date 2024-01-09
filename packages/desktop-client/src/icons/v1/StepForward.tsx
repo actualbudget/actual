@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgStepForward = (props: SVGProps<SVGSVGElement>) => (
+export const SvgStepForward = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -13,4 +13,3 @@ const SvgStepForward = (props: SVGProps<SVGSVGElement>) => (
     <path d="M13 5h3v10h-3V5zM4 5l9 5-9 5V5z" fill="currentColor" />
   </svg>
 );
-export default SvgStepForward;

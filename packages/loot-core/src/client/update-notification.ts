@@ -1,4 +1,4 @@
-export default async function checkForUpdateNotification(
+export async function checkForUpdateNotification(
   addNotification,
   getIsOutdated,
   getLatestVersion,

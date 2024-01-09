@@ -2,18 +2,18 @@ import React, { useMemo } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useCategories from '../../../hooks/useCategories';
+import { useCategories } from '../../../hooks/useCategories';
 import { styles } from '../../../style';
-import Block from '../../common/Block';
-import View from '../../common/View';
-import DateRange from '../DateRange';
-import BarGraph from '../graphs/BarGraph';
-import LoadingIndicator from '../LoadingIndicator';
-import ReportCard from '../ReportCard';
-import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
-import useReport from '../useReport';
+import { Block } from '../../common/Block';
+import { View } from '../../common/View';
+import { DateRange } from '../DateRange';
+import { BarGraph } from '../graphs/BarGraph';
+import { LoadingIndicator } from '../LoadingIndicator';
+import { ReportCard } from '../ReportCard';
+import { createSpreadsheet as defaultSpreadsheet } from '../spreadsheets/default-spreadsheet';
+import { useReport } from '../useReport';
 
-function CustomReportCard() {
+export function CustomReportCard() {
   const categories = useCategories();
 
   const endDate = monthUtils.currentMonth();
@@ -52,7 +52,7 @@ function CustomReportCard() {
           data={data}
           compact={true}
           groupBy={groupBy}
-          balanceTypeOp={'totalDebts'}
+          balanceTypeOp="totalDebts"
           style={{ height: 'auto', flex: 1 }}
         />
       ) : (
@@ -61,5 +61,3 @@ function CustomReportCard() {
     </ReportCard>
   );
 }
-
-export default CustomReportCard;

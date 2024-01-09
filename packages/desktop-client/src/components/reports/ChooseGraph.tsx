@@ -1,19 +1,19 @@
 import React, { useRef } from 'react';
 
-import View from '../common/View';
+import { View } from '../common/View';
 
 import { type DataEntity, type Month } from './entities';
-import AreaGraph from './graphs/AreaGraph';
-import BarGraph from './graphs/BarGraph';
-import BarLineGraph from './graphs/BarLineGraph';
-import DonutGraph from './graphs/DonutGraph';
-import LineGraph from './graphs/LineGraph';
-import StackedBarGraph from './graphs/StackedBarGraph';
+import { AreaGraph } from './graphs/AreaGraph';
+import { BarGraph } from './graphs/BarGraph';
+import { BarLineGraph } from './graphs/BarLineGraph';
+import { DonutGraph } from './graphs/DonutGraph';
+import { LineGraph } from './graphs/LineGraph';
+import { StackedBarGraph } from './graphs/StackedBarGraph';
+import { ReportTable } from './graphs/tableGraph/ReportTable';
+import { ReportTableHeader } from './graphs/tableGraph/ReportTableHeader';
+import { ReportTableList } from './graphs/tableGraph/ReportTableList';
+import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
-import ReportTable from './ReportTable';
-import ReportTableHeader from './ReportTableHeader';
-import ReportTableList from './ReportTableList';
-import ReportTableTotals from './ReportTableTotals';
 
 type ChooseGraphProps = {
   data: DataEntity;
@@ -27,7 +27,7 @@ type ChooseGraphProps = {
   months: Month[];
 };
 
-function ChooseGraph({
+export function ChooseGraph({
   data,
   mode,
   graphType,
@@ -48,9 +48,19 @@ function ChooseGraph({
   const listScrollRef = useRef<HTMLDivElement>(null);
   const totalScrollRef = useRef<HTMLDivElement>(null);
 
-  const handleScrollTotals = scroll => {
-    headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
-    listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+  const handleScroll = scroll => {
+    if (scroll.target.id === 'header') {
+      totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    }
+    if (scroll.target.id === 'total') {
+      headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+      listScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    }
+    if (scroll.target.id === 'list') {
+      headerScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+      totalScrollRef.current.scrollLeft = scroll.target.scrollLeft;
+    }
   };
 
   if (graphType === 'AreaGraph') {
@@ -96,7 +106,8 @@ function ChooseGraph({
       <View>
         <ReportTableHeader
           headerScrollRef={headerScrollRef}
-          interval={mode === 'time' && months}
+          handleScroll={handleScroll}
+          interval={mode === 'time' && data.monthData}
           scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
@@ -104,6 +115,7 @@ function ChooseGraph({
         <ReportTable
           saveScrollWidth={saveScrollWidth}
           listScrollRef={listScrollRef}
+          handleScroll={handleScroll}
         >
           <ReportTableList
             data={data}
@@ -116,7 +128,7 @@ function ChooseGraph({
         </ReportTable>
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
-          handleScrollTotals={handleScrollTotals}
+          handleScroll={handleScroll}
           scrollWidth={scrollWidth}
           data={data}
           mode={mode}
@@ -127,5 +139,3 @@ function ChooseGraph({
     );
   }
 }
-
-export default ChooseGraph;

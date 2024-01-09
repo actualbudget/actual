@@ -31,19 +31,16 @@ export type MonthData = {
   totalTotals: number;
 };
 
-/* this will be used in a future PR
-
-export type GroupedEntity = {
+type GroupedEntity = {
   id: string;
   name: string;
   date?: string;
-  monthData: Array<MonthData>;
-  categories?: Array<ItemEntity>;
+  monthData: MonthData[];
+  categories?: ItemEntity[];
   totalAssets: number;
   totalDebts: number;
   totalTotals: number;
 };
-*/
 
 export type Month = {
   month: string;

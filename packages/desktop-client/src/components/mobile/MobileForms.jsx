@@ -3,10 +3,10 @@ import { forwardRef } from 'react';
 import { css } from 'glamor';
 
 import { theme, styles } from '../../style';
-import Button from '../common/Button';
-import Input from '../common/Input';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 const FIELD_HEIGHT = 40;
 
@@ -18,7 +18,7 @@ export function FieldLabel({ title, flush, style }) {
         marginTop: flush ? 0 : 25,
         fontSize: 13,
         color: theme.tableRowHeaderText,
-        paddingLeft: styles.mobileEditingPadding,
+        padding: `0 ${styles.mobileEditingPadding}px`,
         textTransform: 'uppercase',
         userSelect: 'none',
         ...style,
@@ -35,7 +35,6 @@ const valueStyle = {
   marginLeft: 8,
   marginRight: 8,
   height: FIELD_HEIGHT,
-  paddingHorizontal: styles.mobileEditingPadding,
 };
 
 export const InputField = forwardRef(function InputField(
@@ -44,7 +43,7 @@ export const InputField = forwardRef(function InputField(
 ) {
   return (
     <Input
-      ref={ref}
+      inputRef={ref}
       autoCorrect="false"
       autoCapitalize="none"
       disabled={disabled}

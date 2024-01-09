@@ -8,7 +8,7 @@ import {
   useNavigate as useNavigateReactRouter,
 } from 'react-router-dom';
 
-export default function useNavigate(): NavigateFunction {
+export function useNavigate(): NavigateFunction {
   const location = useLocation();
   const navigate = useNavigateReactRouter();
   return useCallback(

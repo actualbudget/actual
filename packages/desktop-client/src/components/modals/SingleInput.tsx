@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
+import { styles } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
-import FormError from '../common/FormError';
-import InitialFocus from '../common/InitialFocus';
-import Input from '../common/Input';
-import Modal from '../common/Modal';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { FormError } from '../common/FormError';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
+import { Modal } from '../common/Modal';
+import { View } from '../common/View';
 
 type SingleInputProps = {
   modalProps: Partial<CommonModalProps>;
@@ -17,7 +18,7 @@ type SingleInputProps = {
   inputPlaceholder?: string;
 };
 
-function SingleInput({
+export function SingleInput({
   modalProps,
   title,
   buttonText,
@@ -53,6 +54,7 @@ function SingleInput({
               <InitialFocus>
                 <Input
                   placeholder={inputPlaceholder}
+                  style={{ ...styles.mediumText }}
                   onUpdate={setValue}
                   onEnter={e => _onSubmit(e.currentTarget.value)}
                 />
@@ -68,16 +70,23 @@ function SingleInput({
           <View
             style={{
               flexDirection: 'row',
+              alignContent: 'center',
               justifyContent: 'center',
-              paddingBottom: 15,
             }}
           >
-            <Button onPointerUp={e => _onSubmit(value)}>{buttonText}</Button>
+            <Button
+              type="primary"
+              style={{
+                ...styles.mediumText,
+                flexBasis: '50%',
+              }}
+              onPointerUp={e => _onSubmit(value)}
+            >
+              {buttonText}
+            </Button>
           </View>
         </>
       )}
     </Modal>
   );
 }
-
-export default SingleInput;

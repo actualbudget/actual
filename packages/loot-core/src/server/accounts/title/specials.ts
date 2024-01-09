@@ -1,4 +1,4 @@
-const intended = [
+export const specials = [
   'CLI',
   'API',
   'HTTP',
@@ -19,5 +19,3 @@ const intended = [
   'Next.js',
   'Node.js',
 ];
-
-export default intended;

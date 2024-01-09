@@ -1,6 +1,6 @@
 import * as injected from './injected';
 
-export { default as q } from './app/query';
+export { q } from './app/query';
 
 function send(name, args) {
   return injected.send(name, args);
