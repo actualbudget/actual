@@ -50,8 +50,8 @@ export function WelcomeScreen() {
         </Paragraph>
         <Paragraph style={{ color: theme.pageTextLight }}>
           Get started by importing an existing budget file from Actual or
-          another budgeting app, or start fresh with an empty budget. You can
-          always create or import another budget later.
+          another budgeting app, create a demo budget file, or start fresh with
+          an empty budget. You can always create or import another budget later.
         </Paragraph>
       </View>
       <View
@@ -63,9 +63,20 @@ export function WelcomeScreen() {
         }}
       >
         <Button onClick={() => pushModal('import')}>Import my budget</Button>
-        <Button type="primary" onClick={() => createBudget()}>
-          Start fresh
-        </Button>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 10,
+          }}
+        >
+          <Button onClick={() => createBudget({ testMode: true })}>
+            View demo
+          </Button>
+          <Button type="primary" onClick={() => createBudget()}>
+            Start fresh
+          </Button>
+        </View>
       </View>
     </View>
   );
