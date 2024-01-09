@@ -202,6 +202,26 @@ module.exports = {
       },
     },
     {
+      files: ['./packages/desktop-client/**/*'],
+      excludedFiles: [
+        './packages/desktop-client/src/hooks/useNavigate.{ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'warn',
+          {
+            patterns: [
+              {
+                group: ['react-router-dom'],
+                importNames: ['useNavigate'],
+                message: 'Please use Actual’s useNavigate() hook instead.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
       files: ['./packages/loot-core/src/**/*'],
       rules: {
         'no-restricted-imports': [
