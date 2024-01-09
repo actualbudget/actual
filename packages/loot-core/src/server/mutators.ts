@@ -1,6 +1,6 @@
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import { sequential } from '../shared/async';
-import { type HandlerFunctions } from '../types/handlers';
+import { type HandlerFunctions, type Handlers } from '../types/handlers';
 
 const runningMethods = new Set();
 
@@ -37,11 +37,11 @@ function wait(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
-export async function runHandler(
-  handler,
-  args?,
+export async function runHandler<T extends Handlers[keyof Handlers]>(
+  handler: T,
+  args?: Parameters<T>[0],
   { undoTag, name }: { undoTag?; name? } = {},
-) {
+): Promise<ReturnType<T>> {
   // For debug reasons, track the latest handlers that have been
   // called
   _latestHandlerNames.push(name);
