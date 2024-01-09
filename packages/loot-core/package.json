@@ -24,7 +24,7 @@
     "@types/adm-zip": "^0.5.0",
     "absurd-sql": "0.0.54",
     "assert": "^2.0.0",
-    "better-sqlite3": "^9.1.1",
+    "better-sqlite3": "^9.2.2",
     "browserify-zlib": "^0.2.0",
     "core-js": "^3.8.3",
     "csv-parse": "^4.10.1",
