@@ -23,9 +23,9 @@ import { useCategories } from '../../hooks/useCategories';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme, styles } from '../../style';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 import { AccountDetails } from './MobileAccountDetails';
 
