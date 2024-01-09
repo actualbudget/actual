@@ -16,7 +16,7 @@ const SORTED_BALANCE_TYPE_LIST = [
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
-  institutionIds: ['SPARNORD_SPNODK22'],
+  institutionIds: ['SPARNORD_SPNODK22', 'LAGERNES_BANK_LAPNDKK1'],
 
   normalizeAccount(account) {
     return {
@@ -33,7 +33,7 @@ export default {
   },
 
   /**
-   * Spar Nord only gives information regarding the transaction in additionalInformation
+   * Banks on the BEC backend only give information regarding the transaction in additionalInformation
    */
   normalizeTransaction(transaction, _booked) {
     return {
