@@ -19,12 +19,12 @@ import {
   ungroupTransactions,
 } from 'loot-core/src/shared/transactions';
 
-import useCategories from '../../hooks/useCategories';
-import useNavigate from '../../hooks/useNavigate';
+import { useCategories } from '../../hooks/useCategories';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { theme } from '../../style';
 
-import AccountDetails from './MobileAccountDetails';
+import { AccountDetails } from './MobileAccountDetails';
 
 const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   let filter = queries.getAccountFilter(id, '_account');
@@ -68,7 +68,7 @@ function PreviewTransactions({ accountId, children }) {
 
 let paged;
 
-export default function Account(props) {
+export function Account(props) {
   const accounts = useSelector(state => state.queries.accounts);
 
   const navigate = useNavigate();

@@ -5,37 +5,40 @@ import { useLocation } from 'react-router-dom';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
-import useCategories from '../hooks/useCategories';
-import useSyncServerStatus from '../hooks/useSyncServerStatus';
+import { useCategories } from '../hooks/useCategories';
+import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 import { type CommonModalProps } from '../types/modals';
 
-import CloseAccount from './modals/CloseAccount';
-import ConfirmCategoryDelete from './modals/ConfirmCategoryDelete';
-import ConfirmTransactionEdit from './modals/ConfirmTransactionEdit';
-import CreateAccount from './modals/CreateAccount';
-import CreateEncryptionKey from './modals/CreateEncryptionKey';
-import CreateLocalAccount from './modals/CreateLocalAccount';
-import EditField from './modals/EditField';
-import EditRule from './modals/EditRule';
-import FixEncryptionKey from './modals/FixEncryptionKey';
-import GoCardlessExternalMsg from './modals/GoCardlessExternalMsg';
-import GoCardlessInitialise from './modals/GoCardlessInitialise';
-import ImportTransactions from './modals/ImportTransactions';
-import LoadBackup from './modals/LoadBackup';
-import ManageRulesModal from './modals/ManageRulesModal';
-import MergeUnusedPayees from './modals/MergeUnusedPayees';
-import PlaidExternalMsg from './modals/PlaidExternalMsg';
-import ReportBudgetSummary from './modals/ReportBudgetSummary';
-import RolloverBudgetSummary from './modals/RolloverBudgetSummary';
-import SelectLinkedAccounts from './modals/SelectLinkedAccounts';
-import SingleInput from './modals/SingleInput';
-import SwitchBudgetType from './modals/SwitchBudgetType';
-import DiscoverSchedules from './schedules/DiscoverSchedules';
-import ScheduleDetails from './schedules/EditSchedule';
-import ScheduleLink from './schedules/LinkSchedule';
-import PostsOfflineNotification from './schedules/PostsOfflineNotification';
+import { CategoryGroupMenu } from './modals/CategoryGroupMenu';
+import { CategoryMenu } from './modals/CategoryMenu';
+import { CloseAccount } from './modals/CloseAccount';
+import { ConfirmCategoryDelete } from './modals/ConfirmCategoryDelete';
+import { ConfirmTransactionEdit } from './modals/ConfirmTransactionEdit';
+import { CreateAccount } from './modals/CreateAccount';
+import { CreateEncryptionKey } from './modals/CreateEncryptionKey';
+import { CreateLocalAccount } from './modals/CreateLocalAccount';
+import { EditField } from './modals/EditField';
+import { EditRule } from './modals/EditRule';
+import { FixEncryptionKey } from './modals/FixEncryptionKey';
+import { GoCardlessExternalMsg } from './modals/GoCardlessExternalMsg';
+import { GoCardlessInitialise } from './modals/GoCardlessInitialise';
+import { ImportTransactions } from './modals/ImportTransactions';
+import { LoadBackup } from './modals/LoadBackup';
+import { ManageRulesModal } from './modals/ManageRulesModal';
+import { MergeUnusedPayees } from './modals/MergeUnusedPayees';
+import { Notes } from './modals/Notes';
+import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
+import { ReportBudgetSummary } from './modals/ReportBudgetSummary';
+import { RolloverBudgetSummary } from './modals/RolloverBudgetSummary';
+import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
+import { SingleInput } from './modals/SingleInput';
+import { SwitchBudgetType } from './modals/SwitchBudgetType';
+import { DiscoverSchedules } from './schedules/DiscoverSchedules';
+import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
+import { ScheduleDetails } from './schedules/ScheduleDetails';
+import { ScheduleLink } from './schedules/ScheduleLink';
 
-export default function Modals() {
+export function Modals() {
   const modalStack = useSelector(state => state.modals.modalStack);
   const isHidden = useSelector(state => state.modals.isHidden);
   const accounts = useSelector(state => state.queries.accounts);
@@ -232,6 +235,7 @@ export default function Modals() {
               modalProps={modalProps}
               name={options.name}
               onSubmit={options.onSubmit}
+              onClose={options.onClose}
             />
           );
 
@@ -240,7 +244,7 @@ export default function Modals() {
             <SingleInput
               modalProps={modalProps}
               title="New Category"
-              inputPlaceholder="Name"
+              inputPlaceholder="Category name"
               buttonText="Add"
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
@@ -252,7 +256,7 @@ export default function Modals() {
             <SingleInput
               modalProps={modalProps}
               title="New Category Group"
-              inputPlaceholder="Name"
+              inputPlaceholder="Category group name"
               buttonText="Add"
               onValidate={options.onValidate}
               onSubmit={options.onSubmit}
@@ -322,6 +326,45 @@ export default function Modals() {
               key={name}
               modalProps={modalProps}
               onSwitch={options?.onSwitch}
+            />
+          );
+
+        case 'category-menu':
+          return (
+            <CategoryMenu
+              key={name}
+              modalProps={modalProps}
+              categoryId={options.categoryId}
+              onSave={options.onSave}
+              onEditNotes={options.onEditNotes}
+              onDelete={options.onDelete}
+              onClose={options.onClose}
+            />
+          );
+
+        case 'category-group-menu':
+          return (
+            <CategoryGroupMenu
+              key={name}
+              modalProps={modalProps}
+              groupId={options.groupId}
+              onSave={options.onSave}
+              onAddCategory={options.onAddCategory}
+              onEditNotes={options.onEditNotes}
+              onSaveNotes={options.onSaveNotes}
+              onDelete={options.onDelete}
+              onClose={options.onClose}
+            />
+          );
+
+        case 'notes':
+          return (
+            <Notes
+              key={name}
+              modalProps={modalProps}
+              id={options.id}
+              name={options.name}
+              onSave={options.onSave}
             />
           );
 

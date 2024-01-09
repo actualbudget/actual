@@ -1,11 +1,11 @@
 import React, { type ComponentProps } from 'react';
 
 import { theme } from '../../../../style';
-import type CellValue from '../../../spreadsheet/CellValue';
-import useSheetValue from '../../../spreadsheet/useSheetValue';
+import { type CellValue } from '../../../spreadsheet/CellValue';
+import { useSheetValue } from '../../../spreadsheet/useSheetValue';
 
-import fraction from './fraction';
-import PieProgress from './PieProgress';
+import { fraction } from './fraction';
+import { PieProgress } from './PieProgress';
 
 type ExpenseProgressProps = {
   current: ComponentProps<typeof CellValue>['binding'];
@@ -34,7 +34,7 @@ export function ExpenseProgress({ current, target }: ExpenseProgressProps) {
     <PieProgress
       progress={frac}
       color={over ? theme.errorText : theme.noticeTextLight}
-      backgroundColor={over ? theme.errorBackground : theme.pageBackground}
+      backgroundColor={over ? theme.errorBackground : theme.tableBackground}
       style={{ width: 20, height: 20 }}
     />
   );

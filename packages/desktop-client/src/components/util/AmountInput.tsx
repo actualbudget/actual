@@ -1,69 +1,60 @@
-import React, { type Ref, useRef, useState, useEffect } from 'react';
+import React, {
+  type Ref,
+  useRef,
+  useState,
+  useEffect,
+  type FocusEventHandler,
+} from 'react';
 
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
-import Add from '../../icons/v1/Add';
-import Subtract from '../../icons/v1/Subtract';
+import { SvgAdd, SvgSubtract } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
-import Button from '../common/Button';
-import InputWithContent from '../common/InputWithContent';
-import View from '../common/View';
-import useFormat from '../spreadsheet/useFormat';
+import { Button } from '../common/Button';
+import { InputWithContent } from '../common/InputWithContent';
+import { View } from '../common/View';
+import { useFormat } from '../spreadsheet/useFormat';
 
 type AmountInputProps = {
   id?: string;
   inputRef?: Ref<HTMLInputElement>;
-  initialValue: number;
+  value: number;
   zeroSign?: '-' | '+';
-  onChange?: (value: number) => void;
-  onBlur?: () => void;
+  onChange?: (value: string) => void;
+  onFocus?: FocusEventHandler<HTMLInputElement>;
+  onBlur?: FocusEventHandler<HTMLInputElement>;
+  onUpdate?: (amount: number) => void;
   style?: CSSProperties;
   textStyle?: CSSProperties;
   focused?: boolean;
+  disabled?: boolean;
 };
 
 export function AmountInput({
   id,
   inputRef,
-  initialValue,
+  value: initialValue,
   zeroSign = '-', // + or -
-  onChange,
+  onFocus,
   onBlur,
+  onChange,
+  onUpdate,
   style,
   textStyle,
   focused,
+  disabled = false,
+  ...props
 }: AmountInputProps) {
   const format = useFormat();
-  const [negative, setNegative] = useState(
-    (initialValue === 0 && zeroSign === '-') || initialValue < 0,
-  );
+  const negative = (initialValue === 0 && zeroSign === '-') || initialValue < 0;
 
-  const initialValueAbsolute = format(Math.abs(initialValue), 'financial');
+  const initialValueAbsolute = format(Math.abs(initialValue || 0), 'financial');
   const [value, setValue] = useState(initialValueAbsolute);
   useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
 
   const buttonRef = useRef();
-
-  function onSwitch() {
-    setNegative(!negative);
-    fireChange(value, !negative);
-  }
-
-  function fireChange(val, neg) {
-    const valueOrInitial = Math.abs(
-      amountToInteger(evalArithmetic(val, initialValueAbsolute)),
-    );
-    const amount = neg ? valueOrInitial * -1 : valueOrInitial;
-
-    onChange?.(amount);
-  }
-
-  function onInputAmountChange(value) {
-    setValue(value ? value : '');
-  }
-
   const ref = useRef<HTMLInputElement>();
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
 
@@ -73,11 +64,31 @@ export function AmountInput({
     }
   }, [focused]);
 
+  function onSwitch() {
+    fireUpdate(!negative);
+  }
+
+  function getAmount(negate) {
+    const valueOrInitial = Math.abs(
+      amountToInteger(evalArithmetic(value, initialValueAbsolute)),
+    );
+    return negate ? valueOrInitial * -1 : valueOrInitial;
+  }
+
+  function onInputTextChange(val) {
+    setValue(val ? val : '');
+    onChange?.(val);
+  }
+
+  function fireUpdate(negate) {
+    onUpdate?.(getAmount(negate));
+  }
+
   function onInputAmountBlur(e) {
-    fireChange(value, negative);
     if (!ref.current?.contains(e.relatedTarget)) {
-      onBlur?.();
+      fireUpdate(negative);
     }
+    onBlur?.(e);
   }
 
   return (
@@ -88,6 +99,7 @@ export function AmountInput({
       leftContent={
         <Button
           type="bare"
+          disabled={disabled}
           aria-label={`Make ${negative ? 'positive' : 'negative'}`}
           style={{ padding: '0 7px' }}
           onPointerUp={onSwitch}
@@ -95,24 +107,25 @@ export function AmountInput({
           ref={buttonRef}
         >
           {negative ? (
-            <Subtract style={{ width: 8, height: 8, color: 'inherit' }} />
+            <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
           ) : (
-            <Add style={{ width: 8, height: 8, color: 'inherit' }} />
+            <SvgAdd style={{ width: 8, height: 8, color: 'inherit' }} />
           )}
         </Button>
       }
       value={value}
+      disabled={disabled}
       focused={focused}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
       inputStyle={{ paddingLeft: 0, ...textStyle }}
       onKeyUp={e => {
         if (e.key === 'Enter') {
-          fireChange(value, negative);
-          onBlur?.();
+          fireUpdate(negative);
         }
       }}
-      onUpdate={onInputAmountChange}
+      onUpdate={onInputTextChange}
       onBlur={onInputAmountBlur}
+      onFocus={onFocus}
     />
   );
 }
@@ -124,8 +137,8 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <AmountInput
-        initialValue={num1}
-        onChange={value => {
+        value={num1}
+        onUpdate={value => {
           setNum1(value);
           onChange({ num1: value, num2 });
         }}
@@ -133,8 +146,8 @@ export function BetweenAmountInput({ defaultValue, onChange }) {
       />
       <View style={{ margin: '0 5px' }}>and</View>
       <AmountInput
-        initialValue={num2}
-        onChange={value => {
+        value={num2}
+        onUpdate={value => {
           setNum2(value);
           onChange({ num1, num2: value });
         }}

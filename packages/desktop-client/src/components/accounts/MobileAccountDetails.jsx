@@ -1,18 +1,18 @@
 import React, { useState, useMemo } from 'react';
 
 import { useActions } from '../../hooks/useActions';
-import Add from '../../icons/v1/Add';
-import SearchAlternate from '../../icons/v2/SearchAlternate';
+import { SvgAdd } from '../../icons/v1';
+import { SvgSearchAlternate } from '../../icons/v2';
 import { theme } from '../../style';
-import ButtonLink from '../common/ButtonLink';
-import InputWithContent from '../common/InputWithContent';
-import Label from '../common/Label';
-import View from '../common/View';
-import MobileBackButton from '../MobileBackButton';
+import { ButtonLink } from '../common/ButtonLink';
+import { InputWithContent } from '../common/InputWithContent';
+import { Label } from '../common/Label';
+import { View } from '../common/View';
+import { MobileBackButton } from '../MobileBackButton';
 import { Page } from '../Page';
-import PullToRefresh from '../responsive/PullToRefresh';
-import CellValue from '../spreadsheet/CellValue';
-import useSheetValue from '../spreadsheet/useSheetValue';
+import { PullToRefresh } from '../responsive/PullToRefresh';
+import { CellValue } from '../spreadsheet/CellValue';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { TransactionList } from '../transactions/MobileTransaction';
 
 function TransactionSearchInput({ accountName, onSearch }) {
@@ -31,7 +31,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
     >
       <InputWithContent
         leftContent={
-          <SearchAlternate
+          <SvgSearchAlternate
             style={{
               width: 13,
               height: 13,
@@ -62,7 +62,7 @@ function TransactionSearchInput({ accountName, onSearch }) {
   );
 }
 
-export default function AccountDetails({
+export function AccountDetails({
   account,
   prependTransactions,
   transactions,
@@ -107,7 +107,7 @@ export default function AccountDetails({
           }}
           activeStyle={{ background: 'transparent' }}
         >
-          <Add width={20} height={20} />
+          <SvgAdd width={20} height={20} />
         </ButtonLink>
       }
       padding={0}

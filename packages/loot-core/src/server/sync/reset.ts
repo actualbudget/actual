@@ -6,7 +6,7 @@ import * as db from '../db';
 import { runMutator } from '../mutators';
 import * as prefs from '../prefs';
 
-export default async function resetSync(
+export async function resetSync(
   keyState?,
 ): Promise<{ error?: { reason: string; meta?: unknown } }> {
   if (!keyState) {

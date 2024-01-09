@@ -1,25 +1,26 @@
 import React, { type ComponentProps } from 'react';
 
 import { useFilters } from 'loot-core/src/client/data-hooks/filters';
+import { type TransactionFilterEntity } from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
-import Autocomplete from './Autocomplete';
+import { Autocomplete } from './Autocomplete';
 
-type FilterListProps = {
-  items: { id: string; name: string }[];
-  getItemProps: (arg: { item: unknown }) => ComponentProps<typeof View>;
+type FilterListProps<T> = {
+  items: T[];
+  getItemProps: (arg: { item: T }) => ComponentProps<typeof View>;
   highlightedIndex: number;
   embedded?: boolean;
 };
 
-function FilterList({
+function FilterList<T extends { id: string; name: string }>({
   items,
   getItemProps,
   highlightedIndex,
   embedded,
-}: FilterListProps) {
+}: FilterListProps<T>) {
   return (
     <View>
       <View
@@ -57,9 +58,9 @@ function FilterList({
 
 type SavedFilterAutocompleteProps = {
   embedded?: boolean;
-} & ComponentProps<typeof Autocomplete>;
+} & ComponentProps<typeof Autocomplete<TransactionFilterEntity>>;
 
-export default function SavedFilterAutocomplete({
+export function SavedFilterAutocomplete({
   embedded,
   ...props
 }: SavedFilterAutocompleteProps) {

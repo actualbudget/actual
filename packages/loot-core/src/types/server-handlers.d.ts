@@ -5,13 +5,16 @@ import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
 import { Message } from '../server/sync';
+import { QueryState } from '../shared/query';
 
+import { Budget } from './budget';
 import {
   AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
   GoCardlessToken,
   GoCardlessInstitution,
+  PayeeEntity,
 } from './models';
 import { EmptyObject } from './util';
 
@@ -31,8 +34,6 @@ export interface ServerHandlers {
 
   'transaction-add': (transaction) => Promise<EmptyObject>;
 
-  'transaction-add': (transaction) => Promise<EmptyObject>;
-
   'transaction-delete': (transaction) => Promise<EmptyObject>;
 
   'transactions-parse-file': (arg: {
@@ -47,7 +48,7 @@ export interface ServerHandlers {
     payees;
   }) => Promise<unknown>;
 
-  'transactions-export-query': (arg: { query: queryState }) => Promise<unknown>;
+  'transactions-export-query': (arg: { query: QueryState }) => Promise<unknown>;
 
   'get-categories': () => Promise<{
     grouped: Array<CategoryGroupEntity>;
@@ -74,7 +75,12 @@ export interface ServerHandlers {
 
   'budget-set-type': (arg: { type }) => Promise<unknown>;
 
-  'category-create': (arg: { name; groupId; isIncome }) => Promise<unknown>;
+  'category-create': (arg: {
+    name;
+    groupId;
+    isIncome;
+    hidden: boolean;
+  }) => Promise<unknown>;
 
   'category-update': (category) => Promise<unknown>;
 
@@ -247,10 +253,7 @@ export interface ServerHandlers {
 
   'make-plaid-public-token': (arg: {
     bankId;
-  }) => Promise<
-    | { error: ''; code: data.error_code; type: data.error_type }
-    | { linkToken: data.link_token }
-  >;
+  }) => Promise<{ error: ''; code; type } | { linkToken }>;
 
   'save-global-prefs': (prefs) => Promise<'ok'>;
 
@@ -275,9 +278,9 @@ export interface ServerHandlers {
 
   'get-did-bootstrap': () => Promise<boolean>;
 
-  'subscribe-needs-bootstrap': (
-    args: { url } = {},
-  ) => Promise<
+  'subscribe-needs-bootstrap': (args: {
+    url;
+  }) => Promise<
     { error: string } | { bootstrapped: unknown; hasServer: boolean }
   >;
 
@@ -313,7 +316,7 @@ export interface ServerHandlers {
 
   'reset-budget-cache': () => Promise<unknown>;
 
-  'upload-budget': (arg: { id } = {}) => Promise<{ error?: string }>;
+  'upload-budget': (arg: { id }) => Promise<{ error?: string }>;
 
   'download-budget': (arg: { fileId; replace? }) => Promise<{ error; id }>;
 
@@ -321,13 +324,16 @@ export interface ServerHandlers {
     error?: { message: string; reason: string; meta: unknown };
   }>;
 
-  'load-budget': (arg: { id }) => Promise<{ error }>;
+  'load-budget': (arg: { id: string }) => Promise<{ error }>;
 
   'create-demo-budget': () => Promise<unknown>;
 
   'close-budget': () => Promise<'ok'>;
 
-  'delete-budget': (arg: { id; cloudFileId? }) => Promise<'ok'>;
+  'delete-budget': (arg: {
+    id?: string;
+    cloudFileId?: string;
+  }) => Promise<'ok'>;
 
   'create-budget': (arg: {
     budgetName?;

@@ -6,7 +6,7 @@ import { sheetForMonth } from '../shared/months';
 
 import * as Platform from './platform';
 import * as prefs from './prefs';
-import Spreadsheet from './spreadsheet/spreadsheet';
+import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
 
 let globalSheet: Spreadsheet;

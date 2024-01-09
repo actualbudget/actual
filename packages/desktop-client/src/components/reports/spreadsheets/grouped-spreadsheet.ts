@@ -6,11 +6,11 @@ import { integerToAmount } from 'loot-core/src/shared/util';
 import { categoryLists } from '../ReportOptions';
 
 import { type createSpreadsheetProps } from './default-spreadsheet';
-import filterHiddenItems from './filterHiddenItems';
-import makeQuery from './makeQuery';
-import recalculate from './recalculate';
+import { filterHiddenItems } from './filterHiddenItems';
+import { makeQuery } from './makeQuery';
+import { recalculate } from './recalculate';
 
-function createGroupedSpreadsheet({
+export function createGroupedSpreadsheet({
   startDate,
   endDate,
   categories,
@@ -85,7 +85,7 @@ function createGroupedSpreadsheet({
           let groupedAssets = 0;
           let groupedDebts = 0;
 
-          group.categories.map(item => {
+          group.categories.forEach(item => {
             const monthAssets = filterHiddenItems(item, assets)
               .filter(
                 asset => asset.date === month && asset.category === item.id,
@@ -99,8 +99,6 @@ function createGroupedSpreadsheet({
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedDebts += monthDebts;
-
-            return null;
           });
 
           totalAssets += groupedAssets;
@@ -134,7 +132,9 @@ function createGroupedSpreadsheet({
           totalDebts: integerToAmount(totalDebts),
           totalTotals: integerToAmount(totalAssets + totalDebts),
           monthData,
-          categories: stackedCategories,
+          categories: stackedCategories.filter(i =>
+            !showEmpty ? i[balanceTypeOp] !== 0 : true,
+          ),
         };
       },
       [startDate, endDate],
@@ -144,5 +144,3 @@ function createGroupedSpreadsheet({
     );
   };
 }
-
-export default createGroupedSpreadsheet;

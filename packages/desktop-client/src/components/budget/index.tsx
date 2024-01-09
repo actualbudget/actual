@@ -31,11 +31,11 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { type GlobalPrefs, type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { type BoundActions, useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
-import useNavigate from '../../hooks/useNavigate';
+import { useCategories } from '../../hooks/useCategories';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useNavigate } from '../../hooks/useNavigate';
 import { styles } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import {
   SWITCH_BUDGET_MESSAGE_TYPE,
   TitlebarContext,
@@ -43,7 +43,7 @@ import {
   type TitlebarMessage,
 } from '../Titlebar';
 
-import DynamicBudgetTable from './DynamicBudgetTable';
+import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as report from './report/ReportComponents';
 import { ReportProvider } from './report/ReportContext';
 import * as rollover from './rollover/RolloverComponents';
@@ -100,7 +100,7 @@ type BudgetProps = {
   addNotification: BoundActions['addNotification'];
 };
 
-function Budget(props: BudgetProps) {
+function BudgetInner(props: BudgetProps) {
   const currentMonth = monthUtils.currentMonth();
   const tableRef = useRef(null);
 
@@ -274,6 +274,7 @@ function Budget(props: BudgetProps) {
         category.name,
         category.cat_group,
         category.is_income,
+        category.hidden,
       );
 
       setNewCategoryForGroup(null);
@@ -531,7 +532,7 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
   );
 });
 
-export default function BudgetWrapper(props) {
+export function Budget(props) {
   const startMonth = useSelector(
     state => state.prefs.local['budget.startMonth'],
   );
@@ -593,7 +594,7 @@ export default function BudgetWrapper(props) {
         overflow: 'hidden',
       }}
     >
-      <Budget
+      <BudgetInner
         startMonth={startMonth}
         collapsedPrefs={collapsedPrefs}
         summaryCollapsed={summaryCollapsed}
