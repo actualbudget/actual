@@ -21,6 +21,7 @@ import { FormField, FormLabel } from '../forms';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
+import { AccountSettings } from './AccountSettings';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
@@ -167,6 +168,7 @@ export function Settings() {
         {!Platform.isBrowser && <GlobalSettings />}
 
         <ThemeSettings />
+        <AccountSettings />
         <FormatSettings />
         <EncryptionSettings />
         <ExportBudget />

@@ -24,6 +24,7 @@ export type LocalPrefs = Partial<
     isPrivacyEnabled: boolean;
     budgetName: string;
     'ui.showClosedAccounts': boolean;
+    'ui.categorySuggestionsGroupNames': boolean;
     'expand-splits': boolean;
     [key: `show-extra-balances-${string}`]: boolean;
     [key: `hide-cleared-${string}`]: boolean;

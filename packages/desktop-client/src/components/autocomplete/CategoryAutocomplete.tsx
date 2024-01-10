@@ -1,11 +1,12 @@
-import React, {
-  type ComponentProps,
+import {
   Fragment,
   useMemo,
+  type ComponentProps,
+  type ComponentType,
   type ReactNode,
   type SVGProps,
-  type ComponentType,
 } from 'react';
+import { useSelector } from 'react-redux';
 
 import { css } from 'glamor';
 
@@ -16,11 +17,11 @@ import {
 
 import { SvgSplit } from '../../icons/v0';
 import { useResponsive } from '../../ResponsiveProvider';
-import { type CSSProperties, theme } from '../../style';
+import { theme, type CSSProperties } from '../../style';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
-import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
+import { Autocomplete } from './Autocomplete';
 
 type CategorySuggestion = CategoryEntity & { group?: CategoryGroupEntity };
 
@@ -119,6 +120,10 @@ export function CategoryAutocomplete({
   renderCategoryItem,
   ...props
 }: CategoryAutocompleteProps) {
+
+  const categorySuggestionsGroupNames = useSelector(
+    state => state.prefs?.local?.['ui.categorySuggestionsGroupNames'],
+  );
   const categorySuggestions: Array<
     CategoryEntity & { group?: CategoryGroupEntity }
   > = useMemo(
@@ -137,6 +142,20 @@ export function CategoryAutocomplete({
       ),
     [showSplitOption, categoryGroups],
   );
+
+  function filterCategorySuggestions(suggestions: CategorySuggestion[], value) {
+    return suggestions.filter(suggestion => {
+      return (
+        suggestion.id === 'split' ||
+        (categorySuggestionsGroupNames
+          ? [suggestion.name, suggestion.group.name]
+              .join(' ')
+              .toLowerCase()
+              .includes(value.toLowerCase())
+          : suggestion.name.toLowerCase().includes(value.toLowerCase()))
+      );
+    });
+  }
 
   return (
     <Autocomplete
@@ -324,16 +343,4 @@ export function CategoryItem({
 
 function defaultRenderCategoryItem(props: CategoryItemProps) {
   return <CategoryItem {...props} />;
-}
-
-function filterCategorySuggestions(suggestions: CategorySuggestion[], value) {
-  return suggestions.filter(suggestion => {
-    return (
-      suggestion.id === 'split' ||
-      [suggestion.name, suggestion.group.name]
-        .join(' ')
-        .toLowerCase()
-        .includes(value.toLowerCase())
-    );
-  });
 }
