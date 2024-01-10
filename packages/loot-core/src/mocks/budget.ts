@@ -9,6 +9,7 @@ import * as sheet from '../server/sheet';
 import { batchMessages, setSyncingMode } from '../server/sync';
 import * as monthUtils from '../shared/months';
 import { q } from '../shared/query';
+import type { Handlers } from '../types/handlers';
 import type {
   CategoryGroupEntity,
   NewPayeeEntity,
@@ -566,7 +567,7 @@ async function createBudget(accounts, payees, groups) {
   await sheet.waitOnSpreadsheet();
 }
 
-export async function createTestBudget(handlers) {
+export async function createTestBudget(handlers: Handlers) {
   setSyncingMode('import');
 
   await db.execQuery('PRAGMA journal_mode = OFF');
@@ -577,15 +578,15 @@ export async function createTestBudget(handlers) {
   await db.runQuery('DELETE FROM categories;');
   await db.runQuery('DELETE FROM category_groups');
 
-  const accounts: { name: string; offBudget?: 1; id?: string }[] = [
+  const accounts: { name: string; offBudget?: boolean; id?: string }[] = [
     { name: 'Bank of America' },
     { name: 'Ally Savings' },
     { name: 'Capital One Checking' },
     { name: 'HSBC' },
-    { name: 'Vanguard 401k', offBudget: 1 },
-    { name: 'Mortgage', offBudget: 1 },
-    { name: 'House Asset', offBudget: 1 },
-    { name: 'Roth IRA', offBudget: 1 },
+    { name: 'Vanguard 401k', offBudget: true },
+    { name: 'Mortgage', offBudget: true },
+    { name: 'House Asset', offBudget: true },
+    { name: 'Roth IRA', offBudget: true },
   ];
   await runMutator(() =>
     batchMessages(async () => {
@@ -657,7 +658,7 @@ export async function createTestBudget(handlers) {
     for (const group of categoryGroups) {
       group.id = await handlers['category-group-create']({
         name: group.name,
-        isIncome: group.is_income ? 1 : 0,
+        isIncome: group.is_income,
       });
 
       for (const category of group.categories) {
