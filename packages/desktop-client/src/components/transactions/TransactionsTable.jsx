@@ -1374,6 +1374,7 @@ function TransactionError({ error, isDeposit, onAddSplit, onDistributeRemainder,
               type="normal"
               style={{ marginLeft: 15 }}
               onClick={onDistributeRemainder}
+              data-testid="distribute-split-button"
             >
               Distribute
             </Button>
@@ -1381,6 +1382,7 @@ function TransactionError({ error, isDeposit, onAddSplit, onDistributeRemainder,
               type="primary"
               style={{ marginLeft: 10, padding: '4px 10px' }}
               onClick={onAddSplit}
+              data-testid="add-split-button"
             >
               Add Split
             </Button>

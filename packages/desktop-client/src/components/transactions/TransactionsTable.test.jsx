@@ -668,7 +668,7 @@ describe('Transactions', () => {
     await waitForAutocomplete();
 
     await userEvent.click(
-      container.querySelector('[data-testid="transaction-error"] button'),
+      container.querySelector('[data-testid="add-split-button"]'),
     );
 
     input = await editNewField(container, 'debit', 1);
@@ -910,7 +910,7 @@ describe('Transactions', () => {
     await userEvent.click(splitButton);
     await waitForAutocomplete();
     await userEvent.click(
-      container.querySelector('[data-testid="transaction-error"] button'),
+      container.querySelector('[data-testid="add-split-button"]'),
     );
     expect(getTransactions().length).toBe(7);
 
