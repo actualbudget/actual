@@ -22,8 +22,10 @@ import { View } from '../common/View';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 
+type CategorySuggestion = CategoryEntity & { group?: CategoryGroupEntity };
+
 export type CategoryListProps = {
-  items: Array<CategoryEntity & { group?: CategoryGroupEntity }>;
+  items: Array<CategorySuggestion>;
   getItemProps?: (arg: { item }) => Partial<ComponentProps<typeof View>>;
   highlightedIndex: number;
   embedded: boolean;
@@ -150,14 +152,7 @@ export function CategoryAutocomplete({
         }
         return 0;
       }}
-      filterSuggestions={(suggestions, value) => {
-        return suggestions.filter(suggestion => {
-          return (
-            suggestion.id === 'split' ||
-            defaultFilterSuggestion(suggestion, value)
-          );
-        });
-      }}
+      filterSuggestions={filterCategorySuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <CategoryList
@@ -329,4 +324,16 @@ export function CategoryItem({
 
 function defaultRenderCategoryItem(props: CategoryItemProps) {
   return <CategoryItem {...props} />;
+}
+
+function filterCategorySuggestions(suggestions: CategorySuggestion[], value) {
+  return suggestions.filter(suggestion => {
+    return (
+      suggestion.id === 'split' ||
+      [suggestion.name, suggestion.group.name]
+        .join(' ')
+        .toLowerCase()
+        .includes(value.toLowerCase())
+    );
+  });
 }
