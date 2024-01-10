@@ -110,7 +110,7 @@ function mapOfxTransaction(stmtTrn): OFXTransaction {
   };
 }
 
-export default async function parse(ofx: string): Promise<OFXParseResult> {
+export async function ofx2json(ofx: string): Promise<OFXParseResult> {
   // firstly, split into the header attributes and the footer sgml
   const contents = ofx.split('<OFX>', 2);
 

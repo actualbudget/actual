@@ -15,7 +15,7 @@ import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
 
 import { getStartingBalancePayee } from './payees';
-import title from './title';
+import { title } from './title';
 import { runRules } from './transaction-rules';
 import { batchUpdateTransactions } from './transactions';
 
@@ -312,7 +312,8 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
         title(
           trans.debtorName ||
             trans.remittanceInformationUnstructured ||
-            (trans.remittanceInformationUnstructuredArray || []).join(', '),
+            (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
+            trans.additionalInformation,
         ),
       );
       if (trans.debtorAccount && trans.debtorAccount.iban) {
@@ -331,7 +332,8 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
         title(
           trans.creditorName ||
             trans.remittanceInformationUnstructured ||
-            (trans.remittanceInformationUnstructuredArray || []).join(', '),
+            (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
+            trans.additionalInformation,
         ),
       );
       if (trans.creditorAccount && trans.creditorAccount.iban) {
@@ -436,7 +438,7 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -494,6 +496,11 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
   // Finally, generate & commit the changes
   for (const { trans, subtransactions, match } of transactionsStep3) {
     if (match) {
+      // Skip updating already reconciled (locked) transactions
+      if (match.reconciled) {
+        continue;
+      }
+
       // TODO: change the above sql query to use aql
       const existing = {
         ...match,
@@ -594,7 +601,7 @@ export async function reconcileTransactions(acctId, transactions) {
       // matched transaction. See the final pass below for the needed
       // fields.
       fuzzyDataset = await db.all(
-        `SELECT id, is_parent, date, imported_id, payee, category, notes FROM v_transactions
+        `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
           db.toDateRepr(monthUtils.subDays(trans.date, 4)),
@@ -652,6 +659,11 @@ export async function reconcileTransactions(acctId, transactions) {
   // Finally, generate & commit the changes
   for (const { trans, subtransactions, match } of transactionsStep3) {
     if (match) {
+      // Skip updating already reconciled (locked) transactions
+      if (match.reconciled) {
+        continue;
+      }
+
       // TODO: change the above sql query to use aql
       const existing = {
         ...match,

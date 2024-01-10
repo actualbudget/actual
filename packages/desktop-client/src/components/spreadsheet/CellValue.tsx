@@ -1,15 +1,12 @@
-import React, { type ReactNode } from 'react';
+import React, { type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties, styles } from '../../style';
-import Text from '../common/Text';
-import {
-  ConditionalPrivacyFilter,
-  type ConditionalPrivacyFilterProps,
-} from '../PrivacyFilter';
+import { Text } from '../common/Text';
+import { ConditionalPrivacyFilter } from '../PrivacyFilter';
 
-import useFormat from './useFormat';
-import useSheetName from './useSheetName';
-import useSheetValue from './useSheetValue';
+import { useFormat } from './useFormat';
+import { useSheetName } from './useSheetName';
+import { useSheetValue } from './useSheetValue';
 
 import { type Binding } from '.';
 
@@ -19,11 +16,13 @@ type CellValueProps = {
   formatter?: (value) => ReactNode;
   style?: CSSProperties;
   getStyle?: (value) => CSSProperties;
-  privacyFilter?: ConditionalPrivacyFilterProps['privacyFilter'];
+  privacyFilter?: ComponentProps<
+    typeof ConditionalPrivacyFilter
+  >['privacyFilter'];
   ['data-testid']?: string;
 };
 
-function CellValue({
+export function CellValue({
   binding,
   type,
   formatter,
@@ -62,5 +61,3 @@ function CellValue({
     </ConditionalPrivacyFilter>
   );
 }
-
-export default CellValue;

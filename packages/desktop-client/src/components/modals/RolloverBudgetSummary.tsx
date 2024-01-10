@@ -4,10 +4,10 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/src/shared/months';
 
 import { styles } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import ToBudget from '../budget/rollover/budgetsummary/ToBudget';
-import TotalsList from '../budget/rollover/budgetsummary/TotalsList';
-import Modal from '../common/Modal';
-import NamespaceContext from '../spreadsheet/NamespaceContext';
+import { ToBudget } from '../budget/rollover/budgetsummary/ToBudget';
+import { TotalsList } from '../budget/rollover/budgetsummary/TotalsList';
+import { Modal } from '../common/Modal';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type RolloverBudgetSummaryProps = {
   modalProps: CommonModalProps;
@@ -15,7 +15,7 @@ type RolloverBudgetSummaryProps = {
   month: string;
 };
 
-export default function RolloverBudgetSummary({
+export function RolloverBudgetSummary({
   month,
   onBudgetAction,
   modalProps,

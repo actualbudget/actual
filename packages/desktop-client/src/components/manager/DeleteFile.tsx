@@ -6,9 +6,9 @@ import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
-import Modal from '../common/Modal';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 type DeleteFileProps = {
   modalProps: CommonModalProps;
@@ -16,11 +16,7 @@ type DeleteFileProps = {
   file: File;
 };
 
-export default function DeleteFile({
-  modalProps,
-  actions,
-  file,
-}: DeleteFileProps) {
+export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
   // If the state is "broken" that means it was created by another
   // user. The current user should be able to delete the local file,
   // but not the remote one

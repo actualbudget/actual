@@ -1,15 +1,15 @@
 import React from 'react';
 
-import AnimatedLoading from '../../icons/AnimatedLoading';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { theme, styles } from '../../style';
-import Block from '../common/Block';
-import View from '../common/View';
+import { Block } from '../common/Block';
+import { View } from '../common/View';
 
 type LoadingIndicatorProps = {
   message?: string;
 };
 
-const LoadingIndicator = ({ message }: LoadingIndicatorProps) => {
+export const LoadingIndicator = ({ message }: LoadingIndicatorProps) => {
   return (
     <View
       style={{
@@ -29,5 +29,3 @@ const LoadingIndicator = ({ message }: LoadingIndicatorProps) => {
     </View>
   );
 };
-
-export default LoadingIndicator;

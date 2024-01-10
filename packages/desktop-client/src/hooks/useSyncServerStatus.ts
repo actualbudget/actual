@@ -4,7 +4,7 @@ import { useServerURL } from '../components/ServerContext';
 
 export type SyncServerStatus = 'offline' | 'no-server' | 'online';
 
-export default function useSyncServerStatus(): SyncServerStatus {
+export function useSyncServerStatus(): SyncServerStatus {
   const serverUrl = useServerURL();
   const userData = useSelector(state => state.user.data);
 

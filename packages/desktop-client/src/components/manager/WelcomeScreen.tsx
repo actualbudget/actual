@@ -2,13 +2,13 @@ import React from 'react';
 
 import { useActions } from '../../hooks/useActions';
 import { styles, theme } from '../../style';
-import Button from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import Paragraph from '../common/Paragraph';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { ExternalLink } from '../common/ExternalLink';
+import { Paragraph } from '../common/Paragraph';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
-export default function WelcomeScreen() {
+export function WelcomeScreen() {
   const { createBudget, pushModal } = useActions();
 
   return (
@@ -50,8 +50,8 @@ export default function WelcomeScreen() {
         </Paragraph>
         <Paragraph style={{ color: theme.pageTextLight }}>
           Get started by importing an existing budget file from Actual or
-          another budgeting app, or start fresh with an empty budget. You can
-          always create or import another budget later.
+          another budgeting app, create a demo budget file, or start fresh with
+          an empty budget. You can always create or import another budget later.
         </Paragraph>
       </View>
       <View
@@ -63,9 +63,20 @@ export default function WelcomeScreen() {
         }}
       >
         <Button onClick={() => pushModal('import')}>Import my budget</Button>
-        <Button type="primary" onClick={() => createBudget()}>
-          Start fresh
-        </Button>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 10,
+          }}
+        >
+          <Button onClick={() => createBudget({ testMode: true })}>
+            View demo
+          </Button>
+          <Button type="primary" onClick={() => createBudget()}>
+            Start fresh
+          </Button>
+        </View>
       </View>
     </View>
   );

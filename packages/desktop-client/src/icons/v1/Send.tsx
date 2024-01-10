@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgSend = (props: SVGProps<SVGSVGElement>) => (
+export const SvgSend = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -13,4 +13,3 @@ const SvgSend = (props: SVGProps<SVGSVGElement>) => (
     <path d="m0 0 20 10L0 20V0zm0 8v4l10-2L0 8z" fill="currentColor" />
   </svg>
 );
-export default SvgSend;

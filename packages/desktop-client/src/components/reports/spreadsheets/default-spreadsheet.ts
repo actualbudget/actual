@@ -14,10 +14,10 @@ import {
 
 import { categoryLists, groupBySelections } from '../ReportOptions';
 
-import calculateLegend from './calculateLegend';
-import filterHiddenItems from './filterHiddenItems';
-import makeQuery from './makeQuery';
-import recalculate from './recalculate';
+import { calculateLegend } from './calculateLegend';
+import { filterHiddenItems } from './filterHiddenItems';
+import { makeQuery } from './makeQuery';
+import { recalculate } from './recalculate';
 
 export type createSpreadsheetProps = {
   startDate: string;
@@ -37,7 +37,7 @@ export type createSpreadsheetProps = {
   graphType: string;
 };
 
-export default function createSpreadsheet({
+export function createSpreadsheet({
   startDate,
   endDate,
   categories,

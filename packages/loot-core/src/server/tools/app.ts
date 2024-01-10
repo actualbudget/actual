@@ -5,7 +5,7 @@ import { runMutator } from '../mutators';
 
 import { ToolsHandlers } from './types/handlers';
 
-const app = createApp<ToolsHandlers>();
+export const app = createApp<ToolsHandlers>();
 
 app.method('tools/fix-split-transactions', async () => {
   // 1. Check for child transactions that have a blank payee, and set
@@ -59,5 +59,3 @@ app.method('tools/fix-split-transactions', async () => {
     numDeleted: deletedRows.length,
   };
 });
-
-export default app;
