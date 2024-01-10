@@ -11,13 +11,13 @@ import * as monthUtils from '../shared/months';
 import { q } from '../shared/query';
 import type {
   CategoryGroupEntity,
-  PayeeEntity,
+  NewPayeeEntity,
   NewTransactionEntity,
 } from '../types/models';
 
 import { random } from './random';
 
-type MockPayeeEntity = PayeeEntity & { bill?: boolean };
+type MockPayeeEntity = NewPayeeEntity & { bill?: boolean };
 
 function pickRandom<T>(list: T[]): T {
   return list[Math.floor(random() * list.length) % list.length];
