@@ -10,8 +10,5 @@ const getPrefsState = createSelector(getState, state => state.prefs);
 const getLocalPrefsState = createSelector(getPrefsState, prefs => prefs.local);
 
 export const selectNumberFormat = createSelector(getLocalPrefsState, prefs =>
-  getNumberFormat({
-    format: prefs.numberFormat,
-    hideFraction: prefs.hideFraction,
-  }),
+  getNumberFormat(2, prefs.numberFormat, prefs.hideFraction),
 );

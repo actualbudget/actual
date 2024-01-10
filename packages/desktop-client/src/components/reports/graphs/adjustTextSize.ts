@@ -1,91 +1,88 @@
-export const adjustTextSize = size => {
-  if (size <= 400) {
-    return '12px';
-  } else if (size <= 600) {
-    return '14px';
-  } else {
-    return '16px';
+export const adjustTextSize = (
+  sized: number,
+  type: string,
+  width?: number,
+): `${number}px` => {
+  let source;
+  switch (type) {
+    case 'variable':
+      const findArray = variableLookup.find(({ value }) => width < value).arr;
+      source = findArray
+        ? findArray
+        : variableLookup[variableLookup.length - 1].arr;
+      break;
+    case 'donut':
+      source = donutLookup;
+      break;
+    default:
+      source = defaultLookup;
   }
+  const lookup = source.find(({ size }) => sized <= size);
+  const defaultLast = lookup ? lookup : source[source.length - 1];
+  return `${defaultLast.font}px`;
 };
 
-export const adjustDonutTextSize = size => {
-  if (size <= 200) {
-    return '12px';
-  } else if (size <= 233) {
-    return '14px';
-  } else if (size <= 266) {
-    return '16px';
-  } else if (size <= 300) {
-    return '18px';
-  } else {
-    return '20px';
-  }
-};
+const defaultLookup = [
+  { size: 400, font: 12 },
+  { size: 600, font: 14 },
+  { size: null, font: 16 },
+];
 
-export const variableTextSize = (width: number, value: number) => {
-  if (value < 100) {
-    if (width < 9) {
-      return '10px';
-    } else if (width < 13) {
-      return '11px';
-    } else if (width < 16) {
-      return '12px';
-    } else if (width < 19) {
-      return '13px';
-    } else if (width < 22) {
-      return '14px';
-    } else if (width < 25) {
-      return '15px';
-    } else {
-      return '16px';
-    }
-  } else if (value < 1000) {
-    if (width < 23) {
-      return '10px';
-    } else if (width < 26) {
-      return '11px';
-    } else if (width < 29) {
-      return '12px';
-    } else if (width < 32) {
-      return '13px';
-    } else if (width < 35) {
-      return '14px';
-    } else if (width < 38) {
-      return '15px';
-    } else {
-      return '16px';
-    }
-  } else if (value < 10000) {
-    if (width < 30) {
-      return '10px';
-    } else if (width < 35) {
-      return '11px';
-    } else if (width < 40) {
-      return '12px';
-    } else if (width < 45) {
-      return '13px';
-    } else if (width < 50) {
-      return '14px';
-    } else if (width < 55) {
-      return '15px';
-    } else {
-      return '16px';
-    }
-  } else {
-    if (width < 36) {
-      return '10px';
-    } else if (width < 42) {
-      return '11px';
-    } else if (width < 48) {
-      return '12px';
-    } else if (width < 54) {
-      return '13px';
-    } else if (width < 60) {
-      return '14px';
-    } else if (width < 66) {
-      return '15px';
-    } else {
-      return '16px';
-    }
-  }
-};
+const donutLookup = [
+  { size: 200, font: 12 },
+  { size: 233, font: 14 },
+  { size: 266, font: 16 },
+  { size: 300, font: 18 },
+  { size: null, font: 20 },
+];
+
+const variableLookup = [
+  {
+    value: 100,
+    arr: [
+      { size: 9, font: 10 },
+      { size: 13, font: 11 },
+      { size: 16, font: 12 },
+      { size: 19, font: 13 },
+      { size: 22, font: 14 },
+      { size: 25, font: 15 },
+      { size: null, font: 16 },
+    ],
+  },
+  {
+    value: 1000,
+    arr: [
+      { size: 23, font: 10 },
+      { size: 26, font: 11 },
+      { size: 29, font: 12 },
+      { size: 32, font: 13 },
+      { size: 35, font: 14 },
+      { size: 38, font: 15 },
+      { size: null, font: 16 },
+    ],
+  },
+  {
+    value: 10090,
+    arr: [
+      { size: 30, font: 10 },
+      { size: 35, font: 11 },
+      { size: 40, font: 12 },
+      { size: 45, font: 13 },
+      { size: 50, font: 14 },
+      { size: 55, font: 15 },
+      { size: null, font: 16 },
+    ],
+  },
+  {
+    value: null,
+    arr: [
+      { size: 36, font: 10 },
+      { size: 42, font: 11 },
+      { size: 48, font: 12 },
+      { size: 54, font: 13 },
+      { size: 60, font: 14 },
+      { size: 66, font: 15 },
+      { size: null, font: 16 },
+    ],
+  },
+];

@@ -29,7 +29,7 @@ import { type DataEntity } from '../entities';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
 
-import { variableTextSize } from './adjustTextSize';
+import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
 type PayloadChild = {
@@ -119,7 +119,7 @@ const customLabel = props => {
   const textAnchor = 'middle';
   const display =
     props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
-  const textSize = variableTextSize(props.width, props.value);
+  const textSize = adjustTextSize(props.width, 'variable', props.value);
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };

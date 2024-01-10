@@ -8,7 +8,7 @@ import { theme, type CSSProperties } from '../../../style';
 import { Container } from '../Container';
 import { type DataEntity } from '../entities';
 
-import { adjustDonutTextSize } from './adjustTextSize';
+import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
 const RADIAN = Math.PI / 180;
@@ -98,7 +98,7 @@ const customLabel = props => {
   const calcY = props.cy + radius * Math.sin(-props.midAngle * RADIAN);
   const textAnchor = calcX > props.cx ? 'start' : 'end';
   const display = props.value !== 0 && `${(props.percent * 100).toFixed(0)}%`;
-  const textSize = adjustDonutTextSize(size);
+  const textSize = adjustTextSize(size, 'donut');
   const showLabel = props.percent;
   const showLabelThreshold = 0.05;
   const fill = theme.reportsInnerLabel;

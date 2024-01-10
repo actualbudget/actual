@@ -221,16 +221,17 @@ export function setNumberFormat(config: typeof numberFormatConfig) {
   numberFormatConfig = config;
 }
 
-export function getNumberFormat({
-  format,
-  hideFraction,
-}: {
-  format: NumberFormats;
-  hideFraction: boolean;
-} = numberFormatConfig) {
+export function getNumberFormat(
+  decimalNumber?: number,
+  format?: NumberFormats,
+  hideFraction?: boolean,
+) {
+  const calcFormat = format ?? numberFormatConfig.format;
+  const calcHideFraction = hideFraction ?? numberFormatConfig.hideFraction;
+  const calcDecimalNumber = decimalNumber ?? 2;
   let locale, regex, separator;
 
-  switch (format) {
+  switch (calcFormat) {
     case 'space-comma':
       locale = 'en-SE';
       regex = /[^-0-9,]/g;
@@ -259,54 +260,11 @@ export function getNumberFormat({
   }
 
   return {
-    value: format,
+    value: calcFormat,
     separator,
     formatter: new Intl.NumberFormat(locale, {
-      minimumFractionDigits: hideFraction ? 0 : 2,
-      maximumFractionDigits: hideFraction ? 0 : 2,
-    }),
-    regex,
-  };
-}
-
-function getNumberFormatNoDecimal(decimalNumber: number) {
-  const { format, hideFraction } = { ...numberFormatConfig };
-  let locale, regex, separator;
-
-  switch (format) {
-    case 'space-comma':
-      locale = 'en-SE';
-      regex = /[^-0-9,]/g;
-      separator = ',';
-      break;
-    case 'dot-comma':
-      locale = 'de-DE';
-      regex = /[^-0-9,]/g;
-      separator = ',';
-      break;
-    case 'space-dot':
-      locale = 'dje';
-      regex = /[^-0-9.]/g;
-      separator = '.';
-      break;
-    case 'comma-dot-in':
-      locale = 'en-IN';
-      regex = /[^-0-9.]/g;
-      separator = '.';
-      break;
-    case 'comma-dot':
-    default:
-      locale = 'en-US';
-      regex = /[^-0-9.]/g;
-      separator = '.';
-  }
-
-  return {
-    value: format,
-    separator,
-    formatter: new Intl.NumberFormat(locale, {
-      minimumFractionDigits: hideFraction ? 0 : decimalNumber,
-      maximumFractionDigits: hideFraction ? 0 : decimalNumber,
+      minimumFractionDigits: calcHideFraction ? 0 : calcDecimalNumber,
+      maximumFractionDigits: calcHideFraction ? 0 : calcDecimalNumber,
     }),
     regex,
   };
@@ -354,7 +312,7 @@ export function amountToCurrency(n) {
 }
 
 export function amountToCurrencyNoDecimal(n) {
-  return getNumberFormatNoDecimal(0).formatter.format(n);
+  return getNumberFormat(0).formatter.format(n);
 }
 
 export function currencyToAmount(str: string) {

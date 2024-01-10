@@ -106,7 +106,7 @@ const customLabel = (props, width, end) => {
   const textAnchor = props.index === 0 ? 'left' : 'middle';
   const display =
     props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
-  const textSize = adjustTextSize(width);
+  const textSize = adjustTextSize(width, 'area');
 
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
