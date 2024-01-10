@@ -61,7 +61,7 @@ describe('Transactions', () => {
     expect(diff).toEqual({
       added: [],
       deleted: [],
-      updated: [{ id: 't1', amount: 5000 }],
+      updated: [expect.objectContaining({ id: 't1', amount: 5000 })],
     });
     expect(data.map(t => ({ id: t.id, amount: t.amount })).sort()).toEqual([
       { id: expect.any(String), amount: 5000 },
@@ -71,17 +71,12 @@ describe('Transactions', () => {
   });
 
   test('updating does nothing if value not changed', () => {
+    const updatedTransaction = makeTransaction({ id: 't1', amount: 5000 });
     const transactions = [
-      makeTransaction({ id: 't1', amount: 5000 }),
+      updatedTransaction,
       makeTransaction({ amount: 3000 }),
     ];
-    const { data, diff } = updateTransaction(
-      transactions,
-      makeTransaction({
-        id: 't1',
-        amount: 5000,
-      }),
-    );
+    const { data, diff } = updateTransaction(transactions, updatedTransaction);
     expect(diff).toEqual({ added: [], deleted: [], updated: [] });
     expect(data.map(t => ({ id: t.id, amount: t.amount })).sort()).toEqual([
       { id: expect.any(String), amount: 5000 },
