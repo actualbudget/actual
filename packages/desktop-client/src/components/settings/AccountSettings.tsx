@@ -32,7 +32,8 @@ export function AccountSettings() {
       }
     >
       <Text>
-        <strong>Accounts</strong> are where your transations are displayed, with the option to organize all your records into categories.
+        <strong>Accounts</strong> are where your transations are displayed, with
+        the option to organize all your records into categories.
       </Text>
     </Setting>
   );

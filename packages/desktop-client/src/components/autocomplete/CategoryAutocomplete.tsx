@@ -120,7 +120,6 @@ export function CategoryAutocomplete({
   renderCategoryItem,
   ...props
 }: CategoryAutocompleteProps) {
-
   const categorySuggestionsGroupNames = useSelector(
     state => state.prefs?.local?.['ui.categorySuggestionsGroupNames'],
   );
