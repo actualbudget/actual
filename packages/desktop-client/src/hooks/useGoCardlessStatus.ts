@@ -5,7 +5,9 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import useSyncServerStatus from './useSyncServerStatus';
 
 export default function useGoCardlessStatus() {
-  const [configuredGoCardless, setConfiguredGoCardless] = useState<boolean | null>(null);
+  const [configuredGoCardless, setConfiguredGoCardless] = useState<
+    boolean | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 

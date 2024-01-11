@@ -215,10 +215,7 @@ async function downloadGoCardlessTransactions(
   };
 }
 
-async function downloadSimpleFinTransactions(
-  acctId,
-  since,
-) {
+async function downloadSimpleFinTransactions(acctId, since) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
@@ -848,12 +845,12 @@ export async function syncGoCardlessAccount(
 
     let download;
 
-    if (acctRow.account_sync_source === "simplefin") {
-      download = await downloadSimpleFinTransactions(
-        acctId,
-        startDate,
-      );
-    } else if (acctRow.account_sync_source === "gocardless" || acctRow.account_sync_source === null) {
+    if (acctRow.account_sync_source === 'simplefin') {
+      download = await downloadSimpleFinTransactions(acctId, startDate);
+    } else if (
+      acctRow.account_sync_source === 'gocardless' ||
+      acctRow.account_sync_source === null
+    ) {
       download = await downloadGoCardlessTransactions(
         userId,
         userKey,
@@ -885,12 +882,12 @@ export async function syncGoCardlessAccount(
 
     let download;
 
-    if (acctRow.account_sync_source === "simplefin") {
-      download = await downloadSimpleFinTransactions(
-        acctId,
-        startingDay,
-      );
-    } else if (acctRow.account_sync_source === "gocardless" || acctRow.account_sync_source === null) {
+    if (acctRow.account_sync_source === 'simplefin') {
+      download = await downloadSimpleFinTransactions(acctId, startingDay);
+    } else if (
+      acctRow.account_sync_source === 'gocardless' ||
+      acctRow.account_sync_source === null
+    ) {
       download = await downloadGoCardlessTransactions(
         userId,
         userKey,
@@ -904,10 +901,12 @@ export async function syncGoCardlessAccount(
 
     let balanceToUse = startingBalance;
 
-    if (acctRow.account_sync_source === "simplefin") {
+    if (acctRow.account_sync_source === 'simplefin') {
       const currentBalance = startingBalance;
       const previousBalance = transactions.reduce((total, trans) => {
-        return total - parseInt(trans.transactionAmount.amount.replace('.', ''));
+        return (
+          total - parseInt(trans.transactionAmount.amount.replace('.', ''))
+        );
       }, currentBalance);
       balanceToUse = previousBalance;
     }

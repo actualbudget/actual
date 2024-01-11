@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { send } from 'loot-core/src/platform/client/fetch';
+
 import { authorizeBank } from '../../gocardless';
 import { useActions } from '../../hooks/useActions';
 import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
@@ -13,7 +15,6 @@ import Modal from '../common/Modal';
 import Paragraph from '../common/Paragraph';
 import Text from '../common/Text';
 import View from '../common/View';
-import { send } from 'loot-core/src/platform/client/fetch';
 
 type CreateAccountProps = {
   modalProps: CommonModalProps;
@@ -40,7 +41,9 @@ export default function CreateAccount({
     if (upgradingAccountId === undefined) {
       authorizeBank(actions.pushModal);
     } else {
-      authorizeBank(actions.pushModal, { upgradingAccountId: upgradingAccountId });
+      authorizeBank(actions.pushModal, {
+        upgradingAccountId,
+      });
     }
   };
 
@@ -50,27 +53,34 @@ export default function CreateAccount({
       return;
     }
 
+    if (loadingSimpleFinAccounts) {
+      return;
+    }
+
+    setLoadingSimpleFinAccounts(true);
+
     const results = await send('simplefin-accounts');
 
-    let newAccounts = [];
+    const newAccounts = [];
 
     for (let i = 0; i < results.accounts.accounts.length; i++) {
-      let oldAccount = results.accounts.accounts[i];
-      
-      let newAccount = {};
+      const oldAccount = results.accounts.accounts[i];
+      const newAccount = {};
       newAccount.account_id = oldAccount.id;
       newAccount.name = oldAccount.name;
-      newAccount.type = "checking";
-      newAccount.institution = {name: oldAccount.org.name};
+      newAccount.institution = {
+        name: oldAccount.org.name,
+      };
       newAccount.orgDomain = oldAccount.org.domain;
-
       newAccounts.push(newAccount);
     }
 
     actions.pushModal('select-linked-accounts', {
       accounts: newAccounts,
-      syncSource: "simpleFin",
+      syncSource: 'simpleFin',
     });
+
+    setLoadingSimpleFinAccounts(false);
   };
 
   const onGoCardlessInit = () => {
@@ -99,17 +109,19 @@ export default function CreateAccount({
     setIsSimpleFinSetupComplete(configuredSimpleFin);
   }, [configuredSimpleFin]);
 
-  let title = "Add Account";
+  let title = 'Add Account';
+  const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
+    useState(false);
 
   if (upgradingAccountId !== undefined) {
-    title = "Link Account";
+    title = 'Link Account';
   }
 
   return (
     <Modal title={title} {...modalProps}>
       {() => (
         <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
-          {upgradingAccountId === undefined &&
+          {upgradingAccountId === undefined && (
             <View style={{ gap: 10 }}>
               <Button
                 type="primary"
@@ -136,7 +148,7 @@ export default function CreateAccount({
                 </Text>
               </View>
             </View>
-          }
+          )}
           <View style={{ gap: 10 }}>
             {syncServerStatus === 'online' ? (
               <>
@@ -155,12 +167,15 @@ export default function CreateAccount({
                     : 'Set up GoCardless for bank sync'}
                 </ButtonWithLoading>
                 <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                  <strong>Link a <u>European</u> bank account</strong> to automatically download
-                  transactions. GoCardless provides reliable, up-to-date
-                  information from hundreds of banks.
+                  <strong>
+                    Link a <u>European</u> bank account
+                  </strong>
+                  to automatically download transactions. GoCardless provides
+                  reliable, up-to-date information from hundreds of banks.
                 </Text>
                 <ButtonWithLoading
                   disabled={syncServerStatus !== 'online'}
+                  loading={loadingSimpleFinAccounts}
                   style={{
                     marginTop: '18px',
                     padding: '10px 0',
@@ -175,9 +190,11 @@ export default function CreateAccount({
                     : 'Set up SimpleFIN for bank sync'}
                 </ButtonWithLoading>
                 <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                  <strong>Link an <u>American</u> bank account</strong> to automatically download
-                  transactions. SimpleFIN provides reliable, up-to-date
-                  information from hundreds of banks.
+                  <strong>
+                    Link a <u>North American</u> bank account
+                  </strong>
+                  to automatically download transactions. SimpleFIN provides
+                  reliable, up-to-date information from hundreds of banks.
                 </Text>
               </>
             ) : (

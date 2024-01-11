@@ -49,10 +49,13 @@ const SimpleFinInitialise = ({
     <Modal title="Set-up SimpleFIN" size={{ width: 300 }} {...modalProps}>
       <View style={{ display: 'flex', gap: 10 }}>
         <Text>
-          In order to enable bank-sync via SimpleFIN (only for USA banks) you
-          will need to create a token. This can be done by creating
+          In order to enable bank-sync via SimpleFIN (only for North American
+          banks) you will need to create a token. This can be done by creating
           an account with{' '}
-          <ExternalLink to="https://beta-bridge.simplefin.org/" linkColor="purple">
+          <ExternalLink
+            to="https://beta-bridge.simplefin.org/"
+            linkColor="purple"
+          >
             SimpleFIN
           </ExternalLink>
           .
@@ -69,11 +72,7 @@ const SimpleFinInitialise = ({
           />
         </FormField>
 
-        {!isValid && (
-          <Error>
-            It is required to provide a token.
-          </Error>
-        )}
+        {!isValid && <Error>It is required to provide a token.</Error>}
       </View>
 
       <ModalButtons>

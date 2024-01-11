@@ -669,7 +669,7 @@ handlers['gocardless-accounts-link'] = async function ({
       id,
       account_id: account.account_id,
       bank: bank.id,
-      account_sync_source: "gocardless",
+      account_sync_source: 'gocardless',
     });
   } else {
     id = uuidv4();
@@ -680,7 +680,7 @@ handlers['gocardless-accounts-link'] = async function ({
       name: account.name,
       official_name: account.official_name,
       bank: bank.id,
-      account_sync_source: "gocardless",
+      account_sync_source: 'gocardless',
     });
     await db.insertPayee({
       name: '',
@@ -710,7 +710,10 @@ handlers['simplefin-accounts-link'] = async function ({
 }) {
   let id;
 
-  const bank = await link.findOrCreateBank(externalAccount.institution, externalAccount.orgDomain);
+  const bank = await link.findOrCreateBank(
+    externalAccount.institution,
+    externalAccount.orgDomain,
+  );
 
   if (upgradingId) {
     const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
@@ -721,18 +724,17 @@ handlers['simplefin-accounts-link'] = async function ({
       id,
       account_id: externalAccount.account_id,
       bank: bank.id,
-      account_sync_source: "simplefin",
+      account_sync_source: 'simplefin',
     });
   } else {
     id = uuidv4();
     await db.insertWithUUID('accounts', {
       id,
       account_id: externalAccount.account_id,
-      mask: "1234", //TODO: Do we have this?
       name: externalAccount.name,
-      official_name: externalAccount.name, //TODO: Do we have this?
+      official_name: externalAccount.name,
       bank: bank.id,
-      account_sync_source: "simplefin",
+      account_sync_source: 'simplefin',
     });
     await db.insertPayee({
       name: '',
@@ -1365,15 +1367,13 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     return 'ok';
   }
 
-  const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
-    id,
-  ]);
+  const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [id]);
 
   let isGoCardless;
 
-  if (accRow.account_sync_source === "gocardless") {
+  if (accRow.account_sync_source === 'gocardless') {
     isGoCardless = true;
-  } else if (accRow.account_sync_source === "simplefin") {
+  } else if (accRow.account_sync_source === 'simplefin') {
     isGoCardless = false;
   } else {
     isGoCardless = true;
@@ -1392,7 +1392,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
   if (isGoCardless === false) {
     return;
   }
-  
+
   const { count } = await db.first(
     'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
     [bankId],
