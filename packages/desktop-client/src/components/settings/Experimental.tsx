@@ -94,10 +94,6 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="goalTemplatesEnabled">
               Goal templates
             </FeatureToggle>
-
-            <FeatureToggle flag="experimentalOfxParser">
-              Experimental OFX parser
-            </FeatureToggle>
           </View>
         ) : (
           <LinkButton

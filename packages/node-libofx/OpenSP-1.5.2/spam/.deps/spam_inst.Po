@@ -1,3 +1,0 @@
-spam_inst.o: spam_inst.cxx ../config.h
-
-../config.h:

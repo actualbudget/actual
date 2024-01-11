@@ -37,9 +37,6 @@ async function importFileWithRealTime(
   global.restoreDateNow();
   const { errors, transactions: originalTransactions } = await parseFile(
     filepath,
-    {
-      enableExperimentalOfxParser: true,
-    },
   );
   global.restoreFakeDateNow();
 

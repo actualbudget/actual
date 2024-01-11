@@ -1,7 +1,6 @@
 import csv2json from 'csv-parse/lib/sync';
 
 import * as fs from '../../platform/server/fs';
-import { dayFromDate } from '../../shared/months';
 import { looselyParseAmount } from '../../shared/util';
 
 import { ofx2json } from './ofx2json';
@@ -17,7 +16,6 @@ type ParseFileOptions = {
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
-  enableExperimentalOfxParser?: boolean;
 };
 
 export async function parseFile(
@@ -111,10 +109,6 @@ async function parseOFX(
   filepath: string,
   options?: ParseFileOptions,
 ): Promise<ParseFileResult> {
-  if (!options?.enableExperimentalOfxParser) {
-    return parseOFXNodeLibOFX(filepath, options);
-  }
-
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
@@ -145,45 +139,5 @@ async function parseOFX(
         notes: !!trans.name || !useMemoFallback ? trans.memo || null : null, //memo used for payee
       };
     }),
-  };
-}
-
-async function parseOFXNodeLibOFX(
-  filepath: string,
-  options: ParseFileOptions,
-): Promise<ParseFileResult> {
-  const { getOFXTransactions, initModule } = await import(
-    /* webpackChunkName: 'xfo' */ 'node-libofx'
-  );
-  await initModule();
-
-  const errors = Array<ParseError>();
-  const contents = await fs.readFile(filepath, 'binary');
-
-  let data;
-  try {
-    data = getOFXTransactions(contents);
-  } catch (err) {
-    errors.push({
-      message: 'Failed importing file',
-      internal: err.stack,
-    });
-    return { errors };
-  }
-
-  // Banks don't always implement the OFX standard properly
-  // If no payee is available try and fallback to memo
-  const useMemoFallback = options.fallbackMissingPayeeToMemo;
-
-  return {
-    errors,
-    transactions: data.map(trans => ({
-      amount: trans.amount,
-      imported_id: trans.fi_id,
-      date: trans.date ? dayFromDate(new Date(trans.date * 1000)) : null,
-      payee_name: trans.name || (useMemoFallback ? trans.memo : null),
-      imported_payee: trans.name || (useMemoFallback ? trans.memo : null),
-      notes: !!trans.name || !useMemoFallback ? trans.memo || null : null, //memo used for payee
-    })),
   };
 }
