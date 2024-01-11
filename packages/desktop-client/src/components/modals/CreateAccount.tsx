@@ -48,13 +48,6 @@ export function CreateAccount({
     }
   };
 
-  type NormalizedAccount = {
-    account_id: string;
-    name: string;
-    institution: string;
-    orgDomain: string;
-  };
-
   const onConnectSimpleFin = async () => {
     if (!isSimpleFinSetupComplete) {
       onSimpleFinInit();
@@ -71,15 +64,23 @@ export function CreateAccount({
 
     const newAccounts = [];
 
-    for (let i = 0; i < results.accounts.accounts.length; i++) {
-      const oldAccount = results.accounts.accounts[i];
-      const newAccount = {};
-      newAccount.account_id = oldAccount.id;
-      newAccount.name = oldAccount.name;
-      newAccount.institution = {
-        name: oldAccount.org.name,
+    type NormalizedAccount = {
+      account_id: string;
+      name: string;
+      institution: string;
+      orgDomain: string;
+    };
+
+    for (let i = 0; i < results.accounts.length; i++) {
+      const oldAccount = results.accounts[i];
+
+      const newAccount: NormalizedAccount = {
+        account_id: oldAccount.id,
+        name: oldAccount.name,
+        institution: oldAccount.org.name,
+        orgDomain: oldAccount.org.domain,
       };
-      newAccount.orgDomain = oldAccount.org.domain;
+
       newAccounts.push(newAccount);
     }
 
