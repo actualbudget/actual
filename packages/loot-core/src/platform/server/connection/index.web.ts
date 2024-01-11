@@ -47,14 +47,10 @@ export const init: T.Init = function (serverChn, handlers) {
       if (handlers[name]) {
         runHandler(handlers[name], args, { undoTag, name }).then(
           result => {
-            if (catchErrors) {
-              result = { data: result, error: null };
-            }
-
             serverChannel.postMessage({
               type: 'reply',
               id,
-              result,
+              result: catchErrors ? { data: result, error: null } : result,
               mutated: isMutating(handlers[name]),
               undoTag,
             });
