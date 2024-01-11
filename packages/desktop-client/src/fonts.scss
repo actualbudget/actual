@@ -1,2 +1,4 @@
-@use '~inter-ui/variable';
+@use 'inter-ui/variable' with (
+  $inter-font-path: '../../../node_modules/inter-ui/Inter (web)'
+);
 @include variable.default;
