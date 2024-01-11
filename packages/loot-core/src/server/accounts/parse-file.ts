@@ -20,7 +20,7 @@ type ParseFileOptions = {
 
 export async function parseFile(
   filepath: string,
-  options?: ParseFileOptions,
+  options: ParseFileOptions = {},
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const m = filepath.match(/\.[^.]*$/);
@@ -50,7 +50,7 @@ export async function parseFile(
 
 async function parseCSV(
   filepath: string,
-  options?: ParseFileOptions,
+  options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
@@ -107,7 +107,7 @@ async function parseQIF(filepath: string): Promise<ParseFileResult> {
 
 async function parseOFX(
   filepath: string,
-  options?: ParseFileOptions,
+  options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
