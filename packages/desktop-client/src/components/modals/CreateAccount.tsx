@@ -178,7 +178,7 @@ export function CreateAccount({
                 <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                   <strong>
                     Link a <u>European</u> bank account
-                  </strong>
+                  </strong>{' '}
                   to automatically download transactions. GoCardless provides
                   reliable, up-to-date information from hundreds of banks.
                 </Text>
@@ -201,7 +201,7 @@ export function CreateAccount({
                 <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
                   <strong>
                     Link a <u>North American</u> bank account
-                  </strong>
+                  </strong>{' '}
                   to automatically download transactions. SimpleFIN provides
                   reliable, up-to-date information from hundreds of banks.
                 </Text>

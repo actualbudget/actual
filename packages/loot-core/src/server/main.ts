@@ -688,7 +688,7 @@ handlers['gocardless-accounts-link'] = async function ({
     });
   }
 
-  await bankSync.syncGoCardlessAccount(
+  await bankSync.syncExternalAccount(
     undefined,
     undefined,
     id,
@@ -742,7 +742,7 @@ handlers['simplefin-accounts-link'] = async function ({
     });
   }
 
-  await bankSync.syncGoCardlessAccount(
+  await bankSync.syncExternalAccount(
     undefined,
     undefined,
     id,
@@ -1281,7 +1281,7 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
-        const res = await bankSync.syncGoCardlessAccount(
+        const res = await bankSync.syncExternalAccount(
           userId,
           userKey,
           acct.id,

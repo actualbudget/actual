@@ -807,15 +807,7 @@ export async function addTransactions(
   return newTransactions;
 }
 
-// TODO: This needs to be renamed to something more generic as it includes SimpleFin now.
-
-export async function syncGoCardlessAccount(
-  userId,
-  userKey,
-  id,
-  acctId,
-  bankId,
-) {
+export async function syncExternalAccount(userId, userKey, id, acctId, bankId) {
   // TODO: Handle the case where transactions exist in the future
   // (that will make start date after end date)
   const latestTransaction = await db.first(

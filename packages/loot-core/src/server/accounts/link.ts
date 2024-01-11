@@ -143,7 +143,7 @@ export async function addGoCardlessAccounts(
       });
 
       // Do an initial sync
-      await bankSync.syncGoCardlessAccount(
+      await bankSync.syncExternalAccount(
         userId,
         userKey,
         id,
