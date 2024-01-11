@@ -21,12 +21,13 @@ import thunk from 'redux-thunk';
 
 import * as actions from 'loot-core/src/client/actions';
 import * as constants from 'loot-core/src/client/constants';
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
-import reducers from 'loot-core/src/client/reducers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
+import { reducers } from 'loot-core/src/client/reducers';
 import { initialState as initialAppState } from 'loot-core/src/client/reducers/app';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { q } from 'loot-core/src/shared/query';
 
-import App from './components/App';
+import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
 import { handleGlobalEvents } from './global-events';
 import { type BoundActions } from './hooks/useActions';

@@ -7,34 +7,37 @@ import { currentDay, dayFromDate } from 'loot-core/src/shared/months';
 import { amountToInteger } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
-import { Add } from '../../icons/v1';
+import { useCategories } from '../../hooks/useCategories';
+import { SvgAdd } from '../../icons/v1';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
-import AccountAutocomplete, {
+import {
+  AccountAutocomplete,
   AccountItemGroupHeader,
   AccountItem,
 } from '../autocomplete/AccountAutocomplete';
-import CategoryAutocomplete, {
+import {
+  CategoryAutocomplete,
   CategoryItemGroupHeader,
   CategoryItem,
 } from '../autocomplete/CategoryAutocomplete';
-import PayeeAutocomplete, {
+import {
+  PayeeAutocomplete,
   CreatePayeeButton,
   PayeeItemGroupHeader,
   PayeeItem,
 } from '../autocomplete/PayeeAutocomplete';
-import Input from '../common/Input';
-import Modal from '../common/Modal';
-import View from '../common/View';
+import { Input } from '../common/Input';
+import { Modal } from '../common/Modal';
+import { View } from '../common/View';
 import { SectionLabel } from '../forms';
-import DateSelect from '../select/DateSelect';
+import { DateSelect } from '../select/DateSelect';
 
 function CreatePayeeIcon(props) {
-  return <Add {...props} width={14} height={14} />;
+  return <SvgAdd {...props} width={14} height={14} />;
 }
 
-export default function EditField({ modalProps, name, onSubmit, onClose }) {
+export function EditField({ modalProps, name, onSubmit, onClose }) {
   const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );

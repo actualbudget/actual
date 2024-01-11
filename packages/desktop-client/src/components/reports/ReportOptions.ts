@@ -63,7 +63,10 @@ export type QueryDataEntity = {
   amount: number;
 };
 
-export type UncategorizedEntity = CategoryEntity & {
+export type UncategorizedEntity = Pick<
+  CategoryEntity,
+  'name' | 'id' | 'hidden'
+> & {
   /*
     When looking at uncategorized and hidden transactions we
     need a way to group them. To do this we give them a unique
@@ -71,10 +74,10 @@ export type UncategorizedEntity = CategoryEntity & {
     transctions from our query. For this we use the 3 variables
     below.
   */
-  uncategorized_id: string;
-  is_off_budget: boolean;
-  is_transfer: boolean;
-  has_category: boolean;
+  uncategorized_id?: string;
+  is_off_budget?: boolean;
+  is_transfer?: boolean;
+  has_category?: boolean;
 };
 
 const uncategorizedCategory: UncategorizedEntity = {
@@ -105,7 +108,10 @@ const offBudgetCategory: UncategorizedEntity = {
   has_category: true,
 };
 
-type UncategorizedGroupEntity = CategoryGroupEntity & {
+type UncategorizedGroupEntity = Pick<
+  CategoryGroupEntity,
+  'name' | 'id' | 'hidden'
+> & {
   categories?: UncategorizedEntity[];
 };
 

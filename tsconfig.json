@@ -15,11 +15,11 @@
     "downlevelIteration": true,
     // TODO: enable once every file is ts
     // "strict": true,
-    // TODO: enable once the violations are fixed
-    // "strictFunctionTypes": true,
+    "strictFunctionTypes": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "jsx": "preserve",
+    "types": ["vite/client", "jest"],
     // Check JS files too
     "allowJs": true,
     "checkJs": false,

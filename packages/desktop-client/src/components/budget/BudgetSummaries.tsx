@@ -11,20 +11,18 @@ import { css } from 'glamor';
 
 import { addMonths, subMonths } from 'loot-core/src/shared/months';
 
-import useResizeObserver from '../../hooks/useResizeObserver';
-import View from '../common/View';
+import { useResizeObserver } from '../../hooks/useResizeObserver';
+import { View } from '../common/View';
 
 import { MonthsContext } from './MonthsContext';
-import type ReportBudgetSummary from './report/budgetsummary/BudgetSummary';
-import type RolloverBudgetSummary from './rollover/budgetsummary/BudgetSummary';
+import { type BudgetSummary as ReportBudgetSummary } from './report/budgetsummary/BudgetSummary';
+import { type BudgetSummary as RolloverBudgetSummary } from './rollover/budgetsummary/BudgetSummary';
 
 type BudgetSummariesProps = {
   SummaryComponent: typeof ReportBudgetSummary | typeof RolloverBudgetSummary;
 };
 
-export default function BudgetSummaries({
-  SummaryComponent,
-}: BudgetSummariesProps) {
+export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
   const { months } = useContext(MonthsContext);
 
   const [widthState, setWidthState] = useState(0);

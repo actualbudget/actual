@@ -1,7 +1,7 @@
-import q from 'loot-core/src/client/query-helpers';
+import { q } from 'loot-core/src/shared/query';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
-function makeQuery(
+export function makeQuery(
   name: string,
   startDate: string,
   endDate: string,
@@ -82,5 +82,3 @@ function makeQuery(
       { amount: { $sum: '$amount' } },
     ]);
 }
-
-export default makeQuery;

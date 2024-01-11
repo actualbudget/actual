@@ -4,7 +4,7 @@ import * as cloudStorage from '../cloud-storage';
 import { handlers } from '../main';
 import { waitOnSpreadsheet } from '../sheet';
 
-export default async function importActual(_filepath: string, buffer: Buffer) {
+export async function importActual(_filepath: string, buffer: Buffer) {
   // Importing Actual files is a special case because we can directly
   // write down the files, but because it doesn't go through the API
   // layer we need to duplicate some of the workflow

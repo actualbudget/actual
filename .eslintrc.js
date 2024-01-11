@@ -44,6 +44,9 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: { project: [path.join(__dirname, './tsconfig.json')] },
   reportUnusedDisableDirectives: true,
+  globals: {
+    globalThis: false,
+  },
   rules: {
     'prettier/prettier': 'warn',
 
@@ -165,6 +168,7 @@ module.exports = {
     'prefer-const': 'warn',
     'prefer-spread': 'off',
     '@typescript-eslint/no-empty-function': 'off',
+    'import/no-default-export': 'warn',
   },
   overrides: [
     {
@@ -196,6 +200,26 @@ module.exports = {
               FC: { message: ruleFCMsg },
             },
             extendDefaults: true,
+          },
+        ],
+      },
+    },
+    {
+      files: ['./packages/desktop-client/**/*'],
+      excludedFiles: [
+        './packages/desktop-client/src/hooks/useNavigate.{ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'warn',
+          {
+            patterns: [
+              {
+                group: ['react-router-dom'],
+                importNames: ['useNavigate'],
+                message: 'Please use Actual’s useNavigate() hook instead.',
+              },
+            ],
           },
         ],
       },
@@ -236,6 +260,15 @@ module.exports = {
       ],
       rules: {
         'no-restricted-imports': ['off', { patterns: restrictedImportColors }],
+      },
+    },
+    {
+      files: [
+        './packages/api/migrations/*',
+        './packages/loot-core/migrations/*',
+      ],
+      rules: {
+        'import/no-default-export': 'off',
       },
     },
   ],

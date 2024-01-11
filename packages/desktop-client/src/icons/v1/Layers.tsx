@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgLayers = (props: SVGProps<SVGSVGElement>) => (
+export const SvgLayers = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -16,4 +16,3 @@ const SvgLayers = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
-export default SvgLayers;

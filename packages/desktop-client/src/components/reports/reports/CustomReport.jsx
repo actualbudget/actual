@@ -10,29 +10,29 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../../hooks/useActions';
-import useCategories from '../../../hooks/useCategories';
-import useFilters from '../../../hooks/useFilters';
+import { useCategories } from '../../../hooks/useCategories';
+import { useFilters } from '../../../hooks/useFilters';
 import { theme, styles } from '../../../style';
-import AlignedText from '../../common/AlignedText';
-import Block from '../../common/Block';
-import Text from '../../common/Text';
-import View from '../../common/View';
+import { AlignedText } from '../../common/AlignedText';
+import { Block } from '../../common/Block';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 import { AppliedFilters } from '../../filters/FiltersMenu';
-import PrivacyFilter from '../../PrivacyFilter';
-import ChooseGraph from '../ChooseGraph';
-import Header from '../Header';
-import LoadingIndicator from '../LoadingIndicator';
-import ReportLegend from '../ReportLegend';
+import { PrivacyFilter } from '../../PrivacyFilter';
+import { ChooseGraph } from '../ChooseGraph';
+import { Header } from '../Header';
+import { LoadingIndicator } from '../LoadingIndicator';
+import { ReportLegend } from '../ReportLegend';
 import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
-import ReportSummary from '../ReportSummary';
+import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
-import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
-import groupedSpreadsheet from '../spreadsheets/grouped-spreadsheet';
-import useReport from '../useReport';
+import { createSpreadsheet as defaultSpreadsheet } from '../spreadsheets/default-spreadsheet';
+import { createGroupedSpreadsheet as groupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
+import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
-export default function CustomReport() {
+export function CustomReport() {
   const categories = useCategories();
 
   const viewLegend =

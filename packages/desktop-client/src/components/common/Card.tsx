@@ -2,11 +2,11 @@ import { type ComponentProps, forwardRef } from 'react';
 
 import { theme } from '../../style';
 
-import View from './View';
+import { View } from './View';
 
 type CardProps = ComponentProps<typeof View>;
 
-const Card = forwardRef<HTMLDivElement, CardProps>(
+export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ children, ...props }, ref) => {
     return (
       <View
@@ -35,5 +35,3 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
     );
   },
 );
-
-export default Card;

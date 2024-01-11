@@ -1,4 +1,4 @@
-import evalArithmetic from './arithmetic';
+import { evalArithmetic } from './arithmetic';
 
 describe('arithmetic', () => {
   test('handles negative numbers', () => {

@@ -6,7 +6,7 @@ type BlockProps = HTMLProps<HTMLDivElement> & {
   innerRef?: Ref<HTMLDivElement>;
 };
 
-export default function Block(props: BlockProps) {
+export function Block(props: BlockProps) {
   const { className = '', style, innerRef, ...restProps } = props;
   return (
     <div
