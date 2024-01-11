@@ -4,7 +4,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import useSyncServerStatus from './useSyncServerStatus';
 
-export default function useSimpleFinStatus() {
+export function useSimpleFinStatus() {
   const [configuredSimpleFin, setConfiguredSimpleFin] = useState<
     boolean | null
   >(null);

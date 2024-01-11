@@ -17,7 +17,7 @@ type SimpleFinInitialiseProps = {
   onSuccess: () => void;
 };
 
-const SimpleFinInitialise = ({
+export const SimpleFinInitialise = ({
   modalProps,
   onSuccess,
 }: SimpleFinInitialiseProps) => {
@@ -87,5 +87,3 @@ const SimpleFinInitialise = ({
     </Modal>
   );
 };
-
-export default SimpleFinInitialise;
