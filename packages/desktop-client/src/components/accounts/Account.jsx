@@ -586,7 +586,9 @@ class AccountInternal extends PureComponent {
 
     switch (item) {
       case 'link':
-        authorizeBank(this.props.pushModal, { upgradingAccountId: accountId });
+        this.props.pushModal('add-account', {
+          upgradingAccountId: accountId,
+        });
         break;
       case 'unlink':
         this.props.unlinkAccount(accountId);

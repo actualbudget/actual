@@ -23,6 +23,7 @@ type CreateAccountProps = {
 export default function CreateAccount({
   modalProps,
   syncServerStatus,
+  upgradingAccountId,
 }: CreateAccountProps) {
   const actions = useActions();
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] =
@@ -36,7 +37,11 @@ export default function CreateAccount({
       return;
     }
 
-    authorizeBank(actions.pushModal);
+    if (upgradingAccountId === undefined) {
+      authorizeBank(actions.pushModal);
+    } else {
+      authorizeBank(actions.pushModal, { upgradingAccountId: upgradingAccountId });
+    }
   };
 
   const onConnectSimpleFin = async () => {
@@ -94,36 +99,44 @@ export default function CreateAccount({
     setIsSimpleFinSetupComplete(configuredSimpleFin);
   }, [configuredSimpleFin]);
 
+  let title = "Add Account";
+
+  if (upgradingAccountId !== undefined) {
+    title = "Link Account";
+  }
+
   return (
-    <Modal title="Add Account" {...modalProps}>
+    <Modal title={title} {...modalProps}>
       {() => (
         <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
-          <View style={{ gap: 10 }}>
-            <Button
-              type="primary"
-              style={{
-                padding: '10px 0',
-                fontSize: 15,
-                fontWeight: 600,
-              }}
-              onClick={onCreateLocalAccount}
-            >
-              Create local account
-            </Button>
-            <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
-              <Text>
-                <strong>Create a local account</strong> if you want to add
-                transactions manually. You can also{' '}
-                <ExternalLink
-                  to="https://actualbudget.org/docs/transactions/importing"
-                  linkColor="muted"
-                >
-                  import QIF/OFX/QFX files into a local account
-                </ExternalLink>
-                .
-              </Text>
+          {upgradingAccountId === undefined &&
+            <View style={{ gap: 10 }}>
+              <Button
+                type="primary"
+                style={{
+                  padding: '10px 0',
+                  fontSize: 15,
+                  fontWeight: 600,
+                }}
+                onClick={onCreateLocalAccount}
+              >
+                Create local account
+              </Button>
+              <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                <Text>
+                  <strong>Create a local account</strong> if you want to add
+                  transactions manually. You can also{' '}
+                  <ExternalLink
+                    to="https://actualbudget.org/docs/transactions/importing"
+                    linkColor="muted"
+                  >
+                    import QIF/OFX/QFX files into a local account
+                  </ExternalLink>
+                  .
+                </Text>
+              </View>
             </View>
-          </View>
+          }
           <View style={{ gap: 10 }}>
             {syncServerStatus === 'online' ? (
               <>

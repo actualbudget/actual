@@ -80,6 +80,7 @@ export default function Modals() {
             <CreateAccount
               modalProps={modalProps}
               syncServerStatus={syncServerStatus}
+              upgradingAccountId={options?.upgradingAccountId}
             />
           );
 
