@@ -14,6 +14,7 @@ import {
   CategoryGroupEntity,
   GoCardlessToken,
   GoCardlessInstitution,
+  SimpleFinAccount,
   PayeeEntity,
 } from './models';
 import { EmptyObject } from './util';
@@ -223,7 +224,7 @@ export interface ServerHandlers {
 
   'simplefin-status': () => Promise<{ configured: boolean }>;
 
-  'simplefin-accounts': () => Promise<{ configured: boolean }>;
+  'simplefin-accounts': () => Promise<{ accounts: SimpleFinAccount[] }>;
 
   'gocardless-get-banks': (country: string) => Promise<{
     data: GoCardlessInstitution[];

@@ -19,6 +19,7 @@ import { View } from '../common/View';
 type CreateAccountProps = {
   modalProps: CommonModalProps;
   syncServerStatus: SyncServerStatus;
+  upgradingAccountId?: string;
 };
 
 export function CreateAccount({
@@ -45,6 +46,13 @@ export function CreateAccount({
         upgradingAccountId,
       });
     }
+  };
+
+  type NormalizedAccount = {
+    account_id: string;
+    name: string;
+    institution: string;
+    orgDomain: string;
   };
 
   const onConnectSimpleFin = async () => {
