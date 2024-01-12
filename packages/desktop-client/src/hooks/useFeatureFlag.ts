@@ -8,7 +8,6 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   reportBudget: false,
   goalTemplatesEnabled: false,
   customReports: false,
-  experimentalOfxParser: true,
   simpleFinSync: false,
 };
 

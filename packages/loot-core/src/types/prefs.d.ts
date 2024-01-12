@@ -6,7 +6,6 @@ export type FeatureFlag =
   | 'reportBudget'
   | 'goalTemplatesEnabled'
   | 'customReports'
-  | 'experimentalOfxParser'
   | 'simpleFinSync';
 
 export type LocalPrefs = Partial<
