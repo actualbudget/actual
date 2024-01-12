@@ -5,7 +5,6 @@ import {
   Route,
   Routes,
   Navigate,
-  useNavigate,
   BrowserRouter,
   useLocation,
   useHref,
@@ -20,6 +19,7 @@ import { checkForUpdateNotification } from 'loot-core/src/client/update-notifica
 import * as undo from 'loot-core/src/platform/client/undo';
 
 import { useActions } from '../hooks/useActions';
+import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
 import { theme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';

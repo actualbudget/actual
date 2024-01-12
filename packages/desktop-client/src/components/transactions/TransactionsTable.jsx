@@ -366,7 +366,7 @@ const TransactionHeader = memo(
         />
         {showBalance && <Cell value="Balance" width={88} textAlign="right" />}
         {showCleared && <Field width={23} truncate={false} />}
-        <Cell value="" width={5 + scrollWidth ?? 0} />
+        <Cell value="" width={5 + (scrollWidth ?? 0)} />
       </Row>
     );
   },

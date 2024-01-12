@@ -24,7 +24,7 @@
     "@types/adm-zip": "^0.5.0",
     "absurd-sql": "0.0.54",
     "assert": "^2.0.0",
-    "better-sqlite3": "^9.1.1",
+    "better-sqlite3": "^9.2.2",
     "browserify-zlib": "^0.2.0",
     "core-js": "^3.8.3",
     "csv-parse": "^4.10.1",
@@ -37,8 +37,7 @@
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "reselect": "^4.1.8",
-    "stream-browserify": "^3.0.0",
-    "ws": "8.13.0"
+    "stream-browserify": "^3.0.0"
   },
   "devDependencies": {
     "@actual-app/api": "*",
@@ -80,7 +79,6 @@
     "webpack": "^5.88.2",
     "webpack-bundle-analyzer": "^4.9.1",
     "webpack-cli": "^5.1.4",
-    "ws": "^4.1.0",
     "yargs": "^9.0.1"
   }
 }
