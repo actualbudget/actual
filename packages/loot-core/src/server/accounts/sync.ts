@@ -839,12 +839,9 @@ export async function syncExternalAccount(userId, userKey, id, acctId, bankId) {
 
     let download;
 
-    if (acctRow.account_sync_source === 'simplefin') {
+    if (acctRow.account_sync_source === 'simpleFin') {
       download = await downloadSimpleFinTransactions(acctId, startDate);
-    } else if (
-      acctRow.account_sync_source === 'gocardless' ||
-      acctRow.account_sync_source === null
-    ) {
+    } else if (acctRow.account_sync_source === 'goCardless') {
       download = await downloadGoCardlessTransactions(
         userId,
         userKey,
@@ -876,12 +873,9 @@ export async function syncExternalAccount(userId, userKey, id, acctId, bankId) {
 
     let download;
 
-    if (acctRow.account_sync_source === 'simplefin') {
+    if (acctRow.account_sync_source === 'simpleFin') {
       download = await downloadSimpleFinTransactions(acctId, startingDay);
-    } else if (
-      acctRow.account_sync_source === 'gocardless' ||
-      acctRow.account_sync_source === null
-    ) {
+    } else if (acctRow.account_sync_source === 'goCardless') {
       download = await downloadGoCardlessTransactions(
         userId,
         userKey,
@@ -895,7 +889,7 @@ export async function syncExternalAccount(userId, userKey, id, acctId, bankId) {
 
     let balanceToUse = startingBalance;
 
-    if (acctRow.account_sync_source === 'simplefin') {
+    if (acctRow.account_sync_source === 'simpleFin') {
       const currentBalance = startingBalance;
       const previousBalance = transactions.reduce((total, trans) => {
         return (

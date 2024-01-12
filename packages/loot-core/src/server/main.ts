@@ -669,7 +669,7 @@ handlers['gocardless-accounts-link'] = async function ({
       id,
       account_id: account.account_id,
       bank: bank.id,
-      account_sync_source: 'gocardless',
+      account_sync_source: 'goCardless',
     });
   } else {
     id = uuidv4();
@@ -680,7 +680,7 @@ handlers['gocardless-accounts-link'] = async function ({
       name: account.name,
       official_name: account.official_name,
       bank: bank.id,
-      account_sync_source: 'gocardless',
+      account_sync_source: 'goCardless',
     });
     await db.insertPayee({
       name: '',
@@ -732,7 +732,7 @@ handlers['simplefin-accounts-link'] = async function ({
       id,
       account_id: externalAccount.account_id,
       bank: bank.id,
-      account_sync_source: 'simplefin',
+      account_sync_source: 'simpleFin',
     });
   } else {
     id = uuidv4();
@@ -742,7 +742,7 @@ handlers['simplefin-accounts-link'] = async function ({
       name: externalAccount.name,
       official_name: externalAccount.name,
       bank: bank.id,
-      account_sync_source: 'simplefin',
+      account_sync_source: 'simpleFin',
     });
     await db.insertPayee({
       name: '',
@@ -1377,15 +1377,7 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
 
   const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [id]);
 
-  let isGoCardless;
-
-  if (accRow.account_sync_source === 'gocardless') {
-    isGoCardless = true;
-  } else if (accRow.account_sync_source === 'simplefin') {
-    isGoCardless = false;
-  } else {
-    isGoCardless = true;
-  }
+  const isGoCardless = accRow.account_sync_source === 'goCardless';
 
   await db.updateAccount({
     id,

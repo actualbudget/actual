@@ -4,6 +4,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { authorizeBank } from '../../gocardless';
 import { useActions } from '../../hooks/useActions';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { type SyncServerStatus } from '../../hooks/useSyncServerStatus';
@@ -124,6 +125,8 @@ export function CreateAccount({
     title = 'Link Account';
   }
 
+  const simpleFinSyncFeatureFlag = useFeatureFlag('simpleFinSync');
+
   return (
     <Modal title={title} {...modalProps}>
       {() => (
@@ -180,29 +183,33 @@ export function CreateAccount({
                   to automatically download transactions. GoCardless provides
                   reliable, up-to-date information from hundreds of banks.
                 </Text>
-                <ButtonWithLoading
-                  disabled={syncServerStatus !== 'online'}
-                  loading={loadingSimpleFinAccounts}
-                  style={{
-                    marginTop: '18px',
-                    padding: '10px 0',
-                    fontSize: 15,
-                    fontWeight: 600,
-                    flex: 1,
-                  }}
-                  onClick={onConnectSimpleFin}
-                >
-                  {isSimpleFinSetupComplete
-                    ? 'Link bank account with SimpleFIN'
-                    : 'Set up SimpleFIN for bank sync'}
-                </ButtonWithLoading>
-                <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
-                  <strong>
-                    Link a <u>North American</u> bank account
-                  </strong>{' '}
-                  to automatically download transactions. SimpleFIN provides
-                  reliable, up-to-date information from hundreds of banks.
-                </Text>
+                {simpleFinSyncFeatureFlag === true && (
+                  <>
+                    <ButtonWithLoading
+                      disabled={syncServerStatus !== 'online'}
+                      loading={loadingSimpleFinAccounts}
+                      style={{
+                        marginTop: '18px',
+                        padding: '10px 0',
+                        fontSize: 15,
+                        fontWeight: 600,
+                        flex: 1,
+                      }}
+                      onClick={onConnectSimpleFin}
+                    >
+                      {isSimpleFinSetupComplete
+                        ? 'Link bank account with SimpleFIN'
+                        : 'Set up SimpleFIN for bank sync'}
+                    </ButtonWithLoading>
+                    <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                      <strong>
+                        Link a <u>North American</u> bank account
+                      </strong>{' '}
+                      to automatically download transactions. SimpleFIN provides
+                      reliable, up-to-date information from hundreds of banks.
+                    </Text>
+                  </>
+                )}
               </>
             ) : (
               <>
@@ -214,7 +221,7 @@ export function CreateAccount({
                     fontWeight: 600,
                   }}
                 >
-                  Set up GoCardless for bank sync
+                  Set up bank sync
                 </Button>
                 <Paragraph style={{ fontSize: 15 }}>
                   Connect to an Actual server to set up{' '}
@@ -222,7 +229,7 @@ export function CreateAccount({
                     to="https://actualbudget.org/docs/advanced/bank-sync"
                     linkColor="muted"
                   >
-                    automatic syncing with GoCardless
+                    automatic syncing.
                   </ExternalLink>
                   .
                 </Paragraph>

@@ -98,6 +98,7 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="experimentalOfxParser">
               Experimental OFX parser
             </FeatureToggle>
+            <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
           </View>
         ) : (
           <LinkButton

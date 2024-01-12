@@ -9,6 +9,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   goalTemplatesEnabled: false,
   customReports: false,
   experimentalOfxParser: true,
+  simpleFinSync: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {
