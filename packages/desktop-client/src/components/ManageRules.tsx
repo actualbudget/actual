@@ -244,10 +244,6 @@ function ManageRulesContent({
 
   const { isNarrowWidth } = useResponsive();
 
-  if (allRules === null) {
-    return null;
-  }
-
   return (
     <SelectedProvider instance={selectedInst}>
       <View>
