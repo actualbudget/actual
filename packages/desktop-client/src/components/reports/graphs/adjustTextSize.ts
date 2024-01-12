@@ -1,15 +1,12 @@
 export const adjustTextSize = (
   sized: number,
   type: string,
-  width?: number,
+  values?: number,
 ): `${number}px` => {
   let source;
   switch (type) {
     case 'variable':
-      const findArray = variableLookup.find(({ value }) => width < value).arr;
-      source = findArray
-        ? findArray
-        : variableLookup[variableLookup.length - 1].arr;
+      source = variableLookup.find(({ value }) => values > value).arr;
       break;
     case 'donut':
       source = donutLookup;
@@ -17,72 +14,76 @@ export const adjustTextSize = (
     default:
       source = defaultLookup;
   }
-  const lookup = source.find(({ size }) => sized <= size);
-  const defaultLast = lookup ? lookup : source[source.length - 1];
-  return `${defaultLast.font}px`;
+  const lookup = source.find(({ size }) => sized >= size);
+  return `${lookup.font}px`;
 };
 
 const defaultLookup = [
-  { size: 400, font: 12 },
-  { size: 600, font: 14 },
-  { size: null, font: 16 },
+  { size: 600, font: 16 },
+  { size: 500, font: 15 },
+  { size: 400, font: 14 },
+  { size: 300, font: 13 },
+  { size: 200, font: 12 },
+  { size: 100, font: 11 },
+  { size: 0, font: 10 },
 ];
 
 const donutLookup = [
-  { size: 200, font: 12 },
-  { size: 233, font: 14 },
-  { size: 266, font: 16 },
-  { size: 300, font: 18 },
-  { size: null, font: 20 },
+  { size: 300, font: 20 },
+  { size: 266, font: 18 },
+  { size: 233, font: 16 },
+  { size: 200, font: 14 },
+  { size: 166, font: 12 },
+  { size: 0, font: 10 },
 ];
 
 const variableLookup = [
   {
-    value: 100,
+    value: 10000,
     arr: [
-      { size: 9, font: 10 },
-      { size: 13, font: 11 },
-      { size: 16, font: 12 },
-      { size: 19, font: 13 },
-      { size: 22, font: 14 },
-      { size: 25, font: 15 },
-      { size: null, font: 16 },
+      { size: 66, font: 16 },
+      { size: 60, font: 15 },
+      { size: 54, font: 14 },
+      { size: 48, font: 13 },
+      { size: 42, font: 12 },
+      { size: 36, font: 11 },
+      { size: 0, font: 10 },
     ],
   },
   {
     value: 1000,
     arr: [
-      { size: 23, font: 10 },
-      { size: 26, font: 11 },
-      { size: 29, font: 12 },
-      { size: 32, font: 13 },
-      { size: 35, font: 14 },
-      { size: 38, font: 15 },
-      { size: null, font: 16 },
+      { size: 55, font: 16 },
+      { size: 50, font: 15 },
+      { size: 45, font: 14 },
+      { size: 40, font: 13 },
+      { size: 35, font: 12 },
+      { size: 30, font: 11 },
+      { size: 0, font: 10 },
     ],
   },
   {
-    value: 10090,
+    value: 100,
     arr: [
-      { size: 30, font: 10 },
-      { size: 35, font: 11 },
-      { size: 40, font: 12 },
-      { size: 45, font: 13 },
-      { size: 50, font: 14 },
-      { size: 55, font: 15 },
-      { size: null, font: 16 },
+      { size: 38, font: 16 },
+      { size: 35, font: 15 },
+      { size: 32, font: 14 },
+      { size: 29, font: 13 },
+      { size: 26, font: 12 },
+      { size: 23, font: 11 },
+      { size: 0, font: 10 },
     ],
   },
   {
-    value: null,
+    value: 0,
     arr: [
-      { size: 36, font: 10 },
-      { size: 42, font: 11 },
-      { size: 48, font: 12 },
-      { size: 54, font: 13 },
-      { size: 60, font: 14 },
-      { size: 66, font: 15 },
-      { size: null, font: 16 },
+      { size: 25, font: 16 },
+      { size: 22, font: 15 },
+      { size: 19, font: 14 },
+      { size: 16, font: 13 },
+      { size: 13, font: 12 },
+      { size: 9, font: 11 },
+      { size: 0, font: 10 },
     ],
   },
 ];
