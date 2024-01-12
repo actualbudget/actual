@@ -341,5 +341,5 @@ function findByNameIgnoreCase(categories: YNAB5.CategoryGroup[], name: string) {
 }
 
 function findIdByName(categories: YNAB5.CategoryGroup[], name: string) {
-  return findByNameIgnoreCase(categories, name).id;
+  return findByNameIgnoreCase(categories, name)?.id;
 }
