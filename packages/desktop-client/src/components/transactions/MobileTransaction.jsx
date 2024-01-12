@@ -186,6 +186,7 @@ function Footer({
   onSplit,
   onAddSplit,
   onEmptySplitFound,
+  editingField,
 }) {
   const [transaction, ...childTransactions] = transactions;
   const onClickRemainingSplit = () => {
@@ -217,6 +218,7 @@ function Footer({
         <Button
           type="primary"
           style={{ height: 40 }}
+          disabled={editingField}
           onClick={onClickRemainingSplit}
           onPointerDown={e => e.preventDefault()}
         >
@@ -237,19 +239,16 @@ function Footer({
         </Button>
       ) : adding ? (
         <Button
+          type="primary"
           style={{ height: 40 }}
+          disabled={editingField}
           onClick={onAdd}
           onPointerDown={e => e.preventDefault()}
         >
-          <SvgAdd
-            width={17}
-            height={17}
-            style={{ color: theme.formLabelText }}
-          />
+          <SvgAdd width={17} height={17} />
           <Text
             style={{
               ...styles.text,
-              color: theme.formLabelText,
               marginLeft: 5,
             }}
           >
@@ -258,22 +257,17 @@ function Footer({
         </Button>
       ) : (
         <Button
+          type="primary"
           style={{ height: 40 }}
+          disabled={editingField}
           onClick={onSave}
           onPointerDown={e => e.preventDefault()}
         >
-          <SvgPencilWriteAlternate
-            width={16}
-            height={16}
-            style={{
-              color: theme.formLabelText,
-            }}
-          />
+          <SvgPencilWriteAlternate width={16} height={16} />
           <Text
             style={{
               ...styles.text,
               marginLeft: 6,
-              color: theme.formLabelText,
             }}
           >
             Save changes
@@ -678,6 +672,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           onSplit={onSplit}
           onAddSplit={onAddSplit}
           onEmptySplitFound={onEmptySplitFound}
+          editingField={editingField}
         />
       }
       padding={0}
