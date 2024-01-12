@@ -688,7 +688,6 @@ function PayeeIcons({
 const Transaction = memo(function Transaction(props) {
   const {
     transaction: originalTransaction,
-    isNew,
     editing,
     showAccount,
     showBalance,
@@ -730,6 +729,7 @@ const Transaction = memo(function Transaction(props) {
     serializeTransaction(originalTransaction, showZeroInDeposit),
   );
   const isPreview = isPreviewId(transaction.id);
+  const isTemp = isTemporaryId(transaction.id);
 
   if (
     originalTransaction !== prevTransaction ||
@@ -872,19 +872,21 @@ const Transaction = memo(function Transaction(props) {
   const { dragRef } = useDraggable({
     type: 'transaction',
     onDragChange,
-    item: { id: transaction && transaction.id },
-    canDrag: transaction != null && !isNew && !isPreview && canDrag,
+    item: { id: transaction?.id },
+    canDrag: transaction != null && !isTemp && !isPreview && canDrag,
   });
 
   const { dropRef, dropPos } = useDroppable({
     types: 'transaction',
-    id: transaction && transaction.id,
+    id: transaction?.id,
     onDrop,
   });
 
   return (
     <View innerRef={dropRef}>
-      <DropHighlight pos={dropPos} offset={{ top: 1 }} />
+      {!isChild && !isTemp && !isPreview && (
+        <DropHighlight pos={dropPos} offset={{ top: 1 }} />
+      )}
       <Row
         innerRef={dragRef}
         style={{
@@ -914,9 +916,6 @@ const Transaction = memo(function Transaction(props) {
           ...(_unmatched && { opacity: 0.5 }),
         }}
       >
-        {!isChild && !isNew && !isPreview && (
-          <DropHighlight pos={dropPos} offset={{ top: 1 }} />
-        )}
         {isChild && (
           <Field
             /* Checkmark blank placeholder for Child transaction */
@@ -972,7 +971,7 @@ const Transaction = memo(function Transaction(props) {
             style={{ ...(isChild && { borderLeftWidth: 1 }) }}
             value={
               matched && (
-                <Hyperlink2
+                <SvgHyperlink2
                   style={{ width: 13, height: 13, color: 'inherit' }}
                 />
               )
@@ -1134,7 +1133,7 @@ const Transaction = memo(function Transaction(props) {
                       ? theme.warningText
                       : selected
                       ? theme.formLabelText
-                      : theme.tableTextLight,
+                      : theme.upcomingText,
                   backgroundColor:
                     notes === 'missed'
                       ? theme.errorBackground
@@ -1142,7 +1141,7 @@ const Transaction = memo(function Transaction(props) {
                       ? theme.warningBackground
                       : selected
                       ? theme.formLabelBackground
-                      : theme.pageBackground,
+                      : theme.upcomingBackground,
                   margin: '0 5px',
                   padding: '3px 7px',
                   borderRadius: 4,
@@ -1186,7 +1185,7 @@ const Transaction = memo(function Transaction(props) {
                 }}
               >
                 {isParent && (
-                  <CheveronDown
+                  <SvgCheveronDown
                     style={{
                       color: 'inherit',
                       width: 14,
@@ -1205,7 +1204,7 @@ const Transaction = memo(function Transaction(props) {
         ) : isBudgetTransfer || isOffBudget || isPreview ? (
           <InputCell
             /* Category field for transfer and off-budget transactions
-    (NOT preview, it is covered first) */
+      (NOT preview, it is covered first) */
             name="category"
             width="flex"
             exposed={focusedField === 'category'}
@@ -1223,7 +1222,7 @@ const Transaction = memo(function Transaction(props) {
             valueStyle={valueStyle}
             style={{
               fontStyle: 'italic',
-              color: '#c0c0c0',
+              color: theme.pageTextSubdued,
               fontWeight: 300,
             }}
             inputProps={{
@@ -1501,7 +1500,6 @@ function NewTransaction({
     >
       {transactions.map(transaction => (
         <Transaction
-          isNew
           key={transaction.id}
           editing={editingTransaction === transaction.id}
           transaction={transaction}

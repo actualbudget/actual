@@ -175,6 +175,10 @@ export function TransactionList({
     const transIdx = transactions.findIndex(t => t.id === id);
     const targetTransIdx = transactions.findIndex(t => t.id === targetId);
 
+    if (transIdx === -1 || targetTransIdx === -1) {
+      return;
+    }
+
     const trans = transactions[transIdx];
     const targetTrans = transactions[targetTransIdx];
 
@@ -184,7 +188,7 @@ export function TransactionList({
 
     // Check date bounds.
     // Only allow same reorder within same date.
-    if (targetTrans && targetTrans.date !== trans.date) {
+    if (targetTrans.date !== trans.date) {
       if (dropPos === 'top') {
         if (targetTrans.date > trans.date) {
           return;
