@@ -743,19 +743,12 @@ export function ImportTransactions({ modalProps, options }) {
 
   const [clearOnImport, setClearOnImport] = useState(true);
 
-  const enableExperimentalOfxParser = useFeatureFlag('experimentalOfxParser');
-
   async function parse(filename, options) {
     setLoadingState('parsing');
 
     const filetype = getFileType(filename);
     setFilename(filename);
     setFileType(filetype);
-
-    options = {
-      ...options,
-      enableExperimentalOfxParser,
-    };
 
     const { errors, transactions } = await parseTransactions(filename, options);
     setLoadingState(null);

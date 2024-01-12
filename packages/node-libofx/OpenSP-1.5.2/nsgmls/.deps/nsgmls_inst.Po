@@ -1,3 +1,0 @@
-nsgmls_inst.o: nsgmls_inst.cxx ../config.h
-
-../config.h:
