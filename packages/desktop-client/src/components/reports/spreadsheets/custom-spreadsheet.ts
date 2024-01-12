@@ -19,7 +19,7 @@ import { filterHiddenItems } from './filterHiddenItems';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 
-export type createSpreadsheetProps = {
+export type createCustomSpreadsheetProps = {
   startDate: string;
   endDate: string;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
@@ -37,7 +37,7 @@ export type createSpreadsheetProps = {
   graphType: string;
 };
 
-export function createSpreadsheet({
+export function createCustomSpreadsheet({
   startDate,
   endDate,
   categories,
@@ -53,7 +53,7 @@ export function createSpreadsheet({
   accounts,
   setDataCheck,
   graphType,
-}: createSpreadsheetProps) {
+}: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(
     showOffBudgetHidden,
     showUncategorized,
