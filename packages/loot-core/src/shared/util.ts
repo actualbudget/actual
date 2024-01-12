@@ -221,17 +221,16 @@ export function setNumberFormat(config: typeof numberFormatConfig) {
   numberFormatConfig = config;
 }
 
-export function getNumberFormat(
-  decimalNumber?: number,
-  format?: NumberFormats,
-  hideFraction?: boolean,
-) {
-  const calcFormat = format ?? numberFormatConfig.format;
-  const calcHideFraction = hideFraction ?? numberFormatConfig.hideFraction;
-  const calcDecimalNumber = decimalNumber ?? 2;
+export function getNumberFormat({
+  format,
+  hideFraction,
+}: {
+  format?: NumberFormats;
+  hideFraction: boolean;
+} = numberFormatConfig) {
   let locale, regex, separator;
 
-  switch (calcFormat) {
+  switch (format) {
     case 'space-comma':
       locale = 'en-SE';
       regex = /[^-0-9,]/g;
@@ -260,11 +259,11 @@ export function getNumberFormat(
   }
 
   return {
-    value: calcFormat,
+    value: format,
     separator,
     formatter: new Intl.NumberFormat(locale, {
-      minimumFractionDigits: calcHideFraction ? 0 : calcDecimalNumber,
-      maximumFractionDigits: calcHideFraction ? 0 : calcDecimalNumber,
+      minimumFractionDigits: hideFraction ? 0 : 2,
+      maximumFractionDigits: hideFraction ? 0 : 2,
     }),
     regex,
   };
@@ -312,7 +311,7 @@ export function amountToCurrency(n) {
 }
 
 export function amountToCurrencyNoDecimal(n) {
-  return getNumberFormat(0).formatter.format(n);
+  return getNumberFormat({ hideFraction: true }).formatter.format(n);
 }
 
 export function currencyToAmount(str: string) {

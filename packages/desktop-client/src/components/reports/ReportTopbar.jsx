@@ -137,7 +137,7 @@ export function ReportTopbar({
           onChangeViews('viewLabels');
         }}
         style={{ marginRight: 15 }}
-        title="Show labels"
+        title="Show Labels"
       >
         <SvgTag width={15} height={15} />
       </GraphButton>
