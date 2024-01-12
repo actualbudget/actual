@@ -154,7 +154,6 @@ export function Menu<T extends MenuItem>({
                   : -3,
               flexDirection: 'row',
               alignItems: 'center',
-              justifyItems: 'center',
               color: theme.menuItemText,
               ...(item.disabled && { color: theme.buttonBareDisabledText }),
               ...(!item.disabled &&
