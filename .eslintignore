@@ -24,7 +24,3 @@ packages/import-ynab5/**/node_modules/*
 packages/loot-core/**/node_modules/*
 packages/loot-core/**/lib-dist/*
 packages/loot-core/**/proto/*
-
-packages/node-libofx/libofx.*.js
-packages/node-libofx/libofx/
-packages/node-libofx/OpenSP-*/
