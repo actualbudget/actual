@@ -4,9 +4,9 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
-import { ToggleMenu } from '../common/ToggleMenu';
 import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
@@ -269,7 +269,7 @@ export function ReportSidebar({
                   setMenuOpen(false);
                 }}
               >
-                <ToggleMenu
+                <Menu
                   onMenuSelect={type => {
                     if (type === 'show-hidden-categories') {
                       setShowOffBudgetHidden(!showOffBudgetHidden);
