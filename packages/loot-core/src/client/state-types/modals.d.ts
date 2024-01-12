@@ -39,7 +39,7 @@ type FinanceModals = {
     accounts: unknown[];
     requisitionId: string;
     upgradingAccountId?: string;
-    syncSource?: string;
+    syncSource?: AccountSyncSource;
   };
 
   'confirm-category-delete': { onDelete: () => void } & (

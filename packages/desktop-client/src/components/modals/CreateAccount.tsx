@@ -39,7 +39,7 @@ export function CreateAccount({
       return;
     }
 
-    if (upgradingAccountId === undefined) {
+    if (upgradingAccountId == null) {
       authorizeBank(actions.pushModal);
     } else {
       authorizeBank(actions.pushModal, {
@@ -71,9 +71,7 @@ export function CreateAccount({
       orgDomain: string;
     };
 
-    for (let i = 0; i < results.accounts.length; i++) {
-      const oldAccount = results.accounts[i];
-
+    for (const oldAccount of results.accounts) {
       const newAccount: NormalizedAccount = {
         account_id: oldAccount.id,
         name: oldAccount.name,
@@ -122,7 +120,7 @@ export function CreateAccount({
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
     useState(false);
 
-  if (upgradingAccountId !== undefined) {
+  if (upgradingAccountId != null) {
     title = 'Link Account';
   }
 
@@ -130,7 +128,7 @@ export function CreateAccount({
     <Modal title={title} {...modalProps}>
       {() => (
         <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
-          {upgradingAccountId === undefined && (
+          {upgradingAccountId == null && (
             <View style={{ gap: 10 }}>
               <Button
                 type="primary"
