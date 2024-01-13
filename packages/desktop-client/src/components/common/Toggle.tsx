@@ -7,7 +7,7 @@ import { theme, type CSSProperties } from '../../style';
 type ToggleProps = {
   id: string;
   checked: boolean;
-  onChange?: (any) => void;
+  onToggle?: (any) => void;
   onColor?: string;
   style?: CSSProperties;
 };
@@ -15,7 +15,7 @@ type ToggleProps = {
 export const Toggle = ({
   id,
   checked,
-  onChange,
+  onToggle,
   onColor,
   style,
 }: ToggleProps) => {
@@ -24,7 +24,7 @@ export const Toggle = ({
       <input
         id={id}
         checked={checked}
-        onChange={onChange}
+        onChange={onToggle}
         className={`${css({
           height: 0,
           width: 0,
