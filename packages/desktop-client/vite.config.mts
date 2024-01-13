@@ -124,7 +124,7 @@ export default defineConfig(async ({ mode }) => {
             }
             return `static/${extType}/[name].[hash][extname]`;
           },
-          chunkFileNames: 'static/js/[name].[hash].js',
+          chunkFileNames: 'static/js/[name].[hash].chunk.js',
           entryFileNames: 'static/js/[name].[hash].js',
         },
       },
