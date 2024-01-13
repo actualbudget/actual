@@ -5,35 +5,13 @@ export function makeQuery(
   name: string,
   startDate: string,
   endDate: string,
-  showOffBudgetHidden: boolean,
+  showOffBudget: boolean,
   selectedCategories: CategoryEntity[],
   categoryFilter: CategoryEntity[],
   conditionsOpKey: string,
   filters: unknown[],
 ) {
   const query = q('transactions')
-    .filter(
-      //Show Offbudget and hidden categories
-      !showOffBudgetHidden && {
-        $and: [
-          {
-            'account.offbudget': false,
-            $or: [
-              {
-                'category.hidden': false,
-                category: null,
-              },
-            ],
-          },
-        ],
-        $or: [
-          {
-            'payee.transfer_acct.offbudget': true,
-            'payee.transfer_acct': null,
-          },
-        ],
-      },
-    )
     //Apply Category_Selector
     .filter(
       selectedCategories && {

@@ -123,25 +123,21 @@ const uncategorizedGroup: UncategorizedGroupEntity = {
 };
 
 export const categoryLists = (
-  showOffBudgetHidden: boolean,
-  showUncategorized: boolean,
+  showHiddenCategories: boolean,
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] },
 ) => {
-  const categoryList = showUncategorized
-    ? [
-        ...categories.list.filter(f => showOffBudgetHidden || !f.hidden),
-        uncategorizedCategory,
-        transferCategory,
-        offBudgetCategory,
-      ]
-    : categories.list;
-  const categoryGroup = showUncategorized
-    ? [
-        ...categories.grouped.filter(f => showOffBudgetHidden || !f.hidden),
-        uncategorizedGroup,
-      ]
-    : categories.grouped;
-  return [categoryList, categoryGroup] as const;
+  const categoryList = [
+    ...categories.list.filter(f => showHiddenCategories || !f.hidden),
+    uncategorizedCategory,
+    offBudgetCategory,
+    transferCategory,
+  ];
+
+  const categoryGroup = [
+    ...categories.grouped.filter(f => showHiddenCategories || !f.hidden),
+    uncategorizedGroup,
+  ];
+  return [categoryList, categoryGroup.filter(group => group !== null)] as const;
 };
 
 export const groupBySelections = (

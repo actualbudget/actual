@@ -6,8 +6,28 @@ import {
 export function filterHiddenItems(
   item: UncategorizedEntity,
   data: QueryDataEntity[],
+  showOffBudget?: boolean,
+  showUncategorized?: boolean,
 ) {
-  return data.filter(asset => {
+  const showHide = data.filter(f =>
+    showOffBudget
+      ? showUncategorized
+        ? //true,true
+          true
+        : //true,false
+          f.category !== null ||
+          f.accountOffBudget !== false ||
+          f.transferAccount !== null
+      : showUncategorized
+      ? //false, true
+        f.accountOffBudget === false && f.transferAccount === null
+      : //false false
+        f.category !== null &&
+        f.accountOffBudget === false &&
+        f.transferAccount === null,
+  );
+
+  return showHide.filter(asset => {
     if (!item.uncategorized_id) {
       return true;
     }

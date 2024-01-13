@@ -43,8 +43,10 @@ export function ReportSidebar({
   setIsDateStatic,
   showEmpty,
   setShowEmpty,
-  showOffBudgetHidden,
-  setShowOffBudgetHidden,
+  showOffBudget,
+  setShowOffBudget,
+  showHiddenCategories,
+  setShowHiddenCategories,
   showUncategorized,
   setShowUncategorized,
   categories,
@@ -272,25 +274,33 @@ export function ReportSidebar({
                 <Menu
                   onMenuSelect={type => {
                     if (type === 'show-hidden-categories') {
-                      setShowOffBudgetHidden(!showOffBudgetHidden);
-                    } else if (type === 'show-empty-rows') {
+                      setShowHiddenCategories(!showHiddenCategories);
+                    } else if (type === 'show-empty-items') {
                       setShowEmpty(!showEmpty);
+                    } else if (type === 'show-off-budget') {
+                      setShowOffBudget(!showOffBudget);
                     } else if (type === 'show-uncategorized') {
                       setShowUncategorized(!showUncategorized);
                     }
                   }}
                   items={[
                     {
-                      name: 'show-empty-rows',
+                      name: 'show-empty-items',
                       text: 'Show Empty Rows',
                       tooltip: 'Show rows that are zero or blank',
                       toggle: showEmpty,
                     },
                     {
                       name: 'show-hidden-categories',
+                      text: 'Show Hidden',
+                      tooltip: 'Show hidden categories',
+                      toggle: showHiddenCategories,
+                    },
+                    {
+                      name: 'show-off-budget',
                       text: 'Show Off Budget',
-                      tooltip: 'Show off budget accounts and hidden categories',
-                      toggle: showOffBudgetHidden,
+                      tooltip: 'Show off budget accounts',
+                      toggle: showOffBudget,
                     },
                     {
                       name: 'show-uncategorized',

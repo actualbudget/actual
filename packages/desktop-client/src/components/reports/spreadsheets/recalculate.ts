@@ -12,6 +12,8 @@ type recalculateProps = {
   assets: QueryDataEntity[];
   debts: QueryDataEntity[];
   groupByLabel: string;
+  showOffBudget?: boolean;
+  showUncategorized?: boolean;
 };
 
 export function recalculate({
@@ -20,18 +22,30 @@ export function recalculate({
   assets,
   debts,
   groupByLabel,
+  showOffBudget,
+  showUncategorized,
 }: recalculateProps) {
   let totalAssets = 0;
   let totalDebts = 0;
   const monthData = months.reduce((arr, month) => {
     const last = arr.length === 0 ? null : arr[arr.length - 1];
 
-    const monthAssets = filterHiddenItems(item, assets)
+    const monthAssets = filterHiddenItems(
+      item,
+      assets,
+      showOffBudget,
+      showUncategorized,
+    )
       .filter(asset => asset.date === month && asset[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
     totalAssets += monthAssets;
 
-    const monthDebts = filterHiddenItems(item, debts)
+    const monthDebts = filterHiddenItems(
+      item,
+      debts,
+      showOffBudget,
+      showUncategorized,
+    )
       .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
     totalDebts += monthDebts;

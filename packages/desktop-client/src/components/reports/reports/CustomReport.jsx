@@ -65,7 +65,8 @@ export function CustomReport() {
   const [groupBy, setGroupBy] = useState('Category');
   const [balanceType, setBalanceType] = useState('Payment');
   const [showEmpty, setShowEmpty] = useState(false);
-  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(false);
+  const [showOffBudget, setShowOffBudget] = useState(false);
+  const [showHiddenCategories, setShowHiddenCategories] = useState(false);
   const [showUncategorized, setShowUncategorized] = useState(false);
   const [dateRange, setDateRange] = useState('Last 6 months');
   const [dataCheck, setDataCheck] = useState(false);
@@ -122,7 +123,8 @@ export function CustomReport() {
       conditions: filters,
       conditionsOp,
       showEmpty,
-      showOffBudgetHidden,
+      showOffBudget,
+      showHiddenCategories,
       showUncategorized,
       balanceTypeOp,
     });
@@ -134,8 +136,10 @@ export function CustomReport() {
     filters,
     conditionsOp,
     showEmpty,
-    showOffBudgetHidden,
+    showOffBudget,
+    showHiddenCategories,
     showUncategorized,
+    balanceType,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -148,7 +152,8 @@ export function CustomReport() {
       conditions: filters,
       conditionsOp,
       showEmpty,
-      showOffBudgetHidden,
+      showOffBudget,
+      showHiddenCategories,
       showUncategorized,
       groupBy,
       balanceTypeOp,
@@ -169,7 +174,8 @@ export function CustomReport() {
     filters,
     conditionsOp,
     showEmpty,
-    showOffBudgetHidden,
+    showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     graphType,
   ]);
@@ -235,8 +241,10 @@ export function CustomReport() {
           setIsDateStatic={setIsDateStatic}
           showEmpty={showEmpty}
           setShowEmpty={setShowEmpty}
-          showOffBudgetHidden={showOffBudgetHidden}
-          setShowOffBudgetHidden={setShowOffBudgetHidden}
+          showOffBudget={showOffBudget}
+          setShowOffBudget={setShowOffBudget}
+          showHiddenCategories={showHiddenCategories}
+          setShowHiddenCategories={setShowHiddenCategories}
           showUncategorized={showUncategorized}
           setShowUncategorized={setShowUncategorized}
           categories={categories}
