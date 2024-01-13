@@ -25,8 +25,8 @@ import { ResponsiveProvider } from '../../ResponsiveProvider';
 
 import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
 
-jest.mock('loot-core/src/platform/client/fetch');
-jest.mock('../../hooks/useFeatureFlag', () => jest.fn().mockReturnValue(false));
+vi.mock('loot-core/src/platform/client/fetch');
+vi.mock('../../hooks/useFeatureFlag', () => vi.fn().mockReturnValue(false));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [

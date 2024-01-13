@@ -5,7 +5,7 @@ import { integerToAmount } from 'loot-core/src/shared/util';
 
 import { categoryLists } from '../ReportOptions';
 
-import { type createSpreadsheetProps } from './default-spreadsheet';
+import { type createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { filterHiddenItems } from './filterHiddenItems';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
@@ -21,7 +21,7 @@ export function createGroupedSpreadsheet({
   showOffBudgetHidden,
   showUncategorized,
   balanceTypeOp,
-}: createSpreadsheetProps) {
+}: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(
     showOffBudgetHidden,
     showUncategorized,

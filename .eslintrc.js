@@ -44,6 +44,9 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: { project: [path.join(__dirname, './tsconfig.json')] },
   reportUnusedDisableDirectives: true,
+  globals: {
+    globalThis: false,
+  },
   rules: {
     'prettier/prettier': 'warn',
 
