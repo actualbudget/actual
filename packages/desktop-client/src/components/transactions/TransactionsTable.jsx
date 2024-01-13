@@ -1349,13 +1349,10 @@ const Transaction = memo(function Transaction(props) {
   );
 });
 
-function TransactionError({ error, isDeposit, onAddSplit, onDistributeRemainder, style, nestedTransactions }) {
+function TransactionError({ error, isDeposit, onAddSplit, onDistributeRemainder, style, canDistributeRemainder }) {
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {
-        const childTransactions = nestedTransactions.filter(t => t.is_child)
-        const emptyTransactions = childTransactions.filter(t => t.amount === 0)
-
         return (
           <View
             style={{
@@ -1380,7 +1377,7 @@ function TransactionError({ error, isDeposit, onAddSplit, onDistributeRemainder,
               style={{ marginLeft: 15 }}
               onClick={onDistributeRemainder}
               data-testid="distribute-split-button"
-              disabled={emptyTransactions.length === 0}
+              disabled={!canDistributeRemainder}
             >
               Distribute
             </Button>
@@ -1456,7 +1453,7 @@ function NewTransaction({
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
 
-  const nestedTransactions = transactions.filter(t => t.id === transactions[0].id || t.parent_id === transactions[0].id)
+  const emptyChildTransactions = transactions.filter(t => t.parent_id === transactions[0].id && t.amount === 0)
 
   return (
     <View
@@ -1523,9 +1520,9 @@ function NewTransaction({
           <TransactionError
             error={error}
             isDeposit={isDeposit}
-            nestedTransactions={nestedTransactions}
             onAddSplit={() => onAddSplit(transactions[0].id)}
             onDistributeRemainder={() => onDistributeRemainder(transactions[0].id)}
+            canDistributeRemainder={emptyChildTransactions.length > 0}
           />
         ) : (
           <Button
@@ -1615,13 +1612,18 @@ function TransactionTableInner({
       ? (parent && parent.error) || trans.error
       : trans.error;
 
-    const nestedTransactions = trans.parent_id ? transactions.filter(t => t.id === trans.parent_id || t.parent_id === trans.parent_id) : null
+    const hasSplitError =
+      (!expanded || isLastChild(transactions, index)) &&
+      error &&
+      error.type === 'SplitTransactionError'
+
+    const emptyChildTransactions = transactions.filter(
+      t => t.parent_id === (trans.is_parent ? trans.id : trans.parent_id) && t.amount === 0
+    )
 
     return (
       <>
-        {(!expanded || isLastChild(transactions, index)) &&
-          error &&
-          error.type === 'SplitTransactionError' && (
+        {hasSplitError && (
             <Tooltip
               position="bottom-right"
               width={350}
@@ -1634,7 +1636,7 @@ function TransactionTableInner({
                 isDeposit={isChildDeposit}
                 onAddSplit={() => props.onAddSplit(trans.id)}
                 onDistributeRemainder={() => props.onDistributeRemainder(trans.id)}
-                nestedTransactions={nestedTransactions ?? []}
+                canDistributeRemainder={emptyChildTransactions.length > 0}
               />
             </Tooltip>
           )}
