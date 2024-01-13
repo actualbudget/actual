@@ -122,10 +122,10 @@ export default defineConfig(async ({ mode }) => {
             } else if (/woff|woff2/.test(extType)) {
               extType = 'media';
             }
-            return `static/${extType}/[name]-[hash][extname]`;
+            return `static/${extType}/[name].[hash][extname]`;
           },
-          chunkFileNames: 'static/js/[name]-[hash].js',
-          entryFileNames: 'static/js/[name]-[hash].js',
+          chunkFileNames: 'static/js/[name].[hash].js',
+          entryFileNames: 'static/js/[name].[hash].js',
         },
       },
     },
