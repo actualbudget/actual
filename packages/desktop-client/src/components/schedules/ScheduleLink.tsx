@@ -16,7 +16,6 @@ import { View } from '../common/View';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
-
 export function ScheduleLink({
   modalProps,
   actions,
