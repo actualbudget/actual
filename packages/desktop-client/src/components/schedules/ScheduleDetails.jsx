@@ -67,14 +67,14 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export function ScheduleDetails({ modalProps, actions, id }) {
+export function ScheduleDetails({ modalProps, actions, id,transaction }) {
   const adding = id == null;
+  const fromTrans = transaction != null;
   const payees = useCachedPayees({ idKey: true });
   const globalDispatch = useDispatch();
   const dateFormat = useSelector(state => {
     return state.prefs.local.dateFormat || 'MM/dd/yyyy';
   });
-
   const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
@@ -210,12 +210,25 @@ export function ScheduleDetails({ modalProps, actions, id }) {
           endOccurrences: '1',
           endDate: monthUtils.currentDay(),
         };
-        const schedule = {
+        let schedule = {
           posts_transaction: false,
           _date: date,
           _conditions: [{ op: 'isapprox', field: 'date', value: date }],
           _actions: [],
         };
+        if(fromTrans){
+          schedule._account = transaction.account
+          schedule._amount = transaction.amount
+          schedule._amountOp = 'is'
+          schedule._date = {
+            frequency: 'monthly',
+            start: transaction.date,
+            patterns: [],
+          }
+          schedule.name = payees[transaction.payee].name;
+          schedule._payee = transaction.payee;
+        }
+
 
         dispatch({ type: 'set-schedule', schedule });
       } else {
@@ -226,6 +239,7 @@ export function ScheduleDetails({ modalProps, actions, id }) {
         }
       }
     }
+
     run();
   }, []);
 
@@ -415,7 +429,6 @@ export function ScheduleDetails({ modalProps, actions, id }) {
   }
 
   const payee = payees ? payees[state.fields.payee] : null;
-
   // This is derived from the date
   const repeats = state.fields.date ? !!state.fields.date.frequency : false;
   return (

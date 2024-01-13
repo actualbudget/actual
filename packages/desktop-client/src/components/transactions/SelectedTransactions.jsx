@@ -87,6 +87,10 @@ export function SelectedTransactionsButton({
                       text: 'Link schedule',
                     },
                     {
+                      name: 'create-schedule',
+                      text: 'Create schedule',
+                    },
+                    {
                       name: 'create-rule',
                       text: 'Create rule',
                     },
@@ -131,6 +135,10 @@ export function SelectedTransactionsButton({
             if (scheduleId) {
               pushModal('schedule-edit', { id: scheduleId });
             }
+            break;
+          case 'create-schedule':
+            const firstId1 = [...selectedItems][0];
+            pushModal('schedule-edit', { id: null, transaction:getTransaction(firstId1) });
             break;
           case 'link-schedule':
             pushModal('schedule-link', {
