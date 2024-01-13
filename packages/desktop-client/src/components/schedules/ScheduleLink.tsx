@@ -6,22 +6,23 @@ import { send } from 'loot-core/src/platform/client/fetch';
 import { type Query } from 'loot-core/src/shared/query';
 
 import { type BoundActions } from '../../hooks/useActions';
+import { SvgAdd } from '../../icons/v0';
 import { type CommonModalProps } from '../../types/modals';
+import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 import { Search } from '../common/Search';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
-import { SvgAdd } from '../../icons/v0';
-import { Button } from '../common/Button';
+
 
 export function ScheduleLink({
   modalProps,
   actions,
   transactionIds: ids,
   getTransaction,
-  pushModal
+  pushModal,
 }: {
   actions: BoundActions;
   modalProps?: CommonModalProps;
@@ -50,10 +51,12 @@ export function ScheduleLink({
     }
     actions.popModal();
   }
-
-  async function onCreate(){
+  async function onCreate() {
     const firstId1 = [...ids][0];
-    pushModal('schedule-edit', { id: null, transaction:getTransaction(firstId1) });
+    pushModal('schedule-edit', {
+      id: null,
+      transaction: getTransaction(firstId1),
+    });
   }
 
   return (
@@ -86,7 +89,7 @@ export function ScheduleLink({
           style={{ marginLeft: 15, padding: '4px 10px' }}
           onClick={onCreate}
         >
-          <SvgAdd style={{width: '20px', padding: '3px'}}/>
+          <SvgAdd style={{ width: '20px', padding: '3px' }} />
           Create New
         </Button>
       </View>
