@@ -35,7 +35,6 @@ type MenuItem = {
   style?: CSSProperties;
   toggle?: boolean;
   tooltip?: string;
-  isOn?: boolean;
 };
 
 type MenuProps<T extends MenuItem = MenuItem> = {
@@ -167,12 +166,12 @@ export function Menu<T extends MenuItem>({
             onClick={() =>
               !item.disabled &&
               onMenuSelect &&
-              !item.toggle &&
+              item.toggle === undefined &&
               onMenuSelect(item.name)
             }
           >
             {/* Force it to line up evenly */}
-            {!item.toggle ? (
+            {item.toggle === undefined ? (
               <>
                 <Text style={{ lineHeight: 0 }}>
                   {item.icon &&
@@ -196,11 +195,13 @@ export function Menu<T extends MenuItem>({
                 <View style={{ flex: 1 }} />
                 <Toggle
                   id={item.name}
-                  checked={item.isOn}
+                  checked={item.toggle}
                   onColor={theme.pageTextPositive}
                   style={{ marginLeft: 5, ...item.style }}
                   onChange={() =>
-                    !item.disabled && item.toggle && onMenuSelect(item.name)
+                    !item.disabled &&
+                    item.toggle !== undefined &&
+                    onMenuSelect(item.name)
                   }
                 />
               </>

@@ -284,22 +284,19 @@ export function ReportSidebar({
                       name: 'show-empty-rows',
                       text: 'Show Empty Rows',
                       tooltip: 'Show rows that are zero or blank',
-                      isOn: showEmpty,
-                      toggle: true,
+                      toggle: showEmpty,
                     },
                     {
                       name: 'show-hidden-categories',
                       text: 'Show Off Budget',
                       tooltip: 'Show off budget accounts and hidden categories',
-                      isOn: showOffBudgetHidden,
-                      toggle: true,
+                      toggle: showOffBudgetHidden,
                     },
                     {
                       name: 'show-uncategorized',
                       text: 'Show Uncategorized',
                       tooltip: 'Show uncategorized transactions',
-                      isOn: showUncategorized,
-                      toggle: true,
+                      toggle: showUncategorized,
                     },
                   ]}
                 />
