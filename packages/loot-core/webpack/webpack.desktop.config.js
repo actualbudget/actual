@@ -28,7 +28,7 @@ module.exports = {
       'pegjs',
     ],
   },
-  externals: ['better-sqlite3', 'electron-log', 'node-fetch', 'node-libofx'],
+  externals: ['better-sqlite3', 'electron-log', 'node-fetch'],
   plugins: [
     new webpack.IgnorePlugin({
       resourceRegExp: /original-fs/,
