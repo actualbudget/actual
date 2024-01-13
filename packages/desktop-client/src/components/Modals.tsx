@@ -301,6 +301,8 @@ export function Modals() {
               modalProps={modalProps}
               actions={actions}
               transactionIds={options?.transactionIds}
+              getTransaction={options?.getTransaction}
+              pushModal={options?.pushModal}
             />
           );
 

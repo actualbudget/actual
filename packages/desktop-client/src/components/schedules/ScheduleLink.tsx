@@ -13,15 +13,21 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
+import { SvgAdd } from '../../icons/v0';
+import { Button } from '../common/Button';
 
 export function ScheduleLink({
   modalProps,
   actions,
   transactionIds: ids,
+  getTransaction,
+  pushModal
 }: {
   actions: BoundActions;
   modalProps?: CommonModalProps;
   transactionIds: string[];
+  getTransaction: Function;
+  pushModal: Function;
 }) {
   const [filter, setFilter] = useState('');
 
@@ -43,6 +49,11 @@ export function ScheduleLink({
       });
     }
     actions.popModal();
+  }
+
+  async function onCreate(){
+    const firstId1 = [...ids][0];
+    pushModal('schedule-edit', { id: null, transaction:getTransaction(firstId1) });
   }
 
   return (
@@ -70,6 +81,14 @@ export function ScheduleLink({
           value={filter}
           onChange={setFilter}
         />
+        <Button
+          type="primary"
+          style={{ marginLeft: 15, padding: '4px 10px' }}
+          onClick={onCreate}
+        >
+          <SvgAdd style={{width: '20px', padding: '3px'}}/>
+          Create New
+        </Button>
       </View>
 
       <View
