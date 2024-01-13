@@ -4,6 +4,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type Query } from 'loot-core/src/shared/query';
+import { type TransactionEntity } from 'loot-core/src/types/models';
 
 import { type BoundActions } from '../../hooks/useActions';
 import { SvgAdd } from '../../icons/v0';
@@ -16,6 +17,10 @@ import { View } from '../common/View';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
+type ModalParams = {
+  id: string;
+  transaction: TransactionEntity;
+};
 export function ScheduleLink({
   modalProps,
   actions,
@@ -26,8 +31,8 @@ export function ScheduleLink({
   actions: BoundActions;
   modalProps?: CommonModalProps;
   transactionIds: string[];
-  getTransaction: Function;
-  pushModal: Function;
+  getTransaction: (a: string) => TransactionEntity;
+  pushModal: (a: string, b: ModalParams) => void;
 }) {
   const [filter, setFilter] = useState('');
 
