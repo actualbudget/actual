@@ -82,14 +82,26 @@ export function execTracer<T>() {
       const promise = this.wait(name);
       if (data === undefined) {
         // We want to ignore the result
-        return;
+        return expect(
+          timeout(
+            promise.then(() => true),
+            1000,
+          ),
+        ).resolves.toEqual(true);
       }
 
-      // We use this form because it tracks the right location in the
-      // test when it fails. It's annoying to always write this in the
-      // test though, so this provides a clean API. The right line
-      // number in the test will show up in the stack.
-      return expect(timeout(promise, 1000)).resolves.toEqual(data);
+      if (typeof data === 'function') {
+        return expect(timeout(promise, 1000))
+          .resolves.toBeTruthy()
+          .then(() => promise)
+          .then(res => data(res));
+      } else {
+        // We use this form because it tracks the right location in the
+        // test when it fails. It's annoying to always write this in the
+        // test though, so this provides a clean API. The right line
+        // number in the test will show up in the stack.
+        return expect(timeout(promise, 1000)).resolves.toEqual(data);
+      }
     },
 
     expectNow(name: string, data?: T) {
