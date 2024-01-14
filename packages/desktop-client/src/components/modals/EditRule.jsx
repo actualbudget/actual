@@ -29,7 +29,7 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
-import { Delete, SvgAdd, SvgSubtract } from '../../icons/v0';
+import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgInformationOutline } from '../../icons/v1';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
@@ -1026,7 +1026,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                               }}
                               aria-label="Delete split"
                             >
-                              <Delete
+                              <SvgDelete
                                 style={{
                                   width: 8,
                                   height: 8,
