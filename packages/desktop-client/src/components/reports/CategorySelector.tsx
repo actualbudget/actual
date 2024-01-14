@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { Fragment, useMemo, useState } from 'react';
 
 import {

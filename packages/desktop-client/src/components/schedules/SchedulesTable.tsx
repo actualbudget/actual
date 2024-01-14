@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, useMemo, type CSSProperties } from 'react';
 import { useSelector } from 'react-redux';
 

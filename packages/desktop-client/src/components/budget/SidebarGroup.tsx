@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type CSSProperties, useState } from 'react';
 import { type ConnectDragSource } from 'react-dnd';
 

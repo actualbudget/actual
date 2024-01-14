@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Timestamp } from '@actual-app/crdt';
 
 import { Message, addSyncListener, applyMessages } from './index';

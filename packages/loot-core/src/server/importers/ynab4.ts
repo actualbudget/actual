@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // This is a special usage of the API because this package is embedded
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the

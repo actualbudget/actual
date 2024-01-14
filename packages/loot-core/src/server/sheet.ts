@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { type Database } from 'better-sqlite3';
 
 import { captureBreadcrumb } from '../platform/exceptions';

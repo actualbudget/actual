@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as models from './models';
 
 export const accountModel = {

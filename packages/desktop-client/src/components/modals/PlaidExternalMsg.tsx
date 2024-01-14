@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, useRef } from 'react';
 
 import { AnimatedLoading } from '../../icons/AnimatedLoading';

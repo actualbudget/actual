@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { createContext, useEffect, useContext } from 'react';
 
 import hotkeys, { type KeyHandler as HotKeyHandler } from 'hotkeys-js';

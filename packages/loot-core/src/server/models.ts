@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export function requiredFields(name, row, fields, update) {
   fields.forEach(field => {
     if (update) {

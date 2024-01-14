@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export function getUploadError({
   reason,
   meta,

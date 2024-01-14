@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { dayFromDate } from '../../shared/months';
 import { toDateRepr, fromDateRepr } from '../models';
 

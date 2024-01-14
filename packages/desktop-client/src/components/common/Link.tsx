@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ReactNode, type ComponentProps } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
