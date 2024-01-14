@@ -14,7 +14,7 @@ import { FormField, FormLabel } from '../forms';
 import { FieldSelect } from '../modals/EditRule';
 import { GenericInput } from '../util/GenericInput';
 
-import { AppliedFilters } from './FiltersMenu';
+import { AppliedFilters } from './AppliedFilters';
 
 function FilterMenu({ onClose, filterId, onFilterMenuSelect }) {
   return (
