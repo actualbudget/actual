@@ -39,7 +39,6 @@ import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { StatusBadge } from '../schedules/StatusBadge';
-import useFormat from '../spreadsheet/useFormat';
 import { Tooltip } from '../tooltips';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '../util/AmountInput';
@@ -122,6 +121,19 @@ export function OpSelect({
       style={{ minHeight: '1px', ...style }}
       wrapperStyle={wrapperStyle}
     />
+  );
+}
+
+function SplitAmountMethodSelect({ options, style, value, onChange }) {
+  return (
+    <View style={{ color: theme.pageTextPositive, ...style }}>
+      <Select
+        bare
+        options={options}
+        value={value}
+        onChange={value => onChange('method', value)}
+      />
+    </View>
   );
 }
 
@@ -313,8 +325,22 @@ const actionFields = [
   'date',
   'amount',
 ].map(field => [field, mapField(field)]);
+const splitActionFields = actionFields.filter(([field]) => field !== 'amount');
+const splitAmountTypes = [
+  ['fixed-amount', 'a fixed amount'],
+  ['percent', 'a fixed percentage'],
+  ['remainder', 'an equal portion of the remainder'],
+];
 function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
-  const { field, op, value, type, error, inputKey = 'initial' } = action;
+  const {
+    field,
+    op,
+    value,
+    type,
+    error,
+    inputKey = 'initial',
+    options,
+  } = action;
 
   return (
     <Editor style={editorStyle} error={error}>
@@ -327,7 +353,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           </View>
 
           <FieldSelect
-            fields={actionFields}
+            fields={options?.splitIndex ? splitActionFields : actionFields}
             value={field}
             onChange={onChange}
           />
@@ -341,6 +367,30 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               value={value}
               onChange={v => onChange('value', v)}
             />
+          </View>
+        </>
+      ) : op === 'set-split-amount' ? (
+        <>
+          <View style={{ padding: '5px 10px', lineHeight: '1em' }}>
+            allocate
+          </View>
+
+          <SplitAmountMethodSelect
+            options={splitAmountTypes}
+            value={options.method}
+            onChange={onChange}
+          />
+
+          <View style={{ flex: 1 }}>
+            {options.method !== 'remainder' && (
+              <GenericInput
+                key={inputKey}
+                field={field}
+                type="number"
+                value={value}
+                onChange={v => onChange('value', v)}
+              />
+            )}
           </View>
         </>
       ) : op === 'link-schedule' ? (
@@ -358,10 +408,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
       ) : null}
 
       <Stack direction="row">
-        <EditorButtons
-          onAdd={onAdd}
-          onDelete={op !== 'link-schedule' && onDelete}
-        />
+        <EditorButtons onAdd={onAdd} onDelete={op === 'set' && onDelete} />
       </Stack>
     </Editor>
   );
@@ -617,19 +664,22 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   );
   const [actionSplits, setActionSplits] = useState(() => {
     const parsedActions = defaultRule.actions.map(parse);
-    return parsedActions.reduce((acc, action) => {
-      const splitIndex = action.options?.splitIndex ?? 0;
-      acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
-      acc[splitIndex].actions.push(action);
-      return acc;
-    }, []);
+    return parsedActions.reduce(
+      (acc, action) => {
+        const splitIndex = action.options?.splitIndex ?? 0;
+        acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
+        acc[splitIndex].actions.push(action);
+        return acc;
+      },
+      // The pre-split group is always there
+      [{ id: uuid(), actions: [] }],
+    );
   });
   const [stage, setStage] = useState(defaultRule.stage);
   const [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
   const [transactions, setTransactions] = useState([]);
   const dispatch = useDispatch();
   const scrollableEl = useRef();
-  const formatCurrency = useFormat();
 
   const isSchedule = getActions(actionSplits).some(
     action => action.op === 'link-schedule',
@@ -682,24 +732,31 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
   }
 
   function addActionToSplitAfterIndex(splitIndex, actionIndex) {
-    if (actionSplits[splitIndex] == null) {
+    let newAction;
+    if (splitIndex && !actionSplits[splitIndex]?.actions?.length) {
       actionSplits[splitIndex] = { id: uuid(), actions: [] };
+      newAction = {
+        op: 'set-split-amount',
+        options: { method: 'remainder', splitIndex },
+        value: null,
+      };
+    } else {
+      let fields = actionFields.map(f => f[0]);
+      for (const action of actionSplits[splitIndex].actions) {
+        fields = fields.filter(f => f !== action.field);
+      }
+      const field = fields[0] || 'category';
+      newAction = {
+        type: FIELD_TYPES.get(field),
+        field,
+        op: 'set',
+        value: null,
+        options: { splitIndex },
+      };
     }
-
-    let fields = actionFields.map(f => f[0]);
-    for (const action of actionSplits[splitIndex].actions) {
-      fields = fields.filter(f => f !== action.field);
-    }
-    const field = fields[0] || 'category';
 
     const actionsCopy = [...actionSplits[splitIndex].actions];
-    actionsCopy.splice(actionIndex + 1, 0, {
-      type: FIELD_TYPES.get(field),
-      field,
-      op: 'set',
-      value: null,
-      options: { splitIndex },
-    });
+    actionsCopy.splice(actionIndex + 1, 0, newAction);
     const copy = [...actionSplits];
     copy[splitIndex] = { ...actionSplits[splitIndex], actions: actionsCopy };
     setActionSplits(copy);
@@ -711,16 +768,20 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
         id,
         actions: updateValue(actions, action, () => {
           const a = { ...action };
-          a[field] = value;
+          if (field === 'method') {
+            a.options = { ...a.options, method: value };
+          } else {
+            a[field] = value;
 
-          if (field === 'field') {
-            a.type = FIELD_TYPES.get(a.field);
-            a.value = null;
-            return newInput(a);
-          } else if (field === 'op') {
-            a.value = null;
-            a.inputKey = '' + Math.random();
-            return newInput(a);
+            if (field === 'field') {
+              a.type = FIELD_TYPES.get(a.field);
+              a.value = null;
+              return newInput(a);
+            } else if (field === 'op') {
+              a.value = null;
+              a.inputKey = '' + Math.random();
+              return newInput(a);
+            }
           }
 
           return a;
@@ -822,22 +883,6 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
     backgroundColor: theme.pillBackground,
     borderRadius: 4,
   };
-
-  const splitsWithAmounts = Object.fromEntries(
-    getActions(actionSplits)
-      .filter(
-        action =>
-          action.field === 'amount' &&
-          // Don't count the first split
-          action.options?.splitIndex,
-      )
-      .map(action => [
-        action.options.splitIndex,
-        formatCurrency(Number(action.value ?? 0) * 100, 'financial-with-sign'),
-      ]),
-  );
-  const numberOfSplitsWithPercentAmounts =
-    actionSplits.length - 1 - Object.keys(splitsWithAmounts).length;
 
   return (
     <Modal
@@ -969,12 +1014,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                           >
                             {splitIndex === 0
                               ? 'Before split'
-                              : `Split ${splitIndex} (` +
-                                (splitsWithAmounts[splitIndex] ??
-                                  `${(
-                                    100 / numberOfSplitsWithPercentAmounts
-                                  ).toFixed(1)}% of remaining total`) +
-                                ')'}
+                              : `Split ${splitIndex}`}
                           </Text>
                           {splitIndex && (
                             <Button
@@ -997,37 +1037,37 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                           )}
                         </Stack>
                       )}
-                      {actions.length === 0 ? (
+                      <Stack spacing={2} data-testid="action-list">
+                        {actions.map((action, actionIndex) => (
+                          <View key={actionIndex}>
+                            <ActionEditor
+                              ops={['set', 'link-schedule']}
+                              action={action}
+                              editorStyle={editorStyle}
+                              onChange={(name, value) => {
+                                onChangeAction(action, name, value);
+                              }}
+                              onDelete={() => onRemoveAction(action)}
+                              onAdd={() =>
+                                addActionToSplitAfterIndex(
+                                  splitIndex,
+                                  actionIndex,
+                                )
+                              }
+                            />
+                          </View>
+                        ))}
+                      </Stack>
+
+                      {actions.length === 0 && (
                         <Button
-                          style={{ alignSelf: 'flex-start' }}
+                          style={{ alignSelf: 'flex-start', marginTop: 5 }}
                           onClick={() =>
                             addActionToSplitAfterIndex(splitIndex, -1)
                           }
                         >
                           Add action
                         </Button>
-                      ) : (
-                        <Stack spacing={2} data-testid="action-list">
-                          {actions.map((action, actionIndex) => (
-                            <View key={actionIndex}>
-                              <ActionEditor
-                                ops={['set', 'link-schedule']}
-                                action={action}
-                                editorStyle={editorStyle}
-                                onChange={(name, value) => {
-                                  onChangeAction(action, name, value);
-                                }}
-                                onDelete={() => onRemoveAction(action)}
-                                onAdd={() =>
-                                  addActionToSplitAfterIndex(
-                                    splitIndex,
-                                    actionIndex,
-                                  )
-                                }
-                              />
-                            </View>
-                          ))}
-                        </Stack>
                       )}
                     </View>
                   ))}
