@@ -55,7 +55,9 @@ const intervalOptions = [
 export type QueryDataEntity = {
   date: string;
   category: string;
+  categoryHidden: boolean;
   categoryGroup: string;
+  categoryGroupHidden: boolean;
   account: string;
   accountOffBudget: boolean;
   payee: string;
@@ -127,16 +129,13 @@ export const categoryLists = (
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] },
 ) => {
   const categoryList = [
-    ...categories.list.filter(f => showHiddenCategories || !f.hidden),
+    ...categories.list,
     uncategorizedCategory,
     offBudgetCategory,
     transferCategory,
   ];
 
-  const categoryGroup = [
-    ...categories.grouped.filter(f => showHiddenCategories || !f.hidden),
-    uncategorizedGroup,
-  ];
+  const categoryGroup = [...categories.grouped, uncategorizedGroup];
   return [categoryList, categoryGroup.filter(group => group !== null)] as const;
 };
 

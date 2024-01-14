@@ -8,24 +8,31 @@ export function filterHiddenItems(
   data: QueryDataEntity[],
   showOffBudget?: boolean,
   showUncategorized?: boolean,
+  showHiddenCategories?: boolean,
 ) {
-  const showHide = data.filter(f =>
-    showOffBudget
-      ? showUncategorized
-        ? //true,true
-          true
-        : //true,false
-          f.category !== null ||
-          f.accountOffBudget !== false ||
-          f.transferAccount !== null
-      : showUncategorized
-      ? //false, true
-        f.accountOffBudget === false && f.transferAccount === null
-      : //false false
-        f.category !== null &&
-        f.accountOffBudget === false &&
-        f.transferAccount === null,
-  );
+  const showHide = data
+    .filter(e =>
+      !showHiddenCategories
+        ? e.categoryHidden === false && e.categoryGroupHidden === false
+        : true,
+    )
+    .filter(f =>
+      showOffBudget
+        ? showUncategorized
+          ? //true,true
+            true
+          : //true,false
+            f.category !== null ||
+            f.accountOffBudget !== false ||
+            f.transferAccount !== null
+        : showUncategorized
+        ? //false, true
+          f.accountOffBudget === false && f.transferAccount === null
+        : //false false
+          f.category !== null &&
+          f.accountOffBudget === false &&
+          f.transferAccount === null,
+    );
 
   return showHide.filter(asset => {
     if (!item.uncategorized_id) {

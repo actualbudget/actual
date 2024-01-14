@@ -94,7 +94,6 @@ export function createCustomSpreadsheet({
           'assets',
           startDate,
           endDate,
-          showOffBudget,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -106,7 +105,6 @@ export function createCustomSpreadsheet({
           'debts',
           startDate,
           endDate,
-          showOffBudget,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -133,6 +131,7 @@ export function createCustomSpreadsheet({
           assets,
           showOffBudget,
           showUncategorized,
+          showHiddenCategories,
         )
           .filter(
             asset => asset.date === month && asset[groupByLabel] === item.id,
@@ -145,6 +144,7 @@ export function createCustomSpreadsheet({
           debts,
           showOffBudget,
           showUncategorized,
+          showHiddenCategories,
         )
           .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
           .reduce((a, v) => (a = a + v.amount), 0);
@@ -186,6 +186,7 @@ export function createCustomSpreadsheet({
         groupByLabel,
         showOffBudget,
         showUncategorized,
+        showHiddenCategories,
       });
       return { ...calc };
     });

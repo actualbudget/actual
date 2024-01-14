@@ -14,6 +14,7 @@ type recalculateProps = {
   groupByLabel: string;
   showOffBudget?: boolean;
   showUncategorized?: boolean;
+  showHiddenCategories?: boolean;
 };
 
 export function recalculate({
@@ -24,6 +25,7 @@ export function recalculate({
   groupByLabel,
   showOffBudget,
   showUncategorized,
+  showHiddenCategories,
 }: recalculateProps) {
   let totalAssets = 0;
   let totalDebts = 0;
@@ -35,6 +37,7 @@ export function recalculate({
       assets,
       showOffBudget,
       showUncategorized,
+      showHiddenCategories,
     )
       .filter(asset => asset.date === month && asset[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
@@ -45,6 +48,7 @@ export function recalculate({
       debts,
       showOffBudget,
       showUncategorized,
+      showHiddenCategories,
     )
       .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
