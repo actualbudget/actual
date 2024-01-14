@@ -118,6 +118,10 @@ module.exports = {
             href: 'https://github.com/actualbudget/docs',
           },
           {
+            label: 'Privacy Policy',
+            to: '/docs/privacy-policy',
+          },
+          {
             label: 'RSS Feed',
             href: '/blog/rss.xml',
           },
