@@ -1,6 +1,6 @@
-export let tracer = null;
+export let tracer: null | ReturnType<typeof execTracer> = null;
 
-function timeout(promise, n) {
+function timeout<T extends Promise<unknown>>(promise: T, n: number) {
   let resolve;
   const timeoutPromise = new Promise(_ => (resolve = _));
   const timer = setTimeout(() => resolve(`timeout(${n})`), n);
@@ -18,16 +18,20 @@ export function resetTracer() {
   tracer = execTracer();
 }
 
-export function execTracer() {
-  const queue = [];
+export function execTracer<T>() {
+  const queue: Array<{ name: string; data?: T }> = [];
   let hasStarted = false;
-  let waitingFor = null;
+  let waitingFor: null | {
+    name: string;
+    reject: (error: Error) => void;
+    resolve: (data?: T) => void;
+  } = null;
   let ended = false;
 
   const log = false;
 
   return {
-    event(name: string, data?: unknown) {
+    event(name: string, data?: T) {
       if (!hasStarted) {
         return;
       } else if (log) {
@@ -56,7 +60,7 @@ export function execTracer() {
       }
     },
 
-    wait(name) {
+    wait(name: string) {
       if (waitingFor) {
         throw new Error(
           `Already waiting for ${waitingFor.name}, cannot wait for multiple events`,
@@ -68,48 +72,40 @@ export function execTracer() {
       });
     },
 
-    expectWait(name, data) {
+    expectWait(name: string, data?: T) {
       if (!hasStarted) {
         throw new Error(`Expected “${name}” but tracer hasn’t started yet`);
       } else if (log) {
         console.log(`--- expectWait(${name}) ---`);
       }
 
-      let promise = this.wait(name);
+      const promise = this.wait(name);
       if (data === undefined) {
         // We want to ignore the result
-        promise = promise.then(() => true);
-        data = true;
+        return;
       }
 
-      if (typeof data === 'function') {
-        return expect(timeout(promise, 1000))
-          .resolves.toBeTruthy()
-          .then(() => promise)
-          .then(res => data(res));
-      } else {
-        // We use this form because it tracks the right location in the
-        // test when it fails. It's annoying to always write this in the
-        // test though, so this provides a clean API. The right line
-        // number in the test will show up in the stack.
-        return expect(timeout(promise, 1000)).resolves.toEqual(data);
-      }
+      // We use this form because it tracks the right location in the
+      // test when it fails. It's annoying to always write this in the
+      // test though, so this provides a clean API. The right line
+      // number in the test will show up in the stack.
+      return expect(timeout(promise, 1000)).resolves.toEqual(data);
     },
 
-    expectNow(name, data) {
+    expectNow(name: string, data?: T) {
       if (!hasStarted) {
         throw new Error(`Expected “${name}” but tracer hasn’t started yet`);
       } else if (log) {
         console.log(`--- expectNow(${name}) ---`);
       }
 
-      if (queue.length === 0) {
+      const entry = queue.shift();
+
+      if (!entry) {
         throw new Error(
           `Expected event “${name}” but none found - has it happened yet?`,
         );
-      } else if (queue[0].name === name) {
-        const entry = queue.shift();
-
+      } else if (entry.name === name) {
         if (typeof data === 'function') {
           data(entry.data);
         } else {
@@ -122,7 +118,7 @@ export function execTracer() {
       }
     },
 
-    expect(name: string, data?: unknown) {
+    expect(name: string, data?: T) {
       if (queue.length === 0) {
         return this.expectWait(name, data);
       }

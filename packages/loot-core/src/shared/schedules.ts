@@ -3,7 +3,11 @@ import type { IRuleOptions } from '@rschedule/core';
 import * as monthUtils from './months';
 import { q } from './query';
 
-export function getStatus(nextDate, completed, hasTrans) {
+export function getStatus(
+  nextDate: string,
+  completed: boolean,
+  hasTrans: boolean,
+) {
   const today = monthUtils.currentDay();
 
   if (completed) {
@@ -44,7 +48,7 @@ export function getHasTransactionsQuery(schedules) {
     .select(['schedule', 'date']);
 }
 
-function makeNumberSuffix(num) {
+function makeNumberSuffix(num: number) {
   // Slight abuse of date-fns to turn a number like "1" into the full
   // form "1st" but formatting a date with that number
   return monthUtils.format(new Date(2020, 0, num, 12), 'do');
@@ -127,7 +131,7 @@ export function getRecurringDescription(config, dateFormat) {
 
         desc += ' on the ';
 
-        const strs = [];
+        const strs: string[] = [];
 
         const uniqueDays = new Set(patterns.map(p => p.type));
         const isSameDay = uniqueDays.size === 1 && !uniqueDays.has('day');
