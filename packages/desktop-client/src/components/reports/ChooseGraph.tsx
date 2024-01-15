@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useRef } from 'react';
 
 import { View } from '../common/View';
@@ -24,6 +25,7 @@ type ChooseGraphProps = {
   scrollWidth: number;
   setScrollWidth: (value: number) => void;
   months: Month[];
+  viewLabels: boolean;
 };
 
 export function ChooseGraph({
@@ -36,6 +38,7 @@ export function ChooseGraph({
   scrollWidth,
   setScrollWidth,
   months,
+  viewLabels,
 }: ChooseGraphProps) {
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const groupByData =
@@ -74,6 +77,7 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         balanceTypeOp={balanceTypeOp}
+        viewLabels={viewLabels}
       />
     );
   }
@@ -84,6 +88,7 @@ export function ChooseGraph({
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
+        viewLabels={viewLabels}
       />
     );
   }
@@ -97,6 +102,7 @@ export function ChooseGraph({
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
+        viewLabels={viewLabels}
       />
     );
   }
@@ -104,7 +110,13 @@ export function ChooseGraph({
     return <LineGraph style={{ flexGrow: 1 }} graphData={data} />;
   }
   if (graphType === 'StackedBarGraph') {
-    return <StackedBarGraph style={{ flexGrow: 1 }} data={data} />;
+    return (
+      <StackedBarGraph
+        style={{ flexGrow: 1 }}
+        data={data}
+        viewLabels={viewLabels}
+      />
+    );
   }
   if (graphType === 'TableGraph') {
     return (

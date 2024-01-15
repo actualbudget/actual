@@ -1,4 +1,6 @@
-import React from 'react';
+
+// @ts-strict-ignore
+import React, { memo } from 'react';
 
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';

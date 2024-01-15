@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
 

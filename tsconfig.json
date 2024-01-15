@@ -19,6 +19,7 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "jsx": "preserve",
+    "types": ["vite/client", "jest"],
     // Check JS files too
     "allowJs": true,
     "checkJs": false,
@@ -27,7 +28,13 @@
     "moduleResolution": "Node",
     "module": "ES2022",
     // Until/if we build using tsc
-    "noEmit": true
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "path": ["./packages"]
+      }
+    ]
   },
   "include": ["packages/**/*"],
   "exclude": ["**/node_modules/*", "**/build/*", "**/lib-dist/*"],

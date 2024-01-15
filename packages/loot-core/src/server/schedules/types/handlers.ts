@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { DiscoverScheduleEntity } from '../../../types/models';
 
 export interface SchedulesHandlers {
@@ -5,7 +6,7 @@ export interface SchedulesHandlers {
     schedule: {
       id?: string;
       name?: string;
-      post_transaction?: boolean;
+      posts_transaction?: boolean;
     };
     conditions: unknown[];
   }) => Promise<string>;

@@ -20,7 +20,6 @@ root.innerHTML = `
     <div id="success"></div>
     <div id="error"></div>
   </div>
-  <div style="color:rgba(0, 0, 0, .45)">&copy; 2020 Shift Reset LLC</div>
 `;
 
 const container = root.querySelector('#container');

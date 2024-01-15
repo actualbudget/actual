@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export function addCategory(categoryGroups, cat) {
   return categoryGroups.map(group => {
     if (group.id === cat.cat_group) {

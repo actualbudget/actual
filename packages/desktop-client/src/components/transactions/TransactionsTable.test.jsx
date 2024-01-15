@@ -25,8 +25,8 @@ import { ResponsiveProvider } from '../../ResponsiveProvider';
 
 import { SplitsExpandedProvider, TransactionTable } from './TransactionsTable';
 
-jest.mock('loot-core/src/platform/client/fetch');
-jest.mock('../../hooks/useFeatureFlag', () => jest.fn().mockReturnValue(false));
+vi.mock('loot-core/src/platform/client/fetch');
+vi.mock('../../hooks/useFeatureFlag', () => vi.fn().mockReturnValue(false));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
@@ -668,7 +668,7 @@ describe('Transactions', () => {
     await waitForAutocomplete();
 
     await userEvent.click(
-      container.querySelector('[data-testid="transaction-error"] button'),
+      container.querySelector('[data-testid="add-split-button"]'),
     );
 
     input = await editNewField(container, 'debit', 1);
@@ -794,6 +794,7 @@ describe('Transactions', () => {
     expect(getTransactions().length).toBe(5);
     await userEvent.click(splitButton);
     await waitForAutocomplete();
+
     expect(getTransactions().length).toBe(6);
     expect(getTransactions()[0].is_parent).toBe(true);
     expect(getTransactions()[1].is_child).toBe(true);
@@ -816,7 +817,7 @@ describe('Transactions', () => {
 
     // Add another split transaction and make sure everything is
     // updated properly
-    await userEvent.click(toolbar.querySelector('button'));
+    await userEvent.click(toolbar.querySelector('[data-testid="add-split-button"]'));
     expect(getTransactions().length).toBe(7);
     expect(getTransactions()[2].amount).toBe(0);
     expectErrorToExist(getTransactions().slice(0, 3));
@@ -910,7 +911,7 @@ describe('Transactions', () => {
     await userEvent.click(splitButton);
     await waitForAutocomplete();
     await userEvent.click(
-      container.querySelector('[data-testid="transaction-error"] button'),
+      container.querySelector('[data-testid="add-split-button"]'),
     );
     expect(getTransactions().length).toBe(7);
 

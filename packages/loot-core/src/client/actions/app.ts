@@ -1,4 +1,5 @@
-import { init as initConnection, send } from '../../platform/client/fetch';
+// @ts-strict-ignore
+import { send } from '../../platform/client/fetch';
 import * as constants from '../constants';
 import type {
   AppState,
@@ -12,12 +13,6 @@ export function setAppState(state: Partial<AppState>): SetAppStateAction {
   return {
     type: constants.SET_APP_STATE,
     state,
-  };
-}
-
-export function reconnect(connectionName: string) {
-  return () => {
-    initConnection(connectionName);
   };
 }
 

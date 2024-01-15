@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export function makeSpreadsheet() {
   const cells = {};
   return {

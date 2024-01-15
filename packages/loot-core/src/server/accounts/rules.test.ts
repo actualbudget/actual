@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   parseDateString,
   rankRules,

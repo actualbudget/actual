@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -312,7 +313,8 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
         title(
           trans.debtorName ||
             trans.remittanceInformationUnstructured ||
-            (trans.remittanceInformationUnstructuredArray || []).join(', '),
+            (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
+            trans.additionalInformation,
         ),
       );
       if (trans.debtorAccount && trans.debtorAccount.iban) {
@@ -331,7 +333,8 @@ async function normalizeGoCardlessTransactions(transactions, acctId) {
         title(
           trans.creditorName ||
             trans.remittanceInformationUnstructured ||
-            (trans.remittanceInformationUnstructuredArray || []).join(', '),
+            (trans.remittanceInformationUnstructuredArray || []).join(', ') ||
+            trans.additionalInformation,
         ),
       );
       if (trans.creditorAccount && trans.creditorAccount.iban) {

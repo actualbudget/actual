@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export const SORT_INCREMENT = 16384;
 
 function midpoint(items, to) {

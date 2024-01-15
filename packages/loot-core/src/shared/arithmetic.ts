@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getNumberFormat } from './util';
 
 function fail(state, msg) {

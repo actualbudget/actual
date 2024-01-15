@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import './polyfills';
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
@@ -1348,7 +1349,10 @@ handlers['save-global-prefs'] = async function (prefs) {
   }
   if ('autoUpdate' in prefs) {
     await asyncStorage.setItem('auto-update', '' + prefs.autoUpdate);
-    process.send({ type: 'shouldAutoUpdate', flag: prefs.autoUpdate });
+    process.parentPort.postMessage({
+      type: 'shouldAutoUpdate',
+      flag: prefs.autoUpdate,
+    });
   }
   if ('documentDir' in prefs) {
     if (await fs.exists(prefs.documentDir)) {
@@ -1670,14 +1674,11 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
 
     if (validate) {
       // Validate the server is running
-      const { error } = await runHandler(
-        handlers['subscribe-needs-bootstrap'],
-        {
-          url,
-        },
-      );
-      if (error) {
-        return { error };
+      const result = await runHandler(handlers['subscribe-needs-bootstrap'], {
+        url,
+      });
+      if ('error' in result) {
+        return { error: result.error };
       }
     }
   }
@@ -2235,7 +2236,7 @@ export async function initApp(isDev, socketName) {
 
   if (!isDev && !Platform.isMobile && !Platform.isWeb) {
     const autoUpdate = await asyncStorage.getItem('auto-update');
-    process.send({
+    process.parentPort.postMessage({
       type: 'shouldAutoUpdate',
       flag: autoUpdate == null || autoUpdate === 'true',
     });
@@ -2293,7 +2294,10 @@ export async function init(config) {
 export const lib = {
   getDataDir: fs.getDataDir,
   sendMessage: (msg, args) => connection.send(msg, args),
-  send: async (name, args) => {
+  send: async <K extends keyof Handlers, T extends Handlers[K]>(
+    name: K,
+    args?: Parameters<T>[0],
+  ): Promise<Awaited<ReturnType<T>>> => {
     const res = await runHandler(app.handlers[name], args);
     return res;
   },

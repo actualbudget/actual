@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { sequential, once } from './async';
 
 function timeout(n) {

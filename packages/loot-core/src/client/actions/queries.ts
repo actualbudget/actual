@@ -1,6 +1,8 @@
+// @ts-strict-ignore
 import throttle from 'throttleit';
 
 import { send } from '../../platform/client/fetch';
+import { type AccountEntity } from '../../types/models';
 import * as constants from '../constants';
 
 import { pushModal } from './modals';
@@ -260,7 +262,7 @@ export function getAccounts() {
   };
 }
 
-export function updateAccount(account) {
+export function updateAccount(account: AccountEntity) {
   return async (dispatch: Dispatch) => {
     dispatch({ type: constants.UPDATE_ACCOUNT, account });
     await send('account-update', account);

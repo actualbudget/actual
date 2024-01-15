@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export {
   handleRequest as post,
   handleRequestBinary as postBinary,

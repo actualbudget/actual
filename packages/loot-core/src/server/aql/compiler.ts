@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 let _uid = 0;
 function resetUid() {
   _uid = 0;
