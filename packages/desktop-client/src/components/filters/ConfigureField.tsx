@@ -21,8 +21,8 @@ type ConfigureFieldProps = {
   initialSubfield?: string;
   op: string;
   value: string | number;
-  dispatch: Dispatch<{ type; op?; value? }>;
-  onApply: (cond) => void;
+  dispatch: Dispatch<{ type: string; op?: string; value?: string | number }>;
+  onApply: ({ field, op, value, options }) => void;
 };
 
 export function ConfigureField({
@@ -35,17 +35,19 @@ export function ConfigureField({
 }: ConfigureFieldProps) {
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef<HTMLTextAreaElement>();
-  const prevOp = useRef(null);
+  const prevOp = useRef<string>(null);
 
   useEffect(() => {
     if (prevOp.current !== op && inputRef.current) {
       inputRef.current.focus();
     }
-    prevOp.current = op;
+    // prevOp.current = op;
   }, [op]);
 
-  const type = FIELD_TYPES.get(field);
-  let ops = TYPE_INFO[type].ops.filter(op => op !== 'isbetween');
+  const type: string | undefined = FIELD_TYPES.get(field);
+  let ops: Array<string> = TYPE_INFO[type].ops.filter(
+    (op: string) => op !== 'isbetween',
+  );
 
   // Month and year fields are quite hacky right now! Figure out how
   // to clean this up later
@@ -80,7 +82,7 @@ export function ConfigureField({
                         ['month', 'Month'],
                         ['year', 'Year'],
                       ]
-                    : null
+                    : []
                 }
                 value={subfield}
                 onChange={sub => {
@@ -122,7 +124,7 @@ export function ConfigureField({
                 selected={value !== null}
                 onClick={() => {
                   dispatch({ type: 'set-op', op: 'is' });
-                  dispatch({ type: 'set-value', value: true });
+                  dispatch({ type: 'set-value', value: 'true' });
                 }}
               />
               <OpButton
@@ -131,7 +133,7 @@ export function ConfigureField({
                 selected={value === null}
                 onClick={() => {
                   dispatch({ type: 'set-op', op: 'is' });
-                  dispatch({ type: 'set-value', value: false });
+                  dispatch({ type: 'set-value', value: 'false' });
                 }}
               />
             </>
@@ -143,7 +145,7 @@ export function ConfigureField({
                 spacing={1}
                 style={{ flexWrap: 'wrap' }}
               >
-                {ops.slice(0, 3).map(currOp => (
+                {ops.slice(0, 3).map((currOp: string) => (
                   <OpButton
                     key={currOp}
                     op={currOp}
@@ -158,7 +160,7 @@ export function ConfigureField({
                 spacing={1}
                 style={{ flexWrap: 'wrap' }}
               >
-                {ops.slice(3, ops.length).map(currOp => (
+                {ops.slice(3, ops.length).map((currOp: string) => (
                   <OpButton
                     key={currOp}
                     op={currOp}
@@ -185,7 +187,9 @@ export function ConfigureField({
               value={value}
               multi={op === 'oneOf' || op === 'notOneOf'}
               style={{ marginTop: 10 }}
-              onChange={v => dispatch({ type: 'set-value', value: v })}
+              onChange={(v: string | number) =>
+                dispatch({ type: 'set-value', value: v })
+              }
             />
           )}
 

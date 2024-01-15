@@ -1,6 +1,6 @@
 import { makeValue, FIELD_TYPES } from 'loot-core/src/shared/rules';
 
-export function updateFilterReducer(state, action) {
+export function updateFilterReducer(state: any, action: any) {
   switch (action.type) {
     case 'set-op': {
       const type = FIELD_TYPES.get(state.field);

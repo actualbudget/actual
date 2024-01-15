@@ -3,32 +3,42 @@ import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
-export const TYPE_INFO = {
-  date: {
+export const TYPE_INFO: Array<{
+  name: string;
+  ops: Array<string>;
+  nullable: boolean;
+}> = [
+  {
+    name: 'date',
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
   },
-  id: {
+  {
+    name: 'id',
     ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: true,
   },
-  saved: {
+  {
+    name: 'saved',
     ops: [],
     nullable: false,
   },
-  string: {
+  {
+    name: 'string',
     ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: true,
   },
-  number: {
+  {
+    name: 'number',
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
   },
-  boolean: {
+  {
+    name: 'boolean',
     ops: ['is'],
     nullable: false,
   },
-};
+];
 
 export const FIELD_TYPES = new Map(
   Object.entries({

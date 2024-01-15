@@ -1,7 +1,7 @@
 type subfieldFromFilterProps = {
   field: string;
   value: string | number;
-  options?: { inflow; outflow };
+  options?: { inflow: any; outflow: any };
 };
 
 export function subfieldFromFilter({

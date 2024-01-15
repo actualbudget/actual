@@ -5,10 +5,19 @@ import { View } from '../common/View';
 import { FilterExpression } from './FilterExpression';
 import { CondOpMenu } from './SavedFilters';
 
+export type Filter = {
+  type: string;
+  field: string;
+  op: string;
+  value: string | number;
+  options: { inflow: boolean; outflow: boolean };
+  customName?: string;
+};
+
 type AppliedFiltersProps = {
-  filters;
-  onUpdate: (filter, newFilter) => void;
-  onDelete: (filter) => void;
+  filters: Filter[];
+  onUpdate: (filter: Filter, newFilter: Filter) => void;
+  onDelete: (filter: Filter) => void;
   conditionsOp: string;
   onCondOpChange: () => void;
 };
@@ -33,7 +42,7 @@ export function AppliedFilters({
         onCondOpChange={onCondOpChange}
         filters={filters}
       />
-      {filters.map((filter, i) => (
+      {filters.map((filter: Filter, i: number) => (
         <FilterExpression
           key={i}
           customName={filter.customName}

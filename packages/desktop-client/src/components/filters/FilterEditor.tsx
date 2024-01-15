@@ -10,8 +10,8 @@ type FilterEditorProps = {
   field: string;
   op: string;
   value: string | number;
-  options: { inflow; outflow };
-  onSave: (any) => void;
+  options: { inflow: boolean; outflow: boolean };
+  onSave: ({field, op, value, options}) => void;
   onClose: () => void;
 };
 
@@ -24,7 +24,7 @@ export function FilterEditor({
   onClose,
 }: FilterEditorProps) {
   const [state, dispatch] = useReducer(
-    (state, action) => {
+    (state: any, action: any) => {
       switch (action.type) {
         case 'close':
           onClose();

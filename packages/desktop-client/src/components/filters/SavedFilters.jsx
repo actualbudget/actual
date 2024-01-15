@@ -286,7 +286,7 @@ function SavedFilterMenuButton({
 
 export function CondOpMenu({ conditionsOp, onCondOpChange, filters }) {
   return (
-    filters.length > 1 && (
+    filters.length > 1 ?
       <Text style={{ color: theme.pageText, marginTop: 11, marginRight: 5 }}>
         <FieldSelect
           style={{ display: 'inline-flex' }}
@@ -299,7 +299,7 @@ export function CondOpMenu({ conditionsOp, onCondOpChange, filters }) {
         />
         of:
       </Text>
-    )
+    : <View />
   );
 }
 

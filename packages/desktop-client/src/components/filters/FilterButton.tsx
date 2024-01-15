@@ -45,7 +45,7 @@ const filterFields = [
 ].map(field => [field, mapField(field)]);
 
 type FilterButtonProps = {
-  onApply: (any) => void;
+  onApply: (value: string | number) => void;
   compact: boolean;
   hover: boolean;
 };
@@ -53,27 +53,27 @@ type FilterButtonProps = {
 export function FilterButton({ onApply, compact, hover }: FilterButtonProps) {
   const filters = useFilters();
 
-  const { dateFormat } = useSelector(state => {
+  const { dateFormat } = useSelector((state: any) => {
     return {
-      dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
+      dateFormat: state.prefs.local.dateFormat ?? 'MM/dd/yyyy',
     };
   });
 
   const [state, dispatch] = useReducer(
-    (state, action) => {
+    (state: any, action: any) => {
       switch (action.type) {
         case 'select-field':
           return { ...state, fieldsOpen: true, condOpen: false };
         case 'configure': {
           const { field } = deserializeField(action.field);
-          const type = FIELD_TYPES.get(field);
-          const ops = TYPE_INFO[type].ops;
+          const type: string | undefined = FIELD_TYPES.get(field);
+          const info: any = TYPE_INFO.find(f => f.name === type);
           return {
             ...state,
             fieldsOpen: false,
             condOpen: true,
             field: action.field,
-            op: ops[0],
+            op: info.ops[0],
             value: type === 'boolean' ? true : null,
           };
         }
@@ -86,7 +86,7 @@ export function FilterButton({ onApply, compact, hover }: FilterButtonProps) {
     { fieldsOpen: false, condOpen: false, field: null, value: null },
   );
 
-  async function onValidateAndApply(cond) {
+  async function onValidateAndApply(cond: any) {
     cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
 
     if (cond.type === 'date' && cond.options) {
@@ -113,7 +113,7 @@ export function FilterButton({ onApply, compact, hover }: FilterButtonProps) {
       }
     }
 
-    const { error } =
+    const { error }: any =
       cond.field !== 'saved' &&
       (await send('rule-validate', {
         conditions: [cond],
