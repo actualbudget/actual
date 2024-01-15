@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useRef, useLayoutEffect, useCallback } from 'react';
 
 type UseStableCallbackArg = (...args: unknown[]) => unknown;

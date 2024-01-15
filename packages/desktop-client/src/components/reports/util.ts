@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { runQuery } from 'loot-core/src/client/query-helpers';
 import type { Query } from 'loot-core/src/shared/query';
 

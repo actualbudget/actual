@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { memo } from 'react';
 
 import {

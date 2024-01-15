@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import csvStringify from 'csv-stringify/lib/sync';
 
 import { integerToAmount } from '../../shared/util';

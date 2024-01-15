@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import mitt from 'mitt';
 
 import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';

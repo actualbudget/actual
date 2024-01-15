@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useCallback, useMemo, useState } from 'react';
 
 export function useFilters<T>(initialFilters: T[] = []) {

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Notification } from '../../client/state-types/notifications';
 import * as monthUtils from '../../shared/months';
 import { integerToAmount } from '../../shared/util';

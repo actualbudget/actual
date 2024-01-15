@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getClock } from '@actual-app/crdt';
 
 import * as connection from '../platform/server/connection';

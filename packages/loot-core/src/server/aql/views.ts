@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { quoteAlias } from './compiler';
 
 function selectFields(fields) {

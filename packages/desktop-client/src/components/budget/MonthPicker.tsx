@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { type CSSProperties, useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';

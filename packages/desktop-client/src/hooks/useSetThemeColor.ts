@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useEffect } from 'react';
 
 const VAR_STRING_REGEX = /^var\((--.*)\)$/;
