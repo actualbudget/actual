@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import './polyfills';
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';

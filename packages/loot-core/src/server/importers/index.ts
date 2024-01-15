@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { handlers } from '../main';
 
 import { importActual } from './actual';

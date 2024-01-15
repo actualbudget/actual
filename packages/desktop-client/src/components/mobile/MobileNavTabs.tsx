@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ComponentType, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSpring, animated, config } from 'react-spring';

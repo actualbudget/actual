@@ -38,7 +38,7 @@
     "rebuild-node": "yarn workspace loot-core rebuild",
     "lint": "eslint . --max-warnings 0",
     "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
-    "typecheck": "yarn tsc",
+    "typecheck": "yarn tsc && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq"
   },
   "devDependencies": {
@@ -55,7 +55,8 @@
     "prettier": "2.8.2",
     "react-refresh": "^0.14.0",
     "source-map-support": "^0.5.21",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "typescript-strict-plugin": "^2.2.2-beta.2"
   },
   "engines": {
     "node": ">=18.0.0"

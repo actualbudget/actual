@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { SchemaConfig } from '../compiler';
 
 function f(type: string, opts?: Record<string, unknown>) {

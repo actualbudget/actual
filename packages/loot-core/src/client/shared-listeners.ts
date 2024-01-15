@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { listen, send } from '../platform/client/fetch';
 
 import type { Notification } from './state-types/notifications';

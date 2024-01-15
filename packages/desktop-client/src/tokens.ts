@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 enum BreakpointNames {
   small = 'small',
   medium = 'medium',

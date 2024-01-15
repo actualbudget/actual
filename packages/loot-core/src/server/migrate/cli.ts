@@ -1,4 +1,5 @@
 #!/usr/bin/env node --trace-warnings
+// @ts-strict-ignore
 import * as fs from 'fs';
 import * as path from 'path';
 

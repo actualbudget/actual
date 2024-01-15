@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { createContext, useEffect, useState, useContext } from 'react';
 
 import { q, type Query } from '../../shared/query';

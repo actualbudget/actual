@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-strict-ignore
 import * as fs from 'fs';
 
 import * as db from './db';

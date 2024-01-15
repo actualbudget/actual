@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { join, dirname, basename } from 'path';
 
 import snapshotDiff from 'snapshot-diff';
