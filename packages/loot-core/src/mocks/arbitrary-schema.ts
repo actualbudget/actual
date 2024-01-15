@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import fc, { type Arbitrary } from 'fast-check';
 
 import { schema } from '../server/aql';

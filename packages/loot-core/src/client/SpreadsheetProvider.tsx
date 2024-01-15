@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { createContext, useEffect, useMemo, useContext } from 'react';
 
 import LRU from 'lru-cache';

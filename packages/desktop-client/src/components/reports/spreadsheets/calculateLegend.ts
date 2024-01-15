@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { theme } from '../../../style';
 import { getColorScale } from '../chart-theme';
 import { type ItemEntity, type MonthData } from '../entities';

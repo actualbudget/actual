@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { type FinanceModals } from 'loot-core/src/client/state-types/modals';

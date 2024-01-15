@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { SQLiteFS } from 'absurd-sql';
 import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 

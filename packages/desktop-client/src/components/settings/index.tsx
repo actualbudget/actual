@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ReactNode, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 

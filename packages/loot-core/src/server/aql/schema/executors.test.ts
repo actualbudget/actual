@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { setClock } from '@actual-app/crdt';
 import fc from 'fast-check';
 

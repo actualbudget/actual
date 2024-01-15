@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type UIEventHandler } from 'react';
 import { type RefProp } from 'react-spring';
 

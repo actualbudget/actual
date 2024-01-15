@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { addTransactions } from '../server/accounts/sync';
 import { runQuery as aqlQuery } from '../server/aql';
 import * as budgetActions from '../server/budget/actions';

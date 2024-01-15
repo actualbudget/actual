@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { initServer, serverPush } from '../platform/client/fetch';
 import { subDays } from '../shared/months';
 import { q } from '../shared/query';

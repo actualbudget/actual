@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as path from 'path';
 
 import inject from '@rollup/plugin-inject';

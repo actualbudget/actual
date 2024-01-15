@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }

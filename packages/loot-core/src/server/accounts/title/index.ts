@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // Utilities
 import { lowerCaseSet } from './lower-case';
 import { specials } from './specials';

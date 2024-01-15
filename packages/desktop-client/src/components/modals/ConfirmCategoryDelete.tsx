@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { type CategoryGroupEntity } from 'loot-core/src/types/models';

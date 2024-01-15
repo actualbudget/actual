@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { forwardRef, type ElementType, type HTMLProps } from 'react';
 
 import { css } from 'glamor';

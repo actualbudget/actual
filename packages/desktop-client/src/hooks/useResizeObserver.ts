@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useRef, useCallback } from 'react';
 
 export function useResizeObserver(

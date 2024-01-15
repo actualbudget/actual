@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { type HandlerFunctions } from '../types/handlers';
 
 export function sequential<T extends HandlerFunctions>(

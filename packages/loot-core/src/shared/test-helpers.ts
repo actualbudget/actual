@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export let tracer = null;
 
 function timeout(promise, n) {

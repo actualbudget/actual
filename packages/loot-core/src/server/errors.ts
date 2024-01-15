@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // TODO: normalize error types
 export class PostError extends Error {
   meta;

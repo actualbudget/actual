@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ComponentProps, useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
