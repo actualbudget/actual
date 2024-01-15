@@ -7,7 +7,7 @@ import { theme, type CSSProperties } from '../../style';
 type ToggleProps = {
   id: string;
   checked: boolean;
-  onToggle?: (any) => void;
+  onToggle?: () => void;
   onColor?: string;
   style?: CSSProperties;
 };
@@ -33,7 +33,7 @@ export const Toggle = ({
         type="checkbox"
       />
       <label
-        style={{ background: checked && onColor }}
+        style={{ background: checked ? onColor : 'inherit' }}
         className={`${css({
           display: 'flex',
           alignItems: 'center',
