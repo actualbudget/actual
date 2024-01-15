@@ -142,6 +142,7 @@ export function Menu<T extends MenuItem>({
 
         return (
           <View
+            role="button"
             key={item.name}
             style={{
               cursor: 'default',
@@ -161,6 +162,7 @@ export function Menu<T extends MenuItem>({
                   backgroundColor: theme.menuItemBackgroundHover,
                   color: theme.menuItemTextHover,
                 }),
+              ...item.style,
             }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
