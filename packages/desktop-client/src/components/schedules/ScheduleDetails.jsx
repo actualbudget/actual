@@ -67,7 +67,7 @@ function updateScheduleConditions(schedule, fields) {
   };
 }
 
-export function ScheduleDetails({ modalProps, actions, id,transaction }) {
+export function ScheduleDetails({ modalProps, actions, id, transaction }) {
   const adding = id == null;
   const fromTrans = transaction != null;
   const payees = useCachedPayees({ idKey: true });
@@ -143,6 +143,19 @@ export function ScheduleDetails({ modalProps, actions, id,transaction }) {
             fields: { ...state.fields, ...fields },
           };
         case 'set-transactions':
+          if (fromTrans) {
+            transaction.selected = true;
+            const foundIndex = action.transactions.findIndex(
+              x => x.id === transaction.id,
+            );
+            if (foundIndex === -1) {
+              //Not found so add
+              action.transactions.push(transaction);
+            } else {
+              //Update Existing
+              action.transactions[foundIndex] = transaction;
+            }
+          }
           return { ...state, transactions: action.transactions };
         case 'set-repeats':
           return {
@@ -210,25 +223,24 @@ export function ScheduleDetails({ modalProps, actions, id,transaction }) {
           endOccurrences: '1',
           endDate: monthUtils.currentDay(),
         };
-        let schedule = {
+        const schedule = {
           posts_transaction: false,
           _date: date,
           _conditions: [{ op: 'isapprox', field: 'date', value: date }],
           _actions: [],
         };
-        if(fromTrans){
-          schedule._account = transaction.account
-          schedule._amount = transaction.amount
-          schedule._amountOp = 'is'
+        if (fromTrans) {
+          schedule._account = transaction.account;
+          schedule._amount = transaction.amount;
+          schedule._amountOp = 'is';
           schedule._date = {
             frequency: 'monthly',
             start: transaction.date,
             patterns: [],
-          }
+          };
           schedule.name = payees[transaction.payee].name;
           schedule._payee = transaction.payee;
         }
-
 
         dispatch({ type: 'set-schedule', schedule });
       } else {

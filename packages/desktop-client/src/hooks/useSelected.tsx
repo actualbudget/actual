@@ -1,21 +1,20 @@
 // @ts-strict-ignore
 import React, {
   createContext,
-  useContext,
-  useReducer,
-  useCallback,
-  useEffect,
-  useRef,
   type Dispatch,
-  type ReactElement,
   type MouseEvent,
+  type ReactElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
 } from 'react';
 import { useSelector } from 'react-redux';
 
 import { listen } from 'loot-core/src/platform/client/fetch';
 import * as undo from 'loot-core/src/platform/client/undo';
 import { type UndoState } from 'loot-core/src/server/undo';
-import { isNonProductionEnvironment } from 'loot-core/src/shared/environment';
 
 type Range<T> = { start: T; end: T | null };
 type Item = { id: string };
@@ -65,7 +64,7 @@ export function useSelected<T extends Item>(
           const selectedItems = new Set(state.selectedItems);
           const { id, event } = action;
 
-          if (event.shiftKey && selectedRange) {
+          if (event && event.shiftKey && selectedRange) {
             const idx = items.findIndex(p => p.id === id);
             const startIdx = items.findIndex(p => p.id === selectedRange.start);
             const endIdx = items.findIndex(p => p.id === selectedRange.end);
@@ -274,9 +273,6 @@ export function SelectedProvider<T extends Item>({
 
   const dispatch = useCallback(
     async (action: Actions) => {
-      if (!action.event && isNonProductionEnvironment()) {
-        throw new Error('SelectedDispatch actions must have an event');
-      }
       if (action.type === 'select-all') {
         if (latestItems.current && latestItems.current.size > 0) {
           return instance.dispatch({

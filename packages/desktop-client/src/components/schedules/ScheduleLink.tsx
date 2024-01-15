@@ -57,6 +57,7 @@ export function ScheduleLink({
   }
   async function onCreate() {
     const firstId1 = [...ids][0];
+    actions.popModal();
     pushModal('schedule-edit', {
       id: null,
       transaction: getTransaction(firstId1),
