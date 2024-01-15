@@ -18,7 +18,7 @@ type FilterExpressionProps = {
   customName: string;
   op: string;
   value: string | number;
-  options: Array<[number, string]>;
+  options: { inflow; outflow };
   style?: CSSProperties;
   onChange: (newFilter) => void;
   onDelete: () => void;
