@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { memo } from 'react';
 
 import {
@@ -6,7 +7,7 @@ import {
   integerToCurrency,
 } from 'loot-core/src/shared/util';
 
-import { styles, theme } from '../../../../style';
+import { type CSSProperties, styles, theme } from '../../../../style';
 import { Row, Cell } from '../../../table';
 import { type GroupedEntity } from '../../entities';
 
@@ -15,7 +16,7 @@ type ReportTableRowProps = {
   balanceTypeOp?: string;
   groupByItem: string;
   mode: string;
-  style?: object;
+  style?: CSSProperties;
   monthsCount: number;
 };
 
@@ -28,10 +29,9 @@ export const ReportTableRow = memo(
     style,
     monthsCount,
   }: ReportTableRowProps) => {
-    const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
+    const average: number = amountToInteger(item[balanceTypeOp]) / monthsCount;
     return (
       <Row
-        key={item[groupByItem]}
         collapsed={true}
         style={{
           color: theme.tableText,
@@ -52,11 +52,11 @@ export const ReportTableRow = memo(
           ? item.monthData.map(month => {
               return (
                 <Cell
+                  key={amountToCurrency(month[balanceTypeOp])}
                   style={{
                     minWidth: 85,
                     ...styles.tnum,
                   }}
-                  key={amountToCurrency(month[balanceTypeOp])}
                   value={amountToCurrency(month[balanceTypeOp])}
                   title={
                     Math.abs(month[balanceTypeOp]) > 100000 &&
