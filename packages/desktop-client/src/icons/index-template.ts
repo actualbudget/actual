@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import path from 'path';
 
 function indexTemplate(filePaths) {

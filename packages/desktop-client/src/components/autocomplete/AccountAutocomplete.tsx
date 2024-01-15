@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { Fragment, type ComponentProps, type ReactNode } from 'react';
 
 import { css } from 'glamor';

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getDatabase } from '../indexeddb';
 
 import * as T from '.';

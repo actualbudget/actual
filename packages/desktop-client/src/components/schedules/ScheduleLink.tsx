@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useCallback, useRef, useState } from 'react';
 
 import { useSchedules } from 'loot-core/src/client/data-hooks/schedules';

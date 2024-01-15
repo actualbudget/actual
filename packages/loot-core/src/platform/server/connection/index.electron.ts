@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 

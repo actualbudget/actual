@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 import deepEqual from 'deep-equal';
 import { v4 as uuidv4 } from 'uuid';

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';

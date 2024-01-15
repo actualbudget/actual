@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { setNumberFormat } from '../../shared/util';
 import * as constants from '../constants';
 import type { Action } from '../state-types';

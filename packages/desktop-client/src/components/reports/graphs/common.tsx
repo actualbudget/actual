@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import { chartTheme } from '../chart-theme';

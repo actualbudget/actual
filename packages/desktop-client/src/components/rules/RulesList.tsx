@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { type RuleEntity } from 'loot-core/src/types/models';

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import csv2json from 'csv-parse/lib/sync';
 
 import * as fs from '../../platform/server/fs';

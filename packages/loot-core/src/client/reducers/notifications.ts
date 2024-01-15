@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as constants from '../constants';
 import type { Action } from '../state-types';
 import type { NotificationsState } from '../state-types/notifications';

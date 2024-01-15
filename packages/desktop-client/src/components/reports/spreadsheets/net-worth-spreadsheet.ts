@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import { runQuery } from 'loot-core/src/client/query-helpers';

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState, useMemo } from 'react';
 
 import { type AccountEntity } from 'loot-core/src/types/models';

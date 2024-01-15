@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { SvgDotsHorizontalTriple } from '../../icons/v1';

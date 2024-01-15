@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useEffect } from 'react';
 
 import * as Platform from 'loot-core/src/client/platform';
