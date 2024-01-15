@@ -10,6 +10,7 @@ The following are implementations of bank syncing using the Actual API.  See the
 ## Budget Migration
 Actual currently has official support for migrating budgets from YNAB4 and nYNAB.  The following are available for migrating from other budget apps
 * **Mint.com** - https://github.com/youngcw/actual_mint_importer
+* **MoneyMoney** - https://github.com/NikxDa/actual-moneymoney
 
 ## Others
 * **Local REST api** - https://github.com/jhonderson/actual-http-api
