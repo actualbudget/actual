@@ -60,6 +60,7 @@ export function Account({
   } = useSortable({ id: account?.id || `sortable-account-${name}` });
 
   const dndStyle = {
+    touchAction: 'none',
     opacity: isDragging ? 0.5 : undefined,
     transform: CSS.Transform.toString(transform),
     transition,
