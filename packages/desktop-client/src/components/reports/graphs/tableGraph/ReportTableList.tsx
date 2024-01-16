@@ -1,244 +1,90 @@
 // @ts-strict-ignore
-import React, { memo } from 'react';
+import React from 'react';
 
-import {
-  amountToCurrency,
-  amountToInteger,
-  integerToCurrency,
-} from 'loot-core/src/shared/util';
-
-import { type CSSProperties, styles, theme } from '../../../../style';
+import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
-import { Row, Cell } from '../../../table';
+import { Cell, Row } from '../../../table';
+import { type GroupedEntity } from '../../entities';
 
-type TableRowProps = {
-  item: {
-    date: string;
-    name: string;
-    monthData: [];
-    totalAssets: number;
-    totalDebts: number;
-  };
-  balanceTypeOp?: string;
-  groupByItem: string;
-  mode: string;
-  monthsCount: number;
-  style?: CSSProperties;
+type ReportTableListProps = {
+  data: GroupedEntity[];
+  mode?: string;
+  monthsCount?: number;
+  groupBy: string;
+  renderItem;
 };
-
-const TableRow = memo(
-  ({
-    item,
-    balanceTypeOp,
-    groupByItem,
-    mode,
-    monthsCount,
-    style,
-  }: TableRowProps) => {
-    const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
-    return (
-      <Row
-        key={item[groupByItem]}
-        collapsed={true}
-        style={{
-          color: theme.tableText,
-          backgroundColor: theme.tableBackground,
-          ...style,
-        }}
-      >
-        <Cell
-          value={item[groupByItem]}
-          title={item[groupByItem].length > 12 && item[groupByItem]}
-          style={{
-            width: 120,
-            flexShrink: 0,
-            ...styles.tnum,
-          }}
-        />
-        {item.monthData && mode === 'time'
-          ? item.monthData.map(month => {
-              return (
-                <Cell
-                  style={{
-                    minWidth: 85,
-                    ...styles.tnum,
-                  }}
-                  key={amountToCurrency(month[balanceTypeOp])}
-                  value={amountToCurrency(month[balanceTypeOp])}
-                  title={
-                    Math.abs(month[balanceTypeOp]) > 100000 &&
-                    amountToCurrency(month[balanceTypeOp])
-                  }
-                  width="flex"
-                  privacyFilter
-                />
-              );
-            })
-          : balanceTypeOp === 'totalTotals' && (
-              <>
-                <Cell
-                  value={amountToCurrency(item.totalAssets)}
-                  title={
-                    Math.abs(item.totalAssets) > 100000 &&
-                    amountToCurrency(item.totalAssets)
-                  }
-                  width="flex"
-                  style={{
-                    minWidth: 85,
-                    ...styles.tnum,
-                  }}
-                />
-                <Cell
-                  value={amountToCurrency(item.totalDebts)}
-                  title={
-                    Math.abs(item.totalDebts) > 100000 &&
-                    amountToCurrency(item.totalDebts)
-                  }
-                  width="flex"
-                  style={{
-                    minWidth: 85,
-                    ...styles.tnum,
-                  }}
-                />
-              </>
-            )}
-        <Cell
-          value={amountToCurrency(item[balanceTypeOp])}
-          title={
-            Math.abs(item[balanceTypeOp]) > 100000 &&
-            amountToCurrency(item[balanceTypeOp])
-          }
-          style={{
-            fontWeight: 600,
-            minWidth: 85,
-            ...styles.tnum,
-          }}
-          width="flex"
-          privacyFilter
-        />
-        <Cell
-          value={integerToCurrency(Math.round(average))}
-          title={
-            Math.abs(Math.round(average / 100)) > 100000 &&
-            integerToCurrency(Math.round(average))
-          }
-          style={{
-            fontWeight: 600,
-            minWidth: 85,
-            ...styles.tnum,
-          }}
-          width="flex"
-          privacyFilter
-        />
-      </Row>
-    );
-  },
-);
-
-function GroupedTableRow({
-  item,
-  balanceTypeOp,
-  groupByItem,
-  mode,
-  monthsCount,
-  empty,
-}) {
-  return (
-    <>
-      <TableRow
-        key={item.id}
-        item={item}
-        balanceTypeOp={balanceTypeOp}
-        groupByItem={groupByItem}
-        mode={mode}
-        monthsCount={monthsCount}
-        style={{
-          color: theme.tableRowHeaderText,
-          backgroundColor: theme.tableRowHeaderBackground,
-          fontWeight: 600,
-        }}
-      />
-      <View>
-        {item.categories
-          .filter(i =>
-            !empty
-              ? balanceTypeOp === 'totalTotals'
-                ? i.totalAssets !== 0 ||
-                  i.totalDebts !== 0 ||
-                  i.totalTotals !== 0
-                : i[balanceTypeOp] !== 0
-              : true,
-          )
-          .map(cat => {
-            return (
-              <TableRow
-                key={cat.id}
-                item={cat}
-                balanceTypeOp={balanceTypeOp}
-                groupByItem={groupByItem}
-                mode={mode}
-                monthsCount={monthsCount}
-              />
-            );
-          })}
-      </View>
-      <Row height={20} />
-    </>
-  );
-}
 
 export function ReportTableList({
   data,
-  empty,
   monthsCount,
-  balanceTypeOp,
   mode,
   groupBy,
-}) {
+  renderItem,
+}: ReportTableListProps) {
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
-  const groupByData =
-    groupBy === 'Category'
-      ? 'groupedData'
-      : ['Month', 'Year'].includes(groupBy)
-      ? 'monthData'
-      : 'data';
+
+  type RenderRowProps = {
+    key: string;
+    index: number;
+    parent_index?: number;
+    style?: CSSProperties;
+  };
+  function RenderRow({ index, parent_index, style, key }: RenderRowProps) {
+    const item = parent_index
+      ? data[parent_index].categories[index]
+      : data[index];
+
+    return renderItem({
+      item,
+      groupByItem,
+      mode,
+      style,
+      key,
+      monthsCount,
+    });
+  }
 
   return (
     <View>
-      {data[groupByData]
-        .filter(i =>
-          !empty
-            ? balanceTypeOp === 'totalTotals'
-              ? i.totalAssets !== 0 || i.totalDebts !== 0 || i.totalTotals !== 0
-              : i[balanceTypeOp] !== 0
-            : true,
-        )
-        .map(item => {
-          if (groupBy === 'Category') {
-            return (
-              <GroupedTableRow
-                key={item.id}
-                item={item}
-                balanceTypeOp={balanceTypeOp}
-                groupByItem={groupByItem}
-                mode={mode}
-                monthsCount={monthsCount}
-                empty={empty}
-              />
-            );
-          } else {
-            return (
-              <TableRow
-                key={item.id}
-                item={item}
-                balanceTypeOp={balanceTypeOp}
-                groupByItem={groupByItem}
-                mode={mode}
-                monthsCount={monthsCount}
-              />
-            );
-          }
-        })}
+      {data.map((item, index) => {
+        return (
+          <View key={item.id}>
+            {data ? (
+              <>
+                <RenderRow
+                  key={item.id}
+                  index={index}
+                  style={
+                    item.categories && {
+                      color: theme.tableRowHeaderText,
+                      backgroundColor: theme.tableRowHeaderBackground,
+                      fontWeight: 600,
+                    }
+                  }
+                />
+                {item.categories && (
+                  <>
+                    <View>
+                      {item.categories.map((category, i) => {
+                        return (
+                          <RenderRow
+                            key={category.id}
+                            index={i}
+                            parent_index={index}
+                          />
+                        );
+                      })}
+                    </View>
+                    <Row height={20} />
+                  </>
+                )}
+              </>
+            ) : (
+              <Cell width="flex" />
+            )}
+          </View>
+        );
+      })}
     </View>
   );
 }
