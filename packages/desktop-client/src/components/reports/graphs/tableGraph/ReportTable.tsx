@@ -21,7 +21,7 @@ type ReportTableProps = {
   handleScroll: UIEventHandler<HTMLDivElement>;
   style?: CSSProperties;
   groupBy: string;
-  balanceTypeOp: string;
+  balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
   data: GroupedEntity[];
   mode: string;
   monthsCount: number;

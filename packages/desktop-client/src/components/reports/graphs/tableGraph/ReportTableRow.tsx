@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { memo } from 'react';
 
 import {
@@ -13,8 +12,8 @@ import { type GroupedEntity } from '../../entities';
 
 type ReportTableRowProps = {
   item: GroupedEntity;
-  balanceTypeOp?: string;
-  groupByItem: string;
+  balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
+  groupByItem: 'id' | 'name';
   mode: string;
   style?: CSSProperties;
   monthsCount: number;
@@ -29,7 +28,7 @@ export const ReportTableRow = memo(
     style,
     monthsCount,
   }: ReportTableRowProps) => {
-    const average: number = amountToInteger(item[balanceTypeOp]) / monthsCount;
+    const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
     return (
       <Row
         collapsed={true}
@@ -41,7 +40,7 @@ export const ReportTableRow = memo(
       >
         <Cell
           value={item[groupByItem]}
-          title={item[groupByItem].length > 12 && item[groupByItem]}
+          title={item[groupByItem].length > 12 ? item[groupByItem] : undefined}
           style={{
             width: 120,
             flexShrink: 0,
@@ -59,8 +58,9 @@ export const ReportTableRow = memo(
                   }}
                   value={amountToCurrency(month[balanceTypeOp])}
                   title={
-                    Math.abs(month[balanceTypeOp]) > 100000 &&
-                    amountToCurrency(month[balanceTypeOp])
+                    Math.abs(month[balanceTypeOp]) > 100000
+                      ? amountToCurrency(month[balanceTypeOp])
+                      : undefined
                   }
                   width="flex"
                   privacyFilter
@@ -72,8 +72,9 @@ export const ReportTableRow = memo(
                 <Cell
                   value={amountToCurrency(item.totalAssets)}
                   title={
-                    Math.abs(item.totalAssets) > 100000 &&
-                    amountToCurrency(item.totalAssets)
+                    Math.abs(item.totalAssets) > 100000
+                      ? amountToCurrency(item.totalAssets)
+                      : undefined
                   }
                   width="flex"
                   privacyFilter
@@ -85,8 +86,9 @@ export const ReportTableRow = memo(
                 <Cell
                   value={amountToCurrency(item.totalDebts)}
                   title={
-                    Math.abs(item.totalDebts) > 100000 &&
-                    amountToCurrency(item.totalDebts)
+                    Math.abs(item.totalDebts) > 100000
+                      ? amountToCurrency(item.totalDebts)
+                      : undefined
                   }
                   width="flex"
                   privacyFilter
@@ -100,8 +102,9 @@ export const ReportTableRow = memo(
         <Cell
           value={amountToCurrency(item[balanceTypeOp])}
           title={
-            Math.abs(item[balanceTypeOp]) > 100000 &&
-            amountToCurrency(item[balanceTypeOp])
+            Math.abs(item[balanceTypeOp]) > 100000
+              ? amountToCurrency(item[balanceTypeOp])
+              : undefined
           }
           style={{
             fontWeight: 600,
@@ -114,8 +117,9 @@ export const ReportTableRow = memo(
         <Cell
           value={integerToCurrency(Math.round(average))}
           title={
-            Math.abs(Math.round(average / 100)) > 100000 &&
-            integerToCurrency(Math.round(average))
+            Math.abs(Math.round(average / 100)) > 100000
+              ? integerToCurrency(Math.round(average))
+              : undefined
           }
           style={{
             fontWeight: 600,
