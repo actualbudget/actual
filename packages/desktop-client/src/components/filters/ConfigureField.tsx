@@ -4,6 +4,10 @@ import { FocusScope } from '@react-aria/focus';
 
 import { mapField, FIELD_TYPES, TYPE_INFO } from 'loot-core/src/shared/rules';
 import { titleFirst } from 'loot-core/src/shared/util';
+import {
+  type RuleConditionEntity,
+  type setOp,
+} from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button';
@@ -19,10 +23,10 @@ import { subfieldToOptions } from './subfieldToOptions';
 type ConfigureFieldProps = {
   field: string;
   initialSubfield?: string;
-  op: string;
+  op?: string;
   value: string | number;
-  dispatch: Dispatch<{ type: string; op?: string; value?: string | number }>;
-  onApply: ({ field, op, value, options }) => void;
+  dispatch: Dispatch<RuleConditionEntity>;
+  onApply: (cond: RuleConditionEntity) => void;
 };
 
 export function ConfigureField({
@@ -44,6 +48,7 @@ export function ConfigureField({
     // prevOp.current = op;
   }, [op]);
 
+  let opTest: setOp;
   const type: string | undefined = FIELD_TYPES.get(field);
   let ops: Array<string> = TYPE_INFO[type].ops.filter(
     (op: string) => op !== 'isbetween',
@@ -150,7 +155,9 @@ export function ConfigureField({
                     key={currOp}
                     op={currOp}
                     selected={currOp === op}
-                    onClick={() => dispatch({ type: 'set-op', op: currOp })}
+                    onClick={() =>
+                      dispatch({ type: 'set-op', op: { ...opTest, currOp } })
+                    }
                   />
                 ))}
               </Stack>

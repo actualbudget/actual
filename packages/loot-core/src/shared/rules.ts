@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { RuleConditionEntity } from '../types/models';
+
 import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 
 // For now, this info is duplicated from the backend. Figure out how
@@ -195,28 +197,43 @@ export function parse(item) {
   return { ...item, error: null };
 }
 
-export function unparse({ error, inputKey, ...item }) {
+export function unparse({
+  item,
+  error,
+  inputKey,
+}: {
+  item: RuleConditionEntity;
+  error?: string;
+  inputKey?: string;
+}) {
+  let saveItem: RuleConditionEntity = item;
   switch (item.type) {
     case 'number': {
       let unparsed = item.value;
-      if (item.field === 'amount' && item.op !== 'isbetween') {
+      if (
+        item.field === 'amount' &&
+        item.op !== 'isbetween' &&
+        typeof unparsed === 'number'
+      ) {
         unparsed = amountToInteger(unparsed);
       }
-
-      return { ...item, value: unparsed };
+      saveItem = { ...item, value: unparsed };
+      break;
     }
     case 'string': {
       const unparsed = item.value == null ? '' : item.value;
-      return { ...item, value: unparsed };
+      saveItem = { ...item, value: unparsed };
+      break;
     }
     case 'boolean': {
       const unparsed = item.value == null ? false : item.value;
-      return { ...item, value: unparsed };
+      saveItem = { ...item, value: unparsed };
+      break;
     }
     default:
   }
 
-  return item;
+  return saveItem;
 }
 
 export function makeValue(value, cond) {

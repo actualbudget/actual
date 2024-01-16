@@ -19,6 +19,10 @@ import {
   TYPE_INFO,
 } from 'loot-core/src/shared/rules';
 import { titleFirst } from 'loot-core/src/shared/util';
+import {
+  type TransactionFilterEntity,
+  type RuleConditionEntity,
+} from 'loot-core/src/types/models';
 
 import { theme } from '../../style';
 import { HoverTarget } from '../common/HoverTarget';
@@ -27,6 +31,7 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
+import { type Filter } from './AppliedFilters';
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { ConfigureField } from './ConfigureField';
 import { FiltersButton } from './FiltersButton';
@@ -51,29 +56,29 @@ type FilterButtonProps = {
 };
 
 export function FilterButton({ onApply, compact, hover }: FilterButtonProps) {
-  const filters = useFilters();
+  const filters: Filter[] | TransactionFilterEntity[] = useFilters();
 
-  const { dateFormat } = useSelector((state: any) => {
+  const { dateFormat } = useSelector((state: { prefs: any }) => {
     return {
       dateFormat: state.prefs.local.dateFormat ?? 'MM/dd/yyyy',
     };
   });
 
   const [state, dispatch] = useReducer(
-    (state: any, action: any) => {
+    (state: object, action: RuleConditionEntity) => {
       switch (action.type) {
         case 'select-field':
           return { ...state, fieldsOpen: true, condOpen: false };
         case 'configure': {
           const { field } = deserializeField(action.field);
           const type: string | undefined = FIELD_TYPES.get(field);
-          const info: any = TYPE_INFO.find(f => f.name === type);
+          const info: string = TYPE_INFO.find(f => f.name === type).ops[0];
           return {
             ...state,
             fieldsOpen: false,
             condOpen: true,
             field: action.field,
-            op: info.ops[0],
+            op: info,
             value: type === 'boolean' ? true : null,
           };
         }
@@ -86,13 +91,22 @@ export function FilterButton({ onApply, compact, hover }: FilterButtonProps) {
     { fieldsOpen: false, condOpen: false, field: null, value: null },
   );
 
-  async function onValidateAndApply(cond: any) {
-    cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
+  async function onValidateAndApply(cond: RuleConditionEntity) {
+    const valueIsString: string = typeof cond.value === 'string' && cond.value;
+    const saveItem: RuleConditionEntity = {
+      ...cond,
+      type: FIELD_TYPES.get(cond.field),
+    };
+    cond = unparse({ item: saveItem });
 
-    if (cond.type === 'date' && cond.options) {
+    if (
+      cond.type === 'date' &&
+      typeof cond.value !== 'number' &&
+      cond.options
+    ) {
       if (cond.options.month) {
         const date = parseDate(
-          cond.value,
+          valueIsString,
           getMonthYearFormat(dateFormat),
           new Date(),
         );
@@ -103,7 +117,7 @@ export function FilterButton({ onApply, compact, hover }: FilterButtonProps) {
           return;
         }
       } else if (cond.options.year) {
-        const date = parseDate(cond.value, 'yyyy', new Date());
+        const date = parseDate(valueIsString, 'yyyy', new Date());
         if (isDateValid(date)) {
           cond.value = formatDate(date, 'yyyy');
         } else {

@@ -10,7 +10,7 @@ export type Filter = {
   field: string;
   op: string;
   value: string | number;
-  options: { inflow: boolean; outflow: boolean };
+  options: { inflow: boolean; outflow: boolean; month?: string; year?: string };
   customName?: string;
 };
 

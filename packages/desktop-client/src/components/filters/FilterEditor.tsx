@@ -1,7 +1,9 @@
 import React, { useReducer } from 'react';
 
 import { unparse, FIELD_TYPES } from 'loot-core/src/shared/rules';
+import { type RuleConditionEntity } from 'loot-core/src/types/models';
 
+import { type Filter } from './AppliedFilters';
 import { ConfigureField } from './ConfigureField';
 import { subfieldFromFilter } from './subfieldFromFilter';
 import { updateFilterReducer } from './updateFilterReducer';
@@ -11,7 +13,7 @@ type FilterEditorProps = {
   op: string;
   value: string | number;
   options: { inflow: boolean; outflow: boolean };
-  onSave: ({field, op, value, options}) => void;
+  onSave: (cond: RuleConditionEntity) => Filter;
   onClose: () => void;
 };
 
@@ -24,7 +26,7 @@ export function FilterEditor({
   onClose,
 }: FilterEditorProps) {
   const [state, dispatch] = useReducer(
-    (state: any, action: any) => {
+    (state: any, action: RuleConditionEntity) => {
       switch (action.type) {
         case 'close':
           onClose();
@@ -43,8 +45,12 @@ export function FilterEditor({
       op={state.op}
       value={state.value}
       dispatch={dispatch}
-      onApply={cond => {
-        cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
+      onApply={(cond: RuleConditionEntity) => {
+        const saveItem: RuleConditionEntity = {
+          ...cond,
+          type: FIELD_TYPES.get(cond.field),
+        };
+        cond = unparse({ item: saveItem });
         onSave(cond);
         onClose();
       }}
