@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type CSSProperties, type Ref, useState } from 'react';
 
 import { type CategoryEntity } from 'loot-core/src/types/models';

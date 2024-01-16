@@ -15,8 +15,6 @@
     "downlevelIteration": true,
     // TODO: enable once every file is ts
     // "strict": true,
-    // TODO: enable once all issues fixed
-    // "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
@@ -30,7 +28,13 @@
     "moduleResolution": "Node",
     "module": "ES2022",
     // Until/if we build using tsc
-    "noEmit": true
+    "noEmit": true,
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "path": ["./packages"]
+      }
+    ]
   },
   "include": ["packages/**/*"],
   "exclude": ["**/node_modules/*", "**/build/*", "**/lib-dist/*"],

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import 'fake-indexeddb/auto';
 import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
 

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import md5 from 'md5';
 
 import { schema, schemaConfig, makeViews } from './aql';

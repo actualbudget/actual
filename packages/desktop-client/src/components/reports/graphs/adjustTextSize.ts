@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export const adjustTextSize = (
   sized: number,
   type: string,

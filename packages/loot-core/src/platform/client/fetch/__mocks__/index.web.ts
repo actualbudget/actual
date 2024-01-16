@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type * as T from '..';
 
 let listeners = new Map();

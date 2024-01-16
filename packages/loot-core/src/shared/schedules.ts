@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 
 import * as monthUtils from './months';

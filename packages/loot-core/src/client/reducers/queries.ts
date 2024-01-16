@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import memoizeOne from 'memoize-one';
 
 import { groupById } from '../../shared/util';

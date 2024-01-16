@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
