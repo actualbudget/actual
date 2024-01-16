@@ -110,6 +110,7 @@ export function ReportTableTotals({
                     amountToCurrency(data.totalAssets)
                   }
                   width="flex"
+                  privacyFilter
                 />
                 <Cell
                   style={{
@@ -122,6 +123,7 @@ export function ReportTableTotals({
                     amountToCurrency(data.totalDebts)
                   }
                   width="flex"
+                  privacyFilter
                 />
               </>
             )}
