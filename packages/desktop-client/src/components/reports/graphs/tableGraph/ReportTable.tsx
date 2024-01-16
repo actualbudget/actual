@@ -73,7 +73,6 @@ export function ReportTable({
         ...style,
       }}
       tabIndex={1}
-      data-testid="table"
     >
       <Block
         innerRef={listScrollRef}

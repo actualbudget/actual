@@ -30,14 +30,11 @@ export function ReportTableList({
     style?: CSSProperties;
   };
   function RenderRow({ index, parent_index, style, key }: RenderRowProps) {
-    let item;
-    if (parent_index != null) {
-      item = data[parent_index].categories[index];
-    } else {
-      item = data[index];
-    }
+    const item = parent_index
+      ? data[parent_index].categories[index]
+      : data[index];
 
-    const rendered_row = renderItem({
+    return renderItem({
       item,
       groupByItem,
       mode,
@@ -45,8 +42,6 @@ export function ReportTableList({
       key,
       monthsCount,
     });
-
-    return rendered_row;
   }
 
   return (
