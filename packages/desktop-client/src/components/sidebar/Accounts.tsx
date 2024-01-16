@@ -1,11 +1,25 @@
 // @ts-strict-ignore
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
+
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 import { type AccountEntity } from 'loot-core/src/types/models';
 
 import { SvgAdd } from '../../icons/v1';
 import { View } from '../common/View';
-import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
 
 import { Account } from './Account';
@@ -34,7 +48,7 @@ type AccountsProps = {
   showClosedAccounts: boolean;
   onAddAccount: () => void;
   onToggleClosedAccounts: () => void;
-  onReorder: OnDropCallback;
+  onReorder: (id: string, dropPos: 'top' | 'bottom', targetId: string) => void;
 };
 
 export function Accounts({
@@ -54,7 +68,6 @@ export function Accounts({
   onToggleClosedAccounts,
   onReorder,
 }: AccountsProps) {
-  const [isDragging, setIsDragging] = useState(false);
   const offbudgetAccounts = useMemo(
     () =>
       accounts.filter(
@@ -74,100 +87,120 @@ export function Accounts({
     [accounts],
   );
 
-  function onDragChange(drag) {
-    setIsDragging(drag.state === 'start');
-  }
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
-  const makeDropPadding = i => {
-    if (i === 0) {
-      return {
-        paddingTop: isDragging ? 15 : 0,
-        marginTop: isDragging ? -15 : 0,
-      };
+  const onDragEnd = e => {
+    const { active, over } = e;
+
+    if (active.id !== over.id) {
+      const dropPos =
+        active.data.current.sortable.index < over.data.current.sortable.index
+          ? 'bottom'
+          : 'top';
+
+      onReorder(active.id, dropPos, over.id);
     }
-    return null;
   };
 
   return (
     <View>
-      <Account
-        name="All accounts"
-        to={allAccountsPath}
-        query={getAllAccountBalance()}
-        style={{ fontWeight, marginTop: 15 }}
-      />
-
-      {budgetedAccounts.length > 0 && (
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis]}
+        onDragEnd={onDragEnd}
+      >
         <Account
-          name="For budget"
-          to={budgetedAccountPath}
-          query={getOnBudgetBalance()}
-          style={{ fontWeight, marginTop: 13 }}
+          name="All accounts"
+          to={allAccountsPath}
+          query={getAllAccountBalance()}
+          style={{ fontWeight, marginTop: 15 }}
         />
-      )}
 
-      {budgetedAccounts.map((account, i) => (
-        <Account
-          key={account.id}
-          name={account.name}
-          account={account}
-          connected={!!account.bank}
-          failed={failedAccounts && failedAccounts.has(account.id)}
-          updated={updatedAccounts && updatedAccounts.includes(account.id)}
-          to={getAccountPath(account)}
-          query={getBalanceQuery(account)}
-          onDragChange={onDragChange}
-          onDrop={onReorder}
-          outerStyle={makeDropPadding(i)}
-        />
-      ))}
-
-      {offbudgetAccounts.length > 0 && (
-        <Account
-          name="Off budget"
-          to={offBudgetAccountPath}
-          query={getOffBudgetBalance()}
-          style={{ fontWeight, marginTop: 13 }}
-        />
-      )}
-
-      {offbudgetAccounts.map((account, i) => (
-        <Account
-          key={account.id}
-          name={account.name}
-          account={account}
-          connected={!!account.bank}
-          failed={failedAccounts && failedAccounts.has(account.id)}
-          updated={updatedAccounts && updatedAccounts.includes(account.id)}
-          to={getAccountPath(account)}
-          query={getBalanceQuery(account)}
-          onDragChange={onDragChange}
-          onDrop={onReorder}
-          outerStyle={makeDropPadding(i)}
-        />
-      ))}
-
-      {closedAccounts.length > 0 && (
-        <SecondaryItem
-          style={{ marginTop: 15 }}
-          title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
-          onClick={onToggleClosedAccounts}
-          bold
-        />
-      )}
-
-      {showClosedAccounts &&
-        closedAccounts.map(account => (
+        {budgetedAccounts.length > 0 && (
           <Account
-            key={account.id}
-            name={account.name}
-            account={account}
-            to={getAccountPath(account)}
-            query={getBalanceQuery(account)}
-            onDragChange={onDragChange}
-            onDrop={onReorder}
+            name="For budget"
+            to={budgetedAccountPath}
+            query={getOnBudgetBalance()}
+            style={{ fontWeight, marginTop: 13 }}
           />
-        ))}
+        )}
+        <SortableContext
+          items={budgetedAccounts}
+          strategy={verticalListSortingStrategy}
+        >
+          {budgetedAccounts.map((account, i) => (
+            <Account
+              key={account.id}
+              name={account.name}
+              account={account}
+              connected={!!account.bank}
+              failed={failedAccounts && failedAccounts.has(account.id)}
+              updated={updatedAccounts && updatedAccounts.includes(account.id)}
+              to={getAccountPath(account)}
+              query={getBalanceQuery(account)}
+            />
+          ))}
+        </SortableContext>
+
+        {offbudgetAccounts.length > 0 && (
+          <Account
+            name="Off budget"
+            to={offBudgetAccountPath}
+            query={getOffBudgetBalance()}
+            style={{ fontWeight, marginTop: 13 }}
+          />
+        )}
+
+        <SortableContext
+          items={offbudgetAccounts}
+          strategy={verticalListSortingStrategy}
+        >
+          {offbudgetAccounts.map((account, i) => (
+            <Account
+              key={account.id}
+              name={account.name}
+              account={account}
+              connected={!!account.bank}
+              failed={failedAccounts && failedAccounts.has(account.id)}
+              updated={updatedAccounts && updatedAccounts.includes(account.id)}
+              to={getAccountPath(account)}
+              query={getBalanceQuery(account)}
+            />
+          ))}
+        </SortableContext>
+
+        {closedAccounts.length > 0 && (
+          <SecondaryItem
+            style={{ marginTop: 15 }}
+            title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
+            onClick={onToggleClosedAccounts}
+            bold
+          />
+        )}
+
+        {showClosedAccounts && (
+          <SortableContext
+            items={offbudgetAccounts}
+            strategy={verticalListSortingStrategy}
+          >
+            {closedAccounts.map((account, i) => (
+              <Account
+                key={account.id}
+                name={account.name}
+                account={account}
+                to={getAccountPath(account)}
+                query={getBalanceQuery(account)}
+              />
+            ))}
+          </SortableContext>
+        )}
+      </DndContext>
 
       <SecondaryItem
         style={{
