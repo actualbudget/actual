@@ -1,8 +1,8 @@
 export let tracer: null | ReturnType<typeof execTracer> = null;
 
 function timeout<T extends Promise<unknown>>(promise: T, n: number) {
-  let resolve;
-  const timeoutPromise = new Promise(_ => (resolve = _));
+  let resolve: (response: string) => void;
+  const timeoutPromise = new Promise<string>(_ => (resolve = _));
   const timer = setTimeout(() => resolve(`timeout(${n})`), n);
 
   return Promise.race([
