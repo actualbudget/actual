@@ -1,5 +1,9 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
+// eslint-disable-next-line import/no-duplicates
+import type { IByHourOfDayRuleRuleOptions } from '@rschedule/core/rules/ByHourOfDay';
+// eslint-disable-next-line import/no-duplicates
+import type { IFrequencyRuleOptions } from '@rschedule/core/rules/Frequency';
 
 import * as monthUtils from './months';
 import { q } from './query';
@@ -183,7 +187,9 @@ export function getRecurringDescription(config, dateFormat) {
 }
 
 export function recurConfigToRSchedule(config) {
-  const base: IRuleOptions = {
+  const base: IRuleOptions &
+    IFrequencyRuleOptions &
+    IByHourOfDayRuleRuleOptions = {
     start: monthUtils.parseDate(config.start),
     frequency: config.frequency.toUpperCase(),
     byHourOfDay: [12],
