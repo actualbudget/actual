@@ -1,7 +1,7 @@
-// @ts-ignore: false-positive commonjs module error on build until typescript 5.3
 import type {
-  RequestInfo as FetchRequestInfo,
-  RequestInit as FetchRequestInit,
+  RequestInfo as FetchInfo,
+  RequestInit as FetchInit,
+  // @ts-ignore: false-positive commonjs module error on build until typescript 5.3
 } from 'node-fetch'; // with { 'resolution-mode': 'import' };
 
 // loot-core types
@@ -32,10 +32,7 @@ export async function init(config: initConfig = {}) {
   if (!globalThis.fetch) {
     globalThis.fetch = (url: URL | RequestInfo, init?: RequestInit) => {
       return import('node-fetch').then(({ default: fetch }) =>
-        fetch(
-          url as unknown as FetchRequestInfo,
-          init as unknown as FetchRequestInit,
-        ),
+        fetch(url as unknown as FetchInfo, init as unknown as FetchInit),
       ) as unknown as Promise<Response>;
     };
   }
