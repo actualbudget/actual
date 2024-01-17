@@ -104,9 +104,13 @@ export function BarLineGraph({ style, graphData, compact }: BarLineGraphProps) {
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                {!compact && (
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="x" />
+                    <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                  </>
+                )}
                 <Bar type="monotone" dataKey="y" fill="#8884d8" />
                 <Line type="monotone" dataKey="y" stroke="#8884d8" />
               </ComposedChart>

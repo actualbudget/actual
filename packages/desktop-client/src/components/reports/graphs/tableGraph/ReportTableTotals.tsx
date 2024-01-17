@@ -21,6 +21,7 @@ type ReportTableTotalsProps = {
   monthsCount: number;
   totalScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
+  compact: boolean;
 };
 
 export function ReportTableTotals({
@@ -31,6 +32,7 @@ export function ReportTableTotals({
   monthsCount,
   totalScrollRef,
   handleScroll,
+  compact,
 }: ReportTableTotalsProps) {
   const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
 

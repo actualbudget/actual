@@ -190,29 +190,27 @@ export function BarGraph({
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                {!compact && <CartesianGrid strokeDasharray="3 3" />}
                 {!compact && (
-                  <XAxis
-                    dataKey={yAxis}
-                    angle={-35}
-                    textAnchor="end"
-                    height={Math.sqrt(longestLabelLength) * 25}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {!compact && (
-                  <YAxis
-                    tickFormatter={value => getCustomTick(value, privacyMode)}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {!compact && (
-                  <ReferenceLine y={0} stroke={theme.pageTextLight} />
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey={yAxis}
+                      angle={-35}
+                      textAnchor="end"
+                      height={Math.sqrt(longestLabelLength) * 25}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                    <YAxis
+                      tickFormatter={value => getCustomTick(value, privacyMode)}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                    <ReferenceLine y={0} stroke={theme.pageTextLight} />
+                  </>
                 )}
                 <Bar dataKey={val => getVal(val)} stackId="a">
-                  {viewLabels && (
+                  {viewLabels && !compact && (
                     <LabelList
                       dataKey={val => getVal(val)}
                       content={customLabel}
@@ -228,7 +226,7 @@ export function BarGraph({
                 </Bar>
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
                   <Bar dataKey="totalDebts" stackId="a">
-                    {viewLabels && (
+                    {viewLabels && !compact && (
                       <LabelList dataKey="totalDebts" content={customLabel} />
                     )}
                     {data[splitData].map((entry, index) => (

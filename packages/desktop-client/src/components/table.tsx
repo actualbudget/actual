@@ -209,6 +209,7 @@ export function Cell({
               alignItems: 'center',
               ...styles.smallText,
               ...valueStyle,
+              ...style,
             }}
             // Can't use click because we only want to expose the cell if
             // the user does a direct click, not if they also drag the

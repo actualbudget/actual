@@ -14,6 +14,7 @@ type ReportTableHeaderProps = {
   balanceType: string;
   headerScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
+  compact: boolean;
 };
 
 export function ReportTableHeader({
@@ -23,6 +24,7 @@ export function ReportTableHeader({
   balanceType,
   headerScrollRef,
   handleScroll,
+  compact,
 }: ReportTableHeaderProps) {
   return (
     <Row
