@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import {
@@ -156,9 +156,17 @@ export function SimpleTransactionsTable({
     transactions = transactions.map(trans =>
       serializeTransaction(trans, dateFormat),
     );
-    const selected = transactions.filter(x => x.selected).map(x => x.id);
-    selected.forEach(x => dispatchSelected({ type: 'select', id: x }));
     return transactions;
+  }, [transactions]);
+
+  useEffect(() => {
+    const selected = transactions.filter(x => x.selected).map(x => x.id);
+    //Type Select will toggle the record
+    //On init this class is called twice,(due to the memoization
+    //So we check if it is selected before we dispatch.
+    selected.forEach(
+      x => !selectedItems.has(x) && dispatchSelected({ type: 'select', id: x }),
+    );
   }, [transactions]);
 
   const renderItem = useCallback(

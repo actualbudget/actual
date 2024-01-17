@@ -31,8 +31,8 @@ export function ScheduleLink({
   actions: BoundActions;
   modalProps?: CommonModalProps;
   transactionIds: string[];
-  getTransaction: (a: string) => TransactionEntity;
-  pushModal: (a: string, b: ModalParams) => void;
+  getTransaction: (tranID: string) => TransactionEntity;
+  pushModal: (name: string, params: ModalParams) => void;
 }) {
   const [filter, setFilter] = useState('');
 
@@ -56,11 +56,10 @@ export function ScheduleLink({
     actions.popModal();
   }
   async function onCreate() {
-    const firstId1 = [...ids][0];
     actions.popModal();
     pushModal('schedule-edit', {
       id: null,
-      transaction: getTransaction(firstId1),
+      transaction: getTransaction(ids[0]),
     });
   }
 
