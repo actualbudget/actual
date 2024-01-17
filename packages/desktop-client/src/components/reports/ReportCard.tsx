@@ -1,11 +1,25 @@
 // @ts-strict-ignore
 import React from 'react';
 
-import { theme } from '../../style';
+import { type CSSProperties, theme } from '../../style';
 import { AnchorLink } from '../common/AnchorLink';
 import { View } from '../common/View';
 
-export function ReportCard({ flex, to, style, children }) {
+type ReportCardProps = {
+  to: string;
+  report: any;
+  children: any;
+  flex?: any;
+  style?: any;
+};
+
+export function ReportCard({
+  flex,
+  to,
+  style,
+  report,
+  children,
+}: ReportCardProps) {
   const containerProps = { flex, margin: 15 };
 
   const content = (
@@ -35,6 +49,7 @@ export function ReportCard({ flex, to, style, children }) {
       <AnchorLink
         to={to}
         style={{ textDecoration: 'none', flex, ...containerProps }}
+        report={report}
       >
         {content}
       </AnchorLink>

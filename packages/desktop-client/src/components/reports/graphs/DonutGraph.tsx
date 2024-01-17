@@ -173,7 +173,9 @@ export function DonutGraph({
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                   labelLine={false}
-                  label={e => (viewLabels ? customLabel(e) : <div />)}
+                  label={e =>
+                    viewLabels && !compact ? customLabel(e) : <div />
+                  }
                   onMouseEnter={onPieEnter}
                 >
                   {data.legend.map((entry, index) => (

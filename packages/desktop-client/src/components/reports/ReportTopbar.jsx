@@ -14,9 +14,14 @@ import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
-import { SaveReportMenuButton } from './SaveReport';
+import { SaveReport } from './SaveReport';
 
 export function ReportTopbar({
+  startDate,
+  endDate,
+  showEmpty,
+  showOffBudgetHidden,
+  showUncategorized,
   graphType,
   setGraphType,
   mode,
@@ -30,6 +35,13 @@ export function ReportTopbar({
   viewLabels,
   onApplyFilter,
   onChangeViews,
+  filters,
+  conditionsOp,
+  selectedCategories,
+  reportId,
+  onReportChange,
+  onResetReports,
+  data,
 }) {
   return (
     <View
@@ -152,7 +164,27 @@ export function ReportTopbar({
       />
       <FilterButton onApply={onApplyFilter} compact hover />
       <View style={{ flex: 1 }} />
-      <SaveReportMenuButton />
+      <SaveReport
+        reportId={reportId}
+        startDate={startDate}
+        endDate={endDate}
+        filters={filters}
+        conditionsOp={conditionsOp}
+        selectedCategories={selectedCategories}
+        onReportChange={onReportChange}
+        onResetReports={onResetReports}
+        mode={mode}
+        groupBy={groupBy}
+        balanceType={balanceType}
+        showEmpty={showEmpty}
+        showOffBudgetHidden={showOffBudgetHidden}
+        showUncategorized={showUncategorized}
+        graphType={graphType}
+        viewLabels={viewLabels}
+        viewLegend={viewLegend}
+        viewSummary={viewSummary}
+        data={data}
+      />
     </View>
   );
 }

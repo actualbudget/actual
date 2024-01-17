@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { useRef } from 'react';
 
+import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 
 import { type DataEntity, type Month } from './entities';
@@ -16,30 +17,38 @@ import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
+  startDate: string;
+  endDate: string;
   data: DataEntity;
   mode: string;
   graphType: string;
   balanceType: string;
   groupBy: string;
   showEmpty: boolean;
-  scrollWidth: number;
-  setScrollWidth: (value: number) => void;
-  months: Month[];
-  viewLabels: boolean;
+  scrollWidth?: number;
+  setScrollWidth?: (value: number) => void;
+  months?: Month[];
+  viewLabels?: boolean;
+  compact?: boolean;
+  style?: CSSProperties;
 };
 
 export function ChooseGraph({
+  startDate,
+  endDate,
   data,
   mode,
   graphType,
   balanceType,
   groupBy,
-  showEmpty,
   scrollWidth,
   setScrollWidth,
   months,
   viewLabels,
+  compact,
+  style,
 }: ChooseGraphProps) {
+  const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const groupByData =
     groupBy === 'Category'
@@ -74,7 +83,8 @@ export function ChooseGraph({
   if (graphType === 'AreaGraph') {
     return (
       <AreaGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
@@ -84,7 +94,8 @@ export function ChooseGraph({
   if (graphType === 'BarGraph') {
     return (
       <BarGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
@@ -93,12 +104,15 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'BarLineGraph') {
-    return <BarLineGraph style={{ flexGrow: 1 }} graphData={data} />;
+    return (
+      <BarLineGraph style={graphStyle} compact={compact} graphData={data} />
+    );
   }
   if (graphType === 'DonutGraph') {
     return (
       <DonutGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
@@ -107,12 +121,13 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={{ flexGrow: 1 }} graphData={data} />;
+    return <LineGraph style={graphStyle} compact={compact} graphData={data} />;
   }
   if (graphType === 'StackedBarGraph') {
     return (
       <StackedBarGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         viewLabels={viewLabels}
       />

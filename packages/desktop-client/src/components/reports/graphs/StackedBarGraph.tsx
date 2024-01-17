@@ -159,18 +159,20 @@ export function StackedBarGraph({
                   isAnimationActive={false}
                   cursor={{ fill: 'transparent' }}
                 />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
-                />
-                {!compact && (
-                  <YAxis
-                    tickFormatter={value => getCustomTick(value, privacyMode)}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
+                {!compact && ( //flag
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                    <YAxis
+                      tickFormatter={value => getCustomTick(value, privacyMode)}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                  </>
                 )}
                 {data.legend
                   .slice(0)
@@ -182,7 +184,7 @@ export function StackedBarGraph({
                       stackId="a"
                       fill={entry.color}
                     >
-                      {viewLabels && (
+                      {viewLabels && !compact && (
                         <LabelList dataKey={entry.name} content={customLabel} />
                       )}
                     </Bar>

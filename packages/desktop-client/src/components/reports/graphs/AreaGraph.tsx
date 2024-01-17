@@ -184,27 +184,25 @@ export function AreaGraph({
                 data={data.monthData}
                 margin={{ top: 0, right: labelsMargin, left: 0, bottom: 0 }}
               >
-                {compact ? null : (
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                )}
-                {compact ? null : (
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {compact ? null : (
-                  <YAxis
-                    dataKey={balanceTypeOp}
-                    domain={[
-                      viewLabels ? labelsMin : 'auto',
-                      viewLabels ? labelsMax : 'auto',
-                    ]}
-                    tickFormatter={tickFormatter}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
+                {!compact && ( //flag
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                    <YAxis
+                      dataKey={balanceTypeOp}
+                      domain={[
+                        viewLabels ? labelsMin : 'auto',
+                        viewLabels ? labelsMax : 'auto',
+                      ]}
+                      tickFormatter={tickFormatter}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                  </>
                 )}
                 <Tooltip
                   content={<CustomTooltip balanceTypeOp={balanceTypeOp} />}
@@ -236,7 +234,7 @@ export function AreaGraph({
                   fill="url(#splitColor)"
                   fillOpacity={1}
                 >
-                  {viewLabels && (
+                  {viewLabels && !compact && (
                     <LabelList
                       dataKey={balanceTypeOp}
                       content={e => customLabel(e, width, lastLabel)}
