@@ -4,24 +4,25 @@ import { type HandlerFunctions } from '../types/handlers';
 export function sequential<T extends HandlerFunctions>(
   fn: T,
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
-  const sequenceState = {
+  const sequenceState: {
+    running: Promise<Awaited<ReturnType<T>>> | null;
+    queue: Array<{ args: Parameters<T>; resolve; reject }>;
+  } = {
     running: null,
     queue: [],
   };
 
   function pump() {
-    if (sequenceState.queue.length > 0) {
-      const next = sequenceState.queue.shift();
+    const next = sequenceState.queue.shift();
+    if (next !== undefined) {
       run(next.args, next.resolve, next.reject);
     } else {
       sequenceState.running = null;
     }
   }
 
-  function run(args, resolve, reject) {
-    sequenceState.running = fn.apply(null, args);
-
-    sequenceState.running.then(
+  function run(args: Parameters<T>, resolve, reject) {
+    sequenceState.running = fn.apply(null, args).then(
       val => {
         pump();
         resolve(val);
@@ -48,9 +49,9 @@ export function sequential<T extends HandlerFunctions>(
 
 export function once<T extends HandlerFunctions>(
   fn: T,
-): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
-  let promise = null;
-  return (...args) => {
+): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> | null {
+  let promise: Promise<Awaited<ReturnType<T>>> | null = null;
+  return (...args: Parameters<T>) => {
     if (!promise) {
       promise = fn.apply(null, args).finally(() => {
         promise = null;
