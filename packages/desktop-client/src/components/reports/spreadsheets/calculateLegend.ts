@@ -1,7 +1,11 @@
 // @ts-strict-ignore
+import {
+  type ItemEntity,
+  type MonthData,
+} from 'loot-core/src/types/models/reports';
+
 import { theme } from '../../../style';
 import { getColorScale } from '../chart-theme';
-import { type ItemEntity, type MonthData } from '../entities';
 
 export function calculateLegend(
   monthData: MonthData[],
