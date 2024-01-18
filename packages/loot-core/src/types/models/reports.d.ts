@@ -1,3 +1,5 @@
+import { RuleConditionEntity } from "./rule";
+
 export interface CustomReportEntity {
   reportId?: string;
   mode: string;
@@ -8,7 +10,7 @@ export interface CustomReportEntity {
   showUncategorized: boolean;
   graphType: string;
   selectedCategories;
-  filters;
+  filters: RuleConditionEntity;
   conditionsOp: string;
   name: string;
   startDate: string;
