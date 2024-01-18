@@ -1,7 +1,5 @@
 // @ts-strict-ignore
 import React, { type ReactElement, useEffect, useMemo } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
 import {
   Route,
   Routes,
@@ -267,9 +265,7 @@ export function FinancesApp() {
           <BudgetMonthCountProvider>
             <PayeesProvider>
               <AccountsProvider>
-                <DndProvider backend={Backend}>
-                  <ScrollProvider>{app}</ScrollProvider>
-                </DndProvider>
+                <ScrollProvider>{app}</ScrollProvider>
               </AccountsProvider>
             </PayeesProvider>
           </BudgetMonthCountProvider>
