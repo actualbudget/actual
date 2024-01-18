@@ -41,7 +41,7 @@ export const SimpleFinInitialise = ({
     ]);
 
     onSuccess();
-    if (modalProps != null) {
+    if (modalProps !== undefined) {
       modalProps.onClose();
     }
     setIsLoading(false);
