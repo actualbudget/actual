@@ -1,4 +1,4 @@
-import { RuleConditionEntity } from "./rule";
+import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
   reportId?: string;
