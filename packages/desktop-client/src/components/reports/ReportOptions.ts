@@ -1,10 +1,32 @@
 // @ts-strict-ignore
+import * as monthUtils from 'loot-core/src/shared/months';
 import {
+  type CustomReportEntity,
   type AccountEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
   type PayeeEntity,
 } from 'loot-core/src/types/models';
+
+const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
+const endDate = monthUtils.currentMonth();
+
+export const defaultState: CustomReportEntity = {
+  id: null,
+  mode: 'total',
+  groupBy: 'Category',
+  balanceType: 'Payment',
+  showEmpty: false,
+  showOffBudgetHidden: false,
+  showUncategorized: false,
+  graphType: 'BarGraph',
+  startDate,
+  endDate,
+  selectedCategories: null,
+  isDateStatic: false,
+  conditionsOp: 'and',
+  name: 'Default',
+};
 
 const balanceTypeOptions = [
   { description: 'Payment', format: 'totalDebts' as const },

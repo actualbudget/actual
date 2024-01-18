@@ -23,7 +23,7 @@ import { ChooseGraph } from '../ChooseGraph';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportLegend } from '../ReportLegend';
-import { ReportOptions } from '../ReportOptions';
+import { ReportOptions, defaultState } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
@@ -31,6 +31,7 @@ import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+import { useLocation } from 'react-router-dom';
 
 export function CustomReport() {
   const categories = useCategories();
@@ -52,26 +53,30 @@ export function CustomReport() {
     onCondOpChange,
   } = useFilters();
 
-  const [selectedCategories, setSelectedCategories] = useState(null);
+  const location = useLocation();
+  const loadReport = location.state.report ?? defaultState;
+
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);
-  const [startDate, setStartDate] = useState(
-    monthUtils.subMonths(monthUtils.currentMonth(), 5),
-  );
-  const [endDate, setEndDate] = useState(monthUtils.currentMonth());
 
-  const [mode, setMode] = useState('total');
-  const [isDateStatic, setIsDateStatic] = useState(false);
-  const [groupBy, setGroupBy] = useState('Category');
-  const [balanceType, setBalanceType] = useState('Payment');
-  const [showEmpty, setShowEmpty] = useState(false);
-  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(false);
-  const [showUncategorized, setShowUncategorized] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState(
+    loadReport.selectedCategories,
+  );
+  const [startDate, setStartDate] = useState(loadReport.startDate);
+  const [endDate, setEndDate] = useState(loadReport.endDate);
+  const [mode, setMode] = useState(loadReport.mode);
+  const [isDateStatic, setIsDateStatic] = useState(loadReport.isDateStatic);
+  const [groupBy, setGroupBy] = useState(loadReport.groupBy);
+  const [balanceType, setBalanceType] = useState(loadReport.balanceType);
+  const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
+  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(loadReport.showOffBudgetHidden);
+  const [showUncategorized, setShowUncategorized] = useState(loadReport.showUncategorized);
+  const [graphType, setGraphType] = useState(loadReport.graphType);
+
   const [dateRange, setDateRange] = useState('Last 6 months');
   const [dataCheck, setDataCheck] = useState(false);
-
-  const [graphType, setGraphType] = useState('BarGraph');
   const dateRangeLine = ReportOptions.dateRange.length - 3;
+
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
