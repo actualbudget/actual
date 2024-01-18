@@ -3,6 +3,7 @@ RUN apk add --no-cache nodejs yarn npm python3 openssl build-base
 WORKDIR /app
 ADD .yarn ./.yarn
 ADD yarn.lock package.json .yarnrc.yml ./
+RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 RUN yarn workspaces focus --all --production
 RUN if [ "$(uname -m)" = "armv7l" ]; then npm install bcrypt better-sqlite3 --build-from-source; fi
 

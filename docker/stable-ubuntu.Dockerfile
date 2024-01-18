@@ -3,6 +3,7 @@ RUN apt-get update && apt-get install -y openssl
 WORKDIR /app
 ADD .yarn ./.yarn
 ADD yarn.lock package.json .yarnrc.yml ./
+RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 RUN yarn workspaces focus --all --production
 
 FROM node:18-bullseye-slim as prod
