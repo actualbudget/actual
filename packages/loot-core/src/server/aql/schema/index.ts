@@ -52,7 +52,6 @@ export const schema = {
     reconciled: f('boolean', { default: false }),
     tombstone: f('boolean'),
     schedule: f('id', { ref: 'schedules' }),
-    account_sync_source: f('string'),
     // subtransactions is a special field added if the table has the
     // `splits: grouped` option
   },
@@ -69,6 +68,7 @@ export const schema = {
     closed: f('boolean'),
     sort_order: f('float'),
     tombstone: f('boolean'),
+    account_sync_source: f('string'),
   },
   categories: {
     id: f('id'),
