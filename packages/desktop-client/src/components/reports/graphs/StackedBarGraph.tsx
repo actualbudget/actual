@@ -18,13 +18,13 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
-import { type DataEntity } from '../entities';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
 
@@ -122,7 +122,7 @@ const customLabel = props => {
 
 type StackedBarGraphProps = {
   style?: CSSProperties;
-  data: DataEntity;
+  data: GroupedEntity;
   compact?: boolean;
   viewLabels: boolean;
 };
