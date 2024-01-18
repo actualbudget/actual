@@ -7,7 +7,6 @@ import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { styles, theme } from '../../style';
-import { type DropPosition } from '../sort';
 
 import { getValidMonthBounds } from './MonthsContext';
 
@@ -79,8 +78,8 @@ export function makeAmountFullStyle(value: number) {
 }
 
 export function findSortDown(
-  arr: CategoryGroupEntity[],
-  pos: DropPosition,
+  arr: { id: string }[],
+  pos: 'top' | 'bottom',
   targetId: string,
 ) {
   if (pos === 'top') {
@@ -103,8 +102,8 @@ export function findSortDown(
 }
 
 export function findSortUp(
-  arr: CategoryGroupEntity[],
-  pos: DropPosition,
+  arr: { id: string }[],
+  pos: 'top' | 'bottom',
   targetId: string,
 ) {
   if (pos === 'bottom') {

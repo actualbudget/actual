@@ -7,7 +7,6 @@ import { SvgReports, SvgWallet } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
 import { type CSSProperties, theme } from '../../style';
 import { View } from '../common/View';
-import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
 
 import { Accounts } from './Accounts';
@@ -40,7 +39,7 @@ type SidebarProps = {
   onFloat: () => void;
   onAddAccount: () => void;
   onToggleClosedAccounts: () => void;
-  onReorder: OnDropCallback;
+  onReorder: (id: string, dropPos: 'top' | 'bottom', targetId: string) => void;
 };
 
 export function Sidebar({
