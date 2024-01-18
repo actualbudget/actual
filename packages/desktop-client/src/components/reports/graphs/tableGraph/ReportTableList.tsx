@@ -1,13 +1,14 @@
 // @ts-strict-ignore
 import React from 'react';
 
+import { type DataEntity } from 'loot-core/src/types/models/reports';
+
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Cell, Row } from '../../../table';
-import { type GroupedEntity } from '../../entities';
 
 type ReportTableListProps = {
-  data: GroupedEntity[];
+  data: DataEntity[];
   mode?: string;
   monthsCount?: number;
   groupBy: string;

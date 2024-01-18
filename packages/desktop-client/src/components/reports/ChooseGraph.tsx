@@ -2,9 +2,13 @@
 import React, { useRef } from 'react';
 
 import { type CSSProperties } from '../../style';
+import {
+  type GroupedEntity,
+  type Month,
+} from 'loot-core/src/types/models/reports';
+
 import { View } from '../common/View';
 
-import { type DataEntity, type Month } from './entities';
 import { AreaGraph } from './graphs/AreaGraph';
 import { BarGraph } from './graphs/BarGraph';
 import { BarLineGraph } from './graphs/BarLineGraph';
@@ -17,7 +21,7 @@ import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
-  data: DataEntity;
+  data: GroupedEntity;
   mode: string;
   graphType: string;
   balanceType: string;

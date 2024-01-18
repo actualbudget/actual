@@ -7,10 +7,11 @@ import React, {
 } from 'react';
 import { type RefProp } from 'react-spring';
 
+import { type DataEntity } from 'loot-core/src/types/models/reports';
+
 import { type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
 import { View } from '../../../common/View';
-import { type GroupedEntity } from '../../entities';
 
 import { ReportTableList } from './ReportTableList';
 import { ReportTableRow } from './ReportTableRow';
@@ -22,7 +23,7 @@ type ReportTableProps = {
   style?: CSSProperties;
   groupBy: string;
   balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
-  data: GroupedEntity[];
+  data: DataEntity[];
   mode: string;
   monthsCount: number;
   compact: boolean;
