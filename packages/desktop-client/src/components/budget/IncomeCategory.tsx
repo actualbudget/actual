@@ -1,15 +1,11 @@
 // @ts-strict-ignore
 import React, { type ComponentProps } from 'react';
 
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
-import {
-  useDraggable,
-  useDroppable,
-  DropHighlight,
-  type OnDragChangeCallback,
-  type OnDropCallback,
-} from '../sort';
 import { Row } from '../table';
 
 import { RenderMonths } from './RenderMonths';
@@ -24,9 +20,7 @@ type IncomeCategoryProps = {
   onEditMonth?: (id: string, monthIndex: number) => void;
   onSave: ComponentProps<typeof SidebarCategory>['onSave'];
   onDelete: ComponentProps<typeof SidebarCategory>['onDelete'];
-  onDragChange: OnDragChangeCallback<CategoryEntity>;
   onBudgetAction: (idx: number, action: string, arg: unknown) => void;
-  onReorder: OnDropCallback;
   onShowActivity: (name: string, id: string, idx: number) => void;
 };
 
@@ -39,30 +33,31 @@ export function IncomeCategory({
   onEditMonth,
   onSave,
   onDelete,
-  onDragChange,
   onBudgetAction,
-  onReorder,
   onShowActivity,
 }: IncomeCategoryProps) {
-  const { dragRef } = useDraggable({
-    type: 'income-category',
-    onDragChange,
-    item: cat,
-    canDrag: editingCell === null,
-  });
+  const {
+    isDragging,
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: cat.id, disabled: !!editingCell });
 
-  const { dropRef, dropPos } = useDroppable({
-    types: 'income-category',
-    id: cat.id,
-    onDrop: onReorder,
-  });
+  const dndStyle = {
+    opacity: isDragging ? 0.5 : undefined,
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   return (
-    <Row innerRef={dropRef} collapsed={true}>
-      <DropHighlight pos={dropPos} offset={{ top: 1 }} />
-
+    <Row innerRef={setNodeRef} collapsed={true} style={dndStyle}>
       <SidebarCategory
-        innerRef={dragRef}
+        {...attributes}
+        {...listeners}
+        dragPreview={isDragging}
+        dragging={isDragging}
         category={cat}
         isLast={isLast}
         editing={

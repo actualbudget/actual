@@ -13,7 +13,7 @@ import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
 
 type SidebarCategoryProps = {
-  innerRef: Ref<HTMLDivElement>;
+  innerRef?: Ref<HTMLDivElement>;
   category: CategoryEntity;
   dragPreview?: boolean;
   dragging?: boolean;
@@ -39,6 +39,7 @@ export function SidebarCategory({
   onSave,
   onDelete,
   onHideNewCategory,
+  ...props
 }: SidebarCategoryProps) {
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -151,6 +152,7 @@ export function SidebarCategory({
           e.stopPropagation();
         }
       }}
+      {...props}
     >
       <InputCell
         value={category.name}

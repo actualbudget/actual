@@ -36,7 +36,6 @@ type AccountProps = {
   failed?: boolean;
   updated?: boolean;
   style?: CSSProperties;
-  outerStyle?: CSSProperties;
 };
 
 export function Account({
@@ -48,7 +47,6 @@ export function Account({
   to,
   query,
   style,
-  outerStyle,
 }: AccountProps) {
   const {
     isDragging,
@@ -69,7 +67,7 @@ export function Account({
   return (
     <View
       innerRef={setNodeRef}
-      style={{ flexShrink: 0, ...outerStyle, ...dndStyle }}
+      style={{ flexShrink: 0, ...dndStyle }}
       {...attributes}
       {...listeners}
     >

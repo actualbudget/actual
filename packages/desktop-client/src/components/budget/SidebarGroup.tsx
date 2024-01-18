@@ -1,6 +1,7 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, useState } from 'react';
-import { type ConnectDragSource } from 'react-dnd';
+import React, { type CSSProperties, useState, type Ref } from 'react';
+
+import { type CategoryGroupEntity } from 'loot-core/src/types/models';
 
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgCheveronDown } from '../../icons/v1';
@@ -14,19 +15,11 @@ import { InputCell } from '../table';
 import { Tooltip } from '../tooltips';
 
 type SidebarGroupProps = {
-  group: {
-    id: string;
-    hidden: number;
-    categories: object[];
-    is_income: number;
-    name: string;
-    sort_order: number;
-    tombstone: number;
-  };
+  group: CategoryGroupEntity;
   editing?: boolean;
   collapsed: boolean;
   dragPreview?: boolean;
-  innerRef?: ConnectDragSource;
+  innerRef?: Ref<HTMLDivElement>;
   style?: CSSProperties;
   onEdit?: (id: string) => void;
   onSave?: (group: object) => Promise<void>;
@@ -49,6 +42,7 @@ export function SidebarGroup({
   onShowNewCategory,
   onHideNewGroup,
   onToggleCollapse,
+  ...props
 }: SidebarGroupProps) {
   const temporary = group.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -176,6 +170,7 @@ export function SidebarGroup({
           e.stopPropagation();
         }
       }}
+      {...props}
     >
       <InputCell
         value={group.name}

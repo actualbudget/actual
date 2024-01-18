@@ -1,8 +1,23 @@
 import React, { memo, useState, useMemo } from 'react';
 
+import {
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
-import { DropHighlightPosContext } from '../sort';
 import { Row } from '../table';
 
 import { ExpenseCategory } from './ExpenseCategory';
@@ -13,6 +28,8 @@ import { IncomeHeader } from './IncomeHeader';
 import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
+
+const getItemDndId = item => item.value?.id || item.type;
 
 export const BudgetCategories = memo(
   ({
@@ -44,24 +61,24 @@ export const BudgetCategories = memo(
 
       let items = Array.prototype.concat.apply(
         [],
-        expenseGroups.map(group => {
-          if (group.hidden && !showHiddenCategories) {
+        expenseGroups.map(expenseGroup => {
+          if (expenseGroup.hidden && !showHiddenCategories) {
             return [];
           }
 
-          const groupCategories = group.categories.filter(
+          const groupCategories = expenseGroup.categories.filter(
             cat => showHiddenCategories || !cat.hidden,
           );
 
-          const items = [{ type: 'expense-group', value: { ...group } }];
+          const items = [{ type: 'expense-group', value: { ...expenseGroup } }];
 
-          if (newCategoryForGroup === group.id) {
-            items.push({ type: 'new-category' });
+          if (newCategoryForGroup === expenseGroup.id) {
+            items.push({ type: 'new-expense-category' });
           }
 
           return [
             ...items,
-            ...(collapsed.includes(group.id) ? [] : groupCategories).map(
+            ...(collapsed.includes(expenseGroup.id) ? [] : groupCategories).map(
               cat => ({
                 type: 'expense-category',
                 value: cat,
@@ -71,16 +88,13 @@ export const BudgetCategories = memo(
         }),
       );
 
-      if (isAddingGroup) {
-        items.push({ type: 'new-group' });
-      }
-
       if (incomeGroup) {
         items = items.concat(
           [
-            { type: 'income-separator' },
             { type: 'income-group', value: incomeGroup },
-            newCategoryForGroup === incomeGroup.id && { type: 'new-category' },
+            newCategoryForGroup === incomeGroup.id && {
+              type: 'new-income-category',
+            },
             ...(collapsed.includes(incomeGroup.id)
               ? []
               : incomeGroup.categories.filter(
@@ -95,55 +109,142 @@ export const BudgetCategories = memo(
       }
 
       return items;
-    }, [
-      categoryGroups,
-      collapsed,
-      newCategoryForGroup,
-      isAddingGroup,
-      showHiddenCategories,
-    ]);
+    }, [categoryGroups, collapsed, newCategoryForGroup, showHiddenCategories]);
 
-    const [dragState, setDragState] = useState(null);
-    const [savedCollapsed, setSavedCollapsed] = useState(null);
+    const expenseGroupItems = useMemo(
+      () =>
+        items.filter(
+          item =>
+            item.type === 'expense-group' ||
+            item.type === 'expense-category' ||
+            item.type === 'new-expense-category',
+        ),
+      [items],
+    );
 
-    // TODO: If we turn this into a reducer, we could probably memoize
-    // each item in the list for better perf
-    function onDragChange(newDragState) {
-      const { state } = newDragState;
+    const incomeGroupItems = useMemo(
+      () =>
+        items.filter(
+          item =>
+            item.type === 'income-group' ||
+            item.type === 'income-category' ||
+            item.type === 'new-income-category',
+        ),
+      [items],
+    );
 
-      if (state === 'start-preview') {
-        setDragState({
-          type: newDragState.type,
-          item: newDragState.item,
-          preview: true,
-        });
-      } else if (state === 'start') {
-        if (dragState) {
-          setDragState({
-            ...dragState,
-            preview: false,
-          });
-          setSavedCollapsed(collapsed);
-        }
-      } else if (state === 'hover') {
-        setDragState({
-          ...dragState,
-          hoveredId: newDragState.id,
-          hoveredPos: newDragState.pos,
-        });
-      } else if (state === 'end') {
-        setDragState(null);
-        setCollapsed(savedCollapsed || []);
-      }
+    function onCollapse(id) {
+      setCollapsed([...collapsed, id]);
+    }
+
+    function onExpand(id) {
+      setCollapsed(collapsed.filter(_id => _id !== id));
     }
 
     function onToggleCollapse(id) {
       if (collapsed.includes(id)) {
-        setCollapsed(collapsed.filter(id_ => id_ !== id));
+        onExpand(id);
       } else {
-        setCollapsed([...collapsed, id]);
+        onCollapse(id);
       }
     }
+
+    const sensors = useSensors(
+      useSensor(TouchSensor, {
+        activationConstraint: {
+          delay: 250,
+          tolerance: 5,
+        },
+      }),
+      useSensor(MouseSensor, {
+        activationConstraint: {
+          distance: 10,
+        },
+      }),
+      useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+      }),
+    );
+
+    const [originalCollapsed, setOriginalCollapsed] = useState(null);
+    const [collapseOnDrag, setCollapseOnDrag] = useState(null);
+
+    const onDragStart = e => {
+      const { active } = e;
+      setOriginalCollapsed(collapsed);
+
+      const activeItem = items.find(item => getItemDndId(item) === active.id);
+      switch (activeItem?.type) {
+        case 'expense-group':
+          const groupIds = expenseGroupItems
+            .filter(item => item.type === 'expense-group')
+            .map(item => item.value?.id);
+
+          setCollapseOnDrag(groupIds);
+          break;
+        default:
+          break;
+      }
+    };
+
+    const onDragMove = e => {
+      const { active, over } = e;
+      // Delay collapsing groups when sorting groups.
+      if (collapseOnDrag) {
+        setCollapsed(collapseOnDrag);
+        setCollapseOnDrag(null);
+      }
+
+      // Expand groups on hover when sorting categories.
+      const activeItem = items.find(item => getItemDndId(item) === active.id);
+      if (
+        activeItem?.type === 'expense-category' &&
+        collapsed.includes(over.id)
+      ) {
+        onToggleCollapse(over.id);
+      }
+    };
+
+    const onDragEnd = e => {
+      const { active, over } = e;
+
+      if (active.id !== over.id) {
+        const activeItem = items.find(item => getItemDndId(item) === active.id);
+
+        const { top: activeTop, bottom: activeBottom } =
+          active.rect.current.translated;
+        const { top: initialTop, bottom: initialBottom } =
+          active.rect.current.initial;
+
+        const activeCenter = (activeTop + activeBottom) / 2;
+        const initialCenter = (initialTop + initialBottom) / 2;
+
+        // top - the active item was dragged up
+        // bottom - the active item was dragged down
+        const dropPos = activeCenter < initialCenter ? 'top' : 'bottom';
+
+        if (activeItem.type === 'expense-group') {
+          onReorderGroup(active.id, dropPos, over.id);
+        } else if (
+          activeItem.type === 'expense-category' ||
+          activeItem.type === 'income-category'
+        ) {
+          onReorderCategory(active.id, dropPos, over.id);
+        }
+      }
+
+      setCollapsed(originalCollapsed);
+    };
+
+    const expenseGroupIds = useMemo(
+      () => expenseGroupItems.map(getItemDndId),
+      [expenseGroupItems],
+    );
+
+    const incomeGroupIds = useMemo(
+      () => incomeGroupItems.map(getItemDndId),
+      [incomeGroupItems],
+    );
 
     return (
       <View
@@ -156,159 +257,184 @@ export const BudgetCategories = memo(
           flex: 1,
         }}
       >
-        {items.map((item, idx) => {
-          let content;
-          switch (item.type) {
-            case 'new-group':
-              content = (
-                <Row
-                  style={{ backgroundColor: theme.tableRowHeaderBackground }}
-                >
-                  <SidebarGroup
-                    group={{ id: 'new', name: '' }}
-                    editing={true}
-                    onSave={onSaveGroup}
-                    onHideNewGroup={onHideNewGroup}
-                    onEdit={onEditName}
-                  />
-                </Row>
-              );
-              break;
-            case 'new-category':
-              content = (
-                <Row>
-                  <SidebarCategory
-                    category={{
-                      name: '',
-                      cat_group: newCategoryForGroup,
-                      is_income:
-                        newCategoryForGroup ===
-                        categoryGroups.find(g => g.is_income).id,
-                      id: 'new',
-                    }}
-                    editing={true}
-                    onSave={onSaveCategory}
-                    onHideNewCategory={onHideNewCategory}
-                    onEditName={onEditName}
-                  />
-                </Row>
-              );
-              break;
-
-            case 'expense-group':
-              content = (
-                <ExpenseGroup
-                  group={item.value}
-                  editingCell={editingCell}
-                  collapsed={collapsed.includes(item.value.id)}
-                  MonthComponent={dataComponents.ExpenseGroupComponent}
-                  dragState={dragState}
-                  onEditName={onEditName}
-                  onSave={onSaveGroup}
-                  onDelete={onDeleteGroup}
-                  onDragChange={onDragChange}
-                  onReorderGroup={onReorderGroup}
-                  onReorderCategory={onReorderCategory}
-                  onToggleCollapse={onToggleCollapse}
-                  onShowNewCategory={onShowNewCategory}
-                />
-              );
-              break;
-            case 'expense-category':
-              content = (
-                <ExpenseCategory
-                  cat={item.value}
-                  editingCell={editingCell}
-                  MonthComponent={dataComponents.ExpenseCategoryComponent}
-                  dragState={dragState}
-                  onEditName={onEditName}
-                  onEditMonth={onEditMonth}
-                  onSave={onSaveCategory}
-                  onDelete={onDeleteCategory}
-                  onDragChange={onDragChange}
-                  onReorder={onReorderCategory}
-                  onBudgetAction={onBudgetAction}
-                  onShowActivity={onShowActivity}
-                />
-              );
-              break;
-            case 'income-separator':
-              content = (
-                <View
-                  style={{
-                    height: styles.incomeHeaderHeight,
-                    backgroundColor: theme.tableBackground,
-                  }}
-                >
-                  <IncomeHeader
-                    MonthComponent={dataComponents.IncomeHeaderComponent}
-                    onShowNewGroup={onShowNewGroup}
-                  />
-                </View>
-              );
-              break;
-            case 'income-group':
-              content = (
-                <IncomeGroup
-                  group={item.value}
-                  editingCell={editingCell}
-                  MonthComponent={dataComponents.IncomeGroupComponent}
-                  collapsed={collapsed.includes(item.value.id)}
-                  onEditName={onEditName}
-                  onSave={onSaveGroup}
-                  onToggleCollapse={onToggleCollapse}
-                  onShowNewCategory={onShowNewCategory}
-                />
-              );
-              break;
-            case 'income-category':
-              content = (
-                <IncomeCategory
-                  cat={item.value}
-                  editingCell={editingCell}
-                  isLast={idx === items.length - 1}
-                  MonthComponent={dataComponents.IncomeCategoryComponent}
-                  onEditName={onEditName}
-                  onEditMonth={onEditMonth}
-                  onSave={onSaveCategory}
-                  onDelete={onDeleteCategory}
-                  onDragChange={onDragChange}
-                  onReorder={onReorderCategory}
-                  onBudgetAction={onBudgetAction}
-                  onShowActivity={onShowActivity}
-                />
-              );
-              break;
-            default:
-              throw new Error('Unknown item type: ' + item.type);
-          }
-
-          const pos =
-            idx === 0 ? 'first' : idx === items.length - 1 ? 'last' : null;
-
-          return (
-            <DropHighlightPosContext.Provider
-              key={
-                item.value
-                  ? item.value.id
-                  : item.type === 'income-separator'
-                    ? 'separator'
-                    : idx
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragStart={onDragStart}
+          onDragMove={onDragMove}
+          onDragEnd={onDragEnd}
+        >
+          <SortableContext
+            items={expenseGroupIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {expenseGroupItems.map((item, idx) => {
+              let content;
+              switch (item.type) {
+                case 'new-expense-category':
+                  content = (
+                    <Row key="new-expense-category">
+                      <SidebarCategory
+                        category={{
+                          name: '',
+                          cat_group: newCategoryForGroup,
+                          is_income:
+                            newCategoryForGroup ===
+                            categoryGroups.find(g => g.is_income).id,
+                          id: 'new',
+                        }}
+                        editing={true}
+                        onSave={onSaveCategory}
+                        onHideNewCategory={onHideNewCategory}
+                        onEditName={onEditName}
+                      />
+                    </Row>
+                  );
+                  break;
+                case 'expense-group':
+                  content = (
+                    <ExpenseGroup
+                      key={item.value.id}
+                      group={item.value}
+                      editingCell={editingCell}
+                      collapsed={collapsed.includes(item.value.id)}
+                      MonthComponent={dataComponents.ExpenseGroupComponent}
+                      onEditName={onEditName}
+                      onSave={onSaveGroup}
+                      onDelete={onDeleteGroup}
+                      onToggleCollapse={onToggleCollapse}
+                      onShowNewCategory={onShowNewCategory}
+                    />
+                  );
+                  break;
+                case 'expense-category':
+                  content = (
+                    <ExpenseCategory
+                      key={item.value.id}
+                      cat={item.value}
+                      editingCell={editingCell}
+                      MonthComponent={dataComponents.ExpenseCategoryComponent}
+                      onEditName={onEditName}
+                      onEditMonth={onEditMonth}
+                      onSave={onSaveCategory}
+                      onDelete={onDeleteCategory}
+                      onBudgetAction={onBudgetAction}
+                      onShowActivity={onShowActivity}
+                    />
+                  );
+                  break;
+                default:
+                  throw new Error('Unknown item type: ' + item.type);
               }
-              value={pos}
-            >
-              <View
-                style={
-                  !dragState && {
-                    ':hover': { backgroundColor: theme.tableBackground },
-                  }
-                }
-              >
-                {content}
-              </View>
-            </DropHighlightPosContext.Provider>
-          );
-        })}
+
+              return content;
+            })}
+          </SortableContext>
+        </DndContext>
+        {isAddingGroup && (
+          <Row
+            key="new-group"
+            style={{
+              backgroundColor: theme.tableRowHeaderBackground,
+            }}
+          >
+            <SidebarGroup
+              group={{ id: 'new', name: '' }}
+              editing={true}
+              onSave={onSaveGroup}
+              onHideNewGroup={onHideNewGroup}
+              onEdit={onEditName}
+            />
+          </Row>
+        )}
+        <View
+          key="income-separator"
+          style={{
+            height: styles.incomeHeaderHeight,
+            backgroundColor: theme.tableBackground,
+          }}
+        >
+          <IncomeHeader
+            MonthComponent={dataComponents.IncomeHeaderComponent}
+            onShowNewGroup={onShowNewGroup}
+          />
+        </View>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragStart={onDragStart}
+          onDragMove={onDragMove}
+          onDragEnd={onDragEnd}
+        >
+          <SortableContext
+            items={incomeGroupIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {incomeGroupItems.map((item, idx) => {
+              let content;
+              switch (item.type) {
+                case 'new-income-category':
+                  content = (
+                    <Row key="new-income-category">
+                      <SidebarCategory
+                        category={{
+                          name: '',
+                          cat_group: newCategoryForGroup,
+                          is_income:
+                            newCategoryForGroup ===
+                            categoryGroups.find(g => g.is_income).id,
+                          id: 'new',
+                        }}
+                        editing={true}
+                        onSave={onSaveCategory}
+                        onHideNewCategory={onHideNewCategory}
+                        onEditName={onEditName}
+                      />
+                    </Row>
+                  );
+                  break;
+                case 'income-group':
+                  content = (
+                    <IncomeGroup
+                      key={item.value.id}
+                      group={item.value}
+                      editingCell={editingCell}
+                      MonthComponent={dataComponents.IncomeGroupComponent}
+                      collapsed={collapsed.includes(item.value.id)}
+                      onEditName={onEditName}
+                      onSave={onSaveGroup}
+                      onToggleCollapse={onToggleCollapse}
+                      onShowNewCategory={onShowNewCategory}
+                    />
+                  );
+                  break;
+                case 'income-category':
+                  content = (
+                    <IncomeCategory
+                      key={item.value.id}
+                      cat={item.value}
+                      editingCell={editingCell}
+                      isLast={idx === items.length - 1}
+                      MonthComponent={dataComponents.IncomeCategoryComponent}
+                      onEditName={onEditName}
+                      onEditMonth={onEditMonth}
+                      onSave={onSaveCategory}
+                      onDelete={onDeleteCategory}
+                      onBudgetAction={onBudgetAction}
+                      onShowActivity={onShowActivity}
+                    />
+                  );
+                  break;
+                default:
+                  throw new Error('Unknown item type: ' + item.type);
+              }
+
+              return content;
+            })}
+          </SortableContext>
+        </DndContext>
       </View>
     );
   },

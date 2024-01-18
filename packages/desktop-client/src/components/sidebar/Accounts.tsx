@@ -109,10 +109,17 @@ export function Accounts({
     const { active, over } = e;
 
     if (active.id !== over.id) {
-      const dropPos =
-        active.data.current.sortable.index < over.data.current.sortable.index
-          ? 'bottom'
-          : 'top';
+      const { top: activeTop, bottom: activeBottom } =
+        active.rect.current.translated;
+      const { top: initialTop, bottom: initialBottom } =
+        active.rect.current.initial;
+
+      const activeCenter = (activeTop + activeBottom) / 2;
+      const initialCenter = (initialTop + initialBottom) / 2;
+
+      // top - the active item was dragged up
+      // bottom - the active item was dragged down
+      const dropPos = activeCenter < initialCenter ? 'top' : 'bottom';
 
       onReorder(active.id, dropPos, over.id);
     }
