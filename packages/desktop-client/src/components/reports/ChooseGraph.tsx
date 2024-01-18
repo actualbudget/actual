@@ -1,12 +1,12 @@
 // @ts-strict-ignore
 import React, { useRef } from 'react';
 
-import { type CSSProperties } from '../../style';
 import {
   type GroupedEntity,
   type Month,
 } from 'loot-core/src/types/models/reports';
 
+import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 
 import { AreaGraph } from './graphs/AreaGraph';
