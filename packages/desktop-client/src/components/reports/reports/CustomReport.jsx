@@ -27,8 +27,8 @@ import { ReportOptions } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
-import { createSpreadsheet as defaultSpreadsheet } from '../spreadsheets/default-spreadsheet';
-import { createGroupedSpreadsheet as groupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
+import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
+import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
@@ -114,7 +114,7 @@ export function CustomReport() {
   const accounts = useCachedAccounts();
 
   const getGroupData = useMemo(() => {
-    return groupedSpreadsheet({
+    return createGroupedSpreadsheet({
       startDate,
       endDate,
       categories,
@@ -140,7 +140,7 @@ export function CustomReport() {
 
   const getGraphData = useMemo(() => {
     setDataCheck(false);
-    return defaultSpreadsheet({
+    return createCustomSpreadsheet({
       startDate,
       endDate,
       categories,
@@ -197,7 +197,7 @@ export function CustomReport() {
       savePrefs({ reportsViewSummary: !viewSummary });
     }
     if (viewType === 'viewLabels') {
-      savePrefs({ reportsViewLabels: !viewLabels });
+      savePrefs({ reportsViewLabel: !viewLabels });
     }
   };
 
@@ -340,6 +340,7 @@ export function CustomReport() {
                     scrollWidth={scrollWidth}
                     setScrollWidth={setScrollWidth}
                     months={months}
+                    viewLabels={viewLabels}
                   />
                 ) : (
                   <LoadingIndicator message="Loading report..." />

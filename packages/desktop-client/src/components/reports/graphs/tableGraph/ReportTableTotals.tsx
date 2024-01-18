@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type UIEventHandler, useLayoutEffect, useState } from 'react';
 import { type RefProp } from 'react-spring';
 
@@ -109,6 +110,7 @@ export function ReportTableTotals({
                     amountToCurrency(data.totalAssets)
                   }
                   width="flex"
+                  privacyFilter
                 />
                 <Cell
                   style={{
@@ -121,6 +123,7 @@ export function ReportTableTotals({
                     amountToCurrency(data.totalDebts)
                   }
                   width="flex"
+                  privacyFilter
                 />
               </>
             )}

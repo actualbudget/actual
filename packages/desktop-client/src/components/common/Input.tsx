@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useRef,
   type KeyboardEvent,

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export function unresolveName(name) {
   const idx = name.indexOf('!');
   if (idx !== -1) {

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { expectSnapshotWithDiffer } from '../../mocks/util';
 import * as db from '../db';
 

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useSelector } from 'react-redux';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';

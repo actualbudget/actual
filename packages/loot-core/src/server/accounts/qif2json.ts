@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 type Division = {
   category?: string;
   subcategory?: string;

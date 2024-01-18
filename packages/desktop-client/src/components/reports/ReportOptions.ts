@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   type AccountEntity,
   type CategoryEntity,
@@ -6,9 +7,9 @@ import {
 } from 'loot-core/src/types/models';
 
 const balanceTypeOptions = [
-  { description: 'Payment', format: 'totalDebts' },
-  { description: 'Deposit', format: 'totalAssets' },
-  { description: 'Net', format: 'totalTotals' },
+  { description: 'Payment', format: 'totalDebts' as const },
+  { description: 'Deposit', format: 'totalAssets' as const },
+  { description: 'Net', format: 'totalTotals' as const },
 ];
 
 const groupByOptions = [

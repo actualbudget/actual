@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as db from '../db';
 
 async function getPayee(acct) {

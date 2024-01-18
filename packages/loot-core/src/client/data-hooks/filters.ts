@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useMemo } from 'react';
 
 import { q } from '../../shared/query';

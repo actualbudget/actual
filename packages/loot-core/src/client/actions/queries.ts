@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import throttle from 'throttleit';
 
 import { send } from '../../platform/client/fetch';

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useRef } from 'react';
 
 import { View } from '../common/View';
@@ -11,7 +12,6 @@ import { LineGraph } from './graphs/LineGraph';
 import { StackedBarGraph } from './graphs/StackedBarGraph';
 import { ReportTable } from './graphs/tableGraph/ReportTable';
 import { ReportTableHeader } from './graphs/tableGraph/ReportTableHeader';
-import { ReportTableList } from './graphs/tableGraph/ReportTableList';
 import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
@@ -25,6 +25,7 @@ type ChooseGraphProps = {
   scrollWidth: number;
   setScrollWidth: (value: number) => void;
   months: Month[];
+  viewLabels: boolean;
 };
 
 export function ChooseGraph({
@@ -37,8 +38,15 @@ export function ChooseGraph({
   scrollWidth,
   setScrollWidth,
   months,
+  viewLabels,
 }: ChooseGraphProps) {
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
+  const groupByData =
+    groupBy === 'Category'
+      ? 'groupedData'
+      : ['Month', 'Year'].includes(groupBy)
+      ? 'monthData'
+      : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -69,6 +77,7 @@ export function ChooseGraph({
         style={{ flexGrow: 1 }}
         data={data}
         balanceTypeOp={balanceTypeOp}
+        viewLabels={viewLabels}
       />
     );
   }
@@ -79,6 +88,7 @@ export function ChooseGraph({
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
+        viewLabels={viewLabels}
       />
     );
   }
@@ -92,6 +102,7 @@ export function ChooseGraph({
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
+        viewLabels={viewLabels}
       />
     );
   }
@@ -99,7 +110,13 @@ export function ChooseGraph({
     return <LineGraph style={{ flexGrow: 1 }} graphData={data} />;
   }
   if (graphType === 'StackedBarGraph') {
-    return <StackedBarGraph style={{ flexGrow: 1 }} data={data} />;
+    return (
+      <StackedBarGraph
+        style={{ flexGrow: 1 }}
+        data={data}
+        viewLabels={viewLabels}
+      />
+    );
   }
   if (graphType === 'TableGraph') {
     return (
@@ -116,16 +133,12 @@ export function ChooseGraph({
           saveScrollWidth={saveScrollWidth}
           listScrollRef={listScrollRef}
           handleScroll={handleScroll}
-        >
-          <ReportTableList
-            data={data}
-            empty={showEmpty}
-            monthsCount={months.length}
-            balanceTypeOp={balanceTypeOp}
-            mode={mode}
-            groupBy={groupBy}
-          />
-        </ReportTable>
+          balanceTypeOp={balanceTypeOp}
+          groupBy={groupBy}
+          data={data[groupByData]}
+          mode={mode}
+          monthsCount={months.length}
+        />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
           handleScroll={handleScroll}

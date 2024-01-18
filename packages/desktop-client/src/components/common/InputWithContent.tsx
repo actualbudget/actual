@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useState, type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties, theme } from '../../style';

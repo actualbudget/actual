@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { css } from 'glamor';
@@ -8,11 +9,15 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  LabelList,
   ResponsiveContainer,
 } from 'recharts';
 
 import { usePrivacyMode } from 'loot-core/src/client/privacy';
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
@@ -22,6 +27,8 @@ import { Container } from '../Container';
 import { type DataEntity } from '../entities';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
+
+import { renderCustomLabel } from './renderCustomLabel';
 
 type PayloadItem = {
   name: string;
@@ -91,16 +98,40 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   }
 };
 
+const customLabel = props => {
+  const calcX = props.x + props.width / 2;
+  const calcY = props.y + props.height / 2;
+  const textAnchor = 'middle';
+  const display = props.value && `${amountToCurrencyNoDecimal(props.value)}`;
+  const textSize = '12px';
+  const showLabel = props.height;
+  const showLabelThreshold = 20;
+  const fill = theme.reportsInnerLabel;
+
+  return renderCustomLabel(
+    calcX,
+    calcY,
+    textAnchor,
+    display,
+    textSize,
+    showLabel,
+    showLabelThreshold,
+    fill,
+  );
+};
+
 type StackedBarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
   compact?: boolean;
+  viewLabels: boolean;
 };
 
 export function StackedBarGraph({
   style,
   data,
   compact,
+  viewLabels,
 }: StackedBarGraphProps) {
   const privacyMode = usePrivacyMode();
 
@@ -126,6 +157,7 @@ export function StackedBarGraph({
                   content={<CustomTooltip />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
+                  cursor={{ fill: 'transparent' }}
                 />
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
@@ -149,7 +181,11 @@ export function StackedBarGraph({
                       dataKey={entry.name}
                       stackId="a"
                       fill={entry.color}
-                    />
+                    >
+                      {viewLabels && (
+                        <LabelList dataKey={entry.name} content={customLabel} />
+                      )}
+                    </Bar>
                   ))}
               </BarChart>
             </div>

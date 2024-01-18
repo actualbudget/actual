@@ -64,7 +64,11 @@ jobs:
 
       - name: Strip content hashes from stats files
         run: |
+          sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./head/web-stats.json
+          sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./head/web-stats.json
           sed -i -E 's/\.[0-9a-f]{8,}\././g' ./head/*.json
+          sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./base/web-stats.json
+          sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./base/web-stats.json
           sed -i -E 's/\.[0-9a-f]{8,}\././g' ./base/*.json
       - uses: twk3/rollup-size-compare-action@v1.0.0
         with:

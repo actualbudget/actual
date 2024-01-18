@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as monthUtils from '../../../shared/months';
 import { extractScheduleConds } from '../../../shared/schedules';
 import * as db from '../../db';

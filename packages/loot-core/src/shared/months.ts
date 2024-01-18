@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
@@ -182,7 +183,7 @@ export function _range(
   end: DateLike,
   inclusive = false,
 ): string[] {
-  const months = [];
+  const months: string[] = [];
   let month = monthFromDate(start);
   while (d.isBefore(_parse(month), _parse(end))) {
     months.push(month);
@@ -209,15 +210,15 @@ export function _dayRange(
   end: DateLike,
   inclusive = false,
 ): string[] {
-  const days = [];
+  const days: string[] = [];
   let day = start;
   while (d.isBefore(_parse(day), _parse(end))) {
-    days.push(day);
+    days.push(dayFromDate(day));
     day = addDays(day, 1);
   }
 
   if (inclusive) {
-    days.push(day);
+    days.push(dayFromDate(day));
   }
 
   return days;

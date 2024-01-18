@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
@@ -233,7 +234,7 @@ export function getNumberFormat({
   format,
   hideFraction,
 }: {
-  format: NumberFormats;
+  format?: NumberFormats;
   hideFraction: boolean;
 } = numberFormatConfig) {
   let locale, regex, separator;
@@ -316,6 +317,10 @@ export function integerToCurrency(
 
 export function amountToCurrency(n) {
   return getNumberFormat().formatter.format(n);
+}
+
+export function amountToCurrencyNoDecimal(n) {
+  return getNumberFormat({ hideFraction: true }).formatter.format(n);
 }
 
 export function currencyToAmount(str: string) {
