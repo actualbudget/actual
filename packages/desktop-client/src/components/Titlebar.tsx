@@ -177,18 +177,18 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     syncState === 'error'
       ? theme.errorText
       : syncState === 'disabled' ||
-        syncState === 'offline' ||
-        syncState === 'local'
-      ? theme.mobileHeaderTextSubdued
-      : theme.mobileHeaderText;
+          syncState === 'offline' ||
+          syncState === 'local'
+        ? theme.mobileHeaderTextSubdued
+        : theme.mobileHeaderText;
   const desktopColor =
     syncState === 'error'
       ? theme.errorTextDark
       : syncState === 'disabled' ||
-        syncState === 'offline' ||
-        syncState === 'local'
-      ? theme.tableTextLight
-      : 'inherit';
+          syncState === 'offline' ||
+          syncState === 'local'
+        ? theme.tableTextLight
+        : 'inherit';
 
   const activeStyle = isMobile
     ? {
@@ -263,8 +263,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
           {syncState === 'disabled'
             ? 'Disabled'
             : syncState === 'offline'
-            ? 'Offline'
-            : 'Sync'}
+              ? 'Offline'
+              : 'Sync'}
         </Text>
       </Button>
     </>

@@ -377,9 +377,12 @@ function getFile(entries: AdmZip.IZipEntry[], path: string) {
 }
 
 function join(...paths: string[]): string {
-  return paths.slice(1).reduce((full, path) => {
-    return full + '/' + path.replace(/^\//, '');
-  }, paths[0].replace(/\/$/, ''));
+  return paths.slice(1).reduce(
+    (full, path) => {
+      return full + '/' + path.replace(/^\//, '');
+    },
+    paths[0].replace(/\/$/, ''),
+  );
 }
 
 export function parseFile(buffer: Buffer): YNAB4.YFull {
