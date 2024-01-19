@@ -24,7 +24,7 @@ export class HTTPError extends Error {
 }
 
 export class SyncError extends Error {
-  meta?: 
+  meta?:
     | {
         isMissingKey: boolean;
       }
