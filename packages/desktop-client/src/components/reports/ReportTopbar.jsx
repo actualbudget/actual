@@ -17,7 +17,7 @@ import { GraphButton } from './GraphButton';
 import { SaveReportMenuButton } from './SaveReport';
 
 export function ReportTopbar({
-  items,
+  customReportItems,
   setGraphType,
   setTypeDisabled,
   setBalanceType,

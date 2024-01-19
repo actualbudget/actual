@@ -20,7 +20,7 @@ import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
 
 export function ReportSidebar({
-  items,
+  customReportItems,
   categories,
   dateRangeLine,
   allMonths,
