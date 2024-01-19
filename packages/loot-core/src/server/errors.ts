@@ -1,11 +1,10 @@
-// @ts-strict-ignore
 // TODO: normalize error types
 export class PostError extends Error {
-  meta;
-  reason;
-  type;
+  meta: any;
+  reason: string;
+  type: 'PostError';
 
-  constructor(reason, meta?) {
+  constructor(reason: string, meta?: any) {
     super('PostError: ' + reason);
     this.type = 'PostError';
     this.reason = reason;
@@ -14,10 +13,10 @@ export class PostError extends Error {
 }
 
 export class HTTPError extends Error {
-  statusCode;
-  responseBody;
+  statusCode: number;
+  responseBody: string;
 
-  constructor(code, body) {
+  constructor(code: number, body: string) {
     super(`HTTPError: unsuccessful status code (${code}): ${body}`);
     this.statusCode = code;
     this.responseBody = body;
@@ -25,10 +24,10 @@ export class HTTPError extends Error {
 }
 
 export class SyncError extends Error {
-  meta;
-  reason;
+  meta: any;
+  reason: string;
 
-  constructor(reason, meta?) {
+  constructor(reason: string, meta?: any) {
     super('SyncError: ' + reason);
     this.reason = reason;
     this.meta = meta;
@@ -46,14 +45,14 @@ export class RuleError extends Error {
   }
 }
 
-export function APIError(msg, meta?) {
+export function APIError(msg: string, meta?: any) {
   return { type: 'APIError', message: msg, meta };
 }
 
-export function FileDownloadError(reason, meta?) {
+export function FileDownloadError(reason: string, meta?: any) {
   return { type: 'FileDownloadError', reason, meta };
 }
 
-export function FileUploadError(reason, meta?) {
+export function FileUploadError(reason: string, meta?: any) {
   return { type: 'FileUploadError', reason, meta };
 }
