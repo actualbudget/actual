@@ -6,6 +6,7 @@ import {
   type Month,
 } from 'loot-core/src/types/models/reports';
 
+import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 
 import { AreaGraph } from './graphs/AreaGraph';
@@ -25,11 +26,12 @@ type ChooseGraphProps = {
   graphType: string;
   balanceType: string;
   groupBy: string;
-  showEmpty: boolean;
-  scrollWidth: number;
-  setScrollWidth: (value: number) => void;
-  months: Month[];
-  viewLabels: boolean;
+  scrollWidth?: number;
+  setScrollWidth?: (value: number) => void;
+  months?: Month[];
+  viewLabels?: boolean;
+  compact?: boolean;
+  style?: CSSProperties;
 };
 
 export function ChooseGraph({
@@ -38,12 +40,14 @@ export function ChooseGraph({
   graphType,
   balanceType,
   groupBy,
-  showEmpty,
   scrollWidth,
   setScrollWidth,
   months,
   viewLabels,
+  compact,
+  style,
 }: ChooseGraphProps) {
+  const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
   const groupByData =
     groupBy === 'Category'
@@ -78,7 +82,8 @@ export function ChooseGraph({
   if (graphType === 'AreaGraph') {
     return (
       <AreaGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
@@ -88,7 +93,8 @@ export function ChooseGraph({
   if (graphType === 'BarGraph') {
     return (
       <BarGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
@@ -97,12 +103,15 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'BarLineGraph') {
-    return <BarLineGraph style={{ flexGrow: 1 }} graphData={data} />;
+    return (
+      <BarLineGraph style={graphStyle} compact={compact} graphData={data} />
+    );
   }
   if (graphType === 'DonutGraph') {
     return (
       <DonutGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
@@ -111,12 +120,13 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={{ flexGrow: 1 }} graphData={data} />;
+    return <LineGraph style={graphStyle} compact={compact} graphData={data} />;
   }
   if (graphType === 'StackedBarGraph') {
     return (
       <StackedBarGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         viewLabels={viewLabels}
       />
@@ -132,6 +142,7 @@ export function ChooseGraph({
           scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
+          compact={compact}
         />
         <ReportTable
           saveScrollWidth={saveScrollWidth}
@@ -142,6 +153,7 @@ export function ChooseGraph({
           data={data[groupByData]}
           mode={mode}
           monthsCount={months.length}
+          compact={compact}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
@@ -151,6 +163,7 @@ export function ChooseGraph({
           mode={mode}
           balanceTypeOp={balanceTypeOp}
           monthsCount={months.length}
+          compact={compact}
         />
       </View>
     );

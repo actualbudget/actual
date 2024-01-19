@@ -103,9 +103,13 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="x" />
-                <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                {!compact && (
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="x" />
+                    <YAxis dataKey="y" tickFormatter={tickFormatter} />
+                  </>
+                )}
                 <Line type="monotone" dataKey="y" stroke="#8884d8" />
               </LineChart>
             </div>
