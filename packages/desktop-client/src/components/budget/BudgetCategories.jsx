@@ -9,7 +9,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -256,81 +256,83 @@ export const BudgetCategories = memo(
           flex: 1,
         }}
       >
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis]}
-          onDragStart={onDragStart}
-          onDragMove={onDragMove}
-          onDragEnd={onDragEnd}
-        >
-          <SortableContext
-            items={expenseGroupIds}
-            strategy={verticalListSortingStrategy}
+        <View>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            onDragStart={onDragStart}
+            onDragMove={onDragMove}
+            onDragEnd={onDragEnd}
           >
-            {expenseGroupItems.map((item, idx) => {
-              let content;
-              switch (item.type) {
-                case 'new-expense-category':
-                  content = (
-                    <Row key="new-expense-category">
-                      <SidebarCategory
-                        category={{
-                          name: '',
-                          cat_group: newCategoryForGroup,
-                          is_income:
-                            newCategoryForGroup ===
-                            categoryGroups.find(g => g.is_income).id,
-                          id: 'new',
-                        }}
-                        editing={true}
-                        onSave={onSaveCategory}
-                        onHideNewCategory={onHideNewCategory}
+            <SortableContext
+              items={expenseGroupIds}
+              strategy={verticalListSortingStrategy}
+            >
+              {expenseGroupItems.map((item, idx) => {
+                let content;
+                switch (item.type) {
+                  case 'new-expense-category':
+                    content = (
+                      <Row key="new-expense-category">
+                        <SidebarCategory
+                          category={{
+                            name: '',
+                            cat_group: newCategoryForGroup,
+                            is_income:
+                              newCategoryForGroup ===
+                              categoryGroups.find(g => g.is_income).id,
+                            id: 'new',
+                          }}
+                          editing={true}
+                          onSave={onSaveCategory}
+                          onHideNewCategory={onHideNewCategory}
+                          onEditName={onEditName}
+                        />
+                      </Row>
+                    );
+                    break;
+                  case 'expense-group':
+                    content = (
+                      <ExpenseGroup
+                        key={item.value.id}
+                        group={item.value}
+                        editingCell={editingCell}
+                        collapsed={collapsed.includes(item.value.id)}
+                        MonthComponent={dataComponents.ExpenseGroupComponent}
                         onEditName={onEditName}
+                        onSave={onSaveGroup}
+                        onDelete={onDeleteGroup}
+                        onToggleCollapse={onToggleCollapse}
+                        onShowNewCategory={onShowNewCategory}
                       />
-                    </Row>
-                  );
-                  break;
-                case 'expense-group':
-                  content = (
-                    <ExpenseGroup
-                      key={item.value.id}
-                      group={item.value}
-                      editingCell={editingCell}
-                      collapsed={collapsed.includes(item.value.id)}
-                      MonthComponent={dataComponents.ExpenseGroupComponent}
-                      onEditName={onEditName}
-                      onSave={onSaveGroup}
-                      onDelete={onDeleteGroup}
-                      onToggleCollapse={onToggleCollapse}
-                      onShowNewCategory={onShowNewCategory}
-                    />
-                  );
-                  break;
-                case 'expense-category':
-                  content = (
-                    <ExpenseCategory
-                      key={item.value.id}
-                      cat={item.value}
-                      editingCell={editingCell}
-                      MonthComponent={dataComponents.ExpenseCategoryComponent}
-                      onEditName={onEditName}
-                      onEditMonth={onEditMonth}
-                      onSave={onSaveCategory}
-                      onDelete={onDeleteCategory}
-                      onBudgetAction={onBudgetAction}
-                      onShowActivity={onShowActivity}
-                    />
-                  );
-                  break;
-                default:
-                  throw new Error('Unknown item type: ' + item.type);
-              }
+                    );
+                    break;
+                  case 'expense-category':
+                    content = (
+                      <ExpenseCategory
+                        key={item.value.id}
+                        cat={item.value}
+                        editingCell={editingCell}
+                        MonthComponent={dataComponents.ExpenseCategoryComponent}
+                        onEditName={onEditName}
+                        onEditMonth={onEditMonth}
+                        onSave={onSaveCategory}
+                        onDelete={onDeleteCategory}
+                        onBudgetAction={onBudgetAction}
+                        onShowActivity={onShowActivity}
+                      />
+                    );
+                    break;
+                  default:
+                    throw new Error('Unknown item type: ' + item.type);
+                }
 
-              return content;
-            })}
-          </SortableContext>
-        </DndContext>
+                return content;
+              })}
+            </SortableContext>
+          </DndContext>
+        </View>
         {isAddingGroup && (
           <Row
             key="new-group"
@@ -359,81 +361,83 @@ export const BudgetCategories = memo(
             onShowNewGroup={onShowNewGroup}
           />
         </View>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis]}
-          onDragStart={onDragStart}
-          onDragMove={onDragMove}
-          onDragEnd={onDragEnd}
-        >
-          <SortableContext
-            items={incomeGroupIds}
-            strategy={verticalListSortingStrategy}
+        <View>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            onDragStart={onDragStart}
+            onDragMove={onDragMove}
+            onDragEnd={onDragEnd}
           >
-            {incomeGroupItems.map((item, idx) => {
-              let content;
-              switch (item.type) {
-                case 'new-income-category':
-                  content = (
-                    <Row key="new-income-category">
-                      <SidebarCategory
-                        category={{
-                          name: '',
-                          cat_group: newCategoryForGroup,
-                          is_income:
-                            newCategoryForGroup ===
-                            categoryGroups.find(g => g.is_income).id,
-                          id: 'new',
-                        }}
-                        editing={true}
-                        onSave={onSaveCategory}
-                        onHideNewCategory={onHideNewCategory}
+            <SortableContext
+              items={incomeGroupIds}
+              strategy={verticalListSortingStrategy}
+            >
+              {incomeGroupItems.map((item, idx) => {
+                let content;
+                switch (item.type) {
+                  case 'new-income-category':
+                    content = (
+                      <Row key="new-income-category">
+                        <SidebarCategory
+                          category={{
+                            name: '',
+                            cat_group: newCategoryForGroup,
+                            is_income:
+                              newCategoryForGroup ===
+                              categoryGroups.find(g => g.is_income).id,
+                            id: 'new',
+                          }}
+                          editing={true}
+                          onSave={onSaveCategory}
+                          onHideNewCategory={onHideNewCategory}
+                          onEditName={onEditName}
+                        />
+                      </Row>
+                    );
+                    break;
+                  case 'income-group':
+                    content = (
+                      <IncomeGroup
+                        key={item.value.id}
+                        group={item.value}
+                        editingCell={editingCell}
+                        MonthComponent={dataComponents.IncomeGroupComponent}
+                        collapsed={collapsed.includes(item.value.id)}
                         onEditName={onEditName}
+                        onSave={onSaveGroup}
+                        onToggleCollapse={onToggleCollapse}
+                        onShowNewCategory={onShowNewCategory}
                       />
-                    </Row>
-                  );
-                  break;
-                case 'income-group':
-                  content = (
-                    <IncomeGroup
-                      key={item.value.id}
-                      group={item.value}
-                      editingCell={editingCell}
-                      MonthComponent={dataComponents.IncomeGroupComponent}
-                      collapsed={collapsed.includes(item.value.id)}
-                      onEditName={onEditName}
-                      onSave={onSaveGroup}
-                      onToggleCollapse={onToggleCollapse}
-                      onShowNewCategory={onShowNewCategory}
-                    />
-                  );
-                  break;
-                case 'income-category':
-                  content = (
-                    <IncomeCategory
-                      key={item.value.id}
-                      cat={item.value}
-                      editingCell={editingCell}
-                      isLast={idx === items.length - 1}
-                      MonthComponent={dataComponents.IncomeCategoryComponent}
-                      onEditName={onEditName}
-                      onEditMonth={onEditMonth}
-                      onSave={onSaveCategory}
-                      onDelete={onDeleteCategory}
-                      onBudgetAction={onBudgetAction}
-                      onShowActivity={onShowActivity}
-                    />
-                  );
-                  break;
-                default:
-                  throw new Error('Unknown item type: ' + item.type);
-              }
+                    );
+                    break;
+                  case 'income-category':
+                    content = (
+                      <IncomeCategory
+                        key={item.value.id}
+                        cat={item.value}
+                        editingCell={editingCell}
+                        isLast={idx === items.length - 1}
+                        MonthComponent={dataComponents.IncomeCategoryComponent}
+                        onEditName={onEditName}
+                        onEditMonth={onEditMonth}
+                        onSave={onSaveCategory}
+                        onDelete={onDeleteCategory}
+                        onBudgetAction={onBudgetAction}
+                        onShowActivity={onShowActivity}
+                      />
+                    );
+                    break;
+                  default:
+                    throw new Error('Unknown item type: ' + item.type);
+                }
 
-              return content;
-            })}
-          </SortableContext>
-        </DndContext>
+                return content;
+              })}
+            </SortableContext>
+          </DndContext>
+        </View>
       </View>
     );
   },

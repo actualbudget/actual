@@ -10,7 +10,10 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  restrictToParentElement,
+  restrictToVerticalAxis,
+} from '@dnd-kit/modifiers';
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -136,31 +139,34 @@ export function Accounts({
           style={{ fontWeight, marginTop: 13 }}
         />
       )}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        onDragEnd={onDragEnd}
-      >
-        <SortableContext
-          items={budgetedAccounts}
-          strategy={verticalListSortingStrategy}
+      <View>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+          onDragEnd={onDragEnd}
         >
-          {budgetedAccounts.map((account, i) => (
-            <Account
-              key={account.id}
-              name={account.name}
-              account={account}
-              connected={!!account.bank}
-              failed={failedAccounts && failedAccounts.has(account.id)}
-              updated={updatedAccounts && updatedAccounts.includes(account.id)}
-              to={getAccountPath(account)}
-              query={getBalanceQuery(account)}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
-
+          <SortableContext
+            items={budgetedAccounts}
+            strategy={verticalListSortingStrategy}
+          >
+            {budgetedAccounts.map((account, i) => (
+              <Account
+                key={account.id}
+                name={account.name}
+                account={account}
+                connected={!!account.bank}
+                failed={failedAccounts && failedAccounts.has(account.id)}
+                updated={
+                  updatedAccounts && updatedAccounts.includes(account.id)
+                }
+                to={getAccountPath(account)}
+                query={getBalanceQuery(account)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </View>
       {offbudgetAccounts.length > 0 && (
         <Account
           name="Off budget"
@@ -169,30 +175,34 @@ export function Accounts({
           style={{ fontWeight, marginTop: 13 }}
         />
       )}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        onDragEnd={onDragEnd}
-      >
-        <SortableContext
-          items={offbudgetAccounts}
-          strategy={verticalListSortingStrategy}
+      <View>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+          onDragEnd={onDragEnd}
         >
-          {offbudgetAccounts.map((account, i) => (
-            <Account
-              key={account.id}
-              name={account.name}
-              account={account}
-              connected={!!account.bank}
-              failed={failedAccounts && failedAccounts.has(account.id)}
-              updated={updatedAccounts && updatedAccounts.includes(account.id)}
-              to={getAccountPath(account)}
-              query={getBalanceQuery(account)}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={offbudgetAccounts}
+            strategy={verticalListSortingStrategy}
+          >
+            {offbudgetAccounts.map((account, i) => (
+              <Account
+                key={account.id}
+                name={account.name}
+                account={account}
+                connected={!!account.bank}
+                failed={failedAccounts && failedAccounts.has(account.id)}
+                updated={
+                  updatedAccounts && updatedAccounts.includes(account.id)
+                }
+                to={getAccountPath(account)}
+                query={getBalanceQuery(account)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </View>
 
       {closedAccounts.length > 0 && (
         <SecondaryItem
@@ -204,27 +214,29 @@ export function Accounts({
       )}
 
       {showClosedAccounts && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          modifiers={[restrictToVerticalAxis]}
-          onDragEnd={onDragEnd}
-        >
-          <SortableContext
-            items={offbudgetAccounts}
-            strategy={verticalListSortingStrategy}
+        <View>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            onDragEnd={onDragEnd}
           >
-            {closedAccounts.map((account, i) => (
-              <Account
-                key={account.id}
-                name={account.name}
-                account={account}
-                to={getAccountPath(account)}
-                query={getBalanceQuery(account)}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={offbudgetAccounts}
+              strategy={verticalListSortingStrategy}
+            >
+              {closedAccounts.map((account, i) => (
+                <Account
+                  key={account.id}
+                  name={account.name}
+                  account={account}
+                  to={getAccountPath(account)}
+                  query={getBalanceQuery(account)}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        </View>
       )}
 
       <SecondaryItem
