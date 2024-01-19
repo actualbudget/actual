@@ -2251,14 +2251,14 @@ export async function initApp(isDev, socketName) {
   }
 }
 
-export type initConfig = {
+export type InitConfig = {
   dataDir?: string;
   serverURL?: string;
   password?: string;
 };
 
 // eslint-disable-next-line import/no-unused-modules
-export async function init(config: initConfig) {
+export async function init(config: InitConfig) {
   // Get from build
 
   let dataDir, serverURL;

@@ -5,7 +5,7 @@ import type {
 } from 'node-fetch'; // with { 'resolution-mode': 'import' };
 
 // loot-core types
-import type { initConfig } from 'loot-core/server/main';
+import type { InitConfig } from 'loot-core/server/main';
 
 // @ts-ignore: bundle not available until we build it
 // eslint-disable-next-line import/extensions
@@ -22,7 +22,7 @@ export * as methods from './methods';
 export * from './methods';
 export * as utils from './utils';
 
-export async function init(config: initConfig = {}) {
+export async function init(config: InitConfignitConfig = {}) {
   if (actualApp) {
     return;
   }
