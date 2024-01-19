@@ -31,6 +31,7 @@ export const ReportTableRow = memo(
     const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
     return (
       <Row
+        key={item.id}
         collapsed={true}
         style={{
           color: theme.tableText,

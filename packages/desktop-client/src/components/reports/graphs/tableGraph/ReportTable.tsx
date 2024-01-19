@@ -50,10 +50,9 @@ export function ReportTable({
   });
 
   const renderItem = useCallback(
-    ({ item, groupByItem, mode, style, key, monthsCount }) => {
+    ({ item, groupByItem, mode, style, monthsCount }) => {
       return (
         <ReportTableRow
-          key={key}
           item={item}
           balanceTypeOp={balanceTypeOp}
           groupByItem={groupByItem}
