@@ -22,6 +22,7 @@ import { type AccountEntity } from 'loot-core/src/types/models';
 import { SvgAdd } from '../../icons/v1';
 import { View } from '../common/View';
 import { type Binding } from '../spreadsheet';
+import { getDropPosition } from '../util/sort';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
@@ -109,17 +110,10 @@ export function Accounts({
     const { active, over } = e;
 
     if (active.id !== over.id) {
-      const { top: activeTop, bottom: activeBottom } =
-        active.rect.current.translated;
-      const { top: initialTop, bottom: initialBottom } =
-        active.rect.current.initial;
-
-      const activeCenter = (activeTop + activeBottom) / 2;
-      const initialCenter = (initialTop + initialBottom) / 2;
-
-      // top - the active item was dragged up
-      // bottom - the active item was dragged down
-      const dropPos = activeCenter < initialCenter ? 'top' : 'bottom';
+      const dropPos = getDropPosition(
+        active.rect.current.translated,
+        active.rect.current.initial,
+      );
 
       onReorder(active.id, dropPos, over.id);
     }

@@ -77,54 +77,6 @@ export function makeAmountFullStyle(value: number) {
   };
 }
 
-export function findSortDown(
-  arr: { id: string }[],
-  pos: 'top' | 'bottom',
-  targetId: string,
-) {
-  if (pos === 'top') {
-    return { targetId };
-  } else {
-    const idx = arr.findIndex(item => item.id === targetId);
-
-    if (idx === -1) {
-      throw new Error('findSort: item not found: ' + targetId);
-    }
-
-    const newIdx = idx + 1;
-    if (newIdx <= arr.length - 1) {
-      return { targetId: arr[newIdx].id };
-    } else {
-      // Move to the end
-      return { targetId: null };
-    }
-  }
-}
-
-export function findSortUp(
-  arr: { id: string }[],
-  pos: 'top' | 'bottom',
-  targetId: string,
-) {
-  if (pos === 'bottom') {
-    return { targetId };
-  } else {
-    const idx = arr.findIndex(item => item.id === targetId);
-
-    if (idx === -1) {
-      throw new Error('findSort: item not found: ' + targetId);
-    }
-
-    const newIdx = idx - 1;
-    if (newIdx >= 0) {
-      return { targetId: arr[newIdx].id };
-    } else {
-      // Move to the beginning
-      return { targetId: null };
-    }
-  }
-}
-
 export function getScrollbarWidth() {
   return Math.max(styles.scrollbarWidth - 2, 0);
 }

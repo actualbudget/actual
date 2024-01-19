@@ -5,12 +5,13 @@ import * as monthUtils from 'loot-core/src/shared/months';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
 import { IntersectionBoundary } from '../tooltips';
+import { findSortDown, findSortUp } from '../util/sort';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
-import { findSortDown, findSortUp, getScrollbarWidth } from './util';
+import { getScrollbarWidth } from './util';
 
 export class BudgetTable extends Component {
   constructor(props) {

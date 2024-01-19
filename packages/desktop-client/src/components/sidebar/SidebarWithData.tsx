@@ -18,6 +18,7 @@ import { Input } from '../common/Input';
 import { Menu } from '../common/Menu';
 import { Text } from '../common/Text';
 import { Tooltip } from '../tooltips';
+import { findSortDown } from '../util/sort';
 
 import { Sidebar } from './Sidebar';
 
@@ -129,12 +130,10 @@ export function SidebarWithData() {
   useEffect(() => void getAccounts(), [getAccounts]);
 
   async function onReorder(id, dropPos, targetId) {
-    if (dropPos === 'bottom') {
-      const idx = accounts.findIndex(a => a.id === targetId) + 1;
-      targetId = idx < accounts.length ? accounts[idx].id : null;
-    }
-
-    await send('account-move', { id, targetId });
+    await send('account-move', {
+      id,
+      ...findSortDown(accounts, dropPos, targetId),
+    });
     await getAccounts();
   }
 

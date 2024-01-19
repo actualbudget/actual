@@ -19,6 +19,7 @@ import {
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
 import { Row } from '../table';
+import { getDropPosition } from '../util/sort';
 
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
@@ -216,17 +217,10 @@ export const BudgetCategories = memo(
       if (over && over.id !== active.id) {
         const activeItem = items.find(item => getItemDndId(item) === active.id);
 
-        const { top: activeTop, bottom: activeBottom } =
-          active.rect.current.translated;
-        const { top: initialTop, bottom: initialBottom } =
-          active.rect.current.initial;
-
-        const activeCenter = (activeTop + activeBottom) / 2;
-        const initialCenter = (initialTop + initialBottom) / 2;
-
-        // top - the active item was dragged up
-        // bottom - the active item was dragged down
-        const dropPos = activeCenter < initialCenter ? 'top' : 'bottom';
+        const dropPos = getDropPosition(
+          active.rect.current.translated,
+          active.rect.current.initial,
+        );
 
         if (activeItem.type === 'expense-group') {
           onReorderGroup(active.id, dropPos, over.id);
