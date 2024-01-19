@@ -55,12 +55,12 @@ function runPagedQuery(query, data) {
             return op === '$gte'
               ? row.date >= filter.date[op]
               : op === '$lte'
-              ? row.date <= filter.date[op]
-              : op === '$lt'
-              ? row.date < filter.date[op]
-              : op === '$gt'
-              ? row.date > filter.date[op]
-              : false;
+                ? row.date <= filter.date[op]
+                : op === '$lt'
+                  ? row.date < filter.date[op]
+                  : op === '$gt'
+                    ? row.date > filter.date[op]
+                    : false;
           })
           .map(row => select(row, query.selectExpressions)),
         query.limit,

@@ -267,10 +267,10 @@ export class Timestamp {
       lNew === lOld && lNew === lMsg
         ? Math.max(cOld, cMsg) + 1
         : lNew === lOld
-        ? cOld + 1
-        : lNew === lMsg
-        ? cMsg + 1
-        : 0;
+          ? cOld + 1
+          : lNew === lMsg
+            ? cMsg + 1
+            : 0;
 
     // check the result for drift and counter overflow
     if (lNew - phys > config.maxDrift) {

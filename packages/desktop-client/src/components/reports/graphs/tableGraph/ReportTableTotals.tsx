@@ -21,6 +21,7 @@ type ReportTableTotalsProps = {
   monthsCount: number;
   totalScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
+  compact: boolean;
 };
 
 export function ReportTableTotals({
@@ -31,6 +32,7 @@ export function ReportTableTotals({
   monthsCount,
   totalScrollRef,
   handleScroll,
+  compact,
 }: ReportTableTotalsProps) {
   const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
 
@@ -89,8 +91,9 @@ export function ReportTableTotals({
                   key={amountToCurrency(item[balanceTypeOp])}
                   value={amountToCurrency(item[balanceTypeOp])}
                   title={
-                    Math.abs(item[balanceTypeOp]) > 100000 &&
-                    amountToCurrency(item[balanceTypeOp])
+                    Math.abs(item[balanceTypeOp]) > 100000
+                      ? amountToCurrency(item[balanceTypeOp])
+                      : undefined
                   }
                   width="flex"
                   privacyFilter
@@ -106,8 +109,9 @@ export function ReportTableTotals({
                   }}
                   value={amountToCurrency(data.totalAssets)}
                   title={
-                    Math.abs(data.totalAssets) > 100000 &&
-                    amountToCurrency(data.totalAssets)
+                    Math.abs(data.totalAssets) > 100000
+                      ? amountToCurrency(data.totalAssets)
+                      : undefined
                   }
                   width="flex"
                   privacyFilter
@@ -119,8 +123,9 @@ export function ReportTableTotals({
                   }}
                   value={amountToCurrency(data.totalDebts)}
                   title={
-                    Math.abs(data.totalDebts) > 100000 &&
-                    amountToCurrency(data.totalDebts)
+                    Math.abs(data.totalDebts) > 100000
+                      ? amountToCurrency(data.totalDebts)
+                      : undefined
                   }
                   width="flex"
                   privacyFilter
@@ -134,8 +139,9 @@ export function ReportTableTotals({
           }}
           value={amountToCurrency(data[balanceTypeOp])}
           title={
-            Math.abs(data[balanceTypeOp]) > 100000 &&
-            amountToCurrency(data[balanceTypeOp])
+            Math.abs(data[balanceTypeOp]) > 100000
+              ? amountToCurrency(data[balanceTypeOp])
+              : undefined
           }
           width="flex"
           privacyFilter
@@ -147,8 +153,9 @@ export function ReportTableTotals({
           }}
           value={integerToCurrency(Math.round(average))}
           title={
-            Math.abs(Math.round(average / 100)) > 100000 &&
-            integerToCurrency(Math.round(average))
+            Math.abs(Math.round(average / 100)) > 100000
+              ? integerToCurrency(Math.round(average))
+              : undefined
           }
           width="flex"
           privacyFilter
