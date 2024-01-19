@@ -2,18 +2,20 @@
 import React, { type UIEventHandler } from 'react';
 import { type RefProp } from 'react-spring';
 
+import { type DataEntity } from 'loot-core/src/types/models/reports';
+
 import { styles, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
-import { type GroupedEntity } from '../../entities';
 
 type ReportTableHeaderProps = {
   scrollWidth?: number;
   groupBy: string;
-  interval?: GroupedEntity[];
+  interval?: DataEntity[];
   balanceType: string;
   headerScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
+  compact: boolean;
 };
 
 export function ReportTableHeader({
@@ -23,6 +25,7 @@ export function ReportTableHeader({
   balanceType,
   headerScrollRef,
   handleScroll,
+  compact,
 }: ReportTableHeaderProps) {
   return (
     <Row

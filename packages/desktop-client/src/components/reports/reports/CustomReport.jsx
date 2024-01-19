@@ -346,6 +346,7 @@ export function CustomReport() {
                     setScrollWidth={setScrollWidth}
                     months={months}
                     viewLabels={viewLabels}
+                    compact={false}
                   />
                 ) : (
                   <LoadingIndicator message="Loading report..." />
