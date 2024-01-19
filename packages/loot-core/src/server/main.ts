@@ -711,13 +711,9 @@ handlers['simplefin-accounts-link'] = async function ({
 }) {
   let id;
 
-  let institution = externalAccount.institution;
-
-  if (institution == null) {
-    institution = {
-      name: 'Unknown',
-    };
-  }
+  let institution = {
+    name: externalAccount.institution ?? 'Unknown',
+  };
 
   const bank = await link.findOrCreateBank(
     institution,
