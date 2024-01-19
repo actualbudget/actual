@@ -711,7 +711,7 @@ handlers['simplefin-accounts-link'] = async function ({
 }) {
   let id;
 
-  let institution = {
+  const institution = {
     name: externalAccount.institution ?? 'Unknown',
   };
 
