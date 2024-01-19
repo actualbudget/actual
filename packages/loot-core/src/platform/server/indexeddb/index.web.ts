@@ -34,7 +34,7 @@ function _openDatabase() {
 
     openRequest.onblocked = e => console.log('blocked', e);
 
-    openRequest.onerror = event => {
+    openRequest.onerror = () => {
       console.log('openRequest error');
       reject(new Error('indexeddb-failure: Could not open IndexedDB'));
     };
@@ -102,7 +102,7 @@ export const getStore: T.GetStore = function (db, name) {
 export const get: T.Get = async function (store, key, mapper = x => x) {
   return new Promise((resolve, reject) => {
     const req = store.get(key);
-    req.onsuccess = e => {
+    req.onsuccess = () => {
       resolve(mapper(req.result));
     };
     req.onerror = e => reject(e);
@@ -112,7 +112,7 @@ export const get: T.Get = async function (store, key, mapper = x => x) {
 export const set: T.Set = async function (store, item) {
   return new Promise((resolve, reject) => {
     const req = store.put(item);
-    req.onsuccess = e => resolve(undefined);
+    req.onsuccess = () => resolve(undefined);
     req.onerror = e => reject(e);
   });
 };
@@ -120,7 +120,7 @@ export const set: T.Set = async function (store, item) {
 export const del: T.Del = async function (store, key) {
   return new Promise((resolve, reject) => {
     const req = store.delete(key);
-    req.onsuccess = e => resolve(undefined);
+    req.onsuccess = () => resolve(undefined);
     req.onerror = e => reject(e);
   });
 };

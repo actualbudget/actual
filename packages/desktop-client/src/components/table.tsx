@@ -740,12 +740,10 @@ export function SheetCell({
 
 type TableHeaderProps = ComponentProps<typeof Row> & {
   headers?: Array<ComponentProps<typeof Cell>>;
-  version?: string;
 };
 export function TableHeader({
   headers,
   children,
-  version,
   ...rowProps
 }: TableHeaderProps) {
   return (
@@ -853,7 +851,7 @@ type TableWithNavigatorProps = TableProps & {
 export const TableWithNavigator = forwardRef<
   TableHandleRef<TableItem>,
   TableWithNavigatorProps
->(({ fields, ...props }, ref) => {
+>(({ fields, ...props }) => {
   const navigator = useTableNavigator(props.items, fields);
   return <Table {...props} navigator={navigator} />;
 });
@@ -883,7 +881,6 @@ type TableProps<T extends TableItem = TableItem> = {
   navigator?: ReturnType<typeof useTableNavigator<T>>;
   listRef?: unknown;
   onScroll?: () => void;
-  version?: string;
   allowPopupsEscape?: boolean;
   isSelected?: (id: TableItem['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
@@ -906,7 +903,6 @@ export const Table = forwardRef(
       style,
       navigator,
       onScroll,
-      version = 'v1',
       allowPopupsEscape,
       isSelected,
       saveScrollWidth,
@@ -1045,7 +1041,7 @@ export const Table = forwardRef(
       );
     }
 
-    function onItemsRendered({ overscanStartIndex, overscanStopIndex }) {
+    function onItemsRendered({ overscanStopIndex }) {
       if (loadMore && overscanStopIndex > items.length - 100) {
         loadMore();
       }

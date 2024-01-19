@@ -82,7 +82,7 @@ handlers['/plaid/handoff_public_token'] = () => {
   // Do nothing
 };
 
-handlers['/plaid/accounts'] = ({ client_id, group_id, item_id }) => {
+handlers['/plaid/accounts'] = () => {
   // Ignore the parameters and just return the accounts.
   return { accounts: currentMockData.accounts };
 };

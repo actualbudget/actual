@@ -200,7 +200,7 @@ export function setLastTransaction(
 }
 
 export function parseTransactions(filepath, options) {
-  return async (dispatch: Dispatch) => {
+  return async () => {
     return await send('transactions-parse-file', {
       filepath,
       options,
