@@ -178,7 +178,7 @@ export function CustomReport() {
 
   const data = { ...graphData, groupedData };
 
-  const items = {
+  const customReportItems = {
     id: null,
     mode,
     groupBy,
@@ -232,7 +232,7 @@ export function CustomReport() {
         }}
       >
         <ReportSidebar
-          items={items}
+          customReportItems={customReportItems}
           categories={categories}
           dateRangeLine={dateRangeLine}
           allMonths={allMonths}
@@ -257,7 +257,7 @@ export function CustomReport() {
           }}
         >
           <ReportTopbar
-            items={items}
+            customReportItems={customReportItems}
             setGraphType={setGraphType}
             setTypeDisabled={setTypeDisabled}
             setBalanceType={setBalanceType}

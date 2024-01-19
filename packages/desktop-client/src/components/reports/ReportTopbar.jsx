@@ -38,7 +38,7 @@ export function ReportTopbar({
       }}
     >
       <GraphButton
-        selected={items.graphType === 'TableGraph'}
+        selected={customReportItems.graphType === 'TableGraph'}
         title="Data Table"
         onSelect={() => {
           setGraphType('TableGraph');
@@ -50,15 +50,15 @@ export function ReportTopbar({
         <SvgQueue width={15} height={15} />
       </GraphButton>
       <GraphButton
-        title={items.mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'}
-        selected={items.graphType === 'BarGraph' || items.graphType === 'StackedBarGraph'}
+        title={customReportItems.mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'}
+        selected={customReportItems.graphType === 'BarGraph' || customReportItems.graphType === 'StackedBarGraph'}
         onSelect={() => {
-          if (items.mode === 'total') {
+          if (customReportItems.mode === 'total') {
             setGraphType('BarGraph');
-            if (['Net'].includes(items.balanceType)) {
+            if (['Net'].includes(customReportItems.balanceType)) {
               setBalanceType('Payment');
             }
-            setTypeDisabled(['Month', 'Year'].includes(items.groupBy) ? [] : ['Net']);
+            setTypeDisabled(['Month', 'Year'].includes(customReportItems.groupBy) ? [] : ['Net']);
           } else {
             setGraphType('StackedBarGraph');
             setTypeDisabled(['Net']);
@@ -71,7 +71,7 @@ export function ReportTopbar({
       </GraphButton>
       <GraphButton
         title="Area Graph"
-        selected={items.graphType === 'AreaGraph'}
+        selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
           setGraphType('AreaGraph');
           setGroupBy('Month');
@@ -79,20 +79,20 @@ export function ReportTopbar({
           setTypeDisabled([]);
         }}
         style={{ marginRight: 15 }}
-        disabled={items.mode === 'total' ? false : true}
+        disabled={customReportItems.mode === 'total' ? false : true}
       >
         <SvgChart width={15} height={15} />
       </GraphButton>
       <GraphButton
         title="Donut Graph"
-        selected={items.graphType === 'DonutGraph'}
+        selected={customReportItems.graphType === 'DonutGraph'}
         onSelect={() => {
           setGraphType('DonutGraph');
           setTypeDisabled(['Net']);
           setBalanceType('Payment');
         }}
         style={{ marginRight: 15 }}
-        disabled={items.mode === 'total' ? false : true}
+        disabled={customReportItems.mode === 'total' ? false : true}
       >
         <SvgChartPie width={15} height={15} />
       </GraphButton>
@@ -113,7 +113,7 @@ export function ReportTopbar({
         style={{ marginRight: 15 }}
         title="Show Legend"
         disabled={
-          items.graphType === 'TableGraph' || items.graphType === 'AreaGraph' ? true : false
+          customReportItems.graphType === 'TableGraph' || customReportItems.graphType === 'AreaGraph' ? true : false
         }
       >
         <SvgListBullet width={15} height={15} />
