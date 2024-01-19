@@ -46,18 +46,25 @@ const reportModel = {
 
 async function reportNameExists(
   name: string,
-  reportId: string,
+  reportId: string | undefined,
   newItem: boolean,
 ) {
+  if (!name) {
+    throw new Error('Report name is required');
+  }
+
+  if (!reportId) {
+    throw new Error('Report recall error');
+  }
+
   const idForName: { id: string } = await db.first(
     'SELECT id from reports WHERE tombstone = 0 AND name = ?',
     [name],
   );
 
-  if (!newItem) {
-    return idForName.id !== reportId;
+  if (!newItem && idForName.id !== reportId) {
+    throw new Error('There is already a report named ' + name);
   }
-  return true;
 }
 
 async function createReport(report: CustomReportEntity) {
@@ -67,13 +74,7 @@ async function createReport(report: CustomReportEntity) {
     id: reportId,
   };
 
-  if (!item.name) {
-    throw new Error('Report name is required');
-  }
-  
-  if (await reportNameExists(item.name, item.id, true)) {
-    throw new Error('There is already a report named ' + item.name);
-  }
+  reportNameExists(item.name, item.id, true);
 
   // Create the report here based on the info
   await db.insertWithSchema('reports', reportModel.fromJS(item));
@@ -82,13 +83,7 @@ async function createReport(report: CustomReportEntity) {
 }
 
 async function updateReport(item: CustomReportEntity) {
-  if (!item.name) {
-    throw new Error('Report name is required');
-  }
-
-  if (await reportNameExists(item.name, item.id, false)) {
-    throw new Error('There is already a report named ' + item.name);
-  }
+  reportNameExists(item.name, item.id, false);
 
   await db.insertWithSchema('reports', reportModel.fromJS(item));
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
@@ -31,7 +32,6 @@ import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
-import { useLocation } from 'react-router-dom';
 
 export function CustomReport() {
   const categories = useCategories();
@@ -69,8 +69,12 @@ export function CustomReport() {
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
-  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(loadReport.showOffBudgetHidden);
-  const [showUncategorized, setShowUncategorized] = useState(loadReport.showUncategorized);
+  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(
+    loadReport.showOffBudgetHidden,
+  );
+  const [showUncategorized, setShowUncategorized] = useState(
+    loadReport.showUncategorized,
+  );
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
   const [dateRange, setDateRange] = useState('Last 6 months');
