@@ -103,7 +103,7 @@ export function LineGraph({ style, graphData, compact }: LineGraphProps) {
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                {!compact && ( //flag
+                {!compact && (
                   <>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="x" />

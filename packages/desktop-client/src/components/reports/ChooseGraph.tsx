@@ -1,10 +1,14 @@
 // @ts-strict-ignore
 import React, { useRef } from 'react';
 
+import {
+  type GroupedEntity,
+  type Month,
+} from 'loot-core/src/types/models/reports';
+
 import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 
-import { type DataEntity, type Month } from './entities';
 import { AreaGraph } from './graphs/AreaGraph';
 import { BarGraph } from './graphs/BarGraph';
 import { BarLineGraph } from './graphs/BarLineGraph';
@@ -19,12 +23,11 @@ import { ReportOptions } from './ReportOptions';
 type ChooseGraphProps = {
   startDate: string;
   endDate: string;
-  data: DataEntity;
+  data: GroupedEntity;
   mode: string;
   graphType: string;
   balanceType: string;
   groupBy: string;
-  showEmpty: boolean;
   scrollWidth?: number;
   setScrollWidth?: (value: number) => void;
   months?: Month[];
@@ -143,6 +146,7 @@ export function ChooseGraph({
           scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
+          compact={compact}
         />
         <ReportTable
           saveScrollWidth={saveScrollWidth}
@@ -153,6 +157,7 @@ export function ChooseGraph({
           data={data[groupByData]}
           mode={mode}
           monthsCount={months.length}
+          compact={compact}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
@@ -162,6 +167,7 @@ export function ChooseGraph({
           mode={mode}
           balanceTypeOp={balanceTypeOp}
           monthsCount={months.length}
+          compact={compact}
         />
       </View>
     );
