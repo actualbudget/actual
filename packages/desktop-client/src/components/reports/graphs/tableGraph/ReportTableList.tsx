@@ -32,9 +32,10 @@ export function ReportTableList({
     style?: CSSProperties;
   };
   function RenderRow({ index, parent_index, style }: RenderRowProps) {
-    const item = parent_index === undefined
-      ? data[index]
-      : data[parent_index].categories[index];
+    const item =
+      parent_index === undefined
+        ? data[index]
+        : data[parent_index].categories[index];
 
     return renderItem({
       item,
@@ -68,6 +69,7 @@ export function ReportTableList({
                       {item.categories.map((category, i) => {
                         return (
                           <RenderRow
+                            key={category.id}
                             index={i}
                             parent_index={index}
                           />
