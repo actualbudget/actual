@@ -50,15 +50,24 @@ export function ReportTopbar({
         <SvgQueue width={15} height={15} />
       </GraphButton>
       <GraphButton
-        title={customReportItems.mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'}
-        selected={customReportItems.graphType === 'BarGraph' || customReportItems.graphType === 'StackedBarGraph'}
+        title={
+          customReportItems.mode === 'total' ? 'Bar Graph' : 'Stacked Bar Graph'
+        }
+        selected={
+          customReportItems.graphType === 'BarGraph' ||
+          customReportItems.graphType === 'StackedBarGraph'
+        }
         onSelect={() => {
           if (customReportItems.mode === 'total') {
             setGraphType('BarGraph');
             if (['Net'].includes(customReportItems.balanceType)) {
               setBalanceType('Payment');
             }
-            setTypeDisabled(['Month', 'Year'].includes(customReportItems.groupBy) ? [] : ['Net']);
+            setTypeDisabled(
+              ['Month', 'Year'].includes(customReportItems.groupBy)
+                ? []
+                : ['Net'],
+            );
           } else {
             setGraphType('StackedBarGraph');
             setTypeDisabled(['Net']);
@@ -113,7 +122,10 @@ export function ReportTopbar({
         style={{ marginRight: 15 }}
         title="Show Legend"
         disabled={
-          customReportItems.graphType === 'TableGraph' || customReportItems.graphType === 'AreaGraph' ? true : false
+          customReportItems.graphType === 'TableGraph' ||
+          customReportItems.graphType === 'AreaGraph'
+            ? true
+            : false
         }
       >
         <SvgListBullet width={15} height={15} />

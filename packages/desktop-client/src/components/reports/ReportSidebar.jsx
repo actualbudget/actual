@@ -106,10 +106,15 @@ export function ReportSidebar({
     setGroupBy(cond);
     if (customReportItems.mode === 'total') {
       if (customReportItems.graphType !== 'TableGraph') {
-        setTypeDisabled(!['Month', 'Year'].includes(customReportItems.groupBy) ? [] : ['Net']);
+        setTypeDisabled(
+          !['Month', 'Year'].includes(customReportItems.groupBy) ? [] : ['Net'],
+        );
       }
     }
-    if (['Net'].includes(customReportItems.balanceType) && customReportItems.graphType !== 'TableGraph') {
+    if (
+      ['Net'].includes(customReportItems.balanceType) &&
+      customReportItems.graphType !== 'TableGraph'
+    ) {
       setBalanceType('Payment');
     }
   };
@@ -180,8 +185,8 @@ export function ReportSidebar({
               customReportItems.mode === 'time'
                 ? ['Month', 'Year']
                 : customReportItems.graphType === 'AreaGraph'
-                ? ['Category', 'Group', 'Payee', 'Account', 'Year']
-                : ['Year']
+                  ? ['Category', 'Group', 'Payee', 'Account', 'Year']
+                  : ['Year']
             }
           />
         </View>
@@ -265,7 +270,9 @@ export function ReportSidebar({
             id="show-hidden-columns"
             checked={customReportItems.showOffBudgetHidden}
             value={customReportItems.showOffBudgetHidden}
-            onChange={() => setShowOffBudgetHidden(!customReportItems.showOffBudgetHidden)}
+            onChange={() =>
+              setShowOffBudgetHidden(!customReportItems.showOffBudgetHidden)
+            }
           />
           <label
             htmlFor="show-hidden-columns"
@@ -288,7 +295,9 @@ export function ReportSidebar({
             id="show-uncategorized"
             checked={customReportItems.showUncategorized}
             value={customReportItems.showUncategorized}
-            onChange={() => setShowUncategorized(!customReportItems.showUncategorized)}
+            onChange={() =>
+              setShowUncategorized(!customReportItems.showUncategorized)
+            }
           />
           <label
             htmlFor="show-uncategorized"
@@ -331,7 +340,10 @@ export function ReportSidebar({
             selected={customReportItems.isDateStatic}
             onSelect={() => {
               setIsDateStatic(true);
-              onChangeDates(customReportItems.startDate, customReportItems.endDate);
+              onChangeDates(
+                customReportItems.startDate,
+                customReportItems.endDate,
+              );
             }}
           >
             Static
@@ -374,10 +386,19 @@ export function ReportSidebar({
               </Text>
               <Select
                 onChange={newValue =>
-                  onChangeDates(...validateStart(allMonths, newValue, customReportItems.endDate))
+                  onChangeDates(
+                    ...validateStart(
+                      allMonths,
+                      newValue,
+                      customReportItems.endDate,
+                    ),
+                  )
                 }
                 value={customReportItems.startDate}
-                defaultLabel={monthUtils.format(customReportItems.startDate, 'MMMM, yyyy')}
+                defaultLabel={monthUtils.format(
+                  customReportItems.startDate,
+                  'MMMM, yyyy',
+                )}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
@@ -393,7 +414,13 @@ export function ReportSidebar({
               </Text>
               <Select
                 onChange={newValue =>
-                  onChangeDates(...validateEnd(allMonths, customReportItems.startDate, newValue))
+                  onChangeDates(
+                    ...validateEnd(
+                      allMonths,
+                      customReportItems.startDate,
+                      newValue,
+                    ),
+                  )
                 }
                 value={customReportItems.endDate}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
