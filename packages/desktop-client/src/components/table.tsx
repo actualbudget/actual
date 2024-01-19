@@ -44,8 +44,6 @@ import { useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
 import { Tooltip, IntersectionBoundary } from './tooltips';
 
-export const ROW_HEIGHT = 32;
-
 function fireBlur(onBlur, e) {
   if (document.hasFocus()) {
     // We only fire the blur event if the app is still focused
