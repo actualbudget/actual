@@ -552,25 +552,25 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
           backgroundColor: bare
             ? 'transparent'
             : disabled // always use disabled before primary since we can have a disabled primary button
-            ? theme.buttonNormalDisabledBackground
-            : primary
-            ? theme.buttonPrimaryBackground
-            : theme.buttonNormalBackground,
+              ? theme.buttonNormalDisabledBackground
+              : primary
+                ? theme.buttonPrimaryBackground
+                : theme.buttonNormalBackground,
           border: bare
             ? 'none'
             : '1px solid ' +
               (disabled
                 ? theme.buttonNormalDisabledBorder
                 : primary
-                ? theme.buttonPrimaryBorder
-                : theme.buttonNormalBorder),
+                  ? theme.buttonPrimaryBorder
+                  : theme.buttonNormalBorder),
           color: bare
             ? 'inherit'
             : disabled
-            ? theme.buttonNormalDisabledText
-            : primary
-            ? theme.buttonPrimaryText
-            : theme.buttonNormalText,
+              ? theme.buttonNormalDisabledText
+              : primary
+                ? theme.buttonPrimaryText
+                : theme.buttonNormalText,
           ':focus': bare
             ? null
             : {
@@ -717,8 +717,8 @@ export function SheetCell({
         privacyFilter != null
           ? privacyFilter
           : type === 'financial'
-          ? true
-          : undefined
+            ? true
+            : undefined
       }
       data-cellname={sheetValue}
     >
@@ -1327,8 +1327,8 @@ export function useTableNavigator<T extends TableItem>(
                   ? 'up'
                   : 'down'
                 : e.shiftKey
-                ? 'left'
-                : 'right',
+                  ? 'left'
+                  : 'right',
             );
             break;
           default:
