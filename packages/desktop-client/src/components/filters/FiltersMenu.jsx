@@ -196,12 +196,12 @@ function ConfigureField({
                         ['amount-outflow', 'Amount (outflow)'],
                       ]
                     : field === 'date'
-                    ? [
-                        ['date', 'Date'],
-                        ['month', 'Month'],
-                        ['year', 'Year'],
-                      ]
-                    : null
+                      ? [
+                          ['date', 'Date'],
+                          ['month', 'Month'],
+                          ['year', 'Year'],
+                        ]
+                      : null
                 }
                 value={subfield}
                 onChange={sub => {

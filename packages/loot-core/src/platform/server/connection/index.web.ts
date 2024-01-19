@@ -9,8 +9,8 @@ function getGlobalObject() {
     typeof window !== 'undefined'
       ? window
       : typeof self !== 'undefined'
-      ? self
-      : null;
+        ? self
+        : null;
   if (!obj) {
     throw new Error('Cannot get global object');
   }

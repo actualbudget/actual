@@ -191,8 +191,8 @@ export function ReportSidebar({
               mode === 'time'
                 ? ['Month', 'Year']
                 : graphType === 'AreaGraph'
-                ? ['Category', 'Group', 'Payee', 'Account', 'Year']
-                : ['Year']
+                  ? ['Category', 'Group', 'Payee', 'Account', 'Year']
+                  : ['Year']
             }
           />
         </View>
