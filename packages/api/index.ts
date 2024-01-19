@@ -22,7 +22,7 @@ export * as methods from './methods';
 export * from './methods';
 export * as utils from './utils';
 
-export async function init(config: InitConfignitConfig = {}) {
+export async function init(config: InitConfig = {}) {
   if (actualApp) {
     return;
   }
