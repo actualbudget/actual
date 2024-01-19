@@ -117,8 +117,8 @@ function Saved({ projected, onClick }) {
           color: projected
             ? theme.warningText
             : isNegative
-            ? theme.errorTextDark
-            : theme.formInputText,
+              ? theme.errorTextDark
+              : theme.formInputText,
         }}
       />
     </Button>

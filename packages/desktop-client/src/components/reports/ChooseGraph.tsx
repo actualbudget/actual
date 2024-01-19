@@ -53,8 +53,8 @@ export function ChooseGraph({
     groupBy === 'Category'
       ? 'groupedData'
       : ['Month', 'Year'].includes(groupBy)
-      ? 'monthData'
-      : 'data';
+        ? 'monthData'
+        : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);

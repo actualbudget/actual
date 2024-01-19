@@ -288,10 +288,10 @@ export function GoCardlessExternalMsg({
                 {isConfigurationLoading
                   ? 'Checking GoCardless configuration..'
                   : waiting === 'browser'
-                  ? 'Waiting on GoCardless...'
-                  : waiting === 'accounts'
-                  ? 'Loading accounts...'
-                  : null}
+                    ? 'Waiting on GoCardless...'
+                    : waiting === 'accounts'
+                      ? 'Loading accounts...'
+                      : null}
               </View>
 
               {waiting === 'browser' && (
