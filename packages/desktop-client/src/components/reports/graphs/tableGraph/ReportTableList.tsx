@@ -27,22 +27,20 @@ export function ReportTableList({
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
 
   type RenderRowProps = {
-    key: string;
     index: number;
     parent_index?: number;
     style?: CSSProperties;
   };
-  function RenderRow({ index, parent_index, style, key }: RenderRowProps) {
-    const item = parent_index
-      ? data[parent_index].categories[index]
-      : data[index];
+  function RenderRow({ index, parent_index, style }: RenderRowProps) {
+    const item = parent_index === undefined
+      ? data[index]
+      : data[parent_index].categories[index];
 
     return renderItem({
       item,
       groupByItem,
       mode,
       style,
-      key,
       monthsCount,
     });
   }
@@ -55,7 +53,6 @@ export function ReportTableList({
             {data ? (
               <>
                 <RenderRow
-                  key={item.id}
                   index={index}
                   style={
                     item.categories && {
@@ -71,7 +68,6 @@ export function ReportTableList({
                       {item.categories.map((category, i) => {
                         return (
                           <RenderRow
-                            key={category.id}
                             index={i}
                             parent_index={index}
                           />
