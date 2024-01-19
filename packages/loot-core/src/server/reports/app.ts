@@ -54,9 +54,6 @@ async function reportNameExists(
     [name],
   );
 
-  if (idForName === null) {
-    return false;
-  }
   if (!newItem) {
     return idForName.id !== reportId;
   }
@@ -84,16 +81,13 @@ async function createReport(report: CustomReportEntity) {
   return reportId;
 }
 
-async function updateReport(report: CustomReportEntity) {
-  const item: CustomReportData = {
-    ...report,
-  };
-  if (item.name !== undefined) {
-    if (await reportNameExists(item.name, item.id, false)) {
-      throw new Error('There is already a report named ' + item.name);
-    }
-  } else {
+async function updateReport(item: CustomReportEntity) {
+  if (!item.name) {
     throw new Error('Report name is required');
+  }
+
+  if (await reportNameExists(item.name, item.id, false)) {
+    throw new Error('There is already a report named ' + item.name);
   }
 
   await db.insertWithSchema('reports', reportModel.fromJS(item));
@@ -106,6 +100,6 @@ async function deleteReport(id: string) {
 // Expose functions to the client
 export const app = createApp<ReportsHandlers>();
 
-app.method('report/create', mutator(createReport));
-app.method('report/update', mutator(updateReport));
+app.method('report/create', mutator(undoable(createReport)));
+app.method('report/update', mutator(undoable(updateReport)));
 app.method('report/delete', mutator(undoable(deleteReport)));
