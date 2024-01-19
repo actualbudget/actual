@@ -240,9 +240,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-empty-columns"
-            checked={showEmpty}
-            value={showEmpty}
-            onChange={() => setShowEmpty(!showEmpty)}
+            checked={items.showEmpty}
+            value={items.showEmpty}
+            onChange={() => setShowEmpty(!items.showEmpty)}
           />
           <label
             htmlFor="show-empty-columns"
@@ -263,9 +263,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-hidden-columns"
-            checked={showOffBudgetHidden}
-            value={showOffBudgetHidden}
-            onChange={() => setShowOffBudgetHidden(!showOffBudgetHidden)}
+            checked={items.showOffBudgetHidden}
+            value={items.showOffBudgetHidden}
+            onChange={() => setShowOffBudgetHidden(!items.showOffBudgetHidden)}
           />
           <label
             htmlFor="show-hidden-columns"
@@ -286,9 +286,9 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-uncategorized"
-            checked={showUncategorized}
-            value={showUncategorized}
-            onChange={() => setShowUncategorized(!showUncategorized)}
+            checked={items.showUncategorized}
+            value={items.showUncategorized}
+            onChange={() => setShowUncategorized(!items.showUncategorized)}
           />
           <label
             htmlFor="show-uncategorized"
@@ -377,7 +377,7 @@ export function ReportSidebar({
                   onChangeDates(...validateStart(allMonths, newValue, items.endDate))
                 }
                 value={items.startDate}
-                defaultLabel={monthUtils.format(startDate, 'MMMM, yyyy')}
+                defaultLabel={monthUtils.format(items.startDate, 'MMMM, yyyy')}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
             </View>
@@ -420,7 +420,7 @@ export function ReportSidebar({
           <CategorySelector
             categoryGroups={categories.grouped}
             categories={categories.list}
-            selectedCategories={selectedCategories}
+            selectedCategories={items.selectedCategories}
             setSelectedCategories={setSelectedCategories}
           />
         </View>
