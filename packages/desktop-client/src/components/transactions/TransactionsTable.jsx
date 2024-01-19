@@ -770,6 +770,11 @@ const Transaction = memo(function Transaction(props) {
         onUpdateAfterConfirm(name, value);
       }
     }
+
+    // Allow un-reconciling (unlocking) transactions
+    if (name === 'cleared' && transaction.reconciled) {
+      onUpdateAfterConfirm('reconciled', false);
+    }
   }
 
   function onUpdateAfterConfirm(name, value) {
@@ -1349,7 +1354,14 @@ const Transaction = memo(function Transaction(props) {
   );
 });
 
-function TransactionError({ error, isDeposit, onAddSplit, onDistributeRemainder, style, canDistributeRemainder }) {
+function TransactionError({
+  error,
+  isDeposit,
+  onAddSplit,
+  onDistributeRemainder,
+  style,
+  canDistributeRemainder,
+}) {
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {
@@ -1453,7 +1465,9 @@ function NewTransaction({
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
 
-  const emptyChildTransactions = transactions.filter(t => t.parent_id === transactions[0].id && t.amount === 0)
+  const emptyChildTransactions = transactions.filter(
+    t => t.parent_id === transactions[0].id && t.amount === 0,
+  );
 
   return (
     <View
@@ -1521,7 +1535,9 @@ function NewTransaction({
             error={error}
             isDeposit={isDeposit}
             onAddSplit={() => onAddSplit(transactions[0].id)}
-            onDistributeRemainder={() => onDistributeRemainder(transactions[0].id)}
+            onDistributeRemainder={() =>
+              onDistributeRemainder(transactions[0].id)
+            }
             canDistributeRemainder={emptyChildTransactions.length > 0}
           />
         ) : (
@@ -1615,31 +1631,35 @@ function TransactionTableInner({
     const hasSplitError =
       (!expanded || isLastChild(transactions, index)) &&
       error &&
-      error.type === 'SplitTransactionError'
+      error.type === 'SplitTransactionError';
 
     const emptyChildTransactions = transactions.filter(
-      t => t.parent_id === (trans.is_parent ? trans.id : trans.parent_id) && t.amount === 0
-    )
+      t =>
+        t.parent_id === (trans.is_parent ? trans.id : trans.parent_id) &&
+        t.amount === 0,
+    );
 
     return (
       <>
         {hasSplitError && (
-            <Tooltip
-              position="bottom-right"
-              width={350}
-              forceTop={position}
-              forceLayout={true}
-              style={{ transform: 'translate(-5px, 2px)' }}
-            >
-              <TransactionError
-                error={error}
-                isDeposit={isChildDeposit}
-                onAddSplit={() => props.onAddSplit(trans.id)}
-                onDistributeRemainder={() => props.onDistributeRemainder(trans.id)}
-                canDistributeRemainder={emptyChildTransactions.length > 0}
-              />
-            </Tooltip>
-          )}
+          <Tooltip
+            position="bottom-right"
+            width={350}
+            forceTop={position}
+            forceLayout={true}
+            style={{ transform: 'translate(-5px, 2px)' }}
+          >
+            <TransactionError
+              error={error}
+              isDeposit={isChildDeposit}
+              onAddSplit={() => props.onAddSplit(trans.id)}
+              onDistributeRemainder={() =>
+                props.onDistributeRemainder(trans.id)
+              }
+              canDistributeRemainder={emptyChildTransactions.length > 0}
+            />
+          </Tooltip>
+        )}
         <Transaction
           editing={editing}
           transaction={trans}
@@ -2113,16 +2133,20 @@ export const TransactionTable = forwardRef((props, ref) => {
       const { transactions, tableNavigator, newTransactions } =
         latestState.current;
 
-      const targetTransactions = isTemporaryId(id) ? newTransactions : transactions
+      const targetTransactions = isTemporaryId(id)
+        ? newTransactions
+        : transactions;
       const transaction = targetTransactions.find(t => t.id === id);
 
-      const parentTransaction = transaction.is_parent ? transaction : targetTransactions.find(
-        t => t.id === transaction.parent_id
-      )
+      const parentTransaction = transaction.is_parent
+        ? transaction
+        : targetTransactions.find(t => t.id === transaction.parent_id);
 
       const siblingTransactions = targetTransactions.filter(
-        t => t.parent_id === (transaction.is_parent ? transaction.id : transaction.parent_id)
-      )
+        t =>
+          t.parent_id ===
+          (transaction.is_parent ? transaction.id : transaction.parent_id),
+      );
 
       const emptyTransactions = siblingTransactions.filter(t => t.amount === 0);
 
@@ -2148,9 +2172,9 @@ export const TransactionTable = forwardRef((props, ref) => {
       }
 
       if (isTemporaryId(id)) {
-        newNavigator.onEdit(null)
+        newNavigator.onEdit(null);
       } else {
-        tableNavigator.onEdit(null)
+        tableNavigator.onEdit(null);
       }
 
       for (const transactionIndex in emptyTransactions) {
@@ -2162,7 +2186,6 @@ export const TransactionTable = forwardRef((props, ref) => {
     },
     [latestState],
   );
-
 
   function onCloseAddTransaction() {
     setNewTransactions(
