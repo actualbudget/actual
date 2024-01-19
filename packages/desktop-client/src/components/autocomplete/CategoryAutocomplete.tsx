@@ -215,7 +215,7 @@ type SplitTransactionButtonProps = {
   style?: CSSProperties;
 };
 
-export function SplitTransactionButton({
+function SplitTransactionButton({
   Icon,
   highlighted,
   embedded,

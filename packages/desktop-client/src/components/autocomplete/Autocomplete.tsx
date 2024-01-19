@@ -21,7 +21,7 @@ import { Input } from '../common/Input';
 import { View } from '../common/View';
 import { Tooltip } from '../tooltips';
 
-export type Item = {
+type Item = {
   id?: string;
   name: string;
 };

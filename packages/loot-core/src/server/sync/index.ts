@@ -142,8 +142,7 @@ async function fetchAll(table, ids) {
           message: error.message,
           stack: error.stack,
         },
-        sql,
-        params: partIds,
+        query: { sql, params: partIds },
       });
     }
   }

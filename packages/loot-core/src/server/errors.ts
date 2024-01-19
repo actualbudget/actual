@@ -1,10 +1,10 @@
 // TODO: normalize error types
 export class PostError extends Error {
-  meta: any;
+  meta?: { meta: string };
   reason: string;
   type: 'PostError';
 
-  constructor(reason: string, meta?: any) {
+  constructor(reason: string, meta?: { meta: string }) {
     super('PostError: ' + reason);
     this.type = 'PostError';
     this.reason = reason;
@@ -24,10 +24,27 @@ export class HTTPError extends Error {
 }
 
 export class SyncError extends Error {
-  meta: any;
+  meta?: 
+    | {
+        isMissingKey: boolean;
+      }
+    | {
+        error: { message: string; stack: string };
+        query: { sql: string; params: Array<string | number> };
+      };
   reason: string;
 
-  constructor(reason: string, meta?: any) {
+  constructor(
+    reason: string,
+    meta?:
+      | {
+          isMissingKey: boolean;
+        }
+      | {
+          error: { message: string; stack: string };
+          query: { sql: string; params: Array<string | number> };
+        },
+  ) {
     super('SyncError: ' + reason);
     this.reason = reason;
     this.meta = meta;
@@ -45,14 +62,20 @@ export class RuleError extends Error {
   }
 }
 
-export function APIError(msg: string, meta?: any) {
-  return { type: 'APIError', message: msg, meta };
+export function APIError(msg: string) {
+  return { type: 'APIError', message: msg };
 }
 
-export function FileDownloadError(reason: string, meta?: any) {
+export function FileDownloadError(
+  reason: string,
+  meta?: { fileId?: string; isMissingKey?: boolean },
+) {
   return { type: 'FileDownloadError', reason, meta };
 }
 
-export function FileUploadError(reason: string, meta?: any) {
+export function FileUploadError(
+  reason: string,
+  meta?: { isMissingKey: boolean },
+) {
   return { type: 'FileUploadError', reason, meta };
 }
