@@ -129,13 +129,18 @@ export function CustomReport() {
   }, [
     startDate,
     endDate,
+    groupBy,
+    balanceType,
     categories,
     selectedCategories,
+    payees,
+    accounts,
     filters,
     conditionsOp,
     showEmpty,
     showOffBudgetHidden,
     showUncategorized,
+    graphType,
   ]);
 
   const getGraphData = useMemo(() => {
