@@ -253,7 +253,7 @@ handlers['api/finish-import'] = async function () {
   await handlers['get-budget-bounds']();
   await sheet.waitOnSpreadsheet();
 
-  await cloudStorage.upload().catch(err => {});
+  await cloudStorage.upload().catch(() => {});
 
   connection.send('finish-import');
   IMPORT_MODE = false;
@@ -424,10 +424,6 @@ handlers['api/transactions-get'] = async function ({
       .options({ splits: 'grouped' }),
   );
   return data;
-};
-
-handlers['api/transactions-filter'] = async function ({ text, accountId }) {
-  throw new Error('`filterTransactions` is deprecated, use `runQuery` instead');
 };
 
 handlers['api/transaction-update'] = withMutation(async function ({

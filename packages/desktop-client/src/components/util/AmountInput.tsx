@@ -46,7 +46,6 @@ export function AmountInput({
   textStyle,
   focused,
   disabled = false,
-  ...props
 }: AmountInputProps) {
   const format = useFormat();
   const negative = (initialValue === 0 && zeroSign === '-') || initialValue < 0;
