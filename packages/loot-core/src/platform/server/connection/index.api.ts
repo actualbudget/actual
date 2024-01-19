@@ -2,7 +2,7 @@ import type * as T from '.';
 
 export const init: T.Init = function () {};
 
-export const send: T.Send = function (type, args) {
+export const send: T.Send = function () {
   // Nothing
 };
 
