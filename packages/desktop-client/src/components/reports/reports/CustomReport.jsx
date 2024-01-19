@@ -77,6 +77,8 @@ export function CustomReport() {
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine = ReportOptions.dateRange.length - 3;
 
+  const [report, setReport] = useState(location.state.report ?? []);
+  const [savedStatus, setSavedStatus] = useState(location.state.report ? 'saved' : 'new');
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
@@ -183,6 +185,23 @@ export function CustomReport() {
 
   const data = { ...graphData, groupedData };
 
+  const items = {
+    id: null,
+    startDate: startDate,
+    endDate: endDate,
+    mode: mode,
+    groupBy: groupBy,
+    balanceType: balanceType,
+    showEmpty: showEmpty,
+    showOffBudgetHidden: showOffBudgetHidden,
+    showUncategorized: showUncategorized,
+    graphType: graphType,
+    filters: filters,
+    conditionsOp: conditionsOp,
+    selectedCategories: selectedCategories,
+    data: data,
+  };
+
   const [scrollWidth, setScrollWidth] = useState(0);
 
   if (!allMonths || !data) {
@@ -192,6 +211,7 @@ export function CustomReport() {
   const onChangeDates = (startDate, endDate) => {
     setStartDate(startDate);
     setEndDate(endDate);
+    setSavedStatus('changed');
   };
 
   const onChangeViews = (viewType, status) => {
@@ -203,6 +223,45 @@ export function CustomReport() {
     }
     if (viewType === 'viewLabels') {
       savePrefs({ reportsViewLabel: !viewLabels });
+    }
+  };
+
+  const onResetReports = () => {
+    setMode(stateDefault.mode);
+    setGroupBy(stateDefault.groupBy);
+    setBalanceType(stateDefault.balanceType);
+    setShowEmpty(stateDefault.empty);
+    setShowOffBudgetHidden(stateDefault.hidden);
+    setShowUncategorized(stateDefault.uncat);
+    setGraphType(stateDefault.graphType);
+    onApplyFilter(null);
+    onCondOpChange(stateDefault.conditionsOp);
+    setReport([]);
+    setStartDate(stateDefault.start);
+    setEndDate(stateDefault.end);
+    setSavedStatus('new');
+  };
+
+  const onReportChange = (savedReport, type) => {
+    if (type === 'add-update') { //status = saved
+      setReport(savedReport);
+    }
+    
+    if (type === 'reload') {
+      setMode(report.mode);
+      setGroupBy(report.groupBy);
+      setBalanceType(report.balanceType);
+      setShowEmpty(report.empty);
+      setShowOffBudgetHidden(report.hidden);
+      setShowUncategorized(report.uncat);
+      setGraphType(report.graphType);
+      onApplyFilter(report.filters);
+      onCondOpChange(report.conditionsOp);
+      setStartDate(report.start);
+      setEndDate(report.end);
+    } else {
+      if (savedStatus === 'saved') {
+      }
     }
   };
 
@@ -248,6 +307,7 @@ export function CustomReport() {
           selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
           onChangeViews={onChangeViews}
+          setSavedStatus={setSavedStatus}
         />
         <View
           style={{
@@ -255,19 +315,21 @@ export function CustomReport() {
           }}
         >
           <ReportTopbar
-            graphType={graphType}
+            items={items}
+            report={report}
+            savedStatus={savedStatus}
+            setSavedStatus={setSavedStatus}
             setGraphType={setGraphType}
-            mode={mode}
-            viewLegend={viewLegend}
             setTypeDisabled={setTypeDisabled}
-            balanceType={balanceType}
             setBalanceType={setBalanceType}
-            groupBy={groupBy}
             setGroupBy={setGroupBy}
+            viewLegend={viewLegend}
             viewSummary={viewSummary}
             viewLabels={viewLabels}
             onApplyFilter={onApplyFilter}
             onChangeViews={onChangeViews}
+            onReportChange={onReportChange}
+            onResetReports={onResetReports}
           />
           {filters && filters.length > 0 && (
             <View

@@ -49,8 +49,10 @@ export function ReportSidebar({
   selectedCategories,
   setSelectedCategories,
   onChangeViews,
+  setSavedStatus,
 }) {
   const onSelectRange = cond => {
+    setSavedStatus('changed');
     setDateRange(cond);
     switch (cond) {
       case 'All time':
@@ -84,6 +86,7 @@ export function ReportSidebar({
   };
 
   const onChangeMode = cond => {
+    setSavedStatus('changed');
     setMode(cond);
     if (cond === 'time') {
       if (graphType === 'TableGraph') {
@@ -114,6 +117,7 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
+    setSavedStatus('changed');
     setGroupBy(cond);
     if (mode === 'total') {
       if (graphType !== 'TableGraph') {
@@ -123,6 +127,11 @@ export function ReportSidebar({
     if (['Net'].includes(balanceType) && graphType !== 'TableGraph') {
       setBalanceType('Payment');
     }
+  };
+
+  const onChangeBalanceType = cond => {
+    setSavedStatus('changed');
+    setBalanceType(cond);
   };
 
   return (
@@ -208,7 +217,7 @@ export function ReportSidebar({
           </Text>
           <Select
             value={balanceType}
-            onChange={setBalanceType}
+            onChange={e => onChangeBalanceType(e)}
             options={ReportOptions.balanceType.map(option => [
               option.description,
               option.description,
@@ -253,7 +262,10 @@ export function ReportSidebar({
             id="show-empty-columns"
             checked={showEmpty}
             value={showEmpty}
-            onChange={() => setShowEmpty(!showEmpty)}
+            onChange={() => {
+              setShowEmpty(!showEmpty);
+              setSavedStatus('changed');
+            }}
           />
           <label
             htmlFor="show-empty-columns"
@@ -276,7 +288,10 @@ export function ReportSidebar({
             id="show-hidden-columns"
             checked={showOffBudgetHidden}
             value={showOffBudgetHidden}
-            onChange={() => setShowOffBudgetHidden(!showOffBudgetHidden)}
+            onChange={() => {
+              setShowOffBudgetHidden(!showOffBudgetHidden);
+              setSavedStatus('changed');
+            }}
           />
           <label
             htmlFor="show-hidden-columns"
@@ -299,7 +314,10 @@ export function ReportSidebar({
             id="show-uncategorized"
             checked={showUncategorized}
             value={showUncategorized}
-            onChange={() => setShowUncategorized(!showUncategorized)}
+            onChange={() => {
+              setShowUncategorized(!showUncategorized);
+              setSavedStatus('changed');
+            }}
           />
           <label
             htmlFor="show-uncategorized"
@@ -343,6 +361,7 @@ export function ReportSidebar({
             onSelect={() => {
               setIsDateStatic(true);
               onChangeDates(startDate, endDate);
+              setSavedStatus('changed');
             }}
           >
             Static
@@ -384,9 +403,10 @@ export function ReportSidebar({
                 From:
               </Text>
               <Select
-                onChange={newValue =>
-                  onChangeDates(...validateStart(allMonths, newValue, endDate))
-                }
+                onChange={newValue => {
+                  onChangeDates(...validateStart(allMonths, newValue, endDate));
+                  setSavedStatus('changed');
+                }}
                 value={startDate}
                 defaultLabel={monthUtils.format(startDate, 'MMMM, yyyy')}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
@@ -403,9 +423,10 @@ export function ReportSidebar({
                 To:
               </Text>
               <Select
-                onChange={newValue =>
-                  onChangeDates(...validateEnd(allMonths, startDate, newValue))
-                }
+                onChange={newValue => {
+                  onChangeDates(...validateEnd(allMonths, startDate, newValue));
+                  setSavedStatus('changed');
+                }}
                 value={endDate}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
