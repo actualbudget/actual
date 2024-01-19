@@ -16,7 +16,7 @@ export interface CustomReportEntity {
   startDate: string;
   endDate: string;
   isDateStatic: boolean;
-  data: GroupedEntity;
+  data?: GroupedEntity;
   tombstone?: boolean;
 }
 
