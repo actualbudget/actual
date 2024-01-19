@@ -57,14 +57,9 @@ export class BudgetTable extends Component {
         });
       }
     } else {
-      let targetGroup;
-
-      for (const group of categoryGroups) {
-        if (group.categories.find(cat => cat.id === targetId)) {
-          targetGroup = group;
-          break;
-        }
-      }
+      const targetGroup = categoryGroups.find(g =>
+        g.categories.find(c => c.id === targetId),
+      );
 
       this.props.onReorderCategory({
         id,

@@ -92,7 +92,7 @@ export function findSortDown(
     }
 
     const newIdx = idx + 1;
-    if (newIdx < arr.length - 1) {
+    if (newIdx <= arr.length - 1) {
       return { targetId: arr[newIdx].id };
     } else {
       // Move to the end
