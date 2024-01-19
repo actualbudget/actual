@@ -70,12 +70,12 @@ async function createReport(report: CustomReportEntity) {
     id: reportId,
   };
 
-  if (item.name !== undefined) {
-    if (await reportNameExists(item.name, item.id, true)) {
-      throw new Error('There is already a report named ' + item.name);
-    }
-  } else {
+  if (!item.name) {
     throw new Error('Report name is required');
+  }
+  
+  if (await reportNameExists(item.name, item.id, true)) {
+    throw new Error('There is already a report named ' + item.name);
   }
 
   // Create the report here based on the info
