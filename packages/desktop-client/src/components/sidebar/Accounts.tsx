@@ -127,27 +127,27 @@ export function Accounts({
 
   return (
     <View>
+      <Account
+        name="All accounts"
+        to={allAccountsPath}
+        query={getAllAccountBalance()}
+        style={{ fontWeight, marginTop: 15 }}
+      />
+
+      {budgetedAccounts.length > 0 && (
+        <Account
+          name="For budget"
+          to={budgetedAccountPath}
+          query={getOnBudgetBalance()}
+          style={{ fontWeight, marginTop: 13 }}
+        />
+      )}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         modifiers={[restrictToVerticalAxis]}
         onDragEnd={onDragEnd}
       >
-        <Account
-          name="All accounts"
-          to={allAccountsPath}
-          query={getAllAccountBalance()}
-          style={{ fontWeight, marginTop: 15 }}
-        />
-
-        {budgetedAccounts.length > 0 && (
-          <Account
-            name="For budget"
-            to={budgetedAccountPath}
-            query={getOnBudgetBalance()}
-            style={{ fontWeight, marginTop: 13 }}
-          />
-        )}
         <SortableContext
           items={budgetedAccounts}
           strategy={verticalListSortingStrategy}
@@ -165,16 +165,22 @@ export function Accounts({
             />
           ))}
         </SortableContext>
+      </DndContext>
 
-        {offbudgetAccounts.length > 0 && (
-          <Account
-            name="Off budget"
-            to={offBudgetAccountPath}
-            query={getOffBudgetBalance()}
-            style={{ fontWeight, marginTop: 13 }}
-          />
-        )}
-
+      {offbudgetAccounts.length > 0 && (
+        <Account
+          name="Off budget"
+          to={offBudgetAccountPath}
+          query={getOffBudgetBalance()}
+          style={{ fontWeight, marginTop: 13 }}
+        />
+      )}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis]}
+        onDragEnd={onDragEnd}
+      >
         <SortableContext
           items={offbudgetAccounts}
           strategy={verticalListSortingStrategy}
@@ -192,17 +198,24 @@ export function Accounts({
             />
           ))}
         </SortableContext>
+      </DndContext>
 
-        {closedAccounts.length > 0 && (
-          <SecondaryItem
-            style={{ marginTop: 15 }}
-            title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
-            onClick={onToggleClosedAccounts}
-            bold
-          />
-        )}
+      {closedAccounts.length > 0 && (
+        <SecondaryItem
+          style={{ marginTop: 15 }}
+          title={'Closed accounts' + (showClosedAccounts ? '' : '...')}
+          onClick={onToggleClosedAccounts}
+          bold
+        />
+      )}
 
-        {showClosedAccounts && (
+      {showClosedAccounts && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis]}
+          onDragEnd={onDragEnd}
+        >
           <SortableContext
             items={offbudgetAccounts}
             strategy={verticalListSortingStrategy}
@@ -217,8 +230,8 @@ export function Accounts({
               />
             ))}
           </SortableContext>
-        )}
-      </DndContext>
+        </DndContext>
+      )}
 
       <SecondaryItem
         style={{

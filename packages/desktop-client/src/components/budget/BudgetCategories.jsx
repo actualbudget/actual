@@ -167,7 +167,7 @@ export const BudgetCategories = memo(
     );
 
     const [originalCollapsed, setOriginalCollapsed] = useState(null);
-    const [collapseOnDrag, setCollapseOnDrag] = useState(null);
+    const [collapsedOnDragMove, setCollapsedOnDragMove] = useState(null);
 
     const onDragStart = e => {
       const { active } = e;
@@ -180,7 +180,7 @@ export const BudgetCategories = memo(
             .filter(item => item.type === 'expense-group')
             .map(item => item.value?.id);
 
-          setCollapseOnDrag(groupIds);
+          setCollapsedOnDragMove(groupIds);
           break;
         default:
           break;
@@ -189,13 +189,18 @@ export const BudgetCategories = memo(
 
     const onDragMove = e => {
       const { active, over } = e;
-      // Delay collapsing groups when sorting groups.
-      if (collapseOnDrag) {
-        setCollapsed(collapseOnDrag);
-        setCollapseOnDrag(null);
+
+      if (!over) {
+        return;
       }
 
-      // Expand groups on hover when sorting categories.
+      // Delay collapsing groups until user moves the group.
+      if (collapsedOnDragMove) {
+        setCollapsed(collapsedOnDragMove);
+        setCollapsedOnDragMove(null);
+      }
+
+      // Expand groups on hover when moving around categories.
       const activeItem = items.find(item => getItemDndId(item) === active.id);
       if (
         activeItem?.type === 'expense-category' &&
@@ -208,7 +213,7 @@ export const BudgetCategories = memo(
     const onDragEnd = e => {
       const { active, over } = e;
 
-      if (active.id !== over.id) {
+      if (over && over.id !== active.id) {
         const activeItem = items.find(item => getItemDndId(item) === active.id);
 
         const { top: activeTop, bottom: activeBottom } =
