@@ -292,8 +292,8 @@ export const BudgetCategories = memo(
                 item.value
                   ? item.value.id
                   : item.type === 'income-separator'
-                  ? 'separator'
-                  : idx
+                    ? 'separator'
+                    : idx
               }
               value={pos}
             >

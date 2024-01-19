@@ -25,16 +25,14 @@ electron.app.on('web-contents-created', function (event, contents) {
 });
 
 electron.app.on('ready', function () {
-  electron.session.defaultSession.setPermissionRequestHandler(function (
-    webContents,
-    permission,
-    callback,
-  ) {
-    const url = webContents.getURL();
-    if (url.startsWith('file://')) {
-      callback(true);
-    } else {
-      callback(false);
-    }
-  });
+  electron.session.defaultSession.setPermissionRequestHandler(
+    function (webContents, permission, callback) {
+      const url = webContents.getURL();
+      if (url.startsWith('file://')) {
+        callback(true);
+      } else {
+        callback(false);
+      }
+    },
+  );
 });
