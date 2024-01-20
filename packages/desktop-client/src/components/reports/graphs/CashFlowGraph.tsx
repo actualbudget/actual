@@ -121,6 +121,7 @@ export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
             // eslint-disable-next-line rulesdir/typography
             return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
           }}
+          minTickGap={50}
         />
         <YAxis
           tick={{ fill: theme.reportsLabel }}
