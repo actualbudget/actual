@@ -9,7 +9,10 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { restrictToParentElement, restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  restrictToParentElement,
+  restrictToVerticalAxis,
+} from '@dnd-kit/modifiers';
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -168,7 +171,7 @@ export const BudgetCategories = memo(
     );
 
     const [originalCollapsed, setOriginalCollapsed] = useState(null);
-    const [collapsedOnDragMove, setCollapsedOnDragMove] = useState(null);
+    const [collapsedOnDragOver, setCollapsedOnDragOver] = useState(null);
 
     const onDragStart = e => {
       const { active } = e;
@@ -181,24 +184,20 @@ export const BudgetCategories = memo(
             .filter(item => item.type === 'expense-group')
             .map(item => item.value?.id);
 
-          setCollapsedOnDragMove(groupIds);
+          setCollapsedOnDragOver(groupIds);
           break;
         default:
           break;
       }
     };
 
-    const onDragMove = e => {
+    const onDragOver = e => {
       const { active, over } = e;
 
-      if (!over) {
-        return;
-      }
-
-      // Delay collapsing groups until user moves the group.
-      if (collapsedOnDragMove) {
-        setCollapsed(collapsedOnDragMove);
-        setCollapsedOnDragMove(null);
+      // Delay collapsing groups until user drags/hovers on another item.
+      if (collapsedOnDragOver) {
+        setCollapsed(collapsedOnDragOver);
+        setCollapsedOnDragOver(null);
       }
 
       // Expand groups on hover when moving around categories.
@@ -262,7 +261,7 @@ export const BudgetCategories = memo(
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis, restrictToParentElement]}
             onDragStart={onDragStart}
-            onDragMove={onDragMove}
+            onDragOver={onDragOver}
             onDragEnd={onDragEnd}
           >
             <SortableContext
@@ -367,7 +366,7 @@ export const BudgetCategories = memo(
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis, restrictToParentElement]}
             onDragStart={onDragStart}
-            onDragMove={onDragMove}
+            onDragOver={onDragOver}
             onDragEnd={onDragEnd}
           >
             <SortableContext

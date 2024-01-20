@@ -80,7 +80,6 @@ export function SidebarGroup({
           minWidth: 0,
         }}
       >
-        {dragPreview && <Text style={{ fontWeight: 500 }}>Group: </Text>}
         {group.name}
       </div>
       {!dragPreview && (
