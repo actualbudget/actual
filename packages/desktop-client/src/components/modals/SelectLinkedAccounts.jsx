@@ -50,7 +50,7 @@ export function SelectLinkedAccounts({
         }
 
         // Finally link the matched account
-        if (syncSource === "simpleFin") {
+        if (syncSource === 'simpleFin') {
           actions.linkAccountSimpleFin(
             externalAccount,
             chosenLocalAccountId !== addAccountOption.id
