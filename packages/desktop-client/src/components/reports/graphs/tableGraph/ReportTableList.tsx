@@ -13,6 +13,7 @@ type ReportTableListProps = {
   monthsCount?: number;
   groupBy: string;
   renderItem;
+  compact: boolean;
 };
 
 export function ReportTableList({
@@ -21,6 +22,7 @@ export function ReportTableList({
   mode,
   groupBy,
   renderItem,
+  compact,
 }: ReportTableListProps) {
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
 

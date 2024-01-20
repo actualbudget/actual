@@ -139,6 +139,7 @@ export function ChooseGraph({
           interval={mode === 'time' && data.monthData}
           groupBy={groupBy}
           balanceType={balanceType}
+          compact={compact}
         />
         <ReportTable
           saveScrollWidth={saveScrollWidth}
@@ -149,6 +150,7 @@ export function ChooseGraph({
           data={data[groupByData]}
           mode={mode}
           monthsCount={months.length}
+          compact={compact}
         />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
@@ -157,6 +159,7 @@ export function ChooseGraph({
           mode={mode}
           balanceTypeOp={balanceTypeOp}
           monthsCount={months.length}
+          compact={compact}
         />
       </View>
     );
