@@ -173,7 +173,7 @@ export function AreaGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data.monthData && (
           <ResponsiveContainer>
             <div>

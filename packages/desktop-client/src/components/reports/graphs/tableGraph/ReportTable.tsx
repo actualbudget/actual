@@ -26,7 +26,6 @@ type ReportTableProps = {
   data: DataEntity[];
   mode: string;
   monthsCount: number;
-  compact: boolean;
 };
 
 export function ReportTable({
@@ -39,7 +38,6 @@ export function ReportTable({
   data,
   mode,
   monthsCount,
-  compact,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -96,7 +94,6 @@ export function ReportTable({
           mode={mode}
           groupBy={groupBy}
           renderItem={renderItem}
-          compact={compact}
         />
       </Block>
     </View>

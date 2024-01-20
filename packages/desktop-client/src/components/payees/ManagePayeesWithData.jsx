@@ -63,7 +63,7 @@ export function ManagePayeesWithData({ initialSelectedIds }) {
     };
   }, []);
 
-  async function onUndo({ tables, messages, meta, url }, scroll = false) {
+  async function onUndo({ tables, messages, meta }) {
     if (!tables.includes('payees') && !tables.includes('payee_mapping')) {
       return;
     }
@@ -83,7 +83,7 @@ export function ManagePayeesWithData({ initialSelectedIds }) {
 
   useEffect(() => {
     if (lastUndoState.current) {
-      onUndo(lastUndoState.current, true);
+      onUndo(lastUndoState.current);
     }
 
     return listen('undo-event', onUndo);

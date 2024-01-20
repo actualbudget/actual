@@ -228,7 +228,7 @@ class AccountInternal extends PureComponent {
       }
     };
 
-    const onUndo = async ({ tables, messages, undoTag }) => {
+    const onUndo = async ({ tables, messages }) => {
       await maybeRefetch(tables);
 
       // If all the messages are dealing with transactions, find the
@@ -517,7 +517,7 @@ class AccountInternal extends PureComponent {
           });
         }
       },
-      mappedData => {
+      () => {
         return data;
       },
     );

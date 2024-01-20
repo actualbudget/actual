@@ -15,24 +15,20 @@ import { Row, Cell } from '../../../table';
 
 type ReportTableTotalsProps = {
   data: GroupedEntity;
-  scrollWidth?: number;
   balanceTypeOp: string;
   mode: string;
   monthsCount: number;
   totalScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
-  compact: boolean;
 };
 
 export function ReportTableTotals({
   data,
-  scrollWidth,
   balanceTypeOp,
   mode,
   monthsCount,
   totalScrollRef,
   handleScroll,
-  compact,
 }: ReportTableTotalsProps) {
   const [scrollWidthTotals, setScrollWidthTotals] = useState(0);
 

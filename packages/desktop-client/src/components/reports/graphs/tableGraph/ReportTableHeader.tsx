@@ -9,23 +9,19 @@ import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
 
 type ReportTableHeaderProps = {
-  scrollWidth?: number;
   groupBy: string;
   interval?: DataEntity[];
   balanceType: string;
   headerScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
-  compact: boolean;
 };
 
 export function ReportTableHeader({
-  scrollWidth,
   groupBy,
   interval,
   balanceType,
   headerScrollRef,
   handleScroll,
-  compact,
 }: ReportTableHeaderProps) {
   return (
     <Row

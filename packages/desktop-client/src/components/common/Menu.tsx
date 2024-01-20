@@ -163,7 +163,7 @@ export function Menu<T extends MenuItem>({
             }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
-            onClick={e =>
+            onClick={() =>
               !item.disabled && onMenuSelect && onMenuSelect(item.name)
             }
           >
