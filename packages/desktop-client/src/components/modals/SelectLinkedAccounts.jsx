@@ -16,6 +16,7 @@ export function SelectLinkedAccounts({
   externalAccounts,
   localAccounts,
   actions,
+  syncSource,
 }) {
   const [chosenAccounts, setChosenAccounts] = useState(() => {
     return Object.fromEntries(
@@ -49,13 +50,22 @@ export function SelectLinkedAccounts({
         }
 
         // Finally link the matched account
-        actions.linkAccount(
-          requisitionId,
-          externalAccount,
-          chosenLocalAccountId !== addAccountOption.id
-            ? chosenLocalAccountId
-            : undefined,
-        );
+        if (syncSource === 'simpleFin') {
+          actions.linkAccountSimpleFin(
+            externalAccount,
+            chosenLocalAccountId !== addAccountOption.id
+              ? chosenLocalAccountId
+              : undefined,
+          );
+        } else {
+          actions.linkAccount(
+            requisitionId,
+            externalAccount,
+            chosenLocalAccountId !== addAccountOption.id
+              ? chosenLocalAccountId
+              : undefined,
+          );
+        }
       },
     );
 
