@@ -28,8 +28,9 @@ export function ReportTableList({
     index: number;
     parent_index?: number;
     style?: CSSProperties;
+    compact: boolean;
   };
-  function RenderRow({ index, parent_index, style }: RenderRowProps) {
+  function RenderRow({ index, parent_index, style, compact }: RenderRowProps) {
     const item =
       parent_index === undefined
         ? data[index]
@@ -41,6 +42,7 @@ export function ReportTableList({
       mode,
       style,
       monthsCount,
+      compact,
     });
   }
 
@@ -53,6 +55,7 @@ export function ReportTableList({
               <>
                 <RenderRow
                   index={index}
+                  compact={compact}
                   style={
                     item.categories && {
                       color: theme.tableRowHeaderText,
@@ -69,6 +72,7 @@ export function ReportTableList({
                           <RenderRow
                             key={category.id}
                             index={i}
+                            compact={compact}
                             parent_index={index}
                           />
                         );

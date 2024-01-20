@@ -164,6 +164,11 @@ module.exports = {
       { patterns: [...restrictedImportPatterns, ...restrictedImportColors] },
     ],
 
+    '@typescript-eslint/ban-ts-comment': [
+      'error',
+      { 'ts-ignore': 'allow-with-description' },
+    ],
+
     // Rules disable during TS migration
     '@typescript-eslint/no-var-requires': 'off',
     'prefer-const': 'warn',

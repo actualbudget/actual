@@ -3,6 +3,8 @@ import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from 'glamor';
 
+import { type CustomReportEntity } from 'loot-core/src/types/models';
+
 import { type CSSProperties, styles } from '../../style';
 
 type AnchorLinkProps = {
@@ -10,6 +12,7 @@ type AnchorLinkProps = {
   style?: CSSProperties;
   activeStyle?: CSSProperties;
   children?: ReactNode;
+  report?: CustomReportEntity;
 };
 
 export function AnchorLink({
@@ -17,12 +20,14 @@ export function AnchorLink({
   style,
   activeStyle,
   children,
+  report,
 }: AnchorLinkProps) {
   const match = useMatch({ path: to });
 
   return (
     <NavLink
       to={to}
+      state={report ? { report } : {}}
       className={`${css([
         styles.smallText,
         style,

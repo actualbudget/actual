@@ -48,6 +48,7 @@ import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
 import * as prefs from './prefs';
+import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
 import { getServer, setServer } from './server-config';
@@ -2147,7 +2148,15 @@ injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 
 // A hack for now until we clean up everything
 app.handlers = handlers;
-app.combine(schedulesApp, budgetApp, notesApp, toolsApp, filtersApp, rulesApp);
+app.combine(
+  schedulesApp,
+  budgetApp,
+  notesApp,
+  toolsApp,
+  filtersApp,
+  reportsApp,
+  rulesApp,
+);
 
 function getDefaultDocumentDir() {
   if (Platform.isMobile) {
@@ -2251,8 +2260,14 @@ export async function initApp(isDev, socketName) {
   }
 }
 
+export type InitConfig = {
+  dataDir?: string;
+  serverURL?: string;
+  password?: string;
+};
+
 // eslint-disable-next-line import/no-unused-modules
-export async function init(config) {
+export async function init(config: InitConfig) {
   // Get from build
 
   let dataDir, serverURL;

@@ -1,7 +1,7 @@
 import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
-  reportId?: string;
+  id: string | undefined;
   mode: string;
   groupBy: string;
   balanceType: string;
@@ -10,13 +10,13 @@ export interface CustomReportEntity {
   showUncategorized: boolean;
   graphType: string;
   selectedCategories;
-  filters: RuleConditionEntity;
+  filters?: RuleConditionEntity[];
   conditionsOp: string;
   name: string;
   startDate: string;
   endDate: string;
   isDateStatic: boolean;
-  data: GroupedEntity;
+  data?: GroupedEntity;
   tombstone?: boolean;
 }
 
@@ -67,3 +67,8 @@ export interface DataEntity {
 export type Month = {
   month: string;
 };
+
+export interface CustomReportData extends CustomReportEntity {
+  conditions_op?: string;
+  conditions?: RuleConditionEntity[];
+}
