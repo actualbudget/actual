@@ -14,7 +14,7 @@ import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
-import { SaveReport, SaveReportMenuButton } from './SaveReport';
+import { SaveReport } from './SaveReport';
 
 export function ReportTopbar({
   customReportItems,
@@ -30,6 +30,8 @@ export function ReportTopbar({
   viewLabels,
   onApplyFilter,
   onChangeViews,
+  onReportChange,
+  onResetReports,
 }) {
   return (
     <View

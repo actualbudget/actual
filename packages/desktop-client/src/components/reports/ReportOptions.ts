@@ -10,7 +10,7 @@ import {
 const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
 const endDate = monthUtils.currentMonth();
 
-export const defaultState: CustomReportEntity = {
+export const defaultReport: CustomReportEntity = {
   id: undefined,
   mode: 'total',
   groupBy: 'Category',

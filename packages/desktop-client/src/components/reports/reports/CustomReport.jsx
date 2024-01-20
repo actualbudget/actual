@@ -24,7 +24,7 @@ import { ChooseGraph } from '../ChooseGraph';
 import { Header } from '../Header';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportLegend } from '../ReportLegend';
-import { ReportOptions, defaultState } from '../ReportOptions';
+import { ReportOptions, defaultReport } from '../ReportOptions';
 import { ReportSidebar } from '../ReportSidebar';
 import { ReportSummary } from '../ReportSummary';
 import { ReportTopbar } from '../ReportTopbar';
@@ -32,7 +32,6 @@ import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
-import { useLocation } from 'react-router-dom';
 
 export function CustomReport() {
   const categories = useCategories();
@@ -55,7 +54,7 @@ export function CustomReport() {
   } = useFilters();
 
   const location = useLocation();
-  const loadReport = location.state.report ?? defaultState;
+  const loadReport = location.state.report ?? defaultReport;
 
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);
@@ -83,7 +82,9 @@ export function CustomReport() {
   const dateRangeLine = ReportOptions.dateRange.length - 3;
 
   const [report, setReport] = useState(location.state.report ?? []);
-  const [savedStatus, setSavedStatus] = useState(location.state.report ? 'saved' : 'new');
+  const [savedStatus, setSavedStatus] = useState(
+    location.state.report ? 'saved' : 'new',
+  );
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
@@ -237,26 +238,27 @@ export function CustomReport() {
   };
 
   const onResetReports = () => {
-    setMode(stateDefault.mode);
-    setGroupBy(stateDefault.groupBy);
-    setBalanceType(stateDefault.balanceType);
-    setShowEmpty(stateDefault.empty);
-    setShowOffBudgetHidden(stateDefault.hidden);
-    setShowUncategorized(stateDefault.uncat);
-    setGraphType(stateDefault.graphType);
+    setMode(defaultReport.mode);
+    setGroupBy(defaultReport.groupBy);
+    setBalanceType(defaultReport.balanceType);
+    setShowEmpty(defaultReport.empty);
+    setShowOffBudgetHidden(defaultReport.hidden);
+    setShowUncategorized(defaultReport.uncat);
+    setGraphType(defaultReport.graphType);
     onApplyFilter(null);
-    onCondOpChange(stateDefault.conditionsOp);
+    onCondOpChange(defaultReport.conditionsOp);
     setReport([]);
-    setStartDate(stateDefault.start);
-    setEndDate(stateDefault.end);
+    setStartDate(defaultReport.start);
+    setEndDate(defaultReport.end);
     setSavedStatus('new');
   };
 
   const onReportChange = (savedReport, type) => {
-    if (type === 'add-update') { //status = saved
+    if (type === 'add-update') {
+      //status = saved
       setReport(savedReport);
     }
-    
+
     if (type === 'reload') {
       setMode(report.mode);
       setGroupBy(report.groupBy);

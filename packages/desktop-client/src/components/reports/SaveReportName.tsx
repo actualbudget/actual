@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useEffect } from 'react';
 
 import { theme } from '../../style';

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React from 'react';
 
 import { type CustomReportEntity } from 'loot-core/src/types/models';
@@ -38,46 +37,46 @@ export function SaveReportMenu({
                 },
               ]
             : savedStatus === 'saved'
-            ? [
-                { name: 'rename-report', text: 'Rename', disabled: true },
-                { name: 'delete-report', text: 'Delete', disabled: true },
-                Menu.line,
-                {
-                  name: 'save-report',
-                  text: 'Save new report',
-                  disabled: true,
-                },
-                {
-                  name: 'reset-report',
-                  text: 'Reset to default',
-                  disabled: true,
-                },
-              ]
-            : [
-                { name: 'rename-report', text: 'Rename', disabled: true },
-                {
-                  name: 'update-report',
-                  text: 'Update report',
-                  disabled: true,
-                },
-                {
-                  name: 'reload-report',
-                  text: 'Revert changes',
-                  disabled: true,
-                },
-                { name: 'delete-report', text: 'Delete', disabled: true },
-                Menu.line,
-                {
-                  name: 'save-report',
-                  text: 'Save new report',
-                  disabled: true,
-                },
-                {
-                  name: 'reset-report',
-                  text: 'Reset to default',
-                  disabled: true,
-                },
-              ]
+              ? [
+                  { name: 'rename-report', text: 'Rename', disabled: true },
+                  { name: 'delete-report', text: 'Delete', disabled: true },
+                  Menu.line,
+                  {
+                    name: 'save-report',
+                    text: 'Save new report',
+                    disabled: true,
+                  },
+                  {
+                    name: 'reset-report',
+                    text: 'Reset to default',
+                    disabled: true,
+                  },
+                ]
+              : [
+                  { name: 'rename-report', text: 'Rename', disabled: true },
+                  {
+                    name: 'update-report',
+                    text: 'Update report',
+                    disabled: true,
+                  },
+                  {
+                    name: 'reload-report',
+                    text: 'Revert changes',
+                    disabled: true,
+                  },
+                  { name: 'delete-report', text: 'Delete', disabled: true },
+                  Menu.line,
+                  {
+                    name: 'save-report',
+                    text: 'Save new report',
+                    disabled: true,
+                  },
+                  {
+                    name: 'reset-report',
+                    text: 'Reset to default',
+                    disabled: true,
+                  },
+                ]
         }
       />
     </MenuTooltip>
