@@ -34,12 +34,10 @@ export const SimpleFinInitialise = ({
 
     setIsLoading(true);
 
-    await Promise.all([
-      send('secret-set', {
-        name: 'simplefin_token',
-        value: token,
-      }),
-    ]);
+    await send('secret-set', {
+      name: 'simplefin_token',
+      value: token,
+    });
 
     onSuccess();
     modalProps.onClose();
