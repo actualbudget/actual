@@ -4,8 +4,8 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
-export function useGoCardlessStatus() {
-  const [configuredGoCardless, setConfiguredGoCardless] = useState<
+export function useSimpleFinStatus() {
+  const [configuredSimpleFin, setConfiguredSimpleFin] = useState<
     boolean | null
   >(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -15,9 +15,9 @@ export function useGoCardlessStatus() {
     async function fetch() {
       setIsLoading(true);
 
-      const results = await send('gocardless-status');
+      const results = await send('simplefin-status');
 
-      setConfiguredGoCardless(results.configured || false);
+      setConfiguredSimpleFin(results.configured || false);
       setIsLoading(false);
     }
 
@@ -27,7 +27,7 @@ export function useGoCardlessStatus() {
   }, [status]);
 
   return {
-    configuredGoCardless,
+    configuredSimpleFin,
     isLoading,
   };
 }
