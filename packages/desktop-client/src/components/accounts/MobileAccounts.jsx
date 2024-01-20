@@ -1,7 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  restrictToParentElement,
+  restrictToVerticalAxis,
+} from '@dnd-kit/modifiers';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 import * as queries from 'loot-core/src/client/queries';
+import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
@@ -16,6 +36,7 @@ import { View } from '../common/View';
 import { Page } from '../Page';
 import { PullToRefresh } from '../responsive/PullToRefresh';
 import { CellValue } from '../spreadsheet/CellValue';
+import { findSortDown, getDropPosition } from '../util/sort';
 
 function AccountHeader({ name, amount, style = {} }) {
   return (
@@ -52,8 +73,26 @@ function AccountHeader({ name, amount, style = {} }) {
 }
 
 function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
+  const {
+    isDragging,
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: account.id });
+
+  const dndStyle = {
+    opacity: isDragging ? 0.5 : undefined,
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
     <View
+      innerRef={setNodeRef}
+      {...attributes}
+      {...listeners}
       style={{
         flex: 1,
         flexDirection: 'row',
@@ -63,20 +102,18 @@ function AccountCard({ account, updated, getBalanceQuery, onSelect }) {
         marginTop: 10,
         marginRight: 10,
         width: '100%',
+        ...dndStyle,
       }}
       data-testid="account"
     >
       <Button
-        onMouseDown={() => onSelect(account.id)}
+        onClick={() => onSelect(account.id)}
         style={{
           flexDirection: 'row',
           border: '1px solid ' + theme.pillBorder,
           flex: 1,
           alignItems: 'center',
           borderRadius: 6,
-          '&:active': {
-            opacity: 0.1,
-          },
         }}
       >
         <View
@@ -149,12 +186,48 @@ function AccountList({
   onAddAccount,
   onSelectAccount,
   onSync,
+  onReorder,
 }) {
   const budgetedAccounts = accounts.filter(account => account.offbudget === 0);
   const offbudgetAccounts = accounts.filter(account => account.offbudget === 1);
   const noBackgroundColorStyle = {
     backgroundColor: 'transparent',
     color: 'white',
+  };
+
+  const sensors = useSensors(
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+  );
+
+  const [isDragging, setIsDragging] = useState(false);
+
+  const onDragStart = e => {
+    setIsDragging(true);
+  };
+
+  const onDragEnd = e => {
+    const { active, over } = e;
+
+    if (active.id !== over.id) {
+      const dropPos = getDropPosition(
+        active.rect.current.translated,
+        active.rect.current.initial,
+      );
+
+      onReorder(active.id, dropPos, over.id);
+    }
+
+    setIsDragging(false);
   };
 
   return (
@@ -178,20 +251,35 @@ function AccountList({
       style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}
     >
       {accounts.length === 0 && <EmptyMessage />}
-      <PullToRefresh onRefresh={onSync}>
+      <PullToRefresh isPullable={!isDragging} onRefresh={onSync}>
         <View style={{ margin: 10 }}>
           {budgetedAccounts.length > 0 && (
             <AccountHeader name="For Budget" amount={getOnBudgetBalance()} />
           )}
-          {budgetedAccounts.map(acct => (
-            <AccountCard
-              account={acct}
-              key={acct.id}
-              updated={updatedAccounts.includes(acct.id)}
-              getBalanceQuery={getBalanceQuery}
-              onSelect={onSelectAccount}
-            />
-          ))}
+          <View>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+            >
+              <SortableContext
+                items={budgetedAccounts}
+                strategy={verticalListSortingStrategy}
+              >
+                {budgetedAccounts.map(acct => (
+                  <AccountCard
+                    account={acct}
+                    key={acct.id}
+                    updated={updatedAccounts.includes(acct.id)}
+                    getBalanceQuery={getBalanceQuery}
+                    onSelect={onSelectAccount}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+          </View>
 
           {offbudgetAccounts.length > 0 && (
             <AccountHeader
@@ -200,15 +288,30 @@ function AccountList({
               style={{ marginTop: 30 }}
             />
           )}
-          {offbudgetAccounts.map(acct => (
-            <AccountCard
-              account={acct}
-              key={acct.id}
-              updated={updatedAccounts.includes(acct.id)}
-              getBalanceQuery={getBalanceQuery}
-              onSelect={onSelectAccount}
-            />
-          ))}
+          <View>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+            >
+              <SortableContext
+                items={offbudgetAccounts}
+                strategy={verticalListSortingStrategy}
+              >
+                {offbudgetAccounts.map(acct => (
+                  <AccountCard
+                    account={acct}
+                    key={acct.id}
+                    updated={updatedAccounts.includes(acct.id)}
+                    getBalanceQuery={getBalanceQuery}
+                    onSelect={onSelectAccount}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+          </View>
         </View>
       </PullToRefresh>
     </Page>
@@ -244,6 +347,14 @@ export function Accounts() {
     navigate(`/transaction/${transaction}`);
   };
 
+  const onReorder = async (id, dropPos, targetId) => {
+    await send('account-move', {
+      id,
+      ...findSortDown(accounts, dropPos, targetId),
+    });
+    await getAccounts();
+  };
+
   useSetThemeColor(theme.mobileViewTheme);
 
   return (
@@ -264,6 +375,7 @@ export function Accounts() {
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
         onSync={syncAndDownload}
+        onReorder={onReorder}
       />
     </View>
   );
