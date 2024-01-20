@@ -79,6 +79,16 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
               </strong>
             }
           />
+          {data.transfers !== 0 && (
+            <AlignedText
+              left="Transfers:"
+              right={
+                <PrivacyFilter>
+                  {amountToCurrency(data.transfers)}
+                </PrivacyFilter>
+              }
+            />
+          )}
           <AlignedText
             left="Balance:"
             right={
@@ -96,6 +106,7 @@ type CashFlowGraphProps = {
     expenses: { x: Date; y: number }[];
     income: { x: Date; y: number }[];
     balances: { x: Date; y: number }[];
+    transfers: { x: Date; y: number }[];
   };
   isConcise: boolean;
 };
@@ -108,6 +119,7 @@ export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
     expenses: row.y,
     income: graphData.income[idx].y,
     balance: graphData.balances[idx].y,
+    transfers: graphData.transfers[idx].y,
   }));
 
   return (
