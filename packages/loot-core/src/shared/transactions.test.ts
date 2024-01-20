@@ -30,6 +30,7 @@ function makeTransaction(data: Partial<TransactionEntity>): TransactionEntity {
       balance_current: null,
       balance_available: null,
       balance_limit: null,
+      account_sync_source: null,
     },
     ...data,
   };
