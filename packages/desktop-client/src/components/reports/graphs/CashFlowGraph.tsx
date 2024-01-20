@@ -26,6 +26,8 @@ import { AlignedText } from '../../common/AlignedText';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 
+const MAX_BAR_SIZE = 50;
+
 type CustomTooltipProps = TooltipProps<number, 'date'> & {
   isConcise: boolean;
 };
@@ -141,8 +143,18 @@ export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
         />
 
         <ReferenceLine y={0} stroke="#000" />
-        <Bar dataKey="income" stackId="a" fill={chartTheme.colors.blue} />
-        <Bar dataKey="expenses" stackId="a" fill={chartTheme.colors.red} />
+        <Bar
+          dataKey="income"
+          stackId="a"
+          fill={chartTheme.colors.blue}
+          maxBarSize={MAX_BAR_SIZE}
+        />
+        <Bar
+          dataKey="expenses"
+          stackId="a"
+          fill={chartTheme.colors.red}
+          maxBarSize={MAX_BAR_SIZE}
+        />
         <Line
           type="monotone"
           dataKey="balance"
