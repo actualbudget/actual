@@ -230,8 +230,7 @@ export const BudgetCategories = memo(
           onReorderCategory(active.id, dropPos, over.id);
         }
       }
-
-      setCollapsed(originalCollapsed);
+      setTimeout(() => setCollapsed(originalCollapsed), 100);
     };
 
     const expenseGroupIds = useMemo(
