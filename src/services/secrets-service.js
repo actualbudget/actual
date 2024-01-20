@@ -9,6 +9,8 @@ import getAccountDb from '../account-db.js';
 export const SecretName = {
   gocardless_secretId: 'gocardless_secretId',
   gocardless_secretKey: 'gocardless_secretKey',
+  simplefin_token: 'simplefin_token',
+  simplefin_accessKey: 'simplefin_accessKey',
 };
 
 class SecretsDb {
