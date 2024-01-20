@@ -50,7 +50,7 @@ export function ReportTable({
   });
 
   const renderItem = useCallback(
-    ({ item, groupByItem, mode, style, monthsCount }) => {
+    ({ item, groupByItem, mode, style, monthsCount, compact }) => {
       return (
         <ReportTableRow
           item={item}
@@ -59,6 +59,7 @@ export function ReportTable({
           mode={mode}
           style={style}
           monthsCount={monthsCount}
+          compact={compact}
         />
       );
     },

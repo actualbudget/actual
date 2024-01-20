@@ -85,7 +85,7 @@ export function ReportTableTotals({
               return (
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   key={amountToCurrency(item[balanceTypeOp])}
@@ -104,7 +104,7 @@ export function ReportTableTotals({
               <>
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value={amountToCurrency(data.totalAssets)}
@@ -118,7 +118,7 @@ export function ReportTableTotals({
                 />
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value={amountToCurrency(data.totalDebts)}
@@ -134,7 +134,7 @@ export function ReportTableTotals({
             )}
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value={amountToCurrency(data[balanceTypeOp])}
@@ -148,7 +148,7 @@ export function ReportTableTotals({
         />
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value={integerToCurrency(Math.round(average))}
