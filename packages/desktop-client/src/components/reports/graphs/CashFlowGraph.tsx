@@ -1,66 +1,141 @@
-// @ts-strict-ignore
 import React from 'react';
 
 import * as d from 'date-fns';
+import { css } from 'glamor';
 import {
-  VictoryChart,
-  VictoryBar,
-  VictoryLine,
-  VictoryAxis,
-  VictoryVoronoiContainer,
-  VictoryGroup,
-} from 'victory';
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  type TooltipProps,
+} from 'recharts';
+
+import { usePrivacyMode } from 'loot-core/src/client/privacy';
+import { amountToCurrency } from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
+import { AlignedText } from '../../common/AlignedText';
+import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
-import { Container } from '../Container';
-import { Tooltip } from '../Tooltip';
+
+type CustomTooltipProps = TooltipProps<number, 'date'> & {
+  isConcise: boolean;
+};
+
+function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
+  if (!active || !payload) {
+    return null;
+  }
+
+  const [{ payload: data }] = payload;
+
+  return (
+    <div
+      className={`${css({
+        pointerEvents: 'none',
+        borderRadius: 2,
+        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+        backgroundColor: theme.menuBackground,
+        color: theme.menuItemText,
+        padding: 10,
+      })}`}
+    >
+      <div>
+        <div style={{ marginBottom: 10 }}>
+          <strong>
+            {d.format(data.date, isConcise ? 'MMMM yyyy' : 'MMMM dd, yyyy')}
+          </strong>
+        </div>
+        <div style={{ lineHeight: 1.5 }}>
+          <AlignedText
+            left="Income:"
+            right={
+              <PrivacyFilter>{amountToCurrency(data.income)}</PrivacyFilter>
+            }
+          />
+          <AlignedText
+            left="Expenses:"
+            right={
+              <PrivacyFilter>{amountToCurrency(data.expenses)}</PrivacyFilter>
+            }
+          />
+          <AlignedText
+            left="Change:"
+            right={
+              <strong>
+                <PrivacyFilter>
+                  {amountToCurrency(data.income + data.expenses)}
+                </PrivacyFilter>
+              </strong>
+            }
+          />
+          <AlignedText
+            left="Balance:"
+            right={
+              <PrivacyFilter>{amountToCurrency(data.balance)}</PrivacyFilter>
+            }
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 type CashFlowGraphProps = {
-  graphData: { expenses; income; balances };
+  graphData: {
+    expenses: { x: Date; y: number }[];
+    income: { x: Date; y: number }[];
+    balances: { x: Date; y: number }[];
+  };
   isConcise: boolean;
 };
 export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
+  const privacyMode = usePrivacyMode();
+
+  const data = graphData.expenses.map((row, idx) => ({
+    date: row.x,
+    expenses: row.y,
+    income: graphData.income[idx].y,
+    balance: graphData.balances[idx].y,
+  }));
+
   return (
-    <Container>
-      {(width, height, portalHost) =>
-        graphData && (
-          <VictoryChart
-            scale={{ x: 'time', y: 'linear' }}
-            theme={chartTheme}
-            domainPadding={10}
-            width={width}
-            height={height}
-            containerComponent={
-              <VictoryVoronoiContainer voronoiDimension="x" />
-            }
-          >
-            <VictoryGroup>
-              <VictoryBar
-                data={graphData.expenses}
-                style={{ data: { fill: chartTheme.colors.red } }}
-              />
-              <VictoryBar data={graphData.income} />
-            </VictoryGroup>
-            <VictoryLine
-              data={graphData.balances}
-              labelComponent={<Tooltip portalHost={portalHost} />}
-              labels={x => x.premadeLabel}
-              style={{
-                data: { stroke: theme.pageTextLight },
-              }}
-            />
-            <VictoryAxis
-              // eslint-disable-next-line rulesdir/typography
-              tickFormat={x => d.format(x, isConcise ? "MMM ''yy" : 'MMM d')}
-              tickValues={graphData.balances.map(item => item.x)}
-              tickCount={Math.min(5, graphData.balances.length)}
-              offsetY={50}
-            />
-            <VictoryAxis dependentAxis crossAxis={false} />
-          </VictoryChart>
-        )
-      }
-    </Container>
+    <ResponsiveContainer width="100%" height={300}>
+      <ComposedChart stackOffset="sign" data={data}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <XAxis
+          dataKey="date"
+          tickFormatter={x => {
+            // eslint-disable-next-line rulesdir/typography
+            return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
+          }}
+        />
+        <YAxis tickFormatter={value => (privacyMode ? '...' : value)} />
+        <Tooltip
+          labelFormatter={x => {
+            // eslint-disable-next-line rulesdir/typography
+            return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
+          }}
+          content={<CustomTooltip isConcise={isConcise} />}
+          isAnimationActive={false}
+        />
+
+        <ReferenceLine y={0} stroke="#000" />
+        <Bar dataKey="income" stackId="a" fill={chartTheme.colors.blue} />
+        <Bar dataKey="expenses" stackId="a" fill={chartTheme.colors.red} />
+        <Line
+          type="monotone"
+          dataKey="balance"
+          dot={false}
+          stroke={theme.pageTextLight}
+          strokeWidth={2}
+        />
+      </ComposedChart>
+    </ResponsiveContainer>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 
-import { VictoryBar, VictoryGroup, VictoryVoronoiContainer } from 'victory';
+import { Bar, BarChart, ResponsiveContainer } from 'recharts';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToCurrency } from 'loot-core/src/shared/util';
@@ -11,13 +11,36 @@ import { View } from '../../common/View';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { chartTheme } from '../chart-theme';
-import { Container } from '../Container';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
 import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
-import { Tooltip } from '../Tooltip';
 import { useReport } from '../useReport';
+
+function CustomLabel({ value, name, position, ...props }) {
+  return (
+    <>
+      <text
+        {...props}
+        dy={10}
+        dx={position === 'right' ? 20 : -5}
+        textAnchor={position === 'right' ? 'start' : 'end'}
+        fill={theme.tableText}
+      >
+        {name}
+      </text>
+      <text
+        {...props}
+        dy={26}
+        dx={position === 'right' ? 20 : -4}
+        textAnchor={position === 'right' ? 'start' : 'end'}
+        fill={theme.tableText}
+      >
+        <PrivacyFilter>{integerToCurrency(value)}</PrivacyFilter>
+      </text>
+    </>
+  );
+}
 
 export function CashFlowCard() {
   const end = monthUtils.currentDay();
@@ -31,7 +54,7 @@ export function CashFlowCard() {
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false));
 
   const { graphData } = data || {};
-  const expense = -(graphData?.expense || 0);
+  const expenses = -(graphData?.expense || 0);
   const income = graphData?.income || 0;
 
   return (
@@ -55,7 +78,7 @@ export function CashFlowCard() {
             <View style={{ textAlign: 'right' }}>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Change
-                  amount={income - expense}
+                  amount={income - expenses}
                   style={{ color: theme.tableText, fontWeight: 300 }}
                 />
               </PrivacyFilter>
@@ -64,84 +87,33 @@ export function CashFlowCard() {
         </View>
 
         {data ? (
-          <Container style={{ height: 'auto', flex: 1 }}>
-            {(width, height, portalHost) => (
-              <VictoryGroup
-                colorScale={[chartTheme.colors.blue, chartTheme.colors.red]}
-                width={100}
-                height={height}
-                theme={chartTheme}
-                domain={{
-                  x: [0, 100],
-                  y: [0, Math.max(income, expense, 100)],
-                }}
-                containerComponent={
-                  <VictoryVoronoiContainer voronoiDimension="x" />
-                }
-                labelComponent={
-                  <Tooltip
-                    portalHost={portalHost}
-                    offsetX={(width - 100) / 2}
-                    offsetY={y => (y + 40 > height ? height - 40 : y)}
-                    light={true}
-                    forceActive={true}
-                    style={{
-                      padding: 0,
-                    }}
-                  />
-                }
-                padding={{
-                  top: 0,
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                }}
-              >
-                <VictoryBar
-                  barWidth={13}
-                  data={[
-                    {
-                      x: 30,
-                      y: Math.max(income, 5),
-                      premadeLabel: (
-                        <View style={{ textAlign: 'right' }}>
-                          Income
-                          <View>
-                            <PrivacyFilter activationFilters={[!isCardHovered]}>
-                              {integerToCurrency(income)}
-                            </PrivacyFilter>
-                          </View>
-                        </View>
-                      ),
-                      labelPosition: 'left',
-                    },
-                  ]}
-                  labels={d => d.premadeLabel}
-                />
-                <VictoryBar
-                  barWidth={13}
-                  data={[
-                    {
-                      x: 60,
-                      y: Math.max(expense, 5),
-                      premadeLabel: (
-                        <View>
-                          Expenses
-                          <View>
-                            <PrivacyFilter activationFilters={[!isCardHovered]}>
-                              {integerToCurrency(expense)}
-                            </PrivacyFilter>
-                          </View>
-                        </View>
-                      ),
-                      labelPosition: 'right',
-                    },
-                  ]}
-                  labels={d => d.premadeLabel}
-                />
-              </VictoryGroup>
-            )}
-          </Container>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={[
+                {
+                  income,
+                  expenses,
+                },
+              ]}
+              margin={{
+                top: 10,
+                bottom: 0,
+              }}
+            >
+              <Bar
+                dataKey="income"
+                fill={chartTheme.colors.blue}
+                barSize={14}
+                label={<CustomLabel name="Income" position="left" />}
+              />
+              <Bar
+                dataKey="expenses"
+                fill={chartTheme.colors.red}
+                barSize={14}
+                label={<CustomLabel name="Expenses" position="right" />}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         ) : (
           <LoadingIndicator />
         )}
