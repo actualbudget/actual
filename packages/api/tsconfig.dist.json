@@ -8,8 +8,12 @@
     "moduleResolution": "Node16",
     "noEmit": false,
     "declaration": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "declarationDir": "@types",
+    "paths": {
+      "loot-core/*": ["./@types/loot-core/*"],
+    }
   },
   "include": ["."],
-  "exclude": ["dist"]
+  "exclude": ["**/node_modules/*", "dist", "@types"]
 }
