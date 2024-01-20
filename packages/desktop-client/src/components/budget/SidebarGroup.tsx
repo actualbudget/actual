@@ -8,7 +8,6 @@ import { SvgCheveronDown } from '../../icons/v1';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
 import { Menu } from '../common/Menu';
-import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
