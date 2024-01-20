@@ -48,7 +48,7 @@ function create(migrationName) {
 
 async function list(db) {
   const migrationsDir = getMigrationsDir();
-  const applied = await getAppliedMigrations(getDatabase());
+  const applied = await getAppliedMigrations(db);
   const all = await getMigrationList(migrationsDir);
   const pending = getPending(applied, all);
 

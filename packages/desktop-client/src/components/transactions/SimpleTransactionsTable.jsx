@@ -36,7 +36,6 @@ function serializeTransaction(transaction, dateFormat) {
 const TransactionRow = memo(function TransactionRow({
   transaction,
   fields,
-  payees,
   categories,
   accounts,
   selected,
@@ -137,7 +136,6 @@ const TransactionRow = memo(function TransactionRow({
 
 export function SimpleTransactionsTable({
   transactions,
-  schedules,
   renderEmpty,
   fields = ['date', 'payee', 'amount'],
   style,

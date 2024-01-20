@@ -8,7 +8,7 @@ export function RulesHeader() {
   const dispatchSelected = useSelectedDispatch();
 
   return (
-    <TableHeader version="v2" style={{}}>
+    <TableHeader style={{}}>
       <SelectCell
         exposed={true}
         focused={false}

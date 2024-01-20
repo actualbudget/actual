@@ -36,8 +36,8 @@ export function PostsOfflineNotification({ modalProps, actions }) {
                 {idx === payees.length - 1
                   ? ' '
                   : idx === payees.length - 2
-                  ? ', and '
-                  : ', '}
+                    ? ', and '
+                    : ', '}
               </Text>
             ))}
           </Text>
