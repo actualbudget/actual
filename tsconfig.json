@@ -29,6 +29,10 @@
     "module": "ES2022",
     // Until/if we build using tsc
     "noEmit": true,
+    "paths": {
+      // until we turn on composite/references
+      "loot-core/*": ["./packages/loot-core/src/*"],
+    },
     "plugins": [
       {
         "name": "typescript-strict-plugin",
