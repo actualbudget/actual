@@ -313,7 +313,25 @@ function BudgetInner(props: BudgetProps) {
     }
   };
 
+  const groupNameAlreadyExistsNotification = name => {
+    props.addNotification({
+      type: 'error',
+      message: `Group ‘${name}’ already exists in budget`,
+    });
+  };
+
   const onSaveGroup = async group => {
+    const categories = await props.getCategories();
+    const exists =
+      categories.grouped
+        .filter(g => g.name.toUpperCase() === group.name.toUpperCase())
+        .filter(g => group.id === 'new' || group.id !== g.id).length > 0;
+
+    if (exists) {
+      groupNameAlreadyExistsNotification(group.name);
+      return;
+    }
+
     if (group.id === 'new') {
       const id = await props.createGroup(group.name);
       setIsAddingGroup(false);

@@ -304,6 +304,15 @@ export async function getCategoriesGrouped(): Promise<
 }
 
 export async function insertCategoryGroup(group) {
+  // Don't allow duplicate group
+  const existingGroup = await first(
+    `SELECT id FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase()],
+  );
+  if (existingGroup) {
+    throw new Error(`Group ‘${group.name}’ already exists in budget`);
+  }
+
   const lastGroup = await first(`
     SELECT sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
   `);
