@@ -110,12 +110,16 @@ export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
         <CartesianGrid strokeDasharray="3 3" vertical={false} />
         <XAxis
           dataKey="date"
+          tick={{ fill: theme.reportsLabel }}
           tickFormatter={x => {
             // eslint-disable-next-line rulesdir/typography
             return d.format(x, isConcise ? "MMM ''yy" : 'MMM d');
           }}
         />
-        <YAxis tickFormatter={value => (privacyMode ? '...' : value)} />
+        <YAxis
+          tick={{ fill: theme.reportsLabel }}
+          tickFormatter={value => (privacyMode ? '...' : value)}
+        />
         <Tooltip
           labelFormatter={x => {
             // eslint-disable-next-line rulesdir/typography
