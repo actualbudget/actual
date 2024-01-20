@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import * as d from 'date-fns';
 
@@ -69,8 +70,12 @@ export function CustomReport() {
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
-  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(loadReport.showOffBudgetHidden);
-  const [showUncategorized, setShowUncategorized] = useState(loadReport.showUncategorized);
+  const [showOffBudgetHidden, setShowOffBudgetHidden] = useState(
+    loadReport.showOffBudgetHidden,
+  );
+  const [showUncategorized, setShowUncategorized] = useState(
+    loadReport.showUncategorized,
+  );
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
   const [dateRange, setDateRange] = useState('Last 6 months');
@@ -136,13 +141,18 @@ export function CustomReport() {
   }, [
     startDate,
     endDate,
+    groupBy,
+    balanceType,
     categories,
     selectedCategories,
+    payees,
+    accounts,
     filters,
     conditionsOp,
     showEmpty,
     showOffBudgetHidden,
     showUncategorized,
+    graphType,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -184,24 +194,24 @@ export function CustomReport() {
   const groupedData = useReport('grouped', getGroupData);
 
   const data = { ...graphData, groupedData };
-
-  const items = {
-    id: null,
-    startDate: startDate,
-    endDate: endDate,
-    mode: mode,
-    groupBy: groupBy,
-    balanceType: balanceType,
-    showEmpty: showEmpty,
-    showOffBudgetHidden: showOffBudgetHidden,
-    showUncategorized: showUncategorized,
-    graphType: graphType,
-    filters: filters,
-    conditionsOp: conditionsOp,
-    selectedCategories: selectedCategories,
-    data: data,
+  const customReportItems = {
+    id: undefined,
+    mode,
+    groupBy,
+    balanceType,
+    showEmpty,
+    showOffBudgetHidden,
+    showUncategorized,
+    graphType,
+    startDate,
+    endDate,
+    selectedCategories,
+    isDateStatic,
+    dateRange,
+    filters,
+    conditionsOp,
+    data,
   };
-
   const [scrollWidth, setScrollWidth] = useState(0);
 
   if (!allMonths || !data) {
@@ -278,34 +288,23 @@ export function CustomReport() {
         }}
       >
         <ReportSidebar
-          startDate={startDate}
-          endDate={endDate}
-          onChangeDates={onChangeDates}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
+          customReportItems={customReportItems}
+          categories={categories}
           dateRangeLine={dateRangeLine}
           allMonths={allMonths}
-          graphType={graphType}
-          setGraphType={setGraphType}
+          setDateRange={setDateRange}
           typeDisabled={typeDisabled}
           setTypeDisabled={setTypeDisabled}
-          groupBy={groupBy}
+          setGraphType={setGraphType}
           setGroupBy={setGroupBy}
-          balanceType={balanceType}
           setBalanceType={setBalanceType}
-          mode={mode}
           setMode={setMode}
-          isDateStatic={isDateStatic}
           setIsDateStatic={setIsDateStatic}
-          showEmpty={showEmpty}
           setShowEmpty={setShowEmpty}
-          showOffBudgetHidden={showOffBudgetHidden}
           setShowOffBudgetHidden={setShowOffBudgetHidden}
-          showUncategorized={showUncategorized}
           setShowUncategorized={setShowUncategorized}
-          categories={categories}
-          selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
+          onChangeDates={onChangeDates}
           onChangeViews={onChangeViews}
           setSavedStatus={setSavedStatus}
         />
@@ -315,7 +314,7 @@ export function CustomReport() {
           }}
         >
           <ReportTopbar
-            items={items}
+            customReportItems={customReportItems}
             report={report}
             savedStatus={savedStatus}
             setSavedStatus={setSavedStatus}

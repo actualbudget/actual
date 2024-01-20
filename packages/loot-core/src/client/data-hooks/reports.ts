@@ -20,7 +20,8 @@ function toJS(rows: CustomReportData[]) {
 }
 
 /*
-leaving as a placeholder for saved reports implementation return an empty array because "reports" db table doesn't exist yet
+leaving as a placeholder for saved reports implementation return an 
+empty array because "reports" db table doesn't exist yet
 */
 export function useReports(): CustomReportEntity[] {
   const reports: CustomReportEntity[] = toJS(
@@ -37,8 +38,11 @@ export function useReports(): CustomReportEntity[] {
     );
   }
 
-  const flag = true;
+  //return useMemo(() => sort(reports), [reports]);
+
+  //everything below this line will be removed once db table is created
   const order: CustomReportEntity[] = useMemo(() => sort(reports), [reports]);
+  const flag = true;
   const emptyReports: CustomReportEntity[] = flag ? [] : order;
   return emptyReports;
 }

@@ -1,7 +1,7 @@
 import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
-  id: string;
+  id: string | undefined;
   mode: string;
   groupBy: string;
   balanceType: string;

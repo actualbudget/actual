@@ -73,8 +73,8 @@ export function makeAmountFullStyle(value: number) {
       value < 0
         ? theme.errorText
         : value === 0
-        ? theme.tableTextSubdued
-        : theme.noticeText,
+          ? theme.tableTextSubdued
+          : theme.noticeText,
   };
 }
 

@@ -46,21 +46,25 @@ const reportModel = {
 
 async function reportNameExists(
   name: string,
-  reportId: string,
+  reportId: string | undefined,
   newItem: boolean,
 ) {
+  if (!name) {
+    throw new Error('Report name is required');
+  }
+
+  if (!reportId) {
+    throw new Error('Report recall error');
+  }
+
   const idForName: { id: string } = await db.first(
     'SELECT id from reports WHERE tombstone = 0 AND name = ?',
     [name],
   );
 
-  if (idForName === null) {
-    return false;
+  if (!newItem && idForName.id !== reportId) {
+    throw new Error('There is already a report named ' + name);
   }
-  if (!newItem) {
-    return idForName.id !== reportId;
-  }
-  return true;
 }
 
 async function createReport(report: CustomReportEntity) {
@@ -70,13 +74,7 @@ async function createReport(report: CustomReportEntity) {
     id: reportId,
   };
 
-  if (item.name !== undefined) {
-    if (await reportNameExists(item.name, item.id, true)) {
-      throw new Error('There is already a report named ' + item.name);
-    }
-  } else {
-    throw new Error('Report name is required');
-  }
+  reportNameExists(item.name, item.id, true);
 
   // Create the report here based on the info
   await db.insertWithSchema('reports', reportModel.fromJS(item));
@@ -84,17 +82,8 @@ async function createReport(report: CustomReportEntity) {
   return reportId;
 }
 
-async function updateReport(report: CustomReportEntity) {
-  const item: CustomReportData = {
-    ...report,
-  };
-  if (item.name !== undefined) {
-    if (await reportNameExists(item.name, item.id, false)) {
-      throw new Error('There is already a report named ' + item.name);
-    }
-  } else {
-    throw new Error('Report name is required');
-  }
+async function updateReport(item: CustomReportEntity) {
+  reportNameExists(item.name, item.id, false);
 
   await db.insertWithSchema('reports', reportModel.fromJS(item));
 }
@@ -106,6 +95,6 @@ async function deleteReport(id: string) {
 // Expose functions to the client
 export const app = createApp<ReportsHandlers>();
 
-app.method('report/create', mutator(createReport));
-app.method('report/update', mutator(updateReport));
+app.method('report/create', mutator(undoable(createReport)));
+app.method('report/update', mutator(undoable(updateReport)));
 app.method('report/delete', mutator(undoable(deleteReport)));

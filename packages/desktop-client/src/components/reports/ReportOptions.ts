@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
   type CustomReportEntity,
@@ -12,7 +11,7 @@ const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
 const endDate = monthUtils.currentMonth();
 
 export const defaultState: CustomReportEntity = {
-  id: null,
+  id: undefined,
   mode: 'total',
   groupBy: 'Category',
   balanceType: 'Payment',
@@ -105,7 +104,7 @@ export type UncategorizedEntity = Pick<
 
 const uncategorizedCategory: UncategorizedEntity = {
   name: 'Uncategorized',
-  id: null,
+  id: undefined,
   uncategorized_id: '1',
   hidden: false,
   is_off_budget: false,
@@ -114,7 +113,7 @@ const uncategorizedCategory: UncategorizedEntity = {
 };
 const transferCategory: UncategorizedEntity = {
   name: 'Transfers',
-  id: null,
+  id: undefined,
   uncategorized_id: '2',
   hidden: false,
   is_off_budget: false,
@@ -123,7 +122,7 @@ const transferCategory: UncategorizedEntity = {
 };
 const offBudgetCategory: UncategorizedEntity = {
   name: 'Off Budget',
-  id: null,
+  id: undefined,
   uncategorized_id: '3',
   hidden: false,
   is_off_budget: true,
@@ -140,7 +139,7 @@ type UncategorizedGroupEntity = Pick<
 
 const uncategorizedGroup: UncategorizedGroupEntity = {
   name: 'Uncategorized & Off Budget',
-  id: null,
+  id: undefined,
   hidden: false,
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };

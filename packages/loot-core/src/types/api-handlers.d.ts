@@ -72,9 +72,6 @@ export interface ApiHandlers {
     endDate;
   }) => Promise<unknown>;
 
-  /** @deprecated `filterTransactions` is deprecated, use `runQuery` instead' */
-  'api/transactions-filter': (arg: { text; accountId }) => Promise<void>;
-
   'api/transaction-update': (arg: { id; fields }) => Promise<unknown>;
 
   'api/transaction-delete': (arg: { id }) => Promise<unknown>;
