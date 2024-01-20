@@ -13,7 +13,7 @@ import { SaveReportMenu } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
-  items: T;
+  customReportItems: T;
   report: CustomReportEntity;
   savedStatus: string;
   setSavedStatus: (string) => void;
@@ -22,7 +22,7 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
 };
 
 export function SaveReport({
-  items,
+  customReportItems,
   report,
   savedStatus,
   setSavedStatus,
@@ -43,7 +43,7 @@ export function SaveReport({
     //save existing states
     savedReport = {
       ...report,
-      ...items,
+      ...customReportItems,
     };
     setSavedStatus('saved');
 

@@ -14,10 +14,13 @@ import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
-import { SaveReportMenuButton } from './SaveReport';
+import { SaveReport, SaveReportMenuButton } from './SaveReport';
 
 export function ReportTopbar({
   customReportItems,
+  report,
+  savedStatus,
+  setSavedStatus,
   setGraphType,
   setTypeDisabled,
   setBalanceType,
@@ -41,6 +44,7 @@ export function ReportTopbar({
         selected={customReportItems.graphType === 'TableGraph'}
         title="Data Table"
         onSelect={() => {
+          setSavedStatus('changed');
           setGraphType('TableGraph');
           onChangeViews('viewLegend', false);
           setTypeDisabled([]);
@@ -58,6 +62,7 @@ export function ReportTopbar({
           customReportItems.graphType === 'StackedBarGraph'
         }
         onSelect={() => {
+          setSavedStatus('changed');
           if (customReportItems.mode === 'total') {
             setGraphType('BarGraph');
             if (['Net'].includes(customReportItems.balanceType)) {
@@ -82,6 +87,7 @@ export function ReportTopbar({
         title="Area Graph"
         selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
+          setSavedStatus('changed');
           setGraphType('AreaGraph');
           setGroupBy('Month');
           onChangeViews('viewLegend', false);
@@ -96,6 +102,7 @@ export function ReportTopbar({
         title="Donut Graph"
         selected={customReportItems.graphType === 'DonutGraph'}
         onSelect={() => {
+          setSavedStatus('changed');
           setGraphType('DonutGraph');
           setTypeDisabled(['Net']);
           setBalanceType('Payment');
@@ -117,6 +124,7 @@ export function ReportTopbar({
       <GraphButton
         selected={viewLegend}
         onSelect={() => {
+          setSavedStatus('changed');
           onChangeViews('viewLegend');
         }}
         style={{ marginRight: 15 }}
@@ -161,7 +169,14 @@ export function ReportTopbar({
       />
       <FilterButton onApply={onApplyFilter} compact hover />
       <View style={{ flex: 1 }} />
-      <SaveReportMenuButton />
+      <SaveReport
+        customReportItems={customReportItems}
+        report={report}
+        savedStatus={savedStatus}
+        setSavedStatus={setSavedStatus}
+        onReportChange={onReportChange}
+        onResetReports={onResetReports}
+      />
     </View>
   );
 }

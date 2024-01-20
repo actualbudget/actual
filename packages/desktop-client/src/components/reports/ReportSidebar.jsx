@@ -38,8 +38,10 @@ export function ReportSidebar({
   setSelectedCategories,
   onChangeDates,
   onChangeViews,
+  setSavedStatus,
 }) {
   const onSelectRange = cond => {
+    setSavedStatus('changed');
     setDateRange(cond);
     switch (cond) {
       case 'All time':
@@ -73,6 +75,7 @@ export function ReportSidebar({
   };
 
   const onChangeMode = cond => {
+    setSavedStatus('changed');
     setMode(cond);
     if (cond === 'time') {
       if (customReportItems.graphType === 'TableGraph') {
@@ -103,6 +106,7 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
+    setSavedStatus('changed');
     setGroupBy(cond);
     if (customReportItems.mode === 'total') {
       if (customReportItems.graphType !== 'TableGraph') {
@@ -117,6 +121,11 @@ export function ReportSidebar({
     ) {
       setBalanceType('Payment');
     }
+  };
+
+  const onChangeBalanceType = cond => {
+    setSavedStatus('changed');
+    setBalanceType(cond);
   };
 
   return (
@@ -202,7 +211,7 @@ export function ReportSidebar({
           </Text>
           <Select
             value={customReportItems.balanceType}
-            onChange={setBalanceType}
+            onChange={e => onChangeBalanceType(e)}
             options={ReportOptions.balanceType.map(option => [
               option.description,
               option.description,
@@ -247,7 +256,10 @@ export function ReportSidebar({
             id="show-empty-columns"
             checked={customReportItems.showEmpty}
             value={customReportItems.showEmpty}
-            onChange={() => setShowEmpty(!customReportItems.showEmpty)}
+            onChange={() => {
+              setShowEmpty(!customReportItems.showEmpty);
+              setSavedStatus('changed');
+            }}
           />
           <label
             htmlFor="show-empty-columns"
@@ -270,9 +282,10 @@ export function ReportSidebar({
             id="show-hidden-columns"
             checked={customReportItems.showOffBudgetHidden}
             value={customReportItems.showOffBudgetHidden}
-            onChange={() =>
-              setShowOffBudgetHidden(!customReportItems.showOffBudgetHidden)
-            }
+            onChange={() => {
+              setShowOffBudgetHidden(!customReportItems.showOffBudgetHidden);
+              setSavedStatus('changed');
+            }}
           />
           <label
             htmlFor="show-hidden-columns"
@@ -295,9 +308,10 @@ export function ReportSidebar({
             id="show-uncategorized"
             checked={customReportItems.showUncategorized}
             value={customReportItems.showUncategorized}
-            onChange={() =>
-              setShowUncategorized(!customReportItems.showUncategorized)
-            }
+            onChange={() => {
+              setShowUncategorized(!customReportItems.showUncategorized);
+              setSavedStatus('changed');
+            }}
           />
           <label
             htmlFor="show-uncategorized"
@@ -344,6 +358,7 @@ export function ReportSidebar({
                 customReportItems.startDate,
                 customReportItems.endDate,
               );
+              setSavedStatus('changed');
             }}
           >
             Static
@@ -385,15 +400,16 @@ export function ReportSidebar({
                 From:
               </Text>
               <Select
-                onChange={newValue =>
+                onChange={newValue => {
                   onChangeDates(
                     ...validateStart(
                       allMonths,
                       newValue,
                       customReportItems.endDate,
                     ),
-                  )
-                }
+                  );
+                  setSavedStatus('changed');
+                }}
                 value={customReportItems.startDate}
                 defaultLabel={monthUtils.format(
                   customReportItems.startDate,
@@ -413,15 +429,16 @@ export function ReportSidebar({
                 To:
               </Text>
               <Select
-                onChange={newValue =>
+                onChange={newValue => {
                   onChangeDates(
                     ...validateEnd(
                       allMonths,
                       customReportItems.startDate,
                       newValue,
                     ),
-                  )
-                }
+                  );
+                  setSavedStatus('changed');
+                }}
                 value={customReportItems.endDate}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}
               />
