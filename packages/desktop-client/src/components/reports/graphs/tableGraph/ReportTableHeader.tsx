@@ -15,6 +15,7 @@ type ReportTableHeaderProps = {
   balanceType: string;
   headerScrollRef: RefProp<HTMLDivElement>;
   handleScroll: UIEventHandler<HTMLDivElement>;
+  compact: boolean;
 };
 
 export function ReportTableHeader({
@@ -24,6 +25,7 @@ export function ReportTableHeader({
   balanceType,
   headerScrollRef,
   handleScroll,
+  compact,
 }: ReportTableHeaderProps) {
   return (
     <Row
@@ -62,7 +64,7 @@ export function ReportTableHeader({
               return (
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   key={index}
@@ -75,7 +77,7 @@ export function ReportTableHeader({
               <>
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value="Deposits"
@@ -83,7 +85,7 @@ export function ReportTableHeader({
                 />
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value="Payments"
@@ -93,7 +95,7 @@ export function ReportTableHeader({
             )}
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value="Totals"
@@ -101,7 +103,7 @@ export function ReportTableHeader({
         />
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value="Average"

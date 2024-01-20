@@ -217,9 +217,8 @@ export async function goalsSchedule(
     const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
 
     const totalSinking = await getSinkingTotal(t_sinking);
-    const totalSinkingBaseContribution = await getSinkingBaseContributionTotal(
-      t_sinking,
-    );
+    const totalSinkingBaseContribution =
+      await getSinkingBaseContributionTotal(t_sinking);
 
     if (balance >= totalSinking + totalPayMonthOf) {
       to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);

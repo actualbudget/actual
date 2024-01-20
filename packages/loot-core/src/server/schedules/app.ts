@@ -563,7 +563,7 @@ app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
 app.service(trackJSONPaths);
 
-app.events.on('sync', ({ type, subtype }) => {
+app.events.on('sync', ({ type }) => {
   const completeEvent =
     type === 'success' || type === 'error' || type === 'unauthorized';
 

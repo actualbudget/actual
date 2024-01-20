@@ -36,9 +36,8 @@ async function importFileWithRealTime(
 ) {
   // Emscripten requires a real Date.now!
   global.restoreDateNow();
-  const { errors, transactions: originalTransactions } = await parseFile(
-    filepath,
-  );
+  const { errors, transactions: originalTransactions } =
+    await parseFile(filepath);
   global.restoreFakeDateNow();
 
   let transactions = originalTransactions;
