@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import * as d from 'date-fns';
 import { css } from 'glamor';
@@ -16,7 +16,10 @@ import {
 } from 'recharts';
 
 import { usePrivacyMode } from 'loot-core/src/client/privacy';
-import { amountToCurrency } from 'loot-core/src/shared/util';
+import {
+  amountToCurrency,
+  amountToCurrencyNoDecimal,
+} from 'loot-core/src/shared/util';
 
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
@@ -96,6 +99,7 @@ type CashFlowGraphProps = {
 };
 export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
   const privacyMode = usePrivacyMode();
+  const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
 
   const data = graphData.expenses.map((row, idx) => ({
     date: row.x,
@@ -118,7 +122,14 @@ export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
         />
         <YAxis
           tick={{ fill: theme.reportsLabel }}
-          tickFormatter={value => (privacyMode ? '...' : value)}
+          tickCount={8}
+          tickFormatter={value =>
+            privacyMode && !yAxisIsHovered
+              ? '...'
+              : amountToCurrencyNoDecimal(value)
+          }
+          onMouseEnter={() => setYAxisIsHovered(true)}
+          onMouseLeave={() => setYAxisIsHovered(false)}
         />
         <Tooltip
           labelFormatter={x => {
