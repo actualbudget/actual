@@ -5,13 +5,13 @@ import {
   amountToInteger,
   integerToCurrency,
 } from 'loot-core/src/shared/util';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties, styles, theme } from '../../../../style';
 import { Row, Cell } from '../../../table';
-import { type GroupedEntity } from '../../entities';
 
 type ReportTableRowProps = {
-  item: GroupedEntity;
+  item: DataEntity;
   balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   groupByItem: 'id' | 'name';
   mode: string;
@@ -31,6 +31,7 @@ export const ReportTableRow = memo(
     const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
     return (
       <Row
+        key={item.id}
         collapsed={true}
         style={{
           color: theme.tableText,

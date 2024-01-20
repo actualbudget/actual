@@ -1867,7 +1867,7 @@ handlers['delete-budget'] = async function ({ id, cloudFileId }) {
   // If it's a cloud file, you can delete it from the server by
   // passing its cloud id
   if (cloudFileId) {
-    await cloudStorage.removeFile(cloudFileId).catch(err => {});
+    await cloudStorage.removeFile(cloudFileId).catch(() => {});
   }
 
   // If a local file exists, you can delete it by passing its local id

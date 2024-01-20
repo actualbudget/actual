@@ -29,7 +29,7 @@ const addWatchers = (): Plugin => ({
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
   const commonInject = {
-    exclude: ['src/setupTests.jsx'],
+    exclude: ['src/setupTests.js'],
     global: [buildShims, 'global'],
   };
 
@@ -166,7 +166,7 @@ export default defineConfig(async ({ mode }) => {
       include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
       environment: 'jsdom',
       globals: true,
-      setupFiles: './src/setupTests.jsx',
+      setupFiles: './src/setupTests.js',
     },
   };
 });

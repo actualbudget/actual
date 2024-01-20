@@ -38,6 +38,7 @@ module.exports = {
   extends: [
     'react-app',
     'plugin:react/recommended',
+    'plugin:prettier/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:import/typescript',
   ],
@@ -46,6 +47,7 @@ module.exports = {
   reportUnusedDisableDirectives: true,
   globals: {
     globalThis: false,
+    vi: true,
   },
   rules: {
     'prettier/prettier': 'warn',

@@ -129,13 +129,18 @@ export function CustomReport() {
   }, [
     startDate,
     endDate,
+    groupBy,
+    balanceType,
     categories,
     selectedCategories,
+    payees,
+    accounts,
     filters,
     conditionsOp,
     showEmpty,
     showOffBudgetHidden,
     showUncategorized,
+    graphType,
   ]);
 
   const getGraphData = useMemo(() => {
@@ -178,6 +183,24 @@ export function CustomReport() {
 
   const data = { ...graphData, groupedData };
 
+  const customReportItems = {
+    id: null,
+    mode,
+    groupBy,
+    balanceType,
+    showEmpty,
+    showOffBudgetHidden,
+    showUncategorized,
+    graphType,
+    startDate,
+    endDate,
+    selectedCategories,
+    isDateStatic,
+    dateRange,
+    filters,
+    conditionsOp,
+    data,
+  };
   const [scrollWidth, setScrollWidth] = useState(0);
 
   if (!allMonths || !data) {
@@ -214,34 +237,23 @@ export function CustomReport() {
         }}
       >
         <ReportSidebar
-          startDate={startDate}
-          endDate={endDate}
-          onChangeDates={onChangeDates}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
+          customReportItems={customReportItems}
+          categories={categories}
           dateRangeLine={dateRangeLine}
           allMonths={allMonths}
-          graphType={graphType}
-          setGraphType={setGraphType}
+          setDateRange={setDateRange}
           typeDisabled={typeDisabled}
           setTypeDisabled={setTypeDisabled}
-          groupBy={groupBy}
+          setGraphType={setGraphType}
           setGroupBy={setGroupBy}
-          balanceType={balanceType}
           setBalanceType={setBalanceType}
-          mode={mode}
           setMode={setMode}
-          isDateStatic={isDateStatic}
           setIsDateStatic={setIsDateStatic}
-          showEmpty={showEmpty}
           setShowEmpty={setShowEmpty}
-          showOffBudgetHidden={showOffBudgetHidden}
           setShowOffBudgetHidden={setShowOffBudgetHidden}
-          showUncategorized={showUncategorized}
           setShowUncategorized={setShowUncategorized}
-          categories={categories}
-          selectedCategories={selectedCategories}
           setSelectedCategories={setSelectedCategories}
+          onChangeDates={onChangeDates}
           onChangeViews={onChangeViews}
         />
         <View
@@ -250,15 +262,12 @@ export function CustomReport() {
           }}
         >
           <ReportTopbar
-            graphType={graphType}
+            customReportItems={customReportItems}
             setGraphType={setGraphType}
-            mode={mode}
-            viewLegend={viewLegend}
             setTypeDisabled={setTypeDisabled}
-            balanceType={balanceType}
             setBalanceType={setBalanceType}
-            groupBy={groupBy}
             setGroupBy={setGroupBy}
+            viewLegend={viewLegend}
             viewSummary={viewSummary}
             viewLabels={viewLabels}
             onApplyFilter={onApplyFilter}
@@ -341,6 +350,7 @@ export function CustomReport() {
                     setScrollWidth={setScrollWidth}
                     months={months}
                     viewLabels={viewLabels}
+                    compact={false}
                   />
                 ) : (
                   <LoadingIndicator message="Loading report..." />

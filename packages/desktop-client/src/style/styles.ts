@@ -41,6 +41,9 @@ export const styles = {
   verySmallText: {
     fontSize: 13,
   },
+  tinyText: {
+    fontSize: 10,
+  },
   page: {
     flex: 1,
     '@media (max-height: 550px)': {

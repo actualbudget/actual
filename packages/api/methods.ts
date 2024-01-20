@@ -85,10 +85,6 @@ export function getTransactions(accountId, startDate, endDate) {
   return send('api/transactions-get', { accountId, startDate, endDate });
 }
 
-export function filterTransactions(accountId, text) {
-  return send('api/transactions-filter', { accountId, text });
-}
-
 export function updateTransaction(id, fields) {
   return send('api/transaction-update', { id, fields });
 }
