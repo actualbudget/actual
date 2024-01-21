@@ -131,7 +131,7 @@ function SharedArrayBufferOverride() {
       >
         <Checkbox
           checked={understand}
-          onChange={_ => setUnderstand(!understand)}
+          onChange={() => setUnderstand(!understand)}
         />{' '}
         I understand the risks, run Actual in the unsupported fallback mode
       </label>

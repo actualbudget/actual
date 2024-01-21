@@ -131,7 +131,7 @@ async function fetchAll(table, ids) {
     }
 
     sql += ` WHERE `;
-    sql += partIds.map(id => `${column} = ?`).join(' OR ');
+    sql += partIds.map(() => `${column} = ?`).join(' OR ');
 
     try {
       const rows = await db.runQuery(sql, partIds, true);

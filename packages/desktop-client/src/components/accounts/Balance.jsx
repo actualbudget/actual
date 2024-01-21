@@ -159,8 +159,8 @@ export function Balances({
               value < 0
                 ? theme.errorText
                 : value > 0
-                ? theme.noticeTextLight
-                : theme.pageTextSubdued,
+                  ? theme.noticeTextLight
+                  : theme.pageTextSubdued,
           })}
           privacyFilter={{
             blurIntensity: 5,

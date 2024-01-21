@@ -40,8 +40,8 @@ export const RuleRow = memo(
           backgroundColor: selected
             ? theme.tableRowBackgroundHighlight
             : backgroundFocus
-            ? theme.tableRowBackgroundHover
-            : theme.tableBackground,
+              ? theme.tableRowBackgroundHover
+              : theme.tableBackground,
         }}
         collapsed={true}
         onMouseEnter={() => onHover && onHover(rule.id)}

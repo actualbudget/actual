@@ -38,6 +38,7 @@ module.exports = {
   extends: [
     'react-app',
     'plugin:react/recommended',
+    'plugin:prettier/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:import/typescript',
   ],
@@ -46,6 +47,7 @@ module.exports = {
   reportUnusedDisableDirectives: true,
   globals: {
     globalThis: false,
+    vi: true,
   },
   rules: {
     'prettier/prettier': 'warn',
@@ -55,7 +57,6 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': [
       'warn',
       {
-        args: 'none',
         varsIgnorePattern: '^_',
         ignoreRestSiblings: true,
       },
@@ -161,6 +162,11 @@ module.exports = {
     'no-restricted-imports': [
       'warn',
       { patterns: [...restrictedImportPatterns, ...restrictedImportColors] },
+    ],
+
+    '@typescript-eslint/ban-ts-comment': [
+      'error',
+      { 'ts-ignore': 'allow-with-description' },
     ],
 
     // Rules disable during TS migration

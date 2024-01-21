@@ -76,6 +76,17 @@ export function linkAccount(requisitionId, account, upgradingId) {
   };
 }
 
+export function linkAccountSimpleFin(externalAccount, upgradingId) {
+  return async (dispatch: Dispatch) => {
+    await send('simplefin-accounts-link', {
+      externalAccount,
+      upgradingId,
+    });
+    await dispatch(getPayees());
+    await dispatch(getAccounts());
+  };
+}
+
 // TODO: type correctly or remove (unused)
 export function connectAccounts(
   institution,
@@ -200,7 +211,7 @@ export function setLastTransaction(
 }
 
 export function parseTransactions(filepath, options) {
-  return async (dispatch: Dispatch) => {
+  return async () => {
     return await send('transactions-parse-file', {
       filepath,
       options,

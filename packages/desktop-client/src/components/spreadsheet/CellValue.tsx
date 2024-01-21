@@ -43,8 +43,8 @@ export function CellValue({
         privacyFilter != null
           ? privacyFilter
           : type === 'financial'
-          ? true
-          : undefined
+            ? true
+            : undefined
       }
     >
       <Text

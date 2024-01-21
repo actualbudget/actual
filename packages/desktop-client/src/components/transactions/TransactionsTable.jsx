@@ -168,54 +168,57 @@ export function SplitsExpandedProvider({ children, initialMode = 'expand' }) {
   const cachedState = useSelector(state => state.app.lastSplitState);
   const reduxDispatch = useDispatch();
 
-  const [state, dispatch] = useReducer((state, action) => {
-    switch (action.type) {
-      case 'toggle-split': {
-        const ids = new Set([...state.ids]);
-        const { id } = action;
-        if (ids.has(id)) {
-          ids.delete(id);
-        } else {
-          ids.add(id);
+  const [state, dispatch] = useReducer(
+    (state, action) => {
+      switch (action.type) {
+        case 'toggle-split': {
+          const ids = new Set([...state.ids]);
+          const { id } = action;
+          if (ids.has(id)) {
+            ids.delete(id);
+          } else {
+            ids.add(id);
+          }
+          return { ...state, ids };
         }
-        return { ...state, ids };
-      }
-      case 'open-split': {
-        const ids = new Set([...state.ids]);
-        const { id } = action;
-        if (state.mode === 'collapse') {
-          ids.delete(id);
-        } else {
-          ids.add(id);
+        case 'open-split': {
+          const ids = new Set([...state.ids]);
+          const { id } = action;
+          if (state.mode === 'collapse') {
+            ids.delete(id);
+          } else {
+            ids.add(id);
+          }
+          return { ...state, ids };
         }
-        return { ...state, ids };
-      }
-      case 'set-mode': {
-        return {
-          ...state,
-          mode: action.mode,
-          ids: new Set(),
-          transitionId: null,
-        };
-      }
-      case 'switch-mode':
-        if (state.transitionId != null) {
-          // You can only transition once at a time
-          return state;
+        case 'set-mode': {
+          return {
+            ...state,
+            mode: action.mode,
+            ids: new Set(),
+            transitionId: null,
+          };
         }
+        case 'switch-mode':
+          if (state.transitionId != null) {
+            // You can only transition once at a time
+            return state;
+          }
 
-        return {
-          ...state,
-          mode: state.mode === 'expand' ? 'collapse' : 'expand',
-          transitionId: action.id,
-          ids: new Set(),
-        };
-      case 'finish-switch-mode':
-        return { ...state, transitionId: null };
-      default:
-        throw new Error('Unknown action type: ' + action.type);
-    }
-  }, cachedState.current || { ids: new Set(), mode: initialMode });
+          return {
+            ...state,
+            mode: state.mode === 'expand' ? 'collapse' : 'expand',
+            transitionId: action.id,
+            ids: new Set(),
+          };
+        case 'finish-switch-mode':
+          return { ...state, transitionId: null };
+        default:
+          throw new Error('Unknown action type: ' + action.type);
+      }
+    },
+    cachedState.current || { ids: new Set(), mode: initialMode },
+  );
 
   useEffect(() => {
     if (state.transitionId != null) {
@@ -419,14 +422,14 @@ function StatusCell({
     status === 'cleared'
       ? theme.noticeTextLight
       : status === 'reconciled'
-      ? theme.noticeTextLight
-      : status === 'missed'
-      ? theme.errorText
-      : status === 'due'
-      ? theme.warningText
-      : selected
-      ? theme.pageTextLinkLight
-      : theme.pageTextSubdued;
+        ? theme.noticeTextLight
+        : status === 'missed'
+          ? theme.errorText
+          : status === 'due'
+            ? theme.warningText
+            : selected
+              ? theme.pageTextLinkLight
+              : theme.pageTextSubdued;
 
   function onSelect() {
     if (isClearedField) {
@@ -874,8 +877,8 @@ const Transaction = memo(function Transaction(props) {
         backgroundColor: selected
           ? theme.tableRowBackgroundHighlight
           : backgroundFocus
-          ? theme.tableRowBackgroundHover
-          : theme.tableBackground,
+            ? theme.tableRowBackgroundHover
+            : theme.tableBackground,
         ':hover': !(backgroundFocus || selected) && {
           backgroundColor: theme.tableRowBackgroundHover,
         },
@@ -1095,18 +1098,18 @@ const Transaction = memo(function Transaction(props) {
                   notes === 'missed'
                     ? theme.errorText
                     : notes === 'due'
-                    ? theme.warningText
-                    : selected
-                    ? theme.formLabelText
-                    : theme.upcomingText,
+                      ? theme.warningText
+                      : selected
+                        ? theme.formLabelText
+                        : theme.upcomingText,
                 backgroundColor:
                   notes === 'missed'
                     ? theme.errorBackground
                     : notes === 'due'
-                    ? theme.warningBackground
-                    : selected
-                    ? theme.formLabelBackground
-                    : theme.upcomingBackground,
+                      ? theme.warningBackground
+                      : selected
+                        ? theme.formLabelBackground
+                        : theme.upcomingBackground,
                 margin: '0 5px',
                 padding: '3px 7px',
                 borderRadius: 4,
@@ -1179,10 +1182,10 @@ const Transaction = memo(function Transaction(props) {
             isParent
               ? 'Split'
               : isOffBudget
-              ? 'Off Budget'
-              : isBudgetTransfer
-              ? 'Transfer'
-              : ''
+                ? 'Off Budget'
+                : isBudgetTransfer
+                  ? 'Transfer'
+                  : ''
           }
           valueStyle={valueStyle}
           style={{
@@ -1209,8 +1212,8 @@ const Transaction = memo(function Transaction(props) {
                   'name',
                 )
               : transaction.id
-              ? 'Categorize'
-              : ''
+                ? 'Categorize'
+                : ''
           }
           exposed={focusedField === 'category'}
           onExpose={name => onEdit(id, name)}
@@ -1338,10 +1341,10 @@ const Transaction = memo(function Transaction(props) {
             isPreview
               ? notes
               : reconciled
-              ? 'reconciled'
-              : cleared
-              ? 'cleared'
-              : null
+                ? 'reconciled'
+                : cleared
+                  ? 'cleared'
+                  : null
           }
           isChild={isChild}
           onEdit={onEdit}
@@ -2160,11 +2163,11 @@ export const TransactionTable = forwardRef((props, ref) => {
       let remainingCents =
         remainingAmount - amountPerTransaction * emptyTransactions.length;
 
-      let amounts = new Array(emptyTransactions.length).fill(
+      const amounts = new Array(emptyTransactions.length).fill(
         amountPerTransaction,
       );
 
-      for (let amountIndex in amounts) {
+      for (const amountIndex in amounts) {
         if (remainingCents === 0) break;
 
         amounts[amountIndex] += 1;

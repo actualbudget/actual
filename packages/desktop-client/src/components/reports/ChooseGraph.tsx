@@ -26,7 +26,6 @@ type ChooseGraphProps = {
   graphType: string;
   balanceType: string;
   groupBy: string;
-  scrollWidth?: number;
   setScrollWidth?: (value: number) => void;
   months?: Month[];
   viewLabels?: boolean;
@@ -40,7 +39,6 @@ export function ChooseGraph({
   graphType,
   balanceType,
   groupBy,
-  scrollWidth,
   setScrollWidth,
   months,
   viewLabels,
@@ -53,8 +51,8 @@ export function ChooseGraph({
     groupBy === 'Category'
       ? 'groupedData'
       : ['Month', 'Year'].includes(groupBy)
-      ? 'monthData'
-      : 'data';
+        ? 'monthData'
+        : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -139,7 +137,6 @@ export function ChooseGraph({
           headerScrollRef={headerScrollRef}
           handleScroll={handleScroll}
           interval={mode === 'time' && data.monthData}
-          scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
           compact={compact}
@@ -158,7 +155,6 @@ export function ChooseGraph({
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
           handleScroll={handleScroll}
-          scrollWidth={scrollWidth}
           data={data}
           mode={mode}
           balanceTypeOp={balanceTypeOp}

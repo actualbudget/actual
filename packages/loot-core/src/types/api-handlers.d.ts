@@ -54,10 +54,11 @@ export interface ApiHandlers {
     payees;
   }) => Promise<unknown>;
 
-  'api/transactions-import': (arg: {
-    accountId;
-    transactions;
-  }) => Promise<unknown>;
+  'api/transactions-import': (arg: { accountId; transactions }) => Promise<{
+    errors?: { message: string }[];
+    added;
+    updated;
+  }>;
 
   'api/transactions-add': (arg: {
     accountId;
@@ -71,9 +72,6 @@ export interface ApiHandlers {
     startDate;
     endDate;
   }) => Promise<unknown>;
-
-  /** @deprecated `filterTransactions` is deprecated, use `runQuery` instead' */
-  'api/transactions-filter': (arg: { text; accountId }) => Promise<void>;
 
   'api/transaction-update': (arg: { id; fields }) => Promise<unknown>;
 

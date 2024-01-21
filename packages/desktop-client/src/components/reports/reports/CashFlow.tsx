@@ -110,7 +110,6 @@ export function CashFlow(): JSX.Element {
         conditionsOp={conditionsOp}
         onCondOpChange={onCondOpChange}
         headerPrefixItems={undefined}
-        selectGraph={undefined}
       />
       <View
         style={{
