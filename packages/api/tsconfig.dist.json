@@ -3,8 +3,8 @@
   "compilerOptions": {
     // Using ES2021 because that’s the newest version where
     // the latest Node 16.x release supports all of the features
-    "target": "es2021",
-    "module": "CommonJS",
+    "target": "ES2021",
+    "module": "Node16",
     "moduleResolution": "Node16",
     "noEmit": false,
     "declaration": true,
