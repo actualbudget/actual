@@ -776,7 +776,12 @@ const Transaction = memo(function Transaction(props) {
 
     // Allow un-reconciling (unlocking) transactions
     if (name === 'cleared' && transaction.reconciled) {
-      onUpdateAfterConfirm('reconciled', false);
+      props.pushModal('confirm-transaction-edit', {
+        onConfirm: () => {
+          onUpdateAfterConfirm('reconciled', false);
+        },
+        confirmReason: 'unlockReconciled',
+      });
     }
   }
 
