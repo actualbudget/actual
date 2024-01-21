@@ -22,16 +22,12 @@ type NetWorthGraphProps = {
   style?: CSSProperties;
   graphData;
   compact: boolean;
-  domain?: {
-    y?: [number, number];
-  };
 };
 
 export function NetWorthGraph({
   style,
   graphData,
   compact,
-  domain,
 }: NetWorthGraphProps) {
   const tickFormatter = tick => {
     return `${Math.round(tick).toLocaleString()}`; // Formats the tick values as strings with commas
@@ -66,11 +62,10 @@ export function NetWorthGraph({
   type CustomTooltipProps = {
     active?: boolean;
     payload?: PayloadItem[];
-    label?: string;
   };
 
   // eslint-disable-next-line react/no-unstable-nested-components
-  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div
@@ -113,7 +108,7 @@ export function NetWorthGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         graphData && (
           <ResponsiveContainer>
             <div>

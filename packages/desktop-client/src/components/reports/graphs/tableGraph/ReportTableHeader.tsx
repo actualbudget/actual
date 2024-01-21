@@ -9,7 +9,6 @@ import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
 
 type ReportTableHeaderProps = {
-  scrollWidth?: number;
   groupBy: string;
   interval?: DataEntity[];
   balanceType: string;
@@ -19,7 +18,6 @@ type ReportTableHeaderProps = {
 };
 
 export function ReportTableHeader({
-  scrollWidth,
   groupBy,
   interval,
   balanceType,
@@ -64,7 +62,7 @@ export function ReportTableHeader({
               return (
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   key={index}
@@ -77,7 +75,7 @@ export function ReportTableHeader({
               <>
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value="Deposits"
@@ -85,7 +83,7 @@ export function ReportTableHeader({
                 />
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value="Payments"
@@ -95,7 +93,7 @@ export function ReportTableHeader({
             )}
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value="Totals"
@@ -103,7 +101,7 @@ export function ReportTableHeader({
         />
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value="Average"

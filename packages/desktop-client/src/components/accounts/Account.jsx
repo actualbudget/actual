@@ -26,7 +26,6 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
-import { authorizeBank } from '../../gocardless';
 import { useCategories } from '../../hooks/useCategories';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, theme } from '../../style';
@@ -228,7 +227,7 @@ class AccountInternal extends PureComponent {
       }
     };
 
-    const onUndo = async ({ tables, messages, undoTag }) => {
+    const onUndo = async ({ tables, messages }) => {
       await maybeRefetch(tables);
 
       // If all the messages are dealing with transactions, find the
@@ -517,7 +516,7 @@ class AccountInternal extends PureComponent {
           });
         }
       },
-      mappedData => {
+      () => {
         return data;
       },
     );
@@ -589,7 +588,9 @@ class AccountInternal extends PureComponent {
 
     switch (item) {
       case 'link':
-        authorizeBank(this.props.pushModal, { upgradingAccountId: accountId });
+        this.props.pushModal('add-account', {
+          upgradingAccountId: accountId,
+        });
         break;
       case 'unlink':
         this.props.unlinkAccount(accountId);
