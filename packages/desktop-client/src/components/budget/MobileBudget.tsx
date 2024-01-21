@@ -73,8 +73,6 @@ function BudgetInner(props: BudgetInnerProps) {
   const [currentMonth, setCurrentMonth] = useState(currMonth);
   const [initialized, setInitialized] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [editingBudgetCategoryId, setEditingBudgetCategoryId] = useState(null);
-  const [openBalanceActionMenuId, setOpenBalanceActionMenuId] = useState(null);
 
   useEffect(() => {
     async function init() {
