@@ -142,7 +142,7 @@ export function StackedBarGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data.monthData && (
           <ResponsiveContainer>
             <div>

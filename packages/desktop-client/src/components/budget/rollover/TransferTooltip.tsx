@@ -98,7 +98,7 @@ export function TransferTooltip({
         categoryGroups={categoryGroups}
         value={null}
         openOnFocus={true}
-        onUpdate={id => {}}
+        onUpdate={() => {}}
         onSelect={id => setCategory(id)}
         inputProps={{ onEnter: submit, placeholder: '(none)' }}
       />
