@@ -54,7 +54,7 @@ export function CustomReport() {
   } = useFilters();
 
   const location = useLocation();
-  const loadReport = location.state.report ?? defaultReport;
+  const loadReport = location.state && (location.state.report ?? defaultState);
 
   const [allMonths, setAllMonths] = useState(null);
   const [typeDisabled, setTypeDisabled] = useState(['Net']);

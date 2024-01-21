@@ -38,7 +38,7 @@ export function BalanceTooltip({
       {...tooltipProps}
     >
       <Menu
-        onMenuSelect={type => {
+        onMenuSelect={() => {
           onBudgetAction(monthIndex, 'carryover', {
             category: categoryId,
             flag: !carryover,

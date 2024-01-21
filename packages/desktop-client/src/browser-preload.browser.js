@@ -51,7 +51,7 @@ global.Actual = {
     window.location.reload();
   },
 
-  openFileDialog: async ({ filters = [], properties }) => {
+  openFileDialog: async ({ filters = [] }) => {
     return new Promise(resolve => {
       let createdElement = false;
       // Attempt to reuse an already-created file input.
@@ -91,7 +91,7 @@ global.Actual = {
               .uploadFile(filename, ev.target.result)
               .then(() => resolve([filepath]));
           };
-          reader.onerror = function (ev) {
+          reader.onerror = function () {
             alert('Error reading file');
           };
         }
@@ -107,7 +107,7 @@ global.Actual = {
     });
   },
 
-  saveFile: (contents, defaultFilename, dialogTitle) => {
+  saveFile: (contents, defaultFilename) => {
     const temp = document.createElement('a');
     temp.style = 'display: none';
     temp.download = defaultFilename;
@@ -121,9 +121,9 @@ global.Actual = {
   openURLInBrowser: url => {
     window.open(url, '_blank');
   },
-  onEventFromMain: (type, handler) => {},
+  onEventFromMain: () => {},
   applyAppUpdate: () => {},
-  updateAppMenu: isBudgetOpen => {},
+  updateAppMenu: () => {},
 
   ipcConnect: () => {},
   getServerSocket: async () => {
