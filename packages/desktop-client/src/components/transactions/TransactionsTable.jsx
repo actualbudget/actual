@@ -1321,6 +1321,7 @@ const Transaction = memo(function Transaction(props) {
           style={{ ...styles.tnum, ...amountStyle }}
           width={88}
           textAlign="right"
+          title=integerToCurrency(runningBalance)
           privacyFilter
         />
       )}
