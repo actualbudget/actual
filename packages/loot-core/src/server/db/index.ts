@@ -310,7 +310,9 @@ export async function insertCategoryGroup(group) {
     [group.name.toUpperCase()],
   );
   if (existingGroup) {
-    throw new Error(`Group ‘${group.name}’ already exists in budget`);
+    throw new Error(
+      `Group ‘${group.name}’ already exists in budget (May be Hidden)`,
+    );
   }
 
   const lastGroup = await first(`

@@ -316,7 +316,7 @@ function BudgetInner(props: BudgetProps) {
   const groupNameAlreadyExistsNotification = name => {
     props.addNotification({
       type: 'error',
-      message: `Group ‘${name}’ already exists in budget`,
+      message: `Group ‘${name}’ already exists in budget (May be Hidden)`,
     });
   };
 
