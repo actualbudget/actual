@@ -15,7 +15,6 @@ import { Row, Cell } from '../../../table';
 
 type ReportTableTotalsProps = {
   data: GroupedEntity;
-  scrollWidth?: number;
   balanceTypeOp: string;
   mode: string;
   monthsCount: number;
@@ -26,7 +25,6 @@ type ReportTableTotalsProps = {
 
 export function ReportTableTotals({
   data,
-  scrollWidth,
   balanceTypeOp,
   mode,
   monthsCount,

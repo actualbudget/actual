@@ -9,7 +9,6 @@ import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
 
 type ReportTableHeaderProps = {
-  scrollWidth?: number;
   groupBy: string;
   interval?: DataEntity[];
   balanceType: string;
@@ -19,7 +18,6 @@ type ReportTableHeaderProps = {
 };
 
 export function ReportTableHeader({
-  scrollWidth,
   groupBy,
   interval,
   balanceType,
