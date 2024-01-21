@@ -23,10 +23,10 @@ import {
 
 import { theme } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
-import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 
 const MAX_BAR_SIZE = 50;
+const ANIMATION_DURATION = 1000; // in ms
 
 type CustomTooltipProps = TooltipProps<number, 'date'> & {
   isConcise: boolean;
@@ -141,12 +141,14 @@ export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
           stackId="a"
           fill={chartTheme.colors.blue}
           maxBarSize={MAX_BAR_SIZE}
+          animationDuration={ANIMATION_DURATION}
         />
         <Bar
           dataKey="expenses"
           stackId="a"
           fill={chartTheme.colors.red}
           maxBarSize={MAX_BAR_SIZE}
+          animationDuration={ANIMATION_DURATION}
         />
         <Line
           type="monotone"
@@ -154,6 +156,7 @@ export function CashFlowGraph({ graphData, isConcise }: CashFlowGraphProps) {
           dot={false}
           stroke={theme.pageTextLight}
           strokeWidth={2}
+          animationDuration={ANIMATION_DURATION}
         />
       </ComposedChart>
     </ResponsiveContainer>
