@@ -25,8 +25,8 @@
     "checkJs": false,
     // Used for temp builds
     "outDir": "build",
-    "moduleResolution": "Node16",
-    "module": "Node16",
+    "moduleResolution": "Node10",
+    "module": "ES2022",
     // Until/if we build using tsc
     "noEmit": true,
     "paths": {
