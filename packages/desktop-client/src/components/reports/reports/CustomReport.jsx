@@ -81,10 +81,11 @@ export function CustomReport() {
   const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine = ReportOptions.dateRange.length - 3;
 
+  const [report, setReport] = useState(loadReport);
   const months = monthUtils.rangeInclusive(startDate, endDate);
 
   useEffect(() => {
-    if (selectedCategories === null && categories.list.length !== 0) {
+    if (selectedCategories.length === 0 && categories.list.length !== 0) {
       setSelectedCategories(categories.list);
     }
   }, [categories, selectedCategories]);
@@ -235,9 +236,40 @@ export function CustomReport() {
   };
 
   const onChangeAppliedFilter = (filter, changedElement) => {
-    //onReportChange(null, 'modify');
+    onReportChange('reload');
     return changedElement(filter);
   };
+
+  const onReportChange = type => {
+    switch (type) {
+      case 'reload':
+        if (report.name.substr(report.name.length - 10) === '(modified)') {
+          setReport({
+            ...report,
+            name: report.name.substr(0, report.name.length - 11),
+          });
+        }
+
+        setStartDate(report.startDate);
+        setEndDate(report.endDate);
+        setIsDateStatic(report.isDateStatic);
+        setDateRange(report.dateRange);
+        setMode(report.mode);
+        setGroupBy(report.groupBy);
+        setBalanceType(report.balanceType);
+        setShowEmpty(report.showEmpty);
+        setShowOffBudget(report.showOffBudget);
+        setShowUncategorized(report.showUncategorized);
+        setSelectedCategories(report.selectedCategories);
+        setGraphType(report.graphType);
+        onApplyFilter(null);
+        report.conditions.forEach(condition => onApplyFilter(condition));
+        onCondOpChange(report.conditionsOp);
+        break;
+      default:
+    }
+  };
+
   return (
     <View style={{ ...styles.page, minWidth: 650, overflow: 'hidden' }}>
       <Header title="Custom Reports" />
@@ -305,7 +337,7 @@ export function CustomReport() {
                 onCondOpChange={filter =>
                   onChangeAppliedFilter(filter, onCondOpChange)
                 }
-                //onUpdateChange={onReportChange}
+                onUpdateChange={onReportChange}
               />
             </View>
           )}

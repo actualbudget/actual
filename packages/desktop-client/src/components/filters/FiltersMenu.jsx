@@ -597,7 +597,7 @@ export function AppliedFilters({
   onUpdateChange,
 }) {
   const onUpdateAppliedFilter = (filter, newFilter) => {
-    //onUpdateChange?.(null, 'modify');
+    onUpdateChange?.('reload');
     return onUpdate(filter, newFilter);
   };
 

@@ -6,21 +6,13 @@ import {
   type CategoryGroupEntity,
   type PayeeEntity,
 } from 'loot-core/src/types/models';
-import { useCategories } from '../../hooks/useCategories';
 
 const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
 const endDate = monthUtils.currentMonth();
-const categories = useCategories();
-const selectAll: CategoryEntity[] = [];
-categories.grouped.map(
-  categoryGroup =>
-    categoryGroup.categories &&
-    categoryGroup.categories.map(category => selectAll.push(category)),
-);
 
 export const defaultReport: CustomReportEntity = {
   id: undefined,
-  name: undefined,
+  name: 'Default',
   startDate,
   endDate,
   isDateStatic: false,
@@ -31,7 +23,7 @@ export const defaultReport: CustomReportEntity = {
   showEmpty: false,
   showOffBudget: false,
   showUncategorized: false,
-  selectedCategories: selectAll,
+  selectedCategories: [],
   graphType: 'BarGraph',
   conditions: [],
   conditionsOp: 'and',
