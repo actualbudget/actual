@@ -42,6 +42,12 @@ export function ConfirmTransactionEdit({
               Saving your changes to this reconciled transaction may bring your
               reconciliation out of balance.
             </Block>
+          ) : confirmReason === 'unlockReconciled' ? (
+            <Block>
+              Unlocking this transaction means you won‘t be warned about changes
+              that can impact your reconciled balance. (Changes to amount,
+              account, payee, etc).
+            </Block>
           ) : confirmReason === 'deleteReconciled' ? (
             <Block>
               Deleting this reconciled transaction may bring your reconciliation
