@@ -199,7 +199,7 @@ async function importTransactions(
 
             subtransactions:
               transaction.subTransactions &&
-              transaction.subTransactions.map((t, i) => {
+              transaction.subTransactions.map(t => {
                 return {
                   id: entityIdMap.get(t.entityId),
                   amount: amountToInteger(t.amount),
@@ -346,7 +346,7 @@ export async function doImport(data: YNAB4.YFull) {
   console.log('Setting up...');
 }
 
-export function getBudgetName(filepath, _data) {
+export function getBudgetName(filepath) {
   let unixFilepath = normalizePathSep(filepath);
 
   if (!/\.zip/.test(unixFilepath)) {

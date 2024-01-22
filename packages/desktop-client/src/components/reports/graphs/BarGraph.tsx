@@ -167,7 +167,7 @@ export function BarGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data[splitData] && (
           <ResponsiveContainer>
             <div>
