@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
+import { type State } from 'loot-core/src/client/state-types';
+import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
 import { savePrefs } from 'loot-core/src/client/actions';
 
 import { useResponsive } from '../ResponsiveProvider';
