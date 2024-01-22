@@ -1,17 +1,19 @@
 // @ts-strict-ignore
 import React from 'react';
 
+import { type DataEntity } from 'loot-core/src/types/models/reports';
+
 import { type CSSProperties, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Cell, Row } from '../../../table';
-import { type GroupedEntity } from '../../entities';
 
 type ReportTableListProps = {
-  data: GroupedEntity[];
+  data: DataEntity[];
   mode?: string;
   monthsCount?: number;
   groupBy: string;
   renderItem;
+  compact: boolean;
 };
 
 export function ReportTableList({
@@ -20,27 +22,29 @@ export function ReportTableList({
   mode,
   groupBy,
   renderItem,
+  compact,
 }: ReportTableListProps) {
   const groupByItem = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
 
   type RenderRowProps = {
-    key: string;
     index: number;
     parent_index?: number;
     style?: CSSProperties;
+    compact: boolean;
   };
-  function RenderRow({ index, parent_index, style, key }: RenderRowProps) {
-    const item = parent_index
-      ? data[parent_index].categories[index]
-      : data[index];
+  function RenderRow({ index, parent_index, style, compact }: RenderRowProps) {
+    const item =
+      parent_index === undefined
+        ? data[index]
+        : data[parent_index].categories[index];
 
     return renderItem({
       item,
       groupByItem,
       mode,
       style,
-      key,
       monthsCount,
+      compact,
     });
   }
 
@@ -52,8 +56,8 @@ export function ReportTableList({
             {data ? (
               <>
                 <RenderRow
-                  key={item.id}
                   index={index}
+                  compact={compact}
                   style={
                     item.categories && {
                       color: theme.tableRowHeaderText,
@@ -70,6 +74,7 @@ export function ReportTableList({
                           <RenderRow
                             key={category.id}
                             index={i}
+                            compact={compact}
                             parent_index={index}
                           />
                         );

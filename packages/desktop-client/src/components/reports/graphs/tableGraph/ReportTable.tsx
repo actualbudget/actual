@@ -7,10 +7,11 @@ import React, {
 } from 'react';
 import { type RefProp } from 'react-spring';
 
+import { type DataEntity } from 'loot-core/src/types/models/reports';
+
 import { type CSSProperties } from '../../../../style';
 import { Block } from '../../../common/Block';
 import { View } from '../../../common/View';
-import { type GroupedEntity } from '../../entities';
 
 import { ReportTableList } from './ReportTableList';
 import { ReportTableRow } from './ReportTableRow';
@@ -22,9 +23,10 @@ type ReportTableProps = {
   style?: CSSProperties;
   groupBy: string;
   balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
-  data: GroupedEntity[];
+  data: DataEntity[];
   mode: string;
   monthsCount: number;
+  compact: boolean;
 };
 
 export function ReportTable({
@@ -37,6 +39,7 @@ export function ReportTable({
   data,
   mode,
   monthsCount,
+  compact,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -47,16 +50,16 @@ export function ReportTable({
   });
 
   const renderItem = useCallback(
-    ({ item, groupByItem, mode, style, key, monthsCount }) => {
+    ({ item, groupByItem, mode, style, monthsCount, compact }) => {
       return (
         <ReportTableRow
-          key={key}
           item={item}
           balanceTypeOp={balanceTypeOp}
           groupByItem={groupByItem}
           mode={mode}
           style={style}
           monthsCount={monthsCount}
+          compact={compact}
         />
       );
     },
@@ -94,6 +97,7 @@ export function ReportTable({
           mode={mode}
           groupBy={groupBy}
           renderItem={renderItem}
+          compact={compact}
         />
       </Block>
     </View>

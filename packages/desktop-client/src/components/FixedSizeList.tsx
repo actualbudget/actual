@@ -2,7 +2,6 @@
 import {
   createRef,
   PureComponent,
-  type ReactElement,
   type ReactNode,
   type Ref,
   type MutableRefObject,
@@ -11,7 +10,6 @@ import {
 
 import memoizeOne from 'memoize-one';
 
-import { useResizeObserver } from '../hooks/useResizeObserver';
 import { type CSSProperties } from '../style';
 
 import { View } from './common/View';
@@ -19,16 +17,6 @@ import { View } from './common/View';
 const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
 
 const defaultItemKey: FixedSizeListProps['itemKey'] = (index: number) => index;
-
-type ResizeObserverProps = {
-  onResize: Parameters<typeof useResizeObserver>[0];
-  children: (ref: Ref<HTMLDivElement>) => ReactElement;
-};
-
-function ResizeObserver({ onResize, children }: ResizeObserverProps) {
-  const ref = useResizeObserver(onResize);
-  return children(ref);
-}
 
 type FixedSizeListProps = {
   className?: string;
@@ -262,33 +250,29 @@ export class FixedSizeList extends PureComponent<
     const estimatedTotalSize = this.getEstimatedTotalSize();
 
     return (
-      <ResizeObserver onResize={this.onHeaderResize}>
-        {headerRef => (
-          <div
-            className={className}
-            onScroll={this._onScrollVertical}
-            ref={this._outerRefSetter}
-            style={{
-              height,
-              width,
-              overflow: 'hidden auto',
-            }}
-          >
-            <View innerRef={headerRef}>{header}</View>
-            <div
-              ref={innerRef}
-              style={{
-                position: 'relative',
-                height: estimatedTotalSize,
-                width: '100%',
-                pointerEvents: isScrolling ? 'none' : undefined,
-              }}
-            >
-              {items}
-            </div>
-          </div>
-        )}
-      </ResizeObserver>
+      <div
+        className={className}
+        onScroll={this._onScrollVertical}
+        ref={this._outerRefSetter}
+        style={{
+          height,
+          width,
+          overflow: 'hidden auto',
+        }}
+      >
+        <View>{header}</View>
+        <div
+          ref={innerRef}
+          style={{
+            position: 'relative',
+            height: estimatedTotalSize,
+            width: '100%',
+            pointerEvents: isScrolling ? 'none' : undefined,
+          }}
+        >
+          {items}
+        </div>
+      </div>
     );
   }
 
@@ -303,10 +287,6 @@ export class FixedSizeList extends PureComponent<
         outerRef.classList.remove('animated');
       }
     }
-  };
-
-  onHeaderResize = (rect: { height: number }) => {
-    // this.setState({ headerHeight: rect.height });
   };
 
   anchor() {
@@ -499,6 +479,7 @@ export class FixedSizeList extends PureComponent<
     return style;
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _getItemStyleCache = memoizeOne((_, __, ___) => ({}));
 
   _getRangeToRender() {

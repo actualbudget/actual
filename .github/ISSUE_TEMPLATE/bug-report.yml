@@ -18,6 +18,18 @@ body:
           required: true
     validations:
       required: true
+  - type: checkboxes
+    id: bank-sync-issue
+    attributes:
+      label: 'Is this related to GoCardless, Simplefin or another bank-sync provider?'
+      description: 'Most issues with bank-sync providers are due to a lack of a custom bank-mapper (i.e. payee or other fields not coming through). In such cases you can create a custom bank mapper in [actual-server](https://github.com/actualbudget/actual-server/blob/master/src/app-gocardless/README.md) repository. Other likely issue is misconfigured server - in which case please reach out via the [community Discord](https://discord.gg/pRYNYr4W5A) to get support.'
+      options:
+        - label: 'I have checked my server logs and could not see any errors there'
+        - label: 'I will be attaching my server logs to this issue'
+        - label: 'I will be attaching my client-side (browser) logs to this issue'
+        - label: 'I understand that this issue will be automatically closed if insufficient information is provided'
+    validations:
+      required: false
   - type: textarea
     id: what-happened
     attributes:

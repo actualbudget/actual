@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { amountToCurrency } from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { theme, type CSSProperties } from '../../../style';
 import { Container } from '../Container';
-import { type DataEntity } from '../entities';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
@@ -118,7 +118,7 @@ const customLabel = props => {
 
 type DonutGraphProps = {
   style?: CSSProperties;
-  data: DataEntity;
+  data: GroupedEntity;
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
@@ -157,7 +157,7 @@ export function DonutGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data[splitData] && (
           <ResponsiveContainer>
             <div>
@@ -173,7 +173,9 @@ export function DonutGraph({
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                   labelLine={false}
-                  label={e => (viewLabels ? customLabel(e) : <div />)}
+                  label={e =>
+                    viewLabels && !compact ? customLabel(e) : <div />
+                  }
                   onMouseEnter={onPieEnter}
                 >
                   {data.legend.map((entry, index) => (

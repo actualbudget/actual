@@ -5,18 +5,19 @@ import {
   amountToInteger,
   integerToCurrency,
 } from 'loot-core/src/shared/util';
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { type CSSProperties, styles, theme } from '../../../../style';
 import { Row, Cell } from '../../../table';
-import { type GroupedEntity } from '../../entities';
 
 type ReportTableRowProps = {
-  item: GroupedEntity;
+  item: DataEntity;
   balanceTypeOp: 'totalAssets' | 'totalDebts' | 'totalTotals';
   groupByItem: 'id' | 'name';
   mode: string;
   style?: CSSProperties;
   monthsCount: number;
+  compact: boolean;
 };
 
 export const ReportTableRow = memo(
@@ -27,10 +28,12 @@ export const ReportTableRow = memo(
     mode,
     style,
     monthsCount,
+    compact,
   }: ReportTableRowProps) => {
     const average = amountToInteger(item[balanceTypeOp]) / monthsCount;
     return (
       <Row
+        key={item.id}
         collapsed={true}
         style={{
           color: theme.tableText,
@@ -53,7 +56,7 @@ export const ReportTableRow = memo(
                 <Cell
                   key={amountToCurrency(month[balanceTypeOp])}
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value={amountToCurrency(month[balanceTypeOp])}
@@ -79,7 +82,7 @@ export const ReportTableRow = memo(
                   width="flex"
                   privacyFilter
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                 />
@@ -93,7 +96,7 @@ export const ReportTableRow = memo(
                   width="flex"
                   privacyFilter
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                 />
@@ -108,7 +111,7 @@ export const ReportTableRow = memo(
           }
           style={{
             fontWeight: 600,
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           width="flex"
@@ -123,7 +126,7 @@ export const ReportTableRow = memo(
           }
           style={{
             fontWeight: 600,
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           width="flex"
