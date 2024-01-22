@@ -180,6 +180,10 @@ function recalculate(data, start, end, isConcise) {
 
       res.income.push({ x, y: integerToAmount(income) });
       res.expenses.push({ x, y: integerToAmount(expense) });
+      res.transfers.push({
+        x,
+        y: integerToAmount(creditTransfers + debitTransfers),
+      });
       res.balances.push({
         x,
         y: integerToAmount(balance),
@@ -188,7 +192,7 @@ function recalculate(data, start, end, isConcise) {
       });
       return res;
     },
-    { expenses: [], income: [], balances: [] },
+    { expenses: [], income: [], transfers: [], balances: [] },
   );
 
   const { balances } = graphData;
