@@ -43,7 +43,7 @@ export function SaveReportName({
           >
             <FormField style={{ flex: 1 }}>
               <FormLabel
-                title="Filter Name"
+                title="Report Name"
                 htmlFor="name-field"
                 style={{ userSelect: 'none' }}
               />

@@ -12,19 +12,20 @@ const endDate = monthUtils.currentMonth();
 
 export const defaultReport: CustomReportEntity = {
   id: undefined,
+  name: undefined,
+  startDate,
+  endDate,
+  isDateStatic: false,
+  dateRange: 'Last 6 months',
   mode: 'total',
   groupBy: 'Category',
   balanceType: 'Payment',
   showEmpty: false,
-  showOffBudgetHidden: false,
+  showOffBudget: false,
   showUncategorized: false,
-  graphType: 'BarGraph',
-  startDate,
-  endDate,
   selectedCategories: null,
-  isDateStatic: false,
+  graphType: 'BarGraph',
   conditionsOp: 'and',
-  name: 'Default',
 };
 
 const balanceTypeOptions = [

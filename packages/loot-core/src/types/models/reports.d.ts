@@ -1,21 +1,25 @@
+import { CategoryEntity } from './category';
 import { type RuleConditionEntity } from './rule';
 
 export interface CustomReportEntity {
   id: string | undefined;
-  mode: string;
-  groupBy: string;
-  balanceType: string;
-  showEmpty: boolean;
-  showOffBudgetHidden: boolean;
-  showUncategorized: boolean;
-  graphType: string;
-  selectedCategories;
-  filters?: RuleConditionEntity[];
-  conditionsOp: string;
-  name: string;
+  name: string | undefined;
   startDate: string;
   endDate: string;
   isDateStatic: boolean;
+  dateRange: string;
+  mode: string;
+  groupBy: string;
+  balanceType: string;
+  //interval: string;
+  showEmpty: boolean;
+  showOffBudget: boolean;
+  showHidden?: boolean;
+  showUncategorized: boolean;
+  selectedCategories: CategoryEntity[];
+  graphType: string;
+  filters?: RuleConditionEntity[];
+  conditionsOp: string;
   data?: GroupedEntity;
   tombstone?: boolean;
 }

@@ -46,7 +46,7 @@ export function ReportTopbar({
         selected={customReportItems.graphType === 'TableGraph'}
         title="Data Table"
         onSelect={() => {
-          setSavedStatus('changed');
+          onReportChange(null, 'modify');
           setGraphType('TableGraph');
           onChangeViews('viewLegend', false);
           setTypeDisabled([]);
@@ -64,7 +64,7 @@ export function ReportTopbar({
           customReportItems.graphType === 'StackedBarGraph'
         }
         onSelect={() => {
-          setSavedStatus('changed');
+          onReportChange(null, 'modify');
           if (customReportItems.mode === 'total') {
             setGraphType('BarGraph');
             if (['Net'].includes(customReportItems.balanceType)) {
@@ -89,7 +89,7 @@ export function ReportTopbar({
         title="Area Graph"
         selected={customReportItems.graphType === 'AreaGraph'}
         onSelect={() => {
-          setSavedStatus('changed');
+          onReportChange(null, 'modify');
           setGraphType('AreaGraph');
           setGroupBy('Month');
           onChangeViews('viewLegend', false);
@@ -104,7 +104,7 @@ export function ReportTopbar({
         title="Donut Graph"
         selected={customReportItems.graphType === 'DonutGraph'}
         onSelect={() => {
-          setSavedStatus('changed');
+          onReportChange(null, 'modify');
           setGraphType('DonutGraph');
           setTypeDisabled(['Net']);
           setBalanceType('Payment');
@@ -126,7 +126,7 @@ export function ReportTopbar({
       <GraphButton
         selected={viewLegend}
         onSelect={() => {
-          setSavedStatus('changed');
+          onReportChange(null, 'modify');
           onChangeViews('viewLegend');
         }}
         style={{ marginRight: 15 }}

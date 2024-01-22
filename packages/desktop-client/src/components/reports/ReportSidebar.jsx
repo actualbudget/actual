@@ -38,10 +38,10 @@ export function ReportSidebar({
   setSelectedCategories,
   onChangeDates,
   onChangeViews,
-  setSavedStatus,
+  onReportChange,
 }) {
   const onSelectRange = cond => {
-    setSavedStatus('changed');
+    onReportChange(null, 'modify');
     setDateRange(cond);
     switch (cond) {
       case 'All time':
@@ -75,7 +75,7 @@ export function ReportSidebar({
   };
 
   const onChangeMode = cond => {
-    setSavedStatus('changed');
+    onReportChange(null, 'modify');
     setMode(cond);
     if (cond === 'time') {
       if (customReportItems.graphType === 'TableGraph') {
@@ -106,7 +106,7 @@ export function ReportSidebar({
   };
 
   const onChangeSplit = cond => {
-    setSavedStatus('changed');
+    onReportChange(null, 'modify');
     setGroupBy(cond);
     if (customReportItems.mode === 'total') {
       if (customReportItems.graphType !== 'TableGraph') {
@@ -124,7 +124,7 @@ export function ReportSidebar({
   };
 
   const onChangeBalanceType = cond => {
-    setSavedStatus('changed');
+    onReportChange(null, 'modify');
     setBalanceType(cond);
   };
 
@@ -258,7 +258,7 @@ export function ReportSidebar({
             value={customReportItems.showEmpty}
             onChange={() => {
               setShowEmpty(!customReportItems.showEmpty);
-              setSavedStatus('changed');
+              onReportChange(null, 'modify');
             }}
           />
           <label
@@ -280,11 +280,11 @@ export function ReportSidebar({
 
           <Checkbox
             id="show-hidden-columns"
-            checked={customReportItems.showOffBudgetHidden}
-            value={customReportItems.showOffBudgetHidden}
+            checked={customReportItems.showOffBudget}
+            value={customReportItems.showOffBudget}
             onChange={() => {
-              setShowOffBudgetHidden(!customReportItems.showOffBudgetHidden);
-              setSavedStatus('changed');
+              setShowOffBudgetHidden(!customReportItems.showOffBudget);
+              onReportChange(null, 'modify');
             }}
           />
           <label
@@ -310,7 +310,7 @@ export function ReportSidebar({
             value={customReportItems.showUncategorized}
             onChange={() => {
               setShowUncategorized(!customReportItems.showUncategorized);
-              setSavedStatus('changed');
+              onReportChange(null, 'modify');
             }}
           />
           <label
@@ -358,7 +358,7 @@ export function ReportSidebar({
                 customReportItems.startDate,
                 customReportItems.endDate,
               );
-              setSavedStatus('changed');
+              onReportChange(null, 'modify');
             }}
           >
             Static
@@ -408,7 +408,7 @@ export function ReportSidebar({
                       customReportItems.endDate,
                     ),
                   );
-                  setSavedStatus('changed');
+                  onReportChange(null, 'modify');
                 }}
                 value={customReportItems.startDate}
                 defaultLabel={monthUtils.format(
@@ -437,7 +437,7 @@ export function ReportSidebar({
                       newValue,
                     ),
                   );
-                  setSavedStatus('changed');
+                  onReportChange(null, 'modify');
                 }}
                 value={customReportItems.endDate}
                 options={allMonths.map(({ name, pretty }) => [name, pretty])}

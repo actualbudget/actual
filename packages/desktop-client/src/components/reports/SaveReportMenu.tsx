@@ -23,58 +23,50 @@ export function SaveReportMenu({
           onMenuSelect(item);
         }}
         items={
-          report.id === null
+          report.id === undefined
             ? [
                 {
                   name: 'save-report',
                   text: 'Save new report',
-                  disabled: true,
                 },
                 {
                   name: 'reset-report',
                   text: 'Reset to default',
-                  disabled: true,
                 },
               ]
             : savedStatus === 'saved'
               ? [
-                  { name: 'rename-report', text: 'Rename', disabled: true },
-                  { name: 'delete-report', text: 'Delete', disabled: true },
+                  { name: 'rename-report', text: 'Rename' },
+                  { name: 'delete-report', text: 'Delete' },
                   Menu.line,
                   {
                     name: 'save-report',
                     text: 'Save new report',
-                    disabled: true,
                   },
                   {
                     name: 'reset-report',
                     text: 'Reset to default',
-                    disabled: true,
                   },
                 ]
               : [
-                  { name: 'rename-report', text: 'Rename', disabled: true },
+                  { name: 'rename-report', text: 'Rename' },
                   {
                     name: 'update-report',
                     text: 'Update report',
-                    disabled: true,
                   },
                   {
                     name: 'reload-report',
                     text: 'Revert changes',
-                    disabled: true,
                   },
-                  { name: 'delete-report', text: 'Delete', disabled: true },
+                  { name: 'delete-report', text: 'Delete' },
                   Menu.line,
                   {
                     name: 'save-report',
                     text: 'Save new report',
-                    disabled: true,
                   },
                   {
                     name: 'reset-report',
                     text: 'Reset to default',
-                    disabled: true,
                   },
                 ]
         }

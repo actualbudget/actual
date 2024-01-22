@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { createRef, useState } from 'react';
 
+import { v4 as uuidv4 } from 'uuid';
+
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/src/types/models';
 
@@ -49,14 +51,19 @@ export function SaveReport({
 
     if (menuItem === 'save-report') {
       //create new flow
+      /*
       res = await sendCatch('report/create', {
         ...savedReport,
       });
+      */
       savedReport = {
         ...savedReport,
-        id: res.data,
+        id: uuidv4(),
+        name,
       };
-    } else {
+    }
+
+    if (['rename-report', 'update-report'].includes(menuItem)) {
       //rename or update flow
       if (menuItem === 'rename-report') {
         //rename
@@ -66,11 +73,13 @@ export function SaveReport({
         };
       }
       //send update and rename to DB
+      /*
       res = await sendCatch('report/update', {
         ...savedReport,
       });
+      */
     }
-    if (res.error) {
+    if (res) {
       setErr(res.error.message);
       setNameMenuOpen(true);
     } else {
@@ -93,7 +102,7 @@ export function SaveReport({
         break;
       case 'delete-report':
         setMenuOpen(false);
-        await send('report/delete', id);
+        //await send('report/delete', id);
         onResetReports();
         break;
       case 'update-report':
