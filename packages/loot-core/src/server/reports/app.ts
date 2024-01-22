@@ -42,7 +42,7 @@ const reportModel = {
 };
 
 async function reportNameExists(
-  name: string,
+  name: string | undefined,
   reportId: string | undefined,
   newItem: boolean,
 ) {

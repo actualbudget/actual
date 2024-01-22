@@ -13,7 +13,7 @@ export function SaveReportMenu({
 }: {
   report: CustomReportEntity;
   onClose: () => void;
-  onMenuSelect: (item) => void;
+  onMenuSelect: (item: string) => void;
   savedStatus: string;
 }) {
   return (

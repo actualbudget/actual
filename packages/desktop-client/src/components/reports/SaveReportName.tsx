@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { RefObject, useEffect } from 'react';
 
 import { theme } from '../../style';
 import { Button } from '../common/Button';
@@ -11,10 +11,10 @@ import { FormField, FormLabel } from '../forms';
 type SaveReportNameProps = {
   onClose: () => void;
   menuItem: string;
-  onNameChange;
-  inputRef;
+  onNameChange: (name: string) => void;
+  inputRef: RefObject<HTMLInputElement>;
   onAddUpdate: () => void;
-  err;
+  err: string;
 };
 
 export function SaveReportName({
