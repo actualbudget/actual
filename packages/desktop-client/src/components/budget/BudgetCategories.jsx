@@ -267,7 +267,7 @@ export const BudgetCategories = memo(
               items={expenseGroupIds}
               strategy={verticalListSortingStrategy}
             >
-              {expenseGroupItems.map((item, idx) => {
+              {expenseGroupItems.map(item => {
                 let content;
                 switch (item.type) {
                   case 'new-expense-category':

@@ -211,7 +211,7 @@ function AccountList({
 
   const [isDragging, setIsDragging] = useState(false);
 
-  const onDragStart = e => {
+  const onDragStart = () => {
     setIsDragging(true);
   };
 

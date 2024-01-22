@@ -225,7 +225,7 @@ export function Accounts({
               items={offbudgetAccounts}
               strategy={verticalListSortingStrategy}
             >
-              {closedAccounts.map((account, i) => (
+              {closedAccounts.map(account => (
                 <Account
                   key={account.id}
                   name={account.name}
