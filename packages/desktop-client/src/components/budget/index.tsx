@@ -15,6 +15,8 @@ import {
   useMatch,
 } from 'react-router-dom';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { type QueriesState } from 'loot-core/src/client/state-types/queries';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
@@ -551,19 +553,24 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
 });
 
 export function Budget() {
-  const startMonth = useSelector(
-    state => state.prefs.local['budget.startMonth'],
-  );
-  const collapsedPrefs = useSelector(
-    state => state.prefs.local['budget.collapsed'],
-  );
-  const summaryCollapsed = useSelector(
-    state => state.prefs.local['budget.summaryCollapsed'],
-  );
-  const budgetType = useSelector(
+  const startMonth = useSelector<
+    State,
+    PrefsState['local']['budget.startMonth']
+  >(state => state.prefs.local['budget.startMonth']);
+  const collapsedPrefs = useSelector<
+    State,
+    PrefsState['local']['budget.collapsed']
+  >(state => state.prefs.local['budget.collapsed']);
+  const summaryCollapsed = useSelector<
+    State,
+    PrefsState['local']['budget.summaryCollapsed']
+  >(state => state.prefs.local['budget.summaryCollapsed']);
+  const budgetType = useSelector<State, PrefsState['local']['budgetType']>(
     state => state.prefs.local.budgetType || 'rollover',
   );
-  const maxMonths = useSelector(state => state.prefs.global.maxMonths);
+  const maxMonths = useSelector<State, PrefsState['global']['maxMonths']>(
+    state => state.prefs.global.maxMonths,
+  );
   const { grouped: categoryGroups } = useCategories();
 
   const actions = useActions();

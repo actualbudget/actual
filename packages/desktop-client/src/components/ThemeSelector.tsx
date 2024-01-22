@@ -36,7 +36,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
     });
   }
 
-  const Icon = themeIcons?.[theme] || SvgSun;
+  const Icon = themeIcons[theme] || SvgSun;
 
   return isNarrowWidth ? null : (
     <Button

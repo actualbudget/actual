@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { type State } from 'loot-core/client/state-types';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
@@ -39,7 +41,9 @@ export function ResetCache() {
 }
 
 export function ResetSync() {
-  const isEnabled = useSelector(state => !!state.prefs.local.groupId);
+  const isEnabled = !!useSelector<State, PrefsState['local']['groupId']>(
+    state => state.prefs.local.groupId,
+  );
   const { resetSync } = useActions();
 
   const [resetting, setResetting] = useState(false);
