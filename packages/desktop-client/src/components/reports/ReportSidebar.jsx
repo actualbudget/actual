@@ -266,11 +266,15 @@ export function ReportSidebar({
                 <Menu
                   onMenuSelect={type => {
                     if (type === 'show-hidden-categories') {
-                      setShowOffBudgetHidden(!showOffBudgetHidden);
+                      setShowOffBudgetHidden(
+                        !customReportItems.showOffBudgetHidden,
+                      );
                     } else if (type === 'show-empty-rows') {
-                      setShowEmpty(!showEmpty);
+                      setShowEmpty(!customReportItems.showEmpty);
                     } else if (type === 'show-uncategorized') {
-                      setShowUncategorized(!showUncategorized);
+                      setShowUncategorized(
+                        !customReportItems.showUncategorized,
+                      );
                     }
                   }}
                   items={[
@@ -278,19 +282,19 @@ export function ReportSidebar({
                       name: 'show-empty-rows',
                       text: 'Show Empty Rows',
                       tooltip: 'Show rows that are zero or blank',
-                      toggle: showEmpty,
+                      toggle: customReportItems.showEmpty,
                     },
                     {
                       name: 'show-hidden-categories',
                       text: 'Show Off Budget',
                       tooltip: 'Show off budget accounts and hidden categories',
-                      toggle: showOffBudgetHidden,
+                      toggle: customReportItems.showOffBudgetHidden,
                     },
                     {
                       name: 'show-uncategorized',
                       text: 'Show Uncategorized',
                       tooltip: 'Show uncategorized transactions',
-                      toggle: showUncategorized,
+                      toggle: customReportItems.showUncategorized,
                     },
                   ]}
                 />
