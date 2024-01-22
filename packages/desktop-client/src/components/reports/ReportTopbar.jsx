@@ -20,7 +20,6 @@ export function ReportTopbar({
   customReportItems,
   report,
   savedStatus,
-  setSavedStatus,
   setGraphType,
   setTypeDisabled,
   setBalanceType,
@@ -169,13 +168,19 @@ export function ReportTopbar({
           flexShrink: 0,
         }}
       />
-      <FilterButton onApply={onApplyFilter} compact hover />
+      <FilterButton
+        compact
+        hover
+        onApply={e => {
+          onApplyFilter(e);
+          onReportChange(null, 'modify');
+        }}
+      />
       <View style={{ flex: 1 }} />
       <SaveReport
         customReportItems={customReportItems}
         report={report}
         savedStatus={savedStatus}
-        setSavedStatus={setSavedStatus}
         onReportChange={onReportChange}
         onResetReports={onResetReports}
       />

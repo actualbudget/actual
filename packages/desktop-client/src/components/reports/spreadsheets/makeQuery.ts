@@ -5,7 +5,7 @@ export function makeQuery(
   name: string,
   startDate: string,
   endDate: string,
-  showOffBudgetHidden: boolean,
+  showOffBudget: boolean,
   selectedCategories: CategoryEntity[],
   categoryFilter: CategoryEntity[],
   conditionsOpKey: string,
@@ -14,7 +14,7 @@ export function makeQuery(
   const query = q('transactions')
     .filter(
       //Show Offbudget and hidden categories
-      !showOffBudgetHidden && {
+      !showOffBudget && {
         $and: [
           {
             'account.offbudget': false,

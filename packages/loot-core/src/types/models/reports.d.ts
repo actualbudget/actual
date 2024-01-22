@@ -18,7 +18,7 @@ export interface CustomReportEntity {
   showUncategorized: boolean;
   selectedCategories: CategoryEntity[];
   graphType: string;
-  filters?: RuleConditionEntity[];
+  conditions?: RuleConditionEntity[];
   conditionsOp: string;
   data?: GroupedEntity;
   tombstone?: boolean;

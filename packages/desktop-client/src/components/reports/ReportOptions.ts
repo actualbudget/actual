@@ -25,6 +25,7 @@ export const defaultReport: CustomReportEntity = {
   showUncategorized: false,
   selectedCategories: null,
   graphType: 'BarGraph',
+  conditions: null,
   conditionsOp: 'and',
 };
 

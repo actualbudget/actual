@@ -12,7 +12,6 @@ function toJS(rows: CustomReportData[]) {
     const test: CustomReportEntity = {
       ...row,
       conditionsOp: row.conditions_op ?? 'and',
-      filters: row.conditions,
     };
     return test;
   });

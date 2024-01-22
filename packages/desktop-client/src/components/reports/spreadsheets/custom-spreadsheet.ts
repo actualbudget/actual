@@ -28,7 +28,7 @@ export type createCustomSpreadsheetProps = {
   conditions: RuleConditionEntity[];
   conditionsOp: string;
   showEmpty: boolean;
-  showOffBudgetHidden: boolean;
+  showOffBudget: boolean;
   showUncategorized: boolean;
   groupBy?: string;
   balanceTypeOp?: string;
@@ -46,7 +46,7 @@ export function createCustomSpreadsheet({
   conditions = [],
   conditionsOp,
   showEmpty,
-  showOffBudgetHidden,
+  showOffBudget,
   showUncategorized,
   groupBy,
   balanceTypeOp,
@@ -56,7 +56,7 @@ export function createCustomSpreadsheet({
   graphType,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(
-    showOffBudgetHidden,
+    showOffBudget,
     showUncategorized,
     categories,
   );
@@ -94,7 +94,7 @@ export function createCustomSpreadsheet({
           'assets',
           startDate,
           endDate,
-          showOffBudgetHidden,
+          showOffBudget,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,
@@ -106,7 +106,7 @@ export function createCustomSpreadsheet({
           'debts',
           startDate,
           endDate,
-          showOffBudgetHidden,
+          showOffBudget,
           selectedCategories,
           categoryFilter,
           conditionsOpKey,

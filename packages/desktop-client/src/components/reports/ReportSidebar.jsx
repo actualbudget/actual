@@ -33,7 +33,7 @@ export function ReportSidebar({
   setMode,
   setIsDateStatic,
   setShowEmpty,
-  setShowOffBudgetHidden,
+  setShowOffBudget,
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
@@ -283,7 +283,7 @@ export function ReportSidebar({
             checked={customReportItems.showOffBudget}
             value={customReportItems.showOffBudget}
             onChange={() => {
-              setShowOffBudgetHidden(!customReportItems.showOffBudget);
+              setShowOffBudget(!customReportItems.showOffBudget);
               onReportChange(null, 'modify');
             }}
           />

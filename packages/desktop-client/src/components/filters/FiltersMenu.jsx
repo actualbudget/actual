@@ -594,7 +594,13 @@ export function AppliedFilters({
   onDelete,
   conditionsOp,
   onCondOpChange,
+  onUpdateChange,
 }) {
+  const onUpdateAppliedFilter = (filter, newFilter) => {
+    onUpdateChange?.(null, 'modify');
+    return onUpdate(filter, newFilter);
+  };
+
   return (
     <View
       style={{
@@ -617,7 +623,7 @@ export function AppliedFilters({
           value={filter.value}
           options={filter.options}
           editing={editingFilter === filter}
-          onChange={newFilter => onUpdate(filter, newFilter)}
+          onChange={newFilter => onUpdateAppliedFilter(filter, newFilter)}
           onDelete={() => onDelete(filter)}
         />
       ))}

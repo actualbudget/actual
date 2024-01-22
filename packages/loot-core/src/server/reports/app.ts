@@ -4,7 +4,6 @@ import {
   type CustomReportData,
   type CustomReportEntity,
 } from '../../types/models';
-import { parseConditionsOrActions } from '../accounts/transaction-rules';
 import { createApp } from '../app';
 import * as db from '../db';
 import { requiredFields } from '../models';
@@ -30,15 +29,13 @@ const reportModel = {
     return {
       ...row,
       conditionsOp: row.conditions_op,
-      filters: parseConditionsOrActions(row.conditions),
     };
   },
 
   fromJS(report: CustomReportEntity) {
-    const { filters, conditionsOp, ...row }: CustomReportData = report;
+    const { conditionsOp, ...row }: CustomReportData = report;
     if (conditionsOp) {
       row.conditions_op = conditionsOp;
-      row.conditions = filters;
     }
     return row;
   },

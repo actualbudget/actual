@@ -18,7 +18,6 @@ type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;
   report: CustomReportEntity;
   savedStatus: string;
-  setSavedStatus: (string) => void;
   onReportChange: (savedReport: T, type: string) => void;
   onResetReports: () => void;
 };
@@ -27,7 +26,6 @@ export function SaveReport({
   customReportItems,
   report,
   savedStatus,
-  setSavedStatus,
   onReportChange,
   onResetReports,
 }: SaveReportProps) {
@@ -47,7 +45,6 @@ export function SaveReport({
       ...report,
       ...customReportItems,
     };
-    setSavedStatus('saved');
 
     if (menuItem === 'save-report') {
       //create new flow
@@ -63,15 +60,16 @@ export function SaveReport({
       };
     }
 
-    if (['rename-report', 'update-report'].includes(menuItem)) {
+    if (menuItem === 'rename-report') {
       //rename or update flow
-      if (menuItem === 'rename-report') {
-        //rename
-        savedReport = {
-          ...report,
-          name,
-        };
-      }
+      //rename
+      savedReport = {
+        ...report,
+        name,
+      };
+    }
+
+    if (menuItem === 'update-report') {
       //send update and rename to DB
       /*
       res = await sendCatch('report/update', {
@@ -84,7 +82,10 @@ export function SaveReport({
       setNameMenuOpen(true);
     } else {
       setNameMenuOpen(false);
-      onReportChange(savedReport, 'add-update');
+      onReportChange(
+        savedReport,
+        menuItem === 'rename-report' ? 'rename' : 'add-update',
+      );
     }
   };
 
@@ -117,7 +118,6 @@ export function SaveReport({
         break;
       case 'reload-report':
         setMenuOpen(false);
-        setSavedStatus('saved');
         onReportChange(null, 'reload');
         break;
       case 'reset-report':
