@@ -70,6 +70,10 @@ export function SaveReport({
     }
 
     if (menuItem === 'update-report') {
+      savedReport = {
+        ...savedReport,
+        name: report.name,
+      };
       //send update and rename to DB
       /*
       res = await sendCatch('report/update', {
