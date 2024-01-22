@@ -1,19 +1,30 @@
-// @ts-strict-ignore
-export function requiredFields(name, row, fields, update) {
+import {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+} from '../types/models';
+
+export function requiredFields<T extends object, K extends keyof T>(
+  name: string,
+  row: T,
+  fields: K[],
+  update?: boolean,
+) {
   fields.forEach(field => {
     if (update) {
       if (row.hasOwnProperty(field) && row[field] == null) {
-        throw new Error(`${name} is missing field ${field}`);
+        throw new Error(`${name} is missing field ${String(field)}`);
       }
     } else {
       if (!row.hasOwnProperty(field) || row[field] == null) {
-        throw new Error(`${name} is missing field ${field}`);
+        throw new Error(`${name} is missing field ${String(field)}`);
       }
     }
   });
 }
 
-export function toDateRepr(str) {
+export function toDateRepr(str: string) {
   if (typeof str !== 'string') {
     throw new Error('toDateRepr not passed a string: ' + str);
   }
@@ -21,7 +32,7 @@ export function toDateRepr(str) {
   return parseInt(str.replace(/-/g, ''));
 }
 
-export function fromDateRepr(number) {
+export function fromDateRepr(number: number) {
   if (typeof number !== 'number') {
     throw new Error('fromDateRepr not passed a number: ' + number);
   }
@@ -37,7 +48,7 @@ export function fromDateRepr(number) {
 }
 
 export const accountModel = {
-  validate(account, { update }: { update?: boolean } = {}) {
+  validate(account: AccountEntity, { update }: { update?: boolean } = {}) {
     requiredFields(
       'account',
       account,
@@ -50,7 +61,7 @@ export const accountModel = {
 };
 
 export const categoryModel = {
-  validate(category, { update }: { update?: boolean } = {}) {
+  validate(category: CategoryEntity, { update }: { update?: boolean } = {}) {
     requiredFields(
       'category',
       category,
@@ -64,7 +75,10 @@ export const categoryModel = {
 };
 
 export const categoryGroupModel = {
-  validate(categoryGroup, { update }: { update?: boolean } = {}) {
+  validate(
+    categoryGroup: CategoryGroupEntity,
+    { update }: { update?: boolean } = {},
+  ) {
     requiredFields(
       'categoryGroup',
       categoryGroup,
@@ -78,78 +92,8 @@ export const categoryGroupModel = {
 };
 
 export const payeeModel = {
-  validate(payee, { update }: { update?: boolean } = {}) {
+  validate(payee: PayeeEntity, { update }: { update?: boolean } = {}) {
     requiredFields('payee', payee, ['name'], update);
     return payee;
-  },
-};
-
-export const transactionModel = {
-  validate(trans, { update }: { update?: boolean } = {}) {
-    requiredFields('transaction', trans, ['date', 'acct'], update);
-
-    if ('date' in trans) {
-      // Make sure it's the right format, and also do a sanity check.
-      // Really old dates can mess up the system and can happen by
-      // accident
-      if (
-        trans.date.match(/^\d{4}-\d{2}-\d{2}$/) == null ||
-        trans.date < '2000-01-01'
-      ) {
-        throw new Error('Invalid transaction date: ' + trans.date);
-      }
-    }
-
-    return trans;
-  },
-
-  toJS(row) {
-    // Check a non-important field that typically wouldn't be passed in
-    // manually, and use it as a smoke test to see if this is a
-    // fully-formed transaction or not.
-    if (!('location' in row)) {
-      throw new Error(
-        'A full transaction is required to be passed to `toJS`. Instead got: ' +
-          JSON.stringify(row),
-      );
-    }
-
-    const trans = { ...row };
-    trans.error = row.error ? JSON.parse(row.error) : null;
-    trans.isParent = row.isParent === 1 ? true : false;
-    trans.isChild = row.isChild === 1 ? true : false;
-    trans.starting_balance_flag =
-      row.starting_balance_flag === 1 ? true : false;
-    trans.cleared = row.cleared === 1 ? true : false;
-    trans.pending = row.pending === 1 ? true : false;
-    trans.date = trans.date && fromDateRepr(trans.date);
-    return trans;
-  },
-
-  fromJS(trans) {
-    const row = { ...trans };
-    if ('error' in row) {
-      row.error = trans.error ? JSON.stringify(trans.error) : null;
-    }
-    if ('isParent' in row) {
-      row.isParent = trans.isParent ? 1 : 0;
-    }
-    if ('isChild' in row) {
-      row.isChild = trans.isChild ? 1 : 0;
-    }
-    if ('cleared' in row) {
-      row.cleared = trans.cleared ? 1 : 0;
-    }
-    if ('pending' in row) {
-      row.pending = trans.pending ? 1 : 0;
-    }
-    if ('starting_balance_flag' in row) {
-      row.starting_balance_flag = trans.starting_balance_flag ? 1 : 0;
-    }
-    if ('date' in row) {
-      row.date = toDateRepr(trans.date);
-    }
-
-    return row;
   },
 };
