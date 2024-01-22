@@ -33,7 +33,9 @@ export const Toggle = ({
         type="checkbox"
       />
       <label
-        style={{ background: checked ? onColor : theme.checkboxToggleBackground }}
+        style={{
+          background: checked ? onColor : theme.checkboxToggleBackground,
+        }}
         className={`${css({
           display: 'flex',
           alignItems: 'center',
