@@ -20,6 +20,7 @@ import {
 import { fastSetMerge } from '../../shared/util';
 import { RuleConditionEntity } from '../../types/models';
 import { RuleError } from '../errors';
+import * as prefs from '../prefs';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 function assert(test, type, msg) {
@@ -507,7 +508,7 @@ export function execActions(actions: Action[], transaction) {
     ) + 1;
 
   let update = execNonSplitActions(parentActions, transaction);
-  if (totalSplitCount === 1) {
+  if (!prefs.getPrefs()['flags.splitsInRules'] || totalSplitCount === 1) {
     return update;
   }
 
