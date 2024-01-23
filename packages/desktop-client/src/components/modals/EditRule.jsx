@@ -326,7 +326,10 @@ const actionFields = [
   'date',
   'amount',
 ].map(field => [field, mapField(field)]);
-const splitActionFields = actionFields.filter(([field]) => field !== 'amount');
+const parentOnlyFields = ['amount', 'cleared', 'account', 'date'];
+const splitActionFields = actionFields.filter(
+  ([field]) => !parentOnlyFields.includes(field),
+);
 const splitAmountTypes = [
   ['fixed-amount', 'a fixed amount'],
   ['percent', 'a fixed percentage'],
@@ -743,7 +746,8 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
         value: null,
       };
     } else {
-      let fields = actionFields.map(f => f[0]);
+      const fieldsArray = splitIndex === 0 ? actionFields : splitActionFields;
+      let fields = fieldsArray.map(f => f[0]);
       for (const action of actionSplits[splitIndex].actions) {
         fields = fields.filter(f => f !== action.field);
       }
