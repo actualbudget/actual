@@ -7,7 +7,7 @@
   ],
   "devDependencies": {
     "@juggle/resize-observer": "^3.1.2",
-    "@playwright/test": "^1.37.1",
+    "@playwright/test": "^1.41.1",
     "@reach/listbox": "^0.18.0",
     "@react-aria/focus": "^3.14.0",
     "@react-aria/listbox": "^3.10.1",
@@ -26,7 +26,7 @@
     "@types/react-modal": "^3.16.0",
     "@types/react-redux": "^7.1.25",
     "@types/uuid": "^9.0.2",
-    "@types/webpack-bundle-analyzer": "^4.6.0",
+    "@types/webpack-bundle-analyzer": "^4.6.3",
     "@use-gesture/react": "^10.3.0",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
@@ -71,7 +71,7 @@
     "vite": "^5.0.12",
     "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^1.2.1",
-    "webpack-bundle-analyzer": "^4.9.1",
+    "webpack-bundle-analyzer": "^4.10.1",
     "xml2js": "^0.6.2"
   },
   "scripts": {
