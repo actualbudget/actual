@@ -2698,20 +2698,6 @@ __metadata:
   version: 1.41.1
   resolution: "@playwright/test@npm:1.41.1"
   dependencies:
-    cross-spawn: "npm:^7.0.3"
-    fast-glob: "npm:^3.2.12"
-    is-glob: "npm:^4.0.3"
-    open: "npm:^9.1.0"
-    picocolors: "npm:^1.0.0"
-    tslib: "npm:^2.5.0"
-  checksum: 76d6c364da27fc3b8d3360e1e2acf9902cde9d7e16503de7768a34c1a7d46e15c55779bb5b035db4392718cd75d83500702bccfb1c47e76550378071901b1c34
-  languageName: node
-  linkType: hard
-
-"@playwright/test@npm:^1.41.1":
-  version: 1.41.1
-  resolution: "@playwright/test@npm:1.41.1"
-  dependencies:
     playwright: "npm:1.41.1"
   bin:
     playwright: cli.js
