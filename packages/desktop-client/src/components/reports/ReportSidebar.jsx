@@ -120,7 +120,7 @@ export function ReportSidebar({
   };
 
   const onChangeBalanceType = cond => {
-    //onReportChange(null, 'modify');
+    onReportChange('modify');
     setBalanceType(cond);
   };
 
