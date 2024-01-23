@@ -31,7 +31,7 @@ jobs:
     needs: netlify
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.37.0-jammy
+      image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
       - uses: actions/checkout@v3
       - name: Set up environment
@@ -51,7 +51,7 @@ jobs:
     needs: netlify
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.37.0-jammy
+      image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
       - uses: actions/checkout@v3
       - name: Set up environment
