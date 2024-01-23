@@ -28,6 +28,7 @@ import {
   amountToInteger,
 } from 'loot-core/src/shared/util';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { SvgDelete, SvgAdd, SvgSubtract } from '../../icons/v0';
 import { SvgInformationOutline } from '../../icons/v1';
@@ -659,6 +660,7 @@ const conditionFields = [
   ]);
 
 export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
+  const splitsEnabled = useFeatureFlag('splitsInRules');
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse),
   );
@@ -884,6 +886,11 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
     borderRadius: 4,
   };
 
+  // Enable editing existing split rules even if the feature has since been disabled.
+  const showSplitButton = splitsEnabled
+    ? actionSplits.length > 0
+    : actionSplits.length > 1;
+
   return (
     <Modal
       title="Rule"
@@ -1072,7 +1079,7 @@ export function EditRule({ modalProps, defaultRule, onSave: originalOnSave }) {
                     </View>
                   ))}
                 </Stack>
-                {actionSplits.length > 0 && (
+                {showSplitButton && (
                   <Button
                     style={{ alignSelf: 'flex-start', marginTop: 15 }}
                     onClick={() => {
