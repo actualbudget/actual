@@ -144,17 +144,10 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
           };
         case 'set-transactions':
           if (fromTrans) {
-            transaction.selected = true;
-            const foundIndex = action.transactions.findIndex(
-              x => x.id === transaction.id,
+            action.transactions = action.transactions.filter(
+              x => x.id != transaction.id,
             );
-            if (foundIndex === -1) {
-              //Not found so add
-              action.transactions.push(transaction);
-            } else {
-              //Update Existing
-              action.transactions[foundIndex] = transaction;
-            }
+            action.transactions.unshift(transaction);
           }
           return { ...state, transactions: action.transactions };
         case 'set-repeats':
@@ -347,7 +340,9 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
     };
   }, [state.schedule, state.transactionsMode, state.fields]);
 
-  const selectedInst = useSelected('transactions', state.transactions, []);
+  const selectedInst = useSelected('transactions', state.transactions, [
+    transaction ? transaction.id : null,
+  ]);
 
   async function onSave() {
     dispatch({ type: 'form-error', error: null });
