@@ -145,7 +145,7 @@ export function ScheduleDetails({ modalProps, actions, id, transaction }) {
         case 'set-transactions':
           if (fromTrans) {
             action.transactions = action.transactions.filter(
-              x => x.id != transaction.id,
+              x => x.id !== transaction.id,
             );
             action.transactions.unshift(transaction);
           }
