@@ -28,17 +28,13 @@ import {
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
 import * as db from './db';
+import { APIError } from './errors';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
 
 let IMPORT_MODE = false;
-
-// This is duplicate from main.js...
-function APIError(msg, meta?) {
-  return { type: 'APIError', message: msg, meta };
-}
 
 // The API is different in two ways: we never want undo enabled, and
 // we also need to notify the UI manually if stuff has changed (if

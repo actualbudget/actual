@@ -14,7 +14,7 @@ import { ReportsHandlers } from './types/handlers';
 
 const reportModel = {
   validate(report: CustomReportEntity, { update }: { update?: boolean } = {}) {
-    requiredFields('reports', report, ['conditions'], update);
+    requiredFields('reports', report, ['conditionsOp'], update);
 
     if (!update || 'conditionsOp' in report) {
       if (!['and', 'or'].includes(report.conditionsOp)) {

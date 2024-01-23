@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React from 'react';
 import { useSelector } from 'react-redux';
 
@@ -10,14 +9,6 @@ import { Button } from './common/Button';
 import { LinkButton } from './common/LinkButton';
 import { Text } from './common/Text';
 import { View } from './common/View';
-
-function closeNotification(setAppState) {
-  // Set a flag to never show an update notification again for this session
-  setAppState({
-    updateInfo: null,
-    showUpdateNotification: false,
-  });
-}
 
 export function UpdateNotification() {
   const updateInfo = useSelector(state => state.app.updateInfo);
@@ -68,7 +59,7 @@ export function UpdateNotification() {
                   textDecoration: 'underline',
                 }}
                 onClick={() =>
-                  window.Actual.openURLInBrowser(
+                  window.Actual?.openURLInBrowser(
                     'https://actualbudget.org/docs/releases',
                   )
                 }
@@ -80,7 +71,13 @@ export function UpdateNotification() {
                 type="bare"
                 aria-label="Close"
                 style={{ display: 'inline', padding: '1px 7px 2px 7px' }}
-                onClick={() => closeNotification(setAppState)}
+                onClick={() => {
+                  // Set a flag to never show an update notification again for this session
+                  setAppState({
+                    updateInfo: null,
+                    showUpdateNotification: false,
+                  });
+                }}
               >
                 <SvgClose
                   width={9}
