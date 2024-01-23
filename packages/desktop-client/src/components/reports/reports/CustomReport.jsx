@@ -301,6 +301,7 @@ export function CustomReport() {
           setSelectedCategories={setSelectedCategories}
           onChangeDates={onChangeDates}
           onChangeViews={onChangeViews}
+          onReportChange={onReportChange}
         />
         <View
           style={{

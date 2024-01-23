@@ -38,6 +38,7 @@ export function ReportSidebar({
   setSelectedCategories,
   onChangeDates,
   onChangeViews,
+  onReportChange,
 }) {
   const onSelectRange = cond => {
     setDateRange(cond);
