@@ -2,7 +2,7 @@ import { makeValue, FIELD_TYPES } from 'loot-core/src/shared/rules';
 import { type RuleConditionEntity } from 'loot-core/src/types/models';
 
 export function updateFilterReducer(
-  state: { field: string; value: string | number | boolean },
+  state: { field: string; value: string | string[] | number | boolean | null },
   action: RuleConditionEntity,
 ) {
   switch (action.type) {

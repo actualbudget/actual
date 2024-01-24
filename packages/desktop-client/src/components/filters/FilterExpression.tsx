@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
-import { type RuleConditionEntity } from 'loot-core/src/types/models';
+import {
+  type setOp,
+  type RuleConditionEntity,
+} from 'loot-core/src/types/models';
 
 import { SvgDelete } from '../../icons/v0';
 import { type CSSProperties, theme } from '../../style';
@@ -15,10 +18,10 @@ import { FilterEditor } from './FiltersMenu';
 import { subfieldFromFilter } from './subfieldFromFilter';
 
 type FilterExpressionProps = {
-  field: string;
-  customName: string;
-  op: string;
-  value: string | number | boolean;
+  field: string | undefined;
+  customName: string | undefined;
+  op: setOp | undefined;
+  value: string | string[] | number | boolean | undefined;
   options: RuleConditionEntity['options'];
   style?: CSSProperties;
   onChange: (cond: RuleConditionEntity) => RuleConditionEntity;

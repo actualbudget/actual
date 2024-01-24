@@ -1,46 +1,34 @@
 // @ts-strict-ignore
-import { RuleConditionEntity } from '../types/models';
-
 import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
-export const TYPE_INFO: Array<{
-  name: string;
-  ops: Array<string>;
-  nullable: boolean;
-}> = [
-  {
-    name: 'date',
+export const TYPE_INFO = {
+  date: {
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
   },
-  {
-    name: 'id',
+  id: {
     ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: true,
   },
-  {
-    name: 'saved',
+  saved: {
     ops: [],
     nullable: false,
   },
-  {
-    name: 'string',
+  string: {
     ops: ['is', 'contains', 'oneOf', 'isNot', 'doesNotContain', 'notOneOf'],
     nullable: true,
   },
-  {
-    name: 'number',
+  number: {
     ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
   },
-  {
-    name: 'boolean',
+  boolean: {
     ops: ['is'],
     nullable: false,
   },
-];
+};
 
 export const FIELD_TYPES = new Map(
   Object.entries({
@@ -197,43 +185,28 @@ export function parse(item) {
   return { ...item, error: null };
 }
 
-export function unparse({
-  item,
-  error,
-  inputKey,
-}: {
-  item: RuleConditionEntity;
-  error?: string;
-  inputKey?: string;
-}) {
-  let saveItem: RuleConditionEntity = item;
+export function unparse({ error, inputKey, ...item }) {
   switch (item.type) {
     case 'number': {
       let unparsed = item.value;
-      if (
-        item.field === 'amount' &&
-        item.op !== 'isbetween' &&
-        typeof unparsed === 'number'
-      ) {
+      if (item.field === 'amount' && item.op !== 'isbetween') {
         unparsed = amountToInteger(unparsed);
       }
-      saveItem = { ...item, value: unparsed };
-      break;
+
+      return { ...item, value: unparsed };
     }
     case 'string': {
       const unparsed = item.value == null ? '' : item.value;
-      saveItem = { ...item, value: unparsed };
-      break;
+      return { ...item, value: unparsed };
     }
     case 'boolean': {
       const unparsed = item.value == null ? false : item.value;
-      saveItem = { ...item, value: unparsed };
-      break;
+      return { ...item, value: unparsed };
     }
     default:
   }
 
-  return saveItem;
+  return item;
 }
 
 export function makeValue(value, cond) {

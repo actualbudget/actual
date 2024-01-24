@@ -9,7 +9,7 @@ import { ButtonLink } from '../common/ButtonLink';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
 import { AppliedFilters } from '../filters/AppliedFilters';
-import { FilterButton } from '../filters/FilterButton';
+import { FilterButton } from '../filters/FiltersMenu';
 
 export function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;

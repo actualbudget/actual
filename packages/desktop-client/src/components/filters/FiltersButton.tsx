@@ -1,10 +1,9 @@
-// @ts-strict-ignore
 import React from 'react';
 
 import { SvgSettingsSliderAlternate } from '../../icons/v2';
 import { Button } from '../common/Button';
 
-export function FiltersButton({ onClick }: { onClick: (newValue) => void }) {
+export function FiltersButton({ onClick }: { onClick: () => void }) {
   return (
     <Button type="bare" onClick={onClick} title="Filters">
       <SvgSettingsSliderAlternate

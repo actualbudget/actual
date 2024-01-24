@@ -26,10 +26,10 @@ export type setOp =
 export interface RuleConditionEntity {
   field?: string;
   op?: setOp;
-  value?: string | number | boolean;
+  value?: string | string[] | number | boolean;
   options?: {
-    inflow: boolean;
-    outflow: boolean;
+    inflow?: boolean;
+    outflow?: boolean;
     month?: boolean;
     year?: boolean;
   };
