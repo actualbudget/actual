@@ -114,7 +114,7 @@ __metadata:
     redux-thunk: "npm:^2.4.2"
     remark-gfm: "npm:^3.0.1"
     rollup-plugin-visualizer: "npm:^5.12.0"
-    sass: "npm:^1.63.6"
+    sass: "npm:^1.70.0"
     swc-loader: "npm:^0.2.3"
     terser-webpack-plugin: "npm:^5.3.10"
     uuid: "npm:^9.0.1"
@@ -14601,16 +14601,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass@npm:^1.63.6":
-  version: 1.63.6
-  resolution: "sass@npm:1.63.6"
+"sass@npm:^1.70.0":
+  version: 1.70.0
+  resolution: "sass@npm:1.70.0"
   dependencies:
     chokidar: "npm:>=3.0.0 <4.0.0"
     immutable: "npm:^4.0.0"
     source-map-js: "npm:>=0.6.2 <2.0.0"
   bin:
     sass: sass.js
-  checksum: 16e0d0156381a4b401c01823ae5be37bb7ee863b4229418809e30a6668a21097421f08ad731cbf0708c8186600669283073c399f7f0814f8f40996be12c8b52c
+  checksum: f933545d72a932f4a82322dd4ca9f3ea7d3e9d08852d695f76d419939cbdf7f8db3dd894b059ed77bf76811b07319b75b3ef8bb077bf9f52f8fbdfd8cee162f6
   languageName: node
   linkType: hard
 
