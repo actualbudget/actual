@@ -127,8 +127,8 @@ export function setGoal({ month, category, goal }): Promise<void> {
     });
   }
   return db.insert(table, {
-    id: `${month}-${category}`,
-    month,
+    id: `${dbMonth(month)}-${category}`,
+    month: dbMonth(month),
     category,
     goal,
   });
