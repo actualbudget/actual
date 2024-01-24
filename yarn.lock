@@ -3319,16 +3319,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rschedule/ical-tools@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@rschedule/ical-tools@npm:1.5.0"
-  peerDependencies:
-    "@rschedule/core": ^1.5.0
-    ical.js: ^1.3.0
-  checksum: 644694c234f3f2ba2bbad43ed0c09023072b3d54b5184548dcbe9254de4c0ae288119aae45ef761120500582e5379978d58d5c3c0565fdf992dc66c702cd217c
-  languageName: node
-  linkType: hard
-
 "@rschedule/json-tools@npm:^1.5.0":
   version: 1.5.0
   resolution: "@rschedule/json-tools@npm:1.5.0"
@@ -4898,7 +4888,6 @@ __metadata:
     node-jq: "npm:^4.0.1"
     npm-run-all: "npm:^4.1.5"
     prettier: "npm:3.2.4"
-    react-refresh: "npm:^0.14.0"
     source-map-support: "npm:^0.5.21"
     typescript: "npm:^5.0.2"
     typescript-strict-plugin: "npm:^2.2.2-beta.2"
@@ -6381,7 +6370,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^3.35.1, core-js@npm:^3.4":
+"core-js@npm:^3.4":
   version: 3.35.1
   resolution: "core-js@npm:3.35.1"
   checksum: 5d31f22eb05cf66bd1a2088a04b7106faa5d0b91c1ffa5d72c5203e4974c31bd7e11969297f540a806c00c74c23991eaad5639592df8b5dbe4412fff3c075cd5
@@ -10040,15 +10029,11 @@ __metadata:
   linkType: hard
 
 "is-typed-array@npm:^1.1.10, is-typed-array@npm:^1.1.3, is-typed-array@npm:^1.1.9":
-  version: 1.1.10
-  resolution: "is-typed-array@npm:1.1.10"
+  version: 1.1.12
+  resolution: "is-typed-array@npm:1.1.12"
   dependencies:
-    available-typed-arrays: "npm:^1.0.5"
-    call-bind: "npm:^1.0.2"
-    for-each: "npm:^0.3.3"
-    gopd: "npm:^1.0.1"
-    has-tostringtag: "npm:^1.0.0"
-  checksum: 2392b2473bbc994f5c30d6848e32bab3cab6c80b795aaec3020baf5419ff7df38fc11b3a043eb56d50f842394c578dbb204a7a29398099f895cf111c5b27f327
+    which-typed-array: "npm:^1.1.11"
+  checksum: d953adfd3c41618d5e01b2a10f21817e4cdc9572772fa17211100aebb3811b6e3c2e308a0558cc87d218a30504cb90154b833013437776551bfb70606fb088ca
   languageName: node
   linkType: hard
 
@@ -11368,7 +11353,6 @@ __metadata:
     "@actual-app/crdt": "npm:*"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
-    "@rschedule/ical-tools": "npm:^1.5.0"
     "@rschedule/json-tools": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
     "@swc/core": "npm:^1.3.105"
@@ -11389,7 +11373,6 @@ __metadata:
     better-sqlite3: "npm:^9.3.0"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
-    core-js: "npm:^3.35.1"
     cross-env: "npm:^7.0.3"
     csv-parse: "npm:^4.16.3"
     csv-stringify: "npm:^5.6.5"
@@ -13906,13 +13889,6 @@ __metadata:
     react-native:
       optional: true
   checksum: 1c3018bd2601e6d18339281867910b583dcbb3d8856403086e08c00abf0dfe467a94c0d1356bafa8cdf107bf1e2c9899a28486e4778e85c8bc4dfed2076b116f
-  languageName: node
-  linkType: hard
-
-"react-refresh@npm:^0.14.0":
-  version: 0.14.0
-  resolution: "react-refresh@npm:0.14.0"
-  checksum: 75941262ce3ed4fc79b52492943fd59692f29b84f30f3822713b7e920f28e85c62a4386f85cbfbaea95ed62d3e74209f0a0bb065904b7ab2f166a74ac3812e2a
   languageName: node
   linkType: hard
 
@@ -17446,7 +17422,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"which-typed-array@npm:^1.1.10, which-typed-array@npm:^1.1.13, which-typed-array@npm:^1.1.2":
+"which-typed-array@npm:^1.1.10, which-typed-array@npm:^1.1.11, which-typed-array@npm:^1.1.13, which-typed-array@npm:^1.1.2":
   version: 1.1.13
   resolution: "which-typed-array@npm:1.1.13"
   dependencies:
