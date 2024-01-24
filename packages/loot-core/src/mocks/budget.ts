@@ -590,10 +590,11 @@ export async function createTestBudget(handlers: Handlers) {
     { name: 'Roth IRA', offBudget: true },
   ];
 
-  // don't do this async or sort_order breaks
-  for (const account of accounts) {
-    account.id = await handlers['account-create'](account);
-  }
+  await runMutator(async () => {
+    for (const account of accounts) {
+      account.id = await handlers['account-create'](account);
+    }
+  });
 
   const payees: Array<MockPayeeEntity> = [
     { name: 'Starting Balance' },
