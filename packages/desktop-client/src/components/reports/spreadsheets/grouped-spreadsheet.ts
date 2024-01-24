@@ -90,8 +90,8 @@ export function createGroupedSpreadsheet({
               item,
               assets,
               showOffBudget,
-              showUncategorized,
               showHiddenCategories,
+              showUncategorized,
             )
               .filter(
                 asset => asset.date === month && asset.category === item.id,
@@ -103,8 +103,8 @@ export function createGroupedSpreadsheet({
               item,
               debts,
               showOffBudget,
-              showUncategorized,
               showHiddenCategories,
+              showUncategorized,
             )
               .filter(
                 debts => debts.date === month && debts.category === item.id,
@@ -134,8 +134,8 @@ export function createGroupedSpreadsheet({
             debts,
             groupByLabel: 'category',
             showOffBudget,
-            showUncategorized,
             showHiddenCategories,
+            showUncategorized,
           });
           return { ...calc };
         });

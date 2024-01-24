@@ -7,8 +7,8 @@ export function filterHiddenItems(
   item: UncategorizedEntity,
   data: QueryDataEntity[],
   showOffBudget?: boolean,
-  showUncategorized?: boolean,
   showHiddenCategories?: boolean,
+  showUncategorized?: boolean,
 ) {
   const showHide = data
     .filter(e =>

@@ -14,8 +14,8 @@ type recalculateProps = {
   debts: QueryDataEntity[];
   groupByLabel: string;
   showOffBudget?: boolean;
-  showUncategorized?: boolean;
   showHiddenCategories?: boolean;
+  showUncategorized?: boolean;
 };
 
 export function recalculate({
@@ -25,8 +25,8 @@ export function recalculate({
   debts,
   groupByLabel,
   showOffBudget,
-  showUncategorized,
   showHiddenCategories,
+  showUncategorized,
 }: recalculateProps) {
   let totalAssets = 0;
   let totalDebts = 0;
