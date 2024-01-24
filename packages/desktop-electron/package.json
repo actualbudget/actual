@@ -50,7 +50,7 @@
     "electron-log": "4.4.8",
     "electron-updater": "6.1.7",
     "loot-core": "*",
-    "node-fetch": "^2.6.9",
+    "node-fetch": "^2.7.0",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
