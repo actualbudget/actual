@@ -1,126 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
 
 import { SvgExpandArrow } from '../../icons/v0';
-import { theme } from '../../style';
 import { Button } from '../common/Button';
-import { Menu } from '../common/Menu';
-import { MenuTooltip } from '../common/MenuTooltip';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { FormField, FormLabel } from '../forms';
-import { FieldSelect } from '../modals/EditRule';
-import { GenericInput } from '../util/GenericInput';
 
 import { AppliedFilters } from './FiltersMenu';
-
-function FilterMenu({ onClose, filterId, onFilterMenuSelect }) {
-  return (
-    <MenuTooltip width={200} onClose={onClose}>
-      <Menu
-        onMenuSelect={item => {
-          onFilterMenuSelect(item);
-        }}
-        items={[
-          ...(!filterId.id
-            ? [
-                { name: 'save-filter', text: 'Save new filter' },
-                { name: 'clear-filter', text: 'Clear all conditions' },
-              ]
-            : [
-                ...(filterId.id !== null && filterId.status === 'saved'
-                  ? [
-                      { name: 'rename-filter', text: 'Rename' },
-                      { name: 'delete-filter', text: 'Delete' },
-                      Menu.line,
-                      {
-                        name: 'save-filter',
-                        text: 'Save new filter',
-                        disabled: true,
-                      },
-                      { name: 'clear-filter', text: 'Clear all conditions' },
-                    ]
-                  : [
-                      { name: 'rename-filter', text: 'Rename' },
-                      { name: 'update-filter', text: 'Update condtions' },
-                      { name: 'reload-filter', text: 'Revert changes' },
-                      { name: 'delete-filter', text: 'Delete' },
-                      Menu.line,
-                      { name: 'save-filter', text: 'Save new filter' },
-                      { name: 'clear-filter', text: 'Clear all conditions' },
-                    ]),
-              ]),
-        ]}
-      />
-    </MenuTooltip>
-  );
-}
-
-function NameFilter({
-  onClose,
-  menuItem,
-  name,
-  setName,
-  adding,
-  onAddUpdate,
-  err,
-}) {
-  const inputRef = useRef();
-
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
-
-  return (
-    <MenuTooltip width={325} onClose={onClose}>
-      {menuItem !== 'update-filter' && (
-        <form>
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ padding: 10 }}
-          >
-            <FormField style={{ flex: 1 }}>
-              <FormLabel
-                title="Filter Name"
-                htmlFor="name-field"
-                style={{ userSelect: 'none' }}
-              />
-              <GenericInput
-                inputRef={inputRef}
-                id="name-field"
-                field="string"
-                type="string"
-                value={name}
-                onChange={setName}
-              />
-            </FormField>
-            <Button
-              type="primary"
-              style={{ marginTop: 18 }}
-              onClick={e => {
-                e.preventDefault();
-                onAddUpdate();
-              }}
-            >
-              {adding ? 'Add' : 'Update'}
-            </Button>
-          </Stack>
-        </form>
-      )}
-      {err && (
-        <Stack direction="row" align="center" style={{ padding: 10 }}>
-          <Text style={{ color: theme.errorText }}>{err}</Text>
-        </Stack>
-      )}
-    </MenuTooltip>
-  );
-}
+import { FilterMenu } from './FilterMenu';
+import { NameFilter } from './NameFilter';
 
 function SavedFilterMenuButton({
   filters,
@@ -281,25 +171,6 @@ function SavedFilterMenuButton({
         />
       )}
     </View>
-  );
-}
-
-export function CondOpMenu({ conditionsOp, onCondOpChange, filters }) {
-  return (
-    filters.length > 1 && (
-      <Text style={{ color: theme.pageText, marginTop: 11, marginRight: 5 }}>
-        <FieldSelect
-          style={{ display: 'inline-flex' }}
-          fields={[
-            ['and', 'all'],
-            ['or', 'any'],
-          ]}
-          value={conditionsOp}
-          onChange={(name, value) => onCondOpChange(value, filters)}
-        />
-        of:
-      </Text>
-    )
   );
 }
 
