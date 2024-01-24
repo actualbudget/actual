@@ -51,8 +51,7 @@ test.describe('Mobile', () => {
 
     const account = await accountsPage.getNthAccount(0);
 
-    await expect(account.name).toHaveText('Ally Savings');
-    await expect(account.balance).toHaveText('7,653.00');
+    await expect(account.name).toHaveText('Bank of America');
     await expect(page).toMatchThemeScreenshots();
   });
 
@@ -60,7 +59,8 @@ test.describe('Mobile', () => {
     const accountsPage = await navigation.goToAccountsPage();
     const accountPage = await accountsPage.openNthAccount(1);
 
-    await expect(accountPage.heading).toHaveText('Bank of America');
+    await expect(accountPage.heading).toHaveText('Ally Savings');
+    await expect(account.balance).toHaveText('7,653.00');
     expect(await accountPage.getBalance()).toBeGreaterThan(0);
 
     await expect(accountPage.noTransactionsFoundError).not.toBeVisible();
