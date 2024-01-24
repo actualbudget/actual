@@ -8,8 +8,8 @@ import { Button } from '../common/Button';
 import { ButtonLink } from '../common/ButtonLink';
 import { Select } from '../common/Select';
 import { View } from '../common/View';
-import { FilterButton } from '../filters/FilterButton';
 import { AppliedFilters } from '../filters/AppliedFilters';
+import { FilterButton } from '../filters/FilterButton';
 
 export function validateStart(allMonths, start, end) {
   const earliest = allMonths[allMonths.length - 1].name;

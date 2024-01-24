@@ -23,7 +23,7 @@ import { subfieldToOptions } from './subfieldToOptions';
 type ConfigureFieldProps = {
   field: string;
   initialSubfield?: string;
-  op?: string;
+  op?: setOp;
   value: string | number;
   dispatch: Dispatch<RuleConditionEntity>;
   onApply: (cond: RuleConditionEntity) => void;
@@ -48,10 +48,9 @@ export function ConfigureField({
     // prevOp.current = op;
   }, [op]);
 
-  let opTest: setOp;
   const type: string | undefined = FIELD_TYPES.get(field);
-  let ops: Array<string> = TYPE_INFO[type].ops.filter(
-    (op: string) => op !== 'isbetween',
+  let ops: Array<setOp> = TYPE_INFO[type].ops.filter(
+    (op: setOp) => op !== 'isbetween',
   );
 
   // Month and year fields are quite hacky right now! Figure out how
@@ -82,12 +81,12 @@ export function ConfigureField({
                         ['amount-outflow', 'Amount (outflow)'],
                       ]
                     : field === 'date'
-                    ? [
-                        ['date', 'Date'],
-                        ['month', 'Month'],
-                        ['year', 'Year'],
-                      ]
-                    : []
+                      ? [
+                          ['date', 'Date'],
+                          ['month', 'Month'],
+                          ['year', 'Year'],
+                        ]
+                      : []
                 }
                 value={subfield}
                 onChange={sub => {
@@ -150,13 +149,13 @@ export function ConfigureField({
                 spacing={1}
                 style={{ flexWrap: 'wrap' }}
               >
-                {ops.slice(0, 3).map((currOp: string) => (
+                {ops.slice(0, 3).map((currOp: setOp) => (
                   <OpButton
                     key={currOp}
                     op={currOp}
                     selected={currOp === op}
                     onClick={() =>
-                      dispatch({ type: 'set-op', op: { ...opTest, currOp } })
+                      dispatch({ type: 'set-op', op: currOp })
                     }
                   />
                 ))}
@@ -167,7 +166,7 @@ export function ConfigureField({
                 spacing={1}
                 style={{ flexWrap: 'wrap' }}
               >
-                {ops.slice(3, ops.length).map((currOp: string) => (
+                {ops.slice(3, ops.length).map((currOp: setOp) => (
                   <OpButton
                     key={currOp}
                     op={currOp}

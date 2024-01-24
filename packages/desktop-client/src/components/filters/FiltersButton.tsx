@@ -4,11 +4,7 @@ import React from 'react';
 import { SvgSettingsSliderAlternate } from '../../icons/v2';
 import { Button } from '../common/Button';
 
-type FiltersButtonProps = {
-  onClick: (newValue) => void;
-};
-
-export function FiltersButton({ onClick }: FiltersButtonProps) {
+export function FiltersButton({ onClick }: { onClick: (newValue) => void }) {
   return (
     <Button type="bare" onClick={onClick} title="Filters">
       <SvgSettingsSliderAlternate

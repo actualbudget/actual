@@ -11,7 +11,7 @@ import {
 } from '../../icons/v1';
 import { theme } from '../../style';
 import { View } from '../common/View';
-import { FilterButton } from '../filters/FilterButton';
+import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
 import { SaveReportMenuButton } from './SaveReport';

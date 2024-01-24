@@ -11,18 +11,17 @@ import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Value } from '../rules/Value';
 
-import { type Filter } from './AppliedFilters';
-import { FilterEditor } from './FilterEditor';
+import { FilterEditor } from './FiltersMenu';
 import { subfieldFromFilter } from './subfieldFromFilter';
 
 type FilterExpressionProps = {
   field: string;
   customName: string;
   op: string;
-  value: string | number;
+  value: string | number | boolean;
   options: RuleConditionEntity['options'];
   style?: CSSProperties;
-  onChange: (cond: RuleConditionEntity) => Filter;
+  onChange: (cond: RuleConditionEntity) => RuleConditionEntity;
   onDelete: () => void;
 };
 
