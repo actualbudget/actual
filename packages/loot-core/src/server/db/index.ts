@@ -618,15 +618,6 @@ export async function getTransaction(id) {
   return rows[0];
 }
 
-export async function getTransactionsByDate(
-  accountId,
-  startDate,
-  endDate,
-  options = {},
-) {
-  throw new Error('`getTransactionsByDate` is deprecated');
-}
-
 export async function getTransactions(accountId) {
   if (arguments.length > 1) {
     throw new Error(

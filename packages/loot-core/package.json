@@ -6,7 +6,7 @@
   "scripts": {
     "build:node": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.desktop.config.js",
     "watch:node": "cross-env NODE_ENV=development webpack --config ./webpack/webpack.desktop.config.js --watch",
-    "build:api": "cross-env NODE_ENV=development webpack --config ./webpack/webpack.api.config.js; ./bin/copy-migrations ../api",
+    "build:api": "cross-env NODE_ENV=development ./bin/build-api",
     "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
     "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
     "test": "npm-run-all -cp 'test:*'",

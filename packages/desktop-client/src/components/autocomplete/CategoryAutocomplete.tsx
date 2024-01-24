@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, {
   type ComponentProps,
   Fragment,
@@ -25,9 +24,11 @@ import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 
 export type CategoryListProps = {
   items: Array<CategoryEntity & { group?: CategoryGroupEntity }>;
-  getItemProps?: (arg: { item }) => Partial<ComponentProps<typeof View>>;
+  getItemProps?: (arg: {
+    item: CategoryEntity;
+  }) => Partial<ComponentProps<typeof View>>;
   highlightedIndex: number;
-  embedded: boolean;
+  embedded?: boolean;
   footer?: ReactNode;
   renderSplitTransactionButton?: (
     props: SplitTransactionButtonProps,
@@ -47,7 +48,7 @@ function CategoryList({
   renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
 }: CategoryListProps) {
-  let lastGroup = null;
+  let lastGroup: string | undefined | null = null;
 
   return (
     <View>
@@ -72,10 +73,10 @@ function CategoryList({
           lastGroup = item.cat_group;
           return (
             <Fragment key={item.id}>
-              {showGroup && (
-                <Fragment key={item.group?.name}>
+              {showGroup && item.group?.name && (
+                <Fragment key={item.group.name}>
                   {renderCategoryItemGroupHeader({
-                    title: item.group?.name,
+                    title: item.group.name,
                   })}
                 </Fragment>
               )}
@@ -125,7 +126,7 @@ export function CategoryAutocomplete({
       categoryGroups.reduce(
         (list, group) =>
           list.concat(
-            group.categories
+            (group.categories || [])
               .filter(category => category.cat_group === group.id)
               .map(category => ({
                 ...category,
@@ -214,8 +215,7 @@ type SplitTransactionButtonProps = {
   style?: CSSProperties;
 };
 
-// eslint-disable-next-line import/no-unused-modules
-export function SplitTransactionButton({
+function SplitTransactionButton({
   Icon,
   highlighted,
   embedded,

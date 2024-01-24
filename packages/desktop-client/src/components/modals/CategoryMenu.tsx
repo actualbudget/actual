@@ -128,7 +128,7 @@ export function CategoryMenu({
               notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
               editable={false}
               focused={false}
-              getStyle={editable => ({
+              getStyle={() => ({
                 borderRadius: 6,
                 ...((!originalNotes || originalNotes.length === 0) && {
                   justifySelf: 'center',

@@ -1,6 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
+import { useReports } from 'loot-core/src/client/data-hooks/reports';
+
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { styles } from '../../style';
 import { View } from '../common/View';
@@ -12,6 +14,7 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 
 export function Overview() {
+  const customReports = useReports();
   const categorySpendingReportFeatureFlag = useFeatureFlag(
     'categorySpendingReport',
   );
@@ -45,7 +48,7 @@ export function Overview() {
         {categorySpendingReportFeatureFlag && <CategorySpendingCard />}
         {sankeyFeatureFlag && <SankeyCard />}
         {customReportsFeatureFlag ? (
-          <CustomReportCard />
+          <CustomReportCard reports={customReports} />
         ) : (
           <div style={{ flex: 1 }} />
         )}

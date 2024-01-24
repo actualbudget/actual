@@ -9,7 +9,7 @@ const queries = fs
   .split('___BOUNDARY')
   .map(q => q.trim());
 
-function runQueries(n?) {
+function runQueries() {
   for (let i = 0; i < queries.length; i++) {
     if (queries[i] !== '') {
       db.runQuery(queries[i], [], true);

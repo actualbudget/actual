@@ -43,7 +43,7 @@ const getSchedulesTransform = memoizeOne((id, hasSearch) => {
   };
 });
 
-function PreviewTransactions({ accountId, children }) {
+function PreviewTransactions({ children }) {
   const scheduleData = useCachedSchedules();
 
   if (scheduleData == null) {

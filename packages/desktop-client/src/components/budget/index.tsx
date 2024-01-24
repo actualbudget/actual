@@ -533,7 +533,7 @@ const RolloverBudgetSummary = memo<{ month: string }>(props => {
   );
 });
 
-export function Budget(props) {
+export function Budget() {
   const startMonth = useSelector(
     state => state.prefs.local['budget.startMonth'],
   );

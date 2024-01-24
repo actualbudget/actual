@@ -473,8 +473,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
     return isOffBudget
       ? 'Off Budget'
       : isBudgetTransfer(trans)
-      ? 'Transfer'
-      : lookupName(categories, trans.category);
+        ? 'Transfer'
+        : lookupName(categories, trans.category);
   };
 
   const onTotalAmountEdit = () => {
@@ -1172,8 +1172,8 @@ const Transaction = memo(function Transaction({
   const prettyCategory = transferAcct
     ? 'Transfer'
     : isParent
-    ? 'Split'
-    : categoryName;
+      ? 'Split'
+      : categoryName;
 
   const isPreview = isPreviewId(id);
   const isReconciled = transaction.reconciled;

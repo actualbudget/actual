@@ -78,7 +78,7 @@ export function Accounts({
     setIsDragging(drag.state === 'start');
   }
 
-  const makeDropPadding = (i, length) => {
+  const makeDropPadding = i => {
     if (i === 0) {
       return {
         paddingTop: isDragging ? 15 : 0,
@@ -118,7 +118,7 @@ export function Accounts({
           query={getBalanceQuery(account)}
           onDragChange={onDragChange}
           onDrop={onReorder}
-          outerStyle={makeDropPadding(i, budgetedAccounts.length)}
+          outerStyle={makeDropPadding(i)}
         />
       ))}
 
@@ -143,7 +143,7 @@ export function Accounts({
           query={getBalanceQuery(account)}
           onDragChange={onDragChange}
           onDrop={onReorder}
-          outerStyle={makeDropPadding(i, offbudgetAccounts.length)}
+          outerStyle={makeDropPadding(i)}
         />
       ))}
 
@@ -157,7 +157,7 @@ export function Accounts({
       )}
 
       {showClosedAccounts &&
-        closedAccounts.map((account, i) => (
+        closedAccounts.map(account => (
           <Account
             key={account.id}
             name={account.name}

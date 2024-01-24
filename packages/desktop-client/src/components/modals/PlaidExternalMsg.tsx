@@ -92,8 +92,8 @@ export function PlaidExternalMsg({
                 {waiting === 'browser'
                   ? 'Waiting on browser...'
                   : waiting === 'accounts'
-                  ? 'Loading accounts...'
-                  : null}
+                    ? 'Loading accounts...'
+                    : null}
               </View>
             </View>
           ) : success ? (
