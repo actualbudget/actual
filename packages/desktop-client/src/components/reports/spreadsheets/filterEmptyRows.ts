@@ -1,4 +1,4 @@
-import { type GroupedEntity } from '../entities';
+import { type GroupedEntity } from 'loot-core/types/models/reports';
 
 export function filterEmptyRows(
   showEmpty: boolean,

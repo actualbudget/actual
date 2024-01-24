@@ -3,6 +3,7 @@ import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { integerToAmount } from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/types/models/reports';
 
 import { categoryLists } from '../ReportOptions';
 
@@ -75,7 +76,7 @@ export function createGroupedSpreadsheet({
 
     const months = monthUtils.rangeInclusive(startDate, endDate);
 
-    const groupedData = categoryGroup.map(
+    const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {
         let totalAssets = 0;
         let totalDebts = 0;

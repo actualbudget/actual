@@ -23,7 +23,7 @@ export const Toggle = ({
     <div style={{ marginTop: -20, ...style }}>
       <input
         id={id}
-        checked={checked
+        checked={checked}
         onChange={onToggle}
         className={`${css({
           height: 0,

@@ -35,11 +35,8 @@ export function ReportSidebar({
   setMode,
   setIsDateStatic,
   setShowEmpty,
-  showOffBudget,
   setShowOffBudget,
-  showHiddenCategories,
   setShowHiddenCategories,
-  showUncategorized,
   setShowUncategorized,
   setSelectedCategories,
   onChangeDates,
@@ -270,11 +267,11 @@ export function ReportSidebar({
                 <Menu
                   onMenuSelect={type => {
                     if (type === 'show-hidden-categories') {
-                      setShowHiddenCategories(!customReportItems.showHiddenCategories);
-                    } else if (type === 'show-off-budget') {
-                      setShowOffBudget(
-                        !customReportItems.showOffBudget,
+                      setShowHiddenCategories(
+                        !customReportItems.showHiddenCategories,
                       );
+                    } else if (type === 'show-off-budget') {
+                      setShowOffBudget(!customReportItems.showOffBudget);
                     } else if (type === 'show-empty-items') {
                       setShowEmpty(!customReportItems.showEmpty);
                     } else if (type === 'show-uncategorized') {
@@ -290,6 +287,7 @@ export function ReportSidebar({
                       tooltip: 'Show hidden categories',
                       toggle: customReportItems.showHiddenCategories,
                     },
+                    {
                       name: 'show-empty-items',
                       text: 'Show Empty Rows',
                       tooltip: 'Show rows that are zero or blank',

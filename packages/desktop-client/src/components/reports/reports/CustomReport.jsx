@@ -69,10 +69,10 @@ export function CustomReport() {
   const [groupBy, setGroupBy] = useState(loadReport.groupBy);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
-  const [showOffBudget, setShowOffBudget] = useState(
-    loadReport.showOffBudget,
+  const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
+  const [showHiddenCategories, setShowHiddenCategories] = useState(
+    loadReport.showHiddenCategories,
   );
-  const [showHiddenCategories, setShowHiddenCategories] = useState(loadReport.showHiddenCategories);
   const [showUncategorized, setShowUncategorized] = useState(
     loadReport.showUncategorized,
   );
@@ -203,7 +203,8 @@ export function CustomReport() {
     groupBy,
     balanceType,
     showEmpty,
-    showOffBudgetHidden,
+    showOffBudget,
+    showHiddenCategories,
     showUncategorized,
     graphType,
     startDate,
@@ -264,11 +265,8 @@ export function CustomReport() {
           setMode={setMode}
           setIsDateStatic={setIsDateStatic}
           setShowEmpty={setShowEmpty}
-          showOffBudget={showOffBudget}
           setShowOffBudget={setShowOffBudget}
-          showHiddenCategories={showHiddenCategories}
           setShowHiddenCategories={setShowHiddenCategories}
-          showUncategorized={showUncategorized}
           setShowUncategorized={setShowUncategorized}
           setSelectedCategories={setSelectedCategories}
           onChangeDates={onChangeDates}
