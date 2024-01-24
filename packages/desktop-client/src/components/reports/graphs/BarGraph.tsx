@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { css } from 'glamor';
@@ -19,13 +20,13 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
-import { type DataEntity } from '../entities';
 import { getCustomTick } from '../getCustomTick';
 import { numberFormatterTooltip } from '../numberFormatter';
 
@@ -126,7 +127,7 @@ const customLabel = props => {
 
 type BarGraphProps = {
   style?: CSSProperties;
-  data: DataEntity;
+  data: GroupedEntity;
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
@@ -166,7 +167,7 @@ export function BarGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data[splitData] && (
           <ResponsiveContainer>
             <div>
@@ -189,29 +190,27 @@ export function BarGraph({
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
-                {!compact && <CartesianGrid strokeDasharray="3 3" />}
                 {!compact && (
-                  <XAxis
-                    dataKey={yAxis}
-                    angle={-35}
-                    textAnchor="end"
-                    height={Math.sqrt(longestLabelLength) * 25}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {!compact && (
-                  <YAxis
-                    tickFormatter={value => getCustomTick(value, privacyMode)}
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
-                {!compact && (
-                  <ReferenceLine y={0} stroke={theme.pageTextLight} />
+                  <>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey={yAxis}
+                      angle={-35}
+                      textAnchor="end"
+                      height={Math.sqrt(longestLabelLength) * 25}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                    <YAxis
+                      tickFormatter={value => getCustomTick(value, privacyMode)}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageText }}
+                    />
+                    <ReferenceLine y={0} stroke={theme.pageTextLight} />
+                  </>
                 )}
                 <Bar dataKey={val => getVal(val)} stackId="a">
-                  {viewLabels && (
+                  {viewLabels && !compact && (
                     <LabelList
                       dataKey={val => getVal(val)}
                       content={customLabel}
@@ -227,7 +226,7 @@ export function BarGraph({
                 </Bar>
                 {yAxis === 'date' && balanceTypeOp === 'totalTotals' && (
                   <Bar dataKey="totalDebts" stackId="a">
-                    {viewLabels && (
+                    {viewLabels && !compact && (
                       <LabelList dataKey="totalDebts" content={customLabel} />
                     )}
                     {data[splitData].map((entry, index) => (

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import { isAggregateQuery } from '../compiler';

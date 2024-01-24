@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
 import {

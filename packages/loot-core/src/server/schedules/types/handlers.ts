@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { DiscoverScheduleEntity } from '../../../types/models';
 
 export interface SchedulesHandlers {

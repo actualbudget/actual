@@ -1,8 +1,14 @@
+// @ts-strict-ignore
+import type { Handlers } from 'loot-core/src/types/handlers';
+
 import * as injected from './injected';
 
 export { q } from './app/query';
 
-function send(name, args) {
+function send<K extends keyof Handlers, T extends Handlers[K]>(
+  name: K,
+  args?: Parameters<T>[0],
+): Promise<Awaited<ReturnType<T>>> {
   return injected.send(name, args);
 }
 
@@ -21,7 +27,7 @@ export async function loadBudget(budgetId) {
   return send('api/load-budget', { id: budgetId });
 }
 
-export async function downloadBudget(syncId, { password } = {}) {
+export async function downloadBudget(syncId, { password }: { password? } = {}) {
   return send('api/download-budget', { syncId, password });
 }
 
@@ -79,10 +85,6 @@ export function getTransactions(accountId, startDate, endDate) {
   return send('api/transactions-get', { accountId, startDate, endDate });
 }
 
-export function filterTransactions(accountId, text) {
-  return send('api/transactions-filter', { accountId, text });
-}
-
 export function updateTransaction(id, fields) {
   return send('api/transaction-update', { id, fields });
 }
@@ -95,7 +97,7 @@ export function getAccounts() {
   return send('api/accounts-get');
 }
 
-export function createAccount(account, initialBalance) {
+export function createAccount(account, initialBalance?) {
   return send('api/account-create', { account, initialBalance });
 }
 
@@ -103,7 +105,7 @@ export function updateAccount(id, fields) {
   return send('api/account-update', { id, fields });
 }
 
-export function closeAccount(id, transferAccountId, transferCategoryId) {
+export function closeAccount(id, transferAccountId?, transferCategoryId?) {
   return send('api/account-close', {
     id,
     transferAccountId,
@@ -127,7 +129,7 @@ export function updateCategoryGroup(id, fields) {
   return send('api/category-group-update', { id, fields });
 }
 
-export function deleteCategoryGroup(id, transferCategoryId) {
+export function deleteCategoryGroup(id, transferCategoryId?) {
   return send('api/category-group-delete', { id, transferCategoryId });
 }
 
@@ -143,7 +145,7 @@ export function updateCategory(id, fields) {
   return send('api/category-update', { id, fields });
 }
 
-export function deleteCategory(id, transferCategoryId) {
+export function deleteCategory(id, transferCategoryId?) {
   return send('api/category-delete', { id, transferCategoryId });
 }
 

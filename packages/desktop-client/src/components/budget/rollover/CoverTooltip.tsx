@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ComponentProps, useState } from 'react';
 
 import { useCategories } from '../../../hooks/useCategories';
@@ -47,7 +48,7 @@ export function CoverTooltip({
             categoryGroups={categoryGroups}
             value={null}
             openOnFocus={true}
-            onUpdate={id => {}}
+            onUpdate={() => {}}
             onSelect={id => setCategory(id)}
             inputProps={{
               inputRef: node,

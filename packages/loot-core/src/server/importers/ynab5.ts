@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // This is a special usage of the API because this package is embedded
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
@@ -145,8 +146,8 @@ async function importTransactions(
   );
 
   const payeesByTransferAcct = payees
-    .filter((payee: YNAB5.Payee) => payee?.transfer_acct)
-    .map((payee: YNAB5.Payee) => [payee.transfer_acct, payee]);
+    .filter(payee => payee?.transfer_acct)
+    .map(payee => [payee.transfer_acct, payee] as [string, YNAB5.Payee]);
   const payeeTransferAcctHashMap = new Map<string, YNAB5.Payee>(
     payeesByTransferAcct,
   );

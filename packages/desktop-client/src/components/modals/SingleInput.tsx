@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { styles } from '../../style';
@@ -80,7 +81,7 @@ export function SingleInput({
                 ...styles.mediumText,
                 flexBasis: '50%',
               }}
-              onPointerUp={e => _onSubmit(value)}
+              onPointerUp={() => _onSubmit(value)}
             >
               {buttonText}
             </Button>

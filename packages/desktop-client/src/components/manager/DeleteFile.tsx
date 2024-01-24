@@ -26,17 +26,6 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
     null,
   );
 
-  async function onDelete() {
-    setLoadingState(isCloudFile ? 'cloud' : 'local');
-    await actions.deleteBudget(
-      'id' in file ? file.id : undefined,
-      isCloudFile ? file.cloudFileId : undefined,
-    );
-    setLoadingState(null);
-
-    modalProps.onBack();
-  }
-
   return (
     <Modal
       {...modalProps}
@@ -75,7 +64,16 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
                   padding: '10px 30px',
                   fontSize: 14,
                 }}
-                onClick={onDelete}
+                onClick={async () => {
+                  setLoadingState('cloud');
+                  await actions.deleteBudget(
+                    'id' in file ? file.id : undefined,
+                    file.cloudFileId,
+                  );
+                  setLoadingState(null);
+
+                  modalProps.onBack();
+                }}
               >
                 Delete file from all devices
               </ButtonWithLoading>
@@ -125,7 +123,13 @@ export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
                         backgroundColor: theme.errorText,
                       }),
                 }}
-                onClick={onDelete}
+                onClick={async () => {
+                  setLoadingState('local');
+                  await actions.deleteBudget(file.id);
+                  setLoadingState(null);
+
+                  modalProps.onBack();
+                }}
               >
                 Delete file locally
               </ButtonWithLoading>

@@ -13,7 +13,7 @@ import { ReportCard } from '../ReportCard';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { useReport } from '../useReport';
 
-export function CustomReportCard() {
+export function CustomReportCard(reports) {
   const categories = useCategories();
 
   const endDate = monthUtils.currentMonth();
@@ -36,7 +36,7 @@ export function CustomReportCard() {
   const data = useReport('default', getGraphData);
 
   return (
-    <ReportCard flex={1} to="/reports/custom">
+    <ReportCard flex={1} to="/reports/custom" reports={reports}>
       <View>
         <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
           <View style={{ flex: 1 }}>

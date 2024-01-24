@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
-import { theme } from '../../style';
+import { type CustomReportEntity } from 'loot-core/src/types/models';
+
+import { type CSSProperties, theme } from '../../style';
 import { AnchorLink } from '../common/AnchorLink';
 import { View } from '../common/View';
 
-export function ReportCard({ flex, to, style, children }) {
+type ReportCardProps = {
+  to: string;
+  report: CustomReportEntity;
+  children: ReactNode;
+  flex?: string;
+  style?: CSSProperties;
+};
+
+export function ReportCard({
+  to,
+  report,
+  children,
+  flex,
+  style,
+}: ReportCardProps) {
   const containerProps = { flex, margin: 15 };
 
   const content = (
@@ -33,7 +49,8 @@ export function ReportCard({ flex, to, style, children }) {
     return (
       <AnchorLink
         to={to}
-        style={{ textDecoration: 'none', flex, ...containerProps }}
+        report={report}
+        style={{ textDecoration: 'none', ...containerProps }}
       >
         {content}
       </AnchorLink>

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import { TransactionEntity } from '../types/models';
@@ -29,6 +30,7 @@ function makeTransaction(data: Partial<TransactionEntity>): TransactionEntity {
       balance_current: null,
       balance_available: null,
       balance_limit: null,
+      account_sync_source: null,
     },
     ...data,
   };

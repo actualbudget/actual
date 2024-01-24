@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as monthUtils from '../../../shared/months';
 import { extractScheduleConds } from '../../../shared/schedules';
 import * as db from '../../db';
@@ -216,9 +217,8 @@ export async function goalsSchedule(
     const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
 
     const totalSinking = await getSinkingTotal(t_sinking);
-    const totalSinkingBaseContribution = await getSinkingBaseContributionTotal(
-      t_sinking,
-    );
+    const totalSinkingBaseContribution =
+      await getSinkingBaseContributionTotal(t_sinking);
 
     if (balance >= totalSinking + totalPayMonthOf) {
       to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);

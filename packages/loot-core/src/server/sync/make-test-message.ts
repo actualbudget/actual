@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { SyncProtoBuf } from '@actual-app/crdt';
 
 import * as encryption from '../encryption';

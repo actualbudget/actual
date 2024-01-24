@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import mitt from 'mitt';
 
 import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
@@ -77,7 +78,7 @@ export class Spreadsheet {
     return this.nodes.has(name);
   }
 
-  add(name, expr, value) {
+  add(name, expr) {
     this.set(name, expr);
   }
 

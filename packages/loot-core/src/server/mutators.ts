@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import { sequential } from '../shared/async';
 import { type HandlerFunctions, type Handlers } from '../types/handlers';
@@ -50,7 +51,9 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
   }
 
   if (mutatingMethods.has(handler)) {
-    return runMutator(() => handler(args), { undoTag });
+    return runMutator(() => handler(args), { undoTag }) as Promise<
+      ReturnType<T>
+    >;
   }
 
   // When closing a file, it clears out all global state for the file. That
@@ -66,7 +69,7 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
   promise.then(() => {
     runningMethods.delete(promise);
   });
-  return promise;
+  return promise as Promise<ReturnType<T>>;
 }
 
 // These are useful for tests. Only use them in tests.

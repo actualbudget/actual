@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { addSyncListener } from '../sync/index';
 
 import * as db from './index';

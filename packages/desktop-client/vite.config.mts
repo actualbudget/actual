@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as path from 'path';
 
 import inject from '@rollup/plugin-inject';
@@ -28,7 +29,7 @@ const addWatchers = (): Plugin => ({
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
   const commonInject = {
-    exclude: ['src/setupTests.jsx'],
+    exclude: ['src/setupTests.js'],
     global: [buildShims, 'global'],
   };
 
@@ -122,10 +123,10 @@ export default defineConfig(async ({ mode }) => {
             } else if (/woff|woff2/.test(extType)) {
               extType = 'media';
             }
-            return `static/${extType}/[name]-[hash][extname]`;
+            return `static/${extType}/[name].[hash][extname]`;
           },
-          chunkFileNames: 'static/js/[name]-[hash].js',
-          entryFileNames: 'static/js/[name]-[hash].js',
+          chunkFileNames: 'static/js/[name].[hash].chunk.js',
+          entryFileNames: 'static/js/[name].[hash].js',
         },
       },
     },
@@ -149,7 +150,12 @@ export default defineConfig(async ({ mode }) => {
       injectShims(),
       addWatchers(),
       react({
-        plugins: [['@swc/plugin-remove-console', {}]],
+        plugins: [
+          [
+            '@swc/plugin-react-remove-properties',
+            { properties: ['^data-debug'] },
+          ],
+        ],
         devTarget: 'es2022',
       }),
       viteTsconfigPaths({ root: '../..' }),
@@ -160,7 +166,7 @@ export default defineConfig(async ({ mode }) => {
       include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
       environment: 'jsdom',
       globals: true,
-      setupFiles: './src/setupTests.jsx',
+      setupFiles: './src/setupTests.js',
     },
   };
 });

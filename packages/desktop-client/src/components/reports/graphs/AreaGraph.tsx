@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { css } from 'glamor';
@@ -17,13 +18,13 @@ import {
   amountToCurrency,
   amountToCurrencyNoDecimal,
 } from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { theme } from '../../../style';
 import { type CSSProperties } from '../../../style';
 import { AlignedText } from '../../common/AlignedText';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
-import { type DataEntity } from '../entities';
 import { numberFormatterTooltip } from '../numberFormatter';
 
 import { adjustTextSize } from './adjustTextSize';
@@ -113,7 +114,7 @@ const customLabel = (props, width, end) => {
 
 type AreaGraphProps = {
   style?: CSSProperties;
-  data: DataEntity;
+  data: GroupedEntity;
   balanceTypeOp: string;
   compact?: boolean;
   viewLabels: boolean;
@@ -172,7 +173,7 @@ export function AreaGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data.monthData && (
           <ResponsiveContainer>
             <div>

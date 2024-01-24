@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { Fragment, useMemo, useState } from 'react';
 
 import {
@@ -150,7 +151,7 @@ export function CategorySelector({
                   <Checkbox
                     id={`form_${categoryGroup.id}`}
                     checked={allCategoriesInGroupSelected}
-                    onChange={e => {
+                    onChange={() => {
                       const selectedCategoriesExcludingGroupCategories =
                         selectedCategories.filter(
                           selectedCategory =>
@@ -188,7 +189,7 @@ export function CategorySelector({
                       paddingLeft: 10,
                     }}
                   >
-                    {categoryGroup.categories.map((category, index) => {
+                    {categoryGroup.categories.map(category => {
                       const isChecked = selectedCategories.some(
                         selectedCategory => selectedCategory.id === category.id,
                       );
@@ -205,7 +206,7 @@ export function CategorySelector({
                           <Checkbox
                             id={`form_${category.id}`}
                             checked={isChecked}
-                            onChange={e => {
+                            onChange={() => {
                               if (isChecked) {
                                 setSelectedCategories(
                                   selectedCategories.filter(

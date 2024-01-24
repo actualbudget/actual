@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { memo } from 'react';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
@@ -103,10 +104,10 @@ export const PayeeTableRow = memo(
           backgroundColor: hovered
             ? theme.tableRowBackgroundHover
             : selected
-            ? theme.tableRowBackgroundHighlight
-            : backgroundFocus
-            ? theme.tableRowBackgroundHover
-            : theme.tableBackground,
+              ? theme.tableRowBackgroundHighlight
+              : backgroundFocus
+                ? theme.tableRowBackgroundHover
+                : theme.tableBackground,
           ...(selected && {
             backgroundColor: theme.tableRowBackgroundHighlight,
             zIndex: 100,

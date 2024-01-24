@@ -1,27 +1,29 @@
+// @ts-strict-ignore
 import React, { type UIEventHandler } from 'react';
 import { type RefProp } from 'react-spring';
+
+import { type DataEntity } from 'loot-core/src/types/models/reports';
 
 import { styles, theme } from '../../../../style';
 import { View } from '../../../common/View';
 import { Row, Cell } from '../../../table';
-import { type MonthData } from '../../entities';
 
 type ReportTableHeaderProps = {
-  scrollWidth?: number;
   groupBy: string;
-  interval?: MonthData[];
+  interval?: DataEntity[];
   balanceType: string;
   headerScrollRef: RefProp<HTMLDivElement>;
-  handleScroll?: UIEventHandler<HTMLDivElement>;
+  handleScroll: UIEventHandler<HTMLDivElement>;
+  compact: boolean;
 };
 
 export function ReportTableHeader({
-  scrollWidth,
   groupBy,
   interval,
   balanceType,
   headerScrollRef,
   handleScroll,
+  compact,
 }: ReportTableHeaderProps) {
   return (
     <Row
@@ -60,7 +62,7 @@ export function ReportTableHeader({
               return (
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   key={index}
@@ -73,7 +75,7 @@ export function ReportTableHeader({
               <>
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value="Deposits"
@@ -81,7 +83,7 @@ export function ReportTableHeader({
                 />
                 <Cell
                   style={{
-                    minWidth: 85,
+                    minWidth: compact ? 80 : 125,
                     ...styles.tnum,
                   }}
                   value="Payments"
@@ -91,7 +93,7 @@ export function ReportTableHeader({
             )}
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value="Totals"
@@ -99,7 +101,7 @@ export function ReportTableHeader({
         />
         <Cell
           style={{
-            minWidth: 85,
+            minWidth: compact ? 80 : 125,
             ...styles.tnum,
           }}
           value="Average"

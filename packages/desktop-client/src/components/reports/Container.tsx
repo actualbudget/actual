@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useRef, type ReactNode } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 

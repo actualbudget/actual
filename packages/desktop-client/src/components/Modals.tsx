@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -31,6 +32,7 @@ import { PlaidExternalMsg } from './modals/PlaidExternalMsg';
 import { ReportBudgetSummary } from './modals/ReportBudgetSummary';
 import { RolloverBudgetSummary } from './modals/RolloverBudgetSummary';
 import { SelectLinkedAccounts } from './modals/SelectLinkedAccounts';
+import { SimpleFinInitialise } from './modals/SimpleFinInitialise';
 import { SingleInput } from './modals/SingleInput';
 import { SwitchBudgetType } from './modals/SwitchBudgetType';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
@@ -79,6 +81,7 @@ export function Modals() {
             <CreateAccount
               modalProps={modalProps}
               syncServerStatus={syncServerStatus}
+              upgradingAccountId={options?.upgradingAccountId}
             />
           );
 
@@ -108,6 +111,7 @@ export function Modals() {
               requisitionId={options.requisitionId}
               localAccounts={accounts.filter(acct => acct.closed === 0)}
               actions={actions}
+              syncSource={options.syncSource}
             />
           );
 
@@ -190,6 +194,14 @@ export function Modals() {
         case 'gocardless-init':
           return (
             <GoCardlessInitialise
+              modalProps={modalProps}
+              onSuccess={options.onSuccess}
+            />
+          );
+
+        case 'simplefin-init':
+          return (
+            <SimpleFinInitialise
               modalProps={modalProps}
               onSuccess={options.onSuccess}
             />

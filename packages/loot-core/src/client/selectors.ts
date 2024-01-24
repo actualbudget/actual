@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { createSelector } from 'reselect';
 
 import { getNumberFormat } from '../shared/util';

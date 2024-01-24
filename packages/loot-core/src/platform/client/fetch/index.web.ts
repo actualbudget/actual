@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import * as undo from '../undo';
@@ -133,7 +134,7 @@ export const unlisten: T.Unlisten = function (name) {
 };
 
 async function closeSocket(onClose) {
-  socketClient.onclose = event => {
+  socketClient.onclose = () => {
     socketClient = null;
     onClose();
   };

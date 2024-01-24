@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { integerToAmount, amountToInteger, currencyToAmount } from './util';
 
 // For now, this info is duplicated from the backend. Figure out how

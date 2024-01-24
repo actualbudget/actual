@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export function Graph() {
   const graph = {
     addNode,

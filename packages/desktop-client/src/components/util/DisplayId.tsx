@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { CachedAccounts } from 'loot-core/src/client/data-hooks/accounts';

@@ -15,8 +15,6 @@
     "downlevelIteration": true,
     // TODO: enable once every file is ts
     // "strict": true,
-    // TODO: enable once all issues fixed
-    // "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
@@ -27,16 +25,26 @@
     "checkJs": false,
     // Used for temp builds
     "outDir": "build",
-    "moduleResolution": "Node",
+    "moduleResolution": "Node10",
     "module": "ES2022",
     // Until/if we build using tsc
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      // until we turn on composite/references
+      "loot-core/*": ["./packages/loot-core/src/*"],
+    },
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "path": ["./packages"]
+      }
+    ]
   },
   "include": ["packages/**/*"],
   "exclude": ["**/node_modules/*", "**/build/*", "**/lib-dist/*"],
   "ts-node": {
     "compilerOptions": {
-      "module": "commonjs"
+      "module": "CommonJS"
     }
   }
 }

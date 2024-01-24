@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -333,7 +334,7 @@ export async function possiblyUpload() {
   }
 
   // Don't block on uploading
-  upload().catch(err => {});
+  upload().catch(() => {});
 }
 
 export async function removeFile(fileId) {

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
@@ -143,7 +144,7 @@ export async function addGoCardlessAccounts(
       });
 
       // Do an initial sync
-      await bankSync.syncGoCardlessAccount(
+      await bankSync.syncExternalAccount(
         userId,
         userKey,
         id,

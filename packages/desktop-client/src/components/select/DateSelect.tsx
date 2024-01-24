@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   forwardRef,
   useState,
@@ -343,7 +344,7 @@ export function DateSelect({
         {...inputProps}
         inputRef={inputRef}
         value={value}
-        onPointerUp={e => {
+        onPointerUp={() => {
           if (!embedded) {
             setOpen(true);
           }

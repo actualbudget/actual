@@ -7,7 +7,7 @@ import { theme, type CSSProperties } from '../../style';
 type ToggleProps = {
   id: string;
   checked: boolean;
-  onChange?: (any) => void;
+  onToggle?: () => void;
   onColor?: string;
   style?: CSSProperties;
 };
@@ -15,7 +15,7 @@ type ToggleProps = {
 export const Toggle = ({
   id,
   checked,
-  onChange,
+  onToggle,
   onColor,
   style,
 }: ToggleProps) => {
@@ -23,8 +23,8 @@ export const Toggle = ({
     <div style={{ marginTop: -20, ...style }}>
       <input
         id={id}
-        checked={checked}
-        onChange={onChange}
+        checked={checked
+        onChange={onToggle}
         className={`${css({
           height: 0,
           width: 0,
@@ -33,7 +33,9 @@ export const Toggle = ({
         type="checkbox"
       />
       <label
-        style={{ background: checked && onColor }}
+        style={{
+          background: checked ? onColor : theme.checkboxToggleBackground,
+        }}
         className={`${css({
           display: 'flex',
           alignItems: 'center',
@@ -41,7 +43,6 @@ export const Toggle = ({
           cursor: 'pointer',
           width: '32px',
           height: '16px',
-          background: theme.checkboxToggleBackground,
           borderRadius: '100px',
           position: 'relative',
           transition: 'background-color .2s',

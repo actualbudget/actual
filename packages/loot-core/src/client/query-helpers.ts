@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { listen, send } from '../platform/client/fetch';
 import { once } from '../shared/async';
 import { getPrimaryOrderBy } from '../shared/query';

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import csvStringify from 'csv-stringify/lib/sync';
 
 import { integerToAmount } from '../../shared/util';
@@ -97,8 +98,8 @@ export async function exportQueryToCSV(query) {
         trans.Reconciled === true
           ? 'Reconciled'
           : trans.Cleared === true
-          ? 'Cleared'
-          : 'Not cleared',
+            ? 'Cleared'
+            : 'Not cleared',
     };
   });
 

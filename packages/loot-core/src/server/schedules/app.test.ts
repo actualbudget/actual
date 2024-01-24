@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import MockDate from 'mockdate';
 
 import { q } from '../../shared/query';

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { send } from '../../platform/client/fetch';
 
 import { closeBudget, loadBudget } from './budgets';

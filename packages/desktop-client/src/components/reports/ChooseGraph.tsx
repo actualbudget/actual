@@ -1,8 +1,14 @@
+// @ts-strict-ignore
 import React, { useRef } from 'react';
 
+import {
+  type GroupedEntity,
+  type Month,
+} from 'loot-core/src/types/models/reports';
+
+import { type CSSProperties } from '../../style';
 import { View } from '../common/View';
 
-import { type DataEntity, type Month } from './entities';
 import { AreaGraph } from './graphs/AreaGraph';
 import { BarGraph } from './graphs/BarGraph';
 import { BarLineGraph } from './graphs/BarLineGraph';
@@ -11,21 +17,20 @@ import { LineGraph } from './graphs/LineGraph';
 import { StackedBarGraph } from './graphs/StackedBarGraph';
 import { ReportTable } from './graphs/tableGraph/ReportTable';
 import { ReportTableHeader } from './graphs/tableGraph/ReportTableHeader';
-import { ReportTableList } from './graphs/tableGraph/ReportTableList';
 import { ReportTableTotals } from './graphs/tableGraph/ReportTableTotals';
 import { ReportOptions } from './ReportOptions';
 
 type ChooseGraphProps = {
-  data: DataEntity;
+  data: GroupedEntity;
   mode: string;
   graphType: string;
   balanceType: string;
   groupBy: string;
-  showEmpty: boolean;
-  scrollWidth: number;
-  setScrollWidth: (value: number) => void;
-  months: Month[];
-  viewLabels: boolean;
+  setScrollWidth?: (value: number) => void;
+  months?: Month[];
+  viewLabels?: boolean;
+  compact?: boolean;
+  style?: CSSProperties;
 };
 
 export function ChooseGraph({
@@ -34,13 +39,20 @@ export function ChooseGraph({
   graphType,
   balanceType,
   groupBy,
-  showEmpty,
-  scrollWidth,
   setScrollWidth,
   months,
   viewLabels,
+  compact,
+  style,
 }: ChooseGraphProps) {
+  const graphStyle = compact ? { ...style } : { flexGrow: 1 };
   const balanceTypeOp = ReportOptions.balanceTypeMap.get(balanceType);
+  const groupByData =
+    groupBy === 'Category'
+      ? 'groupedData'
+      : ['Month', 'Year'].includes(groupBy)
+        ? 'monthData'
+        : 'data';
 
   const saveScrollWidth = value => {
     setScrollWidth(!value ? 0 : value);
@@ -68,7 +80,8 @@ export function ChooseGraph({
   if (graphType === 'AreaGraph') {
     return (
       <AreaGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
@@ -78,7 +91,8 @@ export function ChooseGraph({
   if (graphType === 'BarGraph') {
     return (
       <BarGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
@@ -87,12 +101,15 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'BarLineGraph') {
-    return <BarLineGraph style={{ flexGrow: 1 }} graphData={data} />;
+    return (
+      <BarLineGraph style={graphStyle} compact={compact} graphData={data} />
+    );
   }
   if (graphType === 'DonutGraph') {
     return (
       <DonutGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         groupBy={groupBy}
         balanceTypeOp={balanceTypeOp}
@@ -101,12 +118,13 @@ export function ChooseGraph({
     );
   }
   if (graphType === 'LineGraph') {
-    return <LineGraph style={{ flexGrow: 1 }} graphData={data} />;
+    return <LineGraph style={graphStyle} compact={compact} graphData={data} />;
   }
   if (graphType === 'StackedBarGraph') {
     return (
       <StackedBarGraph
-        style={{ flexGrow: 1 }}
+        style={graphStyle}
+        compact={compact}
         data={data}
         viewLabels={viewLabels}
       />
@@ -119,32 +137,29 @@ export function ChooseGraph({
           headerScrollRef={headerScrollRef}
           handleScroll={handleScroll}
           interval={mode === 'time' && data.monthData}
-          scrollWidth={scrollWidth}
           groupBy={groupBy}
           balanceType={balanceType}
+          compact={compact}
         />
         <ReportTable
           saveScrollWidth={saveScrollWidth}
           listScrollRef={listScrollRef}
           handleScroll={handleScroll}
-        >
-          <ReportTableList
-            data={data}
-            empty={showEmpty}
-            monthsCount={months.length}
-            balanceTypeOp={balanceTypeOp}
-            mode={mode}
-            groupBy={groupBy}
-          />
-        </ReportTable>
+          balanceTypeOp={balanceTypeOp}
+          groupBy={groupBy}
+          data={data[groupByData]}
+          mode={mode}
+          monthsCount={months.length}
+          compact={compact}
+        />
         <ReportTableTotals
           totalScrollRef={totalScrollRef}
           handleScroll={handleScroll}
-          scrollWidth={scrollWidth}
           data={data}
           mode={mode}
           balanceTypeOp={balanceTypeOp}
           monthsCount={months.length}
+          compact={compact}
         />
       </View>
     );

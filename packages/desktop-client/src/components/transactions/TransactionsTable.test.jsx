@@ -64,8 +64,8 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
             i === 0
               ? null
               : i === 1
-              ? usualGroup.categories[1].id
-              : usualGroup.categories[0].id,
+                ? usualGroup.categories[1].id
+                : usualGroup.categories[0].id,
           amount: isSplit ? 50 : undefined,
           sort_order: i,
         },
@@ -668,7 +668,7 @@ describe('Transactions', () => {
     await waitForAutocomplete();
 
     await userEvent.click(
-      container.querySelector('[data-testid="transaction-error"] button'),
+      container.querySelector('[data-testid="add-split-button"]'),
     );
 
     input = await editNewField(container, 'debit', 1);
@@ -765,7 +765,7 @@ describe('Transactions', () => {
     updateProps({ transactions });
 
     function expectErrorToNotExist(transactions) {
-      transactions.forEach((transaction, idx) => {
+      transactions.forEach(transaction => {
         expect(transaction.error).toBeFalsy();
       });
     }
@@ -794,6 +794,7 @@ describe('Transactions', () => {
     expect(getTransactions().length).toBe(5);
     await userEvent.click(splitButton);
     await waitForAutocomplete();
+
     expect(getTransactions().length).toBe(6);
     expect(getTransactions()[0].is_parent).toBe(true);
     expect(getTransactions()[1].is_child).toBe(true);
@@ -816,7 +817,9 @@ describe('Transactions', () => {
 
     // Add another split transaction and make sure everything is
     // updated properly
-    await userEvent.click(toolbar.querySelector('button'));
+    await userEvent.click(
+      toolbar.querySelector('[data-testid="add-split-button"]'),
+    );
     expect(getTransactions().length).toBe(7);
     expect(getTransactions()[2].amount).toBe(0);
     expectErrorToExist(getTransactions().slice(0, 3));
@@ -910,7 +913,7 @@ describe('Transactions', () => {
     await userEvent.click(splitButton);
     await waitForAutocomplete();
     await userEvent.click(
-      container.querySelector('[data-testid="transaction-error"] button'),
+      container.querySelector('[data-testid="add-split-button"]'),
     );
     expect(getTransactions().length).toBe(7);
 

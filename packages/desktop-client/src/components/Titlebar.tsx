@@ -60,7 +60,14 @@ export type TitlebarContextValue = {
   subscribe: (listener: Listener) => () => void;
 };
 
-export const TitlebarContext = createContext<TitlebarContextValue>(null);
+export const TitlebarContext = createContext<TitlebarContextValue>({
+  sendEvent() {
+    throw new Error('TitlebarContext not initialized');
+  },
+  subscribe() {
+    throw new Error('TitlebarContext not initialized');
+  },
+});
 
 type TitlebarProviderProps = {
   children?: ReactNode;
@@ -87,26 +94,32 @@ export function TitlebarProvider({ children }: TitlebarProviderProps) {
 }
 
 function UncategorizedButton() {
-  const count = useSheetValue(queries.uncategorizedCount());
+  const count: number | null = useSheetValue(queries.uncategorizedCount());
+  if (count === null || count <= 0) {
+    return null;
+  }
+
   return (
-    count !== 0 && (
-      <Link
-        variant="button"
-        type="bare"
-        to="/accounts/uncategorized"
-        style={{
-          color: theme.errorText,
-        }}
-      >
-        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
-      </Link>
-    )
+    <Link
+      variant="button"
+      type="bare"
+      to="/accounts/uncategorized"
+      style={{
+        color: theme.errorText,
+      }}
+    >
+      {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
+    </Link>
   );
 }
 
-function PrivacyButton({ style }) {
+type PrivacyButtonProps = {
+  style?: CSSProperties;
+};
+
+function PrivacyButton({ style }: PrivacyButtonProps) {
   const isPrivacyEnabled = useSelector(
-    state => state.prefs.local.isPrivacyEnabled,
+    state => state.prefs.local?.isPrivacyEnabled,
   );
   const { savePrefs } = useActions();
 
@@ -133,11 +146,13 @@ type SyncButtonProps = {
   isMobile?: boolean;
 };
 function SyncButton({ style, isMobile = false }: SyncButtonProps) {
-  const cloudFileId = useSelector(state => state.prefs.local.cloudFileId);
+  const cloudFileId = useSelector(state => state.prefs.local?.cloudFileId);
   const { sync } = useActions();
 
   const [syncing, setSyncing] = useState(false);
-  const [syncState, setSyncState] = useState(null);
+  const [syncState, setSyncState] = useState<
+    null | 'offline' | 'local' | 'disabled' | 'error'
+  >(null);
 
   useEffect(() => {
     const unlisten = listen('sync-event', ({ type, subtype, syncDisabled }) => {
@@ -176,18 +191,18 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
     syncState === 'error'
       ? theme.errorText
       : syncState === 'disabled' ||
-        syncState === 'offline' ||
-        syncState === 'local'
-      ? theme.mobileHeaderTextSubdued
-      : theme.mobileHeaderText;
+          syncState === 'offline' ||
+          syncState === 'local'
+        ? theme.mobileHeaderTextSubdued
+        : theme.mobileHeaderText;
   const desktopColor =
     syncState === 'error'
       ? theme.errorTextDark
       : syncState === 'disabled' ||
-        syncState === 'offline' ||
-        syncState === 'local'
-      ? theme.tableTextLight
-      : 'inherit';
+          syncState === 'offline' ||
+          syncState === 'local'
+        ? theme.tableTextLight
+        : 'inherit';
 
   const activeStyle = isMobile
     ? {
@@ -262,8 +277,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
           {syncState === 'disabled'
             ? 'Disabled'
             : syncState === 'offline'
-            ? 'Offline'
-            : 'Sync'}
+              ? 'Offline'
+              : 'Sync'}
         </Text>
       </Button>
     </>
@@ -271,8 +286,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 }
 
 function BudgetTitlebar() {
-  const maxMonths = useSelector(state => state.prefs.global.maxMonths);
-  const budgetType = useSelector(state => state.prefs.local.budgetType);
+  const maxMonths = useSelector(state => state.prefs.global?.maxMonths);
+  const budgetType = useSelector(state => state.prefs.local?.budgetType);
   const { saveGlobalPrefs } = useActions();
   const { sendEvent } = useContext(TitlebarContext);
 
@@ -365,14 +380,18 @@ function BudgetTitlebar() {
   );
 }
 
-export function Titlebar({ style }) {
+type TitlebarProps = {
+  style?: CSSProperties;
+};
+
+export function Titlebar({ style }: TitlebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const sidebar = useSidebar();
   const { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
   const floatingSidebar = useSelector(
-    state => state.prefs.global.floatingSidebar,
+    state => state.prefs.global?.floatingSidebar,
   );
 
   return isNarrowWidth ? null : (

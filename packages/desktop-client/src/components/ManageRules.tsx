@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useState,
   useEffect,
@@ -229,7 +230,7 @@ function ManageRulesContent({
     dispatch(
       pushModal('edit-rule', {
         rule,
-        onSave: async newRule => {
+        onSave: async () => {
           await loadRules();
           setLoading(false);
         },

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getClock, Timestamp } from '@actual-app/crdt';
 
 import * as db from '../db';

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import throttle from 'throttleit';
 
 import { send } from '../../platform/client/fetch';
@@ -220,7 +221,7 @@ export function updateGroup(group) {
 }
 
 export function deleteGroup(id, transferId?) {
-  return async function (dispatch, getState) {
+  return async function (dispatch) {
     await send('category-group-delete', { id, transferId });
     await dispatch(getCategories());
     // See `deleteCategory` for why we need this

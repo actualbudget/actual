@@ -1,28 +1,45 @@
+// @ts-strict-ignore
 import React, {
-  type UIEventHandler,
+  useCallback,
   useLayoutEffect,
   useRef,
-  type ReactNode,
+  type UIEventHandler,
 } from 'react';
 import { type RefProp } from 'react-spring';
 
+import { type DataEntity } from 'loot-core/src/types/models/reports';
+
 import { type CSSProperties } from '../../../../style';
+import { Block } from '../../../common/Block';
 import { View } from '../../../common/View';
 
+import { ReportTableList } from './ReportTableList';
+import { ReportTableRow } from './ReportTableRow';
+
 type ReportTableProps = {
-  saveScrollWidth?: (value: number) => void;
-  listScrollRef?: RefProp<HTMLDivElement>;
+  saveScrollWidth: (value: number) => void;
+  listScrollRef: RefProp<HTMLDivElement>;
+  handleScroll: UIEventHandler<HTMLDivElement>;
   style?: CSSProperties;
-  children?: ReactNode;
-  handleScroll?: UIEventHandler<HTMLDivElement>;
+  groupBy: string;
+  balanceTypeOp: 'totalDebts' | 'totalTotals' | 'totalAssets';
+  data: DataEntity[];
+  mode: string;
+  monthsCount: number;
+  compact: boolean;
 };
 
 export function ReportTable({
   saveScrollWidth,
   listScrollRef,
-  style,
-  children,
   handleScroll,
+  style,
+  groupBy,
+  balanceTypeOp,
+  data,
+  mode,
+  monthsCount,
+  compact,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -32,25 +49,57 @@ export function ReportTable({
     }
   });
 
+  const renderItem = useCallback(
+    ({ item, groupByItem, mode, style, monthsCount, compact }) => {
+      return (
+        <ReportTableRow
+          item={item}
+          balanceTypeOp={balanceTypeOp}
+          groupByItem={groupByItem}
+          mode={mode}
+          style={style}
+          monthsCount={monthsCount}
+          compact={compact}
+        />
+      );
+    },
+    [],
+  );
+
   return (
     <View
-      innerRef={listScrollRef}
-      onScroll={handleScroll}
-      id="list"
       style={{
-        overflowY: 'auto',
-        scrollbarWidth: 'none',
-        '::-webkit-scrollbar': { display: 'none' },
         flex: 1,
+        flexDirection: 'row',
         outline: 'none',
         '& .animated .animated-row': { transition: '.25s transform' },
         ...style,
       }}
       tabIndex={1}
     >
-      <View>
-        <div ref={contentRef}>{children}</div>
-      </View>
+      <Block
+        innerRef={listScrollRef}
+        onScroll={handleScroll}
+        id="list"
+        style={{
+          overflowY: 'auto',
+          scrollbarWidth: 'none',
+          '::-webkit-scrollbar': { display: 'none' },
+          flex: 1,
+          outline: 'none',
+          '& .animated .animated-row': { transition: '.25s transform' },
+          ...style,
+        }}
+      >
+        <ReportTableList
+          data={data}
+          monthsCount={monthsCount}
+          mode={mode}
+          groupBy={groupBy}
+          renderItem={renderItem}
+          compact={compact}
+        />
+      </Block>
     </View>
   );
 }

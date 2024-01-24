@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { join } from './path-join';
 
 let documentDir;

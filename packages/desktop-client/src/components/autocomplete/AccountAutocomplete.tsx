@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { Fragment, type ComponentProps, type ReactNode } from 'react';
 
 import { css } from 'glamor';
@@ -40,8 +41,8 @@ function AccountList({
             item.closed
               ? 'Closed Accounts'
               : item.offbudget
-              ? 'Off Budget'
-              : 'For Budget'
+                ? 'Off Budget'
+                : 'For Budget'
           }`;
 
           lastItem = item;

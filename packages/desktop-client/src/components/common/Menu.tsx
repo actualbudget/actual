@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   type ReactNode,
   createElement,
@@ -141,6 +142,7 @@ export function Menu<T extends MenuItem>({
 
         return (
           <View
+            role="button"
             key={item.name}
             style={{
               cursor: 'default',
@@ -160,6 +162,7 @@ export function Menu<T extends MenuItem>({
                   backgroundColor: theme.menuItemBackgroundHover,
                   color: theme.menuItemTextHover,
                 }),
+              ...item.style,
             }}
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
@@ -198,7 +201,7 @@ export function Menu<T extends MenuItem>({
                   checked={item.toggle}
                   onColor={theme.pageTextPositive}
                   style={{ marginLeft: 5, ...item.style }}
-                  onChange={() =>
+                  onToggle={() =>
                     !item.disabled &&
                     item.toggle !== undefined &&
                     onMenuSelect(item.name)

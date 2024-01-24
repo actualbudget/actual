@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 

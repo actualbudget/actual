@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm';
 
 function browserAlgorithmName(name) {

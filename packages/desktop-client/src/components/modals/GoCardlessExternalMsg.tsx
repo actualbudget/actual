@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -109,8 +110,10 @@ export function GoCardlessExternalMsg({
     isLoading: isBankOptionsLoading,
     isError: isBankOptionError,
   } = useAvailableBanks(country);
-  const { configured: isConfigured, isLoading: isConfigurationLoading } =
-    useGoCardlessStatus();
+  const {
+    configuredGoCardless: isConfigured,
+    isLoading: isConfigurationLoading,
+  } = useGoCardlessStatus();
 
   async function onJump() {
     setError(null);
@@ -287,10 +290,10 @@ export function GoCardlessExternalMsg({
                 {isConfigurationLoading
                   ? 'Checking GoCardless configuration..'
                   : waiting === 'browser'
-                  ? 'Waiting on GoCardless...'
-                  : waiting === 'accounts'
-                  ? 'Loading accounts...'
-                  : null}
+                    ? 'Waiting on GoCardless...'
+                    : waiting === 'accounts'
+                      ? 'Loading accounts...'
+                      : null}
               </View>
 
               {waiting === 'browser' && (

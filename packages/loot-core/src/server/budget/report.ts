@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { safeNumber } from '../../shared/util';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
