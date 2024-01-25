@@ -34,18 +34,18 @@ export function filterHiddenItems(
             f.transferAccount === null,
     );
 
-  return showHide.filter(asset => {
+  return showHide.filter(query => {
     if (!item.uncategorized_id) {
       return true;
     }
 
     const isTransfer = item.is_transfer
-      ? asset.transferAccount
-      : !asset.transferAccount;
-    const isHidden = item.has_category ? true : !asset.category;
+      ? query.transferAccount
+      : !query.transferAccount;
+    const isHidden = item.has_category ? true : !query.category;
     const isOffBudget = item.is_off_budget
-      ? asset.accountOffBudget
-      : !asset.accountOffBudget;
+      ? query.accountOffBudget
+      : !query.accountOffBudget;
 
     return isTransfer && isHidden && isOffBudget;
   });

@@ -37,8 +37,8 @@ export function recalculate({
       item,
       assets,
       showOffBudget,
-      showUncategorized,
       showHiddenCategories,
+      showUncategorized,
     )
       .filter(asset => asset.date === month && asset[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
@@ -48,8 +48,8 @@ export function recalculate({
       item,
       debts,
       showOffBudget,
-      showUncategorized,
       showHiddenCategories,
+      showUncategorized,
     )
       .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
       .reduce((a, v) => (a = a + v.amount), 0);
