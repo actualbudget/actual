@@ -42,10 +42,10 @@ Next, navigate to the root of your project folder, run the standartised docker c
 
 ```sh
 # Run docker container
-docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.37.1-jammy /bin/bash
+docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.41.1-jammy /bin/bash
 
     # If you receive an error such as "docker: invalid reference format", please instead use the following command:
-    docker run --rm --network host -v ${pwd}:/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.37.1-jammy /bin/bash
+    docker run --rm --network host -v ${pwd}:/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.41.1-jammy /bin/bash
 
 # Run the VRT tests: important - they MUST be ran against a HTTPS server
 E2E_START_URL=https://192.168.0.178:3001 yarn vrt

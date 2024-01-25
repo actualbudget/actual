@@ -25,7 +25,7 @@
     "checkJs": false,
     // Used for temp builds
     "outDir": "build",
-    "moduleResolution": "Node",
+    "moduleResolution": "Node10",
     "module": "ES2022",
     // Until/if we build using tsc
     "noEmit": true,
@@ -44,7 +44,7 @@
   "exclude": ["**/node_modules/*", "**/build/*", "**/lib-dist/*"],
   "ts-node": {
     "compilerOptions": {
-      "module": "commonjs"
+      "module": "CommonJS"
     }
   }
 }
