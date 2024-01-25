@@ -118,7 +118,9 @@ export function AccountHeader({
       />
 
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
-        <View style={{ marginTop: 2, alignItems: 'flex-start' }}>
+        <View
+          style={{ marginTop: 2, marginBottom: 4, alignItems: 'flex-start' }}
+        >
           <View>
             {editingName ? (
               <InitialFocus>
