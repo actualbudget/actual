@@ -306,12 +306,12 @@ export async function getCategoriesGrouped(): Promise<
 export async function insertCategoryGroup(group) {
   // Don't allow duplicate group
   const existingGroup = await first(
-    `SELECT id FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? and tombstone = 0 LIMIT 1`,
     [group.name.toUpperCase()],
   );
   if (existingGroup) {
     throw new Error(
-      `Group ‘${group.name}’ already exists in budget (May be Hidden)`,
+      `A ${existingGroup.hidden ? 'hidden ' : ''}’${existingGroup.name}’ category group already exists.`,
     );
   }
 
