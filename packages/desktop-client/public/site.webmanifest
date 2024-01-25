@@ -1,6 +1,7 @@
 {
     "name": "Actual",
     "short_name": "Actual",
+    "description": "A local-first personal finance tool",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
@@ -13,8 +14,24 @@
             "type": "image/png"
         }
     ],
+    "screenshots": [
+        {
+            "src": "/screenshot_wide.png",
+            "form_factor": "wide",
+            "label": "Actual Budget Homepage",
+            "type": "image/png",
+            "sizes": "1280x720"
+        },
+        {
+            "src": "/screenshot_narrow.png",
+            "form_factor": "narrow",
+            "label": "Actual Budget Mobile Homepag",
+            "type": "image/png",
+            "sizes": "350x600"
+        }
+    ], 
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
     "display": "standalone",
-    "start_url": "."
+    "start_url": "./"
 }
