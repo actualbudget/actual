@@ -25,7 +25,7 @@
         {
             "src": "/screenshot_narrow.png",
             "form_factor": "narrow",
-            "label": "Actual Budget Mobile Homepag",
+            "label": "Actual Budget Mobile Homepage",
             "type": "image/png",
             "sizes": "350x600"
         }
