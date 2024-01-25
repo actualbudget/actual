@@ -27,7 +27,6 @@ type SidebarGroupProps = {
   collapsed: boolean;
   dragPreview?: boolean;
   innerRef?: ConnectDragSource;
-  borderColor?: string;
   style?: CSSProperties;
   onEdit?: (id: string) => void;
   onSave?: (group: object) => Promise<void>;
@@ -44,7 +43,6 @@ export function SidebarGroup({
   dragPreview,
   innerRef,
   style,
-  borderColor = theme.tableBorder,
   onEdit,
   onSave,
   onDelete,
@@ -63,7 +61,7 @@ export function SidebarGroup({
         userSelect: 'none',
         WebkitUserSelect: 'none',
       }}
-      onClick={e => {
+      onClick={() => {
         onToggleCollapse(group.id);
       }}
     >
@@ -181,7 +179,7 @@ export function SidebarGroup({
     >
       <InputCell
         value={group.name}
-        formatter={value => displayed}
+        formatter={() => displayed}
         width="flex"
         exposed={editing}
         onUpdate={value => {

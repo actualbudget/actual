@@ -94,6 +94,7 @@ export function ExperimentalFeatures() {
             <FeatureToggle flag="goalTemplatesEnabled">
               Goal templates
             </FeatureToggle>
+            <FeatureToggle flag="simpleFinSync">SimpleFIN sync</FeatureToggle>
           </View>
         ) : (
           <LinkButton

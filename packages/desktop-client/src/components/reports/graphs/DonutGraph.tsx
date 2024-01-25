@@ -157,7 +157,7 @@ export function DonutGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data[splitData] && (
           <ResponsiveContainer>
             <div>

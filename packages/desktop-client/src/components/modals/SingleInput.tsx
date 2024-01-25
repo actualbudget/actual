@@ -81,7 +81,7 @@ export function SingleInput({
                 ...styles.mediumText,
                 flexBasis: '50%',
               }}
-              onPointerUp={e => _onSubmit(value)}
+              onPointerUp={() => _onSubmit(value)}
             >
               {buttonText}
             </Button>

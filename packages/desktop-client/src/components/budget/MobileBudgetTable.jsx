@@ -145,7 +145,7 @@ function BudgetCell({
     });
   }
 
-  function onAmountClick(e) {
+  function onAmountClick() {
     onEdit?.(categoryId);
   }
 
@@ -243,7 +243,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
   blank,
   style,
   month,
-  editMode,
   onEdit,
   isEditingBudget,
   onEditBudget,
@@ -569,7 +568,6 @@ const IncomeGroupTotals = memo(function IncomeGroupTotals({
   budgeted,
   balance,
   style,
-  editMode,
   onEdit,
 }) {
   const listItemRef = useRef();
@@ -657,7 +655,6 @@ const IncomeCategory = memo(function IncomeCategory({
   balance,
   month,
   style,
-  editMode,
   onEdit,
   onBudgetAction,
   isEditingBudget,
@@ -1122,7 +1119,6 @@ function BudgetGroups({
 export function BudgetTable({
   type,
   categoryGroups,
-  categories,
   month,
   monthBounds,
   editMode,
@@ -1143,9 +1139,6 @@ export function BudgetTable({
   onBudgetAction,
   onRefresh,
   onSwitchBudgetType,
-  onSaveNotes,
-  onEditGroupNotes,
-  onEditCategoryNotes,
   savePrefs,
   pushModal,
   onEditGroup,
@@ -1154,7 +1147,6 @@ export function BudgetTable({
   onEditCategoryBudget,
   openBalanceActionMenuId,
   onOpenBalanceActionMenu,
-  ...props
 }) {
   const { width } = useResponsive();
   const show3Cols = width >= 360;

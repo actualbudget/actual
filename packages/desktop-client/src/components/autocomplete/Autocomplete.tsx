@@ -691,7 +691,7 @@ function MultiAutocomplete<T extends Item>({
 
 type AutocompleteFooterProps = {
   show?: boolean;
-  embedded: boolean;
+  embedded?: boolean;
   children: ReactNode;
 };
 export function AutocompleteFooter({
@@ -699,18 +699,20 @@ export function AutocompleteFooter({
   embedded,
   children,
 }: AutocompleteFooterProps) {
+  if (!show) {
+    return null;
+  }
+
   return (
-    show && (
-      <View
-        style={{
-          flexShrink: 0,
-          ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
-        }}
-        onMouseDown={e => e.preventDefault()}
-      >
-        {children}
-      </View>
-    )
+    <View
+      style={{
+        flexShrink: 0,
+        ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
+      }}
+      onMouseDown={e => e.preventDefault()}
+    >
+      {children}
+    </View>
   );
 }
 

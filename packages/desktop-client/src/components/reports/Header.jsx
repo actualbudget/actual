@@ -75,7 +75,6 @@ export function Header({
   onDeleteFilter,
   onCondOpChange,
   headerPrefixItems,
-  selectGraph,
 }) {
   const location = useLocation();
   const path = location.pathname;

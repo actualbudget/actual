@@ -408,19 +408,15 @@ function BudgetInner(props: BudgetInnerProps) {
         await sync();
       }}
     >
-      {({ refreshing, onRefresh }) => (
+      {({ onRefresh }) => (
         <BudgetTable
           // This key forces the whole table rerender when the number
           // format changes
           key={numberFormat + hideFraction}
           categoryGroups={categoryGroups}
-          categories={categories}
           type={budgetType}
           month={currentMonth}
           monthBounds={bounds}
-          //   refreshControl={
-          //     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          //   }
           editMode={editMode}
           onEditMode={flag => setEditMode(flag)}
           onShowBudgetSummary={onShowBudgetSummary}
@@ -438,9 +434,6 @@ function BudgetInner(props: BudgetInnerProps) {
           onBudgetAction={applyBudgetAction}
           onRefresh={onRefresh}
           onSwitchBudgetType={onSwitchBudgetType}
-          onSaveNotes={onSaveNotes}
-          onEditGroupNotes={onEditGroupNotes}
-          onEditCategoryNotes={onEditCategoryNotes}
           savePrefs={savePrefs}
           pushModal={pushModal}
           onEditGroup={onEditGroup}

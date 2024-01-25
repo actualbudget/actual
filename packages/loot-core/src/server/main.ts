@@ -671,6 +671,7 @@ handlers['gocardless-accounts-link'] = async function ({
       id,
       account_id: account.account_id,
       bank: bank.id,
+      account_sync_source: 'goCardless',
     });
   } else {
     id = uuidv4();
@@ -681,6 +682,7 @@ handlers['gocardless-accounts-link'] = async function ({
       name: account.name,
       official_name: account.official_name,
       bank: bank.id,
+      account_sync_source: 'goCardless',
     });
     await db.insertPayee({
       name: '',
@@ -688,7 +690,7 @@ handlers['gocardless-accounts-link'] = async function ({
     });
   }
 
-  await bankSync.syncGoCardlessAccount(
+  await bankSync.syncExternalAccount(
     undefined,
     undefined,
     id,
@@ -697,6 +699,64 @@ handlers['gocardless-accounts-link'] = async function ({
   );
 
   connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+};
+
+handlers['simplefin-accounts-link'] = async function ({
+  externalAccount,
+  upgradingId,
+}) {
+  let id;
+
+  const institution = {
+    name: externalAccount.institution ?? 'Unknown',
+  };
+
+  const bank = await link.findOrCreateBank(
+    institution,
+    externalAccount.orgDomain,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [
+      upgradingId,
+    ]);
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: 'simpleFin',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      account_sync_source: 'simpleFin',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncExternalAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+  );
+
+  await connection.send('sync-event', {
     type: 'success',
     tables: ['transactions'],
   });
@@ -1119,6 +1179,38 @@ handlers['gocardless-status'] = async function () {
   );
 };
 
+handlers['simplefin-status'] = async function () {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  return post(
+    getServer().SIMPLEFIN_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+};
+
+handlers['simplefin-accounts'] = async function () {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  return post(
+    getServer().SIMPLEFIN_SERVER + '/accounts',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+};
+
 handlers['gocardless-get-banks'] = async function (country) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1195,7 +1287,7 @@ handlers['gocardless-accounts-sync'] = async function ({ id }) {
     const acct = accounts[i];
     if (acct.bankId) {
       try {
-        const res = await bankSync.syncGoCardlessAccount(
+        const res = await bankSync.syncExternalAccount(
           userId,
           userKey,
           acct.id,
@@ -1281,6 +1373,10 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     return 'ok';
   }
 
+  const accRow = await db.first('SELECT * FROM accounts WHERE id = ?', [id]);
+
+  const isGoCardless = accRow.account_sync_source === 'goCardless';
+
   await db.updateAccount({
     id,
     account_id: null,
@@ -1288,7 +1384,12 @@ handlers['account-unlink'] = mutator(async function ({ id }) {
     balance_current: null,
     balance_available: null,
     balance_limit: null,
+    account_sync_source: null,
   });
+
+  if (isGoCardless === false) {
+    return;
+  }
 
   const { count } = await db.first(
     'SELECT COUNT(*) as count FROM accounts WHERE bank = ?',
