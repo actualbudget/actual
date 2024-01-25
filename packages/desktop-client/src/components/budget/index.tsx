@@ -313,22 +313,21 @@ function BudgetInner(props: BudgetProps) {
     }
   };
 
-  const groupNameAlreadyExistsNotification = name => {
+  const groupNameAlreadyExistsNotification = group => {
     props.addNotification({
       type: 'error',
-      message: `Group ‘${name}’ already exists in budget (May be Hidden)`,
+      message: `Group ‘${group.name}’ already exists in budget ${group.hidden ? '(May be Hidden)' : ''}`,
     });
   };
 
   const onSaveGroup = async group => {
     const categories = await props.getCategories();
-    const exists =
-      categories.grouped
-        .filter(g => g.name.toUpperCase() === group.name.toUpperCase())
-        .filter(g => group.id === 'new' || group.id !== g.id).length > 0;
+    const matchingGroups = categories.grouped
+      .filter(g => g.name.toUpperCase() === group.name.toUpperCase())
+      .filter(g => group.id === 'new' || group.id !== g.id);
 
-    if (exists) {
-      groupNameAlreadyExistsNotification(group.name);
+    if (matchingGroups.length > 0) {
+      groupNameAlreadyExistsNotification(matchingGroups[0]);
       return;
     }
 
