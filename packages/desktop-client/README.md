@@ -32,13 +32,14 @@ Prerequisites:
 
 #### Running against the local server
 
-First start the dev server:
+First start a dev instance:
 
 ```sh
 HTTPS=true yarn start
 ```
+Note the network IP address and port the dev instance is listening on.
 
-Next, navigate to the root of your project folder, run the standartised docker container, and launch the visual regression tests from within the desktop-client package.
+Next, navigate to the root of your project folder, run the standartised docker container, and launch the visual regression tests from within it.
 
 ```sh
 # Run docker container
@@ -47,14 +48,11 @@ docker run --rm --network host -v $(pwd):/work/ -w /work/ -it mcr.microsoft.com/
     # If you receive an error such as "docker: invalid reference format", please instead use the following command:
     docker run --rm --network host -v ${pwd}:/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.41.1-jammy /bin/bash
 
-# Change directories
-cd packages/desktop-client
-
-# Run the VRT tests: important - they MUST be ran against a HTTPS server
-E2E_START_URL=https://192.168.0.178:3001 yarn vrt
+# Run the VRT tests: important - they MUST be ran against a HTTPS server.  Use the ip and port noted earlier
+E2E_START_URL=https://ip:port yarn vrt
 
     # To update snapshots, use the following command:
-    E2E_START_URL=https://192.168.0.178:3001 yarn vrt --update-snapshots
+    E2E_START_URL=https://ip:port yarn vrt --update-snapshots
 ```
 
 #### Running against a remote server
