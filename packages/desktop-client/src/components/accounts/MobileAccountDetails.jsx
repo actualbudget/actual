@@ -199,11 +199,11 @@ export function AccountDetails({
       </View>
       <PullToRefresh onRefresh={onRefresh}>
         <TransactionList
+          account={account}
           transactions={allTransactions}
           categories={categories}
           accounts={accounts}
           payees={payees}
-          showCategory={!account.offbudget}
           isNew={isNewTransaction}
           onLoadMore={onLoadMore}
           onSelect={onSelectTransaction}
