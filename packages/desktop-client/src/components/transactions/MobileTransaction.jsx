@@ -77,7 +77,6 @@ import {
 import { MobileBackButton } from '../MobileBackButton';
 import { Page } from '../Page';
 import { AmountInput } from '../util/AmountInput';
-import { account } from 'loot-core/mocks/arbitrary-schema';
 
 const zIndices = { SECTION_HEADING: 10 };
 
