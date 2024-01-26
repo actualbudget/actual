@@ -10,6 +10,7 @@ import {
 import { type CSSProperties, theme } from '../../style';
 
 import { Text } from './Text';
+import { Toggle } from './Toggle';
 import { View } from './View';
 
 type KeybindingProps = {
@@ -33,6 +34,8 @@ type MenuItem = {
   text: string;
   key?: string;
   style?: CSSProperties;
+  toggle?: boolean;
+  tooltip?: string;
 };
 
 type MenuProps<T extends MenuItem = MenuItem> = {
@@ -164,23 +167,48 @@ export function Menu<T extends MenuItem>({
             onMouseEnter={() => setHoveredIndex(idx)}
             onMouseLeave={() => setHoveredIndex(null)}
             onClick={() =>
-              !item.disabled && onMenuSelect && onMenuSelect(item.name)
+              !item.disabled &&
+              onMenuSelect &&
+              item.toggle === undefined &&
+              onMenuSelect(item.name)
             }
           >
             {/* Force it to line up evenly */}
-            <Text style={{ lineHeight: 0 }}>
-              {item.icon &&
-                createElement(item.icon, {
-                  width: item.iconSize || 10,
-                  height: item.iconSize || 10,
-                  style: {
-                    marginRight: 7,
-                    width: item.iconSize || 10,
-                  },
-                })}
-            </Text>
-            <Text>{item.text}</Text>
-            <View style={{ flex: 1 }} />
+            {item.toggle === undefined ? (
+              <>
+                <Text style={{ lineHeight: 0 }}>
+                  {item.icon &&
+                    createElement(item.icon, {
+                      width: item.iconSize || 10,
+                      height: item.iconSize || 10,
+                      style: {
+                        marginRight: 7,
+                        width: item.iconSize || 10,
+                      },
+                    })}
+                </Text>
+                <Text title={item.tooltip}>{item.text}</Text>
+                <View style={{ flex: 1 }} />
+              </>
+            ) : (
+              <>
+                <label htmlFor={item.name} title={item.tooltip}>
+                  {item.text}
+                </label>
+                <View style={{ flex: 1 }} />
+                <Toggle
+                  id={item.name}
+                  checked={item.toggle}
+                  onColor={theme.pageTextPositive}
+                  style={{ marginLeft: 5, ...item.style }}
+                  onToggle={() =>
+                    !item.disabled &&
+                    item.toggle !== undefined &&
+                    onMenuSelect(item.name)
+                  }
+                />
+              </>
+            )}
             {item.key && <Keybinding keyName={item.key} />}
           </View>
         );

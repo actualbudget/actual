@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
-import { Checkbox } from '../forms';
+import { Tooltip } from '../tooltips';
 
 import { CategorySelector } from './CategorySelector';
 import {
@@ -40,6 +42,7 @@ export function ReportSidebar({
   onChangeViews,
   onReportChange,
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const onSelectRange = cond => {
     setDateRange(cond);
     switch (cond) {
@@ -247,71 +250,63 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-empty-columns"
-            checked={customReportItems.showEmpty}
-            value={customReportItems.showEmpty}
-            onChange={() => setShowEmpty(!customReportItems.showEmpty)}
-          />
-          <label
-            htmlFor="show-empty-columns"
-            title="Show rows that are zero or blank"
-            style={{ fontSize: 12 }}
-          >
-            Show Empty Rows
-          </label>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
-
-          <Checkbox
-            id="show-hidden-columns"
-            checked={customReportItems.showOffBudget}
-            value={customReportItems.showOffBudget}
-            onChange={() => {
-              setShowOffBudget(!customReportItems.showOffBudget);
+          <Button
+            onClick={() => {
+              setMenuOpen(true);
             }}
-          />
-          <label
-            htmlFor="show-hidden-columns"
-            title="Show off budget accounts and hidden categories"
-            style={{ fontSize: 12 }}
+            style={{
+              color: 'currentColor',
+              padding: '5px 10px',
+            }}
           >
-            Off Budget Items
-          </label>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
+            Options
+            {menuOpen && (
+              <Tooltip
+                position="bottom-left"
+                style={{ padding: 0 }}
+                onClose={() => {
+                  setMenuOpen(false);
+                }}
+              >
+                <Menu
+                  onMenuSelect={type => {
+                    if (type === 'show-off-budget') {
+                      setShowOffBudget(
+                        !customReportItems.showOffBudget,
+                      );
+                    } else if (type === 'show-empty-items') {
+                      setShowEmpty(!customReportItems.showEmpty);
+                    } else if (type === 'show-uncategorized') {
+                      setShowUncategorized(
+                        !customReportItems.showUncategorized,
+                      );
+                    }
+                  }}
 
-          <Checkbox
-            id="show-uncategorized"
-            checked={customReportItems.showUncategorized}
-            value={customReportItems.showUncategorized}
-            onChange={() =>
-              setShowUncategorized(!customReportItems.showUncategorized)
-            }
-          />
-          <label
-            htmlFor="show-uncategorized"
-            title="Show uncategorized transactions"
-            style={{ fontSize: 12 }}
-          >
-            Uncategorized
-          </label>
+                  items={[
+                    {
+                      name: 'show-empty-items',
+                      text: 'Show Empty Rows',
+                      tooltip: 'Show rows that are zero or blank',
+                      toggle: customReportItems.showEmpty,
+                    },
+                    {
+                      name: 'show-off-budget',
+                      text: 'Show Off Budget',
+                      tooltip: 'Show off budget accounts and hidden categories',
+                      toggle: customReportItems.showOffBudget,
+                    },
+                    {
+                      name: 'show-uncategorized',
+                      text: 'Show Uncategorized',
+                      tooltip: 'Show uncategorized transactions',
+                      toggle: customReportItems.showUncategorized,
+                    },
+                  ]}
+                />
+              </Tooltip>
+            )}
+          </Button>
         </View>
         <View
           style={{
