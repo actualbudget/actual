@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   serializeClock,
   deserializeClock,
@@ -9,14 +10,14 @@ import {
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
-import logger from '../../platform/server/log';
+import { logger } from '../../platform/server/log';
 import { sequential, once } from '../../shared/async';
 import { setIn, getIn } from '../../shared/util';
 import { LocalPrefs } from '../../types/prefs';
 import { triggerBudgetChanges, setType as setBudgetType } from '../budget/base';
 import * as db from '../db';
 import { PostError, SyncError } from '../errors';
-import app from '../main-app';
+import { app } from '../main-app';
 import { runMutator } from '../mutators';
 import { postBinary } from '../post';
 import * as prefs from '../prefs';
@@ -28,9 +29,9 @@ import * as encoder from './encoder';
 import { rebuildMerkleHash } from './repair';
 import { isError } from './utils';
 
-export { default as makeTestMessage } from './make-test-message';
-export { default as resetSync } from './reset';
-export { default as repairSync } from './repair';
+export { makeTestMessage } from './make-test-message';
+export { resetSync } from './reset';
+export { repairSync } from './repair';
 
 const FULL_SYNC_DELAY = 1000;
 let SYNCING_MODE = 'enabled';
@@ -130,7 +131,7 @@ async function fetchAll(table, ids) {
     }
 
     sql += ` WHERE `;
-    sql += partIds.map(id => `${column} = ?`).join(' OR ');
+    sql += partIds.map(() => `${column} = ?`).join(' OR ');
 
     try {
       const rows = await db.runQuery(sql, partIds, true);
@@ -141,8 +142,7 @@ async function fetchAll(table, ids) {
           message: error.message,
           stack: error.stack,
         },
-        sql,
-        params: partIds,
+        query: { sql, params: partIds },
       });
     }
   }

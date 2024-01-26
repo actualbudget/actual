@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { type useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -72,8 +73,8 @@ export function makeAmountFullStyle(value: number) {
       value < 0
         ? theme.errorText
         : value === 0
-        ? theme.tableTextSubdued
-        : theme.noticeText,
+          ? theme.tableTextSubdued
+          : theme.noticeText,
   };
 }
 

@@ -11,15 +11,14 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import useFeatureFlag from '../../hooks/useFeatureFlag';
 import { theme, styles } from '../../style';
-import Button, { ButtonWithLoading } from '../common/Button';
-import Input from '../common/Input';
-import Modal from '../common/Modal';
-import Select from '../common/Select';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button, ButtonWithLoading } from '../common/Button';
+import { Input } from '../common/Input';
+import { Modal } from '../common/Modal';
+import { Select } from '../common/Select';
+import { Stack } from '../common/Stack';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Checkbox, SectionLabel } from '../forms';
 import { TableHeader, TableWithNavigator, Row, Field } from '../table';
 
@@ -133,7 +132,7 @@ function getFileType(filepath) {
   return rawType;
 }
 
-function ParsedDate({ parseDateFormat, showParsed, dateFormat, date }) {
+function ParsedDate({ parseDateFormat, dateFormat, date }) {
   const parsed =
     date &&
     formatDate(
@@ -185,29 +184,39 @@ function getInitialMappings(transactions) {
   }
 
   const dateField = key(
-    fields.find(([name, value]) => name.toLowerCase().includes('date')) ||
-      fields.find(([name, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
+    fields.find(([name]) => name.toLowerCase().includes('date')) ||
+      fields.find(([, value]) => value.match(/^\d+[-/]\d+[-/]\d+$/)),
   );
 
   const amountField = key(
-    fields.find(([name, value]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([name, value]) => value.match(/^-?[.,\d]+$/)),
+    fields.find(([name]) => name.toLowerCase().includes('amount')) ||
+      fields.find(([, value]) => value.match(/^-?[.,\d]+$/)),
+  );
+
+  const categoryField = key(
+    fields.find(([name]) => name.toLowerCase().includes('category')),
   );
 
   const payeeField = key(
-    fields.find(([name, value]) => name !== dateField && name !== amountField),
+    fields.find(
+      ([name]) =>
+        name !== dateField && name !== amountField && name !== categoryField,
+    ),
   );
 
   const notesField = key(
     fields.find(
-      ([name, value]) =>
-        name !== dateField && name !== amountField && name !== payeeField,
+      ([name]) =>
+        name !== dateField &&
+        name !== amountField &&
+        name !== categoryField &&
+        name !== payeeField,
     ),
   );
 
   const inOutField = key(
     fields.find(
-      ([name, value]) =>
+      ([name]) =>
         name !== dateField &&
         name !== amountField &&
         name !== payeeField &&
@@ -221,6 +230,7 @@ function getInitialMappings(transactions) {
     payee: payeeField,
     notes: notesField,
     inOut: inOutField,
+    category: categoryField,
   };
 }
 
@@ -290,6 +300,19 @@ function parseAmountFields(
   };
 }
 
+function parseCategoryFields(trans, categories) {
+  let match = null;
+  categories.forEach(category => {
+    if (category.id === trans.category) {
+      return null;
+    }
+    if (category.name === trans.category) {
+      match = category.id;
+    }
+  });
+  return match;
+}
+
 function Transaction({
   transaction: rawTransaction,
   fieldMappings,
@@ -301,7 +324,9 @@ function Transaction({
   outValue,
   flipAmount,
   multiplierAmount,
+  categories,
 }) {
+  const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
     () =>
       fieldMappings
@@ -347,6 +372,16 @@ function Transaction({
       </Field>
       <Field width="flex" title={transaction.notes}>
         {transaction.notes}
+      </Field>
+      <Field
+        width="flex"
+        title={
+          categoryList.includes(transaction.category)
+            ? transaction.category
+            : undefined
+        }
+      >
+        {categoryList.includes(transaction.category) && transaction.category}
       </Field>
       {splitMode ? (
         <>
@@ -602,6 +637,17 @@ function FieldMappings({
             firstTransaction={transactions[0]}
           />
         </View>
+        <View style={{ flex: 1 }}>
+          <SubLabel title="Category" />
+          <SelectField
+            options={options}
+            value={mappings.category}
+            style={{ marginRight: 5 }}
+            onChange={name => onChange('category', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
+          />
+        </View>
         {splitMode ? (
           <>
             <View style={{ flex: 0.5 }}>
@@ -656,7 +702,7 @@ function FieldMappings({
   );
 }
 
-export default function ImportTransactions({ modalProps, options }) {
+export function ImportTransactions({ modalProps, options }) {
   const dateFormat = useSelector(
     state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
   );
@@ -676,7 +722,7 @@ export default function ImportTransactions({ modalProps, options }) {
   const [outValue, setOutValue] = useState('');
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
-  const { accountId, onImported } = options;
+  const { accountId, categories, onImported } = options;
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -698,19 +744,12 @@ export default function ImportTransactions({ modalProps, options }) {
 
   const [clearOnImport, setClearOnImport] = useState(true);
 
-  const enableExperimentalOfxParser = useFeatureFlag('experimentalOfxParser');
-
   async function parse(filename, options) {
     setLoadingState('parsing');
 
     const filetype = getFileType(filename);
     setFilename(filename);
     setFileType(filetype);
-
-    options = {
-      ...options,
-      enableExperimentalOfxParser,
-    };
 
     const { errors, transactions } = await parseTransactions(filename, options);
     setLoadingState(null);
@@ -866,6 +905,11 @@ export default function ImportTransactions({ modalProps, options }) {
         break;
       }
 
+      const category_id = parseCategoryFields(trans, categories.list);
+      if (category_id != null) {
+        trans.category = category_id;
+      }
+
       const { inflow, outflow, inOut, ...finalTransaction } = trans;
       finalTransactions.push({
         ...finalTransaction,
@@ -919,6 +963,7 @@ export default function ImportTransactions({ modalProps, options }) {
     { name: 'Date', width: 200 },
     { name: 'Payee', width: 'flex' },
     { name: 'Notes', width: 'flex' },
+    { name: 'Category', width: 'flex' },
   ];
 
   if (inOutMode) {
@@ -959,7 +1004,7 @@ export default function ImportTransactions({ modalProps, options }) {
 
           <TableWithNavigator
             items={transactions}
-            fields={['payee', 'amount']}
+            fields={['payee', 'category', 'amount']}
             style={{ backgroundColor: theme.tableHeaderBackground }}
             getItemKey={index => index}
             renderEmpty={() => {
@@ -976,7 +1021,7 @@ export default function ImportTransactions({ modalProps, options }) {
                 </View>
               );
             }}
-            renderItem={({ key, style, item, editing, focusedField }) => (
+            renderItem={({ key, style, item }) => (
               <View key={key} style={style}>
                 <Transaction
                   transaction={item}
@@ -989,6 +1034,7 @@ export default function ImportTransactions({ modalProps, options }) {
                   outValue={outValue}
                   flipAmount={flipAmount}
                   multiplierAmount={multiplierAmount}
+                  categories={categories.list}
                 />
               </View>
             )}

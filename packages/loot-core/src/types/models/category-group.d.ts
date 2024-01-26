@@ -1,3 +1,5 @@
+import { CategoryEntity } from './category';
+
 export interface CategoryGroupEntity {
   id?: string;
   name: string;

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -8,20 +9,20 @@ import {
   type GoCardlessToken,
 } from 'loot-core/src/types/models';
 
-import useGoCardlessStatus from '../../hooks/useGoCardlessStatus';
-import AnimatedLoading from '../../icons/AnimatedLoading';
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { Error, Warning } from '../alerts';
-import Autocomplete from '../autocomplete/Autocomplete';
-import Button from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import LinkButton from '../common/LinkButton';
-import Menu from '../common/Menu';
-import Modal from '../common/Modal';
-import Paragraph from '../common/Paragraph';
-import View from '../common/View';
+import { Autocomplete } from '../autocomplete/Autocomplete';
+import { Button } from '../common/Button';
+import { ExternalLink } from '../common/ExternalLink';
+import { LinkButton } from '../common/LinkButton';
+import { Menu } from '../common/Menu';
+import { Modal } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { Tooltip } from '../tooltips';
 
@@ -85,7 +86,7 @@ type GoCardlessExternalMsgProps = {
   onClose: () => void;
 };
 
-export default function GoCardlessExternalMsg({
+export function GoCardlessExternalMsg({
   modalProps,
   onMoveExternal,
   onSuccess,
@@ -109,8 +110,10 @@ export default function GoCardlessExternalMsg({
     isLoading: isBankOptionsLoading,
     isError: isBankOptionError,
   } = useAvailableBanks(country);
-  const { configured: isConfigured, isLoading: isConfigurationLoading } =
-    useGoCardlessStatus();
+  const {
+    configuredGoCardless: isConfigured,
+    isLoading: isConfigurationLoading,
+  } = useGoCardlessStatus();
 
   async function onJump() {
     setError(null);
@@ -227,7 +230,7 @@ export default function GoCardlessExternalMsg({
             onClick={() => setMenuOpen(true)}
             aria-label="Menu"
           >
-            <DotsHorizontalTriple
+            <SvgDotsHorizontalTriple
               width={15}
               height={15}
               style={{ transform: 'rotateZ(90deg)' }}
@@ -287,10 +290,10 @@ export default function GoCardlessExternalMsg({
                 {isConfigurationLoading
                   ? 'Checking GoCardless configuration..'
                   : waiting === 'browser'
-                  ? 'Waiting on GoCardless...'
-                  : waiting === 'accounts'
-                  ? 'Loading accounts...'
-                  : null}
+                    ? 'Waiting on GoCardless...'
+                    : waiting === 'accounts'
+                      ? 'Loading accounts...'
+                      : null}
               </View>
 
               {waiting === 'browser' && (

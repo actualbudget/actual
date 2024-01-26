@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import query from '../../shared/query';
+import { q } from '../../shared/query';
 import { makeChild } from '../../shared/transactions';
 import * as db from '../db';
 
@@ -75,15 +76,13 @@ describe('runQuery', () => {
     await insertTransactions();
 
     // date
-    let { data } = await runQuery(
-      query('transactions').select('date').serialize(),
-    );
+    let { data } = await runQuery(q('transactions').select('date').serialize());
     expect(data[0].date).toBe('2020-01-04');
 
     // date-month
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .select({ month: { $month: '$date' } })
           .serialize(),
       )
@@ -93,7 +92,7 @@ describe('runQuery', () => {
     // date-year
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .select({ year: { $year: '$date' } })
           .serialize(),
       )
@@ -103,10 +102,7 @@ describe('runQuery', () => {
     // boolean
     data = (
       await runQuery(
-        query('transactions')
-          .select(['is_child', 'is_parent'])
-          .raw()
-          .serialize(),
+        q('transactions').select(['is_child', 'is_parent']).raw().serialize(),
       )
     ).data;
     expect(data[0].is_child).toBe(false);
@@ -126,7 +122,7 @@ describe('runQuery', () => {
     });
 
     let { data } = await runQuery(
-      query('transactions')
+      q('transactions')
         .filter({ amount: { $lt: { $neg: ':amount' } } })
         .select()
         .serialize(),
@@ -136,7 +132,7 @@ describe('runQuery', () => {
 
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .filter({ date: { $transform: '$month', $eq: { $month: ':month' } } })
           .select('date')
           .serialize(),
@@ -147,7 +143,7 @@ describe('runQuery', () => {
 
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .filter({ date: { $transform: '$year', $eq: { $year: ':month' } } })
           .select('date')
           .serialize(),
@@ -158,7 +154,7 @@ describe('runQuery', () => {
 
     data = (
       await runQuery(
-        query('transactions')
+        q('transactions')
           .filter({ cleared: ':cleared' })
           .select('date')
           .serialize(),
@@ -184,7 +180,7 @@ describe('runQuery', () => {
       category: 'cat',
     });
 
-    const queryState = query('transactions')
+    const queryState = q('transactions')
       .filter({ category: ':category' })
       .select()
       .serialize();
@@ -206,7 +202,7 @@ describe('runQuery', () => {
     });
 
     const { data } = await runQuery(
-      query('transactions')
+      q('transactions')
         .filter({
           amount: { $lt: { $neg: ':amount' } },
           date: [{ $lte: ':date' }, { $gte: ':date' }],
@@ -226,7 +222,7 @@ describe('runQuery', () => {
     ids.sort();
 
     const { data } = await runQuery(
-      query('transactions')
+      q('transactions')
         .filter({ id: { $oneof: repeat(ids, 1000) }, amount: { $lt: 50 } })
         .select('id')
         .raw()

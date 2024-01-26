@@ -3,11 +3,11 @@ import React, { Component, useState, useEffect } from 'react';
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
 import { theme } from '../../style';
-import Block from '../common/Block';
-import Button from '../common/Button';
-import Modal from '../common/Modal';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Block } from '../common/Block';
+import { Button } from '../common/Button';
+import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { Row, Cell } from '../table';
 
 class BackupTable extends Component {
@@ -47,7 +47,7 @@ class BackupTable extends Component {
   }
 }
 
-function LoadBackup({
+export function LoadBackup({
   budgetId,
   watchUpdates,
   backupDisabled,
@@ -133,5 +133,3 @@ function LoadBackup({
     </Modal>
   );
 }
-
-export default LoadBackup;

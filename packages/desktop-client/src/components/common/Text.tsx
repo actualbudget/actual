@@ -11,7 +11,7 @@ type TextProps = HTMLProps<HTMLSpanElement> & {
   style?: CSSProperties;
 };
 
-const Text = (props: TextProps) => {
+export const Text = (props: TextProps) => {
   const { className = '', style, innerRef, ...restProps } = props;
   return (
     <span
@@ -21,5 +21,3 @@ const Text = (props: TextProps) => {
     />
   );
 };
-
-export default Text;

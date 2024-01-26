@@ -15,10 +15,15 @@ type ActionReturnType<T extends (...args: unknown[]) => unknown> =
 export type BoundActions = {
   [Key in keyof typeof actions]: (
     ...args: Parameters<(typeof actions)[Key]>
-  ) => ActionReturnType<(typeof actions)[Key]>;
+  ) => // @ts-expect-error temporarily disabling this TS error; eventually the `useActions` hook should be removed
+  ActionReturnType<(typeof actions)[Key]>;
 };
 
 // https://react-redux.js.org/api/hooks#recipe-useactions
+/**
+ * @deprecated please use actions directly with `useDispatch`
+ * @see https://github.com/reduxjs/react-redux/issues/1252#issuecomment-488160930
+ **/
 export function useActions() {
   const dispatch = useDispatch();
   return useMemo(() => {

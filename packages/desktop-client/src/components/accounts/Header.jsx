@@ -1,27 +1,29 @@
 import React, { useState, useRef } from 'react';
 
-import useSyncServerStatus from '../../hooks/useSyncServerStatus';
-import AnimatedLoading from '../../icons/AnimatedLoading';
-import Add from '../../icons/v1/Add';
-import ArrowsExpand3 from '../../icons/v2/ArrowsExpand3';
-import ArrowsShrink3 from '../../icons/v2/ArrowsShrink3';
-import DownloadThickBottom from '../../icons/v2/DownloadThickBottom';
-import Pencil1 from '../../icons/v2/Pencil1';
+import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { SvgAdd } from '../../icons/v1';
+import {
+  SvgArrowsExpand3,
+  SvgArrowsShrink3,
+  SvgDownloadThickBottom,
+  SvgPencil1,
+} from '../../icons/v2';
 import { theme, styles } from '../../style';
-import AnimatedRefresh from '../AnimatedRefresh';
-import Button from '../common/Button';
-import InitialFocus from '../common/InitialFocus';
-import Input from '../common/Input';
-import Menu from '../common/Menu';
-import MenuButton from '../common/MenuButton';
-import MenuTooltip from '../common/MenuTooltip';
-import Search from '../common/Search';
-import Stack from '../common/Stack';
-import View from '../common/View';
+import { AnimatedRefresh } from '../AnimatedRefresh';
+import { Button } from '../common/Button';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
+import { Menu } from '../common/Menu';
+import { MenuButton } from '../common/MenuButton';
+import { MenuTooltip } from '../common/MenuTooltip';
+import { Search } from '../common/Search';
+import { Stack } from '../common/Stack';
+import { View } from '../common/View';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/SavedFilters';
 import { KeyHandlers } from '../KeyHandlers';
-import NotesButton from '../NotesButton';
+import { NotesButton } from '../NotesButton';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactions';
 import { useSplitsExpanded } from '../transactions/TransactionsTable';
 
@@ -172,7 +174,7 @@ export function AccountHeader({
                   className="hover-visible"
                   onClick={() => onExposeName(true)}
                 >
-                  <Pencil1
+                  <SvgPencil1
                     style={{
                       width: 11,
                       height: 11,
@@ -224,7 +226,7 @@ export function AccountHeader({
                 </>
               ) : (
                 <>
-                  <DownloadThickBottom
+                  <SvgDownloadThickBottom
                     width={13}
                     height={13}
                     style={{ marginRight: 4 }}
@@ -236,7 +238,8 @@ export function AccountHeader({
           )}
           {!showEmptyMessage && (
             <Button type="bare" onClick={onAddTransaction}>
-              <Add width={10} height={10} style={{ marginRight: 3 }} /> Add New
+              <SvgAdd width={10} height={10} style={{ marginRight: 3 }} /> Add
+              New
             </Button>
           )}
           <View style={{ flexShrink: 0 }}>
@@ -278,9 +281,9 @@ export function AccountHeader({
             }
           >
             {splitsExpanded.state.mode === 'collapse' ? (
-              <ArrowsShrink3 style={{ width: 14, height: 14 }} />
+              <SvgArrowsShrink3 style={{ width: 14, height: 14 }} />
             ) : (
-              <ArrowsExpand3 style={{ width: 14, height: 14 }} />
+              <SvgArrowsExpand3 style={{ width: 14, height: 14 }} />
             )}
           </Button>
           {account ? (

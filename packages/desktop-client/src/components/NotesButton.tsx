@@ -1,15 +1,16 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
-import q from 'loot-core/src/client/query-helpers';
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
 import { send } from 'loot-core/src/platform/client/fetch';
+import { q } from 'loot-core/src/shared/query';
 
-import CustomNotesPaper from '../icons/v2/CustomNotesPaper';
+import { SvgCustomNotesPaper } from '../icons/v2';
 import { type CSSProperties, theme } from '../style';
 
-import Button from './common/Button';
-import View from './common/View';
-import Notes from './Notes';
+import { Button } from './common/Button';
+import { View } from './common/View';
+import { Notes } from './Notes';
 import { Tooltip, type TooltipPosition, useTooltip } from './tooltips';
 
 type NotesTooltipProps = {
@@ -45,7 +46,7 @@ type NotesButtonProps = {
   tooltipPosition?: TooltipPosition;
   style?: CSSProperties;
 };
-export default function NotesButton({
+export function NotesButton({
   id,
   width = 12,
   height = 12,
@@ -100,7 +101,7 @@ export default function NotesButton({
         }}
         {...tooltip.getOpenEvents()}
       >
-        <CustomNotesPaper style={{ width, height }} />
+        <SvgCustomNotesPaper style={{ width, height }} />
       </Button>
       {tooltipOpen && (
         <NotesTooltip

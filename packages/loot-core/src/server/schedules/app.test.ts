@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import MockDate from 'mockdate';
 
-import q from '../../shared/query';
+import { q } from '../../shared/query';
 import { loadRules, updateRule } from '../accounts/transaction-rules';
 import { runQuery as aqlQuery } from '../aql';
 import { loadMappings } from '../db/mappings';

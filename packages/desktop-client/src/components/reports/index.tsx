@@ -1,7 +1,7 @@
-import View from '../common/View';
+import { View } from '../common/View';
 import { LoadComponent } from '../util/LoadComponent';
 
-export default function Reports() {
+export function Reports() {
   return (
     <View style={{ flex: 1 }} data-testid="reports-page">
       <LoadComponent

@@ -4,7 +4,7 @@ import { theme } from '../style';
 
 import { LoadComponent } from './util/LoadComponent';
 
-export default function Background() {
+export function Background() {
   return (
     <div
       style={{

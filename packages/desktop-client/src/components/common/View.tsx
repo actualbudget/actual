@@ -15,7 +15,7 @@ export type ViewProps = HTMLProps<HTMLDivElement> & {
   innerRef?: Ref<HTMLDivElement>;
 };
 
-const View = (props: ViewProps) => {
+export const View = (props: ViewProps) => {
   // The default styles are special-cased and pulled out into static
   // styles, and hardcode the class name here. View is used almost
   // everywhere and we can avoid any perf penalty that glamor would
@@ -31,5 +31,3 @@ const View = (props: ViewProps) => {
     />
   );
 };
-
-export default View;

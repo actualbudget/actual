@@ -1,4 +1,7 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
+
+import { TransactionEntity } from '../types/models';
 
 import {
   splitTransaction,
@@ -8,16 +11,27 @@ import {
   makeChild,
 } from './transactions';
 
-// const data = {
-//   splitTransactions: generateTransaction({ amount: -5000, acct: 2 }, -2000)
-// };
-
-function makeTransaction(data) {
+function makeTransaction(data: Partial<TransactionEntity>): TransactionEntity {
   return {
     id: uuidv4(),
     amount: 2422,
     date: '2020-01-05',
-    account: 'acct1',
+    account: {
+      id: 'acc-id-1',
+      name: 'account-1',
+      offbudget: 0,
+      closed: 0,
+      sort_order: 1,
+      tombstone: 0,
+      account_id: null,
+      bank: null,
+      mask: null,
+      official_name: null,
+      balance_current: null,
+      balance_available: null,
+      balance_limit: null,
+      account_sync_source: null,
+    },
     ...data,
   };
 }
@@ -27,7 +41,7 @@ function makeSplitTransaction(data, children) {
   return [parent, ...children.map(t => makeChild(parent, t))];
 }
 
-function splitError(amount) {
+function splitError(amount: number) {
   return { difference: amount, type: 'SplitTransactionError', version: 1 };
 }
 
@@ -38,15 +52,18 @@ describe('Transactions', () => {
       makeTransaction({ id: 't1', amount: 4000 }),
       makeTransaction({ amount: 3000 }),
     ];
-    const { data, diff } = updateTransaction(transactions, {
-      id: 't1',
-      amount: 5000,
-    });
+    const { data, diff } = updateTransaction(
+      transactions,
+      makeTransaction({
+        id: 't1',
+        amount: 5000,
+      }),
+    );
     expect(data.find(d => d.subtransactions)).toBeFalsy();
     expect(diff).toEqual({
       added: [],
       deleted: [],
-      updated: [{ id: 't1', amount: 5000 }],
+      updated: [expect.objectContaining({ id: 't1', amount: 5000 })],
     });
     expect(data.map(t => ({ id: t.id, amount: t.amount })).sort()).toEqual([
       { id: expect.any(String), amount: 5000 },
@@ -56,14 +73,12 @@ describe('Transactions', () => {
   });
 
   test('updating does nothing if value not changed', () => {
+    const updatedTransaction = makeTransaction({ id: 't1', amount: 5000 });
     const transactions = [
-      makeTransaction({ id: 't1', amount: 5000 }),
+      updatedTransaction,
       makeTransaction({ amount: 3000 }),
     ];
-    const { data, diff } = updateTransaction(transactions, {
-      id: 't1',
-      amount: 5000,
-    });
+    const { data, diff } = updateTransaction(transactions, updatedTransaction);
     expect(diff).toEqual({ added: [], deleted: [], updated: [] });
     expect(data.map(t => ({ id: t.id, amount: t.amount })).sort()).toEqual([
       { id: expect.any(String), amount: 5000 },
@@ -160,10 +175,13 @@ describe('Transactions', () => {
       ]),
       makeTransaction({ amount: 3002 }),
     ];
-    const { data, diff } = updateTransaction(transactions, {
-      id: 't2',
-      amount: 2200,
-    });
+    const { data, diff } = updateTransaction(
+      transactions,
+      makeTransaction({
+        id: 't2',
+        amount: 2200,
+      }),
+    );
     expect(data.find(d => d.subtransactions)).toBeFalsy();
     expect(diff).toEqual({
       added: [],

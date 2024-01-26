@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   createContext,
   useContext,
@@ -50,7 +51,7 @@ type SelectAllAction = {
 
 type Actions = SelectAction | SelectNoneAction | SelectAllAction;
 
-export default function useSelected<T extends Item>(
+export function useSelected<T extends Item>(
   name: string,
   items: T[],
   initialSelectedIds: string[],

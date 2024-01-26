@@ -1,14 +1,36 @@
+import * as monthUtils from 'loot-core/src/shared/months';
 import {
+  type CustomReportEntity,
   type AccountEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
   type PayeeEntity,
 } from 'loot-core/src/types/models';
 
+const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5);
+const endDate = monthUtils.currentMonth();
+
+export const defaultState: CustomReportEntity = {
+  id: undefined,
+  mode: 'total',
+  groupBy: 'Category',
+  balanceType: 'Payment',
+  showEmpty: false,
+  showOffBudgetHidden: false,
+  showUncategorized: false,
+  graphType: 'BarGraph',
+  startDate,
+  endDate,
+  selectedCategories: null,
+  isDateStatic: false,
+  conditionsOp: 'and',
+  name: 'Default',
+};
+
 const balanceTypeOptions = [
-  { description: 'Payment', format: 'totalDebts' },
-  { description: 'Deposit', format: 'totalAssets' },
-  { description: 'Net', format: 'totalTotals' },
+  { description: 'Payment', format: 'totalDebts' as const },
+  { description: 'Deposit', format: 'totalAssets' as const },
+  { description: 'Net', format: 'totalTotals' as const },
 ];
 
 const groupByOptions = [
@@ -63,7 +85,10 @@ export type QueryDataEntity = {
   amount: number;
 };
 
-export type UncategorizedEntity = CategoryEntity & {
+export type UncategorizedEntity = Pick<
+  CategoryEntity,
+  'name' | 'id' | 'hidden'
+> & {
   /*
     When looking at uncategorized and hidden transactions we
     need a way to group them. To do this we give them a unique
@@ -71,15 +96,15 @@ export type UncategorizedEntity = CategoryEntity & {
     transctions from our query. For this we use the 3 variables
     below.
   */
-  uncategorized_id: string;
-  is_off_budget: boolean;
-  is_transfer: boolean;
-  has_category: boolean;
+  uncategorized_id?: string;
+  is_off_budget?: boolean;
+  is_transfer?: boolean;
+  has_category?: boolean;
 };
 
 const uncategorizedCategory: UncategorizedEntity = {
   name: 'Uncategorized',
-  id: null,
+  id: undefined,
   uncategorized_id: '1',
   hidden: false,
   is_off_budget: false,
@@ -88,7 +113,7 @@ const uncategorizedCategory: UncategorizedEntity = {
 };
 const transferCategory: UncategorizedEntity = {
   name: 'Transfers',
-  id: null,
+  id: undefined,
   uncategorized_id: '2',
   hidden: false,
   is_off_budget: false,
@@ -97,7 +122,7 @@ const transferCategory: UncategorizedEntity = {
 };
 const offBudgetCategory: UncategorizedEntity = {
   name: 'Off Budget',
-  id: null,
+  id: undefined,
   uncategorized_id: '3',
   hidden: false,
   is_off_budget: true,
@@ -105,13 +130,16 @@ const offBudgetCategory: UncategorizedEntity = {
   has_category: true,
 };
 
-type UncategorizedGroupEntity = CategoryGroupEntity & {
+type UncategorizedGroupEntity = Pick<
+  CategoryGroupEntity,
+  'name' | 'id' | 'hidden'
+> & {
   categories?: UncategorizedEntity[];
 };
 
 const uncategorizedGroup: UncategorizedGroupEntity = {
   name: 'Uncategorized & Off Budget',
-  id: null,
+  id: undefined,
   hidden: false,
   categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
 };

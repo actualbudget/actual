@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -7,10 +8,10 @@ import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { type CSSProperties, theme } from '../../style';
-import LinkButton from '../common/LinkButton';
-import Text from '../common/Text';
+import { LinkButton } from '../common/LinkButton';
+import { Text } from '../common/Text';
 
 type ValueProps<T> = {
   value: T;
@@ -22,7 +23,7 @@ type ValueProps<T> = {
   style?: CSSProperties;
 };
 
-export default function Value<T>({
+export function Value<T>({
   value,
   field,
   valueIsRaw,
@@ -48,10 +49,10 @@ export default function Value<T>({
     (field === 'payee'
       ? payees
       : field === 'category'
-      ? categories
-      : field === 'account'
-      ? accounts
-      : []);
+        ? categories
+        : field === 'account'
+          ? accounts
+          : []);
 
   const [expanded, setExpanded] = useState(false);
 

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgEditCrop = (props: SVGProps<SVGSVGElement>) => (
+export const SvgEditCrop = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -16,4 +16,3 @@ const SvgEditCrop = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
-export default SvgEditCrop;

@@ -174,6 +174,7 @@ export const checkboxText = tableText;
 export const checkboxBackgroundSelected = colorPalette.purple300;
 export const checkboxBorderSelected = colorPalette.purple300;
 export const checkboxShadowSelected = colorPalette.purple500;
+export const checkboxToggleBackground = colorPalette.gray700;
 
 export const pillBackground = colorPalette.navy800;
 export const pillBackgroundLight = colorPalette.navy900;
@@ -188,3 +189,4 @@ export const pillBorderSelected = colorPalette.purple400;
 export const reportsRed = colorPalette.red300;
 export const reportsBlue = colorPalette.blue400;
 export const reportsLabel = pageText;
+export const reportsInnerLabel = colorPalette.navy800;

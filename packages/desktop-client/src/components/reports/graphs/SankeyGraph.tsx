@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import {
@@ -8,8 +9,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import Container from '../Container';
-import numberFormatterTooltip from '../numberFormatter';
+import { Container } from '../Container';
+import { numberFormatterTooltip } from '../numberFormatter';
 
 type SankeyProps = {
   style;
@@ -78,7 +79,7 @@ function convertToCondensed(data) {
   };
 }
 
-function SankeyGraph({ style, data, compact }: SankeyProps) {
+export function SankeyGraph({ style, data, compact }: SankeyProps) {
   const sankeyData = compact ? convertToCondensed(data) : data;
 
   if (!data.links || data.links.length === 0) return null;
@@ -113,7 +114,7 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) => (
+      {width => (
         <ResponsiveContainer>
           <Sankey
             data={sankeyData}
@@ -134,5 +135,3 @@ function SankeyGraph({ style, data, compact }: SankeyProps) {
     </Container>
   );
 }
-
-export default SankeyGraph;

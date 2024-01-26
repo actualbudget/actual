@@ -38,12 +38,17 @@ module.exports = {
   extends: [
     'react-app',
     'plugin:react/recommended',
+    'plugin:prettier/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:import/typescript',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: { project: [path.join(__dirname, './tsconfig.json')] },
   reportUnusedDisableDirectives: true,
+  globals: {
+    globalThis: false,
+    vi: true,
+  },
   rules: {
     'prettier/prettier': 'warn',
 
@@ -52,7 +57,6 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': [
       'warn',
       {
-        args: 'none',
         varsIgnorePattern: '^_',
         ignoreRestSiblings: true,
       },
@@ -160,11 +164,17 @@ module.exports = {
       { patterns: [...restrictedImportPatterns, ...restrictedImportColors] },
     ],
 
+    '@typescript-eslint/ban-ts-comment': [
+      'error',
+      { 'ts-ignore': 'allow-with-description' },
+    ],
+
     // Rules disable during TS migration
     '@typescript-eslint/no-var-requires': 'off',
     'prefer-const': 'warn',
     'prefer-spread': 'off',
     '@typescript-eslint/no-empty-function': 'off',
+    'import/no-default-export': 'warn',
   },
   overrides: [
     {
@@ -196,6 +206,26 @@ module.exports = {
               FC: { message: ruleFCMsg },
             },
             extendDefaults: true,
+          },
+        ],
+      },
+    },
+    {
+      files: ['./packages/desktop-client/**/*'],
+      excludedFiles: [
+        './packages/desktop-client/src/hooks/useNavigate.{ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'warn',
+          {
+            patterns: [
+              {
+                group: ['react-router-dom'],
+                importNames: ['useNavigate'],
+                message: 'Please use Actual’s useNavigate() hook instead.',
+              },
+            ],
           },
         ],
       },
@@ -236,6 +266,15 @@ module.exports = {
       ],
       rules: {
         'no-restricted-imports': ['off', { patterns: restrictedImportColors }],
+      },
+    },
+    {
+      files: [
+        './packages/api/migrations/*',
+        './packages/loot-core/migrations/*',
+      ],
+      rules: {
+        'import/no-default-export': 'off',
       },
     },
   ],

@@ -1,10 +1,11 @@
+// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import { amountToInteger, integerToAmount } from 'loot-core/src/shared/util';
 
 import { type QueryDataEntity } from '../ReportOptions';
 
-import filterHiddenItems from './filterHiddenItems';
+import { filterHiddenItems } from './filterHiddenItems';
 
 type recalculateProps = {
   item;
@@ -14,7 +15,7 @@ type recalculateProps = {
   groupByLabel: string;
 };
 
-function recalculate({
+export function recalculate({
   item,
   months,
   assets,
@@ -65,5 +66,3 @@ function recalculate({
     monthData,
   };
 }
-
-export default recalculate;

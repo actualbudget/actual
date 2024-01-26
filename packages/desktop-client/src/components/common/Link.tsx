@@ -1,12 +1,13 @@
+// @ts-strict-ignore
 import React, { type ReactNode, type ComponentProps } from 'react';
 import { NavLink, useMatch } from 'react-router-dom';
 
 import { css } from 'glamor';
 
-import useNavigate from '../../hooks/useNavigate';
+import { useNavigate } from '../../hooks/useNavigate';
 import { type CSSProperties, styles } from '../../style';
 
-import Button from './Button';
+import { Button } from './Button';
 
 type ButtonLinkProps = ComponentProps<typeof Button> & {
   to: string;
@@ -71,7 +72,7 @@ type LinkProps =
     } & ButtonLinkProps)
   | ({ variant?: 'anchor' } & AnchorLinkProps);
 
-export default function Link({ variant = 'anchor', ...props }: LinkProps) {
+export function Link({ variant = 'anchor', ...props }: LinkProps) {
   switch (variant) {
     case 'anchor':
       return <AnchorLink {...props} />;

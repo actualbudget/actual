@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ComponentProps } from 'react';
 
 import { type CategoryEntity } from 'loot-core/src/types/models';
@@ -11,8 +12,8 @@ import {
 } from '../sort';
 import { Row } from '../table';
 
-import RenderMonths from './RenderMonths';
-import SidebarCategory from './SidebarCategory';
+import { RenderMonths } from './RenderMonths';
+import { SidebarCategory } from './SidebarCategory';
 
 type IncomeCategoryProps = {
   cat: CategoryEntity;
@@ -29,7 +30,7 @@ type IncomeCategoryProps = {
   onShowActivity: (name: string, id: string, idx: number) => void;
 };
 
-function IncomeCategory({
+export function IncomeCategory({
   cat,
   isLast,
   editingCell,
@@ -89,5 +90,3 @@ function IncomeCategory({
     </Row>
   );
 }
-
-export default IncomeCategory;

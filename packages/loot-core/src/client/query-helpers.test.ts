@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import { initServer, serverPush } from '../platform/client/fetch';
 import { subDays } from '../shared/months';
-import q from '../shared/query';
+import { q } from '../shared/query';
 import { tracer } from '../shared/test-helpers';
 
 import { runQuery, liveQuery, pagedQuery } from './query-helpers';
@@ -54,12 +55,12 @@ function runPagedQuery(query, data) {
             return op === '$gte'
               ? row.date >= filter.date[op]
               : op === '$lte'
-              ? row.date <= filter.date[op]
-              : op === '$lt'
-              ? row.date < filter.date[op]
-              : op === '$gt'
-              ? row.date > filter.date[op]
-              : false;
+                ? row.date <= filter.date[op]
+                : op === '$lt'
+                  ? row.date < filter.date[op]
+                  : op === '$gt'
+                    ? row.date > filter.date[op]
+                    : false;
           })
           .map(row => select(row, query.selectExpressions)),
         query.limit,
@@ -361,7 +362,7 @@ describe('query helpers', () => {
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
     await tracer.expect('server-query', ['id']);
-    await tracer.expect('data', data => {});
+    await tracer.expect('data', () => {});
 
     paged.fetchNext();
     paged.fetchNext();
@@ -369,7 +370,7 @@ describe('query helpers', () => {
     paged.fetchNext();
 
     await tracer.expect('server-query', ['id']);
-    await tracer.expect('data', data => {});
+    await tracer.expect('data', () => {});
 
     // Wait a bit and make sure nothing comes through
     const p = Promise.race([tracer.expect('server-query'), wait(200)]);

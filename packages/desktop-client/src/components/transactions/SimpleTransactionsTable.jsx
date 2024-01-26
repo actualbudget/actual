@@ -13,12 +13,12 @@ import {
 } from 'loot-core/src/client/reducers/queries';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import useCategories from '../../hooks/useCategories';
+import { useCategories } from '../../hooks/useCategories';
 import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
-import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
+import { SvgArrowsSynchronize } from '../../icons/v2';
 import { theme, styles } from '../../style';
 import { Table, Row, Field, Cell, SelectCell } from '../table';
-import DisplayId from '../util/DisplayId';
+import { DisplayId } from '../util/DisplayId';
 
 function serializeTransaction(transaction, dateFormat) {
   let { date } = transaction;
@@ -36,7 +36,6 @@ function serializeTransaction(transaction, dateFormat) {
 const TransactionRow = memo(function TransactionRow({
   transaction,
   fields,
-  payees,
   categories,
   accounts,
   selected,
@@ -86,7 +85,7 @@ const TransactionRow = memo(function TransactionRow({
                 {() => (
                   <>
                     {transaction.schedule && (
-                      <ArrowsSynchronize
+                      <SvgArrowsSynchronize
                         style={{
                           width: 13,
                           height: 13,
@@ -135,9 +134,8 @@ const TransactionRow = memo(function TransactionRow({
   );
 });
 
-export default function SimpleTransactionsTable({
+export function SimpleTransactionsTable({
   transactions,
-  schedules,
   renderEmpty,
   fields = ['date', 'payee', 'amount'],
   style,

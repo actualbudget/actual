@@ -1,7 +1,7 @@
 import React, { type MouseEventHandler, type ReactNode } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
-import Button from '../common/Button';
+import { Button } from '../common/Button';
 
 type ModeButtonProps = {
   selected: boolean;
@@ -10,7 +10,12 @@ type ModeButtonProps = {
   onSelect: MouseEventHandler<HTMLButtonElement>;
 };
 
-function ModeButton({ selected, children, style, onSelect }: ModeButtonProps) {
+export function ModeButton({
+  selected,
+  children,
+  style,
+  onSelect,
+}: ModeButtonProps) {
   return (
     <Button
       type="bare"
@@ -35,5 +40,3 @@ function ModeButton({ selected, children, style, onSelect }: ModeButtonProps) {
     </Button>
   );
 }
-
-export default ModeButton;

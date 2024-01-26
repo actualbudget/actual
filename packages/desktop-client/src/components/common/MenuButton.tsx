@@ -1,13 +1,20 @@
 import React from 'react';
 
-import DotsHorizontalTriple from '../../icons/v1/DotsHorizontalTriple';
+import { SvgDotsHorizontalTriple } from '../../icons/v1';
+import { type CSSProperties } from '../../style';
 
-import Button from './Button';
+import { Button } from './Button';
 
-export default function MenuButton({ onClick }) {
+export function MenuButton({
+  onClick,
+  style,
+}: {
+  onClick: () => void;
+  style?: CSSProperties;
+}) {
   return (
-    <Button type="bare" onClick={onClick} aria-label="Menu">
-      <DotsHorizontalTriple
+    <Button type="bare" onClick={onClick} aria-label="Menu" style={style}>
+      <SvgDotsHorizontalTriple
         width={15}
         height={15}
         style={{ transform: 'rotateZ(90deg)' }}

@@ -22,9 +22,10 @@ import {
 } from 'date-fns';
 import { css } from 'glamor';
 
-import q, { runQuery } from 'loot-core/src/client/query-helpers';
+import { runQuery } from 'loot-core/src/client/query-helpers';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
+import { q } from 'loot-core/src/shared/query';
 import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import {
   isPreviewId,
@@ -46,25 +47,26 @@ import {
 } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
-import useCategories from '../../hooks/useCategories';
-import useNavigate from '../../hooks/useNavigate';
+import { useCategories } from '../../hooks/useCategories';
+import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
 } from '../../hooks/useSingleActiveEditForm';
-import Split from '../../icons/v0/Split';
-import Add from '../../icons/v1/Add';
-import Trash from '../../icons/v1/Trash';
-import ArrowsSynchronize from '../../icons/v2/ArrowsSynchronize';
-import CheckCircle1 from '../../icons/v2/CheckCircle1';
-import Lock from '../../icons/v2/LockClosed';
-import PencilWriteAlternate from '../../icons/v2/PencilWriteAlternate';
+import { SvgSplit } from '../../icons/v0';
+import { SvgAdd, SvgTrash } from '../../icons/v1';
+import {
+  SvgArrowsSynchronize,
+  SvgCheckCircle1,
+  SvgLockClosed,
+  SvgPencilWriteAlternate,
+} from '../../icons/v2';
 import { styles, theme } from '../../style';
-import Button from '../common/Button';
-import Text from '../common/Text';
-import TextOneLine from '../common/TextOneLine';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Text } from '../common/Text';
+import { TextOneLine } from '../common/TextOneLine';
+import { View } from '../common/View';
 import { FocusableAmountInput } from '../mobile/MobileAmountInput';
 import {
   FieldLabel,
@@ -72,7 +74,7 @@ import {
   InputField,
   BooleanField,
 } from '../mobile/MobileForms';
-import MobileBackButton from '../MobileBackButton';
+import { MobileBackButton } from '../MobileBackButton';
 import { Page } from '../Page';
 import { AmountInput } from '../util/AmountInput';
 
@@ -184,6 +186,7 @@ function Footer({
   onSplit,
   onAddSplit,
   onEmptySplitFound,
+  editingField,
 }) {
   const [transaction, ...childTransactions] = transactions;
   const onClickRemainingSplit = () => {
@@ -215,10 +218,11 @@ function Footer({
         <Button
           type="primary"
           style={{ height: 40 }}
+          disabled={editingField}
           onClick={onClickRemainingSplit}
           onPointerDown={e => e.preventDefault()}
         >
-          <Split width={17} height={17} />
+          <SvgSplit width={17} height={17} />
           <Text
             style={{
               ...styles.text,
@@ -235,15 +239,16 @@ function Footer({
         </Button>
       ) : adding ? (
         <Button
+          type="primary"
           style={{ height: 40 }}
+          disabled={editingField}
           onClick={onAdd}
           onPointerDown={e => e.preventDefault()}
         >
-          <Add width={17} height={17} style={{ color: theme.formLabelText }} />
+          <SvgAdd width={17} height={17} />
           <Text
             style={{
               ...styles.text,
-              color: theme.formLabelText,
               marginLeft: 5,
             }}
           >
@@ -252,22 +257,17 @@ function Footer({
         </Button>
       ) : (
         <Button
+          type="primary"
           style={{ height: 40 }}
+          disabled={editingField}
           onClick={onSave}
           onPointerDown={e => e.preventDefault()}
         >
-          <PencilWriteAlternate
-            width={16}
-            height={16}
-            style={{
-              color: theme.formLabelText,
-            }}
-          />
+          <SvgPencilWriteAlternate width={16} height={16} />
           <Text
             style={{
               ...styles.text,
               marginLeft: 6,
-              color: theme.formLabelText,
             }}
           >
             Save changes
@@ -405,7 +405,11 @@ const ChildTransactionEdit = forwardRef(
             }}
             type="bare"
           >
-            <Trash width={17} height={17} style={{ color: theme.errorText }} />
+            <SvgTrash
+              width={17}
+              height={17}
+              style={{ color: theme.errorText }}
+            />
             <Text
               style={{
                 color: theme.errorText,
@@ -469,8 +473,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
     return isOffBudget
       ? 'Off Budget'
       : isBudgetTransfer(trans)
-      ? 'Transfer'
-      : lookupName(categories, trans.category);
+        ? 'Transfer'
+        : lookupName(categories, trans.category);
   };
 
   const onTotalAmountEdit = () => {
@@ -668,6 +672,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
           onSplit={onSplit}
           onAddSplit={onAddSplit}
           onEmptySplitFound={onEmptySplitFound}
+          editingField={editingField}
         />
       }
       padding={0}
@@ -770,7 +775,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               onClick={() => onSplit(transaction.id)}
               type="bare"
             >
-              <Split
+              <SvgSplit
                 width={17}
                 height={17}
                 style={{ color: theme.formLabelText }}
@@ -885,7 +890,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               }}
               type="bare"
             >
-              <Trash
+              <SvgTrash
                 width={17}
                 height={17}
                 style={{ color: theme.errorText }}
@@ -1126,10 +1131,10 @@ export const TransactionEdit = props => {
 
 const Transaction = memo(function Transaction({
   transaction,
+  account,
   accounts,
   categories,
   payees,
-  showCategory,
   added,
   onSelect,
   style,
@@ -1164,11 +1169,15 @@ const Transaction = memo(function Transaction({
     payee,
     transferAcct,
   );
-  const prettyCategory = transferAcct
-    ? 'Transfer'
-    : isParent
-    ? 'Split'
-    : categoryName;
+  const specialCategory = account?.offbudget
+    ? 'Off Budget'
+    : transferAcct
+      ? 'Transfer'
+      : isParent
+        ? 'Split'
+        : null;
+
+  const prettyCategory = specialCategory || categoryName;
 
   const isPreview = isPreviewId(id);
   const isReconciled = transaction.reconciled;
@@ -1200,7 +1209,7 @@ const Transaction = memo(function Transaction({
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {schedule && (
-              <ArrowsSynchronize
+              <SvgArrowsSynchronize
                 style={{
                   width: 12,
                   height: 12,
@@ -1235,7 +1244,7 @@ const Transaction = memo(function Transaction({
               }}
             >
               {isReconciled ? (
-                <Lock
+                <SvgLockClosed
                   style={{
                     width: 11,
                     height: 11,
@@ -1244,7 +1253,7 @@ const Transaction = memo(function Transaction({
                   }}
                 />
               ) : (
-                <CheckCircle1
+                <SvgCheckCircle1
                   style={{
                     width: 11,
                     height: 11,
@@ -1255,22 +1264,21 @@ const Transaction = memo(function Transaction({
                   }}
                 />
               )}
-              {showCategory && (
-                <TextOneLine
-                  style={{
-                    fontSize: 11,
-                    marginTop: 1,
-                    fontWeight: '400',
-                    color: prettyCategory
-                      ? theme.tableTextSelected
-                      : theme.menuItemTextSelected,
-                    fontStyle: prettyCategory ? null : 'italic',
-                    textAlign: 'left',
-                  }}
-                >
-                  {prettyCategory || 'Uncategorized'}
-                </TextOneLine>
-              )}
+              <TextOneLine
+                style={{
+                  fontSize: 11,
+                  marginTop: 1,
+                  fontWeight: '400',
+                  color: prettyCategory
+                    ? theme.tableTextSelected
+                    : theme.menuItemTextSelected,
+                  fontStyle:
+                    specialCategory || !prettyCategory ? 'italic' : undefined,
+                  textAlign: 'left',
+                }}
+              >
+                {prettyCategory || 'Uncategorized'}
+              </TextOneLine>
             </View>
           )}
         </View>
@@ -1291,11 +1299,11 @@ const Transaction = memo(function Transaction({
 });
 
 export function TransactionList({
+  account,
   accounts,
   categories,
   payees,
   transactions,
-  showCategory,
   isNew,
   onSelect,
   scrollProps = {},
@@ -1379,10 +1387,10 @@ export function TransactionList({
                   >
                     <Transaction
                       transaction={transaction}
+                      account={account}
                       categories={categories}
                       accounts={accounts}
                       payees={payees}
-                      showCategory={showCategory}
                       added={isNew(transaction.id)}
                       onSelect={onSelect} // onSelect(transaction)}
                     />

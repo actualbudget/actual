@@ -1,31 +1,31 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { css } from 'glamor';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useFeatureFlag from '../../../../hooks/useFeatureFlag';
-import DotsHorizontalTriple from '../../../../icons/v1/DotsHorizontalTriple';
-import ArrowButtonDown1 from '../../../../icons/v2/ArrowButtonDown1';
-import ArrowButtonUp1 from '../../../../icons/v2/ArrowButtonUp1';
+import { useFeatureFlag } from '../../../../hooks/useFeatureFlag';
+import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
+import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
 import { theme, styles } from '../../../../style';
-import Button from '../../../common/Button';
-import Menu from '../../../common/Menu';
-import Stack from '../../../common/Stack';
-import View from '../../../common/View';
-import NotesButton from '../../../NotesButton';
-import NamespaceContext from '../../../spreadsheet/NamespaceContext';
+import { Button } from '../../../common/Button';
+import { Menu } from '../../../common/Menu';
+import { Stack } from '../../../common/Stack';
+import { View } from '../../../common/View';
+import { NotesButton } from '../../../NotesButton';
+import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../../tooltips';
 import { useReport } from '../ReportContext';
 
-import ExpenseTotal from './ExpenseTotal';
-import IncomeTotal from './IncomeTotal';
-import Saved from './Saved';
+import { ExpenseTotal } from './ExpenseTotal';
+import { IncomeTotal } from './IncomeTotal';
+import { Saved } from './Saved';
 
 type BudgetSummaryProps = {
   month?: string;
 };
-export default function BudgetSummary({ month }: BudgetSummaryProps) {
+export function BudgetSummary({ month }: BudgetSummaryProps) {
   const {
     currentMonth,
     summaryCollapsed: collapsed,
@@ -44,7 +44,9 @@ export default function BudgetSummary({ month }: BudgetSummaryProps) {
     setMenuOpen(false);
   }
 
-  const ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
+  const ExpandOrCollapseIcon = collapsed
+    ? SvgArrowButtonDown1
+    : SvgArrowButtonUp1;
 
   return (
     <View
@@ -131,7 +133,7 @@ export default function BudgetSummary({ month }: BudgetSummaryProps) {
             </View>
             <View style={{ userSelect: 'none' }}>
               <Button type="bare" aria-label="Menu" onClick={onMenuOpen}>
-                <DotsHorizontalTriple
+                <SvgDotsHorizontalTriple
                   width={15}
                   height={15}
                   style={{ color: theme.pageTextLight }}

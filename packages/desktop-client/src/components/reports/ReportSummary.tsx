@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
@@ -6,23 +7,22 @@ import {
   integerToCurrency,
   amountToInteger,
 } from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
 
 import { theme, styles } from '../../style';
-import Text from '../common/Text';
-import View from '../common/View';
-import PrivacyFilter from '../PrivacyFilter';
-
-import { type DataEntity } from './entities';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
+import { PrivacyFilter } from '../PrivacyFilter';
 
 type ReportSummaryProps = {
   startDate: string;
   endDate: string;
-  data: DataEntity;
+  data: GroupedEntity;
   balanceTypeOp: string;
   monthsCount: number;
 };
 
-function ReportSummary({
+export function ReportSummary({
   startDate,
   endDate,
   data,
@@ -81,8 +81,8 @@ function ReportSummary({
           {balanceTypeOp === 'totalDebts'
             ? 'TOTAL SPENDING'
             : balanceTypeOp === 'totalAssets'
-            ? 'TOTAL DEPOSITS'
-            : 'NET ' + net}
+              ? 'TOTAL DEPOSITS'
+              : 'NET ' + net}
         </Text>
         <Text
           style={{
@@ -118,8 +118,8 @@ function ReportSummary({
           {balanceTypeOp === 'totalDebts'
             ? 'AVERAGE SPENDING'
             : balanceTypeOp === 'totalAssets'
-            ? 'AVERAGE DEPOSIT'
-            : 'AVERAGE NET'}
+              ? 'AVERAGE DEPOSIT'
+              : 'AVERAGE NET'}
         </Text>
         <Text
           style={{
@@ -138,5 +138,3 @@ function ReportSummary({
     </View>
   );
 }
-
-export default ReportSummary;

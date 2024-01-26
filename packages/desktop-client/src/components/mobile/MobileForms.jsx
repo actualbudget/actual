@@ -3,10 +3,10 @@ import { forwardRef } from 'react';
 import { css } from 'glamor';
 
 import { theme, styles } from '../../style';
-import Button from '../common/Button';
-import Input from '../common/Input';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 const FIELD_HEIGHT = 40;
 

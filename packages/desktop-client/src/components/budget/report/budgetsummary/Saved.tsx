@@ -5,13 +5,13 @@ import { css } from 'glamor';
 import { reportBudget } from 'loot-core/src/client/queries';
 
 import { theme, type CSSProperties, styles } from '../../../../style';
-import AlignedText from '../../../common/AlignedText';
-import HoverTarget from '../../../common/HoverTarget';
-import Text from '../../../common/Text';
-import View from '../../../common/View';
-import PrivacyFilter from '../../../PrivacyFilter';
-import useFormat from '../../../spreadsheet/useFormat';
-import useSheetValue from '../../../spreadsheet/useSheetValue';
+import { AlignedText } from '../../../common/AlignedText';
+import { HoverTarget } from '../../../common/HoverTarget';
+import { Text } from '../../../common/Text';
+import { View } from '../../../common/View';
+import { PrivacyFilter } from '../../../PrivacyFilter';
+import { useFormat } from '../../../spreadsheet/useFormat';
+import { useSheetValue } from '../../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../../tooltips';
 import { makeAmountFullStyle } from '../../util';
 
@@ -19,7 +19,7 @@ type SavedProps = {
   projected: boolean;
   style?: CSSProperties;
 };
-export default function Saved({ projected, style }: SavedProps) {
+export function Saved({ projected, style }: SavedProps) {
   const budgetedSaved = useSheetValue(reportBudget.totalBudgetedSaved) || 0;
   const totalSaved = useSheetValue(reportBudget.totalSaved) || 0;
   const format = useFormat();
@@ -81,8 +81,8 @@ export default function Saved({ projected, style }: SavedProps) {
               color: projected
                 ? theme.warningText
                 : isNegative
-                ? theme.errorTextDark
-                : theme.upcomingText,
+                  ? theme.errorTextDark
+                  : theme.upcomingText,
             },
           ])}`}
         >

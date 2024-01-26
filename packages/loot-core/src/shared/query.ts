@@ -1,5 +1,6 @@
+// @ts-strict-ignore
 export type QueryState = {
-  filterExpressions: Array<unknown>;
+  filterExpressions: Array<string>;
   selectExpressions: Array<unknown>;
   groupExpressions: Array<unknown>;
   orderExpressions: Array<unknown>;
@@ -132,6 +133,6 @@ export function getPrimaryOrderBy(query, defaultOrderBy) {
   return { field, order: firstOrder[field] };
 }
 
-export default function q(table) {
+export function q(table) {
   return new Query({ table });
 }

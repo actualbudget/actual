@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { amountToInteger } from '../../../shared/util';
 
 export async function goalsSimple(

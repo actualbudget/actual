@@ -1,17 +1,17 @@
 import React from 'react';
 
-import useNavigate from '../hooks/useNavigate';
-import CheveronLeft from '../icons/v1/CheveronLeft';
+import { useNavigate } from '../hooks/useNavigate';
+import { SvgCheveronLeft } from '../icons/v1';
 import { type CSSProperties, styles, theme } from '../style';
 
-import Button from './common/Button';
-import Text from './common/Text';
+import { Button } from './common/Button';
+import { Text } from './common/Text';
 
 type MobileBackButtonProps = {
   style?: CSSProperties;
 };
 
-export default function MobileBackButton({ style }: MobileBackButtonProps) {
+export function MobileBackButton({ style }: MobileBackButtonProps) {
   const navigate = useNavigate();
   return (
     <Button
@@ -30,7 +30,7 @@ export default function MobileBackButton({ style }: MobileBackButtonProps) {
       }}
       onPointerUp={() => navigate(-1)}
     >
-      <CheveronLeft
+      <SvgCheveronLeft
         style={{ width: 30, height: 30, margin: -10, marginLeft: -5 }}
       />
       <Text

@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import { handlers } from '../main';
 
-import importActual from './actual';
+import { importActual } from './actual';
 import * as YNAB4 from './ynab4';
 import * as YNAB5 from './ynab5';
 

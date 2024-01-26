@@ -1,10 +1,11 @@
+// @ts-strict-ignore
 import React from 'react';
 
 import { CachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
 import { CachedPayees } from 'loot-core/src/client/data-hooks/payees';
 
 import { theme } from '../../style';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 
 type DisplayIdProps = {
   type: 'accounts' | 'payees';
@@ -12,7 +13,7 @@ type DisplayIdProps = {
   noneColor?: string;
 };
 
-export default function DisplayId({
+export function DisplayId({
   type,
   id,
   noneColor = theme.pageTextSubdued,

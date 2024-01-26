@@ -1,13 +1,14 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { styles } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
-import FormError from '../common/FormError';
-import InitialFocus from '../common/InitialFocus';
-import Input from '../common/Input';
-import Modal from '../common/Modal';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { FormError } from '../common/FormError';
+import { InitialFocus } from '../common/InitialFocus';
+import { Input } from '../common/Input';
+import { Modal } from '../common/Modal';
+import { View } from '../common/View';
 
 type SingleInputProps = {
   modalProps: Partial<CommonModalProps>;
@@ -18,7 +19,7 @@ type SingleInputProps = {
   inputPlaceholder?: string;
 };
 
-function SingleInput({
+export function SingleInput({
   modalProps,
   title,
   buttonText,
@@ -80,7 +81,7 @@ function SingleInput({
                 ...styles.mediumText,
                 flexBasis: '50%',
               }}
-              onPointerUp={e => _onSubmit(value)}
+              onPointerUp={() => _onSubmit(value)}
             >
               {buttonText}
             </Button>
@@ -90,5 +91,3 @@ function SingleInput({
     </Modal>
   );
 }
-
-export default SingleInput;

@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import { useRef, useCallback } from 'react';
 
-export default function useResizeObserver(
+export function useResizeObserver(
   func: (contentRect: DOMRectReadOnly) => void,
 ): (el: unknown) => void {
   const observer = useRef(null);

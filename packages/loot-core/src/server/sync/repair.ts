@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { serializeClock, getClock, Timestamp, merkle } from '@actual-app/crdt';
 
 import * as db from '../db';
@@ -23,7 +24,7 @@ export function rebuildMerkleHash(): {
   };
 }
 
-export default async function repairSync(): Promise<void> {
+export async function repairSync(): Promise<void> {
   const rebuilt = rebuildMerkleHash();
   const clock = getClock();
 

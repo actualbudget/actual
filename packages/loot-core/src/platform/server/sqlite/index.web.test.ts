@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // eslint-disable-next-line no-restricted-imports
 import {
   init,

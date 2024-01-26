@@ -1,11 +1,12 @@
+// @ts-strict-ignore
 import React, { type ComponentProps } from 'react';
 
-import useFeatureFlag from '../../hooks/useFeatureFlag';
-import ArrowThinRight from '../../icons/v1/ArrowThinRight';
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { SvgArrowThinRight } from '../../icons/v1';
 import { type CSSProperties } from '../../style';
-import View from '../common/View';
-import CellValue from '../spreadsheet/CellValue';
-import useSheetValue from '../spreadsheet/useSheetValue';
+import { View } from '../common/View';
+import { CellValue } from '../spreadsheet/CellValue';
+import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { makeAmountStyle } from './util';
 
@@ -19,7 +20,7 @@ type BalanceWithCarryoverProps = {
   balanceStyle?: CSSProperties;
   carryoverStyle?: CSSProperties;
 };
-export default function BalanceWithCarryover({
+export function BalanceWithCarryover({
   carryover,
   balance,
   goal,
@@ -68,7 +69,7 @@ export default function BalanceWithCarryover({
             ...carryoverStyle,
           }}
         >
-          <ArrowThinRight
+          <SvgArrowThinRight
             width={7}
             height={7}
             style={makeAmountStyle(balanceValue, goalValue, budgetedValue)}

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { SVGProps } from 'react';
-const SvgFilter2 = (props: SVGProps<SVGSVGElement>) => (
+export const SvgFilter2 = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
@@ -16,4 +16,3 @@ const SvgFilter2 = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
-export default SvgFilter2;

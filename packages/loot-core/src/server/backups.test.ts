@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as dateFns from 'date-fns';
 
 import { updateBackups } from './backups';

@@ -1,11 +1,12 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
-import ExpandArrow from '../../icons/v0/ExpandArrow';
-import Button from '../common/Button';
-import Menu from '../common/Menu';
-import MenuTooltip from '../common/MenuTooltip';
-import Text from '../common/Text';
-import View from '../common/View';
+import { SvgExpandArrow } from '../../icons/v0';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
+import { MenuTooltip } from '../common/MenuTooltip';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 function SaveReportMenu({ setMenuOpen }) {
   return (
@@ -64,7 +65,7 @@ export function SaveReportMenuButton() {
         >
           Unsaved Report&nbsp;
         </Text>
-        <ExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
+        <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
       {menuOpen && <SaveReportMenu setMenuOpen={setMenuOpen} />}
     </View>

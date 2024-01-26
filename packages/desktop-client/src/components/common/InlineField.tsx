@@ -12,7 +12,7 @@ type InlineFieldProps = {
   style?: CSSProperties;
 };
 
-export default function InlineField({
+export function InlineField({
   label,
   labelWidth,
   children,

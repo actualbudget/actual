@@ -23,21 +23,21 @@ import {
 } from 'loot-core/src/shared/rules';
 import { titleFirst, integerToCurrency } from 'loot-core/src/shared/util';
 
-import DeleteIcon from '../../icons/v0/Delete';
+import { SvgDelete } from '../../icons/v0';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import HoverTarget from '../common/HoverTarget';
-import Menu from '../common/Menu';
-import Select from '../common/Select';
-import Stack from '../common/Stack';
-import Text from '../common/Text';
-import View from '../common/View';
-import Value from '../rules/Value';
+import { Button } from '../common/Button';
+import { HoverTarget } from '../common/HoverTarget';
+import { Menu } from '../common/Menu';
+import { Select } from '../common/Select';
+import { Stack } from '../common/Stack';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
+import { Value } from '../rules/Value';
 import { Tooltip } from '../tooltips';
-import GenericInput from '../util/GenericInput';
+import { GenericInput } from '../util/GenericInput';
 
-import CompactFiltersButton from './CompactFiltersButton';
-import FiltersButton from './FiltersButton';
+import { CompactFiltersButton } from './CompactFiltersButton';
+import { FiltersButton } from './FiltersButton';
 import { CondOpMenu } from './SavedFilters';
 
 const filterFields = [
@@ -48,6 +48,7 @@ const filterFields = [
   'category',
   'amount',
   'cleared',
+  'reconciled',
   'saved',
 ].map(field => [field, mapField(field)]);
 
@@ -195,12 +196,12 @@ function ConfigureField({
                         ['amount-outflow', 'Amount (outflow)'],
                       ]
                     : field === 'date'
-                    ? [
-                        ['date', 'Date'],
-                        ['month', 'Month'],
-                        ['year', 'Year'],
-                      ]
-                    : null
+                      ? [
+                          ['date', 'Date'],
+                          ['month', 'Month'],
+                          ['year', 'Year'],
+                        ]
+                      : null
                 }
                 value={subfield}
                 onChange={sub => {
@@ -561,7 +562,7 @@ function FilterExpression({
         </div>
       </Button>
       <Button type="bare" onClick={onDelete} aria-label="Delete filter">
-        <DeleteIcon
+        <SvgDelete
           style={{
             width: 8,
             height: 8,

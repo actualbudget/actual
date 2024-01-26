@@ -1,15 +1,16 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { Error } from '../alerts';
 import { ButtonWithLoading } from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import Input from '../common/Input';
-import Modal, { ModalButtons } from '../common/Modal';
+import { ExternalLink } from '../common/ExternalLink';
+import { Input } from '../common/Input';
+import { Modal, ModalButtons } from '../common/Modal';
 import type { ModalProps } from '../common/Modal';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 
 type GoCardlessInitialiseProps = {
@@ -17,7 +18,7 @@ type GoCardlessInitialiseProps = {
   onSuccess: () => void;
 };
 
-const GoCardlessInitialise = ({
+export const GoCardlessInitialise = ({
   modalProps,
   onSuccess,
 }: GoCardlessInitialiseProps) => {
@@ -36,11 +37,11 @@ const GoCardlessInitialise = ({
 
     await Promise.all([
       send('secret-set', {
-        name: 'nordigen_secretId',
+        name: 'gocardless_secretId',
         value: secretId,
       }),
       send('secret-set', {
-        name: 'nordigen_secretKey',
+        name: 'gocardless_secretKey',
         value: secretKey,
       }),
     ]);
@@ -57,7 +58,10 @@ const GoCardlessInitialise = ({
           In order to enable bank-sync via GoCardless (only for EU banks) you
           will need to create access credentials. This can be done by creating
           an account with{' '}
-          <ExternalLink to="https://gocardless.com/" linkColor="purple">
+          <ExternalLink
+            to="https://actualbudget.org/docs/advanced/bank-sync/"
+            linkColor="purple"
+          >
             GoCardless
           </ExternalLink>
           .
@@ -104,5 +108,3 @@ const GoCardlessInitialise = ({
     </Modal>
   );
 };
-
-export default GoCardlessInitialise;

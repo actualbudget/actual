@@ -1,3 +1,1 @@
-import { join } from 'path';
-
-export default join;
+export { join } from 'path';

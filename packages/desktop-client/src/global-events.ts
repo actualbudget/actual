@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { type Store } from 'redux';
 
 import * as sharedListeners from 'loot-core/src/client/shared-listeners';

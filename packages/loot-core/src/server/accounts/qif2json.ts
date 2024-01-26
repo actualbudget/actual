@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 type Division = {
   category?: string;
   subcategory?: string;
@@ -18,7 +19,7 @@ type QIFTransaction = {
   division?: Division[];
 };
 
-export default function parse(qif, options: { dateFormat?: string } = {}) {
+export function qif2json(qif, options: { dateFormat?: string } = {}) {
   const lines = qif.split('\n');
   let line = lines.shift();
   const type = /!Type:([^$]*)$/.exec(line.trim());

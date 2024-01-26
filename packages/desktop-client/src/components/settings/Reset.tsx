@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -5,7 +6,7 @@ import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
 import { ButtonWithLoading } from '../common/Button';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 
 import { Setting } from './UI';
 

@@ -1,4 +1,5 @@
-function Graph() {
+// @ts-strict-ignore
+export function Graph() {
   const graph = {
     addNode,
     removeNode,
@@ -120,5 +121,3 @@ function Graph() {
 
   return graph;
 }
-
-export default Graph;

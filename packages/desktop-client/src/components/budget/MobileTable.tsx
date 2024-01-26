@@ -1,7 +1,7 @@
 import React, { type ComponentProps, type ReactNode } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 
 export const ROW_HEIGHT = 50;
 

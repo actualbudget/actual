@@ -1,29 +1,29 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { css } from 'glamor';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import DotsHorizontalTriple from '../../../../icons/v1/DotsHorizontalTriple';
-import ArrowButtonDown1 from '../../../../icons/v2/ArrowButtonDown1';
-import ArrowButtonUp1 from '../../../../icons/v2/ArrowButtonUp1';
+import { SvgDotsHorizontalTriple } from '../../../../icons/v1';
+import { SvgArrowButtonDown1, SvgArrowButtonUp1 } from '../../../../icons/v2';
 import { theme, styles } from '../../../../style';
-import Button from '../../../common/Button';
-import Menu from '../../../common/Menu';
-import View from '../../../common/View';
-import NotesButton from '../../../NotesButton';
-import NamespaceContext from '../../../spreadsheet/NamespaceContext';
+import { Button } from '../../../common/Button';
+import { Menu } from '../../../common/Menu';
+import { View } from '../../../common/View';
+import { NotesButton } from '../../../NotesButton';
+import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
 import { Tooltip } from '../../../tooltips';
 import { useRollover } from '../RolloverContext';
 
-import ToBudget from './ToBudget';
-import TotalsList from './TotalsList';
+import { ToBudget } from './ToBudget';
+import { TotalsList } from './TotalsList';
 
 type BudgetSummaryProps = {
   month: string;
   isGoalTemplatesEnabled?: boolean;
 };
-export default function BudgetSummary({
+export function BudgetSummary({
   month,
   isGoalTemplatesEnabled,
 }: BudgetSummaryProps) {
@@ -35,7 +35,7 @@ export default function BudgetSummary({
   } = useRollover();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  function onMenuOpen(e) {
+  function onMenuOpen() {
     setMenuOpen(true);
   }
 
@@ -45,7 +45,9 @@ export default function BudgetSummary({
 
   const prevMonthName = monthUtils.format(monthUtils.prevMonth(month), 'MMM');
 
-  const ExpandOrCollapseIcon = collapsed ? ArrowButtonDown1 : ArrowButtonUp1;
+  const ExpandOrCollapseIcon = collapsed
+    ? SvgArrowButtonDown1
+    : SvgArrowButtonUp1;
 
   return (
     <View
@@ -134,7 +136,7 @@ export default function BudgetSummary({
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
               <Button type="bare" aria-label="Menu" onClick={onMenuOpen}>
-                <DotsHorizontalTriple
+                <SvgDotsHorizontalTriple
                   width={15}
                   height={15}
                   style={{ color: theme.pageTextLight }}

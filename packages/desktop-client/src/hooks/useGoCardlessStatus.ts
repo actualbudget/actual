@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import useSyncServerStatus from './useSyncServerStatus';
+import { useSyncServerStatus } from './useSyncServerStatus';
 
-export default function useGoCardlessStatus() {
-  const [configured, setConfigured] = useState<boolean | null>(null);
+export function useGoCardlessStatus() {
+  const [configuredGoCardless, setConfiguredGoCardless] = useState<
+    boolean | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 
@@ -15,7 +17,7 @@ export default function useGoCardlessStatus() {
 
       const results = await send('gocardless-status');
 
-      setConfigured(results.configured || false);
+      setConfiguredGoCardless(results.configured || false);
       setIsLoading(false);
     }
 
@@ -25,7 +27,7 @@ export default function useGoCardlessStatus() {
   }, [status]);
 
   return {
-    configured,
+    configuredGoCardless,
     isLoading,
   };
 }

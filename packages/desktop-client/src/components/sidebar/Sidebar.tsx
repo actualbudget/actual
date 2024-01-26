@@ -3,18 +3,17 @@ import React, { type ReactNode } from 'react';
 import * as Platform from 'loot-core/src/client/platform';
 import { type AccountEntity } from 'loot-core/src/types/models';
 
-import Reports from '../../icons/v1/Reports';
-import Wallet from '../../icons/v1/Wallet';
-import CalendarIcon from '../../icons/v2/Calendar';
+import { SvgReports, SvgWallet } from '../../icons/v1';
+import { SvgCalendar } from '../../icons/v2';
 import { type CSSProperties, theme } from '../../style';
-import View from '../common/View';
+import { View } from '../common/View';
 import { type OnDropCallback } from '../sort';
 import { type Binding } from '../spreadsheet';
 
-import Accounts from './Accounts';
-import Item from './Item';
-import ToggleButton from './ToggleButton';
-import Tools from './Tools';
+import { Accounts } from './Accounts';
+import { Item } from './Item';
+import { ToggleButton } from './ToggleButton';
+import { Tools } from './Tools';
 
 import { useSidebar } from '.';
 
@@ -44,7 +43,7 @@ type SidebarProps = {
   onReorder: OnDropCallback;
 };
 
-function Sidebar({
+export function Sidebar({
   style,
   budgetName,
   accounts,
@@ -107,10 +106,10 @@ function Sidebar({
       </View>
 
       <View style={{ overflow: 'auto' }}>
-        <Item title="Budget" Icon={Wallet} to="/budget" />
-        <Item title="Reports" Icon={Reports} to="/reports" />
+        <Item title="Budget" Icon={SvgWallet} to="/budget" />
+        <Item title="Reports" Icon={SvgReports} to="/reports" />
 
-        <Item title="Schedules" Icon={CalendarIcon} to="/schedules" />
+        <Item title="Schedules" Icon={SvgCalendar} to="/schedules" />
 
         <Tools />
 
@@ -144,5 +143,3 @@ function Sidebar({
     </View>
   );
 }
-
-export default Sidebar;

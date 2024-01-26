@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
 import {
   ErrorBoundary,
@@ -14,20 +15,20 @@ import {
 import { type GlobalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
-import installPolyfills from '../polyfills';
+import { installPolyfills } from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
 import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
 
-import AppBackground from './AppBackground';
-import View from './common/View';
-import DevelopmentTopBar from './DevelopmentTopBar';
-import FatalError from './FatalError';
-import FinancesApp from './FinancesApp';
-import ManagementApp from './manager/ManagementApp';
-import MobileWebMessage from './MobileWebMessage';
-import UpdateNotification from './UpdateNotification';
+import { AppBackground } from './AppBackground';
+import { View } from './common/View';
+import { DevelopmentTopBar } from './DevelopmentTopBar';
+import { FatalError } from './FatalError';
+import { FinancesApp } from './FinancesApp';
+import { ManagementApp } from './manager/ManagementApp';
+import { MobileWebMessage } from './MobileWebMessage';
+import { UpdateNotification } from './UpdateNotification';
 
-type AppProps = {
+type AppInnerProps = {
   budgetId: string;
   cloudFileId: string;
   loadingText: string;
@@ -40,14 +41,14 @@ type AppProps = {
   loadGlobalPrefs: () => Promise<GlobalPrefs>;
 };
 
-function App({
+function AppInner({
   budgetId,
   cloudFileId,
   loadingText,
   loadBudget,
   closeBudget,
   loadGlobalPrefs,
-}: AppProps) {
+}: AppInnerProps) {
   const [initializing, setInitializing] = useState(true);
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
 
@@ -121,7 +122,7 @@ function ErrorFallback({ error }: FallbackProps) {
   );
 }
 
-function AppWrapper() {
+export function App() {
   const budgetId = useSelector(
     state => state.prefs.local && state.prefs.local.id,
   );
@@ -178,7 +179,7 @@ function AppWrapper() {
             {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
               <DevelopmentTopBar />
             )}
-            <App
+            <AppInner
               budgetId={budgetId}
               cloudFileId={cloudFileId}
               loadingText={loadingText}
@@ -193,5 +194,3 @@ function AppWrapper() {
     </ResponsiveProvider>
   );
 }
-
-export default AppWrapper;

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   useContext,
   type CSSProperties,
@@ -7,8 +8,8 @@ import React, {
 import * as monthUtils from 'loot-core/src/shared/months';
 
 import { theme } from '../../style';
-import View from '../common/View';
-import NamespaceContext from '../spreadsheet/NamespaceContext';
+import { View } from '../common/View';
+import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 import { MonthsContext } from './MonthsContext';
 
@@ -19,7 +20,7 @@ type RenderMonthsProps = {
   style?: CSSProperties;
 };
 
-function RenderMonths({
+export function RenderMonths({
   component: Component,
   editingIndex,
   args,
@@ -48,5 +49,3 @@ function RenderMonths({
     );
   }) as unknown as JSX.Element;
 }
-
-export default RenderMonths;

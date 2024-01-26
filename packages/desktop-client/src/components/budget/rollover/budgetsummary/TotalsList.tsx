@@ -3,19 +3,19 @@ import React from 'react';
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
 import { styles, type CSSProperties } from '../../../../style';
-import AlignedText from '../../../common/AlignedText';
-import Block from '../../../common/Block';
-import HoverTarget from '../../../common/HoverTarget';
-import View from '../../../common/View';
-import CellValue from '../../../spreadsheet/CellValue';
-import useFormat from '../../../spreadsheet/useFormat';
+import { AlignedText } from '../../../common/AlignedText';
+import { Block } from '../../../common/Block';
+import { HoverTarget } from '../../../common/HoverTarget';
+import { View } from '../../../common/View';
+import { CellValue } from '../../../spreadsheet/CellValue';
+import { useFormat } from '../../../spreadsheet/useFormat';
 import { Tooltip } from '../../../tooltips';
 
 type TotalsListProps = {
   prevMonthName: string;
   style?: CSSProperties;
 };
-export default function TotalsList({ prevMonthName, style }: TotalsListProps) {
+export function TotalsList({ prevMonthName, style }: TotalsListProps) {
   const format = useFormat();
   return (
     <View

@@ -1,8 +1,9 @@
+// @ts-strict-ignore
 import { keyframes } from 'glamor';
 
 import * as Platform from 'loot-core/src/client/platform';
 
-import tokens from '../tokens';
+import { tokens } from '../tokens';
 
 import { theme } from './theme';
 import { type CSSProperties } from './types';
@@ -39,6 +40,9 @@ export const styles = {
   },
   verySmallText: {
     fontSize: 13,
+  },
+  tinyText: {
+    fontSize: 10,
   },
   page: {
     flex: 1,

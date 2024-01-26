@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, {
   type CSSProperties,
   type ComponentProps,
@@ -6,9 +7,9 @@ import React, {
 } from 'react';
 
 import { theme, styles } from '../../../../style';
-import Text from '../../../common/Text';
-import View from '../../../common/View';
-import CellValue from '../../../spreadsheet/CellValue';
+import { Text } from '../../../common/Text';
+import { View } from '../../../common/View';
+import { CellValue } from '../../../spreadsheet/CellValue';
 
 type BudgetTotalProps = {
   title: ReactNode;
@@ -17,7 +18,7 @@ type BudgetTotalProps = {
   ProgressComponent: ComponentType<{ current; target }>;
   style?: CSSProperties;
 };
-export default function BudgetTotal({
+export function BudgetTotal({
   title,
   current,
   target,

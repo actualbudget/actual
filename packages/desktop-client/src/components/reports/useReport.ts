@@ -1,8 +1,9 @@
+// @ts-strict-ignore
 import { useState, useEffect, type SetStateAction } from 'react';
 
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
 
-function useReport(
+export function useReport(
   sheetName: string,
   getData: (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -23,5 +24,3 @@ function useReport(
   }, [getData]);
   return results;
 }
-
-export default useReport;

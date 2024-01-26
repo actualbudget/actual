@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import { useContext } from 'react';
 
-import NamespaceContext from './NamespaceContext';
+import { NamespaceContext } from './NamespaceContext';
 
 import { type Binding } from '.';
 
@@ -15,7 +16,7 @@ function unresolveName(name) {
   return { sheet: null, name };
 }
 
-export default function useSheetName(binding: Binding) {
+export function useSheetName(binding: Binding) {
   if (!binding) {
     throw new Error('Sheet binding is required');
   }

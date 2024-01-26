@@ -1,17 +1,18 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { send } from 'loot-core/src/platform/client/fetch';
 
-import useNavigate from '../../../hooks/useNavigate';
+import { useNavigate } from '../../../hooks/useNavigate';
 import { theme } from '../../../style';
-import Button from '../../common/Button';
-import Text from '../../common/Text';
-import View from '../../common/View';
+import { Button } from '../../common/Button';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
 
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
-export default function ChangePassword() {
+export function ChangePassword() {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [msg, setMessage] = useState(null);

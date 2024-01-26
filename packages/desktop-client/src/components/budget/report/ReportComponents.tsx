@@ -1,24 +1,25 @@
+// @ts-strict-ignore
 import React, { memo, useState } from 'react';
 
 import { reportBudget } from 'loot-core/src/client/queries';
-import evalArithmetic from 'loot-core/src/shared/arithmetic';
+import { evalArithmetic } from 'loot-core/src/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/src/shared/util';
 
-import useFeatureFlag from '../../../hooks/useFeatureFlag';
-import CheveronDown from '../../../icons/v1/CheveronDown';
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+import { SvgCheveronDown } from '../../../icons/v1';
 import { styles, theme, type CSSProperties } from '../../../style';
-import Button from '../../common/Button';
-import Menu from '../../common/Menu';
-import Text from '../../common/Text';
-import View from '../../common/View';
-import CellValue from '../../spreadsheet/CellValue';
-import useFormat from '../../spreadsheet/useFormat';
+import { Button } from '../../common/Button';
+import { Menu } from '../../common/Menu';
+import { Text } from '../../common/Text';
+import { View } from '../../common/View';
+import { CellValue } from '../../spreadsheet/CellValue';
+import { useFormat } from '../../spreadsheet/useFormat';
 import { Field, SheetCell } from '../../table';
 import { Tooltip, useTooltip } from '../../tooltips';
-import BalanceWithCarryover from '../BalanceWithCarryover';
+import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
-import BalanceTooltip from './BalanceTooltip';
+import { BalanceTooltip } from './BalanceTooltip';
 
 const headerLabelStyle: CSSProperties = {
   flex: 1,
@@ -189,9 +190,11 @@ export const CategoryMonth = memo(function CategoryMonth({
           <View
             style={{
               flexShrink: 0,
-              marginRight: 0,
-              marginLeft: 3,
+              paddingLeft: 3,
               justifyContent: 'center',
+              borderTopWidth: 1,
+              borderBottomWidth: 1,
+              borderColor: theme.tableBorder,
             }}
           >
             <Button
@@ -204,7 +207,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                 padding: 3,
               }}
             >
-              <CheveronDown
+              <SvgCheveronDown
                 width={14}
                 height={14}
                 className="hover-visible"
@@ -344,7 +347,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   );
 });
 
-export { default as BudgetSummary } from './budgetsummary/BudgetSummary';
+export { BudgetSummary } from './budgetsummary/BudgetSummary';
 
 export const ExpenseGroupMonth = GroupMonth;
 export const ExpenseCategoryMonth = CategoryMonth;

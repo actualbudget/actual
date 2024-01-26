@@ -1,16 +1,19 @@
 import React from 'react';
 
-import Button from '../common/Button';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { View } from '../common/View';
 
-import RenderMonths from './RenderMonths';
+import { RenderMonths } from './RenderMonths';
 
 type IncomeHeaderProps = {
   MonthComponent?: () => JSX.Element;
   onShowNewGroup: () => void;
 };
 
-function IncomeHeader({ MonthComponent, onShowNewGroup }: IncomeHeaderProps) {
+export function IncomeHeader({
+  MonthComponent,
+  onShowNewGroup,
+}: IncomeHeaderProps) {
   return (
     <View style={{ flexDirection: 'row', flex: 1 }}>
       <View
@@ -31,5 +34,3 @@ function IncomeHeader({ MonthComponent, onShowNewGroup }: IncomeHeaderProps) {
     </View>
   );
 }
-
-export default IncomeHeader;

@@ -4,13 +4,13 @@ import { reportBudget } from 'loot-core/src/client/queries';
 
 import { type CSSProperties } from '../../../../style';
 
-import BudgetTotal from './BudgetTotal';
-import IncomeProgress from './IncomeProgress';
+import { BudgetTotal } from './BudgetTotal';
+import { IncomeProgress } from './IncomeProgress';
 
 type IncomeTotalProps = {
   style?: CSSProperties;
 };
-export default function IncomeTotal({ style }: IncomeTotalProps) {
+export function IncomeTotal({ style }: IncomeTotalProps) {
   return (
     <BudgetTotal
       title="Income"

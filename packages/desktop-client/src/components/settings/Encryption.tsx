@@ -1,16 +1,17 @@
+// @ts-strict-ignore
 import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { useActions } from '../../hooks/useActions';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import Text from '../common/Text';
+import { Button } from '../common/Button';
+import { ExternalLink } from '../common/ExternalLink';
+import { Text } from '../common/Text';
 import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
 
-export default function EncryptionSettings() {
+export function EncryptionSettings() {
   const { pushModal } = useActions();
   const serverURL = useServerURL();
   const encryptKeyId = useSelector(state => state.prefs.local.encryptKeyId);

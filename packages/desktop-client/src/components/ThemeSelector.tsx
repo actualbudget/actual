@@ -3,14 +3,12 @@ import React, { useState } from 'react';
 import type { Theme } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
-import MoonStars from '../icons/v2/MoonStars';
-import Sun from '../icons/v2/Sun';
-import System from '../icons/v2/System';
+import { SvgMoonStars, SvgSun, SvgSystem } from '../icons/v2';
 import { useResponsive } from '../ResponsiveProvider';
 import { type CSSProperties, themeOptions, useTheme } from '../style';
 
-import Button from './common/Button';
-import Menu from './common/Menu';
+import { Button } from './common/Button';
+import { Menu } from './common/Menu';
 import { Tooltip } from './tooltips';
 
 type ThemeSelectorProps = {
@@ -24,7 +22,11 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
 
   const { isNarrowWidth } = useResponsive();
 
-  const themeIcons = { light: Sun, dark: MoonStars, auto: System } as const;
+  const themeIcons = {
+    light: SvgSun,
+    dark: SvgMoonStars,
+    auto: SvgSystem,
+  } as const;
 
   async function onMenuSelect(newTheme: string) {
     setMenuOpen(false);
@@ -34,7 +36,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
     });
   }
 
-  const Icon = themeIcons?.[theme] || Sun;
+  const Icon = themeIcons?.[theme] || SvgSun;
 
   return isNarrowWidth ? null : (
     <Button

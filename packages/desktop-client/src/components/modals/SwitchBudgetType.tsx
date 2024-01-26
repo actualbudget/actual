@@ -1,19 +1,20 @@
+// @ts-strict-ignore
 import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import Modal from '../common/Modal';
-import Paragraph from '../common/Paragraph';
-import Text from '../common/Text';
+import { Button } from '../common/Button';
+import { ExternalLink } from '../common/ExternalLink';
+import { Modal } from '../common/Modal';
+import { Paragraph } from '../common/Paragraph';
+import { Text } from '../common/Text';
 
 type SwitchBudgetTypeProps = {
   modalProps: CommonModalProps;
   onSwitch: () => void;
 };
 
-export default function SwitchBudgetType({
+export function SwitchBudgetType({
   modalProps,
   onSwitch,
 }: SwitchBudgetTypeProps) {

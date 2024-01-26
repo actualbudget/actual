@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 
 import { theme } from '../../style';
-import Autocomplete from '../autocomplete/Autocomplete';
-import Button from '../common/Button';
-import Modal from '../common/Modal';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Autocomplete } from '../autocomplete/Autocomplete';
+import { Button } from '../common/Button';
+import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { TableHeader, Table, Row, Field } from '../table';
 
 const addAccountOption = { id: 'new', name: 'Create new account' };
 
-export default function SelectLinkedAccounts({
+export function SelectLinkedAccounts({
   modalProps,
   requisitionId,
   externalAccounts,
   localAccounts,
   actions,
+  syncSource,
 }) {
   const [chosenAccounts, setChosenAccounts] = useState(() => {
     return Object.fromEntries(
@@ -49,13 +50,22 @@ export default function SelectLinkedAccounts({
         }
 
         // Finally link the matched account
-        actions.linkAccount(
-          requisitionId,
-          externalAccount,
-          chosenLocalAccountId !== addAccountOption.id
-            ? chosenLocalAccountId
-            : undefined,
-        );
+        if (syncSource === 'simpleFin') {
+          actions.linkAccountSimpleFin(
+            externalAccount,
+            chosenLocalAccountId !== addAccountOption.id
+              ? chosenLocalAccountId
+              : undefined,
+          );
+        } else {
+          actions.linkAccount(
+            requisitionId,
+            externalAccount,
+            chosenLocalAccountId !== addAccountOption.id
+              ? chosenLocalAccountId
+              : undefined,
+          );
+        }
       },
     );
 

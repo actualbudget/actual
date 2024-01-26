@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { FIELD_TYPES as ruleFieldTypes } from '../../shared/rules';
 import { type RuleEntity } from '../../types/models';
 import { Condition, Action, rankRules } from '../accounts/rules';
@@ -67,7 +68,7 @@ function validateRule(rule: Partial<RuleEntity>) {
 }
 
 // Expose functions to the client
-const app = createApp<RulesHandlers>();
+export const app = createApp<RulesHandlers>();
 
 app.method('rule-validate', async function (rule) {
   const error = validateRule(rule);
@@ -153,5 +154,3 @@ app.method('rule-get', async function ({ id }) {
 app.method('rules-run', async function ({ transaction }) {
   return rules.runRules(transaction);
 });
-
-export default app;

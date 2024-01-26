@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
 import { getChangedValues } from '../../shared/util';
 import * as db from '../db';

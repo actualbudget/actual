@@ -13,21 +13,22 @@ import memoizeOne from 'memoize-one';
 
 import { groupById } from 'loot-core/src/shared/util';
 
-import useSelected, {
+import {
+  useSelected,
   SelectedProvider,
   useSelectedDispatch,
   useSelectedItems,
 } from '../../hooks/useSelected';
-import useStableCallback from '../../hooks/useStableCallback';
-import ExpandArrow from '../../icons/v0/ExpandArrow';
+import { useStableCallback } from '../../hooks/useStableCallback';
+import { SvgExpandArrow } from '../../icons/v0';
 import { theme } from '../../style';
-import Button from '../common/Button';
-import Search from '../common/Search';
-import View from '../common/View';
+import { Button } from '../common/Button';
+import { Search } from '../common/Search';
+import { View } from '../common/View';
 import { TableHeader, Cell, SelectCell, useTableNavigator } from '../table';
 
-import PayeeMenu from './PayeeMenu';
-import PayeeTable from './PayeeTable';
+import { PayeeMenu } from './PayeeMenu';
+import { PayeeTable } from './PayeeTable';
 
 const getPayeesById = memoizeOne(payees => groupById(payees));
 
@@ -242,7 +243,7 @@ export const ManagePayees = forwardRef(
                 : selected.items.size +
                   ' ' +
                   plural(selected.items.size, 'payee', 'payees')}
-              <ExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
+              <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
             </Button>
             {menuOpen && (
               <PayeeMenu

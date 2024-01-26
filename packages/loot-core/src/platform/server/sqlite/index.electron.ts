@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import SQL from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -98,9 +99,11 @@ export function openDatabase(pathOrBuffer: string | Buffer) {
   const db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER and UPPER implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('UNICODE_LOWER', { deterministic: true }, (arg: string | null) =>
     arg?.toLowerCase(),
   );
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('UNICODE_UPPER', { deterministic: true }, (arg: string | null) =>
     arg?.toUpperCase(),
   );

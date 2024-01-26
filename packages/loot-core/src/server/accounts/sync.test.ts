@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import snapshotDiff from 'snapshot-diff';
 
 import * as monthUtils from '../../shared/months';

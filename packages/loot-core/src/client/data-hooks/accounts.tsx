@@ -1,7 +1,8 @@
+// @ts-strict-ignore
 import React, { createContext, useContext } from 'react';
 
+import { q } from '../../shared/query';
 import { type AccountEntity } from '../../types/models';
-import q from '../query-helpers';
 import { useLiveQuery } from '../query-hooks';
 import { getAccountsById } from '../reducers/queries';
 

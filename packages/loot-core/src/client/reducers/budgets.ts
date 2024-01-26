@@ -125,10 +125,7 @@ const initialState: BudgetsState = {
   allFiles: null,
 };
 
-export default function update(
-  state = initialState,
-  action: Action,
-): BudgetsState {
+export function update(state = initialState, action: Action): BudgetsState {
   switch (action.type) {
     case constants.SET_BUDGETS:
       return {

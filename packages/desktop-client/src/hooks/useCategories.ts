@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { useActions } from './useActions';
 
-export default function useCategories() {
+export function useCategories() {
   const { getCategories } = useActions();
 
   const categories = useSelector(state => state.queries.categories.list);

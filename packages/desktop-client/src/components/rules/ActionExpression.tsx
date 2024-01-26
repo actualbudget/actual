@@ -8,11 +8,11 @@ import {
 } from 'loot-core/src/types/models';
 
 import { type CSSProperties, theme } from '../../style';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
-import ScheduleValue from './ScheduleValue';
-import Value from './Value';
+import { ScheduleValue } from './ScheduleValue';
+import { Value } from './Value';
 
 const valueStyle = {
   color: theme.pillTextHighlighted,
@@ -22,10 +22,7 @@ type ActionExpressionProps = RuleActionEntity & {
   style?: CSSProperties;
 };
 
-export default function ActionExpression({
-  style,
-  ...props
-}: ActionExpressionProps) {
+export function ActionExpression({ style, ...props }: ActionExpressionProps) {
   return (
     <View
       style={{

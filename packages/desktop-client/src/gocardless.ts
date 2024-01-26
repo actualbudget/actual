@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { pushModal as pushModalAction } from 'loot-core/src/client/actions/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 import { type GoCardlessToken } from 'loot-core/src/types/models';
@@ -46,6 +47,7 @@ export async function authorizeBank(
         accounts: data.accounts,
         requisitionId: data.id,
         upgradingAccountId,
+        syncSource: 'goCardless',
       });
     },
   });

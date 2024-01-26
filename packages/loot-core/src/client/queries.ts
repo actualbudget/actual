@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
 import {
@@ -7,7 +8,7 @@ import {
   getShortYearRegex,
   getShortYearFormat,
 } from '../shared/months';
-import q from '../shared/query';
+import { q } from '../shared/query';
 import { currencyToAmount, amountToInteger } from '../shared/util';
 
 export function getAccountFilter(accountId, field = 'account') {
@@ -98,6 +99,26 @@ export function accountBalance(acct) {
     name: `balance-${acct.id}`,
     query: q('transactions')
       .filter({ account: acct.id })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$amount' }),
+  };
+}
+
+export function accountBalanceCleared(acct) {
+  return {
+    name: `balanceCleared-${acct.id}`,
+    query: q('transactions')
+      .filter({ account: acct.id, cleared: true })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$amount' }),
+  };
+}
+
+export function accountBalanceUncleared(acct) {
+  return {
+    name: `balanceUncleared-${acct.id}`,
+    query: q('transactions')
+      .filter({ account: acct.id, cleared: false })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
   };

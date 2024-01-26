@@ -1,4 +1,5 @@
-export default async function checkForUpdateNotification(
+// @ts-strict-ignore
+export async function checkForUpdateNotification(
   addNotification,
   getIsOutdated,
   getLatestVersion,

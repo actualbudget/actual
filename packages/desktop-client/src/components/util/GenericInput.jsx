@@ -3,19 +3,19 @@ import { useSelector } from 'react-redux';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 
-import useCategories from '../../hooks/useCategories';
-import AccountAutocomplete from '../autocomplete/AccountAutocomplete';
-import Autocomplete from '../autocomplete/Autocomplete';
-import CategoryAutocomplete from '../autocomplete/CategoryAutocomplete';
-import PayeeAutocomplete from '../autocomplete/PayeeAutocomplete';
-import SavedFilterAutocomplete from '../autocomplete/SavedFilterAutocomplete';
-import Input from '../common/Input';
-import View from '../common/View';
+import { useCategories } from '../../hooks/useCategories';
+import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { Autocomplete } from '../autocomplete/Autocomplete';
+import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
+import { SavedFilterAutocomplete } from '../autocomplete/SavedFilterAutocomplete';
+import { Input } from '../common/Input';
+import { View } from '../common/View';
 import { Checkbox } from '../forms';
-import DateSelect from '../select/DateSelect';
-import RecurringSchedulePicker from '../select/RecurringSchedulePicker';
+import { DateSelect } from '../select/DateSelect';
+import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 
-export default function GenericInput({
+export function GenericInput({
   field,
   subfield,
   type,

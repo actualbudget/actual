@@ -2,18 +2,18 @@ import React, { useMemo } from 'react';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useCategories from '../../../hooks/useCategories';
+import { useCategories } from '../../../hooks/useCategories';
 import { styles } from '../../../style';
-import Block from '../../common/Block';
-import View from '../../common/View';
-import DateRange from '../DateRange';
-import BarGraph from '../graphs/BarGraph';
-import LoadingIndicator from '../LoadingIndicator';
-import ReportCard from '../ReportCard';
-import defaultSpreadsheet from '../spreadsheets/default-spreadsheet';
-import useReport from '../useReport';
+import { Block } from '../../common/Block';
+import { View } from '../../common/View';
+import { DateRange } from '../DateRange';
+import { BarGraph } from '../graphs/BarGraph';
+import { LoadingIndicator } from '../LoadingIndicator';
+import { ReportCard } from '../ReportCard';
+import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
+import { useReport } from '../useReport';
 
-function CustomReportCard() {
+export function CustomReportCard(reports) {
   const categories = useCategories();
 
   const endDate = monthUtils.currentMonth();
@@ -21,7 +21,7 @@ function CustomReportCard() {
   const groupBy = 'Category';
 
   const getGraphData = useMemo(() => {
-    return defaultSpreadsheet({
+    return createCustomSpreadsheet({
       startDate,
       endDate,
       groupBy,
@@ -32,7 +32,7 @@ function CustomReportCard() {
   const data = useReport('default', getGraphData);
 
   return (
-    <ReportCard flex={1} to="/reports/custom">
+    <ReportCard flex={1} to="/reports/custom" reports={reports}>
       <View>
         <View style={{ flexDirection: 'row', padding: '20px 20px 0' }}>
           <View style={{ flex: 1 }}>
@@ -61,5 +61,3 @@ function CustomReportCard() {
     </ReportCard>
   );
 }
-
-export default CustomReportCard;

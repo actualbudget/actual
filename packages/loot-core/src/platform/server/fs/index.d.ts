@@ -1,4 +1,4 @@
-export { default as join } from './path-join';
+export { join } from './path-join';
 
 export function init(): void;
 export type Init = typeof init;

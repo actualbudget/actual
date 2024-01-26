@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
 import { parseConditionsOrActions } from '../accounts/transaction-rules';
@@ -170,10 +171,8 @@ async function deleteFilter(id) {
   await db.delete_('transaction_filters', id);
 }
 
-const app = createApp<FiltersHandlers>();
+export const app = createApp<FiltersHandlers>();
 
 app.method('filter-create', mutator(createFilter));
 app.method('filter-update', mutator(updateFilter));
 app.method('filter-delete', mutator(undoable(deleteFilter)));
-
-export default app;

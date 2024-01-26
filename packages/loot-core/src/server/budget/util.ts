@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { safeNumber } from '../../shared/util';
 import { number } from '../spreadsheet/globals';
 

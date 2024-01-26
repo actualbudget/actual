@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { newlineToBreak } from 'mdast-util-newline-to-break';
 
 export function sequentialNewlinesPlugin() {

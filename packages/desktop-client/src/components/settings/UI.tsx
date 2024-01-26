@@ -4,9 +4,9 @@ import { useLocation } from 'react-router-dom';
 import { css, media } from 'glamor';
 
 import { type CSSProperties, theme } from '../../style';
-import tokens from '../../tokens';
-import Button from '../common/Button';
-import View from '../common/View';
+import { tokens } from '../../tokens';
+import { Button } from '../common/Button';
+import { View } from '../common/View';
 
 type SettingProps = {
   primaryAction?: ReactNode;

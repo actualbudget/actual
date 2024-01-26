@@ -1,13 +1,14 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { rolloverBudget } from 'loot-core/src/client/queries';
 
-import Menu from '../../common/Menu';
-import useSheetValue from '../../spreadsheet/useSheetValue';
+import { Menu } from '../../common/Menu';
+import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Tooltip } from '../../tooltips';
 
-import CoverTooltip from './CoverTooltip';
-import TransferTooltip from './TransferTooltip';
+import { CoverTooltip } from './CoverTooltip';
+import { TransferTooltip } from './TransferTooltip';
 
 type BalanceTooltipProps = {
   categoryId: string;
@@ -16,7 +17,7 @@ type BalanceTooltipProps = {
   onBudgetAction: (idx: number, action: string, arg?: unknown) => void;
   onClose?: () => void;
 };
-export default function BalanceTooltip({
+export function BalanceTooltip({
   categoryId,
   tooltip,
   monthIndex,

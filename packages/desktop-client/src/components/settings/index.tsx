@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { type ReactNode, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -7,28 +8,28 @@ import * as Platform from 'loot-core/src/client/platform';
 import { listen } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../../hooks/useActions';
-import useLatestVersion, { useIsOutdated } from '../../hooks/useLatestVersion';
+import { useLatestVersion, useIsOutdated } from '../../hooks/useLatestVersion';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
-import tokens from '../../tokens';
-import Button from '../common/Button';
-import ExternalLink from '../common/ExternalLink';
-import Input from '../common/Input';
-import Text from '../common/Text';
-import View from '../common/View';
+import { tokens } from '../../tokens';
+import { Button } from '../common/Button';
+import { ExternalLink } from '../common/ExternalLink';
+import { Input } from '../common/Input';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
 import { Page } from '../Page';
 import { useServerVersion } from '../ServerContext';
 
-import EncryptionSettings from './Encryption';
-import ExperimentalFeatures from './Experimental';
-import ExportBudget from './Export';
-import FixSplitsTool from './FixSplits';
-import FormatSettings from './Format';
-import GlobalSettings from './Global';
+import { EncryptionSettings } from './Encryption';
+import { ExperimentalFeatures } from './Experimental';
+import { ExportBudget } from './Export';
+import { FixSplits } from './FixSplits';
+import { FormatSettings } from './Format';
+import { GlobalSettings } from './Global';
 import { ResetCache, ResetSync } from './Reset';
-import ThemeSettings from './Themes';
+import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
@@ -116,7 +117,7 @@ function AdvancedAbout() {
   );
 }
 
-export default function Settings() {
+export function Settings() {
   const floatingSidebar = useSelector(
     state => state.prefs.global.floatingSidebar,
   );
@@ -175,7 +176,7 @@ export default function Settings() {
           <AdvancedAbout />
           <ResetCache />
           <ResetSync />
-          <FixSplitsTool />
+          <FixSplits />
           <ExperimentalFeatures />
         </AdvancedToggle>
       </View>

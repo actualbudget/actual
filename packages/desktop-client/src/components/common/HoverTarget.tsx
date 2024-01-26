@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 
 import { type CSSProperties } from '../../style';
 
-import View from './View';
+import { View } from './View';
 
 type HoverTargetProps = {
   style?: CSSProperties;
@@ -12,7 +12,7 @@ type HoverTargetProps = {
   disabled?: boolean;
 };
 
-export default function HoverTarget({
+export function HoverTarget({
   style,
   contentStyle,
   children,

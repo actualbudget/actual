@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getClock, deserializeClock } from '@actual-app/crdt';
 
 import { expectSnapshotWithDiffer } from '../mocks/util';

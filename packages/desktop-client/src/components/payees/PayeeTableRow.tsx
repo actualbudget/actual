@@ -1,11 +1,12 @@
+// @ts-strict-ignore
 import { memo } from 'react';
 
 import { type PayeeEntity } from 'loot-core/src/types/models';
 
 import { useSelectedDispatch } from '../../hooks/useSelected';
-import ArrowThinRight from '../../icons/v1/ArrowThinRight';
+import { SvgArrowThinRight } from '../../icons/v1';
 import { type CSSProperties, theme } from '../../style';
-import Text from '../common/Text';
+import { Text } from '../common/Text';
 import { Cell, CellButton, InputCell, Row, SelectCell } from '../table';
 
 type RuleButtonProps = {
@@ -45,7 +46,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
             <>Create rule</>
           )}
         </Text>
-        <ArrowThinRight style={{ width: 8, height: 8 }} />
+        <SvgArrowThinRight style={{ width: 8, height: 8 }} />
       </CellButton>
     </Cell>
   );
@@ -72,7 +73,7 @@ type PayeeTableRowProps = {
   style?: CSSProperties;
 };
 
-const PayeeTableRow = memo(
+export const PayeeTableRow = memo(
   ({
     payee,
     ruleCount,
@@ -103,10 +104,10 @@ const PayeeTableRow = memo(
           backgroundColor: hovered
             ? theme.tableRowBackgroundHover
             : selected
-            ? theme.tableRowBackgroundHighlight
-            : backgroundFocus
-            ? theme.tableRowBackgroundHover
-            : theme.tableBackground,
+              ? theme.tableRowBackgroundHighlight
+              : backgroundFocus
+                ? theme.tableRowBackgroundHover
+                : theme.tableBackground,
           ...(selected && {
             backgroundColor: theme.tableRowBackgroundHighlight,
             zIndex: 100,
@@ -150,5 +151,3 @@ const PayeeTableRow = memo(
     );
   },
 );
-
-export default PayeeTableRow;

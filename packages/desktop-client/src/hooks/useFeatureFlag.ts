@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { useSelector } from 'react-redux';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
@@ -8,10 +9,10 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   reportBudget: false,
   goalTemplatesEnabled: false,
   customReports: false,
-  experimentalOfxParser: true,
+  simpleFinSync: false,
 };
 
-export default function useFeatureFlag(name: FeatureFlag): boolean {
+export function useFeatureFlag(name: FeatureFlag): boolean {
   return useSelector(state => {
     const value = state.prefs.local[`flags.${name}`];
 

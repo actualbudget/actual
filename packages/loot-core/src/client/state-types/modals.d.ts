@@ -39,6 +39,7 @@ type FinanceModals = {
     accounts: unknown[];
     requisitionId: string;
     upgradingAccountId?: string;
+    syncSource?: AccountSyncSource;
   };
 
   'confirm-category-delete': { onDelete: () => void } & (
@@ -67,6 +68,10 @@ type FinanceModals = {
   'gocardless-init': {
     onSuccess: () => void;
   };
+  'simplefin-init': {
+    onSuccess: () => void;
+  };
+
   'gocardless-external-msg': {
     onMoveExternal: (arg: {
       institutionId: string;
@@ -130,6 +135,23 @@ type FinanceModals = {
     id: string;
     name: string;
     onSave: (id: string, notes: string) => void;
+  };
+  'report-budget-summary': { month: string };
+  'rollover-budget-summary': {
+    month: string;
+    onBudgetAction: (
+      month: string,
+      type: string,
+      args: unknown,
+    ) => Promise<void>;
+  };
+  'new-category-group': {
+    onValidate?: (value: string) => string;
+    onSubmit: (value: string) => Promise<void>;
+  };
+  'new-category': {
+    onValidate?: (value: string) => string;
+    onSubmit: (value: string) => Promise<void>;
   };
 };
 

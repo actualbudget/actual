@@ -1,9 +1,10 @@
+// @ts-strict-ignore
 import React, { type HTMLProps } from 'react';
 
 import { type CSSProperties, theme } from '../../style';
-import Button from '../common/Button';
-import HoverTarget from '../common/HoverTarget';
-import Text from '../common/Text';
+import { Button } from '../common/Button';
+import { HoverTarget } from '../common/HoverTarget';
+import { Text } from '../common/Text';
 import { Tooltip } from '../tooltips';
 
 type GraphButtonProps = HTMLProps<HTMLButtonElement> & {
@@ -14,7 +15,7 @@ type GraphButtonProps = HTMLProps<HTMLButtonElement> & {
   disabled?: boolean;
 };
 
-const GraphButton = ({
+export const GraphButton = ({
   selected,
   children,
   onSelect,
@@ -55,5 +56,3 @@ const GraphButton = ({
     </HoverTarget>
   );
 };
-
-export default GraphButton;

@@ -1,3 +1,0 @@
-spcat_inst.o: spcat_inst.cxx ../config.h
-
-../config.h:

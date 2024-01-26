@@ -1,22 +1,20 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { useLiveQuery } from 'loot-core/src/client/query-hooks';
-import q from 'loot-core/src/shared/query';
+import { q } from 'loot-core/src/shared/query';
 import { type CategoryEntity } from 'loot-core/src/types/models';
 
-import useCategories from '../../hooks/useCategories';
-import { DotsHorizontalTriple } from '../../icons/v1';
-import Trash from '../../icons/v1/Trash';
-import NotesPaper from '../../icons/v2/NotesPaper';
-import ViewHide from '../../icons/v2/ViewHide';
-import ViewShow from '../../icons/v2/ViewShow';
+import { useCategories } from '../../hooks/useCategories';
+import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
+import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
 import { type CSSProperties, styles, theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
-import Button from '../common/Button';
-import Menu from '../common/Menu';
-import Modal from '../common/Modal';
-import View from '../common/View';
-import Notes from '../Notes';
+import { Button } from '../common/Button';
+import { Menu } from '../common/Menu';
+import { Modal } from '../common/Modal';
+import { View } from '../common/View';
+import { Notes } from '../Notes';
 import { Tooltip } from '../tooltips';
 
 const BUTTON_HEIGHT = 40;
@@ -30,7 +28,7 @@ type CategoryMenuProps = {
   onClose?: () => void;
 };
 
-export default function CategoryMenu({
+export function CategoryMenu({
   modalProps,
   categoryId,
   onSave,
@@ -130,7 +128,7 @@ export default function CategoryMenu({
               notes={originalNotes?.length > 0 ? originalNotes : 'No notes'}
               editable={false}
               focused={false}
-              getStyle={editable => ({
+              getStyle={() => ({
                 borderRadius: 6,
                 ...((!originalNotes || originalNotes.length === 0) && {
                   justifySelf: 'center',
@@ -156,7 +154,11 @@ export default function CategoryMenu({
               }}
               onClick={_onEditNotes}
             >
-              <NotesPaper width={20} height={20} style={{ paddingRight: 5 }} />
+              <SvgNotesPaper
+                width={20}
+                height={20}
+                style={{ paddingRight: 5 }}
+              />
               Edit notes
             </Button>
           </View>
@@ -182,7 +184,7 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
           setMenuOpen(true);
         }}
       >
-        <DotsHorizontalTriple
+        <SvgDotsHorizontalTriple
           width={17}
           height={17}
           style={{ color: 'currentColor' }}
@@ -200,7 +202,7 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
                 {
                   name: 'toggleVisibility',
                   text: category.hidden ? 'Show' : 'Hide',
-                  icon: category.hidden ? ViewShow : ViewHide,
+                  icon: category.hidden ? SvgViewShow : SvgViewHide,
                   iconSize: 16,
                   style: itemStyle,
                 },
@@ -208,7 +210,7 @@ function AdditionalCategoryMenu({ category, onDelete, onToggleVisibility }) {
                 {
                   name: 'delete',
                   text: 'Delete',
-                  icon: Trash,
+                  icon: SvgTrash,
                   iconSize: 15,
                   style: itemStyle,
                 },

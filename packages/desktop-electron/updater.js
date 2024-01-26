@@ -43,7 +43,7 @@ function fireEvent(type, args) {
   lastEvent = type;
 }
 
-function start(handler) {
+function start() {
   if (updateTimer) {
     return null;
   }
@@ -53,7 +53,7 @@ function start(handler) {
 
     updateTimer = setInterval(() => {
       if (!isCheckingForUpdates) {
-        autoUpdater.checkForUpdates().catch(err => {
+        autoUpdater.checkForUpdates().catch(() => {
           // Do nothing with the error (make sure it's not logged to sentry)
         });
       }
@@ -74,7 +74,7 @@ function stop() {
 
 function check() {
   if (!isDev && !isCheckingForUpdates) {
-    autoUpdater.checkForUpdates().catch(err => {
+    autoUpdater.checkForUpdates().catch(() => {
       // Do nothing with the error (make sure it's not logged to sentry)
     });
   }

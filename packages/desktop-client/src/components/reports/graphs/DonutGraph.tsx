@@ -1,10 +1,16 @@
+// @ts-strict-ignore
 import React, { useState } from 'react';
 
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
-import { type CSSProperties } from '../../../style';
-import Container from '../Container';
-import { type DataEntity } from '../entities';
+import { amountToCurrency } from 'loot-core/src/shared/util';
+import { type GroupedEntity } from 'loot-core/src/types/models/reports';
+
+import { theme, type CSSProperties } from '../../../style';
+import { Container } from '../Container';
+
+import { adjustTextSize } from './adjustTextSize';
+import { renderCustomLabel } from './renderCustomLabel';
 
 const RADIAN = Math.PI / 180;
 const ActiveShape = props => {
@@ -70,7 +76,7 @@ const ActiveShape = props => {
         dy={18}
         textAnchor={textAnchor}
         fill={fill}
-      >{`${value.toFixed(2)}`}</text>
+      >{`${amountToCurrency(value)}`}</text>
       <text
         x={ex + (cos <= 0 ? 1 : -1) * 16}
         y={ey}
@@ -84,20 +90,48 @@ const ActiveShape = props => {
   );
 };
 
+const customLabel = props => {
+  const radius =
+    props.innerRadius + (props.outerRadius - props.innerRadius) * 0.5;
+  const size = props.cx > props.cy ? props.cy : props.cx;
+
+  const calcX = props.cx + radius * Math.cos(-props.midAngle * RADIAN);
+  const calcY = props.cy + radius * Math.sin(-props.midAngle * RADIAN);
+  const textAnchor = calcX > props.cx ? 'start' : 'end';
+  const display = props.value !== 0 && `${(props.percent * 100).toFixed(0)}%`;
+  const textSize = adjustTextSize(size, 'donut');
+  const showLabel = props.percent;
+  const showLabelThreshold = 0.05;
+  const fill = theme.reportsInnerLabel;
+
+  return renderCustomLabel(
+    calcX,
+    calcY,
+    textAnchor,
+    display,
+    textSize,
+    showLabel,
+    showLabelThreshold,
+    fill,
+  );
+};
+
 type DonutGraphProps = {
   style?: CSSProperties;
-  data: DataEntity;
+  data: GroupedEntity;
   groupBy: string;
   balanceTypeOp: string;
   compact?: boolean;
+  viewLabels: boolean;
 };
 
-function DonutGraph({
+export function DonutGraph({
   style,
   data,
   groupBy,
   balanceTypeOp,
   compact,
+  viewLabels,
 }: DonutGraphProps) {
   const yAxis = ['Month', 'Year'].includes(groupBy) ? 'date' : 'name';
   const splitData = ['Month', 'Year'].includes(groupBy) ? 'monthData' : 'data';
@@ -123,7 +157,7 @@ function DonutGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height, portalHost) =>
+      {(width, height) =>
         data[splitData] && (
           <ResponsiveContainer>
             <div>
@@ -139,6 +173,9 @@ function DonutGraph({
                   innerRadius={Math.min(width, height) * 0.2}
                   fill="#8884d8"
                   labelLine={false}
+                  label={e =>
+                    viewLabels && !compact ? customLabel(e) : <div />
+                  }
                   onMouseEnter={onPieEnter}
                 >
                   {data.legend.map((entry, index) => (
@@ -153,5 +190,3 @@ function DonutGraph({
     </Container>
   );
 }
-
-export default DonutGraph;

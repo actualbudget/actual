@@ -1,7 +1,8 @@
+// @ts-strict-ignore
 import { useMemo } from 'react';
 
+import { q } from '../../shared/query';
 import { type TransactionFilterEntity } from '../../types/models';
-import q from '../query-helpers';
 import { useLiveQuery } from '../query-hooks';
 
 function toJS(rows) {

@@ -6,9 +6,9 @@ import { type BoundActions } from '../../hooks/useActions';
 import { theme } from '../../style';
 import { type CommonModalProps } from '../../types/modals';
 import { ButtonWithLoading } from '../common/Button';
-import Modal from '../common/Modal';
-import Text from '../common/Text';
-import View from '../common/View';
+import { Modal } from '../common/Modal';
+import { Text } from '../common/Text';
+import { View } from '../common/View';
 
 type DeleteFileProps = {
   modalProps: CommonModalProps;
@@ -16,11 +16,7 @@ type DeleteFileProps = {
   file: File;
 };
 
-export default function DeleteFile({
-  modalProps,
-  actions,
-  file,
-}: DeleteFileProps) {
+export function DeleteFile({ modalProps, actions, file }: DeleteFileProps) {
   // If the state is "broken" that means it was created by another
   // user. The current user should be able to delete the local file,
   // but not the remote one
@@ -29,17 +25,6 @@ export default function DeleteFile({
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
     null,
   );
-
-  async function onDelete() {
-    setLoadingState(isCloudFile ? 'cloud' : 'local');
-    await actions.deleteBudget(
-      'id' in file ? file.id : undefined,
-      isCloudFile ? file.cloudFileId : undefined,
-    );
-    setLoadingState(null);
-
-    modalProps.onBack();
-  }
 
   return (
     <Modal
@@ -79,7 +64,16 @@ export default function DeleteFile({
                   padding: '10px 30px',
                   fontSize: 14,
                 }}
-                onClick={onDelete}
+                onClick={async () => {
+                  setLoadingState('cloud');
+                  await actions.deleteBudget(
+                    'id' in file ? file.id : undefined,
+                    file.cloudFileId,
+                  );
+                  setLoadingState(null);
+
+                  modalProps.onBack();
+                }}
               >
                 Delete file from all devices
               </ButtonWithLoading>
@@ -129,7 +123,13 @@ export default function DeleteFile({
                         backgroundColor: theme.errorText,
                       }),
                 }}
-                onClick={onDelete}
+                onClick={async () => {
+                  setLoadingState('local');
+                  await actions.deleteBudget(file.id);
+                  setLoadingState(null);
+
+                  modalProps.onBack();
+                }}
               >
                 Delete file locally
               </ButtonWithLoading>
