@@ -37,8 +37,8 @@ import { Tooltip } from '../tooltips';
 import { GenericInput } from '../util/GenericInput';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
+import { CondOpMenu } from './CondOpMenu';
 import { FiltersButton } from './FiltersButton';
-import { CondOpMenu } from './SavedFilters';
 
 const filterFields = [
   'date',

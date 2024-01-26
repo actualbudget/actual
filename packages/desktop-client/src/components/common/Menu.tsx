@@ -25,7 +25,7 @@ function Keybinding({ keyName }: KeybindingProps) {
   );
 }
 
-type MenuItem = {
+export type MenuItem = {
   type?: string | symbol;
   name: string;
   disabled?: boolean;
