@@ -250,6 +250,7 @@ export function ReportSidebar({
             alignItems: 'center',
           }}
         >
+          <Text style={{ width: 40, textAlign: 'right', marginRight: 5 }} />
           <Button
             onClick={() => {
               setMenuOpen(true);
@@ -271,9 +272,7 @@ export function ReportSidebar({
                 <Menu
                   onMenuSelect={type => {
                     if (type === 'show-off-budget') {
-                      setShowOffBudget(
-                        !customReportItems.showOffBudget,
-                      );
+                      setShowOffBudget(!customReportItems.showOffBudget);
                     } else if (type === 'show-empty-items') {
                       setShowEmpty(!customReportItems.showEmpty);
                     } else if (type === 'show-uncategorized') {
@@ -282,7 +281,6 @@ export function ReportSidebar({
                       );
                     }
                   }}
-
                   items={[
                     {
                       name: 'show-empty-items',
