@@ -589,13 +589,12 @@ export async function createTestBudget(handlers: Handlers) {
     { name: 'House Asset', offBudget: true },
     { name: 'Roth IRA', offBudget: true },
   ];
-  await runMutator(() =>
-    batchMessages(async () => {
-      for (const account of accounts) {
-        account.id = await handlers['account-create'](account);
-      }
-    }),
-  );
+
+  await runMutator(async () => {
+    for (const account of accounts) {
+      account.id = await handlers['account-create'](account);
+    }
+  });
 
   const payees: Array<MockPayeeEntity> = [
     { name: 'Starting Balance' },
