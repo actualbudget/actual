@@ -9,7 +9,7 @@ export interface RuleEntity {
   tombstone?: boolean;
 }
 
-export type setOp =
+export type RuleConditionOp =
   | 'is'
   | 'isNot'
   | 'oneOf'
@@ -25,7 +25,7 @@ export type setOp =
 
 export interface RuleConditionEntity {
   field?: string;
-  op?: setOp;
+  op?: RuleConditionOp;
   value?: string | string[] | number | boolean;
   options?: {
     inflow?: boolean;

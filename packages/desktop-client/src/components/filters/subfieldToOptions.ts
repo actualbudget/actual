@@ -6,10 +6,10 @@ export function subfieldToOptions(field: string, subfield: string) {
     case 'amount':
       switch (subfield) {
         case 'amount-inflow':
-          setOptions = { ...setOptions, inflow: true };
+          setOptions = { inflow: true };
           break;
         case 'amount-outflow':
-          setOptions = { ...setOptions, outflow: true };
+          setOptions = { outflow: true };
           break;
         default:
           break;
@@ -18,10 +18,10 @@ export function subfieldToOptions(field: string, subfield: string) {
     case 'date':
       switch (subfield) {
         case 'month':
-          setOptions = { ...setOptions, month: true };
+          setOptions = { month: true };
           break;
         case 'year':
-          setOptions = { ...setOptions, year: true };
+          setOptions = { year: true };
           break;
         default:
           break;

@@ -5,22 +5,23 @@ export function subfieldFromFilter({
   options,
   value,
 }: RuleConditionEntity) {
-  if (typeof value === 'number') {
-    return field;
-  } else if (value === 'string') {
-    if (field === 'date') {
+  if (field === 'date') {
+    if (typeof value === 'string') {
       if (value.length === 7) {
         return 'month';
       } else if (value.length === 4) {
         return 'year';
       }
-    } else if (field === 'amount') {
-      if (options && options.inflow) {
-        return 'amount-inflow';
-      } else if (options && options.outflow) {
-        return 'amount-outflow';
-      }
     }
   }
+
+  if (field === 'amount') {
+    if (options && options.inflow) {
+      return 'amount-inflow';
+    } else if (options && options.outflow) {
+      return 'amount-outflow';
+    }
+  }
+
   return field;
 }

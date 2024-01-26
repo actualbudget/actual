@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { mapField, friendlyOp } from 'loot-core/src/shared/rules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import {
-  type setOp,
+  type RuleConditionOp,
   type RuleConditionEntity,
 } from 'loot-core/src/types/models';
 
@@ -20,7 +20,7 @@ import { subfieldFromFilter } from './subfieldFromFilter';
 type FilterExpressionProps = {
   field: string | undefined;
   customName: string | undefined;
-  op: setOp | undefined;
+  op: RuleConditionOp | undefined;
   value: string | string[] | number | boolean | undefined;
   options: RuleConditionEntity['options'];
   style?: CSSProperties;
