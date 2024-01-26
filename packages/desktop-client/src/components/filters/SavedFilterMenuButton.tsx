@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { send, sendCatch } from 'loot-core/src/platform/client/fetch';
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { SvgExpandArrow } from '../../icons/v0';
 import { Button } from '../common/Button';
@@ -10,6 +11,14 @@ import { View } from '../common/View';
 import { FilterMenu } from './FilterMenu';
 import { NameFilter } from './NameFilter';
 
+export type SavedFilter = {
+  conditions?: RuleConditionEntity[];
+  conditionsOp?: string;
+  id?: string;
+  name: string;
+  status?: string;
+};
+
 export function SavedFilterMenuButton({
   filters,
   conditionsOp,
@@ -17,18 +26,24 @@ export function SavedFilterMenuButton({
   onClearFilters,
   onReloadSavedFilter,
   filtersList,
+}: {
+  filters: RuleConditionEntity[];
+  conditionsOp: string;
+  filterId: SavedFilter;
+  onClearFilters: () => void;
+  onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
+  filtersList: RuleConditionEntity[];
 }) {
   const [nameOpen, setNameOpen] = useState(false);
   const [adding, setAdding] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [err, setErr] = useState(null);
-  const [menuItem, setMenuItem] = useState(null);
+  const [menuItem, setMenuItem] = useState('');
   const [name, setName] = useState(filterId.name);
   const id = filterId.id;
-  let res;
-  let savedFilter;
+  let savedFilter: SavedFilter;
 
-  const onFilterMenuSelect = async item => {
+  const onFilterMenuSelect = async (item: string) => {
     setMenuItem(item);
     switch (item) {
       case 'rename-filter':
@@ -53,16 +68,11 @@ export function SavedFilterMenuButton({
           name: filterId.name,
           status: 'saved',
         };
-        res = await sendCatch('filter-update', {
+        await sendCatch('filter-update', {
           state: savedFilter,
           filters: [...filtersList],
         });
-        if (res.error) {
-          setErr(res.error.message);
-          setNameOpen(true);
-        } else {
-          onReloadSavedFilter(savedFilter, 'update');
-        }
+        onReloadSavedFilter(savedFilter, 'update');
         break;
       case 'save-filter':
         setErr(null);
@@ -73,6 +83,7 @@ export function SavedFilterMenuButton({
       case 'reload-filter':
         setMenuOpen(false);
         savedFilter = {
+          ...savedFilter,
           status: 'saved',
         };
         onReloadSavedFilter(savedFilter, 'reload');
@@ -94,13 +105,13 @@ export function SavedFilterMenuButton({
         name,
         status: 'saved',
       };
-      res = await sendCatch('filter-create', {
+      const res: string = await sendCatch('filter-create', {
         state: savedFilter,
         filters: [...filtersList],
       });
       savedFilter = {
         ...savedFilter,
-        id: res.data,
+        id: res,
       };
     } else {
       //rename flow
@@ -110,17 +121,13 @@ export function SavedFilterMenuButton({
         id: filterId.id,
         name,
       };
-      res = await sendCatch('filter-update', {
+      await sendCatch('filter-update', {
         state: savedFilter,
         filters: [...filtersList],
       });
     }
-    if (res.error) {
-      setErr(res.error.message);
-    } else {
-      setNameOpen(false);
-      onReloadSavedFilter(savedFilter);
-    }
+    setNameOpen(false);
+    onReloadSavedFilter(savedFilter);
   }
 
   return (

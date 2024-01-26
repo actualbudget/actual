@@ -16,6 +16,14 @@ export function NameFilter({
   adding,
   onAddUpdate,
   err,
+}: {
+  onClose: () => void;
+  menuItem: string;
+  name: string;
+  setName: (item: string) => void;
+  adding: boolean;
+  onAddUpdate: () => void;
+  err: string | null;
 }) {
   const inputRef = useRef<HTMLInputElement>();
 
@@ -42,11 +50,10 @@ export function NameFilter({
                 style={{ userSelect: 'none' }}
               />
               <Input
-                inputRef={inputRef}
                 id="name-field"
-                type="string"
-                value={name}
-                onChange={setName}
+                inputRef={inputRef}
+                defaultValue={name || ''}
+                onUpdate={(item: string) => setName(item)}
               />
             </FormField>
             <Button

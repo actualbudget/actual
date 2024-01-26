@@ -25,7 +25,7 @@ export function CondOpMenu({
             ['or', 'any'],
           ]}
           value={conditionsOp}
-          onChange={value => onCondOpChange(value, filters)}
+          onChange={(value: string) => onCondOpChange(value, filters)}
         />
         of:
       </Text>
