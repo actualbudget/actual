@@ -7,7 +7,6 @@ import { MenuTooltip } from '../common/MenuTooltip';
 import { Stack } from '../common/Stack';
 import { Text } from '../common/Text';
 import { FormField, FormLabel } from '../forms';
-import { GenericInput } from '../util/GenericInput';
 
 export function NameFilter({
   onClose,
@@ -18,7 +17,7 @@ export function NameFilter({
   onAddUpdate,
   err,
 }) {
-  const inputRef = useRef<HTMLInputElement>();;
+  const inputRef = useRef<HTMLInputElement>();
 
   useEffect(() => {
     if (inputRef.current) {

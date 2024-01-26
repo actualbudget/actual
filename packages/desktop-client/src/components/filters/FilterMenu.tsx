@@ -1,10 +1,17 @@
-import { RuleConditionEntity } from 'loot-core/types/models';
 import React from 'react';
 
-import { Menu, MenuItem } from '../common/Menu';
+import { Menu } from '../common/Menu';
 import { MenuTooltip } from '../common/MenuTooltip';
 
-export function FilterMenu({ onClose, filterId, onFilterMenuSelect } : {onClose: () => void, filterId: any, onFilterMenuSelect: any}) {
+export function FilterMenu({
+  onClose,
+  filterId,
+  onFilterMenuSelect,
+}: {
+  onClose: () => void;
+  filterId: any;
+  onFilterMenuSelect: any;
+}) {
   return (
     <MenuTooltip width={200} onClose={onClose}>
       <Menu
