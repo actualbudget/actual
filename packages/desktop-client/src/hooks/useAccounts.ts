@@ -8,7 +8,7 @@ export function useAccounts() {
   const accounts = useSelector(state => state.queries.accounts);
 
   useEffect(() => {
-    if (accounts.length === 0) {
+    if (accounts == null || accounts.length === 0) {
       dispatch(getAccounts());
     }
   }, []);

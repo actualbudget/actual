@@ -8,7 +8,7 @@ export function usePayees() {
   const payees = useSelector(state => state.queries.payees);
 
   useEffect(() => {
-    if (payees.length === 0) {
+    if (payees == null || payees.length === 0) {
       dispatch(getPayees());
     }
   }, []);
