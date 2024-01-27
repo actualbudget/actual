@@ -589,7 +589,6 @@ function FilterExpression({
 
 export function AppliedFilters({
   filters,
-  editingFilter,
   onUpdate,
   onDelete,
   conditionsOp,
@@ -616,7 +615,6 @@ export function AppliedFilters({
           op={filter.op}
           value={filter.value}
           options={filter.options}
-          editing={editingFilter === filter}
           onChange={newFilter => onUpdate(filter, newFilter)}
           onDelete={() => onDelete(filter)}
         />

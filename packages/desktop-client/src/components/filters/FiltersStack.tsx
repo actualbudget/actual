@@ -1,10 +1,15 @@
 import React from 'react';
 
+import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+
 import { Stack } from '../common/Stack';
 import { View } from '../common/View';
 
 import { AppliedFilters } from './FiltersMenu';
-import { SavedFilterMenuButton } from './SavedFilterMenuButton';
+import {
+  type SavedFilter,
+  SavedFilterMenuButton,
+} from './SavedFilterMenuButton';
 
 export function FiltersStack({
   filters,
@@ -16,6 +21,19 @@ export function FiltersStack({
   filterId,
   filtersList,
   onCondOpChange,
+}: {
+  filters: RuleConditionEntity[];
+  conditionsOp: string;
+  onUpdateFilter: (
+    filter: RuleConditionEntity,
+    newFilter: RuleConditionEntity,
+  ) => RuleConditionEntity;
+  onDeleteFilter: (filter: RuleConditionEntity) => void;
+  onClearFilters: () => void;
+  onReloadSavedFilter: () => void;
+  filterId: SavedFilter;
+  filtersList: RuleConditionEntity[];
+  onCondOpChange: () => void;
 }) {
   return (
     <View>
