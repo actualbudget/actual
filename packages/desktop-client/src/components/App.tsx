@@ -7,9 +7,6 @@ import {
 } from 'react-error-boundary';
 import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type AppState } from 'loot-core/client/state-types/app';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import * as Platform from 'loot-core/src/client/platform';
 import {
   init as initConnection,
@@ -18,6 +15,7 @@ import {
 import { type GlobalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
+import { useLocalPref } from '../hooks/useLocalPref';
 import { installPolyfills } from '../polyfills';
 import { ResponsiveProvider } from '../ResponsiveProvider';
 import { styles, hasHiddenScrollbars, ThemeStyle } from '../style';
@@ -126,15 +124,9 @@ function ErrorFallback({ error }: FallbackProps) {
 }
 
 export function App() {
-  const budgetId = useSelector<State, PrefsState['local']['id']>(
-    state => state.prefs.local && state.prefs.local.id,
-  );
-  const cloudFileId = useSelector<State, PrefsState['local']['cloudFileId']>(
-    state => state.prefs.local && state.prefs.local.cloudFileId,
-  );
-  const loadingText = useSelector<State, AppState['loadingText']>(
-    state => state.app.loadingText,
-  );
+  const budgetId = useLocalPref('id');
+  const cloudFileId = useLocalPref('cloudFileId');
+  const loadingText = useSelector(state => state.app.loadingText);
   const { loadBudget, closeBudget, loadGlobalPrefs, sync } = useActions();
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),

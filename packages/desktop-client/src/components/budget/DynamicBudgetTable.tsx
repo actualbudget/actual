@@ -1,12 +1,9 @@
 // @ts-strict-ignore
 import React, { forwardRef, useEffect, type ComponentProps } from 'react';
-import { useSelector } from 'react-redux';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
-
 import { useActions } from '../../hooks/useActions';
+import { useLocalPrefs } from '../../hooks/useLocalPrefs';
 import { View } from '../common/View';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
@@ -55,9 +52,7 @@ const DynamicBudgetTableInner = forwardRef<
     },
     ref,
   ) => {
-    const prefs = useSelector<State, PrefsState['local']>(
-      state => state.prefs.local,
-    );
+    const prefs = useLocalPrefs();
     const { setDisplayMax } = useBudgetMonthCount();
     const actions = useActions();
 

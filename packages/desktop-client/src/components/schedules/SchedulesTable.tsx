@@ -1,11 +1,6 @@
 // @ts-strict-ignore
 import React, { useState, useMemo, type CSSProperties } from 'react';
-import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
-import { useCachedAccounts } from 'loot-core/src/client/data-hooks/accounts';
-import { useCachedPayees } from 'loot-core/src/client/data-hooks/payees';
 import {
   type ScheduleStatusType,
   type ScheduleStatuses,
@@ -15,6 +10,9 @@ import { getScheduledAmount } from 'loot-core/src/shared/schedules';
 import { integerToCurrency } from 'loot-core/src/shared/util';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
+import { useAccounts } from '../../hooks/useAccounts';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { usePayees } from '../../hooks/usePayees';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { SvgCheck } from '../../icons/v2';
 import { theme } from '../../style';
@@ -196,16 +194,11 @@ export function SchedulesTable({
   onAction,
   tableStyle,
 }: SchedulesTableProps) {
-  const dateFormat = useSelector<State, PrefsState['local']['dateFormat']>(
-    state => {
-      return state.prefs.local.dateFormat || 'MM/dd/yyyy';
-    },
-  );
-
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [showCompleted, setShowCompleted] = useState(false);
 
-  const payees = useCachedPayees();
-  const accounts = useCachedAccounts();
+  const payees = usePayees();
+  const accounts = useAccounts();
 
   const filteredSchedules = useMemo(() => {
     if (!filter) {

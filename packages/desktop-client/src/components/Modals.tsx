@@ -3,17 +3,10 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
-import { type State } from 'loot-core/src/client/state-types';
-import {
-  type ModalsState,
-  type PopModalAction,
-} from 'loot-core/src/client/state-types/modals';
-import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
-import { type QueriesState } from 'loot-core/src/client/state-types/queries';
+import { type PopModalAction } from 'loot-core/src/client/state-types/modals';
 import { send } from 'loot-core/src/platform/client/fetch';
 
 import { useActions } from '../hooks/useActions';
-import { useCategories } from '../hooks/useCategories';
 import { useSyncServerStatus } from '../hooks/useSyncServerStatus';
 
 import { CategoryGroupMenu } from './modals/CategoryGroupMenu';
@@ -56,19 +49,8 @@ export type CommonModalProps = {
 };
 
 export function Modals() {
-  const modalStack = useSelector<State, ModalsState['modalStack']>(
-    state => state.modals.modalStack,
-  );
-  const isHidden = useSelector<State, ModalsState['isHidden']>(
-    state => state.modals.isHidden,
-  );
-  const accounts = useSelector<State, QueriesState['accounts']>(
-    state => state.queries.accounts,
-  );
-  const { grouped: categoryGroups, list: categories } = useCategories();
-  const budgetId = useSelector<State, PrefsState['local']['id']>(
-    state => state.prefs.local && state.prefs.local.id,
-  );
+  const modalStack = useSelector(state => state.modals.modalStack);
+  const isHidden = useSelector(state => state.modals.isHidden);
   const actions = useActions();
   const location = useLocation();
 
@@ -118,8 +100,6 @@ export function Modals() {
               account={options.account}
               balance={options.balance}
               canDelete={options.canDelete}
-              accounts={accounts.filter(acct => acct.closed === 0)}
-              categoryGroups={categoryGroups}
               actions={actions}
             />
           );
@@ -130,7 +110,6 @@ export function Modals() {
               modalProps={modalProps}
               externalAccounts={options.accounts}
               requisitionId={options.requisitionId}
-              localAccounts={accounts.filter(acct => acct.closed === 0)}
               actions={actions}
               syncSource={options.syncSource}
             />
@@ -140,15 +119,8 @@ export function Modals() {
           return (
             <ConfirmCategoryDelete
               modalProps={modalProps}
-              category={
-                'category' in options &&
-                categories.find(c => c.id === options.category)
-              }
-              group={
-                'group' in options &&
-                categoryGroups.find(g => g.id === options.group)
-              }
-              categoryGroups={categoryGroups}
+              category={options.category}
+              group={options.group}
               onDelete={options.onDelete}
             />
           );
@@ -166,7 +138,7 @@ export function Modals() {
           return (
             <LoadBackup
               watchUpdates
-              budgetId={budgetId}
+              budgetId={options.budgetId}
               modalProps={modalProps}
               actions={actions}
               backupDisabled={false}

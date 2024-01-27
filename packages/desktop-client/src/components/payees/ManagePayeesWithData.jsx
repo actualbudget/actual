@@ -6,11 +6,12 @@ import { applyChanges } from 'loot-core/src/shared/util';
 
 import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
+import { usePayees } from '../../hooks/usePayees';
 
 import { ManagePayees } from './ManagePayees';
 
 export function ManagePayeesWithData({ initialSelectedIds }) {
-  const initialPayees = useSelector(state => state.queries.payees);
+  const initialPayees = usePayees();
   const lastUndoState = useSelector(state => state.app.lastUndoState);
   const { grouped: categoryGroups } = useCategories();
 

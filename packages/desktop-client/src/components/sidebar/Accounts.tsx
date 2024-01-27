@@ -1,12 +1,17 @@
 // @ts-strict-ignore
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 
-import { type AccountEntity } from 'loot-core/src/types/models';
+import * as queries from 'loot-core/src/client/queries';
 
+import { useBudgetedAccounts } from '../../hooks/useBudgetedAccounts';
+import { useClosedAccounts } from '../../hooks/useClosedAccounts';
+import { useFailedAccounts } from '../../hooks/useFailedAccounts';
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
+import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
 import { SvgAdd } from '../../icons/v1';
 import { View } from '../common/View';
 import { type OnDropCallback } from '../sort';
-import { type Binding } from '../spreadsheet';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
@@ -14,65 +19,26 @@ import { SecondaryItem } from './SecondaryItem';
 const fontWeight = 600;
 
 type AccountsProps = {
-  accounts: AccountEntity[];
-  failedAccounts: Map<
-    string,
-    {
-      type: string;
-      code: string;
-    }
-  >;
-  updatedAccounts: string[];
-  getAccountPath: (account: AccountEntity) => string;
-  allAccountsPath: string;
-  budgetedAccountPath: string;
-  offBudgetAccountPath: string;
-  getBalanceQuery: (account: AccountEntity) => Binding;
-  getAllAccountBalance: () => Binding;
-  getOnBudgetBalance: () => Binding;
-  getOffBudgetBalance: () => Binding;
-  showClosedAccounts: boolean;
   onAddAccount: () => void;
   onToggleClosedAccounts: () => void;
   onReorder: OnDropCallback;
 };
 
 export function Accounts({
-  accounts,
-  failedAccounts,
-  updatedAccounts,
-  getAccountPath,
-  allAccountsPath,
-  budgetedAccountPath,
-  offBudgetAccountPath,
-  getBalanceQuery,
-  getAllAccountBalance,
-  getOnBudgetBalance,
-  getOffBudgetBalance,
-  showClosedAccounts,
   onAddAccount,
   onToggleClosedAccounts,
   onReorder,
 }: AccountsProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const offbudgetAccounts = useMemo(
-    () =>
-      accounts.filter(
-        account => account.closed === 0 && account.offbudget === 1,
-      ),
-    [accounts],
-  );
-  const budgetedAccounts = useMemo(
-    () =>
-      accounts.filter(
-        account => account.closed === 0 && account.offbudget === 0,
-      ),
-    [accounts],
-  );
-  const closedAccounts = useMemo(
-    () => accounts.filter(account => account.closed === 1),
-    [accounts],
-  );
+  const failedAccounts = useFailedAccounts();
+  const updatedAccounts = useUpdatedAccounts();
+  const offbudgetAccounts = useOffBudgetAccounts();
+  const budgetedAccounts = useBudgetedAccounts();
+  const closedAccounts = useClosedAccounts();
+
+  const getAccountPath = account => `/accounts/${account.id}`;
+
+  const showClosedAccounts = useLocalPref('ui.showClosedAccounts');
 
   function onDragChange(drag) {
     setIsDragging(drag.state === 'start');
@@ -92,16 +58,16 @@ export function Accounts({
     <View>
       <Account
         name="All accounts"
-        to={allAccountsPath}
-        query={getAllAccountBalance()}
+        to="/accounts"
+        query={queries.allAccountBalance()}
         style={{ fontWeight, marginTop: 15 }}
       />
 
       {budgetedAccounts.length > 0 && (
         <Account
           name="For budget"
-          to={budgetedAccountPath}
-          query={getOnBudgetBalance()}
+          to="/accounts/budgeted"
+          query={queries.budgetedAccountBalance()}
           style={{ fontWeight, marginTop: 13 }}
         />
       )}
@@ -115,7 +81,7 @@ export function Accounts({
           failed={failedAccounts && failedAccounts.has(account.id)}
           updated={updatedAccounts && updatedAccounts.includes(account.id)}
           to={getAccountPath(account)}
-          query={getBalanceQuery(account)}
+          query={queries.accountBalance(account)}
           onDragChange={onDragChange}
           onDrop={onReorder}
           outerStyle={makeDropPadding(i)}
@@ -125,8 +91,8 @@ export function Accounts({
       {offbudgetAccounts.length > 0 && (
         <Account
           name="Off budget"
-          to={offBudgetAccountPath}
-          query={getOffBudgetBalance()}
+          to="/accounts/offbudget"
+          query={queries.offbudgetAccountBalance()}
           style={{ fontWeight, marginTop: 13 }}
         />
       )}
@@ -140,7 +106,7 @@ export function Accounts({
           failed={failedAccounts && failedAccounts.has(account.id)}
           updated={updatedAccounts && updatedAccounts.includes(account.id)}
           to={getAccountPath(account)}
-          query={getBalanceQuery(account)}
+          query={queries.accountBalance(account)}
           onDragChange={onDragChange}
           onDrop={onReorder}
           outerStyle={makeDropPadding(i)}
@@ -163,7 +129,7 @@ export function Accounts({
             name={account.name}
             account={account}
             to={getAccountPath(account)}
-            query={getBalanceQuery(account)}
+            query={queries.accountBalance(account)}
             onDragChange={onDragChange}
             onDrop={onReorder}
           />

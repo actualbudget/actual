@@ -1,20 +1,19 @@
 // @ts-strict-ignore
 import React, { type ReactNode } from 'react';
-import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { numberFormats } from 'loot-core/src/shared/util';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { tokens } from '../../tokens';
 import { Button } from '../common/Button';
 import { Select } from '../common/Select';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
-import { useSidebar } from '../sidebar';
+import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';
 
@@ -59,21 +58,10 @@ export function FormatSettings() {
   const { savePrefs } = useActions();
 
   const sidebar = useSidebar();
-  const firstDayOfWeekIdx = useSelector<
-    State,
-    PrefsState['local']['firstDayOfWeekIdx']
-  >(
-    state => state.prefs.local.firstDayOfWeekIdx || '0', // Sunday
-  );
-  const dateFormat = useSelector<State, PrefsState['local']['dateFormat']>(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
-  const numberFormat = useSelector<State, PrefsState['local']['numberFormat']>(
-    state => state.prefs.local.numberFormat || 'comma-dot',
-  );
-  const hideFraction = useSelector<State, PrefsState['local']['hideFraction']>(
-    state => state.prefs.local.hideFraction,
-  );
+  const firstDayOfWeekIdx = useLocalPref('firstDayOfWeekIdx') || '0'; // Sunday;
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const numberFormat = useLocalPref('numberFormat') || 'comma-dot';
+  const hideFraction = useLocalPref('hideFraction');
 
   return (
     <Setting

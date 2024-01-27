@@ -3,8 +3,10 @@ import { useSelector } from 'react-redux';
 
 import * as queries from 'loot-core/src/client/queries';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSetThemeColor } from '../../hooks/useSetThemeColor';
 import { SvgAdd } from '../../icons/v1';
@@ -216,15 +218,11 @@ function AccountList({
 }
 
 export function Accounts() {
-  const accounts = useSelector(state => state.queries.accounts);
+  const accounts = useAccounts();
   const newTransactions = useSelector(state => state.queries.newTransactions);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  const numberFormat = useSelector(
-    state => state.prefs.local.numberFormat || 'comma-dot',
-  );
-  const hideFraction = useSelector(
-    state => state.prefs.local.hideFraction || false,
-  );
+  const numberFormat = useLocalPref('numberFormat') || 'comma-dot';
+  const hideFraction = useLocalPref('hideFraction') || false;
 
   const { list: categories } = useCategories();
   const { getAccounts, replaceModal, syncAndDownload } = useActions();

@@ -26,7 +26,12 @@ import {
 } from 'loot-core/src/shared/transactions';
 import { applyChanges, groupById } from 'loot-core/src/shared/util';
 
+import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
+import { useDateFormat } from '../../hooks/useDateFormat';
+import { useFailedAccounts } from '../../hooks/useFailedAccounts';
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { usePayees } from '../../hooks/usePayees';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
@@ -39,7 +44,6 @@ import {
 } from '../transactions/TransactionsTable';
 
 import { AccountHeader } from './Header';
-
 function EmptyMessage({ onAdd }) {
   return (
     <View
@@ -1532,23 +1536,41 @@ export function Account() {
   const location = useLocation();
 
   const { grouped: categoryGroups } = useCategories();
-  const state = useSelector(state => ({
-    newTransactions: state.queries.newTransactions,
-    matchedTransactions: state.queries.matchedTransactions,
-    accounts: state.queries.accounts,
-    failedAccounts: state.account.failedAccounts,
-    dateFormat: state.prefs.local.dateFormat || 'MM/dd/yyyy',
-    hideFraction: state.prefs.local.hideFraction || false,
-    expandSplits: state.prefs.local['expand-splits'],
-    showBalances: params.id && state.prefs.local['show-balances-' + params.id],
-    showCleared: params.id && !state.prefs.local['hide-cleared-' + params.id],
-    showExtraBalances:
-      state.prefs.local['show-extra-balances-' + params.id || 'all-accounts'],
-    payees: state.queries.payees,
-    modalShowing: state.modals.modalStack.length > 0,
-    accountsSyncing: state.account.accountsSyncing,
-    lastUndoState: state.app.lastUndoState,
-  }));
+  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const matchedTransactions = useSelector(
+    state => state.queries.matchedTransactions,
+  );
+  const accounts = useAccounts();
+  const payees = usePayees();
+  const failedAccounts = useFailedAccounts();
+  const dateFormat = useDateFormat();
+  const hideFraction = useLocalPref('hideFraction') || false;
+  const expandSplits = useLocalPref('expand-splits') || false;
+  const showBalances = useLocalPref(`show-balances-${params.id}`) || false;
+  const showCleared = useLocalPref(`hide-balances-${params.id}`) || false;
+  const showExtraBalances = useLocalPref(
+    `show-extra-balances-${params.id}` || 'all-accounts',
+  );
+  const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
+  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  const lastUndoState = useSelector(state => state.app.lastUndoState);
+
+  const state = {
+    newTransactions,
+    matchedTransactions,
+    accounts,
+    failedAccounts,
+    dateFormat,
+    hideFraction,
+    expandSplits,
+    showBalances,
+    showCleared,
+    showExtraBalances,
+    payees,
+    modalShowing,
+    accountsSyncing,
+    lastUndoState,
+  };
 
   const dispatch = useDispatch();
   const filtersList = useFilters();

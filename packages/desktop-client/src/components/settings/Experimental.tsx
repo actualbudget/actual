@@ -1,12 +1,10 @@
 import { type ReactNode, useState } from 'react';
-import { useSelector } from 'react-redux';
 
-import { type State } from 'loot-core/src/client/state-types';
-import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme } from '../../style';
 import { LinkButton } from '../common/LinkButton';
 import { Text } from '../common/Text';
@@ -63,9 +61,7 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  const budgetType = useSelector<State, PrefsState['local']['budgetType']>(
-    state => state.prefs.local?.budgetType,
-  );
+  const budgetType = useLocalPref('budgetType');
   const enabled = useFeatureFlag('reportBudget');
   const blockToggleOff = budgetType === 'report' && enabled;
   return (

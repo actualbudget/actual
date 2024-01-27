@@ -6,18 +6,19 @@ import React, {
   useContext,
   type ReactNode,
 } from 'react';
-import { useSelector } from 'react-redux';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
-import { type State } from 'loot-core/client/state-types';
-import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import * as Platform from 'loot-core/src/client/platform';
+import { usePrivacyMode } from 'loot-core/src/client/privacy';
 import * as queries from 'loot-core/src/client/queries';
 import { listen } from 'loot-core/src/platform/client/fetch';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
+import { useGlobalPref } from '../hooks/useGlobalPref';
+import { useGlobalPrefs } from '../hooks/useGlobalPrefs';
+import { useLocalPref } from '../hooks/useLocalPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { SvgArrowLeft } from '../icons/v1';
 import {
@@ -41,7 +42,7 @@ import { View } from './common/View';
 import { KeyHandlers } from './KeyHandlers';
 import { LoggedInUser } from './LoggedInUser';
 import { useServerURL } from './ServerContext';
-import { useSidebar } from './sidebar';
+import { useSidebar } from './sidebar/SidebarProvider';
 import { useSheetValue } from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 import { Tooltip } from './tooltips';
@@ -120,10 +121,7 @@ type PrivacyButtonProps = {
 };
 
 function PrivacyButton({ style }: PrivacyButtonProps) {
-  const isPrivacyEnabled = useSelector<
-    State,
-    PrefsState['local']['isPrivacyEnabled']
-  >(state => state.prefs.local?.isPrivacyEnabled);
+  const isPrivacyEnabled = usePrivacyMode();
   const { savePrefs } = useActions();
 
   const privacyIconStyle = { width: 15, height: 15 };
@@ -149,9 +147,7 @@ type SyncButtonProps = {
   isMobile?: boolean;
 };
 function SyncButton({ style, isMobile = false }: SyncButtonProps) {
-  const cloudFileId = useSelector<State, PrefsState['local']['cloudFileId']>(
-    state => state.prefs.local?.cloudFileId,
-  );
+  const cloudFileId = useLocalPref('cloudFileId');
   const { sync } = useActions();
 
   const [syncing, setSyncing] = useState(false);
@@ -291,12 +287,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 }
 
 function BudgetTitlebar() {
-  const maxMonths = useSelector<State, PrefsState['global']['maxMonths']>(
-    state => state.prefs.global?.maxMonths,
-  );
-  const budgetType = useSelector<State, PrefsState['local']['budgetType']>(
-    state => state.prefs.local?.budgetType,
-  );
+  const maxMonths = useGlobalPrefs('maxMonths');
+  const budgetType = useLocalPref('budgetType');
   const { saveGlobalPrefs } = useActions();
   const { sendEvent } = useContext(TitlebarContext);
 
@@ -399,10 +391,7 @@ export function Titlebar({ style }: TitlebarProps) {
   const sidebar = useSidebar();
   const { isNarrowWidth } = useResponsive();
   const serverURL = useServerURL();
-  const floatingSidebar = useSelector<
-    State,
-    PrefsState['global']['floatingSidebar']
-  >(state => state.prefs.global?.floatingSidebar);
+  const floatingSidebar = useGlobalPref('floatingSidebar');
 
   return isNarrowWidth ? null : (
     <View

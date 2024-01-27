@@ -1,10 +1,10 @@
 import React, { useEffect, useReducer, useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { sendCatch } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
 
+import { useDateFormat } from '../../hooks/useDateFormat';
 import { SvgAdd, SvgSubtract } from '../../icons/v0';
 import { theme } from '../../style';
 import { Button } from '../common/Button';
@@ -159,11 +159,9 @@ function reducer(state, action) {
 }
 
 function SchedulePreview({ previewDates }) {
-  const dateFormat = useSelector(state =>
-    (state.prefs.local.dateFormat || 'MM/dd/yyyy')
-      .replace('MM', 'M')
-      .replace('dd', 'd'),
-  );
+  const dateFormat = (useDateFormat() || 'MM/dd/yyyy')
+    .replace('MM', 'M')
+    .replace('dd', 'd');
 
   if (!previewDates) {
     return null;
@@ -281,9 +279,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
   const skipWeekend = state.config.hasOwnProperty('skipWeekend')
     ? state.config.skipWeekend
     : false;
-  const dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   useEffect(() => {
     dispatch({
@@ -481,9 +477,7 @@ function RecurringScheduleTooltip({ config: currentConfig, onClose, onSave }) {
 
 export function RecurringSchedulePicker({ value, buttonStyle, onChange }) {
   const { isOpen, close, getOpenEvents } = useTooltip();
-  const dateFormat = useSelector(
-    state => state.prefs.local.dateFormat || 'MM/dd/yyyy',
-  );
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   function onSave(config) {
     onChange(config);
