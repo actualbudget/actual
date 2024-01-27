@@ -195,7 +195,16 @@ export function parse(item) {
 export function unparse({ error, inputKey, ...item }) {
   if (item.op === 'set-split-amount') {
     if (item.options.method === 'fixed-amount') {
-      return { ...item, value: item.value && amountToInteger(item.value) };
+      return {
+        ...item,
+        value: item.value && amountToInteger(item.value),
+      };
+    }
+    if (item.options.method === 'fixed-percent') {
+      return {
+        ...item,
+        value: item.value && parseFloat(item.value),
+      };
     }
     return item;
   }

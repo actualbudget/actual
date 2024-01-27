@@ -575,7 +575,7 @@ export function execActions(actions: Action[], transaction) {
       .filter(action => action.options.method === 'fixed-percent')
       .forEach(action => {
         const splitIndex = action.options.splitIndex;
-        const percent = splitAmountActions[splitIndex].value / 100;
+        const percent = action.value / 100;
         const amount = Math.round(amountToDistribute * percent);
         update.subtransactions[splitIndex].amount = amount;
         remainingAmount -= amount;

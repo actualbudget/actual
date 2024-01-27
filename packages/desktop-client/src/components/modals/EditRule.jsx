@@ -332,7 +332,7 @@ const splitActionFields = actionFields.filter(
 );
 const splitAmountTypes = [
   ['fixed-amount', 'a fixed amount'],
-  ['percent', 'a fixed percentage'],
+  ['fixed-percent', 'a fixed percentage'],
   ['remainder', 'an equal portion of the remainder'],
 ];
 function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
