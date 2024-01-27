@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import React, { useRef, useEffect } from 'react';
 
 import { theme } from '../../style';
