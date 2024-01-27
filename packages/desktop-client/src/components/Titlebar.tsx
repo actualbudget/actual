@@ -17,7 +17,6 @@ import { type LocalPrefs } from 'loot-core/src/types/prefs';
 import { useActions } from '../hooks/useActions';
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useGlobalPref } from '../hooks/useGlobalPref';
-import { useGlobalPrefs } from '../hooks/useGlobalPrefs';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useNavigate } from '../hooks/useNavigate';
 import { SvgArrowLeft } from '../icons/v1';
@@ -287,7 +286,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
 }
 
 function BudgetTitlebar() {
-  const maxMonths = useGlobalPrefs('maxMonths');
+  const maxMonths = useGlobalPref('maxMonths');
   const budgetType = useLocalPref('budgetType');
   const { saveGlobalPrefs } = useActions();
   const { sendEvent } = useContext(TitlebarContext);

@@ -8,7 +8,7 @@ import { type LocalPrefs } from 'loot-core/types/prefs';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useActions } from '../../hooks/useActions';
-import { useGlobalPrefs } from '../../hooks/useGlobalPrefs';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPrefs } from '../../hooks/useLocalPrefs';
 import { useNavigate } from '../../hooks/useNavigate';
 import { SvgExpandArrow } from '../../icons/v0';
@@ -37,7 +37,7 @@ export function Sidebar() {
   const sidebar = useSidebar();
   const accounts = useAccounts();
   const prefs = useLocalPrefs() || {};
-  const isFloating = useGlobalPrefs('floatingSidebar') || false;
+  const isFloating = useGlobalPref('floatingSidebar') || false;
 
   const { getAccounts, replaceModal, savePrefs, saveGlobalPrefs } =
     useActions();
