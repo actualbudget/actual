@@ -1545,11 +1545,11 @@ export function Account() {
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat();
   const hideFraction = useLocalPref('hideFraction') || false;
-  const expandSplits = useLocalPref('expand-splits') || false;
-  const showBalances = useLocalPref(`show-balances-${params.id}`) || false;
-  const showCleared = useLocalPref(`hide-balances-${params.id}`) || false;
+  const expandSplits = useLocalPref('expand-splits');
+  const showBalances = useLocalPref(`show-balances-${params.id}`);
+  const showCleared = !useLocalPref(`hide-cleared-${params.id}`);
   const showExtraBalances = useLocalPref(
-    `show-extra-balances-${params.id}` || 'all-accounts',
+    `show-extra-balances-${params.id || 'all-accounts'}`,
   );
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
