@@ -16,6 +16,8 @@ async function processCleanup(month: string): Promise<Notification> {
   let total_weight = 0;
   const errors = [];
   const sinkCategory = [];
+  const sourceWithRollover = [];
+  const db_month = parseInt(month.replace('-', ''));
 
   const category_templates = await getCategoryTemplates();
   const categories = await db.all(
@@ -45,6 +47,16 @@ async function processCleanup(month: string): Promise<Notification> {
         } else {
           errors.push(category.name + ' does not have available funds.');
         }
+        const carryover = await db.first(
+          `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
+          [db_month, category.id],
+        );
+        if (carryover !== null) {
+          //keep track of source categories with rollover enabled
+          if (carryover.carryover === 1) {
+            sourceWithRollover.push({ cat: category, temp: template });
+          }
+        }
       }
       if (template.filter(t => t.type === 'sink').length > 0) {
         sinkCategory.push({ cat: category, temp: template });
@@ -55,7 +67,6 @@ async function processCleanup(month: string): Promise<Notification> {
   }
 
   //funds all underfunded categories first unless the overspending rollover is checked
-  const db_month = parseInt(month.replace('-', ''));
   for (let c = 0; c < categories.length; c++) {
     const category = categories[c];
     const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
@@ -85,8 +96,49 @@ async function processCleanup(month: string): Promise<Notification> {
       });
     }
   }
-
   const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+
+  //fund rollover categories after non-rollover categories
+  for (let c = 0; c < categories.length; c++) {
+    const category = categories[c];
+    const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+    const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
+    const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
+    const to_budget = budgeted + Math.abs(balance);
+    const categoryId = category.id;
+    let carryover = await db.first(
+      `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
+      [db_month, categoryId],
+    );
+
+    if (carryover === null) {
+      carryover = { carryover: 0 };
+    }
+
+    if (
+      balance < 0 &&
+      Math.abs(balance) <= budgetAvailable &&
+      !category.is_income &&
+      carryover.carryover === 1
+    ) {
+      await setBudget({
+        category: category.id,
+        month,
+        amount: to_budget,
+      });
+    } else if (
+      balance < 0 &&
+      !category.is_income &&
+      carryover.carryover === 1 &&
+      Math.abs(balance) >= budgetAvailable
+    ) {
+      await setBudget({
+        category: category.id,
+        month,
+        amount: budgeted + budgetAvailable,
+      });
+    }
+  }
 
   if (budgetAvailable <= 0) {
     errors.push('No funds are available to reallocate.');
