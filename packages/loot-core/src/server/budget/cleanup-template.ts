@@ -94,6 +94,17 @@ async function processCleanup(month: string): Promise<Notification> {
         month,
         amount: to_budget,
       });
+    } else if (
+      balance < 0 &&
+      !category.is_income &&
+      carryover.carryover === 0 &&
+      Math.abs(balance) > budgetAvailable
+    ) {
+      await setBudget({
+        category: category.id,
+        month,
+        amount: budgeted + budgetAvailable,
+      });
     }
   }
   const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
@@ -130,7 +141,7 @@ async function processCleanup(month: string): Promise<Notification> {
       balance < 0 &&
       !category.is_income &&
       carryover.carryover === 1 &&
-      Math.abs(balance) >= budgetAvailable
+      Math.abs(balance) > budgetAvailable
     ) {
       await setBudget({
         category: category.id,
