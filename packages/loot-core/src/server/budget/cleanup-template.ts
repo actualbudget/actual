@@ -37,13 +37,13 @@ async function processCleanup(month: string): Promise<Notification> {
         );
         if (balance > 0) {
           await setBudget({
-          category: category.id,
-          month,
-          amount: budgeted - balance,
+            category: category.id,
+            month,
+            amount: budgeted - balance,
           });
           num_sources += 1;
         } else {
-          errors.push(category.name + ' does not have available funds.'); 
+          errors.push(category.name + ' does not have available funds.');
         }
       }
       if (template.filter(t => t.type === 'sink').length > 0) {
