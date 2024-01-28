@@ -7,10 +7,12 @@ import type { Theme } from 'loot-core/src/types/prefs';
 import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
+import * as midnightTheme from './themes/midnight';
 
 const themes = {
   light: { name: 'Light', colors: lightTheme },
   dark: { name: 'Dark', colors: darkTheme },
+  midnight: { name: 'Midnight', colors: midnightTheme },
   auto: { name: 'System default', colors: darkTheme },
   ...(isNonProductionEnvironment() && {
     development: { name: 'Development', colors: developmentTheme },
@@ -28,7 +30,7 @@ export function useTheme() {
 export function ThemeStyle() {
   const theme = useTheme();
   const [themeColors, setThemeColors] = useState<
-    typeof lightTheme | typeof darkTheme | undefined
+    typeof lightTheme | typeof darkTheme | typeof midnightTheme | undefined
   >(undefined);
 
   useEffect(() => {
