@@ -233,7 +233,7 @@ export function SchedulesTable({
         filterIncludes(dateStr)
       );
     });
-  }, [schedules, filter, statuses]);
+  }, [payees, accounts, schedules, filter, statuses]);
 
   const items: SchedulesTableItem[] = useMemo(() => {
     const unCompletedSchedules = filteredSchedules.filter(s => !s.completed);

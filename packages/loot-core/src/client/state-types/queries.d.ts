@@ -8,8 +8,11 @@ export type QueriesState = {
   lastTransaction: unknown | null;
   updatedAccounts: string[];
   accounts: AccountEntity[];
+  accountsLoaded: boolean;
   categories: Awaited<ReturnType<Handlers['get-categories']>>;
+  categoriesLoaded: boolean;
   payees: Awaited<ReturnType<Handlers['payees-get']>>;
+  payeesLoaded: boolean;
   earliestTransaction: unknown | null;
 };
 
