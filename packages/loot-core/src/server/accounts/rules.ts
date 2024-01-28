@@ -95,8 +95,8 @@ const CONDITION_TYPES = {
         typeof value === 'string'
           ? parseDateString(value)
           : value.frequency != null
-          ? parseRecurDate(value)
-          : null;
+            ? parseRecurDate(value)
+            : null;
       assert(
         parsed,
         'date-format',
