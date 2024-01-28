@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { replaceModal, syncAndDownload } from 'loot-core/client/actions';
 import * as queries from 'loot-core/src/client/queries';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
@@ -218,6 +218,7 @@ function AccountList({
 }
 
 export function Accounts() {
+  const dispatch = useDispatch();
   const accounts = useAccounts();
   const newTransactions = useSelector(state => state.queries.newTransactions);
   const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
@@ -225,14 +226,9 @@ export function Accounts() {
   const hideFraction = useLocalPref('hideFraction') || false;
 
   const { list: categories } = useCategories();
-  const { getAccounts, replaceModal, syncAndDownload } = useActions();
 
   const transactions = useState({});
   const navigate = useNavigate();
-
-  useEffect(() => {
-    (async () => getAccounts())();
-  }, []);
 
   const onSelectAccount = id => {
     navigate(`/accounts/${id}`);
@@ -240,6 +236,14 @@ export function Accounts() {
 
   const onSelectTransaction = transaction => {
     navigate(`/transaction/${transaction}`);
+  };
+
+  const onAddAccount = () => {
+    dispatch(replaceModal('add-account'));
+  };
+
+  const onSync = () => {
+    dispatch(syncAndDownload());
   };
 
   useSetThemeColor(theme.mobileViewTheme);
@@ -258,10 +262,10 @@ export function Accounts() {
         getBalanceQuery={queries.accountBalance}
         getOnBudgetBalance={queries.budgetedAccountBalance}
         getOffBudgetBalance={queries.offbudgetAccountBalance}
-        onAddAccount={() => replaceModal('add-account')}
+        onAddAccount={onAddAccount}
         onSelectAccount={onSelectAccount}
         onSelectTransaction={onSelectTransaction}
-        onSync={syncAndDownload}
+        onSync={onSync}
       />
     </View>
   );

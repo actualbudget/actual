@@ -146,11 +146,6 @@ export function Account(props) {
         }
       });
 
-      if (accounts.length === 0) {
-        await actionCreators.getAccounts();
-      }
-
-      await actionCreators.initiallyLoadPayees();
       await fetchTransactions();
 
       actionCreators.markAccountRead(accountId);

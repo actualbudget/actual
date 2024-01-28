@@ -1,5 +1,9 @@
 import React, { memo, useState, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
+import { savePrefs } from 'loot-core/client/actions';
+
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { theme, styles } from '../../style';
 import { View } from '../common/View';
 import { DropHighlightPosContext } from '../sort';
@@ -17,12 +21,8 @@ import { separateGroups } from './util';
 export const BudgetCategories = memo(
   ({
     categoryGroups,
-    newCategoryForGroup,
     showHiddenCategories,
-    isAddingGroup,
     editingCell,
-    collapsed,
-    setCollapsed,
     dataComponents,
     onBudgetAction,
     onShowActivity,
@@ -34,11 +34,15 @@ export const BudgetCategories = memo(
     onDeleteGroup,
     onReorderCategory,
     onReorderGroup,
-    onShowNewCategory,
-    onHideNewCategory,
-    onShowNewGroup,
-    onHideNewGroup,
   }) => {
+    const dispatch = useDispatch();
+    const collapsed = useLocalPref('budget.collapsed') || [];
+    function onCollapse(value) {
+      dispatch(savePrefs({ 'budget.collapsed': value }));
+    }
+
+    const [isAddingGroup, setIsAddingGroup] = useState(false);
+    const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
@@ -133,15 +137,46 @@ export const BudgetCategories = memo(
         });
       } else if (state === 'end') {
         setDragState(null);
-        setCollapsed(savedCollapsed || []);
+        onCollapse(savedCollapsed || []);
       }
     }
 
     function onToggleCollapse(id) {
       if (collapsed.includes(id)) {
-        setCollapsed(collapsed.filter(id_ => id_ !== id));
+        onCollapse(collapsed.filter(id_ => id_ !== id));
       } else {
-        setCollapsed([...collapsed, id]);
+        onCollapse([...collapsed, id]);
+      }
+    }
+
+    function onShowNewGroup() {
+      setIsAddingGroup(true);
+    }
+
+    function onHideNewGroup() {
+      setIsAddingGroup(false);
+    }
+
+    function _onSaveGroup(group) {
+      onSaveGroup?.(group);
+      if (group.id === 'new') {
+        onHideNewGroup();
+      }
+    }
+
+    function onShowNewCategory(groupId) {
+      onCollapse(collapsed.filter(c => c !== groupId));
+      setNewCategoryForGroup(groupId);
+    }
+
+    function onHideNewCategory() {
+      setNewCategoryForGroup(null);
+    }
+
+    function _onSaveCategory(category) {
+      onSaveCategory?.(category);
+      if (category.id === 'new') {
+        onHideNewCategory();
       }
     }
 
@@ -167,7 +202,7 @@ export const BudgetCategories = memo(
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
                     editing={true}
-                    onSave={onSaveGroup}
+                    onSave={_onSaveGroup}
                     onHideNewGroup={onHideNewGroup}
                     onEdit={onEditName}
                   />
@@ -187,7 +222,7 @@ export const BudgetCategories = memo(
                       id: 'new',
                     }}
                     editing={true}
-                    onSave={onSaveCategory}
+                    onSave={_onSaveCategory}
                     onHideNewCategory={onHideNewCategory}
                     onEditName={onEditName}
                   />
@@ -204,7 +239,7 @@ export const BudgetCategories = memo(
                   MonthComponent={dataComponents.ExpenseGroupComponent}
                   dragState={dragState}
                   onEditName={onEditName}
-                  onSave={onSaveGroup}
+                  onSave={_onSaveGroup}
                   onDelete={onDeleteGroup}
                   onDragChange={onDragChange}
                   onReorderGroup={onReorderGroup}
@@ -223,7 +258,7 @@ export const BudgetCategories = memo(
                   dragState={dragState}
                   onEditName={onEditName}
                   onEditMonth={onEditMonth}
-                  onSave={onSaveCategory}
+                  onSave={_onSaveCategory}
                   onDelete={onDeleteCategory}
                   onDragChange={onDragChange}
                   onReorder={onReorderCategory}
@@ -255,7 +290,7 @@ export const BudgetCategories = memo(
                   MonthComponent={dataComponents.IncomeGroupComponent}
                   collapsed={collapsed.includes(item.value.id)}
                   onEditName={onEditName}
-                  onSave={onSaveGroup}
+                  onSave={_onSaveGroup}
                   onToggleCollapse={onToggleCollapse}
                   onShowNewCategory={onShowNewCategory}
                 />
@@ -270,7 +305,7 @@ export const BudgetCategories = memo(
                   MonthComponent={dataComponents.IncomeCategoryComponent}
                   onEditName={onEditName}
                   onEditMonth={onEditMonth}
-                  onSave={onSaveCategory}
+                  onSave={_onSaveCategory}
                   onDelete={onDeleteCategory}
                   onDragChange={onDragChange}
                   onReorder={onReorderCategory}

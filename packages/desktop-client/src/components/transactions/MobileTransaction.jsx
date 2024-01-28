@@ -942,11 +942,6 @@ function TransactionEditUnconnected(props) {
   useSetThemeColor(theme.mobileViewTheme);
 
   useEffect(() => {
-    // May as well update categories / accounts when transaction ID changes
-    props.getCategories();
-    props.getAccounts();
-    props.getPayees();
-
     async function fetchTransaction() {
       // Query for the transaction based on the ID with grouped splits.
       //

@@ -12,7 +12,6 @@ import {
   init as initConnection,
   send,
 } from 'loot-core/src/platform/client/fetch';
-import { type GlobalPrefs } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../hooks/useActions';
 import { useLocalPref } from '../hooks/useLocalPref';
@@ -32,26 +31,13 @@ import { UpdateNotification } from './UpdateNotification';
 type AppInnerProps = {
   budgetId: string;
   cloudFileId: string;
-  loadingText: string;
-  loadBudget: (
-    id: string,
-    loadingText?: string,
-    options?: object,
-  ) => Promise<void>;
-  closeBudget: () => Promise<void>;
-  loadGlobalPrefs: () => Promise<GlobalPrefs>;
 };
 
-function AppInner({
-  budgetId,
-  cloudFileId,
-  loadingText,
-  loadBudget,
-  closeBudget,
-  loadGlobalPrefs,
-}: AppInnerProps) {
+function AppInner({ budgetId, cloudFileId }: AppInnerProps) {
   const [initializing, setInitializing] = useState(true);
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
+  const loadingText = useSelector(state => state.app.loadingText);
+  const { loadBudget, closeBudget, loadGlobalPrefs } = useActions();
 
   async function init() {
     const socketName = await global.Actual.getServerSocket();
@@ -126,8 +112,7 @@ function ErrorFallback({ error }: FallbackProps) {
 export function App() {
   const budgetId = useLocalPref('id');
   const cloudFileId = useLocalPref('cloudFileId');
-  const loadingText = useSelector(state => state.app.loadingText);
-  const { loadBudget, closeBudget, loadGlobalPrefs, sync } = useActions();
+  const { sync } = useActions();
   const [hiddenScrollbars, setHiddenScrollbars] = useState(
     hasHiddenScrollbars(),
   );
@@ -176,14 +161,7 @@ export function App() {
             {process.env.REACT_APP_REVIEW_ID && !Platform.isPlaywright && (
               <DevelopmentTopBar />
             )}
-            <AppInner
-              budgetId={budgetId}
-              cloudFileId={cloudFileId}
-              loadingText={loadingText}
-              loadBudget={loadBudget}
-              closeBudget={closeBudget}
-              loadGlobalPrefs={loadGlobalPrefs}
-            />
+            <AppInner budgetId={budgetId} cloudFileId={cloudFileId} />
           </ErrorBoundary>
           <ThemeStyle />
         </View>

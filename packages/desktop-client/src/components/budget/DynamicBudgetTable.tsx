@@ -3,6 +3,7 @@ import React, { forwardRef, useEffect, type ComponentProps } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { useActions } from '../../hooks/useActions';
+import { useCategories } from '../../hooks/useCategories';
 import { useLocalPrefs } from '../../hooks/useLocalPrefs';
 import { View } from '../common/View';
 
@@ -41,7 +42,6 @@ const DynamicBudgetTableInner = forwardRef<
     {
       width,
       height,
-      categoryGroups,
       prewarmStartMonth,
       startMonth,
       maxMonths = 3,
@@ -52,6 +52,7 @@ const DynamicBudgetTableInner = forwardRef<
     },
     ref,
   ) => {
+    const { grouped: categoryGroups } = useCategories();
     const prefs = useLocalPrefs();
     const { setDisplayMax } = useBudgetMonthCount();
     const actions = useActions();

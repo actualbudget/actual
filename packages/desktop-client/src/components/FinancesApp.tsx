@@ -17,6 +17,7 @@ import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import { checkForUpdateNotification } from 'loot-core/src/client/update-notification';
 import * as undo from 'loot-core/src/platform/client/undo';
 
+import { useAccounts } from '../hooks/useAccounts';
 import { useActions } from '../hooks/useActions';
 import { useNavigate } from '../hooks/useNavigate';
 import { useResponsive } from '../ResponsiveProvider';
@@ -41,6 +42,7 @@ import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar, TitlebarProvider } from './Titlebar';
 import { TransactionEdit } from './transactions/MobileTransaction';
+import { useSelector } from 'react-redux';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -70,18 +72,17 @@ function WideNotSupported({ children, redirectTo = '/budget' }) {
   return isNarrowWidth ? children : null;
 }
 
-function RouterBehaviors({ getAccounts }) {
+function RouterBehaviors() {
   const navigate = useNavigate();
+  const accounts = useAccounts();
+  const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
   useEffect(() => {
-    // Get the accounts and check if any exist. If there are no
-    // accounts, we want to redirect the user to the All Accounts
-    // screen which will prompt them to add an account
-    getAccounts().then(accounts => {
-      if (accounts.length === 0) {
-        navigate('/accounts');
-      }
-    });
-  }, []);
+    // If there are no accounts, we want to redirect the user to
+    // the All Accounts screen which will prompt them to add an account
+    if (accountsLoaded && accounts.length === 0) {
+      navigate('/accounts');
+    }
+  }, [accountsLoaded, accounts]);
 
   const location = useLocation();
   const href = useHref(location);
@@ -113,9 +114,15 @@ function FinancesAppWithoutContext() {
     }, 100);
   }, []);
 
+  useEffect(() => {
+    actions.getAccounts();
+    actions.getCategories();
+    actions.getPayees();
+  }, []);
+
   return (
     <BrowserRouter>
-      <RouterBehaviors getAccounts={actions.getAccounts} />
+      <RouterBehaviors />
       <ExposeNavigate />
 
       <View style={{ height: '100%' }}>

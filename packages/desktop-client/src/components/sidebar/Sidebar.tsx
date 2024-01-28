@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { closeBudget } from 'loot-core/client/actions';
-import { send } from 'loot-core/platform/client/fetch';
+import {
+  closeBudget,
+  moveAccount,
+  replaceModal,
+  saveGlobalPrefs,
+  savePrefs,
+} from 'loot-core/client/actions';
 import * as Platform from 'loot-core/src/client/platform';
-import { type LocalPrefs } from 'loot-core/types/prefs';
 
 import { useAccounts } from '../../hooks/useAccounts';
-import { useActions } from '../../hooks/useActions';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useLocalPrefs } from '../../hooks/useLocalPrefs';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgReports, SvgWallet } from '../../icons/v1';
@@ -34,13 +37,11 @@ export const SIDEBAR_WIDTH = 240;
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
 
+  const dispatch = useDispatch();
   const sidebar = useSidebar();
   const accounts = useAccounts();
-  const prefs = useLocalPrefs() || {};
+  const showClosedAccounts = useLocalPref('ui.showClosedAccounts');
   const isFloating = useGlobalPref('floatingSidebar') || false;
-
-  const { getAccounts, replaceModal, savePrefs, saveGlobalPrefs } =
-    useActions();
 
   async function onReorder(
     id: string,
@@ -53,22 +54,23 @@ export function Sidebar() {
       targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
     }
 
-    await send('account-move', { id, targetId: targetIdToMove });
-    await getAccounts();
+    dispatch(moveAccount(id, targetIdToMove));
   }
 
   const onFloat = () => {
-    saveGlobalPrefs({ floatingSidebar: !isFloating });
+    dispatch(saveGlobalPrefs({ floatingSidebar: !isFloating }));
   };
 
   const onAddAccount = () => {
-    replaceModal('add-account');
+    dispatch(replaceModal('add-account'));
   };
 
   const onToggleClosedAccounts = () => {
-    savePrefs({
-      'ui.showClosedAccounts': !prefs['ui.showClosedAccounts'],
-    });
+    dispatch(
+      savePrefs({
+        'ui.showClosedAccounts': !showClosedAccounts,
+      }),
+    );
   };
 
   return (
@@ -104,7 +106,7 @@ export function Sidebar() {
           }),
         }}
       >
-        <EditableBudgetName prefs={prefs} savePrefs={savePrefs} />
+        <EditableBudgetName />
 
         <View style={{ flex: 1, flexDirection: 'row' }} />
 
@@ -140,14 +142,10 @@ export function Sidebar() {
   );
 }
 
-type EditableBudgetNameProps = {
-  prefs: LocalPrefs;
-  savePrefs: (prefs: Partial<LocalPrefs>) => Promise<void>;
-};
-
-function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
+function EditableBudgetName() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const budgetName = useLocalPref('budgetName');
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -187,14 +185,16 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
             fontSize: 16,
             fontWeight: 500,
           }}
-          defaultValue={prefs.budgetName}
+          defaultValue={budgetName}
           onEnter={async e => {
             const inputEl = e.target as HTMLInputElement;
             const newBudgetName = inputEl.value;
             if (newBudgetName.trim() !== '') {
-              await savePrefs({
-                budgetName: inputEl.value,
-              });
+              await dispatch(
+                savePrefs({
+                  budgetName: inputEl.value,
+                }),
+              );
               setEditing(false);
             }
           }}
@@ -216,7 +216,7 @@ function EditableBudgetName({ prefs, savePrefs }: EditableBudgetNameProps) {
         onClick={() => setMenuOpen(true)}
       >
         <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-          {prefs.budgetName || 'A budget has no name'}
+          {budgetName || 'A budget has no name'}
         </Text>
         <SvgExpandArrow width={7} height={7} style={{ marginLeft: 5 }} />
         {menuOpen && (
