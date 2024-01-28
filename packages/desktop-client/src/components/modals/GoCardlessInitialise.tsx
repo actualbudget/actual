@@ -58,7 +58,10 @@ export const GoCardlessInitialise = ({
           In order to enable bank-sync via GoCardless (only for EU banks) you
           will need to create access credentials. This can be done by creating
           an account with{' '}
-          <ExternalLink to="https://gocardless.com/" linkColor="purple">
+          <ExternalLink
+            to="https://actualbudget.org/docs/advanced/bank-sync/"
+            linkColor="purple"
+          >
             GoCardless
           </ExternalLink>
           .

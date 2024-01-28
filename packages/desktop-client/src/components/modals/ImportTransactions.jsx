@@ -376,7 +376,9 @@ function Transaction({
       <Field
         width="flex"
         title={
-          categoryList.includes(transaction.category) && transaction.category
+          categoryList.includes(transaction.category)
+            ? transaction.category
+            : undefined
         }
       >
         {categoryList.includes(transaction.category) && transaction.category}
