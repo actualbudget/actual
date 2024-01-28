@@ -35,12 +35,16 @@ async function processCleanup(month: string): Promise<Notification> {
           sheetName,
           `budget-${category.id}`,
         );
-        await setBudget({
+        if (balance > 0) {
+          await setBudget({
           category: category.id,
           month,
           amount: budgeted - balance,
-        });
-        num_sources += 1;
+          });
+          num_sources += 1;
+        } else {
+          errors.push(category.name + ' does not have available funds.'); 
+        }
       }
       if (template.filter(t => t.type === 'sink').length > 0) {
         sinkCategory.push({ cat: category, temp: template });
