@@ -689,6 +689,7 @@ function PayeeIcons({
 const Transaction = memo(function Transaction(props) {
   const {
     transaction: originalTransaction,
+    subtransactions,
     editing,
     showAccount,
     showBalance,
@@ -827,6 +828,8 @@ const Transaction = memo(function Transaction(props) {
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
       setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
+
+      deserialized.subtransactions = subtransactions;
       onSave(deserialized);
     }
   }
@@ -1473,9 +1476,10 @@ function NewTransaction({
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
 
-  const emptyChildTransactions = transactions.filter(
-    t => t.parent_id === transactions[0].id && t.amount === 0,
+  const childTransactions = transactions.filter(
+    t => t.parent_id === transactions[0].id,
   );
+  const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
 
   return (
     <View
@@ -1497,6 +1501,7 @@ function NewTransaction({
           key={transaction.id}
           editing={editingTransaction === transaction.id}
           transaction={transaction}
+          subtransactions={childTransactions.length ? childTransactions : null}
           showAccount={showAccount}
           showCategory={showCategory}
           showBalance={showBalance}

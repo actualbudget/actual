@@ -16,6 +16,7 @@ import {
   addSplitTransaction,
   recalculateSplit,
   splitTransaction,
+  ungroupTransaction,
 } from '../../shared/transactions';
 import { fastSetMerge } from '../../shared/util';
 import { RuleConditionEntity } from '../../types/models';
@@ -541,7 +542,10 @@ export function execActions(actions: Action[], transaction) {
     return transaction;
   }
 
-  const { data, newTransaction } = splitTransaction([update], transaction.id);
+  const { data, newTransaction } = splitTransaction(
+    ungroupTransaction(update),
+    transaction.id,
+  );
   update = recalculateSplit(newTransaction);
   data[0] = update;
   let newTransactions = data;
