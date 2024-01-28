@@ -35,7 +35,7 @@ type DynamicBudgetTableInnerProps = {
 } & ComponentProps<typeof BudgetTable>;
 
 const DynamicBudgetTableInner = forwardRef<
-  BudgetTable,
+  typeof BudgetTable,
   DynamicBudgetTableInnerProps
 >(
   (
@@ -103,7 +103,7 @@ const DynamicBudgetTableInner = forwardRef<
 );
 
 export const DynamicBudgetTable = forwardRef<
-  BudgetTable,
+  typeof BudgetTable,
   DynamicBudgetTableInnerProps
 >((props, ref) => {
   return (

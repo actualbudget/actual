@@ -2,6 +2,7 @@
 import React, { type ReactElement, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend as Backend } from 'react-dnd-html5-backend';
+import { useSelector } from 'react-redux';
 import {
   Route,
   Routes,
@@ -42,7 +43,6 @@ import { FloatableSidebar } from './sidebar';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { Titlebar, TitlebarProvider } from './Titlebar';
 import { TransactionEdit } from './transactions/MobileTransaction';
-import { useSelector } from 'react-redux';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
