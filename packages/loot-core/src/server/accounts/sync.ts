@@ -468,7 +468,7 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
 
     // If it didn't match, query data needed for fuzzy matching
     if (!match) {
-      // Look 1 day ahead and 4 days back when fuzzy matching. This
+      // Look 7 days ahead and 7 days back when fuzzy matching. This
       // needs to select all fields that need to be read from the
       // matched transaction. See the final pass below for the needed
       // fields.
@@ -476,8 +476,8 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
         `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
-          db.toDateRepr(monthUtils.subDays(trans.date, 4)),
-          db.toDateRepr(monthUtils.addDays(trans.date, 1)),
+          db.toDateRepr(monthUtils.subDays(trans.date, 7)),
+          db.toDateRepr(monthUtils.addDays(trans.date, 7)),
           trans.amount || 0,
           acctId,
         ],
@@ -631,7 +631,7 @@ export async function reconcileTransactions(acctId, transactions) {
 
     // If it didn't match, query data needed for fuzzy matching
     if (!match) {
-      // Look 1 day ahead and 4 days back when fuzzy matching. This
+      // Look 7 days ahead and 7 days back when fuzzy matching. This
       // needs to select all fields that need to be read from the
       // matched transaction. See the final pass below for the needed
       // fields.
@@ -639,8 +639,8 @@ export async function reconcileTransactions(acctId, transactions) {
         `SELECT id, is_parent, date, imported_id, payee, category, notes, reconciled FROM v_transactions
            WHERE date >= ? AND date <= ? AND amount = ? AND account = ? AND is_child = 0`,
         [
-          db.toDateRepr(monthUtils.subDays(trans.date, 4)),
-          db.toDateRepr(monthUtils.addDays(trans.date, 1)),
+          db.toDateRepr(monthUtils.subDays(trans.date, 7)),
+          db.toDateRepr(monthUtils.addDays(trans.date, 7)),
           trans.amount || 0,
           acctId,
         ],
