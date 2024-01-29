@@ -59,7 +59,6 @@ export function createCustomSpreadsheet({
   graphType,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(
-    showHiddenCategories,
     categories,
   );
 
@@ -135,7 +134,7 @@ export function createCustomSpreadsheet({
           showUncategorized,
         )
           .filter(
-            asset => asset.date === month && asset[groupByLabel] === item.id,
+            asset => asset.date === month && asset[groupByLabel] === (item.id ?? null),
           )
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthAssets += monthAssets;
@@ -147,7 +146,7 @@ export function createCustomSpreadsheet({
           showHiddenCategories,
           showUncategorized,
         )
-          .filter(debt => debt.date === month && debt[groupByLabel] === item.id)
+          .filter(debt => debt.date === month && debt[groupByLabel] === (item.id ?? null))
           .reduce((a, v) => (a = a + v.amount), 0);
         perMonthDebts += monthDebts;
 

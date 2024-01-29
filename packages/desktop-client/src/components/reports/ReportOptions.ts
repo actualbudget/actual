@@ -90,7 +90,7 @@ export type QueryDataEntity = {
 
 export type UncategorizedEntity = Pick<
   CategoryEntity,
-  'name' | 'id' | 'hidden'
+  'name' | 'hidden'
 > & {
   /*
     When looking at uncategorized and hidden transactions we
@@ -107,7 +107,6 @@ export type UncategorizedEntity = Pick<
 
 const uncategorizedCategory: UncategorizedEntity = {
   name: 'Uncategorized',
-  id: undefined,
   uncategorized_id: '1',
   hidden: false,
   is_off_budget: false,
@@ -116,7 +115,6 @@ const uncategorizedCategory: UncategorizedEntity = {
 };
 const transferCategory: UncategorizedEntity = {
   name: 'Transfers',
-  id: undefined,
   uncategorized_id: '2',
   hidden: false,
   is_off_budget: false,
@@ -125,7 +123,6 @@ const transferCategory: UncategorizedEntity = {
 };
 const offBudgetCategory: UncategorizedEntity = {
   name: 'Off Budget',
-  id: undefined,
   uncategorized_id: '3',
   hidden: false,
   is_off_budget: true,
@@ -148,7 +145,6 @@ const uncategorizedGroup: UncategorizedGroupEntity = {
 };
 
 export const categoryLists = (
-  showHiddenCategories: boolean,
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] },
 ) => {
   const categoryList = [
