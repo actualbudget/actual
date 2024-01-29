@@ -348,3 +348,14 @@ export function redo() {
     }
   };
 }
+
+export function getSchedules() {
+  return async (dispatch: Dispatch) => {
+    const payees = await send('sche');
+    dispatch({
+      type: constants.LOAD_PAYEES,
+      payees,
+    });
+    return payees;
+  };
+}
