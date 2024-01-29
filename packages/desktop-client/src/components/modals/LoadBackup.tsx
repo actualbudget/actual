@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { send, listen, unlisten } from 'loot-core/src/platform/client/fetch';
 
@@ -9,43 +9,54 @@ import { Modal } from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Row, Cell } from '../table';
+import { Backup } from 'loot-core/server/backups';
+import { CommonModalProps } from '../../types/modals';
+import { BoundActions } from '../../hooks/useActions';
 
-class BackupTable extends Component {
-  state = { hoveredBackup: null };
+type LoadBackupProps = {
+  backups: Backup[];
+  onSelect: (id) => void;
+};
 
-  onHover = id => {
-    this.setState({ hoveredBackup: id });
+function BackupTable({ backups, onSelect }: LoadBackupProps) {
+  const [hoveredBackup, setHoveredBackup] = useState(null);
+
+  const onHover = id => {
+    setHoveredBackup(id);
   };
 
-  render() {
-    const { backups, onSelect } = this.props;
-    const { hoveredBackup } = this.state;
-
-    return (
-      <View
-        style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}
-        onMouseLeave={() => this.onHover(null)}
-      >
-        {backups.map((backup, idx) => (
-          <Row
-            key={backup.id}
-            collapsed={idx !== 0}
-            focused={hoveredBackup === backup.id}
-            onMouseEnter={() => this.onHover(backup.id)}
-            onClick={() => onSelect(backup.id)}
-            style={{ cursor: 'pointer' }}
-          >
-            <Cell
-              width="flex"
-              value={backup.date ? backup.date : 'Revert to Latest'}
-              valueStyle={{ paddingLeft: 20 }}
-            />
-          </Row>
-        ))}
-      </View>
-    );
-  }
+  return (
+    <View
+      style={{ flex: 1, maxHeight: 200, overflow: 'auto' }}
+      onMouseLeave={() => onHover(null)}
+    >
+      {backups.map((backup, idx) => (
+        <Row
+          key={backup.id}
+          collapsed={idx !== 0}
+          focused={hoveredBackup === backup.id}
+          onMouseEnter={() => onHover(backup.id)}
+          onClick={() => onSelect(backup.id)}
+          style={{ cursor: 'pointer' }}
+        >
+          <Cell
+            width="flex"
+            value={backup.date ? backup.date : 'Revert to Latest'}
+            valueStyle={{ paddingLeft: 20 }}
+          />
+        </Row>
+      ))}
+    </View>
+  );
 }
+
+type LoadBackupProps = {
+  budgetId: string;
+  watchUpdates: boolean;
+  backupDisabled: boolean;
+  actions: BoundActions;
+  modalProps: CommonModalProps;
+};
 
 export function LoadBackup({
   budgetId,
@@ -53,8 +64,8 @@ export function LoadBackup({
   backupDisabled,
   actions,
   modalProps,
-}) {
-  const [backups, setBackups] = useState([]);
+}: LoadBackupProps) {
+  const [backups, setBackups] = useState<Backup>([]);
 
   useEffect(() => {
     send('backups-get', { id: budgetId }).then(setBackups);
