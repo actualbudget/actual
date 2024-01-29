@@ -23,10 +23,10 @@ import { Modal } from '../common/Modal';
 import { Paragraph } from '../common/Paragraph';
 import { View } from '../common/View';
 import { FormField, FormLabel } from '../forms';
+import { type CommonModalProps } from '../Modals';
 import { Tooltip } from '../tooltips';
 
 import { COUNTRY_OPTIONS } from './countries';
-import { CommonModalProps } from '../Modals';
 
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);
