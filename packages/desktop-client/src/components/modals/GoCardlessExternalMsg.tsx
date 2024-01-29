@@ -13,7 +13,6 @@ import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { AnimatedLoading } from '../../icons/AnimatedLoading';
 import { SvgDotsHorizontalTriple } from '../../icons/v1';
 import { theme } from '../../style';
-import { type CommonModalProps } from '../../types/modals';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Button } from '../common/Button';
@@ -27,6 +26,7 @@ import { FormField, FormLabel } from '../forms';
 import { Tooltip } from '../tooltips';
 
 import { COUNTRY_OPTIONS } from './countries';
+import { CommonModalProps } from '../Modals';
 
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);
