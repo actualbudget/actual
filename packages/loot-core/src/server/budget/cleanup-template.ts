@@ -37,7 +37,7 @@ async function processCleanup(month: string): Promise<Notification> {
           sheetName,
           `budget-${category.id}`,
         );
-        if (balance > 0) {
+        if (balance >= 0) {
           await setBudget({
             category: category.id,
             month,
