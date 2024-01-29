@@ -15,6 +15,7 @@ async function processCleanup(month: string): Promise<Notification> {
   let num_sinks = 0;
   let total_weight = 0;
   const errors = [];
+  const warnings = [];
   const sinkCategory = [];
   const sourceWithRollover = [];
   const db_month = parseInt(month.replace('-', ''));
@@ -45,7 +46,7 @@ async function processCleanup(month: string): Promise<Notification> {
           });
           num_sources += 1;
         } else {
-          errors.push(category.name + ' does not have available funds.');
+          warnings.push(category.name + ' does not have available funds.');
         }
         const carryover = await db.first(
           `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
@@ -107,7 +108,7 @@ async function processCleanup(month: string): Promise<Notification> {
       });
     }
   }
-  const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+  //const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
 
   //fund rollover categories after non-rollover categories
   for (let c = 0; c < categories.length; c++) {
@@ -151,8 +152,9 @@ async function processCleanup(month: string): Promise<Notification> {
     }
   }
 
+  const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
   if (budgetAvailable <= 0) {
-    errors.push('No funds are available to reallocate.');
+    warnings.push('No funds are available to reallocate.');
   }
 
   for (let c = 0; c < sinkCategory.length; c++) {
@@ -189,8 +191,17 @@ async function processCleanup(month: string): Promise<Notification> {
         message: `There were errors interpreting some templates:`,
         pre: errors.join('\n\n'),
       };
+    } else if (warnings.length) {
+      return {
+        type: 'warning',
+        message: 'Funds not available:',
+        pre: warnings.join('\n\n'),
+      };
     } else {
-      return { type: 'message', message: 'All categories were up to date.' };
+      return {
+        type: 'message',
+        message: 'All categories were up to date.',
+      };
     }
   } else {
     const applied = `Successfully returned funds from ${num_sources} ${
