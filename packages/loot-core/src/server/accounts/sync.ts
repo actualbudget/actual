@@ -468,7 +468,7 @@ export async function reconcileGoCardlessTransactions(acctId, transactions) {
 
     // If it didn't match, query data needed for fuzzy matching
     if (!match) {
-      // Look 5 day ahead and 5 days back when fuzzy matching. This
+      // Look 5 days ahead and 5 days back when fuzzy matching. This
       // needs to select all fields that need to be read from the
       // matched transaction. See the final pass below for the needed
       // fields.
@@ -631,7 +631,7 @@ export async function reconcileTransactions(acctId, transactions) {
 
     // If it didn't match, query data needed for fuzzy matching
     if (!match) {
-      // Look 5 day ahead and 5 days back when fuzzy matching. This
+      // Look 5 days ahead and 5 days back when fuzzy matching. This
       // needs to select all fields that need to be read from the
       // matched transaction. See the final pass below for the needed
       // fields.
