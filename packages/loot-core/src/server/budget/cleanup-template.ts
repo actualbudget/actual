@@ -108,7 +108,6 @@ async function processCleanup(month: string): Promise<Notification> {
       });
     }
   }
-  //const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
 
   //fund rollover categories after non-rollover categories
   for (let c = 0; c < categories.length; c++) {
