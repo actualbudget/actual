@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { type GroupedEntity } from 'loot-core/types/models/reports';
 
 export function filterEmptyRows(

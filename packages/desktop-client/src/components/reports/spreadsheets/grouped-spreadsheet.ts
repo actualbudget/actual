@@ -26,11 +26,9 @@ export function createGroupedSpreadsheet({
   showUncategorized,
   balanceTypeOp,
 }: createCustomSpreadsheetProps) {
-  const [categoryList, categoryGroup] = categoryLists(
-    categories,
-  );
+  const [categoryList, categoryGroup] = categoryLists(categories);
 
-  const categoryFilter = (categoryList || []).filter(
+  const categoryFilter = (categories.list || []).filter(
     category =>
       selectedCategories &&
       selectedCategories.some(
@@ -93,7 +91,8 @@ export function createGroupedSpreadsheet({
               showUncategorized,
             )
               .filter(
-                asset => asset.date === month && asset.category === (item.id ?? null),
+                asset =>
+                  asset.date === month && asset.category === (item.id ?? null),
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedAssets += monthAssets;
@@ -106,7 +105,8 @@ export function createGroupedSpreadsheet({
               showUncategorized,
             )
               .filter(
-                debts => debts.date === month && debts.category === (item.id ?? null),
+                debts =>
+                  debts.date === month && debts.category === (item.id ?? null),
               )
               .reduce((a, v) => (a = a + v.amount), 0);
             groupedDebts += monthDebts;

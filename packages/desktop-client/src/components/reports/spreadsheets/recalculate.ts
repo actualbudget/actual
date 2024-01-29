@@ -40,7 +40,10 @@ export function recalculate({
       showHiddenCategories,
       showUncategorized,
     )
-      .filter(asset => asset.date === month && asset[groupByLabel] === (item.id ?? null))
+      .filter(
+        asset =>
+          asset.date === month && asset[groupByLabel] === (item.id ?? null),
+      )
       .reduce((a, v) => (a = a + v.amount), 0);
     totalAssets += monthAssets;
 
@@ -51,7 +54,9 @@ export function recalculate({
       showHiddenCategories,
       showUncategorized,
     )
-      .filter(debt => debt.date === month && debt[groupByLabel] === (item.id ?? null))
+      .filter(
+        debt => debt.date === month && debt[groupByLabel] === (item.id ?? null),
+      )
       .reduce((a, v) => (a = a + v.amount), 0);
     totalDebts += monthDebts;
 
