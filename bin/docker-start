@@ -10,4 +10,4 @@ if [ ! -d "node_modules" ] || [ "$(ls -A node_modules)" = "" ]; then
     yarn
 fi
 
-yarn start:browser
+BROWSER=0 yarn start:browser
