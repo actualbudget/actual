@@ -22,9 +22,6 @@ import { SyncRefresh } from '../SyncRefresh';
 import { BudgetTable } from './MobileBudgetTable';
 import { prewarmMonth, switchBudgetType } from './util';
 
-const CATEGORY_BUDGET_EDIT_ACTION = 'category-budget';
-const BALANCE_MENU_OPEN_ACTION = 'balance-menu';
-
 type BudgetInnerProps = {
   categories: CategoryEntity[];
   categoryGroups: CategoryGroupEntity[];
@@ -76,8 +73,6 @@ function BudgetInner(props: BudgetInnerProps) {
   const [currentMonth, setCurrentMonth] = useState(currMonth);
   const [initialized, setInitialized] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [editingBudgetCategoryId, setEditingBudgetCategoryId] = useState(null);
-  const [openBalanceActionMenuId, setOpenBalanceActionMenuId] = useState(null);
 
   useEffect(() => {
     async function init() {
@@ -360,29 +355,6 @@ function BudgetInner(props: BudgetInnerProps) {
     });
   };
 
-  const onEditCategoryBudget = id => {
-    onEdit(CATEGORY_BUDGET_EDIT_ACTION, id);
-  };
-
-  const onOpenBalanceActionMenu = id => {
-    onEdit(BALANCE_MENU_OPEN_ACTION, id);
-  };
-
-  const onEdit = (action, id) => {
-    // Do not allow editing if another field is currently being edited.
-    // Cancel the currently editing field in that case.
-    const currentlyEditing = editingBudgetCategoryId || openBalanceActionMenuId;
-
-    setEditingBudgetCategoryId(
-      action === CATEGORY_BUDGET_EDIT_ACTION && !currentlyEditing ? id : null,
-    );
-    setOpenBalanceActionMenuId(
-      action === BALANCE_MENU_OPEN_ACTION && !currentlyEditing ? id : null,
-    );
-
-    return { action, editingId: !currentlyEditing ? id : null };
-  };
-
   const numberFormat = prefs?.numberFormat || 'comma-dot';
   const hideFraction = prefs?.hideFraction || false;
 
@@ -438,10 +410,6 @@ function BudgetInner(props: BudgetInnerProps) {
           pushModal={pushModal}
           onEditGroup={onEditGroup}
           onEditCategory={onEditCategory}
-          editingBudgetCategoryId={editingBudgetCategoryId}
-          onEditCategoryBudget={onEditCategoryBudget}
-          openBalanceActionMenuId={openBalanceActionMenuId}
-          onOpenBalanceActionMenu={onOpenBalanceActionMenu}
         />
       )}
     </SyncRefresh>
