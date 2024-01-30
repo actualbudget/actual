@@ -2,7 +2,8 @@ import { type ReactNode, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { type State } from 'loot-core/client/state-types';
-import type { FeatureFlag, LocalPrefs } from 'loot-core/src/types/prefs';
+import { type PrefsState } from 'loot-core/client/state-types/prefs';
+import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
 import { useActions } from '../../hooks/useActions';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
@@ -62,7 +63,7 @@ function FeatureToggle({
 }
 
 function ReportBudgetFeature() {
-  const budgetType = useSelector<State, LocalPrefs['budgetType']>(
+  const budgetType = useSelector<State, PrefsState['local']['budgetType']>(
     state => state.prefs.local?.budgetType,
   );
   const enabled = useFeatureFlag('reportBudget');

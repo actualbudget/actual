@@ -18,7 +18,6 @@ import {
 import { type State } from 'loot-core/client/state-types';
 import { type PrefsState } from 'loot-core/client/state-types/prefs';
 import { useSpreadsheet } from 'loot-core/src/client/SpreadsheetProvider';
-import { type QueriesState } from 'loot-core/src/client/state-types/queries';
 import { send, listen } from 'loot-core/src/platform/client/fetch';
 import {
   addCategory,
@@ -32,6 +31,7 @@ import {
 } from 'loot-core/src/shared/categories';
 import * as monthUtils from 'loot-core/src/shared/months';
 import { type GlobalPrefs, type LocalPrefs } from 'loot-core/src/types/prefs';
+import { type CategoryGroupEntity } from 'loot-core/types/models';
 
 import { type BoundActions, useActions } from '../../hooks/useActions';
 import { useCategories } from '../../hooks/useCategories';
@@ -80,7 +80,7 @@ type BudgetProps = {
   summaryCollapsed: LocalPrefs['budget.summaryCollapsed'];
   budgetType: LocalPrefs['budgetType'];
   maxMonths: GlobalPrefs['maxMonths'];
-  categoryGroups: QueriesState['categories']['grouped'];
+  categoryGroups: CategoryGroupEntity[];
   reportComponents: ReportComponents;
   rolloverComponents: RolloverComponents;
   titlebar: TitlebarContextValue;

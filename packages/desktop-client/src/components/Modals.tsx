@@ -8,6 +8,7 @@ import {
   type ModalsState,
   type PopModalAction,
 } from 'loot-core/src/client/state-types/modals';
+import { type PrefsState } from 'loot-core/src/client/state-types/prefs';
 import { type QueriesState } from 'loot-core/src/client/state-types/queries';
 import { send } from 'loot-core/src/platform/client/fetch';
 
@@ -65,7 +66,7 @@ export function Modals() {
     state => state.queries.accounts,
   );
   const { grouped: categoryGroups, list: categories } = useCategories();
-  const budgetId = useSelector<State>(
+  const budgetId = useSelector<State, PrefsState['local']['id']>(
     state => state.prefs.local && state.prefs.local.id,
   );
   const actions = useActions();
