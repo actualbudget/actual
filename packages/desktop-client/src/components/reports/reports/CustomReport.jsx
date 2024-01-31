@@ -242,6 +242,13 @@ export function CustomReport() {
 
   const onReportChange = type => {
     switch (type) {
+      case 'modify':
+        if (report.name) {
+          if (report.name.substr(report.name.length - 10) !== '(modified)') {
+            setReport({ ...report, name: report.name + ' (modified)' });
+          }
+        }
+        break;
       case 'reload':
         if (report.name.substr(report.name.length - 10) === '(modified)') {
           setReport({
@@ -319,6 +326,7 @@ export function CustomReport() {
             viewLabels={viewLabels}
             onApplyFilter={onApplyFilter}
             onChangeViews={onChangeViews}
+            onReportChange={onReportChange}
           />
           {filters && filters.length > 0 && (
             <View
