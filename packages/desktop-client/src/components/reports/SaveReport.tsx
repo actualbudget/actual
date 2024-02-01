@@ -38,7 +38,7 @@ function SaveReportMenu({ setMenuOpen }) {
   );
 }
 
-export function SaveReportMenuButton(savedStatus: string) {
+export function SaveReportMenuButton({ savedStatus }: { savedStatus: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
