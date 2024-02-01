@@ -1,6 +1,6 @@
 import * as colorPalette from '../palette';
 
-export const pageBackground = colorPalette.gray500; //mobile and desktop
+export const pageBackground = colorPalette.gray600; //mobile and desktop
 export const pageBackgroundModalActive = colorPalette.gray700;
 export const pageBackgroundTopLeft = colorPalette.gray800;
 export const pageBackgroundBottomRight = colorPalette.gray700;
